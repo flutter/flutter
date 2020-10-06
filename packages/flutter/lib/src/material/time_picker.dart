@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -78,13 +76,13 @@ enum TimePickerEntryMode {
 @immutable
 class _TimePickerFragmentContext {
   const _TimePickerFragmentContext({
-    @required this.selectedTime,
-    @required this.mode,
-    @required this.onTimeChange,
-    @required this.onModeChange,
-    @required this.onHourDoubleTapped,
-    @required this.onMinuteDoubleTapped,
-    @required this.use24HourDials,
+    required this.selectedTime,
+    required this.mode,
+    required this.onTimeChange,
+    required this.onModeChange,
+    required this.onHourDoubleTapped,
+    required this.onMinuteDoubleTapped,
+    required this.use24HourDials,
   }) : assert(selectedTime != null),
        assert(mode != null),
        assert(onTimeChange != null),
@@ -102,15 +100,15 @@ class _TimePickerFragmentContext {
 
 class _TimePickerHeader extends StatelessWidget {
   const _TimePickerHeader({
-    @required this.selectedTime,
-    @required this.mode,
-    @required this.orientation,
-    @required this.onModeChanged,
-    @required this.onChanged,
-    @required this.onHourDoubleTapped,
-    @required this.onMinuteDoubleTapped,
-    @required this.use24HourDials,
-    @required this.helpText,
+    required this.selectedTime,
+    required this.mode,
+    required this.orientation,
+    required this.onModeChanged,
+    required this.onChanged,
+    required this.onHourDoubleTapped,
+    required this.onMinuteDoubleTapped,
+    required this.use24HourDials,
+    required this.helpText,
   }) : assert(selectedTime != null),
        assert(mode != null),
        assert(orientation != null),
@@ -124,7 +122,7 @@ class _TimePickerHeader extends StatelessWidget {
   final GestureTapCallback onHourDoubleTapped;
   final GestureTapCallback onMinuteDoubleTapped;
   final bool use24HourDials;
-  final String helpText;
+  final String? helpText;
 
   void _handleChangeMode(_TimePickerMode value) {
     if (value != mode)
@@ -134,9 +132,9 @@ class _TimePickerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final ThemeData themeData = Theme.of(context);
-    final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat(
-      alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+    final ThemeData themeData = Theme.of(context)!;
+    final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context)!.timeOfDayFormat(
+      alwaysUse24HourFormat: MediaQuery.of(context)!.alwaysUse24HourFormat,
     );
 
     final _TimePickerFragmentContext fragmentContext = _TimePickerFragmentContext(
@@ -150,7 +148,7 @@ class _TimePickerHeader extends StatelessWidget {
     );
 
     EdgeInsets padding;
-    double width;
+    double? width;
     Widget controls;
 
     switch (orientation) {
@@ -242,7 +240,7 @@ class _TimePickerHeader extends StatelessWidget {
         children: <Widget>[
           const SizedBox(height: 16.0),
           Text(
-            helpText ?? MaterialLocalizations.of(context).timePickerDialHelpText,
+            helpText ?? MaterialLocalizations.of(context)!.timePickerDialHelpText,
             style: TimePickerTheme.of(context).helpTextStyle ?? themeData.textTheme.overline,
           ),
           controls,
@@ -254,10 +252,10 @@ class _TimePickerHeader extends StatelessWidget {
 
 class _HourMinuteControl extends StatelessWidget {
   const _HourMinuteControl({
-    @required this.text,
-    @required this.onTap,
-    @required this.onDoubleTap,
-    @required this.isSelected,
+    required this.text,
+    required this.onTap,
+    required this.onDoubleTap,
+    required this.isSelected,
   }) : assert(text != null),
        assert(onTap != null),
        assert(isSelected != null);
@@ -269,7 +267,7 @@ class _HourMinuteControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context)!;
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final bool isDark = themeData.colorScheme.brightness == Brightness.dark;
     final Color textColor = timePickerTheme.hourMinuteTextColor
@@ -284,7 +282,7 @@ class _HourMinuteControl extends StatelessWidget {
               ? themeData.colorScheme.primary.withOpacity(isDark ? 0.24 : 0.12)
               : themeData.colorScheme.onSurface.withOpacity(0.12);
         });
-    final TextStyle style = timePickerTheme.hourMinuteTextStyle ?? themeData.textTheme.headline2;
+    final TextStyle style = timePickerTheme.hourMinuteTextStyle ?? themeData.textTheme.headline2!;
     final ShapeBorder shape = timePickerTheme.hourMinuteShape ?? _kDefaultShape;
 
     final Set<MaterialState> states = isSelected ? <MaterialState>{MaterialState.selected} : <MaterialState>{};
@@ -314,7 +312,7 @@ class _HourMinuteControl extends StatelessWidget {
 /// When tapped changes time picker dial mode to [_TimePickerMode.hour].
 class _HourControl extends StatelessWidget {
   const _HourControl({
-    @required this.fragmentContext,
+    required this.fragmentContext,
   });
 
   final _TimePickerFragmentContext fragmentContext;
@@ -322,8 +320,8 @@ class _HourControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final bool alwaysUse24HourFormat = MediaQuery.of(context).alwaysUse24HourFormat;
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final bool alwaysUse24HourFormat = MediaQuery.of(context)!.alwaysUse24HourFormat;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
     final String formattedHour = localizations.formatHour(
       fragmentContext.selectedTime,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
@@ -371,7 +369,7 @@ class _HourControl extends StatelessWidget {
       child: _HourMinuteControl(
         isSelected: fragmentContext.mode == _TimePickerMode.hour,
         text: formattedHour,
-        onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.hour), context),
+        onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.hour), context)!,
         onDoubleTap: fragmentContext.onHourDoubleTapped,
       ),
     );
@@ -381,7 +379,7 @@ class _HourControl extends StatelessWidget {
 /// A passive fragment showing a string value.
 class _StringFragment extends StatelessWidget {
   const _StringFragment({
-    @required this.timeOfDayFormat,
+    required this.timeOfDayFormat,
   });
 
   final TimeOfDayFormat timeOfDayFormat;
@@ -398,14 +396,13 @@ class _StringFragment extends StatelessWidget {
       case TimeOfDayFormat.frenchCanadian:
         return 'h';
     }
-    return '';
   }
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context)!;
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
-    final TextStyle hourMinuteStyle = timePickerTheme.hourMinuteTextStyle ?? theme.textTheme.headline2;
+    final TextStyle hourMinuteStyle = timePickerTheme.hourMinuteTextStyle ?? theme.textTheme.headline2!;
     final Color textColor = timePickerTheme.hourMinuteTextColor ?? theme.colorScheme.onSurface;
 
     return ExcludeSemantics(
@@ -428,14 +425,14 @@ class _StringFragment extends StatelessWidget {
 /// When tapped changes time picker dial mode to [_TimePickerMode.minute].
 class _MinuteControl extends StatelessWidget {
   const _MinuteControl({
-    @required this.fragmentContext,
+    required this.fragmentContext,
   });
 
   final _TimePickerFragmentContext fragmentContext;
 
   @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
     final String formattedMinute = localizations.formatMinute(fragmentContext.selectedTime);
     final TimeOfDay nextMinute = fragmentContext.selectedTime.replacing(
       minute: (fragmentContext.selectedTime.minute + 1) % TimeOfDay.minutesPerHour,
@@ -461,7 +458,7 @@ class _MinuteControl extends StatelessWidget {
       child: _HourMinuteControl(
         isSelected: fragmentContext.mode == _TimePickerMode.minute,
         text: formattedMinute,
-        onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.minute), context),
+        onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.minute), context)!,
         onDoubleTap: fragmentContext.onMinuteDoubleTapped,
       ),
     );
@@ -473,9 +470,9 @@ class _MinuteControl extends StatelessWidget {
 /// and pm.
 class _DayPeriodControl extends StatelessWidget {
   const _DayPeriodControl({
-    @required this.selectedTime,
-    @required this.onChanged,
-    @required this.orientation,
+    required this.selectedTime,
+    required this.onChanged,
+    required this.orientation,
   });
 
   final TimeOfDay selectedTime;
@@ -492,12 +489,12 @@ class _DayPeriodControl extends StatelessWidget {
     if (selectedTime.period == DayPeriod.am) {
       return;
     }
-    switch (Theme.of(context).platform) {
+    switch (Theme.of(context)!.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        _announceToAccessibility(context, MaterialLocalizations.of(context).anteMeridiemAbbreviation);
+        _announceToAccessibility(context, MaterialLocalizations.of(context)!.anteMeridiemAbbreviation);
         break;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -510,12 +507,12 @@ class _DayPeriodControl extends StatelessWidget {
     if (selectedTime.period == DayPeriod.pm) {
       return;
     }
-    switch (Theme.of(context).platform) {
+    switch (Theme.of(context)!.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        _announceToAccessibility(context, MaterialLocalizations.of(context).postMeridiemAbbreviation);
+        _announceToAccessibility(context, MaterialLocalizations.of(context)!.postMeridiemAbbreviation);
         break;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -526,8 +523,8 @@ class _DayPeriodControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(context);
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(context)!;
+    final ColorScheme colorScheme = Theme.of(context)!.colorScheme;
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final bool isDark = colorScheme.brightness == Brightness.dark;
     final Color textColor = timePickerTheme.dayPeriodTextColor
@@ -550,7 +547,7 @@ class _DayPeriodControl extends StatelessWidget {
     final Set<MaterialState> amStates = amSelected ? <MaterialState>{MaterialState.selected} : <MaterialState>{};
     final bool pmSelected = !amSelected;
     final Set<MaterialState> pmStates = pmSelected ? <MaterialState>{MaterialState.selected} : <MaterialState>{};
-    final TextStyle textStyle = timePickerTheme.dayPeriodTextStyle ?? Theme.of(context).textTheme.subtitle1;
+    final TextStyle textStyle = timePickerTheme.dayPeriodTextStyle ?? Theme.of(context)!.textTheme.subtitle1!;
     final TextStyle amStyle = textStyle.copyWith(
       color: MaterialStateProperty.resolveAs(textColor, amStates),
     );
@@ -567,7 +564,7 @@ class _DayPeriodControl extends StatelessWidget {
       side: borderSide,
     );
 
-    final double buttonTextScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2.0);
+    final double buttonTextScaleFactor = math.min(MediaQuery.of(context)!.textScaleFactor, 2.0);
 
     final Widget amButton = Material(
       color: MaterialStateProperty.resolveAs(backgroundColor, amStates),
@@ -669,10 +666,10 @@ class _DayPeriodControl extends StatelessWidget {
 /// A widget to pad the area around the [_DayPeriodControl]'s inner [Material].
 class _DayPeriodInputPadding extends SingleChildRenderObjectWidget {
   const _DayPeriodInputPadding({
-    Key key,
-    Widget child,
-    this.minSize,
-    this.orientation,
+    Key? key,
+    required Widget child,
+    required this.minSize,
+    required this.orientation,
   }) : super(key: key, child: child);
 
   final Size minSize;
@@ -690,7 +687,7 @@ class _DayPeriodInputPadding extends SingleChildRenderObjectWidget {
 }
 
 class _RenderInputPadding extends RenderShiftedBox {
-  _RenderInputPadding(this._minSize, this.orientation, [RenderBox child]) : super(child);
+  _RenderInputPadding(this._minSize, this.orientation, [RenderBox? child]) : super(child);
 
   final Orientation orientation;
 
@@ -706,7 +703,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   @override
   double computeMinIntrinsicWidth(double height) {
     if (child != null) {
-      return math.max(child.getMinIntrinsicWidth(height), minSize.width);
+      return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
     }
     return 0.0;
   }
@@ -714,7 +711,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   @override
   double computeMinIntrinsicHeight(double width) {
     if (child != null) {
-      return math.max(child.getMinIntrinsicHeight(width), minSize.height);
+      return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
     }
     return 0.0;
   }
@@ -722,7 +719,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   @override
   double computeMaxIntrinsicWidth(double height) {
     if (child != null) {
-      return math.max(child.getMaxIntrinsicWidth(height), minSize.width);
+      return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
     }
     return 0.0;
   }
@@ -730,7 +727,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   @override
   double computeMaxIntrinsicHeight(double width) {
     if (child != null) {
-      return math.max(child.getMaxIntrinsicHeight(width), minSize.height);
+      return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
     }
     return 0.0;
   }
@@ -738,31 +735,31 @@ class _RenderInputPadding extends RenderShiftedBox {
   @override
   void performLayout() {
     if (child != null) {
-      child.layout(constraints, parentUsesSize: true);
-      final double width = math.max(child.size.width, minSize.width);
-      final double height = math.max(child.size.height, minSize.height);
+      child!.layout(constraints, parentUsesSize: true);
+      final double width = math.max(child!.size.width, minSize.width);
+      final double height = math.max(child!.size.height, minSize.height);
       size = constraints.constrain(Size(width, height));
-      final BoxParentData childParentData = child.parentData as BoxParentData;
-      childParentData.offset = Alignment.center.alongOffset(size - child.size as Offset);
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
     } else {
       size = Size.zero;
     }
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
     if (super.hitTest(result, position: position)) {
       return true;
     }
 
     if (position.dx < 0.0 ||
-        position.dx > math.max(child.size.width, minSize.width) ||
+        position.dx > math.max(child!.size.width, minSize.width) ||
         position.dy < 0.0 ||
-        position.dy > math.max(child.size.height, minSize.height)) {
+        position.dy > math.max(child!.size.height, minSize.height)) {
       return false;
     }
 
-    Offset newPosition = child.size.center(Offset.zero);
+    Offset newPosition = child!.size.center(Offset.zero);
     switch (orientation) {
       case Orientation.portrait:
         if (position.dy > newPosition.dy) {
@@ -786,7 +783,7 @@ class _RenderInputPadding extends RenderShiftedBox {
       position: newPosition,
       hitTest: (BoxHitTestResult result, Offset position) {
         assert(position == newPosition);
-        return child.hitTest(result, position: newPosition);
+        return child!.hitTest(result, position: newPosition);
       },
     );
   }
@@ -794,9 +791,9 @@ class _RenderInputPadding extends RenderShiftedBox {
 
 class _TappableLabel {
   _TappableLabel({
-    @required this.value,
-    @required this.painter,
-    @required this.onTap,
+    required this.value,
+    required this.painter,
+    required this.onTap,
   });
 
   /// The value this label is displaying.
@@ -811,15 +808,15 @@ class _TappableLabel {
 
 class _DialPainter extends CustomPainter {
   _DialPainter({
-    @required this.primaryLabels,
-    @required this.secondaryLabels,
-    @required this.backgroundColor,
-    @required this.accentColor,
-    @required this.dotColor,
-    @required this.theta,
-    @required this.textDirection,
-    @required this.selectedValue,
-  }) : super(repaint: PaintingBinding.instance.systemFonts);
+    required this.primaryLabels,
+    required this.secondaryLabels,
+    required this.backgroundColor,
+    required this.accentColor,
+    required this.dotColor,
+    required this.theta,
+    required this.textDirection,
+    required this.selectedValue,
+  }) : super(repaint: PaintingBinding.instance!.systemFonts);
 
   final List<_TappableLabel> primaryLabels;
   final List<_TappableLabel> secondaryLabels;
@@ -844,7 +841,7 @@ class _DialPainter extends CustomPainter {
       return center + Offset(labelRadius * math.cos(theta), -labelRadius * math.sin(theta));
     }
 
-    void paintLabels(List<_TappableLabel> labels) {
+    void paintLabels(List<_TappableLabel>? labels) {
       if (labels == null)
         return;
       final double labelThetaIncrement = -_kTwoPi / labels.length;
@@ -900,11 +897,11 @@ class _DialPainter extends CustomPainter {
 
 class _Dial extends StatefulWidget {
   const _Dial({
-    @required this.selectedTime,
-    @required this.mode,
-    @required this.use24HourDials,
-    @required this.onChanged,
-    @required this.onHourSelected,
+    required this.selectedTime,
+    required this.mode,
+    required this.use24HourDials,
+    required this.onChanged,
+    required this.onHourSelected,
   }) : assert(selectedTime != null),
        assert(mode != null),
        assert(use24HourDials != null);
@@ -912,7 +909,7 @@ class _Dial extends StatefulWidget {
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
   final bool use24HourDials;
-  final ValueChanged<TimeOfDay> onChanged;
+  final ValueChanged<TimeOfDay>? onChanged;
   final VoidCallback onHourSelected;
 
   @override
@@ -934,17 +931,17 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       ..addListener(() => setState(() { /* _theta.value has changed */ }));
   }
 
-  ThemeData themeData;
-  MaterialLocalizations localizations;
-  MediaQueryData media;
+  late ThemeData themeData;
+  late MaterialLocalizations localizations;
+  late MediaQueryData media;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     assert(debugCheckHasMediaQuery(context));
-    themeData = Theme.of(context);
-    localizations = MaterialLocalizations.of(context);
-    media = MediaQuery.of(context);
+    themeData = Theme.of(context)!;
+    localizations = MaterialLocalizations.of(context)!;
+    media = MediaQuery.of(context)!;
   }
 
   @override
@@ -962,9 +959,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  Tween<double> _thetaTween;
-  Animation<double> _theta;
-  AnimationController _thetaController;
+  late Tween<double> _thetaTween;
+  late Animation<double> _theta;
+  late AnimationController _thetaController;
   bool _dragging = false;
 
   static double _nearest(double target, double a, double b) {
@@ -1017,13 +1014,13 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     if (widget.onChanged == null)
       return current;
     if (current != widget.selectedTime)
-      widget.onChanged(current);
+      widget.onChanged!(current);
     return current;
   }
 
   void _updateThetaForPan({ bool roundMinutes = false }) {
     setState(() {
-      final Offset offset = _position - _center;
+      final Offset offset = _position! - _center!;
       double angle = (math.atan2(offset.dx, offset.dy) - math.pi / 2.0) % _kTwoPi;
       if (roundMinutes) {
         angle = _getThetaForTime(_getTimeForTheta(angle, roundMinutes: roundMinutes));
@@ -1034,8 +1031,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     });
   }
 
-  Offset _position;
-  Offset _center;
+  Offset? _position;
+  Offset? _center;
 
   void _handlePanStart(DragStartDetails details) {
     assert(!_dragging);
@@ -1048,7 +1045,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   void _handlePanUpdate(DragUpdateDetails details) {
-    _position += details.delta;
+    _position = _position! + details.delta;
     _updateThetaForPan();
     _notifyOnChangedIfNeeded();
   }
@@ -1153,8 +1150,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   ];
 
   _TappableLabel _buildTappableLabel(TextTheme textTheme, Color color, int value, String label, VoidCallback onTap) {
-    final TextStyle style = textTheme.bodyText1.copyWith(color: color);
-    final double labelScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2.0);
+    final TextStyle style = textTheme.bodyText1!.copyWith(color: color);
+    final double labelScaleFactor = math.min(MediaQuery.of(context)!.textScaleFactor, 2.0);
     return _TappableLabel(
       value: value,
       painter: TextPainter(
@@ -1224,7 +1221,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context)!;
     final TimePickerThemeData pickerTheme = TimePickerTheme.of(context);
     final Color backgroundColor = pickerTheme.dialBackgroundColor ?? themeData.colorScheme.onBackground.withOpacity(0.12);
     final Color accentColor = pickerTheme.dialHandColor ?? themeData.colorScheme.primary;
@@ -1268,7 +1265,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           accentColor: accentColor,
           dotColor: theme.colorScheme.surface,
           theta: _theta.value,
-          textDirection: Directionality.of(context),
+          textDirection: Directionality.of(context)!,
         ),
       ),
     );
@@ -1277,12 +1274,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
 class _TimePickerInput extends StatefulWidget {
   const _TimePickerInput({
-    Key key,
-    @required this.initialSelectedTime,
-    @required this.helpText,
-    @required this.autofocusHour,
-    @required this.autofocusMinute,
-    @required this.onChanged,
+    Key? key,
+    required this.initialSelectedTime,
+    required this.helpText,
+    required this.autofocusHour,
+    required this.autofocusMinute,
+    required this.onChanged,
   }) : assert(initialSelectedTime != null),
        assert(onChanged != null),
        super(key: key);
@@ -1291,11 +1288,11 @@ class _TimePickerInput extends StatefulWidget {
   final TimeOfDay initialSelectedTime;
 
   /// Optionally provide your own help text to the time picker.
-  final String helpText;
+  final String? helpText;
 
-  final bool autofocusHour;
+  final bool? autofocusHour;
 
-  final bool autofocusMinute;
+  final bool? autofocusMinute;
 
   final ValueChanged<TimeOfDay> onChanged;
 
@@ -1304,7 +1301,7 @@ class _TimePickerInput extends StatefulWidget {
 }
 
 class _TimePickerInputState extends State<_TimePickerInput> {
-  TimeOfDay _selectedTime;
+  late TimeOfDay _selectedTime;
   bool hourHasError = false;
   bool minuteHasError = false;
 
@@ -1314,17 +1311,17 @@ class _TimePickerInputState extends State<_TimePickerInput> {
     _selectedTime = widget.initialSelectedTime;
   }
 
-  int _parseHour(String value) {
+  int? _parseHour(String? value) {
     if (value == null) {
       return null;
     }
 
-    int newHour = int.tryParse(value);
+    int? newHour = int.tryParse(value);
     if (newHour == null) {
       return null;
     }
 
-    if (MediaQuery.of(context).alwaysUse24HourFormat) {
+    if (MediaQuery.of(context)!.alwaysUse24HourFormat) {
       if (newHour >= 0 && newHour < 24) {
         return newHour;
       }
@@ -1340,12 +1337,12 @@ class _TimePickerInputState extends State<_TimePickerInput> {
     return null;
   }
 
-  int _parseMinute(String value) {
+  int? _parseMinute(String? value) {
     if (value == null) {
       return null;
     }
 
-    final int newMinute = int.tryParse(value);
+    final int? newMinute = int.tryParse(value);
     if (newMinute == null) {
       return null;
     }
@@ -1356,8 +1353,8 @@ class _TimePickerInputState extends State<_TimePickerInput> {
     return null;
   }
 
-  void _handleHourSavedSubmitted(String value) {
-    final int newHour = _parseHour(value);
+  void _handleHourSavedSubmitted(String? value) {
+    final int? newHour = _parseHour(value);
     if (newHour != null) {
       _selectedTime = TimeOfDay(hour: newHour, minute: _selectedTime.minute);
       widget.onChanged(_selectedTime);
@@ -1365,17 +1362,17 @@ class _TimePickerInputState extends State<_TimePickerInput> {
   }
 
   void _handleHourChanged(String value) {
-    final int newHour = _parseHour(value);
+    final int? newHour = _parseHour(value);
     if (newHour != null && value.length == 2) {
       // If a valid hour is typed, move focus to the minute TextField.
       FocusScope.of(context).nextFocus();
     }
   }
 
-  void _handleMinuteSavedSubmitted(String value) {
-    final int newMinute = _parseMinute(value);
+  void _handleMinuteSavedSubmitted(String? value) {
+    final int? newMinute = _parseMinute(value);
     if (newMinute != null) {
-      _selectedTime = TimeOfDay(hour: _selectedTime.hour, minute: int.parse(value));
+      _selectedTime = TimeOfDay(hour: _selectedTime.hour, minute: int.parse(value!));
       widget.onChanged(_selectedTime);
     }
   }
@@ -1385,8 +1382,8 @@ class _TimePickerInputState extends State<_TimePickerInput> {
     widget.onChanged(_selectedTime);
   }
 
-  String _validateHour(String value) {
-    final int newHour = _parseHour(value);
+  String? _validateHour(String? value) {
+    final int? newHour = _parseHour(value);
     setState(() {
       hourHasError = newHour == null;
     });
@@ -1396,8 +1393,8 @@ class _TimePickerInputState extends State<_TimePickerInput> {
     return newHour == null ? '' : null;
   }
 
-  String _validateMinute(String value) {
-    final int newMinute = _parseMinute(value);
+  String? _validateMinute(String? value) {
+    final int? newMinute = _parseMinute(value);
     setState(() {
       minuteHasError = newMinute == null;
     });
@@ -1410,11 +1407,11 @@ class _TimePickerInputState extends State<_TimePickerInput> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData media = MediaQuery.of(context);
-    final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat(alwaysUse24HourFormat: media.alwaysUse24HourFormat);
+    final MediaQueryData media = MediaQuery.of(context)!;
+    final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context)!.timeOfDayFormat(alwaysUse24HourFormat: media.alwaysUse24HourFormat);
     final bool use24HourDials = hourFormat(of: timeOfDayFormat) != HourFormat.h;
-    final ThemeData theme = Theme.of(context);
-    final TextStyle hourMinuteStyle = TimePickerTheme.of(context).hourMinuteTextStyle ?? theme.textTheme.headline2;
+    final ThemeData theme = Theme.of(context)!;
+    final TextStyle hourMinuteStyle = TimePickerTheme.of(context).hourMinuteTextStyle ?? theme.textTheme.headline2!;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -1422,7 +1419,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            widget.helpText ?? MaterialLocalizations.of(context).timePickerInputHelpText,
+            widget.helpText ?? MaterialLocalizations.of(context)!.timePickerInputHelpText,
             style: TimePickerTheme.of(context).helpTextStyle ?? theme.textTheme.overline,
           ),
           const SizedBox(height: 16.0),
@@ -1460,7 +1457,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
                           if (!hourHasError && !minuteHasError)
                             ExcludeSemantics(
                               child: Text(
-                                MaterialLocalizations.of(context).timePickerHourLabel,
+                                MaterialLocalizations.of(context)!.timePickerHourLabel,
                                 style: theme.textTheme.caption,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1490,7 +1487,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
                           if (!hourHasError && !minuteHasError)
                             ExcludeSemantics(
                               child: Text(
-                                MaterialLocalizations.of(context).timePickerMinuteLabel,
+                                MaterialLocalizations.of(context)!.timePickerMinuteLabel,
                                 style: theme.textTheme.caption,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1514,8 +1511,8 @@ class _TimePickerInputState extends State<_TimePickerInput> {
           ),
           if (hourHasError || minuteHasError)
             Text(
-              MaterialLocalizations.of(context).invalidTimeLabel,
-              style: theme.textTheme.bodyText2.copyWith(color: theme.colorScheme.error),
+              MaterialLocalizations.of(context)!.invalidTimeLabel,
+              style: theme.textTheme.bodyText2!.copyWith(color: theme.colorScheme.error),
             )
           else
             const SizedBox(height: 2.0),
@@ -1527,20 +1524,20 @@ class _TimePickerInputState extends State<_TimePickerInput> {
 
 class _HourTextField extends StatelessWidget {
   const _HourTextField({
-    Key key,
-    @required this.selectedTime,
-    @required this.style,
-    @required this.autofocus,
-    @required this.validator,
-    @required this.onSavedSubmitted,
-    @required this.onChanged,
+    Key? key,
+    required this.selectedTime,
+    required this.style,
+    required this.autofocus,
+    required this.validator,
+    required this.onSavedSubmitted,
+    required this.onChanged,
   }) : super(key: key);
 
   final TimeOfDay selectedTime;
   final TextStyle style;
-  final bool autofocus;
+  final bool? autofocus;
   final FormFieldValidator<String> validator;
-  final ValueChanged<String> onSavedSubmitted;
+  final ValueChanged<String?> onSavedSubmitted;
   final ValueChanged<String> onChanged;
 
   @override
@@ -1550,7 +1547,7 @@ class _HourTextField extends StatelessWidget {
       isHour: true,
       autofocus: autofocus,
       style: style,
-      semanticHintText: MaterialLocalizations.of(context).timePickerHourLabel,
+      semanticHintText: MaterialLocalizations.of(context)!.timePickerHourLabel,
       validator: validator,
       onSavedSubmitted: onSavedSubmitted,
       onChanged: onChanged,
@@ -1560,19 +1557,19 @@ class _HourTextField extends StatelessWidget {
 
 class _MinuteTextField extends StatelessWidget {
   const _MinuteTextField({
-    Key key,
-    @required this.selectedTime,
-    @required this.style,
-    @required this.autofocus,
-    @required this.validator,
-    @required this.onSavedSubmitted,
+    Key? key,
+    required this.selectedTime,
+    required this.style,
+    required this.autofocus,
+    required this.validator,
+    required this.onSavedSubmitted,
   }) : super(key: key);
 
   final TimeOfDay selectedTime;
   final TextStyle style;
-  final bool autofocus;
+  final bool? autofocus;
   final FormFieldValidator<String> validator;
-  final ValueChanged<String> onSavedSubmitted;
+  final ValueChanged<String?> onSavedSubmitted;
 
   @override
   Widget build(BuildContext context) {
@@ -1581,7 +1578,7 @@ class _MinuteTextField extends StatelessWidget {
       isHour: false,
       autofocus: autofocus,
       style: style,
-      semanticHintText: MaterialLocalizations.of(context).timePickerMinuteLabel,
+      semanticHintText: MaterialLocalizations.of(context)!.timePickerMinuteLabel,
       validator: validator,
       onSavedSubmitted: onSavedSubmitted,
     );
@@ -1590,33 +1587,33 @@ class _MinuteTextField extends StatelessWidget {
 
 class _HourMinuteTextField extends StatefulWidget {
   const _HourMinuteTextField({
-    Key key,
-    @required this.selectedTime,
-    @required this.isHour,
-    @required this.autofocus,
-    @required this.style,
-    @required this.semanticHintText,
-    @required this.validator,
-    @required this.onSavedSubmitted,
+    Key? key,
+    required this.selectedTime,
+    required this.isHour,
+    required this.autofocus,
+    required this.style,
+    required this.semanticHintText,
+    required this.validator,
+    required this.onSavedSubmitted,
     this.onChanged,
   }) : super(key: key);
 
   final TimeOfDay selectedTime;
   final bool isHour;
-  final bool autofocus;
+  final bool? autofocus;
   final TextStyle style;
   final String semanticHintText;
   final FormFieldValidator<String> validator;
-  final ValueChanged<String> onSavedSubmitted;
-  final ValueChanged<String> onChanged;
+  final ValueChanged<String?> onSavedSubmitted;
+  final ValueChanged<String>? onChanged;
 
   @override
   _HourMinuteTextFieldState createState() => _HourMinuteTextFieldState();
 }
 
 class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
-  TextEditingController controller;
-  FocusNode focusNode;
+  TextEditingController? controller;
+  late FocusNode focusNode;
 
   @override
   void initState() {
@@ -1633,8 +1630,8 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
   }
 
   String get _formattedValue {
-    final bool alwaysUse24HourFormat = MediaQuery.of(context).alwaysUse24HourFormat;
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final bool alwaysUse24HourFormat = MediaQuery.of(context)!.alwaysUse24HourFormat;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
     return !widget.isHour ? localizations.formatMinute(widget.selectedTime) : localizations.formatHour(
       widget.selectedTime,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
@@ -1643,11 +1640,11 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context)!;
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
-    final InputDecorationTheme inputDecorationTheme = timePickerTheme.inputDecorationTheme;
+    final InputDecorationTheme? inputDecorationTheme = timePickerTheme.inputDecorationTheme;
     InputDecoration inputDecoration;
     if (inputDecorationTheme != null) {
       inputDecoration = const InputDecoration().applyDefaults(inputDecorationTheme);
@@ -1676,7 +1673,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
     // If screen reader is in use, make the hint text say hours/minutes.
     // Otherwise, remove the hint text when focused because the centered cursor
     // appears odd above the hint text.
-    final String hintText = MediaQuery.of(context).accessibleNavigation
+    final String? hintText = MediaQuery.of(context)!.accessibleNavigation
         ? widget.semanticHintText
         : (focusNode.hasFocus ? null : _formattedValue);
     inputDecoration = inputDecoration.copyWith(
@@ -1687,7 +1684,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
     return SizedBox(
       height: _kTimePickerHeaderControlHeight,
       child: MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+        data: MediaQuery.of(context)!.copyWith(textScaleFactor: 1.0),
         child: TextFormField(
           autofocus: widget.autofocus ?? false,
           expands: true,
@@ -1702,7 +1699,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
           controller: controller,
           decoration: inputDecoration,
           validator: widget.validator,
-          onEditingComplete: () => widget.onSavedSubmitted(controller.text),
+          onEditingComplete: () => widget.onSavedSubmitted(controller!.text),
           onSaved: widget.onSavedSubmitted,
           onFieldSubmitted: widget.onSavedSubmitted,
           onChanged: widget.onChanged,
@@ -1723,11 +1720,11 @@ class _TimePickerDialog extends StatefulWidget {
   ///
   /// [initialTime] must not be null.
   const _TimePickerDialog({
-    Key key,
-    @required this.initialTime,
-    @required this.cancelText,
-    @required this.confirmText,
-    @required this.helpText,
+    Key? key,
+    required this.initialTime,
+    required this.cancelText,
+    required this.confirmText,
+    required this.helpText,
     this.initialEntryMode = TimePickerEntryMode.dial,
   }) : assert(initialTime != null),
        super(key: key);
@@ -1741,15 +1738,15 @@ class _TimePickerDialog extends StatefulWidget {
   /// Optionally provide your own text for the cancel button.
   ///
   /// If null, the button uses [MaterialLocalizations.cancelButtonLabel].
-  final String cancelText;
+  final String? cancelText;
 
   /// Optionally provide your own text for the confirm button.
   ///
   /// If null, the button uses [MaterialLocalizations.okButtonLabel].
-  final String confirmText;
+  final String? confirmText;
 
   /// Optionally provide your own help text to the header of the time picker.
-  final String helpText;
+  final String? helpText;
 
   @override
   _TimePickerDialogState createState() => _TimePickerDialogState();
@@ -1769,26 +1766,26 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    localizations = MaterialLocalizations.of(context);
+    localizations = MaterialLocalizations.of(context)!;
     _announceInitialTimeOnce();
     _announceModeOnce();
   }
 
-  TimePickerEntryMode _entryMode;
+  late TimePickerEntryMode _entryMode;
   _TimePickerMode _mode = _TimePickerMode.hour;
-  _TimePickerMode _lastModeAnnounced;
-  bool _autoValidate;
-  bool _autofocusHour;
-  bool _autofocusMinute;
+  _TimePickerMode? _lastModeAnnounced;
+  late bool _autoValidate;
+  bool? _autofocusHour;
+  bool? _autofocusMinute;
 
   TimeOfDay get selectedTime => _selectedTime;
-  TimeOfDay _selectedTime;
+  late TimeOfDay _selectedTime;
 
-  Timer _vibrateTimer;
-  MaterialLocalizations localizations;
+  Timer? _vibrateTimer;
+  late MaterialLocalizations localizations;
 
   void _vibrate() {
-    switch (Theme.of(context).platform) {
+    switch (Theme.of(context)!.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -1821,7 +1818,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           _entryMode = TimePickerEntryMode.input;
           break;
         case TimePickerEntryMode.input:
-          _formKey.currentState.save();
+          _formKey.currentState!.save();
           _autofocusHour = false;
           _autofocusMinute = false;
           _entryMode = TimePickerEntryMode.dial;
@@ -1853,8 +1850,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     if (_announcedInitialTime)
       return;
 
-    final MediaQueryData media = MediaQuery.of(context);
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final MediaQueryData media = MediaQuery.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
     _announceToAccessibility(
       context,
       localizations.formatTimeOfDay(widget.initialTime, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
@@ -1891,7 +1888,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 
   void _handleOk() {
     if (_entryMode == TimePickerEntryMode.input) {
-      final FormState form = _formKey.currentState;
+      final FormState form = _formKey.currentState!;
       if (!form.validate()) {
         setState(() { _autoValidate = true; });
         return;
@@ -1902,12 +1899,12 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   }
 
   Size _dialogSize(BuildContext context) {
-    final Orientation orientation = MediaQuery.of(context).orientation;
-    final ThemeData theme = Theme.of(context);
+    final Orientation orientation = MediaQuery.of(context)!.orientation;
+    final ThemeData theme = Theme.of(context)!;
     // Constrain the textScaleFactor to prevent layout issues. Since only some
     // parts of the time picker scale up with textScaleFactor, we cap the factor
     // to 1.1 as that provides enough space to reasonably fit all the content.
-    final double textScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 1.1);
+    final double textScaleFactor = math.min(MediaQuery.of(context)!.textScaleFactor, 1.1);
 
     double timePickerWidth;
     double timePickerHeight;
@@ -1939,10 +1936,10 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData media = MediaQuery.of(context);
+    final MediaQueryData media = MediaQuery.of(context)!;
     final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: media.alwaysUse24HourFormat);
     final bool use24HourDials = hourFormat(of: timeOfDayFormat) != HourFormat.h;
-    final ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context)!;
     final ShapeBorder shape = TimePickerTheme.of(context).shape ?? _kDefaultShape;
     final Orientation orientation = media.orientation;
 
@@ -1956,8 +1953,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           onPressed: _handleEntryModeToggle,
           icon: Icon(_entryMode == TimePickerEntryMode.dial ? Icons.keyboard : Icons.access_time),
           tooltip: _entryMode == TimePickerEntryMode.dial
-              ? MaterialLocalizations.of(context).inputTimeModeButtonLabel
-              : MaterialLocalizations.of(context).dialModeButtonLabel,
+              ? MaterialLocalizations.of(context)!.inputTimeModeButtonLabel
+              : MaterialLocalizations.of(context)!.dialModeButtonLabel,
         ),
         Expanded(
           child: Container(
@@ -2175,15 +2172,15 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///  * [TimePickerThemeData], which allows you to customize the colors,
 ///    typography, and shape of the time picker.
 Future<TimeOfDay> showTimePicker({
-  @required BuildContext context,
-  @required TimeOfDay initialTime,
-  TransitionBuilder builder,
+  required BuildContext context,
+  required TimeOfDay initialTime,
+  TransitionBuilder? builder,
   bool useRootNavigator = true,
   TimePickerEntryMode initialEntryMode = TimePickerEntryMode.dial,
-  String cancelText,
-  String confirmText,
-  String helpText,
-  RouteSettings routeSettings,
+  String? cancelText,
+  String? confirmText,
+  String? helpText,
+  RouteSettings? routeSettings,
 }) async {
   assert(context != null);
   assert(initialTime != null);
@@ -2209,5 +2206,5 @@ Future<TimeOfDay> showTimePicker({
 }
 
 void _announceToAccessibility(BuildContext context, String message) {
-  SemanticsService.announce(message, Directionality.of(context));
+  SemanticsService.announce(message, Directionality.of(context)!);
 }

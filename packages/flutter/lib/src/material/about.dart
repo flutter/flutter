@@ -961,7 +961,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
       );
     }
     return DefaultTextStyle(
-      style: theme.textTheme.caption,
+      style: theme.textTheme.caption!,
       child: page,
     );
   }

@@ -11,6 +11,9 @@ import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/os.dart';
+import 'base/platform.dart';
+import 'base/version.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
@@ -1087,6 +1090,30 @@ void createPluginSymlinks(FlutterProject project, {bool force = false}) {
   }
 }
 
+/// Handler for symlink failures which provides specific instructions for known
+/// failure cases.
+@visibleForTesting
+void handleSymlinkException(FileSystemException e, {
+  @required Platform platform,
+  @required OperatingSystemUtils os,
+}) {
+  if (platform.isWindows && (e.osError?.errorCode ?? 0) == 1314) {
+    final String versionString = RegExp(r'[\d.]+').firstMatch(os.name)?.group(0);
+    final Version version = Version.parse(versionString);
+    // Window 10 14972 is the oldest version that allows creating symlinks
+    // just by enabling developer mode; before that it requires running the
+    // terminal as Administrator.
+    // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
+    final String instructions = (version != null && version >= Version(10, 0, 14972))
+        ? 'Please enable Developer Mode in your system settings. Run\n'
+          '  start ms-settings:developers\n'
+          'to open settings.'
+        : 'You must build from a terminal run as administrator.';
+    throwToolExit('Building with plugins requires symlink support.\n\n' +
+        instructions);
+  }
+}
+
 /// Creates [symlinkDirectory] containing symlinks to each plugin listed in [platformPlugins].
 ///
 /// If [force] is true, the directory will be created only if missing.
@@ -1109,12 +1136,7 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<dynamic> pla
     try {
       link.createSync(path);
     } on FileSystemException catch (e) {
-      if (globals.platform.isWindows && (e.osError?.errorCode ?? 0) == 1314) {
-        throwToolExit(
-          'Building with plugins requires symlink support. '
-          'Please enable Developer Mode in your system settings.\n\n$e'
-        );
-      }
+      handleSymlinkException(e, platform: globals.platform, os: globals.os);
       rethrow;
     }
   }
