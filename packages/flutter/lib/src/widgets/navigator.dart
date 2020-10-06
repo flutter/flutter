@@ -1528,6 +1528,7 @@ class Navigator extends StatefulWidget {
   /// Restoration ID to save and restore the state of the navigator, including
   /// its history.
   ///
+  /// {@template flutter.widgets.navigator.restorationScopeId}
   /// If a restoration ID is provided, the navigator will persist its internal
   /// state (including the route history as well as the restorable state of the
   /// routes) and restore it during state restoration.
@@ -1538,11 +1539,20 @@ class Navigator extends StatefulWidget {
   ///
   /// The state is persisted in a [RestorationBucket] claimed from
   /// the surrounding [RestorationScope] using the provided restoration ID.
+  /// Within that bucket, the [Navigator] also creates a new [RestorationScope]
+  /// for its children (the [Route]s).
   ///
   /// See also:
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
+  ///  * [RestorationMixin], which contains a runnable code sample showcasing
+  ///    state restoration in Flutter.
+  ///  * [Navigator], which explains under the heading "state restoration"
+  ///    how and under what conditions the navigator restores its state.
+  ///  * [Navigator.restorablePush], which includes an example showcasing how
+  ///    to push a restorable route unto the navigator.
+  /// {@endtemplate}
   final String? restorationScopeId;
 
   /// The name for the default route of the application.

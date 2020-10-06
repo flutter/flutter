@@ -9,9 +9,9 @@ import 'route.dart';
 
 /// A single tab view with its own [Navigator] state and history.
 ///
-/// A typical tab view used as the content of each tab in a [CupertinoTabScaffold]
-/// where multiple tabs with parallel navigation states and history can
-/// co-exist.
+/// A typical tab view is used as the content of each tab in a
+/// [CupertinoTabScaffold] where multiple tabs with parallel navigation states
+/// and history can co-exist.
 ///
 /// [CupertinoTabView] configures the top-level [Navigator] to search for routes
 /// in the following order:
@@ -49,6 +49,7 @@ class CupertinoTabView extends StatefulWidget {
     this.onGenerateRoute,
     this.onUnknownRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
+    this.restorationScopeId,
   }) : assert(navigatorObservers != null),
        super(key: key);
 
@@ -125,6 +126,12 @@ class CupertinoTabView extends StatefulWidget {
   /// This list of observers is not shared with ancestor or descendant [Navigator]s.
   final List<NavigatorObserver> navigatorObservers;
 
+  /// Restoration ID to save and restore the state of the [Navigator] built by
+  /// this [CupertinoTabView].
+  ///
+  /// {@macro flutter.widgets.navigator.restorationScopeId}
+  final String? restorationScopeId;
+
   @override
   _CupertinoTabViewState createState() {
     return _CupertinoTabViewState();
@@ -164,6 +171,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
       onGenerateRoute: _onGenerateRoute,
       onUnknownRoute: _onUnknownRoute,
       observers: _navigatorObservers,
+      restorationScopeId: widget.restorationScopeId,
     );
   }
 
