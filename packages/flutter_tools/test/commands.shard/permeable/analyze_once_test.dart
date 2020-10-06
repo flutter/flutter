@@ -194,8 +194,9 @@ flutter_project:lib/
         'info $analyzerSeparator Avoid empty else statements',
         'info $analyzerSeparator Avoid empty statements',
         'info $analyzerSeparator The declaration \'_incrementCounter\' isn\'t',
+        'warning $analyzerSeparator The parameter \'onPressed\' is required',
       ],
-      exitMessageContains: '3 issues found.',
+      exitMessageContains: '4 issues found.',
       toolExit: true,
       exitCode: 1,
     );
@@ -240,8 +241,9 @@ flutter_project:lib/
           'Analyzing',
           'info $analyzerSeparator The declaration \'_incrementCounter\' isn\'t',
           'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
+          'warning $analyzerSeparator The parameter \'onPressed\' is required',
         ],
-        exitMessageContains: '2 issues found.',
+        exitMessageContains: '3 issues found.',
         toolExit: true,
         exitCode: 1,
       );
