@@ -69,7 +69,16 @@ config("relative_flutter_linux_headers") {
 }
 
 source_set("flutter_linux_sources") {
-  public = _public_headers
+  public = _public_headers + [
+             "fl_binary_messenger_private.h",
+             "fl_dart_project_private.h",
+             "fl_engine_private.h",
+             "fl_method_call_private.h",
+             "fl_method_channel_private.h",
+             "fl_method_codec_private.h",
+             "fl_plugin_registrar_private.h",
+             "fl_standard_message_codec_private.h",
+           ]
 
   configs += [ "//flutter/shell/platform/linux/config:gtk" ]
 
@@ -109,6 +118,7 @@ source_set("flutter_linux_sources") {
 
   deps = [
     "//flutter/shell/platform/common/cpp:common_cpp_input",
+    "//flutter/shell/platform/common/cpp:common_cpp_switches",
     "//flutter/shell/platform/embedder:embedder_headers",
     "//third_party/rapidjson",
   ]

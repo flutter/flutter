@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
-#include "gtest/gtest.h"
 
 #include <gmodule.h>
+
+#include <cstdlib>
+
+#include "flutter/shell/platform/linux/fl_dart_project_private.h"
+#include "gtest/gtest.h"
 
 TEST(FlDartProjectTest, GetPaths) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
@@ -33,3 +37,31 @@ TEST(FlDartProjectTest, EnableMirrors) {
   EXPECT_TRUE(fl_dart_project_get_enable_mirrors(project));
   G_GNUC_END_IGNORE_DEPRECATIONS
 }
+
+TEST(FlDartProjectTest, SwitchesEmpty) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+
+  // Clear the main environment variable, since test order is not guaranteed.
+  unsetenv("FLUTTER_ENGINE_SWITCHES");
+
+  g_autoptr(GPtrArray) switches = fl_dart_project_get_switches(project);
+
+  EXPECT_EQ(switches->len, 0U);
+}
+
+#ifndef FLUTTER_RELEASE
+TEST(FlDartProjectTest, Switches) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+
+  setenv("FLUTTER_ENGINE_SWITCHES", "2", 1);
+  setenv("FLUTTER_ENGINE_SWITCH_1", "abc", 1);
+  setenv("FLUTTER_ENGINE_SWITCH_2", "foo=\"bar, baz\"", 1);
+
+  g_autoptr(GPtrArray) switches = fl_dart_project_get_switches(project);
+  EXPECT_EQ(switches->len, 2U);
+  EXPECT_STREQ(static_cast<const char*>(g_ptr_array_index(switches, 0)),
+               "--abc");
+  EXPECT_STREQ(static_cast<const char*>(g_ptr_array_index(switches, 1)),
+               "--foo=\"bar, baz\"");
+}
+#endif  // !FLUTTER_RELEASE

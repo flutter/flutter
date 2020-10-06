@@ -6,6 +6,12 @@
 
 #include <gmodule.h>
 
+#include <string>
+#include <vector>
+
+#include "flutter/shell/platform/common/cpp/engine_switches.h"
+#include "flutter/shell/platform/linux/fl_dart_project_private.h"
+
 struct _FlDartProject {
   GObject parent_instance;
 
@@ -90,4 +96,16 @@ G_MODULE_EXPORT const gchar* fl_dart_project_get_icu_data_path(
     FlDartProject* self) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(self), nullptr);
   return self->icu_data_path;
+}
+
+GPtrArray* fl_dart_project_get_switches(FlDartProject* self) {
+  GPtrArray* switches = g_ptr_array_new_with_free_func(g_free);
+  std::vector<std::string> env_switches = flutter::GetSwitchesFromEnvironment();
+  for (const auto& env_switch : env_switches) {
+    g_ptr_array_add(switches, g_strdup(env_switch.c_str()));
+  }
+  if (self->enable_mirrors) {
+    g_ptr_array_add(switches, g_strdup("--dart-flags=--enable_mirrors=true"));
+  }
+  return switches;
 }
