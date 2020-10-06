@@ -629,7 +629,7 @@ void main() {
         )
       )
     );
-    
+
     final Rect paddingRect = tester.getRect(find.byType(Padding));
     final Rect radioRect = tester.getRect(find.byType(radioType));
     final Rect titleRect = tester.getRect(find.text('Title'));

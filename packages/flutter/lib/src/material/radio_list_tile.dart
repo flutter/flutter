@@ -320,7 +320,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.controlAffinity = ListTileControlAffinity.platform,
     this.autofocus = false,
     this.contentPadding,
-    
+
   }) : assert(toggleable != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
@@ -471,10 +471,10 @@ class RadioListTile<T> extends StatelessWidget {
   final bool autofocus;
 
   /// Defines the insets surrounding the contents of the tile.
-  /// 
+  ///
   /// Insets the [Radio], [title], [subtitle], and [secondary] widgets
   /// in [RadioListTile].
-  /// 
+  ///
   /// When null, `EdgeInsets.symmetric(horizontal: 16.0)` is used.
   final EdgeInsetsGeometry? contentPadding;
 
