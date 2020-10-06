@@ -174,7 +174,7 @@ class TestCommand extends FlutterCommand {
           processManager: globals.processManager,
           logger: globals.logger,
         );
-        final Chromium chromium = await launcher.launch('http://localhost:8888');
+        final Chromium chromium = await launcher.launch('http://localhost:8888', headless: true);
         await chromium.close();
       }
       return FlutterCommandResult.success();
