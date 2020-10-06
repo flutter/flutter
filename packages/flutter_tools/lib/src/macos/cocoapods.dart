@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -307,9 +308,7 @@ class CocoaPods {
   /// Ensures that pod install is deemed needed on next check.
   void invalidatePodInstallOutput(XcodeBasedProject xcodeProject) {
     final File manifestLock = xcodeProject.podManifestLock;
-    if (manifestLock.existsSync()) {
-      manifestLock.deleteSync();
-    }
+    ErrorHandlingFileSystem.deleteIfExists(manifestLock);
   }
 
   // Check if you need to run pod install.

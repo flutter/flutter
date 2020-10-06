@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 
 import 'android/gradle_utils.dart';
 import 'base/common.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpStatus, ProcessException, SocketException;
 import 'base/logger.dart';
@@ -436,9 +437,7 @@ class Cache {
       getStampFileFor('flutter_tools').deleteSync();
       for (final ArtifactSet artifact in _artifacts) {
         final File file = getStampFileFor(artifact.stampName);
-        if (file.existsSync()) {
-          file.deleteSync();
-        }
+        ErrorHandlingFileSystem.deleteIfExists(file);
       }
     } on FileSystemException catch (err) {
       _logger.printError('Failed to delete some stamp files: $err');
