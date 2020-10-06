@@ -19,9 +19,7 @@
 
 #include "accessibility_bridge.h"
 
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
 #include <lib/ui/scenic/cpp/id.h>  // nogncheck
-#endif
 
 namespace flutter_runner {
 
@@ -134,11 +132,9 @@ class PlatformView final : public flutter::PlatformView,
   void OnScenicError(std::string error) override;
   void OnScenicEvent(std::vector<fuchsia::ui::scenic::Event> events) override;
 
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
   void OnChildViewConnected(scenic::ResourceId view_holder_id);
   void OnChildViewDisconnected(scenic::ResourceId view_holder_id);
   void OnChildViewStateChanged(scenic::ResourceId view_holder_id, bool state);
-#endif
 
   bool OnHandlePointerEvent(const fuchsia::ui::input::PointerEvent& pointer);
 
