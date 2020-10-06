@@ -142,13 +142,13 @@ void main() {
     expect(log, <String>['select-all: true']);
     log.clear();
 
-    // Tapping the parent checkbox when some rows are selected, deselects all.
+    // Tapping the parent checkbox when some rows are selected, selects all.
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable(<bool>[true, false, true])),
     ));
     await tester.tap(find.byType(Checkbox).first);
 
-    expect(log, <String>['select-all: false']);
+    expect(log, <String>['select-all: true']);
     log.clear();
 
     // Tapping the parent checkbox when all rows are selected, deselects all.
