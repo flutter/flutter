@@ -19,7 +19,7 @@ void main() {
     final MemoryImage memoryImage = MemoryImage(bytes);
     final ImageStream stream = memoryImage.resolve(ImageConfiguration.empty);
     final Completer<void> completer = Completer<void>();
-    FlutterError.onError = (FlutterErrorDetails error) { completer.completeError(error.exception as Object, error.stack); };
+    FlutterError.onError = (FlutterErrorDetails error) { completer.completeError(error.exception, error.stack); };
     stream.addListener(ImageStreamListener(
       (ImageInfo image, bool synchronousCall) {
         completer.complete();
