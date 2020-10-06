@@ -104,7 +104,7 @@ void main() {
 
     // Simulate system back button
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
 
     expect(selectedResults, <void>[null]);
@@ -439,7 +439,7 @@ void main() {
     expect(selectedResults, <String>['Result']);
   });
 
-  testWidgets( 'Closing search with nested search shown goes back to underlying route', (WidgetTester tester) async {
+  testWidgets('Closing search with nested search shown goes back to underlying route', (WidgetTester tester) async {
     _TestSearchDelegate delegate;
     final List<String> nestedSearchResults = <String>[];
     final _TestSearchDelegate nestedSearchDelegate = _TestSearchDelegate(
@@ -542,8 +542,7 @@ void main() {
   });
 
   testWidgets('Custom searchFieldStyle value', (WidgetTester tester) async {
-    const TextStyle searchFieldStyle =
-        TextStyle(color: Colors.red, fontSize: 3);
+    const TextStyle searchFieldStyle = TextStyle(color: Colors.red, fontSize: 3);
 
     final _TestSearchDelegate delegate = _TestSearchDelegate(searchFieldStyle: searchFieldStyle);
 
@@ -623,8 +622,7 @@ void main() {
                               SemanticsFlag.isTextField,
                               SemanticsFlag.isFocused,
                               SemanticsFlag.isHeader,
-                              if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
-                                  debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                              if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS && debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
                             ],
                             actions: <SemanticsAction>[
                               SemanticsAction.tap,
