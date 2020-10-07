@@ -710,7 +710,7 @@ void main() {
       );
 
       testOptionThatDefaultsToFalse(
-        '--publish-observatory-port',
+        '--publish-port',
             () => !debuggingOptions.disablePortPublication,
       );
     });
