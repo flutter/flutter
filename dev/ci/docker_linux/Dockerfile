@@ -10,7 +10,7 @@
 # for performing pushes to production, and so this image is quite a bit larger
 # than strictly needed for just building Flutter apps.
 
-# Last manual update 2020-08-11 (changing this comment will re-build image)
+# Last manual update 2020-10-05 (changing this comment will re-build image)
 
 # Note: updating past stretch (Debian 9) will bump Java past version 8,
 # which will break the Android SDK.

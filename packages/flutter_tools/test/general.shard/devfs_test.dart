@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -258,7 +259,7 @@ void main() {
     expect(devFS.lastCompiled, isNot(previousCompile));
   });
 
-   testWithoutContext('DevFS uses provided DevFSWriter instead of default HTTP writer', () async {
+  testWithoutContext('DevFS uses provided DevFSWriter instead of default HTTP writer', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeDevFSWriter writer = FakeDevFSWriter();
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
@@ -331,6 +332,84 @@ void main() {
     await expectLater(() async => await writer.write(<Uri, DevFSContent>{
       Uri.parse('goodbye'): DevFSFileContent(file),
     }, Uri.parse('/foo/bar/devfs/')), throwsA(isA<DevFSException>()));
+  });
+
+  testWithoutContext('test handles request closure hangs', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[createDevFSRequest],
+    );
+    final HttpClient httpClient = MockHttpClient();
+    final MockHttpClientRequest httpRequest = MockHttpClientRequest();
+    when(httpRequest.headers).thenReturn(MockHttpHeaders());
+    when(httpClient.putUrl(any)).thenAnswer((Invocation invocation) {
+      return Future<HttpClientRequest>.value(httpRequest);
+    });
+    int closeCount = 0;
+    final Completer<MockHttpClientResponse> hanger = Completer<MockHttpClientResponse>();
+    final Completer<MockHttpClientResponse> succeeder = Completer<MockHttpClientResponse>();
+    final List<Completer<MockHttpClientResponse>> closeCompleters =
+      <Completer<MockHttpClientResponse>>[hanger, succeeder];
+    succeeder.complete(MockHttpClientResponse());
+
+    when(httpRequest.close()).thenAnswer((Invocation invocation) {
+      final Completer<MockHttpClientResponse> completer = closeCompleters[closeCount];
+      closeCount += 1;
+      return completer.future;
+    });
+    when(httpRequest.abort()).thenAnswer((_) {
+      hanger.completeError(const HttpException('aborted'));
+    });
+    when(httpRequest.done).thenAnswer((_) {
+      if (closeCount == 1) {
+        return hanger.future;
+      } else if (closeCount == 2) {
+        return succeeder.future;
+      } else {
+        // This branch shouldn't happen.
+        fail('This branch should not happen');
+      }
+    });
+
+    final BufferLogger logger = BufferLogger.test();
+    final DevFS devFS = DevFS(
+      fakeVmServiceHost.vmService,
+      'test',
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: logger,
+      osUtils: FakeOperatingSystemUtils(),
+      httpClient: httpClient,
+    );
+
+    await devFS.create();
+    final DateTime previousCompile = devFS.lastCompiled;
+
+    final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+    )).thenAnswer((Invocation invocation) async {
+      fileSystem.file('example').createSync();
+      return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
+    });
+
+    final UpdateFSReport report = await devFS.update(
+      mainUri: Uri.parse('lib/main.dart'),
+      generator: residentCompiler,
+      dillOutputPath: 'lib/foo.dill',
+      pathToReload: 'lib/foo.txt.dill',
+      trackWidgetCreation: false,
+      invalidatedFiles: <Uri>[],
+      packageConfig: PackageConfig.empty,
+    );
+
+    expect(report.success, true);
+    expect(devFS.lastCompiled, isNot(previousCompile));
+    expect(closeCount, 2);
+    expect(logger.errorText, '');
   });
 }
 

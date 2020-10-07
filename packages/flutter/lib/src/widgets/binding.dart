@@ -964,7 +964,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       container: renderView,
       debugShortDescription: '[root]',
       child: rootWidget,
-    ).attachToRenderTree(buildOwner!, renderViewElement as RenderObjectToWidgetElement<RenderBox>);
+    ).attachToRenderTree(buildOwner!, renderViewElement as RenderObjectToWidgetElement<RenderBox>?);
   }
 
   /// Whether the [renderViewElement] has been initialized.

@@ -21,13 +21,12 @@ import '../src/fake_devices.dart';
 import '../src/mocks.dart';
 
 void main() {
-  MockCache cache;
+  Cache cache;
   BufferLogger logger;
 
   setUp(() {
-    cache = MockCache();
+    cache = Cache.test();
     logger = BufferLogger.test();
-    when(cache.dyLdLibEntry).thenReturn(const MapEntry<String, String>('foo', 'bar'));
   });
 
   group('DeviceManager', () {
@@ -138,26 +137,26 @@ void main() {
   });
 
   group('PollingDeviceDiscovery', () {
-    testUsingContext('startPolling', () async {
-      await FakeAsync().run((FakeAsync time) async {
+    testUsingContext('startPolling', () {
+      FakeAsync().run((FakeAsync time) {
         final FakePollingDeviceDiscovery pollingDeviceDiscovery = FakePollingDeviceDiscovery();
-        await pollingDeviceDiscovery.startPolling();
+        pollingDeviceDiscovery.startPolling();
         time.elapse(const Duration(milliseconds: 4001));
-        time.flushMicrotasks();
+
         // First check should use the default polling timeout
         // to quickly populate the list.
         expect(pollingDeviceDiscovery.lastPollingTimeout, isNull);
 
         time.elapse(const Duration(milliseconds: 4001));
-        time.flushMicrotasks();
+
         // Subsequent polling should be much longer.
         expect(pollingDeviceDiscovery.lastPollingTimeout, const Duration(seconds: 30));
-        await pollingDeviceDiscovery.stopPolling();
+        pollingDeviceDiscovery.stopPolling();
       });
     }, overrides: <Type, Generator>{
       Artifacts: () => Artifacts.test(),
       Cache: () => cache,
-    }, skip: true); // TODO(jonahwilliams): clean up with https://github.com/flutter/flutter/issues/60675
+    });
   });
 
   group('Filter devices', () {
@@ -370,6 +369,20 @@ void main() {
       Cache: () => cache,
     });
 
+    testUsingContext('Does not remove an unsupported device if FlutterProject is null', () async {
+      final List<Device> devices = <Device>[
+        unsupported,
+      ];
+
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      final List<Device> filtered = await deviceManager.findTargetDevices(null);
+
+      expect(filtered, <Device>[unsupported]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
+    });
+
     testUsingContext('Removes web and fuchsia from --all', () async {
       final List<Device> devices = <Device>[
         webDevice,
@@ -429,9 +442,7 @@ void main() {
       ];
       final MockDeviceDiscovery mockDeviceDiscovery = MockDeviceDiscovery();
       when(mockDeviceDiscovery.supportsPlatform).thenReturn(true);
-      // when(mockDeviceDiscovery.discoverDevices(timeout: timeout)).thenAnswer((_) async => devices);
       when(mockDeviceDiscovery.devices).thenAnswer((_) async => devices);
-      // when(mockDeviceDiscovery.discoverDevices(timeout: timeout)).thenAnswer((_) async => devices);
 
       final DeviceManager deviceManager = TestDeviceManager(<Device>[], deviceDiscoveryOverrides: <DeviceDiscovery>[
         mockDeviceDiscovery
@@ -458,7 +469,6 @@ void main() {
       when(mockDeviceDiscovery.supportsPlatform).thenReturn(true);
       when(mockDeviceDiscovery.discoverDevices(timeout: timeout)).thenAnswer((_) async => devices);
       when(mockDeviceDiscovery.devices).thenAnswer((_) async => devices);
-      // when(mockDeviceDiscovery.discoverDevices(timeout: timeout)).thenAnswer((_) async => devices);
 
       final DeviceManager deviceManager = TestDeviceManager(<Device>[], deviceDiscoveryOverrides: <DeviceDiscovery>[
         mockDeviceDiscovery
@@ -550,5 +560,4 @@ class TestDeviceManager extends DeviceManager {
 class MockProcess extends Mock implements Process {}
 class MockTerminal extends Mock implements AnsiTerminal {}
 class MockStdio extends Mock implements Stdio {}
-class MockCache extends Mock implements Cache {}
 class MockDeviceDiscovery extends Mock implements DeviceDiscovery {}

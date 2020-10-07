@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -12,14 +10,13 @@ import 'package:flutter/painting.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
-
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   TestImageProvider(this.testImage);
 
   final ui.Image testImage;
 
   final Completer<ImageInfo> _completer = Completer<ImageInfo>.sync();
-  ImageConfiguration configuration;
+  ImageConfiguration? configuration;
   int loadCallCount = 0;
 
   @override

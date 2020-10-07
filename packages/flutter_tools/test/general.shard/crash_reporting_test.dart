@@ -183,6 +183,25 @@ void main() {
       expect(logger.errorText, contains('Failed to send crash report due to a network error'));
     });
 
+    testWithoutContext('should print an explanatory message when there is a ClientException', () async {
+      final CrashReportSender crashReportSender = CrashReportSender(
+        client: CrashingCrashReportSender(const HttpException('no internets')),
+        usage: mockUsage,
+        platform: platform,
+        logger: logger,
+        operatingSystemUtils: operatingSystemUtils,
+      );
+
+      await crashReportSender.sendReport(
+        error: ClientException('Test bad state error'),
+        stackTrace: null,
+        getFlutterVersion: () => 'test-version',
+        command: 'crash',
+      );
+
+      expect(logger.errorText, contains('Failed to send crash report due to a network error'));
+    });
+
     testWithoutContext('should send only one crash report when sent many times', () async {
       final RequestInfo requestInfo = RequestInfo();
 

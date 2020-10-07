@@ -6,23 +6,23 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-const String _raisedText =
-    'Raised buttons add dimension to mostly flat layouts. They emphasize '
+const String _elevatedText =
+    'Elevated buttons add dimension to mostly flat layouts. They emphasize '
     'functions on busy or wide spaces.';
 
-const String _raisedCode = 'buttons_raised';
+const String _elevatedCode = 'buttons_elevated';
 
-const String _flatText = 'A flat button displays an ink splash on press '
-    'but does not lift. Use flat buttons on toolbars, in dialogs and '
+const String _textText = 'A text button displays an ink splash on press '
+    'but does not lift. Use text buttons on toolbars, in dialogs and '
     'inline with padding';
 
-const String _flatCode = 'buttons_flat';
+const String _textCode = 'buttons_text';
 
-const String _outlineText =
-    'Outline buttons become opaque and elevate when pressed. They are often '
-    'paired with raised buttons to indicate an alternative, secondary action.';
+const String _outlinedText =
+    'Outlined buttons become opaque and elevate when pressed. They are often '
+    'paired with elevated buttons to indicate an alternative, secondary action.';
 
-const String _outlineCode = 'buttons_outline';
+const String _outlinedCode = 'buttons_outlined';
 
 const String _dropdownText =
     "A dropdown button displays a menu that's used to select a value from a "
@@ -53,44 +53,31 @@ class ButtonsDemo extends StatefulWidget {
 }
 
 class _ButtonsDemoState extends State<ButtonsDemo> {
-  ShapeBorder _buttonShape;
+  OutlinedBorder _buttonShape;
 
   @override
   Widget build(BuildContext context) {
-    final ButtonThemeData buttonTheme = ButtonTheme.of(context).copyWith(
-      shape: _buttonShape
-    );
-
     final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       ComponentDemoTabData(
-        tabName: 'RAISED',
-        description: _raisedText,
-        demoWidget: ButtonTheme.fromButtonThemeData(
-          data: buttonTheme,
-          child: buildRaisedButton(),
-        ),
-        exampleCodeTag: _raisedCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/RaisedButton-class.html',
+        tabName: 'ELEVATED',
+        description: _elevatedText,
+        demoWidget: buildElevatedButton(_buttonShape),
+        exampleCodeTag: _elevatedCode,
+        documentationUrl: 'https://docs.flutter.io/flutter/material/ElevatedButton-class.html',
       ),
       ComponentDemoTabData(
-        tabName: 'FLAT',
-        description: _flatText,
-        demoWidget: ButtonTheme.fromButtonThemeData(
-          data: buttonTheme,
-          child: buildFlatButton(),
-        ),
-        exampleCodeTag: _flatCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/FlatButton-class.html',
+        tabName: 'TEXT',
+        description: _textText,
+        demoWidget: buildTextButton(_buttonShape),
+        exampleCodeTag: _textCode,
+        documentationUrl: 'https://docs.flutter.io/flutter/material/TextButton-class.html',
       ),
       ComponentDemoTabData(
-        tabName: 'OUTLINE',
-        description: _outlineText,
-        demoWidget: ButtonTheme.fromButtonThemeData(
-          data: buttonTheme,
-          child: buildOutlineButton(),
-        ),
-        exampleCodeTag: _outlineCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/OutlineButton-class.html',
+        tabName: 'OUTLINED',
+        description: _outlinedText,
+        demoWidget: buildOutlinedButton(_buttonShape),
+        exampleCodeTag: _outlinedCode,
+        documentationUrl: 'https://docs.flutter.io/flutter/material/OutlinedButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'DROPDOWN',
@@ -131,7 +118,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
-  Widget buildRaisedButton() {
+  Widget buildElevatedButton(OutlinedBorder shape) {
+    final ButtonStyle style = ElevatedButton.styleFrom(shape: shape);
     return Align(
       alignment: const Alignment(0.0, -0.2),
       child: Column(
@@ -140,13 +128,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           ButtonBar(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              RaisedButton(
-                child: const Text('RAISED BUTTON', semanticsLabel: 'RAISED BUTTON 1'),
+              ElevatedButton(
+                style: style,
+                child: const Text('ELEVATED BUTTON', semanticsLabel: 'ELEVATED BUTTON 1'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
-              const RaisedButton(
+              const ElevatedButton(
                 child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 1'),
                 onPressed: null,
               ),
@@ -155,14 +144,16 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           ButtonBar(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              RaisedButton.icon(
+              ElevatedButton.icon(
+                style: style,
                 icon: const Icon(Icons.add, size: 18.0),
-                label: const Text('RAISED BUTTON', semanticsLabel: 'RAISED BUTTON 2'),
+                label: const Text('ELEVATED BUTTON', semanticsLabel: 'ELEVATED BUTTON 2'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
-              RaisedButton.icon(
+              ElevatedButton.icon(
+                style: style,
                 icon: const Icon(Icons.add, size: 18.0),
                 label: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 2'),
                 onPressed: null,
@@ -174,7 +165,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
-  Widget buildFlatButton() {
+  Widget buildTextButton(OutlinedBorder shape) {
+    final ButtonStyle style = ElevatedButton.styleFrom(shape: shape);
     return Align(
       alignment: const Alignment(0.0, -0.2),
       child: Column(
@@ -183,13 +175,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           ButtonBar(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              FlatButton(
-                child: const Text('FLAT BUTTON', semanticsLabel: 'FLAT BUTTON 1'),
+              TextButton(
+                style: style,
+                child: const Text('TEXT BUTTON', semanticsLabel: 'TEXT BUTTON 1'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
-              const FlatButton(
+              const TextButton(
                 child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 3',),
                 onPressed: null,
               ),
@@ -198,15 +191,17 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           ButtonBar(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              FlatButton.icon(
-                icon: const Icon(Icons.add_circle_outline, size: 18.0),
-                label: const Text('FLAT BUTTON', semanticsLabel: 'FLAT BUTTON 2'),
+              TextButton.icon(
+                style: style,
+                icon: const Icon(Icons.add_circle_outlined, size: 18.0),
+                label: const Text('TEXT BUTTON', semanticsLabel: 'TEXT BUTTON 2'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
-              FlatButton.icon(
-                icon: const Icon(Icons.add_circle_outline, size: 18.0),
+              TextButton.icon(
+                style: style,
+                icon: const Icon(Icons.add_circle_outlined, size: 18.0),
                 label: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 4'),
                 onPressed: null,
               ),
@@ -217,7 +212,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
-  Widget buildOutlineButton() {
+  Widget buildOutlinedButton(OutlinedBorder shape) {
+    final ButtonStyle style = ElevatedButton.styleFrom(shape: shape);
     return Align(
       alignment: const Alignment(0.0, -0.2),
       child: Column(
@@ -226,14 +222,16 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           ButtonBar(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              OutlineButton(
-                child: const Text('OUTLINE BUTTON', semanticsLabel: 'OUTLINE BUTTON 1'),
+              OutlinedButton(
+                style: style,
+                child: const Text('OUTLINED BUTTON', semanticsLabel: 'OUTLINED BUTTON 1'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
-              const OutlineButton(
-                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 5'),
+              OutlinedButton(
+                style: style,
+                child: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 5'),
                 onPressed: null,
               ),
             ],
@@ -241,14 +239,15 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           ButtonBar(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              OutlineButton.icon(
+              OutlinedButton.icon(
+                style: style,
                 icon: const Icon(Icons.add, size: 18.0),
-                label: const Text('OUTLINE BUTTON', semanticsLabel: 'OUTLINE BUTTON 2'),
+                label: const Text('OUTLINED BUTTON', semanticsLabel: 'OUTLINED BUTTON 2'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
-              OutlineButton.icon(
+              OutlinedButton.icon(
                 icon: const Icon(Icons.add, size: 18.0),
                 label: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 6'),
                 onPressed: null,

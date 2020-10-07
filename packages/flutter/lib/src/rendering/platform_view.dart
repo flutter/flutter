@@ -724,13 +724,6 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   PointerEnterEventListener? get onEnter => null;
 
   @override
-  PointerHoverEventListener get onHover => _handleHover;
-  void _handleHover(PointerHoverEvent event) {
-    if (_handlePointerEvent != null)
-      _handlePointerEvent!(event);
-  }
-
-  @override
   PointerExitEventListener? get onExit => null;
 
   @override
@@ -740,6 +733,9 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     if (event is PointerDownEvent) {
       _gestureRecognizer!.addPointer(event);
+    }
+    if (event is PointerHoverEvent) {
+      _handlePointerEvent?.call(event);
     }
   }
 

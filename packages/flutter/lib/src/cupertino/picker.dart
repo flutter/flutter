@@ -186,7 +186,7 @@ class CupertinoPicker extends StatefulWidget {
   /// This can be called during scrolls and during ballistic flings. To get the
   /// value only when the scrolling settles, use a [NotificationListener],
   /// listen for [ScrollEndNotification] and read its [FixedExtentMetrics].
-  final ValueChanged<int> onSelectedItemChanged;
+  final ValueChanged<int>? onSelectedItemChanged;
 
   /// A delegate that lazily instantiates children.
   final ListWheelChildDelegate childDelegate;
@@ -247,7 +247,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     }
 
     if (widget.onSelectedItemChanged != null) {
-      widget.onSelectedItemChanged(index);
+      widget.onSelectedItemChanged!(index);
     }
   }
 

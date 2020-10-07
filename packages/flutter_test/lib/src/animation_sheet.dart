@@ -8,7 +8,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 /// Records the frames of an animating widget, and later displays the frames as a
 /// grid in an animation sheet.
@@ -92,7 +91,7 @@ class AnimationSheetBuilder {
   ///
   /// The [frameSize] is a tight constraint for the child to be recorded, and must not
   /// be null.
-  AnimationSheetBuilder({@required this.frameSize}) : assert(frameSize != null);
+  AnimationSheetBuilder({required this.frameSize}) : assert(frameSize != null);
 
   /// The size of the child to be recorded.
   ///
@@ -133,7 +132,7 @@ class AnimationSheetBuilder {
   ///  * [WidgetTester.pumpFrames], which renders a widget in a series of frames
   ///    with a fixed time interval.
   Widget record(Widget child, {
-    Key key,
+    Key? key,
     bool recording = true,
   }) {
     assert(child != null);
@@ -160,14 +159,14 @@ class AnimationSheetBuilder {
   /// The `key` is applied to the root widget.
   ///
   /// This method can only be called if at least one frame has been recorded.
-  Future<Widget> display({Key key}) async {
+  Future<Widget> display({Key? key}) async {
     assert(_recordedFrames.isNotEmpty);
     final List<ui.Image> frames = await _frames;
     return _CellSheet(
       key: key,
       cellSize: frameSize,
       children: frames.map((ui.Image image) => RawImage(
-        image: image,
+        image: image.clone(),
         width: frameSize.width,
         height: frameSize.height,
       )).toList(),
@@ -209,12 +208,12 @@ typedef _RecordedHandler = void Function(Future<ui.Image> image);
 class _AnimationSheetRecorder extends StatefulWidget {
   const _AnimationSheetRecorder({
     this.handleRecorded,
-    this.child,
-    this.size,
-    Key key,
+    required this.child,
+    required this.size,
+    Key? key,
   }) : super(key: key);
 
-  final _RecordedHandler handleRecorded;
+  final _RecordedHandler? handleRecorded;
   final Widget child;
   final Size size;
 
@@ -226,8 +225,9 @@ class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
   GlobalKey boundaryKey = GlobalKey();
 
   void _record(Duration duration) {
-    final RenderRepaintBoundary boundary = boundaryKey.currentContext.findRenderObject() as RenderRepaintBoundary;
-    widget.handleRecorded(boundary.toImage());
+    assert(widget.handleRecorded != null);
+    final RenderRepaintBoundary boundary = boundaryKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+    widget.handleRecorded!(boundary.toImage());
   }
 
   @override
@@ -258,12 +258,12 @@ class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
 // If `callback` is null, `_PostFrameCallbacker` is equivalent to a proxy box.
 class _PostFrameCallbacker extends SingleChildRenderObjectWidget {
   const _PostFrameCallbacker({
-    Key key,
-    Widget child,
+    Key? key,
+    Widget? child,
     this.callback,
   }) : super(key: key, child: child);
 
-  final FrameCallback callback;
+  final FrameCallback? callback;
 
   @override
   _RenderPostFrameCallbacker createRenderObject(BuildContext context) => _RenderPostFrameCallbacker(
@@ -278,12 +278,12 @@ class _PostFrameCallbacker extends SingleChildRenderObjectWidget {
 
 class _RenderPostFrameCallbacker extends RenderProxyBox {
   _RenderPostFrameCallbacker({
-    FrameCallback callback,
+    FrameCallback? callback,
   }) : _callback = callback;
 
-  FrameCallback get callback => _callback;
-  FrameCallback _callback;
-  set callback(FrameCallback value) {
+  FrameCallback? get callback => _callback;
+  FrameCallback? _callback;
+  set callback(FrameCallback? value) {
     _callback = value;
     if (value != null) {
       markNeedsPaint();
@@ -293,8 +293,8 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (callback != null) {
-      SchedulerBinding.instance.addPostFrameCallback(callback == null ? null : (Duration duration) {
-        callback(duration);
+      SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+        callback!(duration);
         markNeedsPaint();
       });
     }
@@ -314,9 +314,9 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
 // positioned from top left to bottom right in a row-major order.
 class _CellSheet extends StatelessWidget {
   _CellSheet({
-    Key key,
-    @required this.cellSize,
-    @required this.children,
+    Key? key,
+    required this.cellSize,
+    required this.children,
   }) : assert(cellSize != null),
        assert(children != null && children.isNotEmpty),
        super(key: key);

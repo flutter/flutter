@@ -4,17 +4,6 @@
 # YAML anchors used to share fields between tasks.
 # See https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html
 
-firebase_shard_template: &FIREBASE_SHARD_TEMPLATE
-  environment:
-    # Empirically, this shard runs in 20-25 minutes with just one CPU and 4G of RAM, as of
-    # October 2019. It does not seem to be sensitive to the number of CPUs or amount of RAM;
-    # doubling CPUs had no effect (mere seconds under 20 minutes), increasing RAM to 24G left it
-    # on the high end of the 20-25 minute range. (This makes sense, as it's just driving the
-    # Firebase test lab remotely.) Less than 4G of RAM made it go OOM.
-    CLOUDSDK_CORE_DISABLE_PROMPTS: 1
-    GCLOUD_FIREBASE_TESTLAB_KEY: ENCRYPTED[1c140257edc48f5578fa5a0e5038b84c8e53270c405efa5a8e35ea303a4e0d135853989f448f72136206de854d17fbec]
-  script:
-    - dart --enable-asserts ./dev/bots/test.dart
 
 use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
 
@@ -189,16 +178,6 @@ task:
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
-    # firebase_test_lab_tests are linux-only
-    - name: firebase_test_lab_tests-0-linux
-      <<: *FIREBASE_SHARD_TEMPLATE
-
-    - name: firebase_test_lab_tests-1-linux
-      <<: *FIREBASE_SHARD_TEMPLATE
-
-    - name: firebase_test_lab_tests-2_last-linux
-      <<: *FIREBASE_SHARD_TEMPLATE
-
     - name: web_smoke_test
       only_if: "changesInclude('.cirrus.yml', 'examples/hello_world/**' ,'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/**') && $CIRRUS_PR != ''"
       environment:
@@ -224,11 +203,8 @@ task:
       # See also: https://github.com/flutter/flutter/pull/49454
       depends_on:
         - analyze-linux
-      environment:
-        # As of October 2019, 1 CPU and 4G of RAM let deploy_gallery-linux finish in about 15
-        # minutes, once it got started.
-        GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE: ENCRYPTED[d9ac1462c3c556fc2f8165c9d5566a16497d8ebc38a50357f7f3abf136b7f83e1d1d76dde36fee356cb0f9ebf7a89346]
-        ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0f2aca35f05b26add5d9edea2a7449341269a2b7e22d5c667f876996e2e8bc44ff1369431ebf73b7c5581fd95d0e5902]
+      # As of October 2019, 1 CPU and 4G of RAM let deploy_gallery-linux finish in about 15
+      # minutes, once it got started.
       script:
         - ./dev/bots/deploy_gallery.sh
 
@@ -275,14 +251,6 @@ task:
       # See also: https://github.com/flutter/flutter/pull/49454
       depends_on:
         - analyze-linux
-      environment:
-        # Apple Fastlane password.
-        FASTLANE_PASSWORD: ENCRYPTED[4b1f0b8d52874e9de965acd46c79743f3b81f3a513614179b9be7cf53dc8258753e257bdadb11a298ee455259df21865]
-        # Private repo for publishing certificates.
-        PUBLISHING_MATCH_CERTIFICATE_REPO: ENCRYPTED[3c0e78877d933fc80107aa6f3790fd1cf927250b852d6cb53202be696b4903ed8ca839b809626aaf18050bf7e436fab7]
-        PUBLISHING_MATCH_REPO_TOKEN: ENCRYPTED[3d1230b744c6ed6c788a91bec741b769401dbcd426b18f9af8080bfeefdfc21913ca4047980c5b5b7ce823f12e7b6b19]
-        # Apple Certificates Match Passphrase
-        MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - ./dev/bots/deploy_gallery.sh

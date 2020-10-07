@@ -27,7 +27,7 @@ void main() {
     expect(themeData.columnSpacing, null);
     expect(themeData.dividerThickness, null);
 
-    const DataTableTheme theme = DataTableTheme(data: DataTableThemeData());
+    const DataTableTheme theme = DataTableTheme(data: DataTableThemeData(), child: SizedBox());
     expect(theme.data.decoration, null);
     expect(theme.data.dataRowColor, null);
     expect(theme.data.dataRowHeight, null);
