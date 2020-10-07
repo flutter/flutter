@@ -1242,48 +1242,48 @@ void main() {
     });
   });
 
-  testWidgets('TimerPicker golden tests', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      CupertinoApp(
-        // Also check if the picker respects the theme.
-        theme: const CupertinoThemeData(
-          textTheme: CupertinoTextThemeData(
-            pickerTextStyle: TextStyle(
-              color: Color(0xFF663311),
-              fontSize: 21,
-            ),
-          ),
-        ),
-        home: Center(
-          child: SizedBox(
-            width: 320,
-            height: 216,
-            child: RepaintBoundary(
-              child: CupertinoTimerPicker(
-                mode: CupertinoTimerPickerMode.hm,
-                initialTimerDuration: const Duration(hours: 23, minutes: 59),
-                onTimerDurationChanged: (_) {},
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await expectLater(
-      find.byType(CupertinoTimerPicker),
-      matchesGoldenFile('timer_picker_test.datetime.initial.png'),
-    );
-
-    // Slightly drag the minute component to make the current minute off-center.
-    await tester.drag(find.text('59'), Offset(0, _kRowOffset.dy / 2));
-    await tester.pump();
-
-    await expectLater(
-      find.byType(CupertinoTimerPicker),
-      matchesGoldenFile('timer_picker_test.datetime.drag.png'),
-    );
-  });
+  // testWidgets('TimerPicker golden tests', (WidgetTester tester) async {
+  //   await tester.pumpWidget(
+  //     CupertinoApp(
+  //       // Also check if the picker respects the theme.
+  //       theme: const CupertinoThemeData(
+  //         textTheme: CupertinoTextThemeData(
+  //           pickerTextStyle: TextStyle(
+  //             color: Color(0xFF663311),
+  //             fontSize: 21,
+  //           ),
+  //         ),
+  //       ),
+  //       home: Center(
+  //         child: SizedBox(
+  //           width: 320,
+  //           height: 216,
+  //           child: RepaintBoundary(
+  //             child: CupertinoTimerPicker(
+  //               mode: CupertinoTimerPickerMode.hm,
+  //               initialTimerDuration: const Duration(hours: 23, minutes: 59),
+  //               onTimerDurationChanged: (_) {},
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  //
+  //   await expectLater(
+  //     find.byType(CupertinoTimerPicker),
+  //     matchesGoldenFile('timer_picker_test.datetime.initial.png'),
+  //   );
+  //
+  //   // Slightly drag the minute component to make the current minute off-center.
+  //   await tester.drag(find.text('59'), Offset(0, _kRowOffset.dy / 2));
+  //   await tester.pump();
+  //
+  //   await expectLater(
+  //     find.byType(CupertinoTimerPicker),
+  //     matchesGoldenFile('timer_picker_test.datetime.drag.png'),
+  //   );
+  // });
 
   testWidgets('TimerPicker only changes hour label after scrolling stops', (WidgetTester tester) async {
     Duration duration;
