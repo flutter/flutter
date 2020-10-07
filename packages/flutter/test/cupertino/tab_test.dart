@@ -245,7 +245,7 @@ void main() {
           builder: (BuildContext context) => CupertinoButton(
             child: const Text('home'),
             onPressed: () {
-              Navigator.of(context).restorablePushNamed('/2');
+              Navigator.of(context)!.restorablePushNamed('/2');
             },
           ),
           routes: <String, WidgetBuilder>{
@@ -269,7 +269,7 @@ void main() {
     expect(find.text('home'), findsNothing);
     expect(find.text('second route'), findsOneWidget);
 
-    Navigator.of(tester.element(find.text('second route'))).pop();
+    Navigator.of(tester.element(find.text('second route')))!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('home'), findsOneWidget);
@@ -280,7 +280,7 @@ void main() {
     expect(find.text('home'), findsNothing);
     expect(find.text('second route'), findsOneWidget);
 
-    Navigator.of(tester.element(find.text('second route'))).pop();
+    Navigator.of(tester.element(find.text('second route')))!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('home'), findsOneWidget);
