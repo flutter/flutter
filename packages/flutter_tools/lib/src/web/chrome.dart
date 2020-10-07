@@ -218,7 +218,7 @@ class ChromiumLauncher {
         _cacheUserSessionInformation(userDataDir, cacheDir);
       }));
     }
-    return await _connect(Chromium._(
+    return _connect(Chromium._(
       port,
       ChromeConnection('localhost', port),
       url: url,
