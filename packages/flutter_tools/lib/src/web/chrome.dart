@@ -247,7 +247,7 @@ class ChromiumLauncher {
       final Process process = await _processManager.start(args);
 
       bool exited = false;
-      unawaited(process.exitCode.then((int exitCode) {
+      unawaited(process.exitCode.whenComplete(() {
         exited = true;
       }));
 
