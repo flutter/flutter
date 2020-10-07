@@ -7,6 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -348,7 +349,13 @@ void main() {
       'centerTitle: true',
       'titleSpacing: 40.0',
     ]);
-  });
+
+    // On the web, Dart doubles and ints are backed by the same kind of object because
+    // JavaScript does not support integers. So, the Dart double "4.0" is identical
+    // to "4", which results in the web evaluating to the value "4" regardless of which
+    // one is used. This results in a difference for doubles in debugFillProperties between
+    // the web and the rest of Flutter's target platforms.
+  }, skip: kIsWeb);
 }
 
 AppBarTheme _appBarTheme() {
