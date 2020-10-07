@@ -24,7 +24,7 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/terminal.dart';
-import 'base/user_messages.dart';
+import 'base/user_messages.dart' hide userMessages;
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'features.dart';
@@ -310,7 +310,7 @@ abstract class DeviceManager {
   void _displayDeviceOptions(List<Device> devices) {
     int count = 0;
     for (final Device device in devices) {
-      _logger.printStatus(userMessages.flutterChooseDevice(count, device.name, device.id));
+      _logger.printStatus(_userMessages.flutterChooseDevice(count, device.name, device.id));
       count++;
     }
   }
@@ -321,7 +321,7 @@ abstract class DeviceManager {
       <String>[ for (int i = 0; i < deviceCount; i++) '$i', 'q', 'Q'],
       displayAcceptedCharacters: false,
       logger: _logger,
-      prompt: userMessages.flutterChooseOne,
+      prompt: _userMessages.flutterChooseOne,
     );
     return result;
   }
@@ -358,6 +358,7 @@ class FlutterDeviceManager extends DeviceManager {
     @required UserMessages userMessages,
     @required OperatingSystemUtils operatingSystemUtils,
     @required WindowsWorkflow windowsWorkflow,
+    @required Terminal terminal,
   }) : deviceDiscoverers =  <DeviceDiscovery>[
     AndroidDevices(
       logger: logger,
@@ -421,7 +422,11 @@ class FlutterDeviceManager extends DeviceManager {
       processManager: processManager,
       logger: logger,
     ),
-  ];
+  ], super(
+      logger: logger,
+      terminal: terminal,
+      userMessages: userMessages,
+    );
 
   @override
   final List<DeviceDiscovery> deviceDiscoverers;
