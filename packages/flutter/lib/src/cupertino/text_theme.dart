@@ -73,17 +73,12 @@ const TextStyle _kDefaultLargeTitleTextStyle = TextStyle(
 //
 // Inspected on iOS 13 simulator with "Debug View Hierarchy".
 // Value extracted from off-center labels. Centered labels have a font size of 25pt.
-//
-// The letterSpacing sourced from iOS 14 simulator screenshots for comparison.
-// See also:
-//
-// * https://github.com/flutter/flutter/pull/65501#discussion_r486557093
 const TextStyle _kDefaultPickerTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Display',
   fontSize: 21.0,
   fontWeight: FontWeight.w400,
-  letterSpacing: -0.6,
+  letterSpacing: -0.41,
   color: CupertinoColors.label,
 );
 

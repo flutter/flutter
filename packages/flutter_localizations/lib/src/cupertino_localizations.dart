@@ -305,16 +305,6 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     ).replaceFirst(r'$hour', _decimalFormat.format(hour));
   }
 
-  @override
-  List<String> get timerPickerHourLabels => <String>[
-    timerPickerHourLabelZero,
-    timerPickerHourLabelOne,
-    timerPickerHourLabelTwo,
-    timerPickerHourLabelFew,
-    timerPickerHourLabelMany,
-    timerPickerHourLabelOther,
-  ];
-
   /// Subclasses should provide the optional zero pluralization of [timerPickerMinuteLabel] based on the ARB file.
   @protected String get timerPickerMinuteLabelZero => null;
   /// Subclasses should provide the optional one pluralization of [timerPickerMinuteLabel] based on the ARB file.
@@ -342,16 +332,6 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     ).replaceFirst(r'$minute', _decimalFormat.format(minute));
   }
 
-  @override
-  List<String> get timerPickerMinuteLabels => <String>[
-    timerPickerMinuteLabelZero,
-    timerPickerMinuteLabelOne,
-    timerPickerMinuteLabelTwo,
-    timerPickerMinuteLabelFew,
-    timerPickerMinuteLabelMany,
-    timerPickerMinuteLabelOther,
-  ];
-
   /// Subclasses should provide the optional zero pluralization of [timerPickerSecondLabel] based on the ARB file.
   @protected String get timerPickerSecondLabelZero => null;
   /// Subclasses should provide the optional one pluralization of [timerPickerSecondLabel] based on the ARB file.
@@ -378,16 +358,6 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       locale: _localeName,
     ).replaceFirst(r'$second', _decimalFormat.format(second));
   }
-
-  @override
-  List<String> get timerPickerSecondLabels => <String>[
-    timerPickerSecondLabelZero,
-    timerPickerSecondLabelOne,
-    timerPickerSecondLabelTwo,
-    timerPickerSecondLabelFew,
-    timerPickerSecondLabelMany,
-    timerPickerSecondLabelOther,
-  ];
 
   /// A [LocalizationsDelegate] for [CupertinoLocalizations].
   ///
