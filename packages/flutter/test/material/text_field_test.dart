@@ -7165,7 +7165,7 @@ void main() {
 
     expect(description, <String>[
       'enabled: false',
-      'decoration: InputDecoration(labelText: "foo", floatingLabelBehavior: FloatingLabelBehavior.auto)',
+      'decoration: InputDecoration(labelText: "foo", floatingLabelBehavior: FloatingLabelBehavior.auto, prefixIconAlignment: center, suffixIconAlignment: center)',
       'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
       'autofocus: true',
       'autocorrect: false',
