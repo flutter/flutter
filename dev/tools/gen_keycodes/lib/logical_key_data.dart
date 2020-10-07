@@ -25,7 +25,6 @@ class LogicalKeyData {
     String chromiumKeys,
   )   : assert(chromiumKeys != null) {
     data = _readHidEntries(chromiumKeys);
-    data.addAll(_alnumKeys());
   }
 
   /// Parses the given JSON data and populates the data structure from it.
@@ -74,45 +73,6 @@ class LogicalKeyData {
     });
     return entries;
   }
-
-  List<LogicalKeyEntry> _alnumKeys() {
-    final List<LogicalKeyEntry> entries = <LogicalKeyEntry>[];
-    entries.addAll(List<LogicalKeyEntry>.generate(26, (int i) {
-      final int code = i + 'a'.codeUnits[0];
-      final String char = String.fromCharCode(code);
-      return LogicalKeyEntry(
-        name: 'lowercase${char.toUpperCase()}',
-        value: code,
-      )..constantName = 'lower${char.toUpperCase()}';
-    }));
-
-    entries.addAll(List<LogicalKeyEntry>.generate(26, (int i) {
-      final int code = i + 'A'.codeUnits[0];
-      final String char = String.fromCharCode(code);
-      return LogicalKeyEntry(
-        name: 'uppercase$char',
-        value: code,
-      )..constantName = 'upper$char';
-    }));
-
-    entries.addAll(List<LogicalKeyEntry>.generate(10, (int i) {
-      final int code = i + '0'.codeUnits[0];
-      final String char = String.fromCharCode(code);
-      return LogicalKeyEntry(
-        name: 'digit$char',
-        value: code,
-      );
-    }));
-
-    return entries;
-  }
-  // // Assert no duplicatese
-  // for (LogicalKeyEntry entry in entries) {
-  //   if (entry.name == newEntry.name || entry.value == newEntry.value) {
-  //     print('Warning: duplicate entry $entry with $newEntry');
-  //       return match.group(0);
-  //   }
-  // }
 }
 
 /// A single entry in the key data structure.

@@ -40,6 +40,38 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
     return definitions.toString();
   }
 
+  static List<LogicalKeyEntry> _alnumLogicalKeys() {
+    final List<LogicalKeyEntry> entries = <LogicalKeyEntry>[];
+    entries.addAll(List<LogicalKeyEntry>.generate(26, (int i) {
+      final int code = i + 'a'.codeUnits[0];
+      final String char = String.fromCharCode(code);
+      return LogicalKeyEntry(
+        name: 'lowercase${char.toUpperCase()}',
+        value: code,
+      )..constantName = 'lower${char.toUpperCase()}';
+    }));
+
+    entries.addAll(List<LogicalKeyEntry>.generate(26, (int i) {
+      final int code = i + 'A'.codeUnits[0];
+      final String char = String.fromCharCode(code);
+      return LogicalKeyEntry(
+        name: 'uppercase$char',
+        value: code,
+      )..constantName = 'upper$char';
+    }));
+
+    entries.addAll(List<LogicalKeyEntry>.generate(10, (int i) {
+      final int code = i + '0'.codeUnits[0];
+      final String char = String.fromCharCode(code);
+      return LogicalKeyEntry(
+        name: 'digit$char',
+        value: code,
+      );
+    }));
+
+    return entries;
+  }
+
   /// Gets the generated definitions of LogicalKeyboardKeys.
   String get _logicalDefinitions {
     String escapeLabel(String label) => label.contains("'") ? 'r"$label"' : "r'$label'";
@@ -54,7 +86,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 ''');
     }
 
-    for (final LogicalKeyEntry entry in logicalData.data) {
+    for (final LogicalKeyEntry entry in _alnumLogicalKeys()..addAll(logicalData.data)) {
       printKey(
         entry.flutterId,
         entry.constantName,
@@ -100,7 +132,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of Flutter key codes to logical keys.
   String get _predefinedKeyCodeMap {
     final StringBuffer keyCodeMap = StringBuffer();
-    for (final LogicalKeyEntry entry in logicalData.data) {
+    for (final LogicalKeyEntry entry in _alnumLogicalKeys()..addAll(logicalData.data)) {
       keyCodeMap.writeln('    ${toHex(entry.flutterId, digits: 10)}: ${entry.constantName},');
     }
     // for (final String entry in PhysicalKeyEntry.synonyms.keys) {
