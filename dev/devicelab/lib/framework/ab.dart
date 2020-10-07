@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:meta/meta.dart';
 
-import 'framework.dart';
+import 'task_result.dart';
 
 const String kBenchmarkTypeKeyName = 'benchmark_type';
 const String kBenchmarkVersionKeyName = 'version';

@@ -30,7 +30,7 @@ void main() {
         },
         'benchmarkScoreKeys': <String>['i', 'k'],
       });
-      ab.addBResult(bResult);;
+      ab.addBResult(bResult);
     }
     ab.finalize();
 
