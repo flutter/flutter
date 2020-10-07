@@ -1,4 +1,4 @@
-Signature: bccba30d609a717c651fc7cde834d3d2
+Signature: d3107608da67165804061970476ba2d7
 
 UNUSED LICENSES:
 
@@ -796,7 +796,6 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLType.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLTypeReference.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLUnresolvedFunction.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVarDeclarations.h
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLVarDeclarationsStatement.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariable.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLWhileStatement.h
@@ -4010,6 +4009,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSampleUsage.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLTinyUnorderedMap.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLInlineMarker.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLSymbolAlias.h
 FILE: ../../../third_party/skia/src/utils/SkCustomTypeface.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google LLC
@@ -6594,11 +6594,13 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/example.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/extra.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/node.example.js
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/package-lock.json
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/package.json
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/shaping.html
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/types/bin/canvaskit.d.ts
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/types/canvaskit-wasm-tests.ts
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/types/index.d.ts
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/types/tsconfig.json
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/types/tslint.json
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/viewer.html
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/example.html
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/package.json
