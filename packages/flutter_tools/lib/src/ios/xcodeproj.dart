@@ -12,7 +12,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -235,11 +234,9 @@ class XcodeProjectInterpreter {
     @required ProcessManager processManager,
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required Terminal terminal,
     @required Usage usage,
   }) : _platform = platform,
       _fileSystem = fileSystem,
-      _terminal = terminal,
       _logger = logger,
       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
       _usage = usage;
@@ -247,7 +244,6 @@ class XcodeProjectInterpreter {
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
-  final Terminal _terminal;
   final Logger _logger;
   final Usage _usage;
 
@@ -326,12 +322,7 @@ class XcodeProjectInterpreter {
     String scheme,
     Duration timeout = const Duration(minutes: 1),
   }) async {
-    final Status status = Status.withSpinner(
-      timeout: const TimeoutConfiguration().fastOperation,
-      timeoutConfiguration: const TimeoutConfiguration(),
-      stopwatch: Stopwatch(),
-      terminal: _terminal,
-    );
+    final Status status = _logger.createStatus();
     final List<String> showBuildSettingsCommand = <String>[
       _executable,
       '-project',

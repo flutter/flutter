@@ -163,6 +163,16 @@ abstract class Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   });
 
+  /// Creates A [SilentStatus] or an [AnsiSpinner] (depending on whether the
+  /// terminal is fancy enough), already started.
+  Status createStatus() {
+    return SilentStatus(
+      timeout: null,
+      stopwatch: Stopwatch(),
+      timeoutConfiguration: const TimeoutConfiguration(),
+    );
+  }
+
   /// Send an event to be emitted.
   ///
   /// Only surfaces a value in machine modes, Loggers may ignore this message in
@@ -332,6 +342,23 @@ class StdoutLogger extends Logger {
     _status?.pause();
     writeToStdOut(_terminal.clearScreen() + '\n');
     _status?.resume();
+  }
+
+  @override
+  Status createStatus() {
+    if (_terminal.supportsColor) {
+      return AnsiSpinner(
+        timeout: null,
+        timeoutConfiguration: timeoutConfiguration,
+        stopwatch: _stopwatchFactory.createStopwatch(),
+        terminal: _terminal,
+      )..start();
+    }
+    return SilentStatus(
+      timeout: null,
+      timeoutConfiguration: timeoutConfiguration,
+      stopwatch: _stopwatchFactory.createStopwatch(),
+    )..start();
   }
 }
 
@@ -506,6 +533,15 @@ class BufferLogger extends Logger {
       'args': args
     }));
   }
+
+  @override
+  Status createStatus() {
+    return SilentStatus(
+      timeout: null,
+      stopwatch: _stopwatchFactory.createStopwatch(),
+      timeoutConfiguration: const TimeoutConfiguration(),
+    );
+  }
 }
 
 class VerboseLogger extends Logger {
@@ -657,6 +693,15 @@ class VerboseLogger extends Logger {
 
   @override
   void clear() => parent.clear();
+
+  @override
+  Status createStatus() {
+    return SilentStatus(
+      timeout: null,
+      stopwatch: _stopwatchFactory.createStopwatch(),
+      timeoutConfiguration: const TimeoutConfiguration(),
+    );
+  }
 }
 
 enum _LogType { error, status, trace }
@@ -691,34 +736,6 @@ abstract class Status {
     @required Stopwatch stopwatch,
   }) : _timeoutConfiguration = timeoutConfiguration,
        _stopwatch = stopwatch;
-
-  /// A [SilentStatus] or an [AnsiSpinner] (depending on whether the
-  /// terminal is fancy enough), already started.
-  factory Status.withSpinner({
-    @required Duration timeout,
-    @required TimeoutConfiguration timeoutConfiguration,
-    @required Stopwatch stopwatch,
-    @required Terminal terminal,
-    VoidCallback onFinish,
-    SlowWarningCallback slowWarningCallback,
-  }) {
-    if (terminal.supportsColor) {
-      return AnsiSpinner(
-        timeout: timeout,
-        onFinish: onFinish,
-        slowWarningCallback: slowWarningCallback,
-        timeoutConfiguration: timeoutConfiguration,
-        stopwatch: stopwatch,
-        terminal: terminal,
-      )..start();
-    }
-    return SilentStatus(
-      timeout: timeout,
-      onFinish: onFinish,
-      timeoutConfiguration: timeoutConfiguration,
-      stopwatch: stopwatch,
-    )..start();
-  }
 
   final Duration timeout;
   final VoidCallback onFinish;

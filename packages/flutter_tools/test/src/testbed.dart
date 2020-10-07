@@ -845,6 +845,11 @@ class DelegateLogger implements Logger {
 
   @override
   void clear() => delegate.clear();
+
+  @override
+  Status createStatus() {
+    return delegate.createStatus();
+  }
 }
 
 /// An implementation of the Cache which does not download or require locking.

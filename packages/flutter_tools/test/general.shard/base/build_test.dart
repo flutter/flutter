@@ -7,7 +7,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -200,7 +199,6 @@ void main() {
             processManager: processManager,
             logger: logger,
             fileSystem: fileSystem,
-            terminal: Terminal.test(),
             usage: Usage.test(),
           ),
         ),

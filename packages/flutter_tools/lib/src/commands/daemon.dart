@@ -1055,6 +1055,15 @@ class NotifyingLogger extends Logger {
   // This method is only relevant for terminals.
   @override
   void clear() { }
+
+  @override
+  Status createStatus() {
+   return SilentStatus(
+      timeout: null,
+      stopwatch: Stopwatch(),
+      timeoutConfiguration: const TimeoutConfiguration(),
+    );
+  }
 }
 
 /// A running application, started by this daemon.
