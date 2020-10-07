@@ -813,6 +813,7 @@ class DebuggingOptions {
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
     this.hostVmServicePort,
+    this.disablePortPublication = false,
     this.deviceVmServicePort,
     this.ddsPort,
     this.initializePlatform = true,
@@ -855,6 +856,7 @@ class DebuggingOptions {
       purgePersistentCache = false,
       verboseSystemLogs = false,
       hostVmServicePort = null,
+      disablePortPublication = false,
       deviceVmServicePort = null,
       ddsPort = null,
       vmserviceOutFile = null,
@@ -884,6 +886,7 @@ class DebuggingOptions {
   final bool initializePlatform;
   final int hostVmServicePort;
   final int deviceVmServicePort;
+  final bool disablePortPublication;
   final int ddsPort;
   final String port;
   final String hostname;
