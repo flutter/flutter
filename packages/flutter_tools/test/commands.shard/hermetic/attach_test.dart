@@ -707,7 +707,6 @@ class StreamLogger extends Logger {
   @override
   bool get hasTerminal => false;
 
-
   @override
   void clear() => _log('[stdout] ${globals.terminal.clearScreen()}\n');
 }
