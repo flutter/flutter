@@ -329,10 +329,10 @@ void main() {
     const AppBarTheme(
       brightness: Brightness.dark,
       color: Color(0xff000001),
-      elevation: 8,
+      elevation: 8.0,
       shadowColor: Color(0xff000002),
       centerTitle: true,
-      titleSpacing: 40,
+      titleSpacing: 40.0,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
