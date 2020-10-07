@@ -163,23 +163,6 @@ class TestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (stringArg('platform') == 'chrome') {
-      for (int i = 0; i < 2000; i++) {
-        print('>>> Launch $i');
-        final ChromiumLauncher launcher = ChromiumLauncher(
-          browserFinder: findChromeExecutable,
-          fileSystem: globals.fs,
-          operatingSystemUtils: globals.os,
-          platform:  globals.platform,
-          processManager: globals.processManager,
-          logger: globals.logger,
-        );
-        final Chromium chromium = await launcher.launch('http://localhost:8888', headless: true);
-        await chromium.close();
-      }
-      return FlutterCommandResult.success();
-    }
-
     if (!globals.fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
