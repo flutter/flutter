@@ -30,7 +30,7 @@ import 'theme.dart';
 ///  * [MaterialRouteTransitionMixin], which provides the material transition
 ///    for this route.
 ///  * [MaterialPage], which is a [Page] of this class.
-class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
+class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T>,  AllowsRouteWithPreviousTransitionMixin<T>{
   /// Construct a MaterialPageRoute whose contents are defined by [builder].
   ///
   /// The values of [builder], [maintainState], and [PageRoute.fullscreenDialog]

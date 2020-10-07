@@ -89,6 +89,7 @@ export 'src/material/material_button.dart';
 export 'src/material/material_localizations.dart';
 export 'src/material/material_state.dart';
 export 'src/material/mergeable_material.dart';
+export 'src/material/modal_bottom_sheet.dart';
 export 'src/material/navigation_rail.dart';
 export 'src/material/navigation_rail_theme.dart';
 export 'src/material/outline_button.dart';

@@ -32,6 +32,7 @@ export 'src/cupertino/localizations.dart';
 export 'src/cupertino/nav_bar.dart';
 export 'src/cupertino/page_scaffold.dart';
 export 'src/cupertino/picker.dart';
+export 'src/cupertino/modal_bottom_sheet.dart';
 export 'src/cupertino/refresh.dart';
 export 'src/cupertino/route.dart';
 export 'src/cupertino/scrollbar.dart';
