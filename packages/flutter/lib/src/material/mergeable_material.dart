@@ -41,6 +41,7 @@ class MaterialSlice extends MergeableMaterialItem {
   const MaterialSlice({
     required LocalKey key,
     required this.child,
+    this.color,
   }) : assert(key != null),
        super(key);
 
@@ -52,7 +53,7 @@ class MaterialSlice extends MergeableMaterialItem {
   /// Defines the color for the slice.
   ///
   /// By default, the value of `color` is [ThemeData.cardColor].
-  final Color color;
+  final Color? color;
 
   @override
   String toString() {
@@ -111,7 +112,6 @@ class MergeableMaterial extends StatefulWidget {
     this.hasDividers = false,
     this.children = const <MergeableMaterialItem>[],
     this.dividerColor,
-    this.color,
   }) : super(key: key);
 
   /// The children of the [MergeableMaterial].
@@ -138,11 +138,6 @@ class MergeableMaterial extends StatefulWidget {
   /// If `dividerColor` is null, then [DividerThemeData.color] is used. If that
   /// is null, then [ThemeData.dividerColor] is used.
   final Color? dividerColor;
-
-  /// Defines color for the slice.
-  /// 
-  /// By default, the value of `color` is [ThemeData.cardColor].
-  final Color? color;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -602,7 +597,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         slices.add(
           Container(
             decoration: BoxDecoration(
-              color: (_children[i] as MaterialSlice).color ?? Theme.of(context).cardColor,
+              color: (_children[i] as MaterialSlice).color ?? Theme.of(context)!.cardColor,
               borderRadius: _borderRadius(i, i == 0, i == _children.length - 1),
               shape: BoxShape.rectangle
             ),
