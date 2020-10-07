@@ -161,7 +161,7 @@ class FallbackDiscovery {
       await Future<void>.delayed(_pollingDelay);
       attempts += 1;
     }
-    _logger.printTrace('Failed to connect directly, falling back to mDNS');
+    _logger.printTrace('Failed to connect directly, falling back to log scanning');
     _sendFailureEvent(firstException, assumedDevicePort);
     return null;
   }
