@@ -155,10 +155,9 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: docs-linux # linux-only
-      # TODO(fujino): Make this pre-submit only once #64212 is fixed
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'bin/**') || $CIRRUS_PR == ''"
+      # TODO(fujino): Make this pre-submit only once we have migrated docs generation to LUCI (https://github.com/flutter/flutter/issues/64212).
       environment:
-        # TODO(tvolkert): optimize CPU and MEMORY settings once #60646 is resolved.
+        # TODO(tvolkert): optimize CPU and MEMORY settings once docs generation is more efficient (https://github.com/flutter/flutter/issues/60646).
         CPU: 4
         MEMORY: 8G
         # For uploading master docs to Firebase master branch staging site
