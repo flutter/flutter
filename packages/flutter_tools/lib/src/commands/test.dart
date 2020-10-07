@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter_tools/src/web/chrome.dart';
-
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
