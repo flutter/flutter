@@ -14,17 +14,10 @@ import '../flutter_test_alternative.dart';
 import './mouse_tracking_test_utils.dart';
 
 typedef MethodCallHandler = Future<dynamic> Function(MethodCall call);
-
-TestMouseTrackerFlutterBinding? _binding = TestMouseTrackerFlutterBinding();
-
-void _ensureTestGestureBinding() {
-  _binding ??= TestMouseTrackerFlutterBinding();
-  assert(GestureBinding.instance != null);
-}
-
 typedef SimpleAnnotationFinder = Iterable<HitTestTarget> Function(Offset offset);
 
 void main() {
+  final TestMouseTrackerFlutterBinding _binding = TestMouseTrackerFlutterBinding();
   MethodCallHandler? _methodCallHandler;
 
   // Only one of `logCursors` and `cursorHandler` should be specified.
@@ -41,7 +34,7 @@ void main() {
       }
       : cursorHandler;
 
-    _binding!.setHitTest((BoxHitTestResult result, Offset position) {
+    _binding.setHitTest((BoxHitTestResult result, Offset position) {
       for (final HitTestTarget target in annotationFinder(position)) {
         result.addWithRawTransform(
           transform: Matrix4.identity(),
@@ -63,8 +56,7 @@ void main() {
   }
 
   setUp(() {
-    _ensureTestGestureBinding();
-    _binding!.postFrameCallbacks.clear();
+    _binding.postFrameCallbacks.clear();
     SystemChannels.mouseCursor.setMockMethodCallHandler((MethodCall call) async {
       if (_methodCallHandler != null)
         return _methodCallHandler!(call);
@@ -232,8 +224,8 @@ void main() {
 
     // Synthesize a new frame while changing annotation
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
-    _binding!.scheduleMouseTrackerPostFrameCheck();
-    _binding!.flushPostFrameCallbacks(Duration.zero);
+    _binding.scheduleMouseTrackerPostFrameCheck();
+    _binding.flushPostFrameCallbacks(Duration.zero);
 
     expect(logCursors, <_CursorUpdateDetails>[
       _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.grabbing.kind),
@@ -242,7 +234,7 @@ void main() {
 
     // Synthesize a new frame without changing annotation
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
-    _binding!.scheduleMouseTrackerPostFrameCheck();
+    _binding.scheduleMouseTrackerPostFrameCheck();
 
     expect(logCursors, <_CursorUpdateDetails>[
     ]);
