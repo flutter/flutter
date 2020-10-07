@@ -1,0 +1,36 @@
+// This file was generated using bin/screenshot_test.dart.template and
+// bin/sample_page.dart. For more information see README.md.
+
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter_driver/flutter_driver.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('sample screenshots', () {
+    FlutterDriver driver;
+
+    setUpAll(() async {
+      driver = await FlutterDriver.connect();
+    });
+
+    tearDownAll(() async {
+      await driver?.close();
+    });
+
+    test('take sample screenshots', () async {
+      final List<String> paths = <String>[
+        @(paths)
+      ];
+      for (String path in paths) {
+        await driver.waitUntilNoTransientCallbacks();
+        final List<int> pixels = await driver.screenshot();
+        final File file = new File(path);
+        await file.writeAsBytes(pixels);
+        print('wrote $file');
+        await driver.tap(find.byValueKey('screenshotGestureDetector'));
+      }
+    });
+  });
+}
