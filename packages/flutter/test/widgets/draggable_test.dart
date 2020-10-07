@@ -2328,28 +2328,30 @@ void main() {
         home: Column(
           children: <Widget>[
             Container(
-                height: 200.0,
-                child: Navigator(
-                    key: childNavigatorKey,
-                    onGenerateRoute: (RouteSettings settings) {
-                      if (settings.name == '/') {
-                        return MaterialPageRoute<void>(
-                          settings: settings,
-                          builder: (BuildContext context) => const Draggable<int>(
-                            data: 1,
-                            child: Text('Source'),
-                            feedback: Text('Dragging'),
-                            rootOverlay: true,
-                          ),
-                        );
-                      }
-                      throw UnsupportedError('Unsupported route: $settings');
-                    })),
+              height: 200.0,
+              child: Navigator(
+                key: childNavigatorKey,
+                onGenerateRoute: (RouteSettings settings) {
+                  if (settings.name == '/') {
+                    return MaterialPageRoute<void>(
+                      settings: settings,
+                      builder: (BuildContext context) => const Draggable<int>(
+                        data: 1,
+                        child: Text('Source'),
+                        feedback: Text('Dragging'),
+                        rootOverlay: true,
+                      ),
+                    );
+                  }
+                  throw UnsupportedError('Unsupported route: $settings');
+                },
+              ),
+            ),
             DragTarget<int>(
-              builder:
-                  (BuildContext context, List<int> data, List<dynamic> rejects) {
+              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
                 return Container(
-                    height: 300.0, child: const Center(child: Text('Target 1')));
+                    height: 300.0, child: const Center(child: Text('Target 1')),
+                );
               },
             ),
           ],
@@ -2369,11 +2371,15 @@ void main() {
       // but not a descendant of the child overlay.
       expect(
           find.descendant(
-              of: find.byType(Overlay).first, matching: find.text('Dragging')),
+            of: find.byType(Overlay).first,
+            matching: find.text('Dragging'),
+          ),
           findsOneWidget);
       expect(
           find.descendant(
-              of: find.byType(Overlay).last, matching: find.text('Dragging')),
+            of: find.byType(Overlay).last,
+            matching: find.text('Dragging'),
+          ),
           findsNothing);
     });
 

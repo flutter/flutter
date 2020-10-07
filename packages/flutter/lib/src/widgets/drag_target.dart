@@ -265,7 +265,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Whether the feedback widget will be put on the root [Overlay].
   ///
   /// When false, the feedback widget will be put on the closest [Overlay]. When
-  /// true, the feedback widget will be put on the farthest (aka root)
+  /// true, the [feedback] widget will be put on the farthest (aka root)
   /// [Overlay].
   ///
   /// Defaults to false.
@@ -400,7 +400,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       _activeCount += 1;
     });
     final _DragAvatar<T> avatar = _DragAvatar<T>(
-      overlayState: Overlay.of(context, debugRequiredFor: widget, rootOverlay:widget.rootOverlay)!,
+      overlayState: Overlay.of(context, debugRequiredFor: widget, rootOverlay: widget.rootOverlay)!,
       data: widget.data,
       axis: widget.axis,
       initialPosition: position,
@@ -437,7 +437,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
 
   @override
   Widget build(BuildContext context) {
-    assert(Overlay.of(context, debugRequiredFor: widget, rootOverlay:widget.rootOverlay) != null);
+    assert(Overlay.of(context, debugRequiredFor: widget, rootOverlay: widget.rootOverlay) != null);
     final bool canDrag = widget.maxSimultaneousDrags == null ||
                          _activeCount < widget.maxSimultaneousDrags!;
     final bool showChild = _activeCount == 0 || widget.childWhenDragging == null;
