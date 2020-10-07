@@ -74,7 +74,7 @@ enum MaterialState {
 
 /// Signature for the function that returns a value of type `T` based on a given
 /// set of states.
-typedef MaterialPropertyResolver<T> = T? Function(Set<MaterialState> states);
+typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 
 /// Defines a [Color] that is also a [MaterialStateProperty].
 ///
@@ -120,7 +120,7 @@ typedef MaterialPropertyResolver<T> = T? Function(Set<MaterialState> states);
 /// }
 /// ```
 /// {@end-tool}
-abstract class MaterialStateColor extends Color implements MaterialStateProperty<Color> {
+abstract class MaterialStateColor extends Color implements MaterialStateProperty<Color?> {
   /// Creates a [MaterialStateColor].
   const MaterialStateColor(int defaultValue) : super(defaultValue);
 
@@ -137,7 +137,7 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
   /// Returns a [Color] that's to be used when a Material component is in the
   /// specified state.
   @override
-  Color? resolve(Set<MaterialState> states);
+  Color resolve(Set<MaterialState> states);
 }
 
 /// A [MaterialStateColor] created from a [MaterialPropertyResolver<Color>]
@@ -148,7 +148,7 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
 ///
 /// Used by [MaterialStateColor.resolveWith].
 class _MaterialStateColor extends MaterialStateColor {
-  _MaterialStateColor(this._resolve) : super(_resolve(_defaultStates)!.value);
+  _MaterialStateColor(this._resolve) : super(_resolve(_defaultStates).value);
 
   final MaterialPropertyResolver<Color> _resolve;
 
@@ -156,7 +156,7 @@ class _MaterialStateColor extends MaterialStateColor {
   static const Set<MaterialState> _defaultStates = <MaterialState>{};
 
   @override
-  Color? resolve(Set<MaterialState> states) => _resolve(states);
+  Color resolve(Set<MaterialState> states) => _resolve(states);
 }
 
 /// Defines a [MouseCursor] whose value depends on a set of [MaterialState]s which
@@ -222,7 +222,7 @@ abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialS
   @protected
   @override
   MouseCursorSession createSession(int device) {
-    return resolve(<MaterialState>{})!.createSession(device);
+    return resolve(<MaterialState>{}).createSession(device);
   }
 
   /// Returns a [MouseCursor] that's to be used when a Material component is in
@@ -230,7 +230,7 @@ abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialS
   ///
   /// This method should never return null.
   @override
-  MouseCursor? resolve(Set<MaterialState> states);
+  MouseCursor resolve(Set<MaterialState> states);
 
   /// A mouse cursor for clickable material widgets, which resolves differently
   /// when the widget is disabled.
@@ -347,7 +347,7 @@ abstract class MaterialStateProperty<T> {
   /// Widgets like [TextButton] and [ElevatedButton] apply this method to their
   /// current [MaterialState]s to compute colors and other visual parameters
   /// at build time.
-  T? resolve(Set<MaterialState> states);
+  T resolve(Set<MaterialState> states);
 
   /// Resolves the value for the given set of states if `value` is a
   /// [MaterialStateProperty], otherwise returns the value itself.
@@ -355,9 +355,9 @@ abstract class MaterialStateProperty<T> {
   /// This is useful for widgets that have parameters which can optionally be a
   /// [MaterialStateProperty]. For example, [InkWell.mouseCursor] can be a
   /// [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
-  static T? resolveAs<T>(T? value, Set<MaterialState> states) {
+  static T resolveAs<T>(T value, Set<MaterialState> states) {
     if (value is MaterialStateProperty<T>) {
-      final MaterialStateProperty<T> property = value as MaterialStateProperty<T>;
+      final MaterialStateProperty<T> property = value;
       return property.resolve(states);
     }
     return value;
@@ -369,7 +369,7 @@ abstract class MaterialStateProperty<T> {
 
   /// Convenience method for creating a [MaterialStateProperty] that resolves
   /// to a single value for all states.
-  static MaterialStateProperty<T> all<T>(T? value) => _MaterialStatePropertyAll<T>(value);
+  static MaterialStateProperty<T> all<T>(T value) => _MaterialStatePropertyAll<T>(value);
 }
 
 class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {
@@ -378,16 +378,16 @@ class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {
   final MaterialPropertyResolver<T> _resolve;
 
   @override
-  T? resolve(Set<MaterialState> states) => _resolve(states);
+  T resolve(Set<MaterialState> states) => _resolve(states);
 }
 
 class _MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
   _MaterialStatePropertyAll(this.value);
 
-  final T? value;
+  final T value;
 
   @override
-  T? resolve(Set<MaterialState> states) => value;
+  T resolve(Set<MaterialState> states) => value;
 
   @override
   String toString() => 'MaterialStateProperty.all($value)';

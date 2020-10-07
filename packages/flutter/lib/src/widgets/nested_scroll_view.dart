@@ -808,10 +808,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     return false;
   }
 
-  void updateShadow() {
-    if (_onHasScrolledBodyChanged != null)
-      _onHasScrolledBodyChanged();
-  }
+  void updateShadow() { _onHasScrolledBodyChanged(); }
 
   ScrollDirection get userScrollDirection => _userScrollDirection;
   ScrollDirection _userScrollDirection = ScrollDirection.idle;

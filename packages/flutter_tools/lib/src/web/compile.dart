@@ -29,19 +29,25 @@ Future<void> buildWeb(
   bool initializePlatform,
   bool csp,
   String serviceWorkerStrategy,
+  bool sourceMaps,
 ) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
   }
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+  final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());
+  if (outputDirectory.existsSync()) {
+    outputDirectory.deleteSync(recursive: true);
+    outputDirectory.createSync(recursive: true);
+  }
   await injectPlugins(flutterProject, checkProjects: true);
   final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);
   final Stopwatch sw = Stopwatch()..start();
   try {
     final BuildResult result = await globals.buildSystem.build(const WebServiceWorker(), Environment(
       projectDir: globals.fs.currentDirectory,
-      outputDir: globals.fs.directory(getWebBuildDirectory()),
+      outputDir: outputDirectory,
       buildDir: flutterProject.directory
         .childDirectory('.dart_tool')
         .childDirectory('flutter_build'),
@@ -53,6 +59,7 @@ Future<void> buildWeb(
         kDartDefines: encodeDartDefines(buildInfo.dartDefines),
         kCspMode: csp.toString(),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
+        kSourceMapsEnabled: sourceMaps.toString(),
         if (serviceWorkerStrategy != null)
          kServiceWorkerStrategy: serviceWorkerStrategy,
         if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false)
