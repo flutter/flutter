@@ -1113,11 +1113,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    if (_usesRouter) {
-      _updateRouter();
-    } else {
-      _updateNavigator();
-    }
+    _updateRouting();
     _locale = _resolveLocales(WidgetsBinding.instance!.window.locales, widget.supportedLocales);
     WidgetsBinding.instance!.addObserver(this);
   }
@@ -1125,12 +1121,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   @override
   void didUpdateWidget(WidgetsApp oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.routeInformationProvider != widget.routeInformationProvider) {
-      _updateRouter();
-    }
-    if (widget.navigatorKey != oldWidget.navigatorKey) {
-      _updateNavigator();
-    }
+    _updateRouting(oldWidget: oldWidget);
   }
 
   @override
@@ -1140,29 +1131,52 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     super.dispose();
   }
 
+  void _updateRouting({WidgetsApp? oldWidget}) {
+    if (_usesRouter) {
+      assert(!_usesNavigator);
+      _navigator = null;
+      if (oldWidget == null || oldWidget.routeInformationProvider != widget.routeInformationProvider) {
+        _defaultRouteInformationProvider?.dispose();
+        _defaultRouteInformationProvider = null;
+        if (widget.routeInformationProvider == null) {
+          _defaultRouteInformationProvider = PlatformRouteInformationProvider(
+            initialRouteInformation: RouteInformation(
+              location: _initialRouteName,
+            ),
+          );
+        }
+      }
+    } else if (_usesNavigator) {
+      assert(!_usesRouter);
+      _defaultRouteInformationProvider?.dispose();
+      _defaultRouteInformationProvider = null;
+      if (oldWidget == null || widget.navigatorKey != oldWidget.navigatorKey) {
+        _navigator = widget.navigatorKey ?? GlobalObjectKey<NavigatorState>(this);
+      }
+      assert(_navigator != null);
+    } else {
+      assert(widget.builder != null);
+      assert(!_usesRouter);
+      assert(!_usesNavigator);
+      _navigator = null;
+      _defaultRouteInformationProvider?.dispose();
+      _defaultRouteInformationProvider = null;
+    }
+    // If we use a navigator, we have a navigator key.
+    assert(_usesNavigator == (_navigator != null));
+  }
+
   bool get _usesRouter => widget.routerDelegate != null;
+  bool get _usesNavigator => widget.home != null || widget.routes?.isNotEmpty == true || widget.onGenerateRoute != null || widget.onUnknownRoute != null;
 
   // ROUTER
+
   RouteInformationProvider? get _effectiveRouteInformationProvider => widget.routeInformationProvider ?? _defaultRouteInformationProvider;
   PlatformRouteInformationProvider? _defaultRouteInformationProvider;
-
-  void _updateRouter() {
-    _defaultRouteInformationProvider?.dispose();
-    if (widget.routeInformationProvider == null)
-      _defaultRouteInformationProvider = PlatformRouteInformationProvider(
-        initialRouteInformation: RouteInformation(
-          location: _initialRouteName,
-        ),
-      );
-  }
 
   // NAVIGATOR
 
   GlobalKey<NavigatorState>? _navigator;
-
-  void _updateNavigator() {
-    _navigator = widget.navigatorKey ?? GlobalObjectKey<NavigatorState>(this);
-  }
 
   Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
     final String? name = settings.name;
@@ -1476,7 +1490,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    Widget routing;
+    Widget? routing;
     if (_usesRouter) {
       assert(_effectiveRouteInformationProvider != null);
       routing = Router<Object>(
@@ -1485,7 +1499,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         routerDelegate: widget.routerDelegate!,
         backButtonDispatcher: widget.backButtonDispatcher,
       );
-    } else {
+    } else if (_usesNavigator) {
       assert(_navigator != null);
       routing = Navigator(
         restorationScopeId: 'nav',
@@ -1512,7 +1526,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     } else {
       assert(routing != null);
-      result = routing;
+      result = routing!;
     }
 
     if (widget.textStyle != null) {
