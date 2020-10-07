@@ -2824,7 +2824,7 @@ class InputDecoration {
 
   /// The alignment for [prefixIcon].
   ///
-  /// Used to align the [prefixIcon] realtive to the position of the text box.
+  /// Used to align the [prefixIcon] relative to the position of the text box.
   ///
   /// The default value is [Alignment.center].
   final Alignment prefixIconAlignment;
@@ -2957,7 +2957,7 @@ class InputDecoration {
 
   /// The alignment for [suffixIcon].
   ///
-  /// Used to align the [suffixIcon] realtive to the position of the text box.
+  /// Used to align the [suffixIcon] relative to the position of the text box.
   ///
   /// The default value is [Alignment.center].
   final Alignment suffixIconAlignment;
