@@ -175,7 +175,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   late Animation<Color?> _valueColor;
 
   _RefreshIndicatorMode? _mode;
-  Future<void>? _pendingRefreshFuture;
+  late Future<void> _pendingRefreshFuture;
   bool? _isIndicatorAtTop;
   double? _dragOffset;
 
@@ -406,7 +406,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   /// When initiated in this manner, the refresh indicator is independent of any
   /// actual scroll view. It defaults to showing the indicator at the top. To
   /// show it at the bottom, set `atTop` to false.
-  Future<void>? show({ bool atTop = true }) {
+  Future<void> show({ bool atTop = true }) {
     if (_mode != _RefreshIndicatorMode.refresh &&
         _mode != _RefreshIndicatorMode.snap) {
       if (_mode == null)

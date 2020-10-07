@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
@@ -298,7 +296,7 @@ void main() {
     expect(renderBox.size.height, equals(appBarHeight));
   });
 
-  Widget _buildStatusBarTestApp(TargetPlatform platform) {
+  Widget _buildStatusBarTestApp(TargetPlatform? platform) {
     return MaterialApp(
       theme: ThemeData(platform: platform),
       home: MediaQuery(
@@ -357,7 +355,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context).showBottomSheet<void>((BuildContext context) {
+                  Scaffold.of(context)!.showBottomSheet<void>((BuildContext context) {
                     return Container(
                       key: sheetKey,
                       color: Colors.blue[500],
@@ -519,7 +517,7 @@ void main() {
       };
       await tester.pumpWidget(MaterialApp(routes: routes));
 
-      Navigator.pushNamed(rootKey.currentContext, '/scaffold');
+      Navigator.pushNamed(rootKey.currentContext!, '/scaffold');
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
@@ -671,9 +669,9 @@ void main() {
 
     testWidgets('body size with extendBody', (WidgetTester tester) async {
       final Key bodyKey = UniqueKey();
-      double mediaQueryBottom;
+      late double mediaQueryBottom;
 
-      Widget buildFrame({ bool extendBody, bool resizeToAvoidBottomInset, double viewInsetBottom = 0.0 }) {
+      Widget buildFrame({ required bool extendBody, bool? resizeToAvoidBottomInset, double viewInsetBottom = 0.0 }) {
         return Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
@@ -685,7 +683,7 @@ void main() {
               extendBody: extendBody,
               body: Builder(
                 builder: (BuildContext context) {
-                  mediaQueryBottom = MediaQuery.of(context).padding.bottom;
+                  mediaQueryBottom = MediaQuery.of(context)!.padding.bottom;
                   return Container(key: bodyKey);
                 },
               ),
@@ -732,10 +730,10 @@ void main() {
 
       const double appBarHeight = 100;
       const double windowPaddingTop = 24;
-      bool fixedHeightAppBar;
-      double mediaQueryTop;
+      late bool fixedHeightAppBar;
+      late double mediaQueryTop;
 
-      Widget buildFrame({ bool extendBodyBehindAppBar, bool hasAppBar }) {
+      Widget buildFrame({ required bool extendBodyBehindAppBar, required bool hasAppBar }) {
         return Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
@@ -758,7 +756,7 @@ void main() {
                   ),
                   body: Builder(
                     builder: (BuildContext context) {
-                      mediaQueryTop = MediaQuery.of(context).padding.top;
+                      mediaQueryTop = MediaQuery.of(context)!.padding.top;
                       return Container(key: bodyKey);
                     }
                   ),
@@ -1224,7 +1222,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
 
       ScaffoldGeometry geometry = listenerState.cache.value;
-      final Rect transitioningFabRect = geometry.floatingActionButtonArea;
+      final Rect transitioningFabRect = geometry.floatingActionButtonArea!;
 
       final double transitioningRotation = tester.widget<RotationTransition>(
         find.byType(RotationTransition),
@@ -1249,17 +1247,17 @@ void main() {
       );
 
       expect(
-        geometry.floatingActionButtonArea.center,
+        geometry.floatingActionButtonArea!.center,
         transitioningFabRect.center,
       );
 
       expect(
-        geometry.floatingActionButtonArea.width,
+        geometry.floatingActionButtonArea!.width,
         greaterThan(transitioningFabRect.width),
       );
 
       expect(
-        geometry.floatingActionButtonArea.height,
+        geometry.floatingActionButtonArea!.height,
         greaterThan(transitioningFabRect.height),
       );
     });
@@ -1672,12 +1670,12 @@ void main() {
   });
 
   testWidgets('End drawer does not open with a drag gesture when it is disabled', (WidgetTester tester) async {
-    double screenWidth;
+    late double screenWidth;
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
-            screenWidth = MediaQuery.of(context).size.width;
+            screenWidth = MediaQuery.of(context)!.size.width;
             return Scaffold(
               endDrawer: const Drawer(
                 child: Text('Drawer'),
@@ -1746,7 +1744,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/20295
     final Key bodyKey = UniqueKey();
 
-    Widget buildFrame(bool innerResizeToAvoidBottomInset, bool outerResizeToAvoidBottomInset) {
+    Widget buildFrame(bool? innerResizeToAvoidBottomInset, bool? outerResizeToAvoidBottomInset) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
@@ -1810,10 +1808,10 @@ void main() {
             ),
           ),
         );
-        FlutterError error;
+        late FlutterError error;
         try {
-          key.currentState.showBottomSheet<void>((BuildContext context) {
-            final ThemeData themeData = Theme.of(context);
+          key.currentState!.showBottomSheet<void>((BuildContext context) {
+            final ThemeData themeData = Theme.of(context)!;
             return Container(
               decoration: BoxDecoration(
                 border: Border(top: BorderSide(color: themeData.disabledColor))
@@ -1872,7 +1870,7 @@ void main() {
             ),
           ),
         );
-        key.currentState.showBottomSheet<void>((_) => Container());
+        key.currentState!.showBottomSheet<void>((_) => Container());
         await tester.tap(find.byKey(buttonKey));
         await tester.pump();
         expect(errors, isNotEmpty);
@@ -1902,7 +1900,7 @@ void main() {
         MaterialApp(
           home: Builder(
             builder: (BuildContext context) {
-              Scaffold.of(context).showBottomSheet<void>((BuildContext context) {
+              Scaffold.of(context)!.showBottomSheet<void>((BuildContext context) {
                 return Container();
               });
               return Container();
@@ -1970,7 +1968,7 @@ void main() {
     });
 
     testWidgets('Call to Scaffold.geometryOf() without context', (WidgetTester tester) async {
-      ValueListenable<ScaffoldGeometry> geometry;
+      late ValueListenable<ScaffoldGeometry> geometry;
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -2036,7 +2034,7 @@ void main() {
   });
 
   testWidgets('ScaffoldMessenger.of can return null', (WidgetTester tester) async {
-    ScaffoldMessengerState scaffoldMessenger;
+    ScaffoldMessengerState? scaffoldMessenger;
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -2070,7 +2068,7 @@ void main() {
     const Key tapTarget = Key('tap-target');
 
     final List<dynamic> exceptions = <dynamic>[];
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       exceptions.add(details.exception);
     };
@@ -2161,8 +2159,8 @@ class _GeometryListenerState extends State<_GeometryListener> {
   }
 
   int numNotifications = 0;
-  ValueListenable<ScaffoldGeometry> geometryListenable;
-  _GeometryCachePainter cache;
+  ValueListenable<ScaffoldGeometry>? geometryListenable;
+  late _GeometryCachePainter cache;
 
   @override
   void didChangeDependencies() {
@@ -2172,11 +2170,11 @@ class _GeometryListenerState extends State<_GeometryListener> {
       return;
 
     if (geometryListenable != null)
-      geometryListenable.removeListener(onGeometryChanged);
+      geometryListenable!.removeListener(onGeometryChanged);
 
     geometryListenable = newListenable;
-    geometryListenable.addListener(onGeometryChanged);
-    cache = _GeometryCachePainter(geometryListenable);
+    geometryListenable!.addListener(onGeometryChanged);
+    cache = _GeometryCachePainter(geometryListenable!);
   }
 
   void onGeometryChanged() {
@@ -2192,7 +2190,7 @@ class _GeometryCachePainter extends CustomPainter {
 
   final ValueListenable<ScaffoldGeometry> geometryListenable;
 
-  ScaffoldGeometry value;
+  late ScaffoldGeometry value;
   @override
   void paint(Canvas canvas, Size size) {
     value = geometryListenable.value;
@@ -2206,7 +2204,7 @@ class _GeometryCachePainter extends CustomPainter {
 
 class _CustomPageRoute<T> extends PageRoute<T> {
   _CustomPageRoute({
-    @required this.builder,
+    required this.builder,
     RouteSettings settings = const RouteSettings(),
     this.maintainState = true,
     bool fullscreenDialog = false,
@@ -2219,10 +2217,10 @@ class _CustomPageRoute<T> extends PageRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
-  Color get barrierColor => null;
+  Color? get barrierColor => null;
 
   @override
-  String get barrierLabel => null;
+  String? get barrierLabel => null;
 
   @override
   final bool maintainState;

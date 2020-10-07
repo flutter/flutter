@@ -335,7 +335,7 @@ class RadioListTile<T> extends StatelessWidget {
   ///
   /// This radio button is considered selected if its [value] matches the
   /// [groupValue].
-  final T groupValue;
+  final T? groupValue;
 
   /// Called when the user selects this radio button.
   ///
