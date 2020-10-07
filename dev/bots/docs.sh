@@ -166,6 +166,6 @@ generate_docs
 #if [[ -n "$LUCI_CI" && -z "$LUCI_PR" ]]; then
 (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
 #(cd "$FLUTTER_ROOT/dev/docs"; create_docset)
-(cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
+#(cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
 deploy_docs
 #fi
