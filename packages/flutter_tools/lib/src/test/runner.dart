@@ -143,9 +143,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         () {
           return FlutterWebPlatform.start(
             flutterProject.directory.path,
-            updateGoldens: updateGoldens,
-            shellPath: shellPath,
-            flutterProject: flutterProject,
             pauseAfterLoad: startPaused,
           );
         },
