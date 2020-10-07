@@ -210,36 +210,7 @@ class ChromiumLauncher {
       url,
     ];
 
-    bool connected = false;
-    final Process process = await _processManager.start(args);
-
-    // Watch the browser process while connecting, and spit out an error if it
-    // exits too early.
-    unawaited(process.exitCode.then((int code) {
-      if (!connected) {
-        _logger.printError('Browser exited prematurely with exit code $code.');
-      }
-    }));
-
-    process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen((String line) {
-        _logger.printTrace('[CHROME]: $line');
-      });
-
-    // Wait until the DevTools are listening before trying to connect. This is
-    // only required for flutter_test --platform=chrome and not flutter run.
-    await process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .map((String line) {
-        _logger.printTrace('[CHROME]:$line');
-        return line;
-      })
-      .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
-        throw ToolExit('Failed to spawn stderr');
-      });
+    final Process process = await _spawnChromiumProcess(args);
 
     // When the process exits, copy the user settings back to the provided data-dir.
     if (cacheDir != null) {
@@ -247,15 +218,73 @@ class ChromiumLauncher {
         _cacheUserSessionInformation(userDataDir, cacheDir);
       }));
     }
-    final Chromium chromium = await _connect(Chromium._(
+    return await _connect(Chromium._(
       port,
       ChromeConnection('localhost', port),
       url: url,
       process: process,
       chromiumLauncher: this,
     ), skipCheck);
-    connected = true;
-    return chromium;
+  }
+
+  Future<Process> _spawnChromiumProcess(List<String> args) async {
+    // Keep attempting to launch the browser until one of:
+    // - We successfully launched it, in which case we just return from the loop.
+    // - We encountered an unretriable error, in which case we throw ToolExit.
+    while (true) {
+      final Process process = await _processManager.start(args);
+
+      bool exited = false;
+      unawaited(process.exitCode.then((int exitCode) {
+        exited = true;
+      }));
+
+      process.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((String line) {
+          _logger.printTrace('[CHROME]: $line');
+        });
+
+      // Wait until the DevTools are listening before trying to connect. This is
+      // only required for flutter_test --platform=chrome and not flutter run.
+      //
+      // Once every few thousands of launches we hit this glibc bug: https://sourceware.org/bugzilla/show_bug.cgi?id=19329.
+      // When this happens Chrome spits out something like the following then exits with code 127:
+      //
+      //     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
+      bool hitGlibcBug = false;
+      await process.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .map((String line) {
+          _logger.printTrace('[CHROME]:$line');
+          if (line.contains('Inconsistency detected by ld.so')) {
+            hitGlibcBug = true;
+          }
+          return line;
+        })
+        .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
+          if (hitGlibcBug) {
+            _logger.printStatus(
+              'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
+              'Will try launching browser again.',
+            );
+            return null;
+          } else {
+            throw ToolExit('Failed to spawn: ${args.join(' ')}');
+          }
+        });
+
+      if (!hitGlibcBug) {
+        return process;
+      } else if (!exited) {
+        // A precaution that avoids accumulating browser processes, in case the
+        // glibc bug doesn't cause the browser to quit and we keep looping and
+        // launching more processes.
+        process.kill();
+      }
+    }
   }
 
   // This is a JSON file which contains configuration from the browser session,

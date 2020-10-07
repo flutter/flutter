@@ -164,7 +164,7 @@ class TestCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (stringArg('platform') == 'chrome') {
-      for (int i = 0; i < 1000; i++) {
+      for (int i = 0; i < 2000; i++) {
         print('>>> Launch $i');
         final ChromiumLauncher launcher = ChromiumLauncher(
           browserFinder: findChromeExecutable,
