@@ -210,7 +210,16 @@ class ChromiumLauncher {
       url,
     ];
 
+    bool connected = false;
     final Process process = await _processManager.start(args);
+
+    // Watch the browser process while connecting, and spit out an error if it
+    // exits too early.
+    unawaited(process.exitCode.then((int code) {
+      if (!connected) {
+        _logger.printError('Browser exited prematurely with exit code $code.');
+      }
+    }));
 
     process.stdout
       .transform(utf8.decoder)
@@ -229,7 +238,7 @@ class ChromiumLauncher {
         return line;
       })
       .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
-        return 'Failed to spawn stderr';
+        throw ToolExit('Failed to spawn stderr');
       });
 
     // When the process exits, copy the user settings back to the provided data-dir.
@@ -238,13 +247,15 @@ class ChromiumLauncher {
         _cacheUserSessionInformation(userDataDir, cacheDir);
       }));
     }
-    return _connect(Chromium._(
+    final Chromium chromium = await _connect(Chromium._(
       port,
       ChromeConnection('localhost', port),
       url: url,
       process: process,
       chromiumLauncher: this,
     ), skipCheck);
+    connected = true;
+    return chromium;
   }
 
   // This is a JSON file which contains configuration from the browser session,
