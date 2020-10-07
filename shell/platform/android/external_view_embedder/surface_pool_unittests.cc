@@ -202,5 +202,46 @@ TEST(SurfacePool, DestroyLayers) {
   ASSERT_TRUE(pool->GetUnusedLayers().empty());
 }
 
+TEST(SurfacePool, DestroyLayers__frameSizeChanged) {
+  auto pool = std::make_unique<SurfacePool>();
+  auto jni_mock = std::make_shared<JNIMock>();
+
+  auto gr_context = GrDirectContext::MakeMock(nullptr);
+  auto android_context =
+      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
+
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+
+  auto surface_factory =
+      [gr_context, window](std::shared_ptr<AndroidContext> android_context,
+                           std::shared_ptr<PlatformViewAndroidJNI> jni_facade) {
+        auto android_surface_mock = std::make_unique<AndroidSurfaceMock>();
+        EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()));
+        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window));
+        EXPECT_CALL(*android_surface_mock, IsValid()).WillOnce(Return(true));
+        return android_surface_mock;
+      };
+  pool->SetFrameSize(SkISize::Make(10, 10));
+  EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(0);
+  EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
+      .Times(1)
+      .WillOnce(Return(
+          ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+              0, window))));
+
+  pool->GetLayer(gr_context.get(), android_context, jni_mock, surface_factory);
+
+  pool->SetFrameSize(SkISize::Make(20, 20));
+  EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(1);
+  EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
+      .Times(1)
+      .WillOnce(Return(
+          ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+              1, window))));
+  pool->GetLayer(gr_context.get(), android_context, jni_mock, surface_factory);
+
+  ASSERT_TRUE(pool->GetUnusedLayers().empty());
+}
+
 }  // namespace testing
 }  // namespace flutter
