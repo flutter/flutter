@@ -256,7 +256,7 @@ void main() {
     DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
     IconTheme iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
 
-    expect(textStyle.style!.color, isSameColorAs(CupertinoColors.white));
+    expect(textStyle.style.color, isSameColorAs(CupertinoColors.white));
     expect(iconTheme.data.color, CupertinoColors.activeBlue);
 
     await tester.tap(find.widgetWithIcon(IconTheme, const IconData(1)));
@@ -265,7 +265,7 @@ void main() {
     textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
     iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
 
-    expect(textStyle.style!.color, CupertinoColors.activeBlue);
+    expect(textStyle.style.color, CupertinoColors.activeBlue);
     expect(iconTheme.data.color, isSameColorAs(CupertinoColors.white));
   });
 
@@ -300,7 +300,7 @@ void main() {
       DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
       IconThemeData iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
-      expect(textStyle.style!.color, isSameColorAs(CupertinoColors.black));
+      expect(textStyle.style.color, isSameColorAs(CupertinoColors.black));
       expect(iconTheme.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
 
       await tester.tap(find.byIcon(const IconData(1)));
@@ -310,7 +310,7 @@ void main() {
       textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
       iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
-      expect(textStyle.style!.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+      expect(textStyle.style.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
       expect(iconTheme.color, isSameColorAs(CupertinoColors.black));
     },
   );
@@ -348,7 +348,7 @@ void main() {
     IconTheme iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
 
     expect(getRenderSegmentedControl(tester).borderColor, CupertinoColors.black);
-    expect(textStyle.style!.color, CupertinoColors.lightBackgroundGray);
+    expect(textStyle.style.color, CupertinoColors.lightBackgroundGray);
     expect(iconTheme.data.color, CupertinoColors.activeGreen.color);
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeGreen.color);
     expect(getBackgroundColor(tester, 1), CupertinoColors.lightBackgroundGray);
@@ -359,7 +359,7 @@ void main() {
     textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
     iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
 
-    expect(textStyle.style!.color, CupertinoColors.activeGreen.color);
+    expect(textStyle.style.color, CupertinoColors.activeGreen.color);
     expect(iconTheme.data.color, CupertinoColors.lightBackgroundGray);
     expect(getBackgroundColor(tester, 0), CupertinoColors.lightBackgroundGray);
     expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen.color);
