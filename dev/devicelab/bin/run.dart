@@ -151,7 +151,7 @@ Future<void> _runABTest() async {
     section('Run #$i');
 
     print('Running with the default engine (A)');
-    final Map<String, dynamic> defaultEngineResult = await runTask(
+    final TaskResult defaultEngineResult = await runTask(
       taskName,
       silent: silent,
       deviceId: deviceId,
@@ -160,7 +160,7 @@ Future<void> _runABTest() async {
     print('Default engine result:');
     print(const JsonEncoder.withIndent('  ').convert(defaultEngineResult));
 
-    if (!(defaultEngineResult['success'] as bool)) {
+    if (!defaultEngineResult.succeeded) {
       stderr.writeln('Task failed on the default engine.');
       exit(1);
     }
@@ -168,7 +168,7 @@ Future<void> _runABTest() async {
     abTest.addAResult(defaultEngineResult);
 
     print('Running with the local engine (B)');
-    final Map<String, dynamic> localEngineResult = await runTask(
+    final TaskResult localEngineResult = await runTask(
       taskName,
       silent: silent,
       localEngine: localEngine,
@@ -179,7 +179,7 @@ Future<void> _runABTest() async {
     print('Task localEngineResult:');
     print(const JsonEncoder.withIndent('  ').convert(localEngineResult));
 
-    if (!(localEngineResult['success'] as bool)) {
+    if (!localEngineResult.succeeded) {
       stderr.writeln('Task failed on the local engine.');
       exit(1);
     }
