@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,7 +44,7 @@ void main() {
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
     TextSpan textSpan = painter.text as TextSpan;
-    expect(textSpan.text.length, 28);
+    expect(textSpan.text!.length, 28);
     painter.layout();
 
     // The skips here are because the old rendering code considers the bidi formatting characters
@@ -131,7 +129,7 @@ void main() {
 
     textSpan = painter.text as TextSpan;
     final List<List<TextBox>> list = <List<TextBox>>[
-      for (int index = 0; index < textSpan.text.length; index += 1)
+      for (int index = 0; index < textSpan.text!.length; index += 1)
         painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)),
     ];
     expect(list, const <List<TextBox>>[
@@ -178,7 +176,7 @@ void main() {
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
     final TextSpan textSpan = painter.text as TextSpan;
-    expect(textSpan.text.length, 28);
+    expect(textSpan.text!.length, 28);
     painter.layout();
 
     final TextRange hebrew1 = painter.getWordBoundary(const TextPosition(offset: 4, affinity: TextAffinity.downstream));
@@ -268,7 +266,7 @@ void main() {
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
     final TextSpan textSpan = painter.text as TextSpan;
-    expect(textSpan.text.length, 2);
+    expect(textSpan.text!.length, 2);
     painter.layout(maxWidth: 10.0);
 
     for (int index = 0; index <= 2; index += 1) {

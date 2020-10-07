@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -44,34 +42,34 @@ class DialogTheme with Diagnosticable {
   ///
   /// If null, [ThemeData.dialogBackgroundColor] is used, if that's null,
   /// defaults to [Colors.white].
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// Default value for [Dialog.elevation].
   ///
   /// If null, the [Dialog] elevation defaults to `24.0`.
-  final double elevation;
+  final double? elevation;
 
   /// Default value for [Dialog.shape].
-  final ShapeBorder shape;
+  final ShapeBorder? shape;
 
   /// Used to configure the [DefaultTextStyle] for the [AlertDialog.title] widget.
   ///
   /// If null, defaults to [TextTheme.headline6] of [ThemeData.textTheme].
-  final TextStyle titleTextStyle;
+  final TextStyle? titleTextStyle;
 
   /// Used to configure the [DefaultTextStyle] for the [AlertDialog.content] widget.
   ///
   /// If null, defaults to [TextTheme.subtitle1] of [ThemeData.textTheme].
-  final TextStyle contentTextStyle;
+  final TextStyle? contentTextStyle;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DialogTheme copyWith({
-    Color backgroundColor,
-    double elevation,
-    ShapeBorder shape,
-    TextStyle titleTextStyle,
-    TextStyle contentTextStyle,
+    Color? backgroundColor,
+    double? elevation,
+    ShapeBorder? shape,
+    TextStyle? titleTextStyle,
+    TextStyle? contentTextStyle,
   }) {
     return DialogTheme(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -84,7 +82,7 @@ class DialogTheme with Diagnosticable {
 
   /// The data from the closest [DialogTheme] instance given the build context.
   static DialogTheme of(BuildContext context) {
-    return Theme.of(context).dialogTheme;
+    return Theme.of(context)!.dialogTheme;
   }
 
   /// Linearly interpolate between two dialog themes.
@@ -92,7 +90,7 @@ class DialogTheme with Diagnosticable {
   /// The arguments must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static DialogTheme lerp(DialogTheme a, DialogTheme b, double t) {
+  static DialogTheme lerp(DialogTheme? a, DialogTheme? b, double t) {
     assert(t != null);
     return DialogTheme(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),

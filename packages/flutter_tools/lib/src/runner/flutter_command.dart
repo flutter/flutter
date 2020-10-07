@@ -369,6 +369,17 @@ abstract class FlutterCommand extends Command<void> {
     return null;
   }
 
+  void addPublishPort({ bool enabledByDefault = true, bool verboseHelp = false }) {
+    argParser.addFlag('publish-port',
+        negatable: true,
+        hide: !verboseHelp,
+        help: 'Publish the VM service port over mDNS. Disable to prevent the'
+            'local network permission app dialog in debug and profile build modes (iOS devices only.)',
+        defaultsTo: enabledByDefault);
+  }
+
+  bool get disablePortPublication => !boolArg('publish-port');
+
   void usesIpv6Flag() {
     argParser.addFlag(ipv6Flag,
       hide: true,
@@ -939,9 +950,9 @@ abstract class FlutterCommand extends Command<void> {
       // First always update universal artifacts, as some of these (e.g.
       // ios-deploy on macOS) are required to determine `requiredArtifacts`.
       await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
-
       await globals.cache.updateAll(await requiredArtifacts);
     }
+    Cache.releaseLock();
 
     await validateCommand();
 
@@ -968,11 +979,7 @@ abstract class FlutterCommand extends Command<void> {
         context: PubContext.getVerifyContext(name),
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,
       );
-      // All done updating dependencies. Release the cache lock.
-      Cache.releaseLock();
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
-    } else {
-      Cache.releaseLock();
     }
 
     setupApplicationPackages();
@@ -1005,13 +1012,18 @@ abstract class FlutterCommand extends Command<void> {
   /// devices and criteria entered by the user on the command line.
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
-  Future<List<Device>> findAllTargetDevices() async {
+  Future<List<Device>> findAllTargetDevices({
+    bool includeUnsupportedDevices = false,
+  }) async {
     if (!globals.doctor.canLaunchAnything) {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
       return null;
     }
     final DeviceManager deviceManager = globals.deviceManager;
-    List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current(), timeout: deviceDiscoveryTimeout);
+    List<Device> devices = await deviceManager.findTargetDevices(
+      includeUnsupportedDevices ? null : FlutterProject.current(),
+      timeout: deviceDiscoveryTimeout,
+    );
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
       globals.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
@@ -1057,8 +1069,13 @@ abstract class FlutterCommand extends Command<void> {
   /// devices and criteria entered by the user on the command line.
   /// If a device cannot be found that meets specified criteria,
   /// then print an error message and return null.
-  Future<Device> findTargetDevice() async {
-    List<Device> deviceList = await findAllTargetDevices();
+  ///
+  /// If [includeUnsupportedDevices] is true, the tool does not filter
+  /// the list by the current project support list.
+  Future<Device> findTargetDevice({
+    bool includeUnsupportedDevices = false,
+  }) async {
+    List<Device> deviceList = await findAllTargetDevices(includeUnsupportedDevices: includeUnsupportedDevices);
     if (deviceList == null) {
       return null;
     }

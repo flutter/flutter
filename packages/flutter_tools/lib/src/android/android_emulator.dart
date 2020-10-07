@@ -56,7 +56,7 @@ class AndroidEmulators extends EmulatorDiscovery {
 
   /// Return the list of available emulator AVDs.
   Future<List<AndroidEmulator>> _getEmulatorAvds() async {
-    final String emulatorPath = _androidSdk.emulatorPath;
+    final String emulatorPath = _androidSdk?.emulatorPath;
     if (emulatorPath == null) {
       return <AndroidEmulator>[];
     }

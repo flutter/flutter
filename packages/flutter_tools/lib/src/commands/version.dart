@@ -151,7 +151,6 @@ class VersionCommand extends FlutterCommand {
         context: PubContext.pubUpgrade,
         directory: projectRoot,
         upgrade: true,
-        checkLastModified: false,
         generateSyntheticPackage: false,
       );
     }

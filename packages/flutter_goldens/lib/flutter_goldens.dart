@@ -9,6 +9,7 @@ import 'dart:typed_data' show Uint8List;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
@@ -26,7 +27,7 @@ const String _kFlutterRootKey = 'FLUTTER_ROOT';
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
 /// works for the current test. _Which_ FlutterGoldenFileComparator is
 /// instantiated is based on the current testing environment.
-Future<void> main(FutureOr<void> testMain()) async {
+Future<void> testExecutable(FutureOr<void> testMain()) async {
   const Platform platform = LocalPlatform();
   if (FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform)) {
     goldenFileComparator = await FlutterPostSubmitFileComparator.fromDefaultComparator(platform);
@@ -670,7 +671,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     if (result.passed)
       return true;
 
-    generateFailureOutput(result, golden, basedir);
-    return false;
+    final String error = await generateFailureOutput(result, golden, basedir);
+    throw FlutterError(error);
   }
 }

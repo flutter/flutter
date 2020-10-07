@@ -1664,7 +1664,7 @@ void main() {
           '   The onGenerateRoute callback must never return null, unless an\n'
           '   onUnknownRoute callback is provided as well.\n'
           '   The Navigator was:\n'
-          '     NavigatorState#4d6bf(lifecycle state: created)\n',
+          '     NavigatorState#00000(lifecycle state: initialized)\n'
         ),
       );
     });
@@ -1690,7 +1690,7 @@ void main() {
           '   route "/".\n'
           '   The onUnknownRoute callback must never return null.\n'
           '   The Navigator was:\n'
-          '     NavigatorState#38036(lifecycle state: created)\n',
+          '     NavigatorState#00000(lifecycle state: initialized)\n',
         ),
       );
     });

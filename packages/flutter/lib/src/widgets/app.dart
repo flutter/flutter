@@ -19,6 +19,7 @@ import 'media_query.dart';
 import 'navigator.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
+import 'restoration.dart';
 import 'router.dart';
 import 'scrollable.dart';
 import 'semantics_debugger.dart';
@@ -195,6 +196,7 @@ class WidgetsApp extends StatefulWidget {
     this.inspectorSelectButtonBuilder,
     this.shortcuts,
     this.actions,
+    this.restorationScopeId,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
        assert(
@@ -290,6 +292,7 @@ class WidgetsApp extends StatefulWidget {
     this.inspectorSelectButtonBuilder,
     this.shortcuts,
     this.actions,
+    this.restorationScopeId,
   }) : assert(
          routeInformationParser != null &&
          routerDelegate != null,
@@ -945,6 +948,24 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final Map<Type, Action<Intent>>? actions;
 
+  /// {@template flutter.widgets.widgetsApp.restorationScopeId}
+  /// The identifier to use for state restoration of this app.
+  ///
+  /// Providing a restoration ID inserts a [RootRestorationScope] into the
+  /// widget hierarchy, which enables state restoration for descendant widgets.
+  ///
+  /// Providing a restoration ID also enables the [Navigator] built by the
+  /// [WidgetsApp] to restore its state (i.e. to restore the history stack of
+  /// active [Route]s). See the documentation on [Navigator] for more details
+  /// around state restoration of [Route]s.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  /// {@endtemplate}
+  final String? restorationScopeId;
+
   /// If true, forces the performance overlay to be visible in all instances.
   ///
   /// Used by the `showPerformanceOverlay` observatory extension.
@@ -1467,6 +1488,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     } else {
       assert(_navigator != null);
       routing = Navigator(
+        restorationScopeId: 'nav',
         key: _navigator,
         initialRoute: _initialRouteName,
         onGenerateRoute: _onGenerateRoute,
@@ -1495,7 +1517,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     if (widget.textStyle != null) {
       result = DefaultTextStyle(
-        style: widget.textStyle,
+        style: widget.textStyle!,
         child: result,
       );
     }
@@ -1573,18 +1595,21 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       : _locale!;
 
     assert(_debugCheckLocalizations(appLocale));
-    return Shortcuts(
-      shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
-      debugLabel: '<Default WidgetsApp Shortcuts>',
-      child: Actions(
-        actions: widget.actions ?? WidgetsApp.defaultActions,
-        child: FocusTraversalGroup(
-          policy: ReadingOrderTraversalPolicy(),
-          child: _MediaQueryFromWindow(
-            child: Localizations(
-              locale: appLocale,
-              delegates: _localizationsDelegates.toList(),
-              child: title,
+    return RootRestorationScope(
+      restorationId: widget.restorationScopeId,
+      child: Shortcuts(
+        shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+        debugLabel: '<Default WidgetsApp Shortcuts>',
+        child: Actions(
+          actions: widget.actions ?? WidgetsApp.defaultActions,
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: _MediaQueryFromWindow(
+              child: Localizations(
+                locale: appLocale,
+                delegates: _localizationsDelegates.toList(),
+                child: title,
+              ),
             ),
           ),
         ),
