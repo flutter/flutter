@@ -109,6 +109,8 @@ executable("flutter_desktop_darwin_unittests") {
 
   cflags_objcc = [ "-fobjc-arc" ]
 
+  ldflags = [ "-ObjC" ]
+
   deps = [
     ":flutter_desktop_darwin_fixtures",
     ":flutter_framework_source",
