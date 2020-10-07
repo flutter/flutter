@@ -512,6 +512,8 @@ class _Decoration {
     this.suffix,
     this.prefixIcon,
     this.suffixIcon,
+    this.prefixIconAlignment = Alignment.center,
+    this.suffixIconAlignment = Alignment.center,
     this.helperError,
     this.counter,
     this.container,
@@ -539,6 +541,8 @@ class _Decoration {
   final Widget? suffix;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
+  final Alignment prefixIconAlignment;
+  final Alignment suffixIconAlignment;
   final Widget? helperError;
   final Widget? counter;
   final Widget? container;
@@ -568,6 +572,8 @@ class _Decoration {
         && other.suffix == suffix
         && other.prefixIcon == prefixIcon
         && other.suffixIcon == suffixIcon
+        && other.prefixIconAlignment == prefixIconAlignment
+        && other.suffixIconAlignment == suffixIconAlignment
         && other.helperError == helperError
         && other.counter == counter
         && other.container == container
@@ -2233,7 +2239,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
     final Widget? prefixIcon = decoration!.prefixIcon == null ? null :
-      Center(
+      Align(
+        alignment: decoration!.prefixIconAlignment,
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
@@ -2254,7 +2261,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
     final Widget? suffixIcon = decoration!.suffixIcon == null ? null :
-      Center(
+      Align(
+        alignment: decoration!.suffixIconAlignment,
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
@@ -2506,11 +2514,13 @@ class InputDecoration {
     this.isDense,
     this.contentPadding,
     this.prefixIcon,
+    this.prefixIconAlignment = Alignment.center,
     this.prefixIconConstraints,
     this.prefix,
     this.prefixText,
     this.prefixStyle,
     this.suffixIcon,
+    this.suffixIconAlignment = Alignment.center,
     this.suffix,
     this.suffixText,
     this.suffixStyle,
@@ -2572,12 +2582,14 @@ class InputDecoration {
        contentPadding = EdgeInsets.zero,
        isCollapsed = true,
        prefixIcon = null,
+       prefixIconAlignment = Alignment.center,
        prefix = null,
        prefixText = null,
        prefixStyle = null,
        prefixIconConstraints = null,
        suffix = null,
        suffixIcon = null,
+       suffixIconAlignment = Alignment.center,
        suffixText = null,
        suffixStyle = null,
        suffixIconConstraints = null,
@@ -2810,6 +2822,13 @@ class InputDecoration {
   ///  * [suffixIcon], which is the same but on the trailing edge.
   final Widget? prefixIcon;
 
+  /// The alignment for [prefixIcon].
+  /// 
+  /// Used to align the [prefixIcon] realtive to the position of the text box.
+  /// 
+  /// The default value is [Alignment.center]. 
+  final Alignment prefixIconAlignment;
+
   /// The constraints for the prefix icon.
   ///
   /// This can be used to modify the [BoxConstraints] surrounding [prefixIcon].
@@ -2935,6 +2954,13 @@ class InputDecoration {
   ///    after the text field (but before the icon).
   ///  * [prefixIcon], which is the same but on the leading edge.
   final Widget? suffixIcon;
+
+  /// The alignment for [suffixIcon].
+  /// 
+  /// Used to align the [suffixIcon] realtive to the position of the text box.
+  /// 
+  /// The default value is [Alignment.center]. 
+  final Alignment suffixIconAlignment;
 
   /// Optional widget to place on the line after the input.
   ///
@@ -3299,11 +3325,13 @@ class InputDecoration {
     bool? isDense,
     EdgeInsetsGeometry? contentPadding,
     Widget? prefixIcon,
+    Alignment prefixIconalignment = Alignment.center,
     Widget? prefix,
     String? prefixText,
     BoxConstraints? prefixIconConstraints,
     TextStyle? prefixStyle,
     Widget? suffixIcon,
+    Alignment suffixIconAlignment = Alignment.center,
     Widget? suffix,
     String? suffixText,
     TextStyle? suffixStyle,
@@ -3344,11 +3372,13 @@ class InputDecoration {
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
       prefixIcon: prefixIcon ?? this.prefixIcon,
+      prefixIconAlignment: prefixIconAlignment,
       prefix: prefix ?? this.prefix,
       prefixText: prefixText ?? this.prefixText,
       prefixStyle: prefixStyle ?? this.prefixStyle,
       prefixIconConstraints: prefixIconConstraints ?? this.prefixIconConstraints,
       suffixIcon: suffixIcon ?? this.suffixIcon,
+      suffixIconAlignment: suffixIconAlignment,
       suffix: suffix ?? this.suffix,
       suffixText: suffixText ?? this.suffixText,
       suffixStyle: suffixStyle ?? this.suffixStyle,
@@ -3432,11 +3462,13 @@ class InputDecoration {
         && other.contentPadding == contentPadding
         && other.isCollapsed == isCollapsed
         && other.prefixIcon == prefixIcon
+        && other.prefixIconAlignment == prefixIconAlignment
         && other.prefix == prefix
         && other.prefixText == prefixText
         && other.prefixStyle == prefixStyle
         && other.prefixIconConstraints == prefixIconConstraints
         && other.suffixIcon == suffixIcon
+        && other.suffixIconAlignment == suffixIconAlignment
         && other.suffix == suffix
         && other.suffixText == suffixText
         && other.suffixStyle == suffixStyle
@@ -3486,11 +3518,13 @@ class InputDecoration {
       border,
       enabled,
       prefixIcon,
+      prefixIconAlignment,
       prefix,
       prefixText,
       prefixStyle,
       prefixIconConstraints,
       suffixIcon,
+      suffixIconAlignment,
       suffix,
       suffixText,
       suffixStyle,
@@ -3529,11 +3563,13 @@ class InputDecoration {
       if (contentPadding != null) 'contentPadding: $contentPadding',
       if (isCollapsed) 'isCollapsed: $isCollapsed',
       if (prefixIcon != null) 'prefixIcon: $prefixIcon',
+      if (prefixIconAlignment != null) 'prefixIconAlignment: $prefixIconAlignment',
       if (prefix != null) 'prefix: $prefix',
       if (prefixText != null) 'prefixText: $prefixText',
       if (prefixStyle != null) 'prefixStyle: $prefixStyle',
       if (prefixIconConstraints != null) 'prefixIconConstraints: $prefixIconConstraints',
       if (suffixIcon != null) 'suffixIcon: $suffixIcon',
+      if (suffixIconAlignment != null) 'suffixIconAlignment: $suffixIconAlignment',
       if (suffix != null) 'suffix: $suffix',
       if (suffixText != null) 'suffixText: $suffixText',
       if (suffixStyle != null) 'suffixStyle: $suffixStyle',
