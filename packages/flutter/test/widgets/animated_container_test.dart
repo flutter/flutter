@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -47,7 +45,7 @@ void main() {
       ),
     );
 
-    final RenderDecoratedBox box = key.currentContext.findRenderObject() as RenderDecoratedBox;
+    final RenderDecoratedBox box = key.currentContext!.findRenderObject() as RenderDecoratedBox;
     actualDecoration = box.decoration as BoxDecoration;
     expect(actualDecoration.color, equals(decorationA.color));
 
@@ -59,7 +57,7 @@ void main() {
       ),
     );
 
-    expect(key.currentContext.findRenderObject(), equals(box));
+    expect(key.currentContext!.findRenderObject(), equals(box));
     actualDecoration = box.decoration as BoxDecoration;
     expect(actualDecoration.color, equals(decorationA.color));
 
