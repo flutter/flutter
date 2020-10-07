@@ -24,11 +24,12 @@ TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
-TaskFunction createTilesScrollPerfTest() {
+TaskFunction createTilesScrollPerfTest({String deviceIdOverride = ''}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'tiles_scroll_perf',
+    deviceIdOverride: deviceIdOverride,
   ).run;
 }
 
@@ -505,6 +506,7 @@ class PerfTest {
     this.benchmarkScoreKeys,
     this.dartDefine = '',
     String resultFilename,
+    this.deviceIdOverride = '',
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -517,6 +519,7 @@ class PerfTest {
     this.benchmarkScoreKeys = _kCommonScoreKeys,
     this.dartDefine = '',
     String resultFilename = 'e2e_perf_summary',
+    this.deviceIdOverride = '',
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
@@ -538,6 +541,8 @@ class PerfTest {
   final bool needsFullTimeline;
   /// Whether to save the trace timeline file `*.timeline.json`.
   final bool saveTraceFile;
+  /// Runs the test on the specified deviceId.
+  final String deviceIdOverride;
 
   /// The keys of the values that need to be reported.
   ///
@@ -576,9 +581,12 @@ class PerfTest {
       String writeSkslFileName,
   }) {
     return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
+      String deviceId = deviceIdOverride;
+      if (deviceId.isEmpty) {
+        final Device device = await devices.workingDevice;
+        await device.unlock();
+        deviceId = device.deviceId;
+      }
       await flutter('packages', options: <String>['get']);
 
       await flutter('drive', options: <String>[
@@ -616,9 +624,10 @@ class PerfTest {
         );
       }
 
-      // TODO(liyuqian): Remove isAndroid restriction once
+      // TODO(liyuqian): Remove this restriction when other platforms support
+      // the collection of CPU/GPU and memory usage.
       // https://github.com/flutter/flutter/issues/61567 is fixed.
-      final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
+      final bool supportsCpuGpuProfiling = deviceOperatingSystem == DeviceOperatingSystem.ios;
       return TaskResult.success(
         data,
         detailFiles: detailFiles.isNotEmpty ? detailFiles : null,
@@ -627,11 +636,11 @@ class PerfTest {
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
-          if (measureCpuGpu && !isAndroid) ...<String>[
+          if (supportsCpuGpuProfiling) ...<String>[
             'average_cpu_usage',
             'average_gpu_usage',
           ],
-          if (measureMemory && !isAndroid) ...<String>[
+          if (supportsCpuGpuProfiling) ...<String>[
             'average_memory_usage',
             '90th_percentile_memory_usage',
             '99th_percentile_memory_usage',
