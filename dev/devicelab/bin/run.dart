@@ -9,7 +9,6 @@ import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/ab.dart';
-import 'package:flutter_devicelab/framework/cocoon.dart';
 import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -35,14 +34,6 @@ bool exitOnFirstTestFailure;
 
 /// The device-id to run test on.
 String deviceId;
-
-/// File containing a service account token.
-/// 
-/// If passed, the test run results will be recorded by Flutter infrastructure.
-String serviceAccountFile;
-
-/// Key for the task to upload to in Flutter infrastructure.
-String taskKey;
 
 /// Runs tasks.
 ///
@@ -88,8 +79,6 @@ Future<void> main(List<String> rawArgs) async {
   localEngineSrcPath = args['local-engine-src-path'] as String;
   exitOnFirstTestFailure = args['exit'] as bool;
   deviceId = args['device-id'] as String;
-  serviceAccountFile = args['service-account-file'] as String;
-  taskKey = args['task-key'] as String;
 
   if (args.wasParsed('ab')) {
     await _runABTest();
@@ -112,11 +101,6 @@ Future<void> _runTasks() async {
     print('Task result:');
     print(const JsonEncoder.withIndent('  ').convert(result));
     section('Finished task "$taskName"');
-
-    if (serviceAccountFile != null) {
-      final Cocoon cocoon = Cocoon(serviceAccountFile: serviceAccountFile, taskKey: taskKey);
-      await cocoon.sendTaskResult(taskKey, result);
-    }
 
     if (!result.succeeded) {
       exitCode = 1;
@@ -351,10 +335,6 @@ final ArgParser _argParser = ArgParser()
           '`required_agent_capabilities`\nin the `manifest.yaml` file.',
   )
   ..addOption(
-    'service-account-file',
-    help: '[Flutter infrastructure] Authentication for uploading results.',
-  )
-  ..addOption(
     'stage',
     abbr: 's',
     help: 'Name of the stage. Runs all tasks for that stage. The tasks and\n'
@@ -364,10 +344,6 @@ final ArgParser _argParser = ArgParser()
     'silent',
     negatable: true,
     defaultsTo: false,
-  )
-  ..addOption(
-    'task-key',
-    help: '[Flutter infrastructure] Task key to upload results to.',
   )
   ..addMultiOption(
     'test',

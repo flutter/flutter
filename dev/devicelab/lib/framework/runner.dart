@@ -28,7 +28,6 @@ Future<TaskResult> runTask(
   String localEngine,
   String localEngineSrcPath,
   String deviceId,
-  String cocoonAuthToken,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
@@ -82,10 +81,10 @@ Future<TaskResult> runTask(
 
   try {
     final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
-    final Map<String, dynamic> taskResultRaw = await isolate.invokeExtension('ext.cocoonRunTask') as Map<String, dynamic>;
-    final TaskResult result = TaskResult.fromJson(taskResultRaw);
+    final Map<String, dynamic> taskResultJson = await isolate.invokeExtension('ext.cocoonRunTask') as Map<String, dynamic>;
+    final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     await runner.exitCode;
-    return result;
+    return taskResult;
   } finally {
     if (!runnerFinished)
       runner.kill(ProcessSignal.sigkill);
