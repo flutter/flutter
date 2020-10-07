@@ -25,6 +25,7 @@ class LogicalKeyData {
     String chromiumKeys,
   )   : assert(chromiumKeys != null) {
     data = _readHidEntries(chromiumKeys);
+    data.addAll(_alnumKeys());
   }
 
   /// Parses the given JSON data and populates the data structure from it.
@@ -67,19 +68,51 @@ class LogicalKeyData {
           value: getHex(match.group(3)),
           name: match.group(1).replaceAll(RegExp('[^A-Za-z0-9]'), ''),
         );
-        // Assert no duplicatese
-        for (LogicalKeyEntry entry in entries) {
-          if (entry.name == newEntry.name || entry.value == newEntry.value) {
-            print('Warning: duplicate entry $entry with $newEntry');
-              return match.group(0);
-          }
-        }
         entries.add(newEntry);
       }
       return match.group(0);
     });
     return entries;
   }
+
+  List<LogicalKeyEntry> _alnumKeys() {
+    final List<LogicalKeyEntry> entries = <LogicalKeyEntry>[];
+    entries.addAll(List<LogicalKeyEntry>.generate(26, (int i) {
+      final int code = i + 'a'.codeUnits[0];
+      final String char = String.fromCharCode(code);
+      return LogicalKeyEntry(
+        name: 'lowercase${char.toUpperCase()}',
+        value: code,
+      )..constantName = 'lower${char.toUpperCase()}';
+    }));
+
+    entries.addAll(List<LogicalKeyEntry>.generate(26, (int i) {
+      final int code = i + 'A'.codeUnits[0];
+      final String char = String.fromCharCode(code);
+      return LogicalKeyEntry(
+        name: 'uppercase$char',
+        value: code,
+      )..constantName = 'upper$char';
+    }));
+
+    entries.addAll(List<LogicalKeyEntry>.generate(10, (int i) {
+      final int code = i + '0'.codeUnits[0];
+      final String char = String.fromCharCode(code);
+      return LogicalKeyEntry(
+        name: 'digit$char',
+        value: code,
+      );
+    }));
+
+    return entries;
+  }
+  // // Assert no duplicatese
+  // for (LogicalKeyEntry entry in entries) {
+  //   if (entry.name == newEntry.name || entry.value == newEntry.value) {
+  //     print('Warning: duplicate entry $entry with $newEntry');
+  //       return match.group(0);
+  //   }
+  // }
 }
 
 /// A single entry in the key data structure.
@@ -125,7 +158,7 @@ class LogicalKeyEntry {
     String upperCamel = lowerCamelToUpperCamel(constantNameBase);
     upperCamel = upperCamel.replaceAllMapped(RegExp(r'(Digit|Numpad|Lang|Button|Left|Right)([0-9]+)'), (Match match) => '${match.group(1)} ${match.group(2)}');
     return upperCamel
-      // 'fooBar' => 'foo Bar'
+      // 'fooBar' => 'foo Bar', 'fooBAR' => 'foo BAR'
       .replaceAllMapped(RegExp(r'([^A-Z])([A-Z])'), (Match match) => '${match.group(1)} ${match.group(2)}')
       // 'ABCDoo' => 'ABC Doo'
       .replaceAllMapped(RegExp(r'([A-Z])([A-Z])([a-z])'), (Match match) => '${match.group(1)} ${match.group(2)}${match.group(3)}')
@@ -150,23 +183,22 @@ class LogicalKeyEntry {
   /// name isn't a Dart reserved word (if it is, then it adds the word "Key" to
   /// the end of the name).
   String get constantNameBase {
-    if (_constantNameBase != null) {
-      return _constantNameBase;
-    }
     final String result = name
       .replaceAll('PinP', 'PInP');
+      // .replaceAllMapped(RegExp('([A-Z])([A-Z]+)([A-Z0-9]|\$)'),
+      //   (Match match) => '${match.group(1)}${match.group(2).toLowerCase()}${match.group(3)}');
     return result;
   }
-  set constantNameBase(String value) => _constantNameBase = value;
-  String _constantNameBase;
 
   String get constantName {
-    final String result = upperCamelToLowerCamel(constantNameBase);
+    String result = _constantName ?? upperCamelToLowerCamel(constantNameBase);
     if (kDartReservedWords.contains(result)) {
       return '${result}Key';
     }
     return result;
   }
+  String _constantName;
+  set constantName(String value) => _constantName = value;
 
   @override
   String toString() {

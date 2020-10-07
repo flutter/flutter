@@ -1829,6 +1829,316 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey zoomToggle = LogicalKeyboardKey(0x00000000d4e, debugName: kReleaseMode ? null : 'Zoom Toggle');
 
+  /// Represents the logical "Lowercase A" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerA = LogicalKeyboardKey(0x00000000061, debugName: kReleaseMode ? null : 'Lowercase A');
+
+  /// Represents the logical "Lowercase B" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerB = LogicalKeyboardKey(0x00000000062, debugName: kReleaseMode ? null : 'Lowercase B');
+
+  /// Represents the logical "Lowercase C" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerC = LogicalKeyboardKey(0x00000000063, debugName: kReleaseMode ? null : 'Lowercase C');
+
+  /// Represents the logical "Lowercase D" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerD = LogicalKeyboardKey(0x00000000064, debugName: kReleaseMode ? null : 'Lowercase D');
+
+  /// Represents the logical "Lowercase E" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerE = LogicalKeyboardKey(0x00000000065, debugName: kReleaseMode ? null : 'Lowercase E');
+
+  /// Represents the logical "Lowercase F" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerF = LogicalKeyboardKey(0x00000000066, debugName: kReleaseMode ? null : 'Lowercase F');
+
+  /// Represents the logical "Lowercase G" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerG = LogicalKeyboardKey(0x00000000067, debugName: kReleaseMode ? null : 'Lowercase G');
+
+  /// Represents the logical "Lowercase H" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerH = LogicalKeyboardKey(0x00000000068, debugName: kReleaseMode ? null : 'Lowercase H');
+
+  /// Represents the logical "Lowercase I" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerI = LogicalKeyboardKey(0x00000000069, debugName: kReleaseMode ? null : 'Lowercase I');
+
+  /// Represents the logical "Lowercase J" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerJ = LogicalKeyboardKey(0x0000000006a, debugName: kReleaseMode ? null : 'Lowercase J');
+
+  /// Represents the logical "Lowercase K" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerK = LogicalKeyboardKey(0x0000000006b, debugName: kReleaseMode ? null : 'Lowercase K');
+
+  /// Represents the logical "Lowercase L" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerL = LogicalKeyboardKey(0x0000000006c, debugName: kReleaseMode ? null : 'Lowercase L');
+
+  /// Represents the logical "Lowercase M" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerM = LogicalKeyboardKey(0x0000000006d, debugName: kReleaseMode ? null : 'Lowercase M');
+
+  /// Represents the logical "Lowercase N" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerN = LogicalKeyboardKey(0x0000000006e, debugName: kReleaseMode ? null : 'Lowercase N');
+
+  /// Represents the logical "Lowercase O" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerO = LogicalKeyboardKey(0x0000000006f, debugName: kReleaseMode ? null : 'Lowercase O');
+
+  /// Represents the logical "Lowercase P" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerP = LogicalKeyboardKey(0x00000000070, debugName: kReleaseMode ? null : 'Lowercase P');
+
+  /// Represents the logical "Lowercase Q" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerQ = LogicalKeyboardKey(0x00000000071, debugName: kReleaseMode ? null : 'Lowercase Q');
+
+  /// Represents the logical "Lowercase R" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerR = LogicalKeyboardKey(0x00000000072, debugName: kReleaseMode ? null : 'Lowercase R');
+
+  /// Represents the logical "Lowercase S" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerS = LogicalKeyboardKey(0x00000000073, debugName: kReleaseMode ? null : 'Lowercase S');
+
+  /// Represents the logical "Lowercase T" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerT = LogicalKeyboardKey(0x00000000074, debugName: kReleaseMode ? null : 'Lowercase T');
+
+  /// Represents the logical "Lowercase U" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerU = LogicalKeyboardKey(0x00000000075, debugName: kReleaseMode ? null : 'Lowercase U');
+
+  /// Represents the logical "Lowercase V" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerV = LogicalKeyboardKey(0x00000000076, debugName: kReleaseMode ? null : 'Lowercase V');
+
+  /// Represents the logical "Lowercase W" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerW = LogicalKeyboardKey(0x00000000077, debugName: kReleaseMode ? null : 'Lowercase W');
+
+  /// Represents the logical "Lowercase X" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerX = LogicalKeyboardKey(0x00000000078, debugName: kReleaseMode ? null : 'Lowercase X');
+
+  /// Represents the logical "Lowercase Y" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerY = LogicalKeyboardKey(0x00000000079, debugName: kReleaseMode ? null : 'Lowercase Y');
+
+  /// Represents the logical "Lowercase Z" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerZ = LogicalKeyboardKey(0x0000000007a, debugName: kReleaseMode ? null : 'Lowercase Z');
+
+  /// Represents the logical "Uppercase A" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperA = LogicalKeyboardKey(0x00000000041, debugName: kReleaseMode ? null : 'Uppercase A');
+
+  /// Represents the logical "Uppercase B" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperB = LogicalKeyboardKey(0x00000000042, debugName: kReleaseMode ? null : 'Uppercase B');
+
+  /// Represents the logical "Uppercase C" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperC = LogicalKeyboardKey(0x00000000043, debugName: kReleaseMode ? null : 'Uppercase C');
+
+  /// Represents the logical "Uppercase D" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperD = LogicalKeyboardKey(0x00000000044, debugName: kReleaseMode ? null : 'Uppercase D');
+
+  /// Represents the logical "Uppercase E" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperE = LogicalKeyboardKey(0x00000000045, debugName: kReleaseMode ? null : 'Uppercase E');
+
+  /// Represents the logical "Uppercase F" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperF = LogicalKeyboardKey(0x00000000046, debugName: kReleaseMode ? null : 'Uppercase F');
+
+  /// Represents the logical "Uppercase G" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperG = LogicalKeyboardKey(0x00000000047, debugName: kReleaseMode ? null : 'Uppercase G');
+
+  /// Represents the logical "Uppercase H" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperH = LogicalKeyboardKey(0x00000000048, debugName: kReleaseMode ? null : 'Uppercase H');
+
+  /// Represents the logical "Uppercase I" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperI = LogicalKeyboardKey(0x00000000049, debugName: kReleaseMode ? null : 'Uppercase I');
+
+  /// Represents the logical "Uppercase J" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperJ = LogicalKeyboardKey(0x0000000004a, debugName: kReleaseMode ? null : 'Uppercase J');
+
+  /// Represents the logical "Uppercase K" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperK = LogicalKeyboardKey(0x0000000004b, debugName: kReleaseMode ? null : 'Uppercase K');
+
+  /// Represents the logical "Uppercase L" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperL = LogicalKeyboardKey(0x0000000004c, debugName: kReleaseMode ? null : 'Uppercase L');
+
+  /// Represents the logical "Uppercase M" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperM = LogicalKeyboardKey(0x0000000004d, debugName: kReleaseMode ? null : 'Uppercase M');
+
+  /// Represents the logical "Uppercase N" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperN = LogicalKeyboardKey(0x0000000004e, debugName: kReleaseMode ? null : 'Uppercase N');
+
+  /// Represents the logical "Uppercase O" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperO = LogicalKeyboardKey(0x0000000004f, debugName: kReleaseMode ? null : 'Uppercase O');
+
+  /// Represents the logical "Uppercase P" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperP = LogicalKeyboardKey(0x00000000050, debugName: kReleaseMode ? null : 'Uppercase P');
+
+  /// Represents the logical "Uppercase Q" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperQ = LogicalKeyboardKey(0x00000000051, debugName: kReleaseMode ? null : 'Uppercase Q');
+
+  /// Represents the logical "Uppercase R" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperR = LogicalKeyboardKey(0x00000000052, debugName: kReleaseMode ? null : 'Uppercase R');
+
+  /// Represents the logical "Uppercase S" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperS = LogicalKeyboardKey(0x00000000053, debugName: kReleaseMode ? null : 'Uppercase S');
+
+  /// Represents the logical "Uppercase T" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperT = LogicalKeyboardKey(0x00000000054, debugName: kReleaseMode ? null : 'Uppercase T');
+
+  /// Represents the logical "Uppercase U" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperU = LogicalKeyboardKey(0x00000000055, debugName: kReleaseMode ? null : 'Uppercase U');
+
+  /// Represents the logical "Uppercase V" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperV = LogicalKeyboardKey(0x00000000056, debugName: kReleaseMode ? null : 'Uppercase V');
+
+  /// Represents the logical "Uppercase W" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperW = LogicalKeyboardKey(0x00000000057, debugName: kReleaseMode ? null : 'Uppercase W');
+
+  /// Represents the logical "Uppercase X" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperX = LogicalKeyboardKey(0x00000000058, debugName: kReleaseMode ? null : 'Uppercase X');
+
+  /// Represents the logical "Uppercase Y" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperY = LogicalKeyboardKey(0x00000000059, debugName: kReleaseMode ? null : 'Uppercase Y');
+
+  /// Represents the logical "Uppercase Z" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperZ = LogicalKeyboardKey(0x0000000005a, debugName: kReleaseMode ? null : 'Uppercase Z');
+
+  /// Represents the logical "Digit 0" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit0 = LogicalKeyboardKey(0x00000000030, debugName: kReleaseMode ? null : 'Digit 0');
+
+  /// Represents the logical "Digit 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit1 = LogicalKeyboardKey(0x00000000031, debugName: kReleaseMode ? null : 'Digit 1');
+
+  /// Represents the logical "Digit 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit2 = LogicalKeyboardKey(0x00000000032, debugName: kReleaseMode ? null : 'Digit 2');
+
+  /// Represents the logical "Digit 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit3 = LogicalKeyboardKey(0x00000000033, debugName: kReleaseMode ? null : 'Digit 3');
+
+  /// Represents the logical "Digit 4" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit4 = LogicalKeyboardKey(0x00000000034, debugName: kReleaseMode ? null : 'Digit 4');
+
+  /// Represents the logical "Digit 5" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit5 = LogicalKeyboardKey(0x00000000035, debugName: kReleaseMode ? null : 'Digit 5');
+
+  /// Represents the logical "Digit 6" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit6 = LogicalKeyboardKey(0x00000000036, debugName: kReleaseMode ? null : 'Digit 6');
+
+  /// Represents the logical "Digit 7" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit7 = LogicalKeyboardKey(0x00000000037, debugName: kReleaseMode ? null : 'Digit 7');
+
+  /// Represents the logical "Digit 8" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit8 = LogicalKeyboardKey(0x00000000038, debugName: kReleaseMode ? null : 'Digit 8');
+
+  /// Represents the logical "Digit 9" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey digit9 = LogicalKeyboardKey(0x00000000039, debugName: kReleaseMode ? null : 'Digit 9');
+
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
   static const Map<int, LogicalKeyboardKey> _knownLogicalKeys = <int, LogicalKeyboardKey>{
@@ -2137,6 +2447,68 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000d4c: videoModeNext,
     0x0000000d4d: wink,
     0x0000000d4e: zoomToggle,
+    0x0000000061: lowerA,
+    0x0000000062: lowerB,
+    0x0000000063: lowerC,
+    0x0000000064: lowerD,
+    0x0000000065: lowerE,
+    0x0000000066: lowerF,
+    0x0000000067: lowerG,
+    0x0000000068: lowerH,
+    0x0000000069: lowerI,
+    0x000000006a: lowerJ,
+    0x000000006b: lowerK,
+    0x000000006c: lowerL,
+    0x000000006d: lowerM,
+    0x000000006e: lowerN,
+    0x000000006f: lowerO,
+    0x0000000070: lowerP,
+    0x0000000071: lowerQ,
+    0x0000000072: lowerR,
+    0x0000000073: lowerS,
+    0x0000000074: lowerT,
+    0x0000000075: lowerU,
+    0x0000000076: lowerV,
+    0x0000000077: lowerW,
+    0x0000000078: lowerX,
+    0x0000000079: lowerY,
+    0x000000007a: lowerZ,
+    0x0000000041: upperA,
+    0x0000000042: upperB,
+    0x0000000043: upperC,
+    0x0000000044: upperD,
+    0x0000000045: upperE,
+    0x0000000046: upperF,
+    0x0000000047: upperG,
+    0x0000000048: upperH,
+    0x0000000049: upperI,
+    0x000000004a: upperJ,
+    0x000000004b: upperK,
+    0x000000004c: upperL,
+    0x000000004d: upperM,
+    0x000000004e: upperN,
+    0x000000004f: upperO,
+    0x0000000050: upperP,
+    0x0000000051: upperQ,
+    0x0000000052: upperR,
+    0x0000000053: upperS,
+    0x0000000054: upperT,
+    0x0000000055: upperU,
+    0x0000000056: upperV,
+    0x0000000057: upperW,
+    0x0000000058: upperX,
+    0x0000000059: upperY,
+    0x000000005a: upperZ,
+    0x0000000030: digit0,
+    0x0000000031: digit1,
+    0x0000000032: digit2,
+    0x0000000033: digit3,
+    0x0000000034: digit4,
+    0x0000000035: digit5,
+    0x0000000036: digit6,
+    0x0000000037: digit7,
+    0x0000000038: digit8,
+    0x0000000039: digit9,
   };
 
   // A map of keys to the pseudo-key synonym for that key. Used by getSynonyms.
@@ -2381,135 +2753,135 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey usbErrorUndefined = PhysicalKeyboardKey(0x00070003, debugName: kReleaseMode ? null : 'Usb Error Undefined');
 
-  /// Represents the location of the "Keya" key on a generalized keyboard.
+  /// Represents the location of the "Key A" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keya = PhysicalKeyboardKey(0x00070004, debugName: kReleaseMode ? null : 'Keya');
+  static const PhysicalKeyboardKey keyA = PhysicalKeyboardKey(0x00070004, debugName: kReleaseMode ? null : 'Key A');
 
-  /// Represents the location of the "Keyb" key on a generalized keyboard.
+  /// Represents the location of the "Key B" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyb = PhysicalKeyboardKey(0x00070005, debugName: kReleaseMode ? null : 'Keyb');
+  static const PhysicalKeyboardKey keyB = PhysicalKeyboardKey(0x00070005, debugName: kReleaseMode ? null : 'Key B');
 
-  /// Represents the location of the "Keyc" key on a generalized keyboard.
+  /// Represents the location of the "Key C" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyc = PhysicalKeyboardKey(0x00070006, debugName: kReleaseMode ? null : 'Keyc');
+  static const PhysicalKeyboardKey keyC = PhysicalKeyboardKey(0x00070006, debugName: kReleaseMode ? null : 'Key C');
 
-  /// Represents the location of the "Keyd" key on a generalized keyboard.
+  /// Represents the location of the "Key D" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyd = PhysicalKeyboardKey(0x00070007, debugName: kReleaseMode ? null : 'Keyd');
+  static const PhysicalKeyboardKey keyD = PhysicalKeyboardKey(0x00070007, debugName: kReleaseMode ? null : 'Key D');
 
-  /// Represents the location of the "Keye" key on a generalized keyboard.
+  /// Represents the location of the "Key E" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keye = PhysicalKeyboardKey(0x00070008, debugName: kReleaseMode ? null : 'Keye');
+  static const PhysicalKeyboardKey keyE = PhysicalKeyboardKey(0x00070008, debugName: kReleaseMode ? null : 'Key E');
 
-  /// Represents the location of the "Keyf" key on a generalized keyboard.
+  /// Represents the location of the "Key F" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyf = PhysicalKeyboardKey(0x00070009, debugName: kReleaseMode ? null : 'Keyf');
+  static const PhysicalKeyboardKey keyF = PhysicalKeyboardKey(0x00070009, debugName: kReleaseMode ? null : 'Key F');
 
-  /// Represents the location of the "Keyg" key on a generalized keyboard.
+  /// Represents the location of the "Key G" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyg = PhysicalKeyboardKey(0x0007000a, debugName: kReleaseMode ? null : 'Keyg');
+  static const PhysicalKeyboardKey keyG = PhysicalKeyboardKey(0x0007000a, debugName: kReleaseMode ? null : 'Key G');
 
-  /// Represents the location of the "Keyh" key on a generalized keyboard.
+  /// Represents the location of the "Key H" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyh = PhysicalKeyboardKey(0x0007000b, debugName: kReleaseMode ? null : 'Keyh');
+  static const PhysicalKeyboardKey keyH = PhysicalKeyboardKey(0x0007000b, debugName: kReleaseMode ? null : 'Key H');
 
-  /// Represents the location of the "Keyi" key on a generalized keyboard.
+  /// Represents the location of the "Key I" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyi = PhysicalKeyboardKey(0x0007000c, debugName: kReleaseMode ? null : 'Keyi');
+  static const PhysicalKeyboardKey keyI = PhysicalKeyboardKey(0x0007000c, debugName: kReleaseMode ? null : 'Key I');
 
-  /// Represents the location of the "Keyj" key on a generalized keyboard.
+  /// Represents the location of the "Key J" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyj = PhysicalKeyboardKey(0x0007000d, debugName: kReleaseMode ? null : 'Keyj');
+  static const PhysicalKeyboardKey keyJ = PhysicalKeyboardKey(0x0007000d, debugName: kReleaseMode ? null : 'Key J');
 
-  /// Represents the location of the "Keyk" key on a generalized keyboard.
+  /// Represents the location of the "Key K" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyk = PhysicalKeyboardKey(0x0007000e, debugName: kReleaseMode ? null : 'Keyk');
+  static const PhysicalKeyboardKey keyK = PhysicalKeyboardKey(0x0007000e, debugName: kReleaseMode ? null : 'Key K');
 
-  /// Represents the location of the "Keyl" key on a generalized keyboard.
+  /// Represents the location of the "Key L" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyl = PhysicalKeyboardKey(0x0007000f, debugName: kReleaseMode ? null : 'Keyl');
+  static const PhysicalKeyboardKey keyL = PhysicalKeyboardKey(0x0007000f, debugName: kReleaseMode ? null : 'Key L');
 
-  /// Represents the location of the "Keym" key on a generalized keyboard.
+  /// Represents the location of the "Key M" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keym = PhysicalKeyboardKey(0x00070010, debugName: kReleaseMode ? null : 'Keym');
+  static const PhysicalKeyboardKey keyM = PhysicalKeyboardKey(0x00070010, debugName: kReleaseMode ? null : 'Key M');
 
-  /// Represents the location of the "Keyn" key on a generalized keyboard.
+  /// Represents the location of the "Key N" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyn = PhysicalKeyboardKey(0x00070011, debugName: kReleaseMode ? null : 'Keyn');
+  static const PhysicalKeyboardKey keyN = PhysicalKeyboardKey(0x00070011, debugName: kReleaseMode ? null : 'Key N');
 
-  /// Represents the location of the "Keyo" key on a generalized keyboard.
+  /// Represents the location of the "Key O" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyo = PhysicalKeyboardKey(0x00070012, debugName: kReleaseMode ? null : 'Keyo');
+  static const PhysicalKeyboardKey keyO = PhysicalKeyboardKey(0x00070012, debugName: kReleaseMode ? null : 'Key O');
 
-  /// Represents the location of the "Keyp" key on a generalized keyboard.
+  /// Represents the location of the "Key P" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyp = PhysicalKeyboardKey(0x00070013, debugName: kReleaseMode ? null : 'Keyp');
+  static const PhysicalKeyboardKey keyP = PhysicalKeyboardKey(0x00070013, debugName: kReleaseMode ? null : 'Key P');
 
-  /// Represents the location of the "Keyq" key on a generalized keyboard.
+  /// Represents the location of the "Key Q" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyq = PhysicalKeyboardKey(0x00070014, debugName: kReleaseMode ? null : 'Keyq');
+  static const PhysicalKeyboardKey keyQ = PhysicalKeyboardKey(0x00070014, debugName: kReleaseMode ? null : 'Key Q');
 
-  /// Represents the location of the "Keyr" key on a generalized keyboard.
+  /// Represents the location of the "Key R" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyr = PhysicalKeyboardKey(0x00070015, debugName: kReleaseMode ? null : 'Keyr');
+  static const PhysicalKeyboardKey keyR = PhysicalKeyboardKey(0x00070015, debugName: kReleaseMode ? null : 'Key R');
 
-  /// Represents the location of the "Keys" key on a generalized keyboard.
+  /// Represents the location of the "Key S" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keys = PhysicalKeyboardKey(0x00070016, debugName: kReleaseMode ? null : 'Keys');
+  static const PhysicalKeyboardKey keyS = PhysicalKeyboardKey(0x00070016, debugName: kReleaseMode ? null : 'Key S');
 
-  /// Represents the location of the "Keyt" key on a generalized keyboard.
+  /// Represents the location of the "Key T" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyt = PhysicalKeyboardKey(0x00070017, debugName: kReleaseMode ? null : 'Keyt');
+  static const PhysicalKeyboardKey keyT = PhysicalKeyboardKey(0x00070017, debugName: kReleaseMode ? null : 'Key T');
 
-  /// Represents the location of the "Keyu" key on a generalized keyboard.
+  /// Represents the location of the "Key U" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyu = PhysicalKeyboardKey(0x00070018, debugName: kReleaseMode ? null : 'Keyu');
+  static const PhysicalKeyboardKey keyU = PhysicalKeyboardKey(0x00070018, debugName: kReleaseMode ? null : 'Key U');
 
-  /// Represents the location of the "Keyv" key on a generalized keyboard.
+  /// Represents the location of the "Key V" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyv = PhysicalKeyboardKey(0x00070019, debugName: kReleaseMode ? null : 'Keyv');
+  static const PhysicalKeyboardKey keyV = PhysicalKeyboardKey(0x00070019, debugName: kReleaseMode ? null : 'Key V');
 
-  /// Represents the location of the "Keyw" key on a generalized keyboard.
+  /// Represents the location of the "Key W" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyw = PhysicalKeyboardKey(0x0007001a, debugName: kReleaseMode ? null : 'Keyw');
+  static const PhysicalKeyboardKey keyW = PhysicalKeyboardKey(0x0007001a, debugName: kReleaseMode ? null : 'Key W');
 
-  /// Represents the location of the "Keyx" key on a generalized keyboard.
+  /// Represents the location of the "Key X" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyx = PhysicalKeyboardKey(0x0007001b, debugName: kReleaseMode ? null : 'Keyx');
+  static const PhysicalKeyboardKey keyX = PhysicalKeyboardKey(0x0007001b, debugName: kReleaseMode ? null : 'Key X');
 
-  /// Represents the location of the "Keyy" key on a generalized keyboard.
+  /// Represents the location of the "Key Y" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyy = PhysicalKeyboardKey(0x0007001c, debugName: kReleaseMode ? null : 'Keyy');
+  static const PhysicalKeyboardKey keyY = PhysicalKeyboardKey(0x0007001c, debugName: kReleaseMode ? null : 'Key Y');
 
-  /// Represents the location of the "Keyz" key on a generalized keyboard.
+  /// Represents the location of the "Key Z" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey keyz = PhysicalKeyboardKey(0x0007001d, debugName: kReleaseMode ? null : 'Keyz');
+  static const PhysicalKeyboardKey keyZ = PhysicalKeyboardKey(0x0007001d, debugName: kReleaseMode ? null : 'Key Z');
 
   /// Represents the location of the "Digit 1" key on a generalized keyboard.
   ///
@@ -3781,32 +4153,32 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x00070001: usbErrorRollOver,
     0x00070002: usbPostFail,
     0x00070003: usbErrorUndefined,
-    0x00070004: keya,
-    0x00070005: keyb,
-    0x00070006: keyc,
-    0x00070007: keyd,
-    0x00070008: keye,
-    0x00070009: keyf,
-    0x0007000a: keyg,
-    0x0007000b: keyh,
-    0x0007000c: keyi,
-    0x0007000d: keyj,
-    0x0007000e: keyk,
-    0x0007000f: keyl,
-    0x00070010: keym,
-    0x00070011: keyn,
-    0x00070012: keyo,
-    0x00070013: keyp,
-    0x00070014: keyq,
-    0x00070015: keyr,
-    0x00070016: keys,
-    0x00070017: keyt,
-    0x00070018: keyu,
-    0x00070019: keyv,
-    0x0007001a: keyw,
-    0x0007001b: keyx,
-    0x0007001c: keyy,
-    0x0007001d: keyz,
+    0x00070004: keyA,
+    0x00070005: keyB,
+    0x00070006: keyC,
+    0x00070007: keyD,
+    0x00070008: keyE,
+    0x00070009: keyF,
+    0x0007000a: keyG,
+    0x0007000b: keyH,
+    0x0007000c: keyI,
+    0x0007000d: keyJ,
+    0x0007000e: keyK,
+    0x0007000f: keyL,
+    0x00070010: keyM,
+    0x00070011: keyN,
+    0x00070012: keyO,
+    0x00070013: keyP,
+    0x00070014: keyQ,
+    0x00070015: keyR,
+    0x00070016: keyS,
+    0x00070017: keyT,
+    0x00070018: keyU,
+    0x00070019: keyV,
+    0x0007001a: keyW,
+    0x0007001b: keyX,
+    0x0007001c: keyY,
+    0x0007001d: keyZ,
     0x0007001e: digit1,
     0x0007001f: digit2,
     0x00070020: digit3,

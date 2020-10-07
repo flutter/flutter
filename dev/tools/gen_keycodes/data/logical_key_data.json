@@ -1218,5 +1218,253 @@
   "zoomToggle": {
     "name": "ZoomToggle",
     "value": 3406
+  },
+  "lowerA": {
+    "name": "lowercaseA",
+    "value": 97
+  },
+  "lowerB": {
+    "name": "lowercaseB",
+    "value": 98
+  },
+  "lowerC": {
+    "name": "lowercaseC",
+    "value": 99
+  },
+  "lowerD": {
+    "name": "lowercaseD",
+    "value": 100
+  },
+  "lowerE": {
+    "name": "lowercaseE",
+    "value": 101
+  },
+  "lowerF": {
+    "name": "lowercaseF",
+    "value": 102
+  },
+  "lowerG": {
+    "name": "lowercaseG",
+    "value": 103
+  },
+  "lowerH": {
+    "name": "lowercaseH",
+    "value": 104
+  },
+  "lowerI": {
+    "name": "lowercaseI",
+    "value": 105
+  },
+  "lowerJ": {
+    "name": "lowercaseJ",
+    "value": 106
+  },
+  "lowerK": {
+    "name": "lowercaseK",
+    "value": 107
+  },
+  "lowerL": {
+    "name": "lowercaseL",
+    "value": 108
+  },
+  "lowerM": {
+    "name": "lowercaseM",
+    "value": 109
+  },
+  "lowerN": {
+    "name": "lowercaseN",
+    "value": 110
+  },
+  "lowerO": {
+    "name": "lowercaseO",
+    "value": 111
+  },
+  "lowerP": {
+    "name": "lowercaseP",
+    "value": 112
+  },
+  "lowerQ": {
+    "name": "lowercaseQ",
+    "value": 113
+  },
+  "lowerR": {
+    "name": "lowercaseR",
+    "value": 114
+  },
+  "lowerS": {
+    "name": "lowercaseS",
+    "value": 115
+  },
+  "lowerT": {
+    "name": "lowercaseT",
+    "value": 116
+  },
+  "lowerU": {
+    "name": "lowercaseU",
+    "value": 117
+  },
+  "lowerV": {
+    "name": "lowercaseV",
+    "value": 118
+  },
+  "lowerW": {
+    "name": "lowercaseW",
+    "value": 119
+  },
+  "lowerX": {
+    "name": "lowercaseX",
+    "value": 120
+  },
+  "lowerY": {
+    "name": "lowercaseY",
+    "value": 121
+  },
+  "lowerZ": {
+    "name": "lowercaseZ",
+    "value": 122
+  },
+  "upperA": {
+    "name": "uppercaseA",
+    "value": 65
+  },
+  "upperB": {
+    "name": "uppercaseB",
+    "value": 66
+  },
+  "upperC": {
+    "name": "uppercaseC",
+    "value": 67
+  },
+  "upperD": {
+    "name": "uppercaseD",
+    "value": 68
+  },
+  "upperE": {
+    "name": "uppercaseE",
+    "value": 69
+  },
+  "upperF": {
+    "name": "uppercaseF",
+    "value": 70
+  },
+  "upperG": {
+    "name": "uppercaseG",
+    "value": 71
+  },
+  "upperH": {
+    "name": "uppercaseH",
+    "value": 72
+  },
+  "upperI": {
+    "name": "uppercaseI",
+    "value": 73
+  },
+  "upperJ": {
+    "name": "uppercaseJ",
+    "value": 74
+  },
+  "upperK": {
+    "name": "uppercaseK",
+    "value": 75
+  },
+  "upperL": {
+    "name": "uppercaseL",
+    "value": 76
+  },
+  "upperM": {
+    "name": "uppercaseM",
+    "value": 77
+  },
+  "upperN": {
+    "name": "uppercaseN",
+    "value": 78
+  },
+  "upperO": {
+    "name": "uppercaseO",
+    "value": 79
+  },
+  "upperP": {
+    "name": "uppercaseP",
+    "value": 80
+  },
+  "upperQ": {
+    "name": "uppercaseQ",
+    "value": 81
+  },
+  "upperR": {
+    "name": "uppercaseR",
+    "value": 82
+  },
+  "upperS": {
+    "name": "uppercaseS",
+    "value": 83
+  },
+  "upperT": {
+    "name": "uppercaseT",
+    "value": 84
+  },
+  "upperU": {
+    "name": "uppercaseU",
+    "value": 85
+  },
+  "upperV": {
+    "name": "uppercaseV",
+    "value": 86
+  },
+  "upperW": {
+    "name": "uppercaseW",
+    "value": 87
+  },
+  "upperX": {
+    "name": "uppercaseX",
+    "value": 88
+  },
+  "upperY": {
+    "name": "uppercaseY",
+    "value": 89
+  },
+  "upperZ": {
+    "name": "uppercaseZ",
+    "value": 90
+  },
+  "digit0": {
+    "name": "digit0",
+    "value": 48
+  },
+  "digit1": {
+    "name": "digit1",
+    "value": 49
+  },
+  "digit2": {
+    "name": "digit2",
+    "value": 50
+  },
+  "digit3": {
+    "name": "digit3",
+    "value": 51
+  },
+  "digit4": {
+    "name": "digit4",
+    "value": 52
+  },
+  "digit5": {
+    "name": "digit5",
+    "value": 53
+  },
+  "digit6": {
+    "name": "digit6",
+    "value": 54
+  },
+  "digit7": {
+    "name": "digit7",
+    "value": 55
+  },
+  "digit8": {
+    "name": "digit8",
+    "value": 56
+  },
+  "digit9": {
+    "name": "digit9",
+    "value": 57
   }
 }

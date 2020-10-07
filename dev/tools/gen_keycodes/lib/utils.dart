@@ -23,10 +23,11 @@ String shoutingToLowerCamel(String shouting) {
 /// Converts 'FooBar' to 'fooBar'.
 ///
 /// 'TVFoo' should be convert to 'tvFoo'.
+/// 'KeyX' should be convert to 'keyX'.
 String upperCamelToLowerCamel(String upperCamel) {
-  final RegExp initialGroup = RegExp(r'^(.+?)([A-Z][^A-Z].*)?$');
-  return upperCamel.replaceAllMapped(initialGroup, (Match match) {
-    return match.group(1).toLowerCase() + (match.group(2) ?? '');
+  final RegExp initialGroup = RegExp(r'^([A-Z]([A-Z]*|[^A-Z]*))([A-Z]([^A-Z]|$)|$)');
+  return upperCamel.replaceFirstMapped(initialGroup, (Match match) {
+    return match.group(1).toLowerCase() + (match.group(3) ?? '');
   });
 }
 
