@@ -28,12 +28,12 @@ import 'plugin_registry.dart';
 ///
 /// The first method is `listen`. When called, it begins forwarding
 /// messages to the framework side when they are added to the
-/// [controller]. This triggers the [onListen] callback on the
-/// [controller].
+/// [controller]. This triggers the [StreamController.onListen] callback
+/// on the [controller].
 ///
 /// The other method is `cancel`. When called, it stops forwarding
-/// events to the framework. This triggers the [onCancel] callback on
-/// the [controller].
+/// events to the framework. This triggers the [StreamController.onCancel]
+/// callback on the [controller].
 ///
 /// Events added to the [controller] when the framework is not
 /// subscribed are silently discarded.
