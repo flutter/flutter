@@ -227,7 +227,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///             builder: (BuildContext context) {
 ///               return AlertDialog(
 ///                 title: const Text('Thanks!'),
-///                 content: Text ('You typed "$value".'),
+///                 content: Text ('You typed "$value", which has length ${value.characters.length}.'),
 ///                 actions: <Widget>[
 ///                   TextButton(
 ///                     onPressed: () { Navigator.pop(context); },
@@ -256,6 +256,14 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///
 /// Keep in mind you can also always read the current string from a TextField's
 /// [TextEditingController] using [TextEditingController.text].
+///
+  /// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.editableText.complexCharacters}
+///
+/// In the live Dartpad example above, try typing the emoji 👨‍👩‍👦
+/// into the field and submitting. Because the example code measures the length
+/// with `value.characters.length`, the emoji is correctly counted as a single
+/// character.
 ///
 /// See also:
 ///

@@ -43,6 +43,9 @@ import 'theme.dart';
 /// the [AppBar.leading] position e.g. from the hamburger menu to the back arrow
 /// used to exit the search page.
 ///
+/// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.editableText.complexCharacters}
+///
 /// See also:
 ///
 ///  * [SearchDelegate] to define the content of the search page.
@@ -85,6 +88,9 @@ Future<T> showSearch<T>({
 /// A given [SearchDelegate] can only be associated with one active [showSearch]
 /// call. Call [SearchDelegate.close] before re-using the same delegate instance
 /// for another [showSearch] call.
+///
+/// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.editableText.complexCharacters}
 abstract class SearchDelegate<T> {
 
   /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
