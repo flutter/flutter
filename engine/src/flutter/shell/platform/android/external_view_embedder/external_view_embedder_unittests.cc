@@ -557,6 +557,91 @@ TEST(AndroidExternalViewEmbedder, DestroyOverlayLayersOnSizeChange) {
                        raster_thread_merger);
 }
 
+TEST(AndroidExternalViewEmbedder, DoesNotDestroyOverlayLayersOnSizeChange) {
+  auto jni_mock = std::make_shared<JNIMock>();
+  auto android_context =
+      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
+
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  auto gr_context = GrDirectContext::MakeMock(nullptr);
+  auto frame_size = SkISize::Make(1000, 1000);
+  auto surface_factory =
+      [gr_context, window, frame_size](
+          std::shared_ptr<AndroidContext> android_context,
+          std::shared_ptr<PlatformViewAndroidJNI> jni_facade) {
+        auto surface_frame_1 = std::make_unique<SurfaceFrame>(
+            SkSurface::MakeNull(1000, 1000), false,
+            [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
+              return true;
+            });
+
+        auto surface_mock = std::make_unique<SurfaceMock>();
+        EXPECT_CALL(*surface_mock, AcquireFrame(frame_size))
+            .WillOnce(Return(ByMove(std::move(surface_frame_1))));
+
+        auto android_surface_mock = std::make_unique<AndroidSurfaceMock>();
+        EXPECT_CALL(*android_surface_mock, IsValid()).WillOnce(Return(true));
+
+        EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()))
+            .WillOnce(Return(ByMove(std::move(surface_mock))));
+
+        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window));
+
+        return android_surface_mock;
+      };
+
+  auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
+      android_context, jni_mock, surface_factory);
+
+  // ------------------ First frame ------------------ //
+  {
+    auto raster_thread_merger = GetThreadMergerFromPlatformThread();
+    EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+    embedder->BeginFrame(frame_size, nullptr, 1.5, raster_thread_merger);
+
+    // Add an Android view.
+    MutatorsStack stack1;
+    // TODO(egarciad): Investigate why Flow applies the device pixel ratio to
+    // the offsetPixels, but not the sizePoints.
+    auto view_params_1 = std::make_unique<EmbeddedViewParams>(
+        SkMatrix(), SkSize::Make(200, 200), stack1);
+
+    embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
+
+    // This simulates Flutter UI that intersects with the Android view.
+    embedder->CompositeEmbeddedView(0)->drawRect(
+        SkRect::MakeXYWH(50, 50, 200, 200), SkPaint());
+
+    // Create a new overlay surface.
+    EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
+        .WillOnce(Return(
+            ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+                0, window))));
+    // The JNI call to display the Android view.
+    EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(0, 0, 0, 200, 200,
+                                                            300, 300, stack1));
+    EXPECT_CALL(*jni_mock,
+                FlutterViewDisplayOverlaySurface(0, 50, 50, 200, 200));
+
+    auto surface_frame =
+        std::make_unique<SurfaceFrame>(SkSurface::MakeNull(1000, 1000), false,
+                                       [](const SurfaceFrame& surface_frame,
+                                          SkCanvas* canvas) { return true; });
+    embedder->SubmitFrame(gr_context.get(), std::move(surface_frame));
+
+    EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
+    embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+  }
+
+  // Changing the frame size from the raster thread does not make JNI calls.
+
+  EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(0);
+  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame()).Times(0);
+
+  embedder->BeginFrame(SkISize::Make(30, 40), nullptr, 1.0,
+                       GetThreadMergerFromRasterThread());
+}
+
 TEST(AndroidExternalViewEmbedder, SupportsDynamicThreadMerging) {
   auto jni_mock = std::make_shared<JNIMock>();
 
