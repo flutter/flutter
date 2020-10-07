@@ -4,7 +4,7 @@
 
 // @dart = 2.8
 
-@TestOn('chrome') // Uses web-only Flutter SDK
+@TestOn('browser') // Uses web-only Flutter SDK
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_web_plugins/src/navigation/utils.dart';

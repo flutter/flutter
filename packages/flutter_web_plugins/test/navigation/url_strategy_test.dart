@@ -58,7 +58,40 @@ void main() {
       location = null;
     });
 
+    test('validates base href', () {
+      location.baseHref = '/';
+      expect(
+        () => PathUrlStrategy(location),
+        returnsNormally,
+      );
+
+      location.baseHref = '/foo/';
+      expect(
+        () => PathUrlStrategy(location),
+        returnsNormally,
+      );
+
+      location.baseHref = '';
+      expect(
+        () => PathUrlStrategy(location),
+        throwsException,
+      );
+
+      location.baseHref = 'foo';
+      expect(
+        () => PathUrlStrategy(location),
+        throwsException,
+      );
+
+      location.baseHref = '/foo';
+      expect(
+        () => PathUrlStrategy(location),
+        throwsException,
+      );
+    });
+
     test('leading slash is always prepended', () {
+      location.baseHref = '/';
       final PathUrlStrategy strategy = PathUrlStrategy(location);
 
       location.pathname = '';
