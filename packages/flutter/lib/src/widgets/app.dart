@@ -568,14 +568,15 @@ class WidgetsApp extends StatefulWidget {
   final List<NavigatorObserver>? navigatorObservers;
 
   /// {@template flutter.widgets.widgetsApp.builder}
-  /// A builder for inserting widgets above the [Navigator] but below the other
-  /// widgets created by the [WidgetsApp] widget, or for replacing the
-  /// [Navigator] entirely.
+  /// A builder for inserting widgets above the [Navigator] or - when the
+  /// [WidgetsApp.router] constructor is used - above the [Router] but below the
+  /// other widgets created by the [WidgetsApp] widget, or for replacing the
+  /// [Navigator]/[Router] entirely.
   ///
   /// For example, from the [BuildContext] passed to this method, the
   /// [Directionality], [Localizations], [DefaultTextStyle], [MediaQuery], etc,
   /// are all available. They can also be overridden in a way that impacts all
-  /// the routes in the [Navigator].
+  /// the routes in the [Navigator] or [Router].
   ///
   /// This is rarely useful, but can be used in applications that wish to
   /// override those defaults, e.g. to force the application into right-to-left
@@ -586,18 +587,22 @@ class WidgetsApp extends StatefulWidget {
   /// [Localizations], consider [onGenerateTitle] instead.
   ///
   /// The [builder] callback is passed two arguments, the [BuildContext] (as
-  /// `context`) and a [Navigator] widget (as `child`).
+  /// `context`) and a [Navigator] or [Router] widget (as `child`).
   ///
-  /// If no routes are provided using [home], [routes], [onGenerateRoute], or
-  /// [onUnknownRoute], the `child` will be null, and it is the responsibility
-  /// of the [builder] to provide the application's routing machinery.
+  /// If no routes are provided to the regular [WidgetsApp] constructor using
+  /// [home], [routes], [onGenerateRoute], or [onUnknownRoute], the `child` will
+  /// be null, and it is the responsibility of the [builder] to provide the
+  /// application's routing machinery.
   ///
-  /// If routes _are_ provided using one or more of those properties, then
-  /// `child` is not null, and the returned value should include the `child` in
-  /// the widget subtree; if it does not, then the application will have no
-  /// navigator and the [navigatorKey], [home], [routes], [onGenerateRoute],
-  /// [onUnknownRoute], [initialRoute], and [navigatorObservers] properties will
-  /// have no effect.
+  /// If routes _are_ provided to the regular [WidgetsApp] constructor using one
+  /// or more of those properties or if the [WidgetsApp.router] constructor is
+  /// used, then `child` is not null, and the returned value should include the
+  /// `child` in the widget subtree; if it does not, then the application will
+  /// have no [Navigator] or [Router] and the routing related properties (i.e.
+  /// [navigatorKey], [home], [routes], [onGenerateRoute], [onUnknownRoute],
+  /// [initialRoute], [navigatorObservers], [routeInformationProvider],
+  /// [backButtonDispatcher], [routerDelegate], and [routeInformationParser])
+  /// are ignored.
   ///
   /// If [builder] is null, it is as if a builder was specified that returned
   /// the `child` directly. If it is null, routes must be provided using one of
@@ -605,8 +610,9 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// Unless a [Navigator] is provided, either implicitly from [builder] being
   /// null, or by a [builder] including its `child` argument, or by a [builder]
-  /// explicitly providing a [Navigator] of its own, widgets and APIs such as
-  /// [Hero], [Navigator.push] and [Navigator.pop], will not function.
+  /// explicitly providing a [Navigator] of its own, or by the [routerDelegate]
+  /// building one, widgets and APIs such as [Hero], [Navigator.push] and
+  /// [Navigator.pop], will not function.
   /// {@endtemplate}
   final TransitionBuilder? builder;
 
