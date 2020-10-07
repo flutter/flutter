@@ -479,7 +479,7 @@ class DataTable extends StatelessWidget {
   /// {@endtemplate}
   ///
   /// By default there is no decoration.
-  final Decoration decoration;
+  final Decoration? decoration;
 
   /// {@template flutter.material.dataTable.dataRowColor}
   /// The background color for the data rows.
