@@ -360,9 +360,9 @@ void _tests() {
     await mediaQueryBoilerplate(tester, true);
 
     expect(semantics, isNot(includesNodeWith(label: ':')));
-    expect(semantics.nodesWith(value: '00'), hasLength(1),
+    expect(semantics.nodesWith(value: 'Select minutes 00'), hasLength(1),
         reason: '00 appears once in the header');
-    expect(semantics.nodesWith(value: '07'), hasLength(1),
+    expect(semantics.nodesWith(value: 'Select hours 07'), hasLength(1),
         reason: '07 appears once in the header');
     expect(semantics, includesNodeWith(label: 'CANCEL'));
     expect(semantics, includesNodeWith(label: 'OK'));
@@ -405,7 +405,7 @@ void _tests() {
 
     Future<void> actAndExpect({ String initialValue, SemanticsAction action, String finalValue }) async {
       final SemanticsNode elevenHours = semantics.nodesWith(
-        value: initialValue,
+        value: 'Select hours $initialValue',
         ancestor: tester.renderObject(_hourControl).debugSemantics,
       ).single;
       tester.binding.pipelineOwner.semanticsOwner.performAction(elevenHours.id, action);
@@ -471,7 +471,7 @@ void _tests() {
 
     Future<void> actAndExpect({ String initialValue, SemanticsAction action, String finalValue }) async {
       final SemanticsNode elevenHours = semantics.nodesWith(
-        value: initialValue,
+        value: 'Select minutes $initialValue',
         ancestor: tester.renderObject(_minuteControl).debugSemantics,
       ).single;
       tester.binding.pipelineOwner.semanticsOwner.performAction(elevenHours.id, action);

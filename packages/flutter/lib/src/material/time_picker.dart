@@ -355,8 +355,7 @@ class _HourControl extends StatelessWidget {
     );
 
     return Semantics(
-      hint: localizations.timePickerHourModeAnnouncement,
-      value: formattedHour,
+      value: '${localizations.timePickerHourModeAnnouncement} $formattedHour',
       excludeSemantics: true,
       increasedValue: formattedNextHour,
       onIncrease: () {
@@ -445,8 +444,7 @@ class _MinuteControl extends StatelessWidget {
 
     return Semantics(
       excludeSemantics: true,
-      hint: localizations.timePickerMinuteModeAnnouncement,
-      value: formattedMinute,
+      value: '${localizations.timePickerMinuteModeAnnouncement} $formattedMinute',
       increasedValue: formattedNextMinute,
       onIncrease: () {
         fragmentContext.onTimeChange(nextMinute);
