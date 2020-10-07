@@ -416,7 +416,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       builder: (BuildContext context, Widget? child) {
         final List<Widget> children = <Widget>[];
         for (final T currentKey in keys) {
-          final TextStyle textStyle = DefaultTextStyle.of(context).style!.copyWith(
+          final TextStyle textStyle = DefaultTextStyle.of(context).style.copyWith(
             fontWeight: _highlightTween.evaluate(_highlightControllers[currentKey]!),
           );
 

@@ -546,7 +546,7 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 10.0)),
     ]));
-    expect(logs, <String>['enterA', 'enterB', 'hoverA', 'hoverB']);
+    expect(logs, <String>['enterA', 'enterB', 'hoverB', 'hoverA']);
     logs.clear();
 
     // Moves out of A within one frame.

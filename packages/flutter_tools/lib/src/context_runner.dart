@@ -47,6 +47,7 @@ import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
 import 'run_hot.dart';
+import 'runner/local_engine.dart';
 import 'version.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio.dart';
@@ -144,6 +145,7 @@ Future<T> runInContext<T>(
         config: globals.config,
         fuchsiaWorkflow: fuchsiaWorkflow,
         xcDevice: globals.xcdevice,
+        userMessages: globals.userMessages,
         windowsWorkflow: windowsWorkflow,
         macOSWorkflow: MacOSWorkflow(
           platform: globals.platform,
@@ -181,6 +183,13 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         xcode: globals.xcode,
         platform: globals.platform,
+      ),
+      LocalEngineLocator: () => LocalEngineLocator(
+        userMessages: userMessages,
+        logger: globals.logger,
+        platform: globals.platform,
+        fileSystem: globals.fs,
+        flutterRoot: Cache.flutterRoot,
       ),
       Logger: () => globals.platform.isWindows
         ? WindowsStdoutLogger(
@@ -227,8 +236,6 @@ Future<T> runInContext<T>(
         botDetector: globals.botDetector,
         platform: globals.platform,
         usage: globals.flutterUsage,
-        // Avoid a circular dependency by making this access lazy.
-        toolStampFile: () => globals.cache.getStampFileFor('flutter_tools'),
       ),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Stdio: () => Stdio(),

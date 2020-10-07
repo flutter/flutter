@@ -1528,6 +1528,7 @@ class Navigator extends StatefulWidget {
   /// Restoration ID to save and restore the state of the navigator, including
   /// its history.
   ///
+  /// {@template flutter.widgets.navigator.restorationScopeId}
   /// If a restoration ID is provided, the navigator will persist its internal
   /// state (including the route history as well as the restorable state of the
   /// routes) and restore it during state restoration.
@@ -1538,11 +1539,20 @@ class Navigator extends StatefulWidget {
   ///
   /// The state is persisted in a [RestorationBucket] claimed from
   /// the surrounding [RestorationScope] using the provided restoration ID.
+  /// Within that bucket, the [Navigator] also creates a new [RestorationScope]
+  /// for its children (the [Route]s).
   ///
   /// See also:
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
+  ///  * [RestorationMixin], which contains a runnable code sample showcasing
+  ///    state restoration in Flutter.
+  ///  * [Navigator], which explains under the heading "state restoration"
+  ///    how and under what conditions the navigator restores its state.
+  ///  * [Navigator.restorablePush], which includes an example showcasing how
+  ///    to push a restorable route unto the navigator.
+  /// {@endtemplate}
   final String? restorationScopeId;
 
   /// The name for the default route of the application.
@@ -1561,6 +1571,16 @@ class Navigator extends StatefulWidget {
   /// The [NavigatorState] and [initialRoute] will be passed to the callback.
   /// The callback must return a list of [Route] objects with which the history
   /// will be primed.
+  ///
+  /// When parsing the initialRoute, if there's any chance that the it may
+  /// contain complex characters, it's best to use the
+  /// [characters](https://pub.dev/packages/characters) API. This will ensure
+  /// that extended grapheme clusters and surrogate pairs are treated as single
+  /// characters by the code, the same way that they appear to the user. For
+  /// example, the string "👨‍👩‍👦" appears to the user as a single
+  /// character and `string.characters.length` intuitively returns 1. On the
+  /// other hand, `string.length` returns 8, and `string.runes.length` returns
+  /// 5!
   final RouteListFactory onGenerateInitialRoutes;
 
   /// Whether this navigator should report route update message back to the
@@ -3603,11 +3623,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         assert(previousOldPageRouteEntry != null);
         final List<_RouteEntry> pagelessRoutes = pageRouteToPagelessRoutes
           .putIfAbsent(
-            previousOldPageRouteEntry!,
+            previousOldPageRouteEntry,
             () => <_RouteEntry>[],
           );
         pagelessRoutes.add(potentialEntryToRemove);
-        if (previousOldPageRouteEntry.isWaitingForExitingDecision)
+        if (previousOldPageRouteEntry!.isWaitingForExitingDecision)
           potentialEntryToRemove.markNeedsExitingDecision();
         continue;
       }
@@ -3651,7 +3671,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         assert(previousOldPageRouteEntry != null);
         final List<_RouteEntry> pagelessRoutes = pageRouteToPagelessRoutes
           .putIfAbsent(
-          previousOldPageRouteEntry!,
+          previousOldPageRouteEntry,
             () => <_RouteEntry>[]
         );
         pagelessRoutes.add(oldEntry);
@@ -5530,7 +5550,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///         mainAxisSize: MainAxisSize.min,
 ///         children: <Widget>[
 ///           Text('Last count: ${_lastCount.value}'),
-///           RaisedButton(
+///           ElevatedButton(
 ///             onPressed: () {
 ///               // Show the route defined by the `RestorableRouteFuture`.
 ///               _counterRoute.present('Awesome Counter');

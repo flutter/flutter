@@ -301,7 +301,7 @@ void main() {
       expect(errors.length, isNonZero);
       expect(errors.first, isNotNull);
       expect(errors.first.exception, isFlutterError);
-      expect(errors.first.exception.toStringDeep(), equalsIgnoringHashCodes(message));
+      expect((errors.first.exception as FlutterError).toStringDeep(), equalsIgnoringHashCodes(message));
     }
 
     testWidgets('layoutChild on non existent child', (WidgetTester tester) async {

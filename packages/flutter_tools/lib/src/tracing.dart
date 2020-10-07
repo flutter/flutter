@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/common.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
-
 import 'vmservice.dart';
 
 // Names of some of the Timeline events we care about.
@@ -94,9 +95,7 @@ Future<void> downloadStartupTrace(vm_service.VmService vmService, {
   final File traceInfoFile = output.childFile('start_up_info.json');
 
   // Delete old startup data, if any.
-  if (traceInfoFile.existsSync()) {
-    traceInfoFile.deleteSync();
-  }
+  ErrorHandlingFileSystem.deleteIfExists(traceInfoFile);
 
   // Create "build" directory, if missing.
   if (!traceInfoFile.parent.existsSync()) {

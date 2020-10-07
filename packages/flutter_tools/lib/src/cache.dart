@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 
 import 'android/gradle_utils.dart';
 import 'base/common.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpStatus, ProcessException, SocketException;
 import 'base/logger.dart';
@@ -436,9 +437,7 @@ class Cache {
       getStampFileFor('flutter_tools').deleteSync();
       for (final ArtifactSet artifact in _artifacts) {
         final File file = getStampFileFor(artifact.stampName);
-        if (file.existsSync()) {
-          file.deleteSync();
-        }
+        ErrorHandlingFileSystem.deleteIfExists(file);
       }
     } on FileSystemException catch (err) {
       _logger.printError('Failed to delete some stamp files: $err');
@@ -701,8 +700,6 @@ class PubDependencies extends ArtifactSet {
       context: PubContext.pubGet,
       directory: _fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
       generateSyntheticPackage: false,
-      skipPubspecYamlCheck: true,
-      checkLastModified: false,
     );
   }
 }
@@ -1598,10 +1595,11 @@ class ArtifactUpdater {
       );
       try {
         _ensureExists(tempFile.parent);
-        final IOSink ioSink = tempFile.openWrite();
-        await _download(url, ioSink);
-        await ioSink.flush();
-        await ioSink.close();
+        if (tempFile.existsSync()) {
+          tempFile.deleteSync();
+        }
+        await _download(url, tempFile);
+
         if (!tempFile.existsSync()) {
           throw Exception('Did not find downloaded file ${tempFile.path}');
         }
@@ -1656,13 +1654,15 @@ class ArtifactUpdater {
   }
 
   /// Download bytes from [url], throwing non-200 responses as an exception.
-  Future<void> _download(Uri url, IOSink ioSink) async {
+  Future<void> _download(Uri url, File file) async {
     final HttpClientRequest request = await _httpClient.getUrl(url);
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok) {
       throw Exception(response.statusCode);
     }
-    await response.forEach(ioSink.add);
+    await response.forEach((List<int> chunk) {
+      file.writeAsBytesSync(chunk, mode: FileMode.append);
+    });
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as

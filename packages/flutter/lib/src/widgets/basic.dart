@@ -2036,9 +2036,15 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 
 /// A box with a specified size.
 ///
-/// If given a child, this widget forces its child to have a specific width
-/// and/or height (assuming values are permitted by this widget's parent). If
-/// either the width or height is null, this widget will try to size itself to
+/// If given a child, this widget forces it to have a specific width and/or height.
+/// These values will be ignored if this widget's parent does not permit them.
+/// For example, this happens if the parent is the screen (forces the child to
+/// be the same size as the parent), or another [SizedBox] (forces its child to
+/// have a specific width and/or height). This can be remedied by wrapping the
+/// child [SizedBox] in a widget that does permit it to be any size up to the
+/// size of the parent, such as [Center] or [Align].
+///
+/// If either the width or height is null, this widget will try to size itself to
 /// match the child's size in that dimension. If the child's size depends on the
 /// size of its parent, the height and width must be provided.
 ///
@@ -2079,6 +2085,8 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
+///  * [Understanding constraints](https://flutter.dev/docs/development/ui/layout/constraints),
+///    an in-depth article about layout in Flutter.
 class SizedBox extends SingleChildRenderObjectWidget {
   /// Creates a fixed size box. The [width] and [height] parameters can be null
   /// to indicate that the size of the box should not be constrained in
@@ -5363,6 +5371,10 @@ class RichText extends MultiChildRenderObjectWidget {
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
 ///
+/// The [image] is not disposed of by this widget. Creators of the widget are
+/// expected to call [Image.dispose] on the [image] once the [RawImage] is no
+/// longer buildable.
+///
 /// This widget is rarely used directly. Instead, consider using [Image].
 class RawImage extends LeafRenderObjectWidget {
   /// Creates a widget that displays an image.
@@ -5394,6 +5406,10 @@ class RawImage extends LeafRenderObjectWidget {
        super(key: key);
 
   /// The image to display.
+  ///
+  /// Since a [RawImage] is stateless, it does not ever dispose this image.
+  /// Creators of a [RawImage] are expected to call [Image.dispose] on this
+  /// image handle when the [RawImage] will no longer be needed.
   final ui.Image? image;
 
   /// A string identifying the source of the image.
@@ -5516,8 +5532,13 @@ class RawImage extends LeafRenderObjectWidget {
   @override
   RenderImage createRenderObject(BuildContext context) {
     assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
+    assert(
+      image?.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
+      'Creator of a RawImage disposed of the image when the RawImage still '
+      'needed it.'
+    );
     return RenderImage(
-      image: image,
+      image: image?.clone(),
       debugImageLabel: debugImageLabel,
       width: width,
       height: height,
@@ -5538,8 +5559,13 @@ class RawImage extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderImage renderObject) {
+    assert(
+      image?.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
+      'Creator of a RawImage disposed of the image when the RawImage still '
+      'needed it.'
+    );
     renderObject
-      ..image = image
+      ..image = image?.clone()
       ..debugImageLabel = debugImageLabel
       ..width = width
       ..height = height
@@ -5554,6 +5580,12 @@ class RawImage extends LeafRenderObjectWidget {
       ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null
       ..invertColors = invertColors
       ..filterQuality = filterQuality;
+  }
+
+  @override
+  void didUnmountRenderObject(RenderImage renderObject) {
+    // Have the render object dispose its image handle.
+    renderObject.image = null;
   }
 
   @override
@@ -5780,7 +5812,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// }
 /// ```
 /// {@end-tool}
-class Listener extends StatelessWidget {
+class Listener extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards point events to callbacks.
   ///
   /// The [behavior] argument defaults to [HitTestBehavior.deferToChild].
@@ -5788,34 +5820,14 @@ class Listener extends StatelessWidget {
     Key? key,
     this.onPointerDown,
     this.onPointerMove,
-    // We have to ignore the lint rule here in order to use deprecated
-    // parameters and keep backward compatibility.
-    // TODO(tongmu): After it goes stable, remove these 3 parameters from Listener
-    // and Listener should no longer need an intermediate class _PointerListener.
-    // https://github.com/flutter/flutter/issues/36085
-    @Deprecated(
-      'Use MouseRegion.onEnter instead. See MouseRegion.opaque for behavioral difference. '
-      'This feature was deprecated after v1.10.14.'
-    )
-    this.onPointerEnter,
-    @Deprecated(
-      'Use MouseRegion.onExit instead. See MouseRegion.opaque for behavioral difference. '
-      'This feature was deprecated after v1.10.14.'
-    )
-    this.onPointerExit,
-    @Deprecated(
-      'Use MouseRegion.onHover instead. See MouseRegion.opaque for behavioral difference. '
-      'This feature was deprecated after v1.10.14.'
-    )
-    this.onPointerHover,
     this.onPointerUp,
+    this.onPointerHover,
     this.onPointerCancel,
     this.onPointerSignal,
     this.behavior = HitTestBehavior.deferToChild,
     Widget? child,
   }) : assert(behavior != null),
-       _child = child,
-       super(key: key);
+       super(key: key, child: child);
 
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -5825,15 +5837,9 @@ class Listener extends StatelessWidget {
   /// Called when a pointer that triggered an [onPointerDown] changes position.
   final PointerMoveEventListener? onPointerMove;
 
-  /// Called when a pointer enters the region for this widget.
-  ///
-  /// This is only fired for pointers which report their location when not down
-  /// (e.g. mouse pointers, but not most touch pointers).
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer enters
-  /// the region defined by this widget, or when the widget appears under the
-  /// pointer.
-  final PointerEnterEventListener? onPointerEnter;
+  /// Called when a pointer that triggered an [onPointerDown] is no longer in
+  /// contact with the screen.
+  final PointerUpEventListener? onPointerUp;
 
   /// Called when a pointer that has not triggered an [onPointerDown] changes
   /// position.
@@ -5841,20 +5847,6 @@ class Listener extends StatelessWidget {
   /// This is only fired for pointers which report their location when not down
   /// (e.g. mouse pointers, but not most touch pointers).
   final PointerHoverEventListener? onPointerHover;
-
-  /// Called when a pointer leaves the region for this widget.
-  ///
-  /// This is only fired for pointers which report their location when not down
-  /// (e.g. mouse pointers, but not most touch pointers).
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
-  /// the region defined by this widget, or when the widget disappears from
-  /// under the pointer.
-  final PointerExitEventListener? onPointerExit;
-
-  /// Called when a pointer that triggered an [onPointerDown] is no longer in
-  /// contact with the screen.
-  final PointerUpEventListener? onPointerUp;
 
   /// Called when the input from a pointer that triggered an [onPointerDown] is
   /// no longer directed towards this receiver.
@@ -5871,66 +5863,13 @@ class Listener extends StatelessWidget {
   /// How to behave during hit testing.
   final HitTestBehavior behavior;
 
-  // The widget listened to by the listener.
-  //
-  // The reason why we don't expose it is that once the deprecated methods are
-  // removed, Listener will no longer need to store the child, but will pass
-  // the child to `super` instead.
-  final Widget? _child;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget? result = _child;
-    if (onPointerEnter != null ||
-        onPointerExit != null ||
-        onPointerHover != null) {
-      result = MouseRegion(
-        onEnter: onPointerEnter,
-        onExit: onPointerExit,
-        onHover: onPointerHover,
-        opaque: false,
-        child: result,
-      );
-    }
-    result = _PointerListener(
-      onPointerDown: onPointerDown,
-      onPointerUp: onPointerUp,
-      onPointerMove: onPointerMove,
-      onPointerCancel: onPointerCancel,
-      onPointerSignal: onPointerSignal,
-      behavior: behavior,
-      child: result,
-    );
-    return result;
-  }
-}
-
-class _PointerListener extends SingleChildRenderObjectWidget {
-  const _PointerListener({
-    Key? key,
-    this.onPointerDown,
-    this.onPointerMove,
-    this.onPointerUp,
-    this.onPointerCancel,
-    this.onPointerSignal,
-    this.behavior = HitTestBehavior.deferToChild,
-    Widget? child,
-  }) : assert(behavior != null),
-       super(key: key, child: child);
-
-  final PointerDownEventListener? onPointerDown;
-  final PointerMoveEventListener? onPointerMove;
-  final PointerUpEventListener? onPointerUp;
-  final PointerCancelEventListener? onPointerCancel;
-  final PointerSignalEventListener? onPointerSignal;
-  final HitTestBehavior behavior;
-
   @override
   RenderPointerListener createRenderObject(BuildContext context) {
     return RenderPointerListener(
       onPointerDown: onPointerDown,
       onPointerMove: onPointerMove,
       onPointerUp: onPointerUp,
+      onPointerHover: onPointerHover,
       onPointerCancel: onPointerCancel,
       onPointerSignal: onPointerSignal,
       behavior: behavior,
@@ -5943,6 +5882,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
       ..onPointerDown = onPointerDown
       ..onPointerMove = onPointerMove
       ..onPointerUp = onPointerUp
+      ..onPointerHover = onPointerHover
       ..onPointerCancel = onPointerCancel
       ..onPointerSignal = onPointerSignal
       ..behavior = behavior;
@@ -5963,11 +5903,15 @@ class _PointerListener extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget that tracks the movement of mice, even when no button is pressed.
+/// A widget that tracks the movement of mice.
 ///
-/// It does not listen to events that can construct gestures, such as when the
-/// pointer is pressed, moved, then released or canceled. For these events,
-/// use [Listener], or more preferably, [GestureDetector].
+/// [MouseRegion] is used
+/// when it is needed to compare the list of objects that a mouse pointer is
+/// hovering over betweeen this frame and the last frame. This means entering
+/// events, exiting events, and mouse cursors.
+///
+/// To listen to general pointer events, use [Listener], or more preferably,
+/// [GestureDetector].
 ///
 /// ## Layout behavior
 ///
@@ -6086,13 +6030,23 @@ class MouseRegion extends StatefulWidget {
   ///    internally implemented.
   final PointerEnterEventListener? onEnter;
 
-  /// Triggered when a mouse pointer has moved onto or within the widget without
+  /// Triggered when a pointer moves into a position within this widget without
   /// buttons pressed.
   ///
-  /// This callback is not triggered by the movement of an annotation.
+  /// Usually this is only fired for pointers which report their location when
+  /// not down (e.g. mouse pointers). Certain devices also fire this event on
+  /// single taps in accessibility mode.
+  ///
+  /// This callback is not triggered by the movement of the widget.
   ///
   /// The time that this callback is triggered is during the callback of a
   /// pointer event, which is always between frames.
+  ///
+  /// See also:
+  ///
+  ///  * [Listener.onPointerHover], which does the same job. Prefer using
+  ///    [Listener.onPointerHover], since hover events are similar to other regular
+  ///    events.
   final PointerHoverEventListener? onHover;
 
   /// Triggered when a mouse pointer has exited this widget when the widget is

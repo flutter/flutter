@@ -39,6 +39,9 @@ const String kCspMode = 'cspMode';
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStratgey';
 
+/// Whether the dart2js build should output source maps.
+const String kSourceMapsEnabled = 'SourceMaps';
+
 /// The caching strategy for the generated service worker.
 enum ServiceWorkerStrategy {
   /// Download the app shell eagerly and all other assets lazily.
@@ -194,6 +197,7 @@ class Dart2JSTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
 
     final List<String> sharedCommandOptions = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
@@ -207,6 +211,8 @@ class Dart2JSTarget extends Target {
         '-Ddart.vm.product=true',
       for (final String dartDefine in decodeDartDefines(environment.defines, kDartDefines))
         '-D$dartDefine',
+      if (!sourceMapsEnabled)
+        '--no-source-maps',
     ];
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
@@ -227,7 +233,7 @@ class Dart2JSTarget extends Target {
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
     final bool csp = environment.defines[kCspMode] == 'true';
 
-    final ProcessResult javaScriptResult = await globals.processManager.run(<String>[
+    final ProcessResult javaScriptResult = await environment.processManager.run(<String>[
       ...sharedCommandOptions,
       if (dart2jsOptimization != null) '-$dart2jsOptimization' else '-O4',
       if (buildMode == BuildMode.profile) '--no-minify',
