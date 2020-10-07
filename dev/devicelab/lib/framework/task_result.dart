@@ -41,8 +41,9 @@ class TaskResult {
   factory TaskResult.fromJson(Map<String, dynamic> json) {
     final bool success = json['success'] as bool;
     if (success) {
+      final List<String> benchmarkScoreKeys = (json['benchmarkScoreKeys'] as List<dynamic> ?? <String>[]).cast<String>();
       return TaskResult.success(json['data'] as Map<String, dynamic>,
-          benchmarkScoreKeys: (json['benchmarkScoreKeys'] as List<dynamic>).cast<String>()); 
+          benchmarkScoreKeys: benchmarkScoreKeys);
     }
 
     return TaskResult.failure(json['reason'] as String);

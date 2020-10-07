@@ -21,5 +21,26 @@ void main() {
       final TaskResult result = TaskResult.fromJson(expectedJson);
       expect(result.toJson(), expectedJson);
     });
+
+    test('succeeded with empty data', () {
+      final TaskResult result = TaskResult.fromJson(<String, dynamic>{
+        'success': true,
+      });
+      final Map<String, dynamic> expectedJson = <String, dynamic>{
+        'success': true,
+        'data': null,
+        'benchmarkScoreKeys': [],
+      };
+      expect(result.toJson(), expectedJson);
+    });
+
+    test('failed', () {
+      final Map<String, dynamic> expectedJson = <String, dynamic>{
+        'success': false,
+        'reason': 'failure message',
+      };
+      final TaskResult result = TaskResult.fromJson(expectedJson);
+      expect(result.toJson(), expectedJson);
+    });
   });
 }
