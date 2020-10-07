@@ -1,4 +1,4 @@
-Signature: d3107608da67165804061970476ba2d7
+Signature: 2716e2054e1a67a28f842cd740815028
 
 UNUSED LICENSES:
 
@@ -5591,6 +5591,7 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateShader.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateShader.h
 FILE: ../../../third_party/skia/src/opts/SkVM_opts.h
 FILE: ../../../third_party/skia/src/sksl/SkSLAnalysis.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLModifiersPool.h
 FILE: ../../../third_party/skia/src/sksl/SkSLRehydrator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLRehydrator.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructor.cpp
