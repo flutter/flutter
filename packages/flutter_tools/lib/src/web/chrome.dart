@@ -246,11 +246,6 @@ class ChromiumLauncher {
     while (true) {
       final Process process = await _processManager.start(args);
 
-      bool exited = false;
-      unawaited(process.exitCode.whenComplete(() {
-        exited = true;
-      }));
-
       process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
@@ -273,7 +268,7 @@ class ChromiumLauncher {
         })
         .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
           if (hitGlibcBug) {
-            _logger.printStatus(
+            _logger.printTrace(
               'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
               'Will try launching browser again.',
             );
@@ -291,12 +286,13 @@ class ChromiumLauncher {
         return process;
       }
 
-      if (!exited) {
-        // A precaution that avoids accumulating browser processes, in case the
-        // glibc bug doesn't cause the browser to quit and we keep looping and
-        // launching more processes.
+      // A precaution that avoids accumulating browser processes, in case the
+      // glibc bug doesn't cause the browser to quit and we keep looping and
+      // launching more processes.
+      unawaited(process.exitCode.timeout(const Duration(seconds: 1), onTimeout: () {
         process.kill();
-      }
+        return null;
+      }));
     }
   }
 
