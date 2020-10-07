@@ -2823,10 +2823,10 @@ class InputDecoration {
   final Widget? prefixIcon;
 
   /// The alignment for [prefixIcon].
-  /// 
+  ///
   /// Used to align the [prefixIcon] realtive to the position of the text box.
-  /// 
-  /// The default value is [Alignment.center]. 
+  ///
+  /// The default value is [Alignment.center].
   final Alignment prefixIconAlignment;
 
   /// The constraints for the prefix icon.
@@ -2956,10 +2956,10 @@ class InputDecoration {
   final Widget? suffixIcon;
 
   /// The alignment for [suffixIcon].
-  /// 
+  ///
   /// Used to align the [suffixIcon] realtive to the position of the text box.
-  /// 
-  /// The default value is [Alignment.center]. 
+  ///
+  /// The default value is [Alignment.center].
   final Alignment suffixIconAlignment;
 
   /// Optional widget to place on the line after the input.
