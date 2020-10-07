@@ -105,12 +105,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
         break;
     }
     properties.add(EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<Decoration>(
-      label,
-      decoration,
-      ifNull: 'no decoration',
-      showName: decoration != null,
-    ));
+    properties.add(DiagnosticsProperty<Decoration>(label, decoration));
   }
 }
 

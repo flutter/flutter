@@ -1085,8 +1085,7 @@ class RenderTable extends RenderBox {
           final TableCellParentData childParentData = child.parentData! as TableCellParentData;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
-              if (baselines[x] != null)
-                childParentData.offset = Offset(positions[x], rowTop + beforeBaselineDistance - baselines[x]);
+              childParentData.offset = Offset(positions[x], rowTop + beforeBaselineDistance - baselines[x]);
               break;
             case TableCellVerticalAlignment.top:
               childParentData.offset = Offset(positions[x], rowTop);

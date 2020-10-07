@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -12,13 +14,12 @@ import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:vm_service_client/vm_service_client.dart';
-import 'package:webdriver/async_io.dart' as async_io;
 import 'package:web_socket_channel/io.dart';
+import 'package:webdriver/async_io.dart' as async_io;
 
 import '../../flutter_driver.dart';
 import '../common/error.dart';
 import '../common/frame_sync.dart';
-import '../common/fuchsia_compat.dart';
 import '../common/health.dart';
 import '../common/message.dart';
 import 'common.dart';
