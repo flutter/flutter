@@ -406,7 +406,12 @@ class _DefaultPub implements Pub {
   /// system to avoid rebuilds caused by an updated pub timestamp.
   ///
   /// if [generateSyntheticPackage] is true then insert flutter_gen synthetic
-  /// package into the package configuration.
+  /// package into the package configuration. This is used by the l10n localization
+  /// tooling to insert a new reference into the package_config file, allowing the import
+  /// of a package URI that is not specified in the pubspec.yaml
+  ///
+  /// For more information, see:
+  ///   * [generateLocalizations], `in lib/src/localizations/gen_l10n.dart`
   Future<void> _updatePackageConfig(
     File packageConfigFile,
     Directory generatedDirectory,
@@ -420,7 +425,6 @@ class _DefaultPub implements Pub {
         packageConfig,
         _fileSystem,
       ));
-
 
     if (!generateSyntheticPackage) {
       return;
@@ -446,12 +450,12 @@ class _DefaultPub implements Pub {
   String _computePackageConfigSubset(PackageConfig packageConfig, FileSystem fileSystem) {
     final StringBuffer buffer = StringBuffer();
     for (final Package package in packageConfig.packages) {
-      buffer.write(package.name);
-      buffer.write(package.languageVersion);
-      buffer.write(package.root);
-      buffer.write(package.packageUriRoot);
+      buffer.writeln(package.name);
+      buffer.writeln(package.languageVersion);
+      buffer.writeln(package.root);
+      buffer.writeln(package.packageUriRoot);
     }
-    buffer.write(packageConfig.version);
+    buffer.writeln(packageConfig.version);
     return buffer.toString();
   }
 }

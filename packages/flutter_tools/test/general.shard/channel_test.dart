@@ -254,7 +254,7 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => mockProcessManager,
     });
 
@@ -307,7 +307,7 @@ void main() {
       );
       expect(testLogger.errorText, hasLength(0));
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => mockProcessManager,
     });
 
@@ -368,7 +368,7 @@ void main() {
       expect(testLogger.errorText, hasLength(0));
       expect(versionCheckFile.existsSync(), isFalse);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => mockProcessManager,
     });
   });

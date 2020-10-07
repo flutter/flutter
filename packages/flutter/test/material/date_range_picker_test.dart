@@ -13,6 +13,7 @@ import 'feedback_tester.dart';
 void main() {
   DateTime firstDate;
   DateTime lastDate;
+  DateTime currentDate;
   DateTimeRange initialDateRange;
   DatePickerEntryMode initialEntryMode = DatePickerEntryMode.calendar;
 
@@ -31,6 +32,7 @@ void main() {
   setUp(() {
     firstDate = DateTime(2015, DateTime.january, 1);
     lastDate = DateTime(2016, DateTime.december, 31);
+    currentDate = null;
     initialDateRange = DateTimeRange(
       start: DateTime(2016, DateTime.january, 15),
       end: DateTime(2016, DateTime.january, 25),
@@ -79,6 +81,7 @@ void main() {
       initialDateRange: initialDateRange,
       firstDate: firstDate,
       lastDate: lastDate,
+      currentDate: currentDate,
       initialEntryMode: initialEntryMode,
       cancelText: cancelText,
       confirmText: confirmText,
@@ -119,6 +122,52 @@ void main() {
         start: DateTime(2016, DateTime.january, 15),
         end: DateTime(2016, DateTime.january, 25)
       ));
+    });
+  });
+
+  testWidgets('Last month header should be visible if last date is selected',
+      (WidgetTester tester) async {
+    firstDate = DateTime(2015, DateTime.january, 1);
+    lastDate = DateTime(2016, DateTime.december, 31);
+    initialDateRange = DateTimeRange(
+      start: lastDate,
+      end: lastDate,
+    );
+    await preparePicker(tester, (Future<DateTimeRange> range) async {
+      // December header should be showing, but no November
+      expect(find.text('December 2016'), findsOneWidget);
+      expect(find.text('November 2016'), findsNothing);
+    });
+  });
+
+  testWidgets('First month header should be visible if first date is selected',
+      (WidgetTester tester) async {
+    firstDate = DateTime(2015, DateTime.january, 1);
+    lastDate = DateTime(2016, DateTime.december, 31);
+    initialDateRange = DateTimeRange(
+      start: firstDate,
+      end: firstDate,
+    );
+    await preparePicker(tester, (Future<DateTimeRange> range) async {
+      // January and February headers should be showing, but no March
+      expect(find.text('January 2015'), findsOneWidget);
+      expect(find.text('February 2015'), findsOneWidget);
+      expect(find.text('March 2015'), findsNothing);
+    });
+  });
+
+  testWidgets('Current month header should be visible if no date is selected',
+      (WidgetTester tester) async {
+    firstDate = DateTime(2015, DateTime.january, 1);
+    lastDate = DateTime(2016, DateTime.december, 31);
+    currentDate = DateTime(2016, DateTime.september, 1);
+    initialDateRange = null;
+
+    await preparePicker(tester, (Future<DateTimeRange> range) async {
+      // September and October headers should be showing, but no August
+      expect(find.text('September 2016'), findsOneWidget);
+      expect(find.text('October 2016'), findsOneWidget);
+      expect(find.text('August 2016'), findsNothing);
     });
   });
 
@@ -204,6 +253,52 @@ void main() {
         start: DateTime(2016, DateTime.january, 12),
         end: DateTime(2016, DateTime.january, 14),
       ));
+    });
+  });
+
+  group('Toggle from input entry mode validates dates', () {
+    setUp(() {
+      initialEntryMode = DatePickerEntryMode.input;
+    });
+
+    testWidgets('Invalid start date', (WidgetTester tester) async {
+      // Invalid start date should have neither a start nor end date selected in
+      // calendar mode
+      await preparePicker(tester, (Future<DateTimeRange> range) async {
+        await tester.enterText(find.byType(TextField).at(0), '12/27/1918');
+        await tester.enterText(find.byType(TextField).at(1), '12/25/2016');
+        await tester.tap(find.byIcon(Icons.calendar_today));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Start Date'), findsOneWidget);
+        expect(find.text('End Date'), findsOneWidget);
+      });
+    });
+
+    testWidgets('Invalid end date', (WidgetTester tester) async {
+      // Invalid end date should only have a start date selected
+      await preparePicker(tester, (Future<DateTimeRange> range) async {
+        await tester.enterText(find.byType(TextField).at(0), '12/24/2016');
+        await tester.enterText(find.byType(TextField).at(1), '12/25/2050');
+        await tester.tap(find.byIcon(Icons.calendar_today));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Dec 24'), findsOneWidget);
+        expect(find.text('End Date'), findsOneWidget);
+      });
+    });
+
+    testWidgets('Invalid range', (WidgetTester tester) async {
+      // Start date after end date should just use the start date
+      await preparePicker(tester, (Future<DateTimeRange> range) async {
+        await tester.enterText(find.byType(TextField).at(0), '12/25/2016');
+        await tester.enterText(find.byType(TextField).at(1), '12/24/2016');
+        await tester.tap(find.byIcon(Icons.calendar_today));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Dec 25'), findsOneWidget);
+        expect(find.text('End Date'), findsOneWidget);
+      });
     });
   });
 
@@ -372,10 +467,10 @@ void main() {
 
     testWidgets('Navigating with arrow keys scrolls as needed', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange> range) async {
-        // Jan and Feb headers should be showing, but no Mar
+        // Jan and Feb headers should be showing, but no March
         expect(find.text('January 2016'), findsOneWidget);
         expect(find.text('February 2016'), findsOneWidget);
-        expect(find.text('Mar 2016'), findsNothing);
+        expect(find.text('March 2016'), findsNothing);
 
         // Navigate to the grid
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);

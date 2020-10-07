@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 
 import '../color_scheme.dart';
@@ -35,16 +33,16 @@ const double _headerPaddingLandscape = 16.0;
 class DatePickerHeader extends StatelessWidget {
   /// Creates a header for use in a date picker dialog.
   const DatePickerHeader({
-    Key key,
-    @required this.helpText,
-    @required this.titleText,
+    Key? key,
+    required this.helpText,
+    required this.titleText,
     this.titleSemanticsLabel,
-    @required this.titleStyle,
-    @required this.orientation,
+    required this.titleStyle,
+    required this.orientation,
     this.isShort = false,
-    @required this.icon,
-    @required this.iconTooltip,
-    @required this.onIconPressed,
+    required this.icon,
+    required this.iconTooltip,
+    required this.onIconPressed,
   }) : assert(helpText != null),
        assert(orientation != null),
        assert(isShort != null),
@@ -59,10 +57,10 @@ class DatePickerHeader extends StatelessWidget {
   final String titleText;
 
   /// The semantic label associated with the [titleText].
-  final String titleSemanticsLabel;
+  final String? titleSemanticsLabel;
 
   /// The [TextStyle] that the title text is displayed with.
-  final TextStyle titleStyle;
+  final TextStyle? titleStyle;
 
   /// The orientation is used to decide how to layout its children.
   final Orientation orientation;
@@ -93,7 +91,7 @@ class DatePickerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context)!;
     final ColorScheme colorScheme = theme.colorScheme;
     final TextTheme textTheme = theme.textTheme;
 
@@ -102,7 +100,7 @@ class DatePickerHeader extends StatelessWidget {
     final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
     final Color onPrimarySurfaceColor = isDark ? colorScheme.onSurface : colorScheme.onPrimary;
 
-    final TextStyle helpStyle = textTheme.overline?.copyWith(
+    final TextStyle? helpStyle = textTheme.overline?.copyWith(
       color: onPrimarySurfaceColor,
     );
 
@@ -189,6 +187,5 @@ class DatePickerHeader extends StatelessWidget {
           ),
         );
     }
-    return null;
   }
 }

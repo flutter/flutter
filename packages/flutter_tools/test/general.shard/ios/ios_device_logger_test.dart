@@ -21,17 +21,17 @@ import '../../src/testbed.dart';
 
 void main() {
   FakeProcessManager processManager;
-  MockArtifacts artifacts;
+  Artifacts artifacts;
   FakeCache fakeCache;
   BufferLogger logger;
+  String ideviceSyslogPath;
 
   setUp(() {
     processManager = FakeProcessManager.list(<FakeCommand>[]);
     fakeCache = FakeCache();
-    artifacts = MockArtifacts();
+    artifacts = Artifacts.test();
     logger = BufferLogger.test();
-    when(artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios))
-        .thenReturn('idevice-syslog');
+    ideviceSyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios);
   });
 
   group('syslog stream', () {
@@ -51,9 +51,9 @@ void main() {
 
     testWithoutContext('IOSDeviceLogReader suppresses non-Flutter lines from output with syslog', () async {
       processManager.addCommand(
-        const FakeCommand(
+        FakeCommand(
             command: <String>[
-              'idevice-syslog', '-u', '1234',
+              ideviceSyslogPath, '-u', '1234',
             ],
             stdout: '''
 Runner(Flutter)[297] <Notice>: A is for ari
@@ -79,9 +79,9 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
 
     testWithoutContext('IOSDeviceLogReader includes multi-line Flutter logs in the output with syslog', () async {
       processManager.addCommand(
-        const FakeCommand(
+        FakeCommand(
             command: <String>[
-              'idevice-syslog', '-u', '1234',
+              ideviceSyslogPath, '-u', '1234',
             ],
             stdout: '''
 Runner(Flutter)[297] <Notice>: This is a multi-line message,
@@ -112,9 +112,9 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
     testWithoutContext('includes multi-line Flutter logs in the output', () async {
       processManager.addCommand(
-        const FakeCommand(
+        FakeCommand(
           command: <String>[
-            'idevice-syslog', '-u', '1234',
+            ideviceSyslogPath, '-u', '1234',
           ],
           stdout: '''
 Runner(Flutter)[297] <Notice>: This is a multi-line message,
@@ -325,6 +325,5 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
   });
 }
 
-class MockArtifacts extends Mock implements Artifacts {}
 class MockVmService extends Mock implements VmService {}
 class MockIOSDeployDebugger extends Mock implements IOSDeployDebugger {}
