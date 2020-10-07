@@ -29,7 +29,7 @@ void main() {
       final Map<String, dynamic> expectedJson = <String, dynamic>{
         'success': true,
         'data': null,
-        'benchmarkScoreKeys': [],
+        'benchmarkScoreKeys': <String>[],
       };
       expect(result.toJson(), expectedJson);
     });
