@@ -162,7 +162,9 @@ class Form extends StatefulWidget {
 class FormState extends State<Form> {
   int _generation = 0;
   bool _hasInteractedByUser = false;
-  final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
+
+  /// Can access [FormFieldState] in public
+  final Set<FormFieldState<dynamic>> fields = <FormFieldState<dynamic>>{};
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
@@ -171,7 +173,7 @@ class FormState extends State<Form> {
       widget.onChanged!();
 
 
-    _hasInteractedByUser = _fields
+    _hasInteractedByUser = fields
         .any((FormFieldState<dynamic> field) => field._hasInteractedByUser);
     _forceRebuild();
   }
@@ -182,12 +184,14 @@ class FormState extends State<Form> {
     });
   }
 
-  void _register(FormFieldState<dynamic> field) {
-    _fields.add(field);
+  /// Can manually register [FormFieldState].
+  void register(FormFieldState<dynamic> field) {
+    fields.add(field);
   }
 
-  void _unregister(FormFieldState<dynamic> field) {
-    _fields.remove(field);
+  /// Can manually unregister [FormFieldState].
+  void unregister(FormFieldState<dynamic> field) {
+    fields.remove(field);
   }
 
   @override
@@ -217,7 +221,7 @@ class FormState extends State<Form> {
 
   /// Saves every [FormField] that is a descendant of this [Form].
   void save() {
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in fields)
       field.save();
   }
 
@@ -229,7 +233,7 @@ class FormState extends State<Form> {
   /// If the form's [Form.autovalidateMode] property is [AutovalidateMode.always],
   /// the fields will all be revalidated after being reset.
   void reset() {
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in fields)
       field.reset();
     _hasInteractedByUser = false;
     _fieldDidChange();
@@ -247,7 +251,7 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in fields)
       hasError = !field.validate() || hasError;
     return !hasError;
   }
@@ -502,7 +506,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   void deactivate() {
-    Form.of(context)?._unregister(this);
+    Form.of(context)?.unregister(this);
     super.deactivate();
   }
 
@@ -522,7 +526,7 @@ class FormFieldState<T> extends State<FormField<T>> {
           break;
       }
     }
-    Form.of(context)?._register(this);
+    Form.of(context)?.register(this);
     return widget.builder(this);
   }
 }
