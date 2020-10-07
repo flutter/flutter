@@ -5550,7 +5550,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///         mainAxisSize: MainAxisSize.min,
 ///         children: <Widget>[
 ///           Text('Last count: ${_lastCount.value}'),
-///           RaisedButton(
+///           ElevatedButton(
 ///             onPressed: () {
 ///               // Show the route defined by the `RestorableRouteFuture`.
 ///               _counterRoute.present('Awesome Counter');
