@@ -260,7 +260,11 @@ void main() {
 
     expect(
       fileSystem.file('.dart_tool/package_config_subset').readAsStringSync(),
-      'flutter_tools2.7file:///file:///lib/2',
+      'flutter_tools\n'
+      '2.7\n'
+      'file:///\n'
+      'file:///lib/\n'
+      '2\n',
     );
   });
 
