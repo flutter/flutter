@@ -40,7 +40,7 @@ void main() {
 
   test('ensure errors processing render objects are well formatted', () {
     late FlutterErrorDetails errorDetails;
-    final FlutterExceptionHandler oldHandler = FlutterError.onError!;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       errorDetails = details;
     };

@@ -565,7 +565,7 @@ void main() {
     bool failed = false;
     try {
       paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
-    } on AssertionError catch(e) {
+    } on AssertionError catch (e) {
       failed = true;
       expect(e.message, 'MultiTapGestureRecognizer is not supported.');
     }

@@ -11,16 +11,14 @@ import 'rendering_tester.dart';
 
 class RealRoot extends AbstractNode {
   RealRoot(this.child) {
-    if (child != null)
-      adoptChild(child);
+    adoptChild(child);
   }
 
   final RenderObject child;
 
   @override
   void redepthChildren() {
-    if (child != null)
-      redepthChild(child);
+    redepthChild(child);
   }
 
   @override
