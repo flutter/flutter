@@ -5,7 +5,7 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'key_data.dart';
+import 'physical_key_data.dart';
 import 'utils.dart';
 
 /// Given an [input] string, wraps the text at 80 characters and prepends each
@@ -17,12 +17,12 @@ String _wrapString(String input) {
 /// Generates the keyboard_keys.dart based on the information in the key data
 /// structure given to it.
 class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
-  KeyboardKeysCodeGenerator(KeyData keyData) : super(keyData);
+  KeyboardKeysCodeGenerator(PhysicalKeyData keyData) : super(keyData);
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _physicalDefinitions {
     final StringBuffer definitions = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       final String firstComment = _wrapString('Represents the location of the '
         '"${entry.commentName}" key on a generalized keyboard.');
       final String otherComments = _wrapString('See the function '
@@ -58,7 +58,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       }
     }
 
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       printKey(
         entry.flutterId,
         entry.keyLabel,
@@ -66,15 +66,15 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
         entry.commentName,
       );
     }
-    for (final String name in Key.synonyms.keys) {
+    for (final String name in PhysicalKeyEntry.synonyms.keys) {
       // Use the first item in the synonyms as a template for the ID to use.
       // It won't end up being the same value because it'll be in the pseudo-key
       // plane.
-      final Key entry = keyData.data.firstWhere((Key item) => item.name == Key.synonyms[name][0]);
-      final Set<String> unionNames = Key.synonyms[name].map<String>((dynamic name) {
+      final PhysicalKeyEntry entry = keyData.data.firstWhere((PhysicalKeyEntry item) => item.name == PhysicalKeyEntry.synonyms[name][0]);
+      final Set<String> unionNames = PhysicalKeyEntry.synonyms[name].map<String>((dynamic name) {
         return upperCamelToLowerCamel(name as String);
       }).toSet();
-      printKey(Key.synonymPlane | entry.flutterId, entry.keyLabel, name, Key.getCommentName(name),
+      printKey(PhysicalKeyEntry.synonymPlane | entry.flutterId, entry.keyLabel, name, PhysicalKeyEntry.getCommentName(name),
           otherComments: _wrapString('This key represents the union of the keys '
               '$unionNames when comparing keys. This key will never be generated '
               'directly, its main use is in defining key maps.'));
@@ -84,8 +84,8 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   String get _logicalSynonyms {
     final StringBuffer synonyms = StringBuffer();
-    for (final String name in Key.synonyms.keys) {
-      for (final String synonym in Key.synonyms[name].cast<String>()) {
+    for (final String name in PhysicalKeyEntry.synonyms.keys) {
+      for (final String synonym in PhysicalKeyEntry.synonyms[name].cast<String>()) {
         final String keyName = upperCamelToLowerCamel(synonym);
         synonyms.writeln('    $keyName: $name,');
       }
@@ -96,7 +96,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of USB HID codes to physical keys.
   String get _predefinedHidCodeMap {
     final StringBuffer scanCodeMap = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       scanCodeMap.writeln('    ${toHex(entry.usbHidCode)}: ${entry.constantName},');
     }
     return scanCodeMap.toString().trimRight();
@@ -105,18 +105,18 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of Flutter key codes to logical keys.
   String get _predefinedKeyCodeMap {
     final StringBuffer keyCodeMap = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       keyCodeMap.writeln('    ${toHex(entry.flutterId, digits: 10)}: ${entry.constantName},');
     }
-    for (final String entry in Key.synonyms.keys) {
+    for (final String entry in PhysicalKeyEntry.synonyms.keys) {
       // Use the first item in the synonyms as a template for the ID to use.
       // It won't end up being the same value because it'll be in the pseudo-key
       // plane.
-      final Key primaryKey = keyData.data.firstWhere((Key item) {
-        return item.name == Key.synonyms[entry][0];
+      final PhysicalKeyEntry primaryKey = keyData.data.firstWhere((PhysicalKeyEntry item) {
+        return item.name == PhysicalKeyEntry.synonyms[entry][0];
       }, orElse: () => null);
       assert(primaryKey != null);
-      keyCodeMap.writeln('    ${toHex(Key.synonymPlane | primaryKey.flutterId, digits: 10)}: $entry,');
+      keyCodeMap.writeln('    ${toHex(PhysicalKeyEntry.synonymPlane | primaryKey.flutterId, digits: 10)}: $entry,');
     }
     return keyCodeMap.toString().trimRight();
   }

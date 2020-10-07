@@ -5,19 +5,19 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'key_data.dart';
+import 'physical_key_data.dart';
 import 'utils.dart';
 
 
 /// Generates the key mapping of Fuchsia, based on the information in the key
 /// data structure given to it.
 class FuchsiaCodeGenerator extends PlatformCodeGenerator {
-  FuchsiaCodeGenerator(KeyData keyData) : super(keyData);
+  FuchsiaCodeGenerator(PhysicalKeyData keyData) : super(keyData);
 
   /// This generates the map of Fuchsia key codes to logical keys.
   String get _fuchsiaKeyCodeMap {
     final StringBuffer fuchsiaKeyCodeMap = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.usbHidCode != null) {
         fuchsiaKeyCodeMap.writeln('  { ${toHex(entry.flutterId)}, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
       }
@@ -28,7 +28,7 @@ class FuchsiaCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Fuchsia USB HID codes to physical keys.
   String get _fuchsiaHidCodeMap {
     final StringBuffer fuchsiaScanCodeMap = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.usbHidCode != null) {
         fuchsiaScanCodeMap.writeln(' { ${toHex(entry.usbHidCode)}, ${toHex(entry.usbHidCode)} },    // ${entry.constantName}');
       }

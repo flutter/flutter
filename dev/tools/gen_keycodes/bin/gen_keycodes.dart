@@ -19,14 +19,22 @@ import 'package:gen_keycodes/windows_code_gen.dart';
 import 'package:gen_keycodes/web_code_gen.dart';
 import 'package:gen_keycodes/keyboard_keys_code_gen.dart';
 import 'package:gen_keycodes/keyboard_maps_code_gen.dart';
-import 'package:gen_keycodes/key_data.dart';
+import 'package:gen_keycodes/physical_key_data.dart';
+import 'package:gen_keycodes/logical_key_data.dart';
 import 'package:gen_keycodes/utils.dart';
 import 'package:gen_keycodes/mask_constants.dart';
 
-/// Get contents of the file that contains the key code mapping in Chromium
+/// Get contents of the file that contains the physical key mapping in Chromium
 /// source.
-Future<String> getChromiumConversions() async {
+Future<String> getChromiumPhysicalKeys() async {
   final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_code_data.inc?format=TEXT');
+  return utf8.decode(base64.decode(await http.read(keyCodesUri)));
+}
+
+/// Get contents of the file that contains the logical key mapping in Chromium
+/// source.
+Future<String> getChromiumLogicalKeys() async {
+  final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_key_data.inc?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
 
@@ -69,6 +77,13 @@ Future<void> main(List<String> rawArguments) async {
     defaultsTo: null,
     help: 'The path to where the Chromium HID code mapping file should be '
         'read. If --chromium-hid-codes is not specified, the input will be read '
+        'from the correct file in the Chromium repository.',
+  );
+  argParser.addOption(
+    'chromium-keys',
+    defaultsTo: null,
+    help: 'The path to where the Chromium key list file should be '
+        'read. If --chromium-keys is not specified, the input will be read '
         'from the correct file in the Chromium repository.',
   );
   argParser.addOption(
@@ -138,10 +153,19 @@ Future<void> main(List<String> rawArguments) async {
     help: 'The path to where the mask constants are.',
   );
   argParser.addOption(
-    'data',
-    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_data.json'),
-    help: 'The path to where the key code data file should be written when '
-        'collected, and read from when generating output code. If --data is '
+    'physical-data',
+    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'physical_key_data.json'),
+    help: 'The path to where the physical key data file should be written when '
+        'collected, and read from when generating output code. If --physical-data is '
+        'not specified, the output will be written to/read from the current '
+        "directory. If the output directory doesn't exist, it, and the path to "
+        'it, will be created.',
+  );
+  argParser.addOption(
+    'logical-data',
+    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'logical_key_data.json'),
+    help: 'The path to where the logical key data file should be written when '
+        'collected, and read from when generating output code. If --logical-data is '
         'not specified, the output will be written to/read from the current '
         "directory. If the output directory doesn't exist, it, and the path to "
         'it, will be created.',
@@ -168,7 +192,8 @@ Future<void> main(List<String> rawArguments) async {
     negatable: false,
     help: 'If this flag is set, then collect and parse header files from '
         'Chromium and Android instead of reading pre-parsed data from '
-        '"key_data.json", and then update "key_data.json" with the fresh data.',
+        '"physical_key_data.json" and "logical_key_data.json", and then '
+        'update these files with the fresh data.',
   );
   argParser.addFlag(
     'help',
@@ -184,64 +209,54 @@ Future<void> main(List<String> rawArguments) async {
     exit(0);
   }
 
-  KeyData data;
+  PhysicalKeyData physicalData;
+  LogicalKeyData logicalData;
   if (parsedArguments['collect'] as bool) {
-    String hidCodes;
-    if (parsedArguments['chromium-hid-codes'] == null) {
-      hidCodes = await getChromiumConversions();
-    } else {
-      hidCodes = File(parsedArguments['chromium-hid-codes'] as String).readAsStringSync();
-    }
+    final String baseHidCodes = parsedArguments['chromium-hid-codes'] == null ?
+      await getChromiumPhysicalKeys() :
+      File(parsedArguments['chromium-hid-codes'] as String).readAsStringSync();
 
     final String supplementalHidCodes = File(parsedArguments['supplemental-hid-codes'] as String).readAsStringSync();
-    hidCodes = '$hidCodes\n$supplementalHidCodes';
+    final String hidCodes = '$baseHidCodes\n$supplementalHidCodes';
 
-    String androidKeyCodes;
-    if (parsedArguments['android-keycodes'] == null) {
-      androidKeyCodes = await getAndroidKeyCodes();
-    } else {
-      androidKeyCodes = File(parsedArguments['android-keycodes'] as String).readAsStringSync();
-    }
+    final String logicalKeys = parsedArguments['chromium-keys'] == null ?
+      await getChromiumLogicalKeys() :
+      File(parsedArguments['chromium-keys'] as String).readAsStringSync();
 
-    String androidScanCodes;
-    if (parsedArguments['android-scancodes'] == null) {
-      androidScanCodes = await getAndroidScanCodes();
-    } else {
-      androidScanCodes = File(parsedArguments['android-scancodes'] as String).readAsStringSync();
-    }
+    final String androidKeyCodes = parsedArguments['android-keycodes'] == null ?
+      await getAndroidKeyCodes() :
+      File(parsedArguments['android-keycodes'] as String).readAsStringSync();
 
-    String glfwKeyCodes;
-    if (parsedArguments['glfw-keycodes'] == null) {
-      glfwKeyCodes = await getGlfwKeyCodes();
-    } else {
-      glfwKeyCodes = File(parsedArguments['glfw-keycodes'] as String).readAsStringSync();
-    }
+    final String androidScanCodes = parsedArguments['android-scancodes'] == null ?
+      await getAndroidScanCodes() :
+      File(parsedArguments['android-scancodes'] as String).readAsStringSync();
 
-    String gtkKeyCodes;
-    if (parsedArguments['gtk-keycodes'] == null) {
-      gtkKeyCodes = await getGtkKeyCodes();
-    } else {
-      gtkKeyCodes = File(parsedArguments['gtk-keycodes'] as String).readAsStringSync();
-    }
+    final String glfwKeyCodes = parsedArguments['glfw-keycodes'] == null ?
+      await getGlfwKeyCodes() :
+      File(parsedArguments['glfw-keycodes'] as String).readAsStringSync();
 
-    String windowsKeyCodes;
-    if (parsedArguments['windows-keycodes'] == null) {
-      windowsKeyCodes = await getWindowsKeyCodes();
-    } else {
-      windowsKeyCodes = File(parsedArguments['windows-keycodes'] as String).readAsStringSync();
-    }
+    final String gtkKeyCodes = parsedArguments['gtk-keycodes'] == null ?
+      await getGtkKeyCodes() :
+      File(parsedArguments['gtk-keycodes'] as String).readAsStringSync();
+
+    final String windowsKeyCodes = parsedArguments['windows-keycodes'] == null ?
+      await getWindowsKeyCodes() :
+      File(parsedArguments['windows-keycodes'] as String).readAsStringSync();
 
     final String windowsToDomKey = File(parsedArguments['windows-domkey'] as String).readAsStringSync();
     final String glfwToDomKey = File(parsedArguments['glfw-domkey'] as String).readAsStringSync();
     final String gtkToDomKey = File(parsedArguments['gtk-domkey'] as String).readAsStringSync();
     final String androidToDomKey = File(parsedArguments['android-domkey'] as String).readAsStringSync();
 
-    data = KeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey, gtkKeyCodes, gtkToDomKey, windowsKeyCodes, windowsToDomKey);
+    physicalData = PhysicalKeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey, gtkKeyCodes, gtkToDomKey, windowsKeyCodes, windowsToDomKey);
+    logicalData = LogicalKeyData(logicalKeys);
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-    File(parsedArguments['data'] as String).writeAsStringSync(encoder.convert(data.toJson()));
+    File(parsedArguments['physical-data'] as String).writeAsStringSync(encoder.convert(physicalData.toJson()));
+    File(parsedArguments['logical-data'] as String).writeAsStringSync(encoder.convert(logicalData.toJson()));
   } else {
-    data = KeyData.fromJson(json.decode(await File(parsedArguments['data'] as String).readAsString()) as Map<String, dynamic>);
+    physicalData = PhysicalKeyData.fromJson(json.decode(await File(parsedArguments['physical-data'] as String).readAsString()) as Map<String, dynamic>);
+    logicalData = LogicalKeyData.fromJson(json.decode(await File(parsedArguments['logical-data'] as String).readAsString()) as Map<String, dynamic>);
   }
 
   List<MaskConstant> maskConstants = parseMaskConstants(json.decode(await File(parsedArguments['mask-constants'] as String).readAsString()));
@@ -251,38 +266,38 @@ Future<void> main(List<String> rawArguments) async {
     codeFile.createSync(recursive: true);
   }
   print('Writing ${'key codes'.padRight(15)}${codeFile.absolute}');
-  await codeFile.writeAsString(KeyboardKeysCodeGenerator(data).generate());
+  await codeFile.writeAsString(KeyboardKeysCodeGenerator(physicalData).generate());
 
   final File mapsFile = File(parsedArguments['maps'] as String);
   if (!mapsFile.existsSync()) {
     mapsFile.createSync(recursive: true);
   }
   print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
-  await mapsFile.writeAsString(KeyboardMapsCodeGenerator(data).generate());
+  await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData).generate());
 
   for (final String platform in <String>['android', 'darwin', 'glfw', 'fuchsia', 'linux', 'windows', 'web']) {
     PlatformCodeGenerator codeGenerator;
     switch (platform) {
       case 'glfw':
-        codeGenerator = GlfwCodeGenerator(data);
+        codeGenerator = GlfwCodeGenerator(physicalData);
         break;
       case 'fuchsia':
-        codeGenerator = FuchsiaCodeGenerator(data);
+        codeGenerator = FuchsiaCodeGenerator(physicalData);
         break;
       case 'android':
-        codeGenerator = AndroidCodeGenerator(data);
+        codeGenerator = AndroidCodeGenerator(physicalData);
         break;
       case 'darwin':
-        codeGenerator = MacOsCodeGenerator(data, maskConstants);
+        codeGenerator = MacOsCodeGenerator(physicalData, maskConstants);
         break;
       case 'windows':
-        codeGenerator = WindowsCodeGenerator(data);
+        codeGenerator = WindowsCodeGenerator(physicalData);
         break;
       case 'linux':
-        codeGenerator = GtkCodeGenerator(data);
+        codeGenerator = GtkCodeGenerator(physicalData);
         break;
       case 'web':
-        codeGenerator = WebCodeGenerator(data);
+        codeGenerator = WebCodeGenerator(physicalData);
         break;
       default:
         assert(false);

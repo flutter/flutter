@@ -5,19 +5,19 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'key_data.dart';
+import 'physical_key_data.dart';
 import 'utils.dart';
 
 
 /// Generates the key mapping of Web, based on the information in the key
 /// data structure given to it.
 class WebCodeGenerator extends PlatformCodeGenerator {
-  WebCodeGenerator(KeyData keyData) : super(keyData);
+  WebCodeGenerator(PhysicalKeyData keyData) : super(keyData);
 
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
   String get _webLogicalKeyCodeMap {
     final StringBuffer result = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.name != null) {
         result.writeln("  '${entry.name}': ${toHex(entry.flutterId, digits: 10)},");
       }
@@ -28,7 +28,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Web KeyboardEvent codes to physical key USB HID codes.
   String get _webPhysicalKeyCodeMap {
     final StringBuffer result = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.name != null) {
         result.writeln("  '${entry.name}': ${toHex(entry.usbHidCode)},");
       }
@@ -39,7 +39,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Web number pad codes to logical key ids.
   String get _webNumpadCodeMap {
     final StringBuffer result = StringBuffer();
-    for (final Key entry in numpadKeyData) {
+    for (final PhysicalKeyEntry entry in numpadKeyData) {
       if (entry.name != null) {
         result.writeln("  '${entry.name}': ${toHex(entry.flutterId, digits: 10)},");
       }

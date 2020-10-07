@@ -14,7 +14,10 @@ information into the pre-defined key values in the `LogicalKeyboardKey` and
 The `data` subdirectory contains both some local data files and the templates
 used to generate the source files.
 
-- `data/key_data.json`: contains the merged data from all the other sources.
+- `data/physical_key_data.json`: contains the merged physical key data from
+  all the other sources. This file will be regenerated if "--collect" is
+  specified for the gen_keycodes script.
+- `data/logical_key_data.json`: contains the list of unprintable logical keys.
   This file will be regenerated if "--collect" is specified for the
   gen_keycodes script.
 - `data/key_name_to_android_name.json`: contains a mapping from Flutter key
@@ -33,7 +36,7 @@ used to generate the source files.
 
 ## Running the tool
 
-To run the `gen_keycodes` tool using the checked in `key_data.json` file, run
+To run the `gen_keycodes` tool using the checked in `physical_key_data.json` file, run
 it like so:
 
 ```bash
@@ -54,7 +57,7 @@ downloaded files, use `--help` to see what is available.
 
 If the data in those files changes in the future to be unhelpful, then we can
 switch to another data source, or abandon the parsing and maintain
-`key_data.json` manually. All output files and local input files should be
+`physical_key_data.json` manually. All output files and local input files should be
 checked in.
 
 ## Key Code ID Scheme

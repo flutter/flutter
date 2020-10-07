@@ -5,19 +5,19 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'key_data.dart';
+import 'physical_key_data.dart';
 import 'utils.dart';
 
 
 /// Generates the key mapping of Windows, based on the information in the key
 /// data structure given to it.
 class WindowsCodeGenerator extends PlatformCodeGenerator {
-  WindowsCodeGenerator(KeyData keyData) : super(keyData);
+  WindowsCodeGenerator(PhysicalKeyData keyData) : super(keyData);
 
   /// This generates the map of Windows scan codes to physical keys.
   String get _windowsScanCodeMap {
     final StringBuffer windowsScanCodeMap = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.windowsScanCode != null) {
         windowsScanCodeMap.writeln('  { ${entry.windowsScanCode}, ${toHex(entry.usbHidCode)} },    // ${entry.constantName}');
       }
@@ -28,7 +28,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Windows number pad key codes to logical keys.
   String get _windowsNumpadMap {
     final StringBuffer windowsNumPadMap = StringBuffer();
-    for (final Key entry in numpadKeyData) {
+    for (final PhysicalKeyEntry entry in numpadKeyData) {
       if (entry.windowsScanCode != null) {
         windowsNumPadMap.writeln('  { ${toHex(entry.windowsScanCode)}, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
       }
@@ -39,7 +39,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Android key codes to logical keys.
   String get _windowsKeyCodeMap {
     final StringBuffer windowsKeyCodeMap = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.windowsKeyCodes != null) {
         for (final int code in entry.windowsKeyCodes.cast<int>()) {
           windowsKeyCodeMap.writeln('  { $code, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');

@@ -15,13 +15,13 @@ import 'package:gen_keycodes/utils.dart';
 /// The main constructor parses the given input data into the data structure.
 ///
 /// The data structure can be also loaded and saved to JSON, with the
-/// [KeyData.fromJson] constructor and [toJson] method, respectively.
-class KeyData {
+/// [PhysicalKeyData.fromJson] constructor and [toJson] method, respectively.
+class PhysicalKeyData {
   /// Parses the input data given in from the various data source files,
   /// populating the data structure.
   ///
   /// None of the parameters may be null.
-  KeyData(
+  PhysicalKeyData(
     String chromiumHidCodes,
     String androidKeyboardLayout,
     String androidKeyCodeHeader,
@@ -71,17 +71,17 @@ class KeyData {
   }
 
   /// Parses the given JSON data and populates the data structure from it.
-  KeyData.fromJson(Map<String, dynamic> contentMap) {
-    data = <Key>[
-      for (final String key in contentMap.keys) Key.fromJsonMapEntry(key, contentMap[key] as Map<String, dynamic>),
+  PhysicalKeyData.fromJson(Map<String, dynamic> contentMap) {
+    data = <PhysicalKeyEntry>[
+      for (final String key in contentMap.keys) PhysicalKeyEntry.fromJsonMapEntry(key, contentMap[key] as Map<String, dynamic>),
     ];
   }
 
   /// Converts the data structure into a JSON structure that can be parsed by
-  /// [KeyData.fromJson].
+  /// [PhysicalKeyData.fromJson].
   Map<String, dynamic> toJson() {
-    for (final Key entry in data) {
-      // Android Key names
+    for (final PhysicalKeyEntry entry in data) {
+      // Android PhysicalKeyEntry names
       entry.androidKeyNames = _nameToAndroidName[entry.constantName]?.cast<String>();
       if (entry.androidKeyNames != null && entry.androidKeyNames.isNotEmpty) {
         for (final String androidKeyName in entry.androidKeyNames) {
@@ -131,14 +131,14 @@ class KeyData {
     }
 
     final Map<String, dynamic> outputMap = <String, dynamic>{};
-    for (final Key entry in data) {
+    for (final PhysicalKeyEntry entry in data) {
       outputMap[entry.constantName] = entry.toJson();
     }
     return outputMap;
   }
 
   /// The list of keys.
-  List<Key> data;
+  List<PhysicalKeyEntry> data;
 
   /// The mapping from the Flutter name (e.g. "eject") to the Android name (e.g.
   /// "MEDIA_EJECT").
@@ -315,8 +315,8 @@ class KeyData {
   /// Lines in this file look like this (without the ///):
   ///            USB       evdev   XKB     Win     Mac     Code     Enum
   /// DOM_CODE(0x000010, 0x0000, 0x0000, 0x0000, 0xffff, "Hyper", HYPER),
-  List<Key> _readHidEntries(String input) {
-    final List<Key> entries = <Key>[];
+  List<PhysicalKeyEntry> _readHidEntries(String input) {
+    final List<PhysicalKeyEntry> entries = <PhysicalKeyEntry>[];
     final RegExp usbMapRegExp = RegExp(
         r'DOM_CODE\s*\(\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),'
         r'\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*"?([^\s]+?)"?,\s*([^\s]+?)\s*\)',
@@ -329,7 +329,7 @@ class KeyData {
         final int linuxScanCode = getHex(match.group(2));
         final int xKbScanCode = getHex(match.group(3));
         final int windowsScanCode = getHex(match.group(4));
-        final Key newEntry = Key(
+        final PhysicalKeyEntry newEntry = PhysicalKeyEntry(
           usbHidCode: getHex(match.group(1)),
           linuxScanCode: linuxScanCode == 0 ? null : linuxScanCode,
           xKbScanCode: xKbScanCode == 0 ? null : xKbScanCode,
@@ -348,7 +348,7 @@ class KeyData {
         }
         // Remove duplicates: last one wins, so that supplemental codes
         // override.
-        entries.removeWhere((Key entry) => entry.usbHidCode == newEntry.usbHidCode);
+        entries.removeWhere((PhysicalKeyEntry entry) => entry.usbHidCode == newEntry.usbHidCode);
         entries.add(newEntry);
       }
       return match.group(0);
@@ -359,13 +359,13 @@ class KeyData {
 
 /// A single entry in the key data structure.
 ///
-/// Can be read from JSON with the [Key.fromJsonMapEntry] constructor, or
+/// Can be read from JSON with the [PhysicalKeyEntry.fromJsonMapEntry] constructor, or
 /// written with the [toJson] method.
-class Key {
+class PhysicalKeyEntry {
   /// Creates a single key entry from available data.
   ///
   /// The [usbHidCode] and [chromiumName] parameters must not be null.
-  Key({
+  PhysicalKeyEntry({
     String enumName,
     this.name,
     @required this.usbHidCode,
@@ -388,8 +388,8 @@ class Key {
         _constantName = enumName;
 
   /// Populates the key from a JSON map.
-  factory Key.fromJsonMapEntry(String name, Map<String, dynamic> map) {
-    return Key(
+  factory PhysicalKeyEntry.fromJsonMapEntry(String name, Map<String, dynamic> map) {
+    return PhysicalKeyEntry(
       enumName: name,
       name: map['names']['domkey'] as String,
       chromiumName: map['names']['chromium'] as String,

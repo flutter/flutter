@@ -5,19 +5,19 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'key_data.dart';
+import 'physical_key_data.dart';
 import 'utils.dart';
 
 
 /// Generates the key mapping of GTK, based on the information in the key
 /// data structure given to it.
 class GtkCodeGenerator extends PlatformCodeGenerator {
-  GtkCodeGenerator(KeyData keyData) : super(keyData);
+  GtkCodeGenerator(PhysicalKeyData keyData) : super(keyData);
 
   /// This generates the map of XKB scan codes to USB HID codes.
   String get xkbScanCodeMap {
     final StringBuffer xkbScanCodeMap = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.xKbScanCode != null) {
         xkbScanCodeMap.writeln('  { ${toHex(entry.xKbScanCode)}, ${toHex(entry.usbHidCode)} },    // ${entry.constantName}');
       }

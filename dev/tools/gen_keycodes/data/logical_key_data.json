@@ -1,0 +1,1222 @@
+{
+  "Backspace": {
+    "name": "Backspace",
+    "value": 8
+  },
+  "Tab": {
+    "name": "Tab",
+    "value": 9
+  },
+  "Enter": {
+    "name": "Enter",
+    "value": 13
+  },
+  "Escape": {
+    "name": "Escape",
+    "value": 27
+  },
+  "Delete": {
+    "name": "Delete",
+    "value": 127
+  },
+  "Unidentified": {
+    "name": "Unidentified",
+    "value": 1
+  },
+  "Accel": {
+    "name": "Accel",
+    "value": 257
+  },
+  "Alt": {
+    "name": "Alt",
+    "value": 258
+  },
+  "AltGraph": {
+    "name": "AltGraph",
+    "value": 259
+  },
+  "CapsLock": {
+    "name": "CapsLock",
+    "value": 260
+  },
+  "Control": {
+    "name": "Control",
+    "value": 261
+  },
+  "Fn": {
+    "name": "Fn",
+    "value": 262
+  },
+  "FnLock": {
+    "name": "FnLock",
+    "value": 263
+  },
+  "Hyper": {
+    "name": "Hyper",
+    "value": 264
+  },
+  "Meta": {
+    "name": "Meta",
+    "value": 265
+  },
+  "NumLock": {
+    "name": "NumLock",
+    "value": 266
+  },
+  "ScrollLock": {
+    "name": "ScrollLock",
+    "value": 268
+  },
+  "Shift": {
+    "name": "Shift",
+    "value": 269
+  },
+  "Super": {
+    "name": "Super",
+    "value": 270
+  },
+  "Symbol": {
+    "name": "Symbol",
+    "value": 271
+  },
+  "SymbolLock": {
+    "name": "SymbolLock",
+    "value": 272
+  },
+  "ShiftLevel5": {
+    "name": "ShiftLevel5",
+    "value": 273
+  },
+  ".AltGraphLatch": {
+    "name": ".AltGraphLatch",
+    "value": 274
+  },
+  "ArrowDown": {
+    "name": "ArrowDown",
+    "value": 769
+  },
+  "ArrowLeft": {
+    "name": "ArrowLeft",
+    "value": 770
+  },
+  "ArrowRight": {
+    "name": "ArrowRight",
+    "value": 771
+  },
+  "ArrowUp": {
+    "name": "ArrowUp",
+    "value": 772
+  },
+  "End": {
+    "name": "End",
+    "value": 773
+  },
+  "Home": {
+    "name": "Home",
+    "value": 774
+  },
+  "PageDown": {
+    "name": "PageDown",
+    "value": 775
+  },
+  "PageUp": {
+    "name": "PageUp",
+    "value": 776
+  },
+  "Clear": {
+    "name": "Clear",
+    "value": 1025
+  },
+  "Copy": {
+    "name": "Copy",
+    "value": 1026
+  },
+  "CrSel": {
+    "name": "CrSel",
+    "value": 1027
+  },
+  "Cut": {
+    "name": "Cut",
+    "value": 1028
+  },
+  "EraseEof": {
+    "name": "EraseEof",
+    "value": 1029
+  },
+  "ExSel": {
+    "name": "ExSel",
+    "value": 1030
+  },
+  "Insert": {
+    "name": "Insert",
+    "value": 1031
+  },
+  "Paste": {
+    "name": "Paste",
+    "value": 1032
+  },
+  "Redo": {
+    "name": "Redo",
+    "value": 1033
+  },
+  "Undo": {
+    "name": "Undo",
+    "value": 1034
+  },
+  "Accept": {
+    "name": "Accept",
+    "value": 1281
+  },
+  "Again": {
+    "name": "Again",
+    "value": 1282
+  },
+  "Attn": {
+    "name": "Attn",
+    "value": 1283
+  },
+  "Cancel": {
+    "name": "Cancel",
+    "value": 1284
+  },
+  "ContextMenu": {
+    "name": "ContextMenu",
+    "value": 1285
+  },
+  "Execute": {
+    "name": "Execute",
+    "value": 1286
+  },
+  "Find": {
+    "name": "Find",
+    "value": 1287
+  },
+  "Help": {
+    "name": "Help",
+    "value": 1288
+  },
+  "Pause": {
+    "name": "Pause",
+    "value": 1289
+  },
+  "Play": {
+    "name": "Play",
+    "value": 1290
+  },
+  "Props": {
+    "name": "Props",
+    "value": 1291
+  },
+  "Select": {
+    "name": "Select",
+    "value": 1292
+  },
+  "ZoomIn": {
+    "name": "ZoomIn",
+    "value": 1293
+  },
+  "ZoomOut": {
+    "name": "ZoomOut",
+    "value": 1294
+  },
+  "BrightnessDown": {
+    "name": "BrightnessDown",
+    "value": 1537
+  },
+  "BrightnessUp": {
+    "name": "BrightnessUp",
+    "value": 1538
+  },
+  "Eject": {
+    "name": "Eject",
+    "value": 1540
+  },
+  "LogOff": {
+    "name": "LogOff",
+    "value": 1541
+  },
+  "Power": {
+    "name": "Power",
+    "value": 1542
+  },
+  "PowerOff": {
+    "name": "PowerOff",
+    "value": 1543
+  },
+  "PrintScreen": {
+    "name": "PrintScreen",
+    "value": 1544
+  },
+  "Hibernate": {
+    "name": "Hibernate",
+    "value": 1545
+  },
+  "Standby": {
+    "name": "Standby",
+    "value": 1546
+  },
+  "WakeUp": {
+    "name": "WakeUp",
+    "value": 1547
+  },
+  "AllCandidates": {
+    "name": "AllCandidates",
+    "value": 1793
+  },
+  "Alphanumeric": {
+    "name": "Alphanumeric",
+    "value": 1794
+  },
+  "CodeInput": {
+    "name": "CodeInput",
+    "value": 1795
+  },
+  "Compose": {
+    "name": "Compose",
+    "value": 1796
+  },
+  "Convert": {
+    "name": "Convert",
+    "value": 1797
+  },
+  "FinalMode": {
+    "name": "FinalMode",
+    "value": 1798
+  },
+  "GroupFirst": {
+    "name": "GroupFirst",
+    "value": 1799
+  },
+  "GroupLast": {
+    "name": "GroupLast",
+    "value": 1800
+  },
+  "GroupNext": {
+    "name": "GroupNext",
+    "value": 1801
+  },
+  "GroupPrevious": {
+    "name": "GroupPrevious",
+    "value": 1802
+  },
+  "ModeChange": {
+    "name": "ModeChange",
+    "value": 1803
+  },
+  "NextCandidate": {
+    "name": "NextCandidate",
+    "value": 1804
+  },
+  "NonConvert": {
+    "name": "NonConvert",
+    "value": 1805
+  },
+  "PreviousCandidate": {
+    "name": "PreviousCandidate",
+    "value": 1806
+  },
+  "Process": {
+    "name": "Process",
+    "value": 1807
+  },
+  "SingleCandidate": {
+    "name": "SingleCandidate",
+    "value": 1808
+  },
+  "HangulMode": {
+    "name": "HangulMode",
+    "value": 1809
+  },
+  "HanjaMode": {
+    "name": "HanjaMode",
+    "value": 1810
+  },
+  "JunjaMode": {
+    "name": "JunjaMode",
+    "value": 1811
+  },
+  "Eisu": {
+    "name": "Eisu",
+    "value": 1812
+  },
+  "Hankaku": {
+    "name": "Hankaku",
+    "value": 1813
+  },
+  "Hiragana": {
+    "name": "Hiragana",
+    "value": 1814
+  },
+  "HiraganaKatakana": {
+    "name": "HiraganaKatakana",
+    "value": 1815
+  },
+  "KanaMode": {
+    "name": "KanaMode",
+    "value": 1816
+  },
+  "KanjiMode": {
+    "name": "KanjiMode",
+    "value": 1817
+  },
+  "Katakana": {
+    "name": "Katakana",
+    "value": 1818
+  },
+  "Romaji": {
+    "name": "Romaji",
+    "value": 1819
+  },
+  "Zenkaku": {
+    "name": "Zenkaku",
+    "value": 1820
+  },
+  "ZenkakuHankaku": {
+    "name": "ZenkakuHankaku",
+    "value": 1821
+  },
+  "F1": {
+    "name": "F1",
+    "value": 2049
+  },
+  "F2": {
+    "name": "F2",
+    "value": 2050
+  },
+  "F3": {
+    "name": "F3",
+    "value": 2051
+  },
+  "F4": {
+    "name": "F4",
+    "value": 2052
+  },
+  "F5": {
+    "name": "F5",
+    "value": 2053
+  },
+  "F6": {
+    "name": "F6",
+    "value": 2054
+  },
+  "F7": {
+    "name": "F7",
+    "value": 2055
+  },
+  "F8": {
+    "name": "F8",
+    "value": 2056
+  },
+  "F9": {
+    "name": "F9",
+    "value": 2057
+  },
+  "F10": {
+    "name": "F10",
+    "value": 2058
+  },
+  "F11": {
+    "name": "F11",
+    "value": 2059
+  },
+  "F12": {
+    "name": "F12",
+    "value": 2060
+  },
+  "F13": {
+    "name": "F13",
+    "value": 2061
+  },
+  "F14": {
+    "name": "F14",
+    "value": 2062
+  },
+  "F15": {
+    "name": "F15",
+    "value": 2063
+  },
+  "F16": {
+    "name": "F16",
+    "value": 2064
+  },
+  "F17": {
+    "name": "F17",
+    "value": 2065
+  },
+  "F18": {
+    "name": "F18",
+    "value": 2066
+  },
+  "F19": {
+    "name": "F19",
+    "value": 2067
+  },
+  "F20": {
+    "name": "F20",
+    "value": 2068
+  },
+  "F21": {
+    "name": "F21",
+    "value": 2069
+  },
+  "F22": {
+    "name": "F22",
+    "value": 2070
+  },
+  "F23": {
+    "name": "F23",
+    "value": 2071
+  },
+  "F24": {
+    "name": "F24",
+    "value": 2072
+  },
+  "Soft1": {
+    "name": "Soft1",
+    "value": 2305
+  },
+  "Soft2": {
+    "name": "Soft2",
+    "value": 2306
+  },
+  "Soft3": {
+    "name": "Soft3",
+    "value": 2307
+  },
+  "Soft4": {
+    "name": "Soft4",
+    "value": 2308
+  },
+  "Soft5": {
+    "name": "Soft5",
+    "value": 2309
+  },
+  "Soft6": {
+    "name": "Soft6",
+    "value": 2310
+  },
+  "Soft7": {
+    "name": "Soft7",
+    "value": 2311
+  },
+  "Soft8": {
+    "name": "Soft8",
+    "value": 2312
+  },
+  "ChannelDown": {
+    "name": "ChannelDown",
+    "value": 3338
+  },
+  "ChannelUp": {
+    "name": "ChannelUp",
+    "value": 3339
+  },
+  "Close": {
+    "name": "Close",
+    "value": 2561
+  },
+  "MailForward": {
+    "name": "MailForward",
+    "value": 2562
+  },
+  "MailReply": {
+    "name": "MailReply",
+    "value": 2563
+  },
+  "MailSend": {
+    "name": "MailSend",
+    "value": 2564
+  },
+  "MediaClose": {
+    "name": "MediaClose",
+    "value": 3419
+  },
+  "MediaFastForward": {
+    "name": "MediaFastForward",
+    "value": 3372
+  },
+  "MediaPause": {
+    "name": "MediaPause",
+    "value": 3374
+  },
+  "MediaPlay": {
+    "name": "MediaPlay",
+    "value": 3375
+  },
+  "MediaPlayPause": {
+    "name": "MediaPlayPause",
+    "value": 2565
+  },
+  "MediaRecord": {
+    "name": "MediaRecord",
+    "value": 3376
+  },
+  "MediaRewind": {
+    "name": "MediaRewind",
+    "value": 3377
+  },
+  "MediaStop": {
+    "name": "MediaStop",
+    "value": 2567
+  },
+  "MediaTrackNext": {
+    "name": "MediaTrackNext",
+    "value": 2568
+  },
+  "MediaTrackPrevious": {
+    "name": "MediaTrackPrevious",
+    "value": 2569
+  },
+  "New": {
+    "name": "New",
+    "value": 2570
+  },
+  "Open": {
+    "name": "Open",
+    "value": 2571
+  },
+  "Print": {
+    "name": "Print",
+    "value": 2572
+  },
+  "Save": {
+    "name": "Save",
+    "value": 2573
+  },
+  "SpellCheck": {
+    "name": "SpellCheck",
+    "value": 2574
+  },
+  "Key11": {
+    "name": "Key11",
+    "value": 4609
+  },
+  "Key12": {
+    "name": "Key12",
+    "value": 4610
+  },
+  "AudioBalanceLeft": {
+    "name": "AudioBalanceLeft",
+    "value": 3329
+  },
+  "AudioBalanceRight": {
+    "name": "AudioBalanceRight",
+    "value": 3330
+  },
+  "AudioBassBoostDown": {
+    "name": "AudioBassBoostDown",
+    "value": 3331
+  },
+  "AudioBassBoostToggle": {
+    "name": "AudioBassBoostToggle",
+    "value": 3586
+  },
+  "AudioBassBoostUp": {
+    "name": "AudioBassBoostUp",
+    "value": 3332
+  },
+  "AudioFaderFront": {
+    "name": "AudioFaderFront",
+    "value": 3333
+  },
+  "AudioFaderRear": {
+    "name": "AudioFaderRear",
+    "value": 3334
+  },
+  "AudioSurroundModeNext": {
+    "name": "AudioSurroundModeNext",
+    "value": 3335
+  },
+  "AudioTrebleDown": {
+    "name": "AudioTrebleDown",
+    "value": 3588
+  },
+  "AudioTrebleUp": {
+    "name": "AudioTrebleUp",
+    "value": 3589
+  },
+  "AudioVolumeDown": {
+    "name": "AudioVolumeDown",
+    "value": 2575
+  },
+  "AudioVolumeUp": {
+    "name": "AudioVolumeUp",
+    "value": 2576
+  },
+  "AudioVolumeMute": {
+    "name": "AudioVolumeMute",
+    "value": 2577
+  },
+  "MicrophoneToggle": {
+    "name": "MicrophoneToggle",
+    "value": 3590
+  },
+  "MicrophoneVolumeDown": {
+    "name": "MicrophoneVolumeDown",
+    "value": 3591
+  },
+  "MicrophoneVolumeUp": {
+    "name": "MicrophoneVolumeUp",
+    "value": 3592
+  },
+  "MicrophoneVolumeMute": {
+    "name": "MicrophoneVolumeMute",
+    "value": 3593
+  },
+  "SpeechCorrectionList": {
+    "name": "SpeechCorrectionList",
+    "value": 3841
+  },
+  "SpeechInputToggle": {
+    "name": "SpeechInputToggle",
+    "value": 3842
+  },
+  "LaunchApplication1": {
+    "name": "LaunchApplication1",
+    "value": 2822
+  },
+  "LaunchApplication2": {
+    "name": "LaunchApplication2",
+    "value": 2817
+  },
+  "LaunchCalendar": {
+    "name": "LaunchCalendar",
+    "value": 2818
+  },
+  "LaunchContacts": {
+    "name": "LaunchContacts",
+    "value": 2828
+  },
+  "LaunchMail": {
+    "name": "LaunchMail",
+    "value": 2819
+  },
+  "LaunchMediaPlayer": {
+    "name": "LaunchMediaPlayer",
+    "value": 2820
+  },
+  "LaunchMusicPlayer": {
+    "name": "LaunchMusicPlayer",
+    "value": 2821
+  },
+  "LaunchPhone": {
+    "name": "LaunchPhone",
+    "value": 2829
+  },
+  "LaunchScreenSaver": {
+    "name": "LaunchScreenSaver",
+    "value": 2823
+  },
+  "LaunchSpreadsheet": {
+    "name": "LaunchSpreadsheet",
+    "value": 2824
+  },
+  "LaunchWebBrowser": {
+    "name": "LaunchWebBrowser",
+    "value": 2825
+  },
+  "LaunchWebCam": {
+    "name": "LaunchWebCam",
+    "value": 2826
+  },
+  "LaunchWordProcessor": {
+    "name": "LaunchWordProcessor",
+    "value": 2827
+  },
+  "LaunchAssistant": {
+    "name": "LaunchAssistant",
+    "value": 2830
+  },
+  "LaunchControlPanel": {
+    "name": "LaunchControlPanel",
+    "value": 2831
+  },
+  "BrowserBack": {
+    "name": "BrowserBack",
+    "value": 3073
+  },
+  "BrowserFavorites": {
+    "name": "BrowserFavorites",
+    "value": 3074
+  },
+  "BrowserForward": {
+    "name": "BrowserForward",
+    "value": 3075
+  },
+  "BrowserHome": {
+    "name": "BrowserHome",
+    "value": 3076
+  },
+  "BrowserRefresh": {
+    "name": "BrowserRefresh",
+    "value": 3077
+  },
+  "BrowserSearch": {
+    "name": "BrowserSearch",
+    "value": 3078
+  },
+  "BrowserStop": {
+    "name": "BrowserStop",
+    "value": 3079
+  },
+  "AppSwitch": {
+    "name": "AppSwitch",
+    "value": 4097
+  },
+  "Call": {
+    "name": "Call",
+    "value": 4098
+  },
+  "Camera": {
+    "name": "Camera",
+    "value": 1539
+  },
+  "CameraFocus": {
+    "name": "CameraFocus",
+    "value": 4099
+  },
+  "EndCall": {
+    "name": "EndCall",
+    "value": 4100
+  },
+  "GoBack": {
+    "name": "GoBack",
+    "value": 4101
+  },
+  "GoHome": {
+    "name": "GoHome",
+    "value": 4102
+  },
+  "HeadsetHook": {
+    "name": "HeadsetHook",
+    "value": 4103
+  },
+  "LastNumberRedial": {
+    "name": "LastNumberRedial",
+    "value": 4104
+  },
+  "Notification": {
+    "name": "Notification",
+    "value": 4105
+  },
+  "MannerMode": {
+    "name": "MannerMode",
+    "value": 4106
+  },
+  "VoiceDial": {
+    "name": "VoiceDial",
+    "value": 4107
+  },
+  "TV": {
+    "name": "TV",
+    "value": 3401
+  },
+  "TV3DMode": {
+    "name": "TV3DMode",
+    "value": 4353
+  },
+  "TVAntennaCable": {
+    "name": "TVAntennaCable",
+    "value": 4354
+  },
+  "TVAudioDescription": {
+    "name": "TVAudioDescription",
+    "value": 4355
+  },
+  "TVAudioDescriptionMixDown": {
+    "name": "TVAudioDescriptionMixDown",
+    "value": 4356
+  },
+  "TVAudioDescriptionMixUp": {
+    "name": "TVAudioDescriptionMixUp",
+    "value": 4357
+  },
+  "TVContentsMenu": {
+    "name": "TVContentsMenu",
+    "value": 4358
+  },
+  "TVDataService": {
+    "name": "TVDataService",
+    "value": 4359
+  },
+  "TVInput": {
+    "name": "TVInput",
+    "value": 3402
+  },
+  "TVInputComponent1": {
+    "name": "TVInputComponent1",
+    "value": 4360
+  },
+  "TVInputComponent2": {
+    "name": "TVInputComponent2",
+    "value": 4361
+  },
+  "TVInputComposite1": {
+    "name": "TVInputComposite1",
+    "value": 4362
+  },
+  "TVInputComposite2": {
+    "name": "TVInputComposite2",
+    "value": 4363
+  },
+  "TVInputHDMI1": {
+    "name": "TVInputHDMI1",
+    "value": 4364
+  },
+  "TVInputHDMI2": {
+    "name": "TVInputHDMI2",
+    "value": 4365
+  },
+  "TVInputHDMI3": {
+    "name": "TVInputHDMI3",
+    "value": 4366
+  },
+  "TVInputHDMI4": {
+    "name": "TVInputHDMI4",
+    "value": 4367
+  },
+  "TVInputVGA1": {
+    "name": "TVInputVGA1",
+    "value": 4368
+  },
+  "TVMediaContext": {
+    "name": "TVMediaContext",
+    "value": 4369
+  },
+  "TVNetwork": {
+    "name": "TVNetwork",
+    "value": 4370
+  },
+  "TVNumberEntry": {
+    "name": "TVNumberEntry",
+    "value": 4371
+  },
+  "TVPower": {
+    "name": "TVPower",
+    "value": 3403
+  },
+  "TVRadioService": {
+    "name": "TVRadioService",
+    "value": 4372
+  },
+  "TVSatellite": {
+    "name": "TVSatellite",
+    "value": 4373
+  },
+  "TVSatelliteBS": {
+    "name": "TVSatelliteBS",
+    "value": 4374
+  },
+  "TVSatelliteCS": {
+    "name": "TVSatelliteCS",
+    "value": 4375
+  },
+  "TVSatelliteToggle": {
+    "name": "TVSatelliteToggle",
+    "value": 4376
+  },
+  "TVTerrestrialAnalog": {
+    "name": "TVTerrestrialAnalog",
+    "value": 4377
+  },
+  "TVTerrestrialDigital": {
+    "name": "TVTerrestrialDigital",
+    "value": 4378
+  },
+  "TVTimer": {
+    "name": "TVTimer",
+    "value": 4379
+  },
+  "AVRInput": {
+    "name": "AVRInput",
+    "value": 3336
+  },
+  "AVRPower": {
+    "name": "AVRPower",
+    "value": 3337
+  },
+  "ColorF0Red": {
+    "name": "ColorF0Red",
+    "value": 3340
+  },
+  "ColorF1Green": {
+    "name": "ColorF1Green",
+    "value": 3341
+  },
+  "ColorF2Yellow": {
+    "name": "ColorF2Yellow",
+    "value": 3342
+  },
+  "ColorF3Blue": {
+    "name": "ColorF3Blue",
+    "value": 3343
+  },
+  "ColorF4Grey": {
+    "name": "ColorF4Grey",
+    "value": 3344
+  },
+  "ColorF5Brown": {
+    "name": "ColorF5Brown",
+    "value": 3345
+  },
+  "ClosedCaptionToggle": {
+    "name": "ClosedCaptionToggle",
+    "value": 3346
+  },
+  "Dimmer": {
+    "name": "Dimmer",
+    "value": 3347
+  },
+  "DisplaySwap": {
+    "name": "DisplaySwap",
+    "value": 3348
+  },
+  "DVR": {
+    "name": "DVR",
+    "value": 3407
+  },
+  "Exit": {
+    "name": "Exit",
+    "value": 3349
+  },
+  "FavoriteClear0": {
+    "name": "FavoriteClear0",
+    "value": 3350
+  },
+  "FavoriteClear1": {
+    "name": "FavoriteClear1",
+    "value": 3351
+  },
+  "FavoriteClear2": {
+    "name": "FavoriteClear2",
+    "value": 3352
+  },
+  "FavoriteClear3": {
+    "name": "FavoriteClear3",
+    "value": 3353
+  },
+  "FavoriteRecall0": {
+    "name": "FavoriteRecall0",
+    "value": 3354
+  },
+  "FavoriteRecall1": {
+    "name": "FavoriteRecall1",
+    "value": 3355
+  },
+  "FavoriteRecall2": {
+    "name": "FavoriteRecall2",
+    "value": 3356
+  },
+  "FavoriteRecall3": {
+    "name": "FavoriteRecall3",
+    "value": 3357
+  },
+  "FavoriteStore0": {
+    "name": "FavoriteStore0",
+    "value": 3358
+  },
+  "FavoriteStore1": {
+    "name": "FavoriteStore1",
+    "value": 3359
+  },
+  "FavoriteStore2": {
+    "name": "FavoriteStore2",
+    "value": 3360
+  },
+  "FavoriteStore3": {
+    "name": "FavoriteStore3",
+    "value": 3361
+  },
+  "Guide": {
+    "name": "Guide",
+    "value": 3362
+  },
+  "GuideNextDay": {
+    "name": "GuideNextDay",
+    "value": 3363
+  },
+  "GuidePreviousDay": {
+    "name": "GuidePreviousDay",
+    "value": 3364
+  },
+  "Info": {
+    "name": "Info",
+    "value": 3365
+  },
+  "InstantReplay": {
+    "name": "InstantReplay",
+    "value": 3366
+  },
+  "Link": {
+    "name": "Link",
+    "value": 3367
+  },
+  "ListProgram": {
+    "name": "ListProgram",
+    "value": 3368
+  },
+  "LiveContent": {
+    "name": "LiveContent",
+    "value": 3369
+  },
+  "Lock": {
+    "name": "Lock",
+    "value": 3370
+  },
+  "MediaApps": {
+    "name": "MediaApps",
+    "value": 3371
+  },
+  "MediaAudioTrack": {
+    "name": "MediaAudioTrack",
+    "value": 3408
+  },
+  "MediaLast": {
+    "name": "MediaLast",
+    "value": 3373
+  },
+  "MediaSkipBackward": {
+    "name": "MediaSkipBackward",
+    "value": 3409
+  },
+  "MediaSkipForward": {
+    "name": "MediaSkipForward",
+    "value": 3410
+  },
+  "MediaSkip": {
+    "name": "MediaSkip",
+    "value": 3378
+  },
+  "MediaStepBackward": {
+    "name": "MediaStepBackward",
+    "value": 3411
+  },
+  "MediaStepForward": {
+    "name": "MediaStepForward",
+    "value": 3412
+  },
+  "MediaTopMenu": {
+    "name": "MediaTopMenu",
+    "value": 3413
+  },
+  "NavigateIn": {
+    "name": "NavigateIn",
+    "value": 3414
+  },
+  "NavigateNext": {
+    "name": "NavigateNext",
+    "value": 3415
+  },
+  "NavigateOut": {
+    "name": "NavigateOut",
+    "value": 3416
+  },
+  "NavigatePrevious": {
+    "name": "NavigatePrevious",
+    "value": 3417
+  },
+  "NextFavoriteChannel": {
+    "name": "NextFavoriteChannel",
+    "value": 3379
+  },
+  "NextUserProfile": {
+    "name": "NextUserProfile",
+    "value": 3380
+  },
+  "OnDemand": {
+    "name": "OnDemand",
+    "value": 3381
+  },
+  "Pairing": {
+    "name": "Pairing",
+    "value": 3418
+  },
+  "PinPDown": {
+    "name": "PinPDown",
+    "value": 3382
+  },
+  "PinPMove": {
+    "name": "PinPMove",
+    "value": 3383
+  },
+  "PinPToggle": {
+    "name": "PinPToggle",
+    "value": 3384
+  },
+  "PinPUp": {
+    "name": "PinPUp",
+    "value": 3385
+  },
+  "PlaySpeedDown": {
+    "name": "PlaySpeedDown",
+    "value": 3386
+  },
+  "PlaySpeedReset": {
+    "name": "PlaySpeedReset",
+    "value": 3387
+  },
+  "PlaySpeedUp": {
+    "name": "PlaySpeedUp",
+    "value": 3388
+  },
+  "RandomToggle": {
+    "name": "RandomToggle",
+    "value": 3389
+  },
+  "RcLowBattery": {
+    "name": "RcLowBattery",
+    "value": 3390
+  },
+  "RecordSpeedNext": {
+    "name": "RecordSpeedNext",
+    "value": 3391
+  },
+  "RfBypass": {
+    "name": "RfBypass",
+    "value": 3392
+  },
+  "ScanChannelsToggle": {
+    "name": "ScanChannelsToggle",
+    "value": 3393
+  },
+  "ScreenModeNext": {
+    "name": "ScreenModeNext",
+    "value": 3394
+  },
+  "Settings": {
+    "name": "Settings",
+    "value": 3395
+  },
+  "SplitScreenToggle": {
+    "name": "SplitScreenToggle",
+    "value": 3396
+  },
+  "STBInput": {
+    "name": "STBInput",
+    "value": 3397
+  },
+  "STBPower": {
+    "name": "STBPower",
+    "value": 3398
+  },
+  "Subtitle": {
+    "name": "Subtitle",
+    "value": 3399
+  },
+  "Teletext": {
+    "name": "Teletext",
+    "value": 3400
+  },
+  "VideoModeNext": {
+    "name": "VideoModeNext",
+    "value": 3404
+  },
+  "Wink": {
+    "name": "Wink",
+    "value": 3405
+  },
+  "ZoomToggle": {
+    "name": "ZoomToggle",
+    "value": 3406
+  }
+}

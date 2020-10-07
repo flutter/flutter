@@ -5,7 +5,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
-import 'key_data.dart';
+import 'physical_key_data.dart';
 import 'utils.dart';
 
 String _injectDictionary(String template, Map<String, String> dictionary) {
@@ -42,24 +42,24 @@ abstract class BaseCodeGenerator {
   }
 
   /// The database of keys loaded from disk.
-  final KeyData keyData;
+  final PhysicalKeyData keyData;
 }
 
 /// A code generator which also defines platform-based behavior.
 abstract class PlatformCodeGenerator extends BaseCodeGenerator {
-  PlatformCodeGenerator(KeyData keyData) : super(keyData);
+  PlatformCodeGenerator(PhysicalKeyData keyData) : super(keyData);
 
   // Used by platform code generators.
-  List<Key> get numpadKeyData {
-    return keyData.data.where((Key entry) {
+  List<PhysicalKeyEntry> get numpadKeyData {
+    return keyData.data.where((PhysicalKeyEntry entry) {
       return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
     }).toList();
   }
 
   // Used by platform code generators.
-  List<Key> get functionKeyData {
+  List<PhysicalKeyEntry> get functionKeyData {
     final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
-    return keyData.data.where((Key entry) {
+    return keyData.data.where((PhysicalKeyEntry entry) {
       return functionKeyRe.hasMatch(entry.constantName);
     }).toList();
   }
