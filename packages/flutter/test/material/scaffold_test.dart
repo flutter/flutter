@@ -1968,7 +1968,7 @@ void main() {
     });
 
     testWidgets('Call to Scaffold.geometryOf() without context', (WidgetTester tester) async {
-      late ValueListenable<ScaffoldGeometry> geometry;
+      ValueListenable<ScaffoldGeometry>? geometry;
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
