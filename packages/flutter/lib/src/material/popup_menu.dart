@@ -756,7 +756,12 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
         menu = Theme(data: theme!, child: menu);
     }
 
-    return SafeArea(
+    return MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      removeBottom: true,
+      removeLeft: true,
+      removeRight: true,
       child: Builder(
         builder: (BuildContext context) {
           return CustomSingleChildLayout(
