@@ -640,11 +640,11 @@ class DataTable extends StatelessWidget {
     // use the new checked value but default to false if it's null.
     final bool effectiveChecked = someChecked || (checked ?? false);
     if (onSelectAll != null) {
-      onSelectAll(effectiveChecked);
+      onSelectAll!(effectiveChecked);
     } else {
       for (final DataRow row in rows) {
         if (row.onSelectChanged != null && row.selected != effectiveChecked)
-          row.onSelectChanged(effectiveChecked);
+          row.onSelectChanged!(effectiveChecked);
       }
     }
   }
@@ -672,7 +672,7 @@ class DataTable extends StatelessWidget {
   Widget _buildCheckbox({
     required BuildContext context,
     required Color activeColor,
-    required bool checked,
+    required bool? checked,
     required VoidCallback? onRowTap,
     required ValueChanged<bool?>? onCheckboxChanged,
     required MaterialStateProperty<Color?>? overlayColor,
@@ -906,7 +906,7 @@ class DataTable extends StatelessWidget {
         activeColor: theme.accentColor,
         checked: someChecked ? null : allChecked,
         onRowTap: null,
-        onCheckboxChanged: (bool checked) => _handleSelectAll(checked, someChecked),
+        onCheckboxChanged: (bool? checked) => _handleSelectAll(checked, someChecked),
         overlayColor: null,
         tristate: true,
       );
