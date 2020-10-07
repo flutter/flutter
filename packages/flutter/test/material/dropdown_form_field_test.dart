@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
@@ -28,21 +26,21 @@ Finder _iconRichText(Key iconKey) {
 }
 
 Widget buildFormFrame({
-  Key buttonKey,
+  Key? buttonKey,
   AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
   int elevation = 8,
   String value = 'two',
-  ValueChanged<String> onChanged,
-  VoidCallback onTap,
-  Widget icon,
-  Color iconDisabledColor,
-  Color iconEnabledColor,
+  ValueChanged<String>? onChanged,
+  VoidCallback? onTap,
+  Widget? icon,
+  Color? iconDisabledColor,
+  Color? iconEnabledColor,
   double iconSize = 24.0,
   bool isDense = true,
   bool isExpanded = false,
-  Widget hint,
-  Widget disabledHint,
-  Widget underline,
+  Widget? hint,
+  Widget? disabledHint,
+  Widget? underline,
   List<String> items = menuItems,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,

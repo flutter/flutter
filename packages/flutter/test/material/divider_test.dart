@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
@@ -23,7 +21,7 @@ void main() {
     expect(box.size.height, 16.0);
     final Container container = tester.widget(find.byType(Container));
     final BoxDecoration decoration = container.decoration as BoxDecoration;
-    expect(decoration.border.bottom.width, 0.0);
+    expect(decoration.border!.bottom.width, 0.0);
   });
 
   testWidgets('Divider custom thickness', (WidgetTester tester) async {
@@ -39,7 +37,7 @@ void main() {
     );
     final Container container = tester.widget(find.byType(Container));
     final BoxDecoration decoration = container.decoration as BoxDecoration;
-    expect(decoration.border.bottom.width, 5.0);
+    expect(decoration.border!.bottom.width, 5.0);
   });
 
   testWidgets('Horizontal divider custom indentation', (WidgetTester tester) async {

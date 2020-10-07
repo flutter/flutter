@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -72,10 +70,10 @@ void main() {
 
       final Container container = tester.widget(find.byType(Container));
       final BoxDecoration decoration = container.decoration as BoxDecoration;
-      expect(decoration.border.bottom.width, 0.0);
+      expect(decoration.border!.bottom.width, 0.0);
 
       final ThemeData theme = ThemeData();
-      expect(decoration.border.bottom.color, theme.dividerColor);
+      expect(decoration.border!.bottom.color, theme.dividerColor);
 
       final Rect dividerRect = tester.getRect(find.byType(Divider));
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
@@ -97,13 +95,13 @@ void main() {
 
       final Container container = tester.widget(find.byType(Container));
       final BoxDecoration decoration = container.decoration as BoxDecoration;
-      expect(decoration.border.bottom.width, dividerTheme.thickness);
-      expect(decoration.border.bottom.color, dividerTheme.color);
+      expect(decoration.border!.bottom.width, dividerTheme.thickness);
+      expect(decoration.border!.bottom.color, dividerTheme.color);
 
       final Rect dividerRect = tester.getRect(find.byType(Divider));
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
-      expect(lineRect.left, dividerRect.left + dividerTheme.indent);
-      expect(lineRect.right, dividerRect.right - dividerTheme.endIndent);
+      expect(lineRect.left, dividerRect.left + dividerTheme.indent!);
+      expect(lineRect.right, dividerRect.right - dividerTheme.endIndent!);
     });
 
     testWidgets('Widget properties take priority over theme', (WidgetTester tester) async {
@@ -132,8 +130,8 @@ void main() {
 
       final Container container = tester.widget(find.byType(Container));
       final BoxDecoration decoration = container.decoration as BoxDecoration;
-      expect(decoration.border.bottom.width, thickness);
-      expect(decoration.border.bottom.color, color);
+      expect(decoration.border!.bottom.width, thickness);
+      expect(decoration.border!.bottom.color, color);
 
       final Rect dividerRect = tester.getRect(find.byType(Divider));
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
@@ -187,8 +185,8 @@ void main() {
 
       final Rect dividerRect = tester.getRect(find.byType(VerticalDivider));
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
-      expect(lineRect.top, dividerRect.top + dividerTheme.indent);
-      expect(lineRect.bottom, dividerRect.bottom - dividerTheme.endIndent);
+      expect(lineRect.top, dividerRect.top + dividerTheme.indent!);
+      expect(lineRect.bottom, dividerRect.bottom - dividerTheme.endIndent!);
     });
 
     testWidgets('Widget properties take priority over theme', (WidgetTester tester) async {
