@@ -35,6 +35,18 @@ const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
 /// The expected Edge executable name on Windows.
 const String kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
 
+/// Used by [ChromiumLauncher] to detect a glibc bug and retry launching the
+/// browser.
+///
+/// Once every few thousands of launches we hit this glibc bug:
+///
+/// https://sourceware.org/bugzilla/show_bug.cgi?id=19329.
+///
+/// When this happens Chrome spits out something like the following then exits with code 127:
+///
+///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
+const String _kGlibcError = 'Inconsistency detected by ld.so';
+
 typedef BrowserFinder = String Function(Platform, FileSystem);
 
 /// Find the chrome executable on the current platform.
@@ -229,8 +241,8 @@ class ChromiumLauncher {
 
   Future<Process> _spawnChromiumProcess(List<String> args) async {
     // Keep attempting to launch the browser until one of:
-    // - We successfully launched it, in which case we just return from the loop.
-    // - We encountered an unretriable error, in which case we throw ToolExit.
+    // - Chrome launched successfully, in which case we just return from the loop.
+    // - The tool detected an unretriable Chrome error, in which case we throw ToolExit.
     while (true) {
       final Process process = await _processManager.start(args);
 
@@ -248,18 +260,13 @@ class ChromiumLauncher {
 
       // Wait until the DevTools are listening before trying to connect. This is
       // only required for flutter_test --platform=chrome and not flutter run.
-      //
-      // Once every few thousands of launches we hit this glibc bug: https://sourceware.org/bugzilla/show_bug.cgi?id=19329.
-      // When this happens Chrome spits out something like the following then exits with code 127:
-      //
-      //     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
       bool hitGlibcBug = false;
       await process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .map((String line) {
           _logger.printTrace('[CHROME]:$line');
-          if (line.contains('Inconsistency detected by ld.so')) {
+          if (line.contains(_kGlibcError)) {
             hitGlibcBug = true;
           }
           return line;
@@ -271,14 +278,20 @@ class ChromiumLauncher {
               'Will try launching browser again.',
             );
             return null;
-          } else {
-            throw ToolExit('Failed to spawn: ${args.join(' ')}');
           }
+          _logger.printTrace('Failed to launch browser. Command used to launch it: ${args.join(' ')}');
+          throw ToolExit(
+            'Failed to launch browser. Make sure you are using an up-to-date '
+            'Chrome or Edge. Otherwise, consider using -d web-server instead '
+            'and filing an issue at https://github.com/flutter/flutter/issues.',
+          );
         });
 
       if (!hitGlibcBug) {
         return process;
-      } else if (!exited) {
+      }
+
+      if (!exited) {
         // A precaution that avoids accumulating browser processes, in case the
         // glibc bug doesn't cause the browser to quit and we keep looping and
         // launching more processes.

@@ -310,7 +310,7 @@ void main() {
         skipCheck: true,
         headless: true,
       ),
-      throwsToolExit(message: 'Failed to spawn: example_chrome'),
+      throwsToolExit(message: 'Failed to launch browser.'),
     );
   });
 }
