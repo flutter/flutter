@@ -330,7 +330,6 @@ class UpdatePackagesCommand extends FlutterCommand {
           context: PubContext.updatePackages,
           directory: tempDir.path,
           upgrade: true,
-          checkLastModified: false,
           offline: offline,
           flutterRootOverride: upgrade
             ? temporaryFlutterSdk.path
@@ -413,7 +412,6 @@ class UpdatePackagesCommand extends FlutterCommand {
       await pub.get(
         context: PubContext.updatePackages,
         directory: dir.path,
-        checkLastModified: false,
         offline: offline,
         generateSyntheticPackage: false,
       );
