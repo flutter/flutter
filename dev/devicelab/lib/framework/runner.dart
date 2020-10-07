@@ -12,7 +12,7 @@ import 'package:vm_service_client/vm_service_client.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 
-import 'framework.dart';
+import 'task_result.dart';
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.

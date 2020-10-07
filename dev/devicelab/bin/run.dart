@@ -6,13 +6,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:flutter_devicelab/framework/cocoon.dart';
-import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/ab.dart';
+import 'package:flutter_devicelab/framework/cocoon.dart';
 import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 ArgResults args;
@@ -113,7 +113,7 @@ Future<void> _runTasks() async {
     print(const JsonEncoder.withIndent('  ').convert(result));
     section('Finished task "$taskName"');
 
-    if (serviceAccountFile.isNotEmpty) {
+    if (serviceAccountFile != null) {
       final Cocoon cocoon = Cocoon(serviceAccountFile: serviceAccountFile, taskKey: taskKey);
       await cocoon.sendTaskResult(taskKey, result);
     }

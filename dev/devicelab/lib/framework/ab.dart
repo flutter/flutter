@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:meta/meta.dart';
 
 import 'framework.dart';

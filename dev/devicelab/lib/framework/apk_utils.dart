@@ -5,8 +5,9 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+
+import 'task_result.dart';
 
 
 final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';

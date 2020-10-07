@@ -6,9 +6,8 @@ import 'dart:convert' show json;
 import 'dart:io';
 
 import 'package:http/http.dart';
-import 'package:logging/logging.dart';
 
-import 'framework.dart';
+import 'task_result.dart';
 
 /// Class for test runner to interact with Flutter's continuous integration, Cocoon.
 class Cocoon {
