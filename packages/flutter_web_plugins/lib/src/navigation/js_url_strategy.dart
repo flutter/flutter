@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 @JS()
 library js_location_strategy;
 
@@ -21,7 +23,7 @@ typedef _JsSetUrlStrategy = void Function(JsUrlStrategy);
 // Keep this in sync with the js name in the web engine. Find it at:
 // https://github.com/flutter/engine/blob/custom_location_strategy/lib/web_ui/lib/src/engine/navigation/js_url_strategy.dart
 //
-// TODO: Add integration test https://github.com/flutter/flutter/issues/66852
+// TODO(mdebbar): Add integration test https://github.com/flutter/flutter/issues/66852
 @JS('_flutter_web_set_location_strategy')
 external _JsSetUrlStrategy get jsSetUrlStrategy;
 

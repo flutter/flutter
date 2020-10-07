@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:ui' as ui;
@@ -228,7 +230,7 @@ abstract class PlatformLocation {
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/search
   String get search;
 
-  /// The `hash]` part of the URL in the browser address bar.
+  /// The `hash` part of the URL in the browser address bar.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/hash
   String get hash;
