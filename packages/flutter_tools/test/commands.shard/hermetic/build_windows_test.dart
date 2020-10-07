@@ -5,7 +5,6 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
@@ -68,26 +67,6 @@ void main() {
   void setUpMockProjectFilesForBuild({int templateVersion}) {
     fileSystem.file(buildFilePath).createSync(recursive: true);
     setUpMockCoreProjectFiles();
-
-    final String versionFileSubpath = fileSystem.path.join('flutter', '.template_version');
-    const int expectedTemplateVersion = 10;  // Arbitrary value for tests.
-    final File sourceTemplateVersionfile = fileSystem.file(fileSystem.path.join(
-      fileSystem.path.absolute(Cache.flutterRoot),
-      'packages',
-      'flutter_tools',
-      'templates',
-      'app',
-      'windows.tmpl',
-      versionFileSubpath,
-    ));
-    sourceTemplateVersionfile.createSync(recursive: true);
-    sourceTemplateVersionfile.writeAsStringSync(expectedTemplateVersion.toString());
-
-    final File projectTemplateVersionFile = fileSystem.file(
-      fileSystem.path.join('windows', versionFileSubpath));
-    templateVersion ??= expectedTemplateVersion;
-    projectTemplateVersionFile.createSync(recursive: true);
-    projectTemplateVersionFile.writeAsStringSync(templateVersion.toString());
   }
 
   // Returns the command matching the build_windows call to generate CMake
@@ -181,38 +160,6 @@ void main() {
     Platform: () => notWindowsPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-  });
-
-  testUsingContext('Windows build fails with instructions when template is too old', () async {
-    final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
-    applyMocksToCommand(command);
-    setUpMockProjectFilesForBuild(templateVersion: 1);
-
-    expect(createTestCommandRunner(command).run(
-      const <String>['windows', '--no-pub']
-    ), throwsToolExit(message: 'flutter create .'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => windowsPlatform,
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-  });
-
-  testUsingContext('Windows build fails with instructions when template is too new', () async {
-    final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
-    applyMocksToCommand(command);
-    setUpMockProjectFilesForBuild(templateVersion: 999);
-
-    expect(createTestCommandRunner(command).run(
-      const <String>['windows', '--no-pub']
-    ), throwsToolExit(message: 'Upgrade Flutter'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => windowsPlatform,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
@@ -472,7 +419,5 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}
 class MockVisualStudio extends Mock implements VisualStudio {}
 class MockUsage extends Mock implements Usage {}

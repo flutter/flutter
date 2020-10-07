@@ -114,7 +114,7 @@ class AssembleCommand extends FlutterCommand {
   }
 
   @override
-  String get description => 'Assemble and build flutter resources.';
+  String get description => 'Assemble and build Flutter resources.';
 
   @override
   String get name => 'assemble';

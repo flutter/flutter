@@ -19,7 +19,6 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
-import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
@@ -27,7 +26,6 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../web/web_runner.dart';
-import '../widget_cache.dart';
 
 const String protocolVersion = '0.6.0';
 
@@ -425,7 +423,6 @@ typedef _RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('restart', restart);
-    registerHandler('reloadMethod', reloadMethod);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
     registerHandler('detach', detach);
@@ -472,7 +469,7 @@ class AppDomain extends Domain {
       flutterProject: flutterProject,
       target: target,
       buildInfo: options.buildInfo,
-      widgetCache: WidgetCache(featureFlags: featureFlags),
+      platform: globals.platform,
     );
 
     ResidentRunner runner;
@@ -545,6 +542,12 @@ class AppDomain extends Domain {
     final AppInstance app = AppInstance(_getNewAppId(),
         runner: runner, logToStdout: daemon.logToStdout, logger: logger);
     _apps.add(app);
+
+    // Set the domain and app for the given AppRunLogger. This allows the logger
+    // to log messages containing the app ID to the host.
+    logger.domain = this;
+    logger.app = app;
+
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
       'directory': projectDirectory,
@@ -630,28 +633,6 @@ class AppDomain extends Domain {
             fullRestart: fullRestart,
             pause: pauseAfterRestart,
             reason: restartReason);
-      },
-    );
-  }
-
-  Future<OperationResult> reloadMethod(Map<String, dynamic> args) async {
-    final String appId = _getStringArg(args, 'appId', required: true);
-    final String classId = _getStringArg(args, 'class', required: true);
-    final String libraryId = _getStringArg(args, 'library', required: true);
-    final bool debounce = _getBoolArg(args, 'debounce') ?? false;
-
-    final AppInstance app = _getApp(appId);
-    if (app == null) {
-      throw "app '$appId' not found";
-    }
-
-    return _queueAndDebounceReloadAction(
-      app,
-      OperationType.reloadMethod,
-      debounce,
-      null,
-      () {
-        return app.reloadMethod(classId: classId, libraryId: libraryId);
       },
     );
   }
@@ -822,21 +803,17 @@ class DeviceDomain extends Domain {
   }
 
   /// Enable device events.
-  Future<void> enable(Map<String, dynamic> args) {
-    final List<Future<void>> calls = <Future<void>>[];
+  Future<void> enable(Map<String, dynamic> args) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      calls.add(discoverer.startPolling());
+      discoverer.startPolling();
     }
-    return Future.wait<void>(calls);
   }
 
   /// Disable device events.
   Future<void> disable(Map<String, dynamic> args) async {
-    final List<Future<void>> calls = <Future<void>>[];
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      calls.add(discoverer.stopPolling());
+      discoverer.stopPolling();
     }
-    return Future.wait<void>(calls);
   }
 
   /// Forward a host port to a device port.
@@ -870,10 +847,11 @@ class DeviceDomain extends Domain {
   }
 
   @override
-  Future<void> dispose() async {
+  Future<void> dispose() {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      await discoverer.dispose();
+      discoverer.dispose();
     }
+    return Future<void>.value();
   }
 
   /// Return the device matching the deviceId field in the args.
@@ -1093,10 +1071,6 @@ class AppInstance {
     return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
   }
 
-  Future<OperationResult> reloadMethod({ String classId, String libraryId }) {
-    return runner.reloadMethod(classId: classId, libraryId: libraryId);
-  }
-
   Future<void> stop() => runner.exit();
   Future<void> detach() => runner.detach();
 
@@ -1105,8 +1079,6 @@ class AppInstance {
   }
 
   Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) async {
-    _logger.domain = domain;
-    _logger.app = this;
     return method();
   }
 }
@@ -1251,25 +1223,24 @@ class AppRunLogger extends Logger {
     bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
-    assert(timeout != null);
     final int id = _nextProgressId++;
 
-    _sendProgressEvent(<String, dynamic>{
-      'id': id.toString(),
-      'progressId': progressId,
-      'message': message,
-    });
+    _sendProgressEvent(
+      eventId: id.toString(),
+      eventType: progressId,
+      message: message,
+    );
 
     _status = SilentStatus(
       timeout: timeout,
       timeoutConfiguration: timeoutConfiguration,
       onFinish: () {
         _status = null;
-        _sendProgressEvent(<String, dynamic>{
-          'id': id.toString(),
-          'progressId': progressId,
-          'finished': true,
-        });
+        _sendProgressEvent(
+          eventId: id.toString(),
+          eventType: progressId,
+          finished: true,
+        );
       }, stopwatch: Stopwatch())..start();
     return _status;
   }
@@ -1286,10 +1257,26 @@ class AppRunLogger extends Logger {
     }
   }
 
-  void _sendProgressEvent(Map<String, dynamic> event) {
+  void _sendProgressEvent({
+    @required String eventId,
+    @required String eventType,
+    bool finished = false,
+    String message,
+  }) {
     if (domain == null) {
-      printStatus('event sent after app closed: $event');
+      // If we're sending progress events before an app has started, send the
+      // progress messages as plain status messages.
+      if (message != null) {
+        printStatus(message);
+      }
     } else {
+      final Map<String, dynamic> event = <String, dynamic>{
+        'id': eventId,
+        'progressId': eventType,
+        if (message != null) 'message': message,
+        if (finished != null) 'finished': finished,
+      };
+
       domain._sendAppEvent(app, 'progress', event);
     }
   }
@@ -1339,7 +1326,6 @@ class LaunchMode {
 }
 
 enum OperationType {
-  reloadMethod,
   reload,
   restart
 }

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -141,17 +140,17 @@ void main() {
 
     group('run app', () {
       MemoryFileSystem fs;
-      MockArtifacts mockArtifacts;
+      Artifacts artifacts;
       MockCache mockCache;
       MockProcessManager mockProcessManager;
       MockUsage mockUsage;
       Directory tempDir;
 
       setUp(() {
-        mockArtifacts = MockArtifacts();
+        artifacts = Artifacts.test();
         mockCache = MockCache();
         mockUsage = MockUsage();
-        fs = MemoryFileSystem();
+        fs = MemoryFileSystem.test();
         mockProcessManager = MockProcessManager();
 
         tempDir = fs.systemTempDirectory.createTempSync('flutter_run_test.');
@@ -358,12 +357,6 @@ void main() {
           userIdentifier: anyNamed('userIdentifier'),
         )).thenAnswer((Invocation invocation) => Future<LaunchResult>.value(LaunchResult.failed()));
 
-        when(mockArtifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: anyNamed('platform'),
-          mode: anyNamed('mode'),
-        )).thenReturn('/path/to/sdk');
-
         when(mockDeviceManager.getDevices()).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[mockDevice])
         );
@@ -410,7 +403,7 @@ void main() {
         expect(parameters.containsKey(cdKey(CustomDimensions.commandRunAndroidEmbeddingVersion)), false);
       }, overrides: <Type, Generator>{
         ApplicationPackageFactory: () => mockApplicationPackageFactory,
-        Artifacts: () => mockArtifacts,
+        Artifacts: () => artifacts,
         Cache: () => mockCache,
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
@@ -542,7 +535,6 @@ void main() {
   });
 }
 
-class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockUsage extends Mock implements Usage {}
 

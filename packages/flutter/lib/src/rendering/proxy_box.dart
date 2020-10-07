@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
 
 import 'package:flutter/animation.dart';
@@ -956,7 +954,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
         return;
       }
       assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha!, super.paint, oldLayer: layer as OpacityLayer);
+      layer = context.pushOpacity(offset, _alpha!, super.paint, oldLayer: layer as OpacityLayer?);
     }
   }
 
@@ -1394,7 +1392,7 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
         _clip!,
         super.paint,
         clipBehavior: clipBehavior,
-        oldLayer: layer as ClipRectLayer,
+        oldLayer: layer as ClipRectLayer?,
       );
     } else {
       layer = null;
@@ -1482,7 +1480,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
         offset,
         _clip!.outerRect,
         _clip!,
-        super.paint, clipBehavior: clipBehavior, oldLayer: layer as ClipRRectLayer,
+        super.paint, clipBehavior: clipBehavior, oldLayer: layer as ClipRRectLayer?,
       );
     } else {
       layer = null;
@@ -1523,9 +1521,9 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect? _cachedRect;
-  Path? _cachedPath;
+  late Path _cachedPath;
 
-  Path? _getClipPath(Rect rect) {
+  Path _getClipPath(Rect rect) {
     if (rect != _cachedRect) {
       _cachedRect = rect;
       _cachedPath = Path()..addOval(_cachedRect!);
@@ -1558,10 +1556,10 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
         needsCompositing,
         offset,
         _clip!,
-        _getClipPath(_clip!)!,
+        _getClipPath(_clip!),
         super.paint,
         clipBehavior: clipBehavior,
-        oldLayer: layer as ClipPathLayer,
+        oldLayer: layer as ClipPathLayer?,
       );
     } else {
       layer = null;
@@ -1573,7 +1571,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawPath(_getClipPath(_clip!)!.shift(offset), _debugPaint!);
+        context.canvas.drawPath(_getClipPath(_clip!).shift(offset), _debugPaint!);
         _debugText!.paint(context.canvas, offset + Offset((_clip!.width - _debugText!.width) / 2.0, -_debugText!.text!.style!.fontSize! * 1.1));
       }
       return true;
@@ -1634,7 +1632,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
         _clip!,
         super.paint,
         clipBehavior: clipBehavior,
-        oldLayer: layer as ClipPathLayer,
+        oldLayer: layer as ClipPathLayer?,
       );
     } else {
       layer = null;
@@ -2300,7 +2298,7 @@ class RenderTransform extends RenderProxyBox {
           offset,
           transform,
           super.paint,
-          oldLayer: layer as TransformLayer,
+          oldLayer: layer as TransformLayer?,
         );
       } else {
         super.paint(context, offset + childOffset);
@@ -2489,7 +2487,7 @@ class RenderFittedBox extends RenderProxyBox {
     final Offset? childOffset = MatrixUtils.getAsTranslation(_transform!);
     if (childOffset == null)
       return context.pushTransform(needsCompositing, offset, _transform!, super.paint,
-          oldLayer: layer is TransformLayer ? layer as TransformLayer : null);
+          oldLayer: layer is TransformLayer ? layer! as TransformLayer : null);
     else
       super.paint(context, offset + childOffset);
     return null;
@@ -2503,7 +2501,7 @@ class RenderFittedBox extends RenderProxyBox {
     if (child != null) {
       if (_hasVisualOverflow! && clipBehavior != Clip.none)
         layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
-            oldLayer: layer is ClipRectLayer ? layer as ClipRectLayer : null, clipBehavior: clipBehavior);
+            oldLayer: layer is ClipRectLayer ? layer! as ClipRectLayer : null, clipBehavior: clipBehavior);
       else
         layer = _paintChildWithTransform(context, offset);
     }
@@ -2664,10 +2662,10 @@ typedef PointerSignalEventListener = void Function(PointerSignalEvent event);
 /// Calls callbacks in response to common pointer events.
 ///
 /// It responds to events that can construct gestures, such as when the
-/// pointer is pressed, moved, then released or canceled.
+/// pointer is pointer is pressed and moved, and then released or canceled.
 ///
 /// It does not respond to events that are exclusive to mouse, such as when the
-/// mouse enters, exits or hovers a region without pressing any buttons. For
+/// mouse enters and exits a region without pressing any buttons. For
 /// these events, use [RenderMouseRegion].
 ///
 /// If it has a child, defers to the child for sizing behavior.
@@ -2681,6 +2679,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     this.onPointerDown,
     this.onPointerMove,
     this.onPointerUp,
+    this.onPointerHover,
     this.onPointerCancel,
     this.onPointerSignal,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
@@ -2699,6 +2698,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// contact with the screen.
   PointerUpEventListener? onPointerUp;
 
+  /// Called when a pointer that has not an [onPointerDown] changes position.
+  PointerHoverEventListener? onPointerHover;
+
   /// Called when the input from a pointer that triggered an [onPointerDown] is
   /// no longer directed towards this receiver.
   PointerCancelEventListener? onPointerCancel;
@@ -2714,16 +2716,18 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    if (onPointerDown != null && event is PointerDownEvent)
-      return onPointerDown!(event);
-    if (onPointerMove != null && event is PointerMoveEvent)
-      return onPointerMove!(event);
-    if (onPointerUp != null && event is PointerUpEvent)
-      return onPointerUp!(event);
-    if (onPointerCancel != null && event is PointerCancelEvent)
-      return onPointerCancel!(event);
-    if (onPointerSignal != null && event is PointerSignalEvent)
-      return onPointerSignal!(event);
+    if (event is PointerDownEvent)
+      return onPointerDown?.call(event);
+    if (event is PointerMoveEvent)
+      return onPointerMove?.call(event);
+    if (event is PointerUpEvent)
+      return onPointerUp?.call(event);
+    if (event is PointerHoverEvent)
+      return onPointerHover?.call(event);
+    if (event is PointerCancelEvent)
+      return onPointerCancel?.call(event);
+    if (event is PointerSignalEvent)
+      return onPointerSignal?.call(event);
   }
 
   @override
@@ -2735,6 +2739,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
         'down': onPointerDown,
         'move': onPointerMove,
         'up': onPointerUp,
+        'hover': onPointerHover,
         'cancel': onPointerCancel,
         'signal': onPointerSignal,
       },
@@ -2823,7 +2828,10 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   @override
   PointerEnterEventListener? onEnter;
 
-  @override
+  /// Triggered when a pointer has moved onto or within the region without
+  /// buttons pressed.
+  ///
+  /// This callback is not triggered by the movement of the object.
   PointerHoverEventListener? onHover;
 
   @override
@@ -2956,7 +2964,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage({ double pixelRatio = 1.0 }) {
     assert(!debugNeedsPaint);
-    final OffsetLayer offsetLayer = layer as OffsetLayer;
+    final OffsetLayer offsetLayer = layer! as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
 
@@ -3567,6 +3575,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool? toggled,
     bool? selected,
     bool? button,
+    bool? slider,
     bool? link,
     bool? header,
     bool? textField,
@@ -3620,6 +3629,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _toggled = toggled,
        _selected = selected,
        _button = button,
+       _slider = slider,
        _link = link,
        _header = header,
        _textField = textField,
@@ -3763,6 +3773,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (button == value)
       return;
     _button = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsConfiguration.isSlider] semantic to the
+  /// given value.
+  bool? get slider => _slider;
+  bool? _slider;
+  set slider(bool? value) {
+    if (slider == value)
+      return;
+    _slider = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4460,8 +4481,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = container;
-    if (explicitChildNodes != null)
-      config.explicitChildNodes = explicitChildNodes;
+    config.explicitChildNodes = explicitChildNodes;
     assert((scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
       'explicitChildNodes must be set to true if scopes route is true');
     assert(!(toggled == true && checked == true),
@@ -4479,6 +4499,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isButton = button!;
     if (link != null)
       config.isLink = link!;
+    if (slider != null)
+      config.isSlider = slider!;
     if (header != null)
       config.isHeader = header!;
     if (textField != null)
@@ -4853,7 +4875,7 @@ class RenderLeaderLayer extends RenderProxyBox {
     if (layer == null) {
       layer = LeaderLayer(link: link, offset: offset);
     } else {
-      final LeaderLayer leaderLayer = layer as LeaderLayer;
+      final LeaderLayer leaderLayer = layer! as LeaderLayer;
       leaderLayer
         ..link = link
         ..offset = offset;

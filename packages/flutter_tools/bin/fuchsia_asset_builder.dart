@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/asset.dart' hide defaultManifestPath;
 import 'package:flutter_tools/src/base/context.dart';

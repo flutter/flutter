@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -211,9 +209,12 @@ void main() {
   });
 
   testWidgets('AnimatedSwitcher uses custom layout.', (WidgetTester tester) async {
-    Widget newLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
+    Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
       return Column(
-        children: previousChildren + <Widget>[currentChild],
+        children: <Widget>[
+          ...previousChildren,
+          if (currentChild != null) currentChild,
+        ],
       );
     }
 
@@ -230,16 +231,13 @@ void main() {
   });
 
   testWidgets('AnimatedSwitcher uses custom transitions.', (WidgetTester tester) async {
-    final List<Widget> foundChildren = <Widget>[];
-    Widget newLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
-      foundChildren.clear();
-      if (currentChild != null) {
-        foundChildren.add(currentChild);
-      }
-      foundChildren.addAll(previousChildren);
-      return Column(
-        children: foundChildren,
-      );
+    late List<Widget> foundChildren;
+    Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
+      foundChildren = <Widget>[
+        if (currentChild != null) currentChild,
+        ...previousChildren,
+      ];
+      return Column(children: foundChildren);
     }
 
     Widget newTransitionBuilder(Widget child, Animation<double> animation) {
@@ -381,16 +379,13 @@ void main() {
     final UniqueKey containerTwo = UniqueKey();
     final UniqueKey containerThree = UniqueKey();
 
-    final List<Widget> foundChildren = <Widget>[];
-    Widget newLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
-      foundChildren.clear();
-      if (currentChild != null) {
-        foundChildren.add(currentChild);
-      }
-      foundChildren.addAll(previousChildren);
-      return Column(
-        children: foundChildren,
-      );
+    late List<Widget> foundChildren;
+    Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
+      foundChildren = <Widget>[
+        if (currentChild != null) currentChild,
+        ...previousChildren,
+      ];
+      return Column(children: foundChildren);
     }
 
     // Insert three unique children so that we have some previous children.
@@ -472,7 +467,7 @@ void main() {
 }
 
 class StatefulTest extends StatefulWidget {
-  const StatefulTest({Key key}) : super(key: key);
+  const StatefulTest({Key? key}) : super(key: key);
 
   @override
   StatefulTestState createState() => StatefulTestState();

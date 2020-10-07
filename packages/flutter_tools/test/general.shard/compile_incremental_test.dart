@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -40,6 +41,7 @@ void main() {
       logger: testLogger,
       processManager: mockProcessManager,
       artifacts: Artifacts.test(),
+      platform: FakePlatform(operatingSystem: 'linux'),
     );
 
     when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);

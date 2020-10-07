@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../flutter_test_alternative.dart' show Fake;
 
 void main() {
   test('TextPainter caret test', () {
@@ -149,7 +149,7 @@ void main() {
 
   test('TextPainter error test', () {
     final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
-    expect(() { painter.paint(null, Offset.zero); }, anyOf(throwsFlutterError, throwsAssertionError));
+    expect(() { painter.paint(MockCanvas(), Offset.zero); }, anyOf(throwsFlutterError, throwsAssertionError));
   });
 
   test('TextPainter requires textDirection', () {
@@ -190,6 +190,18 @@ void main() {
     );
     painter.layout();
     expect(painter.size, const Size(20.0, 20.0));
+  });
+
+  test('TextPainter textScaleFactor null style test', () {
+    final TextPainter painter = TextPainter(
+      text: const TextSpan(
+        text: 'X',
+      ),
+      textDirection: TextDirection.ltr,
+      textScaleFactor: 2.0,
+    );
+    painter.layout();
+    expect(painter.size, const Size(28.0, 28.0));
   });
 
   test('TextPainter default text height is 14 pixels', () {
@@ -718,19 +730,19 @@ void main() {
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 23), ui.Rect.zero);
     expect(caretOffset.dx, 250);
 
-    expect(painter.inlinePlaceholderBoxes.length, 14);
-    expect(painter.inlinePlaceholderBoxes[0], const TextBox.fromLTRBD(56, 0, 106, 30, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[2], const TextBox.fromLTRBD(212, 0, 262, 30, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[3], const TextBox.fromLTRBD(318, 0, 368, 30, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[4], const TextBox.fromLTRBD(368, 0, 418, 30, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[5], const TextBox.fromLTRBD(418, 0, 468, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes!.length, 14);
+    expect(painter.inlinePlaceholderBoxes![0], const TextBox.fromLTRBD(56, 0, 106, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes![2], const TextBox.fromLTRBD(212, 0, 262, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes![3], const TextBox.fromLTRBD(318, 0, 368, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes![4], const TextBox.fromLTRBD(368, 0, 418, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes![5], const TextBox.fromLTRBD(418, 0, 468, 30, TextDirection.ltr));
     // line should break here
-    expect(painter.inlinePlaceholderBoxes[6], const TextBox.fromLTRBD(0, 30, 50, 60, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[7], const TextBox.fromLTRBD(50, 30, 100, 60, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[10], const TextBox.fromLTRBD(200, 30, 250, 60, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[11], const TextBox.fromLTRBD(250, 30, 300, 60, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[12], const TextBox.fromLTRBD(300, 30, 351, 60, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes![6], const TextBox.fromLTRBD(0, 30, 50, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes![7], const TextBox.fromLTRBD(50, 30, 100, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes![10], const TextBox.fromLTRBD(200, 30, 250, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes![11], const TextBox.fromLTRBD(250, 30, 300, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes![12], const TextBox.fromLTRBD(300, 30, 351, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes![13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
 
   // Null values are valid. See https://github.com/flutter/flutter/pull/48346#issuecomment-584839221
@@ -818,7 +830,11 @@ void main() {
     final double caretHeight = painter.getFullHeightForCaret(
       const ui.TextPosition(offset: 0),
       ui.Rect.zero,
-    );
+    )!;
     expect(caretHeight, 50.0);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56308
+}
+
+class MockCanvas extends Fake implements Canvas {
+
 }

@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -68,6 +67,15 @@ enum CocoaPodsStatus {
   brokenInstall,
 }
 
+/// Cocoapods is a depenency management solution for iOS and macOS applications.
+///
+/// Cocoapods is generally installed via ruby gems and interacted with via
+/// the `pod` CLI command.
+///
+/// See also:
+///   * https://cocoapods.org/ - the cocoapods website.
+///   * https://flutter.dev/docs/get-started/install/macos#deploy-to-ios-devices - instructions for
+///     installing iOS/macOS dependencies.
 class CocoaPods {
   CocoaPods({
     @required FileSystem fileSystem,
@@ -309,9 +317,7 @@ class CocoaPods {
   /// Ensures that pod install is deemed needed on next check.
   void invalidatePodInstallOutput(XcodeBasedProject xcodeProject) {
     final File manifestLock = xcodeProject.podManifestLock;
-    if (manifestLock.existsSync()) {
-      manifestLock.deleteSync();
-    }
+    ErrorHandlingFileSystem.deleteIfExists(manifestLock);
   }
 
   // Check if you need to run pod install.

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -72,6 +70,13 @@ class AndroidWorkflow implements Workflow {
     && _androidSdk.emulatorPath != null;
 }
 
+/// A validator that checks if the Android SDK and Java SDK are available and
+/// installed correctly.
+///
+/// Android development requires the Android SDK, and at least one Java SDK. While
+/// newer Java compilers can be used to compile the Java application code, the SDK
+/// tools themselves required JDK 1.8. This older JDK is normally bundled with
+/// Android Studio.
 class AndroidValidator extends DoctorValidator {
   AndroidValidator({
     @required AndroidSdk androidSdk,
@@ -169,7 +174,7 @@ class AndroidValidator extends DoctorValidator {
       } else {
         // Instruct user to set [kAndroidSdkRoot] and not deprecated [kAndroidHome]
         // See https://github.com/flutter/flutter/issues/39301
-        messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(kAndroidSdkRoot, _platform)));
+        messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(_platform)));
       }
       return ValidationResult(ValidationType.missing, messages);
     }
@@ -200,7 +205,7 @@ class AndroidValidator extends DoctorValidator {
         _androidSdk.latestVersion.platformName,
         _androidSdk.latestVersion.buildToolsVersionName)));
     } else {
-      messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(kAndroidHome, _platform)));
+      messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(_platform)));
     }
 
     if (_platform.environment.containsKey(kAndroidHome)) {
@@ -246,6 +251,8 @@ class AndroidValidator extends DoctorValidator {
   }
 }
 
+/// A subvalidator that checks if the licenses within the detected Android
+/// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator() : super('Android license subvalidator',);
 

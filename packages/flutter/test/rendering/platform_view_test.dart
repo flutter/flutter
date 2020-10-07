@@ -87,6 +87,19 @@ void main() {
       expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
     });
 
+    test('touch hover events are dispatched via PlatformViewController.dispatchPointerEvent', () {
+      layout(platformViewRenderBox);
+      pumpFrame(phase: EnginePhase.flushSemantics);
+
+      ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(ui.PointerChange.add, const Offset(0, 0)),
+        _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
+        _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
+      ]));
+
+      expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
+    });
+
   }, skip: isBrowser); // TODO(yjbanov): fails on Web with obscured stack trace: https://github.com/flutter/flutter/issues/42770
 }
 

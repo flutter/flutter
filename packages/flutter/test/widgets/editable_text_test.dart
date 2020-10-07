@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
@@ -19,6 +17,30 @@ import '../flutter_test_alternative.dart' show Fake;
 import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
+
+Matcher matchesMethodCall(String method, { dynamic args }) => _MatchesMethodCall(method, arguments: args == null ? null : wrapMatcher(args));
+
+class _MatchesMethodCall extends Matcher {
+  const _MatchesMethodCall(this.name, {this.arguments});
+
+  final String name;
+  final Matcher arguments;
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is MethodCall && item.method == name)
+      return arguments?.matches(item.arguments, matchState) ?? true;
+    return false;
+  }
+
+  @override
+  Description describe(Description description) {
+    final Description newDescription = description.add('has method name: ').addDescriptionOf(name);
+    if (arguments != null)
+        newDescription.add(' with arguments: ').addDescriptionOf(arguments);
+    return newDescription;
+  }
+}
 
 TextEditingController controller;
 final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
@@ -1396,6 +1418,84 @@ void main() {
         ),
       );
     }
+  });
+
+  testWidgets('Read-only fields do not format text', (WidgetTester tester) async {
+    SelectionChangedCause selectionCause;
+
+    final TextEditingController controller =
+        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          readOnly: true,
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+          onSelectionChanged: (TextSelection selection, SelectionChangedCause cause) {
+            selectionCause = cause;
+          },
+        ),
+      ),
+    );
+
+    // Interact with the field to establish the input connection.
+    final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+    await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+    await tester.pump();
+
+    expect(tester.testTextInput.hasAnyClients, kIsWeb ? isTrue : isFalse);
+    if (kIsWeb) {
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        text: 'Foo bar',
+        selection: TextSelection(baseOffset: 0, extentOffset: 3),
+      ));
+      // On web, the only way a text field can be updated from the engine is if
+      // a keyboard is used.
+      expect(selectionCause, SelectionChangedCause.keyboard);
+    }
+  });
+
+  testWidgets('Sends "updateConfig" when read-only flag is flipped', (WidgetTester tester) async {
+    bool readOnly = true;
+    StateSetter setState;
+    final TextEditingController controller = TextEditingController(text: 'Lorem ipsum dolor sit amet');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          return EditableText(
+            readOnly: readOnly,
+            controller: controller,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          );
+        }),
+      ),
+    );
+
+    // Interact with the field to establish the input connection.
+    final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+    await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+    await tester.pump();
+
+    expect(tester.testTextInput.hasAnyClients, kIsWeb ? isTrue : isFalse);
+    if (kIsWeb) {
+      expect(tester.testTextInput.setClientArgs['readOnly'], isTrue);
+    }
+
+    setState(() { readOnly = false; });
+    await tester.pump();
+
+    expect(tester.testTextInput.hasAnyClients, isTrue);
+    expect(tester.testTextInput.setClientArgs['readOnly'], isFalse);
   });
 
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
@@ -3250,6 +3350,103 @@ void main() {
     );
   });
 
+  group('setMarkedTextRect', () {
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: EditableText(
+                  backgroundCursorColor: Colors.grey,
+                  controller: controller,
+                  focusNode: FocusNode(),
+                  style: textStyle,
+                  cursorColor: Colors.blue,
+                  selectionControls: materialTextSelectionControls,
+                  keyboardType: TextInputType.text,
+                  onChanged: (String value) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets(
+      'called when the composing range changes',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(text: 'a' * 100);
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setMarkedTextRect',
+            args: allOf(
+              // No composing text so the width should not be too wide because
+              // it's empty.
+              containsPair('width', lessThanOrEqualTo(5)),
+              containsPair('x', lessThanOrEqualTo(1)),
+            ),
+          ),
+        ));
+
+        tester.testTextInput.log.clear();
+
+        controller.value = TextEditingValue(text: 'a' * 100, composing: const TextRange(start: 0, end: 10));
+        await tester.pump();
+
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setMarkedTextRect',
+            // Now the composing range is not empty.
+            args: containsPair('width', greaterThanOrEqualTo(10)),
+          ),
+        ));
+    }, skip: isBrowser); // Related to https://github.com/flutter/flutter/issues/66089
+
+    testWidgets(
+      'only send updates when necessary',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(text: 'a' * 100, composing: const TextRange(start: 0, end: 10));
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.setMarkedTextRect')));
+
+        tester.testTextInput.log.clear();
+
+        // Should not send updates every frame.
+        await tester.pump();
+
+        expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.setMarkedTextRect'))));
+    });
+
+    testWidgets(
+      'zero matrix paint transform',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(text: 'a' * 100, composing: const TextRange(start: 0, end: 10));
+        // Use a FittedBox with an zero-sized child to set the paint transform
+        // to the zero matrix.
+        await tester.pumpWidget(FittedBox(child: SizedBox.fromSize(size: Size.zero, child: builder())));
+        await tester.showKeyboard(find.byType(EditableText));
+        expect(tester.testTextInput.log, contains(matchesMethodCall(
+          'TextInput.setMarkedTextRect',
+          args: allOf(
+            containsPair('width', isNotNaN),
+            containsPair('height', isNotNaN),
+            containsPair('x', isNotNaN),
+            containsPair('y', isNotNaN),
+          ),
+        )));
+    });
+  });
+
+
   testWidgets('custom keyboardAppearance is respected', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/22212.
 
@@ -4503,7 +4700,7 @@ void main() {
 
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     final Rect rect = state.renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
-    expect(rect.isFinite, false);
+    expect(rect.isFinite, true);
     expect(tester.takeException(), isNull);
   });
 
@@ -4569,17 +4766,16 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
+      'TextInput.setMarkedTextRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
     ];
-    expect(tester.testTextInput.log.length, 7);
-    int index = 0;
-    for (final MethodCall m in tester.testTextInput.log) {
-      expect(m.method, logOrder[index]);
-      index++;
-    }
+    expect(
+      tester.testTextInput.log.map((MethodCall m) => m.method),
+      logOrder,
+    );
   });
 
   testWidgets('setEditingState is not called when text changes', (WidgetTester tester) async {
@@ -4613,6 +4809,7 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
+      'TextInput.setMarkedTextRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
@@ -4660,19 +4857,145 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
+      'TextInput.setMarkedTextRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setEditingState',
     ];
-    expect(tester.testTextInput.log.length, logOrder.length);
-    int index = 0;
-    for (final MethodCall m in tester.testTextInput.log) {
-      expect(m.method, logOrder[index]);
-      index++;
-    }
+
+    expect(
+      tester.testTextInput.log.map((MethodCall m) => m.method),
+      logOrder,
+    );
     expect(tester.testTextInput.editingState['text'], 'flutter is the best!...');
+  });
+
+  testWidgets('Synchronous test of local and remote editing values', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/65059
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+    final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
+      if (newValue.text == 'I will be modified by the formatter.') {
+        newValue = const TextEditingValue(text: 'Flutter is the best!');
+      }
+      return newValue;
+    });
+    final TextEditingController controller = TextEditingController();
+    StateSetter setState;
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
+    Widget builder() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          return MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(devicePixelRatio: 1.0),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Material(
+                    child: EditableText(
+                      controller: controller,
+                      focusNode: focusNode,
+                      style: textStyle,
+                      cursorColor: Colors.red,
+                      backgroundCursorColor: Colors.red,
+                      keyboardType: TextInputType.multiline,
+                      inputFormatters: <TextInputFormatter>[
+                        formatter,
+                      ],
+                      onChanged: (String value) { },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pump();
+
+    log.clear();
+
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+
+    // setEditingState is not called when only the remote changes
+    state.updateEditingValue(const TextEditingValue(
+      text: 'a',
+    ));
+    expect(log.length, 0);
+
+    // setEditingState is called when remote value modified by the formatter.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'I will be modified by the formatter.',
+    ));
+    expect(log.length, 1);
+    MethodCall methodCall = log[0];
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
+        'text': 'Flutter is the best!',
+        'selectionBase': -1,
+        'selectionExtent': -1,
+        'selectionAffinity': 'TextAffinity.downstream',
+        'selectionIsDirectional': false,
+        'composingBase': -1,
+        'composingExtent': -1,
+      }),
+    );
+
+    log.clear();
+
+    // setEditingState is called when the [controller.value] is modified by local.
+    setState(() {
+      controller.text = 'I love flutter!';
+    });
+    expect(log.length, 1);
+    methodCall = log[0];
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
+        'text': 'I love flutter!',
+        'selectionBase': -1,
+        'selectionExtent': -1,
+        'selectionAffinity': 'TextAffinity.downstream',
+        'selectionIsDirectional': false,
+        'composingBase': -1,
+        'composingExtent': -1,
+      }),
+    );
+
+    log.clear();
+
+    // Currently `_receivedRemoteTextEditingValue` equals 'I will be modified by the formatter.',
+    // setEditingState will be called when set the [controller.value] to `_receivedRemoteTextEditingValue` by local.
+    setState(() {
+      controller.text = 'I will be modified by the formatter.';
+    });
+    expect(log.length, 1);
+    methodCall = log[0];
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
+        'text': 'I will be modified by the formatter.',
+        'selectionBase': -1,
+        'selectionExtent': -1,
+        'selectionAffinity': 'TextAffinity.downstream',
+        'selectionIsDirectional': false,
+        'composingBase': -1,
+        'composingExtent': -1,
+      }),
+    );
   });
 
   testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {
@@ -5413,6 +5736,43 @@ void main() {
 
     // After composing ends, formatter will update.
     state.updateEditingValue(const TextEditingValue(text: '123456'));
+    expect(state.currentTextEditingValue.text, '12345');
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+  });
+
+  testWidgets('Length formatter handles composing text correctly, continued', (WidgetTester tester) async {
+    final TextInputFormatter formatter = LengthLimitingTextInputFormatter(5);
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        inputFormatters: <TextInputFormatter>[formatter],
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Initially we're at maxLength with no composing text.
+    controller.text = '12345' ;
+    assert(state.currentTextEditingValue == const TextEditingValue(text: '12345'));
+
+    // Should be able to change the editing value if the new value is still shorter
+    // than maxLength.
+    state.updateEditingValue(const TextEditingValue(text: '12345', composing: TextRange(start: 2, end: 4)));
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 2, end: 4));
+
+    // Reset.
+    controller.text = '12345' ;
+    assert(state.currentTextEditingValue == const TextEditingValue(text: '12345'));
+
+    // The text should not change when trying to insert when the text is already
+    // at maxLength.
+    state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 5, end: 6)));
     expect(state.currentTextEditingValue.text, '12345');
     expect(state.currentTextEditingValue.composing, TextRange.empty);
   });

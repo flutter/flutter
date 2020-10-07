@@ -24,6 +24,8 @@
 
 # Flutter repo-specific
 /bin/cache/
+/bin/internal/bootstrap.bat
+/bin/internal/bootstrap.sh
 /bin/mingit/
 /dev/benchmarks/mega_gallery/
 /dev/bots/.recipe_deps
