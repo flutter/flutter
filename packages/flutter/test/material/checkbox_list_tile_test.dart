@@ -224,4 +224,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(_value, false);
   });
+
+  testWidgets('CheckboxListTile respects shape', (WidgetTester tester) async {
+    const ShapeBorder shapeBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.horizontal(right: Radius.circular(100))
+    );
+
+    await tester.pumpWidget(wrap(
+      child: const CheckboxListTile(
+        value: false,
+        onChanged: null,
+        title: Text('Title'),
+        shape: shapeBorder,
+      ),
+    ));
+
+    expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
+  });
 }
