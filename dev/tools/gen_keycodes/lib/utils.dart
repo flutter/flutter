@@ -21,8 +21,13 @@ String shoutingToLowerCamel(String shouting) {
 }
 
 /// Converts 'FooBar' to 'fooBar'.
+///
+/// 'TVFoo' should be convert to 'tvFoo'.
 String upperCamelToLowerCamel(String upperCamel) {
-  return upperCamel.substring(0, 1).toLowerCase() + upperCamel.substring(1);
+  final RegExp initialGroup = RegExp(r'^(.+?)([A-Z][^A-Z].*)?$');
+  return upperCamel.replaceAllMapped(initialGroup, (Match match) {
+    return match.group(1).toLowerCase() + (match.group(2) ?? '');
+  });
 }
 
 /// Converts 'fooBar' to 'FooBar'.

@@ -57,7 +57,7 @@ class LogicalKeyData {
   List<LogicalKeyEntry> _readHidEntries(String input) {
     final List<LogicalKeyEntry> entries = <LogicalKeyEntry>[];
     final RegExp domKeyRegExp = RegExp(
-        r'DOM_KEY_(?:UNI|MAP)\s*\(\s*"?([^\s]+?)",\s*([^\s]+?),\s*0x([a-fA-F0-9]+)\s*\)',
+        r'DOM_KEY_(?:UNI|MAP)\s*\(\s*"([^\s]+?)",\s*([^\s]+?),\s*0x([a-fA-F0-9]+)\s*\)',
         multiLine: true);
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
@@ -65,7 +65,7 @@ class LogicalKeyData {
       if (match != null) {
         final LogicalKeyEntry newEntry = LogicalKeyEntry(
           value: getHex(match.group(3)),
-          name: match.group(1),
+          name: match.group(1).replaceAll(RegExp('[^A-Za-z0-9]'), ''),
         );
         // Assert no duplicatese
         for (LogicalKeyEntry entry in entries) {
@@ -121,17 +121,26 @@ class LogicalKeyEntry {
 
   int get flutterId => value;
 
-  static String getCommentName(String constantName) {
-    String upperCamel = lowerCamelToUpperCamel(constantName);
+  static String getCommentName(String constantNameBase) {
+    String upperCamel = lowerCamelToUpperCamel(constantNameBase);
     upperCamel = upperCamel.replaceAllMapped(RegExp(r'(Digit|Numpad|Lang|Button|Left|Right)([0-9]+)'), (Match match) => '${match.group(1)} ${match.group(2)}');
-    return upperCamel.replaceAllMapped(RegExp(r'([A-Z])'), (Match match) => ' ${match.group(1)}').trim();
+    return upperCamel
+      // 'fooBar' => 'foo Bar'
+      .replaceAllMapped(RegExp(r'([^A-Z])([A-Z])'), (Match match) => '${match.group(1)} ${match.group(2)}')
+      // 'ABCDoo' => 'ABC Doo'
+      .replaceAllMapped(RegExp(r'([A-Z])([A-Z])([a-z])'), (Match match) => '${match.group(1)} ${match.group(2)}${match.group(3)}')
+      // 'AB1' => 'AB 1', 'F1' => 'F1'
+      .replaceAllMapped(RegExp(r'([A-Z]{2,})([0-9])'), (Match match) => '${match.group(1)} ${match.group(2)}')
+      // 'Foo1' => 'Foo 1'
+      .replaceAllMapped(RegExp(r'([a-z])([0-9])'), (Match match) => '${match.group(1)} ${match.group(2)}')
+      .trim();
   }
 
   /// Gets the name of the key suitable for placing in comments.
   ///
   /// Takes the [constantName] and converts it from lower camel case to capitalized
   /// separate words (e.g. "wakeUp" converts to "Wake Up").
-  String get commentName => getCommentName(constantName);
+  String get commentName => getCommentName(constantNameBase);
 
   /// Gets the named used for the key constant in the definitions in
   /// keyboard_keys.dart.
@@ -140,18 +149,24 @@ class LogicalKeyEntry {
   /// the name from the various different names available, making sure that the
   /// name isn't a Dart reserved word (if it is, then it adds the word "Key" to
   /// the end of the name).
-  String get constantName {
-    if (_constantName == null) {
-      final String result = name;
-      if (kDartReservedWords.contains(result)) {
-        return '${result}Key';
-      }
-      return result;
+  String get constantNameBase {
+    if (_constantNameBase != null) {
+      return _constantNameBase;
     }
-    return _constantName;
+    final String result = name
+      .replaceAll('PinP', 'PInP');
+    return result;
   }
-  set constantName(String value) => _constantName = value;
-  String _constantName;
+  set constantNameBase(String value) => _constantNameBase = value;
+  String _constantNameBase;
+
+  String get constantName {
+    final String result = upperCamelToLowerCamel(constantNameBase);
+    if (kDartReservedWords.contains(result)) {
+      return '${result}Key';
+    }
+    return result;
+  }
 
   @override
   String toString() {

@@ -424,28 +424,18 @@
       "windows": null
     }
   },
-  "keyA": {
+  "keya": {
     "names": {
       "domkey": "KeyA",
-      "android": [
-        "A"
-      ],
-      "english": "Key A",
+      "android": null,
+      "english": "Keya",
       "chromium": "usA",
-      "glfw": [
-        "A"
-      ],
-      "gtk": [
-        "A"
-      ],
-      "windows": [
-        "A"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        30
-      ],
+      "android": null,
       "usb": 458756,
       "linux": 30,
       "xkb": 38,
@@ -453,42 +443,24 @@
       "macos": 0
     },
     "keyCodes": {
-      "android": [
-        29
-      ],
-      "glfw": [
-        65
-      ],
-      "gtk": [
-        65
-      ],
-      "windows": [
-        65
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyB": {
+  "keyb": {
     "names": {
       "domkey": "KeyB",
-      "android": [
-        "B"
-      ],
-      "english": "Key B",
+      "android": null,
+      "english": "Keyb",
       "chromium": "usB",
-      "glfw": [
-        "B"
-      ],
-      "gtk": [
-        "B"
-      ],
-      "windows": [
-        "B"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        48
-      ],
+      "android": null,
       "usb": 458757,
       "linux": 48,
       "xkb": 56,
@@ -496,42 +468,24 @@
       "macos": 11
     },
     "keyCodes": {
-      "android": [
-        30
-      ],
-      "glfw": [
-        66
-      ],
-      "gtk": [
-        66
-      ],
-      "windows": [
-        66
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyC": {
+  "keyc": {
     "names": {
       "domkey": "KeyC",
-      "android": [
-        "C"
-      ],
-      "english": "Key C",
+      "android": null,
+      "english": "Keyc",
       "chromium": "usC",
-      "glfw": [
-        "C"
-      ],
-      "gtk": [
-        "C"
-      ],
-      "windows": [
-        "C"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        46
-      ],
+      "android": null,
       "usb": 458758,
       "linux": 46,
       "xkb": 54,
@@ -539,42 +493,24 @@
       "macos": 8
     },
     "keyCodes": {
-      "android": [
-        31
-      ],
-      "glfw": [
-        67
-      ],
-      "gtk": [
-        67
-      ],
-      "windows": [
-        67
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyD": {
+  "keyd": {
     "names": {
       "domkey": "KeyD",
-      "android": [
-        "D"
-      ],
-      "english": "Key D",
+      "android": null,
+      "english": "Keyd",
       "chromium": "usD",
-      "glfw": [
-        "D"
-      ],
-      "gtk": [
-        "D"
-      ],
-      "windows": [
-        "D"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        32
-      ],
+      "android": null,
       "usb": 458759,
       "linux": 32,
       "xkb": 40,
@@ -582,42 +518,24 @@
       "macos": 2
     },
     "keyCodes": {
-      "android": [
-        32
-      ],
-      "glfw": [
-        68
-      ],
-      "gtk": [
-        68
-      ],
-      "windows": [
-        68
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyE": {
+  "keye": {
     "names": {
       "domkey": "KeyE",
-      "android": [
-        "E"
-      ],
-      "english": "Key E",
+      "android": null,
+      "english": "Keye",
       "chromium": "usE",
-      "glfw": [
-        "E"
-      ],
-      "gtk": [
-        "E"
-      ],
-      "windows": [
-        "E"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        18
-      ],
+      "android": null,
       "usb": 458760,
       "linux": 18,
       "xkb": 26,
@@ -625,42 +543,24 @@
       "macos": 14
     },
     "keyCodes": {
-      "android": [
-        33
-      ],
-      "glfw": [
-        69
-      ],
-      "gtk": [
-        69
-      ],
-      "windows": [
-        69
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyF": {
+  "keyf": {
     "names": {
       "domkey": "KeyF",
-      "android": [
-        "F"
-      ],
-      "english": "Key F",
+      "android": null,
+      "english": "Keyf",
       "chromium": "usF",
-      "glfw": [
-        "F"
-      ],
-      "gtk": [
-        "F"
-      ],
-      "windows": [
-        "F"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        33
-      ],
+      "android": null,
       "usb": 458761,
       "linux": 33,
       "xkb": 41,
@@ -668,42 +568,24 @@
       "macos": 3
     },
     "keyCodes": {
-      "android": [
-        34
-      ],
-      "glfw": [
-        70
-      ],
-      "gtk": [
-        70
-      ],
-      "windows": [
-        70
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyG": {
+  "keyg": {
     "names": {
       "domkey": "KeyG",
-      "android": [
-        "G"
-      ],
-      "english": "Key G",
+      "android": null,
+      "english": "Keyg",
       "chromium": "usG",
-      "glfw": [
-        "G"
-      ],
-      "gtk": [
-        "G"
-      ],
-      "windows": [
-        "G"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        34
-      ],
+      "android": null,
       "usb": 458762,
       "linux": 34,
       "xkb": 42,
@@ -711,42 +593,24 @@
       "macos": 5
     },
     "keyCodes": {
-      "android": [
-        35
-      ],
-      "glfw": [
-        71
-      ],
-      "gtk": [
-        71
-      ],
-      "windows": [
-        71
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyH": {
+  "keyh": {
     "names": {
       "domkey": "KeyH",
-      "android": [
-        "H"
-      ],
-      "english": "Key H",
+      "android": null,
+      "english": "Keyh",
       "chromium": "usH",
-      "glfw": [
-        "H"
-      ],
-      "gtk": [
-        "H"
-      ],
-      "windows": [
-        "H"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        35
-      ],
+      "android": null,
       "usb": 458763,
       "linux": 35,
       "xkb": 43,
@@ -754,42 +618,24 @@
       "macos": 4
     },
     "keyCodes": {
-      "android": [
-        36
-      ],
-      "glfw": [
-        72
-      ],
-      "gtk": [
-        72
-      ],
-      "windows": [
-        72
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyI": {
+  "keyi": {
     "names": {
       "domkey": "KeyI",
-      "android": [
-        "I"
-      ],
-      "english": "Key I",
+      "android": null,
+      "english": "Keyi",
       "chromium": "usI",
-      "glfw": [
-        "I"
-      ],
-      "gtk": [
-        "I"
-      ],
-      "windows": [
-        "I"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        23
-      ],
+      "android": null,
       "usb": 458764,
       "linux": 23,
       "xkb": 31,
@@ -797,42 +643,24 @@
       "macos": 34
     },
     "keyCodes": {
-      "android": [
-        37
-      ],
-      "glfw": [
-        73
-      ],
-      "gtk": [
-        73
-      ],
-      "windows": [
-        73
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyJ": {
+  "keyj": {
     "names": {
       "domkey": "KeyJ",
-      "android": [
-        "J"
-      ],
-      "english": "Key J",
+      "android": null,
+      "english": "Keyj",
       "chromium": "usJ",
-      "glfw": [
-        "J"
-      ],
-      "gtk": [
-        "J"
-      ],
-      "windows": [
-        "J"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        36
-      ],
+      "android": null,
       "usb": 458765,
       "linux": 36,
       "xkb": 44,
@@ -840,42 +668,24 @@
       "macos": 38
     },
     "keyCodes": {
-      "android": [
-        38
-      ],
-      "glfw": [
-        74
-      ],
-      "gtk": [
-        74
-      ],
-      "windows": [
-        74
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyK": {
+  "keyk": {
     "names": {
       "domkey": "KeyK",
-      "android": [
-        "K"
-      ],
-      "english": "Key K",
+      "android": null,
+      "english": "Keyk",
       "chromium": "usK",
-      "glfw": [
-        "K"
-      ],
-      "gtk": [
-        "K"
-      ],
-      "windows": [
-        "K"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        37
-      ],
+      "android": null,
       "usb": 458766,
       "linux": 37,
       "xkb": 45,
@@ -883,42 +693,24 @@
       "macos": 40
     },
     "keyCodes": {
-      "android": [
-        39
-      ],
-      "glfw": [
-        75
-      ],
-      "gtk": [
-        75
-      ],
-      "windows": [
-        75
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyL": {
+  "keyl": {
     "names": {
       "domkey": "KeyL",
-      "android": [
-        "L"
-      ],
-      "english": "Key L",
+      "android": null,
+      "english": "Keyl",
       "chromium": "usL",
-      "glfw": [
-        "L"
-      ],
-      "gtk": [
-        "L"
-      ],
-      "windows": [
-        "L"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        38
-      ],
+      "android": null,
       "usb": 458767,
       "linux": 38,
       "xkb": 46,
@@ -926,42 +718,24 @@
       "macos": 37
     },
     "keyCodes": {
-      "android": [
-        40
-      ],
-      "glfw": [
-        76
-      ],
-      "gtk": [
-        76
-      ],
-      "windows": [
-        76
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyM": {
+  "keym": {
     "names": {
       "domkey": "KeyM",
-      "android": [
-        "M"
-      ],
-      "english": "Key M",
+      "android": null,
+      "english": "Keym",
       "chromium": "usM",
-      "glfw": [
-        "M"
-      ],
-      "gtk": [
-        "M"
-      ],
-      "windows": [
-        "M"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        50
-      ],
+      "android": null,
       "usb": 458768,
       "linux": 50,
       "xkb": 58,
@@ -969,42 +743,24 @@
       "macos": 46
     },
     "keyCodes": {
-      "android": [
-        41
-      ],
-      "glfw": [
-        77
-      ],
-      "gtk": [
-        77
-      ],
-      "windows": [
-        77
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyN": {
+  "keyn": {
     "names": {
       "domkey": "KeyN",
-      "android": [
-        "N"
-      ],
-      "english": "Key N",
+      "android": null,
+      "english": "Keyn",
       "chromium": "usN",
-      "glfw": [
-        "N"
-      ],
-      "gtk": [
-        "N"
-      ],
-      "windows": [
-        "N"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        49
-      ],
+      "android": null,
       "usb": 458769,
       "linux": 49,
       "xkb": 57,
@@ -1012,42 +768,24 @@
       "macos": 45
     },
     "keyCodes": {
-      "android": [
-        42
-      ],
-      "glfw": [
-        78
-      ],
-      "gtk": [
-        78
-      ],
-      "windows": [
-        78
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyO": {
+  "keyo": {
     "names": {
       "domkey": "KeyO",
-      "android": [
-        "O"
-      ],
-      "english": "Key O",
+      "android": null,
+      "english": "Keyo",
       "chromium": "usO",
-      "glfw": [
-        "O"
-      ],
-      "gtk": [
-        "O"
-      ],
-      "windows": [
-        "O"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        24
-      ],
+      "android": null,
       "usb": 458770,
       "linux": 24,
       "xkb": 32,
@@ -1055,42 +793,24 @@
       "macos": 31
     },
     "keyCodes": {
-      "android": [
-        43
-      ],
-      "glfw": [
-        79
-      ],
-      "gtk": [
-        79
-      ],
-      "windows": [
-        79
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyP": {
+  "keyp": {
     "names": {
       "domkey": "KeyP",
-      "android": [
-        "P"
-      ],
-      "english": "Key P",
+      "android": null,
+      "english": "Keyp",
       "chromium": "usP",
-      "glfw": [
-        "P"
-      ],
-      "gtk": [
-        "P"
-      ],
-      "windows": [
-        "P"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        25
-      ],
+      "android": null,
       "usb": 458771,
       "linux": 25,
       "xkb": 33,
@@ -1098,42 +818,24 @@
       "macos": 35
     },
     "keyCodes": {
-      "android": [
-        44
-      ],
-      "glfw": [
-        80
-      ],
-      "gtk": [
-        80
-      ],
-      "windows": [
-        80
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyQ": {
+  "keyq": {
     "names": {
       "domkey": "KeyQ",
-      "android": [
-        "Q"
-      ],
-      "english": "Key Q",
+      "android": null,
+      "english": "Keyq",
       "chromium": "usQ",
-      "glfw": [
-        "Q"
-      ],
-      "gtk": [
-        "Q"
-      ],
-      "windows": [
-        "Q"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        16
-      ],
+      "android": null,
       "usb": 458772,
       "linux": 16,
       "xkb": 24,
@@ -1141,42 +843,24 @@
       "macos": 12
     },
     "keyCodes": {
-      "android": [
-        45
-      ],
-      "glfw": [
-        81
-      ],
-      "gtk": [
-        81
-      ],
-      "windows": [
-        81
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyR": {
+  "keyr": {
     "names": {
       "domkey": "KeyR",
-      "android": [
-        "R"
-      ],
-      "english": "Key R",
+      "android": null,
+      "english": "Keyr",
       "chromium": "usR",
-      "glfw": [
-        "R"
-      ],
-      "gtk": [
-        "R"
-      ],
-      "windows": [
-        "R"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        19
-      ],
+      "android": null,
       "usb": 458773,
       "linux": 19,
       "xkb": 27,
@@ -1184,42 +868,24 @@
       "macos": 15
     },
     "keyCodes": {
-      "android": [
-        46
-      ],
-      "glfw": [
-        82
-      ],
-      "gtk": [
-        82
-      ],
-      "windows": [
-        82
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyS": {
+  "keys": {
     "names": {
       "domkey": "KeyS",
-      "android": [
-        "S"
-      ],
-      "english": "Key S",
+      "android": null,
+      "english": "Keys",
       "chromium": "usS",
-      "glfw": [
-        "S"
-      ],
-      "gtk": [
-        "S"
-      ],
-      "windows": [
-        "S"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        31
-      ],
+      "android": null,
       "usb": 458774,
       "linux": 31,
       "xkb": 39,
@@ -1227,42 +893,24 @@
       "macos": 1
     },
     "keyCodes": {
-      "android": [
-        47
-      ],
-      "glfw": [
-        83
-      ],
-      "gtk": [
-        83
-      ],
-      "windows": [
-        83
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyT": {
+  "keyt": {
     "names": {
       "domkey": "KeyT",
-      "android": [
-        "T"
-      ],
-      "english": "Key T",
+      "android": null,
+      "english": "Keyt",
       "chromium": "usT",
-      "glfw": [
-        "T"
-      ],
-      "gtk": [
-        "T"
-      ],
-      "windows": [
-        "T"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        20
-      ],
+      "android": null,
       "usb": 458775,
       "linux": 20,
       "xkb": 28,
@@ -1270,42 +918,24 @@
       "macos": 17
     },
     "keyCodes": {
-      "android": [
-        48
-      ],
-      "glfw": [
-        84
-      ],
-      "gtk": [
-        84
-      ],
-      "windows": [
-        84
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyU": {
+  "keyu": {
     "names": {
       "domkey": "KeyU",
-      "android": [
-        "U"
-      ],
-      "english": "Key U",
+      "android": null,
+      "english": "Keyu",
       "chromium": "usU",
-      "glfw": [
-        "U"
-      ],
-      "gtk": [
-        "U"
-      ],
-      "windows": [
-        "U"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        22
-      ],
+      "android": null,
       "usb": 458776,
       "linux": 22,
       "xkb": 30,
@@ -1313,42 +943,24 @@
       "macos": 32
     },
     "keyCodes": {
-      "android": [
-        49
-      ],
-      "glfw": [
-        85
-      ],
-      "gtk": [
-        85
-      ],
-      "windows": [
-        85
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyV": {
+  "keyv": {
     "names": {
       "domkey": "KeyV",
-      "android": [
-        "V"
-      ],
-      "english": "Key V",
+      "android": null,
+      "english": "Keyv",
       "chromium": "usV",
-      "glfw": [
-        "V"
-      ],
-      "gtk": [
-        "V"
-      ],
-      "windows": [
-        "V"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        47
-      ],
+      "android": null,
       "usb": 458777,
       "linux": 47,
       "xkb": 55,
@@ -1356,42 +968,24 @@
       "macos": 9
     },
     "keyCodes": {
-      "android": [
-        50
-      ],
-      "glfw": [
-        86
-      ],
-      "gtk": [
-        86
-      ],
-      "windows": [
-        86
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyW": {
+  "keyw": {
     "names": {
       "domkey": "KeyW",
-      "android": [
-        "W"
-      ],
-      "english": "Key W",
+      "android": null,
+      "english": "Keyw",
       "chromium": "usW",
-      "glfw": [
-        "W"
-      ],
-      "gtk": [
-        "W"
-      ],
-      "windows": [
-        "W"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        17
-      ],
+      "android": null,
       "usb": 458778,
       "linux": 17,
       "xkb": 25,
@@ -1399,42 +993,24 @@
       "macos": 13
     },
     "keyCodes": {
-      "android": [
-        51
-      ],
-      "glfw": [
-        87
-      ],
-      "gtk": [
-        87
-      ],
-      "windows": [
-        87
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyX": {
+  "keyx": {
     "names": {
       "domkey": "KeyX",
-      "android": [
-        "X"
-      ],
-      "english": "Key X",
+      "android": null,
+      "english": "Keyx",
       "chromium": "usX",
-      "glfw": [
-        "X"
-      ],
-      "gtk": [
-        "X"
-      ],
-      "windows": [
-        "X"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        45
-      ],
+      "android": null,
       "usb": 458779,
       "linux": 45,
       "xkb": 53,
@@ -1442,42 +1018,24 @@
       "macos": 7
     },
     "keyCodes": {
-      "android": [
-        52
-      ],
-      "glfw": [
-        88
-      ],
-      "gtk": [
-        88
-      ],
-      "windows": [
-        88
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyY": {
+  "keyy": {
     "names": {
       "domkey": "KeyY",
-      "android": [
-        "Y"
-      ],
-      "english": "Key Y",
+      "android": null,
+      "english": "Keyy",
       "chromium": "usY",
-      "glfw": [
-        "Y"
-      ],
-      "gtk": [
-        "Y"
-      ],
-      "windows": [
-        "Y"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        21
-      ],
+      "android": null,
       "usb": 458780,
       "linux": 21,
       "xkb": 29,
@@ -1485,42 +1043,24 @@
       "macos": 16
     },
     "keyCodes": {
-      "android": [
-        53
-      ],
-      "glfw": [
-        89
-      ],
-      "gtk": [
-        89
-      ],
-      "windows": [
-        89
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
-  "keyZ": {
+  "keyz": {
     "names": {
       "domkey": "KeyZ",
-      "android": [
-        "Z"
-      ],
-      "english": "Key Z",
+      "android": null,
+      "english": "Keyz",
       "chromium": "usZ",
-      "glfw": [
-        "Z"
-      ],
-      "gtk": [
-        "Z"
-      ],
-      "windows": [
-        "Z"
-      ]
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     },
     "scanCodes": {
-      "android": [
-        44
-      ],
+      "android": null,
       "usb": 458781,
       "linux": 44,
       "xkb": 52,
@@ -1528,18 +1068,10 @@
       "macos": 6
     },
     "keyCodes": {
-      "android": [
-        54
-      ],
-      "glfw": [
-        90
-      ],
-      "gtk": [
-        90
-      ],
-      "windows": [
-        90
-      ]
+      "android": null,
+      "glfw": null,
+      "gtk": null,
+      "windows": null
     }
   },
   "digit1": {

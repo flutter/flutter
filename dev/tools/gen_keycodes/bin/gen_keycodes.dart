@@ -266,7 +266,7 @@ Future<void> main(List<String> rawArguments) async {
     codeFile.createSync(recursive: true);
   }
   print('Writing ${'key codes'.padRight(15)}${codeFile.absolute}');
-  await codeFile.writeAsString(KeyboardKeysCodeGenerator(physicalData).generate());
+  await codeFile.writeAsString(KeyboardKeysCodeGenerator(physicalData, logicalData).generate());
 
   final File mapsFile = File(parsedArguments['maps'] as String);
   if (!mapsFile.existsSync()) {
