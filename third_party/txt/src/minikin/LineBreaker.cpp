@@ -62,6 +62,12 @@ const size_t MAX_TEXT_BUF_RETAIN = 32678;
 // Maximum amount that spaces can shrink, in justified text.
 const float SHRINKABILITY = 1.0 / 3.0;
 
+// libtxt: Add a fudge factor to comparisons between currentLineWidth and
+// postBreak width.  The currentLineWidth passed by the Flutter framework
+// is based on maxIntrinsicWidth/Layout::measureText calculations that may
+// not precisely match the postBreak width.
+const float LIBTXT_WIDTH_ADJUST = 0.00001;
+
 void LineBreaker::setLocale(const icu::Locale& locale, Hyphenator* hyphenator) {
   mWordBreaker.setLocale(locale);
   mLocale = locale;
@@ -240,7 +246,7 @@ void LineBreaker::addWordBreak(size_t offset,
   // libtxt: add a fudge factor to this comparison.  The currentLineWidth passed
   // by the framework is based on maxIntrinsicWidth/Layout::measureText
   // calculations that may not precisely match the postBreak width.
-  if (postBreak - width > currentLineWidth() + 0.00001) {
+  if (postBreak - width > currentLineWidth() + LIBTXT_WIDTH_ADJUST) {
     // Add desperate breaks.
     // Note: these breaks are based on the shaping of the (non-broken) original
     // text; they are imprecise especially in the presence of kerning,
@@ -305,7 +311,7 @@ void LineBreaker::addCandidate(Candidate cand) {
   // mCandidates, and mPreBreak is its preBreak value. mBestBreak is the index
   // of the best line breaking candidate we have found since then, and
   // mBestScore is its penalty.
-  if (cand.postBreak - mPreBreak > currentLineWidth()) {
+  if (cand.postBreak - mPreBreak > currentLineWidth() + LIBTXT_WIDTH_ADJUST) {
     // This break would create an overfull line, pick the best break and break
     // there (greedy)
     if (mBestBreak == mLastBreak) {
@@ -316,7 +322,8 @@ void LineBreaker::addCandidate(Candidate cand) {
   }
 
   while (mLastBreak != candIndex &&
-         cand.postBreak - mPreBreak > currentLineWidth()) {
+         cand.postBreak - mPreBreak >
+             currentLineWidth() + LIBTXT_WIDTH_ADJUST) {
     // We should rarely come here. But if we are here, we have broken the line,
     // but the remaining part still doesn't fit. We now need to break at the
     // second best place after the last break, but we have not kept that
