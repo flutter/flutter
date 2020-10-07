@@ -24,6 +24,7 @@ final String bold = RegExp.escape(AnsiTerminal.bold);
 final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
 final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 
+class MockLogger extends Mock implements Logger {}
 class MockStdout extends Mock implements Stdout {}
 
 void main() {
@@ -71,6 +72,112 @@ void main() {
       daemon: false,
       windows: false,
     ), isA<AppRunLogger>());
+  });
+
+  testWithoutContext('DelegatingLogger delegates', () {
+    final MockLogger mockLogger = MockLogger();
+    final DelegatingLogger delegatingLogger = DelegatingLogger(mockLogger);
+
+    delegatingLogger.quiet;
+    verify(mockLogger.quiet).called(1);
+
+    delegatingLogger.quiet = true;
+    verify(mockLogger.quiet = true).called(1);
+
+    delegatingLogger.hasTerminal;
+    verify(mockLogger.hasTerminal).called(1);
+
+    delegatingLogger.isVerbose;
+    verify(mockLogger.isVerbose).called(1);
+
+    const String message = 'message';
+    final StackTrace stackTrace = StackTrace.current;
+    const bool emphasis = true;
+    const TerminalColor color = TerminalColor.cyan;
+    const int indent = 88;
+    const int hangingIndent = 52;
+    const bool wrap = true;
+    const bool newline = true;
+
+    delegatingLogger.printError(message,
+      stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+    verify(mockLogger.printError(message,
+      stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    )).called(1);
+
+    delegatingLogger.printStatus(message,
+      emphasis: emphasis,
+      color: color,
+      newline: newline,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+    verify(mockLogger.printStatus(message,
+      emphasis: emphasis,
+      color: color,
+      newline: newline,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    )).called(1);
+
+    delegatingLogger.printTrace(message);
+    verify(mockLogger.printTrace(message)).called(1);
+
+    final Map<String, dynamic> eventArgs = <String, dynamic>{};
+    delegatingLogger.sendEvent(message, eventArgs);
+    verify(mockLogger.sendEvent(message, eventArgs)).called(1);
+
+    const Duration timeout = Duration(seconds: 12);
+    const String progressId = 'progressId';
+    const bool multilineOutput = true;
+    const int progressIndicatorPadding = kDefaultStatusPadding * 2;
+    delegatingLogger.startProgress(message,
+      timeout: timeout,
+      progressId: progressId,
+      multilineOutput: multilineOutput,
+      progressIndicatorPadding: progressIndicatorPadding,
+    );
+    verify(mockLogger.startProgress(message,
+      timeout: timeout,
+      progressId: progressId,
+      multilineOutput: multilineOutput,
+      progressIndicatorPadding: progressIndicatorPadding,
+    )).called(1);
+
+    delegatingLogger.supportsColor;
+    verify(mockLogger.supportsColor).called(1);
+
+    delegatingLogger.clear();
+    verify(mockLogger.clear()).called(1);
+  });
+
+  testWithoutContext('asLogger finds the correct delegate', () async {
+    final MockLogger mockLogger = MockLogger();
+    final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
+    final NotifyingLogger notifyingLogger =
+        NotifyingLogger(verbose: true, parent: verboseLogger);
+    expect(asLogger<Logger>(notifyingLogger), notifyingLogger);
+    expect(asLogger<NotifyingLogger>(notifyingLogger), notifyingLogger);
+    expect(asLogger<VerboseLogger>(notifyingLogger), verboseLogger);
+    expect(asLogger<MockLogger>(notifyingLogger), mockLogger);
+
+    expect(
+      () => asLogger<AppRunLogger>(notifyingLogger),
+      throwsA(isA<Exception>()),
+    );
   });
 
   group('AppContext', () {
