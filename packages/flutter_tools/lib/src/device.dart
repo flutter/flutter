@@ -23,6 +23,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -30,7 +31,7 @@ import 'features.dart';
 import 'fuchsia/fuchsia_device.dart';
 import 'fuchsia/fuchsia_sdk.dart';
 import 'fuchsia/fuchsia_workflow.dart';
-import 'globals.dart' as globals;
+import 'globals.dart' as globals show logger;
 import 'ios/devices.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
@@ -81,6 +82,17 @@ class PlatformType {
 
 /// A disovery mechanism for flutter-supported development devices.
 abstract class DeviceManager {
+  DeviceManager({
+    @required Logger logger,
+    @required Terminal terminal,
+    @required UserMessages userMessages,
+  }) : _logger = logger,
+       _terminal = terminal,
+       _userMessages = userMessages;
+
+  final Logger _logger;
+  final Terminal _terminal;
+  final UserMessages _userMessages;
 
   /// Constructing DeviceManagers is cheap; they only do expensive work if some
   /// of their methods are called.
@@ -139,7 +151,7 @@ abstract class DeviceManager {
           return null;
         }, onError: (dynamic error, StackTrace stackTrace) {
           // Return matches from other discoverers even if one fails.
-          globals.printTrace('Ignored error discovering $deviceId: $error');
+          _logger.printTrace('Ignored error discovering $deviceId: $error');
         })
     ];
 
@@ -275,11 +287,11 @@ abstract class DeviceManager {
       // has two active Android devices running, then we request the user to
       // choose one. If the user has two nonEphemeral devices running, we also
       // request input to choose one.
-      if (devices.length > 1 && globals.stdio.stdinHasTerminal) {
-        globals.printStatus(globals.userMessages.flutterMultipleDevicesFound);
-        await Device.printDevices(devices);
+      if (devices.length > 1 && _terminal.stdinHasTerminal) {
+        _logger.printStatus(_userMessages.flutterMultipleDevicesFound);
+        await Device.printDevices(devices, _logger);
         final Device chosenDevice = await _chooseOneOfAvailableDevices(devices);
-        globals.deviceManager.specifiedDeviceId = chosenDevice.id;
+        specifiedDeviceId = chosenDevice.id;
         devices = <Device>[chosenDevice];
       }
     }
@@ -298,18 +310,19 @@ abstract class DeviceManager {
   void _displayDeviceOptions(List<Device> devices) {
     int count = 0;
     for (final Device device in devices) {
-      globals.printStatus(userMessages.flutterChooseDevice(count, device.name, device.id));
+      _logger.printStatus(userMessages.flutterChooseDevice(count, device.name, device.id));
       count++;
     }
   }
 
   Future<String> _readUserInput(int deviceCount) async {
-    globals.terminal.usesTerminalUi = true;
-    final String result = await globals.terminal.promptForCharInput(
-        <String>[ for (int i = 0; i < deviceCount; i++) '$i', 'q', 'Q'],
-        displayAcceptedCharacters: false,
-        logger: globals.logger,
-        prompt: userMessages.flutterChooseOne);
+    _terminal.usesTerminalUi = true;
+    final String result = await _terminal.promptForCharInput(
+      <String>[ for (int i = 0; i < deviceCount; i++) '$i', 'q', 'Q'],
+      displayAcceptedCharacters: false,
+      logger: _logger,
+      prompt: userMessages.flutterChooseOne,
+    );
     return result;
   }
 
@@ -465,7 +478,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
         final List<Device> devices = await pollingGetDevices(timeout: pollingTimeout);
         deviceNotifier.updateWithNewList(devices);
       } on TimeoutException {
-        globals.printTrace('Device poll timed out. Will retry.');
+        // Do nothing on a timeout.
       }
       // Subsequent timeouts after initial population should wait longer.
       _timer = _initTimer(_pollingTimeout);
@@ -736,8 +749,8 @@ abstract class Device {
     }
   }
 
-  static Future<void> printDevices(List<Device> devices) async {
-    await descriptions(devices).forEach(globals.printStatus);
+  static Future<void> printDevices(List<Device> devices, Logger logger) async {
+    await descriptions(devices).forEach(logger.printStatus);
   }
 
   static List<String> devicesPlatformTypes(List<Device> devices) {
