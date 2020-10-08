@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -18,11 +16,11 @@ void main() {
   testWidgets('DataTable control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    Widget buildTable({ int sortColumnIndex, bool sortAscending = true }) {
+    Widget buildTable({ int? sortColumnIndex, bool sortAscending = true }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
-        onSelectAll: (bool value) {
+        onSelectAll: (bool? value) {
           log.add('select-all: $value');
         },
         columns: <DataColumn>[
@@ -42,7 +40,7 @@ void main() {
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
-            onSelectChanged: (bool selected) {
+            onSelectChanged: (bool? selected) {
               log.add('row-selected: ${dessert.name}');
             },
             cells: <DataCell>[
@@ -112,7 +110,7 @@ void main() {
     Widget buildTable({ bool checkboxes = false }) {
       return DataTable(
         showCheckboxColumn: checkboxes,
-        onSelectAll: (bool value) {
+        onSelectAll: (bool? value) {
           log.add('select-all: $value');
         },
         columns: const <DataColumn>[
@@ -129,7 +127,7 @@ void main() {
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
-            onSelectChanged: (bool selected) {
+            onSelectChanged: (bool? selected) {
               log.add('row-selected: ${dessert.name}');
             },
             cells: <DataCell>[
@@ -395,7 +393,7 @@ void main() {
 
   testWidgets('DataTable custom row height', (WidgetTester tester) async {
     Widget buildCustomTable({
-      int sortColumnIndex,
+      int? sortColumnIndex,
       bool sortAscending = true,
       double dataRowHeight = 48.0,
       double headingRowHeight = 56.0,
@@ -403,7 +401,7 @@ void main() {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
-        onSelectAll: (bool value) {},
+        onSelectAll: (bool? value) {},
         dataRowHeight: dataRowHeight,
         headingRowHeight: headingRowHeight,
         columns: <DataColumn>[
@@ -421,7 +419,7 @@ void main() {
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
-            onSelectChanged: (bool selected) {},
+            onSelectChanged: (bool? selected) {},
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -441,7 +439,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: DataTable(
-          onSelectAll: (bool value) {},
+          onSelectAll: (bool? value) {},
           columns: <DataColumn>[
             const DataColumn(
               label: Text('Name'),
@@ -457,7 +455,7 @@ void main() {
           rows: kDesserts.map<DataRow>((Dessert dessert) {
             return DataRow(
               key: ValueKey<String>(dessert.name),
-              onSelectChanged: (bool selected) {},
+              onSelectChanged: (bool? selected) {},
               cells: <DataCell>[
                 DataCell(
                   Text(dessert.name),
@@ -520,13 +518,13 @@ void main() {
     Finder padding;
 
     Widget buildDefaultTable({
-      int sortColumnIndex,
+      int? sortColumnIndex,
       bool sortAscending = true,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
-        onSelectAll: (bool value) {},
+        onSelectAll: (bool? value) {},
         columns: <DataColumn>[
           const DataColumn(
             label: Text('Name'),
@@ -548,7 +546,7 @@ void main() {
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
-            onSelectChanged: (bool selected) {},
+            onSelectChanged: (bool? selected) {},
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -623,15 +621,15 @@ void main() {
     );
 
     Widget buildCustomTable({
-      int sortColumnIndex,
+      int? sortColumnIndex,
       bool sortAscending = true,
-      double horizontalMargin,
-      double columnSpacing,
+      double? horizontalMargin,
+      double? columnSpacing,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
-        onSelectAll: (bool value) {},
+        onSelectAll: (bool? value) {},
         horizontalMargin: horizontalMargin,
         columnSpacing: columnSpacing,
         columns: <DataColumn>[
@@ -655,7 +653,7 @@ void main() {
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
-            onSelectChanged: (bool selected) {},
+            onSelectChanged: (bool? selected) {},
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -742,7 +740,7 @@ void main() {
     Finder padding;
 
     Widget buildDefaultTable({
-      int sortColumnIndex,
+      int? sortColumnIndex,
       bool sortAscending = true,
     }) {
       return DataTable(
@@ -831,10 +829,10 @@ void main() {
     );
 
     Widget buildCustomTable({
-      int sortColumnIndex,
+      int? sortColumnIndex,
       bool sortAscending = true,
-      double horizontalMargin,
-      double columnSpacing,
+      double? horizontalMargin,
+      double? columnSpacing,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
@@ -959,7 +957,7 @@ void main() {
     Table table = tester.widget(find.byType(Table));
     TableRow tableRow = table.children.last;
     BoxDecoration boxDecoration = tableRow.decoration as BoxDecoration;
-    expect(boxDecoration.border.top.width, 1.0);
+    expect(boxDecoration.border!.top.width, 1.0);
 
     const double thickness =  4.2;
     await tester.pumpWidget(
@@ -976,7 +974,7 @@ void main() {
     table = tester.widget(find.byType(Table));
     tableRow = table.children.last;
     boxDecoration = tableRow.decoration as BoxDecoration;
-    expect(boxDecoration.border.top.width, thickness);
+    expect(boxDecoration.border!.top.width, thickness);
   });
 
   testWidgets('DataTable set show bottom border', (WidgetTester tester) async {
@@ -1010,7 +1008,7 @@ void main() {
     Table table = tester.widget(find.byType(Table));
     TableRow tableRow = table.children.last;
     BoxDecoration boxDecoration = tableRow.decoration as BoxDecoration;
-    expect(boxDecoration.border.bottom.width, 1.0);
+    expect(boxDecoration.border!.bottom.width, 1.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1025,11 +1023,11 @@ void main() {
     table = tester.widget(find.byType(Table));
     tableRow = table.children.last;
     boxDecoration = tableRow.decoration as BoxDecoration;
-    expect(boxDecoration.border.bottom.width, 0.0);
+    expect(boxDecoration.border!.bottom.width, 0.0);
   });
 
   testWidgets('DataTable column heading cell - with and without sorting', (WidgetTester tester) async {
-    Widget buildTable({ int sortColumnIndex, bool sortEnabled = true }) {
+    Widget buildTable({ int? sortColumnIndex, bool sortEnabled = true }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         columns: <DataColumn>[
@@ -1098,7 +1096,7 @@ void main() {
     // Regression test for a bug described in
     // https://github.com/flutter/flutter/pull/43735#issuecomment-589459947
     // Filed at https://github.com/flutter/flutter/issues/51152
-    Widget buildTable({ int sortColumnIndex }) {
+    Widget buildTable({ int? sortColumnIndex }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         columns: <DataColumn>[
@@ -1208,7 +1206,7 @@ void main() {
               cells: const <DataCell>[
                 DataCell(Text('Content1')),
               ],
-              onSelectChanged: (bool value) {},
+              onSelectChanged: (bool? value) {},
             ),
             DataRow(
               color: MaterialStateProperty.resolveWith<Color>(
@@ -1221,7 +1219,7 @@ void main() {
               cells: const <DataCell>[
                 DataCell(Text('Content2')),
               ],
-              onSelectChanged: disabled ? null : (bool value) {},
+              onSelectChanged: disabled ? null : (bool? value) {},
             ),
           ],
         ),
@@ -1263,7 +1261,7 @@ void main() {
                 return Colors.transparent;
               },
             ),
-            onSelectChanged: (bool value) {},
+            onSelectChanged: (bool? value) {},
             cells: const <DataCell>[
               DataCell(Text('Content1')),
             ],

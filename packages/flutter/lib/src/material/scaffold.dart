@@ -1412,8 +1412,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///  * [ScaffoldState], which is the state associated with this widget.
 ///  * <https://material.io/design/layout/responsive-layout-grid.html>
 ///  * Cookbook: [Add a Drawer to a screen](https://flutter.dev/docs/cookbook/design/drawer)
-///  * See our
-///    [Scaffold Sample Apps](https://flutter.dev/docs/catalog/samples/Scaffold).
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
   const Scaffold({
