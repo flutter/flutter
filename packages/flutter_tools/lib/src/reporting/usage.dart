@@ -190,6 +190,7 @@ class _DefaultUsage implements Usage {
     String logFile,
     AnalyticsFactory analyticsIOFactory,
     @required bool runningOnBot,
+    SystemClock clock,
   }) {
     final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
@@ -198,6 +199,7 @@ class _DefaultUsage implements Usage {
     final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;
 
     analyticsIOFactory ??= _defaultAnalyticsIOFactory;
+    _clock = clock ?? globals.systemClock;
 
     if (// To support testing, only allow other signals to supress analytics
         // when analytics are not being shunted to a file.
@@ -273,12 +275,14 @@ class _DefaultUsage implements Usage {
 
   _DefaultUsage.test() :
       _suppressAnalytics = false,
-      _analytics = AnalyticsMock(true);
+      _analytics = AnalyticsMock(true),
+      _clock = SystemClock.fixed(DateTime(2020, 10, 8));
 
   Analytics _analytics;
 
   bool _printedWelcome = false;
   bool _suppressAnalytics = false;
+  SystemClock _clock;
 
   @override
   bool get isFirstRun => _analytics.firstRun;
@@ -310,7 +314,7 @@ class _DefaultUsage implements Usage {
 
     final Map<String, String> paramsWithLocalTime = <String, String>{
       ...?parameters,
-      cdKey(CustomDimensions.localTime): formatDateTime(globals.systemClock.now()),
+      cdKey(CustomDimensions.localTime): formatDateTime(_clock.now()),
     };
     _analytics.sendScreenView(command, parameters: paramsWithLocalTime);
   }
@@ -329,7 +333,7 @@ class _DefaultUsage implements Usage {
 
     final Map<String, String> paramsWithLocalTime = <String, String>{
       ...?parameters,
-      cdKey(CustomDimensions.localTime): formatDateTime(globals.systemClock.now()),
+      cdKey(CustomDimensions.localTime): formatDateTime(_clock.now()),
     };
 
     _analytics.sendEvent(
