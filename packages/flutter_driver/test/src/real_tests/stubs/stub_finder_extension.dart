@@ -21,14 +21,15 @@ class StubFinderExtension extends FinderExtension {
       if (key is! ValueKey<String>) {
         return false;
       }
-      return (key as ValueKey<String>).value ==
-          (finder as StubFinder).keyString;
+      return (key as ValueKey<String>).value == (finder as StubFinder).keyString;
     });
   }
 
   @override
   SerializableFinder deserialize(
-      Map<String, String> params, DeserializeFinderFactory finderFactory) {
+    Map<String, String> params,
+    DeserializeFinderFactory finderFactory,
+  ) {
     return StubFinder(params['keyString']);
   }
 
