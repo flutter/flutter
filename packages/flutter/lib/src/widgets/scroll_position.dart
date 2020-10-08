@@ -759,8 +759,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// [pointerScroll] is very similar to [jumpTo], but [pointerScroll] will
   /// update [ScrollDirection.forward] / [ScrollDirection.reverse].
   ///
-  /// This is usually used in processing pointer signals, where delta is given
-  /// to [ScrollPosition] to calculate target value sliding.
+  /// The method is used to process the pointer signal, where delta given
+  /// [ScrollPosition] the calculated target value to slide.
   // TODO(YeungKC): Support trackpad scroll, https://github.com/flutter/flutter/issues/23604.
   void pointerScroll(double delta);
 
