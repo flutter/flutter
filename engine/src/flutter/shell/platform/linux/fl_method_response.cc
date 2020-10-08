@@ -97,16 +97,19 @@ G_MODULE_EXPORT FlValue* fl_method_response_get_result(FlMethodResponse* self,
     FlValue* details =
         fl_method_error_response_get_details(FL_METHOD_ERROR_RESPONSE(self));
     g_autofree gchar* details_text = nullptr;
-    if (details != nullptr)
+    if (details != nullptr) {
       details_text = fl_value_to_string(details);
+    }
 
     g_autoptr(GString) error_message = g_string_new("");
     g_string_append_printf(error_message, "Remote code returned error %s",
                            code);
-    if (message != nullptr)
+    if (message != nullptr) {
       g_string_append_printf(error_message, ": %s", message);
-    if (details_text != nullptr)
+    }
+    if (details_text != nullptr) {
       g_string_append_printf(error_message, " %s", details_text);
+    }
     g_set_error_literal(error, FL_METHOD_RESPONSE_ERROR,
                         FL_METHOD_RESPONSE_ERROR_REMOTE_ERROR,
                         error_message->str);
@@ -128,8 +131,9 @@ G_MODULE_EXPORT FlMethodSuccessResponse* fl_method_success_response_new(
   FlMethodSuccessResponse* self = FL_METHOD_SUCCESS_RESPONSE(
       g_object_new(fl_method_success_response_get_type(), nullptr));
 
-  if (result != nullptr)
+  if (result != nullptr) {
     self->result = fl_value_ref(result);
+  }
 
   return self;
 }
