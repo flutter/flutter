@@ -192,10 +192,11 @@ int RunTester(const flutter::Settings& settings,
 
   auto asset_manager = std::make_shared<flutter::AssetManager>();
   asset_manager->PushBack(std::make_unique<flutter::DirectoryAssetBundle>(
-      fml::Duplicate(settings.assets_dir)));
-  asset_manager->PushBack(
-      std::make_unique<flutter::DirectoryAssetBundle>(fml::OpenDirectory(
-          settings.assets_path.c_str(), false, fml::FilePermission::kRead)));
+      fml::Duplicate(settings.assets_dir), true));
+  asset_manager->PushBack(std::make_unique<flutter::DirectoryAssetBundle>(
+      fml::OpenDirectory(settings.assets_path.c_str(), false,
+                         fml::FilePermission::kRead),
+      true));
 
   RunConfiguration run_configuration(std::move(isolate_configuration),
                                      std::move(asset_manager));
