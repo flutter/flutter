@@ -468,6 +468,7 @@ Matcher matchesSemantics({
   bool hasToggledState = false,
   bool isToggled = false,
   bool hasImplicitScrolling = false,
+  bool isSlider = false,
   // Actions //
   bool hasTapAction = false,
   bool hasLongPressAction = false,
@@ -519,6 +520,7 @@ Matcher matchesSemantics({
     if (hasToggledState) SemanticsFlag.hasToggledState,
     if (isToggled) SemanticsFlag.isToggled,
     if (hasImplicitScrolling) SemanticsFlag.hasImplicitScrolling,
+    if (isSlider) SemanticsFlag.isSlider
   ];
 
   final List<SemanticsAction> actions = <SemanticsAction>[
