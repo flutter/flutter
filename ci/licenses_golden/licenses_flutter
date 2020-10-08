@@ -426,6 +426,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/alarm_clock.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/assets.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/bitmap_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/browser_detection.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/browser_location.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvas_pool.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/canvaskit_api.dart
@@ -462,9 +463,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/dom_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/dom_renderer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/engine_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/frame_reference.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/history/history.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/history/js_url_strategy.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/history/url_strategy.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/history.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/backdrop_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/clip.dart

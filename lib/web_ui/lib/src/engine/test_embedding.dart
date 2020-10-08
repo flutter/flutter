@@ -20,27 +20,29 @@ class TestHistoryEntry {
   }
 }
 
-/// This URL strategy mimics the browser's history as closely as possible
+/// This location strategy mimics the browser's history as closely as possible
 /// while doing it all in memory with no interaction with the browser.
 ///
 /// It keeps a list of history entries and event listeners in memory and
 /// manipulates them in order to achieve the desired functionality.
-class TestUrlStrategy extends UrlStrategy {
-  /// Creates a instance of [TestUrlStrategy] with an empty string as the
+class TestLocationStrategy extends LocationStrategy {
+  /// Creates a instance of [TestLocationStrategy] with an empty string as the
   /// path.
-  factory TestUrlStrategy() => TestUrlStrategy.fromEntry(TestHistoryEntry(null, null, ''));
+  factory TestLocationStrategy() => TestLocationStrategy.fromEntry(TestHistoryEntry(null, null, ''));
 
-  /// Creates an instance of [TestUrlStrategy] and populates it with a list
+  /// Creates an instance of [TestLocationStrategy] and populates it with a list
   /// that has [initialEntry] as the only item.
-  TestUrlStrategy.fromEntry(TestHistoryEntry initialEntry)
+  TestLocationStrategy.fromEntry(TestHistoryEntry initialEntry)
       : _currentEntryIndex = 0,
         history = <TestHistoryEntry>[initialEntry];
 
   @override
-  String getPath() => currentEntry.url;
+  String get path => currentEntry.url;
 
   @override
-  dynamic getState() => currentEntry.state;
+  dynamic get state {
+    return currentEntry.state;
+  }
 
   int _currentEntryIndex;
   int get currentEntryIndex => _currentEntryIndex;
@@ -103,12 +105,12 @@ class TestUrlStrategy extends UrlStrategy {
   }
 
   @override
-  Future<void> go(int count) {
+  Future<void> back({int count = 1}) {
     assert(withinAppHistory);
-    // Browsers don't move in history immediately. They do it at the next
+    // Browsers don't move back in history immediately. They do it at the next
     // event loop. So let's simulate that.
     return _nextEventLoop(() {
-      _currentEntryIndex = _currentEntryIndex + count;
+      _currentEntryIndex = _currentEntryIndex - count;
       if (withinAppHistory) {
         _firePopStateEvent();
       }
@@ -122,7 +124,7 @@ class TestUrlStrategy extends UrlStrategy {
   final List<html.EventListener> listeners = <html.EventListener>[];
 
   @override
-  ui.VoidCallback addPopStateListener(html.EventListener fn) {
+  ui.VoidCallback onPopState(html.EventListener fn) {
     listeners.add(fn);
     return () {
       // Schedule a micro task here to avoid removing the listener during

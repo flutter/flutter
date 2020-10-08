@@ -10,7 +10,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' as engine;
 
-engine.TestUrlStrategy _strategy;
+engine.TestLocationStrategy _strategy;
 
 const engine.MethodCodec codec = engine.JSONMethodCodec();
 
@@ -21,14 +21,12 @@ void main() {
 }
 
 void testMain() {
-  setUp(() async {
-    _strategy = engine.TestUrlStrategy();
-    await engine.window.debugInitializeHistory(_strategy, useSingle: true);
+  setUp(() {
+    engine.window.locationStrategy = _strategy = engine.TestLocationStrategy();
   });
 
-  tearDown(() async {
-    _strategy = null;
-    await engine.window.debugResetHistory();
+  tearDown(() {
+    engine.window.locationStrategy = _strategy = null;
   });
 
   test('Tracks pushed, replaced and popped routes', () async {
@@ -42,6 +40,6 @@ void testMain() {
       (_) => completer.complete(),
     );
     await completer.future;
-    expect(_strategy.getPath(), '/foo');
+    expect(_strategy.path, '/foo');
   });
 }
