@@ -20,7 +20,7 @@ typedef _JsSetUrlStrategy = void Function(JsUrlStrategy);
 
 /// A JavaScript hook to customize the URL strategy of a Flutter app.
 //
-// Keep this in sync with the js name in the web engine. Find it at:
+// Keep this in sync with the JS name in the web engine. Find it at:
 // https://github.com/flutter/engine/blob/custom_location_strategy/lib/web_ui/lib/src/engine/navigation/js_url_strategy.dart
 //
 // TODO(mdebbar): Add integration test https://github.com/flutter/flutter/issues/66852
@@ -40,8 +40,8 @@ typedef _StateOperation = void Function(
 
 typedef _HistoryMove = Future<void> Function(int count);
 
-/// Given a Dart implementation of URL strategy, it converts it to a JavaScript
-/// URL strategy that be passed through JS interop.
+/// Given a Dart implementation of URL strategy, converts it to a JavaScript
+/// URL strategy to be passed through JS interop.
 JsUrlStrategy convertToJsUrlStrategy(UrlStrategy strategy) {
   if (strategy == null) {
     return null;
@@ -77,8 +77,8 @@ abstract class JsUrlStrategy {
     @required _HistoryMove go,
   });
 
-  /// Adds a listener to the `popstate` event and returns a function that, when
-  /// invoked, removes the listener.
+  /// Adds a listener to the `popstate` event and returns a function that
+  /// removes the listener.
   external ui.VoidCallback addPopStateListener(html.EventListener fn);
 
   /// Returns the active path in the browser.
