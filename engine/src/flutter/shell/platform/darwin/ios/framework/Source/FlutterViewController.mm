@@ -157,6 +157,12 @@ typedef enum UIAccessibilityContrast : NSInteger {
 
 - (void)sharedSetupWithProject:(nullable FlutterDartProject*)project
                   initialRoute:(nullable NSString*)initialRoute {
+  // Need the project to get settings for the view. Initializing it here means
+  // the Engine class won't initialize it later.
+  if (!project) {
+    project = [[[FlutterDartProject alloc] init] autorelease];
+  }
+  FlutterView.forceSoftwareRendering = project.settings.enable_software_rendering;
   auto engine = fml::scoped_nsobject<FlutterEngine>{[[FlutterEngine alloc]
                 initWithName:@"io.flutter"
                      project:project

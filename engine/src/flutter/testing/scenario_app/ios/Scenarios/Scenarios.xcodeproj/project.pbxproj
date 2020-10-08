@@ -24,6 +24,7 @@
 		242F37A222E636DE001E83D4 /* Flutter.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		242F37A322E636DE001E83D4 /* App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4122E3B5F700073EBF /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		244EA6D0230DBE8900B2D26E /* golden_platform_view_D21AP.png in Resources */ = {isa = PBXBuildFile; fileRef = 244EA6CF230DBE8900B2D26E /* golden_platform_view_D21AP.png */; };
+		246A6611252E693A00EAB0F3 /* RenderingSelectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 246A6610252E693A00EAB0F3 /* RenderingSelectionTest.m */; };
 		246B4E4222E3B5F700073EBF /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4122E3B5F700073EBF /* App.framework */; };
 		246B4E4622E3B61000073EBF /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; };
 		248D76CC22E388370012F0C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 248D76CB22E388370012F0C1 /* AppDelegate.m */; };
@@ -126,6 +127,7 @@
 		0D8470A3240F0B1F0030B565 /* StatusBarTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StatusBarTest.m; sourceTree = "<group>"; };
 		0DB781FC22EA2C0300E9B371 /* FlutterViewControllerTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FlutterViewControllerTest.m; sourceTree = "<group>"; };
 		244EA6CF230DBE8900B2D26E /* golden_platform_view_D21AP.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = golden_platform_view_D21AP.png; sourceTree = "<group>"; };
+		246A6610252E693A00EAB0F3 /* RenderingSelectionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RenderingSelectionTest.m; sourceTree = "<group>"; };
 		246B4E4122E3B5F700073EBF /* App.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = App.framework; sourceTree = "<group>"; };
 		246B4E4522E3B61000073EBF /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Flutter.framework; sourceTree = "<group>"; };
 		248D76C722E388370012F0C1 /* Scenarios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scenarios.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -291,6 +293,7 @@
 				0D8470A3240F0B1F0030B565 /* StatusBarTest.m */,
 				0A42BFB32447E179007E212E /* TextSemanticsFocusTest.m */,
 				0A42BFB52447E19F007E212E /* TextSemanticsFocusTest.h */,
+				246A6610252E693A00EAB0F3 /* RenderingSelectionTest.m */,
 			);
 			path = ScenariosUITests;
 			sourceTree = "<group>";
@@ -488,6 +491,7 @@
 				6816DBA42318358200A51400 /* PlatformViewGoldenTestManager.m in Sources */,
 				248D76EF22E388380012F0C1 /* PlatformViewUITests.m in Sources */,
 				0D8470A4240F0B1F0030B565 /* StatusBarTest.m in Sources */,
+				246A6611252E693A00EAB0F3 /* RenderingSelectionTest.m in Sources */,
 				4F06F1B32473296E000AF246 /* LocalizationInitializationTest.m in Sources */,
 				0A42BFB42447E179007E212E /* TextSemanticsFocusTest.m in Sources */,
 			);
