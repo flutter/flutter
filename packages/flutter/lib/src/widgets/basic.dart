@@ -2709,6 +2709,71 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// needed, prefer removing the widget from the tree entirely rather than
 /// keeping it alive in an [Offstage] subtree.
 ///
+/// {@tool dartpad --template=stateful_widget_material}
+///
+/// This example shows a [FlutterLogo] widget when the `_offstage` member field
+/// is false, and hides it without any room in the parent when it is true. The
+/// [Size] of the logo without bringing it on screen will be measured.
+///
+/// ```dart
+/// GlobalKey _key = GlobalKey();
+/// bool _offstage = true;
+/// Size _invisibleLogoSize;
+///
+/// void _changeOffstageValue() {
+///   setState(() {
+///     _offstage = !_offstage;
+///     _invisibleLogoSize = null;
+///   });
+/// }
+///
+/// void _getInvisibleLogoSize() {
+///   setState(() {
+///     final RenderBox renderLogo = _key.currentContext.findRenderObject();
+///     final sizeLogo = renderLogo.size;
+///     _invisibleLogoSize = sizeLogo;
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   String isFlutterLogoOffstageText;
+///     if (_offstage) {
+///       isFlutterLogoOffstageText = 'FlutterLogo widget is offstage. '
+///         'It is laid out in the widget tree, but occupies no space visually, '
+///         'cannot be hit tested, and is not painted. Yet, we are able to get its '
+///         'size as if it were painted: $_invisibleLogoSize';
+///     } else {
+///       isFlutterLogoOffstageText = 'FlutterLogo widget is not currently offstage, '
+///         'so it occupies space, is available for hit testing, and painted.';
+///     }
+///   }
+///
+///   return Scaffold(
+///     body: Center(
+///       child: Column(
+///         mainAxisAlignment: MainAxisAlignment.center,
+///         children: <Widget>[
+///           Offstage(
+///             offstage: _offstage,
+///             child: FlutterLogo(
+///               key: _key,
+///               size: 150.0,
+///             ),
+///           ),
+///           RaisedButton(
+///             child: Text('Toggle Offstage Value'),
+///             onPressed: () { _changeOffstageValue(); },
+///           ),
+///           Text(isFlutterLogoOffstageText),
+///         ],
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Visibility], which can hide a child more efficiently (albeit less
