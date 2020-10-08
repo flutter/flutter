@@ -651,13 +651,13 @@ FlutterEngineResult FlutterEngineCreateAOTData(
 }
 
 FlutterEngineResult FlutterEngineCollectAOTData(FlutterEngineAOTData data) {
-  if (data) {
-    data->loaded_elf = nullptr;
-    data->vm_snapshot_data = nullptr;
-    data->vm_snapshot_instrs = nullptr;
-    data->vm_isolate_data = nullptr;
-    data->vm_isolate_instrs = nullptr;
+  if (!data) {
+    // Deleting a null object should be a no-op.
+    return kSuccess;
   }
+
+  // Created in a unique pointer in `FlutterEngineCreateAOTData`.
+  delete data;
   return kSuccess;
 }
 
