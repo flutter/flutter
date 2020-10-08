@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show window;
 
 import 'package:flutter/gestures.dart';
@@ -73,7 +71,7 @@ double getEnableProgress(WidgetTester tester) => getRenderChip(tester)?.enableAn
 
 /// Adds the basic requirements for a Chip.
 Widget _wrapForChip({
-  Widget child,
+  required Widget child,
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
   Brightness brightness = Brightness.light,
@@ -96,8 +94,8 @@ Widget _wrapForChip({
 /// cause the chip or label to exceed its constrained height.
 Future<void> _testConstrainedLabel(
   WidgetTester tester, {
-  CircleAvatar avatar,
-  VoidCallback onDeleted,
+  CircleAvatar? avatar,
+  VoidCallback? onDeleted,
 }) async {
   const double labelWidth = 100.0;
   const double labelHeight = 50.0;
@@ -134,7 +132,7 @@ Future<void> _testConstrainedLabel(
   expect(chipSize.height, chipParentHeight);
 }
 
-Widget _selectedInputChip({ Color checkmarkColor }) {
+Widget _selectedInputChip({ Color? checkmarkColor }) {
   return InputChip(
     label: const Text('InputChip'),
     selected: true,
@@ -143,7 +141,7 @@ Widget _selectedInputChip({ Color checkmarkColor }) {
   );
 }
 
-Widget _selectedFilterChip({ Color checkmarkColor }) {
+Widget _selectedFilterChip({ Color? checkmarkColor }) {
   return FilterChip(
     label: const Text('InputChip'),
     selected: true,
@@ -155,8 +153,8 @@ Widget _selectedFilterChip({ Color checkmarkColor }) {
 
 Future<void> _pumpCheckmarkChip(
   WidgetTester tester, {
-  @required Widget chip,
-  Color themeColor,
+  required Widget chip,
+  Color? themeColor,
   Brightness brightness = Brightness.light,
 }) async {
   await tester.pumpWidget(
@@ -191,9 +189,9 @@ void _expectCheckmarkColor(Finder finder, Color color) {
 }
 
 Widget _chipWithOptionalDeleteButton({
-  UniqueKey deleteButtonKey,
-  UniqueKey labelKey,
-  bool deletable,
+  UniqueKey? deleteButtonKey,
+  UniqueKey? labelKey,
+  required bool deletable,
   TextDirection textDirection = TextDirection.ltr,
 }){
   return _wrapForChip(
@@ -394,7 +392,7 @@ void main() {
     'the chip when it exceeds the available space',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/11523
-      Widget chipBuilder (String text, {Widget avatar, VoidCallback onDeleted}) {
+      Widget chipBuilder (String text, {Widget? avatar, VoidCallback? onDeleted}) {
         return MaterialApp(
           home: Scaffold(
             body: Container(
@@ -770,7 +768,7 @@ void main() {
 
   testWidgets('Avatar drawer works as expected on RawChip', (WidgetTester tester) async {
     final GlobalKey labelKey = GlobalKey();
-    Future<void> pushChip({ Widget avatar }) async {
+    Future<void> pushChip({ Widget? avatar }) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: Wrap(
@@ -1195,7 +1193,7 @@ void main() {
   testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({ Widget avatar, bool selectable = false }) async {
+    Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: Wrap(
@@ -1241,7 +1239,7 @@ void main() {
     // Simulate a tap on the label to select the chip.
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(true));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
@@ -1259,7 +1257,7 @@ void main() {
     // Simulate another tap on the label to deselect the chip.
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(false));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
     expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
@@ -1317,7 +1315,7 @@ void main() {
     // Simulate a tap on the label to select the chip.
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(true));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
@@ -1335,7 +1333,7 @@ void main() {
     // Simulate another tap on the label to deselect the chip.
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(false));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
     expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
@@ -1354,7 +1352,7 @@ void main() {
   testWidgets('Activation works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({ Widget avatar, bool selectable = false }) async {
+    Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: Wrap(
@@ -1392,7 +1390,7 @@ void main() {
 
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(true));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
@@ -1484,9 +1482,9 @@ void main() {
     final ChipThemeData defaultChipTheme = themeData.chipTheme;
     bool value = false;
     Widget buildApp({
-      ChipThemeData chipTheme,
-      Widget avatar,
-      Widget deleteIcon,
+      ChipThemeData? chipTheme,
+      Widget? avatar,
+      Widget? deleteIcon,
       bool isSelectable = true,
       bool isPressable = false,
       bool isDeletable = true,
@@ -1506,7 +1504,7 @@ void main() {
                 avatar: avatar,
                 deleteIcon: deleteIcon,
                 isEnabled: isSelectable || isPressable,
-                shape: chipTheme.shape,
+                shape: chipTheme?.shape,
                 selected: isSelectable && value,
                 label: Text('$value'),
                 onSelected: isSelectable
@@ -2296,20 +2294,6 @@ void main() {
     expect(find.byType(InkWell), findsOneWidget);
   });
 
-  testWidgets('RawChip.selected can not be null', (WidgetTester tester) async {
-    expect(() async {
-      MaterialApp(
-        home: Material(
-          child: RawChip(
-            onPressed: () { },
-            selected: null,
-            label: const Text('Chip'),
-          ),
-        ),
-      );
-    }, throwsAssertionError);
-  });
-
   testWidgets('Chip uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
@@ -2355,7 +2339,7 @@ void main() {
       );
     }
     Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('Chip')).text.style.color;
+      return tester.renderObject<RenderParagraph>(find.text('Chip')).text.style!.color!;
     }
 
     // Default, not disabled.

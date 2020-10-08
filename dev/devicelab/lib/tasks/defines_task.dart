@@ -5,7 +5,7 @@
 import 'dart:io';
 
 import '../framework/adb.dart';
-import '../framework/framework.dart';
+import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 Future<TaskResult> runDartDefinesTask() async {

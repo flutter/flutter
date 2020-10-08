@@ -423,6 +423,7 @@ class IOSSimulator extends Device {
           '--enable-checked-mode',
           '--verify-entry-points',
         ],
+        if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
         if (debuggingOptions.startPaused) '--start-paused',
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
         if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',

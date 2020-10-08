@@ -186,10 +186,9 @@ task:
         - git clone https://github.com/flutter/web_installers.git
         - cd web_installers/packages/web_drivers/
         - pub get
-        - dart lib/web_driver_installer.dart &
-        - sleep 20
+        - dart lib/web_driver_installer.dart chromedriver --install-only
         - chromedriver/chromedriver --port=4444 &
-        - sleep 5
+        - sleep 1
         - cd ../../../examples/hello_world/
         - flutter drive --target=test_driver/smoke_web_engine.dart -d web-server --profile --browser-name=chrome
 

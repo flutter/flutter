@@ -3736,7 +3736,7 @@ class InputDecorationTheme with Diagnosticable {
   /// true and bordered per the [border].
   ///
   /// This property is false by default.
-  final bool? filled;
+  final bool filled;
 
   /// The color to fill the decoration's container with, if [filled] is true.
   ///
