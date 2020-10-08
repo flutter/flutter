@@ -199,7 +199,9 @@ abstract class SearchDelegate<T> {
     final ThemeData theme = Theme.of(context)!;
     assert(theme != null);
     return theme.copyWith(
-      primaryColor: Colors.white,
+      primaryColor: theme.brightness == Brightness.dark
+          ? theme.primaryColor
+          : Colors.white,
       primaryIconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
       primaryColorBrightness: Brightness.light,
       primaryTextTheme: theme.textTheme,
