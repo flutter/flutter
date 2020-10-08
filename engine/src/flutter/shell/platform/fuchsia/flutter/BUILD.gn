@@ -229,8 +229,8 @@ flutter_runner("jit_product") {
   product = true
 
   extra_deps = [
-    "//third_party/dart/runtime:libdart_jit_product",
-    "//third_party/dart/runtime/platform:libdart_platform_jit_product",
+    "//third_party/dart/runtime:libdart_jit",
+    "//third_party/dart/runtime/platform:libdart_platform_jit",
   ]
 }
 
@@ -249,8 +249,8 @@ flutter_runner("aot_product") {
   product = true
 
   extra_deps = [
-    "//third_party/dart/runtime:libdart_precompiled_runtime_product",
-    "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime_product",
+    "//third_party/dart/runtime:libdart_precompiled_runtime",
+    "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime",
   ]
 }
 
