@@ -329,17 +329,16 @@ void main() {
     fileSystem.file('build/macos/Build/Products/Release/Runner.app/App')
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
-    await runZoned(() async {
-      await createTestCommandRunner(command).run(
+
+    // Capture Usage.test() events.
+    final StringBuffer buffer = await capturedConsolePrint(() =>
+      createTestCommandRunner(command).run(
         const <String>['build', 'macos', '--no-pub', '--analyze-size']
-      );
-    }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-      // Capture Usage.test() events.
-      testLogger.printTrace(line);
-    }));
+      )
+    );
 
     expect(testLogger.statusText, contains('A summary of your macOS bundle analysis can be found at'));
-    expect(testLogger.traceText, contains('event {category: code-size-analysis, action: macos, label: null, value: null, cd33:'));
+    expect(buffer.toString(), contains('event {category: code-size-analysis, action: macos, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[

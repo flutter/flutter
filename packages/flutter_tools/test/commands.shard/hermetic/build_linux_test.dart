@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -400,16 +398,14 @@ set(BINARY_NAME "fizz_bar")
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.filled(10000, 0));
 
-    await runZoned(() async {
-      await createTestCommandRunner(command).run(
+    // Capture Usage.test() events.
+    final StringBuffer buffer = await capturedConsolePrint(() =>
+      createTestCommandRunner(command).run(
         const <String>['build', 'linux', '--no-pub', '--analyze-size']
-      );
-    }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-      // Capture Usage.test() events.
-      testLogger.printTrace(line);
-    }));
+      )
+    );
 
-    expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
+    expect(buffer.toString(), contains('A summary of your Linux bundle analysis can be found at'));
     expect(testLogger.traceText, contains('event {category: code-size-analysis, action: linux, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

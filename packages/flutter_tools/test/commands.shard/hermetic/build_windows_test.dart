@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -405,17 +403,15 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
       }),
     ]);
 
-    await runZoned(() async {
-      await createTestCommandRunner(command).run(
+    // Capture Usage.test() events.
+    final StringBuffer buffer = await capturedConsolePrint(() =>
+      createTestCommandRunner(command).run(
         const <String>['windows', '--no-pub', '--analyze-size']
-      );
-    }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-      // Capture Usage.test() events.
-      testLogger.printTrace(line);
-    }));
+      )
+    );
 
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
-    expect(testLogger.traceText, contains('event {category: code-size-analysis, action: windows, label: null, value: null, cd33:'));
+    expect(buffer.toString(), contains('event {category: code-size-analysis, action: windows, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     FileSystem: () => fileSystem,

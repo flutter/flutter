@@ -376,21 +376,19 @@ void main() {
           ..writeAsStringSync('# Hello, World');
         globals.fs.currentDirectory = tempDir;
 
-        await runZoned(() async {
-          await expectToolExitLater(createTestCommandRunner(command).run(<String>[
+        // Capture Usage.test() events.
+        final StringBuffer buffer = await capturedConsolePrint(() =>
+          expectToolExitLater(createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
             '--no-hot',
-          ]), isNull);
-        }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-          // Capture Usage.test() events.
-          testLogger.printTrace(line);
-        }));
+          ]), isNull)
+        );
         // Allow any CustomDimensions.localTime (cd33) timestamp.
         final RegExp usageRegexp = RegExp(
           'screenView {cd3: false, cd4: ios, cd22: iOS 13, cd23: debug, cd18: false, cd15: swift, cd31: false, cd47: false, cd33: .*, viewName: run'
         );
-        expect(testLogger.traceText, matches(usageRegexp));
+        expect(buffer.toString(), matches(usageRegexp));
       }, overrides: <Type, Generator>{
         ApplicationPackageFactory: () => mockApplicationPackageFactory,
         Artifacts: () => artifacts,
