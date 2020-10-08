@@ -1583,6 +1583,119 @@ void main() {
 
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
+
+  testWidgets('PopupMenu in AppBar does not overlap with the status bar', (WidgetTester tester) async {
+    const List<PopupMenuItem<int>> choices = <PopupMenuItem<int>>[
+      PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+      PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+      PopupMenuItem<int>(value: 3, child: Text('Item 3')),
+    ];
+
+    const double statusBarHeight = 24.0;
+    final PopupMenuItem<int> firstItem = choices[0];
+    int _selectedValue = choices[0].value!;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            data: const MediaQueryData(padding: EdgeInsets.only(top: statusBarHeight)), // status bar
+            child: child!,
+          );
+        },
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('PopupMenu Test'),
+                actions: <Widget>[
+                  PopupMenuButton<int>(
+                    onSelected: (int result) {
+                      setState(() {
+                        _selectedValue = result;
+                      });
+                    },
+                    initialValue: _selectedValue,
+                    itemBuilder: (BuildContext context) {
+                      return choices;
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+
+    // Tap third item.
+    await tester.tap(find.text('Item 3'));
+    await tester.pumpAndSettle();
+
+    // Open popupMenu again.
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+
+    // Check whether the first item is not overlapping with status bar.
+    expect(tester.getTopLeft(find.byWidget(firstItem)).dy, greaterThan(statusBarHeight));
+  });
+
+  testWidgets('Vertically long PopupMenu does not overlap with the status bar and bottom notch', (WidgetTester tester) async {
+    const double windowPaddingTop = 44;
+    const double windowPaddingBottom = 34;
+    final GlobalKey _firstKey = GlobalKey();
+    final GlobalKey _lastKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(
+                top: windowPaddingTop,
+                bottom: windowPaddingBottom,
+              ),
+            ),
+            child: child!,
+          );
+        },
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('PopupMenu Test'),
+          ),
+          body: PopupMenuButton<int>(
+            child: const Text('Show Menu'),
+            itemBuilder: (BuildContext context) => Iterable<PopupMenuItem<int>>.generate(
+              20, (int i) => PopupMenuItem<int>(
+                // Set globalKey to the first and last item.
+                key: i == 0 ? _firstKey : i == 19 ? _lastKey : null,
+                value: i,
+                child: Text('Item $i'),
+              ),
+            ).toList(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Show Menu'));
+    await tester.pumpAndSettle();
+
+    // Check whether the first item is not overlapping with status bar.
+    expect(tester.getTopLeft(find.byKey(_firstKey)).dy, greaterThan(windowPaddingTop));
+
+    await tester.ensureVisible(find.byKey(_lastKey, skipOffstage: false));
+    await tester.pumpAndSettle();
+
+    // Check whether the last item is not overlapping with bottom notch.
+    expect(
+      tester.getBottomLeft(find.byKey(_lastKey)).dy,
+      lessThan(600 - windowPaddingBottom), // Device height is 600.
+    );
+  });
 }
 
 class TestApp extends StatefulWidget {
