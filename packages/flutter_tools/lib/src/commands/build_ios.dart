@@ -21,7 +21,6 @@ import 'build.dart';
 /// .ipas, see https://flutter.dev/docs/deployment/ios.
 class BuildIOSCommand extends _BuildIOSSubCommand {
   BuildIOSCommand({ @required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
-    addBuildModeFlags(defaultToRelease: true);
     argParser
       ..addFlag('config-only',
         help: 'Update the project configuration without performing a build. '
@@ -43,15 +42,6 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 
   @override
   final String description = 'Build an iOS application bundle (Mac OS X host only).';
-
-  @override
-  BuildInfo get buildInfo {
-    // Side effect: ensure defaultBuildMode is set before build info is derived.
-    defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
-    _buildInfo ??= getBuildInfo();
-    return _buildInfo;
-  }
-  BuildInfo _buildInfo;
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
@@ -79,13 +69,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   final String description = 'Build an iOS archive bundle (Mac OS X host only).';
 
   @override
-  BuildInfo get buildInfo {
-    _buildInfo ??= getBuildInfo(forcedBuildMode: BuildMode.release);
-    return _buildInfo;
-  }
-  BuildInfo _buildInfo;
-
-  @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.archive;
 
   @override
@@ -102,6 +85,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
+    addBuildModeFlags(defaultToRelease: true);
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -122,7 +106,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     DevelopmentArtifact.iOS,
   };
 
-  BuildInfo get buildInfo;
   XcodeBuildAction get xcodeBuildAction;
   bool get forSimulator;
   bool get configOnly;
@@ -130,6 +113,9 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
+    final BuildInfo buildInfo = getBuildInfo();
+
     if (!globals.platform.isMacOS) {
       throwToolExit('Building for iOS is only supported on macOS.');
     }

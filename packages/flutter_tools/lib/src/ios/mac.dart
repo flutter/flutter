@@ -96,7 +96,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool codesign = true,
   String deviceID,
   bool configOnly = false,
-  XcodeBuildAction buildAction,
+  XcodeBuildAction buildAction = XcodeBuildAction.build,
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
@@ -583,6 +583,9 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
   }
 }
 
+/// xcodebuild <buildaction> parameter (see man xcodebuild for details).
+///
+/// `clean`, `test`, `analyze`, and `install` are not supported.
 enum XcodeBuildAction { build, archive }
 
 extension XcodeBuildActionExtension on XcodeBuildAction {
