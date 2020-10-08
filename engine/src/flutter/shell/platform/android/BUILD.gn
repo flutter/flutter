@@ -251,6 +251,23 @@ embedding_dependencies_jars =
                 ],
                 "list lines")
 
+action("check_imports") {
+  script = "//flutter/tools/android_illegal_imports.py"
+
+  sources = android_java_sources
+
+  stamp_file = "$root_out_dir/check_android_imports"
+
+  # File does not actually get created, but GN expects us to have an output here.
+  outputs = [ stamp_file ]
+
+  args = [
+           "--stamp",
+           rebase_path(stamp_file),
+           "--files",
+         ] + rebase_path(android_java_sources)
+}
+
 action("flutter_shell_java") {
   script = "//build/android/gyp/javac.py"
   depfile = "$target_gen_dir/$target_name.d"
@@ -299,7 +316,10 @@ action("flutter_shell_java") {
 
   args += rebase_path(sources, root_build_dir)
 
-  deps = [ ":gen_android_build_config_java" ]
+  deps = [
+    ":check_imports",
+    ":gen_android_build_config_java",
+  ]
 }
 
 action("icudtl_object") {
