@@ -78,4 +78,27 @@ void main() {
 
     expect(result.exitCode, 1);
   });
+
+  testWithoutContext('--analyze-size is not supported in combination with --split-debug-info', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final List<String> localEngineArguments = <String>[
+      if (platform.environment.containsKey('FLUTTER_LOCAL_ENGINE'))
+        '--local-engine=${platform.environment['FLUTTER_LOCAL_ENGINE']}',
+      if (platform.environment.containsKey('FLUTTER_LOCAL_ENGINE_SRC_PATH'))
+        '--local-engine-src-path=${platform.environment['FLUTTER_LOCAL_ENGINE_SRC_PATH']}',
+    ];
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+       ...localEngineArguments,
+      'build',
+      'apk',
+      '--analyze-size',
+      '--target-platform=android-arm64',
+      '--split-debug-info=infos'
+    ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
+
+    expect(result.stderr.toString(), contains('--analyze-size cannot be combined with --split-debug-info'));
+
+    expect(result.exitCode, 1);
+  });
 }

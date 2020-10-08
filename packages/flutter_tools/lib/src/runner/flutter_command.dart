@@ -458,7 +458,8 @@ abstract class FlutterCommand extends Command<void> {
         'symbol files can be stored for later use. These symbol files contain '
         'the information needed to symbolize Dart stack traces. For an app built '
         "with this flag, the 'flutter symbolize' command with the right program "
-        'symbol file is required to obtain a human readable stack trace.',
+        'symbol file is required to obtain a human readable stack trace.\n'
+        'This flag cannot be combined with --analyze-size',
       valueHelp: '/project-name/v1.2.3/',
     );
   }
@@ -654,7 +655,8 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Whether to produce additional profile information for artifact output size. '
         'This flag is only supported on release builds. When building for Android, a single '
         'ABI must be specified at a time with the --target-platform flag. When building for iOS, '
-        'only the symbols from the arm64 architecture are used to analyze code size.'
+        'only the symbols from the arm64 architecture are used to analyze code size.\n'
+        'This flag cannot be combined with --split-debug-info.'
     );
   }
 
@@ -736,6 +738,9 @@ abstract class FlutterCommand extends Command<void> {
     final BuildMode buildMode = forcedBuildMode ?? getBuildMode();
     if (buildMode != BuildMode.release && codeSizeDirectory != null) {
       throwToolExit('--analyze-size can only be used on release builds.');
+    }
+    if (codeSizeDirectory != null && splitDebugInfoPath != null) {
+      throwToolExit('--analyze-size cannot be combined with --split-debug-info.');
     }
 
     final bool treeShakeIcons = argParser.options.containsKey('tree-shake-icons')
