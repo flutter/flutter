@@ -615,7 +615,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   // Returns the delta that should result from applying [event] with axis and
   // direction taken into account.
-  double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
+  double _targetScrollDeltaForPointerScroll(PointerScrollEvent event) {
     double delta = widget.axis == Axis.horizontal
         ? event.scrollDelta.dx
         : event.scrollDelta.dy;
@@ -629,7 +629,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent && _position != null) {
-      final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
+      final double targetScrollOffset = _targetScrollDeltaForPointerScroll(event);
       // Only express interest in the event if it would actually result in a scroll.
       if (targetScrollOffset != 0) {
         GestureBinding.instance!.pointerSignalResolver.register(event, _handlePointerScroll);
@@ -642,7 +642,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
       return;
     }
-    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
+    final double targetScrollOffset = _targetScrollDeltaForPointerScroll(event as PointerScrollEvent);
     if (targetScrollOffset != 0) {
       position.pointerScroll(targetScrollOffset);
     }
