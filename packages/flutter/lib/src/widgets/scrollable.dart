@@ -613,7 +613,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   // SCROLL WHEEL
 
-  // Returns the offset that should result from applying [event] with axis and
+  // Returns the delta that should result from applying [event] with axis and
   // direction taken into account.
   double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
     double delta = widget.axis == Axis.horizontal
