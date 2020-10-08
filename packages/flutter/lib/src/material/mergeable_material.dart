@@ -528,7 +528,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
     final List<Widget> widgets = <Widget>[];
     List<Widget> slices = <Widget>[];
-    int i;
+    final int i;
 
     for (i = 0; i < _children.length; i += 1) {
       if (_children[i] is MaterialGap) {
@@ -562,13 +562,13 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           final bool hasTopDivider = _willNeedDivider(i - 1);
           final bool hasBottomDivider = _willNeedDivider(i + 1);
 
-          Border border;
           final BorderSide divider = Divider.createBorderSide(
             context,
             width: 0.5, // TODO(ianh): This probably looks terrible when the dpr isn't a power of two.
             color: widget.dividerColor,
           );
 
+          final Border border;
           if (i == 0) {
             border = Border(
               bottom: hasBottomDivider ? divider : BorderSide.none
@@ -583,8 +583,6 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               bottom: hasBottomDivider ? divider : BorderSide.none,
             );
           }
-
-          assert(border != null);
 
           child = AnimatedContainer(
             key: _MergeableMaterialSliceKey(_children[i].key),

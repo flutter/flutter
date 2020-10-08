@@ -274,7 +274,7 @@ class RenderConstrainedBox extends RenderProxyBox {
   void debugPaintSize(PaintingContext context, Offset offset) {
     super.debugPaintSize(context, offset);
     assert(() {
-      Paint paint;
+      final Paint paint;
       if (child == null || child!.size.isEmpty) {
         paint = Paint()
           ..color = const Color(0x90909090);
@@ -479,7 +479,7 @@ class RenderAspectRatio extends RenderProxyBox {
       return constraints.smallest;
 
     double width = constraints.maxWidth;
-    double height;
+    final double height;
 
     // We default to picking the height based on the width, but if the width
     // would be infinite, that's not sensible so we try to infer the height
@@ -3032,7 +3032,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
         properties.add(MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)'));
       } else {
         final double fraction = debugAsymmetricPaintCount / (debugSymmetricPaintCount + debugAsymmetricPaintCount);
-        String diagnosis;
+        final String diagnosis;
         if (debugSymmetricPaintCount + debugAsymmetricPaintCount < 5) {
           diagnosis = 'insufficient data to draw conclusion (less than five repaints)';
         } else if (fraction > 0.9) {

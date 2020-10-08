@@ -1910,8 +1910,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return RevealedOffset(offset: _scrollController!.offset, rect: rect);
 
     final Size editableSize = renderEditable.size;
-    double additionalOffset;
-    Offset unitOffset;
+    final double additionalOffset;
+    final Offset unitOffset;
 
     if (!_isMultiline) {
       additionalOffset = rect.width >= editableSize.width

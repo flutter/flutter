@@ -976,7 +976,7 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _titleTextStyle(ThemeData theme, ListTileTheme? tileTheme) {
-    TextStyle style;
+    final TextStyle style;
     if (tileTheme != null) {
       switch (tileTheme.style) {
         case ListTileStyle.drawer:
@@ -1646,8 +1646,8 @@ class _RenderListTile extends RenderBox {
     //  - For smaller tiles, trailing should always be centered. Leading can be
     //    centered or closer to the top. It should never be further than 16dp
     //    to the top.
-    double leadingY;
-    double trailingY;
+    final double leadingY;
+    final double trailingY;
     if (tileHeight > 72.0) {
       leadingY = 16.0;
       trailingY = 16.0;
