@@ -21,6 +21,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 // Matches the output of the "test" package, e.g.: "00:01 +1 loading foo"

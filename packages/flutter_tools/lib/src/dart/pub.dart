@@ -250,10 +250,11 @@ class _DefaultPub implements Pub {
         'The time now is: $now'
       );
     }
-    // Insert references to synthetic flutter package.
-    if (generateSyntheticPackage) {
-      await _updatePackageConfig(packageConfigFile, generatedDirectory);
-    }
+    await _updatePackageConfig(
+      packageConfigFile,
+      generatedDirectory,
+      generateSyntheticPackage,
+    );
   }
 
   @override
@@ -458,13 +459,35 @@ class _DefaultPub implements Pub {
     return environment;
   }
 
-  /// Insert the flutter_gen synthetic package into the package configuration file if
-  /// there is an l10n.yaml.
-  Future<void> _updatePackageConfig(File packageConfigFile, Directory generatedDirectory) async {
-    if (!packageConfigFile.existsSync()) {
+  /// Update the package configuration file.
+  ///
+  /// Creates a corresponding `package_config_subset` file that is used by the build
+  /// system to avoid rebuilds caused by an updated pub timestamp.
+  ///
+  /// if [generateSyntheticPackage] is true then insert flutter_gen synthetic
+  /// package into the package configuration. This is used by the l10n localization
+  /// tooling to insert a new reference into the package_config file, allowing the import
+  /// of a package URI that is not specified in the pubspec.yaml
+  ///
+  /// For more information, see:
+  ///   * [generateLocalizations], `in lib/src/localizations/gen_l10n.dart`
+  Future<void> _updatePackageConfig(
+    File packageConfigFile,
+    Directory generatedDirectory,
+    bool generateSyntheticPackage,
+  ) async {
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(packageConfigFile, logger: _logger);
+
+    packageConfigFile.parent
+      .childFile('package_config_subset')
+      .writeAsStringSync(_computePackageConfigSubset(
+        packageConfig,
+        _fileSystem,
+      ));
+
+    if (!generateSyntheticPackage) {
       return;
     }
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(packageConfigFile, logger: _logger);
     final Package flutterGen = Package('flutter_gen', generatedDirectory.uri, languageVersion: LanguageVersion(2, 8));
     if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
       return;
@@ -479,5 +502,19 @@ class _DefaultPub implements Pub {
     if (packageConfigFile.fileSystem is LocalFileSystem) {
       await savePackageConfig(newPackageConfig, packageConfigFile.parent.parent);
     }
+  }
+
+  // Subset the package config file to only the parts that are relevant for
+  // rerunning the dart compiler.
+  String _computePackageConfigSubset(PackageConfig packageConfig, FileSystem fileSystem) {
+    final StringBuffer buffer = StringBuffer();
+    for (final Package package in packageConfig.packages) {
+      buffer.writeln(package.name);
+      buffer.writeln(package.languageVersion);
+      buffer.writeln(package.root);
+      buffer.writeln(package.packageUriRoot);
+    }
+    buffer.writeln(packageConfig.version);
+    return buffer.toString();
   }
 }

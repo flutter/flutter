@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -46,54 +44,54 @@ class AppBarTheme with Diagnosticable {
   /// Default value for [AppBar.brightness].
   ///
   /// If null, [AppBar] uses [ThemeData.primaryColorBrightness].
-  final Brightness brightness;
+  final Brightness? brightness;
 
   /// Default value for [AppBar.backgroundColor].
   ///
   /// If null, [AppBar] uses [ThemeData.primaryColor].
-  final Color color;
+  final Color? color;
 
   /// Default value for [AppBar.elevation].
   ///
   /// If null, [AppBar] uses a default value of 4.0.
-  final double elevation;
+  final double? elevation;
 
   /// Default value for [AppBar.shadowColor].
   ///
   /// If null, [AppBar] uses a default value of fully opaque black.
-  final Color shadowColor;
+  final Color? shadowColor;
 
   /// Default value for [AppBar.iconTheme].
   ///
   /// If null, [AppBar] uses [ThemeData.primaryIconTheme].
-  final IconThemeData iconTheme;
+  final IconThemeData? iconTheme;
 
   /// Default value for [AppBar.actionsIconTheme].
   ///
   /// If null, [AppBar] uses [ThemeData.primaryIconTheme].
-  final IconThemeData actionsIconTheme;
+  final IconThemeData? actionsIconTheme;
 
   /// Default value for [AppBar.textTheme].
   ///
   /// If null, [AppBar] uses [ThemeData.primaryTextTheme].
-  final TextTheme textTheme;
+  final TextTheme? textTheme;
 
   /// Default value for [AppBar.centerTitle].
   ///
   /// If null, the value is adapted to current [TargetPlatform].
-  final bool centerTitle;
+  final bool? centerTitle;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
-    IconThemeData actionsIconTheme,
-    Brightness brightness,
-    Color color,
-    double elevation,
-    Color shadowColor,
-    IconThemeData iconTheme,
-    TextTheme textTheme,
-    bool centerTitle,
+    IconThemeData? actionsIconTheme,
+    Brightness? brightness,
+    Color? color,
+    double? elevation,
+    Color? shadowColor,
+    IconThemeData? iconTheme,
+    TextTheme? textTheme,
+    bool? centerTitle,
   }) {
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
@@ -109,7 +107,7 @@ class AppBarTheme with Diagnosticable {
 
   /// The [ThemeData.appBarTheme] property of the ambient [Theme].
   static AppBarTheme of(BuildContext context) {
-    return Theme.of(context).appBarTheme;
+    return Theme.of(context)!.appBarTheme;
   }
 
   /// Linearly interpolate between two AppBar themes.
@@ -117,7 +115,7 @@ class AppBarTheme with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static AppBarTheme lerp(AppBarTheme a, AppBarTheme b, double t) {
+  static AppBarTheme lerp(AppBarTheme? a, AppBarTheme? b, double t) {
     assert(t != null);
     return AppBarTheme(
       brightness: t < 0.5 ? a?.brightness : b?.brightness,

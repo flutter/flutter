@@ -62,7 +62,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
         return AlertDialog(
           content: const Text('You tapped the floating action button.'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -93,7 +93,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
         ),
       ),
       body: Center(
-        child: RaisedButton(
+        child: ElevatedButton(
           onPressed: _showBottomSheetCallback,
           child: const Text('SHOW BOTTOM SHEET'),
         ),

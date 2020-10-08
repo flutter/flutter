@@ -40,7 +40,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
           const Text(_text1),
           const Text(_text2),
           Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               child: const Text('SHOW A SNACKBAR'),
               onPressed: () {
                 final int thisSnackBarIndex = _snackBarIndex++;

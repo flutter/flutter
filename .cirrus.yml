@@ -155,10 +155,9 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: docs-linux # linux-only
-      # TODO(fujino): Make this pre-submit only once #64212 is fixed
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'bin/**') || $CIRRUS_PR == ''"
+      # TODO(fujino): Make this pre-submit only once we have migrated docs generation to LUCI (https://github.com/flutter/flutter/issues/64212).
       environment:
-        # TODO(tvolkert): optimize CPU and MEMORY settings once #60646 is resolved.
+        # TODO(tvolkert): optimize CPU and MEMORY settings once docs generation is more efficient (https://github.com/flutter/flutter/issues/60646).
         CPU: 4
         MEMORY: 8G
         # For uploading master docs to Firebase master branch staging site
@@ -190,10 +189,9 @@ task:
         - git clone https://github.com/flutter/web_installers.git
         - cd web_installers/packages/web_drivers/
         - pub get
-        - dart lib/web_driver_installer.dart &
-        - sleep 20
+        - dart lib/web_driver_installer.dart chromedriver --install-only
         - chromedriver/chromedriver --port=4444 &
-        - sleep 5
+        - sleep 1
         - cd ../../../examples/hello_world/
         - flutter drive --target=test_driver/smoke_web_engine.dart -d web-server --profile --browser-name=chrome
 
@@ -203,11 +201,8 @@ task:
       # See also: https://github.com/flutter/flutter/pull/49454
       depends_on:
         - analyze-linux
-      environment:
-        # As of October 2019, 1 CPU and 4G of RAM let deploy_gallery-linux finish in about 15
-        # minutes, once it got started.
-        GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE: ENCRYPTED[d9ac1462c3c556fc2f8165c9d5566a16497d8ebc38a50357f7f3abf136b7f83e1d1d76dde36fee356cb0f9ebf7a89346]
-        ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0f2aca35f05b26add5d9edea2a7449341269a2b7e22d5c667f876996e2e8bc44ff1369431ebf73b7c5581fd95d0e5902]
+      # As of October 2019, 1 CPU and 4G of RAM let deploy_gallery-linux finish in about 15
+      # minutes, once it got started.
       script:
         - ./dev/bots/deploy_gallery.sh
 
@@ -254,14 +249,6 @@ task:
       # See also: https://github.com/flutter/flutter/pull/49454
       depends_on:
         - analyze-linux
-      environment:
-        # Apple Fastlane password.
-        FASTLANE_PASSWORD: ENCRYPTED[4b1f0b8d52874e9de965acd46c79743f3b81f3a513614179b9be7cf53dc8258753e257bdadb11a298ee455259df21865]
-        # Private repo for publishing certificates.
-        PUBLISHING_MATCH_CERTIFICATE_REPO: ENCRYPTED[3c0e78877d933fc80107aa6f3790fd1cf927250b852d6cb53202be696b4903ed8ca839b809626aaf18050bf7e436fab7]
-        PUBLISHING_MATCH_REPO_TOKEN: ENCRYPTED[3d1230b744c6ed6c788a91bec741b769401dbcd426b18f9af8080bfeefdfc21913ca4047980c5b5b7ce823f12e7b6b19]
-        # Apple Certificates Match Passphrase
-        MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - ./dev/bots/deploy_gallery.sh
