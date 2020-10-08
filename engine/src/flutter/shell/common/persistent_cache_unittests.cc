@@ -185,9 +185,10 @@ TEST_F(ShellTest, CanLoadSkSLsFromAsset) {
   ResetAssetManager();
   auto asset_manager = std::make_shared<AssetManager>();
   RunConfiguration config(nullptr, asset_manager);
-  asset_manager->PushBack(
-      std::make_unique<DirectoryAssetBundle>(fml::OpenDirectory(
-          asset_dir.path().c_str(), false, fml::FilePermission::kRead)));
+  asset_manager->PushBack(std::make_unique<DirectoryAssetBundle>(
+      fml::OpenDirectory(asset_dir.path().c_str(), false,
+                         fml::FilePermission::kRead),
+      false));
   CheckTwoSkSLsAreLoaded();
 
   // 3rd, test the content of the SkSLs in the asset.

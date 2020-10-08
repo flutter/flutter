@@ -106,6 +106,10 @@ void Engine::SetupDefaultFontManager() {
   font_collection_.SetupDefaultFontManager();
 }
 
+std::shared_ptr<AssetManager> Engine::GetAssetManager() {
+  return asset_manager_;
+}
+
 bool Engine::UpdateAssetManager(
     std::shared_ptr<AssetManager> new_asset_manager) {
   if (asset_manager_ == new_asset_manager) {

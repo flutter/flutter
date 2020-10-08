@@ -21,12 +21,13 @@ RunConfiguration RunConfiguration::InferFromSettings(
 
   if (fml::UniqueFD::traits_type::IsValid(settings.assets_dir)) {
     asset_manager->PushBack(std::make_unique<DirectoryAssetBundle>(
-        fml::Duplicate(settings.assets_dir)));
+        fml::Duplicate(settings.assets_dir), true));
   }
 
-  asset_manager->PushBack(
-      std::make_unique<DirectoryAssetBundle>(fml::OpenDirectory(
-          settings.assets_path.c_str(), false, fml::FilePermission::kRead)));
+  asset_manager->PushBack(std::make_unique<DirectoryAssetBundle>(
+      fml::OpenDirectory(settings.assets_path.c_str(), false,
+                         fml::FilePermission::kRead),
+      true));
 
   return {IsolateConfiguration::InferFromSettings(settings, asset_manager,
                                                   io_worker),
