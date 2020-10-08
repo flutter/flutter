@@ -272,8 +272,8 @@ class _DefaultUsage implements Usage {
   }
 
   _DefaultUsage.test() :
-      _suppressAnalytics = true,
-      _analytics = AnalyticsMock();
+      _suppressAnalytics = false,
+      _analytics = AnalyticsMock(true);
 
   Analytics _analytics;
 

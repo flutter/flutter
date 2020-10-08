@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -43,7 +45,7 @@ void main() {
 
   ProcessManager processManager;
   MockVisualStudio mockVisualStudio;
-  MockUsage usage;
+  Usage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -53,7 +55,7 @@ void main() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
     mockVisualStudio = MockVisualStudio();
-    usage = MockUsage();
+    usage = Usage.test();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -403,12 +405,17 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
       }),
     ]);
 
-    await createTestCommandRunner(command).run(
-      const <String>['windows', '--no-pub', '--analyze-size']
-    );
+    await runZoned(() async {
+      await createTestCommandRunner(command).run(
+        const <String>['windows', '--no-pub', '--analyze-size']
+      );
+    }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+      // Capture Usage.test() events.
+      testLogger.printTrace(line);
+    }));
 
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
-    verify(usage.sendEvent('code-size-analysis', 'windows')).called(1);
+    expect(testLogger.traceText, contains('event {category: code-size-analysis, action: windows, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     FileSystem: () => fileSystem,
@@ -420,4 +427,3 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
 }
 
 class MockVisualStudio extends Mock implements VisualStudio {}
-class MockUsage extends Mock implements Usage {}

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -15,7 +17,6 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -49,7 +50,7 @@ final Platform notMacosPlatform = FakePlatform(
 
 void main() {
   FileSystem fileSystem;
-  MockUsage usage;
+  Usage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -57,7 +58,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    usage = MockUsage();
+    usage = Usage.test();
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -328,13 +329,17 @@ void main() {
     fileSystem.file('build/macos/Build/Products/Release/Runner.app/App')
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
-
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'macos', '--no-pub', '--analyze-size']
-    );
+    await runZoned(() async {
+      await createTestCommandRunner(command).run(
+        const <String>['build', 'macos', '--no-pub', '--analyze-size']
+      );
+    }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+      // Capture Usage.test() events.
+      testLogger.printTrace(line);
+    }));
 
     expect(testLogger.statusText, contains('A summary of your macOS bundle analysis can be found at'));
-    verify(usage.sendEvent('code-size-analysis', 'macos')).called(1);
+    expect(testLogger.traceText, contains('event {category: code-size-analysis, action: macos, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -360,5 +365,3 @@ void main() {
     Usage: () => usage,
   });
 }
-
-class MockUsage extends Mock implements Usage {}

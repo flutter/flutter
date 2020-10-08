@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -143,13 +145,13 @@ void main() {
       Artifacts artifacts;
       MockCache mockCache;
       MockProcessManager mockProcessManager;
-      MockUsage mockUsage;
+      Usage usage;
       Directory tempDir;
 
       setUp(() {
         artifacts = Artifacts.test();
         mockCache = MockCache();
-        mockUsage = MockUsage();
+        usage = Usage.test();
         fs = MemoryFileSystem.test();
         mockProcessManager = MockProcessManager();
 
@@ -374,33 +376,21 @@ void main() {
           ..writeAsStringSync('# Hello, World');
         globals.fs.currentDirectory = tempDir;
 
-        try {
-          await createTestCommandRunner(command).run(<String>[
+        await runZoned(() async {
+          await expectToolExitLater(createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
             '--no-hot',
-          ]);
-          fail('Exception expected');
-        } on ToolExit catch (e) {
-          // We expect a ToolExit because app does not start
-          expect(e.message, null);
-        } on Exception catch (e) {
-          fail('ToolExit expected, got $e');
-        }
-        final List<dynamic> captures = verify(mockUsage.sendCommand(
-          captureAny,
-          parameters: captureAnyNamed('parameters'),
-        )).captured;
-        expect(captures[0], 'run');
-        final Map<String, String> parameters = captures[1] as Map<String, String>;
-
-        expect(parameters[cdKey(CustomDimensions.commandRunIsEmulator)], 'false');
-        expect(parameters[cdKey(CustomDimensions.commandRunTargetName)], 'ios');
-        expect(parameters[cdKey(CustomDimensions.commandRunProjectHostLanguage)], 'swift');
-        expect(parameters[cdKey(CustomDimensions.commandRunTargetOsVersion)], 'iOS 13');
-        expect(parameters[cdKey(CustomDimensions.commandRunModeName)], 'debug');
-        expect(parameters[cdKey(CustomDimensions.commandRunProjectModule)], 'false');
-        expect(parameters.containsKey(cdKey(CustomDimensions.commandRunAndroidEmbeddingVersion)), false);
+          ]), isNull);
+        }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+          // Capture Usage.test() events.
+          testLogger.printTrace(line);
+        }));
+        // Allow any CustomDimensions.localTime (cd33) timestamp.
+        final RegExp usageRegexp = RegExp(
+          'screenView {cd3: false, cd4: ios, cd22: iOS 13, cd23: debug, cd18: false, cd15: swift, cd31: false, cd47: false, cd33: .*, viewName: run'
+        );
+        expect(testLogger.traceText, matches(usageRegexp));
       }, overrides: <Type, Generator>{
         ApplicationPackageFactory: () => mockApplicationPackageFactory,
         Artifacts: () => artifacts,
@@ -408,7 +398,7 @@ void main() {
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => mockProcessManager,
-        Usage: () => mockUsage,
+        Usage: () => usage,
       });
     });
 
