@@ -68,8 +68,19 @@
   [super layoutSubviews];
 }
 
+static BOOL _forceSoftwareRendering;
+
++ (BOOL)forceSoftwareRendering {
+  return _forceSoftwareRendering;
+}
+
++ (void)setForceSoftwareRendering:(BOOL)forceSoftwareRendering {
+  _forceSoftwareRendering = forceSoftwareRendering;
+}
+
 + (Class)layerClass {
-  return flutter::GetCoreAnimationLayerClassForRenderingAPI();
+  return flutter::GetCoreAnimationLayerClassForRenderingAPI(
+      flutter::GetRenderingAPIForProcess(FlutterView.forceSoftwareRendering));
 }
 
 - (std::unique_ptr<flutter::IOSSurface>)createSurface:

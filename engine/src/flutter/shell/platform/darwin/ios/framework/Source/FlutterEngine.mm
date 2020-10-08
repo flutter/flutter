@@ -474,6 +474,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   self.initialRoute = initialRoute;
 
   auto settings = [_dartProject.get() settings];
+  FlutterView.forceSoftwareRendering = settings.enable_software_rendering;
+
   auto platformData = [_dartProject.get() defaultPlatformData];
 
   if (libraryURI) {
@@ -513,7 +515,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   flutter::Shell::CreateCallback<flutter::PlatformView> on_create_platform_view =
       [](flutter::Shell& shell) {
         return std::make_unique<flutter::PlatformViewIOS>(
-            shell, flutter::GetRenderingAPIForProcess(), shell.GetTaskRunners());
+            shell, flutter::GetRenderingAPIForProcess(FlutterView.forceSoftwareRendering),
+            shell.GetTaskRunners());
       };
 
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =

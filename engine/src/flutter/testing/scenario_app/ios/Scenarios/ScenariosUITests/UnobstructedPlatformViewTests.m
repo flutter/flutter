@@ -21,7 +21,8 @@
 //             +---+
 - (void)testNoOverlay {
   XCUIApplication* app = [[XCUIApplication alloc] init];
-  app.launchArguments = @[ @"--platform-view-no-overlay-intersection" ];
+  app.launchArguments =
+      @[ @"--platform-view-no-overlay-intersection", @"--enable-software-rendering" ];
   [app launch];
 
   XCUIElement* platform_view = app.textViews[@"platform_view[0]"];

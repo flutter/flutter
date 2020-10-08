@@ -50,7 +50,8 @@
     @"--gesture-reject-eager" : @"platform_view_gesture_reject_eager",
     @"--gesture-accept" : @"platform_view_gesture_accept",
     @"--tap-status-bar" : @"tap_status_bar",
-    @"--text-semantics-focus" : @"text_semantics_focus"
+    @"--text-semantics-focus" : @"text_semantics_focus",
+    @"--animated-color-square" : @"animated_color_square",
   };
   __block NSString* flutterViewControllerTestName = nil;
   [launchArgsMap
@@ -119,6 +120,16 @@
       gestureRecognizersBlockingPolicy:
           FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded];
   self.window.rootViewController = flutterViewController;
+
+  if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--assert-ca-layer-type"]) {
+    if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--enable-software-rendering"]) {
+      NSAssert([flutterViewController.view.layer isKindOfClass:[CALayer class]],
+               @"Expected CALayer for software rendering.");
+    } else {
+      NSAssert([flutterViewController.view.layer isKindOfClass:[CAMetalLayer class]],
+               @"Expected CAMetalLayer for non-software rendering.");
+    }
+  }
 }
 
 @end
