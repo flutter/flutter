@@ -1343,6 +1343,18 @@ void testMain() {
         '500 12px sans-serif',
       );
 
+      // For `blink` and `webkit` browser engines the overlay would be hidden.
+      if (browserEngine == BrowserEngine.blink ||
+          browserEngine == BrowserEngine.webkit) {
+        expect(textEditing.editingElement.domElement.classes,
+            contains('transparentTextEditing'));
+      } else {
+        expect(
+            textEditing.editingElement.domElement.classes.any(
+                (element) => element.toString() == 'transparentTextEditing'),
+            isFalse);
+      }
+
       const MethodCall clearClient = MethodCall('TextInput.clearClient');
       sendFrameworkMessage(codec.encodeMethodCall(clearClient));
     },
@@ -1806,6 +1818,17 @@ void testMain() {
       final CssStyleDeclaration css = firstElement.style;
       expect(css.color, 'transparent');
       expect(css.backgroundColor, 'transparent');
+
+      // For `blink` and `webkit` browser engines the overlay would be hidden.
+      if (browserEngine == BrowserEngine.blink ||
+          browserEngine == BrowserEngine.webkit) {
+        expect(firstElement.classes, contains('transparentTextEditing'));
+      } else {
+        expect(
+            firstElement.classes.any(
+                (element) => element.toString() == 'transparentTextEditing'),
+            isFalse);
+      }
     });
 
     test('validate multi element form ids sorted for form id', () {

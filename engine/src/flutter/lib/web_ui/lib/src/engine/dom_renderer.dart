@@ -307,6 +307,21 @@ flt-glass-pane * {
 ''', sheet.cssRules.length);
     }
 
+    // This css prevents an autofill overlay brought by the browser during
+    // text field autofill by delaying the transition effect.
+    // See: https://github.com/flutter/flutter/issues/61132.
+    if(browserHasAutofillOverlay()) {
+        sheet.insertRule('''
+.transparentTextEditing:-webkit-autofill,
+.transparentTextEditing:-webkit-autofill:hover,
+.transparentTextEditing:-webkit-autofill:focus,
+.transparentTextEditing:-webkit-autofill:active {
+    -webkit-transition-delay: 99999s;
+}
+''', sheet.cssRules.length);
+    }
+
+
     final html.BodyElement bodyElement = html.document.body!;
     setElementStyle(bodyElement, 'position', 'fixed');
     setElementStyle(bodyElement, 'top', '0');
