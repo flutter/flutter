@@ -167,5 +167,5 @@ generate_docs
 (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
 #(cd "$FLUTTER_ROOT/dev/docs"; create_docset)
 #(cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
-deploy_docs
+#deploy_docs
 #fi
