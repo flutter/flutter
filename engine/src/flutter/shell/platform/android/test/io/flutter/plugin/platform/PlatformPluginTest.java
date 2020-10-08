@@ -1,5 +1,6 @@
 package io.flutter.plugin.platform;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -10,11 +11,17 @@ import static org.mockito.Mockito.when;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.view.View;
 import android.view.Window;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.ClipboardContentFormat;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -42,8 +49,9 @@ public class PlatformPluginTest {
     platformPlugin.vibrateHapticFeedback(PlatformChannel.HapticFeedbackType.SELECTION_CLICK);
   }
 
+  @Config(sdk = 29)
   @Test
-  public void platformPlugin_getClipboardData() {
+  public void platformPlugin_getClipboardData() throws IOException {
     ClipboardManager clipboardManager =
         RuntimeEnvironment.application.getSystemService(ClipboardManager.class);
 
@@ -61,6 +69,23 @@ public class PlatformPluginTest {
     ClipData clip = ClipData.newPlainText("label", "Text");
     clipboardManager.setPrimaryClip(clip);
     assertNotNull(platformPlugin.mPlatformMessageHandler.getClipboardData(clipboardFormat));
+
+    ContentResolver contentResolver = RuntimeEnvironment.application.getContentResolver();
+    Uri uri = Uri.parse("content://media/external_primary/images/media/");
+    clip = ClipData.newUri(contentResolver, "URI", uri);
+    clipboardManager.setPrimaryClip(clip);
+    assertNull(platformPlugin.mPlatformMessageHandler.getClipboardData(clipboardFormat));
+
+    uri =
+        RingtoneManager.getActualDefaultRingtoneUri(
+            RuntimeEnvironment.application.getApplicationContext(), RingtoneManager.TYPE_RINGTONE);
+    clip = ClipData.newUri(contentResolver, "URI", uri);
+    clipboardManager.setPrimaryClip(clip);
+    String uriData =
+        platformPlugin.mPlatformMessageHandler.getClipboardData(clipboardFormat).toString();
+    InputStream uriInputStream = contentResolver.openInputStream(uri);
+    InputStream dataInputStream = new ByteArrayInputStream(uriData.getBytes());
+    assertEquals(dataInputStream.read(), uriInputStream.read());
   }
 
   @Test
