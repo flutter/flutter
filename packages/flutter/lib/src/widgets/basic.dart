@@ -2738,15 +2738,14 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// @override
 /// Widget build(BuildContext context) {
 ///   String isFlutterLogoOffstageText;
-///     if (_offstage) {
-///       isFlutterLogoOffstageText = 'FlutterLogo widget is offstage. '
-///         'It is laid out in the widget tree, but occupies no space visually, '
-///         'cannot be hit tested, and is not painted. Yet, we are able to get its '
-///         'size as if it were painted: $_invisibleLogoSize';
-///     } else {
-///       isFlutterLogoOffstageText = 'FlutterLogo widget is not currently offstage, '
-///         'so it occupies space, is available for hit testing, and painted.';
-///     }
+///   if (_offstage) {
+///     isFlutterLogoOffstageText = 'FlutterLogo widget is offstage. '
+///       'It is laid out in the widget tree, but occupies no space visually, '
+///       'cannot be hit tested, and is not painted. Yet, we are able to get its '
+///       'size as if it were painted: $_invisibleLogoSize';
+///   } else {
+///     isFlutterLogoOffstageText = 'FlutterLogo widget is not currently offstage, '
+///       'so it occupies space, is available for hit testing, and painted.';
 ///   }
 ///
 ///   return Scaffold(
