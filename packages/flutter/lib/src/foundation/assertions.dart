@@ -591,7 +591,7 @@ class FlutterErrorDetails with Diagnosticable {
       return exception;
     }
     if (exception is AssertionError && exception.message is FlutterError) {
-      return exception.message as FlutterError;
+      return exception.message! as FlutterError;
     }
     return null;
   }
