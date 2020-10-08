@@ -520,9 +520,9 @@ void main() {
     // Regression Test for https://github.com/flutter/flutter/issues/61346.
     Widget buildNavigator() {
       return Navigator(
-        pages: <Page<void>>[
+        pages: const <Page<void>>[
           MaterialPage<void>(
-            builder: (BuildContext context) => const Placeholder(),
+            child: Placeholder(),
           )
         ],
         onPopPage: (Route<dynamic> route, dynamic result) => false,
@@ -550,14 +550,14 @@ void main() {
 
   testWidgets('Pages update does update overlay correctly', (WidgetTester tester) async {
     // Regression Test for https://github.com/flutter/flutter/issues/64941.
-    List<Page<void>> pages = <Page<void>>[
+    List<Page<void>> pages = const <Page<void>>[
       MaterialPage<void>(
-        key: const ValueKey<int>(0),
-        builder: (BuildContext context) => const Text('page 0'),
+        key:  ValueKey<int>(0),
+        child: Text('page 0'),
       ),
       MaterialPage<void>(
-        key: const ValueKey<int>(1),
-        builder: (BuildContext context) => const Text('page 1'),
+        key: ValueKey<int>(1),
+        child: Text('page 1'),
       ),
     ];
     Widget buildNavigator() {
@@ -577,10 +577,10 @@ void main() {
     expect(find.text('page 0'), findsNothing);
 
     // Removes the first page.
-    pages = <Page<void>>[
+    pages = const <Page<void>>[
       MaterialPage<void>(
-        key: const ValueKey<int>(1),
-        builder: (BuildContext context) => const Text('page 1'),
+        key: ValueKey<int>(1),
+        child: Text('page 1'),
       ),
     ];
 
@@ -1664,7 +1664,7 @@ void main() {
           '   The onGenerateRoute callback must never return null, unless an\n'
           '   onUnknownRoute callback is provided as well.\n'
           '   The Navigator was:\n'
-          '     NavigatorState#4d6bf(lifecycle state: created)\n',
+          '     NavigatorState#00000(lifecycle state: initialized)\n'
         ),
       );
     });
@@ -1690,7 +1690,7 @@ void main() {
           '   route "/".\n'
           '   The onUnknownRoute callback must never return null.\n'
           '   The Navigator was:\n'
-          '     NavigatorState#38036(lifecycle state: created)\n',
+          '     NavigatorState#00000(lifecycle state: initialized)\n',
         ),
       );
     });
@@ -2509,18 +2509,13 @@ void main() {
       Animation<double> primaryAnimationOfRouteThree;
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       List<Page<dynamic>> myPages = <Page<dynamic>>[
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('1'),
           name:'initial',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteOne = secondaryAnimation;
-                primaryAnimationOfRouteOne = animation;
-                return const Text('initial');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteOne = secondaryAnimation;
+            primaryAnimationOfRouteOne = animation;
+            return const Text('initial');
           },
         ),
       ];
@@ -2536,48 +2531,33 @@ void main() {
       expect(find.text('initial'), findsOneWidget);
 
       myPages = <Page<dynamic>>[
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('1'),
           name:'initial',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteOne = secondaryAnimation;
-                primaryAnimationOfRouteOne = animation;
-                return const Text('initial');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteOne = secondaryAnimation;
+            primaryAnimationOfRouteOne = animation;
+            return const Text('initial');
           },
         ),
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('2'),
           name:'second',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteTwo = secondaryAnimation;
-                primaryAnimationOfRouteTwo = animation;
-                return const Text('second');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteTwo = secondaryAnimation;
+            primaryAnimationOfRouteTwo = animation;
+            return const Text('second');
           },
         ),
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('3'),
           name:'third',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteThree = secondaryAnimation;
-                primaryAnimationOfRouteThree = animation;
-                return const Text('third');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteThree = secondaryAnimation;
+            primaryAnimationOfRouteThree = animation;
+            return const Text('third');
           },
-        )
+        ),
       ];
 
       await tester.pumpWidget(
@@ -2615,32 +2595,22 @@ void main() {
       // correctly.
 
       myPages = <Page<dynamic>>[
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('1'),
           name:'initial',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteOne = secondaryAnimation;
-                primaryAnimationOfRouteOne = animation;
-                return const Text('initial');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteOne = secondaryAnimation;
+            primaryAnimationOfRouteOne = animation;
+            return const Text('initial');
           },
         ),
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('2'),
           name:'second',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteTwo = secondaryAnimation;
-                primaryAnimationOfRouteTwo = animation;
-                return const Text('second');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteTwo = secondaryAnimation;
+            primaryAnimationOfRouteTwo = animation;
+            return const Text('second');
           },
         ),
       ];
@@ -2672,47 +2642,32 @@ void main() {
       Animation<double> primaryAnimationOfRouteTwo;
       Animation<double> secondaryAnimationOfRouteThree;
       Animation<double> primaryAnimationOfRouteThree;
-      List<Page<dynamic>> myPages = <CustomBuilderPage<void>>[
-        CustomBuilderPage<void>(
+      List<Page<dynamic>> myPages = <Page<void>>[
+        BuilderPage(
           key: const ValueKey<String>('1'),
           name:'initial',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteOne = secondaryAnimation;
-                primaryAnimationOfRouteOne = animation;
-                return const Text('initial');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteOne = secondaryAnimation;
+            primaryAnimationOfRouteOne = animation;
+            return const Text('initial');
           },
         ),
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('2'),
           name:'second',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteTwo = secondaryAnimation;
-                primaryAnimationOfRouteTwo = animation;
-                return const Text('second');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteTwo = secondaryAnimation;
+            primaryAnimationOfRouteTwo = animation;
+            return const Text('second');
           },
         ),
-        CustomBuilderPage<void>(
+        BuilderPage(
           key: const ValueKey<String>('3'),
           name:'third',
-          routeBuilder: (BuildContext context, RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                secondaryAnimationOfRouteThree = secondaryAnimation;
-                primaryAnimationOfRouteThree = animation;
-                return const Text('third');
-              },
-            );
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationOfRouteThree = secondaryAnimation;
+            primaryAnimationOfRouteThree = animation;
+            return const Text('third');
           },
         ),
       ];
@@ -3511,4 +3466,18 @@ class NavigatorObservation {
   final String previous;
   final String current;
   final String operation;
+}
+
+class BuilderPage extends Page<void> {
+  const BuilderPage({LocalKey key, String name, this.pageBuilder}) : super(key: key, name: name);
+
+  final RoutePageBuilder pageBuilder;
+
+  @override
+  Route<void> createRoute(BuildContext context) {
+    return PageRouteBuilder<void>(
+      settings: this,
+      pageBuilder: pageBuilder,
+    );
+  }
 }

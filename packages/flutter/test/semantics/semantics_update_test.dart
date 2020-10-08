@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -48,12 +46,12 @@ void main() {
     expect(SemanticsUpdateBuilderSpy.observations.length, 2);
 
     expect(SemanticsUpdateBuilderSpy.observations.containsKey(0), isTrue);
-    expect(SemanticsUpdateBuilderSpy.observations[0].childrenInTraversalOrder.length, 1);
-    expect(SemanticsUpdateBuilderSpy.observations[0].childrenInTraversalOrder[0], 1);
+    expect(SemanticsUpdateBuilderSpy.observations[0]!.childrenInTraversalOrder.length, 1);
+    expect(SemanticsUpdateBuilderSpy.observations[0]!.childrenInTraversalOrder[0], 1);
 
     expect(SemanticsUpdateBuilderSpy.observations.containsKey(1), isTrue);
-    expect(SemanticsUpdateBuilderSpy.observations[1].childrenInTraversalOrder.length, 0);
-    expect(SemanticsUpdateBuilderSpy.observations[1].label, 'outer\ninner\ntext');
+    expect(SemanticsUpdateBuilderSpy.observations[1]!.childrenInTraversalOrder.length, 0);
+    expect(SemanticsUpdateBuilderSpy.observations[1]!.label, 'outer\ninner\ntext');
 
     SemanticsUpdateBuilderSpy.observations.clear();
 
@@ -79,8 +77,8 @@ void main() {
     expect(SemanticsUpdateBuilderSpy.observations.length, 1);
 
     expect(SemanticsUpdateBuilderSpy.observations.containsKey(1), isTrue);
-    expect(SemanticsUpdateBuilderSpy.observations[1].childrenInTraversalOrder.length, 0);
-    expect(SemanticsUpdateBuilderSpy.observations[1].label, 'outer\ninner-updated\ntext');
+    expect(SemanticsUpdateBuilderSpy.observations[1]!.childrenInTraversalOrder.length, 0);
+    expect(SemanticsUpdateBuilderSpy.observations[1]!.label, 'outer\ninner-updated\ntext');
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
@@ -99,32 +97,32 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
 
   @override
   void updateNode({
-    @required int id,
-    @required int flags,
-    @required int actions,
-    @required int maxValueLength,
-    @required int currentValueLength,
-    @required int textSelectionBase,
-    @required int textSelectionExtent,
-    @required int platformViewId,
-    @required int scrollChildren,
-    @required int scrollIndex,
-    @required double scrollPosition,
-    @required double scrollExtentMax,
-    @required double scrollExtentMin,
-    @required double elevation,
-    @required double thickness,
-    @required Rect rect,
-    @required String label,
-    @required String hint,
-    @required String value,
-    @required String increasedValue,
-    @required String decreasedValue,
-    TextDirection textDirection,
-    @required Float64List transform,
-    @required Int32List childrenInTraversalOrder,
-    @required Int32List childrenInHitTestOrder,
-    @required Int32List additionalActions,
+    required int id,
+    required int flags,
+    required int actions,
+    required int maxValueLength,
+    required int currentValueLength,
+    required int textSelectionBase,
+    required int textSelectionExtent,
+    required int platformViewId,
+    required int scrollChildren,
+    required int scrollIndex,
+    required double scrollPosition,
+    required double scrollExtentMax,
+    required double scrollExtentMin,
+    required double elevation,
+    required double thickness,
+    required Rect rect,
+    required String label,
+    required String hint,
+    required String value,
+    required String increasedValue,
+    required String decreasedValue,
+    TextDirection? textDirection,
+    required Float64List transform,
+    required Int32List childrenInTraversalOrder,
+    required Int32List childrenInHitTestOrder,
+    required Int32List additionalActions,
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));
@@ -161,32 +159,32 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
 
 class SemanticsNodeUpdateObservation {
   const SemanticsNodeUpdateObservation({
-    @required this.id,
-    @required this.flags,
-    @required this.actions,
-    @required this.maxValueLength,
-    @required this.currentValueLength,
-    @required this.textSelectionBase,
-    @required this.textSelectionExtent,
-    @required this.platformViewId,
-    @required this.scrollChildren,
-    @required this.scrollIndex,
-    @required this.scrollPosition,
-    @required this.scrollExtentMax,
-    @required this.scrollExtentMin,
-    @required this.elevation,
-    @required this.thickness,
-    @required this.rect,
-    @required this.label,
-    @required this.hint,
-    @required this.value,
-    @required this.increasedValue,
-    @required this.decreasedValue,
+    required this.id,
+    required this.flags,
+    required this.actions,
+    required this.maxValueLength,
+    required this.currentValueLength,
+    required this.textSelectionBase,
+    required this.textSelectionExtent,
+    required this.platformViewId,
+    required this.scrollChildren,
+    required this.scrollIndex,
+    required this.scrollPosition,
+    required this.scrollExtentMax,
+    required this.scrollExtentMin,
+    required this.elevation,
+    required this.thickness,
+    required this.rect,
+    required this.label,
+    required this.hint,
+    required this.value,
+    required this.increasedValue,
+    required this.decreasedValue,
     this.textDirection,
-    @required this.transform,
-    @required this.childrenInTraversalOrder,
-    @required this.childrenInHitTestOrder,
-    @required this.additionalActions,
+    required this.transform,
+    required this.childrenInTraversalOrder,
+    required this.childrenInHitTestOrder,
+    required this.additionalActions,
   });
 
   final int id;
@@ -210,7 +208,7 @@ class SemanticsNodeUpdateObservation {
   final String value;
   final String increasedValue;
   final String decreasedValue;
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
   final Float64List transform;
   final Int32List childrenInTraversalOrder;
   final Int32List childrenInHitTestOrder;

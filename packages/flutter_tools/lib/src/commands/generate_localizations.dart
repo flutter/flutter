@@ -155,7 +155,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
   final FileSystem _fileSystem;
 
   @override
-  String get description => 'Generate localizations for the Flutter project.';
+  String get description => 'Generate localizations for the current project.';
 
   @override
   String get name => 'gen-l10n';

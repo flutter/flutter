@@ -28,7 +28,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
 
-class MockFile extends Mock implements File {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockLogger extends Mock implements Logger {}
 class MockProcess extends Mock implements Process {}
@@ -377,8 +376,6 @@ void main() {
     MockLogger mockLogger;
     MockProcessManager mockProcessManager;
     IOSSimulator deviceUnderTest;
-    // only used for fs.path.join()
-    final FileSystem fs = globals.fs;
 
     setUp(() {
       mockXcode = MockXcode();
@@ -416,9 +413,8 @@ void main() {
         when(mockXcode.majorVersion).thenReturn(8);
         when(mockXcode.minorVersion).thenReturn(2);
         expect(deviceUnderTest.supportsScreenshot, true);
-        final MockFile mockFile = MockFile();
-        when(mockFile.path).thenReturn(fs.path.join('some', 'path', 'to', 'screenshot.png'));
-        await deviceUnderTest.takeScreenshot(mockFile);
+        final File screenshot = MemoryFileSystem.test().file('screenshot.png');
+        await deviceUnderTest.takeScreenshot(screenshot);
         verify(mockProcessManager.run(
           <String>[
             '/usr/bin/xcrun',
@@ -426,7 +422,7 @@ void main() {
             'io',
             'x',
             'screenshot',
-            fs.path.join('some', 'path', 'to', 'screenshot.png'),
+            'screenshot.png',
           ],
           environment: null,
           workingDirectory: null,
@@ -945,7 +941,7 @@ flutter:
       );
       expect(simulator.isSupportedForProject(flutterProject), true);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -963,7 +959,7 @@ flutter:
       );
       expect(simulator.isSupportedForProject(flutterProject), true);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -979,7 +975,7 @@ flutter:
       );
       expect(simulator.isSupportedForProject(flutterProject), false);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 

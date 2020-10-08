@@ -148,7 +148,7 @@ class FlutterLogoDecoration extends Decoration {
     assert(debugAssertIsValid());
     if (a == null || a is FlutterLogoDecoration) {
       assert(a == null || a.debugAssertIsValid());
-      return FlutterLogoDecoration.lerp(a as FlutterLogoDecoration, this, t);
+      return FlutterLogoDecoration.lerp(a as FlutterLogoDecoration?, this, t);
     }
     return super.lerpFrom(a, t) as FlutterLogoDecoration?;
   }
@@ -158,7 +158,7 @@ class FlutterLogoDecoration extends Decoration {
     assert(debugAssertIsValid());
     if (b == null || b is FlutterLogoDecoration) {
       assert(b == null || b.debugAssertIsValid());
-      return FlutterLogoDecoration.lerp(this, b as FlutterLogoDecoration, t);
+      return FlutterLogoDecoration.lerp(this, b as FlutterLogoDecoration?, t);
     }
     return super.lerpTo(b, t) as FlutterLogoDecoration?;
   }

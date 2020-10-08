@@ -12,11 +12,11 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 import 'protocol_discovery.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit
@@ -25,12 +25,14 @@ abstract class DesktopDevice extends Device {
   DesktopDevice(String identifier, {
       @required PlatformType platformType,
       @required bool ephemeral,
-      Logger logger,
-      ProcessManager processManager,
-      FileSystem fileSystem,
-    }) : _logger = logger ?? globals.logger, // TODO(jonahwilliams): remove after updating google3
-         _processManager = processManager ?? globals.processManager,
-         _fileSystem = fileSystem ?? globals.fs,
+      @required Logger logger,
+      @required ProcessManager processManager,
+      @required FileSystem fileSystem,
+      @required OperatingSystemUtils operatingSystemUtils,
+    }) : _logger = logger,
+         _processManager = processManager,
+         _fileSystem = fileSystem,
+         _operatingSystemUtils = operatingSystemUtils,
          super(
           identifier,
           category: Category.desktop,
@@ -41,6 +43,7 @@ abstract class DesktopDevice extends Device {
   final Logger _logger;
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
+  final OperatingSystemUtils _operatingSystemUtils;
   final Set<Process> _runningProcesses = <Process>{};
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
@@ -88,7 +91,7 @@ abstract class DesktopDevice extends Device {
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override
-  Future<String> get sdkNameAndVersion async => globals.os.name;
+  Future<String> get sdkNameAndVersion async => _operatingSystemUtils.name;
 
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
@@ -110,8 +113,8 @@ abstract class DesktopDevice extends Device {
     ApplicationPackage package, {
     String mainPath,
     String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    @required DebuggingOptions debuggingOptions,
+    Map<String, dynamic> platformArgs = const <String, dynamic>{},
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
@@ -119,22 +122,26 @@ abstract class DesktopDevice extends Device {
     if (!prebuiltApplication) {
       await buildForDevice(
         package,
-        buildInfo: debuggingOptions?.buildInfo,
+        buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
       );
     }
 
     // Ensure that the executable is locatable.
     final BuildMode buildMode = debuggingOptions?.buildInfo?.mode;
+    final bool traceStartup = platformArgs['trace-startup'] as bool ?? false;
     final String executable = executablePathForDevice(package, buildMode);
     if (executable == null) {
       _logger.printError('Unable to find executable to run');
       return LaunchResult.failed();
     }
 
-    final Process process = await _processManager.start(<String>[
-      executable,
-    ]);
+    final Process process = await _processManager.start(
+      <String>[
+        executable,
+      ],
+      environment: _computeEnvironment(debuggingOptions, traceStartup, route),
+    );
     _runningProcesses.add(process);
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
 
@@ -146,6 +153,7 @@ abstract class DesktopDevice extends Device {
       devicePort: debuggingOptions?.deviceVmServicePort,
       hostPort: debuggingOptions?.hostVmServicePort,
       ipv6: ipv6,
+      logger: _logger,
     );
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
@@ -174,7 +182,7 @@ abstract class DesktopDevice extends Device {
     // Walk a copy of _runningProcesses, since the exit handler removes from the
     // set.
     for (final Process process in Set<Process>.of(_runningProcesses)) {
-      succeeded &= process.kill();
+      succeeded &= _processManager.killPid(process.pid);
     }
     return succeeded;
   }
@@ -198,11 +206,100 @@ abstract class DesktopDevice extends Device {
   /// Called after a process is attached, allowing any device-specific extra
   /// steps to be run.
   void onAttached(ApplicationPackage package, BuildMode buildMode, Process process) {}
+
+  /// Computes a set of environment variables used to pass debugging information
+  /// to the engine without interfering with application level command line
+  /// arguments.
+  ///
+  /// The format of the environment variables is:
+  ///   * FLUTTER_ENGINE_SWITCHES to the number of switches.
+  ///   * FLUTTER_ENGINE_SWITCH_<N> (indexing from 1) to the individual switches.
+  Map<String, String> _computeEnvironment(DebuggingOptions debuggingOptions, bool traceStartup, String route) {
+    int flags = 0;
+    final Map<String, String> environment = <String, String>{};
+
+    void addFlag(String value) {
+      flags += 1;
+      environment['FLUTTER_ENGINE_SWITCH_$flags'] = value;
+    }
+    void finish() {
+      environment['FLUTTER_ENGINE_SWITCHES'] = flags.toString();
+    }
+
+    addFlag('enable-dart-profiling=true');
+    addFlag('enable-background-compilation=true');
+
+    if (traceStartup) {
+      addFlag('trace-startup=true');
+    }
+    if (route != null) {
+      addFlag('route=$route');
+    }
+    if (debuggingOptions.enableSoftwareRendering) {
+      addFlag('enable-software-rendering=true');
+    }
+    if (debuggingOptions.skiaDeterministicRendering) {
+      addFlag('skia-deterministic-rendering=true');
+    }
+    if (debuggingOptions.traceSkia) {
+      addFlag('trace-skia=true');
+    }
+    if (debuggingOptions.traceAllowlist != null) {
+      addFlag('trace-allowlist=${debuggingOptions.traceAllowlist}');
+    }
+    if (debuggingOptions.traceSystrace) {
+      addFlag('trace-systrace=true');
+    }
+    if (debuggingOptions.endlessTraceBuffer) {
+      addFlag('endless-trace-buffer=true');
+    }
+    if (debuggingOptions.dumpSkpOnShaderCompilation) {
+      addFlag('dump-skp-on-shader-compilation=true');
+    }
+    if (debuggingOptions.cacheSkSL) {
+      addFlag('cache-sksl=true');
+    }
+    if (debuggingOptions.purgePersistentCache) {
+      addFlag('purge-persistent-cache=true');
+    }
+    // Options only supported when there is a VM Service connection between the
+    // tool and the device, usually in debug or profile mode.
+    if (debuggingOptions.debuggingEnabled) {
+      if (debuggingOptions.deviceVmServicePort != null) {
+        addFlag('observatory-port=${debuggingOptions.deviceVmServicePort}');
+      }
+      if (debuggingOptions.buildInfo.isDebug) {
+        addFlag('enable-checked-mode=true');
+        addFlag('verify-entry-points=true');
+      }
+      if (debuggingOptions.startPaused) {
+        addFlag('start-paused=true');
+      }
+      if (debuggingOptions.disableServiceAuthCodes) {
+        addFlag('disable-service-auth-codes=true');
+      }
+      final String dartVmFlags = computeDartVmFlags(debuggingOptions);
+      if (dartVmFlags.isNotEmpty) {
+        addFlag('dart-flags=$dartVmFlags');
+      }
+      if (debuggingOptions.useTestFonts) {
+        addFlag('use-test-fonts=true');
+      }
+      if (debuggingOptions.verboseSystemLogs) {
+        addFlag('verbose-logging=true');
+      }
+    }
+    finish();
+    return environment;
+  }
 }
 
+/// A log reader for desktop applications that delegates to a [Process] stdout
+/// and stderr streams.
 class DesktopLogReader extends DeviceLogReader {
   final StreamController<List<int>> _inputController = StreamController<List<int>>.broadcast();
 
+  /// Begin listening to the stdout and stderr streams of the provided [process].
   void initializeProcess(Process process) {
     process.stdout.listen(_inputController.add);
     process.stderr.listen(_inputController.add);

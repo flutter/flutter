@@ -6,6 +6,8 @@ import 'dart:collection';
 
 import 'events.dart';
 
+/// A callback used by [PointerEventResampler.sample] and
+/// [PointerEventResampler.stop] to process a resampled `event`.
 typedef HandleEventCallback = void Function(PointerEvent event);
 
 /// Class for pointer event resampling.
@@ -102,6 +104,18 @@ class PointerEventResampler {
       synthesized: event.synthesized,
       embedderId: event.embedderId,
     );
+  }
+
+  PointerEvent _toMoveOrHoverEvent(
+    PointerEvent event,
+    Offset position,
+    Offset delta,
+    int pointerIdentifier,
+    Duration timeStamp,
+    bool isDown,
+  ) {
+    return isDown ? _toMoveEvent(event, position, delta, pointerIdentifier, timeStamp)
+                  : _toHoverEvent(event, position, delta, timeStamp);
   }
 
   Offset _positionAt(Duration sampleTime) {
@@ -222,13 +236,21 @@ class PointerEventResampler {
       // Skip `move` and `hover` events as they are automatically
       // generated when the position has changed.
       if (event is! PointerMoveEvent && event is! PointerHoverEvent) {
+        // Add synthetics `move` or `hover` event if position has changed.
+        // Note: Devices without `hover` events are expected to always have
+        // `add` and `down` events with the same position and this logic will
+        // therefor never produce `hover` events.
+        if (position != _position) {
+          final Offset delta = position - _position;
+          callback(_toMoveOrHoverEvent(event, position, delta, _pointerIdentifier, sampleTime, wasDown));
+          _position = position;
+        }
         callback(event.copyWith(
           position: position,
-          delta: position - _position,
+          delta: Offset.zero,
           pointer: pointerIdentifier,
           timeStamp: sampleTime,
         ));
-        _position = position;
       }
 
       _queuedEvents.removeFirst();
@@ -246,10 +268,7 @@ class PointerEventResampler {
     final PointerEvent? next = _next;
     if (position != _position && next != null) {
       final Offset delta = position - _position;
-      final PointerEvent event = _isDown
-          ? _toMoveEvent(next, position, delta, _pointerIdentifier, sampleTime)
-          : _toHoverEvent(next, position, delta, sampleTime);
-      callback(event);
+      callback(_toMoveOrHoverEvent(next, position, delta, _pointerIdentifier, sampleTime, _isDown));
       _position = position;
     }
   }

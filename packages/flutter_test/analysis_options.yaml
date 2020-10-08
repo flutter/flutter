@@ -1,0 +1,12 @@
+# Use the parent analysis options settings and enable null-experiment.
+
+include: ../analysis_options.yaml
+
+analyzer:
+  enable-experiment:
+    - non-nullable
+  errors:
+    always_require_non_null_named_parameters: false # not needed with nnbd
+    unrelated_type_equality_checks: false # https://github.com/dart-lang/linter/issues/2196
+    void_checks: false # https://github.com/dart-lang/linter/issues/2185
+    unnecessary_null_comparison: false # https://github.com/dart-lang/language/issues/1018

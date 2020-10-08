@@ -3427,17 +3427,22 @@ void main() {
     });
 
     testWidgets(
-      'does not throw when sending infinite Rect',
+      'zero matrix paint transform',
       (WidgetTester tester) async {
         controller.value = TextEditingValue(text: 'a' * 100, composing: const TextRange(start: 0, end: 10));
+        // Use a FittedBox with an zero-sized child to set the paint transform
+        // to the zero matrix.
         await tester.pumpWidget(FittedBox(child: SizedBox.fromSize(size: Size.zero, child: builder())));
         await tester.showKeyboard(find.byType(EditableText));
-        expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.setMarkedTextRect', args: <String, dynamic> {
-          'width': -1,
-          'height': -1,
-          'x': 0,
-          'y': 0,
-        })));
+        expect(tester.testTextInput.log, contains(matchesMethodCall(
+          'TextInput.setMarkedTextRect',
+          args: allOf(
+            containsPair('width', isNotNaN),
+            containsPair('height', isNotNaN),
+            containsPair('x', isNotNaN),
+            containsPair('y', isNotNaN),
+          ),
+        )));
     });
   });
 
@@ -4695,7 +4700,7 @@ void main() {
 
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     final Rect rect = state.renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
-    expect(rect.isFinite, false);
+    expect(rect.isFinite, true);
     expect(tester.takeException(), isNull);
   });
 
@@ -5701,6 +5706,119 @@ void main() {
     expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: -1, end: 9)), false);
   });
 
+  testWidgets('Preserves composing range if cursor moves within that range', (WidgetTester tester) async {
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    controller.selection = const TextSelection.collapsed(offset: 5);
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 4, end: 12));
+  });
+
+  testWidgets('Clears composing range if cursor moves outside that range', (WidgetTester tester) async {
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Positioning cursor before the composing range should clear the composing range.
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    controller.selection = const TextSelection.collapsed(offset: 2);
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+    // Reset the composing range.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 4, end: 12));
+
+    // Positioning cursor after the composing range should clear the composing range.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    controller.selection = const TextSelection.collapsed(offset: 14);
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+  });
+
+  testWidgets('Clears composing range if cursor moves outside that range', (WidgetTester tester) async {
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Setting a selection before the composing range clears the composing range.
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    controller.selection = const TextSelection(baseOffset: 1, extentOffset: 2);
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+    // Reset the composing range.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 4, end: 12));
+
+    // Setting a selection within the composing range clears the composing range.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    controller.selection = const TextSelection(baseOffset: 5, extentOffset: 7);
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+    // Reset the composing range.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 4, end: 12));
+
+    // Setting a selection after the composing range clears the composing range.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    controller.selection = const TextSelection(baseOffset: 13, extentOffset: 15);
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/65374.
   testWidgets('Length formatter will not cause crash while the TextEditingValue is composing', (WidgetTester tester) async {
     final TextInputFormatter formatter = LengthLimitingTextInputFormatter(5);
@@ -5770,6 +5888,125 @@ void main() {
     state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 5, end: 6)));
     expect(state.currentTextEditingValue.text, '12345');
     expect(state.currentTextEditingValue.composing, TextRange.empty);
+  });
+
+  group('callback errors', () {
+    const String errorText = 'Test EditableText callback error';
+
+    testWidgets('onSelectionChanged can throw errors', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: TextEditingController(
+            text: 'flutter is the best!',
+          ),
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+          selectionControls: materialTextSelectionControls,
+          onSelectionChanged: (TextSelection selection, SelectionChangedCause cause) {
+            throw FlutterError(errorText);
+          },
+        ),
+      ));
+
+      // Interact with the field to establish the input connection.
+      await tester.tap(find.byType(EditableText));
+      final dynamic error = tester.takeException();
+      expect(error, isFlutterError);
+      expect(error.toString(), contains(errorText));
+    });
+
+    testWidgets('onChanged can throw errors', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: TextEditingController(
+            text: 'flutter is the best!',
+          ),
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+          onChanged: (String text) {
+            throw FlutterError(errorText);
+          },
+        ),
+      ));
+
+      // Modify the text and expect an error from onChanged.
+      await tester.enterText(find.byType(EditableText), '...');
+      final dynamic error = tester.takeException();
+      expect(error, isFlutterError);
+      expect(error.toString(), contains(errorText));
+    });
+
+    testWidgets('onEditingComplete can throw errors', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: TextEditingController(
+            text: 'flutter is the best!',
+          ),
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+          onEditingComplete: () {
+            throw FlutterError(errorText);
+          },
+        ),
+      ));
+
+      // Interact with the field to establish the input connection.
+      final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+      await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+      await tester.pump();
+
+      // Submit and expect an error from onEditingComplete.
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      final dynamic error = tester.takeException();
+      expect(error, isFlutterError);
+      expect(error.toString(), contains(errorText));
+    });
+
+    testWidgets('onSubmitted can throw errors', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: TextEditingController(
+            text: 'flutter is the best!',
+          ),
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+          onSubmitted: (String text) {
+            throw FlutterError(errorText);
+          },
+        ),
+      ));
+
+      // Interact with the field to establish the input connection.
+      final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+      await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+      await tester.pump();
+
+      // Submit and expect an error from onSubmitted.
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      final dynamic error = tester.takeException();
+      expect(error, isFlutterError);
+      expect(error.toString(), contains(errorText));
+    });
   });
 }
 
