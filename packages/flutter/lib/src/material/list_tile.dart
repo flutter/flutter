@@ -1688,7 +1688,7 @@ class _RenderListTile extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     void doPaint(RenderBox? child) {
       if (child != null) {
-        final BoxParentData parentData = child.parentData as BoxParentData;
+        final BoxParentData parentData = child.parentData! as BoxParentData;
         context.paintChild(child, parentData.offset + offset);
       }
     }
@@ -1705,7 +1705,7 @@ class _RenderListTile extends RenderBox {
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     assert(position != null);
     for (final RenderBox child in _children) {
-      final BoxParentData parentData = child.parentData as BoxParentData;
+      final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,

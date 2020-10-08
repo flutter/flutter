@@ -1179,7 +1179,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   TextStyle? get _textStyle => widget.style ?? Theme.of(context)!.textTheme.subtitle1;
 
   void _handleTap() {
-    final RenderBox itemBox = context.findRenderObject() as RenderBox;
+    final RenderBox itemBox = context.findRenderObject()! as RenderBox;
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
     final TextDirection? textDirection = Directionality.of(context);
     final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown

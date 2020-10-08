@@ -4978,7 +4978,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return _history.cast<_RouteEntry?>().firstWhere(
       (_RouteEntry? entry) => entry!.restorationId == id,
       orElse: () => null,
-    )?.route as Route<T>;
+    )?.route as Route<T>?;
   }
 
   int get _userGesturesInProgress => _userGesturesInProgressCount;
@@ -5208,8 +5208,7 @@ class _AnonymousRestorationInformation extends _RestorationInformation {
 
   factory _AnonymousRestorationInformation.fromSerializableData(List<Object> data) {
     assert(data.length > 1);
-    final RestorableRouteBuilder routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1] as int)) as RestorableRouteBuilder;
-    assert(routeBuilder != null);
+    final RestorableRouteBuilder routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1] as int))! as RestorableRouteBuilder;
     return _AnonymousRestorationInformation(
       restorationScopeId: data[0] as int,
       routeBuilder: routeBuilder,

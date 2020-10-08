@@ -246,5 +246,5 @@ void main() {
 BoxDecoration _tableRowBoxDecoration({required WidgetTester tester, required int index}) {
   final Table table = tester.widget(find.byType(Table));
   final TableRow tableRow = table.children[index];
-  return tableRow.decoration as BoxDecoration;
+  return tableRow.decoration! as BoxDecoration;
 }
