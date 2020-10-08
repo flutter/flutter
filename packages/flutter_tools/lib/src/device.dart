@@ -27,6 +27,7 @@ import 'base/terminal.dart';
 import 'base/user_messages.dart' hide userMessages;
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'devfs.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_device.dart';
 import 'fuchsia/fuchsia_sdk.dart';
@@ -621,6 +622,18 @@ abstract class Device {
   Future<TargetPlatform> get targetPlatform;
 
   Future<String> get sdkNameAndVersion;
+
+  /// Create a platform-specific [DevFSWriter] for the given [app], or
+  /// null if the device does not support them.
+  ///
+  /// For example, the destkop device classes can use a writer which
+  /// copies the files across the local file system.
+  DevFSWriter createDevFSWriter(
+    covariant ApplicationPackage app,
+    String userIdentifier,
+  ) {
+    return null;
+  }
 
   /// Get a log reader for this device.
   ///
