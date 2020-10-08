@@ -980,7 +980,7 @@ class _RenderDecoration extends RenderBox {
       _boxSize(icon).width
       + contentPadding.left
       + _boxSize(prefixIcon).width
-      + _boxSize(suffixIcon).width
+      + (decoration.border!.isOutline ? 0.0 : _boxSize(suffixIcon).width)
       + contentPadding.right));
     boxToBaseline[label] = _layoutLineBox(
       label,
