@@ -29,6 +29,10 @@ void AssetManager::PushBack(std::unique_ptr<AssetResolver> resolver) {
   resolvers_.push_back(std::move(resolver));
 }
 
+std::deque<std::unique_ptr<AssetResolver>> AssetManager::TakeResolvers() {
+  return std::move(resolvers_);
+}
+
 // |AssetResolver|
 std::unique_ptr<fml::Mapping> AssetManager::GetAsMapping(
     const std::string& asset_name) const {
@@ -50,6 +54,11 @@ std::unique_ptr<fml::Mapping> AssetManager::GetAsMapping(
 // |AssetResolver|
 bool AssetManager::IsValid() const {
   return resolvers_.size() > 0;
+}
+
+// |AssetResolver|
+bool AssetManager::IsValidAfterAssetManagerChange() const {
+  return false;
 }
 
 }  // namespace flutter

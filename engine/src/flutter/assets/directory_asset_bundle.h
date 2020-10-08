@@ -14,16 +14,21 @@ namespace flutter {
 
 class DirectoryAssetBundle : public AssetResolver {
  public:
-  explicit DirectoryAssetBundle(fml::UniqueFD descriptor);
+  DirectoryAssetBundle(fml::UniqueFD descriptor,
+                       bool is_valid_after_asset_manager_change);
 
   ~DirectoryAssetBundle() override;
 
  private:
   const fml::UniqueFD descriptor_;
   bool is_valid_ = false;
+  bool is_valid_after_asset_manager_change_ = false;
 
   // |AssetResolver|
   bool IsValid() const override;
+
+  // |AssetResolver|
+  bool IsValidAfterAssetManagerChange() const override;
 
   // |AssetResolver|
   std::unique_ptr<fml::Mapping> GetAsMapping(

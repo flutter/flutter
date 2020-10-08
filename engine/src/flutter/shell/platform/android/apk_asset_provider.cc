@@ -27,6 +27,10 @@ bool APKAssetProvider::IsValid() const {
   return true;
 }
 
+bool APKAssetProvider::IsValidAfterAssetManagerChange() const {
+  return true;
+}
+
 class APKAssetMapping : public fml::Mapping {
  public:
   APKAssetMapping(AAsset* asset) : asset_(asset) {}
