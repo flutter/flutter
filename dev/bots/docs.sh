@@ -11,7 +11,7 @@ function deploy {
   shift
   while [[ "$remaining_tries" -gt 0 ]]; do
     echo "zzz:"${FIREBASE_TOKEN: -3}
-    (cd "$FLUTTER_ROOT/dev/docs" && firebase --debug deploy --token "$FIREBASE_TOKEN" --project "$@") && break
+    (cd "$FLUTTER_ROOT/dev/docs" && firebase --debug deploy --token "$FIREBASE_TOKEN" --project "$@" --only hosting) && break
     remaining_tries=$(($remaining_tries - 1))
     echo "Error: Unable to deploy documentation to Firebase. Retrying in five seconds... ($remaining_tries tries left)"
     sleep 5
