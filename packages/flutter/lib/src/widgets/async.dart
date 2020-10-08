@@ -500,7 +500,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   @override
   AsyncSnapshot<T> initial() => initialData == null
       ? AsyncSnapshot<T>.nothing()
-      : AsyncSnapshot<T>.withData(ConnectionState.none, initialData!);
+      : AsyncSnapshot<T>.withData(ConnectionState.none, initialData as T);
 
   @override
   AsyncSnapshot<T> afterConnected(AsyncSnapshot<T> current) => current.inState(ConnectionState.waiting);
@@ -733,7 +733,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
     super.initState();
     _snapshot = widget.initialData == null
         ? AsyncSnapshot<T>.nothing()
-        : AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData!);
+        : AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData as T);
     _subscribe();
   }
 

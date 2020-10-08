@@ -7,6 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -245,6 +246,116 @@ void main() {
     // The AppBar.shadowColor should be used instead of AppBarTheme.shadowColor.
     expect(appBar.shadowColor, Colors.yellow);
   });
+
+  testWidgets('AppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
+    const double kTitleSpacing = 10;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolBar.middleSpacing, kTitleSpacing);
+  });
+
+  testWidgets('AppBar.titleSpacing takes priority over AppBarTheme.titleSpacing', (WidgetTester tester) async {
+    const double kTitleSpacing = 10;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Title'),
+          titleSpacing: 40,
+        ),
+      ),
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolBar.middleSpacing, 40);
+  });
+
+  testWidgets('SliverAppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
+    const double kTitleSpacing = 10;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      home: const CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: Text('Title'),
+          ),
+        ],
+      ),
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolBar.middleSpacing, kTitleSpacing);
+  });
+
+  testWidgets('SliverAppBar.titleSpacing takes priority over AppBarTheme.titleSpacing ', (WidgetTester tester) async {
+    const double kTitleSpacing = 10;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      home: const CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: Text('Title'),
+            titleSpacing: 40,
+          ),
+        ],
+      ),
+    ));
+
+    final NavigationToolbar navToolbar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolbar.middleSpacing, 40);
+  });
+
+  testWidgets('Default AppBarTheme debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const AppBarTheme().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('AppBarTheme implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const AppBarTheme(
+      brightness: Brightness.dark,
+      color: Color(0xff000001),
+      elevation: 8.0,
+      shadowColor: Color(0xff000002),
+      centerTitle: true,
+      titleSpacing: 40.0,
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'brightness: Brightness.dark',
+      'color: Color(0xff000001)',
+      'elevation: 8.0',
+      'shadowColor: Color(0xff000002)',
+      'centerTitle: true',
+      'titleSpacing: 40.0',
+    ]);
+
+    // On the web, Dart doubles and ints are backed by the same kind of object because
+    // JavaScript does not support integers. So, the Dart double "4.0" is identical
+    // to "4", which results in the web evaluating to the value "4" regardless of which
+    // one is used. This results in a difference for doubles in debugFillProperties between
+    // the web and the rest of Flutter's target platforms.
+  }, skip: kIsWeb);
 }
 
 AppBarTheme _appBarTheme() {

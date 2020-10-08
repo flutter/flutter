@@ -296,6 +296,7 @@ class UpgradeCommandRunner {
         context: PubContext.pubUpgrade,
         directory: projectRoot,
         upgrade: true,
+        checkLastModified: false,
         generateSyntheticPackage: false,
       );
     }
