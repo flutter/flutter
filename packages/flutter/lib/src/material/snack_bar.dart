@@ -420,7 +420,7 @@ class _SnackBarState extends State<SnackBar> {
       snackBarTheme: snackBarTheme,
     );
 
-    final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? inverseTheme.textTheme.subtitle1;
+    final TextStyle contentTextStyle = snackBarTheme.contentTextStyle ?? inverseTheme.textTheme.subtitle1;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
@@ -444,7 +444,7 @@ class _SnackBarState extends State<SnackBar> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding),
               child: DefaultTextStyle(
-                style: contentTextStyle!,
+                style: contentTextStyle,
                 child: widget.content,
               ),
             ),

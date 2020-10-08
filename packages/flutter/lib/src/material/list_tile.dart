@@ -980,14 +980,14 @@ class ListTile extends StatelessWidget {
     if (tileTheme != null) {
       switch (tileTheme.style) {
         case ListTileStyle.drawer:
-          style = theme.textTheme.bodyText1!;
+          style = theme.textTheme.bodyText1;
           break;
         case ListTileStyle.list:
-          style = theme.textTheme.subtitle1!;
+          style = theme.textTheme.subtitle1;
           break;
       }
     } else {
-      style = theme.textTheme.subtitle1!;
+      style = theme.textTheme.subtitle1;
     }
     final Color? color = _textColor(theme, tileTheme, style.color);
     return _isDenseLayout(tileTheme)
@@ -996,7 +996,7 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _subtitleTextStyle(ThemeData theme, ListTileTheme? tileTheme) {
-    final TextStyle style = theme.textTheme.bodyText2!;
+    final TextStyle style = theme.textTheme.bodyText2;
     final Color? color = _textColor(theme, tileTheme, theme.textTheme.caption!.color);
     return _isDenseLayout(tileTheme)
       ? style.copyWith(color: color, fontSize: 12.0)

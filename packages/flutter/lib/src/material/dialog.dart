@@ -485,7 +485,7 @@ class AlertDialog extends StatelessWidget {
           bottom: effectiveTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
-          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6!,
+          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6,
           child: Semantics(
             child: title,
             namesRoute: label == null,
@@ -505,7 +505,7 @@ class AlertDialog extends StatelessWidget {
           bottom: effectiveContentPadding.bottom,
         ),
         child: DefaultTextStyle(
-          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1!,
+          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1,
           child: content!,
         ),
       );
@@ -840,7 +840,7 @@ class SimpleDialog extends StatelessWidget {
           bottom: children == null ? effectiveTitlePadding.bottom * paddingScaleFactor : effectiveTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
-          style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6!,
+          style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6,
           child: Semantics(namesRoute: true, child: title),
         ),
       );

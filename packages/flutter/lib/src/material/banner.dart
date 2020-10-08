@@ -126,7 +126,7 @@ class MaterialBanner extends StatelessWidget {
     final Color backgroundColor = this.backgroundColor
         ?? bannerTheme.backgroundColor
         ?? theme!.colorScheme.surface;
-    final TextStyle? textStyle = contentTextStyle
+    final TextStyle textStyle = contentTextStyle
         ?? bannerTheme.contentTextStyle
         ?? theme!.textTheme.bodyText2;
 
@@ -145,7 +145,7 @@ class MaterialBanner extends StatelessWidget {
                   ),
                 Expanded(
                   child: DefaultTextStyle(
-                    style: textStyle!,
+                    style: textStyle,
                     child: content,
                   ),
                 ),

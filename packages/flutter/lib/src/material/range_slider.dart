@@ -627,7 +627,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
       rangeValueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
-      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1!.copyWith(
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1.copyWith(
         color: theme.colorScheme.onPrimary,
       ),
       minThumbSeparation: sliderTheme.minThumbSeparation ?? _defaultMinThumbSeparation,

@@ -2074,7 +2074,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // The base style for the inline label or hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
   TextStyle _getInlineStyle(ThemeData themeData) {
-    return themeData.textTheme.subtitle1!.merge(widget.baseStyle)
+    return themeData.textTheme.subtitle1.merge(widget.baseStyle)
       .copyWith(color: decoration!.enabled ? themeData.hintColor : themeData.disabledColor);
   }
 
@@ -2082,7 +2082,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Color color = decoration!.errorText != null
       ? decoration!.errorStyle?.color ?? themeData.errorColor
       : _getActiveColor(themeData);
-    final TextStyle style = themeData.textTheme.subtitle1!.merge(widget.baseStyle);
+    final TextStyle style = themeData.textTheme.subtitle1.merge(widget.baseStyle);
     // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
     // Setting TextStyle.height to 1 ensures that the label's height will equal
     // its font size.

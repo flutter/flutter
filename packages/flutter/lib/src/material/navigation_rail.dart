@@ -453,8 +453,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       color: defaultSelectedIconTheme?.color ?? theme.colorScheme.primary,
       opacity: defaultSelectedIconTheme?.opacity ?? 1.0,
     );
-    final TextStyle unselectedLabelTextStyle = theme.textTheme.bodyText1!.copyWith(color: baseUnselectedColor).merge(widget.unselectedLabelTextStyle ?? navigationRailTheme.unselectedLabelTextStyle);
-    final TextStyle selectedLabelTextStyle = theme.textTheme.bodyText1!.copyWith(color: baseSelectedColor).merge(widget.selectedLabelTextStyle ?? navigationRailTheme.selectedLabelTextStyle);
+    final TextStyle unselectedLabelTextStyle = theme.textTheme.bodyText1.copyWith(color: baseUnselectedColor).merge(widget.unselectedLabelTextStyle ?? navigationRailTheme.unselectedLabelTextStyle);
+    final TextStyle selectedLabelTextStyle = theme.textTheme.bodyText1.copyWith(color: baseSelectedColor).merge(widget.selectedLabelTextStyle ?? navigationRailTheme.selectedLabelTextStyle);
     final double groupAlignment = widget.groupAlignment ?? navigationRailTheme.groupAlignment ?? -1.0;
     final NavigationRailLabelType labelType = widget.labelType ?? navigationRailTheme.labelType ?? NavigationRailLabelType.none;
 

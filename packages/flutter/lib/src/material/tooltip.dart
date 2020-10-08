@@ -373,7 +373,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     TextStyle defaultTextStyle;
     BoxDecoration defaultDecoration;
     if (theme.brightness == Brightness.dark) {
-      defaultTextStyle = theme.textTheme.bodyText2!.copyWith(
+      defaultTextStyle = theme.textTheme.bodyText2.copyWith(
         color: Colors.black,
       );
       defaultDecoration = BoxDecoration(
@@ -381,7 +381,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         borderRadius: const BorderRadius.all(Radius.circular(4)),
       );
     } else {
-      defaultTextStyle = theme.textTheme.bodyText2!.copyWith(
+      defaultTextStyle = theme.textTheme.bodyText2.copyWith(
         color: Colors.white,
       );
       defaultDecoration = BoxDecoration(
@@ -515,7 +515,7 @@ class _TooltipOverlay extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: height),
               child: DefaultTextStyle(
-                style: Theme.of(context)!.textTheme.bodyText2!,
+                style: Theme.of(context)!.textTheme.bodyText2,
                 child: Container(
                   decoration: decoration,
                   padding: padding,

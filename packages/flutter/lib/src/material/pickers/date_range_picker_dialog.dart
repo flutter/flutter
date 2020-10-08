@@ -487,11 +487,11 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     final Color headerDisabledForeground = headerForeground.withOpacity(0.38);
     final String startDateText = utils.formatRangeStartDate(localizations, selectedStartDate, selectedEndDate);
     final String endDateText = utils.formatRangeEndDate(localizations, selectedStartDate, selectedEndDate, DateTime.now());
-    final TextStyle? headlineStyle = textTheme.headline5;
-    final TextStyle? startDateStyle = headlineStyle?.apply(
+    final TextStyle headlineStyle = textTheme.headline5;
+    final TextStyle startDateStyle = headlineStyle.apply(
       color: selectedStartDate != null ? headerForeground : headerDisabledForeground
     );
-    final TextStyle? endDateStyle = headlineStyle?.apply(
+    final TextStyle endDateStyle = headlineStyle.apply(
       color: selectedEndDate != null ? headerForeground : headerDisabledForeground
     );
     final TextStyle saveButtonStyle = textTheme.button!.apply(
@@ -639,9 +639,9 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     final Color dateColor = colorScheme.brightness == Brightness.light
       ? colorScheme.onPrimary
       : colorScheme.onSurface;
-    final TextStyle? dateStyle = orientation == Orientation.landscape
-      ? textTheme.headline5?.apply(color: dateColor)
-      : textTheme.headline4?.apply(color: dateColor);
+    final TextStyle dateStyle = orientation == Orientation.landscape
+      ? textTheme.headline5.apply(color: dateColor)
+      : textTheme.headline4.apply(color: dateColor);
     final String dateText = _formatDateRange(context, selectedStartDate, selectedEndDate, currentDate!);
     final String semanticDateText = selectedStartDate != null && selectedEndDate != null
       ? '${localizations.formatMediumDate(selectedStartDate!)} – ${localizations.formatMediumDate(selectedEndDate!)}'

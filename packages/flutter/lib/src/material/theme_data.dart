@@ -409,7 +409,7 @@ class ThemeData with Diagnosticable {
     chipTheme ??= ChipThemeData.fromDefaults(
       secondaryColor: primaryColor,
       brightness: colorScheme.brightness,
-      labelStyle: textTheme.bodyText1!,
+      labelStyle: textTheme.bodyText1,
     );
     dialogTheme ??= const DialogTheme();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();

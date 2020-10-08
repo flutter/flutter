@@ -737,7 +737,7 @@ class DataTable extends StatelessWidget {
 
     final TextStyle effectiveHeadingTextStyle = headingTextStyle
       ?? themeData.dataTableTheme.headingTextStyle
-      ?? themeData.textTheme.subtitle2!;
+      ?? themeData.textTheme.subtitle2;
     final double effectiveHeadingRowHeight = headingRowHeight
       ?? themeData.dataTableTheme.headingRowHeight
       ?? _headingRowHeight;
@@ -792,7 +792,7 @@ class DataTable extends StatelessWidget {
 
     final TextStyle effectiveDataTextStyle = dataTextStyle
       ?? themeData.dataTableTheme.dataTextStyle
-      ?? themeData.textTheme.bodyText2!;
+      ?? themeData.textTheme.bodyText2;
     final double effectiveDataRowHeight = dataRowHeight
       ?? themeData.dataTableTheme.dataRowHeight
       ?? kMinInteractiveDimension;

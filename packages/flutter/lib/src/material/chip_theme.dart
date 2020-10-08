@@ -509,7 +509,7 @@ class ChipThemeData with Diagnosticable {
     final ChipThemeData defaultData = ChipThemeData.fromDefaults(
       secondaryColor: defaultTheme.primaryColor,
       brightness: defaultTheme.brightness,
-      labelStyle: defaultTheme.textTheme.bodyText1!,
+      labelStyle: defaultTheme.textTheme.bodyText1,
     );
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
     properties.add(ColorProperty('deleteIconColor', deleteIconColor, defaultValue: defaultData.deleteIconColor));

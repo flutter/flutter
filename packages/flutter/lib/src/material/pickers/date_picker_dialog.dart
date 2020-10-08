@@ -370,9 +370,9 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     final Color dateColor = colorScheme.brightness == Brightness.light
       ? colorScheme.onPrimary
       : colorScheme.onSurface;
-    final TextStyle? dateStyle = orientation == Orientation.landscape
-      ? textTheme.headline5?.copyWith(color: dateColor)
-      : textTheme.headline4?.copyWith(color: dateColor);
+    final TextStyle dateStyle = orientation == Orientation.landscape
+      ? textTheme.headline5.copyWith(color: dateColor)
+      : textTheme.headline4.copyWith(color: dateColor);
 
     final Widget actions = Container(
       alignment: AlignmentDirectional.centerEnd,

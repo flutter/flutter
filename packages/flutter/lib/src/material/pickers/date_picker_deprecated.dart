@@ -273,10 +273,10 @@ class DayPicker extends StatelessWidget {
             shape: BoxShape.circle,
           );
         } else if (disabled) {
-          itemStyle = themeData.textTheme.bodyText2!.copyWith(color: themeData.disabledColor);
+          itemStyle = themeData.textTheme.bodyText2.copyWith(color: themeData.disabledColor);
         } else if (currentDate.year == year && currentDate.month == month && currentDate.day == day) {
           // The current day gets a different text color.
-          itemStyle = themeData.textTheme.bodyText1!.copyWith(color: themeData.accentColor);
+          itemStyle = themeData.textTheme.bodyText1.copyWith(color: themeData.accentColor);
         }
 
         Widget dayWidget = Container(
@@ -687,7 +687,7 @@ class _YearPickerState extends State<YearPicker> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context)!;
-    final TextStyle? style = themeData.textTheme.bodyText2;
+    final TextStyle style = themeData.textTheme.bodyText2;
     return ListView.builder(
       dragStartBehavior: widget.dragStartBehavior,
       controller: scrollController,
@@ -696,8 +696,8 @@ class _YearPickerState extends State<YearPicker> {
       itemBuilder: (BuildContext context, int index) {
         final int year = widget.firstDate.year + index;
         final bool isSelected = year == widget.selectedDate.year;
-        final TextStyle? itemStyle = isSelected
-          ? themeData.textTheme.headline5!.copyWith(color: themeData.accentColor)
+        final TextStyle itemStyle = isSelected
+          ? themeData.textTheme.headline5.copyWith(color: themeData.accentColor)
           : style;
         return InkWell(
           key: ValueKey<int>(year),

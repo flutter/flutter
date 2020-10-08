@@ -687,7 +687,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
       valueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
-      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1!.copyWith(
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1.copyWith(
         color: theme.colorScheme.onPrimary,
       ),
     );

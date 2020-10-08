@@ -181,50 +181,52 @@ class TextTheme with Diagnosticable {
          (display4 == null && display3 == null && display2 == null && display1 == null && headline == null && title == null &&
           subhead == null && subtitle == null &&
           body2 == null && body1 == null), 'Cannot mix 2014 and 2018 terms in call to TextTheme() constructor.'),
-       headline1 = headline1 ?? display4,
-       headline2 = headline2 ?? display3,
-       headline3 = headline3 ?? display2,
-       headline4 = headline4 ?? display1,
-       headline5 = headline5 ?? headline,
-       headline6 = headline6 ?? title,
-       subtitle1 = subtitle1 ?? subhead,
-       subtitle2 = subtitle2 ?? subtitle,
-       bodyText1 = bodyText1 ?? body2,
-       bodyText2 = bodyText2 ?? body1;
+       // Because of the assert above, the const TextStyle default constructors
+       // wil never be called, but it allows us to make the fields non-nullable.
+       headline1 = headline1 ?? display4 ?? const TextStyle(),
+       headline2 = headline2 ?? display3 ?? const TextStyle(),
+       headline3 = headline3 ?? display2 ?? const TextStyle(),
+       headline4 = headline4 ?? display1 ?? const TextStyle(),
+       headline5 = headline5 ?? headline ?? const TextStyle(),
+       headline6 = headline6 ?? title ?? const TextStyle(),
+       subtitle1 = subtitle1 ?? subhead ?? const TextStyle(),
+       subtitle2 = subtitle2 ?? subtitle ?? const TextStyle(),
+       bodyText1 = bodyText1 ?? body2 ?? const TextStyle(),
+       bodyText2 = bodyText2 ?? body1 ?? const TextStyle();
 
   /// Extremely large text.
-  final TextStyle? headline1;
+  final TextStyle headline1;
 
   /// Very, very large text.
   ///
   /// Used for the date in the dialog shown by [showDatePicker].
-  final TextStyle? headline2;
+  final TextStyle headline2;
 
   /// Very large text.
-  final TextStyle? headline3;
+  final TextStyle headline3;
 
   /// Large text.
-  final TextStyle? headline4;
+  final TextStyle headline4;
 
   /// Used for large text in dialogs (e.g., the month and year in the dialog
   /// shown by [showDatePicker]).
-  final TextStyle? headline5;
+  final TextStyle headline5;
 
   /// Used for the primary text in app bars and dialogs (e.g., [AppBar.title]
   /// and [AlertDialog.title]).
-  final TextStyle? headline6;
+  final TextStyle headline6;
 
   /// Used for the primary text in lists (e.g., [ListTile.title]).
-  final TextStyle? subtitle1;
+  final TextStyle subtitle1;
 
   /// For medium emphasis text that's a little smaller than [subtitle1].
-  final TextStyle? subtitle2;
+  final TextStyle subtitle2;
 
   /// Used for emphasizing text that would otherwise be [bodyText2].
-  final TextStyle? bodyText1;
+  final TextStyle bodyText1;
 
   /// The default text style for [Material].
-  final TextStyle? bodyText2;
+  final TextStyle bodyText2;
 
   /// Used for auxiliary text associated with images.
   final TextStyle? caption;
@@ -524,16 +526,16 @@ class TextTheme with Diagnosticable {
     if (other == null)
       return this;
     return copyWith(
-      headline1: headline1?.merge(other.headline1) ?? other.headline1,
-      headline2: headline2?.merge(other.headline2) ?? other.headline2,
-      headline3: headline3?.merge(other.headline3) ?? other.headline3,
-      headline4: headline4?.merge(other.headline4) ?? other.headline4,
-      headline5: headline5?.merge(other.headline5) ?? other.headline5,
-      headline6: headline6?.merge(other.headline6) ?? other.headline6,
-      subtitle1: subtitle1?.merge(other.subtitle1) ?? other.subtitle1,
-      subtitle2: subtitle2?.merge(other.subtitle2) ?? other.subtitle2,
-      bodyText1: bodyText1?.merge(other.bodyText1) ?? other.bodyText1,
-      bodyText2: bodyText2?.merge(other.bodyText2) ?? other.bodyText2,
+      headline1: headline1.merge(other.headline1),
+      headline2: headline2.merge(other.headline2),
+      headline3: headline3.merge(other.headline3),
+      headline4: headline4.merge(other.headline4),
+      headline5: headline5.merge(other.headline5),
+      headline6: headline6.merge(other.headline6),
+      subtitle1: subtitle1.merge(other.subtitle1),
+      subtitle2: subtitle2.merge(other.subtitle2),
+      bodyText1: bodyText1.merge(other.bodyText1),
+      bodyText2: bodyText2.merge(other.bodyText2),
       caption: caption?.merge(other.caption) ?? other.caption,
       button: button?.merge(other.button) ?? other.button,
       overline: overline?.merge(other.overline) ?? other.overline,
@@ -561,7 +563,7 @@ class TextTheme with Diagnosticable {
     TextDecorationStyle? decorationStyle,
   }) {
     return TextTheme(
-      headline1: headline1?.apply(
+      headline1: headline1.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -570,7 +572,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      headline2: headline2?.apply(
+      headline2: headline2.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -579,7 +581,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      headline3: headline3?.apply(
+      headline3: headline3.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -588,7 +590,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      headline4: headline4?.apply(
+      headline4: headline4.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -597,7 +599,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      headline5: headline5?.apply(
+      headline5: headline5.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -606,7 +608,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      headline6: headline6?.apply(
+      headline6: headline6.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -615,7 +617,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      subtitle1: subtitle1?.apply(
+      subtitle1: subtitle1.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -624,7 +626,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      subtitle2: subtitle2?.apply(
+      subtitle2: subtitle2.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -633,7 +635,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      bodyText1: bodyText1?.apply(
+      bodyText1: bodyText1.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -642,7 +644,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      bodyText2: bodyText2?.apply(
+      bodyText2: bodyText2.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
