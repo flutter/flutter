@@ -761,8 +761,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// This is usually used in processing pointer signals, where delta is given
   /// to [ScrollPosition] to calculate target value sliding.
-  // TODO(YeungKC): On macOS, a distinction should be made between mouse wheel
-  //  events and touchpad events, which can trigger an overscroll.
+  // TODO(YeungKC): Support trackpad scroll, https://github.com/flutter/flutter/issues/23604.
   void pointerScroll(double delta);
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
