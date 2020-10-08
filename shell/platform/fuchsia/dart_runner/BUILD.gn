@@ -93,8 +93,8 @@ runner("dart_jit_product_runner_bin") {
   product = true
   extra_defines = [ "DART_PRODUCT" ]
   extra_deps = [
-    "//third_party/dart/runtime:libdart_jit_product",
-    "//third_party/dart/runtime/platform:libdart_platform_jit_product",
+    "//third_party/dart/runtime:libdart_jit",
+    "//third_party/dart/runtime/platform:libdart_platform_jit",
   ]
 }
 
@@ -121,8 +121,8 @@ runner("dart_aot_product_runner_bin") {
   ]
   extra_deps = [
     "embedder:dart_aot_product_snapshot_cc",
-    "//third_party/dart/runtime:libdart_precompiled_runtime_product",
-    "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime_product",
+    "//third_party/dart/runtime:libdart_precompiled_runtime",
+    "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime",
   ]
 }
 
