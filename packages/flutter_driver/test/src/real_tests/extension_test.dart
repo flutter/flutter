@@ -901,7 +901,7 @@ void main() {
 
     testWidgets('unknown extension finder', (WidgetTester tester) async {
       final FlutterDriverExtension driverExtension = FlutterDriverExtension(
-        (String arg) async => '', 
+        (String arg) async => '',
         true,
         finders: <FinderExtension>[],
       );
@@ -921,7 +921,7 @@ void main() {
 
     testWidgets('simple extension finder', (WidgetTester tester) async {
       final FlutterDriverExtension driverExtension = FlutterDriverExtension(
-        (String arg) async => '', 
+        (String arg) async => '',
         true,
         finders: <FinderExtension>[
           StubFinderExtension(),
@@ -942,7 +942,7 @@ void main() {
 
     testWidgets('complex extension finder', (WidgetTester tester) async {
       final FlutterDriverExtension driverExtension = FlutterDriverExtension(
-        (String arg) async => '', 
+        (String arg) async => '',
         true,
         finders: <FinderExtension>[
           StubFinderExtension(),
@@ -963,7 +963,7 @@ void main() {
 
     testWidgets('extension finder with command', (WidgetTester tester) async {
       final FlutterDriverExtension driverExtension = FlutterDriverExtension(
-        (String arg) async => '', 
+        (String arg) async => '',
         true,
         finders: <FinderExtension>[
           StubFinderExtension(),
