@@ -940,7 +940,7 @@ void main() {
       expect(result.text, 'Foo');
     });
 
-    testWidgets('complex etension finder', (WidgetTester tester) async {
+    testWidgets('complex extension finder', (WidgetTester tester) async {
       final FlutterDriverExtension extension = FlutterDriverExtension(
           (String arg) async => '', true,
           finders: <FinderExtension>[
