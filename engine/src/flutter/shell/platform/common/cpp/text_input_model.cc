@@ -52,10 +52,14 @@ bool TextInputModel::SetSelection(size_t base, size_t extent) {
   return true;
 }
 
-void TextInputModel::DeleteSelected() {
+bool TextInputModel::DeleteSelected() {
+  if (selection_base_ == selection_extent_) {
+    return false;
+  }
   text_.erase(selection_start(), selection_end() - selection_start());
   selection_base_ = selection_start();
   selection_extent_ = selection_base_;
+  return true;
 }
 
 void TextInputModel::AddCodePoint(char32_t c) {
@@ -73,9 +77,7 @@ void TextInputModel::AddCodePoint(char32_t c) {
 }
 
 void TextInputModel::AddText(const std::u16string& text) {
-  if (selection_base_ != selection_extent_) {
-    DeleteSelected();
-  }
+  DeleteSelected();
   text_.insert(selection_extent_, text);
   selection_extent_ += text.length();
   selection_base_ = selection_extent_;
@@ -89,8 +91,7 @@ void TextInputModel::AddText(const std::string& text) {
 
 bool TextInputModel::Backspace() {
   // If there's a selection, delete it.
-  if (selection_base_ != selection_extent_) {
-    DeleteSelected();
+  if (DeleteSelected()) {
     return true;
   }
   // There's no selection; delete the preceding codepoint.
@@ -106,8 +107,7 @@ bool TextInputModel::Backspace() {
 
 bool TextInputModel::Delete() {
   // If there's a selection, delete it.
-  if (selection_base_ != selection_extent_) {
-    DeleteSelected();
+  if (DeleteSelected()) {
     return true;
   }
   // There's no selection; delete the following codepoint.

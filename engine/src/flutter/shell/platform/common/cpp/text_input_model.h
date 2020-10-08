@@ -110,7 +110,11 @@ class TextInputModel {
   int selection_extent() const { return selection_extent_; }
 
  private:
-  void DeleteSelected();
+  // Deletes the current selection, if any.
+  //
+  // Returns true if any text is deleted. The selection base and extent are
+  // reset to the start of the selected range.
+  bool DeleteSelected();
 
   std::u16string text_;
   size_t selection_base_ = 0;
