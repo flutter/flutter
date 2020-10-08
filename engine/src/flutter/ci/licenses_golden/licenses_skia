@@ -1,4 +1,4 @@
-Signature: 0a329613a3353c3bac2996b596f32311
+Signature: b4a6293d0c7db2f2b8d7883e4977328c
 
 UNUSED LICENSES:
 
@@ -1307,6 +1307,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/debug.js
 FILE: ../../../third_party/skia/modules/canvaskit/externs.js
 FILE: ../../../third_party/skia/modules/canvaskit/font.js
 FILE: ../../../third_party/skia/modules/canvaskit/fonts/NotoMono-Regular.ttf
+FILE: ../../../third_party/skia/modules/canvaskit/gm.js
 FILE: ../../../third_party/skia/modules/canvaskit/gpu.js
 FILE: ../../../third_party/skia/modules/canvaskit/helper.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/_namedcolors.js
@@ -1347,6 +1348,8 @@ FILE: ../../../third_party/skia/modules/canvaskit/release.js
 FILE: ../../../third_party/skia/modules/canvaskit/rt_shader.js
 FILE: ../../../third_party/skia/modules/canvaskit/skottie.js
 FILE: ../../../third_party/skia/modules/canvaskit/skp.js
+FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/gmtests.html
+FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/viewer.html
 FILE: ../../../third_party/skia/modules/pathkit/chaining.js
 FILE: ../../../third_party/skia/modules/pathkit/externs.js
 FILE: ../../../third_party/skia/modules/pathkit/helper.js
@@ -3909,6 +3912,7 @@ FILE: ../../../third_party/skia/include/private/GrD3DTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkIDChangeListener.h
 FILE: ../../../third_party/skia/include/private/SkSLSampleUsage.h
 FILE: ../../../third_party/skia/include/utils/SkCustomTypeface.h
+FILE: ../../../third_party/skia/modules/canvaskit/gm_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/viewer_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/SIMD/simd_float_capabilities.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/SIMD/simd_int_capabilities.cpp
@@ -6602,7 +6606,6 @@ FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/types/canvaskit-wasm
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/types/index.d.ts
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/types/tsconfig.json
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/types/tslint.json
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/viewer.html
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/example.html
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/package.json
 FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/example.html
