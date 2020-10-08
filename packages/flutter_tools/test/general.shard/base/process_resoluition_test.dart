@@ -7,7 +7,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:test/test.dart';
+
+import '../../src/common.dart';
 
 void main() {
   group('resolveExecutablePath', () {
