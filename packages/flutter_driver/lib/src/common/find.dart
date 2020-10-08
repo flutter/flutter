@@ -24,7 +24,7 @@ mixin DeserializeFinderFactory {
       case 'Descendant': return Descendant.deserialize(json, this);
       case 'Ancestor': return Ancestor.deserialize(json, this);
     }
-    throw DriverError('Unsupported search specification type $finderType');
+    return null;
   }
 }
 
