@@ -10,11 +10,9 @@ import("//flutter/tools/fuchsia/dart.gni")
 import("//flutter/tools/fuchsia/fuchsia_host_bundle.gni")
 
 product_suffix = ""
-is_product = false
 
 if (flutter_runtime_mode == "release") {
   product_suffix = "product_"
-  is_product = true
 }
 
 fuchsia_host_bundle("flutter_binaries") {
@@ -35,7 +33,7 @@ fuchsia_host_bundle("dart_binaries") {
   name = "dart_binaries"
 
   _gen_snapshot_to_use = gen_snapshot + "($host_toolchain)"
-  if (is_product) {
+  if (flutter_runtime_mode == "release") {
     _gen_snapshot_to_use = gen_snapshot_product + "($host_toolchain)"
   }
 
