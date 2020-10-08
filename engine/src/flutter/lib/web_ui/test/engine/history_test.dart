@@ -16,6 +16,11 @@ import 'package:ui/src/engine.dart';
 
 import '../spy.dart';
 
+TestLocationStrategy get strategy => window.browserHistory.locationStrategy;
+Future<void> setStrategy(TestLocationStrategy newStrategy) async {
+  await window.browserHistory.setLocationStrategy(newStrategy);
+}
+
 Map<String, dynamic> _wrapOriginState(dynamic state) {
   return <String, dynamic>{'origin': true, 'state': state};
 }
@@ -43,19 +48,18 @@ void testMain() {
     final PlatformMessagesSpy spy = PlatformMessagesSpy();
 
     setUp(() async {
+      await window.debugSwitchBrowserHistory(useSingle: true);
       spy.setUp();
     });
 
     tearDown(() async {
       spy.tearDown();
-      await window.debugResetHistory();
+      await setStrategy(null);
     });
 
     test('basic setup works', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry('initial state', null, '/initial'),
-      );
-      await window.debugInitializeHistory(strategy, useSingle: true);
+      await setStrategy(TestLocationStrategy.fromEntry(
+          TestHistoryEntry('initial state', null, '/initial')));
 
       // There should be two entries: origin and flutter.
       expect(strategy.history, hasLength(2));
@@ -78,11 +82,7 @@ void testMain() {
         skip: browserEngine == BrowserEngine.edge);
 
     test('browser back button pops routes correctly', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry(null, null, '/home'),
-      );
-      await window.debugInitializeHistory(strategy, useSingle: true);
-
+      await setStrategy(TestLocationStrategy.fromEntry(TestHistoryEntry(null, null, '/home')));
       // Initially, we should be on the flutter entry.
       expect(strategy.history, hasLength(2));
       expect(strategy.currentEntry.state, flutterState);
@@ -98,7 +98,7 @@ void testMain() {
       // No platform messages have been sent so far.
       expect(spy.messages, isEmpty);
       // Clicking back should take us to page1.
-      await strategy.go(-1);
+      await strategy.back();
       // First, the framework should've received a `popRoute` platform message.
       expect(spy.messages, hasLength(1));
       expect(spy.messages[0].channel, 'flutter/navigation');
@@ -115,10 +115,7 @@ void testMain() {
         skip: browserEngine == BrowserEngine.edge);
 
     test('multiple browser back clicks', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry(null, null, '/home'),
-      );
-      await window.debugInitializeHistory(strategy, useSingle: true);
+      await setStrategy(TestLocationStrategy.fromEntry(TestHistoryEntry(null, null, '/home')));
 
       await routeUpdated('/page1');
       await routeUpdated('/page2');
@@ -130,7 +127,7 @@ void testMain() {
       expect(strategy.currentEntry.url, '/page2');
 
       // Back to page1.
-      await strategy.go(-1);
+      await strategy.back();
       // 1. The engine sends a `popRoute` platform message.
       expect(spy.messages, hasLength(1));
       expect(spy.messages[0].channel, 'flutter/navigation');
@@ -146,7 +143,7 @@ void testMain() {
       expect(strategy.currentEntry.url, '/page1');
 
       // Back to home.
-      await strategy.go(-1);
+      await strategy.back();
       // 1. The engine sends a `popRoute` platform message.
       expect(spy.messages, hasLength(1));
       expect(spy.messages[0].channel, 'flutter/navigation');
@@ -164,8 +161,8 @@ void testMain() {
       // The next browser back will exit the app. We store the strategy locally
       // because it will be remove from the browser history class once it exits
       // the app.
-      TestUrlStrategy originalStrategy = strategy;
-      await originalStrategy.go(-1);
+      TestLocationStrategy originalStrategy = strategy;
+      await originalStrategy.back();
       // 1. The engine sends a `popRoute` platform message.
       expect(spy.messages, hasLength(1));
       expect(spy.messages[0].channel, 'flutter/navigation');
@@ -184,10 +181,7 @@ void testMain() {
             browserEngine == BrowserEngine.webkit);
 
     test('handle user-provided url', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry(null, null, '/home'),
-      );
-      await window.debugInitializeHistory(strategy, useSingle: true);
+      await setStrategy(TestLocationStrategy.fromEntry(TestHistoryEntry(null, null, '/home')));
 
       await strategy.simulateUserTypingUrl('/page3');
       // This delay is necessary to wait for [BrowserHistory] because it
@@ -208,7 +202,7 @@ void testMain() {
       expect(strategy.currentEntry.url, '/page3');
 
       // Back to home.
-      await strategy.go(-1);
+      await strategy.back();
       // 1. The engine sends a `popRoute` platform message.
       expect(spy.messages, hasLength(1));
       expect(spy.messages[0].channel, 'flutter/navigation');
@@ -227,10 +221,7 @@ void testMain() {
         skip: browserEngine == BrowserEngine.edge);
 
     test('user types unknown url', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry(null, null, '/home'),
-      );
-      await window.debugInitializeHistory(strategy, useSingle: true);
+      await setStrategy(TestLocationStrategy.fromEntry(TestHistoryEntry(null, null, '/home')));
 
       await strategy.simulateUserTypingUrl('/unknown');
       // This delay is necessary to wait for [BrowserHistory] because it
@@ -257,19 +248,18 @@ void testMain() {
     final PlatformMessagesSpy spy = PlatformMessagesSpy();
 
     setUp(() async {
+      await window.debugSwitchBrowserHistory(useSingle: false);
       spy.setUp();
     });
 
     tearDown(() async {
       spy.tearDown();
-      await window.debugResetHistory();
+      await setStrategy(null);
     });
 
     test('basic setup works', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry('initial state', null, '/initial'),
-      );
-      await window.debugInitializeHistory(strategy, useSingle: false);
+      await setStrategy(TestLocationStrategy.fromEntry(
+          TestHistoryEntry('initial state', null, '/initial')));
 
       // There should be only one entry.
       expect(strategy.history, hasLength(1));
@@ -283,11 +273,7 @@ void testMain() {
         skip: browserEngine == BrowserEngine.edge);
 
     test('browser back button push route infromation correctly', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry('initial state', null, '/home'),
-      );
-      await window.debugInitializeHistory(strategy, useSingle: false);
-
+      await setStrategy(TestLocationStrategy.fromEntry(TestHistoryEntry('initial state', null, '/home')));
       // Initially, we should be on the flutter entry.
       expect(strategy.history, hasLength(1));
       expect(strategy.currentEntry.state, _tagStateWithSerialCount('initial state', 0));
@@ -303,7 +289,7 @@ void testMain() {
       // No platform messages have been sent so far.
       expect(spy.messages, isEmpty);
       // Clicking back should take us to page1.
-      await strategy.go(-1);
+      await strategy.back();
       // First, the framework should've received a `pushRouteInformation`
       // platform message.
       expect(spy.messages, hasLength(1));
@@ -324,10 +310,7 @@ void testMain() {
         skip: browserEngine == BrowserEngine.edge);
 
     test('multiple browser back clicks', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry('initial state', null, '/home'),
-      );
-      await window.debugInitializeHistory(strategy, useSingle: false);
+      await setStrategy(TestLocationStrategy.fromEntry(TestHistoryEntry('initial state', null, '/home')));
 
       await routeInfomrationUpdated('/page1', 'page1 state');
       await routeInfomrationUpdated('/page2', 'page2 state');
@@ -339,7 +322,7 @@ void testMain() {
       expect(strategy.currentEntry.url, '/page2');
 
       // Back to page1.
-      await strategy.go(-1);
+      await strategy.back();
       // 1. The engine sends a `pushRouteInformation` platform message.
       expect(spy.messages, hasLength(1));
       expect(spy.messages[0].channel, 'flutter/navigation');
@@ -355,7 +338,7 @@ void testMain() {
       expect(strategy.currentEntry.state, _tagStateWithSerialCount('page1 state', 1));
       expect(strategy.currentEntry.url, '/page1');
       // Back to home.
-      await strategy.go(-1);
+      await strategy.back();
       // 1. The engine sends a `pushRouteInformation` platform message.
       expect(spy.messages, hasLength(1));
       expect(spy.messages[0].channel, 'flutter/navigation');
@@ -376,10 +359,7 @@ void testMain() {
             browserEngine == BrowserEngine.webkit);
 
     test('handle user-provided url', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry('initial state', null, '/home'),
-      );
-      await window.debugInitializeHistory(strategy, useSingle: false);
+      await setStrategy(TestLocationStrategy.fromEntry(TestHistoryEntry('initial state', null, '/home')));
 
       await strategy.simulateUserTypingUrl('/page3');
       // This delay is necessary to wait for [BrowserHistory] because it
@@ -401,7 +381,7 @@ void testMain() {
       expect(strategy.currentEntry.url, '/page3');
 
       // Back to home.
-      await strategy.go(-1);
+      await strategy.back();
       // 1. The engine sends a `pushRouteInformation` platform message.
       expect(spy.messages, hasLength(1));
       expect(spy.messages[0].channel, 'flutter/navigation');
@@ -421,10 +401,7 @@ void testMain() {
         skip: browserEngine == BrowserEngine.edge);
 
     test('forward button works', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry('initial state', null, '/home'),
-      );
-      await window.debugInitializeHistory(strategy, useSingle: false);
+      await setStrategy(TestLocationStrategy.fromEntry(TestHistoryEntry('initial state', null, '/home')));
 
       await routeInfomrationUpdated('/page1', 'page1 state');
       await routeInfomrationUpdated('/page2', 'page2 state');
@@ -436,7 +413,7 @@ void testMain() {
       expect(strategy.currentEntry.url, '/page2');
 
       // Back to page1.
-      await strategy.go(-1);
+      await strategy.back();
       // 1. The engine sends a `pushRouteInformation` platform message.
       expect(spy.messages, hasLength(1));
       expect(spy.messages[0].channel, 'flutter/navigation');
@@ -453,7 +430,7 @@ void testMain() {
       expect(strategy.currentEntry.url, '/page1');
 
       // Forward to page2
-      await strategy.go(1);
+      await strategy.back(count: -1);
       // 1. The engine sends a `pushRouteInformation` platform message.
       expect(spy.messages, hasLength(1));
       expect(spy.messages[0].channel, 'flutter/navigation');
@@ -473,7 +450,7 @@ void testMain() {
         skip: browserEngine == BrowserEngine.edge);
   });
 
-  group('$HashUrlStrategy', () {
+  group('$HashLocationStrategy', () {
     TestPlatformLocation location;
 
     setUp(() {
@@ -485,26 +462,26 @@ void testMain() {
     });
 
     test('leading slash is optional', () {
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
+      final HashLocationStrategy strategy = HashLocationStrategy(location);
 
       location.hash = '#/';
-      expect(strategy.getPath(), '/');
+      expect(strategy.path, '/');
 
       location.hash = '#/foo';
-      expect(strategy.getPath(), '/foo');
+      expect(strategy.path, '/foo');
 
       location.hash = '#foo';
-      expect(strategy.getPath(), 'foo');
+      expect(strategy.path, 'foo');
     });
 
     test('path should not be empty', () {
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
+      final HashLocationStrategy strategy = HashLocationStrategy(location);
 
       location.hash = '';
-      expect(strategy.getPath(), '/');
+      expect(strategy.path, '/');
 
       location.hash = '#';
-      expect(strategy.getPath(), '/');
+      expect(strategy.path, '/');
     });
   });
 }
@@ -552,31 +529,31 @@ class TestPlatformLocation extends PlatformLocation {
   String hash;
   dynamic state;
 
-  @override
-  void addPopStateListener(html.EventListener fn) {
+  void onPopState(html.EventListener fn) {
     throw UnimplementedError();
   }
 
-  @override
-  void removePopStateListener(html.EventListener fn) {
+  void offPopState(html.EventListener fn) {
     throw UnimplementedError();
   }
 
-  @override
+  void onHashChange(html.EventListener fn) {
+    throw UnimplementedError();
+  }
+
+  void offHashChange(html.EventListener fn) {
+    throw UnimplementedError();
+  }
+
   void pushState(dynamic state, String title, String url) {
     throw UnimplementedError();
   }
 
-  @override
   void replaceState(dynamic state, String title, String url) {
     throw UnimplementedError();
   }
 
-  @override
-  void go(int count) {
+  void back(int count) {
     throw UnimplementedError();
   }
-
-  @override
-  String getBaseHref() => '/';
 }
