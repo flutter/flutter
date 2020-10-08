@@ -117,12 +117,12 @@ class TextInputModel {
   size_t selection_extent_ = 0;
 
   // Returns the left hand side of the selection.
-  size_t selection_start() {
+  size_t selection_start() const {
     return std::min(selection_base_, selection_extent_);
   }
 
   // Returns the right hand side of the selection.
-  size_t selection_end() {
+  size_t selection_end() const {
     return std::max(selection_base_, selection_extent_);
   }
 };
