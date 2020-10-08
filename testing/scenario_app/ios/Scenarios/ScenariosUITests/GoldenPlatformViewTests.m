@@ -32,7 +32,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
   self.continueAfterFailure = NO;
 
   self.application = [[XCUIApplication alloc] init];
-  self.application.launchArguments = @[ self.manager.launchArg ];
+  self.application.launchArguments = @[ self.manager.launchArg, @"--enable-software-rendering" ];
   [self.application launch];
 }
 

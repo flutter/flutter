@@ -222,8 +222,8 @@ def to_gn_args(args):
       gn_args['use_goma'] = False
       gn_args['goma_dir'] = None
 
-    # Enable Metal on non-simulator iOS builds.
-    if args.target_os == 'ios' and not args.simulator:
+    # Enable Metal on iOS builds.
+    if args.target_os == 'ios':
       gn_args['skia_use_metal'] = True
       gn_args['shell_enable_metal'] = True
       # Bitcode enabled builds using the current version of the toolchain leak
