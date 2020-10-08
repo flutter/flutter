@@ -1675,8 +1675,8 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
     // Otherwise, remove the hint text when focused because the centered cursor
     // appears odd above the hint text.
     //
-    // Until https://github.com/flutter/flutter/issues/67571 is resolved, we
-    // have to use the window to check for semantics being enabled on web.
+    // TODO(rami-a): Once https://github.com/flutter/flutter/issues/67571 is
+    // resolved, remove the window check for semantics being enabled on web.
     final String? hintText = MediaQuery.of(context)!.accessibleNavigation || ui.window.semanticsEnabled
     ? widget.semanticHintText
         : (focusNode.hasFocus ? null : _formattedValue);
