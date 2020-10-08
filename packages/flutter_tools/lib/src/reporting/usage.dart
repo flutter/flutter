@@ -190,7 +190,6 @@ class _DefaultUsage implements Usage {
     String logFile,
     AnalyticsFactory analyticsIOFactory,
     @required bool runningOnBot,
-    SystemClock clock,
   }) {
     final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
@@ -199,7 +198,7 @@ class _DefaultUsage implements Usage {
     final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;
 
     analyticsIOFactory ??= _defaultAnalyticsIOFactory;
-    _clock = clock ?? globals.systemClock;
+    _clock = globals.systemClock;
 
     if (// To support testing, only allow other signals to supress analytics
         // when analytics are not being shunted to a file.
