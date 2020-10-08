@@ -96,6 +96,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool codesign = true,
   String deviceID,
   bool configOnly = false,
+  XcodeBuildAction buildAction,
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
@@ -321,6 +322,14 @@ Future<XcodeBuildResult> buildXcodeProject({
   buildCommands.add('COMPILER_INDEX_STORE_ENABLE=NO');
   buildCommands.addAll(environmentVariablesAsXcodeBuildSettings(globals.platform));
 
+  if (buildAction == XcodeBuildAction.archive) {
+    buildCommands.addAll(<String>[
+      '-archivePath',
+      globals.fs.path.absolute(app.archiveBundlePath),
+      'archive',
+    ]);
+  }
+
   final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = globals.logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.slowOperation);
 
@@ -333,13 +342,13 @@ Future<XcodeBuildResult> buildXcodeProject({
   initialBuildStatus?.cancel();
   initialBuildStatus = null;
   globals.printStatus(
-    'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
+    'Xcode ${buildAction.name} done.'.padRight(kDefaultStatusPadding + 1)
         + getElapsedAsSeconds(sw.elapsed).padLeft(5),
   );
-  globals.flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming(buildAction.name, 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
   // Run -showBuildSettings again but with the exact same parameters as the
-  // build. showBuildSettings is reported to ocassionally timeout. Here, we give
+  // build. showBuildSettings is reported to occasionally timeout. Here, we give
   // it a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
   // When there is a timeout, we retry once. See issue #35988.
   final List<String> showBuildSettingsCommand = (List<String>
@@ -398,36 +407,42 @@ Future<XcodeBuildResult> buildXcodeProject({
       ),
     );
   } else {
-    // If the app contains a watch companion target, the sdk argument of xcodebuild has to be omitted.
-    // For some reason this leads to TARGET_BUILD_DIR always ending in 'iphoneos' even though the
-    // actual directory will end with 'iphonesimulator' for simulator builds.
-    // The value of TARGET_BUILD_DIR is adjusted to accommodate for this effect.
-    String targetBuildDir = buildSettings['TARGET_BUILD_DIR'];
-    if (hasWatchCompanion && !buildForDevice) {
-      globals.printTrace('Replacing iphoneos with iphonesimulator in TARGET_BUILD_DIR.');
-      targetBuildDir = targetBuildDir.replaceFirst('iphoneos', 'iphonesimulator');
-    }
-    final String expectedOutputDirectory = globals.fs.path.join(
-      targetBuildDir,
-      buildSettings['WRAPPER_NAME'],
-    );
-
     String outputDir;
-    if (globals.fs.isDirectorySync(expectedOutputDirectory)) {
-      // Copy app folder to a place where other tools can find it without knowing
-      // the BuildInfo.
-      outputDir = expectedOutputDirectory.replaceFirst('/$configuration-', '/');
-      if (globals.fs.isDirectorySync(outputDir)) {
-        // Previous output directory might have incompatible artifacts
-        // (for example, kernel binary files produced from previous run).
-        globals.fs.directory(outputDir).deleteSync(recursive: true);
+    if (buildAction == XcodeBuildAction.build) {
+      // If the app contains a watch companion target, the sdk argument of xcodebuild has to be omitted.
+      // For some reason this leads to TARGET_BUILD_DIR always ending in 'iphoneos' even though the
+      // actual directory will end with 'iphonesimulator' for simulator builds.
+      // The value of TARGET_BUILD_DIR is adjusted to accommodate for this effect.
+      String targetBuildDir = buildSettings['TARGET_BUILD_DIR'];
+      if (hasWatchCompanion && !buildForDevice) {
+        globals.printTrace('Replacing iphoneos with iphonesimulator in TARGET_BUILD_DIR.');
+        targetBuildDir = targetBuildDir.replaceFirst('iphoneos', 'iphonesimulator');
       }
-      globals.fsUtils.copyDirectorySync(
-        globals.fs.directory(expectedOutputDirectory),
-        globals.fs.directory(outputDir),
+      final String expectedOutputDirectory = globals.fs.path.join(
+        targetBuildDir,
+        buildSettings['WRAPPER_NAME'],
       );
+      if (globals.fs.isDirectorySync(expectedOutputDirectory)) {
+        // Copy app folder to a place where other tools can find it without knowing
+        // the BuildInfo.
+        outputDir = expectedOutputDirectory.replaceFirst('/$configuration-', '/');
+        if (globals.fs.isDirectorySync(outputDir)) {
+          // Previous output directory might have incompatible artifacts
+          // (for example, kernel binary files produced from previous run).
+          globals.fs.directory(outputDir).deleteSync(recursive: true);
+        }
+        globals.fsUtils.copyDirectorySync(
+          globals.fs.directory(expectedOutputDirectory),
+          globals.fs.directory(outputDir),
+        );
+      } else {
+        globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
+      }
     } else {
-      globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
+      outputDir = '${globals.fs.path.absolute(app.archiveBundlePath)}.xcarchive';
+      if (!globals.fs.isDirectorySync(outputDir)) {
+        globals.printError('Archive succeeded but the expected xcarchive at $outputDir not found');
+      }
     }
     return XcodeBuildResult(
         success: true,
@@ -565,6 +580,21 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
     logger.printError('');
     logger.printError("Also try selecting 'Product > Build' to fix the problem:");
     return;
+  }
+}
+
+enum XcodeBuildAction { build, archive }
+
+extension XcodeBuildActionExtension on XcodeBuildAction {
+  String get name {
+    switch (this) {
+      case XcodeBuildAction.build:
+        return 'build';
+      case XcodeBuildAction.archive:
+        return 'archive';
+      default:
+        throw UnsupportedError('Unknown Xcode build action');
+    }
   }
 }
 
