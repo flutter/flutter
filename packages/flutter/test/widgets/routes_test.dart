@@ -1647,7 +1647,7 @@ void main() {
 
     final ModalRoute<void>? parentRoute = ModalRoute.of<void>(tester.element(find.text('page2')));
     expect(parentRoute, isNotNull);
-    expect(parentRoute, isA<MaterialPageRoute<dynamic>>());
+    expect(parentRoute, isA<MaterialPageRoute<void>>());
   });
 }
 
