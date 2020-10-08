@@ -676,7 +676,10 @@ void main() {
   testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
     int dropdownButtonTapCounter = 0;
     String value = 'one';
-    void onChanged(String newValue) { value = newValue; }
+    void onChanged(String? newValue) {
+      if (newValue != null)
+        value = newValue;
+    }
     void onTap() { dropdownButtonTapCounter += 1; }
 
     Widget build() => buildFormFrame(
@@ -779,7 +782,7 @@ void main() {
                 );
               }).toList(),
               onChanged: onChanged,
-              validator: (String value) {
+              validator: (String? value) {
                 _validateCalled++;
                 return null;
               },

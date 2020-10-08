@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
@@ -18,7 +16,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
-final ValueChanged<String> onChanged = (_) { };
+final ValueChanged<String?> onChanged = (_) { };
 
 final Type dropdownButtonType = DropdownButton<String>(
   onChanged: (_) { },
@@ -33,32 +31,32 @@ Finder _iconRichText(Key iconKey) {
 }
 
 Widget buildDropdown({
-    bool isFormField,
-    Key buttonKey,
+    required bool isFormField,
+    Key? buttonKey,
     String value = 'two',
-    ValueChanged<String> onChanged,
-    VoidCallback onTap,
-    Widget icon,
-    Color iconDisabledColor,
-    Color iconEnabledColor,
+    ValueChanged<String?>? onChanged,
+    VoidCallback? onTap,
+    Widget? icon,
+    Color? iconDisabledColor,
+    Color? iconEnabledColor,
     double iconSize = 24.0,
     bool isDense = false,
     bool isExpanded = false,
-    Widget hint,
-    Widget disabledHint,
-    Widget underline,
-    List<String> items = menuItems,
-    List<Widget> Function(BuildContext) selectedItemBuilder,
+    Widget? hint,
+    Widget? disabledHint,
+    Widget? underline,
+    List<String>? items = menuItems,
+    List<Widget> Function(BuildContext)? selectedItemBuilder,
     double itemHeight = kMinInteractiveDimension,
     Alignment alignment = Alignment.center,
     TextDirection textDirection = TextDirection.ltr,
-    Size mediaSize,
-    FocusNode focusNode,
+    Size? mediaSize,
+    FocusNode? focusNode,
     bool autofocus = false,
-    Color focusColor,
-    Color dropdownColor,
+    Color? focusColor,
+    Color? dropdownColor,
   }) {
-  final List<DropdownMenuItem<String>> listItems = items == null
+  final List<DropdownMenuItem<String>>? listItems = items == null
       ? null
       : items.map<DropdownMenuItem<String>>((String item) {
     return DropdownMenuItem<String>(
@@ -119,29 +117,29 @@ Widget buildDropdown({
 }
 
 Widget buildFrame({
-  Key buttonKey,
+  Key? buttonKey,
   String value = 'two',
-  ValueChanged<String> onChanged,
-  VoidCallback onTap,
-  Widget icon,
-  Color iconDisabledColor,
-  Color iconEnabledColor,
+  ValueChanged<String?>? onChanged,
+  VoidCallback? onTap,
+  Widget? icon,
+  Color? iconDisabledColor,
+  Color? iconEnabledColor,
   double iconSize = 24.0,
   bool isDense = false,
   bool isExpanded = false,
-  Widget hint,
-  Widget disabledHint,
-  Widget underline,
+  Widget? hint,
+  Widget? disabledHint,
+  Widget? underline,
   List<String> items = menuItems,
-  List<Widget> Function(BuildContext) selectedItemBuilder,
+  List<Widget> Function(BuildContext)? selectedItemBuilder,
   double itemHeight = kMinInteractiveDimension,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
-  Size mediaSize,
-  FocusNode focusNode,
+  Size? mediaSize,
+  FocusNode? focusNode,
   bool autofocus = false,
-  Color focusColor,
-  Color dropdownColor,
+  Color? focusColor,
+  Color? dropdownColor,
   bool isFormField = false,
 }) {
   return TestApp(
@@ -181,15 +179,15 @@ Widget buildFrame({
 
 class TestApp extends StatefulWidget {
   const TestApp({
-    Key key,
-    this.textDirection,
-    this.child,
+    Key? key,
+    required this.textDirection,
+    required this.child,
     this.mediaSize,
   }) : super(key: key);
 
   final TextDirection textDirection;
   final Widget child;
-  final Size mediaSize;
+  final Size? mediaSize;
 
   @override
   _TestAppState createState() => _TestAppState();
@@ -239,7 +237,7 @@ void checkSelectedItemTextGeometry(WidgetTester tester, String value) {
 void verifyPaintedShadow(Finder customPaint, int elevation) {
   const Rect originalRectangle = Rect.fromLTRB(0.0, 0.0, 800, 208.0);
 
-  final List<BoxShadow> boxShadows = List<BoxShadow>.generate(3, (int index) => kElevationToShadow[elevation][index]);
+  final List<BoxShadow> boxShadows = List<BoxShadow>.generate(3, (int index) => kElevationToShadow[elevation]![index]);
   final List<RRect> rrects = List<RRect>.generate(3, (int index) {
     return RRect.fromRectAndRadius(
       originalRectangle.shift(
@@ -259,7 +257,7 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
   );
 }
 
-Future<void> checkDropdownColor(WidgetTester tester, {Color color, bool isFormField = false }) async {
+Future<void> checkDropdownColor(WidgetTester tester, {Color? color, bool isFormField = false }) async {
   const String text = 'foo';
   await tester.pumpWidget(
     MaterialApp(
@@ -341,8 +339,9 @@ void main() {
 
   testWidgets('Dropdown button control test', (WidgetTester tester) async {
     String value = 'one';
-    void didChangeValue(String newValue) {
-      value = newValue;
+    void didChangeValue(String? newValue) {
+      if (newValue != null)
+        value = newValue;
     }
 
     Widget build() => buildFrame(value: value, onChanged: didChangeValue);
@@ -380,8 +379,9 @@ void main() {
 
   testWidgets('Dropdown button with no app', (WidgetTester tester) async {
     String value = 'one';
-    void didChangeValue(String newValue) {
-      value = newValue;
+    void didChangeValue(String? newValue) {
+      if (newValue != null)
+        value = newValue;
     }
 
     Widget build() {
@@ -449,7 +449,7 @@ void main() {
           home: Scaffold(
             body: DropdownButton<String>(
               value: 'c',
-              onChanged: (String newValue) {},
+              onChanged: (String? newValue) {},
               items: itemsWithDuplicateValues,
             ),
           ),
@@ -480,7 +480,7 @@ void main() {
           home: Scaffold(
             body: DropdownButton<String>(
               value: 'e',
-              onChanged: (String newValue) {},
+              onChanged: (String? newValue) {},
               items: itemsWithDuplicateValues,
             ),
           ),
@@ -499,7 +499,7 @@ void main() {
   testWidgets('Dropdown form field uses form field state', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    String value;
+    String? value;
     await tester.pumpWidget(
         StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
@@ -520,12 +520,13 @@ void main() {
                             child: Text(val)
                         );
                       }).toList(),
-                      validator: (String v) => v == null ? 'Must select value' : null,
-                      onChanged: (String newValue) {},
-                      onSaved: (String v) {
-                        setState(() {
-                          value = v;
-                        });
+                      validator: (String? v) => v == null ? 'Must select value' : null,
+                      onChanged: (String? newValue) {},
+                      onSaved: (String? v) {
+                        if (v != null)
+                          setState(() {
+                            value = v;
+                          });
                       },
                     ),
                   ),
