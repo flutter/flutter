@@ -384,11 +384,7 @@ void main() {
             '--no-hot',
           ]), isNull)
         );
-        // Allow any CustomDimensions.localTime (cd33) timestamp.
-        final RegExp usageRegexp = RegExp(
-          'screenView {cd3: false, cd4: ios, cd22: iOS 13, cd23: debug, cd18: false, cd15: swift, cd31: false, cd47: false, cd33: .*, viewName: run'
-        );
-        expect(buffer.toString(), matches(usageRegexp));
+        expect(buffer.toString(), contains('screenView {cd3: false, cd4: ios, cd22: iOS 13, cd23: debug, cd18: false, cd15: swift, cd31: false, cd47: false, cd33: 2020-10-08 00:00:00.000 -0700, viewName: run'));
       }, overrides: <Type, Generator>{
         ApplicationPackageFactory: () => mockApplicationPackageFactory,
         Artifacts: () => artifacts,
