@@ -398,6 +398,8 @@ def main(argv):
   elif sys.platform == 'darwin':
     # On the Mac, generate an Xcode project by default.
     command.append('--ide=xcode')
+    command.append('--xcode-project=flutter_engine')
+    command.append('--xcode-build-system=new')
   elif sys.platform.startswith('win'):
     # On Windows, generate a Visual Studio project.
     command.append('--ide=vs')
