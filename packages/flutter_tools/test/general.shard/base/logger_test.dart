@@ -1242,7 +1242,7 @@ Invocation _invocationFor(dynamic Function() fakeCall) {
 /// Returns a [Matcher] that matches against an expected [Invocation].
 Matcher _matchesInvocation(Invocation expected) {
   return predicate<dynamic>(
-    (actual) => actual is Invocation && _invocationsEqual(actual, expected),
+    (dynamic actual) => actual is Invocation && _invocationsEqual(actual, expected),
     'an Invocation of ${expected.memberName}',
   );
 }
