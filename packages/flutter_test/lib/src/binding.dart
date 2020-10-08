@@ -101,11 +101,11 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   int get pendingMessageCount => _pendingMessages.length;
 
   @override
-  Future<ByteData?> send(String channel, ByteData? message) {
-    final Future<ByteData?> resultFuture = delegate.send(channel, message);
-    // Removes the future itself from the [_pendingMessages] list when it
-    // completes.
+  Future<ByteData?>? send(String channel, ByteData? message) {
+    final Future<ByteData?>? resultFuture = delegate.send(channel, message);
     if (resultFuture != null) {
+      // Removes the future itself from the [_pendingMessages] list when it
+      // completes.
       _pendingMessages.add(resultFuture);
       resultFuture.whenComplete(() => _pendingMessages.remove(resultFuture));
     }
@@ -1780,8 +1780,7 @@ class _LiveTestRenderView extends RenderView {
     _label ??= TextPainter(textAlign: TextAlign.left, textDirection: TextDirection.ltr);
     _label!.text = TextSpan(text: value, style: _labelStyle);
     _label!.layout();
-    if (onNeedPaint != null)
-      onNeedPaint();
+    onNeedPaint();
   }
 
   @override

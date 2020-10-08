@@ -1072,8 +1072,7 @@ class _TestTicker extends Ticker {
 
   @override
   void dispose() {
-    if (_onDispose != null)
-      _onDispose(this);
+    _onDispose(this);
     super.dispose();
   }
 }
