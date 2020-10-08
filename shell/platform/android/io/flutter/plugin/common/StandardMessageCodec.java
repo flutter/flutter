@@ -4,8 +4,8 @@
 
 package io.flutter.plugin.common;
 
-import android.util.Log;
 import io.flutter.BuildConfig;
+import io.flutter.Log;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;

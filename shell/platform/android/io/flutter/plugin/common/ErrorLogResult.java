@@ -4,9 +4,9 @@
 
 package io.flutter.plugin.common;
 
-import android.util.Log;
 import androidx.annotation.Nullable;
 import io.flutter.BuildConfig;
+import io.flutter.Log;
 
 /**
  * An implementation of {@link MethodChannel.Result} that writes error results to the Android log.

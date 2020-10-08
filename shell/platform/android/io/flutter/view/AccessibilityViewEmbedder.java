@@ -9,7 +9,6 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,6 +19,7 @@ import android.view.accessibility.AccessibilityRecord;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import io.flutter.Log;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -502,9 +502,9 @@ class AccessibilityViewEmbedder {
       try {
         return (Long) getSourceNodeId.invoke(node);
       } catch (IllegalAccessException e) {
-        Log.w(TAG, e);
+        Log.w(TAG, "Failed to access getSourceNodeId method.", e);
       } catch (InvocationTargetException e) {
-        Log.w(TAG, e);
+        Log.w(TAG, "The getSourceNodeId method threw an exception when invoked.", e);
       }
       return null;
     }
@@ -523,9 +523,9 @@ class AccessibilityViewEmbedder {
           // type ReflectiveOperationException. As a workaround either create individual
           // catch statements, or catch Exception. [NewApi]
         } catch (IllegalAccessException e) {
-          Log.w(TAG, e);
+          Log.w(TAG, "Failed to access getChildId method.", e);
         } catch (InvocationTargetException e) {
-          Log.w(TAG, e);
+          Log.w(TAG, "The getChildId method threw an exception when invoked.", e);
         }
       } else {
         try {
@@ -536,9 +536,9 @@ class AccessibilityViewEmbedder {
           // type ReflectiveOperationException. As a workaround either create individual
           // catch statements, or catch Exception. [NewApi]
         } catch (IllegalAccessException e) {
-          Log.w(TAG, e);
+          Log.w(TAG, "Failed to access longArrayGetIndex method or the childNodeId field.", e);
         } catch (InvocationTargetException | ArrayIndexOutOfBoundsException e) {
-          Log.w(TAG, e);
+          Log.w(TAG, "The longArrayGetIndex method threw an exception when invoked.", e);
         }
       }
       return null;
@@ -555,9 +555,9 @@ class AccessibilityViewEmbedder {
           // type ReflectiveOperationException. As a workaround either create individual
           // catch statements, or catch Exception. [NewApi]
         } catch (IllegalAccessException e) {
-          Log.w(TAG, e);
+          Log.w(TAG, "Failed to access getParentNodeId method.", e);
         } catch (InvocationTargetException e) {
-          Log.w(TAG, e);
+          Log.w(TAG, "The getParentNodeId method threw an exception when invoked.", e);
         }
       }
 
@@ -620,9 +620,9 @@ class AccessibilityViewEmbedder {
       try {
         return (Long) getRecordSourceNodeId.invoke(node);
       } catch (IllegalAccessException e) {
-        Log.w(TAG, e);
+        Log.w(TAG, "Failed to access the getRecordSourceNodeId method.", e);
       } catch (InvocationTargetException e) {
-        Log.w(TAG, e);
+        Log.w(TAG, "The getRecordSourceNodeId method threw an exception when invoked.", e);
       }
       return null;
     }
