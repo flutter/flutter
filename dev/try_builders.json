@@ -165,7 +165,7 @@
          "repo":"flutter",
          "task_name":"linux_web_tests",
          "enabled":true,
-         "run_if":["dev/", "packages/flutter/", "packages/flutter_goldens_client/", "packages/flutter_goldens/", "packages/flutter_test/", "packages/flutter_tools/lib/src/test/", "packages/flutter_web_plugins/", "bin/"]
+         "run_if":["dev/", "packages/", "bin/"]
       },
       {
          "name":"Linux web_integration_tests",
