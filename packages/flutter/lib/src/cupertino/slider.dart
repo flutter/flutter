@@ -548,6 +548,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = isInteractive;
+    config.isSlider = true;
     if (isInteractive) {
       config.textDirection = textDirection;
       config.onIncrease = _increaseAction;

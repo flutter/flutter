@@ -1525,6 +1525,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final SemanticsConfiguration config = SemanticsConfiguration();
     config.isEnabled = isEnabled;
     config.textDirection = textDirection;
+    config.isSlider = true;
     if (isEnabled) {
       config.onIncrease = increaseAction;
       config.onDecrease = decreaseAction;

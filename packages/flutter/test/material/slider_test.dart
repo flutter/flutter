@@ -1349,7 +1349,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
                           actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
                           value: '50%',
                           increasedValue: '55%',
@@ -1407,6 +1407,7 @@ void main() {
                             SemanticsFlag.hasEnabledState,
                             // isFocusable is delayed by 1 frame.
                             SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider,
                           ],
                           value: '50%',
                           increasedValue: '55%',
@@ -1447,6 +1448,7 @@ void main() {
                           id: 4,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isSlider,
                           ],
                           value: '50%',
                           increasedValue: '55%',
@@ -1512,7 +1514,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
                           actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
                           value: '50%',
                           increasedValue: '60%',
@@ -1566,7 +1568,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 5,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState],
+                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isSlider],
                           value: '50%',
                           increasedValue: '60%',
                           decreasedValue: '40%',
@@ -1627,7 +1629,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
                           actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
                           value: '40',
                           increasedValue: '60',
