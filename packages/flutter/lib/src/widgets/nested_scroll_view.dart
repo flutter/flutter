@@ -1079,29 +1079,29 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     updateUserScrollDirection(
         delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
     if (_innerPositions.isEmpty) {
-      _outerPosition!.applyClampedDragUpdate(delta);
+      _outerPosition!.applyClampedPointerSignalUpdate(delta);
     } else {
       double innerDelta = delta;
       // Apply delta to the outer header first if it is configured to float.
       if (delta > 0.0 && _floatHeaderSlivers)
-        innerDelta = _outerPosition!.applyClampedDragUpdate(delta);
+        innerDelta = _outerPosition!.applyClampedPointerSignalUpdate(delta);
 
       // Scroll "up", apply delta to the outerPosition scroll extent.
       if(delta < 0.0 && innerDelta != 0.0)
-        innerDelta = _outerPosition!.applyClampedDragUpdate(innerDelta);
+        innerDelta = _outerPosition!.applyClampedPointerSignalUpdate(innerDelta);
 
       if (innerDelta != 0.0) {
         double outerDelta = delta > 0.0 ? 0 : innerDelta;
         for (final _NestedScrollPosition position in _innerPositions) {
             final double potentialOuterDelta =
-                position.applyClampedDragUpdate(innerDelta);
+                position.applyClampedPointerSignalUpdate(innerDelta);
             outerDelta = math.max(outerDelta, potentialOuterDelta);
         }
 
         // Scroll "down", Apply the maximum delta of innerPositions to
         // outerPosition.
         if (delta > 0.0 && outerDelta != 0.0)
-          _outerPosition!.applyClampedDragUpdate(outerDelta);
+          _outerPosition!.applyClampedPointerSignalUpdate(outerDelta);
       }
     }
     goBallistic(0.0);
@@ -1417,6 +1417,34 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       return overscroll;
     }
     return 0.0;
+  }
+
+
+  // Returns the amount of delta that was not used.
+  //
+  // Positive delta means going down (exposing stuff above), negative delta
+  // going up (exposing stuff below).
+  //
+  // The method is actually very similar to [applyClampedDragUpdate] in that
+  // it also doesn't enter an overscroll situation.
+  // But the method doesn't take into account the effects of [ScrollPhysics].
+  double applyClampedPointerSignalUpdate(double delta) {
+    assert(delta != 0.0);
+
+    final double min = delta < 0.0
+        ? -double.infinity
+        : math.min(minScrollExtent, pixels);
+    // The logic for max is equivalent but on the other side.
+    final double max = delta > 0.0
+        ? double.infinity
+        : math.max(maxScrollExtent, pixels);
+    final double newPixels = (pixels - delta).clamp(min, max);
+    final double clampedDelta = newPixels - pixels;
+    if (clampedDelta == 0.0)
+      return delta;
+    forcePixels(newPixels);
+    didUpdateScrollPositionBy(clampedDelta);
+    return delta + clampedDelta;
   }
 
   @override
