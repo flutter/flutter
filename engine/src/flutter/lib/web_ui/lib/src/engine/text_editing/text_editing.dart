@@ -11,6 +11,16 @@ bool _debugVisibleTextEditing = false;
 /// The `keyCode` of the "Enter" key.
 const int _kReturnKeyCode = 13;
 
+/// Blink and Webkit engines, bring an overlay on top of the text field when it
+/// is autofilled.
+bool browserHasAutofillOverlay() =>
+    browserEngine == BrowserEngine.blink ||
+    browserEngine == BrowserEngine.webkit;
+
+/// `transparentTextEditing` class is configured to make the autofill overlay
+/// transparent.
+const String transparentTextEditingClass = 'transparentTextEditing';
+
 void _emptyCallback(dynamic _) {}
 
 /// These style attributes are constant throughout the life time of an input
@@ -39,7 +49,11 @@ void _setStaticStyleAttributes(html.HtmlElement domElement) {
     ..overflow = 'hidden'
     ..transformOrigin = '0 0 0';
 
-  /// This property makes the input's blinking cursor transparent.
+  if (browserHasAutofillOverlay()) {
+    domElement.classes.add(transparentTextEditingClass);
+  }
+
+  // This property makes the input's blinking cursor transparent.
   elementStyle.setProperty('caret-color', 'transparent');
 
   if (_debugVisibleTextEditing) {
@@ -78,6 +92,10 @@ void _hideAutofillElements(html.HtmlElement domElement,
     elementStyle
       ..top = '-9999px'
       ..left = '-9999px';
+  }
+
+  if (browserHasAutofillOverlay()) {
+    domElement.classes.add(transparentTextEditingClass);
   }
 
   /// This property makes the input's blinking cursor transparent.
