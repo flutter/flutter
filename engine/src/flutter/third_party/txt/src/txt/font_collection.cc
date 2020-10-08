@@ -27,6 +27,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "font_skia.h"
+#include "minikin/Layout.h"
 #include "txt/platform.h"
 #include "txt/text_style.h"
 
@@ -82,7 +83,9 @@ class TxtFallbackFontProvider
 
 FontCollection::FontCollection() : enable_font_fallback_(true) {}
 
-FontCollection::~FontCollection() = default;
+FontCollection::~FontCollection() {
+  minikin::Layout::purgeCaches();
+}
 
 size_t FontCollection::GetFontManagersCount() const {
   return GetFontManagerOrder().size();
