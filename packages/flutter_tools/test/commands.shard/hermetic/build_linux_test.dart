@@ -405,8 +405,8 @@ set(BINARY_NAME "fizz_bar")
       )
     );
 
-    expect(buffer.toString(), contains('A summary of your Linux bundle analysis can be found at'));
-    expect(testLogger.traceText, contains('event {category: code-size-analysis, action: linux, label: null, value: null, cd33:'));
+    expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
+    expect(buffer.toString(), contains('event {category: code-size-analysis, action: linux, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
