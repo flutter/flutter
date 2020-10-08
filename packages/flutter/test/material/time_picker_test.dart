@@ -905,7 +905,7 @@ void _testsInput() {
   });
 
   testWidgets('Invalid text prevents dismissing', (WidgetTester tester) async {
-    late TimeOfDay result;
+    TimeOfDay? result;
     await startPicker(tester, (TimeOfDay time) { result = time; }, entryMode: TimePickerEntryMode.input);
 
     // Invalid hour.

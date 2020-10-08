@@ -831,12 +831,12 @@ void main() {
 
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
     const Duration waitDuration = Duration(milliseconds: 0);
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
       if (gesture != null)
         return gesture.removePointer();
     });
-    await gesture.addPointer();
+    await gesture!.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
     await tester.pump();
     await gesture.moveTo(Offset.zero);
@@ -877,6 +877,7 @@ void main() {
     // Wait for it to disappear.
     await tester.pumpAndSettle();
     await gesture.removePointer();
+    gesture = null;
     expect(find.text(tooltipText), findsNothing);
   });
 
