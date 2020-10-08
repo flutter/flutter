@@ -18,6 +18,9 @@ import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/extension/extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'stubs/stub_finder.dart';
+import 'stubs/stub_finder_extension.dart';
+
 Future<void> silenceDriverLogger(AsyncCallback callback) async {
   final DriverLogCallback oldLogger = driverLog;
   driverLog = (String source, String message) { };
@@ -878,8 +881,39 @@ void main() {
   });
 
   group('extension finders', () {
-    testWidgets('empty extensions list', (WidgetTester tester) async {
-      final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true, finders: []);
+    final Widget debugTree = Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+              child: Column(
+                children: <Widget>[
+                  const Text('Foo', key: ValueKey<String>('Text1')),
+                  const Text('Bar', key: ValueKey<String>('Text2')),
+                ],
+              )
+          ),
+        );
+
+    testWidgets('unknown extension throws exception', (WidgetTester tester) async {
+      final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true, finders: <FinderExtension>[]);
+
+      Future<Map<String, dynamic>> getText(SerializableFinder finder) async {
+        final Map<String, String> arguments = GetText(finder, timeout: const Duration(seconds: 1)).serialize();
+        final Map<String, dynamic> response = await extension.call(arguments);
+        return response;
+      }
+
+      await tester.pumpWidget(debugTree);
+
+      final Map<String, dynamic> result = await getText(StubFinder('Text1'));
+      expect(result['isError'], true);
+      expect(result['response'] is String, true);
+      expect(result['response'] as String, contains('Unsupported search specification type Stub'));
+    });
+
+    testWidgets('extension finds a widget', (WidgetTester tester) async {
+      final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true, finders: <FinderExtension>[
+        StubFinderExtension(),
+      ]);
 
       Future<GetTextResult> getText(SerializableFinder finder) async {
         final Map<String, String> arguments = GetText(finder, timeout: const Duration(seconds: 1)).serialize();
@@ -887,26 +921,10 @@ void main() {
         return GetTextResult.fromJson(response);
       }
 
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-              child: Column(
-                children: [
-                  Text('Foo', key: ValueKey<String>('Text1')),
-                  Text('Bar', key: ValueKey<String>('Text2')),
-                ],
-              )
-          ),
-        ),
-      );
+      await tester.pumpWidget(debugTree);
 
-      // Widget
-      GetTextResult result = await getText(ByValueKey('Text1'));
+      final GetTextResult result = await getText(StubFinder('Text1'));
       expect(result.text, 'Foo');
-
-      result = await getText(ByValueKey('Text2'));
-      expect(result.text, 'Bar');
     });
   });
 
