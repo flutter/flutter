@@ -79,6 +79,28 @@ void main() {
     });
   });
 
+  testWidgets('Router.of can be null', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(buildBoilerPlate(
+      Text('dummy', key: key)
+    ));
+    final BuildContext textContext = key.currentContext;
+
+    // This should not throw error.
+    Router<dynamic> router = Router.of(textContext, nullOk: true);
+    expect(router, isNull);
+    
+    // Test when the nullOk is not specified.
+    bool hasFlutterError = false;
+    try {
+      router = Router.of(textContext);
+    } on FlutterError catch(e) {
+      expect(e.message.startsWith('Router'), isTrue);
+      hasFlutterError = true;
+    }
+    expect(hasFlutterError, isTrue);
+  });
+
   testWidgets('Simple router can handle pop route', (WidgetTester tester) async {
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
     provider.value = const RouteInformation(
