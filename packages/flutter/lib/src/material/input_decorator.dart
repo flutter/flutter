@@ -62,7 +62,7 @@ class _InputBorderTween extends Tween<InputBorder> {
   _InputBorderTween({InputBorder? begin, InputBorder? end}) : super(begin: begin, end: end);
 
   @override
-  InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t) as InputBorder;
+  InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t)! as InputBorder;
 }
 
 // Passes the _InputBorderGap parameters along to an InputBorder's paint method.
@@ -919,7 +919,7 @@ class _RenderDecoration extends RenderBox {
 
   static Size _boxSize(RenderBox? box) => box == null ? Size.zero : box.size;
 
-  static BoxParentData _boxParentData(RenderBox box) => box.parentData as BoxParentData;
+  static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
 
   EdgeInsets get contentPadding => decoration.contentPadding as EdgeInsets;
 
@@ -3736,7 +3736,7 @@ class InputDecorationTheme with Diagnosticable {
   /// true and bordered per the [border].
   ///
   /// This property is false by default.
-  final bool? filled;
+  final bool filled;
 
   /// The color to fill the decoration's container with, if [filled] is true.
   ///

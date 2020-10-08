@@ -96,7 +96,9 @@ class ListTileTheme extends InheritedTheme {
   /// If true then [ListTile]s will have the vertically dense layout.
   final bool dense;
 
+  /// {@template flutter.material.ListTile.shape}
   /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
+  /// {@endtemplate}
   final ShapeBorder? shape;
 
   /// If specified, [style] defines the font used for [ListTile] titles.
@@ -1686,7 +1688,7 @@ class _RenderListTile extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     void doPaint(RenderBox? child) {
       if (child != null) {
-        final BoxParentData parentData = child.parentData as BoxParentData;
+        final BoxParentData parentData = child.parentData! as BoxParentData;
         context.paintChild(child, parentData.offset + offset);
       }
     }
@@ -1703,7 +1705,7 @@ class _RenderListTile extends RenderBox {
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     assert(position != null);
     for (final RenderBox child in _children) {
-      final BoxParentData parentData = child.parentData as BoxParentData;
+      final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,

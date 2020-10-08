@@ -214,10 +214,17 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// [TextEditingController]; however, one should not also set [text]
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
+  ///
+  /// If the new selection if of non-zero length, or is outside the composing
+  /// range, the composing composing range is cleared.
   set selection(TextSelection newSelection) {
     if (!isSelectionWithinTextBounds(newSelection))
       throw FlutterError('invalid text selection: $newSelection');
-    value = value.copyWith(selection: newSelection, composing: TextRange.empty);
+    final TextRange newComposing =
+        newSelection.isCollapsed && _isSelectionWithinComposingRange(newSelection)
+            ? value.composing
+            : TextRange.empty;
+    value = value.copyWith(selection: newSelection, composing: newComposing);
   }
 
   /// Set the [value] to empty.
@@ -250,6 +257,11 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// Check that the [selection] is inside of the bounds of [text].
   bool isSelectionWithinTextBounds(TextSelection selection) {
     return selection.start <= text.length && selection.end <= text.length;
+  }
+
+  /// Check that the [selection] is inside of the composing range.
+  bool _isSelectionWithinComposingRange(TextSelection selection) {
+    return selection.start >= value.composing.start && selection.end <= value.composing.end;
   }
 }
 
