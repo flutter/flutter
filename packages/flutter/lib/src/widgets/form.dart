@@ -184,13 +184,11 @@ class FormState extends State<Form> {
     });
   }
 
-  /// Can manually register [FormFieldState].
-  void register(FormFieldState<dynamic> field) {
+  void _register(FormFieldState<dynamic> field) {
     fields.add(field);
   }
 
-  /// Can manually unregister [FormFieldState].
-  void unregister(FormFieldState<dynamic> field) {
+  void _unregister(FormFieldState<dynamic> field) {
     fields.remove(field);
   }
 
@@ -506,7 +504,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   void deactivate() {
-    Form.of(context)?.unregister(this);
+    Form.of(context)?._unregister(this);
     super.deactivate();
   }
 
@@ -526,7 +524,7 @@ class FormFieldState<T> extends State<FormField<T>> {
           break;
       }
     }
-    Form.of(context)?.register(this);
+    Form.of(context)?._register(this);
     return widget.builder(this);
   }
 }
