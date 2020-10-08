@@ -259,7 +259,7 @@ class DelegatingLogger implements Logger {
 /// If [logger] is a [DelegatingLogger], walks the delegate chain and returns
 /// the first delegate with the matching type.
 ///
-/// Throws an exception if no matching delegate is found.
+/// Throws a [StateError] if no matching delegate is found.
 @override
 T asLogger<T extends Logger>(Logger logger) {
   final Logger original = logger;
@@ -269,7 +269,7 @@ T asLogger<T extends Logger>(Logger logger) {
     } else if (logger is DelegatingLogger) {
       logger = (logger as DelegatingLogger)._delegate;
     } else {
-      throw Exception('$original has no ancestor delegate of type $T');
+      throw StateError('$original has no ancestor delegate of type $T');
     }
   }
 }
