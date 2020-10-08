@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io; // ignore: dart_io_import
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
 
@@ -21,17 +25,24 @@ class MockDirectory extends Mock implements Directory {}
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
-  environment: <String, String>{}
+  environment: <String, String>{
+    'PATH': '',
+    'PATHEXT': '',
+  }
 );
 
 final Platform linuxPlatform = FakePlatform(
   operatingSystem: 'linux',
-  environment: <String, String>{}
+  environment: <String, String>{
+    'PATH': '',
+  }
 );
 
 final Platform macOSPlatform = FakePlatform(
   operatingSystem: 'macos',
-  environment: <String, String>{}
+  environment: <String, String>{
+    'PATH': '',
+  }
 );
 
 void setupWriteMocks({
@@ -631,16 +642,13 @@ void main() {
     const int kUserPermissionDenied = 5;
 
     test('when the device is full', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
-        platform: windowsPlatform,
+      final ProcessManager processManager = setUpProcessManager(
+        windowsPlatform,
+        kDeviceFull,
       );
-      setupProcessManagerMocks(mockProcessManager, kDeviceFull);
 
       const String expectedMessage = 'The target device is full';
-      expect(() => processManager.canRun('foo'),
-             throwsToolExit(message: expectedMessage));
+
       expect(() => processManager.killPid(1),
              throwsToolExit(message: expectedMessage));
       expect(() async => await processManager.start(<String>['foo']),
@@ -652,16 +660,13 @@ void main() {
     });
 
     test('when the file is being used by another program', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
-        platform: windowsPlatform,
+      final ProcessManager processManager = setUpProcessManager(
+        windowsPlatform,
+        kUserMappedSectionOpened,
       );
-      setupProcessManagerMocks(mockProcessManager, kUserMappedSectionOpened);
 
       const String expectedMessage = 'The file is being used by another program';
-      expect(() => processManager.canRun('foo'),
-             throwsToolExit(message: expectedMessage));
+
       expect(() => processManager.killPid(1),
              throwsToolExit(message: expectedMessage));
       expect(() async => await processManager.start(<String>['foo']),
@@ -673,16 +678,13 @@ void main() {
     });
 
     test('when permissions are denied', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
-        platform: windowsPlatform,
+      final ProcessManager processManager = setUpProcessManager(
+        windowsPlatform,
+        kUserPermissionDenied,
       );
-      setupProcessManagerMocks(mockProcessManager, kUserPermissionDenied);
 
       const String expectedMessage = 'The flutter tool cannot access the file';
-      expect(() => processManager.canRun('foo'),
-             throwsToolExit(message: expectedMessage));
+
       expect(() => processManager.killPid(1),
              throwsToolExit(message: expectedMessage));
       expect(() async => await processManager.start(<String>['foo']),
@@ -699,16 +701,13 @@ void main() {
     const int eacces = 13;
 
     test('when writing to a full device', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
-        platform: linuxPlatform,
+      final ProcessManager processManager = setUpProcessManager(
+        linuxPlatform,
+        enospc,
       );
-      setupProcessManagerMocks(mockProcessManager, enospc);
 
       const String expectedMessage = 'The target device is full';
-      expect(() => processManager.canRun('foo'),
-             throwsToolExit(message: expectedMessage));
+
       expect(() => processManager.killPid(1),
              throwsToolExit(message: expectedMessage));
       expect(() async => await processManager.start(<String>['foo']),
@@ -720,16 +719,13 @@ void main() {
     });
 
     test('when permissions are denied', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
-        platform: linuxPlatform,
+      final ProcessManager processManager = setUpProcessManager(
+        linuxPlatform,
+        eacces,
       );
-      setupProcessManagerMocks(mockProcessManager, eacces);
 
       const String expectedMessage = 'The flutter tool cannot access the file';
-      expect(() => processManager.canRun('foo'),
-             throwsToolExit(message: expectedMessage));
+
       expect(() => processManager.killPid(1),
              throwsToolExit(message: expectedMessage));
       expect(() async => await processManager.start(<String>['foo']),
@@ -746,16 +742,13 @@ void main() {
     const int eacces = 13;
 
     test('when writing to a full device', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
-        platform: macOSPlatform,
+      final ProcessManager processManager = setUpProcessManager(
+        macOSPlatform,
+        enospc,
       );
-      setupProcessManagerMocks(mockProcessManager, enospc);
 
       const String expectedMessage = 'The target device is full';
-      expect(() => processManager.canRun('foo'),
-             throwsToolExit(message: expectedMessage));
+
       expect(() => processManager.killPid(1),
              throwsToolExit(message: expectedMessage));
       expect(() async => await processManager.start(<String>['foo']),
@@ -767,16 +760,13 @@ void main() {
     });
 
     test('when permissions are denied', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
-        platform: linuxPlatform,
+      final ProcessManager processManager = setUpProcessManager(
+        macOSPlatform,
+        eacces,
       );
-      setupProcessManagerMocks(mockProcessManager, eacces);
 
       const String expectedMessage = 'The flutter tool cannot access the file';
-      expect(() => processManager.canRun('foo'),
-             throwsToolExit(message: expectedMessage));
+
       expect(() => processManager.killPid(1),
              throwsToolExit(message: expectedMessage));
       expect(() async => await processManager.start(<String>['foo']),
@@ -789,39 +779,53 @@ void main() {
   });
 }
 
-void setupProcessManagerMocks(
-  MockProcessManager processManager,
-  int errorCode,
+ProcessManager setUpProcessManager(
+  Platform platform,
+  int osError,
 ) {
-  when(processManager.canRun(any, workingDirectory: anyNamed('workingDirectory')))
-    .thenThrow(ProcessException('', <String>[], '', errorCode));
-  when(processManager.killPid(any, any))
-    .thenThrow(ProcessException('', <String>[], '', errorCode));
-  when(processManager.runSync(
-    any,
-    environment: anyNamed('environment'),
-    includeParentEnvironment: anyNamed('includeParentEnvironment'),
-    runInShell: anyNamed('runInShell'),
-    workingDirectory: anyNamed('workingDirectory'),
-    stdoutEncoding: anyNamed('stdoutEncoding'),
-    stderrEncoding: anyNamed('stderrEncoding'),
-  )).thenThrow(ProcessException('', <String>[], '', errorCode));
-  when(processManager.run(
-    any,
-    environment: anyNamed('environment'),
-    includeParentEnvironment: anyNamed('includeParentEnvironment'),
-    runInShell: anyNamed('runInShell'),
-    workingDirectory: anyNamed('workingDirectory'),
-    stdoutEncoding: anyNamed('stdoutEncoding'),
-    stderrEncoding: anyNamed('stderrEncoding'),
-  )).thenThrow(ProcessException('', <String>[], '', errorCode));
-  when(processManager.start(
-    any,
-    environment: anyNamed('environment'),
-    includeParentEnvironment: anyNamed('includeParentEnvironment'),
-    runInShell: anyNamed('runInShell'),
-    workingDirectory: anyNamed('workingDirectory'),
-  )).thenThrow(ProcessException('', <String>[], '', errorCode));
+  return ErrorHandlingProcessManager(
+    fileSystem: MemoryFileSystem.test(
+      style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+    ),
+    logger: BufferLogger.test(),
+    platform: platform,
+    killPid: (int pid, [io.ProcessSignal signal]) {
+      throw ProcessException('executable', <String>[], '', osError);
+    },
+    run: (
+      String excutable,
+      List<String> arguments, {
+      Map<String, String> environment,
+      bool includeParentEnvironment,
+      bool runInShell,
+      Encoding stderrEncoding,
+      Encoding stdoutEncoding,
+      String workingDirectory,
+    }) {
+      throw ProcessException(excutable, arguments, '', osError);
+    },
+    runSync: (
+      String excutable,
+      List<String> arguments, {
+      Map<String, String> environment,
+      bool includeParentEnvironment,
+      bool runInShell,
+      Encoding stderrEncoding,
+      Encoding stdoutEncoding,
+      String workingDirectory,
+    }) {
+      throw ProcessException(excutable, arguments, '', osError);
+    },
+    start: (
+      String excutable,
+      List<String> arguments, {
+      Map<String, String> environment,
+      bool includeParentEnvironment,
+      bool runInShell,
+      String workingDirectory,
+      ProcessStartMode mode,
+    }) {
+      throw ProcessException(excutable, arguments, '', osError);
+    },
+  );
 }
-
-class MockProcessManager extends Mock implements ProcessManager {}

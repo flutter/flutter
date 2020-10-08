@@ -11,6 +11,7 @@ import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:process/process.dart';
 
 import 'common.dart' show throwToolExit;
+import 'logger.dart';
 import 'platform.dart';
 
 // The Flutter tool hits file system and process errors that only the end-user can address.
@@ -501,6 +502,44 @@ T _runSync<T>(T Function() op, {
   }
 }
 
+/// Type signature for [io.Process.killPid].
+typedef ProcessKillPid = bool Function(int pid, [io.ProcessSignal signal]);
+
+/// Type signature for [io.Process.run].
+typedef ProcessRun = Future<io.ProcessResult> Function(
+  String executable,
+  List<String> arguments, {
+  String workingDirectory,
+  Map<String, String> environment,
+  bool includeParentEnvironment,
+  bool runInShell,
+  Encoding stdoutEncoding,
+  Encoding stderrEncoding,
+});
+
+/// Type signature for [io.Process.runSync].
+typedef ProcessRunSync = io.ProcessResult Function(
+  String executable,
+  List<String> arguments, {
+  String workingDirectory,
+  Map<String, String> environment,
+  bool includeParentEnvironment,
+  bool runInShell,
+  Encoding stdoutEncoding,
+  Encoding stderrEncoding,
+});
+
+/// Type signature for [io.Process.start].
+typedef ProcessStart = Future<io.Process> Function(
+  String executable,
+  List<String> arguments, {
+  String workingDirectory,
+  Map<String, String> environment,
+  bool includeParentEnvironment,
+  bool runInShell,
+  io.ProcessStartMode mode,
+});
+
 /// A [ProcessManager] that throws a [ToolExit] on certain errors.
 ///
 /// If a [ProcessException] is not caused by the Flutter tool, and can only be
@@ -509,28 +548,47 @@ T _runSync<T>(T Function() op, {
 ///
 /// See also:
 ///   * [ErrorHandlngFileSystem], for a similar file system strategy.
-class ErrorHandlingProcessManager extends ProcessManager {
+class ErrorHandlingProcessManager implements ProcessManager {
   ErrorHandlingProcessManager({
-    @required ProcessManager delegate,
     @required Platform platform,
-  }) : _delegate = delegate,
-       _platform = platform;
+    @required Logger logger,
+    @required FileSystem fileSystem,
+    @visibleForTesting ProcessKillPid killPid = io.Process.killPid,
+    @visibleForTesting ProcessRun run = io.Process.run,
+    @visibleForTesting ProcessRunSync runSync = io.Process.runSync,
+    @visibleForTesting ProcessStart start = io.Process.start,
+  }) : _platform = platform,
+       _logger = logger,
+       _fileSystem = fileSystem,
+       _killPid = killPid,
+       _processRun = run,
+       _processRunSync = runSync,
+       _processStart = start;
 
-  final ProcessManager _delegate;
+  final Logger _logger;
+  final FileSystem _fileSystem;
   final Platform _platform;
+  final ProcessKillPid _killPid;
+  final ProcessRun _processRun;
+  final ProcessRunSync _processRunSync;
+  final ProcessStart _processStart;
+
+  // Cached executable paths, the first is the working directory, the next is a map from
+  // executable name to actual path.
+  final Map<String, Map<String, String>> _resolvedExecutables = <String, Map<String, String>>{};
 
   @override
   bool canRun(dynamic executable, {String workingDirectory}) {
-    return _runSync(
-      () => _delegate.canRun(executable, workingDirectory: workingDirectory),
+    return _runSync<bool>(
+      () => _getCommandPath(<dynamic>[executable], workingDirectory, strict: true) != null,
       platform: _platform,
     );
   }
 
   @override
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
-    return _runSync(
-      () => _delegate.killPid(pid, signal),
+    return _runSync<bool>(
+      () => _killPid(pid, signal),
       platform: _platform,
     );
   }
@@ -545,15 +603,18 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Encoding stdoutEncoding = io.systemEncoding,
     Encoding stderrEncoding = io.systemEncoding,
   }) {
-    return _run(() => _delegate.run(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
-    ), platform: _platform);
+    return _run(() {
+      return _processRun(
+        _getCommandPath(command, workingDirectory),
+        _getArguments(command),
+        workingDirectory: workingDirectory,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+        runInShell: runInShell,
+        stdoutEncoding: stdoutEncoding,
+        stderrEncoding: stderrEncoding,
+      );
+    }, platform: _platform);
   }
 
   @override
@@ -565,13 +626,16 @@ class ErrorHandlingProcessManager extends ProcessManager {
     bool runInShell = false,
     io.ProcessStartMode mode = io.ProcessStartMode.normal,
   }) {
-    return _run(() => _delegate.start(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-    ), platform: _platform);
+    return _run(() {
+      return _processStart(
+        _getCommandPath(command, workingDirectory),
+        _getArguments(command),
+        workingDirectory: workingDirectory,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+        runInShell: runInShell,
+      );
+    }, platform: _platform);
   }
 
   @override
@@ -584,15 +648,35 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Encoding stdoutEncoding = io.systemEncoding,
     Encoding stderrEncoding = io.systemEncoding,
   }) {
-    return _runSync(() => _delegate.runSync(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
-    ), platform: _platform);
+    return _runSync(() {
+      return _processRunSync(
+        _getCommandPath(command, workingDirectory),
+        _getArguments(command),
+        workingDirectory: workingDirectory,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+        runInShell: runInShell,
+        stdoutEncoding: stdoutEncoding,
+        stderrEncoding: stderrEncoding,
+      );
+    }, platform: _platform);
+  }
+
+  String _getCommandPath(List<dynamic> command, String workingDirectory, { bool strict = false }) {
+    final String executable = command.first.toString();
+    final Map<String, String> workingDirectoryCache = _resolvedExecutables[workingDirectory] ??= <String, String>{};
+    return workingDirectoryCache[executable] ??= resolveExecutablePath(
+      executable,
+      workingDirectory,
+      fileSystem: _fileSystem,
+      platform: _platform,
+      logger: _logger,
+      strict: strict,
+    );
+  }
+
+  List<String> _getArguments(List<dynamic> command) {
+    return <String>[for (dynamic arg in command.skip(1)) arg.toString()];
   }
 }
 
@@ -670,4 +754,92 @@ void _throwFileSystemException(String errorMessage) {
     throw Exception(errorMessage);
   }
   throwToolExit(errorMessage);
+}
+
+
+/// Searches the `PATH` for the executable that [command] is supposed to launch.
+///
+/// This first builds a list of candidate paths where the executable may reside.
+/// If [command] is already an absolute path, then the `PATH` environment
+/// variable will not be consulted, and the specified absolute path will be the
+/// only candidate that is considered.
+///
+/// Once the list of candidate paths has been constructed, this will pick the
+/// first such path that represents an existent file.
+///
+/// If [strict] is false, return The original executable if there were no viable
+/// candidates - otherwise return `null`
+@visibleForTesting
+String resolveExecutablePath(
+  String command,
+  String workingDirectory, {
+  @required FileSystem fileSystem,
+  @required Platform platform,
+  @required Logger logger,
+  @required bool strict,
+}) {
+  try {
+    ErrorHandlingFileSystem.noExitOnFailure(() {
+      workingDirectory ??= fileSystem.currentDirectory.path;
+    });
+  } on Exception {
+    // The `currentDirectory` getter can throw a FileSystemException for example
+    // when the process doesn't have read/list permissions in each component of
+    // the cwd path. In this case, fall back on '.'.
+    workingDirectory ??= '.';
+  }
+  final String pathSeparator = platform.isWindows ? ';' : ':';
+
+  List<String> extensions = <String>[];
+  if (platform.isWindows && fileSystem.path.extension(command).isEmpty) {
+    extensions = platform.environment['PATHEXT'].split(pathSeparator);
+  }
+
+  List<String> candidates = <String>[];
+  if (command.contains(fileSystem.path.separator)) {
+    candidates = _getCandidatePaths(command, <String>[workingDirectory], extensions, fileSystem);
+  } else {
+    final List<String> searchPath = platform.environment['PATH'].split(pathSeparator);
+    candidates = _getCandidatePaths(command, searchPath, extensions, fileSystem);
+  }
+  for (final String path in candidates) {
+    final FileSystemEntityType type = fileSystem.typeSync(path);
+    if (type != FileSystemEntityType.notFound) {
+      return path;
+    }
+  }
+  logger.printTrace(
+    'Did not find executable for "$command", search path candidates: $candidates\n'
+    'Attempting original executable path.'
+  );
+  if (strict) {
+    return null;
+  }
+  return command;
+}
+
+/// Returns all possible combinations of `$searchPath\$command.$ext` for
+/// `searchPath` in [searchPaths] and `ext` in [extensions].
+///
+/// If [extensions] is empty, it will just enumerate all
+/// `$searchPath\$command`.
+/// If [command] is an absolute path, it will just enumerate
+/// `$command.$ext`.
+List<String> _getCandidatePaths(
+  String command,
+  List<String> searchPaths,
+  List<String> extensions,
+  FileSystem fileSystem,
+) {
+  final List<String> withExtensions = extensions.isNotEmpty
+    ? <String>[for (String ext in extensions) '$command$ext']
+    : <String>[ command ];
+  if (fileSystem.path.isAbsolute(command)) {
+    return withExtensions;
+  }
+  return <String>[
+    for (String path in searchPaths)
+      for (String command in withExtensions)
+        fileSystem.path.join(path, command)
+  ];
 }
