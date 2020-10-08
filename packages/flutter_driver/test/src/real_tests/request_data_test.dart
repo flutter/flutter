@@ -12,6 +12,6 @@ void main() {
   test('RequestData does not insert "null" string when no message is provided', () {
     const RequestData data = RequestData(null);
 
-    expect(data.serialize(), <String, String>{});
+    expect(data.serialize(), <String, String>{'command': 'request_data'});
   });
 }
