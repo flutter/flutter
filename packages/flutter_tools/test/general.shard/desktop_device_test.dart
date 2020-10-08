@@ -245,7 +245,7 @@ void main() {
   });
 
   testUsingContext('createDevFSWriter returns a LocalDevFSWriter', () {
-    final FakeDesktopDevice device = FakeDesktopDevice();
+    final FakeDesktopDevice device = setUpDesktopDevice();
 
     expect(device.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());
   });
