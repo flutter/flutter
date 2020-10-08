@@ -29,6 +29,16 @@ static FlutterLocale FlutterLocaleFromNSLocale(NSLocale* locale) {
   return flutterLocale;
 }
 
+namespace {
+
+struct AotDataDeleter {
+  void operator()(FlutterEngineAOTData aot_data) { FlutterEngineCollectAOTData(aot_data); }
+};
+
+using UniqueAotDataPtr = std::unique_ptr<_FlutterEngineAOTData, AotDataDeleter>;
+
+}
+
 /**
  * Private interface declaration for FlutterEngine.
  */
@@ -75,6 +85,12 @@ static FlutterLocale FlutterLocaleFromNSLocale(NSLocale* locale) {
  * time is in the clock used by the Flutter engine.
  */
 - (void)postMainThreadTask:(FlutterTask)task targetTimeInNanoseconds:(uint64_t)targetTime;
+
+/**
+ * Loads the AOT snapshots and instructions from the elf bundle (app_elf_snapshot.so) if it is
+ * present in the assets directory.
+ */
+- (UniqueAotDataPtr)loadAOTData:(NSString*)assetsDir;
 
 @end
 
@@ -162,16 +178,6 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 }
 
 #pragma mark -
-
-namespace {
-
-struct AotDataDeleter {
-  void operator()(FlutterEngineAOTData aot_data) { FlutterEngineCollectAOTData(aot_data); }
-};
-
-using UniqueAotDataPtr = std::unique_ptr<_FlutterEngineAOTData, AotDataDeleter>;
-
-}
 
 @implementation FlutterEngine {
   // The embedding-API-level engine object.
@@ -289,7 +295,7 @@ using UniqueAotDataPtr = std::unique_ptr<_FlutterEngineAOTData, AotDataDeleter>;
   };
   flutterArguments.custom_task_runners = &custom_task_runners;
 
-  _aotData = [self loadAotData:flutterArguments.assets_path];
+  _aotData = [self loadAOTData:_project.assetsPath];
   if (_aotData) {
     flutterArguments.aot_data = _aotData.get();
   }
@@ -313,12 +319,14 @@ using UniqueAotDataPtr = std::unique_ptr<_FlutterEngineAOTData, AotDataDeleter>;
   return YES;
 }
 
-- (UniqueAotDataPtr)loadAotData:(std::string)assetsDir {
+- (UniqueAotDataPtr)loadAOTData:(NSString*)assetsDir {
   if (!FlutterEngineRunsAOTCompiledDartCode()) {
     return nullptr;
   }
 
-  std::filesystem::path assetsFsDir(assetsDir);
+  // This is the location where the test fixture places the snapshot file.
+  // For applications built by Flutter tool, this is in "App.framework".
+  std::filesystem::path assetsFsDir(assetsDir.UTF8String);
   std::filesystem::path elfFile("app_elf_snapshot.so");
   auto fullElfPath = assetsFsDir / elfFile;
 
