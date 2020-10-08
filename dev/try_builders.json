@@ -199,8 +199,7 @@
          "name":"Mac build_tests",
          "repo":"flutter",
          "task_name":"mac_build_tests",
-         "enabled":true,
-         "run_if":["dev/**", "bin/**"]
+         "enabled":true
       },
       {
          "name":"Mac customer_testing",
@@ -331,8 +330,7 @@
          "name": "Windows build_tests",
          "repo": "flutter",
          "task_name": "win_build_tests",
-         "enabled":true,
-         "run_if":["dev/", "bin/"]
+         "enabled":true
       },
       {
          "name": "Windows customer_testing",
