@@ -38,7 +38,7 @@ Material _getMaterialFromDialog(WidgetTester tester) {
 }
 
 RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.text(text)).renderObject as RenderParagraph;
+  return tester.element<StatelessElement>(find.text(text)).renderObject! as RenderParagraph;
 }
 
 void main() {
