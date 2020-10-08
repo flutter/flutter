@@ -98,7 +98,7 @@ void main() {
         // Measure the delta in width and height of the fab, and check that it never grows
         // by more than the expected maximum deltas.
         void check() {
-          geometry = listenerState?.cache?.value;
+          geometry = listenerState?.cache.value;
           final Size? currentRect = geometry?.floatingActionButtonArea?.size;
           // Measure the delta in width and height of the rect, and check that
           // it never grows by more than a safe amount.
