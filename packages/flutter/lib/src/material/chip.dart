@@ -1171,7 +1171,7 @@ class FilterChip extends StatelessWidget
   @override
   final bool selected;
   @override
-  final ValueChanged<bool> onSelected;
+  final ValueChanged<bool>? onSelected;
   @override
   final double? pressElevation;
   @override

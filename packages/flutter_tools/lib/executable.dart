@@ -42,7 +42,6 @@ import 'src/commands/test.dart';
 import 'src/commands/train.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
-import 'src/commands/version.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
@@ -116,7 +115,6 @@ Future<void> main(List<String> args) async {
     ShellCompletionCommand(),
     TestCommand(verboseHelp: verboseHelp),
     UpgradeCommand(),
-    VersionCommand(),
     SymbolizeCommand(
       stdio: globals.stdio,
       fileSystem: globals.fs,

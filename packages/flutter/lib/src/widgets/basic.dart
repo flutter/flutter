@@ -2036,9 +2036,15 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 
 /// A box with a specified size.
 ///
-/// If given a child, this widget forces its child to have a specific width
-/// and/or height (assuming values are permitted by this widget's parent). If
-/// either the width or height is null, this widget will try to size itself to
+/// If given a child, this widget forces it to have a specific width and/or height.
+/// These values will be ignored if this widget's parent does not permit them.
+/// For example, this happens if the parent is the screen (forces the child to
+/// be the same size as the parent), or another [SizedBox] (forces its child to
+/// have a specific width and/or height). This can be remedied by wrapping the
+/// child [SizedBox] in a widget that does permit it to be any size up to the
+/// size of the parent, such as [Center] or [Align].
+///
+/// If either the width or height is null, this widget will try to size itself to
 /// match the child's size in that dimension. If the child's size depends on the
 /// size of its parent, the height and width must be provided.
 ///
@@ -2079,6 +2085,8 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
+///  * [Understanding constraints](https://flutter.dev/docs/development/ui/layout/constraints),
+///    an in-depth article about layout in Flutter.
 class SizedBox extends SingleChildRenderObjectWidget {
   /// Creates a fixed size box. The [width] and [height] parameters can be null
   /// to indicate that the size of the box should not be constrained in
@@ -5804,7 +5812,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// }
 /// ```
 /// {@end-tool}
-class Listener extends StatelessWidget {
+class Listener extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards point events to callbacks.
   ///
   /// The [behavior] argument defaults to [HitTestBehavior.deferToChild].
@@ -5819,8 +5827,7 @@ class Listener extends StatelessWidget {
     this.behavior = HitTestBehavior.deferToChild,
     Widget? child,
   }) : assert(behavior != null),
-       _child = child,
-       super(key: key);
+       super(key: key, child: child);
 
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -5854,52 +5861,6 @@ class Listener extends StatelessWidget {
   final PointerSignalEventListener? onPointerSignal;
 
   /// How to behave during hit testing.
-  final HitTestBehavior behavior;
-
-  // The widget listened to by the listener.
-  //
-  // The reason why we don't expose it is that once the deprecated methods are
-  // removed, Listener will no longer need to store the child, but will pass
-  // the child to `super` instead.
-  final Widget? _child;
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO(dkwingsmt): Remove the extra wrapper, and make `Listener` a
-    // StatelessWidget. https://github.com/flutter/flutter/issues/65586
-    return _PointerListener(
-      onPointerDown: onPointerDown,
-      onPointerUp: onPointerUp,
-      onPointerMove: onPointerMove,
-      onPointerHover: onPointerHover,
-      onPointerCancel: onPointerCancel,
-      onPointerSignal: onPointerSignal,
-      behavior: behavior,
-      child: _child,
-    );
-  }
-}
-
-class _PointerListener extends SingleChildRenderObjectWidget {
-  const _PointerListener({
-    Key? key,
-    this.onPointerDown,
-    this.onPointerMove,
-    this.onPointerUp,
-    this.onPointerHover,
-    this.onPointerCancel,
-    this.onPointerSignal,
-    this.behavior = HitTestBehavior.deferToChild,
-    Widget? child,
-  }) : assert(behavior != null),
-       super(key: key, child: child);
-
-  final PointerDownEventListener? onPointerDown;
-  final PointerMoveEventListener? onPointerMove;
-  final PointerUpEventListener? onPointerUp;
-  final PointerHoverEventListener? onPointerHover;
-  final PointerCancelEventListener? onPointerCancel;
-  final PointerSignalEventListener? onPointerSignal;
   final HitTestBehavior behavior;
 
   @override

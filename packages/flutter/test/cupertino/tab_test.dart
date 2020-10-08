@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -42,7 +40,7 @@ void main() {
             return CupertinoButton(
               child: const Text('go to second page'),
               onPressed: () {
-                Navigator.of(context).pushNamed('/2');
+                Navigator.of(context)!.pushNamed('/2');
               },
             );
           },
@@ -83,12 +81,12 @@ void main() {
   });
 
   testWidgets('Use onUnknownRoute', (WidgetTester tester) async {
-    String unknownForRouteCalled;
+    late String unknownForRouteCalled;
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
           onUnknownRoute: (RouteSettings settings) {
-            unknownForRouteCalled = settings.name;
+            unknownForRouteCalled = settings.name!;
             return null;
           },
         ),
@@ -117,7 +115,7 @@ void main() {
       ),
     );
 
-    key.currentState.pushNamed('/2');
+    key.currentState!.pushNamed('/2');
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -133,7 +131,7 @@ void main() {
             return CupertinoButton(
               child: const Text('go to second page'),
               onPressed: () {
-                Navigator.of(context).pushNamed('/2');
+                Navigator.of(context)!.pushNamed('/2');
               },
             );
           },
@@ -158,7 +156,7 @@ void main() {
             return CupertinoButton(
               child: const Text('go to second page'),
               onPressed: () {
-                Navigator.of(context).pushNamed('/2');
+                Navigator.of(context)!.pushNamed('/2');
               },
             );
           },
@@ -186,9 +184,9 @@ void main() {
         ),
       ),
     );
-    FlutterError error;
+    late FlutterError error;
     try {
-      key.currentState.pushNamed('/2');
+      key.currentState!.pushNamed('/2');
     } on FlutterError catch (e) {
       error = e;
     }
@@ -222,9 +220,9 @@ void main() {
         ),
       ),
     );
-    FlutterError error;
+    late FlutterError error;
     try {
-      key.currentState.pushNamed('/2');
+      key.currentState!.pushNamed('/2');
     } on FlutterError catch (e) {
       error = e;
     }
@@ -247,7 +245,7 @@ void main() {
           builder: (BuildContext context) => CupertinoButton(
             child: const Text('home'),
             onPressed: () {
-              Navigator.of(context).restorablePushNamed('/2');
+              Navigator.of(context)!.restorablePushNamed('/2');
             },
           ),
           routes: <String, WidgetBuilder>{
@@ -271,7 +269,7 @@ void main() {
     expect(find.text('home'), findsNothing);
     expect(find.text('second route'), findsOneWidget);
 
-    Navigator.of(tester.element(find.text('second route'))).pop();
+    Navigator.of(tester.element(find.text('second route')))!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('home'), findsOneWidget);
@@ -282,7 +280,7 @@ void main() {
     expect(find.text('home'), findsNothing);
     expect(find.text('second route'), findsOneWidget);
 
-    Navigator.of(tester.element(find.text('second route'))).pop();
+    Navigator.of(tester.element(find.text('second route')))!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('home'), findsOneWidget);

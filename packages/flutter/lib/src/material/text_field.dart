@@ -26,7 +26,7 @@ import 'theme.dart';
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
 /// Signature for the [TextField.buildCounter] callback.
-typedef InputCounterWidgetBuilder = Widget Function(
+typedef InputCounterWidgetBuilder = Widget? Function(
   /// The build context for the TextField.
   BuildContext context, {
   /// The length of the string currently in the input.
@@ -227,7 +227,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///             builder: (BuildContext context) {
 ///               return AlertDialog(
 ///                 title: const Text('Thanks!'),
-///                 content: Text ('You typed "$value".'),
+///                 content: Text ('You typed "$value", which has length ${value.characters.length}.'),
 ///                 actions: <Widget>[
 ///                   TextButton(
 ///                     onPressed: () { Navigator.pop(context); },
@@ -256,6 +256,14 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///
 /// Keep in mind you can also always read the current string from a TextField's
 /// [TextEditingController] using [TextEditingController.text].
+///
+  /// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.editableText.complexCharacters}
+///
+/// In the live Dartpad example above, try typing the emoji 👨‍👩‍👦
+/// into the field and submitting. Because the example code measures the length
+/// with `value.characters.length`, the emoji is correctly counted as a single
+/// character.
 ///
 /// See also:
 ///
@@ -872,7 +880,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         && effectiveDecoration.counterText == null
         && widget.buildCounter != null) {
       final bool isFocused = _effectiveFocusNode.hasFocus;
-      final Widget builtCounter = widget.buildCounter!(
+      final Widget? builtCounter = widget.buildCounter!(
         context,
         currentLength: currentLength,
         maxLength: widget.maxLength,

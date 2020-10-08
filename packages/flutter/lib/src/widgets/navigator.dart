@@ -1571,6 +1571,16 @@ class Navigator extends StatefulWidget {
   /// The [NavigatorState] and [initialRoute] will be passed to the callback.
   /// The callback must return a list of [Route] objects with which the history
   /// will be primed.
+  ///
+  /// When parsing the initialRoute, if there's any chance that the it may
+  /// contain complex characters, it's best to use the
+  /// [characters](https://pub.dev/packages/characters) API. This will ensure
+  /// that extended grapheme clusters and surrogate pairs are treated as single
+  /// characters by the code, the same way that they appear to the user. For
+  /// example, the string "👨‍👩‍👦" appears to the user as a single
+  /// character and `string.characters.length` intuitively returns 1. On the
+  /// other hand, `string.length` returns 8, and `string.runes.length` returns
+  /// 5!
   final RouteListFactory onGenerateInitialRoutes;
 
   /// Whether this navigator should report route update message back to the
@@ -5540,7 +5550,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///         mainAxisSize: MainAxisSize.min,
 ///         children: <Widget>[
 ///           Text('Last count: ${_lastCount.value}'),
-///           RaisedButton(
+///           ElevatedButton(
 ///             onPressed: () {
 ///               // Show the route defined by the `RestorableRouteFuture`.
 ///               _counterRoute.present('Awesome Counter');

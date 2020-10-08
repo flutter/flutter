@@ -177,7 +177,7 @@ class MouseTrackerUpdateDetails with Diagnosticable {
   const MouseTrackerUpdateDetails.byNewFrame({
     required this.lastAnnotations,
     required this.nextAnnotations,
-    required this.previousEvent,
+    required PointerEvent this.previousEvent,
   }) : assert(previousEvent != null),
        assert(lastAnnotations != null),
        assert(nextAnnotations != null),

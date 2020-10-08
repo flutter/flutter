@@ -96,8 +96,7 @@ abstract class PopupMenuEntry<T> extends StatefulWidget {
 ///  * [showMenu], a method to dynamically show a popup menu at a given location.
 ///  * [PopupMenuButton], an [IconButton] that automatically shows a menu when
 ///    it is tapped.
-// ignore: prefer_void_to_null, https://github.com/dart-lang/sdk/issues/34416
-class PopupMenuDivider extends PopupMenuEntry<Null> {
+class PopupMenuDivider extends PopupMenuEntry<Never> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16 logical pixels.
@@ -757,12 +756,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
         menu = Theme(data: theme!, child: menu);
     }
 
-    return MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
-      removeBottom: true,
-      removeLeft: true,
-      removeRight: true,
+    return SafeArea(
       child: Builder(
         builder: (BuildContext context) {
           return CustomSingleChildLayout(

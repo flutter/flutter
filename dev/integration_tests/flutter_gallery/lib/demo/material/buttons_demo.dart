@@ -193,7 +193,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             children: <Widget>[
               TextButton.icon(
                 style: style,
-                icon: const Icon(Icons.add_circle_outlined, size: 18.0),
+                icon: const Icon(Icons.add_circle_outline, size: 18.0),
                 label: const Text('TEXT BUTTON', semanticsLabel: 'TEXT BUTTON 2'),
                 onPressed: () {
                   // Perform some action
@@ -201,7 +201,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               ),
               TextButton.icon(
                 style: style,
-                icon: const Icon(Icons.add_circle_outlined, size: 18.0),
+                icon: const Icon(Icons.add_circle_outline, size: 18.0),
                 label: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 4'),
                 onPressed: null,
               ),
