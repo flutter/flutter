@@ -108,8 +108,7 @@ void main() {
     final Text textWidget = actionTextBox.widget as Text;
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
 
-    TextStyle? effectiveStyle = textWidget.style;
-    effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
+    final TextStyle effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
     expect(effectiveStyle.color?.alpha, 128); // Which is alpha of .5
 
     // We drag up to fully collapse the space bar.
@@ -389,7 +388,7 @@ void main() {
   testWidgets('FlexibleSpaceBar sets width constraints for the title', (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
-    double width = 0.0;
+    late double width;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

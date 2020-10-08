@@ -138,13 +138,13 @@ void main() {
               && previousRect != null && currentRect != null) {
             final List<double> deltas = <double>[];
             for (final double currentRotation in currentRotations) {
-              double? minDelta;
+              late double minDelta;
               for (final double previousRotation in previousRotations!) {
                 final double delta = (previousRotation - currentRotation).abs();
-                minDelta ??= delta;
+                minDelta = delta;
                 minDelta = min(delta, minDelta);
               }
-              deltas.add(minDelta!);
+              deltas.add(minDelta);
             }
 
             if (deltas.where((double delta) => delta < maxDeltaRotation).isEmpty) {
@@ -647,7 +647,7 @@ void main() {
               builder: (BuildContext context) {
                 return FloatingActionButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context)?.showSnackBar(
+                    ScaffoldMessenger.of(context)!.showSnackBar(
                       const SnackBar(content: Text('Snacky!')),
                     );
                   },
@@ -1507,7 +1507,7 @@ class _GeometryListenerState extends State<_GeometryListener> {
 
   int numNotifications = 0;
   ValueListenable<ScaffoldGeometry>? geometryListenable;
-  _GeometryCachePainter? cache;
+  late _GeometryCachePainter cache;
 
   @override
   void didChangeDependencies() {
@@ -1587,7 +1587,7 @@ class _GeometryCachePainter extends CustomPainter {
 
   final ValueListenable<ScaffoldGeometry> geometryListenable;
 
-  ScaffoldGeometry? value;
+  late ScaffoldGeometry value;
   @override
   void paint(Canvas canvas, Size size) {
     value = geometryListenable.value;
