@@ -21,6 +21,10 @@ Future<void> webOnlyInitializePlatform({
 Future<void> _initializePlatform({
   engine.AssetManager? assetManager,
 }) async {
+  if (!debugEmulateFlutterTesterEnvironment) {
+    engine.window.locationStrategy = const engine.HashLocationStrategy();
+  }
+
   engine.initializeEngine();
 
   // This needs to be after `webOnlyInitializeEngine` because that is where the
