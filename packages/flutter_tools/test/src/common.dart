@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/doctor.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:path/path.dart' as path; // ignore: package_path_import
 
@@ -58,13 +59,13 @@ String getFlutterRoot() {
   Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.');
 
   Uri scriptUri;
-  switch (globals.platform.script.scheme) {
+  switch (platform.script.scheme) {
     case 'file':
-      scriptUri = globals.platform.script;
+      scriptUri = platform.script;
       break;
     case 'data':
       final RegExp flutterTools = RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
-      final Match match = flutterTools.firstMatch(Uri.decodeFull(globals.platform.script.path));
+      final Match match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
       if (match == null) {
         throw invalidScript();
       }
@@ -412,4 +413,16 @@ class ConfiguredFileSystem extends ForwardingFileSystem {
   Directory directory(dynamic path) {
     return (entities[path] as Directory) ?? super.directory(path);
   }
+}
+
+/// Matches a doctor validation result.
+Matcher matchDoctorValidation({
+  ValidationType validationType,
+  String statusInfo,
+  dynamic messages
+}) {
+  return const test_package.TypeMatcher<ValidationResult>()
+    .having((ValidationResult result) => result.type, 'type', validationType)
+    .having((ValidationResult result) => result.statusInfo, 'statusInfo', statusInfo)
+    .having((ValidationResult result) => result.messages, 'messages', messages);
 }

@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -21,7 +22,6 @@ import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
-import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -368,6 +368,7 @@ class IOSDevice extends Device {
       '--enable-service-port-fallback',
       '--disable-service-auth-codes',
       '--observatory-port=$assumedObservatoryPort',
+      if (debuggingOptions.disablePortPublication) '--disable-observatory-publication',
       if (debuggingOptions.startPaused) '--start-paused',
       if (dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
       if (debuggingOptions.useTestFonts) '--use-test-fonts',
@@ -401,16 +402,21 @@ class IOSDevice extends Device {
       int installationResult = 1;
       if (debuggingOptions.debuggingEnabled) {
         _logger.printTrace('Debugging is enabled, connecting to observatory');
-        iosDeployDebugger = _iosDeploy.prepareDebuggerForLaunch(
-          deviceId: id,
-          bundlePath: bundle.path,
-          launchArguments: launchArguments,
-          interfaceType: interfaceType,
-        );
-
         final DeviceLogReader deviceLogReader = getLogReader(app: package);
-        if (deviceLogReader is IOSDeviceLogReader) {
-          deviceLogReader.debuggerStream = iosDeployDebugger;
+
+        // If the device supports syslog reading, prefer launching the app without
+        // attaching the debugger to avoid the overhead of the unnecessary extra running process.
+        if (majorSdkVersion >= IOSDeviceLogReader.minimumUniversalLoggingSdkVersion) {
+          iosDeployDebugger = _iosDeploy.prepareDebuggerForLaunch(
+            deviceId: id,
+            bundlePath: bundle.path,
+            launchArguments: launchArguments,
+            interfaceType: interfaceType,
+          );
+
+          if (deviceLogReader is IOSDeviceLogReader) {
+            deviceLogReader.debuggerStream = iosDeployDebugger;
+          }
         }
         observatoryDiscovery = ProtocolDiscovery.observatory(
           deviceLogReader,
@@ -421,14 +427,16 @@ class IOSDevice extends Device {
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
         );
-        installationResult = await iosDeployDebugger.launchAndAttach() ? 0 : 1;
-      } else {
+      }
+      if (iosDeployDebugger == null) {
         installationResult = await _iosDeploy.launchApp(
           deviceId: id,
           bundlePath: bundle.path,
           launchArguments: launchArguments,
           interfaceType: interfaceType,
         );
+      } else {
+        installationResult = await iosDeployDebugger.launchAndAttach() ? 0 : 1;
       }
       if (installationResult != 0) {
         _logger.printError('Could not run ${bundle.path} on $id.');
@@ -445,7 +453,6 @@ class IOSDevice extends Device {
       _logger.printTrace('Application launched on the device. Waiting for observatory port.');
       final FallbackDiscovery fallbackDiscovery = FallbackDiscovery(
         logger: _logger,
-        mDnsObservatoryDiscovery: MDnsObservatoryDiscovery.instance,
         portForwarder: portForwarder,
         protocolDiscovery: observatoryDiscovery,
         flutterUsage: globals.flutterUsage,
@@ -461,12 +468,6 @@ class IOSDevice extends Device {
         packageName: FlutterProject.current().manifest.appName,
       );
       if (localUri == null) {
-        if (majorSdkVersion >= 14) {
-          _logger.printError('Failed to attach to the observatory.');
-          _logger.printError(
-              'Try accepting the local network permissions popup, or enable "Settings > Privacy > Local Network" for your app.');
-          _logger.printError('For more information, see https://flutter.dev/docs/development/ios-14#debugging-flutter');
-        }
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);
@@ -700,13 +701,17 @@ class IOSDeviceLogReader extends DeviceLogReader {
     _connectedVMService = connectedVmService;
   }
 
-  static const int _minimumUniversalLoggingSdkVersion = 13;
+  static const int minimumUniversalLoggingSdkVersion = 13;
 
   Future<void> _listenToUnifiedLoggingEvents(vm_service.VmService connectedVmService) async {
-    if (_majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
+    if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
       return;
     }
     try {
+      // The VM service will not publish logging events unless the debug stream is being listened to.
+      // Listen to this stream as a side effect.
+      unawaited(connectedVmService.streamListen('Debug'));
+
       await Future.wait(<Future<void>>[
         connectedVmService.streamListen(vm_service.EventStreams.kStdout),
         connectedVmService.streamListen(vm_service.EventStreams.kStderr),
@@ -735,7 +740,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   /// Log reader will listen to [debugger.logLines] and will detach debugger on dispose.
   set debuggerStream(IOSDeployDebugger debugger) {
     // Logging is gathered from syslog on iOS 13 and earlier.
-    if (_majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
+    if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
       return;
     }
     _iosDeployDebugger = debugger;
@@ -754,7 +759,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
   void _listenToSysLog() {
     // syslog is not written on iOS 13+.
-    if (_majorSdkVersion >= _minimumUniversalLoggingSdkVersion) {
+    if (_majorSdkVersion >= minimumUniversalLoggingSdkVersion) {
       return;
     }
     _iMobileDevice.startLogger(_deviceId).then<void>((Process process) {

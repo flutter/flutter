@@ -221,14 +221,16 @@ class _DefaultUsage implements Usage {
       _analytics = LogToFileAnalytics(logFilePath);
     } else {
       try {
-        _analytics = analyticsIOFactory(
-          _kFlutterUA,
-          settingsName,
-          version,
-          documentDirectory: configDirOverride != null
-            ? globals.fs.directory(configDirOverride)
-            : null,
-        );
+        ErrorHandlingFileSystem.noExitOnFailure(() {
+          _analytics = analyticsIOFactory(
+            _kFlutterUA,
+            settingsName,
+            version,
+            documentDirectory: configDirOverride != null
+              ? globals.fs.directory(configDirOverride)
+              : null,
+          );
+        });
       } on Exception catch (e) {
         globals.printTrace('Failed to initialize analytics reporting: $e');
         suppressAnalytics = true;

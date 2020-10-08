@@ -4,22 +4,6 @@
 # YAML anchors used to share fields between tasks.
 # See https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html
 
-windows_shard_template: &WINDOWS_SHARD_TEMPLATE
-  only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-  script:
-    - dart --enable-asserts ./dev/bots/test.dart
-
-firebase_shard_template: &FIREBASE_SHARD_TEMPLATE
-  environment:
-    # Empirically, this shard runs in 20-25 minutes with just one CPU and 4G of RAM, as of
-    # October 2019. It does not seem to be sensitive to the number of CPUs or amount of RAM;
-    # doubling CPUs had no effect (mere seconds under 20 minutes), increasing RAM to 24G left it
-    # on the high end of the 20-25 minute range. (This makes sense, as it's just driving the
-    # Firebase test lab remotely.) Less than 4G of RAM made it go OOM.
-    CLOUDSDK_CORE_DISABLE_PROMPTS: 1
-    GCLOUD_FIREBASE_TESTLAB_KEY: ENCRYPTED[1c140257edc48f5578fa5a0e5038b84c8e53270c405efa5a8e35ea303a4e0d135853989f448f72136206de854d17fbec]
-  script:
-    - dart --enable-asserts ./dev/bots/test.dart
 
 use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
 
@@ -159,39 +143,6 @@ task:
         - (cd dev/bots; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: tool_tests-integration-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') && $CIRRUS_PR != ''"
-      environment:
-        # As of October 2019, the tool_tests-integration-linux shard got faster with more CPUs up to
-        # 6 CPUs, and needed at least 8G of RAM to not run out of memory.
-        CPU: 6
-        MEMORY: 8G
-        CHROME_NO_SANDBOX: true
-        SHOULD_UPDATE_PACKAGES: "FALSE"
-      script:
-        - (cd packages/flutter_tools; pub get)
-        - (cd dev/bots; pub get)
-        - (cd dev/tools; pub get)
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: tool_coverage-linux # linux-only
-      skip: true # Skip while moving between Cirrus and LUCI
-      only_if: "$CIRRUS_BRANCH == 'master'"
-      environment:
-        # As of February 2020, the tool_coverage-linux shard needed at least 24G of RAM to run without
-        # getting OOM-killed, and even 8 CPUs took 25 minutes.
-        CPU: 8
-        MEMORY: 24G
-        CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
-        SHOULD_UPDATE_PACKAGES: "FALSE"
-      script:
-        - (cd packages/flutter_tools; pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/main; pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/font; pub get)
-        - (cd dev/bots; pub get)
-        - dart --enable-asserts ./dev/bots/test.dart
-        - bash <(curl -s https://codecov.io/bash) -c -f packages/flutter_tools/coverage/lcov.info -F flutter_tool
-
     - name: web_integration_tests
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/**', 'packages/flutter_web_plugins/**', 'bin/**') && $CIRRUS_PR != ''"
       environment:
@@ -204,10 +155,9 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: docs-linux # linux-only
-      # TODO(fujino): Make this pre-submit only once #64212 is fixed
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'bin/**') || $CIRRUS_PR == ''"
+      # TODO(fujino): Make this pre-submit only once we have migrated docs generation to LUCI (https://github.com/flutter/flutter/issues/64212).
       environment:
-        # TODO(tvolkert): optimize CPU and MEMORY settings once #60646 is resolved.
+        # TODO(tvolkert): optimize CPU and MEMORY settings once docs generation is more efficient (https://github.com/flutter/flutter/issues/60646).
         CPU: 4
         MEMORY: 8G
         # For uploading master docs to Firebase master branch staging site
@@ -227,16 +177,6 @@ task:
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
-    # firebase_test_lab_tests are linux-only
-    - name: firebase_test_lab_tests-0-linux
-      <<: *FIREBASE_SHARD_TEMPLATE
-
-    - name: firebase_test_lab_tests-1-linux
-      <<: *FIREBASE_SHARD_TEMPLATE
-
-    - name: firebase_test_lab_tests-2_last-linux
-      <<: *FIREBASE_SHARD_TEMPLATE
-
     - name: web_smoke_test
       only_if: "changesInclude('.cirrus.yml', 'examples/hello_world/**' ,'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/**') && $CIRRUS_PR != ''"
       environment:
@@ -249,10 +189,9 @@ task:
         - git clone https://github.com/flutter/web_installers.git
         - cd web_installers/packages/web_drivers/
         - pub get
-        - dart lib/web_driver_installer.dart &
-        - sleep 20
+        - dart lib/web_driver_installer.dart chromedriver --install-only
         - chromedriver/chromedriver --port=4444 &
-        - sleep 5
+        - sleep 1
         - cd ../../../examples/hello_world/
         - flutter drive --target=test_driver/smoke_web_engine.dart -d web-server --profile --browser-name=chrome
 
@@ -262,66 +201,10 @@ task:
       # See also: https://github.com/flutter/flutter/pull/49454
       depends_on:
         - analyze-linux
-      environment:
-        # As of October 2019, 1 CPU and 4G of RAM let deploy_gallery-linux finish in about 15
-        # minutes, once it got started.
-        GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE: ENCRYPTED[d9ac1462c3c556fc2f8165c9d5566a16497d8ebc38a50357f7f3abf136b7f83e1d1d76dde36fee356cb0f9ebf7a89346]
-        ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0f2aca35f05b26add5d9edea2a7449341269a2b7e22d5c667f876996e2e8bc44ff1369431ebf73b7c5581fd95d0e5902]
+      # As of October 2019, 1 CPU and 4G of RAM let deploy_gallery-linux finish in about 15
+      # minutes, once it got started.
       script:
         - ./dev/bots/deploy_gallery.sh
-
-# WINDOWS SHARDS
-task:
-  windows_container:
-    image: cirrusci/android-sdk:30-windowsservercore-2019
-    os_version: 2019
-    cpu: $CPU
-    memory: $MEMORY
-  environment:
-    CPU: 1 # 1-8 without compute credits, 1-30 with
-    MEMORY: 2G # 256M-24G without compute credits, 256M-90G with
-    CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\$FLUTTER_SDK_PATH_WITH_SPACE"
-    PATH: "$CIRRUS_WORKING_DIR/bin;$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin;$PATH"
-    SHOULD_UPDATE_PACKAGES: "TRUE"
-  pub_cache:
-    folder: $APPDATA\Pub\Cache
-    fingerprint_script:
-      - ps: $Environment:OS; Get-ChildItem -Path "$Environment:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
-    reupload_on_changes: false
-  flutter_pkg_cache:
-    folder: bin\cache\pkg
-    fingerprint_script: echo %OS% & type bin\internal\*.version
-    reupload_on_changes: false
-  artifacts_cache:
-    folder: bin\cache\artifacts
-    fingerprint_script: echo %OS% & type bin\internal\*.version
-    reupload_on_changes: false
-  setup_script:
-    - git clean -xffd --exclude=bin/cache/ # git wants forward slash path separators, even on Windows.
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
-    - flutter config --no-analytics
-    - flutter doctor -v
-    - CMD /C IF "%SHOULD_UPDATE_PACKAGES%" EQU "TRUE" flutter update-packages
-    - git fetch origin master
-  matrix:
-    - name: hostonly_devicelab_tests-0-windows
-      << : *WINDOWS_SHARD_TEMPLATE
-      environment:
-        # As of December 2019, the hostonly_devicelab_tests-0-windows shard needs at least 6G RAM to
-        # succeed. The shard got faster with more CPUs up to 6 CPUs and more RAM up to 8 GB
-        # (running in about 30 minutes).
-        CPU: 6
-        MEMORY: 8G
-
-    - name: hostonly_devicelab_tests-1_last-windows
-      << : *WINDOWS_SHARD_TEMPLATE
-      environment:
-        # As of December 2019, the hostonly_devicelab_tests-1-windows shard requires 4 GB RAM to
-        # succeed. The optimal configuration was 4 CPUs and 6 GB RAM, running in ~26 minutes.
-        # Less CPU or RAM ran slower, and more CPU or RAM yielded no extra gain.
-        CPU: 4
-        MEMORY: 6G
 
 # MACOS SHARDS
 # Mac doesn't use caches because they apparently take longer to populate and save
@@ -366,14 +249,6 @@ task:
       # See also: https://github.com/flutter/flutter/pull/49454
       depends_on:
         - analyze-linux
-      environment:
-        # Apple Fastlane password.
-        FASTLANE_PASSWORD: ENCRYPTED[4b1f0b8d52874e9de965acd46c79743f3b81f3a513614179b9be7cf53dc8258753e257bdadb11a298ee455259df21865]
-        # Private repo for publishing certificates.
-        PUBLISHING_MATCH_CERTIFICATE_REPO: ENCRYPTED[3c0e78877d933fc80107aa6f3790fd1cf927250b852d6cb53202be696b4903ed8ca839b809626aaf18050bf7e436fab7]
-        PUBLISHING_MATCH_REPO_TOKEN: ENCRYPTED[3d1230b744c6ed6c788a91bec741b769401dbcd426b18f9af8080bfeefdfc21913ca4047980c5b5b7ce823f12e7b6b19]
-        # Apple Certificates Match Passphrase
-        MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - ./dev/bots/deploy_gallery.sh

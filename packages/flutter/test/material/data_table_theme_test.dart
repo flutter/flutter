@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,7 +24,7 @@ void main() {
     expect(themeData.columnSpacing, null);
     expect(themeData.dividerThickness, null);
 
-    const DataTableTheme theme = DataTableTheme(data: DataTableThemeData());
+    const DataTableTheme theme = DataTableTheme(data: DataTableThemeData(), child: SizedBox());
     expect(theme.data.dataRowColor, null);
     expect(theme.data.dataRowHeight, null);
     expect(theme.data.dataTextStyle, null);
@@ -135,15 +133,15 @@ void main() {
       ),
     );
 
-    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style;
+    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 1).color, dataRowColor.resolve(<MaterialState>{}));
-    expect(_tableRowBoxDecoration(tester: tester, index: 1).border.top.width, dividerThickness);
+    expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, dividerThickness);
 
     final Finder dataRowContainer = find.ancestor(of: find.text('Data'), matching: find.byType(Container));
     expect(tester.getSize(dataRowContainer).height, dataRowHeight);
 
-    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style;
+    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 0).color, headingRowColor.resolve(<MaterialState>{}));
 
@@ -226,15 +224,15 @@ void main() {
       ),
     );
 
-    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style;
+    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 1).color, dataRowColor.resolve(<MaterialState>{}));
-    expect(_tableRowBoxDecoration(tester: tester, index: 1).border.top.width, dividerThickness);
+    expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, dividerThickness);
 
     final Finder dataRowContainer = find.ancestor(of: find.text('Data'), matching: find.byType(Container));
     expect(tester.getSize(dataRowContainer).height, dataRowHeight);
 
-    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style;
+    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 0).color, headingRowColor.resolve(<MaterialState>{}));
 
@@ -245,7 +243,7 @@ void main() {
   });
 }
 
-BoxDecoration _tableRowBoxDecoration({WidgetTester tester, int index}) {
+BoxDecoration _tableRowBoxDecoration({required WidgetTester tester, required int index}) {
   final Table table = tester.widget(find.byType(Table));
   final TableRow tableRow = table.children[index];
   return tableRow.decoration as BoxDecoration;

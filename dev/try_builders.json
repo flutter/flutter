@@ -40,6 +40,24 @@
          "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
       },
       {
+         "name":"Linux firebase_abstract_method_smoke_test",
+         "repo":"flutter",
+         "task_name":"linux_firebase_abstract_method_smoke_test",
+         "enabled":true
+      },
+      {
+         "name":"Linux firebase_android_embedding_v2_smoke_test",
+         "repo":"flutter",
+         "task_name":"linux_firebase_android_embedding_v2_smoke_test",
+         "enabled":true
+      },
+      {
+         "name":"Linux firebase_release_smoke_test",
+         "repo":"flutter",
+         "task_name":"linux_firebase_release_smoke_test",
+         "enabled":true
+      },
+      {
          "name":"Linux fuchsia_precache",
          "repo":"flutter",
          "task_name":"linux_fuchsia_precache",
@@ -147,7 +165,7 @@
          "repo":"flutter",
          "task_name":"linux_web_tests",
          "enabled":true,
-         "run_if":["dev/", "packages/flutter/", "packages/flutter_goldens_client/", "packages/flutter_goldens/", "packages/flutter_test/", "packages/flutter_tools/lib/src/test/", "packages/flutter_web_plugins/", "bin/"]
+         "run_if":["dev/", "packages/", "bin/"]
       },
       {
          "name":"Linux web_integration_tests",
@@ -303,6 +321,13 @@
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
+         "name": "Windows build_aar_module_test",
+         "repo": "flutter",
+         "task_name": "win_build_aar_module_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
          "name": "Windows build_tests",
          "repo": "flutter",
          "task_name": "win_build_tests",
@@ -330,6 +355,13 @@
          "run_if":["dev/**", "bin/**"]
       },
       {
+         "name": "Windows gradle_jetifier_test",
+         "repo": "flutter",
+         "task_name": "win_gradle_jetifier_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
          "name": "Windows gradle_non_android_plugin_test",
          "repo": "flutter",
          "task_name": "win_gradle_non_android_plugin_test",
@@ -344,6 +376,13 @@
          "run_if":["dev/**", "bin/**"]
       },
       {
+         "name": "Windows gradle_plugin_light_apk_test",
+         "repo": "flutter",
+         "task_name": "win_gradle_plugin_light_apk_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
          "name": "Windows gradle_r8_test",
          "repo": "flutter",
          "task_name": "win_gradle_r8_test",
@@ -351,9 +390,30 @@
          "run_if":["dev/**", "bin/**"]
       },
       {
+         "name": "Windows module_custom_host_app_name_test",
+         "repo": "flutter",
+         "task_name": "win_module_custom_host_app_name_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name": "Windows module_test",
+         "repo": "flutter",
+         "task_name": "win_module_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
          "name": "Windows module_host_with_custom_build_test",
          "repo": "flutter",
          "task_name": "win_module_host_with_custom_build_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name": "Windows plugin_dependencies_test",
+         "repo": "flutter",
+         "task_name": "win_plugin_dependencies_test",
          "enabled":true,
          "run_if":["dev/**", "bin/**"]
       },

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -19,7 +17,7 @@ import '../scheduler/scheduler_tester.dart';
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
-    WidgetsBinding.instance.resetEpoch();
+    WidgetsBinding.instance!.resetEpoch();
     ui.window.onBeginFrame = null;
     ui.window.onDrawFrame = null;
   });
@@ -350,7 +348,7 @@ void main() {
     expect(controller.repeat, throwsFlutterError);
 
     controller.dispose();
-    FlutterError result;
+    FlutterError? result;
     try {
       controller.dispose();
     } on FlutterError catch (e) {
@@ -358,7 +356,7 @@ void main() {
     }
     expect(result, isNotNull);
     expect(
-      result.toStringDeep(),
+      result!.toStringDeep(),
       equalsIgnoringHashCodes(
         'FlutterError\n'
         '   AnimationController.dispose() called more than once.\n'
@@ -482,7 +480,7 @@ void main() {
     controller.forward(from: 0.2);
     expect(controller.value, 0.2);
     controller.animateTo(1.0, duration: Duration.zero);
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0), reason: 'Expected no animation.');
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0), reason: 'Expected no animation.');
     expect(controller.value, 1.0);
   });
 

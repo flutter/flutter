@@ -16,6 +16,11 @@ import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
+// The default font size if none is specified. This should be kept in
+// sync with the default values in text_style.dart, as well as the
+// defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
+const double _kDefaultFontSize = 14.0;
+
 /// Holds the [Size] and baseline required to represent the dimensions of
 /// a placeholder in text.
 ///
@@ -420,6 +425,10 @@ class TextPainter {
     ) ?? ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
+      // Use the default font size to multiply by as RichText does not
+      // perform inheriting [TextStyle]s and would otherwise
+      // fail to apply textScaleFactor.
+      fontSize: _kDefaultFontSize * textScaleFactor,
       maxLines: maxLines,
       textHeightBehavior: _textHeightBehavior,
       ellipsis: ellipsis,

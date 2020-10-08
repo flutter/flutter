@@ -50,9 +50,16 @@ import 'run.dart';
 /// successful the exit code will be `0`. Otherwise, you will see a non-zero
 /// exit code.
 class DriveCommand extends RunCommandBase {
-  DriveCommand() {
+  DriveCommand({
+    bool verboseHelp = false,
+  }) {
     requiresPubspecYaml();
+    addEnableExperimentation(hide: !verboseHelp);
 
+    // By default, the drive app should not publish the VM service port over mDNS
+    // to prevent a local network permission dialog on iOS 14+,
+    // which cannot be accepted or dismissed in a CI environment.
+    addPublishPort(enabledByDefault: false, verboseHelp: verboseHelp);
     argParser
       ..addFlag('keep-app-running',
         defaultsTo: null,
@@ -128,7 +135,7 @@ class DriveCommand extends RunCommandBase {
   final String name = 'drive';
 
   @override
-  final String description = 'Runs Flutter Driver tests for the current project.';
+  final String description = 'Run integration tests for the project on an attached device or emulator.';
 
   @override
   final List<String> aliases = <String>['driver'];
@@ -199,6 +206,7 @@ class DriveCommand extends RunCommandBase {
           flutterProject: flutterProject,
           target: targetFile,
           buildInfo: buildInfo,
+          platform: globals.platform,
         );
         residentRunner = webRunnerFactory.createWebRunner(
           flutterDevice,
@@ -212,7 +220,8 @@ class DriveCommand extends RunCommandBase {
             )
             : DebuggingOptions.enabled(
               getBuildInfo(),
-              port: stringArg('web-port')
+              port: stringArg('web-port'),
+              disablePortPublication: disablePortPublication,
             ),
           stayResident: false,
           urlTunneller: null,
@@ -321,7 +330,18 @@ $ex
     }
 
     try {
-      await testRunner(<String>[testFile], environment);
+      await testRunner(
+        <String>[
+          if (buildInfo.dartExperiments.isNotEmpty)
+            '--enable-experiment=${buildInfo.dartExperiments.join(',')}',
+          if (buildInfo.nullSafetyMode == NullSafetyMode.sound)
+            '--sound-null-safety',
+          if (buildInfo.nullSafetyMode == NullSafetyMode.unsound)
+            '--no-sound-null-safety',
+          testFile,
+        ],
+        environment,
+      );
     } on Exception catch (error, stackTrace) {
       if (error is ToolExit) {
         rethrow;
@@ -487,6 +507,7 @@ Future<LaunchResult> _startApp(
       command.getBuildInfo(),
       startPaused: true,
       hostVmServicePort: webUri != null ? command.hostVmservicePort : 0,
+      disablePortPublication: command.disablePortPublication,
       ddsPort: command.ddsPort,
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,

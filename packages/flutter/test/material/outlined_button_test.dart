@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,10 +47,10 @@ void main() {
       ),
       borderRadius: BorderRadius.circular(4.0),
     ));
-    expect(material.textStyle.color, colorScheme.primary);
-    expect(material.textStyle.fontFamily, 'Roboto');
-    expect(material.textStyle.fontSize, 14);
-    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, colorScheme.primary);
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.button);
 
     final Offset center = tester.getCenter(find.byType(OutlinedButton));
@@ -80,10 +78,10 @@ void main() {
       ),
       borderRadius: BorderRadius.circular(4.0),
     ));
-    expect(material.textStyle.color, colorScheme.primary);
-    expect(material.textStyle.fontFamily, 'Roboto');
-    expect(material.textStyle.fontSize, 14);
-    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, colorScheme.primary);
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.button);
 
     // Disabled OutlinedButton
@@ -114,17 +112,17 @@ void main() {
       ),
       borderRadius: BorderRadius.circular(4.0),
     ));
-    expect(material.textStyle.color, colorScheme.onSurface.withOpacity(0.38));
-    expect(material.textStyle.fontFamily, 'Roboto');
-    expect(material.textStyle.fontSize, 14);
-    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.button);
   });
 
   testWidgets('Does OutlinedButton work with hover', (WidgetTester tester) async {
     const Color hoverColor = Color(0xff001122);
 
-    Color getOverlayColor(Set<MaterialState> states) {
+    Color? getOverlayColor(Set<MaterialState> states) {
       return states.contains(MaterialState.hovered) ? hoverColor : null;
     }
 
@@ -133,7 +131,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: OutlinedButton(
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color>(getOverlayColor),
+            overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           onPressed: () { },
           child: const Text('button'),
@@ -154,7 +152,7 @@ void main() {
   testWidgets('Does OutlinedButton work with focus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 
-    Color getOverlayColor(Set<MaterialState> states) {
+    Color? getOverlayColor(Set<MaterialState> states) {
       return states.contains(MaterialState.focused) ? focusColor : null;
     }
 
@@ -164,7 +162,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: OutlinedButton(
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color>(getOverlayColor),
+            overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           focusNode: focusNode,
           onPressed: () { },
@@ -184,7 +182,7 @@ void main() {
   testWidgets('Does OutlinedButton work with autofocus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 
-    Color getOverlayColor(Set<MaterialState> states) {
+    Color? getOverlayColor(Set<MaterialState> states) {
       return states.contains(MaterialState.focused) ? focusColor : null;
     }
 
@@ -195,7 +193,7 @@ void main() {
         child: OutlinedButton(
           autofocus: true,
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color>(getOverlayColor),
+            overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           focusNode: focusNode,
           onPressed: () { },
@@ -268,9 +266,9 @@ void main() {
         MaterialState.focused,
       };
       if (states.any(interactiveStates.contains)) {
-        return Colors.blue[900];
+        return Colors.blue[900]!;
       }
-      return Colors.blue[800];
+      return Colors.blue[800]!;
     }
 
     await tester.pumpWidget(
@@ -368,7 +366,7 @@ void main() {
     );
 
     Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('OutlinedButton')).text.style.color;
+      return tester.renderObject<RenderParagraph>(find.text('OutlinedButton')).text.style!.color!;
     }
 
     // Default, not disabled.
@@ -438,7 +436,7 @@ void main() {
       ),
     );
 
-    Color iconColor() => _iconStyle(tester, Icons.add).color;
+    Color iconColor() => _iconStyle(tester, Icons.add).color!;
     // Default, not disabled.
     expect(iconColor(), equals(defaultColor));
 
@@ -535,7 +533,7 @@ void main() {
     bool wasPressed;
     Finder outlinedButton;
 
-    Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
+    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: OutlinedButton(
@@ -575,7 +573,7 @@ void main() {
   });
 
   testWidgets("Outline button doesn't crash if disabled during a gesture", (WidgetTester tester) async {
-    Widget buildFrame(VoidCallback onPressed) {
+    Widget buildFrame(VoidCallback? onPressed) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Theme(
@@ -600,7 +598,7 @@ void main() {
     const BorderSide enabledBorderSide = BorderSide(color: Color(0xFFFF00FF), width: 4);
     const BorderSide pressedBorderSide = BorderSide(color: Color(0xFF0000FF), width: 5);
 
-    Widget buildFrame({ VoidCallback onPressed }) {
+    Widget buildFrame({ VoidCallback? onPressed }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Theme(
@@ -946,7 +944,7 @@ void main() {
 
     const List<double> textScaleFactorOptions = <double>[0.5, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0];
     const List<TextDirection> textDirectionOptions = <TextDirection>[TextDirection.ltr, TextDirection.rtl];
-    const List<Widget> iconOptions = <Widget>[null, Icon(Icons.add, size: 18, key: iconKey)];
+    const List<Widget?> iconOptions = <Widget?>[null, Icon(Icons.add, size: 18, key: iconKey)];
 
     // Expected values for each textScaleFactor.
     final Map<double, double> paddingVertical = <double, double>{
@@ -986,7 +984,7 @@ void main() {
     }
 
     /// Computes the padding between two [Rect]s, one inside the other.
-    EdgeInsets paddingBetween({ Rect parent, Rect child }) {
+    EdgeInsets paddingBetween({ required Rect parent, required Rect child }) {
       assert (parent.intersect(child) == child);
       return EdgeInsets.fromLTRB(
         child.left - parent.left,
@@ -998,7 +996,7 @@ void main() {
 
     for (final double textScaleFactor in textScaleFactorOptions) {
       for (final TextDirection textDirection in textDirectionOptions) {
-        for (final Widget icon in iconOptions) {
+        for (final Widget? icon in iconOptions) {
           final String testName = 'OutlinedButton'
             ', text scale $textScaleFactor'
             '${icon != null ? ", with icon" : ""}'
@@ -1011,7 +1009,7 @@ void main() {
                 home: Builder(
                   builder: (BuildContext context) {
                     return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(
+                      data: MediaQuery.of(context)!.copyWith(
                         textScaleFactor: textScaleFactor,
                       ),
                       child: Directionality(
@@ -1050,9 +1048,9 @@ void main() {
 
             // Compute expected padding, and check.
 
-            final double expectedPaddingTop = paddingVertical[textScaleFactor];
-            final double expectedPaddingBottom = paddingVertical[textScaleFactor];
-            final double expectedPaddingStart = paddingHorizontal[textScaleFactor];
+            final double expectedPaddingTop = paddingVertical[textScaleFactor]!;
+            final double expectedPaddingBottom = paddingVertical[textScaleFactor]!;
+            final double expectedPaddingStart = paddingHorizontal[textScaleFactor]!;
             final double expectedPaddingEnd = expectedPaddingStart;
 
             final EdgeInsets expectedPadding = EdgeInsetsDirectional.fromSTEB(
@@ -1069,9 +1067,9 @@ void main() {
 
             final RenderBox labelRenderBox = tester.renderObject<RenderBox>(find.byKey(labelKey));
             final Rect labelBounds = globalBounds(labelRenderBox);
-            final RenderBox iconRenderBox = icon == null ? null : tester.renderObject<RenderBox>(find.byKey(iconKey));
-            final Rect iconBounds = icon == null ? null : globalBounds(iconRenderBox);
-            final Rect childBounds = icon == null ? labelBounds : labelBounds.expandToInclude(iconBounds);
+            final RenderBox? iconRenderBox = icon == null ? null : tester.renderObject<RenderBox>(find.byKey(iconKey));
+            final Rect? iconBounds = icon == null ? null : globalBounds(iconRenderBox!);
+            final Rect childBounds = icon == null ? labelBounds : labelBounds.expandToInclude(iconBounds!);
 
             // We measure the `InkResponse` descendant of the button
             // element, because the button has a larger `RenderBox`
@@ -1120,8 +1118,8 @@ void main() {
             // Check the gap between the icon and the label
             if (icon != null) {
               final double gapWidth = textDirection == TextDirection.ltr
-                ? labelBounds.left - iconBounds.right
-                : iconBounds.left - labelBounds.right;
+                ? labelBounds.left - iconBounds!.right
+                : iconBounds!.left - labelBounds.right;
               expect(gapWidth, paddingWithIconGap[textScaleFactor]);
             }
 
@@ -1150,7 +1148,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return MediaQuery(
-              data: MediaQuery.of(context).copyWith(
+              data: MediaQuery.of(context)!.copyWith(
                 textScaleFactor: 2,
               ),
               child: Scaffold(
@@ -1180,24 +1178,24 @@ void main() {
 
 PhysicalModelLayer _findPhysicalLayer(Element element) {
   expect(element, isNotNull);
-  RenderObject object = element.renderObject;
+  RenderObject? object = element.renderObject;
   while (object != null && object is! RenderRepaintBoundary && object is! RenderView) {
     object = object.parent as RenderObject;
   }
-  expect(object.debugLayer, isNotNull);
-  expect(object.debugLayer.firstChild, isA<PhysicalModelLayer>());
-  final PhysicalModelLayer layer = object.debugLayer.firstChild as PhysicalModelLayer;
-  final Layer child = layer.firstChild;
+  expect(object!.debugLayer, isNotNull);
+  expect(object.debugLayer!.firstChild, isA<PhysicalModelLayer>());
+  final PhysicalModelLayer layer = object.debugLayer!.firstChild as PhysicalModelLayer;
+  final Layer child = layer.firstChild!;
   return child is PhysicalModelLayer ? child : layer;
 }
 
-void _checkPhysicalLayer(Element element, Color expectedColor, { Path clipPath, Rect clipRect }) {
+void _checkPhysicalLayer(Element element, Color expectedColor, { Path? clipPath, Rect? clipRect }) {
   final PhysicalModelLayer expectedLayer = _findPhysicalLayer(element);
   expect(expectedLayer.elevation, 0.0);
   expect(expectedLayer.color, expectedColor);
   if (clipPath != null) {
     expect(clipRect, isNotNull);
-    expect(expectedLayer.clipPath, coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)));
+    expect(expectedLayer.clipPath, coversSameAreaAs(clipPath, areaToCompare: clipRect!.inflate(10.0)));
   }
 }
 
@@ -1205,5 +1203,5 @@ TextStyle _iconStyle(WidgetTester tester, IconData icon) {
   final RichText iconRichText = tester.widget<RichText>(
     find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
   );
-  return iconRichText.text.style;
+  return iconRichText.text.style!;
 }
