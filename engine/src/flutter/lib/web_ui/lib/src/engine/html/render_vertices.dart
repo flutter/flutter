@@ -668,8 +668,8 @@ class _OffscreenCanvas {
           height: heightInPixels,
         );
         _glCanvas!.className = 'gl-canvas';
-        final double cssWidth = widthInPixels / EngineWindow.browserDevicePixelRatio;
-        final double cssHeight = heightInPixels / EngineWindow.browserDevicePixelRatio;
+        final double cssWidth = widthInPixels / EnginePlatformDispatcher.browserDevicePixelRatio;
+        final double cssHeight = heightInPixels / EnginePlatformDispatcher.browserDevicePixelRatio;
         _glCanvas!.style
           ..position = 'absolute'
           ..width = '${cssWidth}px'

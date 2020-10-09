@@ -193,13 +193,14 @@ class Engine final : public RuntimeDelegate,
     /// @brief      Notifies the shell of the name of the root isolate and its
     ///             port when that isolate is launched, restarted (in the
     ///             cold-restart scenario) or the application itself updates the
-    ///             name of the root isolate (via `Window.setIsolateDebugName`
-    ///             in `window.dart`). The name of the isolate is meaningless to
-    ///             the engine but is used in instrumentation and tooling.
-    ///             Currently, this information is to update the service
-    ///             protocol list of available root isolates running in the VM
-    ///             and their names so that the appropriate isolate can be
-    ///             selected in the tools for debugging and instrumentation.
+    ///             name of the root isolate (via
+    ///             `PlatformDispatcher.setIsolateDebugName` in
+    ///             `platform_dispatcher.dart`). The name of the isolate is
+    ///             meaningless to the engine but is used in instrumentation and
+    ///             tooling. Currently, this information is to update the
+    ///             service protocol list of available root isolates running in
+    ///             the VM and their names so that the appropriate isolate can
+    ///             be selected in the tools for debugging and instrumentation.
     ///
     /// @param[in]  isolate_name  The isolate name
     /// @param[in]  isolate_port  The isolate port
@@ -543,8 +544,8 @@ class Engine final : public RuntimeDelegate,
   ///             "main.dart", the entrypoint is "main" and the port name
   ///             "1234". Once launched, the isolate may re-christen itself
   ///             using a name it selects via `setIsolateDebugName` in
-  ///             `window.dart`. This name is purely advisory and only used by
-  ///             instrumentation and reporting purposes.
+  ///             `platform_dispatcher.dart`. This name is purely advisory and
+  ///             only used by instrumentation and reporting purposes.
   ///
   /// @return     The debug name of the root isolate.
   ///

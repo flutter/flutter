@@ -11,7 +11,8 @@
 
 namespace flutter {
 
-Window::Window(ViewportMetrics metrics) : viewport_metrics_(metrics) {
+Window::Window(int64_t window_id, ViewportMetrics metrics)
+    : window_id_(window_id), viewport_metrics_(metrics) {
   library_.Set(tonic::DartState::Current(),
                Dart_LookupLibrary(tonic::ToDart("dart:ui")));
 }
@@ -46,6 +47,7 @@ void Window::UpdateWindowMetrics(const ViewportMetrics& metrics) {
   tonic::LogIfError(tonic::DartInvokeField(
       library_.value(), "_updateWindowMetrics",
       {
+          tonic::ToDart(window_id_),
           tonic::ToDart(metrics.device_pixel_ratio),
           tonic::ToDart(metrics.physical_width),
           tonic::ToDart(metrics.physical_height),
