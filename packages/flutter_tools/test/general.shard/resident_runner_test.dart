@@ -509,8 +509,7 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
     expect(analyticsLogs, contains(
       'analytics: event {category: hot, action: exception, label: null, '
-      'value: null, cd27: android-arm, cd28: Example, cd29: false, cd30: false, cd47: false, '
-      'cd33: 2020-10-08 00:00:00.000 -0700}\n'));
+      'value: null, cd27: android-arm, cd28: Example, cd29: false, cd30: false, cd47: false'));
   }, overrides: <Type, Generator>{
     Usage: () => Usage.test(),
   }));
@@ -578,8 +577,7 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
     expect(analyticsLogs, contains(
       'analytics: event {category: hot, action: exception, label: null, value: null, '
-      'cd27: android-arm, cd28: Example, cd29: false, cd30: false, cd47: true, '
-      'cd33: 2020-10-08 00:00:00.000 -0700}\n'));
+      'cd27: android-arm, cd28: Example, cd29: false, cd30: false, cd47: true'));
   }, overrides: <Type, Generator>{
     Usage: () => Usage.test(),
   }));
@@ -851,7 +849,7 @@ void main() {
     expect(analyticsLogs, contains(
       'analytics: event {category: hot, action: reload, label: null, value: null, '
       'cd27: android-arm, cd28: Example, cd29: false, cd30: false, cd10: 0, cd11: 0,'
-      ' cd12: 12, cd13: 12, cd47: false, cd48: false, cd33: 2020-10-08 00:00:00.000 -0700}',
+      ' cd12: 12, cd13: 12, cd47: false, cd48: false',
     ));
     expect(analyticsLogs, contains(
       'analytics: timing {variableName: reload' // truncated due to stopwatch
@@ -1042,7 +1040,7 @@ void main() {
     expect(result.code, 0);
     expect(analyticsLogs, contains(
       'analytics: event {category: hot, action: restart, label: null, value: null, '
-      'cd27: android-arm, cd28: Example, cd29: false, cd30: true, cd47: false, '
+      'cd27: android-arm, cd28: Example, cd29: false, cd30: true, cd47: false,'
       'cd33: 2020-10-08 00:00:00.000 -0700}'
     ));
     expect(analyticsLogs, contains('analytics: timing {variableName: restart, ')); // truncated due to stopwatch usage
@@ -1305,8 +1303,7 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
     expect(analyticsLogs, contains(
       'analytics: event {category: hot, action: exception, label: null, value: null, '
-      'cd27: android-arm, cd28: Example, cd29: false, cd30: true, cd47: false, '
-      'cd33: 2020-10-08 00:00:00.000 -0700}\n'));
+      'cd27: android-arm, cd28: Example, cd29: false, cd30: true, cd47: false,'));
   }, overrides: <Type, Generator>{
     Usage: () => Usage.test(),
   }));
