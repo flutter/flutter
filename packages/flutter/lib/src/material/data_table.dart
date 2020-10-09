@@ -874,8 +874,10 @@ class DataTable extends StatelessWidget {
     );
     final bool anyRowSelectable = rows.any((DataRow row) => row.onSelectChanged != null);
     final bool displayCheckboxColumn = showCheckboxColumn && anyRowSelectable;
-    final bool allChecked = displayCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
-    final bool anyChecked = displayCheckboxColumn && rows.any((DataRow row) => row.onSelectChanged != null && row.selected);
+    final Iterable<DataRow> rowsChecked = displayCheckboxColumn ?
+      rows.where((DataRow row) => row.onSelectChanged != null && row.selected) : <DataRow>[];
+    final bool allChecked = displayCheckboxColumn && rowsChecked.length == rows.length;
+    final bool anyChecked = displayCheckboxColumn && rowsChecked.isNotEmpty;
     final bool someChecked = anyChecked && !allChecked;
     final double effectiveHorizontalMargin = horizontalMargin
       ?? theme.dataTableTheme.horizontalMargin
