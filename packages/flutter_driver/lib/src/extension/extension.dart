@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_driver/src/common/create_finder_factory.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -17,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../common/create_finder_factory.dart';
 import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
 import '../common/find.dart';
@@ -359,31 +359,21 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory 
 
   @override
   SerializableFinder deserializeFinder(Map<String, String> json) {
-    final SerializableFinder? standard = super.deserializeFinder(json);
-    if (standard != null) {
-      return standard;
-    }
-
     final String? finderType = json['finderType'];
     if (_finderExtensions.containsKey(finderType)) {
       return _finderExtensions[finderType]!.deserialize(json, this);
     }
 
-    throw DriverError('Unsupported search specification type $finderType');
+    return super.deserializeFinder(json);
   }
 
   @override
   Finder createFinder(SerializableFinder finder) {
-    final Finder? standard = super.createFinder(finder);
-    if(standard != null) {
-      return standard;
-    }
-
     if (_finderExtensions.containsKey(finder.finderType)) {
       return _finderExtensions[finder.finderType]!.createFinder(finder, this);
     }
 
-    throw DriverError('Unsupported search specification type ${finder.finderType}');
+    return super.createFinder(finder);
   }
 
   Future<TapResult> _tap(Command command) async {

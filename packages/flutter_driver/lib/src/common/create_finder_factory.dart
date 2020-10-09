@@ -7,13 +7,15 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
+import 'error.dart';
 import 'find.dart';
 
 /// A factory which creates [Finder]s from [SerializableFinder]s.
 mixin CreateFinderFactory {
   /// Creates the flutter widget finder from [SerializableFinder].
-  Finder? createFinder(SerializableFinder finder) {
-    switch (finder.finderType) {
+  Finder createFinder(SerializableFinder finder) {
+    final String finderType = finder.finderType;
+    switch (finderType) {
       case 'ByText':
         return _createByTextFinder(finder as ByText);
       case 'ByTooltipMessage':
@@ -31,7 +33,7 @@ mixin CreateFinderFactory {
       case 'Descendant':
         return _createDescendantFinder(finder as Descendant);
       default:
-        return null;
+        throw DriverError('Unsupported search specification type $finderType');
     }
   }
 
@@ -97,8 +99,8 @@ mixin CreateFinderFactory {
 
   Finder _createAncestorFinder(Ancestor arguments) {
     final Finder finder = find.ancestor(
-      of: createFinder(arguments.of)!,
-      matching: createFinder(arguments.matching)!,
+      of: createFinder(arguments.of),
+      matching: createFinder(arguments.matching),
       matchRoot: arguments.matchRoot,
     );
     return arguments.firstMatchOnly ? finder.first : finder;
@@ -106,8 +108,8 @@ mixin CreateFinderFactory {
 
   Finder _createDescendantFinder(Descendant arguments) {
     final Finder finder = find.descendant(
-      of: createFinder(arguments.of)!,
-      matching: createFinder(arguments.matching)!,
+      of: createFinder(arguments.of),
+      matching: createFinder(arguments.matching),
       matchRoot: arguments.matchRoot,
     );
     return arguments.firstMatchOnly ? finder.first : finder;
