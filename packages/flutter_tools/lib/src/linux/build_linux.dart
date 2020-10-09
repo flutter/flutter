@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/io.dart';
+
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
@@ -104,7 +106,10 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
       },
       trace: true,
     );
-  } on ArgumentError {
+  } on ProcessException catch (err) {
+    if (!isMissingExecutableException(err)) {
+      rethrow;
+    }
     throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
   }
   if (result != 0) {
@@ -131,7 +136,10 @@ Future<void> _runBuild(Directory buildDir) async {
       },
       trace: true,
     );
-  } on ArgumentError {
+  } on ProcessException catch (err) {
+    if (!isMissingExecutableException(err)) {
+      rethrow;
+    }
     throwToolExit("ninja not found. Run 'flutter doctor' for more information.");
   }
   if (result != 0) {

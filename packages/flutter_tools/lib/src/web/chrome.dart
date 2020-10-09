@@ -150,11 +150,7 @@ class ChromiumLauncher {
   /// Whether we can locate the chrome executable.
   bool canFindExecutable() {
     final String chrome = _browserFinder(_platform, _fileSystem);
-    try {
-      return _processManager.canRun(chrome);
-    } on ArgumentError {
-      return false;
-    }
+    return _processManager.canRun(chrome);
   }
 
   /// The executable this launcher will use.
