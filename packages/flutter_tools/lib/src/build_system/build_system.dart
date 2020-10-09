@@ -10,6 +10,7 @@ import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -160,9 +161,7 @@ abstract class Target {
   /// Invoke to remove the stamp file if the [buildAction] threw an exception.
   void clearStamp(Environment environment) {
     final File stamp = _findStampFile(environment);
-    if (stamp.existsSync()) {
-      stamp.deleteSync();
-    }
+    ErrorHandlingFileSystem.deleteIfExists(stamp);
   }
 
   void _writeStamp(
@@ -697,9 +696,7 @@ class FlutterBuildSystem extends BuildSystem {
     for (final String lastOutput in lastOutputs) {
       if (!currentOutputs.containsKey(lastOutput)) {
         final File lastOutputFile = fileSystem.file(lastOutput);
-        if (lastOutputFile.existsSync()) {
-          lastOutputFile.deleteSync();
-        }
+        ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
       }
     }
   }
@@ -820,9 +817,7 @@ class _BuildInstance {
           continue;
         }
         final File previousFile = fileSystem.file(previousOutput);
-        if (previousFile.existsSync()) {
-          previousFile.deleteSync();
-        }
+        ErrorHandlingFileSystem.deleteIfExists(previousFile);
       }
     } on Exception catch (exception, stackTrace) {
       // TODO(jonahwilliams): throw specific exception for expected errors to mark

@@ -29,7 +29,7 @@ void main() {
 
   OperatingSystemUtils createOSUtils(Platform platform) {
     return OperatingSystemUtils(
-      fileSystem: MemoryFileSystem(),
+      fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: platform,
       processManager: mockProcessManager,
@@ -140,6 +140,55 @@ void main() {
     expect(
       () => osUtils.unzip(mockFile, mockDirectory),
       throwsProcessException(message: exceptionMessage),
+    );
+  });
+
+  testWithoutContext('If unzip throws an ArgumentError, display an install message', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    when(mockProcessManager.runSync(
+      <String>['unzip', '-o', '-q', 'foo.zip', '-d', fileSystem.currentDirectory.path],
+    )).thenThrow(ArgumentError());
+
+    final OperatingSystemUtils linuxOsUtils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'linux'),
+      processManager: mockProcessManager,
+    );
+
+    expect(
+      () => linuxOsUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+      throwsToolExit(
+        message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
+        'Consider running "sudo apt-get install unzip".'),
+    );
+
+    final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'macos'),
+      processManager: mockProcessManager,
+    );
+
+    expect(
+      () => macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+      throwsToolExit
+      (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
+        'Consider running "brew install unzip".'),
+    );
+
+    final OperatingSystemUtils unknownOsUtils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'fuchsia'),
+      processManager: mockProcessManager,
+    );
+
+    expect(
+      () => unknownOsUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+      throwsToolExit
+      (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
+        'Please install unzip.'),
     );
   });
 

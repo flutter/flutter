@@ -17,15 +17,7 @@ import 'package:process/process.dart';
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
-const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
-
-/// Enum representing the supported CI environments used by flutter/flutter.
-enum ContinuousIntegrationEnvironment {
-  luci,
-  cirrus,
-  none,
-}
 
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
@@ -35,7 +27,6 @@ class SkiaGoldClient {
     this.fs = const LocalFileSystem(),
     this.process = const LocalProcessManager(),
     this.platform = const LocalPlatform(),
-    required this.ci,
     io.HttpClient? httpClient,
   }) : httpClient = httpClient ?? io.HttpClient();
 
@@ -58,9 +49,6 @@ class SkiaGoldClient {
   /// sub-processes.
   final ProcessManager process;
 
-  /// What testing environment we may be in, like Cirrus or Luci.
-  final ContinuousIntegrationEnvironment ci;
-
   /// A client for making Http requests to the Flutter Gold dashboard.
   final io.HttpClient httpClient;
 
@@ -82,12 +70,6 @@ class SkiaGoldClient {
   /// Uses the [platform] environment in this implementation.
   String get _goldctl => platform.environment[_kGoldctlKey]!;
 
-  /// The path to the local [Directory] where the service account key is
-  /// hosted.
-  ///
-  /// Uses the [platform] environment in this implementation.
-  String get _serviceAccount => platform.environment[_kServiceAccountKey]!;
-
   /// Prepares the local work space for golden file testing and calls the
   /// goldctl `auth` command.
   ///
@@ -101,81 +83,12 @@ class SkiaGoldClient {
   Future<void> auth() async {
     if (await clientIsAuthorized())
       return;
-
-    List<String> authArguments;
-    String failureContext;
-
-    switch (ci) {
-      case ContinuousIntegrationEnvironment.luci:
-        authArguments = <String>[
-          'auth',
-          '--work-dir', workDirectory
-            .childDirectory('temp')
-            .path,
-          '--luci',
-        ];
-        failureContext =
-        'Luci environments authenticate using the file provided '
-          'by LUCI_CONTEXT. There may be an error with this file or Gold '
-          'authentication.';
-        break;
-      case ContinuousIntegrationEnvironment.cirrus:
-        if (_serviceAccount.isEmpty) {
-          final StringBuffer buf = StringBuffer()
-            ..writeln('The Gold service account is unavailable.')..writeln(
-              'Without a service account, Gold can not be authorized.')..writeln(
-              'Please check your user permissions and current comparator.');
-          throw Exception(buf.toString());
-        }
-
-        final File authorization = workDirectory.childFile('serviceAccount.json');
-        await authorization.writeAsString(_serviceAccount);
-        authArguments = <String>[
-          'auth',
-          '--service-account', authorization.path,
-          '--work-dir', workDirectory
-            .childDirectory('temp')
-            .path,
-        ];
-        failureContext = 'This could be caused by incorrect user permissions on '
-          'Cirrus, if the debug information below contains ENCRYPTED, the wrong '
-          'comparator was chosen for the test case.';
-        break;
-      case ContinuousIntegrationEnvironment.none:
-        return;
-    }
-
-    final io.ProcessResult result = await io.Process.run(
-      _goldctl,
-      authArguments,
-    );
-
-    if (result.exitCode != 0) {
-      final StringBuffer buf = StringBuffer()
-        ..writeln('Skia Gold authorization failed.')
-        ..writeln(failureContext)
-        ..writeln('Debug information for Gold:')
-        ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}');
-      throw Exception(buf.toString());
-    }
-  }
-
-  /// Prepares the local work space for an unauthorized client to lookup golden
-  /// file expectations using [imgtestCheck].
-  ///
-  /// It will only be called once for each instance of an
-  /// [_UnauthorizedFlutterPreSubmitComparator].
-  Future<void> emptyAuth() async {
-    // We only use emptyAuth when the service account cannot be decrypted on
-    // Cirrus.
-    assert(ci == ContinuousIntegrationEnvironment.cirrus);
-
     final List<String> authArguments = <String>[
       'auth',
       '--work-dir', workDirectory
         .childDirectory('temp')
         .path,
+      '--luci',
     ];
 
     final io.ProcessResult result = await io.Process.run(
@@ -185,8 +98,10 @@ class SkiaGoldClient {
 
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
-        ..writeln('Skia Gold emptyAuth failed.')
-        ..writeln()
+        ..writeln('Skia Gold authorization failed.')
+        ..writeln('Luci environments authenticate using the file provided '
+          'by LUCI_CONTEXT. There may be an error with this file or Gold '
+          'authentication.')
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
@@ -306,9 +221,8 @@ class SkiaGoldClient {
       '--passfail',
       '--crs', 'github',
       '--patchset_id', commitHash,
+      ...getCIArguments(),
     ];
-
-    imgtestInitArguments.addAll(getCIArguments());
 
     if (imgtestInitArguments.contains(null)) {
       final StringBuffer buf = StringBuffer()
@@ -558,10 +472,12 @@ class SkiaGoldClient {
   String _getKeysJSON() {
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
-      'CI' : ci.toString().split('.').last,
+      'CI' : 'luci',
     };
-    if (platform.environment[_kTestBrowserKey] != null)
+    if (platform.environment[_kTestBrowserKey] != null) {
       keys['Browser'] = platform.environment[_kTestBrowserKey];
+      keys['Platform'] = keys['Platform'] + '-browser';
+    }
     return json.encode(keys);
   }
 
@@ -590,29 +506,13 @@ class SkiaGoldClient {
   /// Returns a list of arguments for initializing a tryjob based on the testing
   /// environment.
   List<String> getCIArguments() {
-    String pullRequest;
-    String jobId;
-    String cis;
-
-    switch (ci) {
-      case ContinuousIntegrationEnvironment.luci:
-        jobId = platform.environment['LOGDOG_STREAM_PREFIX']!.split('/').last;
-        final List<String> refs = platform.environment['GOLD_TRYJOB']!.split('/');
-        pullRequest = refs[refs.length - 2];
-        cis = 'buildbucket';
-        break;
-      case ContinuousIntegrationEnvironment.cirrus:
-        pullRequest = platform.environment['CIRRUS_PR']!;
-        jobId = platform.environment['CIRRUS_TASK_ID']!;
-        cis = 'cirrus';
-        break;
-      case ContinuousIntegrationEnvironment.none:
-        return <String>[];
-    }
+    final String jobId = platform.environment['LOGDOG_STREAM_PREFIX']!.split('/').last;
+    final List<String> refs = platform.environment['GOLD_TRYJOB']!.split('/');
+    final String pullRequest = refs[refs.length - 2];
 
     return <String>[
       '--changelist', pullRequest,
-      '--cis', cis,
+      '--cis', 'buildbucket',
       '--jobid', jobId,
     ];
   }
@@ -627,14 +527,12 @@ class SkiaGoldClient {
   /// Example TraceID for Flutter Gold:
   ///   ',CI=cirrus,Platform=linux,name=cupertino.activityIndicator.inprogress.1.0,source_type=flutter,'
   String getTraceID(String testName) {
-    // If we are not in a CI environment, fallback on luci.
     return '${platform.environment[_kTestBrowserKey] == null ? ',' : ',Browser=${platform.environment[_kTestBrowserKey]},'}'
-      'CI=${ci == ContinuousIntegrationEnvironment.none ? 'luci' : ci.toString().split('.').last},'
+      'CI=luci,'
       'Platform=${platform.operatingSystem},'
       'name=$testName,'
       'source_type=flutter,';
   }
-
 }
 
 /// Used to make HttpRequests during testing.

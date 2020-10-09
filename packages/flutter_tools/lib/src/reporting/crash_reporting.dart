@@ -188,7 +188,7 @@ class CrashReportSender {
     // Catch all exceptions to print the message that makes clear that the
     // crash logger crashed.
     } catch (sendError, sendStackTrace) { // ignore: avoid_catches_without_on_clauses
-      if (sendError is SocketException || sendError is HttpException) {
+      if (sendError is SocketException || sendError is HttpException || sendError is http.ClientException) {
         _logger.printError('Failed to send crash report due to a network error: $sendError');
       } else {
         // If the sender itself crashes, just print. We did our best.

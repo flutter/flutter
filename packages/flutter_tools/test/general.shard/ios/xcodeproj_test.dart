@@ -33,7 +33,7 @@ void main() {
     setUp(() {
       processManager = mocks.MockProcessManager();
       platform = FakePlatform(operatingSystem: 'macos');
-      final FileSystem fileSystem = MemoryFileSystem();
+      final FileSystem fileSystem = MemoryFileSystem.test();
       fileSystem.file(xcodebuild).createSync(recursive: true);
       final AnsiTerminal terminal = MockAnsiTerminal();
       logger = BufferLogger.test(
@@ -85,7 +85,7 @@ void main() {
   setUp(() {
     fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
     platform = FakePlatform(operatingSystem: 'macos');
-    fileSystem = MemoryFileSystem();
+    fileSystem = MemoryFileSystem.test();
     fileSystem.file(xcodebuild).createSync(recursive: true);
     terminal = MockAnsiTerminal();
     logger = BufferLogger.test(
@@ -534,7 +534,7 @@ Information about project "Runner":
     FileSystem fs;
 
     setUp(() {
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
       mockArtifacts = MockLocalEngineArtifacts();
       macOS = FakePlatform(operatingSystem: 'macos');
       fs.file(xcodebuild).createSync(recursive: true);

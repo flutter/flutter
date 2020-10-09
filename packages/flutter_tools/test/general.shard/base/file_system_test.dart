@@ -21,7 +21,7 @@ void main() {
     FileSystemUtils fsUtils;
 
     setUp(() {
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
       fsUtils = FileSystemUtils(
         fileSystem: fs,
         platform: FakePlatform(),
@@ -61,7 +61,7 @@ void main() {
     /// Test file_systems.copyDirectorySync() using MemoryFileSystem.
     /// Copies between 2 instances of file systems which is also supported by copyDirectorySync().
     testWithoutContext('test directory copy', () async {
-      final MemoryFileSystem sourceMemoryFs = MemoryFileSystem();
+      final MemoryFileSystem sourceMemoryFs = MemoryFileSystem.test();
       const String sourcePath = '/some/origin';
       final Directory sourceDirectory = await sourceMemoryFs.directory(sourcePath).create(recursive: true);
       sourceMemoryFs.currentDirectory = sourcePath;
@@ -71,7 +71,7 @@ void main() {
       sourceMemoryFs.directory('empty_directory').createSync();
 
       // Copy to another memory file system instance.
-      final MemoryFileSystem targetMemoryFs = MemoryFileSystem();
+      final MemoryFileSystem targetMemoryFs = MemoryFileSystem.test();
       const String targetPath = '/some/non-existent/target';
       final Directory targetDirectory = targetMemoryFs.directory(targetPath);
 
@@ -94,7 +94,7 @@ void main() {
     });
 
     testWithoutContext('Skip files if shouldCopyFile returns false', () {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final FileSystemUtils fsUtils = FileSystemUtils(
         fileSystem: fileSystem,
         platform: FakePlatform(),
@@ -122,7 +122,7 @@ void main() {
 
   group('escapePath', () {
     testWithoutContext('on Windows', () {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final FileSystemUtils fsUtils = FileSystemUtils(
         fileSystem: fileSystem,
         platform: FakePlatform(operatingSystem: 'windows'),
@@ -133,7 +133,7 @@ void main() {
     });
 
     testWithoutContext('on Linux', () {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final FileSystemUtils fsUtils = FileSystemUtils(
         fileSystem: fileSystem,
         platform: FakePlatform(operatingSystem: 'linux'),
@@ -180,3 +180,4 @@ void main() {
 }
 
 class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
+class MockFile extends Mock implements File {}

@@ -475,6 +475,7 @@ void main() {
           checked: true,
           selected: true,
           button: true,
+          slider: true,
           link: true,
           textField: true,
           readOnly: true,
