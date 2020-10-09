@@ -10,7 +10,7 @@ dependencies:
   crypto: 2.1.5
   flutter_devicelab:
     path: ../devicelab
-  googleapis: 0.56.0
+  googleapis: 0.56.1
   googleapis_auth: 0.2.12
   http: 0.12.2
   http_parser: 3.1.4
@@ -76,4 +76,4 @@ dev_dependencies:
   mockito: 4.1.1
   test_api: 0.2.19-nullsafety.2
 
-# PUBSPEC CHECKSUM: fc6e
+# PUBSPEC CHECKSUM: 4c6f
