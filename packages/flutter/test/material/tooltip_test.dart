@@ -39,7 +39,17 @@ Finder _findTooltipContainer(String tooltipText) {
   );
 }
 
+Bar<T> foo<T extends Object>() {
+  return Bar<void>() as Bar<T>;
+}
+
+class Bar<T> {}
+
 void main() {
+  test('foo', () {
+    print(foo());
+  });
+
   testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
@@ -836,7 +846,7 @@ void main() {
       if (gesture != null)
         return gesture.removePointer();
     });
-    await gesture!.addPointer();
+    await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
     await tester.pump();
     await gesture.moveTo(Offset.zero);
