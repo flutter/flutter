@@ -564,10 +564,7 @@ class _FloatingOptions<T> extends StatelessWidget {
       child: CompositedTransformFollower(
         link: layerLink,
         showWhenUnlinked: false,
-        offset: Offset(
-          0.0,
-          fieldSize.height,
-        ),
+        targetAnchor: Alignment.bottomLeft,
         child: optionsBuilder(context, onSelected, options),
       ),
     );
