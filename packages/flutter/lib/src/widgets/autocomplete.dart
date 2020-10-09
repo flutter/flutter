@@ -35,12 +35,12 @@ typedef AutocompleteFieldBuilder = Widget Function(
   VoidCallback onFieldSubmitted,
 );
 
-// A type for getting a String from some option.
+/// A type for getting a String from some option.
 typedef AutocompleteOptionToString<T> = String Function(T option);
 
-// TODO(justinmc): Link to Autocomplete and AutocompleteCupertino when they are
+// TODO(justinmc): Mention Autocomplete and AutocompleteCupertino when they are
 // implemented.
-/// A widget for helping the user to make a selection by entering some text and
+/// A widget for helping the user make a selection by entering some text and
 /// choosing from among a list of options.
 ///
 /// This is a core framework widget with very basic UI. Try using Autocomplete
@@ -367,11 +367,10 @@ class AutocompleteCore<T> extends StatefulWidget {
     required this.fieldBuilder,
     required this.optionsBuilder,
     required this.buildOptions,
-    AutocompleteOptionToString<T>? displayStringForOption,
+    this.displayStringForOption = _defaultStringForOption,
     this.onSelected,
   }) : assert(fieldBuilder != null),
-       assert(optionsBuilder != null),
-       displayStringForOption = displayStringForOption ?? _defaultStringForOption;
+       assert(optionsBuilder != null);
 
   /// Builds the field whose input is used to get the options.
   final AutocompleteFieldBuilder fieldBuilder;
@@ -388,6 +387,10 @@ class AutocompleteCore<T> extends StatefulWidget {
   final AutocompleteOptionToString<T> displayStringForOption;
 
   /// Called when an option is selected by the user.
+  ///
+  /// [TextEditingController.onChanged] will not be called when the user selects
+  /// an option, even though the field will update with the selected value, so
+  /// use this to be informed of selection.
   final AutocompleteOnSelected<T>? onSelected;
 
   /// A function that returns the current selectable options objects given the
@@ -395,7 +398,7 @@ class AutocompleteCore<T> extends StatefulWidget {
   final AutocompleteBuildOptions<T> buildOptions;
 
   // The default way to convert an option to a string.
-  static String _defaultStringForOption<T>(T option) {
+  static String _defaultStringForOption(dynamic option) {
     return option.toString();
   }
 
@@ -418,7 +421,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     final TextSelection selection = _textEditingController.selection;
     final bool fieldIsFocused = selection.baseOffset >= 0
         && selection.extentOffset >= 0;
-    final bool hasOptions = _options != null && _options.isNotEmpty;
+    final bool hasOptions = _options.isNotEmpty;
     return fieldIsFocused && _selection == null && hasOptions;
   }
 
@@ -472,7 +475,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     if (_shouldShowOptions) {
       final RenderBox renderBox = context.findRenderObject() as RenderBox;
       _floatingOptions?.remove();
-      _floatingOptions= OverlayEntry(
+      _floatingOptions = OverlayEntry(
         builder: (BuildContext context) {
           return _FloatingOptions<T>(
             optionsBuilder: widget.optionsBuilder,
