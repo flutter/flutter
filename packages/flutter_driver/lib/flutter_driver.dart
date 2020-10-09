@@ -13,7 +13,6 @@
 /// Protractor (Angular), Espresso (Android) or Earl Gray (iOS).
 library flutter_driver;
 
-export 'src/common/create_finder_factory.dart';
 export 'src/common/diagnostics_tree.dart';
 export 'src/common/enum_util.dart';
 export 'src/common/error.dart';
