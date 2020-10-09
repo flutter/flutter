@@ -485,20 +485,21 @@ class DevFS {
     int syncedBytes = 0;
     if (bundle != null) {
       final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
-      // We write the assets into the AssetBundle working dir so that they
+      // The tool writes the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
       final String assetDirectory = getAssetBuildDirectory();
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        if (content.isModified && !bundleFirstUpload) {
-          final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
-          if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
-            archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-          }
-          dirtyEntries[deviceUri] = content;
-          syncedBytes += content.size;
-          if (archivePath != null && !bundleFirstUpload) {
-            assetPathsToEvict.add(archivePath);
-          }
+        if (!content.isModified || bundleFirstUpload) {
+          return;
+        }
+        final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
+        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
+          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+        }
+        dirtyEntries[deviceUri] = content;
+        syncedBytes += content.size;
+        if (archivePath != null && !bundleFirstUpload) {
+          assetPathsToEvict.add(archivePath);
         }
       });
     }
