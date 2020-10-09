@@ -490,7 +490,7 @@ class AlertDialog extends StatelessWidget {
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6,
           child: Semantics(
             child: title,
-            namesRoute: label == null,
+            namesRoute: false, // No need to announce the route since the title of the alert has the same text.
             container: true,
           ),
         ),
