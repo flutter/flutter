@@ -11,11 +11,12 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'overlay.dart';
 
+// TODO(justinmc): Rename AutocompleteBuildOptions? And others below.
 /// A type for getting a list of options based on a String.
 ///
 /// See also:
 ///   * [AutocompleteCore.optionsBuilder], which is of this type.
-typedef AutocompleteBuildOptions<T> = List<T> Function(TextEditingValue textEditingValue);
+typedef AutocompleteBuildOptions<T> = Iterable<T> Function(TextEditingValue textEditingValue);
 
 /// A type for indicating the selection of an autocomplete option.
 typedef AutocompleteOnSelected<T> = void Function(T? option);
@@ -25,7 +26,7 @@ typedef AutocompleteOnSelected<T> = void Function(T? option);
 typedef AutocompleteOptionsBuilder<T> = Widget Function(
   BuildContext context,
   AutocompleteOnSelected<T> onSelected,
-  List<T> options,
+  Iterable<T> options,
 );
 
 /// A builder for the field in autocomplete.
@@ -71,7 +72,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///       optionsBuilder: (TextEditingValue textEditingValue) {
 ///         return _kOptions.where((String option) {
 ///           return option.contains(textEditingValue.text.toLowerCase());
-///         }).toList();
+///         });
 ///       },
 ///       fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
 ///         return TextFormField(
@@ -81,7 +82,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///           },
 ///         );
 ///       },
-///       optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
+///       optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
 ///         return Material(
 ///           elevation: 4.0,
 ///           child: Container(
@@ -90,7 +91,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///               padding: EdgeInsets.all(8.0),
 ///               itemCount: options.length,
 ///               itemBuilder: (BuildContext context, int index) {
-///                 final String option = options[index];
+///                 final String option = options.elementAt(index);
 ///                 return GestureDetector(
 ///                   onTap: () {
 ///                     onSelected(option);
@@ -155,7 +156,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///       optionsBuilder: (TextEditingValue textEditingValue) {
 ///         return _kUserOptions.where((User option) {
 ///           return option.toString().contains(textEditingValue.text.toLowerCase());
-///         }).toList();
+///         });
 ///       },
 ///       displayStringForOption: _displayStringForOption,
 ///       fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
@@ -166,7 +167,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///           },
 ///         );
 ///       },
-///       optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> options) {
+///       optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
 ///         return SizedBox(
 ///           height: 200.0,
 ///           child: Material(
@@ -272,7 +273,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///                 optionsBuilder: (TextEditingValue textEditingValue) {
 ///                   return _kOptions.where((String option) {
 ///                     return option.contains(textEditingValue.text.toLowerCase());
-///                   }).toList();
+///                   });
 ///                 },
 ///                 onSelected: (String selection) {
 ///                   setState(() {
@@ -296,7 +297,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///                     },
 ///                   );
 ///                 },
-///                 optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
+///                 optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
 ///                   return Material(
 ///                     elevation: 4.0,
 ///                     child: SizedBox(
@@ -410,7 +411,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
   final TextEditingController _textEditingController = TextEditingController();
-  List<T> _options = <T>[];
+  Iterable<T> _options = Iterable<T>.empty();
   T? _selection;
 
   // The OverlayEntry containing the options.
@@ -427,7 +428,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 
   // Called when _textEditingController changes.
   void _onChangedField() {
-    final List<T> options = widget.optionsBuilder(
+    final Iterable<T> options = widget.optionsBuilder(
       _textEditingController.value,
     );
     assert(options != null);
@@ -449,7 +450,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     if (_options.isEmpty) {
       return;
     }
-    _select(_options[0]);
+    _select(_options.first);
   }
 
   // Select the given option and update the widget.
@@ -473,7 +474,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   // Hide or show the options overlay, if needed.
   void _updateOverlay() {
     if (_shouldShowOptions) {
-      final RenderBox renderBox = context.findRenderObject() as RenderBox;
+      final RenderBox renderBox = context.findRenderObject()! as RenderBox;
       _floatingOptions?.remove();
       _floatingOptions = OverlayEntry(
         builder: (BuildContext context) {
@@ -555,7 +556,7 @@ class _FloatingOptions<T> extends StatelessWidget {
   final Size fieldSize;
   final LayerLink layerLink;
   final AutocompleteOnSelected<T> onSelected;
-  final List<T> options;
+  final Iterable<T> options;
 
   @override
   Widget build(BuildContext context) {
