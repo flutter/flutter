@@ -11,32 +11,43 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'overlay.dart';
 
-// TODO(justinmc): Rename AutocompleteBuildOptions? And others below.
 /// A type for getting a list of options based on a String.
 ///
 /// See also:
 ///   * [AutocompleteCore.optionsBuilder], which is of this type.
-typedef AutocompleteBuildOptions<T> = Iterable<T> Function(TextEditingValue textEditingValue);
+typedef AutocompleteOptionsBuilder<T> = Iterable<T> Function(TextEditingValue textEditingValue);
 
 /// A type for indicating the selection of an autocomplete option.
+///
+/// See also:
+///   * [AutocompleteCore.onSelected], which is of this type.
 typedef AutocompleteOnSelected<T> = void Function(T? option);
 
 /// A builder for the selectable options given the current autocomplete field
 /// value.
-typedef AutocompleteOptionsBuilder<T> = Widget Function(
+///
+/// See also:
+///   * [AutocompleteCore.optionsViewBuilder], which is of this type.
+typedef AutocompleteOptionsViewBuilder<T> = Widget Function(
   BuildContext context,
   AutocompleteOnSelected<T> onSelected,
   Iterable<T> options,
 );
 
 /// A builder for the field in autocomplete.
-typedef AutocompleteFieldBuilder = Widget Function(
+///
+/// See also:
+///   * [AutocompleteCore.optionsFieldBuilder], which is of this type.
+typedef AutocompleteFieldViewBuilder = Widget Function(
   BuildContext context,
   TextEditingController textEditingController,
   VoidCallback onFieldSubmitted,
 );
 
 /// A type for getting a String from some option.
+///
+/// See also:
+///   * [AutocompleteCore.displayStringForOption], which is of this type.
 typedef AutocompleteOptionToString<T> = String Function(T option);
 
 // TODO(justinmc): Mention Autocomplete and AutocompleteCupertino when they are
@@ -374,10 +385,10 @@ class AutocompleteCore<T> extends StatefulWidget {
        assert(optionsViewBuilder != null);
 
   /// Builds the field whose input is used to get the options.
-  final AutocompleteFieldBuilder fieldViewBuilder;
+  final AutocompleteFieldViewBuilder fieldViewBuilder;
 
   /// Builds the selectable options widgets from a list of options objects.
-  final AutocompleteOptionsBuilder<T> optionsViewBuilder;
+  final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
 
   /// Returns the string to display in the field when the option is selected.
   ///
@@ -396,7 +407,7 @@ class AutocompleteCore<T> extends StatefulWidget {
 
   /// A function that returns the current selectable options objects given the
   /// current TextEditingValue.
-  final AutocompleteBuildOptions<T> optionsBuilder;
+  final AutocompleteOptionsBuilder<T> optionsBuilder;
 
   // The default way to convert an option to a string.
   static String _defaultStringForOption(dynamic option) {
@@ -552,7 +563,7 @@ class _FloatingOptions<T> extends StatelessWidget {
        assert(options != null),
        super(key: key);
 
-  final AutocompleteOptionsBuilder<T> optionsViewBuilder;
+  final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
   final Size fieldSize;
   final LayerLink layerLink;
   final AutocompleteOnSelected<T> onSelected;
