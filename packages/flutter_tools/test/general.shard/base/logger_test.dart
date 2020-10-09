@@ -5,13 +5,13 @@
 import 'dart:async';
 import 'dart:convert' show jsonEncode;
 
-import 'package:collection/collection.dart' show ListEquality, MapEquality;
 import 'package:flutter_tools/executable.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:matcher/matcher.dart';
 import 'package:mockito/mockito.dart';
 import 'package:fake_async/fake_async.dart';
 
@@ -1214,20 +1214,6 @@ class FakeLogger implements Logger {
   dynamic noSuchMethod(Invocation invocation) => throw invocation;
 }
 
-/// Returns whether two [Invocation]s should be considered equal.
-bool _invocationsEqual(Invocation invocation1, Invocation invocation2) {
-  const ListEquality<dynamic> listEquality = ListEquality<dynamic>();
-  const MapEquality<Symbol, dynamic> mapEquality = MapEquality<Symbol, dynamic>();
-
-  return invocation1.memberName == invocation2.memberName
-      && invocation1.isGetter == invocation2.isGetter
-      && invocation1.isSetter == invocation2.isSetter
-      && invocation1.isMethod == invocation2.isMethod
-      && listEquality.equals(invocation1.typeArguments, invocation2.typeArguments)
-      && listEquality.equals(invocation1.positionalArguments, invocation2.positionalArguments)
-      && mapEquality.equals(invocation1.namedArguments, invocation2.namedArguments);
- }
-
 /// Returns the [Invocation] thrown from a call to [FakeLogger].
 Invocation _invocationFor(dynamic Function() fakeCall) {
   try {
@@ -1241,10 +1227,15 @@ Invocation _invocationFor(dynamic Function() fakeCall) {
 
 /// Returns a [Matcher] that matches against an expected [Invocation].
 Matcher _matchesInvocation(Invocation expected) {
-  return predicate<dynamic>(
-    (dynamic actual) => actual is Invocation && _invocationsEqual(actual, expected),
-    'an Invocation of ${expected.memberName}',
-  );
+  return const TypeMatcher<Invocation>()
+    // Compare Symbol strings instead of comparing Symbols directly for a nicer failure message.
+    .having((Invocation actual) => actual.memberName.toString(), 'memberName', expected.memberName.toString())
+    .having((Invocation actual) => actual.isGetter, 'isGetter', expected.isGetter)
+    .having((Invocation actual) => actual.isSetter, 'isSetter', expected.isSetter)
+    .having((Invocation actual) => actual.isMethod, 'isMethod', expected.isMethod)
+    .having((Invocation actual) => actual.typeArguments, 'typeArguments', expected.typeArguments)
+    .having((Invocation actual) => actual.positionalArguments, 'positionalArguments', expected.positionalArguments)
+    .having((Invocation actual) => actual.namedArguments, 'namedArguments', expected.namedArguments);
 }
 
 /// Returns a [Matcher] that matches against an [Invocation] thrown from a call
