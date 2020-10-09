@@ -192,17 +192,6 @@ task:
         - cd ../../../examples/hello_world/
         - flutter drive --target=test_driver/smoke_web_engine.dart -d web-server --profile --browser-name=chrome
 
-    - name: deploy_gallery-linux # linux- and macos- only
-      # Do not add more tasks here. Nothing is currently deployed from master branch, so it is safe to run
-      # even if a test has failed. The behavior of failing dependencies is non-ideal for infra health.
-      # See also: https://github.com/flutter/flutter/pull/49454
-      depends_on:
-        - analyze-linux
-      # As of October 2019, 1 CPU and 4G of RAM let deploy_gallery-linux finish in about 15
-      # minutes, once it got started.
-      script:
-        - ./dev/bots/deploy_gallery.sh
-
 # MACOS SHARDS
 # Mac doesn't use caches because they apparently take longer to populate and save
 # than just fetching the data in the first place.
@@ -239,16 +228,6 @@ task:
       - which flutter
   matrix:
     # TODO(ianh): Enable Web tests on macOS.
-
-    - name: deploy_gallery-macos # linux- and macos- only
-      # Do not add more tasks here. Nothing is currently deployed from master branch, so it is safe to run
-      # even if a test has failed. The behavior of failing dependencies is non-ideal for infra health.
-      # See also: https://github.com/flutter/flutter/pull/49454
-      depends_on:
-        - analyze-linux
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - ./dev/bots/deploy_gallery.sh
 
     - name: verify_binaries_codesigned-macos # macos-only
       # TODO(fujino): remove this `only_if` after https://github.com/flutter/flutter/issues/44372
