@@ -108,19 +108,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///  * [SystemChrome.setSystemUIOverlayStyle], for imperatively setting the system ui style.
   bool automaticSystemUiAdjustment = true;
 
-  /// Bootstrap the rendering pipeline by scheduling the first frame.
-  ///
-  /// Deprecated. Call [prepareInitialFrame] followed by a call to
-  /// [PipelineOwner.requestVisualUpdate] on [owner] instead.
-  @Deprecated(
-    'Call prepareInitialFrame followed by owner.requestVisualUpdate() instead. '
-    'This feature was deprecated after v1.10.0.'
-  )
-  void scheduleInitialFrame() {
-    prepareInitialFrame();
-    owner!.requestVisualUpdate();
-  }
-
   /// Bootstrap the rendering pipeline by preparing the first frame.
   ///
   /// This should only be called once, and must be called before changing

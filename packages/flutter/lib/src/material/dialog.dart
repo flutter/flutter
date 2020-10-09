@@ -957,21 +957,14 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///  * <https://material.io/design/components/dialogs.html>
 Future<T> showDialog<T>({
   required BuildContext context,
-  WidgetBuilder? builder,
+  required WidgetBuilder builder,
   bool barrierDismissible = true,
   Color? barrierColor,
   bool useSafeArea = true,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
-  @Deprecated(
-    'Instead of using the "child" argument, return the child from a closure '
-    'provided to the "builder" argument. This will ensure that the BuildContext '
-    'is appropriate for widgets built in the dialog. '
-    'This feature was deprecated after v0.2.3.'
-  )
-  Widget? child,
 }) {
-  assert(child == null || builder == null);
+  assert(builder != null);
   assert(barrierDismissible != null);
   assert(useSafeArea != null);
   assert(useRootNavigator != null);
@@ -981,7 +974,7 @@ Future<T> showDialog<T>({
   return showGeneralDialog(
     context: context,
     pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
-      final Widget pageChild = child ?? Builder(builder: builder!);
+      final Widget pageChild = Builder(builder: builder);
       Widget dialog = Builder(
         builder: (BuildContext context) {
           return theme != null

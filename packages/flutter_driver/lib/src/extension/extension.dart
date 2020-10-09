@@ -305,16 +305,6 @@ class FlutterDriverExtension with DeserializeFinderFactory {
     return RenderTree(RendererBinding.instance?.renderView.toStringDeep());
   }
 
-  // This can be used to wait for the first frame being rasterized during app launch.
-  @Deprecated(
-    'This method has been deprecated in favor of _waitForCondition. '
-    'This feature was deprecated after v1.9.3.'
-  )
-  Future<Result?> _waitUntilFirstFrameRasterized(Command command) async {
-    await WidgetsBinding.instance!.waitUntilFirstFrameRasterized;
-    return null;
-  }
-
   // Waits until at the end of a frame the provided [condition] is [true].
   Future<void> _waitUntilFrame(bool condition(), [ Completer<void>? completer ]) {
     completer ??= Completer<void>();
@@ -482,47 +472,6 @@ class FlutterDriverExtension with DeserializeFinderFactory {
     final WaitForCondition waitForConditionCommand = command as WaitForCondition;
     final WaitCondition condition = deserializeCondition(waitForConditionCommand.condition);
     await condition.wait();
-    return null;
-  }
-
-  @Deprecated(
-    'This method has been deprecated in favor of _waitForCondition. '
-    'This feature was deprecated after v1.9.3.'
-  )
-  Future<Result?> _waitUntilNoTransientCallbacks(Command command) async {
-    if (SchedulerBinding.instance!.transientCallbackCount != 0)
-      await _waitUntilFrame(() => SchedulerBinding.instance!.transientCallbackCount == 0);
-    return null;
-  }
-
-  /// Returns a future that waits until no pending frame is scheduled (frame is synced).
-  ///
-  /// Specifically, it checks:
-  /// * Whether the count of transient callbacks is zero.
-  /// * Whether there's no pending request for scheduling a new frame.
-  ///
-  /// We consider the frame is synced when both conditions are met.
-  ///
-  /// This method relies on a Flutter Driver mechanism called "frame sync",
-  /// which waits for transient animations to finish. Persistent animations will
-  /// cause this to wait forever.
-  ///
-  /// If a test needs to interact with the app while animations are running, it
-  /// should avoid this method and instead disable the frame sync using
-  /// `set_frame_sync` method. See [FlutterDriver.runUnsynchronized] for more
-  /// details on how to do this. Note, disabling frame sync will require the
-  /// test author to use some other method to avoid flakiness.
-  ///
-  /// This method has been deprecated in favor of [_waitForCondition].
-  @Deprecated(
-    'This method has been deprecated in favor of _waitForCondition. '
-    'This feature was deprecated after v1.9.3.'
-  )
-  Future<Result?> _waitUntilNoPendingFrame(Command command) async {
-    await _waitUntilFrame(() {
-      return SchedulerBinding.instance!.transientCallbackCount == 0
-          && !SchedulerBinding.instance!.hasScheduledFrame;
-    });
     return null;
   }
 

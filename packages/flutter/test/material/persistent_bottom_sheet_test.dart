@@ -384,7 +384,7 @@ void main() {
           padding: EdgeInsets.all(50.0),
         ),
         child: Scaffold(
-          resizeToAvoidBottomPadding: false,
+          resizeToAvoidBottomInset: false,
           body: Builder(
             builder: (BuildContext context) {
               scaffoldContext = context;

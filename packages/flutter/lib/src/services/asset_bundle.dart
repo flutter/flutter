@@ -10,7 +10,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
-import 'binary_messenger.dart';
+import 'binding.dart';
 
 /// A collection of resources used by the application.
 ///
@@ -220,7 +220,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
   Future<ByteData> load(String key) async {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
     final ByteData? asset =
-        await defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
+        await ServicesBinding.instance!.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
     if (asset == null)
       throw FlutterError('Unable to load asset: $key');
     return asset;

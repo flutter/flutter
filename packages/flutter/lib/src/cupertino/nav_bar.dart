@@ -218,7 +218,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.backgroundColor,
     this.brightness,
     this.padding,
-    this.actionsForegroundColor,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
   }) : assert(automaticallyImplyLeading != null),
@@ -346,21 +345,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Border? border;
 
-  /// {@template flutter.cupertino.navBar.actionsForegroundColor}
-  /// Default color used for text and icons of the [leading] and [trailing]
-  /// widgets in the navigation bar.
-  ///
-  /// Defaults to the `primaryColor` of the [CupertinoTheme] when null.
-  /// {@endtemplate}
-  ///
-  /// The default color for text in the [middle] slot is always black, as per
-  /// iOS standard design.
-  @Deprecated(
-    'Use CupertinoTheme and primaryColor to propagate color. '
-    'This feature was deprecated after v1.1.2.'
-  )
-  final Color? actionsForegroundColor;
-
   /// {@template flutter.cupertino.navBar.transitionBetweenRoutes}
   /// Whether to transition between navigation bars.
   ///
@@ -460,10 +444,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       ),
     );
 
-    final Color? actionsForegroundColor = CupertinoDynamicColor.resolve(
-      widget.actionsForegroundColor,
-      context,
-    );
+    final Color actionsForegroundColor = CupertinoTheme.of(context).primaryColor;
     if (!widget.transitionBetweenRoutes || !_isTransitionable(context)) {
       // Lint ignore to maintain backward compatibility.
       return _wrapActiveColor(actionsForegroundColor, context, navBar);
@@ -573,7 +554,6 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.backgroundColor,
     this.brightness,
     this.padding,
-    this.actionsForegroundColor,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
   }) : assert(automaticallyImplyLeading != null),
@@ -654,16 +634,6 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.navBar.border}
   final Border? border;
 
-  /// {@macro flutter.cupertino.navBar.actionsForegroundColor}
-  ///
-  /// The default color for text in the [largeTitle] slot is always black, as per
-  /// iOS standard design.
-  @Deprecated(
-    'Use CupertinoTheme and primaryColor to propagate color. '
-    'This feature was deprecated after v1.1.2.'
-  )
-  final Color? actionsForegroundColor;
-
   /// {@macro flutter.cupertino.navBar.transitionBetweenRoutes}
   final bool transitionBetweenRoutes;
 
@@ -691,9 +661,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
   @override
   Widget build(BuildContext context) {
-    // Lint ignore to maintain backward compatibility.
-    final Color actionsForegroundColor = CupertinoDynamicColor.resolve(widget.actionsForegroundColor, context)
-                                      ?? CupertinoTheme.of(context).primaryColor;
+    final Color actionsForegroundColor = CupertinoTheme.of(context).primaryColor;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
