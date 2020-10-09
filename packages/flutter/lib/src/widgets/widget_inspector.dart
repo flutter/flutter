@@ -544,7 +544,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
   }) {
     RenderObject repaintBoundary = renderObject;
     while (repaintBoundary != null && !repaintBoundary.isRepaintBoundary) {
-      repaintBoundary = repaintBoundary.parent as RenderObject;
+      repaintBoundary = repaintBoundary.parent! as RenderObject;
     }
     assert(repaintBoundary != null);
     final _ScreenshotData data = _ScreenshotData(target: renderObject);
@@ -560,7 +560,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
       // want to capture debugPaint information as well.
       data.containerLayer.append(_ProxyLayer(repaintBoundary.debugLayer!));
       data.foundTarget = true;
-      final OffsetLayer offsetLayer = repaintBoundary.debugLayer as OffsetLayer;
+      final OffsetLayer offsetLayer = repaintBoundary.debugLayer! as OffsetLayer;
       data.screenshotOffset = offsetLayer.offset;
     } else {
       // Repaint everything under the repaint boundary.
@@ -970,7 +970,7 @@ mixin WidgetInspectorService {
   void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     _structuredExceptionHandler = _reportError;
     if (isStructuredErrorsEnabled()) {
-      FlutterError.onError = _structuredExceptionHandler!;
+      FlutterError.onError = _structuredExceptionHandler;
     }
     _registerServiceExtensionCallback = registerServiceExtensionCallback;
     assert(!_debugServiceExtensionsRegistered);
@@ -1048,10 +1048,8 @@ mixin WidgetInspectorService {
               renderObject.markNeedsPaint();
               renderObject.visitChildren(markTreeNeedsPaint);
             }
-            final RenderObject? root = RendererBinding.instance!.renderView;
-            if (root != null) {
-              markTreeNeedsPaint(root);
-            }
+            final RenderObject root = RendererBinding.instance!.renderView;
+            markTreeNeedsPaint(root);
           } else {
             debugOnProfilePaint = null;
           }
@@ -1359,7 +1357,7 @@ mixin WidgetInspectorService {
         if (object == selection.current) {
           return false;
         }
-        selection.current = object as RenderObject;
+        selection.current = object! as RenderObject;
         developer.inspect(selection.current);
       }
       if (selectionChangedCallback != null) {
@@ -2193,7 +2191,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
       if (diagnostics.style == DiagnosticsTreeStyle.offstage ||
           diagnostics.value is! RenderObject)
         continue;
-      final RenderObject child = diagnostics.value as RenderObject;
+      final RenderObject child = diagnostics.value! as RenderObject;
       final Rect? paintClip = object.describeApproximatePaintClip(child);
       if (paintClip != null && !paintClip.contains(localPosition))
         continue;
@@ -2247,7 +2245,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     if (!isSelectMode)
       return;
 
-    final RenderIgnorePointer ignorePointer = _ignorePointerKey.currentContext!.findRenderObject() as RenderIgnorePointer;
+    final RenderIgnorePointer ignorePointer = _ignorePointerKey.currentContext!.findRenderObject()! as RenderIgnorePointer;
     final RenderObject userRender = ignorePointer.child!;
     final List<RenderObject> selected = hitTest(position, userRender);
 
@@ -2286,10 +2284,8 @@ class _WidgetInspectorState extends State<WidgetInspector>
     if (_lastPointerLocation != null) {
       _inspectAt(_lastPointerLocation!);
 
-      if (selection != null) {
-        // Notify debuggers to open an inspector on the object.
-        developer.inspect(selection.current);
-      }
+      // Notify debuggers to open an inspector on the object.
+      developer.inspect(selection.current);
     }
     setState(() {
       // Only exit select mode if there is a button to return to select mode.
@@ -2457,7 +2453,7 @@ class _RenderInspectorOverlay extends RenderBox {
     context.addLayer(_InspectorOverlayLayer(
       overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       selection: selection,
-      rootRenderObject: parent is RenderObject ? parent as RenderObject : null,
+      rootRenderObject: parent is RenderObject ? parent! as RenderObject : null,
     ));
   }
 }
@@ -2667,8 +2663,8 @@ class _InspectorOverlayLayer extends Layer {
   ) {
     canvas.save();
     final double maxWidth = size.width - 2 * (_kScreenEdgeMargin + _kTooltipPadding);
-    final TextSpan textSpan = _textPainter?.text as TextSpan;
-    if (_textPainter == null || textSpan.text != message || _textPainterMaxWidth != maxWidth) {
+    final TextSpan? textSpan = _textPainter?.text as TextSpan?;
+    if (_textPainter == null || textSpan!.text != message || _textPainterMaxWidth != maxWidth) {
       _textPainterMaxWidth = maxWidth;
       _textPainter = TextPainter()
         ..maxLines = _kMaxTooltipLines
@@ -2739,7 +2735,7 @@ class _InspectorOverlayLayer extends Layer {
           && current.lastChild is _RenderInspectorOverlay) {
         return rootRenderObject == current;
       }
-      current = current.parent as RenderObject;
+      current = current.parent as RenderObject?;
     }
     return false;
   }
@@ -2852,7 +2848,7 @@ Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> proper
 Iterable<DiagnosticsNode>? _parseDiagnosticsNode(DiagnosticsNode node) {
   if (!_isDebugCreator(node))
     return null;
-  final DebugCreator debugCreator = node.value as DebugCreator;
+  final DebugCreator debugCreator = node.value! as DebugCreator;
   final Element element = debugCreator.element;
   return _describeRelevantUserCode(element);
 }

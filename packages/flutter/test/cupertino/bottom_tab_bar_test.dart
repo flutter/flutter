@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../painting/image_data.dart';
+import '../image_data.dart';
 import '../widgets/semantics_tester.dart';
 
 Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async {
@@ -72,13 +70,13 @@ Future<void> main() async {
       of: find.text('Tab 1'),
       matching: find.byType(RichText),
     ));
-    expect(actualInactive.text.style.color, const Color(0xFF654321));
+    expect(actualInactive.text.style!.color, const Color(0xFF654321));
 
     final RichText actualActive = tester.widget(find.descendant(
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
-    expect(actualActive.text.style.color, const Color(0xFF123456));
+    expect(actualActive.text.style!.color, const Color(0xFF123456));
   });
 
 
@@ -138,13 +136,13 @@ Future<void> main() async {
       of: find.text('Tab 1'),
       matching: find.byType(RichText),
     ));
-    expect(actualInactive.text.style.color.value, 0xFF000002);
+    expect(actualInactive.text.style!.color!.value, 0xFF000002);
 
     RichText actualActive = tester.widget(find.descendant(
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
-    expect(actualActive.text.style.color.value, 0xFF000000);
+    expect(actualActive.text.style!.color!.value, 0xFF000000);
 
     final RenderDecoratedBox renderDecoratedBox = tester.renderObject(find.descendant(
       of: find.byType(BackdropFilter),
@@ -153,7 +151,7 @@ Future<void> main() async {
 
     // Border color is resolved correctly.
     final BoxDecoration decoration1 = renderDecoratedBox.decoration as BoxDecoration;
-    expect(decoration1.border.top.color.value, 0x4C000000);
+    expect(decoration1.border!.top.color.value, 0x4C000000);
 
     // Switch to dark mode.
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
@@ -179,17 +177,17 @@ Future<void> main() async {
         of: find.text('Tab 1'),
         matching: find.byType(RichText),
     ));
-    expect(actualInactive.text.style.color.value, 0xFF000003);
+    expect(actualInactive.text.style!.color!.value, 0xFF000003);
 
     actualActive = tester.widget(find.descendant(
         of: find.text('Tab 2'),
         matching: find.byType(RichText),
     ));
-    expect(actualActive.text.style.color.value, 0xFF000001);
+    expect(actualActive.text.style!.color!.value, 0xFF000001);
 
     // Border color is resolved correctly.
     final BoxDecoration decoration2 = renderDecoratedBox.decoration as BoxDecoration;
-    expect(decoration2.border.top.color.value, 0x29000000);
+    expect(decoration2.border!.top.color.value, 0x29000000);
   });
 
   testWidgets('Tabs respects themes', (WidgetTester tester) async {
@@ -215,13 +213,13 @@ Future<void> main() async {
       of: find.text('Tab 1'),
       matching: find.byType(RichText),
     ));
-    expect(actualInactive.text.style.color.value, 0xFF999999);
+    expect(actualInactive.text.style!.color!.value, 0xFF999999);
 
     RichText actualActive = tester.widget(find.descendant(
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
-    expect(actualActive.text.style.color, CupertinoColors.activeBlue);
+    expect(actualActive.text.style!.color, CupertinoColors.activeBlue);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -246,18 +244,18 @@ Future<void> main() async {
       of: find.text('Tab 1'),
       matching: find.byType(RichText),
     ));
-    expect(actualInactive.text.style.color.value, 0xFF757575);
+    expect(actualInactive.text.style!.color!.value, 0xFF757575);
 
     actualActive = tester.widget(find.descendant(
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
 
-    expect(actualActive.text.style.color, isSameColorAs(CupertinoColors.activeBlue.darkColor));
+    expect(actualActive.text.style!.color, isSameColorAs(CupertinoColors.activeBlue.darkColor));
   });
 
   testWidgets('Use active icon', (WidgetTester tester) async {
-    final MemoryImage activeIcon = MemoryImage(Uint8List.fromList(kBlueSquare));
+    final MemoryImage activeIcon = MemoryImage(Uint8List.fromList(kBlueSquarePng));
     final MemoryImage inactiveIcon = MemoryImage(Uint8List.fromList(kTransparentImage));
 
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
@@ -368,7 +366,7 @@ Future<void> main() async {
   });
 
   testWidgets('Tap callback', (WidgetTester tester) async {
-    int callbackTab;
+    late int callbackTab;
 
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),

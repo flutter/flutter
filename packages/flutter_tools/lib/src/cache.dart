@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:archive/archive.dart';
+import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 
 import 'android/gradle_utils.dart';
 import 'base/common.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpStatus, ProcessException, SocketException;
 import 'base/logger.dart';
@@ -92,8 +95,8 @@ class Cache {
   /// [rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
   Cache({
-    Directory rootOverride,
-    List<ArtifactSet> artifacts,
+    @protected Directory rootOverride,
+    @protected List<ArtifactSet> artifacts,
     // TODO(jonahwilliams): make required once migrated to context-free.
     Logger logger,
     FileSystem fileSystem,
@@ -117,7 +120,7 @@ class Cache {
       _artifacts.add(AndroidInternalBuildArtifacts(this));
 
       _artifacts.add(IOSEngineArtifacts(this));
-      _artifacts.add(FlutterWebSdk(this));
+      _artifacts.add(FlutterWebSdk(this, platform: _platform));
       _artifacts.add(FlutterSdk(this));
       _artifacts.add(WindowsEngineArtifacts(this, platform: _platform));
       _artifacts.add(MacOSEngineArtifacts(this));
@@ -141,6 +144,38 @@ class Cache {
     } else {
       _artifacts.addAll(artifacts);
     }
+  }
+
+  /// Create a [Cache] for testing.
+  ///
+  /// Defaults to a memory file system, fake platform,
+  /// buffer logger, and no accessible artifacts.
+  /// By default, the root cache directory path is "cache".
+  @visibleForTesting
+  factory Cache.test({
+    Directory rootOverride,
+    List<ArtifactSet> artifacts,
+    Logger logger,
+    FileSystem fileSystem,
+    Platform platform,
+    ProcessManager processManager,
+  }) {
+    fileSystem ??= rootOverride?.fileSystem ?? MemoryFileSystem.test();
+    platform ??= FakePlatform(environment: <String, String>{});
+    logger ??= BufferLogger.test();
+    return Cache(
+      rootOverride: rootOverride ??= fileSystem.directory('cache'),
+      artifacts: artifacts ?? <ArtifactSet>[],
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: platform,
+      osUtils: OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
+    );
   }
 
   final Logger _logger;
@@ -402,9 +437,7 @@ class Cache {
       getStampFileFor('flutter_tools').deleteSync();
       for (final ArtifactSet artifact in _artifacts) {
         final File file = getStampFileFor(artifact.stampName);
-        if (file.existsSync()) {
-          file.deleteSync();
-        }
+        ErrorHandlingFileSystem.deleteIfExists(file);
       }
     } on FileSystemException catch (err) {
       _logger.printError('Failed to delete some stamp files: $err');
@@ -647,7 +680,7 @@ class PubDependencies extends ArtifactSet {
       logger: _logger,
       throwOnError: false,
     );
-    if (packageConfig == null || packageConfig == PackageConfig.empty ) {
+    if (packageConfig == null || packageConfig == PackageConfig.empty) {
       return false;
     }
     for (final Package package in packageConfig.packages) {
@@ -667,6 +700,8 @@ class PubDependencies extends ArtifactSet {
       context: PubContext.pubGet,
       directory: _fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
       generateSyntheticPackage: false,
+      skipPubspecYamlCheck: true,
+      checkLastModified: false,
     );
   }
 }
@@ -691,11 +726,15 @@ class MaterialFonts extends CachedArtifact {
 ///
 /// This SDK references code within the regular Dart sdk to reduce download size.
 class FlutterWebSdk extends CachedArtifact {
-  FlutterWebSdk(Cache cache) : super(
-    'flutter_web_sdk',
-    cache,
-    DevelopmentArtifact.web,
-  );
+  FlutterWebSdk(Cache cache, {Platform platform})
+   : _platform = platform ?? globals.platform,
+     super(
+      'flutter_web_sdk',
+      cache,
+      DevelopmentArtifact.web,
+    );
+
+  final Platform _platform;
 
   @override
   Directory get location => cache.getWebSdkDirectory();
@@ -706,22 +745,26 @@ class FlutterWebSdk extends CachedArtifact {
   @override
   Future<void> updateInner(ArtifactUpdater artifactUpdater) async {
     String platformName = 'flutter-web-sdk-';
-    if (globals.platform.isMacOS) {
+    if (_platform.isMacOS) {
       platformName += 'darwin-x64';
-    } else if (globals.platform.isLinux) {
+    } else if (_platform.isLinux) {
       platformName += 'linux-x64';
-    } else if (globals.platform.isWindows) {
+    } else if (_platform.isWindows) {
       platformName += 'windows-x64';
     }
     final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra/flutter/$version/$platformName.zip');
+    if (location.existsSync()) {
+      location.deleteSync(recursive: true);
+    }
     await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
     // This is a temporary work-around for not being able to safely download into a shared directory.
+    final FileSystem fileSystem = location.fileSystem;
     for (final FileSystemEntity entity in location.listSync(recursive: true)) {
       if (entity is File) {
-        final List<String> segments = globals.fs.path.split(entity.path);
+        final List<String> segments = fileSystem.path.split(entity.path);
         segments.remove('flutter_web_sdk');
-        final String newPath = globals.fs.path.joinAll(segments);
-        final File newFile = globals.fs.file(newPath);
+        final String newPath = fileSystem.path.joinAll(segments);
+        final File newFile = fileSystem.file(newPath);
         if (!newFile.existsSync()) {
           newFile.createSync(recursive: true);
         }
@@ -1554,9 +1597,14 @@ class ArtifactUpdater {
       );
       try {
         _ensureExists(tempFile.parent);
-        final IOSink ioSink = tempFile.openWrite();
-        await _download(url, ioSink);
-        await ioSink.close();
+        if (tempFile.existsSync()) {
+          tempFile.deleteSync();
+        }
+        await _download(url, tempFile);
+
+        if (!tempFile.existsSync()) {
+          throw Exception('Did not find downloaded file ${tempFile.path}');
+        }
       } on Exception catch (err) {
         _logger.printTrace(err.toString());
         retries -= 1;
@@ -1608,13 +1656,15 @@ class ArtifactUpdater {
   }
 
   /// Download bytes from [url], throwing non-200 responses as an exception.
-  Future<void> _download(Uri url, IOSink ioSink) async {
+  Future<void> _download(Uri url, File file) async {
     final HttpClientRequest request = await _httpClient.getUrl(url);
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok) {
       throw Exception(response.statusCode);
     }
-    await response.forEach(ioSink.add);
+    await response.forEach((List<int> chunk) {
+      file.writeAsBytesSync(chunk, mode: FileMode.append);
+    });
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as

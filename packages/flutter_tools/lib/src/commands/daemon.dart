@@ -423,7 +423,6 @@ typedef _RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('restart', restart);
-    registerHandler('reloadMethod', reloadMethod);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
     registerHandler('detach', detach);
@@ -470,6 +469,7 @@ class AppDomain extends Domain {
       flutterProject: flutterProject,
       target: target,
       buildInfo: options.buildInfo,
+      platform: globals.platform,
     );
 
     ResidentRunner runner;
@@ -633,28 +633,6 @@ class AppDomain extends Domain {
             fullRestart: fullRestart,
             pause: pauseAfterRestart,
             reason: restartReason);
-      },
-    );
-  }
-
-  Future<OperationResult> reloadMethod(Map<String, dynamic> args) async {
-    final String appId = _getStringArg(args, 'appId', required: true);
-    final String classId = _getStringArg(args, 'class', required: true);
-    final String libraryId = _getStringArg(args, 'library', required: true);
-    final bool debounce = _getBoolArg(args, 'debounce') ?? false;
-
-    final AppInstance app = _getApp(appId);
-    if (app == null) {
-      throw "app '$appId' not found";
-    }
-
-    return _queueAndDebounceReloadAction(
-      app,
-      OperationType.reloadMethod,
-      debounce,
-      null,
-      () {
-        return app.reloadMethod(classId: classId, libraryId: libraryId);
       },
     );
   }
@@ -825,21 +803,17 @@ class DeviceDomain extends Domain {
   }
 
   /// Enable device events.
-  Future<void> enable(Map<String, dynamic> args) {
-    final List<Future<void>> calls = <Future<void>>[];
+  Future<void> enable(Map<String, dynamic> args) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      calls.add(discoverer.startPolling());
+      discoverer.startPolling();
     }
-    return Future.wait<void>(calls);
   }
 
   /// Disable device events.
   Future<void> disable(Map<String, dynamic> args) async {
-    final List<Future<void>> calls = <Future<void>>[];
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      calls.add(discoverer.stopPolling());
+      discoverer.stopPolling();
     }
-    return Future.wait<void>(calls);
   }
 
   /// Forward a host port to a device port.
@@ -873,10 +847,11 @@ class DeviceDomain extends Domain {
   }
 
   @override
-  Future<void> dispose() async {
+  Future<void> dispose() {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      await discoverer.dispose();
+      discoverer.dispose();
     }
+    return Future<void>.value();
   }
 
   /// Return the device matching the deviceId field in the args.
@@ -1094,10 +1069,6 @@ class AppInstance {
 
   Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String reason }) {
     return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
-  }
-
-  Future<OperationResult> reloadMethod({ String classId, String libraryId }) {
-    return runner.reloadMethod(classId: classId, libraryId: libraryId);
   }
 
   Future<void> stop() => runner.exit();
@@ -1355,7 +1326,6 @@ class LaunchMode {
 }
 
 enum OperationType {
-  reloadMethod,
   reload,
   restart
 }

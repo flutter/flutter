@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -94,7 +95,7 @@ void main() {
           route: anyNamed('route')
       )).thenAnswer((Invocation invocation) => Future<int>.value(1));
       final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
-      final MockFile applicationBinary = MockFile();
+      final File applicationBinary = MemoryFileSystem.test().file('binary');
       final int result = await ColdRunner(
         devices,
         applicationBinary: applicationBinary,
@@ -110,7 +111,6 @@ void main() {
   });
 }
 
-class MockFile extends Mock implements File {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
 class MockDevice extends Mock implements Device {
   MockDevice() {
@@ -134,7 +134,6 @@ class TestFlutterDevice extends FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     bool disableDds = false,

@@ -17,6 +17,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../devfs.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
@@ -296,6 +297,11 @@ class IOSSimulator extends Device {
   final Xcode _xcode;
 
   @override
+  DevFSWriter createDevFSWriter(covariant ApplicationPackage app, String userIdentifier) {
+    return LocalDevFSWriter(fileSystem: globals.fs);
+  }
+
+  @override
   Future<bool> get isLocalEmulator async => true;
 
   @override
@@ -419,6 +425,7 @@ class IOSSimulator extends Device {
           '--enable-checked-mode',
           '--verify-entry-points',
         ],
+        if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
         if (debuggingOptions.startPaused) '--start-paused',
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
         if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',

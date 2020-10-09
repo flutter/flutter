@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -290,11 +288,11 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    final RenderSliver sliverA = a.parent as RenderSliver;
-    final RenderSliver sliverB = b.parent as RenderSliver;
-    final RenderSliver sliverC = c.parent as RenderSliver;
-    final RenderSliver sliverD = d.parent as RenderSliver;
-    final RenderSliver sliverE = e.parent as RenderSliver;
+    final RenderSliver sliverA = a.parent! as RenderSliver;
+    final RenderSliver sliverB = b.parent! as RenderSliver;
+    final RenderSliver sliverC = c.parent! as RenderSliver;
+    final RenderSliver sliverD = d.parent! as RenderSliver;
+    final RenderSliver sliverE = e.parent! as RenderSliver;
 
     expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
     expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(400.0, 0.0));
@@ -872,8 +870,7 @@ void main() {
         crossAxisOffset: 0.0,
         mainAxisPosition: 0.0,
         crossAxisPosition: 0.0,
-        hitTest: (SliverHitTestResult result, { double mainAxisPosition, double crossAxisPosition }) {
-          expect(result, isNotNull);
+        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
           mainAxisPositions.add(mainAxisPosition);
           crossAxisPositions.add(crossAxisPosition);
           return true;
@@ -891,8 +888,7 @@ void main() {
         crossAxisOffset: 6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { double mainAxisPosition, double crossAxisPosition }) {
-          expect(result, isNotNull);
+        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
           mainAxisPositions.add(mainAxisPosition);
           crossAxisPositions.add(crossAxisPosition);
           return false;
@@ -910,8 +906,7 @@ void main() {
         crossAxisOffset: -6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { double mainAxisPosition, double crossAxisPosition }) {
-          expect(result, isNotNull);
+        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
           mainAxisPositions.add(mainAxisPosition);
           crossAxisPositions.add(crossAxisPosition);
           return false;
@@ -926,8 +921,8 @@ void main() {
 
     test('addWithAxisOffset with non zero paintOffset', () {
       final SliverHitTestResult result = SliverHitTestResult();
-      double recordedMainAxisPosition;
-      double recordedCrossAxisPosition;
+      late double recordedMainAxisPosition;
+      late double recordedCrossAxisPosition;
       final HitTestEntry entry = HitTestEntry(_DummyHitTestTarget());
       const Offset paintOffset = Offset(7, 11);
 
@@ -937,8 +932,7 @@ void main() {
         crossAxisOffset: 6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { double mainAxisPosition, double crossAxisPosition }) {
-          expect(result, isNotNull);
+        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
           recordedMainAxisPosition = mainAxisPosition;
           recordedCrossAxisPosition = crossAxisPosition;
           result.add(entry);
@@ -949,7 +943,7 @@ void main() {
       expect(recordedMainAxisPosition, 10.0 - 5.0);
       expect(recordedCrossAxisPosition, 20.0 - 6.0);
       expect(
-        entry.transform..translate(paintOffset.dx, paintOffset.dy),
+        entry.transform!..translate(paintOffset.dx, paintOffset.dy),
         Matrix4.identity(),
       );
     });

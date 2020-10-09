@@ -8,11 +8,7 @@ import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
+import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
@@ -201,7 +197,7 @@ void main() {
 ''');
   if (testConfigFile != null) {
     buffer.write('''
-    return () => test_config.main(test.main);
+    return () => test_config.testExecutable(test.main);
 ''');
   } else {
     buffer.write('''
@@ -464,7 +460,7 @@ class FlutterPlatform extends PlatformPlugin {
         enableObservatory: enableObservatory,
         startPaused: startPaused,
         disableServiceAuthCodes: disableServiceAuthCodes,
-        observatoryPort: explicitObservatoryPort,
+        observatoryPort: disableDds ? explicitObservatoryPort : 0,
         serverPort: server.port,
       );
       subprocessActive = true;
@@ -495,6 +491,7 @@ class FlutterPlatform extends PlatformPlugin {
       // Pipe stdout and stderr from the subprocess to our printStatus console.
       // We also keep track of what observatory port the engine used, if any.
       Uri processObservatoryUri;
+      final Uri ddsServiceUri = getDdsServiceUri();
       _pipeStandardStreamsToConsole(
         process,
         reportObservatoryUri: (Uri detectedUri) async {
@@ -504,6 +501,7 @@ class FlutterPlatform extends PlatformPlugin {
           if (!disableDds) {
             final DartDevelopmentService dds = await DartDevelopmentService.startDartDevelopmentService(
               detectedUri,
+              serviceUri: ddsServiceUri,
               enableAuthCodes: !disableServiceAuthCodes,
               ipv6: host.type == InternetAddressType.IPv6,
             );
@@ -903,6 +901,19 @@ class FlutterPlatform extends PlatformPlugin {
       default:
         return 'Shell subprocess crashed with unexpected exit code $exitCode $when.';
     }
+  }
+
+  @visibleForTesting
+  @protected
+  Uri getDdsServiceUri() {
+    return Uri(
+      scheme: 'http',
+      host: (host.type == InternetAddressType.IPv6 ?
+        InternetAddress.loopbackIPv6 :
+        InternetAddress.loopbackIPv4
+      ).host,
+      port: explicitObservatoryPort ?? 0,
+    );
   }
 }
 

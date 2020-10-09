@@ -13,9 +13,9 @@ class ButtonsDemo {
 
   void buttons() {
 
-// START buttons_raised
-// Create a raised button.
-RaisedButton(
+// START buttons_elevated
+// Create an elevated button.
+ElevatedButton(
   child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
@@ -25,14 +25,14 @@ RaisedButton(
 // Create a disabled button.
 // Buttons are disabled when onPressed isn't
 // specified or is null.
-const RaisedButton(
+const ElevatedButton(
   child: Text('BUTTON TITLE'),
   onPressed: null,
 );
 
 // Create a button with an icon and a
 // title.
-RaisedButton.icon(
+ElevatedButton.icon(
   icon: const Icon(Icons.add, size: 18.0),
   label: const Text('BUTTON TITLE'),
   onPressed: () {
@@ -41,9 +41,9 @@ RaisedButton.icon(
 );
 // END
 
-// START buttons_outline
-// Create an outline button.
-OutlineButton(
+// START buttons_outlined
+// Create an outlined button.
+OutlinedButton(
   child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
@@ -53,14 +53,14 @@ OutlineButton(
 // Create a disabled button.
 // Buttons are disabled when onPressed isn't
 // specified or is null.
-const OutlineButton(
+const OutlinedButton(
   child: Text('BUTTON TITLE'),
   onPressed: null,
 );
 
 // Create a button with an icon and a
 // title.
-OutlineButton.icon(
+OutlinedButton.icon(
   icon: const Icon(Icons.add, size: 18.0),
   label: const Text('BUTTON TITLE'),
   onPressed: () {
@@ -69,9 +69,9 @@ OutlineButton.icon(
 );
 // END
 
-// START buttons_flat
-// Create a flat button.
-FlatButton(
+// START buttons_text
+// Create a text button.
+TextButton(
   child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
@@ -81,7 +81,7 @@ FlatButton(
 // Create a disabled button.
 // Buttons are disabled when onPressed isn't
 // specified or is null.
-const FlatButton(
+const TextButton(
   child: Text('BUTTON TITLE'),
   onPressed: null,
 );

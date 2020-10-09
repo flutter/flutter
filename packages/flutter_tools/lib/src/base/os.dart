@@ -90,8 +90,6 @@ abstract class OperatingSystemUtils {
   /// Return the File representing a new pipe.
   File makePipe(String path);
 
-  void zip(Directory data, File zipFile);
-
   void unzip(File file, Directory targetDirectory);
 
   void unpack(File gzippedTarFile, Directory targetDirectory);
@@ -206,23 +204,28 @@ class _PosixUtils extends OperatingSystemUtils {
     ).toList();
   }
 
-  @override
-  void zip(Directory data, File zipFile) {
-    _processUtils.runSync(
-      <String>['zip', '-r', '-q', zipFile.path, '.'],
-      workingDirectory: data.path,
-      throwOnError: true,
-    );
-  }
-
   // unzip -o -q zipfile -d dest
   @override
   void unzip(File file, Directory targetDirectory) {
-    _processUtils.runSync(
-      <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
-      throwOnError: true,
-      verboseExceptions: true,
-    );
+    try {
+      _processUtils.runSync(
+        <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+        throwOnError: true,
+        verboseExceptions: true,
+      );
+    } on ArgumentError {
+      // unzip is not available. this error message is modeled after the download
+      // error in bin/internal/update_dart_sdk.sh
+      String message = 'Please install unzip.';
+      if (_platform.isMacOS) {
+        message = 'Consider running "brew install unzip".';
+      } else if (_platform.isLinux) {
+        message = 'Consider running "sudo apt-get install unzip".';
+      }
+      throwToolExit(
+        'Missing "unzip" tool. Unable to extract ${file.path}.\n$message'
+      );
+    }
   }
 
   // tar -xzf tarball -C dest
@@ -311,21 +314,6 @@ class _WindowsUtils extends OperatingSystemUtils {
       return lines.map<File>((String path) => _fileSystem.file(path.trim())).toList();
     }
     return <File>[_fileSystem.file(lines.first.trim())];
-  }
-
-  @override
-  void zip(Directory data, File zipFile) {
-    final Archive archive = Archive();
-    for (final FileSystemEntity entity in data.listSync(recursive: true)) {
-      if (entity is! File) {
-        continue;
-      }
-      final File file = entity as File;
-      final String path = file.fileSystem.path.relative(file.path, from: data.path);
-      final List<int> bytes = file.readAsBytesSync();
-      archive.addFile(ArchiveFile(path, bytes.length, bytes));
-    }
-    zipFile.writeAsBytesSync(ZipEncoder().encode(archive), flush: true);
   }
 
   @override

@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -18,7 +17,9 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/signals.dart';
+import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
@@ -63,6 +64,7 @@ class FlutterDevice {
          artifacts: globals.artifacts,
          processManager: globals.processManager,
          logger: globals.logger,
+         platform: globals.platform,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -71,6 +73,7 @@ class FlutterDevice {
     @required FlutterProject flutterProject,
     @required String target,
     @required BuildInfo buildInfo,
+    @required Platform platform,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     TargetModel targetModel = TargetModel.flutter,
@@ -129,6 +132,7 @@ class FlutterDevice {
         artifacts: globals.artifacts,
         processManager: globals.processManager,
         logger: globals.logger,
+        platform: platform,
       );
     } else {
       // The flutter-widget-cache feature only applies to run mode.
@@ -161,6 +165,7 @@ class FlutterDevice {
         artifacts: globals.artifacts,
         processManager: globals.processManager,
         logger: globals.logger,
+        platform: platform,
       );
     }
 
@@ -180,6 +185,8 @@ class FlutterDevice {
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
+
+  DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;
   vm_service.VmService vmService;
   DevFS devFS;
@@ -205,7 +212,6 @@ class FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     int hostVmServicePort,
@@ -224,24 +230,43 @@ class FlutterDevice {
       isWaitingForVm = true;
       vm_service.VmService service;
       if (!disableDds) {
-        await device.dds.startDartDevelopmentService(
-          observatoryUri,
-          ddsPort,
-          ipv6,
-          disableServiceAuthCodes,
-        );
+        // This first try block is meant to catch errors that occur during DDS startup
+        // (e.g., failure to bind to a port, failure to connect to the VM service,
+        // attaching to a VM service with existing clients, etc.).
+        try {
+          await device.dds.startDartDevelopmentService(
+            observatoryUri,
+            ddsPort,
+            ipv6,
+            disableServiceAuthCodes,
+          );
+        } on Exception catch (e) {
+          globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
+          if (!completer.isCompleted && !_isListeningForObservatoryUri) {
+            completer.completeError('failed to connect to $observatoryUri');
+          }
+          return;
+        }
       }
+      // This second try block handles cases where the VM service connection goes down
+      // before flutter_tools connects to DDS. The DDS `done` future completes when DDS
+      // shuts down, including after an error. If `done` completes before `connectToVmService`,
+      // something went wrong that caused DDS to shutdown early.
       try {
-        service = await connectToVmService(
-          disableDds ? observatoryUri : device.dds.uri,
-          reloadSources: reloadSources,
-          restart: restart,
-          compileExpression: compileExpression,
-          reloadMethod: reloadMethod,
-          getSkSLMethod: getSkSLMethod,
-          printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-          device: device,
-        );
+        service = await Future.any<dynamic>(
+          <Future<dynamic>>[
+            connectToVmService(
+              disableDds ? observatoryUri : device.dds.uri,
+              reloadSources: reloadSources,
+              restart: restart,
+              compileExpression: compileExpression,
+              getSkSLMethod: getSkSLMethod,
+              printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+              device: device,
+            ),
+            device.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
+          ]
+        ) as vm_service.VmService;
       } on Exception catch (exception) {
         globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
         if (!completer.isCompleted && !_isListeningForObservatoryUri) {
@@ -550,6 +575,7 @@ class FlutterDevice {
       globals.printError(message);
       return 1;
     }
+    devFSWriter = device.createDevFSWriter(package, userIdentifier);
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
 
@@ -597,6 +623,7 @@ class FlutterDevice {
       buildInfo: coldRunner.debuggingOptions.buildInfo,
       applicationBinary: coldRunner.applicationBinary,
     );
+    devFSWriter = device.createDevFSWriter(package, userIdentifier);
 
     final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
@@ -692,6 +719,7 @@ class FlutterDevice {
         pathToReload: pathToReload,
         invalidatedFiles: invalidatedFiles,
         packageConfig: packageConfig,
+        devFSWriter: devFSWriter,
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -925,22 +953,6 @@ abstract class ResidentRunner {
     return sharedSkSlWriter(device, data);
   }
 
-  /// The resident runner API for interaction with the reloadMethod vmservice
-  /// request.
-  ///
-  /// This API should only be called for UI only-changes spanning a single
-  /// library/Widget.
-  ///
-  /// The value [classId] should be the identifier of the StatelessWidget that
-  /// was invalidated, or the StatefulWidget for the corresponding State class
-  /// that was invalidated. This must be provided.
-  ///
-  /// The value [libraryId] should be the absolute file URI for the containing
-  /// library of the widget that was invalidated. This must be provided.
-  Future<OperationResult> reloadMethod({ String classId, String libraryId }) {
-    throw UnsupportedError('Method is not supported.');
-  }
-
   @protected
   void writeVmserviceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
@@ -972,73 +984,120 @@ abstract class ResidentRunner {
     appFinished();
   }
 
-  Future<void> debugDumpApp() async {
+  Future<bool> debugDumpApp() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpApp();
     }
+    return true;
   }
 
-  Future<void> debugDumpRenderTree() async {
+  Future<bool> debugDumpRenderTree() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpRenderTree();
     }
+    return true;
   }
 
-  Future<void> debugDumpLayerTree() async {
+  Future<bool> debugDumpLayerTree() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpLayerTree();
     }
+    return true;
   }
 
-  Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
+  Future<bool> debugDumpSemanticsTreeInTraversalOrder() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpSemanticsTreeInTraversalOrder();
     }
+    return true;
   }
 
-  Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
+  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpSemanticsTreeInInverseHitTestOrder();
     }
+    return true;
   }
 
-  Future<void> debugToggleDebugPaintSizeEnabled() async {
+  Future<bool> debugToggleDebugPaintSizeEnabled() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleDebugPaintSizeEnabled();
     }
+    return true;
   }
 
-  Future<void> debugToggleDebugCheckElevationsEnabled() async {
+  Future<bool> debugToggleDebugCheckElevationsEnabled() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleDebugCheckElevationsEnabled();
     }
+    return true;
   }
 
-  Future<void> debugTogglePerformanceOverlayOverride() async {
+  Future<bool> debugTogglePerformanceOverlayOverride() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.debugTogglePerformanceOverlayOverride();
     }
+    return true;
   }
 
-  Future<void> debugToggleWidgetInspector() async {
+  Future<bool> debugToggleWidgetInspector() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleWidgetInspector();
     }
+    return true;
   }
 
-  Future<void> debugToggleInvertOversizedImages() async {
+  Future<bool> debugToggleInvertOversizedImages() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleInvertOversizedImages();
     }
+    return true;
   }
 
-  Future<void> debugToggleProfileWidgetBuilds() async {
+  Future<bool> debugToggleProfileWidgetBuilds() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleProfileWidgetBuilds();
     }
+    return true;
   }
 
-  Future<void> debugToggleBrightness() async {
+  Future<bool> debugToggleBrightness() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     final Brightness brightness = await flutterDevices.first.toggleBrightness();
     Brightness next;
     for (final FlutterDevice device in flutterDevices) {
@@ -1047,6 +1106,7 @@ abstract class ResidentRunner {
       );
       globals.logger.printStatus('Changed brightness to $next.');
     }
+    return true;
   }
 
   /// Take a screenshot on the provided [device].
@@ -1111,7 +1171,10 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<void> debugTogglePlatform() async {
+  Future<bool> debugTogglePlatform() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
     final List<FlutterView> views = await flutterDevices
       .first
       .vmService.getFlutterViews();
@@ -1125,6 +1188,7 @@ abstract class ResidentRunner {
       to = await device.togglePlatform(from: from);
     }
     globals.printStatus('Switched operating system to $to');
+    return true;
   }
 
   Future<void> stopEchoingDeviceLog() async {
@@ -1181,7 +1245,6 @@ abstract class ResidentRunner {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
@@ -1197,7 +1260,6 @@ abstract class ResidentRunner {
         disableDds: debuggingOptions.disableDds,
         ddsPort: debuggingOptions.ddsPort,
         hostVmServicePort: debuggingOptions.hostVmServicePort,
-        reloadMethod: reloadMethod,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
         ipv6: ipv6,
@@ -1223,10 +1285,14 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<void> launchDevTools() async {
+  Future<bool> launchDevTools() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     assert(supportsServiceProtocol);
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    return _devtoolsLauncher.launch(flutterDevices.first.vmService.httpAddress);
+    await _devtoolsLauncher.launch(flutterDevices.first.vmService.httpAddress);
+    return true;
   }
 
   Future<void> shutdownDevtools() async {
@@ -1384,7 +1450,17 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
 
 /// Redirects terminal commands to the correct resident runner methods.
 class TerminalHandler {
-  TerminalHandler(this.residentRunner);
+  TerminalHandler(this.residentRunner, {
+    @required Logger logger,
+    @required Terminal terminal,
+    @required Signals signals,
+  }) : _logger = logger,
+       _terminal = terminal,
+       _signals = signals;
+
+  final Logger _logger;
+  final Terminal _terminal;
+  final Signals _signals;
 
   final ResidentRunner residentRunner;
   bool _processingUserRequest = false;
@@ -1394,19 +1470,19 @@ class TerminalHandler {
   String lastReceivedCommand;
 
   void setupTerminal() {
-    if (!globals.logger.quiet) {
-      globals.printStatus('');
+    if (!_logger.quiet) {
+      _logger.printStatus('');
       residentRunner.printHelp(details: false);
     }
-    globals.terminal.singleCharMode = true;
-    subscription = globals.terminal.keystrokes.listen(processTerminalInput);
+    _terminal.singleCharMode = true;
+    subscription = _terminal.keystrokes.listen(processTerminalInput);
   }
 
 
   final Map<io.ProcessSignal, Object> _signalTokens = <io.ProcessSignal, Object>{};
 
   void _addSignalHandler(io.ProcessSignal signal, SignalHandler handler) {
-    _signalTokens[signal] = globals.signals.addHandler(signal, handler);
+    _signalTokens[signal] = _signals.addHandler(signal, handler);
   }
 
   void registerSignalHandlers() {
@@ -1425,7 +1501,7 @@ class TerminalHandler {
   void stop() {
     assert(residentRunner.stayResident);
     for (final MapEntry<io.ProcessSignal, Object> entry in _signalTokens.entries) {
-      globals.signals.removeHandler(entry.key, entry.value);
+      _signals.removeHandler(entry.key, entry.value);
     }
     _signalTokens.clear();
     subscription.cancel();
@@ -1433,17 +1509,12 @@ class TerminalHandler {
 
   /// Returns [true] if the input has been handled by this function.
   Future<bool> _commonTerminalInputHandler(String character) async {
-    globals.printStatus(''); // the key the user tapped might be on this line
-    switch(character) {
+    _logger.printStatus(''); // the key the user tapped might be on this line
+    switch (character) {
       case 'a':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugToggleProfileWidgetBuilds();
-          return true;
-        }
-        return false;
+        return residentRunner.debugToggleProfileWidgetBuilds();
       case 'b':
-        await residentRunner.debugToggleBrightness();
-        return true;
+        return residentRunner.debugToggleBrightness();
       case 'c':
         residentRunner.clearScreen();
         return true;
@@ -1461,30 +1532,14 @@ class TerminalHandler {
         residentRunner.printHelp(details: true);
         return true;
       case 'i':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugToggleWidgetInspector();
-          return true;
-        }
-        return false;
+        return residentRunner.debugToggleWidgetInspector();
       case 'I':
-        if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
-          await residentRunner.debugToggleInvertOversizedImages();
-          return true;
-        }
-        return false;
+        return residentRunner.debugToggleInvertOversizedImages();
       case 'L':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugDumpLayerTree();
-          return true;
-        }
-        return false;
+        return residentRunner.debugDumpLayerTree();
       case 'o':
       case 'O':
-        if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
-          await residentRunner.debugTogglePlatform();
-          return true;
-        }
-        return false;
+        return residentRunner.debugTogglePlatform();
       case 'M':
         if (residentRunner.supportsWriteSkSL) {
           await residentRunner.writeSkSL();
@@ -1492,17 +1547,9 @@ class TerminalHandler {
         }
         return false;
       case 'p':
-        if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
-          await residentRunner.debugToggleDebugPaintSizeEnabled();
-          return true;
-        }
-        return false;
+        return residentRunner.debugToggleDebugPaintSizeEnabled();
       case 'P':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugTogglePerformanceOverlayOverride();
-          return true;
-        }
-        return false;
+        return residentRunner.debugTogglePerformanceOverlayOverride();
       case 'q':
       case 'Q':
         // exit
@@ -1517,7 +1564,7 @@ class TerminalHandler {
           throwToolExit(result.message);
         }
         if (!result.isOk) {
-          globals.printStatus('Try again after fixing the above error(s).', emphasis: true);
+          _logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
         }
         return true;
       case 'R':
@@ -1530,7 +1577,7 @@ class TerminalHandler {
           throwToolExit(result.message);
         }
         if (!result.isOk) {
-          globals.printStatus('Try again after fixing the above error(s).', emphasis: true);
+          _logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
         }
         return true;
       case 's':
@@ -1541,41 +1588,20 @@ class TerminalHandler {
         }
         return true;
       case 'S':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugDumpSemanticsTreeInTraversalOrder();
-          return true;
-        }
-        return false;
+        return residentRunner.debugDumpSemanticsTreeInTraversalOrder();
       case 't':
       case 'T':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugDumpRenderTree();
-          return true;
-        }
-        return false;
+        return residentRunner.debugDumpRenderTree();
       case 'U':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
-          return true;
-        }
-        return false;
+        return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
       case 'v':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.launchDevTools();
-          return true;
-        }
-        return false;
+        return residentRunner.launchDevTools();
       case 'w':
       case 'W':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugDumpApp();
-          return true;
-        }
-        return false;
+        return residentRunner.debugDumpApp();
       case 'z':
       case 'Z':
-        await residentRunner.debugToggleDebugCheckElevationsEnabled();
-        return true;
+        return residentRunner.debugToggleDebugCheckElevationsEnabled();
     }
     return false;
   }
@@ -1584,7 +1610,7 @@ class TerminalHandler {
     // When terminal doesn't support line mode, '\n' can sneak into the input.
     command = command.trim();
     if (_processingUserRequest) {
-      globals.printTrace('Ignoring terminal input: "$command" because we are busy.');
+      _logger.printTrace('Ignoring terminal input: "$command" because we are busy.');
       return;
     }
     _processingUserRequest = true;
@@ -1595,7 +1621,7 @@ class TerminalHandler {
     } catch (error, st) { // ignore: avoid_catches_without_on_clauses
       // Don't print stack traces for known error types.
       if (error is! ToolExit) {
-        globals.printError('$error\n$st');
+        _logger.printError('$error\n$st');
       }
       await _cleanUp(null);
       rethrow;
@@ -1606,7 +1632,7 @@ class TerminalHandler {
 
   Future<void> _handleSignal(io.ProcessSignal signal) async {
     if (_processingUserRequest) {
-      globals.printTrace('Ignoring signal: "$signal" because we are busy.');
+      _logger.printTrace('Ignoring signal: "$signal" because we are busy.');
       return;
     }
     _processingUserRequest = true;
@@ -1621,7 +1647,7 @@ class TerminalHandler {
   }
 
   Future<void> _cleanUp(io.ProcessSignal signal) async {
-    globals.terminal.singleCharMode = false;
+    _terminal.singleCharMode = false;
     await subscription?.cancel();
     await residentRunner.cleanupAfterSignal();
   }
@@ -1660,43 +1686,15 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
   }
 }
 
-class DevtoolsLauncher {
-  io.HttpServer _devtoolsServer;
-  Future<void> launch(Uri observatoryAddress) async {
-    try {
-      await serve();
-      await devtools_server.launchDevTools(
-        <String, dynamic>{
-          'reuseWindows': true,
-        },
-        observatoryAddress,
-        'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
-        false,  // headless mode,
-        false,  // machine mode
-      );
-    } on Exception catch (e, st) {
-      globals.printTrace('Failed to launch DevTools: $e\n$st');
-    }
-  }
+/// A launcher for the devtools debugger and analysis tool.
+abstract class DevtoolsLauncher {
+  Future<void> launch(Uri observatoryAddress);
 
-  Future<DevToolsServerAddress> serve() async {
-    try {
-      _devtoolsServer ??= await devtools_server.serveDevTools(
-        enableStdinCommands: false,
-      );
-      return DevToolsServerAddress(_devtoolsServer.address.host, _devtoolsServer.port);
-    } on Exception catch (e, st) {
-      globals.printTrace('Failed to serve DevTools: $e\n$st');
-      return null;
-    }
-  }
+  Future<DevToolsServerAddress> serve();
 
-  Future<void> close() async {
-    await _devtoolsServer?.close();
-    _devtoolsServer = null;
-  }
+  Future<void> close();
 
-  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>() ?? DevtoolsLauncher();
+  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>();
 }
 
 class DevToolsServerAddress {

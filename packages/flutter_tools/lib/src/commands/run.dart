@@ -97,6 +97,11 @@ class RunCommand extends RunCommandBase {
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraFrontendOptions();
     addEnableExperimentation(hide: !verboseHelp);
+
+    // By default, the app should to publish the VM service port over mDNS.
+    // This will allow subsequent "flutter attach" commands to connect to the VM
+    // without needing to know the port.
+    addPublishPort(enabledByDefault: true, verboseHelp: verboseHelp);
     argParser
       ..addFlag('start-paused',
         negatable: false,
@@ -407,6 +412,7 @@ class RunCommand extends RunCommandBase {
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
+        disablePortPublication: disablePortPublication,
         ddsPort: ddsPort,
         verboseSystemLogs: boolArg('verbose-system-logs'),
         initializePlatform: boolArg('web-initialize-platform'),
@@ -531,6 +537,7 @@ class RunCommand extends RunCommandBase {
           target: stringArg('target'),
           buildInfo: getBuildInfo(),
           userIdentifier: userIdentifier,
+          platform: globals.platform,
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner
@@ -591,7 +598,12 @@ class RunCommand extends RunCommandBase {
       (_) {
         appStartedTime = globals.systemClock.now();
         if (stayResident) {
-          TerminalHandler(runner)
+          TerminalHandler(
+            runner,
+            logger: globals.logger,
+            terminal: globals.terminal,
+            signals: globals.signals,
+          )
             ..setupTerminal()
             ..registerSignalHandlers();
         }
