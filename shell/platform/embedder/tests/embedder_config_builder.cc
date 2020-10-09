@@ -217,6 +217,14 @@ void EmbedderConfigBuilder::AddCommandLineArgument(std::string arg) {
   command_line_arguments_.emplace_back(std::move(arg));
 }
 
+void EmbedderConfigBuilder::AddDartEntrypointArgument(std::string arg) {
+  if (arg.size() == 0) {
+    return;
+  }
+
+  dart_entrypoint_arguments_.emplace_back(std::move(arg));
+}
+
 void EmbedderConfigBuilder::SetPlatformTaskRunner(
     const FlutterTaskRunnerDescription* runner) {
   if (runner == nullptr) {
@@ -315,6 +323,23 @@ UniqueEngine EmbedderConfigBuilder::SetupEngine(bool run) const {
     // embedder config builder.
     project_args.command_line_argv = nullptr;
     project_args.command_line_argc = 0;
+  }
+
+  std::vector<const char*> dart_args;
+  dart_args.reserve(dart_entrypoint_arguments_.size());
+
+  for (const auto& arg : dart_entrypoint_arguments_) {
+    dart_args.push_back(arg.c_str());
+  }
+
+  if (dart_args.size() > 0) {
+    project_args.dart_entrypoint_argv = dart_args.data();
+    project_args.dart_entrypoint_argc = dart_args.size();
+  } else {
+    // Clear it out in case this is not the first engine launch from the
+    // embedder config builder.
+    project_args.dart_entrypoint_argv = nullptr;
+    project_args.dart_entrypoint_argc = 0;
   }
 
   auto result =
