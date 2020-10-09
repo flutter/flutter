@@ -146,7 +146,7 @@ class RuntimeController : public PlatformConfigurationClient {
   ///             If the isolate is not running, these metrics will be saved and
   ///             flushed to the isolate when it starts.
   ///
-  /// @param[in]  metrics  The viewport metrics.
+  /// @param[in]  metrics  The window's viewport metrics.
   ///
   /// @return     If the window metrics were forwarded to the running isolate.
   ///
