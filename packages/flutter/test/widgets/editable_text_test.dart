@@ -5054,7 +5054,7 @@ void main() {
     // Nothing called when only the remote changes.
     expect(log.length, 0);
 
-    // Hide the keyboard
+    // Hide the keyboard.
     focusNode.unfocus();
     await tester.pump();
 
