@@ -221,7 +221,7 @@ void main() {
         ),
       ),
     );
-    
+
     final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container));
     expect(tester.widget<Container>(tableContainerFinder).decoration, decoration);
 
