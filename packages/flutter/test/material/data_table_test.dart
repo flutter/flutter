@@ -471,41 +471,35 @@ void main() {
         ),
       ),
     ));
-    expect(tester.renderObject<RenderBox>(
-      find.widgetWithText(Container, 'Name')
-    ).size.height, 56.0); // This is the header row height
-    expect(tester.renderObject<RenderBox>(
-      find.widgetWithText(Container, 'Frozen yogurt')
-    ).size.height, 48.0); // This is the data row height
+
+    // The finder matches with the Container of the cell content, as well as the
+    // Container wrapping the whole table. The first one is used to test row
+    // heights.
+    Finder findFirstContainerFor(String text) => find.widgetWithText(Container, text).first;
+
+    expect(tester.getSize(findFirstContainerFor('Name')).height, 56.0);
+    expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 48.0);
 
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildCustomTable(headingRowHeight: 48.0)),
     ));
-    expect(tester.renderObject<RenderBox>(
-      find.widgetWithText(Container, 'Name')
-    ).size.height, 48.0);
+    expect(tester.getSize(findFirstContainerFor('Name')).height, 48.0);
 
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildCustomTable(headingRowHeight: 64.0)),
     ));
-    expect(tester.renderObject<RenderBox>(
-      find.widgetWithText(Container, 'Name')
-    ).size.height, 64.0);
+    expect(tester.getSize(findFirstContainerFor('Name')).height, 64.0);
 
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildCustomTable(dataRowHeight: 30.0)),
     ));
-    expect(tester.renderObject<RenderBox>(
-      find.widgetWithText(Container, 'Frozen yogurt')
-    ).size.height, 30.0);
+    expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 30.0);
 
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildCustomTable(dataRowHeight: 56.0)),
     ));
-    expect(tester.renderObject<RenderBox>(
-      find.widgetWithText(Container, 'Frozen yogurt')
-    ).size.height, 56.0);
+    expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 56.0);
   });
 
   testWidgets('DataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
@@ -1303,4 +1297,56 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('DataTable renders with border and background decoration', (WidgetTester tester) async {
+    const double width = 800;
+    const double height = 600;
+    const double borderHorizontal = 5.0;
+    const double borderVertical = 10.0;
+    const Color borderColor = Color(0xff2196f3);
+    const Color backgroundColor = Color(0xfff5f5f5);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DataTable(
+          decoration: const BoxDecoration(
+            color: backgroundColor,
+            border: Border.symmetric(
+              vertical: BorderSide(width: borderVertical, color: borderColor),
+              horizontal: BorderSide(width: borderHorizontal, color: borderColor),
+            ),
+          ),
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Col1')),
+          ],
+          rows: const <DataRow>[
+            DataRow(cells: <DataCell>[DataCell(Text('1'))]),
+          ],
+        ),
+      ),
+    );
+
+    expect(
+      find.ancestor(of: find.byType(Table), matching: find.byType(Container)),
+      paints..rect(
+        rect: const Rect.fromLTRB(0.0, 0.0, width, height),
+        color: backgroundColor,
+      ),
+    );
+    expect(
+      find.ancestor(of: find.byType(Table), matching: find.byType(Container)),
+      paints
+        ..path(color: borderColor)
+        ..path(color: borderColor)
+        ..path(color: borderColor)
+        ..path(color: borderColor),
+    );
+    expect(
+      tester.getTopLeft(find.byType(Table)),
+      const Offset(borderVertical, borderHorizontal),
+    );
+    expect(
+      tester.getBottomRight(find.byType(Table)),
+      const Offset(width - borderVertical, height - borderHorizontal),
+    );
+  });
 }
