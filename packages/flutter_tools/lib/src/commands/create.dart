@@ -58,12 +58,6 @@ class CreateCommand extends FlutterCommand {
         'whether to run it in offline mode or not. In offline mode, it will need to '
         'have all dependencies already available in the pub cache to succeed.',
     );
-    argParser.addFlag(
-      'with-driver-test',
-      negatable: true,
-      defaultsTo: false,
-      help: "Also add a flutter_driver dependency and generate a sample 'flutter drive' test.",
-    );
     argParser.addOption(
       'template',
       abbr: 't',
@@ -404,7 +398,6 @@ class CreateCommand extends FlutterCommand {
       projectName: projectName,
       projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
-      renderDriverTest: boolArg('with-driver-test'),
       withPluginHook: generatePlugin,
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
@@ -721,7 +714,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
     String androidLanguage,
     String iosLanguage,
     String flutterRoot,
-    bool renderDriverTest = false,
     bool withPluginHook = false,
     bool ios = false,
     bool android = false,
@@ -755,7 +747,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android_common.minApiLevel,
       'androidSdkVersion': kAndroidSdkMinVersion,
-      'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
       'pluginClassSnakeCase': pluginClassSnakeCase,
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
