@@ -384,6 +384,10 @@ void main() {
     );
     expect(tester.takeException(), isFlutterError);
     expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);
+
+    // Work-around for https://github.com/flutter/flutter/issues/65655.
+    await tester.pumpWidget(Container());
+    expect(tester.takeException(), isAssertionError);
   });
 
   testWidgets('MaterialApp with builder and no route information works.', (WidgetTester tester) async {
@@ -979,6 +983,17 @@ void main() {
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
+  });
+
+  testWidgets('MaterialApp.builder can build app without a Navigator', (WidgetTester tester) async {
+    Widget builderChild;
+    await tester.pumpWidget(MaterialApp(
+      builder: (BuildContext context, Widget child) {
+        builderChild = child;
+        return Container();
+      },
+    ));
+    expect(builderChild, isNull);
   });
 }
 

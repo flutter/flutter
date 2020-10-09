@@ -198,7 +198,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   Future<Evaluation> evaluate(WidgetTester tester) async {
     final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
     final RenderView renderView = tester.binding.renderView;
-    final OffsetLayer layer = renderView.debugLayer as OffsetLayer;
+    final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
     ui.Image? image;
     final ByteData byteData = (await tester.binding.runAsync<ByteData?>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
@@ -244,7 +244,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
         if (widget is Text) {
           final TextStyle effectiveTextStyle = widget.style == null || widget.style!.inherit
-              ? defaultTextStyle.style!.merge(widget.style)
+              ? defaultTextStyle.style.merge(widget.style)
               : widget.style!;
           fontSize = effectiveTextStyle.fontSize;
           isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
@@ -370,7 +370,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
     // Obtain rendered image.
 
     final RenderView renderView = tester.binding.renderView;
-    final OffsetLayer layer = renderView.debugLayer as OffsetLayer;
+    final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
     ui.Image? image;
     final ByteData byteData = (await tester.binding.runAsync<ByteData?>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
@@ -383,7 +383,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
     // How to evaluate a single element.
 
     Evaluation evaluateElement(Element element) {
-      final RenderBox renderObject = element.renderObject as RenderBox;
+      final RenderBox renderObject = element.renderObject! as RenderBox;
 
       final Rect originalPaintBounds = renderObject.paintBounds;
 

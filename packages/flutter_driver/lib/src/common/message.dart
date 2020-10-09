@@ -15,8 +15,8 @@ abstract class Command {
   Command.deserialize(Map<String, String> json)
     : timeout = _parseTimeout(json);
 
-  static Duration _parseTimeout(Map<String, String> json) {
-    final String timeout = json['timeout'];
+  static Duration? _parseTimeout(Map<String, String> json) {
+    final String? timeout = json['timeout'];
     if (timeout == null)
       return null;
     return Duration(milliseconds: int.parse(timeout));
@@ -27,7 +27,7 @@ abstract class Command {
   /// Defaults to no timeout, because it is common for operations to take oddly
   /// long in test environments (e.g. because the test host is overloaded), and
   /// having timeouts essentially means having race conditions.
-  final Duration timeout;
+  final Duration? timeout;
 
   /// Identifies the type of the command object and of the handler.
   String get kind;
@@ -53,7 +53,7 @@ abstract class Command {
       'command': kind,
     };
     if (timeout != null)
-      result['timeout'] = '${timeout.inMilliseconds}';
+      result['timeout'] = '${timeout!.inMilliseconds}';
     return result;
   }
 }

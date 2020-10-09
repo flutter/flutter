@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -194,8 +195,9 @@ flutter_project:lib/
         'info $analyzerSeparator Avoid empty else statements',
         'info $analyzerSeparator Avoid empty statements',
         'info $analyzerSeparator The declaration \'_incrementCounter\' isn\'t',
+        'warning $analyzerSeparator The parameter \'onPressed\' is required',
       ],
-      exitMessageContains: '3 issues found.',
+      exitMessageContains: '4 issues found.',
       toolExit: true,
       exitCode: 1,
     );
@@ -240,15 +242,14 @@ flutter_project:lib/
           'Analyzing',
           'info $analyzerSeparator The declaration \'_incrementCounter\' isn\'t',
           'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
+          'warning $analyzerSeparator The parameter \'onPressed\' is required',
         ],
-        exitMessageContains: '2 issues found.',
+        exitMessageContains: '3 issues found.',
         toolExit: true,
         exitCode: 1,
       );
     } finally {
-      if (optionsFile.existsSync()) {
-        optionsFile.deleteSync();
-      }
+      ErrorHandlingFileSystem.deleteIfExists(optionsFile);
     }
   });
 

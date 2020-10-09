@@ -341,6 +341,25 @@ void main() {
     expect(listTile.trailing.runtimeType, Switch);
   });
 
+  testWidgets('SwitchListTile respects shape', (WidgetTester tester) async {
+    const ShapeBorder shapeBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.horizontal(right: Radius.circular(100))
+    );
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: SwitchListTile(
+          value: true,
+          onChanged: null,
+          title: Text('Title'),
+          shape: shapeBorder,
+        ),
+      ),
+    ));
+
+    expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
+  });
+
   testWidgets('SwitchListTile.tileColor is passed into the inner ListTile', (WidgetTester tester) async {
     const Color tileColor = Colors.red;
 
