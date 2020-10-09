@@ -249,7 +249,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     if (_draggingFeedbackSize == null) {
       return _defaultDropAreaExtent;
     }
-    double dropAreaWithoutMargin;
+    final double dropAreaWithoutMargin;
     switch (widget.scrollDirection) {
       case Axis.horizontal:
         dropAreaWithoutMargin = _draggingFeedbackSize!.width;

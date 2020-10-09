@@ -479,7 +479,7 @@ class RenderAspectRatio extends RenderProxyBox {
       return constraints.smallest;
 
     double width = constraints.maxWidth;
-    final double height;
+    double height;
 
     // We default to picking the height based on the width, but if the width
     // would be infinite, that's not sensible so we try to infer the height

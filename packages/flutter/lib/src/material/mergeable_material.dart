@@ -528,7 +528,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
     final List<Widget> widgets = <Widget>[];
     List<Widget> slices = <Widget>[];
-    final int i;
+    int i;
 
     for (i = 0; i < _children.length; i += 1) {
       if (_children[i] is MaterialGap) {
