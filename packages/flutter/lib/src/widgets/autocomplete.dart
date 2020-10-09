@@ -14,7 +14,7 @@ import 'overlay.dart';
 /// A type for getting a list of options based on a String.
 ///
 /// See also:
-///   * [AutocompleteCore.buildOptions], which is of this type.
+///   * [AutocompleteCore.optionsBuilder], which is of this type.
 typedef AutocompleteBuildOptions<T> = List<T> Function(TextEditingValue textEditingValue);
 
 /// A type for indicating the selection of an autocomplete option.
@@ -48,7 +48,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to create a very basic autocomplete widget using the
-/// [fieldBuilder] and [optionsBuilder] parameters.
+/// [fieldViewBuilder] and [optionsViewBuilder] parameters.
 ///
 /// ```dart imports
 /// import 'package:flutter/widgets.dart';
@@ -68,12 +68,12 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return AutocompleteCore<String>(
-///       buildOptions: (TextEditingValue textEditingValue) {
+///       optionsBuilder: (TextEditingValue textEditingValue) {
 ///         return _kOptions.where((String option) {
 ///           return option.contains(textEditingValue.text.toLowerCase());
 ///         }).toList();
 ///       },
-///       fieldBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+///       fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
 ///         return TextFormField(
 ///           controller: textEditingController,
 ///           onFieldSubmitted: (String value) {
@@ -81,7 +81,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///           },
 ///         );
 ///       },
-///       optionsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
+///       optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
 ///         return Material(
 ///           elevation: 4.0,
 ///           child: Container(
@@ -152,13 +152,13 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return AutocompleteCore<User>(
-///       buildOptions: (TextEditingValue textEditingValue) {
+///       optionsBuilder: (TextEditingValue textEditingValue) {
 ///         return _kUserOptions.where((User option) {
 ///           return option.toString().contains(textEditingValue.text.toLowerCase());
 ///         }).toList();
 ///       },
 ///       displayStringForOption: _displayStringForOption,
-///       fieldBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+///       fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
 ///         return TextFormField(
 ///           controller: textEditingController,
 ///           onFieldSubmitted: (String value) {
@@ -166,7 +166,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///           },
 ///         );
 ///       },
-///       optionsBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> options) {
+///       optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> options) {
 ///         return SizedBox(
 ///           height: 200.0,
 ///           child: Material(
@@ -269,7 +269,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///                 },
 ///               ),
 ///               AutocompleteCore<String>(
-///                 buildOptions: (TextEditingValue textEditingValue) {
+///                 optionsBuilder: (TextEditingValue textEditingValue) {
 ///                   return _kOptions.where((String option) {
 ///                     return option.contains(textEditingValue.text.toLowerCase());
 ///                   }).toList();
@@ -279,7 +279,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///                     _autocompleteSelection = selection;
 ///                   });
 ///                 },
-///                 fieldBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+///                 fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
 ///                   return TextFormField(
 ///                     controller: textEditingController,
 ///                     decoration: InputDecoration(
@@ -296,7 +296,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///                     },
 ///                   );
 ///                 },
-///                 optionsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
+///                 optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
 ///                   return Material(
 ///                     elevation: 4.0,
 ///                     child: SizedBox(
@@ -362,21 +362,21 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 class AutocompleteCore<T> extends StatefulWidget {
   /// Create an instance of AutocompleteCore.
   ///
-  /// [fieldBuilder] and [optionsBuilder] must not be null.
+  /// [fieldViewBuilder] and [optionsViewBuilder] must not be null.
   const AutocompleteCore({
-    required this.fieldBuilder,
+    required this.fieldViewBuilder,
+    required this.optionsViewBuilder,
     required this.optionsBuilder,
-    required this.buildOptions,
     this.displayStringForOption = _defaultStringForOption,
     this.onSelected,
-  }) : assert(fieldBuilder != null),
-       assert(optionsBuilder != null);
+  }) : assert(fieldViewBuilder != null),
+       assert(optionsViewBuilder != null);
 
   /// Builds the field whose input is used to get the options.
-  final AutocompleteFieldBuilder fieldBuilder;
+  final AutocompleteFieldBuilder fieldViewBuilder;
 
   /// Builds the selectable options widgets from a list of options objects.
-  final AutocompleteOptionsBuilder<T> optionsBuilder;
+  final AutocompleteOptionsBuilder<T> optionsViewBuilder;
 
   /// Returns the string to display in the field when the option is selected.
   ///
@@ -395,7 +395,7 @@ class AutocompleteCore<T> extends StatefulWidget {
 
   /// A function that returns the current selectable options objects given the
   /// current TextEditingValue.
-  final AutocompleteBuildOptions<T> buildOptions;
+  final AutocompleteBuildOptions<T> optionsBuilder;
 
   // The default way to convert an option to a string.
   static String _defaultStringForOption(dynamic option) {
@@ -427,7 +427,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 
   // Called when _textEditingController changes.
   void _onChangedField() {
-    final List<T> options = widget.buildOptions(
+    final List<T> options = widget.optionsBuilder(
       _textEditingController.value,
     );
     assert(options != null);
@@ -444,7 +444,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     _updateOverlay();
   }
 
-  // Called from fieldBuilder when the user submits the field.
+  // Called from fieldViewBuilder when the user submits the field.
   void _onFieldSubmitted() {
     if (_options.isEmpty) {
       return;
@@ -478,7 +478,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
       _floatingOptions = OverlayEntry(
         builder: (BuildContext context) {
           return _FloatingOptions<T>(
-            optionsBuilder: widget.optionsBuilder,
+            optionsViewBuilder: widget.optionsViewBuilder,
             fieldSize: renderBox.size,
             layerLink: _optionsLayerLink,
             onSelected: _select,
@@ -524,7 +524,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
       key: _fieldKey,
       child: CompositedTransformTarget(
         link: _optionsLayerLink,
-        child: widget.fieldBuilder(
+        child: widget.fieldViewBuilder(
           context,
           _textEditingController,
           _onFieldSubmitted,
@@ -539,19 +539,19 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 class _FloatingOptions<T> extends StatelessWidget {
   const _FloatingOptions({
     Key? key,
-    required this.optionsBuilder,
+    required this.optionsViewBuilder,
     required this.fieldSize,
     required this.layerLink,
     required this.onSelected,
     required this.options,
-  }) : assert(optionsBuilder != null),
+  }) : assert(optionsViewBuilder != null),
        assert(fieldSize != null),
        assert(layerLink != null),
        assert(onSelected != null),
        assert(options != null),
        super(key: key);
 
-  final AutocompleteOptionsBuilder<T> optionsBuilder;
+  final AutocompleteOptionsBuilder<T> optionsViewBuilder;
   final Size fieldSize;
   final LayerLink layerLink;
   final AutocompleteOnSelected<T> onSelected;
@@ -565,7 +565,7 @@ class _FloatingOptions<T> extends StatelessWidget {
         link: layerLink,
         showWhenUnlinked: false,
         targetAnchor: Alignment.bottomLeft,
-        child: optionsBuilder(context, onSelected, options),
+        child: optionsViewBuilder(context, onSelected, options),
       ),
     );
   }
