@@ -6,7 +6,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
 
-import '../../src/common.dart';
+import '../src/common.dart';
 
 void main() {
   testWithoutContext('ProxyValidator does not show if HTTP_PROXY is not set', () {
