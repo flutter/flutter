@@ -16,7 +16,6 @@ library flutter_driver;
 export 'src/common/diagnostics_tree.dart';
 export 'src/common/enum_util.dart';
 export 'src/common/error.dart';
-export 'src/common/factory.dart';
 export 'src/common/find.dart';
 export 'src/common/frame_sync.dart';
 export 'src/common/fuchsia_compat.dart';
