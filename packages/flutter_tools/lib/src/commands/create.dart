@@ -656,11 +656,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       generatedCount += _injectGradleWrapper(project);
     }
 
-    if (boolArg('with-driver-test')) {
-      final Directory testDirectory = directory.childDirectory('test_driver');
-      generatedCount += await _renderTemplate('driver', testDirectory, templateContext, overwrite: overwrite);
-    }
-
     if (boolArg('pub')) {
       await pub.get(
         context: PubContext.create,
