@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_driver/driver_extension.dart';
-import 'package:flutter_driver/src/common/find.dart';
+import 'package:flutter_driver/src/common/factory.dart';
 import 'package:flutter_driver/src/common/message.dart';
 
 import 'stub_command.dart';

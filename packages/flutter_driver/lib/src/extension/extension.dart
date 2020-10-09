@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_driver/flutter_driver.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -16,7 +17,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../common/create_finder_factory.dart';
 import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
 import '../common/find.dart';
@@ -188,7 +188,7 @@ abstract class CommandExtension {
 /// This is not normally used directly. It is instantiated automatically when
 /// calling [enableFlutterDriverExtension].
 @visibleForTesting
-class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory {
+class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory, CommandDeserializerFactory, CommandHandlerFactory {
   /// Creates an object to manage a Flutter Driver connection.
   FlutterDriverExtension(
     this._requestDataHandler,
@@ -197,54 +197,6 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory 
     List<CommandExtension> commands = const <CommandExtension>[],
   }) : assert(finders != null) {
     _testTextInput.register();
-
-    _commandHandlers.addAll(<String, CommandHandlerCallback>{
-      'get_health': _getHealth,
-      'get_layer_tree': _getLayerTree,
-      'get_render_tree': _getRenderTree,
-      'enter_text': _enterText,
-      'get_text': _getText,
-      'request_data': _requestData,
-      'scroll': _scroll,
-      'scrollIntoView': _scrollIntoView,
-      'set_frame_sync': _setFrameSync,
-      'set_semantics': _setSemantics,
-      'set_text_entry_emulation': _setTextEntryEmulation,
-      'tap': _tap,
-      'waitFor': _waitFor,
-      'waitForAbsent': _waitForAbsent,
-      'waitForCondition': _waitForCondition,
-      'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
-      'waitUntilNoPendingFrame': _waitUntilNoPendingFrame,
-      'waitUntilFirstFrameRasterized': _waitUntilFirstFrameRasterized,
-      'get_semantics_id': _getSemanticsId,
-      'get_offset': _getOffset,
-      'get_diagnostics_tree': _getDiagnosticsTree,
-    });
-
-    _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
-      'get_health': (Map<String, String> params) => GetHealth.deserialize(params),
-      'get_layer_tree': (Map<String, String> params) => GetLayerTree.deserialize(params),
-      'get_render_tree': (Map<String, String> params) => GetRenderTree.deserialize(params),
-      'enter_text': (Map<String, String> params) => EnterText.deserialize(params),
-      'get_text': (Map<String, String> params) => GetText.deserialize(params, this),
-      'request_data': (Map<String, String> params) => RequestData.deserialize(params),
-      'scroll': (Map<String, String> params) => Scroll.deserialize(params, this),
-      'scrollIntoView': (Map<String, String> params) => ScrollIntoView.deserialize(params, this),
-      'set_frame_sync': (Map<String, String> params) => SetFrameSync.deserialize(params),
-      'set_semantics': (Map<String, String> params) => SetSemantics.deserialize(params),
-      'set_text_entry_emulation': (Map<String, String> params) => SetTextEntryEmulation.deserialize(params),
-      'tap': (Map<String, String> params) => Tap.deserialize(params, this),
-      'waitFor': (Map<String, String> params) => WaitFor.deserialize(params, this),
-      'waitForAbsent': (Map<String, String> params) => WaitForAbsent.deserialize(params, this),
-      'waitForCondition': (Map<String, String> params) => WaitForCondition.deserialize(params),
-      'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params),
-      'waitUntilNoPendingFrame': (Map<String, String> params) => WaitUntilNoPendingFrame.deserialize(params),
-      'waitUntilFirstFrameRasterized': (Map<String, String> params) => WaitUntilFirstFrameRasterized.deserialize(params),
-      'get_semantics_id': (Map<String, String> params) => GetSemanticsId.deserialize(params, this),
-      'get_offset': (Map<String, String> params) => GetOffset.deserialize(params, this),
-      'get_diagnostics_tree': (Map<String, String> params) => GetDiagnosticsTree.deserialize(params, this),
-    });
 
     for(final FinderExtension finder in finders) {
       _finderExtensions[finder.finderType] = finder;
@@ -258,21 +210,15 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory 
   final TestTextInput _testTextInput = TestTextInput();
 
   final DataHandler? _requestDataHandler;
+
   final bool _silenceErrors;
 
   void _log(String message) {
     driverLog('FlutterDriverExtension', message);
   }
 
-  final WidgetController _prober = LiveWidgetController(WidgetsBinding.instance!);
-  final Map<String, CommandHandlerCallback> _commandHandlers = <String, CommandHandlerCallback>{};
-  final Map<String, CommandDeserializerCallback> _commandDeserializers = <String, CommandDeserializerCallback>{};
   final Map<String, FinderExtension> _finderExtensions = <String, FinderExtension>{};
   final Map<String, CommandExtension> _commandExtensions = <String, CommandExtension>{};
-
-  /// With [_frameSync] enabled, Flutter Driver will wait to perform an action
-  /// until there are no pending frames in the app under test.
-  bool _frameSync = true;
 
   /// Processes a driver command configured by [params] and returns a result
   /// as an arbitrary JSON object.
@@ -288,15 +234,10 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory 
   Future<Map<String, dynamic>> call(Map<String, String> params) async {
     final String commandKind = params['command']!;
     try {
-      final CommandHandlerCallback commandHandler = _commandHandlers[commandKind]!;
-      final CommandDeserializerCallback commandDeserializer =
-          _commandDeserializers[commandKind]!;
-      if (commandHandler == null || commandDeserializer == null)
-        throw 'Extension $_extensionMethod does not support command $commandKind';
-      final Command command = commandDeserializer(params);
+      final Command command = deserializeCommand(params, this);
       assert(WidgetsBinding.instance!.isRootWidgetAttached || !command.requiresRootWidgetAttached,
           'No root widget is attached; have you remembered to call runApp()?');
-      Future<Result?> responseFuture = commandHandler(command);
+      Future<Result?> responseFuture = handleCommand(command);
       if (command.timeout != null)
         responseFuture = responseFuture.timeout(command.timeout ?? Duration.zero);
       final Result? response = await responseFuture;
@@ -320,65 +261,6 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory 
     };
   }
 
-  Future<Health> _getHealth(Command command) async => const Health(HealthStatus.ok);
-
-  Future<LayerTree> _getLayerTree(Command command) async {
-    return LayerTree(RendererBinding.instance?.renderView.debugLayer?.toStringDeep());
-  }
-
-  Future<RenderTree> _getRenderTree(Command command) async {
-    return RenderTree(RendererBinding.instance?.renderView.toStringDeep());
-  }
-
-  // This can be used to wait for the first frame being rasterized during app launch.
-  @Deprecated(
-    'This method has been deprecated in favor of _waitForCondition. '
-    'This feature was deprecated after v1.9.3.'
-  )
-  Future<Result?> _waitUntilFirstFrameRasterized(Command command) async {
-    await WidgetsBinding.instance!.waitUntilFirstFrameRasterized;
-    return null;
-  }
-
-  // Waits until at the end of a frame the provided [condition] is [true].
-  Future<void> _waitUntilFrame(bool condition(), [ Completer<void>? completer ]) {
-    completer ??= Completer<void>();
-    if (!condition()) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration timestamp) {
-        _waitUntilFrame(condition, completer);
-      });
-    } else {
-      completer.complete();
-    }
-    return completer.future;
-  }
-
-  /// Runs `finder` repeatedly until it finds one or more [Element]s.
-  Future<Finder> _waitForElement(Finder finder) async {
-    if (_frameSync)
-      await _waitUntilFrame(() => SchedulerBinding.instance!.transientCallbackCount == 0);
-
-    await _waitUntilFrame(() => finder.evaluate().isNotEmpty);
-
-    if (_frameSync)
-      await _waitUntilFrame(() => SchedulerBinding.instance!.transientCallbackCount == 0);
-
-    return finder;
-  }
-
-  /// Runs `finder` repeatedly until it finds zero [Element]s.
-  Future<Finder> _waitForAbsentElement(Finder finder) async {
-    if (_frameSync)
-      await _waitUntilFrame(() => SchedulerBinding.instance!.transientCallbackCount == 0);
-
-    await _waitUntilFrame(() => finder.evaluate().isEmpty);
-
-    if (_frameSync)
-      await _waitUntilFrame(() => SchedulerBinding.instance!.transientCallbackCount == 0);
-
-    return finder;
-  }
-
   @override
   SerializableFinder deserializeFinder(Map<String, String> json) {
     final String? finderType = json['finderType'];
@@ -398,251 +280,23 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory 
     return super.createFinder(finder);
   }
 
-  Future<TapResult> _tap(Command command) async {
-    final Tap tapCommand = command as Tap;
-    final Finder computedFinder = await _waitForElement(
-      createFinder(tapCommand.finder).hitTestable()
-    );
-    await _prober.tap(computedFinder);
-    return const TapResult();
-  }
-
-  Future<WaitForResult> _waitFor(Command command) async {
-    final WaitFor waitForCommand = command as WaitFor;
-    await _waitForElement(createFinder(waitForCommand.finder));
-    return const WaitForResult();
-  }
-
-  Future<WaitForAbsentResult> _waitForAbsent(Command command) async {
-    final WaitForAbsent waitForAbsentCommand = command as WaitForAbsent;
-    await _waitForAbsentElement(createFinder(waitForAbsentCommand.finder));
-    return const WaitForAbsentResult();
-  }
-
-  Future<Result?> _waitForCondition(Command command) async {
-    assert(command != null);
-    final WaitForCondition waitForConditionCommand = command as WaitForCondition;
-    final WaitCondition condition = deserializeCondition(waitForConditionCommand.condition);
-    await condition.wait();
-    return null;
-  }
-
-  @Deprecated(
-    'This method has been deprecated in favor of _waitForCondition. '
-    'This feature was deprecated after v1.9.3.'
-  )
-  Future<Result?> _waitUntilNoTransientCallbacks(Command command) async {
-    if (SchedulerBinding.instance!.transientCallbackCount != 0)
-      await _waitUntilFrame(() => SchedulerBinding.instance!.transientCallbackCount == 0);
-    return null;
-  }
-
-  /// Returns a future that waits until no pending frame is scheduled (frame is synced).
-  ///
-  /// Specifically, it checks:
-  /// * Whether the count of transient callbacks is zero.
-  /// * Whether there's no pending request for scheduling a new frame.
-  ///
-  /// We consider the frame is synced when both conditions are met.
-  ///
-  /// This method relies on a Flutter Driver mechanism called "frame sync",
-  /// which waits for transient animations to finish. Persistent animations will
-  /// cause this to wait forever.
-  ///
-  /// If a test needs to interact with the app while animations are running, it
-  /// should avoid this method and instead disable the frame sync using
-  /// `set_frame_sync` method. See [FlutterDriver.runUnsynchronized] for more
-  /// details on how to do this. Note, disabling frame sync will require the
-  /// test author to use some other method to avoid flakiness.
-  ///
-  /// This method has been deprecated in favor of [_waitForCondition].
-  @Deprecated(
-    'This method has been deprecated in favor of _waitForCondition. '
-    'This feature was deprecated after v1.9.3.'
-  )
-  Future<Result?> _waitUntilNoPendingFrame(Command command) async {
-    await _waitUntilFrame(() {
-      return SchedulerBinding.instance!.transientCallbackCount == 0
-          && !SchedulerBinding.instance!.hasScheduledFrame;
-    });
-    return null;
-  }
-
-  Future<GetSemanticsIdResult> _getSemanticsId(Command command) async {
-    final GetSemanticsId semanticsCommand = command as GetSemanticsId;
-    final Finder target = await _waitForElement(createFinder(semanticsCommand.finder));
-    final Iterable<Element> elements = target.evaluate();
-    if (elements.length > 1) {
-      throw StateError('Found more than one element with the same ID: $elements');
-    }
-    final Element element = elements.single;
-    RenderObject? renderObject = element.renderObject;
-    SemanticsNode? node;
-    while (renderObject != null && node == null) {
-      node = renderObject.debugSemantics;
-      renderObject = renderObject.parent as RenderObject?;
-    }
-    if (node == null)
-      throw StateError('No semantics data found');
-    return GetSemanticsIdResult(node.id);
-  }
-
-  Future<GetOffsetResult> _getOffset(Command command) async {
-    final GetOffset getOffsetCommand = command as GetOffset;
-    final Finder finder = await _waitForElement(createFinder(getOffsetCommand.finder));
-    final Element element = finder.evaluate().single;
-    final RenderBox box = (element.renderObject as RenderBox?)!;
-    Offset localPoint;
-    switch (getOffsetCommand.offsetType) {
-      case OffsetType.topLeft:
-        localPoint = Offset.zero;
-        break;
-      case OffsetType.topRight:
-        localPoint = box.size.topRight(Offset.zero);
-        break;
-      case OffsetType.bottomLeft:
-        localPoint = box.size.bottomLeft(Offset.zero);
-        break;
-      case OffsetType.bottomRight:
-        localPoint = box.size.bottomRight(Offset.zero);
-        break;
-      case OffsetType.center:
-        localPoint = box.size.center(Offset.zero);
-        break;
-    }
-    final Offset globalPoint = box.localToGlobal(localPoint);
-    return GetOffsetResult(dx: globalPoint.dx, dy: globalPoint.dy);
-  }
-
-  Future<DiagnosticsTreeResult> _getDiagnosticsTree(Command command) async {
-    final GetDiagnosticsTree diagnosticsCommand = command as GetDiagnosticsTree;
-    final Finder finder = await _waitForElement(createFinder(diagnosticsCommand.finder));
-    final Element element = finder.evaluate().single;
-    DiagnosticsNode diagnosticsNode;
-    switch (diagnosticsCommand.diagnosticsType) {
-      case DiagnosticsType.renderObject:
-        diagnosticsNode = element.renderObject!.toDiagnosticsNode();
-        break;
-      case DiagnosticsType.widget:
-        diagnosticsNode = element.toDiagnosticsNode();
-        break;
-    }
-    return DiagnosticsTreeResult(diagnosticsNode.toJsonMap(DiagnosticsSerializationDelegate(
-      subtreeDepth: diagnosticsCommand.subtreeDepth,
-      includeProperties: diagnosticsCommand.includeProperties,
-    )));
-  }
-
-  Future<ScrollResult> _scroll(Command command) async {
-    final Scroll scrollCommand = command as Scroll;
-    final Finder target = await _waitForElement(createFinder(scrollCommand.finder));
-    final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.microsecondsPerSecond;
-    final Offset delta = Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
-    final Duration pause = scrollCommand.duration ~/ totalMoves;
-    final Offset startLocation = _prober.getCenter(target);
-    Offset currentLocation = startLocation;
-    final TestPointer pointer = TestPointer(1);
-    _prober.binding.handlePointerEvent(pointer.down(startLocation));
-    await Future<void>.value(); // so that down and move don't happen in the same microtask
-    for (int moves = 0; moves < totalMoves; moves += 1) {
-      currentLocation = currentLocation + delta;
-      _prober.binding.handlePointerEvent(pointer.move(currentLocation));
-      await Future<void>.delayed(pause);
-    }
-    _prober.binding.handlePointerEvent(pointer.up());
-
-    return const ScrollResult();
-  }
-
-  Future<ScrollResult> _scrollIntoView(Command command) async {
-    final ScrollIntoView scrollIntoViewCommand = command as ScrollIntoView;
-    final Finder target = await _waitForElement(createFinder(scrollIntoViewCommand.finder));
-    await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: scrollIntoViewCommand.alignment);
-    return const ScrollResult();
-  }
-
-  Future<GetTextResult> _getText(Command command) async {
-    final GetText getTextCommand = command as GetText;
-    final Finder target = await _waitForElement(createFinder(getTextCommand.finder));
-
-    final Widget widget = target.evaluate().single.widget;
-    String? text;
-
-    if (widget.runtimeType == Text) {
-      text = (widget as Text).data;
-    } else if (widget.runtimeType == RichText) {
-      final RichText richText = widget as RichText;
-      if (richText.text.runtimeType == TextSpan) {
-        text = (richText.text as TextSpan).text;
-      }
-    } else if (widget.runtimeType == TextField) {
-      text = (widget as TextField).controller?.text;
-    } else if (widget.runtimeType == TextFormField) {
-      text = (widget as TextFormField).controller?.text;
-    } else if (widget.runtimeType == EditableText) {
-      text = (widget as EditableText).controller.text;
+  @override
+  Command deserializeCommand(Map<String, String> params, DeserializeFinderFactory finderFactory) {
+    final String? kind = params['command'];
+    if(_commandExtensions.containsKey(kind)) {
+      return _commandExtensions[kind]!.deserialize(params, finderFactory);
     }
 
-    if (text == null) {
-      throw UnsupportedError('Type ${widget.runtimeType.toString()} is currently not supported by getText');
+    return super.deserializeCommand(params, finderFactory);
+  }
+
+  @override
+  Future<Result?> handleCommand(Command command) {
+    final String kind = command.kind;
+    if(_commandExtensions.containsKey(kind)) {
+      return _commandExtensions[kind]!.call(command);
     }
 
-    return GetTextResult(text);
-  }
-
-  Future<SetTextEntryEmulationResult> _setTextEntryEmulation(Command command) async {
-    final SetTextEntryEmulation setTextEntryEmulationCommand = command as SetTextEntryEmulation;
-    if (setTextEntryEmulationCommand.enabled) {
-      _testTextInput.register();
-    } else {
-      _testTextInput.unregister();
-    }
-    return const SetTextEntryEmulationResult();
-  }
-
-  Future<EnterTextResult> _enterText(Command command) async {
-    if (!_testTextInput.isRegistered) {
-      throw 'Unable to fulfill `FlutterDriver.enterText`. Text emulation is '
-            'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.';
-    }
-    final EnterText enterTextCommand = command as EnterText;
-    _testTextInput.enterText(enterTextCommand.text);
-    return const EnterTextResult();
-  }
-
-  Future<RequestDataResult> _requestData(Command command) async {
-    final RequestData requestDataCommand = command as RequestData;
-    return RequestDataResult(_requestDataHandler == null
-      ? 'No requestData Extension registered'
-      : await _requestDataHandler!(requestDataCommand.message));
-  }
-
-  Future<SetFrameSyncResult> _setFrameSync(Command command) async {
-    final SetFrameSync setFrameSyncCommand = command as SetFrameSync;
-    _frameSync = setFrameSyncCommand.enabled;
-    return const SetFrameSyncResult();
-  }
-
-  SemanticsHandle? _semantics;
-  bool get _semanticsIsEnabled => RendererBinding.instance!.pipelineOwner.semanticsOwner != null;
-
-  Future<SetSemanticsResult> _setSemantics(Command command) async {
-    final SetSemantics setSemanticsCommand = command as SetSemantics;
-    final bool semanticsWasEnabled = _semanticsIsEnabled;
-    if (setSemanticsCommand.enabled && _semantics == null) {
-      _semantics = RendererBinding.instance!.pipelineOwner.ensureSemantics();
-      if (!semanticsWasEnabled) {
-        // wait for the first frame where semantics is enabled.
-        final Completer<void> completer = Completer<void>();
-        SchedulerBinding.instance!.addPostFrameCallback((Duration d) {
-          completer.complete();
-        });
-        await completer.future;
-      }
-    } else if (!setSemanticsCommand.enabled && _semantics != null) {
-      _semantics!.dispose();
-      _semantics = null;
-    }
-    return SetSemanticsResult(semanticsWasEnabled != _semanticsIsEnabled);
+    return super.handleCommand(command);
   }
 }

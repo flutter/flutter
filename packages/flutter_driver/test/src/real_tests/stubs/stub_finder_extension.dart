@@ -4,7 +4,7 @@
 
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_driver/driver_extension.dart';
-import 'package:flutter_driver/src/common/create_finder_factory.dart';
+import 'package:flutter_driver/src/common/factory.dart';
 import 'package:flutter_test/src/finders.dart';
 import 'package:flutter_driver/src/common/find.dart';
 

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'enum_util.dart';
+import 'factory.dart';
 import 'find.dart';
 import 'message.dart';
 
