@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
+import 'layer.dart';
 import 'object.dart';
 
 /// A context in which a [FlowDelegate] paints.
@@ -383,11 +384,15 @@ class RenderFlow extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (clipBehavior == Clip.none) {
+      _clipRectLayer = null;
       _paintWithDelegate(context, offset);
     } else {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintWithDelegate, clipBehavior: clipBehavior);
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintWithDelegate,
+          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
     }
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
