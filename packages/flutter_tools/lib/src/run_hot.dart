@@ -1339,25 +1339,22 @@ class ReloadReportContents {
   factory ReloadReportContents.fromReloadReport(vm_service.ReloadReport report) {
     final List<ReasonForCancelling> reasons = <ReasonForCancelling>[];
     final Object notices = report.json['notices'];
-    if (notices is List<dynamic>) {
-      for (final Object notice in notices) {
-        if (notice is Map<String, dynamic>) {
-          reasons.add(
-            ReasonForCancelling(
-              message: notice['message'] is String
-                ? notice['message'] as String
-                : 'Unknown Error',
-            ),
-          );
-        }
+    if (notices is! List<dynamic>) {
+      return ReloadReportContents._(report.success, reasons, report);
+    }
+    for (final Object obj in notices as List<dynamic>) {
+      if (obj is! Map<String, dynamic>) {
+        continue;
       }
+      final Map<String, dynamic> notice = obj as Map<String, dynamic>;
+      reasons.add(ReasonForCancelling(
+        message: notice['message'] is String
+          ? notice['message'] as String
+          : 'Unknown Error',
+      ));
     }
 
-    return ReloadReportContents._(
-      report.success,
-      reasons,
-      report,
-    );
+    return ReloadReportContents._(report.success, reasons, report);
   }
 
   ReloadReportContents._(
