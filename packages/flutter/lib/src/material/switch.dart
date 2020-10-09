@@ -149,7 +149,7 @@ class Switch extends StatefulWidget {
   ///   },
   /// )
   /// ```
-  final ValueChanged<bool?>? onChanged;
+  final ValueChanged<bool>? onChanged;
 
   /// The color to use when this switch is on.
   ///
@@ -296,6 +296,12 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     setState(() {});
   }
 
+  void _handleValueChanged(bool? value) {
+    if (value != null) {
+      widget.onChanged!(value);
+    }
+  }
+
   Widget buildMaterialSwitch(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context)!;
@@ -350,7 +356,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
             activeTrackColor: activeTrackColor,
             inactiveTrackColor: inactiveTrackColor,
             configuration: createLocalImageConfiguration(context),
-            onChanged: widget.onChanged,
+            onChanged: enabled ? _handleValueChanged : null,
             additionalConstraints: BoxConstraints.tight(getSwitchSize(theme)),
             hasFocus: _focused,
             hovering: _hovering,

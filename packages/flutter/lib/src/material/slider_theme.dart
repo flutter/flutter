@@ -870,14 +870,14 @@ abstract class SliderComponentShape {
     Offset center, {
     required Animation<double> activationAnimation,
     required Animation<double> enableAnimation,
-    bool isDiscrete,
+    bool? isDiscrete,
     required TextPainter labelPainter,
     required RenderBox parentBox,
     required SliderThemeData sliderTheme,
     required TextDirection textDirection,
     required double value,
-    double textScaleFactor,
-    Size sizeWithOverflow,
+    double? textScaleFactor,
+    Size? sizeWithOverflow,
   });
 
   /// Special instance of [SliderComponentShape] to skip the thumb drawing.
@@ -927,7 +927,7 @@ abstract class SliderTickMarkShape {
   /// {@endtemplate}
   Size getPreferredSize({
     required SliderThemeData sliderTheme,
-    bool isEnabled,
+    required bool isEnabled,
   });
 
   /// Paints the slider track.
@@ -958,7 +958,7 @@ abstract class SliderTickMarkShape {
     required SliderThemeData sliderTheme,
     required Animation<double> enableAnimation,
     required Offset thumbCenter,
-    bool isEnabled,
+    required bool isEnabled,
     required TextDirection textDirection,
   });
 
@@ -2484,7 +2484,7 @@ class RoundSliderOverlayShape extends SliderComponentShape {
     Offset center, {
     required Animation<double> activationAnimation,
     required Animation<double> enableAnimation,
-    bool isDiscrete = false,
+    bool? isDiscrete = false,
     required TextPainter labelPainter,
     required RenderBox parentBox,
     required SliderThemeData sliderTheme,
