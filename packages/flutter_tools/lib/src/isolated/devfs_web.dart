@@ -926,6 +926,11 @@ class WebDevFS implements DevFS {
     'web',
     'dart_stack_trace_mapper.js',
   ));
+
+  @override
+  void resetLastCompiled() {
+    // Not used for web compilation.
+  }
 }
 
 class ReleaseAssetServer {
