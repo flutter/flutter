@@ -474,6 +474,33 @@ TEST_F(EmbedderTest, VMShutsDownWhenNoEnginesInProcess) {
 }
 
 //------------------------------------------------------------------------------
+///
+TEST_F(EmbedderTest, DartEntrypointArgs) {
+  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.AddDartEntrypointArgument("foo");
+  builder.AddDartEntrypointArgument("bar");
+  builder.SetDartEntrypoint("dart_entrypoint_args");
+  fml::AutoResetWaitableEvent callback_latch;
+  std::vector<std::string> callback_args;
+  auto nativeArgumentsCallback = [&callback_args,
+                                  &callback_latch](Dart_NativeArguments args) {
+    Dart_Handle exception = nullptr;
+    callback_args =
+        tonic::DartConverter<std::vector<std::string>>::FromArguments(
+            args, 0, exception);
+    callback_latch.Signal();
+  };
+  context.AddNativeCallback("NativeArgumentsCallback",
+                            CREATE_NATIVE_ENTRY(nativeArgumentsCallback));
+  auto engine = builder.LaunchEngine();
+  callback_latch.Wait();
+  ASSERT_EQ(callback_args[0], "foo");
+  ASSERT_EQ(callback_args[1], "bar");
+}
+
+//------------------------------------------------------------------------------
 /// These snapshots may be materialized from symbols and the size field may not
 /// be relevant. Since this information is redundant, engine launch should not
 /// be gated on a non-zero buffer size.
