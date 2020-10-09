@@ -4267,7 +4267,7 @@ void main() {
     // Build with a OutlineInputBorder.
     await tester.pumpWidget(getLabeledInputDecorator(true));
 
-    expect(tester.getSize(find.text(labelText)).width == labelWidth, isFalse);
+    expect(tester.getSize(find.text(labelText)).width > labelWidth, isTrue);
   });
 
   testWidgets('given enough space, constrained and unconstrained heights result in the same size widget', (WidgetTester tester) async {
