@@ -335,7 +335,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 ///  * [CupertinoTabScaffold], for applications that have a tab bar at the
 ///    bottom with multiple pages.
 ///  * [CupertinoPage], for a [Page] version of this class.
-class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
+class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T>, AllowsRouteWithPreviousTransitionMixin<T>{
   /// Creates a page route for use in an iOS designed app.
   ///
   /// The [builder], [maintainState], and [fullscreenDialog] arguments must not
