@@ -77,7 +77,6 @@ class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation
   @override
   final PointerEnterEventListener? onEnter;
 
-  @override
   final PointerHoverEventListener? onHover;
 
   @override

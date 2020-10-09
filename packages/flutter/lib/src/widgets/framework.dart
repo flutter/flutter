@@ -2112,33 +2112,52 @@ typedef ElementVisitor = void Function(Element element);
 /// widget can be used: the build context passed to the [Builder.builder]
 /// callback will be that of the [Builder] itself.
 ///
-/// For example, in the following snippet, the [ScaffoldState.showSnackBar]
+/// For example, in the following snippet, the [ScaffoldState.showBottomSheet]
 /// method is called on the [Scaffold] widget that the build method itself
 /// creates. If a [Builder] had not been used, and instead the `context`
 /// argument of the build method itself had been used, no [Scaffold] would have
 /// been found, and the [Scaffold.of] function would have returned null.
 ///
 /// ```dart
-///   @override
-///   Widget build(BuildContext context) {
-///     // here, Scaffold.of(context) returns null
-///     return Scaffold(
-///       appBar: AppBar(title: Text('Demo')),
-///       body: Builder(
-///         builder: (BuildContext context) {
-///           return TextButton(
-///             child: Text('BUTTON'),
-///             onPressed: () {
-///               // here, Scaffold.of(context) returns the locally created Scaffold
-///               Scaffold.of(context).showSnackBar(SnackBar(
-///                 content: Text('Hello.')
-///               ));
-///             }
-///           );
-///         }
-///       )
-///     );
-///   }
+/// @override
+/// Widget build(BuildContext context) {
+///   // here, Scaffold.of(context) returns null
+///   return Scaffold(
+///     appBar: const AppBar(title: Text('Demo')),
+///     body: Builder(
+///       builder: (BuildContext context) {
+///         return TextButton(
+///           child: const Text('BUTTON'),
+///           onPressed: () {
+///             Scaffold.of(context).showBottomSheet<void>(
+///               (BuildContext context) {
+///                 return Container(
+///                   alignment: Alignment.center,
+///                   height: 200,
+///                   color: Colors.amber,
+///                   child: Center(
+///                     child: Column(
+///                       mainAxisSize: MainAxisSize.min,
+///                       children: <Widget>[
+///                         const Text('BottomSheet'),
+///                         ElevatedButton(
+///                           child: const Text('Close BottomSheet'),
+///                           onPressed: () {
+///                             Navigator.pop(context),
+///                           },
+///                         )
+///                       ],
+///                     ),
+///                   ),
+///                 );
+///               },
+///             );
+///           },
+///         );
+///       },
+///     )
+///   );
+/// }
 /// ```
 ///
 /// The [BuildContext] for a particular widget can change location over time as
@@ -4507,7 +4526,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
       message = _stringify(details.exception) + '\nSee also: https://flutter.dev/docs/testing/errors';
       return true;
     }());
-    final dynamic exception = details.exception;
+    final Object exception = details.exception;
     return ErrorWidget.withDetails(message: message, error: exception is FlutterError ? exception : null);
   }
 
@@ -4604,7 +4623,7 @@ typedef TransitionBuilder = Widget Function(BuildContext context, Widget? child)
 /// See also:
 ///
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
-typedef ControlsWidgetBuilder = Widget Function(BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel });
+typedef ControlsWidgetBuilder = Widget Function(BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel });
 
 /// An [Element] that composes other [Element]s.
 ///
@@ -6293,7 +6312,7 @@ class DebugCreator {
 
 FlutterErrorDetails _debugReportException(
   DiagnosticsNode context,
-  dynamic exception,
+  Object exception,
   StackTrace? stack, {
   InformationCollector? informationCollector,
 }) {

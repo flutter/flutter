@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -15,21 +13,21 @@ import '../flutter_test_alternative.dart';
 typedef HandleEventCallback = void Function(PointerEvent event);
 
 class TestGestureFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
-  HandleEventCallback callback;
-  FrameCallback frameCallback;
-  Duration frameTime;
+  HandleEventCallback? callback;
+  FrameCallback? frameCallback;
+  Duration? frameTime;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
     if (callback != null)
-      callback(event);
+      callback?.call(event);
   }
 
   @override
   Duration get currentSystemFrameTimeStamp {
     assert(frameTime != null);
-    return frameTime;
+    return frameTime!;
   }
 
   @override
@@ -39,7 +37,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding, Schedul
   }
 }
 
-TestGestureFlutterBinding _binding = TestGestureFlutterBinding();
+TestGestureFlutterBinding? _binding;
 
 void ensureTestGestureBinding() {
   _binding ??= TestGestureFlutterBinding();
@@ -59,9 +57,9 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = events.add;
+    _binding!.callback = events.add;
 
-    ui.window.onPointerDataPacket(packet);
+    ui.window.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[1], isA<PointerUpEvent>());
@@ -77,9 +75,9 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = events.add;
+    _binding!.callback = events.add;
 
-    ui.window.onPointerDataPacket(packet);
+    ui.window.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[1], isA<PointerMoveEvent>());
@@ -99,13 +97,16 @@ void main() {
     );
 
     final List<PointerEvent> pointerRouterEvents = <PointerEvent>[];
-    GestureBinding.instance.pointerRouter.addGlobalRoute(pointerRouterEvents.add);
+    GestureBinding.instance!.pointerRouter.addGlobalRoute(pointerRouterEvents.add);
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = events.add;
+    _binding!.callback = events.add;
 
-    ui.window.onPointerDataPacket(packet);
-    expect(events.length, 0);
+    ui.window.onPointerDataPacket?.call(packet);
+    expect(events.length, 3);
+    expect(events[0], isA<PointerHoverEvent>());
+    expect(events[1], isA<PointerHoverEvent>());
+    expect(events[2], isA<PointerHoverEvent>());
     expect(pointerRouterEvents.length, 6,
         reason: 'pointerRouterEvents contains: $pointerRouterEvents');
     expect(pointerRouterEvents[0], isA<PointerAddedEvent>());
@@ -125,9 +126,9 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = events.add;
+    _binding!.callback = events.add;
 
-    ui.window.onPointerDataPacket(packet);
+    ui.window.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[1], isA<PointerCancelEvent>());
@@ -142,13 +143,13 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = (PointerEvent event) {
+    _binding!.callback = (PointerEvent event) {
       events.add(event);
       if (event is PointerDownEvent)
-        _binding.cancelPointer(event.pointer);
+        _binding!.cancelPointer(event.pointer);
     };
 
-    ui.window.onPointerDataPacket(packet);
+    ui.window.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[1], isA<PointerCancelEvent>());

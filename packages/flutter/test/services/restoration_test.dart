@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 import 'dart:typed_data';
@@ -25,9 +24,9 @@ void main() {
       });
 
       final RestorationManager manager = RestorationManager();
-      final Future<RestorationBucket> rootBucketFuture = manager.rootBucket;
-      RestorationBucket rootBucket;
-      rootBucketFuture.then((RestorationBucket bucket) {
+      final Future<RestorationBucket?> rootBucketFuture = manager.rootBucket;
+      RestorationBucket? rootBucket;
+      rootBucketFuture.then((RestorationBucket? bucket) {
         rootBucket = bucket;
       });
       expect(rootBucketFuture, isNotNull);
@@ -48,14 +47,14 @@ void main() {
       expect(rootBucket, isNotNull);
 
       // Root bucket contains the expected data.
-      expect(rootBucket.read<int>('value1'), 10);
-      expect(rootBucket.read<String>('value2'), 'Hello');
-      final RestorationBucket child = rootBucket.claimChild('child1', debugOwner: null);
+      expect(rootBucket!.read<int>('value1'), 10);
+      expect(rootBucket!.read<String>('value2'), 'Hello');
+      final RestorationBucket child = rootBucket!.claimChild('child1', debugOwner: null);
       expect(child.read<int>('another value'), 22);
 
       // Accessing the root bucket again completes synchronously with same bucket.
-      RestorationBucket synchronousBucket;
-      manager.rootBucket.then((RestorationBucket bucket) {
+      RestorationBucket? synchronousBucket;
+      manager.rootBucket.then((RestorationBucket? bucket) {
         synchronousBucket = bucket;
       });
       expect(synchronousBucket, isNotNull);
@@ -65,16 +64,15 @@ void main() {
     testWidgets('root bucket received from engine before retrieval', (WidgetTester tester) async {
       SystemChannels.restoration.setMethodCallHandler(null);
       final List<MethodCall> callsToEngine = <MethodCall>[];
-      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) {
+      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) async {
         callsToEngine.add(call);
-        return null;
       });
       final RestorationManager manager = RestorationManager();
 
       await _pushDataFromEngine(_createEncodedRestorationData1());
 
-      RestorationBucket rootBucket;
-      manager.rootBucket.then((RestorationBucket bucket) => rootBucket = bucket);
+      RestorationBucket? rootBucket;
+      manager.rootBucket.then((RestorationBucket? bucket) => rootBucket = bucket);
       // Root bucket is available synchronously.
       expect(rootBucket, isNotNull);
       // Engine was never asked.
@@ -91,24 +89,24 @@ void main() {
       });
       final RestorationManager manager = RestorationManager();
 
-      RestorationBucket rootBucket;
-      manager.rootBucket.then((RestorationBucket bucket) => rootBucket = bucket);
+      RestorationBucket? rootBucket;
+      manager.rootBucket.then((RestorationBucket? bucket) => rootBucket = bucket);
       expect(rootBucket, isNull);
       expect(callsToEngine.single.method, 'get');
 
       await _pushDataFromEngine(_createEncodedRestorationData1());
       expect(rootBucket, isNotNull);
-      expect(rootBucket.read<int>('value1'), 10);
+      expect(rootBucket!.read<int>('value1'), 10);
 
       result.complete(_createEncodedRestorationData2());
       await tester.pump();
 
-      RestorationBucket rootBucket2;
-      manager.rootBucket.then((RestorationBucket bucket) => rootBucket2 = bucket);
+      RestorationBucket? rootBucket2;
+      manager.rootBucket.then((RestorationBucket? bucket) => rootBucket2 = bucket);
       expect(rootBucket2, isNotNull);
       expect(rootBucket2, same(rootBucket));
-      expect(rootBucket2.read<int>('value1'), 10);
-      expect(rootBucket2.contains('foo'), isFalse);
+      expect(rootBucket2!.read<int>('value1'), 10);
+      expect(rootBucket2!.contains('foo'), isFalse);
     });
 
     testWidgets('root bucket is properly replaced when new data is available', (WidgetTester tester) async {
@@ -116,21 +114,21 @@ void main() {
         return _createEncodedRestorationData1();
       });
       final RestorationManager manager = RestorationManager();
-      RestorationBucket rootBucket;
-      manager.rootBucket.then((RestorationBucket bucket) {
+      RestorationBucket? rootBucket;
+      manager.rootBucket.then((RestorationBucket? bucket) {
         rootBucket = bucket;
       });
       await tester.pump();
       expect(rootBucket, isNotNull);
-      expect(rootBucket.read<int>('value1'), 10);
-      final RestorationBucket child = rootBucket.claimChild('child1', debugOwner: null);
+      expect(rootBucket!.read<int>('value1'), 10);
+      final RestorationBucket child = rootBucket!.claimChild('child1', debugOwner: null);
       expect(child.read<int>('another value'), 22);
 
       bool rootReplaced = false;
-      RestorationBucket newRoot;
+      RestorationBucket? newRoot;
       manager.addListener(() {
         rootReplaced = true;
-        manager.rootBucket.then((RestorationBucket bucket) {
+        manager.rootBucket.then((RestorationBucket? bucket) {
           newRoot = bucket;
         });
         // The new bucket is available synchronously.
@@ -145,9 +143,9 @@ void main() {
 
       child.dispose();
 
-      expect(newRoot.read<int>('foo'), 33);
-      expect(newRoot.read<int>('value1'), null);
-      final RestorationBucket newChild = newRoot.claimChild('childFoo', debugOwner: null);
+      expect(newRoot!.read<int>('foo'), 33);
+      expect(newRoot!.read<int>('value1'), null);
+      final RestorationBucket newChild = newRoot!.claimChild('childFoo', debugOwner: null);
       expect(newChild.read<String>('bar'), 'Hello');
     });
 
@@ -162,9 +160,9 @@ void main() {
       final RestorationManager manager = RestorationManager()..addListener(() {
         listenerCount++;
       });
-      RestorationBucket rootBucket;
+      RestorationBucket? rootBucket;
       bool rootBucketResolved = false;
-      manager.rootBucket.then((RestorationBucket bucket) {
+      manager.rootBucket.then((RestorationBucket? bucket) {
         rootBucketResolved = true;
         rootBucket = bucket;
       });
@@ -180,7 +178,7 @@ void main() {
       // Switch to non-null.
       await _pushDataFromEngine(_createEncodedRestorationData1());
       expect(listenerCount, 1);
-      manager.rootBucket.then((RestorationBucket bucket) {
+      manager.rootBucket.then((RestorationBucket? bucket) {
         rootBucket = bucket;
       });
       expect(rootBucket, isNotNull);
@@ -188,7 +186,7 @@ void main() {
       // Switch to null again.
       await _pushDataFromEngine(_packageRestorationData(enabled: false));
       expect(listenerCount, 2);
-      manager.rootBucket.then((RestorationBucket bucket) {
+      manager.rootBucket.then((RestorationBucket? bucket) {
         rootBucket = bucket;
       });
       expect(rootBucket, isNull);
@@ -203,9 +201,9 @@ void main() {
       });
 
       final RestorationManager manager = RestorationManager();
-      final Future<RestorationBucket> rootBucketFuture = manager.rootBucket;
-      RestorationBucket rootBucket;
-      rootBucketFuture.then((RestorationBucket bucket) {
+      final Future<RestorationBucket?> rootBucketFuture = manager.rootBucket;
+      RestorationBucket? rootBucket;
+      rootBucketFuture.then((RestorationBucket? bucket) {
         rootBucket = bucket;
       });
       result.complete(_createEncodedRestorationData1());
@@ -214,8 +212,8 @@ void main() {
       callsToEngine.clear();
 
       // Schedule a frame.
-      SchedulerBinding.instance.ensureVisualUpdate();
-      rootBucket.write('foo', 1);
+      SchedulerBinding.instance!.ensureVisualUpdate();
+      rootBucket!.write('foo', 1);
       // flushData is no-op because frame is scheduled.
       manager.flushData();
       expect(callsToEngine, isEmpty);
@@ -225,7 +223,7 @@ void main() {
       callsToEngine.clear();
 
       // flushData without frame sends data directly.
-      rootBucket.write('foo', 2);
+      rootBucket!.write('foo', 2);
       manager.flushData();
       expect(callsToEngine, hasLength(1));
     });
@@ -239,40 +237,40 @@ void main() {
       final TestRestorationManager manager = TestRestorationManager();
       expect(manager.isReplacing, isFalse);
 
-      RestorationBucket rootBucket;
-      manager.rootBucket.then((RestorationBucket bucket) {
+      RestorationBucket? rootBucket;
+      manager.rootBucket.then((RestorationBucket? bucket) {
         rootBucket = bucket;
       });
       result.complete(_createEncodedRestorationData1());
       await tester.idle();
       expect(rootBucket, isNotNull);
-      expect(rootBucket.isReplacing, isFalse);
+      expect(rootBucket!.isReplacing, isFalse);
       expect(manager.isReplacing, isFalse);
       tester.binding.scheduleFrame();
       await tester.pump();
       expect(manager.isReplacing, isFalse);
-      expect(rootBucket.isReplacing, isFalse);
+      expect(rootBucket!.isReplacing, isFalse);
 
       manager.receiveDataFromEngine(enabled: true, data: null);
-      RestorationBucket rootBucket2;
-      manager.rootBucket.then((RestorationBucket bucket) {
+      RestorationBucket? rootBucket2;
+      manager.rootBucket.then((RestorationBucket? bucket) {
         rootBucket2 = bucket;
       });
       expect(rootBucket2, isNotNull);
-      expect(rootBucket2, isNot(same(rootBucket)));
+      expect(rootBucket2!, isNot(same(rootBucket)));
       expect(manager.isReplacing, isTrue);
-      expect(rootBucket2.isReplacing, isTrue);
+      expect(rootBucket2!.isReplacing, isTrue);
       await tester.idle();
       expect(manager.isReplacing, isTrue);
-      expect(rootBucket2.isReplacing, isTrue);
+      expect(rootBucket2!.isReplacing, isTrue);
       tester.binding.scheduleFrame();
       await tester.pump();
       expect(manager.isReplacing, isFalse);
-      expect(rootBucket2.isReplacing, isFalse);
+      expect(rootBucket2!.isReplacing, isFalse);
 
       manager.receiveDataFromEngine(enabled: false, data: null);
-      RestorationBucket rootBucket3;
-      manager.rootBucket.then((RestorationBucket bucket) {
+      RestorationBucket? rootBucket3;
+      manager.rootBucket.then((RestorationBucket? bucket) {
         rootBucket3 = bucket;
       });
       expect(rootBucket3, isNull);
@@ -307,7 +305,7 @@ void main() {
 }
 
 Future<void> _pushDataFromEngine(Map<dynamic, dynamic> data) async {
-  await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+  await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
     'flutter/restoration',
     const StandardMethodCodec().encodeMethodCall(MethodCall('push', data)),
     (_) { },
@@ -347,16 +345,16 @@ Map<dynamic, dynamic> _createEncodedRestorationData2() {
   return _packageRestorationData(data: data);
 }
 
-Map<dynamic, dynamic> _packageRestorationData({bool enabled = true, Map<dynamic, dynamic> data}) {
-  final ByteData encoded = const StandardMessageCodec().encodeMessage(data);
+Map<dynamic, dynamic> _packageRestorationData({bool enabled = true, Map<dynamic, dynamic>? data}) {
+  final ByteData? encoded = const StandardMessageCodec().encodeMessage(data);
   return <dynamic, dynamic>{
     'enabled': enabled,
-    'data': encoded == null ? null : encoded.buffer.asUint8List(encoded.offsetInBytes, encoded.lengthInBytes)
+    'data': encoded?.buffer.asUint8List(encoded.offsetInBytes, encoded.lengthInBytes),
   };
 }
 
 class TestRestorationManager extends RestorationManager {
-  void receiveDataFromEngine({@required bool enabled, @required Uint8List data}) {
+  void receiveDataFromEngine({required bool enabled, required Uint8List? data}) {
     handleRestorationUpdateFromEngine(enabled: enabled, data: data);
   }
 }

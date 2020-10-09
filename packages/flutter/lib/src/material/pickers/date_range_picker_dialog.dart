@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 
 import '../app_bar.dart';
 import '../back_button.dart';
-import '../button_theme.dart';
 import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
@@ -303,6 +302,17 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
           break;
 
         case DatePickerEntryMode.input:
+          // Validate the range dates
+          if (_selectedStart != null &&
+              (_selectedStart!.isBefore(widget.firstDate) || _selectedStart!.isAfter(widget.lastDate))) {
+            _selectedStart = null;
+            // With no valid start date, having an end date makes no sense for the UI.
+            _selectedEnd = null;
+          }
+          if (_selectedEnd != null &&
+              (_selectedEnd!.isBefore(widget.firstDate) || _selectedEnd!.isAfter(widget.lastDate))) {
+            _selectedEnd = null;
+          }
           // If invalid range (start after end), then just use the start date
           if (_selectedStart != null && _selectedEnd != null && _selectedStart!.isAfter(_selectedEnd!)) {
             _selectedEnd = null;
@@ -313,7 +323,7 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
     });
   }
 
-  void _handleStartDateChanged(DateTime date) {
+  void _handleStartDateChanged(DateTime? date) {
     setState(() => _selectedStart = date);
   }
 
@@ -507,12 +517,9 @@ class _CalendarRangePickerDialog extends StatelessWidget {
           ),
           actions: <Widget>[
             if (orientation == Orientation.landscape) entryModeIcon,
-            ButtonTheme(
-              minWidth: 64,
-              child: TextButton(
-                onPressed: onConfirm,
-                child: Text(confirmText, style: saveButtonStyle),
-              ),
+            TextButton(
+              onPressed: onConfirm,
+              child: Text(confirmText, style: saveButtonStyle),
             ),
             const SizedBox(width: 8),
           ],

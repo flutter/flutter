@@ -61,12 +61,6 @@
          "flaky": false
       },
       {
-         "name": "Linux gradle_fast_start_test",
-         "repo": "flutter",
-         "task_name": "linux_gradle_fast_start_test",
-         "flaky": false
-      },
-      {
          "name": "Linux gradle_jetifier_test",
          "repo": "flutter",
          "task_name": "linux_gradle_jetifier_test",
@@ -187,12 +181,6 @@
          "flaky": false
       },
       {
-         "name": "Mac gradle_fast_start_test",
-         "repo": "flutter",
-         "task_name": "mac_gradle_fast_start_test",
-         "flaky": false
-      },
-      {
          "name": "Mac gradle_jetifier_test",
          "repo": "flutter",
          "task_name": "mac_gradle_jetifier_test",
@@ -298,12 +286,6 @@
          "name": "Windows framework_tests",
          "repo": "flutter",
          "task_name": "win_framework_tests",
-         "flaky": false
-      },
-      {
-         "name": "Windows gradle_fast_start_test",
-         "repo": "flutter",
-         "task_name": "win_gradle_fast_start_test",
          "flaky": false
       },
       {

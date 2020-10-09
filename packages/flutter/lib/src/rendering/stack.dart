@@ -8,6 +8,7 @@ import 'dart:ui' show lerpDouble, hashValues;
 import 'package:flutter/foundation.dart';
 
 import 'box.dart';
+import 'layer.dart';
 import 'object.dart';
 
 /// An immutable 2D, axis-aligned, floating-point rectangle whose coordinates
@@ -613,11 +614,15 @@ class RenderStack extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (clipBehavior != Clip.none && _hasVisualOverflow) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack, clipBehavior: clipBehavior);
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack,
+          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
     } else {
+      _clipRectLayer = null;
       paintStack(context, offset);
     }
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;

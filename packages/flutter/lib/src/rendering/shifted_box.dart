@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'debug_overflow_indicator.dart';
+import 'layer.dart';
 import 'object.dart';
 import 'stack.dart' show RelativeRect;
 
@@ -712,10 +713,12 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
     }
 
     if (clipBehavior == Clip.none) {
+      _clipRectLayer = null;
       super.paint(context, offset);
     } else {
       // We have overflow and the clipBehavior isn't none. Clip it.
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint, clipBehavior: clipBehavior);
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint,
+          clipBehavior: clipBehavior, oldLayer:_clipRectLayer);
     }
 
     // Display the overflow indicator.
@@ -724,6 +727,8 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
       return true;
     }());
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) {

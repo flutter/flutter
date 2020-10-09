@@ -64,13 +64,6 @@
          "enabled":true
       },
       {
-         "name":"Linux gradle_fast_start_test",
-         "repo":"flutter",
-         "task_name":"linux_gradle_fast_start_test",
-         "enabled":true,
-         "run_if": ["dev/**", "bin/**"]
-      },
-      {
          "name":"Linux gradle_jetifier_test",
          "repo":"flutter",
          "task_name":"linux_gradle_jetifier_test",
@@ -165,7 +158,7 @@
          "repo":"flutter",
          "task_name":"linux_web_tests",
          "enabled":true,
-         "run_if":["dev/", "packages/flutter/", "packages/flutter_goldens_client/", "packages/flutter_goldens/", "packages/flutter_test/", "packages/flutter_tools/lib/src/test/", "packages/flutter_web_plugins/", "bin/"]
+         "run_if":["dev/", "packages/", "bin/"]
       },
       {
          "name":"Linux web_integration_tests",
@@ -199,8 +192,7 @@
          "name":"Mac build_tests",
          "repo":"flutter",
          "task_name":"mac_build_tests",
-         "enabled":true,
-         "run_if":["dev/**", "bin/**"]
+         "enabled":true
       },
       {
          "name":"Mac customer_testing",
@@ -214,13 +206,6 @@
          "task_name":"mac_framework_tests",
          "enabled":true,
          "run_if":["dev/**", "packages/flutter/**", "packages/flutter_goldens/**", "packages/flutter_goldens_client/**", "packages/flutter_test/**", "packages/flutter_tools/lib/src/test/**", "bin/**"]
-      },
-      {
-         "name":"Mac gradle_fast_start_test",
-         "repo":"flutter",
-         "task_name":"mac_gradle_fast_start_test",
-         "enabled":true,
-         "run_if":["dev/**", "bin/**"]
       },
       {
          "name":"Mac gradle_jetifier_test",
@@ -331,8 +316,7 @@
          "name": "Windows build_tests",
          "repo": "flutter",
          "task_name": "win_build_tests",
-         "enabled":true,
-         "run_if":["dev/", "bin/"]
+         "enabled":true
       },
       {
          "name": "Windows customer_testing",
@@ -346,13 +330,6 @@
          "task_name": "win_framework_tests",
          "enabled":true,
          "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
-      },
-      {
-         "name": "Windows gradle_fast_start_test",
-         "repo": "flutter",
-         "task_name": "win_gradle_fast_start_test",
-         "enabled":true,
-         "run_if":["dev/**", "bin/**"]
       },
       {
          "name": "Windows gradle_jetifier_test",
