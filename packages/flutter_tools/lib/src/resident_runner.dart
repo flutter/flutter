@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import 'android/android_device.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';

@@ -472,7 +472,6 @@ class DevFS {
     String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
-    bool skipAssets = false,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
@@ -484,7 +483,7 @@ class DevFS {
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
 
     int syncedBytes = 0;
-    if (bundle != null && !skipAssets) {
+    if (bundle != null) {
       final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
       // We write the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
