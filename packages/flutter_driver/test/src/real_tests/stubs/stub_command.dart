@@ -6,9 +6,11 @@ import 'package:flutter_driver/driver_extension.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 
 class StubCommand extends CommandWithTarget {
-  StubCommand(SerializableFinder finder, this.times) : super(finder);
+  StubCommand(SerializableFinder finder, this.times, {Duration? timeout})
+      : super(finder, timeout: timeout);
 
-  StubCommand.deserialize(Map<String, String> json, DeserializeFinderFactory finderFactory)
+  StubCommand.deserialize(
+      Map<String, String> json, DeserializeFinderFactory finderFactory)
       : times = int.parse(json['times']!),
         super.deserialize(json, finderFactory);
 
@@ -29,7 +31,9 @@ class StubCommandResult extends Result {
   final String resultParam;
 
   @override
-  Map<String, dynamic> toJson() => <String, dynamic>{
-    'resultParam': resultParam,
-  };
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'resultParam': resultParam,
+    };
+  }
 }

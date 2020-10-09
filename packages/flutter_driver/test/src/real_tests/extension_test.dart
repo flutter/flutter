@@ -1026,7 +1026,7 @@ void main() {
       expect(result['response'] as String, contains('Unsupported command kind StubCommand'));
     });
 
-    testWidgets('simple command', (WidgetTester tester) async {
+    testWidgets('nested tap command', (WidgetTester tester) async {
       final FlutterDriverExtension driverExtension = FlutterDriverExtension(
         (String arg) async => '',
         true,
@@ -1036,7 +1036,8 @@ void main() {
       );
 
       Future<StubCommandResult> invokeCommand(SerializableFinder finder, int times) async {
-        final Map<String, String> arguments = StubCommand(finder, times).serialize();
+        await driverExtension.call(const SetFrameSync(false).serialize()); // disable frame sync for test to avoid lock
+        final Map<String, String> arguments = StubCommand(finder, times, timeout: const Duration(seconds: 1)).serialize();
         final Map<String, dynamic> response = await driverExtension.call(arguments);
         final Map<String, dynamic> commandResponse = response['response'] as Map<String, dynamic>;
         return StubCommandResult(commandResponse['resultParam'] as String);
