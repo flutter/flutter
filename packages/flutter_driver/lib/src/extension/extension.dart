@@ -10,32 +10,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show RendererBinding, SemanticsHandle;
+import 'package:flutter/rendering.dart' show RendererBinding;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
 import '../common/find.dart';
-import '../common/frame_sync.dart';
-import '../common/geometry.dart';
-import '../common/gesture.dart';
-import '../common/health.dart';
-import '../common/layer_tree.dart';
 import '../common/message.dart';
-import '../common/render_tree.dart';
-import '../common/request_data.dart';
-import '../common/semantics.dart';
-import '../common/text.dart';
-import '../common/wait.dart';
 import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
-import 'wait_conditions.dart';
 
 const String _extensionMethodName = 'driver';
-const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 
 /// Signature for the handler passed to [enableFlutterDriverExtension].
 ///
@@ -179,7 +166,7 @@ abstract class CommandExtension {
   
   /// Calls action for given [command].
   /// Returns action [Result].
-  Future<Result> call(Command command);
+  Future<Result> call(Command command, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory);
 }
 
 /// The class that manages communication between a Flutter Driver test and the
@@ -196,7 +183,7 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
     List<FinderExtension> finders = const <FinderExtension>[],
     List<CommandExtension> commands = const <CommandExtension>[],
   }) : assert(finders != null) {
-    _testTextInput.register();
+    registerTextInput();
 
     for(final FinderExtension finder in finders) {
       _finderExtensions[finder.finderType] = finder;
@@ -206,8 +193,6 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
       _commandExtensions[command.commandKind] = command;
     }
   }
-
-  final TestTextInput _testTextInput = TestTextInput();
 
   final DataHandler? _requestDataHandler;
 
@@ -237,7 +222,7 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
       final Command command = deserializeCommand(params, this);
       assert(WidgetsBinding.instance!.isRootWidgetAttached || !command.requiresRootWidgetAttached,
           'No root widget is attached; have you remembered to call runApp()?');
-      Future<Result?> responseFuture = handleCommand(command);
+      Future<Result?> responseFuture = handleCommand(command, this);
       if (command.timeout != null)
         responseFuture = responseFuture.timeout(command.timeout ?? Duration.zero);
       final Result? response = await responseFuture;
@@ -273,8 +258,9 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
 
   @override
   Finder createFinder(SerializableFinder finder) {
-    if (_finderExtensions.containsKey(finder.finderType)) {
-      return _finderExtensions[finder.finderType]!.createFinder(finder, this);
+    final String finderType = finder.finderType;
+    if (_finderExtensions.containsKey(finderType)) {
+      return _finderExtensions[finderType]!.createFinder(finder, this);
     }
 
     return super.createFinder(finder);
@@ -291,12 +277,18 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
   }
 
   @override
-  Future<Result?> handleCommand(Command command) {
+  @protected
+  DataHandler? getDataHandler() {
+    return _requestDataHandler;
+  }
+
+  @override
+  Future<Result?> handleCommand(Command command, CreateFinderFactory finderFactory) {
     final String kind = command.kind;
     if(_commandExtensions.containsKey(kind)) {
-      return _commandExtensions[kind]!.call(command);
+      return _commandExtensions[kind]!.call(command, finderFactory, this);
     }
 
-    return super.handleCommand(command);
+    return super.handleCommand(command, finderFactory);
   }
 }
