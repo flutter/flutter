@@ -7,7 +7,6 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 
 #include <algorithm>
-#include <filesystem>
 #include <vector>
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
@@ -324,24 +323,25 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
     return nullptr;
   }
 
+  BOOL isDirOut = false;  // required for NSFileManager fileExistsAtPath.
+  NSFileManager* fileManager = [NSFileManager defaultManager];
+
   // This is the location where the test fixture places the snapshot file.
   // For applications built by Flutter tool, this is in "App.framework".
-  std::filesystem::path assetsFsDir(assetsDir.UTF8String);
-  std::filesystem::path elfFile("app_elf_snapshot.so");
-  auto fullElfPath = assetsFsDir / elfFile;
+  NSString* elfPath = [NSString pathWithComponents:@[ assetsDir, @"app_elf_snapshot.so" ]];
 
-  if (!std::filesystem::exists(fullElfPath)) {
+  if (![fileManager fileExistsAtPath:elfPath isDirectory:&isDirOut]) {
     return nullptr;
   }
 
   FlutterEngineAOTDataSource source = {};
   source.type = kFlutterEngineAOTDataSourceTypeElfPath;
-  source.elf_path = fullElfPath.c_str();
+  source.elf_path = [elfPath cStringUsingEncoding:NSUTF8StringEncoding];
 
   FlutterEngineAOTData data = nullptr;
   auto result = FlutterEngineCreateAOTData(&source, &data);
   if (result != kSuccess) {
-    NSLog(@"Failed to load AOT data from: %@", @(fullElfPath.c_str()));
+    NSLog(@"Failed to load AOT data from: %@", elfPath);
     return nullptr;
   }
 
