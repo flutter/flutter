@@ -956,7 +956,7 @@ void main() {
 
     Table table = tester.widget(find.byType(Table));
     TableRow tableRow = table.children.last;
-    BoxDecoration boxDecoration = tableRow.decoration as BoxDecoration;
+    BoxDecoration boxDecoration = tableRow.decoration! as BoxDecoration;
     expect(boxDecoration.border!.top.width, 1.0);
 
     const double thickness =  4.2;
@@ -973,7 +973,7 @@ void main() {
     );
     table = tester.widget(find.byType(Table));
     tableRow = table.children.last;
-    boxDecoration = tableRow.decoration as BoxDecoration;
+    boxDecoration = tableRow.decoration! as BoxDecoration;
     expect(boxDecoration.border!.top.width, thickness);
   });
 
@@ -1007,7 +1007,7 @@ void main() {
 
     Table table = tester.widget(find.byType(Table));
     TableRow tableRow = table.children.last;
-    BoxDecoration boxDecoration = tableRow.decoration as BoxDecoration;
+    BoxDecoration boxDecoration = tableRow.decoration! as BoxDecoration;
     expect(boxDecoration.border!.bottom.width, 1.0);
 
     await tester.pumpWidget(
@@ -1022,7 +1022,7 @@ void main() {
     );
     table = tester.widget(find.byType(Table));
     tableRow = table.children.last;
-    boxDecoration = tableRow.decoration as BoxDecoration;
+    boxDecoration = tableRow.decoration! as BoxDecoration;
     expect(boxDecoration.border!.bottom.width, 0.0);
   });
 
@@ -1175,7 +1175,7 @@ void main() {
     BoxDecoration lastTableRowBoxDecoration() {
       final Table table = tester.widget(find.byType(Table));
       final TableRow tableRow = table.children.last;
-      return tableRow.decoration as BoxDecoration;
+      return tableRow.decoration! as BoxDecoration;
     }
 
     await tester.pumpWidget(MaterialApp(
@@ -1229,7 +1229,7 @@ void main() {
     BoxDecoration lastTableRowBoxDecoration() {
       final Table table = tester.widget(find.byType(Table));
       final TableRow tableRow = table.children.last;
-      return tableRow.decoration as BoxDecoration;
+      return tableRow.decoration! as BoxDecoration;
     }
 
     await tester.pumpWidget(MaterialApp(
@@ -1276,7 +1276,7 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content1')));
     await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     expect(box, paints..circle(x: 68.0, y: 24.0, color: pressedColor));
     await gesture.up();
   });

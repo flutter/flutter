@@ -2570,7 +2570,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         clipBehavior: clipBehavior,
       );
     });
-    return _currentBottomSheet as PersistentBottomSheetController<T>;
+    return _currentBottomSheet! as PersistentBottomSheetController<T>;
   }
 
   // Floating Action Button API
@@ -3326,38 +3326,28 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.animationController != null) {
-      return AnimatedBuilder(
-        animation: widget.animationController,
-        builder: (BuildContext context, Widget? child) {
-          return Align(
-            alignment: AlignmentDirectional.topStart,
-            heightFactor: animationCurve.transform(widget.animationController.value),
-            child: child,
-          );
-        },
-        child: _wrapBottomSheet(
-          BottomSheet(
-            animationController: widget.animationController,
-            enableDrag: widget.enableDrag,
-            onDragStart: _handleDragStart,
-            onDragEnd: _handleDragEnd,
-            onClosing: widget.onClosing!,
-            builder: widget.builder,
-            backgroundColor: widget.backgroundColor,
-            elevation: widget.elevation,
-            shape: widget.shape,
-            clipBehavior: widget.clipBehavior,
-          ),
+    return AnimatedBuilder(
+      animation: widget.animationController,
+      builder: (BuildContext context, Widget? child) {
+        return Align(
+          alignment: AlignmentDirectional.topStart,
+          heightFactor: animationCurve.transform(widget.animationController.value),
+          child: child,
+        );
+      },
+      child: _wrapBottomSheet(
+        BottomSheet(
+          animationController: widget.animationController,
+          enableDrag: widget.enableDrag,
+          onDragStart: _handleDragStart,
+          onDragEnd: _handleDragEnd,
+          onClosing: widget.onClosing!,
+          builder: widget.builder,
+          backgroundColor: widget.backgroundColor,
+          elevation: widget.elevation,
+          shape: widget.shape,
+          clipBehavior: widget.clipBehavior,
         ),
-      );
-    }
-
-    return _wrapBottomSheet(
-      BottomSheet(
-        onClosing: widget.onClosing!,
-        builder: widget.builder,
-        backgroundColor: widget.backgroundColor,
       ),
     );
   }
