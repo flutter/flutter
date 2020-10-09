@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -355,8 +356,7 @@ class _HourControl extends StatelessWidget {
     );
 
     return Semantics(
-      hint: localizations.timePickerHourModeAnnouncement,
-      value: formattedHour,
+      value: '${localizations.timePickerHourModeAnnouncement} $formattedHour',
       excludeSemantics: true,
       increasedValue: formattedNextHour,
       onIncrease: () {
@@ -445,8 +445,7 @@ class _MinuteControl extends StatelessWidget {
 
     return Semantics(
       excludeSemantics: true,
-      hint: localizations.timePickerMinuteModeAnnouncement,
-      value: formattedMinute,
+      value: '${localizations.timePickerMinuteModeAnnouncement} $formattedMinute',
       increasedValue: formattedNextMinute,
       onIncrease: () {
         fragmentContext.onTimeChange(nextMinute);
@@ -571,7 +570,8 @@ class _DayPeriodControl extends StatelessWidget {
       child: InkWell(
         onTap: Feedback.wrapForTap(() => _setAm(context), context),
         child: Semantics(
-          selected: amSelected,
+          checked: amSelected,
+          inMutuallyExclusiveGroup: true,
           button: true,
           child: Center(
             child: Text(
@@ -589,7 +589,8 @@ class _DayPeriodControl extends StatelessWidget {
       child: InkWell(
         onTap: Feedback.wrapForTap(() => _setPm(context), context),
         child: Semantics(
-          selected: pmSelected,
+          checked: pmSelected,
+          inMutuallyExclusiveGroup: true,
           button: true,
           child: Center(
             child: Text(
@@ -1673,7 +1674,10 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
     // If screen reader is in use, make the hint text say hours/minutes.
     // Otherwise, remove the hint text when focused because the centered cursor
     // appears odd above the hint text.
-    final String? hintText = MediaQuery.of(context)!.accessibleNavigation
+    //
+    // TODO(rami-a): Once https://github.com/flutter/flutter/issues/67571 is
+    // resolved, remove the window check for semantics being enabled on web.
+    final String? hintText = MediaQuery.of(context)!.accessibleNavigation || ui.window.semanticsEnabled
         ? widget.semanticHintText
         : (focusNode.hasFocus ? null : _formattedValue);
     inputDecoration = inputDecoration.copyWith(
