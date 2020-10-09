@@ -499,20 +499,20 @@ void main() {
       packageConfig: anyNamed('packageConfig'),
     )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
 
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    OperationResult result;
+    final String analyticsLogs = (await capturedConsolePrint(() async {
+      result = await residentRunner.restart(fullRestart: false);
+    })).toString();
+
     expect(result.fatal, true);
     expect(result.code, 1);
-    verify(globals.flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
-      cdKey(CustomDimensions.hotEventTargetPlatform):
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-      cdKey(CustomDimensions.hotEventSdkName): 'Example',
-      cdKey(CustomDimensions.hotEventEmulator): 'false',
-      cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      cdKey(CustomDimensions.nullSafety): 'false',
-    })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(analyticsLogs, contains(
+      'analytics: event {category: hot, action: exception, label: null, '
+      'value: null, cd27: android-arm, cd28: Example, cd29: false, cd30: false, cd47: false, '
+      'cd33: 2020-10-08 00:00:00.000 -0700}\n'));
   }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
+    Usage: () => Usage.test(),
   }));
 
   testUsingContext('ResidentRunner reports hot reload event with null safety analytics', () => testbed.run(() async {
@@ -526,11 +526,16 @@ void main() {
         mockFlutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
-        BuildMode.debug, '', treeShakeIcons: false, extraFrontEndOptions: <String>[
-        '--enable-experiment=non-nullable',
-        ],
-      )),
+      debuggingOptions: DebuggingOptions.enabled(
+        const BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          extraFrontEndOptions: <String>[
+          '--enable-experiment=non-nullable',
+          ],
+        ),
+      ),
     );
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
@@ -563,20 +568,20 @@ void main() {
       packageConfig: anyNamed('packageConfig'),
     )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
 
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    OperationResult result;
+    final String analyticsLogs = (await capturedConsolePrint(() async {
+      result = await residentRunner.restart(fullRestart: false);
+    })).toString();
+
     expect(result.fatal, true);
     expect(result.code, 1);
-    verify(globals.flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
-      cdKey(CustomDimensions.hotEventTargetPlatform):
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-      cdKey(CustomDimensions.hotEventSdkName): 'Example',
-      cdKey(CustomDimensions.hotEventEmulator): 'false',
-      cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      cdKey(CustomDimensions.nullSafety): 'true',
-    })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(analyticsLogs, contains(
+      'analytics: event {category: hot, action: exception, label: null, value: null, '
+      'cd27: android-arm, cd28: Example, cd29: false, cd30: false, cd47: true, '
+      'cd33: 2020-10-08 00:00:00.000 -0700}\n'));
   }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
+    Usage: () => Usage.test(),
   }));
 
   testUsingContext('ResidentRunner reports error with missing entrypoint file', () => testbed.run(() async {
@@ -836,16 +841,23 @@ void main() {
       connectionInfoCompleter: onConnectionInfo,
     ));
 
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    OperationResult result;
+    final String analyticsLogs = (await capturedConsolePrint(() async {
+      result = await residentRunner.restart(fullRestart: false);
+    })).toString();
+
     expect(result.fatal, false);
     expect(result.code, 0);
-    expect(verify(globals.flutterUsage.sendEvent('hot', 'reload',
-                  parameters: captureAnyNamed('parameters'))).captured[0],
-      containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
-                   getNameForTargetPlatform(TargetPlatform.android_arm)),
-    );
+    expect(analyticsLogs, contains(
+      'analytics: event {category: hot, action: reload, label: null, value: null, '
+      'cd27: android-arm, cd28: Example, cd29: false, cd30: false, cd10: 0, cd11: 0,'
+      ' cd12: 12, cd13: 12, cd47: false, cd48: false, cd33: 2020-10-08 00:00:00.000 -0700}',
+    ));
+    expect(analyticsLogs, contains(
+      'analytics: timing {variableName: reload' // truncated due to stopwatch
+    ));
   }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
+    Usage: () => Usage.test(),
   }));
 
   testUsingContext('ResidentRunner can perform fast reassemble', () => testbed.run(() async {
@@ -949,19 +961,19 @@ void main() {
       connectionInfoCompleter: onConnectionInfo,
     ));
 
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    OperationResult result;
+    final String analyticsLogs = (await capturedConsolePrint(() async {
+      result = await residentRunner.restart(fullRestart: false);
+    })).toString();
 
     expect(result.fatal, false);
     expect(result.code, 0);
-    verify(globals.flutterUsage.sendEvent('hot', 'reload', parameters: argThat(
-      containsPair('cd48', 'true'),
-      named: 'parameters',
-    ))).called(1);
+    expect(analyticsLogs, contains('cd48: true'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     Platform: () => FakePlatform(operatingSystem: 'linux'),
     ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
-    Usage: () => MockUsage(),
+    Usage: () => Usage.test(),
     FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
   }));
 
@@ -1021,17 +1033,22 @@ void main() {
       connectionInfoCompleter: onConnectionInfo,
     ));
 
-    final OperationResult result = await residentRunner.restart(fullRestart: true);
+    OperationResult result;
+    final String analyticsLogs = (await capturedConsolePrint(() async {
+      result = await residentRunner.restart(fullRestart: true);
+    })).toString();
+
     expect(result.fatal, false);
     expect(result.code, 0);
-    expect(verify(globals.flutterUsage.sendEvent('hot', 'restart',
-                  parameters: captureAnyNamed('parameters'))).captured[0],
-      containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
-                   getNameForTargetPlatform(TargetPlatform.android_arm)),
-    );
+    expect(analyticsLogs, contains(
+      'analytics: event {category: hot, action: restart, label: null, value: null, '
+      'cd27: android-arm, cd28: Example, cd29: false, cd30: true, cd47: false, '
+      'cd33: 2020-10-08 00:00:00.000 -0700}'
+    ));
+    expect(analyticsLogs, contains('analytics: timing {variableName: restart, ')); // truncated due to stopwatch usage
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
+    Usage: () => Usage.test(),
   }));
 
   testUsingContext('ResidentRunner can remove breakpoints from paused isolate during hot restart', () => testbed.run(() async {
@@ -1277,20 +1294,21 @@ void main() {
       packageConfig: anyNamed('packageConfig'),
     )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
 
-    final OperationResult result = await residentRunner.restart(fullRestart: true);
+    OperationResult result;
+    final String analyticsLogs = (await capturedConsolePrint(() async {
+      result = await residentRunner.restart(fullRestart: true);
+    })).toString();
+
     expect(result.fatal, true);
     expect(result.code, 1);
-    verify(globals.flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
-      cdKey(CustomDimensions.hotEventTargetPlatform):
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-      cdKey(CustomDimensions.hotEventSdkName): 'Example',
-      cdKey(CustomDimensions.hotEventEmulator): 'false',
-      cdKey(CustomDimensions.hotEventFullRestart): 'true',
-      cdKey(CustomDimensions.nullSafety): 'false',
-    })).called(1);
+
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(analyticsLogs, contains(
+      'analytics: event {category: hot, action: exception, label: null, value: null, '
+      'cd27: android-arm, cd28: Example, cd29: false, cd30: true, cd47: false, '
+      'cd33: 2020-10-08 00:00:00.000 -0700}\n'));
   }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
+    Usage: () => Usage.test(),
   }));
 
   testUsingContext('ResidentRunner uses temp directory when there is no output dill path', () => testbed.run(() {
@@ -2515,7 +2533,6 @@ class MockDevice extends Mock implements Device {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockDevtoolsLauncher extends Mock implements DevtoolsLauncher {}
-class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
 
@@ -2607,37 +2624,4 @@ class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator 
       uris: <Uri>[Uri.parse('file:///hello_world/main.dart'),
     ]);
   }
-}
-
-class FakeDevice extends Fake implements Device {
-  FakeDevice({
-    String sdkNameAndVersion = 'Android',
-    TargetPlatform targetPlatform = TargetPlatform.android_arm,
-    bool isLocalEmulator = false,
-    this.supportsHotRestart = true,
-  }) : _isLocalEmulator = isLocalEmulator,
-       _targetPlatform = targetPlatform,
-       _sdkNameAndVersion = sdkNameAndVersion;
-
-  final bool _isLocalEmulator;
-  final TargetPlatform _targetPlatform;
-  final String _sdkNameAndVersion;
-
-  @override
-  final bool supportsHotRestart;
-
-  @override
-  Future<String> get sdkNameAndVersion async => _sdkNameAndVersion;
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => _targetPlatform;
-
-  @override
-  Future<bool> get isLocalEmulator async => _isLocalEmulator;
-
-  @override
-  String get name => 'FakeDevice';
-
-  @override
-  Future<void> dispose() async {  }
 }
