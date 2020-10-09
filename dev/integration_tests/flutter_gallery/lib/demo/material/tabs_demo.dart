@@ -14,7 +14,7 @@ const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 class _Page {
   _Page({ this.label });
   final String label;
-  String get id => label[0];
+  String get id => label.characters.first;
   @override
   String toString() => '$runtimeType("$label")';
 }

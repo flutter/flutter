@@ -167,19 +167,6 @@ class HotRunner extends ResidentRunner {
     throw 'Failed to compile $expression';
   }
 
-  @override
-  Future<OperationResult> reloadMethod({ String libraryId, String classId }) async {
-    final OperationResult result = await restart(pause: false);
-    if (!result.isOk) {
-      throw vm_service.RPCError(
-        'Unable to reload sources',
-        RPCErrorCodes.kInternalError,
-        '',
-      );
-    }
-    return result;
-  }
-
   // Returns the exit code of the flutter tool process, like [run].
   @override
   Future<int> attach({
@@ -192,7 +179,6 @@ class HotRunner extends ResidentRunner {
         reloadSources: _reloadSourcesService,
         restart: _restartService,
         compileExpression: _compileExpressionService,
-        reloadMethod: reloadMethod,
         getSkSLMethod: writeSkSL,
       );
     // Catches all exceptions, non-Exception objects are rethrown.

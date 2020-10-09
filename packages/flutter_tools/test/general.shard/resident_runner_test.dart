@@ -2340,7 +2340,7 @@ void main() {
     expect(testLogger.errorText, contains('Failed to write vmservice-out-file at foo'));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem()),
+    FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem.test()),
   }));
 
 
@@ -2491,7 +2491,6 @@ void main() {
       ReloadSources reloadSources,
       Restart restart,
       CompileExpression compileExpression,
-      ReloadMethod reloadMethod,
       GetSkSLMethod getSkSLMethod,
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       io.CompressionOptions compression,
@@ -2559,7 +2558,6 @@ class FakeFlutterDevice extends FlutterDevice {
     bool disableServiceAuthCodes = false,
     bool ipv6 = false,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     int hostVmServicePort,
     int ddsPort,
