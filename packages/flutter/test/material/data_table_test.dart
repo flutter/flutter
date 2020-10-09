@@ -109,7 +109,7 @@ void main() {
     const int numItems = 3;
     Widget buildTable(List<bool> selected) {
       return DataTable(
-        onSelectAll: (bool value) {
+        onSelectAll: (bool? value) {
           log.add('select-all: $value');
         },
         columns: const <DataColumn>[
@@ -123,7 +123,7 @@ void main() {
           (int index) => DataRow(
             cells: <DataCell>[DataCell(Text('Row $index'))],
             selected: selected[index],
-            onSelectChanged: (bool value) {
+            onSelectChanged: (bool? value) {
               log.add('row-selected: $index');
             },
           ),
