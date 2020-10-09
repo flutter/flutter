@@ -359,14 +359,14 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory 
 
   @override
   SerializableFinder deserializeFinder(Map<String, String> json) {
-    final SerializableFinder standard = super.deserializeFinder(json);
+    final SerializableFinder? standard = super.deserializeFinder(json);
     if (standard != null) {
       return standard;
     }
 
-    final String finderType = json['finderType'];
+    final String? finderType = json['finderType'];
     if (_finderExtensions.containsKey(finderType)) {
-      return _finderExtensions[finderType].deserialize(json, this);
+      return _finderExtensions[finderType]!.deserialize(json, this);
     }
 
     throw DriverError('Unsupported search specification type $finderType');
@@ -374,13 +374,13 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory 
 
   @override
   Finder createFinder(SerializableFinder finder) {
-    final Finder standard = super.createFinder(finder);
+    final Finder? standard = super.createFinder(finder);
     if(standard != null) {
       return standard;
     }
 
     if (_finderExtensions.containsKey(finder.finderType)) {
-      return _finderExtensions[finder.finderType].createFinder(finder, this);
+      return _finderExtensions[finder.finderType]!.createFinder(finder, this);
     }
 
     throw DriverError('Unsupported search specification type ${finder.finderType}');
@@ -545,7 +545,7 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory 
   Future<ScrollResult> _scrollIntoView(Command command) async {
     final ScrollIntoView scrollIntoViewCommand = command as ScrollIntoView;
     final Finder target = await _waitForElement(createFinder(scrollIntoViewCommand.finder));
-    await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: scrollIntoViewCommand.alignment ?? 0.0);
+    await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: scrollIntoViewCommand.alignment);
     return const ScrollResult();
   }
 

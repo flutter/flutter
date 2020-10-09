@@ -17,11 +17,11 @@ class StubFinderExtension extends FinderExtension {
     CreateFinderFactory finderFactory,
   ) {
     return find.byWidgetPredicate((Widget widget) {
-      final Key key = widget.key;
+      final Key? key = widget.key;
       if (key is! ValueKey<String>) {
         return false;
       }
-      return (key as ValueKey<String>).value == (finder as StubFinder).keyString;
+      return key.value == (finder as StubFinder).keyString;
     });
   }
 
@@ -30,7 +30,7 @@ class StubFinderExtension extends FinderExtension {
     Map<String, String> params,
     DeserializeFinderFactory finderFactory,
   ) {
-    return StubFinder(params['keyString']);
+    return StubFinder(params['keyString']!);
   }
 
   @override
