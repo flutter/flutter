@@ -648,10 +648,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// by just scrolling this position.
   ///
   /// The optional `targetRenderObject` parameter is used to determine which area
-  /// of that object should be as visible as possible. If `targetRenderObject` is null,
-  /// the entire [RenderObject] (as defined by its [RenderObject.paintBounds])
-  /// will be as visible as possible. If `targetRenderObject` is provided it should be
-  /// a descendant of the object.
+  /// of that object should be as visible as possible. If `targetRenderObject`
+  /// is null, the entire [RenderObject] (as defined by its
+  /// [RenderObject.paintBounds]) will be as visible as possible. If
+  /// `targetRenderObject` is provided, it must be a descendant of the object.
   ///
   /// See also:
   ///
