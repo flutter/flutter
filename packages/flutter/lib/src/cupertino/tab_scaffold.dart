@@ -349,6 +349,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
     }
     if (widget.controller != null && _internalController != null) {
       // Use the widget-provided controller.
+      unregisterFromRestoration(_internalController!);
       _internalController!.dispose();
       _internalController = null;
     }
