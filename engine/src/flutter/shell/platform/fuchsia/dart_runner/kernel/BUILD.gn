@@ -22,10 +22,6 @@ compile_platform("kernel_platform_files") {
   args = [
     "--enable-experiment=non-nullable",
     "--nnbd-agnostic",
-
-    # TODO(dartbug.com/36342): enable bytecode for core libraries when performance of bytecode
-    # pipeline is on par with default pipeline and continuously tracked.
-    # "--bytecode",
     "--target=dart_runner",
     "dart:core",
   ]
@@ -75,7 +71,6 @@ template("create_kernel_core_snapshot") {
       # TODO(FL-117): Re-enable causal async stack traces when this issue is
       # addressed.
       "--no_causal_async_stacks",
-      "--use_bytecode_compiler",
       "--enable_mirrors=false",
       "--deterministic",
       "--snapshot_kind=core-jit",

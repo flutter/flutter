@@ -147,8 +147,6 @@ Future<int> starter(
           '--target=flutter',
           '--track-widget-creation',
           '--enable-asserts',
-          '--gen-bytecode',
-          '--bytecode-options=source-positions,local-var-info,debugger-stops,instance-field-initializers,keep-unreachable-code,avoid-closure-call-instructions',
         ]);
         compiler ??= _FlutterFrontendCompiler(
           output,
