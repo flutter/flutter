@@ -2,6 +2,7 @@
 
 [![Build Status - Cirrus][]][Build status]
 [![Gitter Channel][]][Gitter badge]
+[![Guthub star][]][Github]
 [![Twitter handle][]][Twitter badge]
 
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
@@ -75,6 +76,8 @@ Information on how to get started can be found at our
 [Gitter badge]: https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 [Twitter handle]: https://img.shields.io/twitter/follow/flutterdev.svg?style=social&label=Follow
 [Twitter badge]: https://twitter.com/intent/follow?screen_name=flutterdev
+[Github]: https://github.com/flutter/flutter
+[Guthub star]: https://img.shields.io/github/stars/flutter/flutter?style=social
 [layered architecture]: https://flutter.dev/docs/resources/inside-flutter
 [widget catalog]: https://flutter.dev/widgets/
 [Reflectly hero image]: https://github.com/flutter/website/blob/master/src/images/homepage/reflectly-hero-600px.png
