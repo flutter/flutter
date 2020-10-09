@@ -301,7 +301,7 @@ void main() {
         _expectSamePath(executablePath, expectedPath);
       });
 
-      test('not found', () {
+      test('not found with strict', () {
         const String command = 'foo';
 
         final String executablePath = resolveExecutablePath(
@@ -313,6 +313,20 @@ void main() {
           strict: true,
         );
         expect(executablePath, isNull);
+      });
+
+      test('not found without strict', () {
+        const String command = 'foo';
+
+        final String executablePath = resolveExecutablePath(
+          command,
+          workingDir.path,
+          platform: platform,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          strict: false,
+        );
+        expect(executablePath, 'foo');
       });
     });
   });

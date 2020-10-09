@@ -662,17 +662,32 @@ class ErrorHandlingProcessManager implements ProcessManager {
     }, platform: _platform);
   }
 
+  /// Resolve the first item of [command] to a file or link.
+  ///
+  /// This function will cache each raw command string per working directory,
+  /// so that repeated lookups for the same command will resolve to the same
+  /// executable. If a new executable is installed in a higher priority
+  /// location after a command has already been cached, the older executable
+  /// will be used until the tool restarts.
+  ///
+  /// If the entity cannot be found, return the raw command as is and do not
+  /// cache it.
   String _getCommandPath(List<dynamic> command, String workingDirectory, { bool strict = false }) {
     final String executable = command.first.toString();
     final Map<String, String> workingDirectoryCache = _resolvedExecutables[workingDirectory] ??= <String, String>{};
-    return workingDirectoryCache[executable] ??= resolveExecutablePath(
-      executable,
-      workingDirectory,
-      fileSystem: _fileSystem,
-      platform: _platform,
-      logger: _logger,
-      strict: strict,
-    );
+    final String resolvedExecutable = workingDirectoryCache[executable]
+      ?? resolveExecutablePath(
+        executable,
+        workingDirectory,
+        fileSystem: _fileSystem,
+        platform: _platform,
+        logger: _logger,
+        strict: strict,
+      );
+    if (resolvedExecutable != executable) {
+      workingDirectoryCache[executable] = resolvedExecutable;
+    }
+    return resolvedExecutable;
   }
 
   List<String> _getArguments(List<dynamic> command) {
@@ -803,9 +818,14 @@ String resolveExecutablePath(
     candidates = _getCandidatePaths(command, searchPath, extensions, fileSystem);
   }
   for (final String path in candidates) {
-    final FileSystemEntityType type = fileSystem.typeSync(path);
-    if (type != FileSystemEntityType.notFound) {
-      return path;
+    try {
+      final FileSystemEntityType type = fileSystem.typeSync(path);
+      if (type != FileSystemEntityType.notFound && type != FileSystemEntityType.directory) {
+        return path;
+      }
+    } on FileSystemException catch (err) {
+      logger.printTrace('Error checking $path:$err');
+      // Ignore.
     }
   }
   logger.printTrace(
