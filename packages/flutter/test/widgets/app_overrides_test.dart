@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class TestRoute<T> extends PageRoute<T> {
-  TestRoute({ this.child, RouteSettings settings }) : super(settings: settings);
+  TestRoute({ required this.child, RouteSettings? settings }) : super(settings: settings);
 
   final Widget child;
 
@@ -16,10 +14,10 @@ class TestRoute<T> extends PageRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 150);
 
   @override
-  Color get barrierColor => null;
+  Color? get barrierColor => null;
 
   @override
-  String get barrierLabel => null;
+  String? get barrierLabel => null;
 
   @override
   bool get maintainState => false;
