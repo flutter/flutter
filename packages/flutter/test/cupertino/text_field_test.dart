@@ -2741,7 +2741,7 @@ void main() {
       ),
     );
 
-    // Should not accept requestFocus
+    // Should not accept requestFocus.
     focusNode.requestFocus();
     await tester.pump();
     expect(focusNode.hasFocus, false);
