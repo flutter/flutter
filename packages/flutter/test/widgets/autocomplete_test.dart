@@ -51,23 +51,23 @@ void main() {
     testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
-      List<String> lastOptions;
+      Iterable<String> lastOptions;
       AutocompleteOnSelected<String> lastOnSelected;
       TextEditingController textEditingController;
 
       await tester.pumpWidget(
         MaterialApp(
           home: AutocompleteCore<String>(
-            buildOptions: (TextEditingValue textEditingValue) {
+            optionsBuilder: (TextEditingValue textEditingValue) {
               return kOptions.where((String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
-              }).toList();
+              });
             },
-            fieldBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
               textEditingController ??= fieldTextEditingController;
               return Container(key: fieldKey);
             },
-            optionsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               lastOptions = options;
               lastOnSelected = onSelected;
               return Container(key: optionsKey);
@@ -89,12 +89,12 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsOneWidget);
       expect(lastOptions.length, 2);
-      expect(lastOptions[0], 'chameleon');
-      expect(lastOptions[1], 'elephant');
+      expect(lastOptions.elementAt(0), 'chameleon');
+      expect(lastOptions.elementAt(1), 'elephant');
 
       // Select a option. The options hide and the field updates to show the
       // selection.
-      final String selection = lastOptions[1];
+      final String selection = lastOptions.elementAt(1);
       lastOnSelected(selection);
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
@@ -110,18 +110,18 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsOneWidget);
       expect(lastOptions.length, 6);
-      expect(lastOptions[0], 'chameleon');
-      expect(lastOptions[1], 'elephant');
-      expect(lastOptions[2], 'goose');
-      expect(lastOptions[3], 'lemur');
-      expect(lastOptions[4], 'mouse');
-      expect(lastOptions[5], 'northern white rhinocerous');
+      expect(lastOptions.elementAt(0), 'chameleon');
+      expect(lastOptions.elementAt(1), 'elephant');
+      expect(lastOptions.elementAt(2), 'goose');
+      expect(lastOptions.elementAt(3), 'lemur');
+      expect(lastOptions.elementAt(4), 'mouse');
+      expect(lastOptions.elementAt(5), 'northern white rhinocerous');
     });
 
     testWidgets('can filter and select a list of custom User options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
-      List<User> lastOptions;
+      Iterable<User> lastOptions;
       AutocompleteOnSelected<User> lastOnSelected;
       User lastUserSelected;
       TextEditingController textEditingController;
@@ -129,19 +129,19 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: AutocompleteCore<User>(
-            buildOptions: (TextEditingValue textEditingValue) {
+            optionsBuilder: (TextEditingValue textEditingValue) {
               return kOptionsUsers.where((User option) {
                 return option.toString().contains(textEditingValue.text.toLowerCase());
-              }).toList();
+              });
             },
             onSelected: (User selected) {
               lastUserSelected = selected;
             },
-            fieldBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
               textEditingController ??= fieldTextEditingController;
               return Container(key: fieldKey);
             },
-            optionsBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> options) {
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
               lastOptions = options;
               lastOnSelected = onSelected;
               return Container(key: optionsKey);
@@ -162,11 +162,11 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsOneWidget);
       expect(lastOptions.length, 2);
-      expect(lastOptions[0], kOptionsUsers[0]);
-      expect(lastOptions[1], kOptionsUsers[1]);
+      expect(lastOptions.elementAt(0), kOptionsUsers[0]);
+      expect(lastOptions.elementAt(1), kOptionsUsers[1]);
 
       // Select a option. The options hide and onSelected is called.
-      final User selection = lastOptions[1];
+      final User selection = lastOptions.elementAt(1);
       lastOnSelected(selection);
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
@@ -184,13 +184,13 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsOneWidget);
       expect(lastOptions.length, 1);
-      expect(lastOptions[0], kOptionsUsers[1]);
+      expect(lastOptions.elementAt(0), kOptionsUsers[1]);
     });
 
     testWidgets('can specify a custom display string for a list of custom User options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
-      List<User> lastOptions;
+      Iterable<User> lastOptions;
       AutocompleteOnSelected<User> lastOnSelected;
       User lastUserSelected;
       final AutocompleteOptionToString<User> displayStringForOption = (User option) => option.name;
@@ -199,22 +199,22 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: AutocompleteCore<User>(
-            buildOptions: (TextEditingValue textEditingValue) {
+            optionsBuilder: (TextEditingValue textEditingValue) {
               return kOptionsUsers.where((User option) {
                 return option
                     .toString()
                     .contains(textEditingValue.text.toLowerCase());
-              }).toList();
+              });
             },
             displayStringForOption: displayStringForOption,
             onSelected: (User selected) {
               lastUserSelected = selected;
             },
-            fieldBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
               textEditingController ??= fieldTextEditingController;
               return Container(key: fieldKey);
             },
-            optionsBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> options) {
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
               lastOptions = options;
               lastOnSelected = onSelected;
               return Container(key: optionsKey);
@@ -235,12 +235,12 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsOneWidget);
       expect(lastOptions.length, 2);
-      expect(lastOptions[0], kOptionsUsers[0]);
-      expect(lastOptions[1], kOptionsUsers[1]);
+      expect(lastOptions.elementAt(0), kOptionsUsers[0]);
+      expect(lastOptions.elementAt(1), kOptionsUsers[1]);
 
       // Select a option. The options hide and onSelected is called. The field
       // has its text set to the selection's display string.
-      final User selection = lastOptions[1];
+      final User selection = lastOptions.elementAt(1);
       lastOnSelected(selection);
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
@@ -258,30 +258,30 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsOneWidget);
       expect(lastOptions.length, 1);
-      expect(lastOptions[0], kOptionsUsers[1]);
+      expect(lastOptions.elementAt(0), kOptionsUsers[1]);
     });
 
     testWidgets('onFieldSubmitted selects the first option', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
-      List<String> lastOptions;
+      Iterable<String> lastOptions;
       VoidCallback lastOnFieldSubmitted;
       TextEditingController textEditingController;
 
       await tester.pumpWidget(
         MaterialApp(
           home: AutocompleteCore<String>(
-            buildOptions: (TextEditingValue textEditingValue) {
+            optionsBuilder: (TextEditingValue textEditingValue) {
               return kOptions.where((String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
-              }).toList();
+              });
             },
-            fieldBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
               textEditingController ??= fieldTextEditingController;
               lastOnFieldSubmitted = onFieldSubmitted;
               return Container(key: fieldKey);
             },
-            optionsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               lastOptions = options;
               return Container(key: optionsKey);
             },
@@ -298,8 +298,8 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsOneWidget);
       expect(lastOptions.length, 2);
-      expect(lastOptions[0], 'chameleon');
-      expect(lastOptions[1], 'elephant');
+      expect(lastOptions.elementAt(0), 'chameleon');
+      expect(lastOptions.elementAt(1), 'elephant');
 
       // Select the current string, as if the field was submitted. The options
       // hide and the field updates to show the selection.
@@ -307,7 +307,7 @@ void main() {
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsNothing);
-      expect(textEditingController.text, lastOptions[0]);
+      expect(textEditingController.text, lastOptions.elementAt(0));
     });
 
     testWidgets('options follow field when it moves', (WidgetTester tester) async {
@@ -326,19 +326,19 @@ void main() {
                 return Align(
                   alignment: alignment,
                   child: AutocompleteCore<String>(
-                    buildOptions: (TextEditingValue textEditingValue) {
+                    optionsBuilder: (TextEditingValue textEditingValue) {
                       return kOptions.where((String option) {
                         return option.contains(textEditingValue.text.toLowerCase());
-                      }).toList();
+                      });
                     },
-                    fieldBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
+                    fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
                       textEditingController ??= fieldTextEditingController;
                       return TextFormField(
                         controller: fieldTextEditingController,
                         key: fieldKey,
                       );
                     },
-                    optionsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
+                    optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
                       return Container(key: optionsKey);
                     },
                   ),
