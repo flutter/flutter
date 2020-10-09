@@ -25,7 +25,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('hot reload displays a pretty, actionable error message when removing a field from a const class', () async {
+  testWithoutContext('hot reload displays a formatted error message when removing a field from a const class', () async {
     await flutter.run();
     project.removeFieldFromConstClass();
 

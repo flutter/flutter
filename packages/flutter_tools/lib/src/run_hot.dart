@@ -801,6 +801,38 @@ class HotRunner extends ResidentRunner {
     return result;
   }
 
+  Future<List<Future<vm_service.ReloadReport>>> _reloadDeviceSources(
+    FlutterDevice device,
+    String entryPath, {
+    bool pause = false,
+  }) async {
+    final String deviceEntryUri = device.devFS.baseUri
+      .resolveUri(globals.fs.path.toUri(entryPath)).toString();
+    final vm_service.VM vm = await device.vmService.getVM();
+    return <Future<vm_service.ReloadReport>>[
+      for (final vm_service.IsolateRef isolateRef in vm.isolates)
+        device.vmService.reloadSources(
+          isolateRef.id,
+          pause: pause,
+          rootLibUri: deviceEntryUri,
+        )
+    ];
+  }
+
+  Future<void> _resetAssetDirectory(FlutterDevice device) async {
+    final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(
+      globals.fs.path.toUri(getAssetBuildDirectory()));
+    assert(deviceAssetsDirectoryUri != null);
+    final List<FlutterView> views = await device.vmService.getFlutterViews();
+    await Future.wait<void>(views.map<Future<void>>(
+      (FlutterView view) => device.vmService.setAssetDirectory(
+        assetsDirectory: deviceAssetsDirectoryUri,
+        uiIsolateId: view.uiIsolate.id,
+        viewId: view.id,
+      )
+    ));
+  }
+
   Future<OperationResult> _reloadSources({
     String targetPlatform,
     String sdkName,
@@ -838,12 +870,13 @@ class HotRunner extends ResidentRunner {
       final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
       for (final FlutterDevice device in flutterDevices) {
         if (_shouldResetAssetDirectory) {
-          // Asset directory has to be set only once when we switch from
+          // Asset directory has to be set only once when the engine switches from
           // running from bundle to uploaded files.
-          await device.resetAssetDirectory();
+          await _resetAssetDirectory(device);
           _shouldResetAssetDirectory = false;
         }
-        final List<Future<vm_service.ReloadReport>> reportFutures = await device.reloadSources(
+        final List<Future<vm_service.ReloadReport>> reportFutures = await _reloadDeviceSources(
+          device,
           entryPath, pause: pause,
         );
         allReportsFutures.add(Future.wait(reportFutures).then(
