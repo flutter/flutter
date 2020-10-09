@@ -4236,6 +4236,40 @@ void main() {
     expect(getOpacity(tester, prefixText), 1.0);
   });
 
+  testWidgets('OutlineInputBorder with InputDecorator long label, width should ignore icon width', (WidgetTester tester) async {
+    // Related issue: https://github.com/flutter/flutter/issues/64427
+    const String labelText = 'Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.';
+
+    Widget getLabeledInputDecorator(bool useOutlineBorder) => MaterialApp(
+        home: Material(
+          child: Container(
+            width: 300,
+            child: TextField(
+              decoration: InputDecoration(
+                border: useOutlineBorder ? const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.greenAccent, width: 1.0),
+                ) : null,
+                suffixIcon: const Icon(Icons.arrow_drop_down),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                labelText: labelText,
+              ),
+            ),
+          ),
+        ),
+      );
+
+    // Build with no OutlineInputBorder.
+    await tester.pumpWidget(getLabeledInputDecorator(false));
+
+    // Get the width of the label when there is no OutlineInputBorder.
+    final double labelWidth = tester.getSize(find.text(labelText)).width;
+
+    // Build with a OutlineInputBorder.
+    await tester.pumpWidget(getLabeledInputDecorator(true));
+
+    expect(tester.getSize(find.text(labelText)).width == labelWidth, isFalse);
+  });
+
   testWidgets('given enough space, constrained and unconstrained heights result in the same size widget', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/65572
     final UniqueKey keyUnconstrained = UniqueKey();
