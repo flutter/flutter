@@ -658,13 +658,16 @@ class DataTable extends StatelessWidget {
 
   static final LocalKey _headingRowKey = UniqueKey();
 
-  void _handleSelectAll(bool? checked) {
+  void _handleSelectAll(bool? checked, bool someChecked) {
+    // If some checkboxes are checked, all checkboxes are selected. Otherwise,
+    // use the new checked value but default to false if it's null.
+    final bool effectiveChecked = someChecked || (checked ?? false);
     if (onSelectAll != null) {
-      onSelectAll!(checked);
+      onSelectAll!(effectiveChecked);
     } else {
       for (final DataRow row in rows) {
-        if ((row.onSelectChanged != null) && (row.selected != checked))
-          row.onSelectChanged!(checked);
+        if (row.onSelectChanged != null && row.selected != effectiveChecked)
+          row.onSelectChanged!(effectiveChecked);
       }
     }
   }
@@ -692,10 +695,11 @@ class DataTable extends StatelessWidget {
   Widget _buildCheckbox({
     required BuildContext context,
     required Color activeColor,
-    required bool checked,
+    required bool? checked,
     required VoidCallback? onRowTap,
     required ValueChanged<bool?>? onCheckboxChanged,
     required MaterialStateProperty<Color?>? overlayColor,
+    required bool tristate,
   }) {
     final ThemeData themeData = Theme.of(context)!;
     final double effectiveHorizontalMargin = horizontalMargin
@@ -713,6 +717,7 @@ class DataTable extends StatelessWidget {
             activeColor: activeColor,
             value: checked,
             onChanged: onCheckboxChanged,
+            tristate: tristate,
           ),
         ),
       ),
@@ -869,7 +874,11 @@ class DataTable extends StatelessWidget {
     );
     final bool anyRowSelectable = rows.any((DataRow row) => row.onSelectChanged != null);
     final bool displayCheckboxColumn = showCheckboxColumn && anyRowSelectable;
-    final bool allChecked = displayCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
+    final Iterable<DataRow> rowsChecked = displayCheckboxColumn ?
+      rows.where((DataRow row) => row.onSelectChanged != null && row.selected) : <DataRow>[];
+    final bool allChecked = displayCheckboxColumn && rowsChecked.length == rows.length;
+    final bool anyChecked = displayCheckboxColumn && rowsChecked.isNotEmpty;
+    final bool someChecked = anyChecked && !allChecked;
     final double effectiveHorizontalMargin = horizontalMargin
       ?? theme.dataTableTheme.horizontalMargin
       ?? _horizontalMargin;
@@ -920,10 +929,11 @@ class DataTable extends StatelessWidget {
       tableRows[0].children![0] = _buildCheckbox(
         context: context,
         activeColor: theme.accentColor,
-        checked: allChecked,
+        checked: someChecked ? null : allChecked,
         onRowTap: null,
-        onCheckboxChanged: _handleSelectAll,
+        onCheckboxChanged: (bool? checked) => _handleSelectAll(checked, someChecked),
         overlayColor: null,
+        tristate: true,
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
@@ -934,6 +944,7 @@ class DataTable extends StatelessWidget {
           onRowTap: () => row.onSelectChanged != null ? row.onSelectChanged!(!row.selected) : null ,
           onCheckboxChanged: row.onSelectChanged,
           overlayColor: row.color ?? effectiveDataRowColor,
+          tristate: false,
         );
         rowIndex += 1;
       }

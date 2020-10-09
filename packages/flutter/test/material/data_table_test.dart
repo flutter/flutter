@@ -104,6 +104,61 @@ void main() {
     log.clear();
   });
 
+  testWidgets('DataTable control test - tristate', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+    const int numItems = 3;
+    Widget buildTable(List<bool> selected) {
+      return DataTable(
+        onSelectAll: (bool? value) {
+          log.add('select-all: $value');
+        },
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Name'),
+            tooltip: 'Name',
+          ),
+        ],
+        rows: List<DataRow>.generate(
+          numItems,
+          (int index) => DataRow(
+            cells: <DataCell>[DataCell(Text('Row $index'))],
+            selected: selected[index],
+            onSelectChanged: (bool? value) {
+              log.add('row-selected: $index');
+            },
+          ),
+        ),
+      );
+    }
+
+    // Tapping the parent checkbox when no rows are selected, selects all.
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(<bool>[false, false, false])),
+    ));
+    await tester.tap(find.byType(Checkbox).first);
+
+    expect(log, <String>['select-all: true']);
+    log.clear();
+
+    // Tapping the parent checkbox when some rows are selected, selects all.
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(<bool>[true, false, true])),
+    ));
+    await tester.tap(find.byType(Checkbox).first);
+
+    expect(log, <String>['select-all: true']);
+    log.clear();
+
+    // Tapping the parent checkbox when all rows are selected, deselects all.
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(<bool>[true, true, true])),
+    ));
+    await tester.tap(find.byType(Checkbox).first);
+
+    expect(log, <String>['select-all: false']);
+    log.clear();
+  });
+
   testWidgets('DataTable control test - no checkboxes', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
