@@ -240,7 +240,7 @@ class _TabLabelBarRenderer extends RenderFlex {
     RenderBox? child = firstChild;
     final List<double> xOffsets = <double>[];
     while (child != null) {
-      final FlexParentData childParentData = child.parentData as FlexParentData;
+      final FlexParentData childParentData = child.parentData! as FlexParentData;
       xOffsets.add(childParentData.offset.dx);
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;

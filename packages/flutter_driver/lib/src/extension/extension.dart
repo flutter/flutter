@@ -538,7 +538,7 @@ class FlutterDriverExtension with DeserializeFinderFactory {
     SemanticsNode? node;
     while (renderObject != null && node == null) {
       node = renderObject.debugSemantics;
-      renderObject = renderObject.parent as RenderObject;
+      renderObject = renderObject.parent as RenderObject?;
     }
     if (node == null)
       throw StateError('No semantics data found');
@@ -549,7 +549,7 @@ class FlutterDriverExtension with DeserializeFinderFactory {
     final GetOffset getOffsetCommand = command as GetOffset;
     final Finder finder = await _waitForElement(_createFinder(getOffsetCommand.finder));
     final Element element = finder.evaluate().single;
-    final RenderBox box = element.renderObject as RenderBox;
+    final RenderBox box = (element.renderObject as RenderBox?)!;
     Offset localPoint;
     switch (getOffsetCommand.offsetType) {
       case OffsetType.topLeft:

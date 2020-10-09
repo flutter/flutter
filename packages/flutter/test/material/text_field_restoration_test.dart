@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -74,7 +72,7 @@ Future<void> restoreAndVerify(WidgetTester tester) async {
 }
 
 class TestWidget extends StatefulWidget {
-  const TestWidget({Key key, this.useExternal = false}) : super(key: key);
+  const TestWidget({Key? key, this.useExternal = false}) : super(key: key);
 
   final bool useExternal;
 
@@ -89,7 +87,7 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   String get restorationId => 'widget';
 
   @override
-  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(controller, 'controller');
   }
 

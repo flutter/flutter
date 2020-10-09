@@ -42,7 +42,6 @@ import 'src/commands/test.dart';
 import 'src/commands/train.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
-import 'src/commands/version.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
@@ -61,6 +60,11 @@ import 'src/web/web_runner.dart';
 Future<void> main(List<String> args) async {
   final bool veryVerbose = args.contains('-vv');
   final bool verbose = args.contains('-v') || args.contains('--verbose') || veryVerbose;
+  // Support the -? Powershell help idiom.
+  final int powershellHelpIndex = args.indexOf('-?');
+  if (powershellHelpIndex != -1) {
+    args[powershellHelpIndex] = '-h';
+  }
 
   final bool doctor = (args.isNotEmpty && args.first == 'doctor') ||
       (args.length == 2 && verbose && args.last == 'doctor');
@@ -116,7 +120,6 @@ Future<void> main(List<String> args) async {
     ShellCompletionCommand(),
     TestCommand(verboseHelp: verboseHelp),
     UpgradeCommand(),
-    VersionCommand(),
     SymbolizeCommand(
       stdio: globals.stdio,
       fileSystem: globals.fs,

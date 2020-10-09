@@ -273,6 +273,7 @@ class SwitchListTile extends StatelessWidget {
     this.selected = false,
     this.autofocus = false,
     this.controlAffinity = ListTileControlAffinity.platform,
+    this.shape,
   }) : _switchListTileType = _SwitchListTileType.material,
        assert(value != null),
        assert(isThreeLine != null),
@@ -308,6 +309,7 @@ class SwitchListTile extends StatelessWidget {
     this.selected = false,
     this.autofocus = false,
     this.controlAffinity = ListTileControlAffinity.platform,
+    this.shape,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
        assert(value != null),
        assert(isThreeLine != null),
@@ -435,6 +437,9 @@ class SwitchListTile extends StatelessWidget {
   /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform].
   final ListTileControlAffinity controlAffinity;
 
+  /// {@macro flutter.material.ListTile.shape}
+  final ShapeBorder? shape;
+
   @override
   Widget build(BuildContext context) {
     Widget control;
@@ -497,6 +502,7 @@ class SwitchListTile extends StatelessWidget {
           onTap: onChanged != null ? () { onChanged!(!value); } : null,
           selected: selected,
           autofocus: autofocus,
+          shape: shape,
         ),
       ),
     );

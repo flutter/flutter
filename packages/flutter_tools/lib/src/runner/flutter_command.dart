@@ -950,9 +950,9 @@ abstract class FlutterCommand extends Command<void> {
       // First always update universal artifacts, as some of these (e.g.
       // ios-deploy on macOS) are required to determine `requiredArtifacts`.
       await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+
       await globals.cache.updateAll(await requiredArtifacts);
     }
-    Cache.releaseLock();
 
     await validateCommand();
 
@@ -979,7 +979,11 @@ abstract class FlutterCommand extends Command<void> {
         context: PubContext.getVerifyContext(name),
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,
       );
+      // All done updating dependencies. Release the cache lock.
+      Cache.releaseLock();
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
+    } else {
+      Cache.releaseLock();
     }
 
     setupApplicationPackages();
@@ -1059,7 +1063,7 @@ abstract class FlutterCommand extends Command<void> {
         devices = await deviceManager.getAllConnectedDevices();
       }
       globals.printStatus('');
-      await Device.printDevices(devices);
+      await Device.printDevices(devices, globals.logger);
       return null;
     }
     return devices;
@@ -1083,7 +1087,7 @@ abstract class FlutterCommand extends Command<void> {
       globals.printStatus(userMessages.flutterSpecifyDevice);
       deviceList = await globals.deviceManager.getAllConnectedDevices();
       globals.printStatus('');
-      await Device.printDevices(deviceList);
+      await Device.printDevices(deviceList, globals.logger);
       return null;
     }
     return deviceList.single;

@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import 'android/android_device.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
@@ -186,6 +185,8 @@ class FlutterDevice {
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
+
+  DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;
   vm_service.VmService vmService;
   DevFS devFS;
@@ -574,6 +575,7 @@ class FlutterDevice {
       globals.printError(message);
       return 1;
     }
+    devFSWriter = device.createDevFSWriter(package, userIdentifier);
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
 
@@ -621,6 +623,7 @@ class FlutterDevice {
       buildInfo: coldRunner.debuggingOptions.buildInfo,
       applicationBinary: coldRunner.applicationBinary,
     );
+    devFSWriter = device.createDevFSWriter(package, userIdentifier);
 
     final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
@@ -716,8 +719,7 @@ class FlutterDevice {
         pathToReload: pathToReload,
         invalidatedFiles: invalidatedFiles,
         packageConfig: packageConfig,
-        devFSWriter: null,
-        androidReload: device is AndroidDevice,
+        devFSWriter: devFSWriter,
       );
     } on DevFSException {
       devFSStatus.cancel();

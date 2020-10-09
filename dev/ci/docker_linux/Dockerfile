@@ -123,8 +123,3 @@ COPY ci/docker_linux/Gemfile.lock /Gemfile.lock
 
 RUN bundle config set system 'true' && \
   bundle install --system
-
-# Install goldctl, for Golden testing
-COPY bots/download_goldctl.sh /download_goldctl.sh
-ENV GOLDCTL '/depot_tools/goldctl'
-RUN /download_goldctl.sh

@@ -307,9 +307,6 @@ class FakeOperatingSystemUtils implements OperatingSystemUtils {
   File makePipe(String path) => null;
 
   @override
-  void zip(Directory data, File zipFile) { }
-
-  @override
   void unzip(File file, Directory targetDirectory) { }
 
   @override

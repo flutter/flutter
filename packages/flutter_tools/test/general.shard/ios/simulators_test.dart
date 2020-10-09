@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/mac.dart';
@@ -910,6 +911,29 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('startApp respects the enable software rendering flag', () async {
+      final IOSSimulator device = IOSSimulator(
+        'x',
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.2',
+        simControl: simControl,
+        xcode: mockXcode,
+      );
+
+      final Directory mockDir = globals.fs.currentDirectory;
+      final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
+
+      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
+      final DebuggingOptions mockOptions = DebuggingOptions.enabled(mockInfo, enableSoftwareRendering: true);
+      await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+
+      verify(simControl.launch(any, any, captureAny)).captured.contains('--enable-software-rendering');
+    }, overrides: <Type, Generator>{
+      PlistParser: () => MockPlistUtils(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 
   group('IOSDevice.isSupportedForProject', () {
@@ -976,6 +1000,16 @@ flutter:
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('createDevFSWriter returns a LocalDevFSWriter', () {
+      final IOSSimulator simulator = IOSSimulator(
+        'test',
+        simControl: mockSimControl,
+        xcode: mockXcode,
+      );
+
+      expect(simulator.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());
     });
   });
 }

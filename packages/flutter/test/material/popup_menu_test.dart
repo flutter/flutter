@@ -1593,14 +1593,14 @@ void main() {
 
     const double statusBarHeight = 24.0;
     final PopupMenuItem<int> firstItem = choices[0];
-    int _selectedValue = choices[0].value;
+    int _selectedValue = choices[0].value!;
 
     await tester.pumpWidget(
       MaterialApp(
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return MediaQuery(
             data: const MediaQueryData(padding: EdgeInsets.only(top: statusBarHeight)), // status bar
-            child: child,
+            child: child!,
           );
         },
         home: StatefulBuilder(
@@ -1651,7 +1651,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return MediaQuery(
             data: const MediaQueryData(
               padding: EdgeInsets.only(
@@ -1659,7 +1659,7 @@ void main() {
                 bottom: windowPaddingBottom,
               ),
             ),
-            child: child,
+            child: child!,
           );
         },
         home: Scaffold(
