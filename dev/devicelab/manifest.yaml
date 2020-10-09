@@ -256,7 +256,6 @@ tasks:
       Measures the runtime performance of backdrop filter blurs on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   textfield_perf__timeline_summary:
     description: >
@@ -264,11 +263,23 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  textfield_perf__e2e_summary:
+    description: >
+      Measures the runtime performance of textfield on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   color_filter_and_fade_perf__timeline_summary:
     description: >
       Measures the runtime performance of color filter with fade on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  color_filter_and_fade_perf__e2e_summary:
+    description: >
+      Measures the runtime performance of color filter with fade on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   fading_child_animation_perf__timeline_summary:
     description: >
@@ -507,7 +518,6 @@ tasks:
       Measures the runtime performance of platform views in the Complex Layout sample app on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   flutter_gallery_ios32__start_up:
     description: >

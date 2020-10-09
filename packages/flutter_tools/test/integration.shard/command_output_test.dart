@@ -33,6 +33,21 @@ void main() {
     expect(result.stdout, isNot(contains('exiting with code 0')));
   });
 
+  testWithoutContext('Flutter help is shown with -? command line argument', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      '-?',
+    ]);
+
+    // Development tools.
+    expect(result.stdout, contains(
+      'Run "flutter help <command>" for more information about a command.\n'
+      'Run "flutter help -v" for verbose help output, including less commonly used options.'
+    ));
+  });
+
   testWithoutContext('flutter doctor is not verbose', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
@@ -169,5 +184,29 @@ void main() {
 
     expect(result.exitCode, 1);
     expect(result.stderr, contains('Invalid `--debug-uri`: http://127.0.0.1:3333*/'));
+  });
+
+  testWithoutContext('will load bootstrap script before starting', () async {
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+
+    final File bootstrap = fileSystem.file(fileSystem.path.join(
+        getFlutterRoot(),
+        'bin',
+        'internal',
+        platform.isWindows ? 'bootstrap.bat' : 'bootstrap.sh'));
+
+    try {
+      bootstrap.writeAsStringSync('echo TESTING 1 2 3');
+
+      final ProcessResult result = await processManager.run(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+      ]);
+
+      expect(result.stdout, contains('TESTING 1 2 3'));
+    } finally {
+      bootstrap.deleteSync();
+    }
   });
 }

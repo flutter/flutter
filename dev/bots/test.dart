@@ -55,11 +55,6 @@ final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
-/// The number of Cirrus jobs that run host-only devicelab tests in parallel.
-///
-/// WARNING: if you change this number, also change .cirrus.yml
-/// and make sure it runs _all_ shards.
-const int kDeviceLabShardCount = 2;
 
 /// The number of Cirrus jobs that run build tests in parallel.
 ///
@@ -121,10 +116,8 @@ Future<void> main(List<String> args) async {
     await selectShard(const <String, ShardRunner>{
       'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
       'build_tests': _runBuildTests,
-      'firebase_test_lab_tests': _runFirebaseTestLabTests,
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
-      'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
       'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
       'web_tests': _runWebUnitTests,
@@ -620,14 +613,13 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata, options: nullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: nullSafetyOptions);
     await _runFlutterTest(
@@ -667,28 +659,6 @@ Future<void> _runFrameworkTests() async {
     'libraries': runLibraries,
     'misc': runMisc,
   });
-}
-
-Future<void> _runFirebaseTestLabTests() async {
-  // Firebase Lab tests take ~20 minutes per integration test,
-  // so only one test is run per shard. Therefore, there are as
-  // many shards available as there are integration tests in this list.
-  // If you add a new test, add a corresponding firebase_test_lab-#-linux
-  // to .cirrus.yml
-  final List<String> integrationTests = <String>[
-    'release_smoke_test',
-    'abstract_method_smoke_test',
-    'android_embedding_v2_smoke_test',
-  ];
-
-  final String firebaseScript = path.join(flutterRoot, 'dev', 'bots', 'firebase_testlab.sh');
-  final String integrationTestDirectory = path.join(flutterRoot, 'dev', 'integration_tests');
-
-  final List<ShardRunner> tests = integrationTests.map((String integrationTest) =>
-    () => runCommand(firebaseScript, <String>[ path.join(integrationTestDirectory, integrationTest) ])
-  ).toList();
-
-  await _selectIndexedSubshard(tests, integrationTests.length);
 }
 
 Future<void> _runFrameworkCoverage() async {
@@ -794,6 +764,16 @@ Future<void> _runWebIntegrationTests() async {
       '--dart-define=test.valueB=Value',
     ]
   );
+  await _runWebDebugTest('lib/sound_mode.dart', additionalArguments: <String>[
+    '--enable-experiment',
+    'non-nullable',
+    '--sound-null-safety',
+  ]);
+  await _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
+    '--enable-experiment',
+    'non-nullable',
+    '--sound-null-safety',
+  ]);
 }
 
 Future<void> _runWebStackTraceTest(String buildMode) async {
@@ -1214,51 +1194,6 @@ Map<String, String> _initGradleEnvironment() {
 }
 
 final Map<String, String> gradleEnvironment = _initGradleEnvironment();
-
-Future<void> _runHostOnlyDeviceLabTests() async {
-  // Please don't add more tests here. We should not be using the devicelab
-  // logic to run tests outside devicelab, that's just confusing.
-  // Instead, create tests that are not devicelab tests, and run those.
-
-  // TODO(ianh): Move the tests that are not running on devicelab any more out
-  // of the device lab directory.
-
-  // List the tests to run.
-  // We split these into subshards. The tests are randomly distributed into
-  // those subshards so as to get a uniform distribution of costs, but the
-  // seed is fixed so that issues are reproducible.
-  final List<ShardRunner> tests = <ShardRunner>[
-    // Keep this in alphabetical order.
-    () => _runDevicelabTest('build_aar_module_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('module_custom_host_app_name_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('plugin_dependencies_test', environment: gradleEnvironment),
-  ]..shuffle(math.Random(0));
-
-  await _selectIndexedSubshard(tests, kDeviceLabShardCount);
-}
-
-Future<void> _runDevicelabTest(String testName, {
-  Map<String, String> environment,
-  // testEmbeddingV2 is only supported by certain specific devicelab tests.
-  // Don't use it unless you're sure the test actually supports it.
-  // You can check by looking to see if the test examines the environment
-  // for the ENABLE_ANDROID_EMBEDDING_V2 variable.
-  bool testEmbeddingV2 = false,
-}) async {
-  await runCommand(
-    dart,
-    <String>['bin/run.dart', '-t', testName],
-    workingDirectory: path.join(flutterRoot, 'dev', 'devicelab'),
-    environment: <String, String>{
-      ...?environment,
-      if (testEmbeddingV2)
-        'ENABLE_ANDROID_EMBEDDING_V2': 'true',
-    },
-  );
-}
 
 void deleteFile(String path) {
   // This is technically a race condition but nobody else should be running

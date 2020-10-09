@@ -214,10 +214,17 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// [TextEditingController]; however, one should not also set [text]
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
+  ///
+  /// If the new selection if of non-zero length, or is outside the composing
+  /// range, the composing composing range is cleared.
   set selection(TextSelection newSelection) {
     if (!isSelectionWithinTextBounds(newSelection))
       throw FlutterError('invalid text selection: $newSelection');
-    value = value.copyWith(selection: newSelection, composing: TextRange.empty);
+    final TextRange newComposing =
+        newSelection.isCollapsed && _isSelectionWithinComposingRange(newSelection)
+            ? value.composing
+            : TextRange.empty;
+    value = value.copyWith(selection: newSelection, composing: newComposing);
   }
 
   /// Set the [value] to empty.
@@ -250,6 +257,11 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// Check that the [selection] is inside of the bounds of [text].
   bool isSelectionWithinTextBounds(TextSelection selection) {
     return selection.start <= text.length && selection.end <= text.length;
+  }
+
+  /// Check that the [selection] is inside of the composing range.
+  bool _isSelectionWithinComposingRange(TextSelection selection) {
+    return selection.start >= value.composing.start && selection.end <= value.composing.end;
   }
 }
 
@@ -957,6 +969,22 @@ class EditableText extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  /// {@endtemplate}
+  ///
+  /// ## Handling emojis and other complex characters
+  /// {@template flutter.widgets.editableText.complexCharacters}
+  /// It's important to always use
+  /// [characters](https://pub.dev/packages/characters) when dealing with user
+  /// input text that may contain complex characters. This will ensure that
+  /// extended grapheme clusters and surrogate pairs are treated as single
+  /// characters, as they appear to the user.
+  ///
+  /// For example, when finding the length of some user input, use
+  /// `string.characters.length`. Do NOT use `string.length` or even
+  /// `string.runes.length`. For the complex character "👨‍👩‍👦", this
+  /// appears to the user as a single character, and `string.characters.length`
+  /// intuitively returns 1. On the other hand, `string.length` returns 8, and
+  /// `string.runes.length` returns 5!
   /// {@endtemplate}
   ///
   /// See also:
@@ -1809,7 +1837,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void _finalizeEditing(TextInputAction action, {required bool shouldUnfocus}) {
     // Take any actions necessary now that the user has completed editing.
     if (widget.onEditingComplete != null) {
-      widget.onEditingComplete!();
+      try {
+        widget.onEditingComplete!();
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while calling onEditingComplete for $action'),
+        ));
+      }
     } else {
       // Default behavior if the developer did not provide an
       // onEditingComplete callback: Finalize editing and remove focus, or move
@@ -1841,7 +1878,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // Invoke optional callback with the user's submitted content.
-    widget.onSubmitted?.call(_value.text);
+    try {
+      widget.onSubmitted?.call(_value.text);
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widgets',
+        context: ErrorDescription('while calling onSubmitted for $action'),
+      ));
+    }
   }
 
   int _batchEditDepth = 0;
@@ -1877,8 +1923,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (localValue == _lastKnownRemoteTextEditingValue)
       return;
     _textInputConnection!.setEditingState(localValue);
-    // Update _lastKnownremoteTextEditingValue immediately as setEditingValue is
-    // "fire and forget".
     _lastKnownRemoteTextEditingValue = localValue;
   }
 
@@ -2075,7 +2119,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
       _selectionOverlay!.handlesVisible = widget.showSelectionHandles;
       _selectionOverlay!.showHandles();
-      widget.onSelectionChanged?.call(selection, cause);
+      try {
+        widget.onSelectionChanged?.call(selection, cause);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while calling onSelectionChanged for $cause'),
+        ));
+      }
     }
   }
 
@@ -2183,14 +2236,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       value = _whitespaceFormatter.formatEditUpdate(_value, value);
     }
 
-    // Before triggering the [_value] change notifier, we want to make sure
-    // [_updateRemoteEditingValueIfNeeded] is muted, so we can consolidate the
-    // changes and send them to the engine in one batch.
+    // Put all optional user callback invocations in a batch edit to prevent
+    // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
 
     _value = value;
-    if (textChanged)
-      widget.onChanged?.call(value.text);
+    if (textChanged) {
+      try {
+        widget.onChanged?.call(value.text);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while calling onChanged'),
+        ));
+      }
+    }
 
     endBatchEdit();
   }

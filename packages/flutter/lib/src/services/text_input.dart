@@ -801,7 +801,7 @@ abstract class TextInputClient {
   const TextInputClient();
 
   /// The current state of the [TextEditingValue] held by this client.
-  TextEditingValue get currentTextEditingValue;
+  TextEditingValue? get currentTextEditingValue;
 
   /// The [AutofillScope] this [TextInputClient] belongs to, if any.
   ///
@@ -1230,7 +1230,7 @@ class TextInput {
     if (method == 'TextInputClient.requestExistingInputState') {
       assert(_currentConnection!._client != null);
       _attach(_currentConnection!, _currentConfiguration);
-      final TextEditingValue editingValue = _currentConnection!._client.currentTextEditingValue;
+      final TextEditingValue? editingValue = _currentConnection!._client.currentTextEditingValue;
       if (editingValue != null) {
         _setEditingState(editingValue);
       }

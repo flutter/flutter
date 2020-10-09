@@ -1309,5 +1309,6 @@ bool _isGeneratedPluginRegistrant(File file) {
       && (filename == 'GeneratedPluginRegistrant.java' ||
           filename == 'GeneratedPluginRegistrant.h' ||
           filename == 'GeneratedPluginRegistrant.m' ||
-          filename == 'generated_plugin_registrant.dart');
+          filename == 'generated_plugin_registrant.dart' ||
+          filename == 'generated_plugin_registrant.h');
 }

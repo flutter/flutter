@@ -324,8 +324,22 @@ void _tests() {
     final SemanticsTester semantics = SemanticsTester(tester);
     await mediaQueryBoilerplate(tester, false);
 
-    expect(semantics, includesNodeWith(label: 'AM', actions: <SemanticsAction>[SemanticsAction.tap]));
-    expect(semantics, includesNodeWith(label: 'PM', actions: <SemanticsAction>[SemanticsAction.tap]));
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'AM',
+        actions: <SemanticsAction>[SemanticsAction.tap],
+        flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.isSelected, SemanticsFlag.isFocusable],
+      ),
+    );
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'PM',
+        actions: <SemanticsAction>[SemanticsAction.tap],
+        flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.isFocusable],
+      ),
+    );
 
     semantics.dispose();
   });
@@ -345,6 +359,32 @@ void _tests() {
     // In 24-hour mode we don't have AM/PM control.
     expect(semantics, isNot(includesNodeWith(label: 'AM')));
     expect(semantics, isNot(includesNodeWith(label: 'PM')));
+
+    semantics.dispose();
+  });
+
+  testWidgets('provides semantics information for text fields', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, accessibleNavigation: true);
+
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Hour',
+        value: '07',
+        actions: <SemanticsAction>[SemanticsAction.tap],
+        flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isMultiline],
+      ),
+    );
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Minute',
+        value: '00',
+        actions: <SemanticsAction>[SemanticsAction.tap],
+        flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isMultiline],
+      ),
+    );
 
     semantics.dispose();
   });
@@ -486,8 +526,8 @@ void _tests() {
     expect(minuteSize.width, greaterThanOrEqualTo(48.0));
     expect(minuteSize.height, greaterThanOrEqualTo(48.0));
 
-    tester.binding.window.physicalSizeTestValue = null;
-    tester.binding.window.devicePixelRatioTestValue = null;
+    tester.binding.window.clearPhysicalSizeTestValue();
+    tester.binding.window.clearDevicePixelRatioTestValue();
   });
 
   testWidgets('builder parameter', (WidgetTester tester) async {
@@ -763,6 +803,89 @@ void _testsInput() {
     expect(find.byType(TextField), findsNothing);
   });
 
+  testWidgets('Can double tap hours (when selected) to enter input mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
+    final Finder hourFinder = find.ancestor(
+      of: find.text('7'),
+      matching: find.byType(InkWell),
+    );
+
+    expect(find.byType(TextField), findsNothing);
+
+    // Double tap the hour.
+    await tester.tap(hourFinder);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(hourFinder);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TextField), findsWidgets);
+  });
+
+  testWidgets('Can not double tap hours (when not selected) to enter input mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
+    final Finder hourFinder = find.ancestor(
+      of: find.text('7'),
+      matching: find.byType(InkWell),
+    );
+    final Finder minuteFinder = find.ancestor(
+      of: find.text('00'),
+      matching: find.byType(InkWell),
+    );
+
+    expect(find.byType(TextField), findsNothing);
+
+    // Switch to minutes mode.
+    await tester.tap(minuteFinder);
+    await tester.pumpAndSettle();
+
+    // Double tap the hour.
+    await tester.tap(hourFinder);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(hourFinder);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TextField), findsNothing);
+  });
+
+  testWidgets('Can double tap minutes (when selected) to enter input mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
+    final Finder minuteFinder = find.ancestor(
+      of: find.text('00'),
+      matching: find.byType(InkWell),
+    );
+
+    expect(find.byType(TextField), findsNothing);
+
+    // Switch to minutes mode.
+    await tester.tap(minuteFinder);
+    await tester.pumpAndSettle();
+
+    // Double tap the minutes.
+    await tester.tap(minuteFinder);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(minuteFinder);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TextField), findsWidgets);
+  });
+
+  testWidgets('Can not double tap minutes (when not selected) to enter input mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
+    final Finder minuteFinder = find.ancestor(
+      of: find.text('00'),
+      matching: find.byType(InkWell),
+    );
+
+    expect(find.byType(TextField), findsNothing);
+
+    // Double tap the minutes.
+    await tester.tap(minuteFinder);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(minuteFinder);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TextField), findsNothing);
+  });
 
   testWidgets('Entered text returns time', (WidgetTester tester) async {
     TimeOfDay result;
@@ -840,6 +963,7 @@ Future<void> mediaQueryBoilerplate(
       double textScaleFactor = 1.0,
       TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
       String helpText,
+      bool accessibleNavigation = false,
     }) async {
   await tester.pumpWidget(
     Localizations(
@@ -852,6 +976,7 @@ Future<void> mediaQueryBoilerplate(
         data: MediaQueryData(
           alwaysUse24HourFormat: alwaysUse24HourFormat,
           textScaleFactor: textScaleFactor,
+          accessibleNavigation: accessibleNavigation,
         ),
         child: Material(
           child: Directionality(

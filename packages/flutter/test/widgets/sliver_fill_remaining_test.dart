@@ -25,6 +25,9 @@ void main() {
       Axis scrollDirection = Axis.vertical,
     }) {
     return MaterialApp(
+      theme:  ThemeData(
+        materialTapTargetSize: MaterialTapTargetSize.padded,
+      ),
       home: Scaffold(
         body: CustomScrollView(
           scrollDirection: scrollDirection,

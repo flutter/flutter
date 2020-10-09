@@ -40,6 +40,24 @@
          "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
       },
       {
+         "name":"Linux firebase_abstract_method_smoke_test",
+         "repo":"flutter",
+         "task_name":"linux_firebase_abstract_method_smoke_test",
+         "enabled":true
+      },
+      {
+         "name":"Linux firebase_android_embedding_v2_smoke_test",
+         "repo":"flutter",
+         "task_name":"linux_firebase_android_embedding_v2_smoke_test",
+         "enabled":true
+      },
+      {
+         "name":"Linux firebase_release_smoke_test",
+         "repo":"flutter",
+         "task_name":"linux_firebase_release_smoke_test",
+         "enabled":true
+      },
+      {
          "name":"Linux fuchsia_precache",
          "repo":"flutter",
          "task_name":"linux_fuchsia_precache",
@@ -147,7 +165,7 @@
          "repo":"flutter",
          "task_name":"linux_web_tests",
          "enabled":true,
-         "run_if":["dev/", "packages/flutter/", "packages/flutter_goldens_client/", "packages/flutter_goldens/", "packages/flutter_test/", "packages/flutter_tools/lib/src/test/", "packages/flutter_web_plugins/", "bin/"]
+         "run_if":["dev/", "packages/", "bin/"]
       },
       {
          "name":"Linux web_integration_tests",
@@ -181,8 +199,7 @@
          "name":"Mac build_tests",
          "repo":"flutter",
          "task_name":"mac_build_tests",
-         "enabled":true,
-         "run_if":["dev/**", "bin/**"]
+         "enabled":true
       },
       {
          "name":"Mac customer_testing",
@@ -313,8 +330,7 @@
          "name": "Windows build_tests",
          "repo": "flutter",
          "task_name": "win_build_tests",
-         "enabled":true,
-         "run_if":["dev/", "bin/"]
+         "enabled":true
       },
       {
          "name": "Windows customer_testing",

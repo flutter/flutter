@@ -574,7 +574,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       InspectorSelectButtonBuilder selectButtonBuilder(Key key) {
         return (BuildContext context, VoidCallback onPressed) {
-          return Material(child: RaisedButton(onPressed: onPressed, key: key));
+          return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: null));
         };
       }
 

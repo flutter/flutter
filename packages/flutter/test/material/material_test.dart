@@ -343,6 +343,27 @@ void main() {
       expect(model.color, equals(Colors.cyan));
     });
 
+    testWidgets('overlay will apply to materials with a non-opaque surface color', (WidgetTester tester) async {
+      const Color surfaceColor = Color(0xFF121212);
+      const Color surfaceColorWithOverlay = Color(0xC6353535);
+
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            applyElevationOverlayColor: true,
+            colorScheme: const ColorScheme.dark(surface: surfaceColor),
+          ),
+          child: buildMaterial(
+            color: surfaceColor.withOpacity(.75),
+            elevation: 8.0,
+          ),
+        ),
+      );
+
+      final RenderPhysicalShape model = getModel(tester);
+      expect(model.color, equals(surfaceColorWithOverlay));
+      expect(model.color, isNot(equals(surfaceColor)));
+    });
   });
 
   group('Transparency clipping', () {

@@ -17,7 +17,7 @@ class ModalBottomSheetDemo extends StatelessWidget {
         actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
       ),
       body: Center(
-        child: RaisedButton(
+        child: ElevatedButton(
           child: const Text('SHOW BOTTOM SHEET'),
           onPressed: () {
             showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
