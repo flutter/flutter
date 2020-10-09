@@ -77,51 +77,6 @@ abstract class _GlRenderer {
 /// This class gets instantiated on demand by Vertices constructor. For apps
 /// that don't use Vertices WebGlRenderer will be removed from release binary.
 class _WebGlRenderer implements _GlRenderer {
-  // Vertex shader transforms pixel space [Vertices.positions] to
-  // final clipSpace -1..1 coordinates with inverted Y Axis.
-  static const _vertexShaderTriangle = '''
-      #version 300 es
-      layout (location=0) in vec4 position;
-      layout (location=1) in vec4 color;
-      uniform mat4 u_ctransform;
-      uniform vec4 u_scale;
-      uniform vec4 u_shift;
-      out vec4 vColor;
-      void main() {
-        gl_Position = ((u_ctransform * position) * u_scale) + u_shift;
-        vColor = color.zyxw;
-      }''';
-  // This fragment shader enables Int32List of colors to be passed directly
-  // to gl context buffer for rendering by decoding RGBA8888.
-  static const _fragmentShaderTriangle = '''
-      #version 300 es
-      precision highp float;
-      in vec4 vColor;
-      out vec4 fragColor;
-      void main() {
-        fragColor = vColor;
-      }''';
-
-  // WebGL 1 version of shaders above for compatibility with Safari.
-  static const _vertexShaderTriangleEs1 = '''
-      attribute vec4 position;
-      attribute vec4 color;
-      uniform mat4 u_ctransform;
-      uniform vec4 u_scale;
-      uniform vec4 u_shift;
-      varying vec4 vColor;
-      void main() {
-        gl_Position = ((u_ctransform * position) * u_scale) + u_shift;
-        vColor = color.zyxw;
-      }''';
-  // WebGL 1 version of shaders above for compatibility with Safari.
-  static const _fragmentShaderTriangleEs1 = '''
-      precision highp float;
-      varying vec4 vColor;
-      void main() {
-        gl_FragColor = vColor;
-      }''';
-
   @override
   void drawVertices(
       html.CanvasRenderingContext2D? context,
@@ -161,16 +116,16 @@ class _WebGlRenderer implements _GlRenderer {
     if (widthInPixels == 0 || heightInPixels == 0) {
       return;
     }
+    final String vertexShader = _writeVerticesVertexShader();
+    final String fragmentShader = _writeVerticesFragmentShader();
     _GlContext gl =
         _OffscreenCanvas.createGlContext(widthInPixels, heightInPixels)!;
-    _GlProgram glProgram = webGLVersion == 1
-        ? gl.useAndCacheProgram(
-            _vertexShaderTriangleEs1, _fragmentShaderTriangleEs1)!
-        : gl.useAndCacheProgram(
-            _vertexShaderTriangle, _fragmentShaderTriangle)!;
+    _GlProgram glProgram = gl.useAndCacheProgram(vertexShader, fragmentShader)!;
 
-    Object? transformUniform = gl.getUniformLocation(glProgram.program, 'u_ctransform');
-    Matrix4 transformAtOffset = transform.clone()..translate(-offsetX, -offsetY);
+    Object? transformUniform = gl.getUniformLocation(glProgram.program,
+        'u_ctransform');
+    Matrix4 transformAtOffset = transform.clone()
+        ..translate(-offsetX, -offsetY);
     gl.setUniformMatrix4fv(transformUniform, false, transformAtOffset.storage);
 
     // Set uniform to scale 0..width/height pixels coordinates to -1..1
@@ -186,8 +141,11 @@ class _WebGlRenderer implements _GlRenderer {
     assert(positionsBuffer != null); // ignore: unnecessary_null_comparison
     gl.bindArrayBuffer(positionsBuffer);
     gl.bufferData(positions, gl.kStaticDraw);
+    Object? positionLoc = gl.getAttribLocation(glProgram.program, 'position');
     js_util.callMethod(
-        gl.glContext!, 'vertexAttribPointer', <dynamic>[0, 2, gl.kFloat, false, 0, 0]);
+        gl.glContext!, 'vertexAttribPointer', <dynamic>[
+          positionLoc, 2, gl.kFloat, false, 0, 0,
+    ]);
     gl.enableVertexAttribArray(0);
 
     // Setup color buffer.
@@ -195,9 +153,9 @@ class _WebGlRenderer implements _GlRenderer {
     gl.bindArrayBuffer(colorsBuffer);
     // Buffer kBGRA_8888.
     gl.bufferData(vertices._colors, gl.kStaticDraw);
-
+    Object? colorLoc = gl.getAttribLocation(glProgram.program, 'color');
     js_util.callMethod(gl.glContext!, 'vertexAttribPointer',
-        <dynamic>[1, 4, gl.kUnsignedByte, true, 0, 0]);
+        <dynamic>[colorLoc, 4, gl.kUnsignedByte, true, 0, 0]);
     gl.enableVertexAttribArray(1);
     gl.clear();
     final int vertexCount = positions.length ~/ 2;
@@ -207,6 +165,51 @@ class _WebGlRenderer implements _GlRenderer {
     context.resetTransform();
     gl.drawImage(context, offsetX, offsetY);
     context.restore();
+  }
+
+  /// Vertex shader transforms pixel space [Vertices.positions] to
+  /// final clipSpace -1..1 coordinates with inverted Y Axis.
+  ///     #version 300 es
+  ///     layout (location=0) in vec4 position;
+  ///     layout (location=1) in vec4 color;
+  ///     uniform mat4 u_ctransform;
+  ///     uniform vec4 u_scale;
+  ///     uniform vec4 u_shift;
+  ///     out vec4 vColor;
+  ///     void main() {
+  ///       gl_Position = ((u_ctransform * position) * u_scale) + u_shift;
+  ///       v_color = color.zyxw;
+  ///     }
+  String _writeVerticesVertexShader() {
+    ShaderBuilder builder = ShaderBuilder(webGLVersion);
+    builder.addIn(ShaderType.kVec4, name: 'position');
+    builder.addIn(ShaderType.kVec4, name: 'color');
+    builder.addUniform(ShaderType.kMat4, name: 'u_ctransform');
+    builder.addUniform(ShaderType.kVec4, name: 'u_scale');
+    builder.addUniform(ShaderType.kVec4, name: 'u_shift');
+    builder.addOut(ShaderType.kVec4, name: 'v_color');
+    ShaderMethod method = builder.addMethod('main');
+    method.addStatement('gl_Position = ((u_ctransform * position) * u_scale) + u_shift;');
+    method.addStatement('v_color = color.zyxw;');
+    return builder.build();
+  }
+
+  /// This fragment shader enables Int32List of colors to be passed directly
+  /// to gl context buffer for rendering by decoding RGBA8888.
+  ///     #version 300 es
+  ///     precision mediump float;
+  ///     in vec4 vColor;
+  ///     out vec4 fragColor;
+  ///     void main() {
+  ///       fragColor = vColor;
+  ///     }
+  String _writeVerticesFragmentShader() {
+    ShaderBuilder builder = ShaderBuilder.fragment(webGLVersion);
+    builder.floatPrecision = ShaderPrecision.kMedium;
+    builder.addIn(ShaderType.kVec4, name:'v_color');
+    ShaderMethod method = builder.addMethod('main');
+    method.addStatement('${builder.fragmentColor.name} = v_color;');
+    return builder.build();
   }
 
   @override
@@ -547,7 +550,15 @@ class _GlContext {
   /// Returns reference to uniform in program.
   Object? getUniformLocation(Object? program, String uniformName) {
     return js_util
-        .callMethod(glContext!, 'getUniformLocation', <dynamic>[program, uniformName]);
+        .callMethod(glContext!, 'getUniformLocation',
+        <dynamic>[program, uniformName]);
+  }
+
+  /// Returns reference to attribute in program.
+  Object? getAttribLocation(Object? program, String uniformName) {
+    return js_util
+        .callMethod(glContext!, 'getAttribLocation',
+        <dynamic>[program, uniformName]);
   }
 
   /// Sets vec2 uniform values.
