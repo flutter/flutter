@@ -412,8 +412,8 @@ void _testCullRectComputation() {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
 
     builder.pushTransform(Matrix4.diagonal3Values(
-        EngineWindow.browserDevicePixelRatio,
-        EngineWindow.browserDevicePixelRatio, 1.0).toFloat64());
+        EnginePlatformDispatcher.browserDevicePixelRatio,
+        EnginePlatformDispatcher.browserDevicePixelRatio, 1.0).toFloat64());
 
     // TODO(yjbanov): see the TODO below.
     // final double screenWidth = html.window.innerWidth.toDouble();

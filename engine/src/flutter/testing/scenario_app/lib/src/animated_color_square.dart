@@ -16,10 +16,10 @@ import 'scenario.dart';
 class AnimatedColorSquareScenario extends Scenario {
   /// Creates the AnimatedColorSquare scenario.
   ///
-  /// The [window] parameter must not be null.
-  AnimatedColorSquareScenario(Window window)
-      : assert(window != null),
-        super(window);
+  /// The [dispatcher] parameter must not be null.
+  AnimatedColorSquareScenario(PlatformDispatcher dispatcher)
+      : assert(dispatcher != null),
+        super(dispatcher);
 
   static const double _squareSize = 200;
   /// Used to animate the red value in the color of the square.

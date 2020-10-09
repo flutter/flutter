@@ -9,6 +9,7 @@
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_message_response_dart.h"
+#include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/lib/ui/window/window.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
@@ -197,7 +198,8 @@ PlatformConfiguration::~PlatformConfiguration() {}
 void PlatformConfiguration::DidCreateIsolate() {
   library_.Set(tonic::DartState::Current(),
                Dart_LookupLibrary(tonic::ToDart("dart:ui")));
-  window_.reset(new Window({1.0, 0.0, 0.0}));
+  windows_.insert(std::make_pair(0, std::unique_ptr<Window>(new Window{
+                                        0, ViewportMetrics{1.0, 0.0, 0.0}})));
 }
 
 void PlatformConfiguration::UpdateLocales(
@@ -421,7 +423,7 @@ void PlatformConfiguration::RegisterNatives(
        true},
       {"PlatformConfiguration_respondToPlatformMessage",
        _RespondToPlatformMessage, 3, true},
-      {"PlatformConfiguration_render", Render, 2, true},
+      {"PlatformConfiguration_render", Render, 3, true},
       {"PlatformConfiguration_updateSemantics", UpdateSemantics, 2, true},
       {"PlatformConfiguration_setIsolateDebugName", SetIsolateDebugName, 2,
        true},

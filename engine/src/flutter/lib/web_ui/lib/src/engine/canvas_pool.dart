@@ -99,9 +99,9 @@ class _CanvasPool extends _SaveStackTracking {
       // * To make sure that when we scale the canvas by devicePixelRatio (see
       //   _initializeViewport below) the pixels line up.
       final double cssWidth =
-          _widthInBitmapPixels / EngineWindow.browserDevicePixelRatio;
+          _widthInBitmapPixels / EnginePlatformDispatcher.browserDevicePixelRatio;
       final double cssHeight =
-          _heightInBitmapPixels / EngineWindow.browserDevicePixelRatio;
+          _heightInBitmapPixels / EnginePlatformDispatcher.browserDevicePixelRatio;
       canvas = html.CanvasElement(
         width: _widthInBitmapPixels,
         height: _heightInBitmapPixels,
@@ -194,7 +194,7 @@ class _CanvasPool extends _SaveStackTracking {
             clipTimeTransform[5] != prevTransform[5] ||
             clipTimeTransform[12] != prevTransform[12] ||
             clipTimeTransform[13] != prevTransform[13]) {
-          final double ratio = EngineWindow.browserDevicePixelRatio;
+          final double ratio = EnginePlatformDispatcher.browserDevicePixelRatio;
           ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
           ctx.transform(
               clipTimeTransform[0],
@@ -223,7 +223,7 @@ class _CanvasPool extends _SaveStackTracking {
         transform[5] != prevTransform[5] ||
         transform[12] != prevTransform[12] ||
         transform[13] != prevTransform[13]) {
-      final double ratio = EngineWindow.browserDevicePixelRatio;
+      final double ratio = EnginePlatformDispatcher.browserDevicePixelRatio;
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       ctx.transform(transform[0], transform[1], transform[4], transform[5],
           transform[12], transform[13]);
@@ -307,8 +307,8 @@ class _CanvasPool extends _SaveStackTracking {
 
     // This scale makes sure that 1 CSS pixel is translated to the correct
     // number of bitmap pixels.
-    ctx.scale(EngineWindow.browserDevicePixelRatio,
-        EngineWindow.browserDevicePixelRatio);
+    ctx.scale(EnginePlatformDispatcher.browserDevicePixelRatio,
+        EnginePlatformDispatcher.browserDevicePixelRatio);
   }
 
   void resetTransform() {
