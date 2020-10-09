@@ -62,7 +62,7 @@ class _InputBorderTween extends Tween<InputBorder> {
   _InputBorderTween({InputBorder? begin, InputBorder? end}) : super(begin: begin, end: end);
 
   @override
-  InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t) as InputBorder;
+  InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t)! as InputBorder;
 }
 
 // Passes the _InputBorderGap parameters along to an InputBorder's paint method.
@@ -919,7 +919,7 @@ class _RenderDecoration extends RenderBox {
 
   static Size _boxSize(RenderBox? box) => box == null ? Size.zero : box.size;
 
-  static BoxParentData _boxParentData(RenderBox box) => box.parentData as BoxParentData;
+  static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
 
   EdgeInsets get contentPadding => decoration.contentPadding as EdgeInsets;
 
@@ -1474,7 +1474,10 @@ class _RenderDecoration extends RenderBox {
       _labelTransform = Matrix4.identity()
         ..translate(dx, labelOffset.dy + dy)
         ..scale(scale);
-      context.pushTransform(needsCompositing, offset, _labelTransform!, _paintLabel);
+      _transformLayer = context.pushTransform(needsCompositing, offset, _labelTransform!, _paintLabel,
+          oldLayer: _transformLayer);
+    } else {
+      _transformLayer = null;
     }
 
     doPaint(icon);
@@ -1487,6 +1490,8 @@ class _RenderDecoration extends RenderBox {
     doPaint(helperError);
     doPaint(counter);
   }
+
+  TransformLayer? _transformLayer;
 
   @override
   bool hitTestSelf(Offset position) => true;

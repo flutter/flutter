@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 
 import 'checkbox.dart';
 import 'constants.dart';
+import 'data_table_theme.dart';
 import 'debug.dart';
 import 'divider.dart';
 import 'dropdown.dart';
@@ -411,6 +412,7 @@ class DataTable extends StatelessWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
+    this.decoration,
     this.dataRowColor,
     this.dataRowHeight,
     this.dataTextStyle,
@@ -473,6 +475,14 @@ class DataTable extends StatelessWidget {
   /// row is selectable.
   final ValueSetter<bool?>? onSelectAll;
 
+  /// {@template flutter.material.dataTable.decoration}
+  /// The background and border decoration for the table.
+  /// {@endtemplate}
+  ///
+  /// If null, [DataTableThemeData.decoration] is used. By default there is no
+  /// decoration.
+  final Decoration? decoration;
+
   /// {@template flutter.material.dataTable.dataRowColor}
   /// The background color for the data rows.
   ///
@@ -484,9 +494,10 @@ class DataTable extends StatelessWidget {
   /// color.
   /// {@endtemplate}
   ///
-  /// By default, the background color is transparent unless selected. Selected
-  /// rows have a grey translucent color. To set a different color for
-  /// individual rows, see [DataRow.color].
+  /// If null, [DataTableThemeData.dataRowColor] is used. By default, the
+  /// background color is transparent unless selected. Selected rows have a grey
+  /// translucent color. To set a different color for individual rows, see
+  /// [DataRow.color].
   ///
   /// {@template flutter.material.dataTable.dataRowColorCode}
   /// ```dart
@@ -511,15 +522,17 @@ class DataTable extends StatelessWidget {
   /// The height of each row (excluding the row that contains column headings).
   /// {@endtemplate}
   ///
-  /// This value defaults to [kMinInteractiveDimension] to adhere to the Material
-  /// Design specifications.
+  /// If null, [DataTableThemeData.dataRowHeight] is used. This value defaults
+  /// to [kMinInteractiveDimension] to adhere to the Material Design
+  /// specifications.
   final double? dataRowHeight;
 
   /// {@template flutter.material.dataTable.dataTextStyle}
   /// The text style for data rows.
   /// {@endtemplate}
   ///
-  /// By default, the text style is [TextTheme.bodyText2].
+  /// If null, [DataTableThemeData.dataTextStyle] is used. By default, the text
+  /// style is [TextTheme.bodyText2].
   final TextStyle? dataTextStyle;
 
   /// {@template flutter.material.dataTable.headingRowColor}
@@ -530,7 +543,11 @@ class DataTable extends StatelessWidget {
   /// sorted. The color is painted as an overlay to the row. To make sure that
   /// the row's [InkWell] is visible (when pressed, hovered and focused), it is
   /// recommended to use a translucent color.
+  /// {@endtemplate}
   ///
+  /// If null, [DataTableThemeData.headingRowColor] is used.
+  ///
+  /// {@template flutter.material.dataTable.headingRowColorCode}
   /// ```dart
   /// DataTable(
   ///   headingRowColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
@@ -553,14 +570,16 @@ class DataTable extends StatelessWidget {
   /// The height of the heading row.
   /// {@endtemplate}
   ///
-  /// This value defaults to 56.0 to adhere to the Material Design specifications.
+  /// If null, [DataTableThemeData.headingRowHeight] is used. This value
+  /// defaults to 56.0 to adhere to the Material Design specifications.
   final double? headingRowHeight;
 
   /// {@template flutter.material.dataTable.headingTextStyle}
   /// The text style for the heading row.
   /// {@endtemplate}
   ///
-  /// By default, the text style is [TextTheme.subtitle2].
+  /// If null, [DataTableThemeData.headingTextStyle] is used. By default, the
+  /// text style is [TextTheme.subtitle2].
   final TextStyle? headingTextStyle;
 
   /// {@template flutter.material.dataTable.horizontalMargin}
@@ -571,14 +590,16 @@ class DataTable extends StatelessWidget {
   /// the content in the first data column.
   /// {@endtemplate}
   ///
-  /// This value defaults to 24.0 to adhere to the Material Design specifications.
+  /// If null, [DataTableThemeData.horizontalMargin] is used. This value
+  /// defaults to 24.0 to adhere to the Material Design specifications.
   final double? horizontalMargin;
 
   /// {@template flutter.material.dataTable.columnSpacing}
   /// The horizontal margin between the contents of each data column.
   /// {@endtemplate}
   ///
-  /// This value defaults to 56.0 to adhere to the Material Design specifications.
+  /// If null, [DataTableThemeData.columnSpacing] is used. This value defaults
+  /// to 56.0 to adhere to the Material Design specifications.
   final double? columnSpacing;
 
   /// {@template flutter.material.dataTable.showCheckboxColumn}
@@ -603,13 +624,15 @@ class DataTable extends StatelessWidget {
   ///
   /// Must be greater than or equal to zero.
   /// {@endtemplate}
-  /// This value defaults to 1.0.
+  ///
+  /// If null, [DataTableThemeData.dividerThickness] is used. This value
+  /// defaults to 1.0.
   final double? dividerThickness;
 
   /// Whether a border at the bottom of the table is displayed.
   ///
   /// By default, a border is not shown at the bottom to allow for a border
-  /// around the table.
+  /// around the table defined by [decoration].
   final bool showBottomBorder;
 
   // Set by the constructor to the index of the only Column that is
@@ -635,13 +658,16 @@ class DataTable extends StatelessWidget {
 
   static final LocalKey _headingRowKey = UniqueKey();
 
-  void _handleSelectAll(bool? checked) {
+  void _handleSelectAll(bool? checked, bool someChecked) {
+    // If some checkboxes are checked, all checkboxes are selected. Otherwise,
+    // use the new checked value but default to false if it's null.
+    final bool effectiveChecked = someChecked || (checked ?? false);
     if (onSelectAll != null) {
-      onSelectAll!(checked);
+      onSelectAll!(effectiveChecked);
     } else {
       for (final DataRow row in rows) {
-        if ((row.onSelectChanged != null) && (row.selected != checked))
-          row.onSelectChanged!(checked);
+        if (row.onSelectChanged != null && row.selected != effectiveChecked)
+          row.onSelectChanged!(effectiveChecked);
       }
     }
   }
@@ -669,10 +695,11 @@ class DataTable extends StatelessWidget {
   Widget _buildCheckbox({
     required BuildContext context,
     required Color activeColor,
-    required bool checked,
+    required bool? checked,
     required VoidCallback? onRowTap,
     required ValueChanged<bool?>? onCheckboxChanged,
     required MaterialStateProperty<Color?>? overlayColor,
+    required bool tristate,
   }) {
     final ThemeData themeData = Theme.of(context)!;
     final double effectiveHorizontalMargin = horizontalMargin
@@ -690,6 +717,7 @@ class DataTable extends StatelessWidget {
             activeColor: activeColor,
             value: checked,
             onChanged: onCheckboxChanged,
+            tristate: tristate,
           ),
         ),
       ),
@@ -846,7 +874,11 @@ class DataTable extends StatelessWidget {
     );
     final bool anyRowSelectable = rows.any((DataRow row) => row.onSelectChanged != null);
     final bool displayCheckboxColumn = showCheckboxColumn && anyRowSelectable;
-    final bool allChecked = displayCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
+    final Iterable<DataRow> rowsChecked = displayCheckboxColumn ?
+      rows.where((DataRow row) => row.onSelectChanged != null && row.selected) : <DataRow>[];
+    final bool allChecked = displayCheckboxColumn && rowsChecked.length == rows.length;
+    final bool anyChecked = displayCheckboxColumn && rowsChecked.isNotEmpty;
+    final bool someChecked = anyChecked && !allChecked;
     final double effectiveHorizontalMargin = horizontalMargin
       ?? theme.dataTableTheme.horizontalMargin
       ?? _horizontalMargin;
@@ -897,10 +929,11 @@ class DataTable extends StatelessWidget {
       tableRows[0].children![0] = _buildCheckbox(
         context: context,
         activeColor: theme.accentColor,
-        checked: allChecked,
+        checked: someChecked ? null : allChecked,
         onRowTap: null,
-        onCheckboxChanged: _handleSelectAll,
+        onCheckboxChanged: (bool? checked) => _handleSelectAll(checked, someChecked),
         overlayColor: null,
+        tristate: true,
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
@@ -911,6 +944,7 @@ class DataTable extends StatelessWidget {
           onRowTap: () => row.onSelectChanged != null ? row.onSelectChanged!(!row.selected) : null ,
           onCheckboxChanged: row.onSelectChanged,
           overlayColor: row.color ?? effectiveDataRowColor,
+          tristate: false,
         );
         rowIndex += 1;
       }
@@ -975,9 +1009,15 @@ class DataTable extends StatelessWidget {
       displayColumnIndex += 1;
     }
 
-    return Table(
-      columnWidths: tableColumns.asMap(),
-      children: tableRows,
+    return Container(
+      decoration: decoration ?? theme.dataTableTheme.decoration,
+      child: Material(
+        type: MaterialType.transparency,
+        child: Table(
+          columnWidths: tableColumns.asMap(),
+          children: tableRows,
+        ),
+      ),
     );
   }
 }
@@ -1030,7 +1070,7 @@ class TableRowInkWell extends InkResponse {
         table = table.parent;
       }
       if (table is RenderTable) {
-        final TableCellParentData cellParentData = cell.parentData as TableCellParentData;
+        final TableCellParentData cellParentData = cell.parentData! as TableCellParentData;
         assert(cellParentData.y != null);
         final Rect rect = table.getRowBox(cellParentData.y!);
         // The rect is in the table's coordinate space. We need to change it to the

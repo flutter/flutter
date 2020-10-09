@@ -152,6 +152,7 @@ Future<T> runInContext<T>(
           featureFlags: featureFlags,
         ),
         operatingSystemUtils: globals.os,
+        terminal: globals.terminal,
       ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,

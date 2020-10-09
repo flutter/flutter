@@ -2570,7 +2570,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         clipBehavior: clipBehavior,
       );
     });
-    return _currentBottomSheet as PersistentBottomSheetController<T>;
+    return _currentBottomSheet! as PersistentBottomSheetController<T>;
   }
 
   // Floating Action Button API
