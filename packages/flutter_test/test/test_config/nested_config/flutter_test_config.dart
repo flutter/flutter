@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-Future<void> main(FutureOr<void> testMain()) async {
+Future<void> testExecutable(FutureOr<void> testMain()) async {
   await runZoned<dynamic>(testMain, zoneValues: <Type, dynamic>{
     String: '/test_config/nested_config',
     int: 123,

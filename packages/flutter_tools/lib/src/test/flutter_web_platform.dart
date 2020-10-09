@@ -19,14 +19,7 @@ import 'package:shelf_packages_handler/shelf_packages_handler.dart';
 import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_api/src/backend/runtime.dart';
-import 'package:test_api/src/backend/suite_platform.dart';
-import 'package:test_core/src/runner/configuration.dart';
-import 'package:test_core/src/runner/environment.dart';
-import 'package:test_core/src/runner/platform.dart';
-import 'package:test_core/src/runner/plugin/platform_helpers.dart';
-import 'package:test_core/src/runner/runner_suite.dart';
-import 'package:test_core/src/runner/suite.dart';
+import 'package:test_core/src/platform.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
@@ -963,7 +956,7 @@ void main() async {
   LocalFileComparator comparator = LocalFileComparator(Uri.parse('$testUri'));
   goldenFileComparator = comparator;
 
-  ${testConfigFile != null ? 'test_config.main(() async {' : ''}
+  ${testConfigFile != null ? 'test_config.testExecutable(() async {' : ''}
   final commands = stdin
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())

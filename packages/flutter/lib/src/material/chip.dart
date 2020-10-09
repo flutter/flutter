@@ -1171,7 +1171,7 @@ class FilterChip extends StatelessWidget
   @override
   final bool selected;
   @override
-  final ValueChanged<bool> onSelected;
+  final ValueChanged<bool>? onSelected;
   @override
   final double? pressElevation;
   @override
@@ -2128,13 +2128,13 @@ class _RenderChipElement extends RenderObjectElement {
   void _updateRenderObject(RenderObject? child, _ChipSlot slot) {
     switch (slot) {
       case _ChipSlot.avatar:
-        renderObject.avatar = child as RenderBox;
+        renderObject.avatar = child as RenderBox?;
         break;
       case _ChipSlot.label:
-        renderObject.label = child as RenderBox;
+        renderObject.label = child as RenderBox?;
         break;
       case _ChipSlot.deleteIcon:
-        renderObject.deleteIcon = child as RenderBox;
+        renderObject.deleteIcon = child as RenderBox?;
         break;
     }
   }
@@ -2385,7 +2385,7 @@ class _RenderChip extends RenderBox {
 
   static Rect _boxRect(RenderBox? box) => box == null ? Rect.zero : _boxParentData(box).offset & box.size;
 
-  static BoxParentData _boxParentData(RenderBox box) => box.parentData as BoxParentData;
+  static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -2907,7 +2907,7 @@ class _LocationAwareInkRippleFactory extends InteractiveInkFeatureFactory {
 
     if (tapIsOnDeleteIcon) {
       final RenderBox currentBox = referenceBox;
-      referenceBox = deleteIconKey.currentContext!.findRenderObject() as RenderBox;
+      referenceBox = deleteIconKey.currentContext!.findRenderObject()! as RenderBox;
       position = referenceBox.globalToLocal(currentBox.localToGlobal(position));
       containedInkWell = false;
     }

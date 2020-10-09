@@ -910,7 +910,7 @@ class _Dial extends StatefulWidget {
   final _TimePickerMode mode;
   final bool use24HourDials;
   final ValueChanged<TimeOfDay>? onChanged;
-  final VoidCallback onHourSelected;
+  final VoidCallback? onHourSelected;
 
   @override
   _DialState createState() => _DialState();
@@ -1037,7 +1037,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   void _handlePanStart(DragStartDetails details) {
     assert(!_dragging);
     _dragging = true;
-    final RenderBox box = context.findRenderObject() as RenderBox;
+    final RenderBox box = context.findRenderObject()! as RenderBox;
     _position = box.globalToLocal(details.globalPosition);
     _center = box.size.center(Offset.zero);
     _updateThetaForPan();
@@ -1058,13 +1058,13 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _animateTo(_getThetaForTime(widget.selectedTime));
     if (widget.mode == _TimePickerMode.hour) {
       if (widget.onHourSelected != null) {
-        widget.onHourSelected();
+        widget.onHourSelected!();
       }
     }
   }
 
   void _handleTapUp(TapUpDetails details) {
-    final RenderBox box = context.findRenderObject() as RenderBox;
+    final RenderBox box = context.findRenderObject()! as RenderBox;
     _position = box.globalToLocal(details.globalPosition);
     _center = box.size.center(Offset.zero);
     _updateThetaForPan(roundMinutes: true);
@@ -1076,7 +1076,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         _announceToAccessibility(context, localizations.formatDecimal(newTime.hourOfPeriod));
       }
       if (widget.onHourSelected != null) {
-        widget.onHourSelected();
+        widget.onHourSelected!();
       }
     } else {
       _announceToAccessibility(context, localizations.formatDecimal(newTime.minute));

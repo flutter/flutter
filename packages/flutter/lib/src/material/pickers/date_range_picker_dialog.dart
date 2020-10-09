@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 
 import '../app_bar.dart';
 import '../back_button.dart';
-import '../button_theme.dart';
 import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
@@ -518,12 +517,9 @@ class _CalendarRangePickerDialog extends StatelessWidget {
           ),
           actions: <Widget>[
             if (orientation == Orientation.landscape) entryModeIcon,
-            ButtonTheme(
-              minWidth: 64,
-              child: TextButton(
-                onPressed: onConfirm,
-                child: Text(confirmText, style: saveButtonStyle),
-              ),
+            TextButton(
+              onPressed: onConfirm,
+              child: Text(confirmText, style: saveButtonStyle),
             ),
             const SizedBox(width: 8),
           ],

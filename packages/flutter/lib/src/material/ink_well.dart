@@ -172,7 +172,7 @@ abstract class InteractiveInkFeatureFactory {
     BorderRadius? borderRadius,
     ShapeBorder? customBorder,
     double? radius,
-    required VoidCallback? onRemoved,
+    VoidCallback? onRemoved,
   });
 }
 

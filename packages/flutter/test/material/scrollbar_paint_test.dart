@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +10,7 @@ import '../rendering/mock_canvas.dart';
 Widget _buildSingleChildScrollViewWithScrollbar({
   TextDirection textDirection = TextDirection.ltr,
   EdgeInsets padding = EdgeInsets.zero,
-  Widget child,
+  Widget? child,
 }) {
   return Directionality(
     textDirection: textDirection,

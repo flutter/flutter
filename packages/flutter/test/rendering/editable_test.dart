@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -408,7 +406,7 @@ void main() {
   test('ignore key event from web platform', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final ViewportOffset viewportOffset = ViewportOffset.zero();
-    TextSelection currentSelection;
+    late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
       selectionColor: Colors.black,
@@ -460,7 +458,7 @@ void main() {
   test('selects correct place with offsets', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final ViewportOffset viewportOffset = ViewportOffset.zero();
-    TextSelection currentSelection;
+    late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
       selectionColor: Colors.black,
@@ -545,7 +543,7 @@ void main() {
   test('selects correct place when offsets are flipped', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final ViewportOffset viewportOffset = ViewportOffset.zero();
-    TextSelection currentSelection;
+    late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
       selectionColor: Colors.black,
@@ -578,7 +576,7 @@ void main() {
 
   test('selection does not flicker as user is dragging', () {
     int selectionChangedCount = 0;
-    TextSelection updatedSelection;
+    TextSelection? updatedSelection;
     final TextSelectionDelegate delegate = FakeEditableTextState();
     const TextSpan text = TextSpan(
       text: 'abc def ghi',
@@ -630,8 +628,8 @@ void main() {
     editable2.selectPositionAt(from: const Offset(30, 2), to: const Offset(48, 2), cause: SelectionChangedCause.drag);
     pumpFrame();
 
-    expect(updatedSelection.baseOffset, 3);
-    expect(updatedSelection.extentOffset, 5);
+    expect(updatedSelection!.baseOffset, 3);
+    expect(updatedSelection!.extentOffset, 5);
     expect(selectionChangedCount, 1);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61028
 
@@ -742,7 +740,7 @@ void main() {
   test('arrow keys and delete handle simple text correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final ViewportOffset viewportOffset = ViewportOffset.zero();
-    TextSelection currentSelection;
+    late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
       selectionColor: Colors.black,
@@ -791,7 +789,7 @@ void main() {
   test('arrow keys and delete handle surrogate pairs correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final ViewportOffset viewportOffset = ViewportOffset.zero();
-    TextSelection currentSelection;
+    late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
       selectionColor: Colors.black,
@@ -841,7 +839,7 @@ void main() {
   test('arrow keys and delete handle grapheme clusters correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final ViewportOffset viewportOffset = ViewportOffset.zero();
-    TextSelection currentSelection;
+    late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
       selectionColor: Colors.black,
@@ -891,7 +889,7 @@ void main() {
   test('arrow keys and delete handle surrogate pairs correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final ViewportOffset viewportOffset = ViewportOffset.zero();
-    TextSelection currentSelection;
+    late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
       selectionColor: Colors.black,
@@ -1048,11 +1046,11 @@ void main() {
       // Give it a width that forces the editable to wrap.
       editable.layout(const BoxConstraints.tightFor(width: 200));
 
-      final Rect composingRect = editable.getRectForComposingRange(const TextRange(start: 0, end: 20 + 2));
+      final Rect composingRect = editable.getRectForComposingRange(const TextRange(start: 0, end: 20 + 2))!;
 
       // Since the range covers an entire line, the Rect should also be almost
       // as wide as the entire paragraph (give or take 1 character).
-      expect(composingRect?.width, greaterThan(200 - 10));
+      expect(composingRect.width, greaterThan(200 - 10));
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/66089
   });
 

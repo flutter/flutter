@@ -25,11 +25,10 @@ Future<ui.Image> captureImage(Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent as RenderObject;
-    assert(renderObject != null);
+    renderObject = renderObject.parent! as RenderObject;
   }
   assert(!renderObject.debugNeedsPaint);
-  final OffsetLayer layer = renderObject.debugLayer as OffsetLayer;
+  final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
   return layer.toImage(renderObject.paintBounds);
 }
 

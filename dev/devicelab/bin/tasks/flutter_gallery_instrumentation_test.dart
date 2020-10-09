@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 // This test runs "//dev/integration_tests/flutter_gallery/test/live_smoketest.dart", which communicates

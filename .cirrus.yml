@@ -89,7 +89,6 @@ task:
         # We use 3 CPUs because that's the minimum required to get framework_tests-widgets-linux
         # running fast enough that it is not the long pole, as of October 2019.
         CPU: 3
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
@@ -100,7 +99,6 @@ task:
         # framework_tests-libraries-linux shard running fast enough that it is not the long pole, as
         # of October 2019.
         CPU: 3
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
@@ -150,15 +148,13 @@ task:
         CPU: 2
         MEMORY: 8G
         CHROME_NO_SANDBOX: true
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: docs-linux # linux-only
-      # TODO(fujino): Make this pre-submit only once #64212 is fixed
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'bin/**') || $CIRRUS_PR == ''"
+      # TODO(fujino): Make this pre-submit only once we have migrated docs generation to LUCI (https://github.com/flutter/flutter/issues/64212).
       environment:
-        # TODO(tvolkert): optimize CPU and MEMORY settings once #60646 is resolved.
+        # TODO(tvolkert): optimize CPU and MEMORY settings once docs generation is more efficient (https://github.com/flutter/flutter/issues/60646).
         CPU: 4
         MEMORY: 8G
         # For uploading master docs to Firebase master branch staging site
@@ -190,10 +186,9 @@ task:
         - git clone https://github.com/flutter/web_installers.git
         - cd web_installers/packages/web_drivers/
         - pub get
-        - dart lib/web_driver_installer.dart &
-        - sleep 20
+        - dart lib/web_driver_installer.dart chromedriver --install-only
         - chromedriver/chromedriver --port=4444 &
-        - sleep 5
+        - sleep 1
         - cd ../../../examples/hello_world/
         - flutter drive --target=test_driver/smoke_web_engine.dart -d web-server --profile --browser-name=chrome
 

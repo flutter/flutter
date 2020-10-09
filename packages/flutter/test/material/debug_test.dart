@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -157,7 +155,6 @@ void main() {
       '     Semantics\n'
       '     FocusScope\n'
       '     AbsorbPointer\n'
-      '     _PointerListener\n'
       '     Listener\n'
       '     HeroControllerScope\n'
       '     Navigator-[GlobalObjectKey<NavigatorState> _WidgetsAppState#00000]\n'
@@ -232,12 +229,12 @@ void main() {
       )
     ));
     final List<dynamic> exceptions = <dynamic>[];
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       exceptions.add(details.exception);
     };
     // ScaffoldMessenger shows SnackBar.
-    _scaffoldMessengerKey.currentState.showSnackBar(snackBar);
+    _scaffoldMessengerKey.currentState!.showSnackBar(snackBar);
     await tester.pumpAndSettle();
 
     // Pump widget to rebuild without ScaffoldMessenger
