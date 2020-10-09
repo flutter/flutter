@@ -152,20 +152,17 @@ List<String> buildModeOptions(BuildMode mode) {
       return <String>[
         '-Ddart.vm.profile=false',
         '-Ddart.vm.product=false',
-        '--bytecode-options=source-positions,local-var-info,debugger-stops,instance-field-initializers,keep-unreachable-code,avoid-closure-call-instructions',
         '--enable-asserts',
       ];
     case BuildMode.profile:
       return <String>[
         '-Ddart.vm.profile=true',
         '-Ddart.vm.product=false',
-        '--bytecode-options=source-positions',
       ];
     case BuildMode.release:
       return <String>[
         '-Ddart.vm.profile=false',
         '-Ddart.vm.product=true',
-        '--bytecode-options=source-positions',
       ];
   }
   throw Exception('Unknown BuildMode: $mode');
