@@ -29,6 +29,7 @@ void main() {
       BuildWebCommand(verboseHelp: false),
       BuildApkCommand(verboseHelp: false),
       BuildIOSCommand(verboseHelp: false),
+      BuildIOSArchiveCommand(verboseHelp: false),
       BuildAppBundleCommand(verboseHelp: false),
       BuildFuchsiaCommand(verboseHelp: false),
       BuildAarCommand(verboseHelp: false),

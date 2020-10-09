@@ -39,7 +39,7 @@ function generate_docs() {
     # Install and activate dartdoc.
     # NOTE: When updating to a new dartdoc version, please also update
     # `dartdoc_options.yaml` to include newly introduced error and warning types.
-    "$PUB" global activate dartdoc 0.34.0
+    "$PUB" global activate dartdoc 0.35.0
 
     # This script generates a unified doc set, and creates
     # a custom index.html, placing everything into dev/docs/doc.

@@ -214,10 +214,17 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// [TextEditingController]; however, one should not also set [text]
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
+  ///
+  /// If the new selection if of non-zero length, or is outside the composing
+  /// range, the composing composing range is cleared.
   set selection(TextSelection newSelection) {
     if (!isSelectionWithinTextBounds(newSelection))
       throw FlutterError('invalid text selection: $newSelection');
-    value = value.copyWith(selection: newSelection, composing: TextRange.empty);
+    final TextRange newComposing =
+        newSelection.isCollapsed && _isSelectionWithinComposingRange(newSelection)
+            ? value.composing
+            : TextRange.empty;
+    value = value.copyWith(selection: newSelection, composing: newComposing);
   }
 
   /// Set the [value] to empty.
@@ -250,6 +257,11 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// Check that the [selection] is inside of the bounds of [text].
   bool isSelectionWithinTextBounds(TextSelection selection) {
     return selection.start <= text.length && selection.end <= text.length;
+  }
+
+  /// Check that the [selection] is inside of the composing range.
+  bool _isSelectionWithinComposingRange(TextSelection selection) {
+    return selection.start >= value.composing.start && selection.end <= value.composing.end;
   }
 }
 
@@ -1806,7 +1818,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void _finalizeEditing(TextInputAction action, {required bool shouldUnfocus}) {
     // Take any actions necessary now that the user has completed editing.
     if (widget.onEditingComplete != null) {
-      widget.onEditingComplete!();
+      try {
+        widget.onEditingComplete!();
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while calling onEditingComplete for $action'),
+        ));
+      }
     } else {
       // Default behavior if the developer did not provide an
       // onEditingComplete callback: Finalize editing and remove focus, or move
@@ -1838,8 +1859,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // Invoke optional callback with the user's submitted content.
-    if (widget.onSubmitted != null)
-      widget.onSubmitted!(_value.text);
+    if (widget.onSubmitted != null) {
+      try {
+        widget.onSubmitted!(_value.text);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while calling onSubmitted for $action'),
+        ));
+      }
+    }
   }
 
   void _updateRemoteEditingValueIfNeeded() {
@@ -2053,8 +2084,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
       _selectionOverlay!.handlesVisible = widget.showSelectionHandles;
       _selectionOverlay!.showHandles();
-      if (widget.onSelectionChanged != null)
-        widget.onSelectionChanged!(selection, cause);
+      if (widget.onSelectionChanged != null) {
+        try {
+          widget.onSelectionChanged!(selection, cause);
+        } catch (exception, stack) {
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets',
+            context: ErrorDescription('while calling onSelectionChanged for $cause'),
+          ));
+        }
+      }
     }
   }
 
@@ -2178,8 +2219,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _value = _lastFormattedValue!;
     }
 
-    if (textChanged && widget.onChanged != null)
-      widget.onChanged!(value.text);
+    if (textChanged && widget.onChanged != null) {
+      try {
+        widget.onChanged!(value.text);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while calling onChanged'),
+        ));
+      }
+    }
     _lastFormattedUnmodifiedTextEditingValue = _receivedRemoteTextEditingValue;
   }
 

@@ -6,8 +6,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
+
 import '../framework/adb.dart';
 import '../framework/framework.dart';
+import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {

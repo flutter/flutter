@@ -296,8 +296,10 @@ class IOSSimulator extends Device {
   final SimControl _simControl;
   final Xcode _xcode;
 
-  DevFSWriter get devFSWriter => _desktopDevFSWriter ??= LocalDevFSWriter(fileSystem: globals.fs);
-  LocalDevFSWriter _desktopDevFSWriter;
+  @override
+  DevFSWriter createDevFSWriter(covariant ApplicationPackage app, String userIdentifier) {
+    return LocalDevFSWriter(fileSystem: globals.fs);
+  }
 
   @override
   Future<bool> get isLocalEmulator async => true;
@@ -423,6 +425,7 @@ class IOSSimulator extends Device {
           '--enable-checked-mode',
           '--verify-entry-points',
         ],
+        if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
         if (debuggingOptions.startPaused) '--start-paused',
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
         if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',

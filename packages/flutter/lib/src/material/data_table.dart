@@ -1044,7 +1044,7 @@ class TableRowInkWell extends InkResponse {
         table = table.parent;
       }
       if (table is RenderTable) {
-        final TableCellParentData cellParentData = cell.parentData as TableCellParentData;
+        final TableCellParentData cellParentData = cell.parentData! as TableCellParentData;
         assert(cellParentData.y != null);
         final Rect rect = table.getRowBox(cellParentData.y!);
         // The rect is in the table's coordinate space. We need to change it to the

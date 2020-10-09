@@ -9,7 +9,7 @@ import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:path/path.dart' as path;
-import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 final Directory integrationTestDir = Directory(

@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
@@ -745,6 +746,7 @@ class PerfTestWithSkSL extends PerfTest {
         'run',
         '--verbose',
         '--verbose-system-logs',
+        '--purge-persistent-cache',
         '--profile',
         if (cacheSkSL) '--cache-sksl',
         '-d', _device.deviceId,

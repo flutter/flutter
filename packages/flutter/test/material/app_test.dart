@@ -984,6 +984,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
+
+  testWidgets('MaterialApp.builder can build app without a Navigator', (WidgetTester tester) async {
+    Widget builderChild;
+    await tester.pumpWidget(MaterialApp(
+      builder: (BuildContext context, Widget child) {
+        builderChild = child;
+        return Container();
+      },
+    ));
+    expect(builderChild, isNull);
+  });
 }
 
 class MockAccessibilityFeature implements AccessibilityFeatures {
