@@ -836,7 +836,7 @@ void main() {
       if (gesture != null)
         return gesture.removePointer();
     });
-    await gesture!.addPointer();
+    await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
     await tester.pump();
     await gesture.moveTo(Offset.zero);
