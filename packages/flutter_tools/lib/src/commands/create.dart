@@ -889,7 +889,7 @@ const Set<String> _packageDependencies = <String>{
 
 // A valid Dart identifier.
 // https://dart.dev/guides/language/language-tour#important-concepts
-final RegExp _identifierRegExp = RegExp('[a-zA-Z_][a-zA-Z0-9_]*');
+final RegExp _identifierRegExp = RegExp('[a-z_][a-z0-9_]*');
 
 // non-contextual dart keywords.
 //' https://dart.dev/guides/language/language-tour#keywords
