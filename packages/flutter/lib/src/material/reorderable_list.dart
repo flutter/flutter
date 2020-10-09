@@ -381,8 +381,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         if (startIndex != endIndex)
           widget.onReorder(startIndex, endIndex);
         // Animates leftover space in the drop area closed.
-        _ghostController.reverse(from: 0.1);
-        _entranceController.reverse(from: 0.1);
+        _ghostController.reverse(from: 0);
+        _entranceController.reverse(from: 0);
         _dragging = null;
       });
     }

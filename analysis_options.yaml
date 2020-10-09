@@ -95,6 +95,7 @@ linter:
     - camel_case_types
     - cancel_subscriptions
     # - cascade_invocations # not yet tested
+    - cast_nullable_to_non_nullable
     # - close_sinks # not reliable enough
     # - comment_references # blocked on https://github.com/flutter/flutter/issues/20765
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204

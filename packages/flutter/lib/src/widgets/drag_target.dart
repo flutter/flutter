@@ -131,7 +131,6 @@ class Draggable<T extends Object> extends StatefulWidget {
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
        super(key: key);
 
-
   /// The data that will be dropped by this draggable.
   final T? data;
 

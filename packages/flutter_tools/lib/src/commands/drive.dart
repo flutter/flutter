@@ -427,7 +427,7 @@ Future<Device> findTargetDevice({ @required Duration timeout }) async {
     }
     if (devices.length > 1) {
       globals.printStatus("Found ${devices.length} devices with name or id matching '${deviceManager.specifiedDeviceId}':");
-      await Device.printDevices(devices);
+      await Device.printDevices(devices, globals.logger);
       return null;
     }
     return devices.first;
@@ -438,7 +438,7 @@ Future<Device> findTargetDevice({ @required Duration timeout }) async {
     return null;
   } else if (devices.length > 1) {
     globals.printStatus('Found multiple connected devices:');
-    await Device.printDevices(devices);
+    await Device.printDevices(devices, globals.logger);
   }
   globals.printStatus('Using device ${devices.first.name}.');
   return devices.first;
