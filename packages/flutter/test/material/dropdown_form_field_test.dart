@@ -149,7 +149,7 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
 
 void main() {
   testWidgets('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
-    String value = 'one';
+    String? value = 'one';
     int _validateCalled = 0;
 
     await tester.pumpWidget(
@@ -170,10 +170,9 @@ void main() {
                   );
                 }).toList(),
                 onChanged: (String? newValue) {
-                  if (newValue != null)
-                    setState(() {
-                      value = newValue;
-                    });
+                  setState(() {
+                    value = newValue;
+                  });
                 },
                 validator: (String? currentValue) {
                   _validateCalled++;
@@ -675,10 +674,9 @@ void main() {
 
   testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
     int dropdownButtonTapCounter = 0;
-    String value = 'one';
+    String? value = 'one';
     void onChanged(String? newValue) {
-      if (newValue != null)
-        value = newValue;
+      value = newValue;
     }
     void onTap() { dropdownButtonTapCounter += 1; }
 

@@ -338,10 +338,9 @@ void main() {
   });
 
   testWidgets('Dropdown button control test', (WidgetTester tester) async {
-    String value = 'one';
+    String? value = 'one';
     void didChangeValue(String? newValue) {
-      if (newValue != null)
-        value = newValue;
+      value = newValue;
     }
 
     Widget build() => buildFrame(value: value, onChanged: didChangeValue);
@@ -378,10 +377,9 @@ void main() {
   });
 
   testWidgets('Dropdown button with no app', (WidgetTester tester) async {
-    String value = 'one';
+    String? value = 'one';
     void didChangeValue(String? newValue) {
-      if (newValue != null)
-        value = newValue;
+      value = newValue;
     }
 
     Widget build() {
@@ -523,10 +521,9 @@ void main() {
                       validator: (String? v) => v == null ? 'Must select value' : null,
                       onChanged: (String? newValue) {},
                       onSaved: (String? v) {
-                        if (v != null)
-                          setState(() {
-                            value = v;
-                          });
+                        setState(() {
+                          value = v;
+                        });
                       },
                     ),
                   ),
@@ -590,14 +587,13 @@ void main() {
   });
 
   testWidgets('Dropdown screen edges', (WidgetTester tester) async {
-    int value = 4;
+    int? value = 4;
     final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[
       for (int i = 0; i < 20; ++i) DropdownMenuItem<int>(value: i, child: Text('$i')),
     ];
 
     void handleChanged(int? newValue) {
-      if (newValue != null)
-        value = newValue;
+      value = newValue;
     }
 
     final DropdownButton<int> button = DropdownButton<int>(
@@ -1823,8 +1819,7 @@ void main() {
                       child: DropdownButton<int>(
                         value: 12,
                         onChanged: (int? i) {
-                          if (i != null)
-                            selectedIndex = i;
+                          selectedIndex = i;
                         },
                         items: List<DropdownMenuItem<int>>.generate(100, (int i) {
                           return DropdownMenuItem<int>(value: i, child: Text('$i'));
@@ -1879,7 +1874,7 @@ void main() {
       'Two',
       'Three',
     ];
-    String selectedItem = items[0];
+    String? selectedItem = items[0];
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1889,8 +1884,7 @@ void main() {
               body: DropdownButton<String>(
                 value: selectedItem,
                 onChanged: (String? string) {
-                  if (string != null)
-                    setState(() => selectedItem = string);
+                  setState(() => selectedItem = string);
                 },
                 selectedItemBuilder: (BuildContext context) {
                   int index = 0;
@@ -1980,7 +1974,7 @@ void main() {
 
   testWidgets('Variable size and oversized menu items', (WidgetTester tester) async {
     final List<double> itemHeights = <double>[30, 40, 50, 60];
-    double dropdownValue = itemHeights[0];
+    double? dropdownValue = itemHeights[0];
 
     Widget buildFrame() {
       return MaterialApp(
@@ -1990,8 +1984,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return DropdownButton<double>(
                   onChanged: (double? value) {
-                    if (value != null)
-                      setState(() { dropdownValue = value; });
+                    setState(() { dropdownValue = value; });
                   },
                   value: dropdownValue,
                   itemHeight: null,
@@ -2085,7 +2078,7 @@ void main() {
       'two',
       'three',
     ];
-    String item = items[0];
+    String? item = items[0];
     late MediaQueryData mediaQuery;
 
     await tester.pumpWidget(
@@ -2108,7 +2101,6 @@ void main() {
                 )).toList(),
                 onChanged: (String? newItem) {
                   setState(() {
-                    if (newItem != null)
                     item = newItem;
                     mediaQuery = mediaQuery.copyWith(
                       textScaleFactor: mediaQuery.textScaleFactor + 0.1,
@@ -2138,7 +2130,7 @@ void main() {
   testWidgets('DropdownButton hint is selected item', (WidgetTester tester) async {
     const double hintPaddingOffset = 8;
     const List<String> itemValues = <String>['item0', 'item1', 'item2', 'item3'];
-    String selectedItem = 'item0';
+    String? selectedItem = 'item0';
 
     Widget buildFrame() {
       return MaterialApp(
@@ -2175,8 +2167,7 @@ void main() {
                         },
                       ),
                       onChanged: (String? value) {
-                        if (value != null)
-                          setState(() { selectedItem = value; });
+                        setState(() { selectedItem = value; });
                       },
                       icon: Container(),
                       items: itemValues.map<DropdownMenuItem<String>>((String value) {
@@ -2244,7 +2235,7 @@ void main() {
 
   testWidgets('DropdownButton is activated with the enter/space key', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
-    String value = 'one';
+    String? value = 'one';
 
     Widget buildFrame() {
       return MaterialApp(
@@ -2256,10 +2247,9 @@ void main() {
                   focusNode: focusNode,
                   autofocus: true,
                   onChanged: (String? newValue) {
-                    if (newValue != null)
-                      setState(() {
-                        value = newValue;
-                      });
+                    setState(() {
+                      value = newValue;
+                    });
                   },
                   value: value,
                   itemHeight: null,
@@ -2301,7 +2291,7 @@ void main() {
 
   testWidgets('Selected element is focused when dropdown is opened', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
-    String value = 'one';
+    String? value = 'one';
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Center(
@@ -2311,10 +2301,9 @@ void main() {
                 focusNode: focusNode,
                 autofocus: true,
                 onChanged: (String? newValue) {
-                  if (newValue != null)
-                    setState(() {
-                      value = newValue;
-                    });
+                  setState(() {
+                    value = newValue;
+                  });
                 },
                 value: value,
                 itemHeight: null,
@@ -2362,7 +2351,7 @@ void main() {
 
   testWidgets('Selected element is correctly focused with dropdown that more items than fit on the screen', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
-    int value = 1;
+    int? value = 1;
     final List<int> hugeMenuItems = List<int>.generate(50, (int index) => index);
 
     await tester.pumpWidget(
@@ -2375,10 +2364,9 @@ void main() {
                   focusNode: focusNode,
                   autofocus: true,
                   onChanged: (int? newValue) {
-                    if (newValue != null)
-                      setState(() {
-                        value = newValue;
-                      });
+                    setState(() {
+                      value = newValue;
+                    });
                   },
                   value: value,
                   itemHeight: null,
@@ -2426,7 +2414,7 @@ void main() {
 
   testWidgets("Having a focused element doesn't interrupt scroll when flung by touch", (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
-    int value = 1;
+    int? value = 1;
     final List<int> hugeMenuItems = List<int>.generate(100, (int index) => index);
 
     await tester.pumpWidget(
@@ -2439,10 +2427,9 @@ void main() {
                   focusNode: focusNode,
                   autofocus: true,
                   onChanged: (int? newValue) {
-                    if (newValue != null)
-                      setState(() {
-                        value = newValue;
-                      });
+                    setState(() {
+                      value = newValue;
+                    });
                   },
                   value: value,
                   itemHeight: null,
