@@ -733,3 +733,10 @@ void render_targets_are_recycled() {
   };
   window.scheduleFrame();
 }
+
+void nativeArgumentsCallback(List<String> args) native 'NativeArgumentsCallback';
+
+@pragma('vm:entry-point')
+void dart_entrypoint_args(List<String> args) {
+  nativeArgumentsCallback(args);
+}

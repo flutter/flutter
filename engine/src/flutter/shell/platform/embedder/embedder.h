@@ -1368,6 +1368,19 @@ typedef struct {
   /// matches what the platform would natively resolve to as possible.
   FlutterComputePlatformResolvedLocaleCallback
       compute_platform_resolved_locale_callback;
+
+  /// The command line argument count for arguments passed through to the Dart
+  /// entrypoint.
+  int dart_entrypoint_argc;
+
+  /// The command line arguments passed through to the Dart entrypoint. The
+  /// strings must be `NULL` terminated.
+  ///
+  /// The strings will be copied out and so any strings passed in here can
+  /// be safely collected after initializing the engine with
+  /// `FlutterProjectArgs`.
+  const char* const* dart_entrypoint_argv;
+
 } FlutterProjectArgs;
 
 //------------------------------------------------------------------------------
