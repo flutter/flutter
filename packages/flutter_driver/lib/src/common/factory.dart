@@ -183,7 +183,7 @@ mixin CommandDeserializerFactory {
       case 'get_diagnostics_tree': return GetDiagnosticsTree.deserialize(params, finderFactory);
     }
 
-    throw DriverError('Unsupported kind of command $kind');
+    throw DriverError('Unsupported command kind $kind');
   }
 }
 

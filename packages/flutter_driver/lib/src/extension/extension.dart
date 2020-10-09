@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_driver/driver_extension.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/cupertino.dart';

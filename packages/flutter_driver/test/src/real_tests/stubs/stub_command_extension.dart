@@ -18,7 +18,7 @@ class StubCommandExtension extends CommandExtension {
   Future<Result> call(Command command, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
     final StubCommand stubCommand = command as StubCommand;
     for (int i = 0; i < stubCommand.times; i++) {
-      handlerFactory.handleCommand(Tap(stubCommand.finder), finderFactory);
+      await handlerFactory.handleCommand(Tap(stubCommand.finder), finderFactory);
     }
     return const StubCommandResult('stub response');
   }
