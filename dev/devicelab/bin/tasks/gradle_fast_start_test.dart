@@ -24,9 +24,6 @@ Future<void> main() async {
           'lib/x86_64/libflutter.so',
           'lib/armeabi-v7a/libflutter.so',
           'lib/arm64-v8a/libflutter.so',
-        ], apkFiles);
-
-        checkCollectionDoesNotContain<String>(<String>[
           ...flutterAssets,
         ], apkFiles);
       });
