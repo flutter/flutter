@@ -268,7 +268,6 @@ tasks:
       Measures the runtime performance of textfield on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   color_filter_and_fade_perf__timeline_summary:
     description: >
@@ -281,7 +280,6 @@ tasks:
       Measures the runtime performance of color filter with fade on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   fading_child_animation_perf__timeline_summary:
     description: >

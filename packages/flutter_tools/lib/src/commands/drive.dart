@@ -55,6 +55,11 @@ class DriveCommand extends RunCommandBase {
   }) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
+
+    // By default, the drive app should not publish the VM service port over mDNS
+    // to prevent a local network permission dialog on iOS 14+,
+    // which cannot be accepted or dismissed in a CI environment.
+    addPublishPort(enabledByDefault: false, verboseHelp: verboseHelp);
     argParser
       ..addFlag('keep-app-running',
         defaultsTo: null,
@@ -215,7 +220,8 @@ class DriveCommand extends RunCommandBase {
             )
             : DebuggingOptions.enabled(
               getBuildInfo(),
-              port: stringArg('web-port')
+              port: stringArg('web-port'),
+              disablePortPublication: disablePortPublication,
             ),
           stayResident: false,
           urlTunneller: null,
@@ -421,7 +427,7 @@ Future<Device> findTargetDevice({ @required Duration timeout }) async {
     }
     if (devices.length > 1) {
       globals.printStatus("Found ${devices.length} devices with name or id matching '${deviceManager.specifiedDeviceId}':");
-      await Device.printDevices(devices);
+      await Device.printDevices(devices, globals.logger);
       return null;
     }
     return devices.first;
@@ -432,7 +438,7 @@ Future<Device> findTargetDevice({ @required Duration timeout }) async {
     return null;
   } else if (devices.length > 1) {
     globals.printStatus('Found multiple connected devices:');
-    await Device.printDevices(devices);
+    await Device.printDevices(devices, globals.logger);
   }
   globals.printStatus('Using device ${devices.first.name}.');
   return devices.first;
@@ -501,6 +507,7 @@ Future<LaunchResult> _startApp(
       command.getBuildInfo(),
       startPaused: true,
       hostVmServicePort: webUri != null ? command.hostVmservicePort : 0,
+      disablePortPublication: command.disablePortPublication,
       ddsPort: command.ddsPort,
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,

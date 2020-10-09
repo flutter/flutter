@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
@@ -176,4 +174,38 @@ Future<void> main() async {
     image.colorBlendMode = BlendMode.color;
     expect(image.colorBlendMode, BlendMode.color);
   });
+
+  test('Render image disposes its image', () async {
+    final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
+    expect(image.debugGetOpenHandleStackTraces()!.length, 1);
+
+    final RenderImage renderImage = RenderImage(image: image.clone());
+    expect(image.debugGetOpenHandleStackTraces()!.length, 2);
+
+    renderImage.image = image.clone();
+    expect(image.debugGetOpenHandleStackTraces()!.length, 2);
+
+    renderImage.image = null;
+    expect(image.debugGetOpenHandleStackTraces()!.length, 1);
+
+    image.dispose();
+    expect(image.debugGetOpenHandleStackTraces()!.length, 0);
+  }, skip: kIsWeb); // Web doesn't track open image handles.
+
+  test('Render image does not dispose its image if setting the same image twice', () async {
+    final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
+    expect(image.debugGetOpenHandleStackTraces()!.length, 1);
+
+    final RenderImage renderImage = RenderImage(image: image.clone());
+    expect(image.debugGetOpenHandleStackTraces()!.length, 2);
+
+    renderImage.image = renderImage.image;
+    expect(image.debugGetOpenHandleStackTraces()!.length, 2);
+
+    renderImage.image = null;
+    expect(image.debugGetOpenHandleStackTraces()!.length, 1);
+
+    image.dispose();
+    expect(image.debugGetOpenHandleStackTraces()!.length, 0);
+  }, skip: kIsWeb); // Web doesn't track open image handles.
 }

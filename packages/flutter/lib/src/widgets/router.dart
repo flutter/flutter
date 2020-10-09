@@ -245,7 +245,12 @@ class Router<T> extends StatefulWidget {
     this.routeInformationParser,
     required this.routerDelegate,
     this.backButtonDispatcher,
-  })  : assert(routeInformationProvider == null || routeInformationParser != null),
+  })  : assert(
+          (routeInformationProvider == null) == (routeInformationParser == null),
+          'You must provide both routeInformationProvider and routeInformationParser '
+          'if this router parses route information. Otheriwse, they should both '
+          'be null.'
+        ),
         assert(routerDelegate != null),
         super(key: key);
 

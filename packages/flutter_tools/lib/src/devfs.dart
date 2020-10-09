@@ -473,8 +473,6 @@ class DevFS {
     bool fullRestart = false,
     String projectRootPath,
     bool skipAssets = false,
-    // TODO(jonahwilliams): remove once https://github.com/flutter/engine/pull/21586 is resolved.
-    bool androidReload = false,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
@@ -492,7 +490,7 @@ class DevFS {
       // are in the same location in DevFS and the iOS simulator.
       final String assetDirectory = getAssetBuildDirectory();
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        if (content.isModified && (!bundleFirstUpload) || androidReload) {
+        if (content.isModified && !bundleFirstUpload) {
           final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
           if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
             archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);

@@ -848,6 +848,10 @@ abstract class AndroidViewController extends PlatformViewController {
   /// for description of the parameters.
   @override
   Future<void> dispatchPointerEvent(PointerEvent event) async {
+    if (event is PointerHoverEvent) {
+      return;
+    }
+
     if (event is PointerDownEvent) {
       _motionEventConverter.handlePointerDownEvent(event);
     }
