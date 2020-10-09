@@ -5051,7 +5051,7 @@ void main() {
     ));
     await tester.pump();
 
-    // Nothing called when only the remote changes
+    // Nothing called when only the remote changes.
     expect(log.length, 0);
 
     // Hide the keyboard
@@ -5069,13 +5069,13 @@ void main() {
 
     log.clear();
 
-    // Send repeat value from the engine
+    // Send repeat value from the engine.
     state.updateEditingValue(const TextEditingValue(
       text: 'a',
     ));
     await tester.pump();
 
-    // Nothing called when only the remote changes
+    // Nothing called when only the remote changes.
     expect(log.length, 0);
     // The keyboard is not be requested after a repeat value from the engine.
     expect(focusNode.hasFocus, false);
