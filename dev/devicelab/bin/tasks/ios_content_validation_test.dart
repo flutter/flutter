@@ -166,6 +166,29 @@ Future<void> main() async {
         if (!await localNetworkUsageFound(outputAppPath)) {
           throw TaskResult.failure('Debug bundle is missing NSLocalNetworkUsageDescription');
         }
+
+        section('Clean build');
+
+        await inDirectory(flutterProject.rootPath, () async {
+          await flutter('clean');
+        });
+
+        section('Archive');
+
+        await inDirectory(flutterProject.rootPath, () async {
+          await flutter('build', options: <String>[
+            'xcarchive',
+          ]);
+        });
+
+        checkDirectoryExists(path.join(
+          flutterProject.rootPath,
+          'build',
+          'ios',
+          'archive',
+          'Runner.xcarchive',
+          'Products',
+        ));
       });
 
       return TaskResult.success(null);
