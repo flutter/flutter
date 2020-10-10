@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/install.dart';
 import 'package:mockito/mockito.dart';
@@ -18,6 +21,7 @@ void main() {
 
     testUsingContext('returns 0 when Android is connected and ready for an install', () async {
       final InstallCommand command = InstallCommand();
+      command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final MockAndroidDevice device = MockAndroidDevice();
       when(device.isAppInstalled(any, userIdentifier: anyNamed('userIdentifier')))
@@ -33,6 +37,7 @@ void main() {
 
     testUsingContext('returns 1 when targeted device is not Android with --device-user', () async {
       final InstallCommand command = InstallCommand();
+      command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final MockIOSDevice device = MockIOSDevice();
       when(device.isAppInstalled(any, userIdentifier: anyNamed('userIdentifier')))
@@ -49,6 +54,7 @@ void main() {
 
     testUsingContext('returns 0 when iOS is connected and ready for an install', () async {
       final InstallCommand command = InstallCommand();
+      command.applicationPackages = FakeApplicationPackageFactory(FakeIOSApp());
 
       final MockIOSDevice device = MockIOSDevice();
       when(device.isAppInstalled(any)).thenAnswer((_) async => false);
@@ -61,3 +67,17 @@ void main() {
     });
   });
 }
+
+class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
+  FakeApplicationPackageFactory(this.applicationPackage);
+
+  final ApplicationPackage applicationPackage;
+
+  @override
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) async {
+    return applicationPackage;
+  }
+}
+
+class FakeAndroidApk extends Fake implements AndroidApk {}
+class FakeIOSApp extends Fake implements IOSApp {}
