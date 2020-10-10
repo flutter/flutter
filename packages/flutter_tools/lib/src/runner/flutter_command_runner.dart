@@ -94,12 +94,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !showPackagesCommand,
         help: 'Path to your ".packages" file.\n$packagesHelp');
 
-    argParser.addOption('flutter-root',
-        hide: !verboseHelp,
-        help: 'The root directory of the Flutter repository.\n'
-              'Defaults to \$$kFlutterRootEnvironmentVariableName if set, otherwise uses the parent '
-              'of the directory that the "flutter" script itself is in.');
-
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
     }
@@ -110,7 +104,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
               'Defaults to \$$kFlutterEngineEnvironmentVariableName if set, otherwise defaults to '
               'the path given in your pubspec.yaml dependency_overrides for $kFlutterEnginePackageName, '
               'if any, or, failing that, tries to guess at the location based on the value of the '
-              '--flutter-root option.');
+              'FLUTTER_ROOT.');
 
     argParser.addOption('local-engine',
         hide: !verboseHelp,
@@ -220,11 +214,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (topLevelResults['show-test-device'] as bool ||
         topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
       FlutterTesterDevices.showFlutterTesterDevice = true;
-    }
-
-    if (topLevelResults.wasParsed('flutter-root')) {
-      Cache.flutterRoot = globals.fs.path.normalize(
-        globals.fs.path.absolute(topLevelResults['flutter-root'] as String));
     }
 
     // Set up the tooling configuration.
