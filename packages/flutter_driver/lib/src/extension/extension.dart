@@ -92,6 +92,10 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// }
 /// ```
 /// 
+/// ```dart
+/// driver.sendCommand(SomeCommand(ByValueKey('Button'), 7));
+/// ```
+/// 
 /// Note: SomeFinder and SomeFinderExtension should be placed in different files 
 /// to avoid `dart:ui` import issue.
 ///
