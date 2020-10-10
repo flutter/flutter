@@ -1696,7 +1696,7 @@ class ArtifactUpdater {
       if (inputSink != null) {
         inputSink.add(chunk);
       }
-      randomAccessFile.writeFrom(chunk);
+      randomAccessFile.writeFromSync(chunk);
     });
     randomAccessFile.closeSync();
     if (inputSink != null) {
