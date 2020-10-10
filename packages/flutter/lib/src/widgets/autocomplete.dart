@@ -15,20 +15,20 @@ import 'overlay.dart';
 ///
 /// See also:
 ///   * [AutocompleteCore.optionsBuilder], which is of this type.
-typedef AutocompleteOptionsBuilder<T> = Iterable<T> Function(TextEditingValue textEditingValue);
+typedef AutocompleteOptionsBuilder<T extends Object> = Iterable<T> Function(TextEditingValue textEditingValue);
 
 /// A type for indicating the selection of an autocomplete option.
 ///
 /// See also:
 ///   * [AutocompleteCore.onSelected], which is of this type.
-typedef AutocompleteOnSelected<T> = void Function(T? option);
+typedef AutocompleteOnSelected<T extends Object> = void Function(T? option);
 
 /// A builder for the selectable options given the current autocomplete field
 /// value.
 ///
 /// See also:
 ///   * [AutocompleteCore.optionsViewBuilder], which is of this type.
-typedef AutocompleteOptionsViewBuilder<T> = Widget Function(
+typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
   BuildContext context,
   AutocompleteOnSelected<T> onSelected,
   Iterable<T> options,
@@ -48,7 +48,7 @@ typedef AutocompleteFieldViewBuilder = Widget Function(
 ///
 /// See also:
 ///   * [AutocompleteCore.displayStringForOption], which is of this type.
-typedef AutocompleteOptionToString<T> = String Function(T option);
+typedef AutocompleteOptionToString<T extends Object> = String Function(T option);
 
 // TODO(justinmc): Mention Autocomplete and AutocompleteCupertino when they are
 // implemented.
@@ -371,7 +371,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 /// }
 /// ```
 /// {@end-tool}
-class AutocompleteCore<T> extends StatefulWidget {
+class AutocompleteCore<T extends Object> extends StatefulWidget {
   /// Create an instance of AutocompleteCore.
   ///
   /// [fieldViewBuilder] and [optionsViewBuilder] must not be null.
@@ -418,7 +418,7 @@ class AutocompleteCore<T> extends StatefulWidget {
   _AutocompleteCoreState<T> createState() => _AutocompleteCoreState<T>();
 }
 
-class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
+class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>> {
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
   final TextEditingController _textEditingController = TextEditingController();
@@ -548,7 +548,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 
 // The floating options, meant to be built inside of an Overlay. Will position
 // itself at the bottom of the field indicated by layerLink and fieldSize.
-class _FloatingOptions<T> extends StatelessWidget {
+class _FloatingOptions<T extends Object> extends StatelessWidget {
   const _FloatingOptions({
     Key? key,
     required this.optionsViewBuilder,
