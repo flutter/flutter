@@ -58,6 +58,14 @@ class CreateCommand extends FlutterCommand {
         'whether to run it in offline mode or not. In offline mode, it will need to '
         'have all dependencies already available in the pub cache to succeed.',
     );
+    argParser.addFlag(
+      'with-driver-test',
+      negatable: true,
+      defaultsTo: false,
+      help: '(Deprecated) Also add a flutter_driver dependency and generate a '
+      "sample 'flutter drive' test. This flag has been deprecated, instead see "
+      'package:integration_test at https://pub.dev/packages/integration_test .',
+    );
     argParser.addOption(
       'template',
       abbr: 't',
@@ -391,6 +399,14 @@ class CreateCommand extends FlutterCommand {
     error = _validateProjectName(projectName);
     if (error != null) {
       throwToolExit(error);
+    }
+
+    if (boolArg('with-driver-test')) {
+      globals.printError(
+        '--with-driver-test has been deprecated and will no longer add a flutter '
+        'driver template. Instead, learn how to use package:integration_test by '
+        'visiting https://pub.dev/packages/integration_test .'
+      );
     }
 
     final Map<String, dynamic> templateContext = _createTemplateContext(
