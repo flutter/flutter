@@ -91,12 +91,12 @@ class BottomNavigationBarThemeData with Diagnosticable {
   /// See [BottomNavigationBar.unselectedLabelStyle].
   final TextStyle? unselectedLabelStyle;
 
-  /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
+  /// Whether the labels are shown for the selected [BottomNavigationBarItem]s.
   ///
   /// See [BottomNavigationBar.showSelectedLabels].
   final bool? showSelectedLabels;
 
-  /// Whether the labels are shown for the selected [BottomNavigationBarItem].
+  /// Whether the labels are shown for the unselected [BottomNavigationBarItem].
   ///
   /// See [BottomNavigationBar.showUnselectedLabels].
   final bool? showUnselectedLabels;

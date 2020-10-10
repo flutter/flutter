@@ -314,10 +314,10 @@ class BottomNavigationBar extends StatefulWidget {
   /// Defaults to `12.0`.
   final double unselectedFontSize;
 
-  /// Whether the labels are shown for the selected [BottomNavigationBarItem].
+  /// Whether the labels are shown for the unselected [BottomNavigationBarItem].
   final bool? showUnselectedLabels;
 
-  /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
+  /// Whether the labels are shown for the selected [BottomNavigationBarItem]s.
   final bool showSelectedLabels;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
