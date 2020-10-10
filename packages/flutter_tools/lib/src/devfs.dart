@@ -207,6 +207,9 @@ class DevFSException implements Exception {
   final String message;
   final dynamic error;
   final StackTrace stackTrace;
+
+  @override
+  String toString() => 'DevFSException($message, $error, $stackTrace)';
 }
 
 /// Interface responsible for syncing asset files to a development device.
@@ -399,6 +402,7 @@ class DevFS {
 
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
+  DateTime _previousCompiled;
   PackageConfig lastPackageConfig;
   File _widgetCacheOutputFile;
 
@@ -440,6 +444,20 @@ class DevFS {
     _logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
   }
 
+  /// Mark the [lastCompiled] time to the previous successful compile.
+  ///
+  /// Sometimes a hot reload will be rejected by the VM due to a change in the
+  /// structure of the code not supporting the hot reload. In these cases,
+  /// the best resolution is a hot restart. However, the resident runner
+  /// will not recognize this file as having been changed since the delta
+  /// will already have been accepted. Instead, reset the compile time so
+  /// that the last updated files are included in subsequent compilations until
+  /// a reload is accepted.
+  void resetLastCompiled() {
+    lastCompiled = _previousCompiled;
+  }
+
+
   /// If the build method of a single widget was modified, return the widget name.
   ///
   /// If any other changes were made, or there is an error scanning the file,
@@ -472,7 +490,6 @@ class DevFS {
     String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
-    bool skipAssets = false,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
@@ -484,24 +501,23 @@ class DevFS {
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
 
     int syncedBytes = 0;
-    if (bundle != null && !skipAssets) {
+    if (bundle != null) {
       final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
-      // We write the assets into the AssetBundle working dir so that they
+      // The tool writes the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
       final String assetDirectory = getAssetBuildDirectory();
       bundle.entries.forEach((String archivePath, DevFSContent content) {
+        if (!content.isModified || bundleFirstUpload) {
+          return;
+        }
         final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
         if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
           archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
         }
-        // Only update assets if they have been modified, or if this is the
-        // first upload of the asset bundle.
-        if (content.isModified || (bundleFirstUpload && archivePath != null)) {
-          dirtyEntries[deviceUri] = content;
-          syncedBytes += content.size;
-          if (archivePath != null && !bundleFirstUpload) {
-            assetPathsToEvict.add(archivePath);
-          }
+        dirtyEntries[deviceUri] = content;
+        syncedBytes += content.size;
+        if (archivePath != null && !bundleFirstUpload) {
+          assetPathsToEvict.add(archivePath);
         }
       });
     }
@@ -522,6 +538,7 @@ class DevFS {
       return UpdateFSReport(success: false);
     }
     // Only update the last compiled time if we successfully compiled.
+    _previousCompiled = lastCompiled;
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
     sources = compilerOutput.sources;

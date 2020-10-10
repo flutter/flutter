@@ -10,6 +10,14 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
 
+/// A parser for the Intellij and Android Studio plugin JAR files.
+///
+/// This searches on the provided plugin path for a JAR archive, then
+/// unzips it to parse the META-INF/plugin.xml for version information.
+///
+/// See also:
+///   * [IntellijValidator], the validator base class that uses this to check
+///     plugin versions.
 class IntelliJPlugins {
   IntelliJPlugins(this.pluginsPath, {
     @required FileSystem fileSystem
@@ -74,7 +82,7 @@ class IntelliJPlugins {
       final int start = content.indexOf(versionStartTag);
       final int end = content.indexOf('</version>', start);
       return content.substring(start + versionStartTag.length, end);
-    } on Exception {
+    } on ArchiveException {
       return null;
     }
   }

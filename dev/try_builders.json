@@ -33,6 +33,12 @@
          "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_drive/", "packages/flutter_localizations/", "bin/"]
       },
       {
+         "name":"Linux build_gallery",
+         "repo":"flutter",
+         "task_name":"linux_build_gallery",
+         "enabled":true
+      },
+      {
          "name":"Linux framework_tests",
          "repo":"flutter",
          "task_name":"linux_framework_tests",
@@ -62,13 +68,6 @@
          "repo":"flutter",
          "task_name":"linux_fuchsia_precache",
          "enabled":true
-      },
-      {
-         "name":"Linux gradle_fast_start_test",
-         "repo":"flutter",
-         "task_name":"linux_gradle_fast_start_test",
-         "enabled":true,
-         "run_if": ["dev/**", "bin/**"]
       },
       {
          "name":"Linux gradle_jetifier_test",
@@ -208,18 +207,17 @@
          "enabled":true
       },
       {
+         "name":"Mac build_gallery",
+         "repo":"flutter",
+         "task_name":"mac_build_gallery",
+         "enabled":true
+      },
+      {
          "name":"Mac framework_tests",
          "repo":"flutter",
          "task_name":"mac_framework_tests",
          "enabled":true,
          "run_if":["dev/**", "packages/flutter/**", "packages/flutter_goldens/**", "packages/flutter_goldens_client/**", "packages/flutter_test/**", "packages/flutter_tools/lib/src/test/**", "bin/**"]
-      },
-      {
-         "name":"Mac gradle_fast_start_test",
-         "repo":"flutter",
-         "task_name":"mac_gradle_fast_start_test",
-         "enabled":true,
-         "run_if":["dev/**", "bin/**"]
       },
       {
          "name":"Mac gradle_jetifier_test",
@@ -344,13 +342,6 @@
          "task_name": "win_framework_tests",
          "enabled":true,
          "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
-      },
-      {
-         "name": "Windows gradle_fast_start_test",
-         "repo": "flutter",
-         "task_name": "win_gradle_fast_start_test",
-         "enabled":true,
-         "run_if":["dev/**", "bin/**"]
       },
       {
          "name": "Windows gradle_jetifier_test",

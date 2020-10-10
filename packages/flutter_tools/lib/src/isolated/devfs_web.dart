@@ -818,7 +818,6 @@ class WebDevFS implements DevFS {
     String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
-    bool skipAssets = false,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
@@ -927,6 +926,11 @@ class WebDevFS implements DevFS {
     'web',
     'dart_stack_trace_mapper.js',
   ));
+
+  @override
+  void resetLastCompiled() {
+    // Not used for web compilation.
+  }
 }
 
 class ReleaseAssetServer {

@@ -28,7 +28,6 @@ import 'src/commands/format.dart';
 import 'src/commands/generate.dart';
 import 'src/commands/generate_localizations.dart';
 import 'src/commands/ide_config.dart';
-import 'src/commands/inject_plugins.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
 import 'src/commands/make_host_app_editable.dart';
@@ -39,7 +38,6 @@ import 'src/commands/screenshot.dart';
 import 'src/commands/shell_completion.dart';
 import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
-import 'src/commands/train.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/features.dart';
@@ -126,8 +124,6 @@ Future<void> main(List<String> args) async {
     ),
     // Development-only commands. These are always hidden,
     IdeConfigCommand(),
-    InjectPluginsCommand(),
-    TrainingCommand(),
     UpdatePackagesCommand(),
   ], verbose: verbose,
      muteCommandLogging: muteCommandLogging,

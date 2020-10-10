@@ -113,7 +113,6 @@ void main() {
       '--tfa',
       '-Ddart.vm.profile=true',
       '-Ddart.vm.product=false',
-      '--bytecode-options=source-positions',
       '-Ddart.developer.causal_async_stacks=false',
     ]));
   });
@@ -150,7 +149,6 @@ void main() {
       '--tfa',
       '-Ddart.vm.profile=false',
       '-Ddart.vm.product=true',
-      '--bytecode-options=source-positions',
       '-Ddart.developer.causal_async_stacks=false',
     ]));
   });
