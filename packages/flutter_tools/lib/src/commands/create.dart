@@ -886,7 +886,8 @@ const Set<String> _packageDependencies = <String>{
   'yaml',
 };
 
-// A valid Dart identifier.
+// A valid Dart identifier that can be used for a package, i.e. no
+// capital letters.
 // https://dart.dev/guides/language/language-tour#important-concepts
 final RegExp _identifierRegExp = RegExp('[a-z_][a-z0-9_]*');
 
