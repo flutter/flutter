@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/vmservice.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/mocks.dart';
 
 void main() {
   group('drive', () {
@@ -37,7 +36,6 @@ void main() {
 
     setUp(() {
       command = DriveCommand();
-      applyMocksToCommand(command);
       fs = MemoryFileSystem.test();
       tempDir = fs.systemTempDirectory.createTempSync('flutter_drive_test.');
       fs.currentDirectory = tempDir;

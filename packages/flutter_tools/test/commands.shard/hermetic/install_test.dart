@@ -18,7 +18,6 @@ void main() {
 
     testUsingContext('returns 0 when Android is connected and ready for an install', () async {
       final InstallCommand command = InstallCommand();
-      applyMocksToCommand(command);
 
       final MockAndroidDevice device = MockAndroidDevice();
       when(device.isAppInstalled(any, userIdentifier: anyNamed('userIdentifier')))
@@ -34,7 +33,6 @@ void main() {
 
     testUsingContext('returns 1 when targeted device is not Android with --device-user', () async {
       final InstallCommand command = InstallCommand();
-      applyMocksToCommand(command);
 
       final MockIOSDevice device = MockIOSDevice();
       when(device.isAppInstalled(any, userIdentifier: anyNamed('userIdentifier')))
@@ -51,7 +49,6 @@ void main() {
 
     testUsingContext('returns 0 when iOS is connected and ready for an install', () async {
       final InstallCommand command = InstallCommand();
-      applyMocksToCommand(command);
 
       final MockIOSDevice device = MockIOSDevice();
       when(device.isAppInstalled(any)).thenAnswer((_) async => false);

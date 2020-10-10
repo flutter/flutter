@@ -18,7 +18,6 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/mocks.dart';
 
 void main() {
   group('UpgradeCommandRunner', () {
@@ -331,7 +330,6 @@ void main() {
 
         testUsingContext('upgrade continue prints welcome message', () async {
           final UpgradeCommand upgradeCommand = UpgradeCommand(fakeCommandRunner);
-          applyMocksToCommand(upgradeCommand);
 
           await createTestCommandRunner(upgradeCommand).run(
             <String>[

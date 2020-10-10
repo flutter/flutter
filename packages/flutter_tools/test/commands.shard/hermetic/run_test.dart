@@ -31,7 +31,6 @@ import '../../src/testbed.dart';
 
 void main() {
   group('run', () {
-    MockApplicationPackageFactory mockApplicationPackageFactory;
     MockDeviceManager mockDeviceManager;
     FileSystem fileSystem;
 
@@ -40,14 +39,12 @@ void main() {
     });
 
     setUp(() {
-      mockApplicationPackageFactory = MockApplicationPackageFactory();
       mockDeviceManager = MockDeviceManager();
       fileSystem = MemoryFileSystem.test();
     });
 
     testUsingContext('fails when target not found', () async {
       final RunCommand command = RunCommand();
-      applyMocksToCommand(command);
       try {
         await createTestCommandRunner(command).run(<String>['run', '-t', 'abc123', '--no-pub']);
         fail('Expect exception');
@@ -66,7 +63,6 @@ void main() {
       fileSystem.file('.packages').createSync();
 
       final RunCommand command = RunCommand();
-      applyMocksToCommand(command);
       try {
         await createTestCommandRunner(command).run(<String>[
           'run',
@@ -95,7 +91,6 @@ void main() {
         ..createSync(recursive: true);
 
       final RunCommand command = RunCommand();
-      applyMocksToCommand(command);
       try {
         await createTestCommandRunner(command).run(<String>[
           'run',
@@ -123,7 +118,6 @@ void main() {
         .createSync(recursive: true);
 
       final RunCommand command = RunCommand();
-      applyMocksToCommand(command);
       try {
         await createTestCommandRunner(command).run(<String>[
           'run',
@@ -173,7 +167,6 @@ void main() {
 
       testUsingContext('exits with a user message when no supported devices attached', () async {
         final RunCommand command = RunCommand();
-        applyMocksToCommand(command);
 
         const List<Device> noDevices = <Device>[];
         when(mockDeviceManager.getDevices()).thenAnswer(
@@ -222,7 +215,6 @@ void main() {
         when(mockDeviceManager.deviceDiscoverers).thenReturn(<DeviceDiscovery>[]);
 
         final RunCommand command = RunCommand();
-        applyMocksToCommand(command);
         await expectLater(createTestCommandRunner(command).run(<String>[
           'run',
           '--no-pub',
@@ -238,7 +230,6 @@ void main() {
 
       testUsingContext('shows unsupported devices when no supported devices are found',  () async {
         final RunCommand command = RunCommand();
-        applyMocksToCommand(command);
 
         final MockDevice mockDevice = MockDevice(TargetPlatform.android_arm);
         when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) => Future<bool>.value(true));
@@ -294,8 +285,6 @@ void main() {
 
       testUsingContext('updates cache before checking for devices', () async {
         final RunCommand command = RunCommand();
-        applyMocksToCommand(command);
-
         // Called as part of requiredArtifacts()
         when(mockDeviceManager.getDevices()).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[])
@@ -331,7 +320,6 @@ void main() {
           mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout')),
         ]);
       }, overrides: <Type, Generator>{
-        ApplicationPackageFactory: () => mockApplicationPackageFactory,
         Cache: () => mockCache,
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
@@ -340,7 +328,6 @@ void main() {
 
       testUsingContext('passes device target platform to usage', () async {
         final RunCommand command = RunCommand();
-        applyMocksToCommand(command);
         final MockDevice mockDevice = MockDevice(TargetPlatform.ios);
         when(mockDevice.supportsRuntimeMode(any)).thenAnswer((Invocation invocation) => true);
         when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) => Future<bool>.value(false));
@@ -390,7 +377,6 @@ void main() {
         );
         expect(buffer.toString(), matches(usageRegexp));
       }, overrides: <Type, Generator>{
-        ApplicationPackageFactory: () => mockApplicationPackageFactory,
         Artifacts: () => artifacts,
         Cache: () => mockCache,
         DeviceManager: () => mockDeviceManager,
@@ -433,7 +419,6 @@ void main() {
           expect(e.exitCode, FakeDevice.kSuccess);
         }
       }, overrides: <Type, Generator>{
-        ApplicationPackageFactory: () => mockApplicationPackageFactory,
         DeviceManager: () => mockDeviceManager,
       });
 
@@ -449,7 +434,6 @@ void main() {
           expect(e.exitCode, FakeDevice.kSuccess);
         }
       }, overrides: <Type, Generator>{
-        ApplicationPackageFactory: () => mockApplicationPackageFactory,
         DeviceManager: () => mockDeviceManager,
       });
 
@@ -466,7 +450,6 @@ void main() {
           expect(e.exitCode, FakeDevice.kSuccess);
         }
       }, overrides: <Type, Generator>{
-        ApplicationPackageFactory: () => mockApplicationPackageFactory,
         DeviceManager: () => mockDeviceManager,
       });
     });

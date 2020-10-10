@@ -467,7 +467,7 @@ Future<LaunchResult> _startApp(
   await appStopper(command);
 
   final ApplicationPackage package = await command.applicationPackages
-      .getPackageForPlatform(await command.device.targetPlatform, command.getBuildInfo());
+      .getPackageForPlatform(await command.device.targetPlatform, buildInfo: command.getBuildInfo());
 
   if (command.shouldBuild) {
     globals.printTrace('Installing application package.');
@@ -564,7 +564,7 @@ Future<bool> _stopApp(DriveCommand command) async {
   globals.printTrace('Stopping application.');
   final ApplicationPackage package = await command.applicationPackages.getPackageForPlatform(
     await command.device.targetPlatform,
-    command.getBuildInfo(),
+    buildInfo: command.getBuildInfo(),
   );
   final bool stopped = await command.device.stopApp(package, userIdentifier: command.userIdentifier);
   await command._deviceLogSubscription?.cancel();

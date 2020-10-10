@@ -37,7 +37,6 @@ void main() {
       fileSystem: fileSystem,
       dwarfSymbolizationService: mockDwarfSymbolizationService,
     );
-    applyMocksToCommand(command);
   });
 
   testUsingContext('Regression test for type error in codec', () async {

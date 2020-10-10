@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/commands/logs.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
 void main() {
   group('logs', () {
@@ -22,7 +21,6 @@ void main() {
 
     testUsingContext('fail with a bad device id', () async {
       final LogsCommand command = LogsCommand();
-      applyMocksToCommand(command);
       try {
         await createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']);
         fail('Expect exception');
