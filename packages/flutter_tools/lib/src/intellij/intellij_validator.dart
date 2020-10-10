@@ -47,8 +47,15 @@ abstract class IntelliJValidator extends DoctorValidator {
     @required PlistParser plistParser,
   }) {
     final FileSystemUtils fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
-    if (platform.isLinux || platform.isWindows) {
+    if (platform.isWindows) {
       return IntelliJValidatorOnLinuxAndWindows.installed(
+        fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
+        userMessages: userMessages,
+      );
+    }
+    if (platform.isLinux) {
+      return IntelliJValidatorOnLinux.installed(
         fileSystem: fileSystem,
         fileSystemUtils: fileSystemUtils,
         userMessages: userMessages,
@@ -186,6 +193,110 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
           }
         }
       });
+    }
+    return validators;
+  }
+}
+
+/// A linux specific implementation of the intellij validator.
+class IntelliJValidatorOnLinux extends IntelliJValidator {
+  IntelliJValidatorOnLinux(String title, this.version, String installPath, this.pluginsPath, {
+    @required FileSystem fileSystem,
+    @required UserMessages userMessages,
+  }) : super(title, installPath, fileSystem: fileSystem, userMessages: userMessages);
+
+  @override
+  final String version;
+
+  @override
+  final String pluginsPath;
+
+  static Iterable<DoctorValidator> installed({
+    @required FileSystem fileSystem,
+    @required FileSystemUtils fileSystemUtils,
+    @required UserMessages userMessages,
+  }) {
+    final List<DoctorValidator> validators = <DoctorValidator>[];
+    if (fileSystemUtils.homeDirPath == null) {
+      return validators;
+    }
+
+    void addValidator(String title, String version, String installPath, String pluginsPath) {
+      final IntelliJValidatorOnLinux validator = IntelliJValidatorOnLinux(
+        title,
+        version,
+        installPath,
+        pluginsPath,
+        fileSystem: fileSystem,
+        userMessages: userMessages,
+      );
+      for (int index = 0; index < validators.length; index += 1) {
+        final DoctorValidator other = validators[index];
+        if (other is IntelliJValidatorOnLinux && validator.installPath == other.installPath) {
+          if (validator.version.compareTo(other.version) > 0) {
+            validators[index] = validator;
+          }
+          return;
+        }
+      }
+      validators.add(validator);
+    }
+
+    // before IntelliJ 2019
+    final Directory homeDir = fileSystem.directory(fileSystemUtils.homeDirPath);
+    for (final Directory dir in homeDir.listSync().whereType<Directory>()) {
+      final String name = fileSystem.path.basename(dir.path);
+      IntelliJValidator._idToTitle.forEach((String id, String title) {
+        if (name.startsWith('.$id')) {
+          final String version = name.substring(id.length + 1);
+          String installPath;
+          try {
+            installPath = fileSystem.file(fileSystem.path.join(dir.path, 'system', '.home')).readAsStringSync();
+          } on FileSystemException {
+            // ignored
+          }
+          if (installPath != null && fileSystem.isDirectorySync(installPath)) {
+            final String pluginsPath = fileSystem.path.join(dir.path, 'config', 'plugins');
+            addValidator(title, version, installPath, pluginsPath);
+          }
+        }
+      });
+    }
+    // after IntelliJ 2020 ~
+    final Directory cacheDir = fileSystem.directory(fileSystem.path.join(fileSystemUtils.homeDirPath, '.cache', 'JetBrains'));
+    if (cacheDir.existsSync()) {
+      for (final Directory dir in cacheDir.listSync().whereType<Directory>()) {
+        final String name = fileSystem.path.basename(dir.path);
+        IntelliJValidator._idToTitle.forEach((String id, String title) {
+          if (name.startsWith(id)) {
+            final String version = name.substring(id.length);
+            String installPath;
+            try {
+              installPath = fileSystem.file(fileSystem.path.join(dir.path, '.home')).readAsStringSync();
+            } on Exception {
+              // ignored
+            }
+            if (installPath != null && fileSystem.isDirectorySync(installPath)) {
+              if (installPath.contains(fileSystem.path.join('JetBrains','Toolbox','apps'))) {
+                // via JetBrains ToolBox app
+                if (fileSystem.isDirectorySync(fileSystem.path.join(fileSystemUtils.homeDirPath, '.local', 'share', 'JetBrains', name))) {
+                  // after 2020.2.x
+                  final String pluginsPath = fileSystem.path.join(fileSystemUtils.homeDirPath, '.local', 'share', 'JetBrains', name);
+                  addValidator(title, version, installPath, pluginsPath);
+                } else if (fileSystem.isDirectorySync(installPath + '.plugins')) {
+                  // only 2020.1.X
+                  final String pluginsPath = installPath + '.plugins';
+                  addValidator(title, version, installPath, pluginsPath);
+                }
+              } else {
+                // via tar.gz
+                final String pluginsPath = fileSystem.path.join(fileSystemUtils.homeDirPath, '.local', 'share', 'JetBrains', name);
+                addValidator(title, version, installPath, pluginsPath);
+              }
+            }
+          }
+        });
+      }
     }
     return validators;
   }

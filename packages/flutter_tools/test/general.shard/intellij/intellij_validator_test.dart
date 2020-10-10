@@ -20,23 +20,19 @@ final Platform macPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{'HOME': '/foo/bar'}
 );
+final Platform linuxPlatform = FakePlatform(
+  operatingSystem: 'linux',
+  environment: <String, String>{
+    'HOME': '/foo/bar'
+  },
+);
 
 void main() {
   testWithoutContext('Intellij validator can parse plugin manifest from plugin JAR', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     // Create plugin JAR file for Flutter and Dart plugin.
-    final List<int> flutterPluginBytes = utf8.encode(kIntellijFlutterPluginXml);
-    final Archive flutterPlugins = Archive();
-    flutterPlugins.addFile(ArchiveFile('META-INF/plugin.xml', flutterPluginBytes.length, flutterPluginBytes));
-    fileSystem.file('plugins/flutter-intellij.jar')
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(ZipEncoder().encode(flutterPlugins));
-    final List<int> dartPluginBytes = utf8.encode(kIntellijDartPluginXml);
-    final Archive dartPlugins = Archive();
-    dartPlugins.addFile(ArchiveFile('META-INF/plugin.xml', dartPluginBytes.length, dartPluginBytes));
-    fileSystem.file('plugins/Dart/lib/Dart.jar')
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(ZipEncoder().encode(dartPlugins));
+    createIntellijFlutterPluginJar('plugins/flutter-intellij.jar', fileSystem);
+    createIntellijDartPluginJar('plugins/Dart/lib/Dart.jar', fileSystem);
 
     final ValidationResult result = await IntelliJValidatorTestTarget('', 'path/to/intellij', fileSystem).validate();
     expect(result.type, ValidationType.partial);
@@ -48,6 +44,114 @@ void main() {
       ValidationMessage('For information about installing plugins, see\n'
           'https://flutter.dev/intellij-setup/#installing-the-plugins')
     ]);
+  });
+
+  testWithoutContext('legacy intellij(<2020) plugins check on linux', () async {
+    const String cachePath  = '/foo/bar/.IntelliJIdea2019.10/system';
+    const String installPath = '/foo/bar/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-1/2019.10.1';
+    const String pluginPath  = '/foo/bar/.IntelliJIdea2019.10/config/plugins';
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final Directory cacheDirectory = fileSystem.directory(cachePath)
+      ..createSync(recursive: true);
+    cacheDirectory
+        .childFile('.home')
+        .writeAsStringSync(installPath, flush: true);
+    final Directory installedDirectory = fileSystem.directory(installPath);
+    installedDirectory.createSync(recursive: true);
+    // Create plugin JAR file for Flutter and Dart plugin.
+    createIntellijFlutterPluginJar(pluginPath + '/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
+    createIntellijDartPluginJar(pluginPath + '/Dart/lib/Dart.jar', fileSystem);
+
+    final Iterable<DoctorValidator> installed = IntelliJValidatorOnLinux.installed(
+      fileSystem: fileSystem,
+      fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: linuxPlatform),
+      userMessages: UserMessages(),
+      );
+    expect(1, installed.length);
+    final ValidationResult result = await installed.toList()[0].validate();
+    expect(ValidationType.installed, result.type);
+  });
+
+  testWithoutContext('intellij(2020.1) plugins check on linux (installed via JetBrains ToolBox app)', () async {
+    const String cachePath   = '/foo/bar/.cache/JetBrains/IntelliJIdea2020.10';
+    const String installPath = '/foo/bar/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-1/2020.10.1';
+    const String pluginPath  = '/foo/bar/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-1/2020.10.1.plugins';
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final Directory cacheDirectory = fileSystem.directory(cachePath)
+      ..createSync(recursive: true);
+    cacheDirectory
+        .childFile('.home')
+        .writeAsStringSync(installPath, flush: true);
+    final Directory installedDirectory = fileSystem.directory(installPath);
+    installedDirectory.createSync(recursive: true);
+    // Create plugin JAR file for Flutter and Dart plugin.
+    createIntellijFlutterPluginJar(pluginPath + '/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
+    createIntellijDartPluginJar(pluginPath + '/Dart/lib/Dart.jar', fileSystem);
+
+    final Iterable<DoctorValidator> installed = IntelliJValidatorOnLinux.installed(
+      fileSystem: fileSystem,
+      fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: linuxPlatform),
+      userMessages: UserMessages(),
+    );
+    expect(1, installed.length);
+    final ValidationResult result = await installed.toList()[0].validate();
+    expect(ValidationType.installed, result.type);
+  });
+
+  testWithoutContext('intellij(>=2020.2) plugins check on linux (installed via JetBrains ToolBox app)', () async {
+    const String cachePath   = '/foo/bar/.cache/JetBrains/IntelliJIdea2020.10';
+    const String installPath = '/foo/bar/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-1/2020.10.1';
+    const String pluginPath  = '/foo/bar/.local/share/JetBrains/IntelliJIdea2020.10';
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final Directory cacheDirectory = fileSystem.directory(cachePath)
+      ..createSync(recursive: true);
+    cacheDirectory
+        .childFile('.home')
+        .writeAsStringSync(installPath, flush: true);
+    final Directory installedDirectory = fileSystem.directory(installPath);
+    installedDirectory.createSync(recursive: true);
+    // Create plugin JAR file for Flutter and Dart plugin.
+    createIntellijFlutterPluginJar(pluginPath + '/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
+    createIntellijDartPluginJar(pluginPath + '/Dart/lib/Dart.jar', fileSystem);
+
+    final Iterable<DoctorValidator> installed = IntelliJValidatorOnLinux.installed(
+      fileSystem: fileSystem,
+      fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: linuxPlatform),
+      userMessages: UserMessages(),
+    );
+    expect(1, installed.length);
+    final ValidationResult result = await installed.toList()[0].validate();
+    expect(ValidationType.installed, result.type);
+  });
+
+  testWithoutContext('intellij(2020.1~) plugins check on linux (installed via tar.gz)', () async {
+    const String cachePath   = '/foo/bar/.cache/JetBrains/IdeaIC2020.10';
+    const String installPath = '/foo/bar/some/dir/ideaIC-2020.10.1/idea-IC-201.0000.00';
+    const String pluginPath  = '/foo/bar/.local/share/JetBrains/IdeaIC2020.10';
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final Directory cacheDirectory = fileSystem.directory(cachePath)
+      ..createSync(recursive: true);
+    cacheDirectory
+        .childFile('.home')
+        .writeAsStringSync(installPath, flush: true);
+    final Directory installedDirectory = fileSystem.directory(installPath);
+    installedDirectory.createSync(recursive: true);
+    // Create plugin JAR file for Flutter and Dart plugin.
+    createIntellijFlutterPluginJar(pluginPath + '/flutter-intellij/lib/flutter-intellij.jar', fileSystem, version: '50.0');
+    createIntellijDartPluginJar(pluginPath + '/Dart/lib/Dart.jar', fileSystem);
+
+    final Iterable<DoctorValidator> installed = IntelliJValidatorOnLinux.installed(
+      fileSystem: fileSystem,
+      fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: linuxPlatform),
+      userMessages: UserMessages(),
+    );
+    expect(1, installed.length);
+    final ValidationResult result = await installed.toList()[0].validate();
+    expect(ValidationType.installed, result.type);
   });
 
   testWithoutContext('Intellij plugins path checking on mac', () async {
@@ -127,16 +231,16 @@ class IntelliJValidatorTestTarget extends IntelliJValidator {
   String get version => 'test.test.test';
 }
 
-
-/// These file contents were derived from the META-INF/plugin.xml from an Intellij Flutter
-/// plugin installation.
-///
-/// The file is loacted in a plugin JAR, which can be located by looking at the plugin
-/// path for the Intellij and Android Studio validators.
-///
-/// If more XML contents are needed, prefer modifying these contents over checking
-/// in another JAR.
-const String kIntellijFlutterPluginXml = r'''
+void createIntellijFlutterPluginJar(String pluginJarPath, FileSystem fileSystem, {String version = '0.1.3'}) {
+  /// These file contents were derived from the META-INF/plugin.xml from an Intellij Flutter
+  /// plugin installation.
+  ///
+  /// The file is loacted in a plugin JAR, which can be located by looking at the plugin
+  /// path for the Intellij and Android Studio validators.
+  ///
+  /// If more XML contents are needed, prefer modifying these contents over checking
+  /// in another JAR.
+  final String intellijFlutterPluginXml = '''
 <idea-plugin version="2">
   <id>io.flutter</id>
   <name>Flutter</name>
@@ -145,11 +249,31 @@ const String kIntellijFlutterPluginXml = r'''
 
   <category>Custom Languages</category>
 
-  <version>0.1.3</version>
+  <version>$version</version>
 
   <idea-version since-build="162.1" until-build="163.*"/>
 </idea-plugin>
+''';
 
+  final List<int> flutterPluginBytes = utf8.encode(intellijFlutterPluginXml);
+  final Archive flutterPlugins = Archive();
+  flutterPlugins.addFile(ArchiveFile('META-INF/plugin.xml', flutterPluginBytes.length, flutterPluginBytes));
+  fileSystem.file(pluginJarPath)
+    ..createSync(recursive: true)
+    ..writeAsBytesSync(ZipEncoder().encode(flutterPlugins));
+
+}
+
+void createIntellijDartPluginJar(String pluginJarPath, FileSystem fileSystem) {
+  /// These file contents were derived from the META-INF/plugin.xml from an Intellij Dart
+  /// plugin installation.
+  ///
+  /// The file is loacted in a plugin JAR, which can be located by looking at the plugin
+  /// path for the Intellij and Android Studio validators.
+  ///
+  /// If more XML contents are needed, prefer modifying these contents over checking
+  /// in another JAR.
+  const String intellijDartPluginXml = r'''
 <idea-plugin version="2">
   <name>Dart</name>
   <version>162.2485</version>
@@ -165,26 +289,10 @@ const String kIntellijFlutterPluginXml = r'''
 </idea-plugin>
 ''';
 
-/// These file contents were derived from the META-INF/plugin.xml from an Intellij Dart
-/// plugin installation.
-///
-/// The file is loacted in a plugin JAR, which can be located by looking at the plugin
-/// path for the Intellij and Android Studio validators.
-///
-/// If more XML contents are needed, prefer modifying these contents over checking
-/// in another JAR.
-const String kIntellijDartPluginXml = r'''
-<idea-plugin version="2">
-  <name>Dart</name>
-  <version>162.2485</version>
-  <idea-version since-build="162.1121" until-build="162.*"/>
-
-  <description>Support for Dart programming language</description>
-  <vendor>JetBrains</vendor>
-  <depends>com.intellij.modules.xml</depends>
-  <depends optional="true" config-file="dartium-debugger-support.xml">JavaScriptDebugger</depends>
-  <depends optional="true" config-file="dart-yaml.xml">org.jetbrains.plugins.yaml</depends>
-  <depends optional="true" config-file="dart-copyright.xml">com.intellij.copyright</depends>
-  <depends optional="true" config-file="dart-coverage.xml">com.intellij.modules.coverage</depends>
-</idea-plugin>
-''';
+  final List<int> dartPluginBytes = utf8.encode(intellijDartPluginXml);
+  final Archive dartPlugins = Archive();
+  dartPlugins.addFile(ArchiveFile('META-INF/plugin.xml', dartPluginBytes.length, dartPluginBytes));
+  fileSystem.file(pluginJarPath)
+    ..createSync(recursive: true)
+    ..writeAsBytesSync(ZipEncoder().encode(dartPlugins));
+}
