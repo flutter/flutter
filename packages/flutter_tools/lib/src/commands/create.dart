@@ -132,12 +132,9 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
     );
-    // TODO(egarciad): Remove this flag. https://github.com/flutter/flutter/issues/52363
     argParser.addFlag(
-      'androidx',
+      'skip-checks',
       hide: true,
-      negatable: true,
-      help: 'Deprecated. Setting this flag has no effect.',
     );
   }
 
@@ -394,9 +391,11 @@ class CreateCommand extends FlutterCommand {
     }
 
     final String projectName = stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
-    error = _validateProjectName(projectName);
-    if (error != null) {
-      throwToolExit(error);
+    if (!boolArg('skip-checks')) {
+      error = _validateProjectName(projectName);
+      if (error != null) {
+        throwToolExit(error);
+      }
     }
 
     final Map<String, dynamic> templateContext = _createTemplateContext(
