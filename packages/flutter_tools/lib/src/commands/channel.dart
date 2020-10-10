@@ -171,7 +171,7 @@ class ChannelCommand extends FlutterCommand {
     } else {
       // Remove the version check stamp, since it could contain out-of-date
       // information that pertains to the previous channel.
-      await FlutterVersion.resetFlutterVersionFreshnessCheck();
+      globals.flutterVersion.resetFlutterVersionFreshnessCheck();
     }
   }
 }

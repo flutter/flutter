@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:usage/usage_io.dart';
 
@@ -70,7 +69,6 @@ void main() {
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
@@ -94,7 +92,6 @@ void main() {
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
@@ -112,7 +109,6 @@ void main() {
 
       expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
       Config: () => mockFlutterConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
@@ -138,7 +134,6 @@ void main() {
         contains('$featuresKey: enable-web,enable-linux-desktop,enable-macos-desktop'),
       );
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
       Config: () => mockFlutterConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',

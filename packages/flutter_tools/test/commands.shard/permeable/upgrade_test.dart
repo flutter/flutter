@@ -321,7 +321,7 @@ void main() {
           ]);
           tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_upgrade_test.');
           flutterToolState = tempDir.childFile('.flutter_tool_state');
-          mockFlutterVersion = MockFlutterVersion(isStable: true);
+          mockFlutterVersion = MockFlutterVersion();
         });
 
         tearDown(() {

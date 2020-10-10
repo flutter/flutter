@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:args/command_runner.dart';
-
 import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -486,11 +484,6 @@ class RunCommand extends RunCommandBase {
       );
     }
     globals.terminal.usesTerminalUi = true;
-
-    if (argResults['dart-flags'] != null && !globals.flutterVersion.isMaster) {
-      throw UsageException('--dart-flags is not available on the stable '
-                           'channel.', null);
-    }
 
     final BuildMode buildMode = getBuildMode();
     for (final Device device in devices) {

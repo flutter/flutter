@@ -8,7 +8,6 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
-import '../base/time.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
@@ -59,10 +58,10 @@ class UpgradeCommand extends FlutterCommand {
       force: boolArg('force'),
       continueFlow: boolArg('continue'),
       testFlow: stringArg('working-directory') != null,
-      gitTagVersion: GitTagVersion.determine(processUtils),
+      gitTagVersion: GitTagVersion.determine(processUtils, globals.flutterVersion.flutterGit),
       flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
-        : FlutterVersion(const SystemClock(), _commandRunner.workingDirectory),
+        : globals.flutterVersionFactory.createVersion(_commandRunner.workingDirectory),
     );
   }
 }

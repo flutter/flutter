@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
-import '../base/time.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -29,20 +27,20 @@ import '../version.dart';
 /// the command would fail since there was no previously recorded stable version.
 class DowngradeCommand extends FlutterCommand {
   DowngradeCommand({
-    PersistentToolState persistentToolState,
-    Logger logger,
-    ProcessManager processManager,
-    FlutterVersion flutterVersion,
-    AnsiTerminal terminal,
-    Stdio stdio,
-    FileSystem fileSystem,
+    @required PersistentToolState persistentToolState,
+    @required Logger logger,
+    @required ProcessManager processManager,
+    @required FlutterVersion flutterVersion,
+    @required Terminal terminal,
+    @required Stdio stdio,
+    @required FlutterVersionFactory flutterVersionFactory,
   }) : _terminal = terminal,
        _flutterVersion = flutterVersion,
        _persistentToolState = persistentToolState,
-       _processManager = processManager,
        _stdio = stdio,
        _logger = logger,
-       _fileSystem = fileSystem {
+       _flutterVersionFactory = flutterVersionFactory,
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager) {
     argParser.addOption(
       'working-directory',
       hide: true,
@@ -56,14 +54,14 @@ class DowngradeCommand extends FlutterCommand {
     );
   }
 
-  AnsiTerminal _terminal;
+  final Terminal _terminal;
+  final PersistentToolState _persistentToolState;
+  final Logger _logger;
+  final Stdio _stdio;
+  final ProcessUtils _processUtils;
+  final FlutterVersionFactory _flutterVersionFactory;
+
   FlutterVersion _flutterVersion;
-  PersistentToolState _persistentToolState;
-  ProcessUtils _processUtils;
-  ProcessManager _processManager;
-  Logger _logger;
-  Stdio _stdio;
-  FileSystem _fileSystem;
 
   @override
   String get description => 'Downgrade Flutter to the last active version for the current channel.';
@@ -73,21 +71,10 @@ class DowngradeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    // Note: commands do not necessarily have access to the correct zone injected
-    // values when being created. Fields must be lazily instantiated in runCommand,
-    // at least until the zone injection is refactored.
-    _terminal ??= globals.terminal;
-    _logger ??= globals.logger;
-    _flutterVersion ??= globals.flutterVersion;
-    _persistentToolState ??= globals.persistentToolState;
-    _processManager ??= globals.processManager;
-    _processUtils ??= ProcessUtils(processManager: _processManager, logger: _logger);
-    _stdio ??= globals.stdio;
-    _fileSystem ??= globals.fs;
     String workingDirectory = Cache.flutterRoot;
     if (argResults.wasParsed('working-directory')) {
       workingDirectory = stringArg('working-directory');
-      _flutterVersion = FlutterVersion(const SystemClock(), workingDirectory);
+      _flutterVersion = _flutterVersionFactory.createVersion(workingDirectory);
     }
 
     final String currentChannel = _flutterVersion.channel;
@@ -163,7 +150,7 @@ class DowngradeCommand extends FlutterCommand {
         'and retry again.\nError: $error.'
       );
     }
-    await FlutterVersion.resetFlutterVersionFreshnessCheck();
+    _flutterVersion.resetFlutterVersionFreshnessCheck();
     _logger.printStatus('Success');
     return FlutterCommandResult.success();
   }

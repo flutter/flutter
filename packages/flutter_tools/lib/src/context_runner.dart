@@ -64,12 +64,6 @@ Future<T> runInContext<T>(
   bool runningOnBot;
   FutureOr<T> runnerWrapper() async {
     runningOnBot = await globals.isRunningOnBot;
-    // Initialize the flutter root as early as possible.
-    Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-      fileSystem: globals.fs,
-      platform: globals.platform,
-      userMessages: userMessages,
-    );
     return runner();
   }
 
@@ -170,7 +164,20 @@ Future<T> runInContext<T>(
         androidWorkflow: androidWorkflow,
       ),
       FeatureFlags: () => const FlutterFeatureFlags(),
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      FlutterVersion: () => FlutterVersion(
+        fileSystem: globals.fs,
+        processManager: globals.processManager,
+        platform: globals.platform,
+        logger: globals.logger,
+        cache: globals.cache,
+      ),
+      FlutterVersionFactory: () => FlutterVersionFactory(
+        cache: globals.cache,
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        logger: globals.logger,
+        processManager: globals.processManager,
+      ),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),

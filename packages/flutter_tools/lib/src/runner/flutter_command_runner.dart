@@ -254,7 +254,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         try {
-          await globals.flutterVersion.ensureVersionFile();
+          globals.flutterVersion.ensureVersionFile();
         } on FileSystemException catch (e) {
           globals.printError('Failed to write the version file to the artifact cache: "$e".');
           globals.printError('Please ensure you have permissions in the artifact cache directory.');

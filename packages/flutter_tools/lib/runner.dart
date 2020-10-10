@@ -15,6 +15,7 @@ import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
+import 'src/cache.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart' as globals;
@@ -45,8 +46,13 @@ Future<int> run(
 
   return runInContext<int>(() async {
     reportCrashes ??= !await globals.isRunningOnBot;
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
-    commands().forEach(runner.addCommand);
+
+    // Initialize the flutter root as early as possible.
+    Cache.flutterRoot ??= Cache.defaultFlutterRoot(
+      fileSystem: globals.fs,
+      platform: globals.platform,
+      userMessages: globals.userMessages,
+    );
 
     // Initialize the system locale.
     final String systemLocale = await intl_standalone.findSystemLocale();
@@ -58,6 +64,9 @@ Future<int> run(
     String getVersion() => flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
     Object firstError;
     StackTrace firstStackTrace;
+
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
+    commands().forEach(runner.addCommand);
     return await runZoned<Future<int>>(() async {
       try {
         await runner.run(args);

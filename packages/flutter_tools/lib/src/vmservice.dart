@@ -202,7 +202,7 @@ vm_service.VmService setUpVmService(
   }
 
   vmService.registerServiceCallback('flutterVersion', (Map<String, dynamic> params) async {
-    final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion();
+    final FlutterVersion version = context.get<FlutterVersion>();
     final Map<String, Object> versionJson = version.toJson();
     versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
     versionJson['engineRevisionShort'] = version.engineRevisionShort;

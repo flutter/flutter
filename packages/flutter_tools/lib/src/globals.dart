@@ -92,6 +92,7 @@ AndroidStudio get androidStudio => context.get<AndroidStudio>();
 AndroidSdk get androidSdk => context.get<AndroidSdk>();
 CocoaPods get cocoaPods => context.get<CocoaPods>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
+FlutterVersionFactory get flutterVersionFactory => context.get<FlutterVersionFactory>();
 FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
 IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();

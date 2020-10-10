@@ -710,15 +710,23 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  bool get isMaster => true;
-
-  @override
   String get repositoryUrl => null;
 
   @override
   Map<String, Object> toJson() {
     return null;
   }
+
+  @override
+  Future<String> fetchRemoteFrameworkCommitDate(String branch) async {
+    return '';
+  }
+
+  @override
+  void resetFlutterVersionFreshnessCheck() { }
+
+  @override
+  String get flutterGit => '';
 }
 
 // A test implementation of [FeatureFlags] that allows enabling without reading

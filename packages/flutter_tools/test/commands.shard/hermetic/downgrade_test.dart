@@ -12,7 +12,9 @@ import 'package:flutter_tools/src/commands/downgrade.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
+import '../../general.shard/build_system/targets/android_test.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
@@ -52,6 +54,13 @@ void main() {
       stdio: mockStdio,
       flutterVersion: flutterVersion,
       logger: bufferLogger,
+      flutterVersionFactory: FlutterVersionFactory(
+        cache: globals.cache,
+        fileSystem: fileSystem,
+        platform: platform,
+        logger: bufferLogger,
+        processManager: processManager,
+      ),
     );
     applyMocksToCommand(command);
 
@@ -78,6 +87,13 @@ void main() {
       stdio: mockStdio,
       flutterVersion: flutterVersion,
       logger: bufferLogger,
+      flutterVersionFactory: FlutterVersionFactory(
+        cache: globals.cache,
+        fileSystem: fileSystem,
+        platform: platform,
+        logger: bufferLogger,
+        processManager: processManager,
+      ),
     );
     applyMocksToCommand(command);
 
@@ -107,6 +123,13 @@ void main() {
       stdio: mockStdio,
       flutterVersion: flutterVersion,
       logger: bufferLogger,
+      flutterVersionFactory: FlutterVersionFactory(
+        cache: globals.cache,
+        fileSystem: fileSystem,
+        platform: platform,
+        logger: bufferLogger,
+        processManager: processManager,
+      ),
     );
     applyMocksToCommand(command);
 
@@ -126,6 +149,13 @@ void main() {
       stdio: mockStdio,
       flutterVersion: flutterVersion,
       logger: bufferLogger,
+      flutterVersionFactory: FlutterVersionFactory(
+        cache: globals.cache,
+        fileSystem: fileSystem,
+        platform: platform,
+        logger: bufferLogger,
+        processManager: processManager,
+      ),
     );
     applyMocksToCommand(command);
 
@@ -157,6 +187,13 @@ void main() {
       stdio: mockStdio,
       flutterVersion: flutterVersion,
       logger: bufferLogger,
+      flutterVersionFactory: FlutterVersionFactory(
+        cache: globals.cache,
+        fileSystem: fileSystem,
+        platform: platform,
+        logger: bufferLogger,
+        processManager: processManager,
+      ),
     );
     applyMocksToCommand(command);
 
@@ -191,6 +228,13 @@ void main() {
       stdio: mockStdio,
       flutterVersion: flutterVersion,
       logger: bufferLogger,
+      flutterVersionFactory: FlutterVersionFactory(
+        cache: globals.cache,
+        fileSystem: fileSystem,
+        platform: platform,
+        logger: bufferLogger,
+        processManager: processManager,
+      ),
     );
     applyMocksToCommand(command);
 
@@ -236,6 +280,13 @@ void main() {
       stdio: mockStdio,
       flutterVersion: flutterVersion,
       logger: bufferLogger,
+      flutterVersionFactory: FlutterVersionFactory(
+        cache: globals.cache,
+        fileSystem: fileSystem,
+        platform: platform,
+        logger: bufferLogger,
+        processManager: processManager,
+      ),
     );
     applyMocksToCommand(command);
 
