@@ -207,6 +207,9 @@ class DevFSException implements Exception {
   final String message;
   final dynamic error;
   final StackTrace stackTrace;
+
+  @override
+  String toString() => 'DevFSException($message, $error, $stackTrace)';
 }
 
 /// Interface responsible for syncing asset files to a development device.
@@ -399,6 +402,7 @@ class DevFS {
 
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
+  DateTime _previousCompiled;
   PackageConfig lastPackageConfig;
   File _widgetCacheOutputFile;
 
@@ -439,6 +443,20 @@ class DevFS {
     await _vmService.deleteDevFS(fsName);
     _logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
   }
+
+  /// Mark the [lastCompiled] time to the previous successful compile.
+  ///
+  /// Sometimes a hot reload will be rejected by the VM due to a change in the
+  /// structure of the code not supporting the hot reload. In these cases,
+  /// the best resolution is a hot restart. However, the resident runner
+  /// will not recognize this file as having been changed since the delta
+  /// will already have been accepted. Instead, reset the compile time so
+  /// that the last updated files are included in subsequent compilations until
+  /// a reload is accepted.
+  void resetLastCompiled() {
+    lastCompiled = _previousCompiled;
+  }
+
 
   /// If the build method of a single widget was modified, return the widget name.
   ///
@@ -520,6 +538,7 @@ class DevFS {
       return UpdateFSReport(success: false);
     }
     // Only update the last compiled time if we successfully compiled.
+    _previousCompiled = lastCompiled;
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
     sources = compilerOutput.sources;
