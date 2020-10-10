@@ -1,4 +1,4 @@
-Signature: 5631ff969ea0de3e53374d25f5256624
+Signature: 3355cd28697392bb51f37379f2504269
 
 UNUSED LICENSES:
 
@@ -6481,6 +6481,7 @@ FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/task_builder.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/canary/canary.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/cifuzz/cifuzz.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/cifuzz/cifuzz_test.go
+FILE: ../../../third_party/skia/infra/bots/task_drivers/compile_wasm_gm_tests/compile_wasm_gm_tests.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/fm_driver/fm_driver.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/g3_canary/g3_canary.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_canvas/perf_puppeteer_canvas.go
