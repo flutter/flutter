@@ -826,9 +826,7 @@ String resolveExecutablePath(
       if (type == FileSystemEntityType.link) {
         return fileSystem.link(path).resolveSymbolicLinksSync();
       }
-    } on FileSystemException catch (err, st) {
-      print(err);
-      print(st);
+    } on FileSystemException catch (err) {
       logger.printTrace('Error checking $path:$err');
       // Ignore.
     }
