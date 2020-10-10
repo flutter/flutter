@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:archive/archive.dart';
+import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -18,6 +21,7 @@ import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
 import 'features.dart';
@@ -1610,7 +1614,7 @@ class ArtifactUpdater {
         retries -= 1;
         if (retries == 0) {
           throwToolExit(
-            'Failed to download $url. Ensure you have network connectivity and then try again.',
+            'Failed to download $url. Ensure you have network connectivity and then try again.\n$err',
           );
         }
         continue;
@@ -1656,15 +1660,53 @@ class ArtifactUpdater {
   }
 
   /// Download bytes from [url], throwing non-200 responses as an exception.
+  ///
+  /// Validates that the md5 of the content bytes matches the provided
+  /// `x-goog-hash` header, if present. This header should contain and md5 hash
+  /// if the download source is Google cloud storage.
+  ///
+  /// See also:
+  ///   * https://cloud.google.com/storage/docs/xml-api/reference-headers#xgooghash
   Future<void> _download(Uri url, File file) async {
     final HttpClientRequest request = await _httpClient.getUrl(url);
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok) {
       throw Exception(response.statusCode);
     }
+
+    String md5Hash;
+    final List<String> values = response.headers['x-goog-hash'];
+    if (values != null) {
+      final String rawMd5Hash = values.firstWhere((String value) {
+        return value.startsWith('md5=');
+      }, orElse: () => null);
+      if (rawMd5Hash != null) {
+        md5Hash = rawMd5Hash.split('md5=')[1];
+      }
+    }
+    ByteConversionSink inputSink;
+    StreamController<Digest> digests;
+    if (md5Hash != null) {
+      _logger.printTrace('Content $url md5 hash: $md5Hash');
+      digests = StreamController<Digest>();
+      inputSink = md5.startChunkedConversion(digests);
+    }
+    final RandomAccessFile randomAccessFile = file.openSync(mode: FileMode.writeOnly);
     await response.forEach((List<int> chunk) {
-      file.writeAsBytesSync(chunk, mode: FileMode.append);
+      if (inputSink != null) {
+        inputSink.add(chunk);
+      }
+      randomAccessFile.writeFrom(chunk);
     });
+    randomAccessFile.closeSync();
+    if (inputSink != null) {
+      inputSink.close();
+      final Digest digest = await digests.stream.last;
+      final String rawDigest = base64.encode(digest.bytes);
+      if (rawDigest != md5Hash) {
+        throw Exception('Expected $url to have md5 checksum $md5Hash, but was $rawDigest');
+      }
+    }
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
