@@ -583,12 +583,16 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       }
 
       if (_shouldClipAtPaintOffset(paintOffset) && clipBehavior != Clip.none) {
-        context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContents, clipBehavior: clipBehavior);
+        _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContents,
+            clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
       } else {
+        _clipRectLayer = null;
         paintContents(context, offset);
       }
     }
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {

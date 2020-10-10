@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -48,8 +47,7 @@ class KeyEventSimulator {
 
   static int _getScanCode(PhysicalKeyboardKey key, String platform) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
-    int scanCode;
-    Map<int, PhysicalKeyboardKey> map;
+    late Map<int, PhysicalKeyboardKey> map;
     switch (platform) {
       case 'android':
         map = kAndroidToPhysicalKey;
@@ -67,22 +65,23 @@ class KeyEventSimulator {
         map = kWindowsToPhysicalKey;
         break;
       case 'web':
-      // web doesn't have int type code
-        return null;
+        // web doesn't have int type code
+        return -1;
     }
+    int? scanCode;
     for (final int code in map.keys) {
-      if (key.usbHidUsage == map[code].usbHidUsage) {
+      if (key.usbHidUsage == map[code]!.usbHidUsage) {
         scanCode = code;
         break;
       }
     }
-    return scanCode;
+    assert(scanCode != null, 'Physical key for $key not found in $platform scanCode map');
+    return scanCode!;
   }
 
   static int _getKeyCode(LogicalKeyboardKey key, String platform) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
-    int keyCode;
-    Map<int, LogicalKeyboardKey> map;
+    late Map<int, LogicalKeyboardKey> map;
     switch (platform) {
       case 'android':
         map = kAndroidToLogicalKey;
@@ -91,11 +90,11 @@ class KeyEventSimulator {
         map = kFuchsiaToLogicalKey;
         break;
       case 'macos':
-      // macOS doesn't do key codes, just scan codes.
-        return null;
+        // macOS doesn't do key codes, just scan codes.
+        return -1;
       case 'web':
-      // web doesn't have int type code
-        return null;
+        // web doesn't have int type code
+        return -1;
       case 'linux':
         map = kGlfwToLogicalKey;
         break;
@@ -103,26 +102,31 @@ class KeyEventSimulator {
         map = kWindowsToLogicalKey;
         break;
     }
+    int? keyCode;
     for (final int code in map.keys) {
-      if (key.keyId == map[code].keyId) {
+      if (key.keyId == map[code]!.keyId) {
         keyCode = code;
         break;
       }
     }
-    return keyCode;
+    assert(keyCode != null, 'Key $key not found in $platform keyCode map');
+    return keyCode!;
   }
   static String _getWebKeyCode(LogicalKeyboardKey key) {
+    String? result;
     for (final String code in kWebToLogicalKey.keys) {
-      if (key.keyId == kWebToLogicalKey[code].keyId) {
-        return code;
+      if (key.keyId == kWebToLogicalKey[code]!.keyId) {
+        result = code;
+        break;
       }
     }
-    return null;
+    assert(result != null, 'Key $key not found in web keyCode map');
+    return result!;
   }
 
   static PhysicalKeyboardKey _findPhysicalKey(LogicalKeyboardKey key, String platform) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
-    Map<dynamic, PhysicalKeyboardKey> map;
+    late Map<dynamic, PhysicalKeyboardKey> map;
     switch (platform) {
       case 'android':
         map = kAndroidToPhysicalKey;
@@ -143,20 +147,23 @@ class KeyEventSimulator {
         map = kWindowsToPhysicalKey;
         break;
     }
+    PhysicalKeyboardKey? result;
     for (final PhysicalKeyboardKey physicalKey in map.values) {
       if (key.debugName == physicalKey.debugName) {
-        return physicalKey;
+        result = physicalKey;
+        break;
       }
     }
-    return null;
+    assert(result != null, 'Physical key for $key not found in $platform physical key map');
+    return result!;
   }
 
   /// Get a raw key data map given a [LogicalKeyboardKey] and a platform.
   static Map<String, dynamic> getKeyData(
     LogicalKeyboardKey key, {
-    String platform,
+    required String platform,
     bool isDown = true,
-    PhysicalKeyboardKey physicalKey,
+    PhysicalKeyboardKey? physicalKey,
   }) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
 
@@ -166,10 +173,8 @@ class KeyEventSimulator {
     physicalKey ??= _findPhysicalKey(key, platform);
 
     assert(key.debugName != null);
-    final int keyCode = platform == 'macos' || platform == 'web' ? -1 : _getKeyCode(key, platform);
-    assert(platform == 'macos' || platform == 'web' || keyCode != null, 'Key $key not found in $platform keyCode map');
-    final int scanCode = platform == 'web' ? -1 : _getScanCode(physicalKey, platform);
-    assert(platform == 'web' || scanCode != null, 'Physical key for $key not found in $platform scanCode map');
+    final int keyCode = _getKeyCode(key, platform);
+    final int scanCode = _getScanCode(physicalKey, platform);
 
     final Map<String, dynamic> result = <String, dynamic>{
       'type': isDown ? 'keydown' : 'keyup',
@@ -187,7 +192,7 @@ class KeyEventSimulator {
         result['metaState'] = _getAndroidModifierFlags(key, isDown);
         break;
       case 'fuchsia':
-        result['hidUsage'] = physicalKey?.usbHidUsage ?? (key.keyId & LogicalKeyboardKey.hidPlane != 0 ? key.keyId & LogicalKeyboardKey.valueMask : null);
+        result['hidUsage'] = physicalKey.usbHidUsage;
         if (key.keyLabel.isNotEmpty) {
           result['codePoint'] = key.keyLabel.codeUnitAt(0);
         }
@@ -514,16 +519,16 @@ class KeyEventSimulator {
   /// See also:
   ///
   ///  - [simulateKeyUpEvent] to simulate the corresponding key up event.
-  static Future<void> simulateKeyDownEvent(LogicalKeyboardKey key, {String platform, PhysicalKeyboardKey physicalKey}) async {
+  static Future<void> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) async {
     return TestAsyncUtils.guard<void>(() async {
       platform ??= Platform.operatingSystem;
-      assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
+      assert(_osIsSupported(platform!), 'Platform $platform not supported for key simulation');
 
-      final Map<String, dynamic> data = getKeyData(key, platform: platform, isDown: true, physicalKey: physicalKey);
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      final Map<String, dynamic> data = getKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey);
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData data) {},
+            (ByteData? data) { },
       );
     });
   }
@@ -541,16 +546,16 @@ class KeyEventSimulator {
   /// See also:
   ///
   ///  - [simulateKeyDownEvent] to simulate the corresponding key down event.
-  static Future<void> simulateKeyUpEvent(LogicalKeyboardKey key, {String platform, PhysicalKeyboardKey physicalKey}) async {
+  static Future<void> simulateKeyUpEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) async {
     return TestAsyncUtils.guard<void>(() async {
       platform ??= Platform.operatingSystem;
-      assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
+      assert(_osIsSupported(platform!), 'Platform $platform not supported for key simulation');
 
-      final Map<String, dynamic> data = getKeyData(key, platform: platform, isDown: false, physicalKey: physicalKey);
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      final Map<String, dynamic> data = getKeyData(key, platform: platform!, isDown: false, physicalKey: physicalKey);
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData data) {},
+            (ByteData? data) { },
       );
     });
   }
@@ -574,7 +579,7 @@ class KeyEventSimulator {
 /// See also:
 ///
 ///  - [simulateKeyUpEvent] to simulate the corresponding key up event.
-Future<void> simulateKeyDownEvent(LogicalKeyboardKey key, {String platform, PhysicalKeyboardKey physicalKey}) {
+Future<void> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) {
   return KeyEventSimulator.simulateKeyDownEvent(key, platform: platform, physicalKey: physicalKey);
 }
 
@@ -594,6 +599,6 @@ Future<void> simulateKeyDownEvent(LogicalKeyboardKey key, {String platform, Phys
 /// See also:
 ///
 ///  - [simulateKeyDownEvent] to simulate the corresponding key down event.
-Future<void> simulateKeyUpEvent(LogicalKeyboardKey key, {String platform, PhysicalKeyboardKey physicalKey}) {
+Future<void> simulateKeyUpEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) {
   return KeyEventSimulator.simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
 }

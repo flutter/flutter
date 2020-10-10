@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -169,7 +167,7 @@ void main() {
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.macos.managedDirectory.childFile('GeneratedPluginRegistrant.swift'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem(),
+        FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
         FlutterProjectFactory: () => FlutterProjectFactory(
@@ -183,7 +181,7 @@ void main() {
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.macos.generatedXcodePropertiesFile);
       }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem(),
+        FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
         FlutterProjectFactory: () => FlutterProjectFactory(
@@ -198,7 +196,7 @@ void main() {
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem(),
+        FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
         FlutterProjectFactory: () => FlutterProjectFactory(
@@ -213,7 +211,7 @@ void main() {
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem(),
+        FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
         FlutterProjectFactory: () => FlutterProjectFactory(
@@ -296,7 +294,7 @@ void main() {
       MemoryFileSystem fs;
       FlutterProjectFactory flutterProjectFactory;
       setUp(() {
-        fs = MemoryFileSystem();
+        fs = MemoryFileSystem.test();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
         flutterProjectFactory = FlutterProjectFactory(
           logger: logger,
@@ -334,7 +332,7 @@ apply plugin: 'kotlin-android'
       MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
       FlutterProjectFactory flutterProjectFactory;
       setUp(() {
-        fs = MemoryFileSystem();
+        fs = MemoryFileSystem.test();
         mockPlistUtils = MockPlistUtils();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
         flutterProjectFactory = FlutterProjectFactory(
@@ -498,7 +496,7 @@ apply plugin: 'kotlin-android'
       MemoryFileSystem fs;
       MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
       setUp(() {
-        fs = MemoryFileSystem();
+        fs = MemoryFileSystem.test();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
       });
 

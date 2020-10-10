@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -415,6 +414,7 @@ void _defineTests() {
             selected: true,
             hidden: true,
             button: true,
+            slider: true,
             link: true,
             textField: true,
             readOnly: true,
@@ -465,6 +465,7 @@ void _defineTests() {
             selected: true,
             hidden: true,
             button: true,
+            slider: true,
             link: true,
             textField: true,
             readOnly: true,

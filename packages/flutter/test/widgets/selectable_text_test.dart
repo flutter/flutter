@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -2444,7 +2442,7 @@ void main() {
       );
 
       // But don't trigger the toolbar.
-      expect(find.byType(FlatButton), findsNothing);
+      expect(find.byType(TextButton), findsNothing);
     },
   );
 
@@ -2566,7 +2564,7 @@ void main() {
       );
 
       // Selected text shows 2 toolbar buttons: copy, select all
-      expect(find.byType(FlatButton), findsNWidgets(2));
+      expect(find.byType(TextButton), findsNWidgets(2));
     },
   );
 
@@ -2615,7 +2613,7 @@ void main() {
       );
 
       // Selected text shows 2 toolbar buttons: copy, select all
-      expect(find.byType(FlatButton), findsNWidgets(2));
+      expect(find.byType(TextButton), findsNWidgets(2));
     },
   );
 
@@ -2771,7 +2769,7 @@ void main() {
       );
 
       // Collapsed toolbar shows 2 buttons: copy, select all
-      expect(find.byType(FlatButton), findsNWidgets(2));
+      expect(find.byType(TextButton), findsNWidgets(2));
     },
   );
 
@@ -3177,7 +3175,7 @@ void main() {
 
     await gesture.up();
     await tester.pump();
-    expect(find.byType(FlatButton), findsNothing);
+    expect(find.byType(TextButton), findsNothing);
   });
 
   testWidgets('force press selects word', (WidgetTester tester) async {

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -738,7 +736,7 @@ class RawKeyboard {
 }
 
 @immutable
-class _ModifierSidePair extends Object {
+class _ModifierSidePair {
   const _ModifierSidePair(this.modifier, this.side);
 
   final ModifierKey modifier;

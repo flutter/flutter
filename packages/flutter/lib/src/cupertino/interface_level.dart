@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 
 import '../widgets/framework.dart';
@@ -41,9 +39,9 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   /// Creates a [CupertinoUserInterfaceLevel] to change descendant Cupertino widget's
   /// visual level.
   const CupertinoUserInterfaceLevel({
-    Key key,
-    @required CupertinoUserInterfaceLevelData data,
-    Widget child,
+    Key? key,
+    required CupertinoUserInterfaceLevelData data,
+    required Widget child,
   }) : assert(data != null),
       _data = data,
       super(key: key, child: child);
@@ -59,10 +57,10 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   /// You can use this function to query the user interface elevation level within
   /// the given [BuildContext]. When that information changes, your widget will
   /// be scheduled to be rebuilt, keeping your widget up-to-date.
-  static CupertinoUserInterfaceLevelData of(BuildContext context, { bool nullOk = false }) {
+  static CupertinoUserInterfaceLevelData? of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
-    final CupertinoUserInterfaceLevel query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
+    final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
     if (query != null)
       return query._data;
     if (nullOk)

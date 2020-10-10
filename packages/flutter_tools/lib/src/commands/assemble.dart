@@ -49,7 +49,6 @@ const List<Target> _kDefaultTargets = <Target>[
   CopyFlutterBundle(),
   // Android targets,
   DebugAndroidApplication(),
-  FastStartAndroidApplication(),
   ProfileAndroidApplication(),
   // Android ABI specific AOT rules.
   androidArmProfileBundle,
@@ -114,7 +113,7 @@ class AssembleCommand extends FlutterCommand {
   }
 
   @override
-  String get description => 'Assemble and build flutter resources.';
+  String get description => 'Assemble and build Flutter resources.';
 
   @override
   String get name => 'assemble';

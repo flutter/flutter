@@ -245,7 +245,12 @@ class Router<T> extends StatefulWidget {
     this.routeInformationParser,
     required this.routerDelegate,
     this.backButtonDispatcher,
-  })  : assert(routeInformationProvider == null || routeInformationParser != null),
+  })  : assert(
+          (routeInformationProvider == null) == (routeInformationParser == null),
+          'You must provide both routeInformationProvider and routeInformationParser '
+          'if this router parses route information. Otheriwse, they should both '
+          'be null.'
+        ),
         assert(routerDelegate != null),
         super(key: key);
 
@@ -976,8 +981,8 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
 ///
 /// This delegate is used when the [Router] widget is first built with initial
 /// route information from [Router.routeInformationProvider] and any subsequent
-/// new route notifications from it. The [parseRouteInformation] widget calls
-/// the [parseRouteInformation] with the route information.
+/// new route notifications from it. The [Router] widget calls the [parseRouteInformation]
+/// with the route information from [Router.routeInformationProvider].
 abstract class RouteInformationParser<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

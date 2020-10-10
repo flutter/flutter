@@ -69,13 +69,13 @@ class UserMessages {
   String androidBadSdkDir(String envKey, String homeDir) =>
       '$envKey = $homeDir\n'
       'but Android SDK not found at this location.';
-  String androidMissingSdkInstructions(String envKey, Platform platform) =>
+  String androidMissingSdkInstructions(Platform platform) =>
       'Unable to locate Android SDK.\n'
       'Install Android Studio from: https://developer.android.com/studio/index.html\n'
       'On first launch it will assist you in installing the Android SDK components.\n'
       '(or visit ${_androidSdkInstallUrl(platform)} for detailed instructions).\n'
-      'If the Android SDK has been installed to a custom location, set $envKey to that location.\n'
-      'You may also want to add it to your PATH environment variable.\n';
+      'If the Android SDK has been installed to a custom location, please use\n'
+      '`flutter config --android-sdk` to update to that location.\n';
   String androidSdkLocation(String directory) => 'Android SDK at $directory';
   String androidSdkPlatformToolsVersion(String platform, String tools) =>
       'Platform $platform, build-tools $tools';
@@ -264,8 +264,7 @@ class UserMessages {
   String get flutterNoConnectedDevices => 'No connected devices.';
   String get flutterNoPubspec =>
       'Error: No pubspec.yaml file found.\n'
-      'This command should be run from the root of your Flutter project.\n'
-      'Do not run this command from the root of your git clone of Flutter.';
+      'This command should be run from the root of your Flutter project.';
   String flutterTargetFileMissing(String path) => 'Target file "$path" not found.';
   String get flutterBasePatchFlagsExclusive => 'Error: Only one of --baseline, --patch is allowed.';
   String get flutterBaselineRequiresTraceFile => 'Error: --baseline requires --compilation-trace-file to be specified.';

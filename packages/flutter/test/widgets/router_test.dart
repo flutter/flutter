@@ -118,6 +118,50 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
+  testWidgets('Router throw when passes only routeInformationProvider', (WidgetTester tester) async {
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    try {
+      Router<RouteInformation>(
+        routeInformationProvider: provider,
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext context, RouteInformation information) {
+            return Text(information.location);
+          },
+        ),
+      );
+    } on AssertionError catch(e) {
+      expect(
+        e.message,
+        'You must provide both routeInformationProvider and '
+        'routeInformationParser if this router parses route information. '
+        'Otheriwse, they should both be null.'
+      );
+    }
+  });
+
+  testWidgets('Router throw when passes only routeInformationParser', (WidgetTester tester) async {
+    try {
+      Router<RouteInformation>(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext context, RouteInformation information) {
+            return Text(information.location);
+          },
+        ),
+      );
+    } on AssertionError catch(e) {
+      expect(
+        e.message,
+        'You must provide both routeInformationProvider and '
+        'routeInformationParser if this router parses route information. '
+        'Otheriwse, they should both be null.'
+      );
+    }
+  });
+
   testWidgets('PopNavigatorRouterDelegateMixin works', (WidgetTester tester) async {
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
     provider.value = const RouteInformation(
@@ -663,12 +707,12 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
       pages: <Page<void>>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        MaterialPage<void>(
-          builder: (BuildContext context) => const Text('base'),
+        const MaterialPage<void>(
+          child: Text('base'),
         ),
         MaterialPage<void>(
           key: ValueKey<String>(routeInformation?.location),
-          builder: (BuildContext context) => builder(context, routeInformation),
+          child: builder(context, routeInformation),
         )
       ],
     );

@@ -8,6 +8,7 @@ import 'dart:ui' show lerpDouble, hashValues;
 import 'package:flutter/foundation.dart';
 
 import 'box.dart';
+import 'layer.dart';
 import 'object.dart';
 
 /// An immutable 2D, axis-aligned, floating-point rectangle whose coordinates
@@ -268,6 +269,24 @@ enum StackFit {
   passthrough,
 }
 
+/// Whether overflowing children should be clipped, or their overflow be
+/// visible.
+///
+/// Deprecated. Use [Stack.clipBehavior] instead.
+@Deprecated(
+  'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
+  'This feature was deprecated after v1.22.0-12.0.pre.'
+)
+enum Overflow {
+  /// Overflowing children will be visible.
+  ///
+  /// The visible overflow area will not accept hit testing.
+  visible,
+
+  /// Overflowing children will be clipped to the bounds of their parent.
+  clip,
+}
+
 /// Implements the stack layout algorithm.
 ///
 /// In a stack layout, the children are positioned on top of each other in the
@@ -420,7 +439,7 @@ class RenderStack extends RenderBox
     double extent = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       if (!childParentData.isPositioned)
         extent = math.max(extent, mainChildSizeGetter(child));
       assert(child.parentData == childParentData);
@@ -538,7 +557,7 @@ class RenderStack extends RenderBox
 
     RenderBox? child = firstChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
 
       if (!childParentData.isPositioned) {
         hasNonPositionedChildren = true;
@@ -565,7 +584,7 @@ class RenderStack extends RenderBox
 
     child = firstChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
 
       if (!childParentData.isPositioned) {
         childParentData.offset = _resolvedAlignment!.alongOffset(size - child.size as Offset);
@@ -595,11 +614,15 @@ class RenderStack extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (clipBehavior != Clip.none && _hasVisualOverflow) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack, clipBehavior: clipBehavior);
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack,
+          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
     } else {
+      _clipRectLayer = null;
       paintStack(context, offset);
     }
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
@@ -656,7 +679,7 @@ class RenderIndexedStack extends RenderStack {
     RenderBox? child = firstChild;
     int i = 0;
     while (child != null && i < index!) {
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       child = childParentData.nextSibling;
       i += 1;
     }
@@ -671,7 +694,7 @@ class RenderIndexedStack extends RenderStack {
       return false;
     assert(position != null);
     final RenderBox child = _childAtIndex();
-    final StackParentData childParentData = child.parentData as StackParentData;
+    final StackParentData childParentData = child.parentData! as StackParentData;
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
@@ -687,7 +710,7 @@ class RenderIndexedStack extends RenderStack {
     if (firstChild == null || index == null)
       return;
     final RenderBox child = _childAtIndex();
-    final StackParentData childParentData = child.parentData as StackParentData;
+    final StackParentData childParentData = child.parentData! as StackParentData;
     context.paintChild(child, childParentData.offset + offset);
   }
 
