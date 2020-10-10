@@ -78,24 +78,31 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// will still be returned in the `response` field of the result JSON along
 /// with an `isError` boolean.
 ///
-/// The `finders` parameter are used to add custom finders, as in the following example.
+/// The `finders` and `commands` parameters are optional and used to add custom 
+/// finders or commands, as in the following example.
 ///
 /// ```dart main
 /// void main() {
-///   enableFlutterDriverExtension(finders: <FinderExtension>[ SomeFinderExtension() ]);
+///   enableFlutterDriverExtension(
+///     finders: <FinderExtension>[ SomeFinderExtension() ], 
+///     commands: <CommandExtension>[ SomeCommandExtension() ],
+///   );
 ///
 ///   app.main();
 /// }
 /// ```
+/// 
+/// Note: SomeFinder and SomeFinderExtension should be placed in different files 
+/// to avoid `dart:ui` import issue.
 ///
 /// ```dart
-/// class Some extends SerializableFinder {
-///   const Some(this.title);
+/// class SomeFinder extends SerializableFinder {
+///   const SomeFinder(this.title);
 ///
 ///   final String title;
 ///
 ///   @override
-///   String get finderType => 'Some';
+///   String get finderType => 'SomeFinder';
 ///
 ///   @override
 ///   Map<String, String> serialize() => super.serialize()..addAll(<String, String>{
@@ -107,14 +114,14 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// ```dart
 /// class SomeFinderExtension extends FinderExtension {
 ///
-///  String get finderType => 'Some';
+///  String get finderType => 'SomeFinder';
 ///
 ///  SerializableFinder deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory) {
-///    return Some(json['title']);
+///    return SomeFinder(json['title']);
 ///  }
 ///
 ///  Finder createFinder(SerializableFinder finder, CreateFinderFactory finderFactory) {
-///    Some someFinder = finder as Some;
+///    Some someFinder = finder as SomeFinder;
 ///
 ///    return find.byElementPredicate((Element element) {
 ///      final Widget widget = element.widget;
@@ -124,6 +131,74 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 ///      return false;
 ///    });
 ///  }
+/// }
+/// ```
+/// 
+/// Note: SomeCommand, SomeResult and SomeCommandExtension should be placed in 
+/// different files to avoid `dart:ui` import issue.
+/// 
+/// ```dart
+/// class SomeCommand extends CommandWithTarget {
+///  SomeCommand(SerializableFinder finder, this.times, {Duration? timeout})
+///      : super(finder, timeout: timeout);
+///
+///  SomeCommand.deserialize(Map<String, String> json, DeserializeFinderFactory finderFactory)
+///      : times = int.parse(json['times']!),
+///        super.deserialize(json, finderFactory);
+///
+///  @override
+///  Map<String, String> serialize() {
+///    return super.serialize()..addAll(<String, String>{'times': '$times'});
+///  }
+///
+///  @override
+///  String get kind => 'SomeCommand';
+///
+///  final int times;
+///}
+///```
+///
+/// ```dart
+/// class SomeCommandResult extends Result {
+///   const SomeCommandResult(this.resultParam);
+/// 
+///   final String resultParam;
+/// 
+///   @override
+///   Map<String, dynamic> toJson() {
+///     return <String, dynamic>{
+///       'resultParam': resultParam,
+///     };
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// class SomeCommandExtension extends CommandExtension {
+///   @override
+///   String get commandKind => 'SomeCommand';
+/// 
+///   @override
+///   Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
+///     final SomeCommand someCommand = command as SomeCommand;
+///     
+///     // Submit known [Command]s:
+///     for (int i = 0; i < someCommand.times; i++) {
+///       await handlerFactory.handleCommand(Tap(someCommand.finder), prober, finderFactory);
+///     }
+/// 
+///     // Alternatively, use [WidgetController]:
+///     for (int i = 0; i < stubCommand.times; i++) {
+///       await prober.tap(finderFactory.createFinder(stubCommand.finder));
+///     }
+/// 
+///     return const SomeCommandResult('foo bar');
+///   }
+/// 
+///   @override
+///   Command deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory, DeserializeCommandFactory commandFactory) {
+///     return SomeCommand.deserialize(params, finderFactory);
+///   }
 /// }
 /// ```
 ///
