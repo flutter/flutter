@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
-import '../../general.shard/build_system/targets/android_test.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
