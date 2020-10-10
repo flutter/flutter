@@ -10,13 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'stub_command.dart';
 
-class StubCommandExtension extends CommandExtension {
+class StubNestedCommandExtension extends CommandExtension {
   @override
-  String get commandKind => 'StubCommand';
+  String get commandKind => 'StubNestedCommand';
 
   @override
   Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
-    final StubCommand stubCommand = command as StubCommand;
+    final StubNestedCommand stubCommand = command as StubNestedCommand;
     for (int i = 0; i < stubCommand.times; i++) {
       await handlerFactory.handleCommand(Tap(stubCommand.finder), prober, finderFactory);
     }
@@ -25,6 +25,25 @@ class StubCommandExtension extends CommandExtension {
 
   @override
   Command deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory, DeserializeCommandFactory commandFactory) {
-    return StubCommand.deserialize(params, finderFactory);
+    return StubNestedCommand.deserialize(params, finderFactory);
+  }
+}
+
+class StubProberCommandExtension extends CommandExtension {
+  @override
+  String get commandKind => 'StubProberCommand';
+
+  @override
+  Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
+    final StubProberCommand stubCommand = command as StubProberCommand;
+    for (int i = 0; i < stubCommand.times; i++) {
+      await prober.tap(finderFactory.createFinder(stubCommand.finder));
+    }
+    return const StubCommandResult('stub response');
+  }
+
+  @override
+  Command deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory, DeserializeCommandFactory commandFactory) {
+    return StubProberCommand.deserialize(params, finderFactory);
   }
 }

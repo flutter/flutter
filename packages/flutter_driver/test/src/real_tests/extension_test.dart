@@ -1014,7 +1014,7 @@ void main() {
       );
 
       Future<Map<String, dynamic>> invokeCommand(SerializableFinder finder, int times) async {
-        final Map<String, String> arguments = StubCommand(finder, times).serialize();
+        final Map<String, String> arguments = StubNestedCommand(finder, times).serialize();
         return await driverExtension.call(arguments);
       }
 
@@ -1023,7 +1023,7 @@ void main() {
       final Map<String, dynamic> result = await invokeCommand(ByValueKey('Button'), 10);
       expect(result['isError'], true);
       expect(result['response'] is String, true);
-      expect(result['response'] as String, contains('Unsupported command kind StubCommand'));
+      expect(result['response'] as String, contains('Unsupported command kind StubNestedCommand'));
     });
 
     testWidgets('nested command', (WidgetTester tester) async {
@@ -1031,13 +1031,38 @@ void main() {
         (String arg) async => '',
         true,
         commands: <CommandExtension>[
-          StubCommandExtension(),
+          StubNestedCommandExtension(),
         ],
       );
 
       Future<StubCommandResult> invokeCommand(SerializableFinder finder, int times) async {
         await driverExtension.call(const SetFrameSync(false).serialize()); // disable frame sync for test to avoid lock
-        final Map<String, String> arguments = StubCommand(finder, times, timeout: const Duration(seconds: 1)).serialize();
+        final Map<String, String> arguments = StubNestedCommand(finder, times, timeout: const Duration(seconds: 1)).serialize();
+        final Map<String, dynamic> response = await driverExtension.call(arguments);
+        final Map<String, dynamic> commandResponse = response['response'] as Map<String, dynamic>;
+        return StubCommandResult(commandResponse['resultParam'] as String);
+      }
+
+      await tester.pumpWidget(debugTree);
+
+      const int times = 10;
+      final StubCommandResult result = await invokeCommand(ByValueKey('Button'), times);
+      expect(result.resultParam, 'stub response');
+      verify(mockCallback.call()).called(times);
+    });
+
+    testWidgets('prober command', (WidgetTester tester) async {
+      final FlutterDriverExtension driverExtension = FlutterDriverExtension(
+        (String arg) async => '',
+        true,
+        commands: <CommandExtension>[
+          StubProberCommandExtension(),
+        ],
+      );
+
+      Future<StubCommandResult> invokeCommand(SerializableFinder finder, int times) async {
+        await driverExtension.call(const SetFrameSync(false).serialize()); // disable frame sync for test to avoid lock
+        final Map<String, String> arguments = StubProberCommand(finder, times, timeout: const Duration(seconds: 1)).serialize();
         final Map<String, dynamic> response = await driverExtension.call(arguments);
         final Map<String, dynamic> commandResponse = response['response'] as Map<String, dynamic>;
         return StubCommandResult(commandResponse['resultParam'] as String);
