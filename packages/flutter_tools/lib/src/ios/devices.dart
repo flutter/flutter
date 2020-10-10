@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -21,7 +22,6 @@ import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
-import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -212,6 +212,9 @@ class IOSDevice extends Device {
 
   DevicePortForwarder _portForwarder;
 
+  @visibleForTesting
+  IOSDeployDebugger iosDeployDebugger;
+
   @override
   Future<bool> get isLocalEmulator async => false;
 
@@ -310,6 +313,7 @@ class IOSDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     @visibleForTesting Duration fallbackPollingDelay,
+    @visibleForTesting Duration fallbackThrottleTimeout,
     String userIdentifier,
   }) async {
     String packageId;
@@ -364,6 +368,7 @@ class IOSDevice extends Device {
       '--enable-service-port-fallback',
       '--disable-service-auth-codes',
       '--observatory-port=$assumedObservatoryPort',
+      if (debuggingOptions.disablePortPublication) '--disable-observatory-publication',
       if (debuggingOptions.startPaused) '--start-paused',
       if (dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
       if (debuggingOptions.useTestFonts) '--use-test-fonts',
@@ -394,22 +399,45 @@ class IOSDevice extends Device {
         timeout: timeoutConfiguration.slowOperation);
     try {
       ProtocolDiscovery observatoryDiscovery;
+      int installationResult = 1;
       if (debuggingOptions.debuggingEnabled) {
         _logger.printTrace('Debugging is enabled, connecting to observatory');
+        final DeviceLogReader deviceLogReader = getLogReader(app: package);
+
+        // If the device supports syslog reading, prefer launching the app without
+        // attaching the debugger to avoid the overhead of the unnecessary extra running process.
+        if (majorSdkVersion >= IOSDeviceLogReader.minimumUniversalLoggingSdkVersion) {
+          iosDeployDebugger = _iosDeploy.prepareDebuggerForLaunch(
+            deviceId: id,
+            bundlePath: bundle.path,
+            launchArguments: launchArguments,
+            interfaceType: interfaceType,
+          );
+
+          if (deviceLogReader is IOSDeviceLogReader) {
+            deviceLogReader.debuggerStream = iosDeployDebugger;
+          }
+        }
         observatoryDiscovery = ProtocolDiscovery.observatory(
-          getLogReader(app: package),
+          deviceLogReader,
           portForwarder: portForwarder,
+          throttleDuration: fallbackPollingDelay,
+          throttleTimeout: fallbackThrottleTimeout ?? const Duration(seconds: 5),
           hostPort: debuggingOptions.hostVmServicePort,
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
         );
       }
-      final int installationResult = await _iosDeploy.runApp(
-        deviceId: id,
-        bundlePath: bundle.path,
-        launchArguments: launchArguments,
-        interfaceType: interfaceType,
-      );
+      if (iosDeployDebugger == null) {
+        installationResult = await _iosDeploy.launchApp(
+          deviceId: id,
+          bundlePath: bundle.path,
+          launchArguments: launchArguments,
+          interfaceType: interfaceType,
+        );
+      } else {
+        installationResult = await iosDeployDebugger.launchAndAttach() ? 0 : 1;
+      }
       if (installationResult != 0) {
         _logger.printError('Could not run ${bundle.path} on $id.');
         _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
@@ -425,7 +453,6 @@ class IOSDevice extends Device {
       _logger.printTrace('Application launched on the device. Waiting for observatory port.');
       final FallbackDiscovery fallbackDiscovery = FallbackDiscovery(
         logger: _logger,
-        mDnsObservatoryDiscovery: MDnsObservatoryDiscovery.instance,
         portForwarder: portForwarder,
         protocolDiscovery: observatoryDiscovery,
         flutterUsage: globals.flutterUsage,
@@ -457,7 +484,11 @@ class IOSDevice extends Device {
     IOSApp app, {
     String userIdentifier,
   }) async {
-    // Currently we don't have a way to stop an app running on iOS.
+    // If the debugger is not attached, killing the ios-deploy process won't stop the app.
+    if (iosDeployDebugger!= null && iosDeployDebugger.debuggerAttached) {
+      // Avoid null.
+      return iosDeployDebugger?.exit() == true;
+    }
     return false;
   }
 
@@ -647,6 +678,13 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // Matches a syslog line from any app.
   RegExp _anyLineRegex;
 
+  // Logging from native code/Flutter engine is prefixed by timestamp and process metadata:
+  // 2020-09-15 19:15:10.931434-0700 Runner[541:226276] Did finish launching.
+  // 2020-09-15 19:15:10.931434-0700 Runner[541:226276] [Category] Did finish launching.
+  //
+  // Logging from the dart code has no prefixing metadata.
+  final RegExp _debuggerLoggingRegex = RegExp(r'^\S* \S* \S*\[[0-9:]*] (.*)');
+
   StreamController<String> _linesController;
   List<StreamSubscription<void>> _loggingSubscriptions;
 
@@ -663,13 +701,17 @@ class IOSDeviceLogReader extends DeviceLogReader {
     _connectedVMService = connectedVmService;
   }
 
-  static const int _minimumUniversalLoggingSdkVersion = 13;
+  static const int minimumUniversalLoggingSdkVersion = 13;
 
   Future<void> _listenToUnifiedLoggingEvents(vm_service.VmService connectedVmService) async {
-    if (_majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
+    if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
       return;
     }
     try {
+      // The VM service will not publish logging events unless the debug stream is being listened to.
+      // Listen to this stream as a side effect.
+      unawaited(connectedVmService.streamListen('Debug'));
+
       await Future.wait(<Future<void>>[
         connectedVmService.streamListen(vm_service.EventStreams.kStdout),
         connectedVmService.streamListen(vm_service.EventStreams.kStderr),
@@ -679,6 +721,10 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
 
     void logMessage(vm_service.Event event) {
+      if (_iosDeployDebugger != null && _iosDeployDebugger.debuggerAttached) {
+        // Prefer the more complete logs from the  attached debugger.
+        return;
+      }
       final String message = processVmServiceMessage(event);
       if (message.isNotEmpty) {
         _linesController.add(message);
@@ -691,9 +737,29 @@ class IOSDeviceLogReader extends DeviceLogReader {
     ]);
   }
 
+  /// Log reader will listen to [debugger.logLines] and will detach debugger on dispose.
+  set debuggerStream(IOSDeployDebugger debugger) {
+    // Logging is gathered from syslog on iOS 13 and earlier.
+    if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
+      return;
+    }
+    _iosDeployDebugger = debugger;
+    // Add the debugger logs to the controller created on initialization.
+    _loggingSubscriptions.add(debugger.logLines.listen(
+      (String line) => _linesController.add(_debuggerLineHandler(line)),
+      onError: _linesController.addError,
+      onDone: _linesController.close,
+      cancelOnError: true,
+    ));
+  }
+  IOSDeployDebugger _iosDeployDebugger;
+
+  // Strip off the logging metadata (leave the category), or just echo the line.
+  String _debuggerLineHandler(String line) => _debuggerLoggingRegex?.firstMatch(line)?.group(1) ?? line;
+
   void _listenToSysLog() {
     // syslog is not written on iOS 13+.
-    if (_majorSdkVersion >= _minimumUniversalLoggingSdkVersion) {
+    if (_majorSdkVersion >= minimumUniversalLoggingSdkVersion) {
       return;
     }
     _iMobileDevice.startLogger(_deviceId).then<void>((Process process) {
@@ -750,6 +816,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       loggingSubscription.cancel();
     }
     _idevicesyslogProcess?.kill();
+    _iosDeployDebugger?.detach();
   }
 }
 

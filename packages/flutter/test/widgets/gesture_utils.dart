@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,6 +9,5 @@ Future<void> scrollAt(Offset position, WidgetTester tester, [Offset offset = con
   final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
   // Create a hover event so that |testPointer| has a location when generating the scroll.
   testPointer.hover(position);
-  final HitTestResult result = tester.hitTestOnBinding(position);
-  return tester.sendEventToBinding(testPointer.scroll(offset), result);
+  return tester.sendEventToBinding(testPointer.scroll(offset));
 }

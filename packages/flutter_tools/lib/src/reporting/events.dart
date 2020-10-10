@@ -40,6 +40,7 @@ class HotEvent extends UsageEvent {
     @required this.emulator,
     @required this.fullRestart,
     @required this.nullSafety,
+    @required this.fastReassemble,
     this.reason,
     this.finalLibraryCount,
     this.syncedLibraryCount,
@@ -57,6 +58,7 @@ class HotEvent extends UsageEvent {
   final bool emulator;
   final bool fullRestart;
   final bool nullSafety;
+  final bool fastReassemble;
   final int finalLibraryCount;
   final int syncedLibraryCount;
   final int syncedClassesCount;
@@ -93,6 +95,8 @@ class HotEvent extends UsageEvent {
         CustomDimensions.hotEventOverallTimeInMs: overallTimeInMs.toString(),
       if (nullSafety != null)
         CustomDimensions.nullSafety: nullSafety.toString(),
+      if (fastReassemble != null)
+        CustomDimensions.fastReassemble: fastReassemble.toString(),
     });
     flutterUsage.sendEvent(category, parameter, parameters: parameters);
   }

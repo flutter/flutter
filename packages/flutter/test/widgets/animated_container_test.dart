@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -47,7 +45,7 @@ void main() {
       ),
     );
 
-    final RenderDecoratedBox box = key.currentContext.findRenderObject() as RenderDecoratedBox;
+    final RenderDecoratedBox box = key.currentContext!.findRenderObject()! as RenderDecoratedBox;
     actualDecoration = box.decoration as BoxDecoration;
     expect(actualDecoration.color, equals(decorationA.color));
 
@@ -59,7 +57,7 @@ void main() {
       ),
     );
 
-    expect(key.currentContext.findRenderObject(), equals(box));
+    expect(key.currentContext!.findRenderObject(), equals(box));
     actualDecoration = box.decoration as BoxDecoration;
     expect(actualDecoration.color, equals(decorationA.color));
 
@@ -285,5 +283,75 @@ void main() {
 
     expect(text.size.width, equals(200.0));
     expect(text.size.height, equals(100.0));
+  });
+
+  testWidgets('AnimatedContainer sets transformAlignment', (WidgetTester tester) async {
+    final Key target = UniqueKey();
+
+    await tester.pumpWidget(
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            child: SizedBox(key: target, width: 100.0, height: 200.0),
+            transform: Matrix4.diagonal3Values(0.5, 0.5, 1),
+            transformAlignment: Alignment.topLeft,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(target)), const Size(100.0, 200.0));
+    expect(tester.getTopLeft(find.byKey(target)), const Offset(350.0, 200.0));
+
+    await tester.pumpWidget(
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            child: SizedBox(key: target, width: 100.0, height: 200.0),
+            transform: Matrix4.diagonal3Values(0.5, 0.5, 1),
+            transformAlignment: Alignment.bottomRight,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(target)), const Size(100.0, 200.0));
+    expect(tester.getTopLeft(find.byKey(target)), const Offset(350.0, 200.0));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(tester.getSize(find.byKey(target)), const Size(100.0, 200.0));
+    expect(tester.getTopLeft(find.byKey(target)), const Offset(375.0, 250.0));
+
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(tester.getSize(find.byKey(target)), const Size(100.0, 200.0));
+    expect(tester.getTopLeft(find.byKey(target)), const Offset(400.0, 300.0));
+  });
+
+  testWidgets('AnimatedContainer sets clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      AnimatedContainer(
+        decoration: const BoxDecoration(
+          color: Color(0xFFED1D7F),
+        ),
+        duration: const Duration(milliseconds: 200),
+      )
+    );
+    expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.none);
+    await tester.pumpWidget(
+      AnimatedContainer(
+        decoration: const BoxDecoration(
+          color: Color(0xFFED1D7F),
+        ),
+        duration: const Duration(milliseconds: 200),
+        clipBehavior: Clip.antiAlias,
+      )
+    );
+    expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.antiAlias);
   });
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -38,6 +36,13 @@ class BuildWebCommand extends BuildSubCommand {
       negatable: false,
       help: 'Disable dynamic generation of code in the generated output. '
         'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).'
+    );
+    argParser.addFlag(
+      'source-maps',
+      defaultsTo: false,
+      help: 'Whether to generate a sourcemap file. These can be used by browsers '
+      'To view and debug the original source code of a compiled and minified Dart '
+      'application. Defaults to false (no sourcemaps produced).'
     );
     argParser.addOption('pwa-strategy',
       defaultsTo: kOfflineFirst,
@@ -90,6 +95,7 @@ class BuildWebCommand extends BuildSubCommand {
       boolArg('web-initialize-platform'),
       boolArg('csp'),
       stringArg('pwa-strategy'),
+      boolArg('source-maps')
     );
     return FlutterCommandResult.success();
   }

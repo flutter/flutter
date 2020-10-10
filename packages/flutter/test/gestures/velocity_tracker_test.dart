@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'velocity_tracker_data.dart';
@@ -38,7 +36,7 @@ void main() {
   ];
 
   test('Velocity tracker gives expected results', () {
-    final VelocityTracker tracker = VelocityTracker(PointerDeviceKind.touch);
+    final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     int i = 0;
     for (final PointerEvent event in velocityEventData) {
       if (event is PointerDownEvent || event is PointerMoveEvent)
@@ -64,7 +62,7 @@ void main() {
 
   test('Interrupted velocity estimation', () {
     // Regression test for https://github.com/flutter/flutter/pull/7510
-    final VelocityTracker tracker = VelocityTracker(PointerDeviceKind.touch);
+    final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     for (final PointerEvent event in interruptedVelocityEventData) {
       if (event is PointerDownEvent || event is PointerMoveEvent)
         tracker.addPosition(event.timeStamp, event.position);
@@ -75,13 +73,13 @@ void main() {
   });
 
   test('No data velocity estimation', () {
-    final VelocityTracker tracker = VelocityTracker(PointerDeviceKind.touch);
+    final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     expect(tracker.getVelocity(), Velocity.zero);
   });
 
   test('FreeScrollStartVelocityTracker.getVelocity throws when no points', () {
     final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
-    AssertionError exception;
+    AssertionError? exception;
     try {
       tracker.getVelocity();
     } on AssertionError catch (e) {
@@ -93,7 +91,7 @@ void main() {
 
   test('FreeScrollStartVelocityTracker.getVelocity throws when the new point precedes the previous point', () {
     final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
-    AssertionError exception;
+    AssertionError? exception;
 
     tracker.addPosition(const Duration(hours: 1), Offset.zero);
     try {
@@ -112,7 +110,7 @@ void main() {
     Duration time = Duration.zero;
     const Offset positionDelta = Offset(0, -1);
     const Duration durationDelta = Duration(seconds: 1);
-    AssertionError exception;
+    AssertionError? exception;
 
     for (int i = 0; i < 5; i+=1) {
       position += positionDelta;

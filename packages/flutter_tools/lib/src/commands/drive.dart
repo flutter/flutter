@@ -50,9 +50,16 @@ import 'run.dart';
 /// successful the exit code will be `0`. Otherwise, you will see a non-zero
 /// exit code.
 class DriveCommand extends RunCommandBase {
-  DriveCommand() {
+  DriveCommand({
+    bool verboseHelp = false,
+  }) {
     requiresPubspecYaml();
+    addEnableExperimentation(hide: !verboseHelp);
 
+    // By default, the drive app should not publish the VM service port over mDNS
+    // to prevent a local network permission dialog on iOS 14+,
+    // which cannot be accepted or dismissed in a CI environment.
+    addPublishPort(enabledByDefault: false, verboseHelp: verboseHelp);
     argParser
       ..addFlag('keep-app-running',
         defaultsTo: null,
@@ -128,7 +135,7 @@ class DriveCommand extends RunCommandBase {
   final String name = 'drive';
 
   @override
-  final String description = 'Runs Flutter Driver tests for the current project.';
+  final String description = 'Run integration tests for the project on an attached device or emulator.';
 
   @override
   final List<String> aliases = <String>['driver'];
@@ -199,6 +206,7 @@ class DriveCommand extends RunCommandBase {
           flutterProject: flutterProject,
           target: targetFile,
           buildInfo: buildInfo,
+          platform: globals.platform,
         );
         residentRunner = webRunnerFactory.createWebRunner(
           flutterDevice,
@@ -212,7 +220,8 @@ class DriveCommand extends RunCommandBase {
             )
             : DebuggingOptions.enabled(
               getBuildInfo(),
-              port: stringArg('web-port')
+              port: stringArg('web-port'),
+              disablePortPublication: disablePortPublication,
             ),
           stayResident: false,
           urlTunneller: null,
@@ -236,12 +245,18 @@ class DriveCommand extends RunCommandBase {
       }
       observatoryUri = result.observatoryUri.toString();
       // TODO(bkonyi): add web support (https://github.com/flutter/flutter/issues/61259)
-      if (!isWebPlatform) {
+      if (!isWebPlatform && !disableDds) {
         try {
           // If there's another flutter_tools instance still connected to the target
           // application, DDS will already be running remotely and this call will fail.
           // We can ignore this and continue to use the remote DDS instance.
-          await device.dds.startDartDevelopmentService(Uri.parse(observatoryUri), ipv6);
+          await device.dds.startDartDevelopmentService(
+            Uri.parse(observatoryUri),
+            ddsPort,
+            ipv6,
+            disableServiceAuthCodes,
+          );
+          observatoryUri = device.dds.uri.toString();
         } on dds.DartDevelopmentServiceException catch(_) {
           globals.printTrace('Note: DDS is already connected to $observatoryUri.');
         }
@@ -315,7 +330,18 @@ $ex
     }
 
     try {
-      await testRunner(<String>[testFile], environment);
+      await testRunner(
+        <String>[
+          if (buildInfo.dartExperiments.isNotEmpty)
+            '--enable-experiment=${buildInfo.dartExperiments.join(',')}',
+          if (buildInfo.nullSafetyMode == NullSafetyMode.sound)
+            '--sound-null-safety',
+          if (buildInfo.nullSafetyMode == NullSafetyMode.unsound)
+            '--no-sound-null-safety',
+          testFile,
+        ],
+        environment,
+      );
     } on Exception catch (error, stackTrace) {
       if (error is ToolExit) {
         rethrow;
@@ -401,7 +427,7 @@ Future<Device> findTargetDevice({ @required Duration timeout }) async {
     }
     if (devices.length > 1) {
       globals.printStatus("Found ${devices.length} devices with name or id matching '${deviceManager.specifiedDeviceId}':");
-      await Device.printDevices(devices);
+      await Device.printDevices(devices, globals.logger);
       return null;
     }
     return devices.first;
@@ -412,7 +438,7 @@ Future<Device> findTargetDevice({ @required Duration timeout }) async {
     return null;
   } else if (devices.length > 1) {
     globals.printStatus('Found multiple connected devices:');
-    await Device.printDevices(devices);
+    await Device.printDevices(devices, globals.logger);
   }
   globals.printStatus('Using device ${devices.first.name}.');
   return devices.first;
@@ -480,7 +506,9 @@ Future<LaunchResult> _startApp(
     debuggingOptions: DebuggingOptions.enabled(
       command.getBuildInfo(),
       startPaused: true,
-      hostVmServicePort: command.hostVmservicePort,
+      hostVmServicePort: webUri != null ? command.hostVmservicePort : 0,
+      disablePortPublication: command.disablePortPublication,
+      ddsPort: command.ddsPort,
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,
       dumpSkpOnShaderCompilation: command.dumpSkpOnShaderCompilation,
