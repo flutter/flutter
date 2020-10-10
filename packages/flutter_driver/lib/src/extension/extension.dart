@@ -78,25 +78,25 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// will still be returned in the `response` field of the result JSON along
 /// with an `isError` boolean.
 ///
-/// The `finders` and `commands` parameters are optional and used to add custom 
+/// The `finders` and `commands` parameters are optional and used to add custom
 /// finders or commands, as in the following example.
 ///
 /// ```dart main
 /// void main() {
 ///   enableFlutterDriverExtension(
-///     finders: <FinderExtension>[ SomeFinderExtension() ], 
+///     finders: <FinderExtension>[ SomeFinderExtension() ],
 ///     commands: <CommandExtension>[ SomeCommandExtension() ],
 ///   );
 ///
 ///   app.main();
 /// }
 /// ```
-/// 
+///
 /// ```dart
 /// driver.sendCommand(SomeCommand(ByValueKey('Button'), 7));
 /// ```
-/// 
-/// Note: SomeFinder and SomeFinderExtension should be placed in different files 
+///
+/// Note: SomeFinder and SomeFinderExtension should be placed in different files
 /// to avoid `dart:ui` import issue.
 ///
 /// ```dart
@@ -137,10 +137,10 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 ///  }
 /// }
 /// ```
-/// 
-/// Note: SomeCommand, SomeResult and SomeCommandExtension should be placed in 
+///
+/// Note: SomeCommand, SomeResult and SomeCommandExtension should be placed in
 /// different files to avoid `dart:ui` import issue.
-/// 
+///
 /// ```dart
 /// class SomeCommand extends CommandWithTarget {
 ///  SomeCommand(SerializableFinder finder, this.times, {Duration? timeout})
@@ -165,9 +165,9 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// ```dart
 /// class SomeCommandResult extends Result {
 ///   const SomeCommandResult(this.resultParam);
-/// 
+///
 ///   final String resultParam;
-/// 
+///
 ///   @override
 ///   Map<String, dynamic> toJson() {
 ///     return <String, dynamic>{
@@ -181,24 +181,24 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// class SomeCommandExtension extends CommandExtension {
 ///   @override
 ///   String get commandKind => 'SomeCommand';
-/// 
+///
 ///   @override
 ///   Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
 ///     final SomeCommand someCommand = command as SomeCommand;
-///     
+///
 ///     // Submit known [Command]s:
 ///     for (int i = 0; i < someCommand.times; i++) {
 ///       await handlerFactory.handleCommand(Tap(someCommand.finder), prober, finderFactory);
 ///     }
-/// 
+///
 ///     // Alternatively, use [WidgetController]:
 ///     for (int i = 0; i < stubCommand.times; i++) {
 ///       await prober.tap(finderFactory.createFinder(stubCommand.finder));
 ///     }
-/// 
+///
 ///     return const SomeCommandResult('foo bar');
 ///   }
-/// 
+///
 ///   @override
 ///   Command deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory, DeserializeCommandFactory commandFactory) {
 ///     return SomeCommand.deserialize(params, finderFactory);
@@ -244,7 +244,7 @@ abstract class CommandExtension {
   /// [finderFactory] could be used to deserialize nested finders.
   /// [commandFactory] could be used to deserialize nested commands.
   Command deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory, DeserializeCommandFactory commandFactory);
-  
+
   /// Calls action for given [command].
   /// Returns action [Result].
   /// [prober] could be used to perform widget actions.
