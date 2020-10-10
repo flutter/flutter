@@ -1662,9 +1662,9 @@ class ArtifactUpdater {
     if (response.statusCode != HttpStatus.ok) {
       throw Exception(response.statusCode);
     }
-    await response.forEach((List<int> chunk) {
-      file.writeAsBytesSync(chunk, mode: FileMode.append);
-    });
+    final RandomAccessFile randomAccessFile = file.openSync(mode: FileMode.writeOnly);
+    await response.forEach(randomAccessFile.writeFromSync);
+    randomAccessFile.closeSync();
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
