@@ -554,7 +554,7 @@ class DevFS {
         dirtyEntries[entryUri] = content;
       }
     }
-    _logger.printTrace('Updating files: ${dirtyEntries.keys.join(',')}');
+    _logger.printTrace('Updating files.');
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri, _httpWriter);
     }
