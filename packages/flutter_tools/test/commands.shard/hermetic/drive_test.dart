@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -53,6 +54,7 @@ void main() {
       appStopper = (DriveCommand command) {
         throw 'Unexpected call to appStopper';
       };
+      command.applicationPackages = FakeApplicationPackageFactory();
     });
 
     tearDown(() {
@@ -898,3 +900,9 @@ class MockDevice extends Mock implements Device {
 class MockAndroidDevice extends Mock implements AndroidDevice { }
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService { }
 class MockLaunchResult extends Mock implements LaunchResult { }
+class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
+  @override
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) {
+    return null;
+  }
+}
