@@ -1176,9 +1176,9 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
     expect(box.size.height, equals(kBottomNavigationBarHeight));
 
-    final RenderBox itemBoxA = tester.renderObject(find.text(longTextA.data!));
+    final RenderBox itemBoxA = tester.renderObject(find.text(longTextA));
     expect(itemBoxA.size, equals(const Size(400.0, 14.0)));
-    final RenderBox itemBoxB = tester.renderObject(find.text(longTextB.data!));
+    final RenderBox itemBoxB = tester.renderObject(find.text(longTextB));
     expect(itemBoxB.size, equals(const Size(400.0, 14.0)));
   });
 
