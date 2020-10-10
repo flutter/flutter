@@ -74,6 +74,36 @@ void main() {
         _expectSamePath(executablePath, expectedPath);
       });
 
+      test('in path as link', () {
+        String command = 'bla.exe';
+        final File target = fileSystem.file(fileSystem.path.join('something', 'else', 'bla.exe'))
+          ..createSync(recursive: true);
+        fileSystem.link(fileSystem.path.join(dir2.path, command)).createSync(target.absolute.path, recursive: true);
+        final String expectedPath = target.absolute.path;
+
+        String executablePath = resolveExecutablePath(
+          command,
+          workingDir.path,
+          platform: platform,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          strict: true,
+        );
+
+        _expectSamePath(executablePath, expectedPath);
+
+        command = fileSystem.path.withoutExtension(command);
+        executablePath = resolveExecutablePath(
+          command,
+          workingDir.path,
+          platform: platform,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          strict: true,
+        );
+        _expectSamePath(executablePath, expectedPath);
+      });
+
       test('in path', () {
         String command = 'bla.exe';
         final String expectedPath = fileSystem.path.join(dir2.path, command);

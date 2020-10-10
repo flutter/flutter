@@ -819,11 +819,16 @@ String resolveExecutablePath(
   }
   for (final String path in candidates) {
     try {
-      final FileSystemEntityType type = fileSystem.typeSync(path);
-      if (type != FileSystemEntityType.notFound && type != FileSystemEntityType.directory) {
+      final FileSystemEntityType type = fileSystem.typeSync(path, followLinks: false);
+      if (type == FileSystemEntityType.file) {
         return path;
       }
-    } on FileSystemException catch (err) {
+      if (type == FileSystemEntityType.link) {
+        return fileSystem.link(path).resolveSymbolicLinksSync();
+      }
+    } on FileSystemException catch (err, st) {
+      print(err);
+      print(st);
       logger.printTrace('Error checking $path:$err');
       // Ignore.
     }
