@@ -328,9 +328,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
 
   XCTAssertEqual([accessibility_notifications count], 1ul);
-  SemanticsObject* focusObject = accessibility_notifications[0][@"argument"];
-  XCTAssertEqual([focusObject uid], 3);
-  XCTAssertEqualObjects([focusObject accessibilityLabel], @"node3");
+  XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], @"node3");
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
                  UIAccessibilityScreenChangedNotification);
 }
@@ -373,7 +371,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutter::SemanticsNode node1;
   node1.id = 1;
   node1.label = "node1";
-  node1.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute);
+  node1.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
+                static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
   node1.childrenInTraversalOrder = {2, 3};
   node1.childrenInHitTestOrder = {2, 3};
   nodes[node1.id] = node1;
@@ -394,9 +393,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
 
   // Notification should focus first focusable node, which is node1.
   XCTAssertEqual([accessibility_notifications count], 1ul);
-  SemanticsObject* focusObject = accessibility_notifications[0][@"argument"];
-  XCTAssertEqual([focusObject uid], 2);
-  XCTAssertEqualObjects([focusObject accessibilityLabel], @"node2");
+  id focusObject = accessibility_notifications[0][@"argument"];
+  XCTAssertTrue([focusObject isKindOfClass:[NSString class]]);
+  XCTAssertEqualObjects(focusObject, @"node1");
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
                  UIAccessibilityScreenChangedNotification);
 }
