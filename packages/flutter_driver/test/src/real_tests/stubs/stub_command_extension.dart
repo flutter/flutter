@@ -15,10 +15,10 @@ class StubCommandExtension extends CommandExtension {
   String get commandKind => 'StubCommand';
 
   @override
-  Future<Result> call(Command command, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
+  Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
     final StubCommand stubCommand = command as StubCommand;
     for (int i = 0; i < stubCommand.times; i++) {
-      await handlerFactory.handleCommand(Tap(stubCommand.finder, timeout: stubCommand.timeout), finderFactory);
+      await handlerFactory.handleCommand(Tap(stubCommand.finder), prober, finderFactory);
     }
     return const StubCommandResult('stub response');
   }

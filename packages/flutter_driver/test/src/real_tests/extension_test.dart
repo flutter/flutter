@@ -1026,7 +1026,7 @@ void main() {
       expect(result['response'] as String, contains('Unsupported command kind StubCommand'));
     });
 
-    testWidgets('nested tap command', (WidgetTester tester) async {
+    testWidgets('nested command', (WidgetTester tester) async {
       final FlutterDriverExtension driverExtension = FlutterDriverExtension(
         (String arg) async => '',
         true,

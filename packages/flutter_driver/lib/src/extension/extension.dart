@@ -167,7 +167,7 @@ abstract class CommandExtension {
   
   /// Calls action for given [command].
   /// Returns action [Result].
-  Future<Result> call(Command command, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory);
+  Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory);
 }
 
 /// The class that manages communication between a Flutter Driver test and the
@@ -194,6 +194,8 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
       _commandExtensions[command.commandKind] = command;
     }
   }
+
+  final WidgetController _prober = LiveWidgetController(WidgetsBinding.instance!);
 
   final DataHandler? _requestDataHandler;
 
@@ -223,7 +225,7 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
       final Command command = deserializeCommand(params, this);
       assert(WidgetsBinding.instance!.isRootWidgetAttached || !command.requiresRootWidgetAttached,
           'No root widget is attached; have you remembered to call runApp()?');
-      Future<Result?> responseFuture = handleCommand(command, this);
+      Future<Result?> responseFuture = handleCommand(command, _prober, this);
       if (command.timeout != null)
         responseFuture = responseFuture.timeout(command.timeout ?? Duration.zero);
       final Result? response = await responseFuture;
@@ -284,12 +286,12 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
   }
 
   @override
-  Future<Result?> handleCommand(Command command, CreateFinderFactory finderFactory) {
+  Future<Result?> handleCommand(Command command, WidgetController prober, CreateFinderFactory finderFactory) {
     final String kind = command.kind;
     if(_commandExtensions.containsKey(kind)) {
-      return _commandExtensions[kind]!.call(command, finderFactory, this);
+      return _commandExtensions[kind]!.call(command, prober, finderFactory, this);
     }
 
-    return super.handleCommand(command, finderFactory);
+    return super.handleCommand(command, prober, finderFactory);
   }
 }
