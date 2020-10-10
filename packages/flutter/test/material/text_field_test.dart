@@ -5966,7 +5966,7 @@ void main() {
     ));
     await tester.enterText(find.byType(TextField), text);
     await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(TextField)).width, 2 * stepWidth!);
+    expect(tester.getSize(find.byType(TextField)).width, 2 * stepWidth);
 
     // A null stepWidth causes the TextField to perfectly wrap the text plus
     // the cursor regardless of alignment.
