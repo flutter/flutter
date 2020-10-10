@@ -540,7 +540,7 @@ class RenderStack extends RenderBox
     double width = constraints.minWidth;
     double height = constraints.minHeight;
 
-    BoxConstraints nonPositionedConstraints;
+    final BoxConstraints nonPositionedConstraints;
     assert(fit != null);
     switch (fit) {
       case StackFit.loose:

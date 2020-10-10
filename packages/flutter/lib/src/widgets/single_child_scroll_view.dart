@@ -633,9 +633,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     final Rect bounds = MatrixUtils.transformRect(transform, rect);
     final Size contentSize = child!.size;
 
-    double leadingScrollOffset;
-    double targetMainAxisExtent;
-    double mainAxisExtent;
+    final double leadingScrollOffset;
+    final double targetMainAxisExtent;
+    final double mainAxisExtent;
 
     assert(axisDirection != null);
     switch (axisDirection) {
