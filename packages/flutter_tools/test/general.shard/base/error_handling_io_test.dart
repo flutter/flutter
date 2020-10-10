@@ -642,7 +642,7 @@ void main() {
     const int kUserPermissionDenied = 5;
 
     test('when the device is full', () {
-      final ProcessManager processManager = setUpProcessManager(
+      final ProcessManager processManager = setUpCrashingProcessManager(
         windowsPlatform,
         kDeviceFull,
       );
@@ -660,7 +660,7 @@ void main() {
     });
 
     test('when the file is being used by another program', () {
-      final ProcessManager processManager = setUpProcessManager(
+      final ProcessManager processManager = setUpCrashingProcessManager(
         windowsPlatform,
         kUserMappedSectionOpened,
       );
@@ -678,7 +678,7 @@ void main() {
     });
 
     test('when permissions are denied', () {
-      final ProcessManager processManager = setUpProcessManager(
+      final ProcessManager processManager = setUpCrashingProcessManager(
         windowsPlatform,
         kUserPermissionDenied,
       );
@@ -701,7 +701,7 @@ void main() {
     const int eacces = 13;
 
     test('when writing to a full device', () {
-      final ProcessManager processManager = setUpProcessManager(
+      final ProcessManager processManager = setUpCrashingProcessManager(
         linuxPlatform,
         enospc,
       );
@@ -719,7 +719,7 @@ void main() {
     });
 
     test('when permissions are denied', () {
-      final ProcessManager processManager = setUpProcessManager(
+      final ProcessManager processManager = setUpCrashingProcessManager(
         linuxPlatform,
         eacces,
       );
@@ -742,7 +742,7 @@ void main() {
     const int eacces = 13;
 
     test('when writing to a full device', () {
-      final ProcessManager processManager = setUpProcessManager(
+      final ProcessManager processManager = setUpCrashingProcessManager(
         macOSPlatform,
         enospc,
       );
@@ -760,7 +760,7 @@ void main() {
     });
 
     test('when permissions are denied', () {
-      final ProcessManager processManager = setUpProcessManager(
+      final ProcessManager processManager = setUpCrashingProcessManager(
         macOSPlatform,
         eacces,
       );
@@ -777,9 +777,250 @@ void main() {
              throwsToolExit(message: expectedMessage));
     });
   });
+
+  testWithoutContext('Process manager uses which on Linux to resolve executables', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final ProcessManager processManager = setUpProcessManager(
+      linuxPlatform,
+      fileSystem,
+      (String executable,
+       List<String> arguments, {
+       Map<String, String> environment,
+       bool includeParentEnvironment,
+       bool runInShell,
+       Encoding stderrEncoding,
+       Encoding stdoutEncoding,
+       String workingDirectory,
+      }) {
+        if (executable == 'which') {
+          return ProcessResult(0, 0, 'fizz/foo\n', '');
+        }
+        if (executable == 'fizz/foo') {
+          return ProcessResult(0, 0, '', '');
+        }
+        throw ProcessException(executable, arguments, '', 2);
+     },
+    );
+    fileSystem.file('fizz/foo').createSync(recursive: true);
+
+    final ProcessResult result = processManager.runSync(<String>['foo']);
+
+    expect(result.exitCode, 0);
+  });
+
+  testWithoutContext('Process manager uses which on macOS to resolve executables', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final ProcessManager processManager = setUpProcessManager(
+      macOSPlatform,
+      fileSystem,
+      (String executable,
+       List<String> arguments, {
+       Map<String, String> environment,
+       bool includeParentEnvironment,
+       bool runInShell,
+       Encoding stderrEncoding,
+       Encoding stdoutEncoding,
+       String workingDirectory,
+      }) {
+        if (executable == 'which') {
+          return ProcessResult(0, 0, 'fizz/foo\n', '');
+        }
+        if (executable == 'fizz/foo') {
+          return ProcessResult(0, 0, '', '');
+        }
+        throw ProcessException(executable, arguments, '', 2);
+     },
+    );
+    fileSystem.file('fizz/foo').createSync(recursive: true);
+
+    final ProcessResult result = processManager.runSync(<String>['foo']);
+
+    expect(result.exitCode, 0);
+  });
+
+  testWithoutContext('Process manager uses where on Windows to resolve executables', () {
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final ProcessManager processManager = setUpProcessManager(
+      windowsPlatform,
+      fileSystem,
+      (String executable,
+       List<String> arguments, {
+       Map<String, String> environment,
+       bool includeParentEnvironment,
+       bool runInShell,
+       Encoding stderrEncoding,
+       Encoding stdoutEncoding,
+       String workingDirectory,
+      }) {
+        if (executable == 'where') {
+          return ProcessResult(0, 0, 'C:\\fizz\\foo.exe\n', '');
+        }
+        if (executable == 'C:\\fizz\\foo.exe') {
+          return ProcessResult(0, 0, '', '');
+        }
+        throw ProcessException(executable, arguments, '', 2);
+     },
+    );
+
+    fileSystem.file('C:\\fizz\\foo.exe').createSync(recursive: true);
+
+    final ProcessResult result = processManager.runSync(<String>['foo']);
+
+    expect(result.exitCode, 0);
+  });
+
+  testWithoutContext('Process manager will exit if where returns exit code 2 on Windows', () {
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final ProcessManager processManager = setUpProcessManager(
+      windowsPlatform,
+      fileSystem,
+      (String executable,
+       List<String> arguments, {
+       Map<String, String> environment,
+       bool includeParentEnvironment,
+       bool runInShell,
+       Encoding stderrEncoding,
+       Encoding stdoutEncoding,
+       String workingDirectory,
+      }) {
+        throw ProcessException(executable, arguments, '', 2);
+     },
+    );
+
+    expect(() => processManager.runSync(<String>['any']), throwsToolExit());
+  });
+
+  testWithoutContext('Process manager will rethrow process exception if exit code on Linux', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final ProcessManager processManager = setUpProcessManager(
+      linuxPlatform,
+      fileSystem,
+      (String executable,
+       List<String> arguments, {
+       Map<String, String> environment,
+       bool includeParentEnvironment,
+       bool runInShell,
+       Encoding stderrEncoding,
+       Encoding stdoutEncoding,
+       String workingDirectory,
+      }) {
+      throw ProcessException(executable, arguments, '', 2);
+     },
+    );
+
+    expect(() => processManager.runSync(<String>['any']), throwsA(isA<ProcessException>()));
+  });
+
+  testWithoutContext('Process manager will return first executable that exists', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final ProcessManager processManager = setUpProcessManager(
+      linuxPlatform,
+      fileSystem,
+      (String executable,
+       List<String> arguments, {
+       Map<String, String> environment,
+       bool includeParentEnvironment,
+       bool runInShell,
+       Encoding stderrEncoding,
+       Encoding stdoutEncoding,
+       String workingDirectory,
+      }) {
+        if (executable == 'which') {
+          return ProcessResult(0, 0, 'fizz/foo\nbar/foo\n', '');
+        }
+        if (executable == 'bar/foo') {
+          return ProcessResult(0, 0, '', '');
+        }
+        throw ProcessException(executable, arguments, '', 2);
+     },
+    );
+    fileSystem.file('bar/foo').createSync(recursive: true);
+
+    final ProcessResult result = processManager.runSync(<String>['foo']);
+
+    expect(result.exitCode, 0);
+  });
+
+  testWithoutContext('Process manager will cache executable resolution', () {
+    int whichCalled = 0;
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final ProcessManager processManager = setUpProcessManager(
+      linuxPlatform,
+      fileSystem,
+      (String executable,
+       List<String> arguments, {
+       Map<String, String> environment,
+       bool includeParentEnvironment,
+       bool runInShell,
+       Encoding stderrEncoding,
+       Encoding stdoutEncoding,
+       String workingDirectory,
+      }) {
+        if (executable == 'which') {
+          whichCalled += 1;
+          return ProcessResult(0, 0, 'fizz/foo\n', '');
+        }
+        if (executable == 'fizz/foo') {
+          return ProcessResult(0, 0, '', '');
+        }
+        throw ProcessException(executable, arguments, '', 2);
+     },
+    );
+    fileSystem.file('fizz/foo').createSync(recursive: true);
+
+    processManager.runSync(<String>['foo']);
+    processManager.runSync(<String>['foo']);
+
+    expect(whichCalled, 1);
+  });
+
+  testWithoutContext('Process manager will not cache executable resolution if the process fails', () {
+    int whichCalled = 0;
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final ProcessManager processManager = setUpProcessManager(
+      linuxPlatform,
+      fileSystem,
+      (String executable,
+       List<String> arguments, {
+       Map<String, String> environment,
+       bool includeParentEnvironment,
+       bool runInShell,
+       Encoding stderrEncoding,
+       Encoding stdoutEncoding,
+       String workingDirectory,
+      }) {
+        if (executable == 'which') {
+          whichCalled += 1;
+          return ProcessResult(0, 0, '', '');
+        }
+        if (executable == 'foo') {
+          return ProcessResult(0, 0, '', '');
+        }
+        throw ProcessException(executable, arguments, '', 2);
+     },
+    );
+
+    processManager.runSync(<String>['foo']);
+    processManager.runSync(<String>['foo']);
+
+    expect(whichCalled, 2);
+  });
 }
 
 ProcessManager setUpProcessManager(
+  Platform platform,
+  FileSystem fileSystem,
+  ProcessRunSync processRunSync,
+) {
+  return ErrorHandlingProcessManager(
+    fileSystem: fileSystem,
+    logger: BufferLogger.test(),
+    platform: platform,
+    runSync: processRunSync,
+  );
+}
+
+ProcessManager setUpCrashingProcessManager(
   Platform platform,
   int osError,
 ) {
@@ -793,7 +1034,7 @@ ProcessManager setUpProcessManager(
       throw ProcessException('executable', <String>[], '', osError);
     },
     run: (
-      String excutable,
+      String executable,
       List<String> arguments, {
       Map<String, String> environment,
       bool includeParentEnvironment,
@@ -802,10 +1043,10 @@ ProcessManager setUpProcessManager(
       Encoding stdoutEncoding,
       String workingDirectory,
     }) {
-      throw ProcessException(excutable, arguments, '', osError);
+      throw ProcessException(executable, arguments, '', osError);
     },
     runSync: (
-      String excutable,
+      String executable,
       List<String> arguments, {
       Map<String, String> environment,
       bool includeParentEnvironment,
@@ -814,10 +1055,10 @@ ProcessManager setUpProcessManager(
       Encoding stdoutEncoding,
       String workingDirectory,
     }) {
-      throw ProcessException(excutable, arguments, '', osError);
+      throw ProcessException(executable, arguments, '', osError);
     },
     start: (
-      String excutable,
+      String executable,
       List<String> arguments, {
       Map<String, String> environment,
       bool includeParentEnvironment,
@@ -825,7 +1066,7 @@ ProcessManager setUpProcessManager(
       String workingDirectory,
       ProcessStartMode mode,
     }) {
-      throw ProcessException(excutable, arguments, '', osError);
+      throw ProcessException(executable, arguments, '', osError);
     },
   );
 }

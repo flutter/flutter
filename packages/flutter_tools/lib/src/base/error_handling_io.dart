@@ -11,8 +11,10 @@ import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:process/process.dart';
 
 import 'common.dart' show throwToolExit;
+import 'io.dart';
 import 'logger.dart';
 import 'platform.dart';
+import 'process.dart';
 
 // The Flutter tool hits file system and process errors that only the end-user can address.
 // We would like these errors to not hit crash logging. In these cases, we
@@ -54,11 +56,11 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   /// This can be used to bypass the [ErrorHandlingFileSystem] permission exit
   /// checks for situations where failure is acceptable, such as the flutter
   /// persistent settings cache.
-  static void noExitOnFailure(void Function() operation) {
+  static T noExitOnFailure<T>(T Function() operation) {
     final bool previousValue = ErrorHandlingFileSystem._noExitOnFailure;
     try {
       ErrorHandlingFileSystem._noExitOnFailure = true;
-      operation();
+      return operation();
     } finally {
       ErrorHandlingFileSystem._noExitOnFailure = previousValue;
     }
@@ -551,22 +553,22 @@ typedef ProcessStart = Future<io.Process> Function(
 class ErrorHandlingProcessManager implements ProcessManager {
   ErrorHandlingProcessManager({
     @required Platform platform,
-    @required Logger logger,
     @required FileSystem fileSystem,
+    @required Logger logger,
     @visibleForTesting ProcessKillPid killPid = io.Process.killPid,
     @visibleForTesting ProcessRun run = io.Process.run,
     @visibleForTesting ProcessRunSync runSync = io.Process.runSync,
     @visibleForTesting ProcessStart start = io.Process.start,
   }) : _platform = platform,
+       _fileSytem = fileSystem,
        _logger = logger,
-       _fileSystem = fileSystem,
        _killPid = killPid,
        _processRun = run,
        _processRunSync = runSync,
        _processStart = start;
 
   final Logger _logger;
-  final FileSystem _fileSystem;
+  final FileSystem _fileSytem;
   final Platform _platform;
   final ProcessKillPid _killPid;
   final ProcessRun _processRun;
@@ -676,18 +678,56 @@ class ErrorHandlingProcessManager implements ProcessManager {
     final String executable = command.first.toString();
     final Map<String, String> workingDirectoryCache = _resolvedExecutables[workingDirectory] ??= <String, String>{};
     final String resolvedExecutable = workingDirectoryCache[executable]
-      ?? resolveExecutablePath(
-        executable,
-        workingDirectory,
-        fileSystem: _fileSystem,
-        platform: _platform,
-        logger: _logger,
-        strict: strict,
-      );
+      ?? _which(executable, workingDirectory);
     if (resolvedExecutable != executable) {
       workingDirectoryCache[executable] = resolvedExecutable;
     }
     return resolvedExecutable;
+  }
+
+  String _which(String execName, String workingDirectory) {
+    // `where` always returns all matches, not just the first one.
+    ProcessResult result;
+    try {
+      result = _processRunSync(
+        _platform.isWindows ? 'where' : 'which',
+        <String>[execName],
+        workingDirectory: workingDirectory,
+      );
+    } on ProcessException catch (err) {
+      if (!isMissingExecutableException(err) || !_platform.isWindows) {
+        rethrow;
+      }
+      // `where` could be missing if system32 is not on the PATH.
+      throwToolExit(
+        'Cannot find the executable for `where`. This can happen if the System32 '
+        'folder (e.g. C:\\Windows\\System32 ) is removed from the PATH environment '
+        'variable. Ensure that this is present and then try again after restarting '
+        'the terminal and/or IDE.'
+      );
+    }
+    if (result.exitCode != 0) {
+      return execName;
+    }
+    final List<String> lines = (result.stdout as String).trim().split('\n');
+    for (final String line in lines) {
+      final String resolvedPath = line.trim();
+      try {
+        final String candidate = ErrorHandlingFileSystem.noExitOnFailure(() {
+          if (_fileSytem.isFileSync(resolvedPath)) {
+            return resolvedPath;
+          }
+          return null;
+        });
+        if (candidate != null) {
+          return candidate;
+        }
+      } on Exception {
+        // Do nothing and prevent permission issues from causing a tool exit.
+      }
+    }
+    _logger.printTrace('Could not resolve executable for $execName in $workingDirectory.');
+    return execName;
   }
 
   List<String> _getArguments(List<dynamic> command) {
@@ -769,100 +809,4 @@ void _throwFileSystemException(String errorMessage) {
     throw Exception(errorMessage);
   }
   throwToolExit(errorMessage);
-}
-
-
-/// Searches the `PATH` for the executable that [command] is supposed to launch.
-///
-/// This first builds a list of candidate paths where the executable may reside.
-/// If [command] is already an absolute path, then the `PATH` environment
-/// variable will not be consulted, and the specified absolute path will be the
-/// only candidate that is considered.
-///
-/// Once the list of candidate paths has been constructed, this will pick the
-/// first such path that represents an existent file.
-///
-/// If [strict] is false, return The original executable if there were no viable
-/// candidates - otherwise return `null`
-@visibleForTesting
-String resolveExecutablePath(
-  String command,
-  String workingDirectory, {
-  @required FileSystem fileSystem,
-  @required Platform platform,
-  @required Logger logger,
-  @required bool strict,
-}) {
-  try {
-    ErrorHandlingFileSystem.noExitOnFailure(() {
-      workingDirectory ??= fileSystem.currentDirectory.path;
-    });
-  } on Exception {
-    // The `currentDirectory` getter can throw a FileSystemException for example
-    // when the process doesn't have read/list permissions in each component of
-    // the cwd path. In this case, fall back on '.'.
-    workingDirectory ??= '.';
-  }
-  final String pathSeparator = platform.isWindows ? ';' : ':';
-
-  List<String> extensions = <String>[];
-  if (platform.isWindows && fileSystem.path.extension(command).isEmpty) {
-    extensions = platform.environment['PATHEXT'].split(pathSeparator);
-  }
-
-  List<String> candidates = <String>[];
-  if (command.contains(fileSystem.path.separator)) {
-    candidates = _getCandidatePaths(command, <String>[workingDirectory], extensions, fileSystem);
-  } else {
-    final List<String> searchPath = platform.environment['PATH'].split(pathSeparator);
-    candidates = _getCandidatePaths(command, searchPath, extensions, fileSystem);
-  }
-  for (final String path in candidates) {
-    try {
-      final FileSystemEntityType type = fileSystem.typeSync(path, followLinks: false);
-      if (type == FileSystemEntityType.file) {
-        return path;
-      }
-      if (type == FileSystemEntityType.link) {
-        return fileSystem.link(path).resolveSymbolicLinksSync();
-      }
-    } on FileSystemException catch (err) {
-      logger.printTrace('Error checking $path:$err');
-      // Ignore.
-    }
-  }
-  logger.printTrace(
-    'Did not find executable for "$command", search path candidates: $candidates\n'
-    'Attempting original executable path.'
-  );
-  if (strict) {
-    return null;
-  }
-  return command;
-}
-
-/// Returns all possible combinations of `$searchPath\$command.$ext` for
-/// `searchPath` in [searchPaths] and `ext` in [extensions].
-///
-/// If [extensions] is empty, it will just enumerate all
-/// `$searchPath\$command`.
-/// If [command] is an absolute path, it will just enumerate
-/// `$command.$ext`.
-List<String> _getCandidatePaths(
-  String command,
-  List<String> searchPaths,
-  List<String> extensions,
-  FileSystem fileSystem,
-) {
-  final List<String> withExtensions = extensions.isNotEmpty
-    ? <String>[for (String ext in extensions) '$command$ext']
-    : <String>[ command ];
-  if (fileSystem.path.isAbsolute(command)) {
-    return withExtensions;
-  }
-  return <String>[
-    for (String path in searchPaths)
-      for (String command in withExtensions)
-        fileSystem.path.join(path, command)
-  ];
 }
