@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/downgrade.dart';
@@ -17,6 +18,8 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
+
+final FakePlatform platform = FakePlatform(environment: <String, String>{});
 
 void main() {
   FileSystem fileSystem;

@@ -7,6 +7,7 @@ import 'dart:io' hide File;
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/commands/channel.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
+import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
@@ -21,9 +23,11 @@ import '../src/mocks.dart';
 void main() {
   group('channel', () {
     final MockProcessManager mockProcessManager = MockProcessManager();
+    FileSystem fileSystem;
 
     setUpAll(() {
       Cache.disableLocking();
+      fileSystem = MemoryFileSystem.test();
     });
 
     Future<void> simpleChannelTest(List<String> args) async {
@@ -364,12 +368,18 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
 
-      expect(testLogger.statusText, isNot(contains('A new version of Flutter')));
       expect(testLogger.errorText, hasLength(0));
       expect(versionCheckFile.existsSync(), isFalse);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => mockProcessManager,
+      FlutterVersion: () => FlutterVersion(
+        cache: globals.cache,
+        fileSystem: fileSystem,
+        logger: globals.logger,
+        processManager: processManager,
+        platform: FakePlatform(environment: <String, String>{}),
+      )
     });
   });
 }

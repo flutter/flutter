@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -13,6 +14,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -146,7 +148,13 @@ void main() {
         when(processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%ad --date=iso'.split(' ')),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
 
-        final FakeFlutterVersion version = FakeFlutterVersion();
+        final FakeFlutterVersion version = FakeFlutterVersion(
+          platform: platform,
+          cache: globals.cache,
+          fileSystem: fs,
+          processManager: processManager,
+          logger: BufferLogger.test(),
+        );
 
         // Because the hash depends on the time, we just use the 0.0.0-unknown here.
         expect(version.toJson()['frameworkVersion'], '0.10.3');
@@ -245,6 +253,14 @@ void main() {
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class FakeFlutterVersion extends FlutterVersion {
+  FakeFlutterVersion({
+    @required Cache cache,
+    @required FileSystem fileSystem,
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required Platform platform,
+  }) : super(cache: cache, fileSystem: fileSystem, processManager: processManager, logger: logger, platform: platform);
+
   @override
   String get frameworkVersion => '0.10.3';
 }

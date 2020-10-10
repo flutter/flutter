@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -10,6 +9,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/process.dart' hide processUtils;
 import 'base/time.dart';
 import 'cache.dart';
