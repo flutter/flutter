@@ -1045,5 +1045,4 @@ class TestTickerProvider extends TickerProvider {
   Ticker createTicker(TickerCallback onTick) {
     return Ticker(onTick);
   }
-
 }
