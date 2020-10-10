@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -32,14 +30,14 @@ import 'theme_data.dart';
 abstract class ButtonStyleButton extends StatefulWidget {
   /// Create a [ButtonStyleButton].
   const ButtonStyleButton({
-    Key key,
-    @required this.onPressed,
-    @required this.onLongPress,
-    @required this.style,
-    @required this.focusNode,
-    @required this.autofocus,
-    @required this.clipBehavior,
-    @required this.child,
+    Key? key,
+    required this.onPressed,
+    required this.onLongPress,
+    required this.style,
+    required this.focusNode,
+    required this.autofocus,
+    required this.clipBehavior,
+    required this.child,
   }) : assert(autofocus != null),
        assert(clipBehavior != null),
        super(key: key);
@@ -51,7 +49,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// See also:
   ///
   ///  * [enabled], which is true if the button is enabled.
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   /// Called when the button is long-pressed.
   ///
@@ -60,7 +58,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// See also:
   ///
   ///  * [enabled], which is true if the button is enabled.
-  final VoidCallback onLongPress;
+  final VoidCallback? onLongPress;
 
   /// Customizes this button's appearance.
   ///
@@ -70,7 +68,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// [MaterialStateProperty]s in [themeStyleOf] and [defaultStyleOf].
   ///
   /// Null by default.
-  final ButtonStyle style;
+  final ButtonStyle? style;
 
   /// {@macro flutter.widgets.Clip}
   ///
@@ -78,13 +76,13 @@ abstract class ButtonStyleButton extends StatefulWidget {
   final Clip clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}
-  final FocusNode focusNode;
+  final FocusNode? focusNode;
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
   /// Typically the button's label.
-  final Widget child;
+  final Widget? child;
 
   /// Returns a non-null [ButtonStyle] that's based primarily on the [Theme]'s
   /// [ThemeData.textTheme] and [ThemeData.colorScheme].
@@ -117,7 +115,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   ///
   ///  * [defaultStyleOf], Returns the default [ButtonStyle] for this button.
   @protected
-  ButtonStyle themeStyleOf(BuildContext context);
+  ButtonStyle? themeStyleOf(BuildContext context);
 
   /// Whether the button is enabled or disabled.
   ///
@@ -139,7 +137,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Returns null if [value] is null, otherwise `MaterialStateProperty.all<T>(value)`.
   ///
   /// A convenience method for subclasses.
-  static MaterialStateProperty<T> allOrNull<T>(T value) => value == null ? null : MaterialStateProperty.all<T>(value);
+  static MaterialStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : MaterialStateProperty.all<T>(value);
 
   /// Returns an interpolated value based on the [textScaleFactor] parameter:
   ///
@@ -165,9 +163,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
     } else if (textScaleFactor >= 3) {
       return geometry3x;
     } else if (textScaleFactor <= 2) {
-      return EdgeInsetsGeometry.lerp(geometry1x, geometry2x, textScaleFactor - 1);
+      return EdgeInsetsGeometry.lerp(geometry1x, geometry2x, textScaleFactor - 1)!;
     }
-    return EdgeInsetsGeometry.lerp(geometry2x, geometry3x, textScaleFactor - 2);
+    return EdgeInsetsGeometry.lerp(geometry2x, geometry3x, textScaleFactor - 2)!;
   }
 }
 
@@ -179,7 +177,10 @@ abstract class ButtonStyleButton extends StatefulWidget {
 ///  * [TextButton], a simple button without a shadow.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
-class _ButtonStyleState extends State<ButtonStyleButton> {
+class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStateMixin {
+  AnimationController? _controller;
+  double? _elevation;
+  Color? _backgroundColor;
   final Set<MaterialState> _states = <MaterialState>{};
 
   bool get _hovered => _states.contains(MaterialState.hovered);
@@ -222,6 +223,12 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
   }
 
   @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(ButtonStyleButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateState(MaterialState.disabled, !widget.enabled);
@@ -236,54 +243,54 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
 
   @override
   Widget build(BuildContext context) {
-    final ButtonStyle widgetStyle = widget.style;
-    final ButtonStyle themeStyle = widget.themeStyleOf(context);
+    final ButtonStyle? widgetStyle = widget.style;
+    final ButtonStyle? themeStyle = widget.themeStyleOf(context);
     final ButtonStyle defaultStyle = widget.defaultStyleOf(context);
     assert(defaultStyle != null);
 
-    T effectiveValue<T>(T Function(ButtonStyle style) getProperty) {
-      final T widgetValue  = getProperty(widgetStyle);
-      final T themeValue   = getProperty(themeStyle);
-      final T defaultValue = getProperty(defaultStyle);
+    T? effectiveValue<T>(T? Function(ButtonStyle? style) getProperty) {
+      final T? widgetValue  = getProperty(widgetStyle);
+      final T? themeValue   = getProperty(themeStyle);
+      final T? defaultValue = getProperty(defaultStyle);
       return widgetValue ?? themeValue ?? defaultValue;
     }
 
-    T resolve<T>(MaterialStateProperty<T> Function(ButtonStyle style) getProperty) {
+    T? resolve<T>(MaterialStateProperty<T>? Function(ButtonStyle? style) getProperty) {
       return effectiveValue(
-        (ButtonStyle style) => getProperty(style)?.resolve(_states),
+        (ButtonStyle? style) => getProperty(style)?.resolve(_states),
       );
     }
 
-    final TextStyle resolvedTextStyle = resolve<TextStyle>((ButtonStyle style) => style?.textStyle);
-    final Color resolvedBackgroundColor = resolve<Color>((ButtonStyle style) => style?.backgroundColor);
-    final Color resolvedForegroundColor = resolve<Color>((ButtonStyle style) => style?.foregroundColor);
-    final Color resolvedShadowColor = resolve<Color>((ButtonStyle style) => style?.shadowColor);
-    final double resolvedElevation = resolve<double>((ButtonStyle style) => style?.elevation);
-    final EdgeInsetsGeometry resolvedPadding = resolve<EdgeInsetsGeometry>((ButtonStyle style) => style?.padding);
-    final Size resolvedMinimumSize = resolve<Size>((ButtonStyle style) => style?.minimumSize);
-    final BorderSide resolvedSide = resolve<BorderSide>((ButtonStyle style) => style?.side);
-    final OutlinedBorder resolvedShape = resolve<OutlinedBorder>((ButtonStyle style) => style?.shape);
+    final double? resolvedElevation = resolve<double?>((ButtonStyle? style) => style?.elevation);
+    final TextStyle? resolvedTextStyle = resolve<TextStyle?>((ButtonStyle? style) => style?.textStyle);
+    Color? resolvedBackgroundColor = resolve<Color?>((ButtonStyle? style) => style?.backgroundColor);
+    final Color? resolvedForegroundColor = resolve<Color?>((ButtonStyle? style) => style?.foregroundColor);
+    final Color? resolvedShadowColor = resolve<Color?>((ButtonStyle? style) => style?.shadowColor);
+    final EdgeInsetsGeometry? resolvedPadding = resolve<EdgeInsetsGeometry?>((ButtonStyle? style) => style?.padding);
+    final Size? resolvedMinimumSize = resolve<Size?>((ButtonStyle? style) => style?.minimumSize);
+    final BorderSide? resolvedSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side);
+    final OutlinedBorder? resolvedShape = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape);
 
     final MaterialStateMouseCursor resolvedMouseCursor = _MouseCursor(
-      (Set<MaterialState> states) => effectiveValue((ButtonStyle style) => style?.mouseCursor?.resolve(states)),
+      (Set<MaterialState> states) => effectiveValue((ButtonStyle? style) => style?.mouseCursor?.resolve(states)),
     );
 
-    final MaterialStateProperty<Color> overlayColor = MaterialStateProperty.resolveWith<Color>(
-      (Set<MaterialState> states) => effectiveValue((ButtonStyle style) => style?.overlayColor?.resolve(states)),
+    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
+      (Set<MaterialState> states) => effectiveValue((ButtonStyle? style) => style?.overlayColor?.resolve(states)),
     );
 
-    final VisualDensity resolvedVisualDensity = effectiveValue((ButtonStyle style) => style?.visualDensity);
-    final MaterialTapTargetSize resolvedTapTargetSize = effectiveValue((ButtonStyle style) => style?.tapTargetSize);
-    final Duration resolvedAnimationDuration = effectiveValue((ButtonStyle style) => style?.animationDuration);
-    final bool resolvedEnableFeedback = effectiveValue((ButtonStyle style) => style?.enableFeedback);
-    final Offset densityAdjustment = resolvedVisualDensity.baseSizeAdjustment;
+    final VisualDensity? resolvedVisualDensity = effectiveValue((ButtonStyle? style) => style?.visualDensity);
+    final MaterialTapTargetSize? resolvedTapTargetSize = effectiveValue((ButtonStyle? style) => style?.tapTargetSize);
+    final Duration? resolvedAnimationDuration = effectiveValue((ButtonStyle? style) => style?.animationDuration);
+    final bool? resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback);
+    final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
     final BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
-        minWidth: resolvedMinimumSize.width,
+        minWidth: resolvedMinimumSize!.width,
         minHeight: resolvedMinimumSize.height,
       ),
     );
-    final EdgeInsetsGeometry padding = resolvedPadding.add(
+    final EdgeInsetsGeometry padding = resolvedPadding!.add(
       EdgeInsets.only(
         left: densityAdjustment.dx,
         top: densityAdjustment.dy,
@@ -292,12 +299,43 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
       ),
     ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
+    // If an opaque button's background is becoming translucent while its
+    // elevation is changing, change the elevation first. Material implicitly
+    // animates its elevation but not its color. SKIA renders non-zero
+    // elevations as a shadow colored fill behind the Material's background.
+    if (resolvedAnimationDuration! > Duration.zero
+        && _elevation != null
+        && _backgroundColor != null
+        && _elevation != resolvedElevation
+        && _backgroundColor!.value != resolvedBackgroundColor!.value
+        && _backgroundColor!.opacity == 1
+        && resolvedBackgroundColor.opacity < 1
+        && resolvedElevation == 0) {
+      if (_controller?.duration != resolvedAnimationDuration) {
+        _controller?.dispose();
+        _controller = AnimationController(
+          duration: resolvedAnimationDuration,
+          vsync: this,
+        )
+        ..addStatusListener((AnimationStatus status) {
+          if (status == AnimationStatus.completed) {
+            setState(() { }); // Rebuild with the final background color.
+          }
+        });
+      }
+      resolvedBackgroundColor = _backgroundColor; // Defer changing the background color.
+      _controller!.value = 0;
+      _controller!.forward();
+    }
+    _elevation = resolvedElevation;
+    _backgroundColor = resolvedBackgroundColor;
+
     final Widget result = ConstrainedBox(
       constraints: effectiveConstraints,
       child: Material(
-        elevation: resolvedElevation,
+        elevation: resolvedElevation!,
         textStyle: resolvedTextStyle?.copyWith(color: resolvedForegroundColor),
-        shape: resolvedShape.copyWith(side: resolvedSide),
+        shape: resolvedShape!.copyWith(side: resolvedSide),
         color: resolvedBackgroundColor,
         shadowColor: resolvedShadowColor,
         type: resolvedBackgroundColor == null ? MaterialType.transparency : MaterialType.button,
@@ -334,7 +372,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
     );
 
     Size minSize;
-    switch (resolvedTapTargetSize) {
+    switch (resolvedTapTargetSize!) {
       case MaterialTapTargetSize.padded:
         minSize = Size(
           kMinInteractiveDimension + densityAdjustment.dx,
@@ -363,10 +401,10 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
 class _MouseCursor extends MaterialStateMouseCursor {
   const _MouseCursor(this.resolveCallback);
 
-  final MaterialPropertyResolver<MouseCursor> resolveCallback;
+  final MaterialPropertyResolver<MouseCursor?> resolveCallback;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) => resolveCallback(states);
+  MouseCursor resolve(Set<MaterialState> states) => resolveCallback(states)!;
 
   @override
   String get debugDescription => 'ButtonStyleButton_MouseCursor';
@@ -379,9 +417,9 @@ class _MouseCursor extends MaterialStateMouseCursor {
 /// "tap target", but not its material or its ink splashes.
 class _InputPadding extends SingleChildRenderObjectWidget {
   const _InputPadding({
-    Key key,
-    Widget child,
-    this.minSize,
+    Key? key,
+    Widget? child,
+    required this.minSize,
   }) : super(key: key, child: child);
 
   final Size minSize;
@@ -398,7 +436,7 @@ class _InputPadding extends SingleChildRenderObjectWidget {
 }
 
 class _RenderInputPadding extends RenderShiftedBox {
-  _RenderInputPadding(this._minSize, [RenderBox child]) : super(child);
+  _RenderInputPadding(this._minSize, [RenderBox? child]) : super(child);
 
   Size get minSize => _minSize;
   Size _minSize;
@@ -412,28 +450,28 @@ class _RenderInputPadding extends RenderShiftedBox {
   @override
   double computeMinIntrinsicWidth(double height) {
     if (child != null)
-      return math.max(child.getMinIntrinsicWidth(height), minSize.width);
+      return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
     if (child != null)
-      return math.max(child.getMinIntrinsicHeight(width), minSize.height);
+      return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     if (child != null)
-      return math.max(child.getMaxIntrinsicWidth(height), minSize.width);
+      return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     if (child != null)
-      return math.max(child.getMaxIntrinsicHeight(width), minSize.height);
+      return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 
@@ -441,29 +479,29 @@ class _RenderInputPadding extends RenderShiftedBox {
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     if (child != null) {
-      child.layout(constraints, parentUsesSize: true);
-      final double height = math.max(child.size.width, minSize.width);
-      final double width = math.max(child.size.height, minSize.height);
+      child!.layout(constraints, parentUsesSize: true);
+      final double height = math.max(child!.size.width, minSize.width);
+      final double width = math.max(child!.size.height, minSize.height);
       size = constraints.constrain(Size(height, width));
-      final BoxParentData childParentData = child.parentData as BoxParentData;
-      childParentData.offset = Alignment.center.alongOffset(size - child.size as Offset);
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
     } else {
       size = Size.zero;
     }
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
     if (super.hitTest(result, position: position)) {
       return true;
     }
-    final Offset center = child.size.center(Offset.zero);
+    final Offset center = child!.size.center(Offset.zero);
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(center),
       position: center,
-      hitTest: (BoxHitTestResult result, Offset position) {
+      hitTest: (BoxHitTestResult result, Offset? position) {
         assert(position == center);
-        return child.hitTest(result, position: center);
+        return child!.hitTest(result, position: center);
       },
     );
   }

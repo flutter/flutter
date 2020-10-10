@@ -119,11 +119,8 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Navigator(
-        pages: <Page<void>>[
-          TransitionBuilderPage<void>(
-            name: '/',
-            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => const Placeholder(),
-          ),
+        pages: const <Page<void>>[
+          TestPage(name: '/'),
         ],
         onPopPage: (Route<void> route, void result) => false,
       )
@@ -134,15 +131,9 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Navigator(
-        pages: <Page<void>>[
-          TransitionBuilderPage<void>(
-            name: '/',
-            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => const Placeholder(),
-          ),
-          TransitionBuilderPage<void>(
-            name: '/abc',
-            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => const Placeholder(),
-          ),
+        pages: const <Page<void>>[
+          TestPage(name: '/'),
+          TestPage(name: '/abc',),
         ],
         onPopPage: (Route<void> route, void result) => false,
       )
@@ -370,4 +361,16 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   Widget build(BuildContext context) => builder(context, routeInformation);
+}
+
+class TestPage extends Page<void> {
+  const TestPage({LocalKey key, String name}) : super(key: key, name: name);
+
+  @override
+  Route<void> createRoute(BuildContext context) {
+    return PageRouteBuilder<void>(
+      settings: this,
+      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => const Placeholder(),
+    );
+  }
 }

@@ -286,7 +286,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerEvent event) {
     startTrackingPointer(event.pointer, event.transform);
-    _velocityTrackers[event.pointer] = VelocityTracker();
+    _velocityTrackers[event.pointer] = VelocityTracker.withKind(event.kind);
     if (_state == _ScaleState.ready) {
       _state = _ScaleState.possible;
       _initialSpan = 0.0;
@@ -329,7 +329,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     _update();
 
     if (!didChangeConfiguration || _reconfigure(event.pointer))
-      _advanceStateMachine(shouldStartIfAccepted);
+      _advanceStateMachine(shouldStartIfAccepted, event.kind);
     stopTrackingIfPointerNoLongerDown(event);
   }
 
@@ -414,14 +414,14 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     return true;
   }
 
-  void _advanceStateMachine(bool shouldStartIfAccepted) {
+  void _advanceStateMachine(bool shouldStartIfAccepted, PointerDeviceKind pointerDeviceKind) {
     if (_state == _ScaleState.ready)
       _state = _ScaleState.possible;
 
     if (_state == _ScaleState.possible) {
       final double spanDelta = (_currentSpan - _initialSpan).abs();
       final double focalPointDelta = (_currentFocalPoint - _initialFocalPoint).distance;
-      if (spanDelta > kScaleSlop || focalPointDelta > kPanSlop)
+      if (spanDelta > computeScaleSlop(pointerDeviceKind) || focalPointDelta > computePanSlop(pointerDeviceKind))
         resolve(GestureDisposition.accepted);
     } else if (_state.index >= _ScaleState.accepted.index) {
       resolve(GestureDisposition.accepted);

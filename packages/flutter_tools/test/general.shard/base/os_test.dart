@@ -29,7 +29,7 @@ void main() {
 
   OperatingSystemUtils createOSUtils(Platform platform) {
     return OperatingSystemUtils(
-      fileSystem: MemoryFileSystem(),
+      fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: platform,
       processManager: mockProcessManager,
@@ -95,6 +95,29 @@ void main() {
     });
   });
 
+  testWithoutContext('macos name', () async {
+    when(mockProcessManager.runSync(
+      <String>['sw_vers', '-productName'],
+    )).thenReturn(ProcessResult(0, 0, 'product', ''));
+    when(mockProcessManager.runSync(
+      <String>['sw_vers', '-productVersion'],
+    )).thenReturn(ProcessResult(0, 0, 'version', ''));
+    when(mockProcessManager.runSync(
+      <String>['sw_vers', '-buildVersion'],
+    )).thenReturn(ProcessResult(0, 0, 'build', ''));
+    when(mockProcessManager.runSync(
+      <String>['uname', '-m'],
+    )).thenReturn(ProcessResult(0, 0, 'arch', ''));
+    final MockFileSystem fileSystem = MockFileSystem();
+    final OperatingSystemUtils utils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'macos'),
+      processManager: mockProcessManager,
+    );
+    expect(utils.name, 'product version build arch');
+  });
+
   testWithoutContext('If unzip fails, include stderr in exception text', () {
     const String exceptionMessage = 'Something really bad happened.';
     when(mockProcessManager.runSync(
@@ -117,6 +140,55 @@ void main() {
     expect(
       () => osUtils.unzip(mockFile, mockDirectory),
       throwsProcessException(message: exceptionMessage),
+    );
+  });
+
+  testWithoutContext('If unzip throws an ArgumentError, display an install message', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    when(mockProcessManager.runSync(
+      <String>['unzip', '-o', '-q', 'foo.zip', '-d', fileSystem.currentDirectory.path],
+    )).thenThrow(ArgumentError());
+
+    final OperatingSystemUtils linuxOsUtils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'linux'),
+      processManager: mockProcessManager,
+    );
+
+    expect(
+      () => linuxOsUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+      throwsToolExit(
+        message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
+        'Consider running "sudo apt-get install unzip".'),
+    );
+
+    final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'macos'),
+      processManager: mockProcessManager,
+    );
+
+    expect(
+      () => macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+      throwsToolExit
+      (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
+        'Consider running "brew install unzip".'),
+    );
+
+    final OperatingSystemUtils unknownOsUtils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'fuchsia'),
+      processManager: mockProcessManager,
+    );
+
+    expect(
+      () => unknownOsUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+      throwsToolExit
+      (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
+        'Please install unzip.'),
     );
   });
 

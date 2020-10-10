@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../flutter_test_alternative.dart';
@@ -53,8 +51,16 @@ void main() {
   });
 
   test('RenderShaderMask getters and setters', () {
-    final ShaderCallback callback1 = (Rect bounds) => null;
-    final ShaderCallback callback2 = (Rect bounds) => null;
+    final ShaderCallback callback1 = (Rect bounds) {
+      assert(false); // The test should not call this.
+      const LinearGradient gradient = LinearGradient(colors: <Color>[Colors.red]);
+      return gradient.createShader(Rect.zero);
+    };
+    final ShaderCallback callback2 = (Rect bounds) {
+      assert(false); // The test should not call this.
+      const LinearGradient gradient = LinearGradient(colors: <Color>[Colors.blue]);
+      return gradient.createShader(Rect.zero);
+    };
     final RenderShaderMask box = RenderShaderMask(shaderCallback: callback1);
     expect(box.shaderCallback, equals(callback1));
     box.shaderCallback = callback2;

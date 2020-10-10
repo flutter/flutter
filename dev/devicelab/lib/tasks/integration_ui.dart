@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import '../framework/adb.dart';
-import '../framework/framework.dart';
+import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 Future<TaskResult> runEndToEndTests() async {

@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -885,8 +884,8 @@ void main() {
 
   testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by tap', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
-    RangeValues startValues;
-    RangeValues endValues;
+    RangeValues? startValues;
+    RangeValues? endValues;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -933,18 +932,18 @@ void main() {
     expect(startValues, null);
     expect(endValues, null);
     await tester.dragFrom(leftTarget, (bottomRight - topLeft) * 0.2);
-    expect(startValues.start, moreOrLessEquals(30, epsilon: 1));
-    expect(startValues.end, moreOrLessEquals(70, epsilon: 1));
+    expect(startValues!.start, moreOrLessEquals(30, epsilon: 1));
+    expect(startValues!.end, moreOrLessEquals(70, epsilon: 1));
     expect(values.start, moreOrLessEquals(50, epsilon: 1));
     expect(values.end, moreOrLessEquals(70, epsilon: 1));
-    expect(endValues.start, moreOrLessEquals(50, epsilon: 1));
-    expect(endValues.end, moreOrLessEquals(70, epsilon: 1));
+    expect(endValues!.start, moreOrLessEquals(50, epsilon: 1));
+    expect(endValues!.end, moreOrLessEquals(70, epsilon: 1));
   });
 
   testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by drag', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
-    RangeValues startValues;
-    RangeValues endValues;
+    late RangeValues startValues;
+    late RangeValues endValues;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1028,14 +1027,14 @@ void main() {
   }
 
   Widget _buildThemedApp({
-    ThemeData theme,
-    Color activeColor,
-    Color inactiveColor,
-    int divisions,
+    required ThemeData theme,
+    Color? activeColor,
+    Color? inactiveColor,
+    int? divisions,
     bool enabled = true,
   }) {
     RangeValues values = const RangeValues(0.5, 0.75);
-    final ValueChanged<RangeValues> onChanged = !enabled ? null : (RangeValues newValues) {
+    final ValueChanged<RangeValues>? onChanged = !enabled ? null : (RangeValues newValues) {
       values = newValues;
     };
     return MaterialApp(
@@ -1286,12 +1285,12 @@ void main() {
     RangeValues values = const RangeValues(0.5, 0.75);
 
     Widget buildApp({
-      Color activeColor,
-      Color inactiveColor,
-      int divisions,
+      Color? activeColor,
+      Color? inactiveColor,
+      int? divisions,
       bool enabled = true,
     }) {
-      final ValueChanged<RangeValues> onChanged = !enabled ? null : (RangeValues newValues) {
+      final ValueChanged<RangeValues>? onChanged = !enabled ? null : (RangeValues newValues) {
         values = newValues;
       };
       return MaterialApp(
@@ -1344,9 +1343,9 @@ void main() {
     const Color fillColor = Color(0xf55f5f5f);
 
     Widget buildApp({
-      Color activeColor,
-      Color inactiveColor,
-      int divisions,
+      Color? activeColor,
+      Color? inactiveColor,
+      int? divisions,
       bool enabled = true,
     }) {
       final ValueChanged<RangeValues> onChanged = (RangeValues newValues) {
@@ -1373,12 +1372,12 @@ void main() {
                   ElevatedButton(
                     child: const Text('Next'),
                     onPressed: () {
-                      Navigator.of(context).pushReplacement(
+                      Navigator.of(context)!.pushReplacement(
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
                             return ElevatedButton(
                               child: const Text('Inner page'),
-                              onPressed: () { Navigator.of(context).pop(); },
+                              onPressed: () { Navigator.of(context)!.pop(); },
                             );
                           },
                         ),
@@ -1914,5 +1913,48 @@ void main() {
           ..circle(x: -12.0, y: 5.0, radius: 10.0,)
           ..circle(x: 0.0, y: 5.0, radius: 10.0,)
     );
+  });
+
+  testWidgets('Update the divisions and values at the same time for RangeSlider', (WidgetTester tester) async {
+    // Regress test for https://github.com/flutter/flutter/issues/65943
+    Widget buildFrame(double maxValue) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: RangeSlider(
+              values: const RangeValues(5, 8),
+              max: maxValue,
+              divisions: maxValue.toInt(),
+              onChanged: (RangeValues newValue) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(10));
+
+    // _RenderRangeSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    // Update the divisions from 10 to 15, the thumbs should be paint at the correct position.
+    await tester.pumpWidget(buildFrame(15));
+    await tester.pumpAndSettle(); // Finish the animation.
+
+    late Rect activeTrackRect;
+    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
+      if (method != #drawRect)
+        return false;
+      activeTrackRect = arguments[0] as Rect;
+      return true;
+    }));
+
+    // The 1st thumb should at one-third(5 / 15) of the Slider.
+    // The 2nd thumb should at (8 / 15) of the Slider.
+    // The left of the active track shape is the position of the 1st thumb.
+    // The right of the active track shape is the position of the 2nd thumb.
+    // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
+    expect(nearEqual(activeTrackRect.left, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
+    expect(nearEqual(activeTrackRect.right, (800.0 - 24.0 - 24.0) * (8 / 15) + 24.0, 0.01), true);
   });
 }
