@@ -124,12 +124,12 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.onDragEnd,
     this.onDragCompleted,
     this.ignoringFeedbackSemantics = true,
+    this.rootOverlay = false,
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
        super(key: key);
-
 
   /// The data that will be dropped by this draggable.
   final T? data;
@@ -261,6 +261,15 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// the tree (i.e. [State.mounted] is true).
   final DragEndCallback? onDragEnd;
 
+  /// Whether the feedback widget will be put on the root [Overlay].
+  ///
+  /// When false, the feedback widget will be put on the closest [Overlay]. When
+  /// true, the [feedback] widget will be put on the farthest (aka root)
+  /// [Overlay].
+  ///
+  /// Defaults to false.
+  final bool rootOverlay;
+
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
   /// Subclasses can override this function to customize when they start
@@ -376,7 +385,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   _DragAvatar<T>? _startDrag(Offset position) {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
       return null;
-    Offset dragStartPoint;
+    final Offset dragStartPoint;
     switch (widget.dragAnchor) {
       case DragAnchor.child:
         final RenderBox renderObject = context.findRenderObject()! as RenderBox;
@@ -390,7 +399,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       _activeCount += 1;
     });
     final _DragAvatar<T> avatar = _DragAvatar<T>(
-      overlayState: Overlay.of(context, debugRequiredFor: widget)!,
+      overlayState: Overlay.of(context, debugRequiredFor: widget, rootOverlay: widget.rootOverlay)!,
       data: widget.data,
       axis: widget.axis,
       initialPosition: position,
@@ -427,7 +436,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
 
   @override
   Widget build(BuildContext context) {
-    assert(Overlay.of(context, debugRequiredFor: widget) != null);
+    assert(Overlay.of(context, debugRequiredFor: widget, rootOverlay: widget.rootOverlay) != null);
     final bool canDrag = widget.maxSimultaneousDrags == null ||
                          _activeCount < widget.maxSimultaneousDrags!;
     final bool showChild = _activeCount == 0 || widget.childWhenDragging == null;

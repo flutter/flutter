@@ -40,7 +40,7 @@ typedef _ContextMenuPreviewBuilderChildless = Widget Function(
 // paintBounds in global coordinates.
 Rect _getRect(GlobalKey globalKey) {
   assert(globalKey.currentContext != null);
-  final RenderBox renderBoxContainer = globalKey.currentContext!.findRenderObject() as RenderBox;
+  final RenderBox renderBoxContainer = globalKey.currentContext!.findRenderObject()! as RenderBox;
   final Offset containerOffset = renderBoxContainer.localToGlobal(
     renderBoxContainer.paintBounds.topLeft,
   );

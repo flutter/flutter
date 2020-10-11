@@ -119,12 +119,6 @@ class FuchsiaKernelCompiler {
       ],
       '-Ddart.developer.causal_async_stacks=${buildInfo.isDebug}',
 
-      // Use bytecode and drop the ast in JIT release mode.
-      if (buildInfo.isJitRelease) ...<String>[
-        '--gen-bytecode',
-        '--drop-ast',
-      ],
-
       for (final String dartDefine in buildInfo.dartDefines)
         '-D$dartDefine',
     ];

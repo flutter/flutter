@@ -17,7 +17,6 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
-import 'globals.dart' as globals;
 
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
@@ -153,20 +152,17 @@ List<String> buildModeOptions(BuildMode mode) {
       return <String>[
         '-Ddart.vm.profile=false',
         '-Ddart.vm.product=false',
-        '--bytecode-options=source-positions,local-var-info,debugger-stops,instance-field-initializers,keep-unreachable-code,avoid-closure-call-instructions',
         '--enable-asserts',
       ];
     case BuildMode.profile:
       return <String>[
         '-Ddart.vm.profile=true',
         '-Ddart.vm.product=false',
-        '--bytecode-options=source-positions',
       ];
     case BuildMode.release:
       return <String>[
         '-Ddart.vm.profile=false',
         '-Ddart.vm.product=true',
-        '--bytecode-options=source-positions',
       ];
   }
   throw Exception('Unknown BuildMode: $mode');
@@ -416,8 +412,6 @@ abstract class ResidentCompiler {
     List<String> dartDefines,
     String librariesSpec,
     @required Platform platform,
-    // Deprecated
-    List<String> experimentalFlags,
   }) = DefaultResidentCompiler;
 
   // TODO(jonahwilliams): find a better way to configure additional file system
@@ -517,12 +511,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.platformDill,
     List<String> dartDefines,
     this.librariesSpec,
-    // Deprecated
-    List<String> experimentalFlags, // ignore: avoid_unused_constructor_parameters
   }) : assert(sdkRoot != null),
-       _logger = logger ?? globals.logger,
-       _processManager = processManager ?? globals.processManager,
-       _artifacts = artifacts ?? globals.artifacts,
+       _logger = logger,
+       _processManager = processManager,
+       _artifacts = artifacts,
        _stdoutHandler = StdoutHandler(logger: logger),
        _platform = platform,
        dartDefines = dartDefines ?? const <String>[],

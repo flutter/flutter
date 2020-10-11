@@ -22,15 +22,28 @@ void main() {
     ]);
 
     // Development tools.
-    expect(result.stdout, isNot(contains('ide-config')));
     expect(result.stdout, isNot(contains('update-packages')));
-    expect(result.stdout, isNot(contains('inject-plugins')));
 
     // Deprecated.
     expect(result.stdout, isNot(contains('make-host-app-editable')));
 
     // Only printed by verbose tool.
     expect(result.stdout, isNot(contains('exiting with code 0')));
+  });
+
+  testWithoutContext('Flutter help is shown with -? command line argument', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      '-?',
+    ]);
+
+    // Development tools.
+    expect(result.stdout, contains(
+      'Run "flutter help <command>" for more information about a command.\n'
+      'Run "flutter help -v" for verbose help output, including less commonly used options.'
+    ));
   });
 
   testWithoutContext('flutter doctor is not verbose', () async {

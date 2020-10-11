@@ -483,7 +483,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     final double currentValue = _state.position.value;
     final double currentReactionValue = _state._reaction.value;
 
-    double visualPosition;
+    final double visualPosition;
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - currentValue;
@@ -524,10 +524,12 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       thumbCenterY + CupertinoThumbPainter.radius,
     );
 
-    context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (PaintingContext innerContext, Offset offset) {
+    _clipRRectLayer = context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (PaintingContext innerContext, Offset offset) {
       const CupertinoThumbPainter.switchThumb().paint(innerContext.canvas, thumbBounds);
-    });
+    }, oldLayer: _clipRRectLayer);
   }
+
+  ClipRRectLayer? _clipRRectLayer;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {

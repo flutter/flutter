@@ -49,7 +49,6 @@ const List<Target> _kDefaultTargets = <Target>[
   CopyFlutterBundle(),
   // Android targets,
   DebugAndroidApplication(),
-  FastStartAndroidApplication(),
   ProfileAndroidApplication(),
   // Android ABI specific AOT rules.
   androidArmProfileBundle,

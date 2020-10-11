@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -886,8 +884,8 @@ void main() {
 
   testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by tap', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
-    RangeValues startValues;
-    RangeValues endValues;
+    RangeValues? startValues;
+    RangeValues? endValues;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -934,18 +932,18 @@ void main() {
     expect(startValues, null);
     expect(endValues, null);
     await tester.dragFrom(leftTarget, (bottomRight - topLeft) * 0.2);
-    expect(startValues.start, moreOrLessEquals(30, epsilon: 1));
-    expect(startValues.end, moreOrLessEquals(70, epsilon: 1));
+    expect(startValues!.start, moreOrLessEquals(30, epsilon: 1));
+    expect(startValues!.end, moreOrLessEquals(70, epsilon: 1));
     expect(values.start, moreOrLessEquals(50, epsilon: 1));
     expect(values.end, moreOrLessEquals(70, epsilon: 1));
-    expect(endValues.start, moreOrLessEquals(50, epsilon: 1));
-    expect(endValues.end, moreOrLessEquals(70, epsilon: 1));
+    expect(endValues!.start, moreOrLessEquals(50, epsilon: 1));
+    expect(endValues!.end, moreOrLessEquals(70, epsilon: 1));
   });
 
   testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by drag', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
-    RangeValues startValues;
-    RangeValues endValues;
+    late RangeValues startValues;
+    late RangeValues endValues;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1029,14 +1027,14 @@ void main() {
   }
 
   Widget _buildThemedApp({
-    ThemeData theme,
-    Color activeColor,
-    Color inactiveColor,
-    int divisions,
+    required ThemeData theme,
+    Color? activeColor,
+    Color? inactiveColor,
+    int? divisions,
     bool enabled = true,
   }) {
     RangeValues values = const RangeValues(0.5, 0.75);
-    final ValueChanged<RangeValues> onChanged = !enabled ? null : (RangeValues newValues) {
+    final ValueChanged<RangeValues>? onChanged = !enabled ? null : (RangeValues newValues) {
       values = newValues;
     };
     return MaterialApp(
@@ -1287,12 +1285,12 @@ void main() {
     RangeValues values = const RangeValues(0.5, 0.75);
 
     Widget buildApp({
-      Color activeColor,
-      Color inactiveColor,
-      int divisions,
+      Color? activeColor,
+      Color? inactiveColor,
+      int? divisions,
       bool enabled = true,
     }) {
-      final ValueChanged<RangeValues> onChanged = !enabled ? null : (RangeValues newValues) {
+      final ValueChanged<RangeValues>? onChanged = !enabled ? null : (RangeValues newValues) {
         values = newValues;
       };
       return MaterialApp(
@@ -1345,9 +1343,9 @@ void main() {
     const Color fillColor = Color(0xf55f5f5f);
 
     Widget buildApp({
-      Color activeColor,
-      Color inactiveColor,
-      int divisions,
+      Color? activeColor,
+      Color? inactiveColor,
+      int? divisions,
       bool enabled = true,
     }) {
       final ValueChanged<RangeValues> onChanged = (RangeValues newValues) {
@@ -1374,12 +1372,12 @@ void main() {
                   ElevatedButton(
                     child: const Text('Next'),
                     onPressed: () {
-                      Navigator.of(context).pushReplacement(
+                      Navigator.of(context)!.pushReplacement(
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
                             return ElevatedButton(
                               child: const Text('Inner page'),
-                              onPressed: () { Navigator.of(context).pop(); },
+                              onPressed: () { Navigator.of(context)!.pop(); },
                             );
                           },
                         ),
@@ -1943,7 +1941,7 @@ void main() {
     await tester.pumpWidget(buildFrame(15));
     await tester.pumpAndSettle(); // Finish the animation.
 
-    Rect activeTrackRect;
+    late Rect activeTrackRect;
     expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
       if (method != #drawRect)
         return false;

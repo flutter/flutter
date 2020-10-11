@@ -433,7 +433,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     if (findChildIndexCallback == null)
       return null;
     assert(key != null);
-    Key childKey;
+    final Key childKey;
     if (key is _SaltedValueKey) {
       final _SaltedValueKey saltedValueKey = key;
       childKey = saltedValueKey.value;
@@ -665,7 +665,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   @override
   int? findIndexByKey(Key key) {
     assert(key != null);
-    Key childKey;
+    final Key childKey;
     if (key is _SaltedValueKey) {
       final _SaltedValueKey saltedValueKey = key;
       childKey = saltedValueKey.value;
@@ -1107,7 +1107,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           if (childParentData != null)
             childParentData.layoutOffset = null;
 
-          newChildren[newIndex] = _childElements[index]!;
+          newChildren[newIndex] = _childElements[index];
           // We need to make sure the original index gets processed.
           newChildren.putIfAbsent(index, () => null);
           // We do not want the remapped child to get deactivated during processElement.
@@ -1366,7 +1366,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     _childElements.values.cast<Element>().where((Element child) {
       final SliverMultiBoxAdaptorParentData parentData = child.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
-      double itemExtent;
+      final double itemExtent;
       switch (renderObject.constraints.axis) {
         case Axis.horizontal:
           itemExtent = child.renderObject!.paintBounds.width;
@@ -1670,7 +1670,7 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
 }
 
 // Return a Widget for the given Exception
-Widget _createErrorWidget(dynamic exception, StackTrace stackTrace) {
+Widget _createErrorWidget(Object exception, StackTrace stackTrace) {
   final FlutterErrorDetails details = FlutterErrorDetails(
     exception: exception,
     stack: stackTrace,

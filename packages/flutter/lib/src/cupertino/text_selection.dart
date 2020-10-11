@@ -324,7 +324,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
       .loosen();
 
     child!.layout(heightConstraint.enforce(enforcedConstraint), parentUsesSize: true,);
-    final _ToolbarParentData childParentData = child!.parentData as _ToolbarParentData;
+    final _ToolbarParentData childParentData = child!.parentData! as _ToolbarParentData;
 
     // The local x-coordinate of the center of the toolbar.
     final double lowerBound = child!.size.width/2 + _kToolbarScreenPadding;
@@ -337,7 +337,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
 
   // The path is described in the toolbar's coordinate system.
   Path _clipPath() {
-    final _ToolbarParentData childParentData = child!.parentData as _ToolbarParentData;
+    final _ToolbarParentData childParentData = child!.parentData! as _ToolbarParentData;
     final Path rrect = Path()
       ..addRRect(
         RRect.fromRectAndRadius(
@@ -370,16 +370,18 @@ class _ToolbarRenderBox extends RenderShiftedBox {
       return;
     }
 
-    final _ToolbarParentData childParentData = child!.parentData as _ToolbarParentData;
-    context.pushClipPath(
+    final _ToolbarParentData childParentData = child!.parentData! as _ToolbarParentData;
+    _clipPathLayer = context.pushClipPath(
       needsCompositing,
       offset + childParentData.offset,
       Offset.zero & child!.size,
       _clipPath(),
       (PaintingContext innerContext, Offset innerOffset) => innerContext.paintChild(child!, innerOffset),
+      oldLayer: _clipPathLayer
     );
   }
 
+  ClipPathLayer? _clipPathLayer;
   Paint? _debugPaint;
 
   @override
@@ -400,7 +402,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
         ..strokeWidth = 2.0
         ..style = PaintingStyle.stroke;
 
-      final _ToolbarParentData childParentData = child!.parentData as _ToolbarParentData;
+      final _ToolbarParentData childParentData = child!.parentData! as _ToolbarParentData;
       context.canvas.drawPath(_clipPath().shift(offset + childParentData.offset), _debugPaint!);
       return true;
     }());
@@ -789,11 +791,11 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   @override
   void moveRenderObjectChild(RenderObject child, IndexedSlot<Element> oldSlot, IndexedSlot<Element> newSlot) {
     assert(child.parent == renderObject);
-    renderObject.move(child as RenderBox, after: newSlot.value.renderObject as RenderBox);
+    renderObject.move(child as RenderBox, after: newSlot.value.renderObject as RenderBox?);
   }
 
   static bool _shouldPaint(Element child) {
-    return (child.renderObject!.parentData as ToolbarItemsParentData).shouldPaint;
+    return (child.renderObject!.parentData! as ToolbarItemsParentData).shouldPaint;
   }
 
   @override
@@ -986,7 +988,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       i++;
       final RenderBox child = renderObjectChild as RenderBox;
       final ToolbarItemsParentData childParentData =
-          child.parentData as ToolbarItemsParentData;
+          child.parentData! as ToolbarItemsParentData;
       childParentData.shouldPaint = false;
 
       // Skip slotted children and children on pages after the visible page.
@@ -1046,11 +1048,11 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     // Position page nav buttons.
     if (currentPage > 0) {
       final ToolbarItemsParentData nextButtonParentData =
-          _nextButton!.parentData as ToolbarItemsParentData;
+          _nextButton!.parentData! as ToolbarItemsParentData;
       final ToolbarItemsParentData nextButtonDisabledParentData =
-          _nextButtonDisabled!.parentData as ToolbarItemsParentData;
+          _nextButtonDisabled!.parentData! as ToolbarItemsParentData;
       final ToolbarItemsParentData backButtonParentData =
-          _backButton!.parentData as ToolbarItemsParentData;
+          _backButton!.parentData! as ToolbarItemsParentData;
       // The forward button always shows if there is more than one page, even on
       // the last page (it's just disabled).
       if (page == currentPage) {
@@ -1081,7 +1083,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
   void paint(PaintingContext context, Offset offset) {
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
 
       if (childParentData.shouldPaint) {
         final Offset childOffset = childParentData.offset + offset;
@@ -1103,7 +1105,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       return false;
     }
     final ToolbarItemsParentData childParentData =
-        child.parentData as ToolbarItemsParentData;
+        child.parentData! as ToolbarItemsParentData;
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
@@ -1120,7 +1122,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     // The x, y parameters have the top left of the node's box as the origin.
     RenderBox? child = lastChild;
     while (child != null) {
-      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
 
       // Don't hit test children that aren't shown.
       if (!childParentData.shouldPaint) {
@@ -1199,7 +1201,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
       if (childParentData.shouldPaint) {
         visitor(renderObjectChild);
       }

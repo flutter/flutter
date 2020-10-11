@@ -100,7 +100,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
     // this handler. If the clear button widget recognizes the up event,
     // then do not handle it.
     if (_state._clearGlobalKey.currentContext != null) {
-      final RenderBox renderBox = _state._clearGlobalKey.currentContext!.findRenderObject() as RenderBox;
+      final RenderBox renderBox = _state._clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
       final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
       if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
         return;
@@ -130,6 +130,8 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// text in the field. If the user indicates that they are done typing in the
 /// field (e.g., by pressing a button on the soft keyboard), the text field
 /// calls the [onSubmitted] callback.
+///
+/// {@macro flutter.widgets.editableText.complexCharacters}
 ///
 /// To control the text that is displayed in the text field, use the
 /// [controller]. For example, to set the initial value of the text field, use
@@ -703,10 +705,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     super.dispose();
   }
 
-  EditableTextState? get _editableText => editableTextKey.currentState;
+  EditableTextState get _editableText => editableTextKey.currentState!;
 
   void _requestKeyboard() {
-    _editableText?.requestKeyboard();
+    _editableText.requestKeyboard();
   }
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
@@ -730,7 +732,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     if (cause == SelectionChangedCause.longPress) {
-      _editableText?.bringIntoView(selection.base);
+      _editableText.bringIntoView(selection.base);
     }
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
@@ -903,7 +905,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final Color? decorationColor = CupertinoDynamicColor.resolve(widget.decoration?.color, context);
 
     final BoxBorder? border = widget.decoration?.border;
-    Border resolvedBorder = border as Border;
+    Border? resolvedBorder = border as Border?;
     if (border is Border) {
       BorderSide resolveBorderSide(BorderSide side) {
         return side == BorderSide.none
