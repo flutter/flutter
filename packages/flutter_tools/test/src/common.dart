@@ -8,10 +8,13 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:file/local.dart' as local_fs;
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -392,6 +395,7 @@ class FakeVmServiceStreamResponse implements VmServiceExpectation {
 class TestFlutterCommandRunner extends FlutterCommandRunner {
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
+    Cache.flutterRoot ??= getFlutterRoot();
     final Logger topLevelLogger = globals.logger;
     final Map<Type, dynamic> contextOverrides = <Type, dynamic>{
       if (topLevelResults['verbose'] as bool)

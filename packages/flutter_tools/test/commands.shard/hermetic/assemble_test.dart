@@ -19,7 +19,11 @@ import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  Cache.disableLocking();
+  setUpAll(() {
+    Cache.disableLocking();
+    Cache.flutterRoot = '';
+  });
+
   final Testbed testbed = Testbed(overrides: <Type, Generator>{
     BuildSystem: ()  => MockBuildSystem(),
     Cache: () => FakeCache(),
