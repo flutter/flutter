@@ -1,4 +1,4 @@
-Signature: c252752f32283d7bfc5847ad8abb5106
+Signature: 1ddc21dfb8c528f98d2a0fc2bdf73821
 
 UNUSED LICENSES:
 
@@ -2781,7 +2781,6 @@ FILE: ../../../third_party/skia/src/core/SkDrawLooper.cpp
 FILE: ../../../third_party/skia/src/core/SkFontStream.h
 FILE: ../../../third_party/skia/src/core/SkGpuBlurUtils.cpp
 FILE: ../../../third_party/skia/src/core/SkGpuBlurUtils.h
-FILE: ../../../third_party/skia/src/core/SkLegacyGpuBlurUtils.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixUtils.h
 FILE: ../../../third_party/skia/src/core/SkMessageBus.h
 FILE: ../../../third_party/skia/src/core/SkMipmap.cpp
