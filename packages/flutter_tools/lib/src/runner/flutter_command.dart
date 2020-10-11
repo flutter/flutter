@@ -775,6 +775,10 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kBundleSkSLPathOption)
       : null;
 
+    if (bundleSkSLPath != null && !globals.fs.isFileSync(bundleSkSLPath)) {
+      throwToolExit('No SkSL shader bundle found at $bundleSkSLPath.');
+    }
+
     final String performanceMeasurementFile = argParser.options.containsKey(FlutterOptions.kPerformanceMeasurementFile)
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
