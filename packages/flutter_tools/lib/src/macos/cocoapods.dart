@@ -67,7 +67,7 @@ enum CocoaPodsStatus {
   brokenInstall,
 }
 
-/// Cocoapods is a depenency management solution for iOS and macOS applications.
+/// Cocoapods is a dependency management solution for iOS and macOS applications.
 ///
 /// Cocoapods is generally installed via ruby gems and interacted with via
 /// the `pod` CLI command.

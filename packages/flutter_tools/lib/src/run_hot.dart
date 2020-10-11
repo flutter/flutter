@@ -536,7 +536,7 @@ class HotRunner extends ResidentRunner {
 
       // The engine handles killing and recreating isolates that it has spawned
       // ("uiIsolates"). The isolates that were spawned from these uiIsolates
-      // will not be restared, and so they must be manually killed.
+      // will not be restarted, and so they must be manually killed.
       final vm_service.VM vm = await device.vmService.getVM();
       for (final vm_service.IsolateRef isolateRef in vm.isolates) {
         if (uiIsolatesIds.contains(isolateRef.id)) {
@@ -570,7 +570,7 @@ class HotRunner extends ResidentRunner {
         try {
           await device.vmService.streamListen('Isolate');
         } on vm_service.RPCError {
-          // Do nothing, we're already subcribed.
+          // Do nothing, we're already subscribed.
         }
         isolateNotifications.add(
           device.vmService.onIsolateEvent.firstWhere((vm_service.Event event) {

@@ -77,7 +77,7 @@ class FlutterVersion {
     _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
   }
 
-  /// Fetchs tags from the upstream Flutter repository and re-calculates the
+  /// Fetches tags from the upstream Flutter repository and re-calculates the
   /// version.
   ///
   /// This carries a performance penalty, and should only be called when the
@@ -259,7 +259,7 @@ class FlutterVersion {
       );
     } on VersionCheckError catch (error) {
       if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
-        globals.logger.printError('Warning: the Flutter git upstream was overriden '
+        globals.logger.printError('Warning: the Flutter git upstream was overridden '
         'by the environment variable FLUTTER_GIT_URL = $_flutterGit');
       }
       globals.logger.printError(error.toString());

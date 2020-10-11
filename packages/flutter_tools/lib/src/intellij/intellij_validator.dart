@@ -251,9 +251,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       for (final Directory dir in installDirs) {
         checkForIntelliJ(dir);
         if (!dir.path.endsWith('.app')) {
-          for (final FileSystemEntity subdir in dir.listSync()) {
-            if (subdir is Directory) {
-              checkForIntelliJ(subdir);
+          for (final FileSystemEntity subdirectory in dir.listSync()) {
+            if (subdirectory is Directory) {
+              checkForIntelliJ(subdirectory);
             }
           }
         }
