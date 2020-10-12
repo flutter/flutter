@@ -2213,7 +2213,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     if (value == _value) {
-      // Please note that the setter will not notify subscribers if set duplicate values.
       // If the value was modified by the formatter, the remote should be notified to keep in sync,
       // if not modified, it will short-circuit.
       _updateRemoteEditingValueIfNeeded();

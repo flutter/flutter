@@ -4998,7 +4998,7 @@ void main() {
     );
   });
 
-  testWidgets('Synchronous test of local and remote editing values (#2)', (WidgetTester tester) async {
+  testWidgets('Send text input state to engine when the input formatter rejects user input', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/67828
     final List<MethodCall> log = <MethodCall>[];
     SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -5055,19 +5055,12 @@ void main() {
       text: 'I will be modified by the formatter.',
     ));
     expect(log.length, 1);
-    MethodCall methodCall = log[0];
-    expect(
-      methodCall,
-      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
-        'text': 'Flutter is the best!',
-        'selectionBase': -1,
-        'selectionExtent': -1,
-        'selectionAffinity': 'TextAffinity.downstream',
-        'selectionIsDirectional': false,
-        'composingBase': -1,
-        'composingExtent': -1,
-      }),
-    );
+    expect(log, contains(matchesMethodCall(
+      'TextInput.setEditingState',
+      args: allOf(
+        containsPair('text', 'Flutter is the best!'),
+      ),
+    )));
 
     log.clear();
 
@@ -5075,19 +5068,12 @@ void main() {
       text: 'I will be modified by the formatter.',
     ));
     expect(log.length, 1);
-    methodCall = log[0];
-    expect(
-      methodCall,
-      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
-        'text': 'Flutter is the best!',
-        'selectionBase': -1,
-        'selectionExtent': -1,
-        'selectionAffinity': 'TextAffinity.downstream',
-        'selectionIsDirectional': false,
-        'composingBase': -1,
-        'composingExtent': -1,
-      }),
-    );
+    expect(log, contains(matchesMethodCall(
+      'TextInput.setEditingState',
+      args: allOf(
+        containsPair('text', 'Flutter is the best!'),
+      ),
+    )));
   });
 
   testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {
