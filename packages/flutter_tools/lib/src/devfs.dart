@@ -507,6 +507,9 @@ class DevFS {
     // this will produce a full dill. Subsequent invocations will produce incremental
     // dill files that depend on the invalidated files.
     _logger.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
+
+    // Await the compiler response after checking if the bundle is updated. This allows the file
+    // stating to be done while waiting for the frontend_server response.
     final Future<CompilerOutput> pendingCompilerOutput = generator.recompile(
       mainUri,
       invalidatedFiles,
@@ -519,6 +522,8 @@ class DevFS {
       final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
       final String assetDirectory = getAssetBuildDirectory();
       bundle.entries.forEach((String archivePath, DevFSContent content) {
+        // If the content is backed by a real file, isModified will file stat and return true if
+        // it was modified since the last time this was called.
         if (!content.isModified || bundleFirstUpload) {
           return;
         }
