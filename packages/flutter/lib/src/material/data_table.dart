@@ -689,8 +689,6 @@ class DataTable extends StatelessWidget {
   static const double _dividerThickness = 1.0;
 
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
-  static const Color _grey100Opacity = Color(0x0A000000); // Grey 100 as opacity instead of solid color
-  static const Color _grey300Opacity = Color(0x1E000000); // Dark theme variant is just a guess.
 
   Widget _buildCheckbox({
     required BuildContext context,
@@ -862,13 +860,8 @@ class DataTable extends StatelessWidget {
       ?? theme.dataTableTheme.dataRowColor;
     final MaterialStateProperty<Color?> defaultRowColor = MaterialStateProperty.resolveWith(
       (Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
-          // The color has to be transparent so you can see the ink on
-          // the [Material].
-          // TODO(perclasson): Align with Material specs, use translucent primary color: https://github.com/flutter/flutter/issues/64314.
-          return (Theme.of(context)!.brightness == Brightness.light) ?
-            _grey100Opacity : _grey300Opacity;
-        }
+        if (states.contains(MaterialState.selected))
+          return theme.colorScheme.primary.withOpacity(0.08);
         return null;
       },
     );
