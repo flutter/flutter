@@ -1007,7 +1007,6 @@ void main() {
   });
 
   testWithoutContext('Process manager can run will return false if the executable does not exist', () {
-    int whichCalled = 0;
     final FileSystem fileSystem = MemoryFileSystem.test();
     final ProcessManager processManager = setUpProcessManager(
       linuxPlatform,
@@ -1022,7 +1021,6 @@ void main() {
         String workingDirectory,
       }) {
         if (executable == 'which') {
-          whichCalled += 1;
           return ProcessResult(0, 0, 'bar/foo\n', '');
         }
         throw ProcessException(executable, arguments, '', 2);
@@ -1033,7 +1031,6 @@ void main() {
   });
 
   testWithoutContext('Process manager can run will return true if the executable does exist', () {
-    int whichCalled = 0;
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('bar/foo').createSync(recursive: true);
     final ProcessManager processManager = setUpProcessManager(
@@ -1049,7 +1046,6 @@ void main() {
         String workingDirectory,
       }) {
         if (executable == 'which') {
-          whichCalled += 1;
           return ProcessResult(0, 0, 'bar/foo\n', '');
         }
         throw ProcessException(executable, arguments, '', 2);
