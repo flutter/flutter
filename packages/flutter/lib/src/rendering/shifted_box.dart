@@ -406,9 +406,9 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   void debugPaintSize(PaintingContext context, Offset offset) {
     super.debugPaintSize(context, offset);
     assert(() {
-      Paint paint;
+      final Paint paint;
       if (child != null && !child!.size.isEmpty) {
-        Path path;
+        final Path path;
         paint = Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0
@@ -673,7 +673,7 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
     if (child != null) {
       // Let the child lay itself out at it's "natural" size, but if
       // constrainedAxis is non-null, keep any constraints on that axis.
-      BoxConstraints childConstraints;
+      final BoxConstraints childConstraints;
       if (constrainedAxis != null) {
         switch (constrainedAxis!) {
           case Axis.horizontal:
@@ -911,7 +911,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    double result;
+    final double result;
     if (child == null) {
       result = super.computeMinIntrinsicWidth(height);
     } else { // the following line relies on double.infinity absorption
@@ -923,7 +923,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    double result;
+    final double result;
     if (child == null) {
       result = super.computeMaxIntrinsicWidth(height);
     } else { // the following line relies on double.infinity absorption
@@ -935,7 +935,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    double result;
+    final double result;
     if (child == null) {
       result = super.computeMinIntrinsicHeight(width);
     } else { // the following line relies on double.infinity absorption
@@ -947,7 +947,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    double result;
+    final double result;
     if (child == null) {
       result = super.computeMaxIntrinsicHeight(width);
     } else { // the following line relies on double.infinity absorption

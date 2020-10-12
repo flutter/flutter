@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:matcher/matcher.dart';
 import 'package:mockito/mockito.dart';
 import 'package:fake_async/fake_async.dart';
 
@@ -71,6 +72,133 @@ void main() {
       daemon: false,
       windows: false,
     ), isA<AppRunLogger>());
+  });
+
+  testWithoutContext('DelegatingLogger delegates', () {
+    final FakeLogger fakeLogger = FakeLogger();
+    final DelegatingLogger delegatingLogger = DelegatingLogger(fakeLogger);
+
+    expect(
+      () => delegatingLogger.quiet,
+      _throwsInvocationFor(() => fakeLogger.quiet),
+    );
+
+    expect(
+      () => delegatingLogger.quiet = true,
+      _throwsInvocationFor(() => fakeLogger.quiet = true),
+    );
+
+    expect(
+      () => delegatingLogger.hasTerminal,
+      _throwsInvocationFor(() => fakeLogger.hasTerminal),
+    );
+
+    expect(
+      () => delegatingLogger.isVerbose,
+      _throwsInvocationFor(() => fakeLogger.isVerbose),
+    );
+
+    const String message = 'message';
+    final StackTrace stackTrace = StackTrace.current;
+    const bool emphasis = true;
+    const TerminalColor color = TerminalColor.cyan;
+    const int indent = 88;
+    const int hangingIndent = 52;
+    const bool wrap = true;
+    const bool newline = true;
+    expect(
+      () => delegatingLogger.printError(message,
+        stackTrace: stackTrace,
+        emphasis: emphasis,
+        color: color,
+        indent: indent,
+        hangingIndent: hangingIndent,
+        wrap: wrap,
+      ),
+      _throwsInvocationFor(() => fakeLogger.printError(message,
+        stackTrace: stackTrace,
+        emphasis: emphasis,
+        color: color,
+        indent: indent,
+        hangingIndent: hangingIndent,
+        wrap: wrap,
+      )),
+    );
+
+    expect(
+      () => delegatingLogger.printStatus(message,
+        emphasis: emphasis,
+        color: color,
+        newline: newline,
+        indent: indent,
+        hangingIndent: hangingIndent,
+        wrap: wrap,
+      ),
+      _throwsInvocationFor(() => fakeLogger.printStatus(message,
+        emphasis: emphasis,
+        color: color,
+        newline: newline,
+        indent: indent,
+        hangingIndent: hangingIndent,
+        wrap: wrap,
+      )),
+    );
+
+    expect(
+      () => delegatingLogger.printTrace(message),
+      _throwsInvocationFor(() => fakeLogger.printTrace(message)),
+    );
+
+    final Map<String, dynamic> eventArgs = <String, dynamic>{};
+    expect(
+      () => delegatingLogger.sendEvent(message, eventArgs),
+    _throwsInvocationFor(() => fakeLogger.sendEvent(message, eventArgs)),
+    );
+
+    const Duration timeout = Duration(seconds: 12);
+    const String progressId = 'progressId';
+    const bool multilineOutput = true;
+    const int progressIndicatorPadding = kDefaultStatusPadding * 2;
+    expect(
+      () => delegatingLogger.startProgress(message,
+        timeout: timeout,
+        progressId: progressId,
+        multilineOutput: multilineOutput,
+        progressIndicatorPadding: progressIndicatorPadding,
+      ),
+      _throwsInvocationFor(() => fakeLogger.startProgress(message,
+          timeout: timeout,
+          progressId: progressId,
+          multilineOutput: multilineOutput,
+          progressIndicatorPadding: progressIndicatorPadding,
+      )),
+    );
+
+    expect(
+      () => delegatingLogger.supportsColor,
+      _throwsInvocationFor(() => fakeLogger.supportsColor),
+    );
+
+    expect(
+      () => delegatingLogger.clear(),
+      _throwsInvocationFor(() => fakeLogger.clear()),
+    );
+  });
+
+  testWithoutContext('asLogger finds the correct delegate', () async {
+    final FakeLogger fakeLogger = FakeLogger();
+    final VerboseLogger verboseLogger = VerboseLogger(fakeLogger);
+    final NotifyingLogger notifyingLogger =
+        NotifyingLogger(verbose: true, parent: verboseLogger);
+    expect(asLogger<Logger>(notifyingLogger), notifyingLogger);
+    expect(asLogger<NotifyingLogger>(notifyingLogger), notifyingLogger);
+    expect(asLogger<VerboseLogger>(notifyingLogger), verboseLogger);
+    expect(asLogger<FakeLogger>(notifyingLogger), fakeLogger);
+
+    expect(
+      () => asLogger<AppRunLogger>(notifyingLogger),
+      throwsA(isA<StateError>()),
+    );
   });
 
   group('AppContext', () {
@@ -1079,3 +1207,38 @@ class FakeStopwatchFactory implements StopwatchFactory {
     return stopwatch ?? FakeStopwatch();
   }
 }
+
+/// A fake [Logger] that throws the [Invocation] for any method call.
+class FakeLogger implements Logger {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw invocation;
+}
+
+/// Returns the [Invocation] thrown from a call to [FakeLogger].
+Invocation _invocationFor(dynamic Function() fakeCall) {
+  try {
+    fakeCall();
+  } on Invocation catch (invocation) {
+    return invocation;
+  }
+  throw UnsupportedError('_invocationFor can be used only with Fake objects '
+    'that throw Invocations');
+}
+
+/// Returns a [Matcher] that matches against an expected [Invocation].
+Matcher _matchesInvocation(Invocation expected) {
+  return const TypeMatcher<Invocation>()
+    // Compare Symbol strings instead of comparing Symbols directly for a nicer failure message.
+    .having((Invocation actual) => actual.memberName.toString(), 'memberName', expected.memberName.toString())
+    .having((Invocation actual) => actual.isGetter, 'isGetter', expected.isGetter)
+    .having((Invocation actual) => actual.isSetter, 'isSetter', expected.isSetter)
+    .having((Invocation actual) => actual.isMethod, 'isMethod', expected.isMethod)
+    .having((Invocation actual) => actual.typeArguments, 'typeArguments', expected.typeArguments)
+    .having((Invocation actual) => actual.positionalArguments, 'positionalArguments', expected.positionalArguments)
+    .having((Invocation actual) => actual.namedArguments, 'namedArguments', expected.namedArguments);
+}
+
+/// Returns a [Matcher] that matches against an [Invocation] thrown from a call
+/// to [FakeLogger].
+Matcher _throwsInvocationFor(dynamic Function() fakeCall) =>
+  throwsA(_matchesInvocation(_invocationFor(fakeCall)));

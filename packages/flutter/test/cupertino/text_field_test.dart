@@ -3222,8 +3222,8 @@ void main() {
       EditableText.debugDeterministicCursor = true;
       tester.binding.window.physicalSizeTestValue = const Size(400, 400);
       tester.binding.window.devicePixelRatioTestValue = 1;
-      TextEditingController controller;
-      EditableTextState state;
+      final TextEditingController controller;
+      final EditableTextState state;
 
       // Normal multiword collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the caret.
@@ -3293,8 +3293,8 @@ void main() {
       EditableText.debugDeterministicCursor = true;
       tester.binding.window.physicalSizeTestValue = const Size(400, 400);
       tester.binding.window.devicePixelRatioTestValue = 1;
-      TextEditingController controller;
-      EditableTextState state;
+      final TextEditingController controller;
+      final EditableTextState state;
 
       // Normal multiline collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the horizontal center of the text field.

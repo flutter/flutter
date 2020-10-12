@@ -870,7 +870,7 @@ class RenderTable extends RenderBox {
     if (totalFlex > 0.0) {
       // this can only grow the table, but it _will_ grow the table at
       // least as big as the target width.
-      double targetWidth;
+      final double targetWidth;
       if (maxWidthConstraint.isFinite) {
         targetWidth = maxWidthConstraint;
       } else {
@@ -1011,7 +1011,7 @@ class RenderTable extends RenderBox {
     }
     final List<double> widths = _computeColumnWidths(constraints);
     final List<double> positions = List<double>.filled(columns, 0.0, growable: false);
-    double tableWidth;
+    final double tableWidth;
     switch (textDirection) {
       case TextDirection.rtl:
         positions[columns - 1] = 0.0;

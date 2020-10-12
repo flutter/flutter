@@ -31,7 +31,7 @@ import 'process.dart';
 ///
 /// Cf. If there is some hope that the tool can continue when an operation fails
 /// with an error, then that error/operation should not be handled here. For
-/// example, the tool should gernerally be able to continue executing even if it
+/// example, the tool should generally be able to continue executing even if it
 /// fails to delete a file.
 class ErrorHandlingFileSystem extends ForwardingFileSystem {
   ErrorHandlingFileSystem({
@@ -69,7 +69,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   /// Delete the file or directory and return true if it exists, take no
   /// action and return false if it does not.
   ///
-  /// This method should be prefered to checking if it exists and
+  /// This method should be preferred to checking if it exists and
   /// then deleting, because it handles the edge case where the file or directory
   /// is deleted by a different program between the two calls.
   static bool deleteIfExists(FileSystemEntity file, {bool recursive = false}) {
@@ -549,8 +549,8 @@ typedef ProcessStart = Future<io.Process> Function(
 /// as a [ToolExit] using [throwToolExit].
 ///
 /// See also:
-///   * [ErrorHandlngFileSystem], for a similar file system strategy.
-class ErrorHandlingProcessManager implements ProcessManager {
+///   * [ErrorHandlingFileSystem], for a similar file system strategy.
+class ErrorHandlingProcessManager extends ProcessManager {
   ErrorHandlingProcessManager({
     @required Platform platform,
     @required FileSystem fileSystem,

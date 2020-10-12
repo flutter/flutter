@@ -1247,7 +1247,7 @@ class ListView extends BoxScrollView {
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
-           Widget widget;
+           final Widget widget;
            if (index.isEven) {
              widget = itemBuilder(context, itemIndex);
            } else {
