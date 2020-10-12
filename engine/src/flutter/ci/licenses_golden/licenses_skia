@@ -1,4 +1,4 @@
-Signature: 80a5ff3da2cf7f74dc2fd885112b353f
+Signature: dd91721a42021f83633b4bd9f44efac5
 
 UNUSED LICENSES:
 
@@ -4066,6 +4066,7 @@ FILE: ../../../third_party/skia/experimental/skrive/src/reader/BinaryReader.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/reader/JsonReader.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/reader/StreamReader.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/reader/StreamReader.h
+FILE: ../../../third_party/skia/experimental/svg/utils/SvgTool.cpp
 FILE: ../../../third_party/skia/gm/3d.cpp
 FILE: ../../../third_party/skia/gm/bc1_transparency.cpp
 FILE: ../../../third_party/skia/gm/bicubic.cpp
