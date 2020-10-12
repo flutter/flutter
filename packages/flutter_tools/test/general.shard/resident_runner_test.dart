@@ -1457,7 +1457,7 @@ void main() {
     ]);
     await residentRunner.writeSkSL();
 
-    expect(testLogger.statusText, contains('No data was receieved'));
+    expect(testLogger.statusText, contains('No data was received'));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
