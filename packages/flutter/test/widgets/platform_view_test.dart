@@ -1152,9 +1152,6 @@ void main() {
 
     testWidgets('clipBehavior test', (WidgetTester tester) async {
       // Regressing test for https://github.com/flutter/flutter/issues/67343
-      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
-      viewsController.registerViewType('webview');
-
       Widget buildView(double width, double height, Clip clipBehavior) {
         return Center(
           child: SizedBox(
