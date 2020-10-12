@@ -11,6 +11,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       key: const Key('mainapp'),
+      theme: ThemeData(fontFamily: 'RobotoMono'),
       title: 'Integration Test App',
       home: MyHomePage(title: 'Integration Test App'),
     );
@@ -56,6 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
               enabled: true,
               controller: _emptyController,
               decoration: const InputDecoration(
+                contentPadding: EdgeInsets.all(10.0),
                 labelText: 'Empty Input Field:',
               ),
             ),
@@ -67,6 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
               enabled: true,
               controller: _controller,
               decoration: const InputDecoration(
+                contentPadding: EdgeInsets.all(10.0),
                 labelText: 'Text Input Field:',
               ),
             ),
@@ -78,6 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
               enabled: true,
               controller: _controller2,
               decoration: const InputDecoration(
+                contentPadding: EdgeInsets.all(10.0),
                 labelText: 'Text Input Field 2:',
               ),
               onFieldSubmitted: (String str) {
@@ -94,7 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: SelectableText(
                 'Lorem ipsum dolor sit amet',
                 key: Key('selectable'),
-                style: TextStyle(fontFamily: 'Roboto', fontSize: 20.0),
+                style: TextStyle(fontFamily: 'RobotoMono', fontSize: 20.0),
               ),
             ),
           ],

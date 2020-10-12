@@ -15,8 +15,14 @@ dev_dependencies:
     sdk: flutter
   integration_test: 0.9.0
   http: 0.12.0+2
-  test: any
+  web_test_utils:
+    path: ../../../web_sdk/web_test_utils
 
 flutter:
   assets:
     - assets/images/
+  fonts:
+    - family: RobotoMono
+      fonts:
+        - asset: fonts/RobotoMono-Bold.ttf
+        - asset: fonts/RobotoMono-Regular.ttf

@@ -37,3 +37,34 @@ flutter drive -v --target=test_driver/text_editing_integration.dart -d web-serve
 ```
 
 More details for "Running Flutter Driver tests with Web" can be found in [wiki](https://github.com/flutter/flutter/wiki/Running-Flutter-Driver-tests-with-Web).
+
+## Adding screenshot tests
+
+In order to test screenshot tests the tests on the driver side needs to call the `integration_test` package with an `onScreenshot` callback which can do a comparison between the `screenshotBytes` taken during the test and a golden file. We added a utility method that can do this comparison by using a golden in `flutter/goldens` repository.
+
+In order to use screenshot testing first, import `screenshot_support.dart` from the driver side test (example: `text_editing_integration_test.dart`). Default value for `diffRateFailure` is 0.5.
+
+```
+import 'package:regular_integration_tests/screenshot_support.dart' as test;
+
+Future<void> main() async {
+  final double kMaxDiffRateFailure = 0.1;
+  await test.runTestWithScreenshots(diffRateFailure = kMaxDiffRateFailure);
+}
+```
+
+In order to run the tests follow these steps:
+
+1. You can use two different approaches, using [felt](https://github.com/flutter/engine/blob/master/lib/web_ui/dev/README.md) tool will run all the tests, an update all the goldens. For running individual tests, we need to set UPDATE_GOLDENS environment variable.
+
+```
+felt test --integration-tests-only --update-screenshot-goldens
+```
+
+```
+UPDATE_GOLDENS=true flutter drive -v --target=test_driver/text_editing_integration.dart -d web-server --release --local-engine=host_debug_unopt
+```
+
+2. The golden will be under `engine/src/flutter/lib/web_ui/.dart_tool/goldens/engine/web/` directory, you should create a PR for that file and merge it to `flutter/goldens`.
+
+3. Get the commit SHA and replace the `revision` in this file: `engine/src/flutter/lib/web_ui/dev/goldens_lock.yaml`
