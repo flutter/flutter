@@ -320,7 +320,7 @@ class FuchsiaDevice extends Device {
       }
       packageRepo.createSync(recursive: true);
     } on Exception catch (e) {
-      globals.printError('Failed to create Fuchisa package repo directory '
+      globals.printError('Failed to create Fuchsia package repo directory '
                  'at ${packageRepo.path}: $e');
       return LaunchResult.failed();
     }
@@ -440,7 +440,7 @@ class FuchsiaDevice extends Device {
     }
 
     if (debuggingOptions.buildInfo.mode.isRelease) {
-      globals.printTrace('App succesfully started in a release mode.');
+      globals.printTrace('App successfully started in a release mode.');
       return LaunchResult.succeeded();
     }
     globals.printTrace('App started in a non-release mode. Setting up vmservice connection.');

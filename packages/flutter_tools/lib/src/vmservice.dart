@@ -421,10 +421,10 @@ extension FlutterVmService on vm_service.VmService {
       });
   }
 
-  /// Retreive the cached SkSL shaders from an attached Flutter view.
+  /// Retrieve the cached SkSL shaders from an attached Flutter view.
   ///
   /// This method will only return data if `--cache-sksl` was provided as a
-  /// flutter run agument, and only then on physical devices.
+  /// flutter run argument, and only then on physical devices.
   Future<Map<String, Object>> getSkSLs({
     @required String viewId,
   }) async {
@@ -437,7 +437,7 @@ extension FlutterVmService on vm_service.VmService {
     return response.json['SkSLs'] as Map<String, Object>;
   }
 
-  /// Flush all tasks on the UI thead for an attached Flutter view.
+  /// Flush all tasks on the UI thread for an attached Flutter view.
   ///
   /// This method is currently used only for benchmarking.
   Future<void> flushUIThreadTasks({
@@ -809,7 +809,7 @@ Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
 }) async {
   if (data.isEmpty) {
     globals.logger.printStatus(
-      'No data was receieved. To ensure SkSL data can be generated use a '
+      'No data was received. To ensure SkSL data can be generated use a '
       'physical device then:\n'
       '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
       '  2. Interact with the application to force shaders to be compiled.\n'

@@ -22,9 +22,7 @@ void main() {
     ]);
 
     // Development tools.
-    expect(result.stdout, isNot(contains('ide-config')));
     expect(result.stdout, isNot(contains('update-packages')));
-    expect(result.stdout, isNot(contains('inject-plugins')));
 
     // Deprecated.
     expect(result.stdout, isNot(contains('make-host-app-editable')));

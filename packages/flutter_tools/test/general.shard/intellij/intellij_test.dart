@@ -89,6 +89,27 @@ void main() {
     expect(message.message, contains('Flutter plugin can be installed from'));
     expect(message.contextUrl, isNotNull);
   });
+
+  testWithoutContext('IntelliJPlugins does not crash if no plugin file found', () async {
+    final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
+
+    final Archive dartJarArchive =
+    buildSingleFileArchive('META-INF/plugin.xml', r'''
+<idea-plugin version="2">
+<name>Dart</name>
+<version>162.2485</version>
+</idea-plugin>
+''');
+    writeFileCreatingDirectories(
+      fileSystem.path.join(_kPluginsPath, 'Dart', 'lib', 'Other.jar'),
+      ZipEncoder().encode(dartJarArchive),
+    );
+
+    expect(
+      () => plugins.validatePackage(<ValidationMessage>[], <String>['Dart'], 'Dart', 'download-Dart'),
+      returnsNormally,
+    );
+  });
 }
 
 const String _kPluginsPath = '/data/intellij/plugins';

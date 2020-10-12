@@ -82,7 +82,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         help: 'Produce xcframeworks that include all valid architectures (Xcode 11 or later).',
       )
       ..addFlag('cocoapods',
-        help: 'Produce a Flutter.podspec instead of an engine Flutter.framework (recomended if host app uses CocoaPods).',
+        help: 'Produce a Flutter.podspec instead of an engine Flutter.framework (recommended if host app uses CocoaPods).',
       )
       ..addOption('output',
         abbr: 'o',

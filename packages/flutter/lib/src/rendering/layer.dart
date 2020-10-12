@@ -2225,7 +2225,7 @@ class FollowerLayer extends ContainerLayer {
   Matrix4? _invertedTransform;
   bool _inverseDirty = true;
 
-  Offset? _transformOffset<S extends Object>(Offset localPosition) {
+  Offset? _transformOffset(Offset localPosition) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(getLastTransform()!);
       _inverseDirty = false;
@@ -2245,7 +2245,7 @@ class FollowerLayer extends ContainerLayer {
       }
       return false;
     }
-    final Offset? transformedOffset = _transformOffset<S>(localPosition);
+    final Offset? transformedOffset = _transformOffset(localPosition);
     if (transformedOffset == null) {
       return false;
     }

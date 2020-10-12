@@ -553,7 +553,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(FlutterOptions.kNullAssertions,
       help:
         'Perform additional null assertions on the boundaries of migrated and '
-        'unmigrated code. This setting is not currently supported on desktop '
+        'un-migrated code. This setting is not currently supported on desktop '
         'devices.'
     );
   }
@@ -598,7 +598,7 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kPerformanceMeasurementFile,
       help:
         'The name of a file where flutter assemble performance and '
-        'cachedness information will be written in a JSON format.'
+        'cached-ness information will be written in a JSON format.'
     );
   }
 
@@ -1186,7 +1186,7 @@ mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
     // If there is no specified target device, fallback to the default
-    // confiugration.
+    // configuration.
     final String rawTargetPlatform = stringArg('target-platform');
     final TargetPlatform targetPlatform = getTargetPlatformForName(rawTargetPlatform);
     if (targetPlatform == null) {
