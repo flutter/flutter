@@ -11,20 +11,24 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'overlay.dart';
 
-/// A type for getting a list of options based on a String.
+/// The type of the [AutocompleteCore] callback which computes the list of
+/// optional completions for the widget's field based on the text the user has
+/// entered so far.
 ///
 /// See also:
 ///   * [AutocompleteCore.optionsBuilder], which is of this type.
 typedef AutocompleteOptionsBuilder<T extends Object> = Iterable<T> Function(TextEditingValue textEditingValue);
 
-/// A type for indicating the selection of an autocomplete option.
+/// The type of the callback used by the [AutocompleteCore] widget to indicate
+/// that the user has selected an option.
 ///
 /// See also:
 ///   * [AutocompleteCore.onSelected], which is of this type.
 typedef AutocompleteOnSelected<T extends Object> = void Function(T? option);
 
-/// A builder for the selectable options given the current autocomplete field
-/// value.
+/// The type of the [AutocompleteCore] callback which returns a [Widget] that
+/// displays the specified [options] and calls [onSelected] if the user
+/// selects an option.
 ///
 /// See also:
 ///   * [AutocompleteCore.optionsViewBuilder], which is of this type.
@@ -34,7 +38,8 @@ typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
   Iterable<T> options,
 );
 
-/// A builder for the field in autocomplete.
+/// The type of the [Autocomplete] callback which returns the widget that
+/// contains the input [TextField] or [TextFormField].
 ///
 /// See also:
 ///   * [AutocompleteCore.fieldViewBuilder], which is of this type.
@@ -44,7 +49,8 @@ typedef AutocompleteFieldViewBuilder = Widget Function(
   VoidCallback onFieldSubmitted,
 );
 
-/// A type for getting a String from some option.
+/// The type of the [AutocompleteCore] callback that converts an option value to
+/// a string which can be displayed in the widget's options menu.
 ///
 /// See also:
 ///   * [AutocompleteCore.displayStringForOption], which is of this type.
@@ -71,7 +77,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// class AutocompleteBasicExample extends StatelessWidget {
 ///   AutocompleteBasicExample({Key key}) : super(key: key);
 ///
-///   final List<String> _kOptions = <String>[
+///   final List<String> _options = <String>[
 ///     'aardvark',
 ///     'bobcat',
 ///     'chameleon',
@@ -81,7 +87,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///   Widget build(BuildContext context) {
 ///     return AutocompleteCore<String>(
 ///       optionsBuilder: (TextEditingValue textEditingValue) {
-///         return _kOptions.where((String option) {
+///         return _options.where((String option) {
 ///           return option.contains(textEditingValue.text.toLowerCase());
 ///         });
 ///       },
@@ -225,7 +231,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///   String _dropdownValue;
 ///   String _autocompleteSelection;
 ///
-///   final List<String> _kOptions = <String>[
+///   final List<String> _options = <String>[
 ///     'aardvark',
 ///     'bobcat',
 ///     'chameleon',
@@ -282,7 +288,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///               ),
 ///               AutocompleteCore<String>(
 ///                 optionsBuilder: (TextEditingValue textEditingValue) {
-///                   return _kOptions.where((String option) {
+///                   return _options.where((String option) {
 ///                     return option.contains(textEditingValue.text.toLowerCase());
 ///                   });
 ///                 },
@@ -301,7 +307,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                       onFieldSubmitted();
 ///                     },
 ///                     validator: (String value) {
-///                       if (!_kOptions.contains(value)) {
+///                       if (!_options.contains(value)) {
 ///                         return 'Nothing selected.';
 ///                       }
 ///                       return null;
