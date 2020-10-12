@@ -6,7 +6,6 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -22,9 +21,11 @@ const String kPath2 = '/another/bin/$kExecutable';
 
 void main() {
   MockProcessManager mockProcessManager;
+  FakeProcessManager fakeProcessManager;
 
   setUp(() {
     mockProcessManager = MockProcessManager();
+    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
   });
 
   OperatingSystemUtils createOSUtils(Platform platform) {
@@ -32,28 +33,50 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: platform,
-      processManager: mockProcessManager,
+      processManager: fakeProcessManager,
     );
   }
 
   group('which on POSIX', () {
     testWithoutContext('returns null when executable does not exist', () async {
-      when(mockProcessManager.runSync(<String>['which', kExecutable]))
-          .thenReturn(ProcessResult(0, 1, null, null));
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'which',
+            kExecutable,
+          ],
+          exitCode: 1,
+        ),
+      );
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
       expect(utils.which(kExecutable), isNull);
     });
 
     testWithoutContext('returns exactly one result', () async {
-      when(mockProcessManager.runSync(<String>['which', 'foo']))
-          .thenReturn(ProcessResult(0, 0, kPath1, null));
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'which',
+            'foo',
+          ],
+          stdout: kPath1,
+        ),
+      );
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
       expect(utils.which(kExecutable).path, kPath1);
     });
 
     testWithoutContext('returns all results for whichAll', () async {
-      when(mockProcessManager.runSync(<String>['which', '-a', kExecutable]))
-          .thenReturn(ProcessResult(0, 0, '$kPath1\n$kPath2', null));
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'which',
+            '-a',
+            kExecutable,
+          ],
+          stdout: '$kPath1\n$kPath2',
+        ),
+      );
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
       final List<File> result = utils.whichAll(kExecutable);
       expect(result, hasLength(2));
@@ -66,27 +89,55 @@ void main() {
     testWithoutContext('throws tool exit if where throws an argument error', () async {
       when(mockProcessManager.runSync(<String>['where', kExecutable]))
           .thenThrow(ArgumentError('Cannot find executable for where'));
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      final OperatingSystemUtils utils = OperatingSystemUtils(
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        platform: FakePlatform(operatingSystem: 'windows'),
+        processManager: mockProcessManager,
+      );
 
       expect(() => utils.which(kExecutable), throwsA(isA<ToolExit>()));
     });
+
     testWithoutContext('returns null when executable does not exist', () async {
-      when(mockProcessManager.runSync(<String>['where', kExecutable]))
-          .thenReturn(ProcessResult(0, 1, null, null));
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'where',
+            kExecutable,
+          ],
+          exitCode: 1,
+        ),
+      );
+
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.which(kExecutable), isNull);
     });
 
     testWithoutContext('returns exactly one result', () async {
-      when(mockProcessManager.runSync(<String>['where', 'foo']))
-          .thenReturn(ProcessResult(0, 0, '$kPath1\n$kPath2', null));
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'where',
+            'foo',
+          ],
+          stdout: '$kPath1\n$kPath2',
+        ),
+      );
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.which(kExecutable).path, kPath1);
     });
 
     testWithoutContext('returns all results for whichAll', () async {
-      when(mockProcessManager.runSync(<String>['where', kExecutable]))
-          .thenReturn(ProcessResult(0, 0, '$kPath1\n$kPath2', null));
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'where',
+            kExecutable,
+          ],
+          stdout: '$kPath1\n$kPath2',
+        ),
+      );
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
       final List<File> result = utils.whichAll(kExecutable);
       expect(result, hasLength(2));
@@ -95,34 +146,94 @@ void main() {
     });
   });
 
-  testWithoutContext('macos name', () async {
-    when(mockProcessManager.runSync(
-      <String>['sw_vers', '-productName'],
-    )).thenReturn(ProcessResult(0, 0, 'product', ''));
-    when(mockProcessManager.runSync(
-      <String>['sw_vers', '-productVersion'],
-    )).thenReturn(ProcessResult(0, 0, 'version', ''));
-    when(mockProcessManager.runSync(
-      <String>['sw_vers', '-buildVersion'],
-    )).thenReturn(ProcessResult(0, 0, 'build', ''));
-    when(mockProcessManager.runSync(
-      <String>['uname', '-m'],
-    )).thenReturn(ProcessResult(0, 0, 'arch', ''));
-    final MockFileSystem fileSystem = MockFileSystem();
-    final OperatingSystemUtils utils = OperatingSystemUtils(
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'macos'),
-      processManager: mockProcessManager,
-    );
-    expect(utils.name, 'product version build arch');
+  testWithoutContext('macos ARM name', () async {
+    fakeProcessManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'sw_vers',
+          '-productName',
+        ],
+        stdout: 'product',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'sw_vers',
+          '-productVersion',
+        ],
+        stdout: 'version',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'sw_vers',
+          '-buildVersion',
+        ],
+        stdout: 'build',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'sysctl',
+          'hw.optional.arm64',
+        ],
+        stdout: 'hw.optional.arm64: 1',
+      ),
+    ]);
+
+    final OperatingSystemUtils utils =
+        createOSUtils(FakePlatform(operatingSystem: 'macos'));
+    expect(utils.name, 'product version build arm64');
+  });
+
+  testWithoutContext('macos x86 name', () async {
+    fakeProcessManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'sw_vers',
+          '-productName',
+        ],
+        stdout: 'product',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'sw_vers',
+          '-productVersion',
+        ],
+        stdout: 'version',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'sw_vers',
+          '-buildVersion',
+        ],
+        stdout: 'build',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'sysctl',
+          'hw.optional.arm64',
+        ],
+        exitCode: 1,
+      ),
+    ]);
+
+    final OperatingSystemUtils utils =
+        createOSUtils(FakePlatform(operatingSystem: 'macos'));
+    expect(utils.name, 'product version build x86_64');
   });
 
   testWithoutContext('If unzip fails, include stderr in exception text', () {
     const String exceptionMessage = 'Something really bad happened.';
-    when(mockProcessManager.runSync(
-      <String>['unzip', '-o', '-q', null, '-d', null],
-    )).thenReturn(ProcessResult(0, 1, '', exceptionMessage));
+
+    fakeProcessManager.addCommand(
+      const FakeCommand(command: <String>[
+        'unzip',
+        '-o',
+        '-q',
+        null,
+        '-d',
+        null,
+      ], exitCode: 1, stderr: exceptionMessage),
+    );
+
     final MockFileSystem fileSystem = MockFileSystem();
     final MockFile mockFile = MockFile();
     final MockDirectory mockDirectory = MockDirectory();
@@ -134,7 +245,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       platform: FakePlatform(operatingSystem: 'linux'),
-      processManager: mockProcessManager,
+      processManager: fakeProcessManager,
     );
 
     expect(

@@ -256,11 +256,21 @@ class _PosixUtils extends OperatingSystemUtils {
           _processUtils.runSync(<String>['sw_vers', '-productName']),
           _processUtils.runSync(<String>['sw_vers', '-productVersion']),
           _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
-          _processUtils.runSync(<String>['uname', '-m']),
         ];
         if (results.every((RunResult result) => result.exitCode == 0)) {
-          _name = '${results[0].stdout.trim()} ${results[1].stdout
-              .trim()} ${results[2].stdout.trim()} ${results[3].stdout.trim()}';
+          _name =
+              '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()}';
+        }
+        // Check for Apple Silicon ARM architecture, which requires macOS 11.
+        final RunResult arm64Check =
+            _processUtils.runSync(<String>['sysctl', 'hw.optional.arm64']);
+        // hw.optional.arm64 is unavailable on < macOS 11 and exits with 1, assume x86 on failure.
+        // On arm64 stdout is "sysctl hw.optional.arm64: 1"
+        if (arm64Check.exitCode == 0 &&
+            arm64Check.stdout.trim().endsWith('1')) {
+          _name += ' arm64';
+        } else {
+          _name += ' x86_64';
         }
       }
       _name ??= super.name;
