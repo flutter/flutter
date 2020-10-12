@@ -2721,7 +2721,7 @@ void main() {
 
     expect(focusNode.hasFocus, false); // initial status
 
-    // Should accept requestFocus
+    // Should accept requestFocus.
     focusNode.requestFocus();
     await tester.pump();
     expect(focusNode.hasFocus, true);
