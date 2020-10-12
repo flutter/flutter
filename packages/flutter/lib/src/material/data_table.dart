@@ -692,7 +692,6 @@ class DataTable extends StatelessWidget {
 
   Widget _buildCheckbox({
     required BuildContext context,
-    required Color activeColor,
     required bool? checked,
     required VoidCallback? onRowTap,
     required ValueChanged<bool?>? onCheckboxChanged,
@@ -712,7 +711,9 @@ class DataTable extends StatelessWidget {
         ),
         child: Center(
           child: Checkbox(
-            activeColor: activeColor,
+            // TODO(per): Remove when Checkbox has theme, https://github.com/flutter/flutter/issues/53420.
+            activeColor: themeData.colorScheme.primary,
+            checkColor: themeData.colorScheme.onPrimary,
             value: checked,
             onChanged: onCheckboxChanged,
             tristate: tristate,
@@ -921,7 +922,6 @@ class DataTable extends StatelessWidget {
       tableColumns[0] = FixedColumnWidth(effectiveHorizontalMargin + Checkbox.width + effectiveHorizontalMargin / 2.0);
       tableRows[0].children![0] = _buildCheckbox(
         context: context,
-        activeColor: theme.accentColor,
         checked: someChecked ? null : allChecked,
         onRowTap: null,
         onCheckboxChanged: (bool? checked) => _handleSelectAll(checked, someChecked),
@@ -932,7 +932,6 @@ class DataTable extends StatelessWidget {
       for (final DataRow row in rows) {
         tableRows[rowIndex].children![0] = _buildCheckbox(
           context: context,
-          activeColor: theme.accentColor,
           checked: row.selected,
           onRowTap: () => row.onSelectChanged != null ? row.onSelectChanged!(!row.selected) : null ,
           onCheckboxChanged: row.onSelectChanged,

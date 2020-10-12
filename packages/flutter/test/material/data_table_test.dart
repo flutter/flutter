@@ -1232,6 +1232,40 @@ void main() {
     );
   });
 
+  testWidgets('DataRow renders checkbox with colors from Theme', (WidgetTester tester) async {
+    final ThemeData _themeData = ThemeData.light();
+    Widget buildTable() {
+      return MaterialApp(
+        theme: _themeData,
+        home: Material(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text('Column1'),
+              ),
+            ],
+            rows: <DataRow>[
+              DataRow(
+                onSelectChanged: (bool? checked) {},
+                cells: const <DataCell>[
+                  DataCell(Text('Content1')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Checkbox lastCheckbox() {
+      return tester.widgetList<Checkbox>(find.byType(Checkbox)).last;
+    }
+
+    await tester.pumpWidget(buildTable());
+    expect(lastCheckbox().activeColor, _themeData.colorScheme.primary);
+    expect(lastCheckbox().checkColor, _themeData.colorScheme.onPrimary);
+  });
+
   testWidgets('DataRow renders custom colors when selected', (WidgetTester tester) async {
     const Color selectedColor = Colors.green;
     const Color defaultColor = Colors.red;
