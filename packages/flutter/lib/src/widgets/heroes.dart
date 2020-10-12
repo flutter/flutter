@@ -951,9 +951,7 @@ class HeroMode extends StatelessWidget {
   final bool enabled;
 
   @override
-  Widget build(BuildContext context) {
-    return child;
-  }
+  Widget build(BuildContext context) => child;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
