@@ -2228,9 +2228,9 @@ class PointerCancelEvent extends PointerEvent {
 double computeHitSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
+      return kPrecisePointerHitSlop;
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
-      return kPrecisePointerHitSlop;
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
       return kTouchSlop;
@@ -2241,9 +2241,9 @@ double computeHitSlop(PointerDeviceKind kind) {
 double computePanSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
+      return kPrecisePointerPanSlop;
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
-      return kPrecisePointerPanSlop;
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
       return kPanSlop;
@@ -2254,9 +2254,9 @@ double computePanSlop(PointerDeviceKind kind) {
 double computeScaleSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
+      return kPrecisePointerScaleSlop;
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
-      return kPrecisePointerScaleSlop;
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
       return kScaleSlop;
