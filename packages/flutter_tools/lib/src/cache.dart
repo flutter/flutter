@@ -15,7 +15,7 @@ import 'android/gradle_utils.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
-import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpStatus, ProcessException, SocketException;
+import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpHeaders, HttpStatus, ProcessException, SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
@@ -1674,22 +1674,13 @@ class ArtifactUpdater {
       throw Exception(response.statusCode);
     }
 
-    String md5Hash;
+    final String md5Hash = _expectedMd5(response.headers);
     ByteConversionSink inputSink;
     StreamController<Digest> digests;
-    final List<String> values = response.headers['x-goog-hash'];
-    if (values != null) {
-      final String rawMd5Hash = values.firstWhere((String value) {
-        return value.startsWith('md5=');
-      }, orElse: () => null);
-      if (rawMd5Hash != null
-          && rawMd5Hash.split('md5=').length > 1
-          && rawMd5Hash.split('md5=')[1].isNotEmpty) {
-        md5Hash = rawMd5Hash.split('md5=')[1];
-        _logger.printTrace('Content $url md5 hash: $md5Hash');
-        digests = StreamController<Digest>();
-        inputSink = md5.startChunkedConversion(digests);
-      }
+    if (md5Hash != null) {
+      _logger.printTrace('Content $url md5 hash: $md5Hash');
+      digests = StreamController<Digest>();
+      inputSink = md5.startChunkedConversion(digests);
     }
     final RandomAccessFile randomAccessFile = file.openSync(mode: FileMode.writeOnly);
     await response.forEach((List<int> chunk) {
@@ -1702,9 +1693,36 @@ class ArtifactUpdater {
       final Digest digest = await digests.stream.last;
       final String rawDigest = base64.encode(digest.bytes);
       if (rawDigest != md5Hash) {
-        throw Exception('Expected $url to have md5 checksum $md5Hash, but was $rawDigest');
+        throw Exception(''
+          'Expected $url to have md5 checksum $md5Hash, but was $rawDigest. This '
+          'may indicate a problem with your connection to the Flutter backend servers. '
+          'Please re-try the download after confirming that your network connection is '
+          'stable.'
+        );
       }
     }
+  }
+
+  String _expectedMd5(HttpHeaders httpHeaders) {
+    final List<String> values = httpHeaders['x-goog-hash'];
+    if (values == null) {
+      return null;
+    }
+    final String rawMd5Hash = values.firstWhere((String value) {
+      return value.startsWith('md5=');
+    }, orElse: () => null);
+    if (rawMd5Hash == null) {
+      return null;
+    }
+    final List<String> segments = rawMd5Hash.split('md5=');
+    if (segments.length < 2) {
+      return null;
+    }
+    final String md5Hash = segments[1];
+    if (md5Hash.isEmpty) {
+      return null;
+    }
+    return md5Hash;
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
