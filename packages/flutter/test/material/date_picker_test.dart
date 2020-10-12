@@ -645,6 +645,20 @@ void main() {
         );
       });
     });
+
+    testWidgets('Selecting date does not switch picker to year selection', (WidgetTester tester) async {
+      initialDate = DateTime(2020, DateTime.may, 10);
+      initialCalendarMode = DatePickerMode.year;
+      await prepareDatePicker(tester, (Future<DateTime> date) async {
+        await tester.pump();
+        await tester.tap(find.text('2017'));
+        await tester.pump();
+        expect(find.text('May 2017'), findsOneWidget);
+        await tester.tap(find.text('10'));
+        await tester.pump();
+        expect(find.text('25'), findsOneWidget);
+      });
+    });
   });
 
   group('Input mode', () {
