@@ -1345,38 +1345,6 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  testWidgets('showCupertinoModalPopup passes RouteSettings to PopupRoute', (WidgetTester tester) async {
-    final RouteSettingsObserver routeSettingsObserver = RouteSettingsObserver();
-
-    await tester.pumpWidget(CupertinoApp(
-      navigatorObservers: <NavigatorObserver>[routeSettingsObserver],
-      home: Navigator(
-        onGenerateRoute: (RouteSettings settings) {
-          return PageRouteBuilder<dynamic>(
-            pageBuilder: (BuildContext context, Animation<double> _,
-                Animation<double> __) {
-              return GestureDetector(
-                onTap: () async {
-                  await showCupertinoModalPopup<void>(
-                    context: context,
-                    builder: (BuildContext context) => const SizedBox(),
-                    routeSettings: const RouteSettings(name: '/modal'),
-                  );
-                },
-                child: const Text('tap'),
-              );
-            },
-          );
-        },
-      ),
-    ));
-
-    // Open the dialog.
-    await tester.tap(find.text('tap'));
-
-    expect(routeSettingsObserver.routeName, '/modal');
-  });
-
   testWidgets('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
     const Color _kTransparentColor = Color(0x00000000);
 
@@ -1684,18 +1652,6 @@ class DialogObserver extends NavigatorObserver {
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route.toString().contains('_DialogRoute')) {
       dialogCount++;
-    }
-    super.didPush(route, previousRoute);
-  }
-}
-
-class RouteSettingsObserver extends NavigatorObserver {
-  String routeName;
-
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
-    if (route.toString().contains('_CupertinoModalPopupRoute')) {
-      routeName = route.settings.name;
     }
     super.didPush(route, previousRoute);
   }
