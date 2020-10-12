@@ -294,7 +294,7 @@ class CupertinoTabScaffold extends StatefulWidget {
 
   /// Restoration ID to save and restore the state of the [CupertinoTabScaffold].
   ///
-  /// This property only has an affect when no [controller] has been provided:
+  /// This property only has an effect when no [controller] has been provided:
   /// If it is non-null (and no [controller] has been provided), the scaffold
   /// will persist and restore the currently selected tab index. If a
   /// [controller] has been provided, it is the responsibility of the owner of
@@ -474,7 +474,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
     if (widget.controller?._isDisposed == false) {
       _controller.removeListener(_onCurrentIndexChange);
     }
-   _internalController?.dispose();
+    _internalController?.dispose();
     super.dispose();
   }
 }
