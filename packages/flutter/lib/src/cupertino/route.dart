@@ -1031,9 +1031,6 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// The `semanticsDismissible` argument is used to determine whether the
 /// semantics of the modal barrier are included in the semantics tree.
 ///
-/// The `routeSettings` argument is used to provide [RouteSettings] to the
-/// created Route.
-///
 /// The `builder` argument typically builds a [CupertinoActionSheet] widget.
 /// Content below the widget is dimmed with a [ModalBarrier]. The widget built
 /// by the `builder` does not share a context with the location that
@@ -1057,7 +1054,6 @@ Future<T> showCupertinoModalPopup<T>({
   bool barrierDismissible = true,
   bool useRootNavigator = true,
   bool? semanticsDismissible,
-  RouteSettings? routeSettings,
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator)!.push(
@@ -1068,7 +1064,6 @@ Future<T> showCupertinoModalPopup<T>({
       builder: builder,
       filter: filter,
       semanticsDismissible: semanticsDismissible,
-      settings: routeSettings,
     ),
   );
 }
