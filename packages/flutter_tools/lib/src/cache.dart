@@ -257,7 +257,7 @@ class Cache {
         final String packageConfigPath = Uri.parse(platform.packageConfig).toFilePath(
           windows: platform.isWindows,
         );
-        return process(dirname(dirname(dirname(dirname(packageConfigPath)))));
+        return process(dirname(dirname(packageConfigPath)));
       }
 
       if (platform.script.scheme == 'file') {
