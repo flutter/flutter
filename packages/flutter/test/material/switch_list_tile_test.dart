@@ -360,24 +360,23 @@ void main() {
     expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
   });
 
-  testWidgets('SwitchListTile.tileColor is passed into the inner ListTile', (WidgetTester tester) async {
+  testWidgets('SwitchListTile respects tileColor', (WidgetTester tester) async {
     const Color tileColor = Colors.red;
 
     await tester.pumpWidget(
-        wrap(
-          child: const Center(
-            child: SwitchListTile(
-              value: false,
-              onChanged: null,
-              title: Text('Title'),
-              tileColor: tileColor,
-            ),
+      wrap(
+        child: const Center(
+          child: SwitchListTile(
+            value: false,
+            onChanged: null,
+            title: Text('Title'),
+            tileColor: tileColor,
           ),
-        )
+        ),
+      )
     );
 
-    final Finder coloredBoxFinder = find.byType(ColoredBox);
-    final ColoredBox coloredBox = tester.firstWidget(coloredBoxFinder);
-    expect(coloredBox.color, equals(tileColor));
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, tileColor);
   });
 }
