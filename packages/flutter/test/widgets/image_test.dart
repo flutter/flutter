@@ -788,7 +788,7 @@ void main() {
       )
     );
 
-    // Two listeners - one is the listener added by precacheImage, the other by the imageCache!.
+    // Two listeners - one is the listener added by precacheImage, the other by the ImageCache.
     final List<ImageStreamListener> listeners = imageStreamCompleter.listeners.toList();
     expect(listeners.length, 2);
 
