@@ -63,9 +63,9 @@ void main() {
   });
 
   group('which on Windows', () {
-    testWithoutContext('throws tool exit if where throws a process exception with code 2', () async {
+    testWithoutContext('throws tool exit if where throws an argument error', () async {
       when(mockProcessManager.runSync(<String>['where', kExecutable]))
-          .thenThrow(const ProcessException('where', <String>[], 'Cannot find executable for where', 2));
+          .thenThrow(ArgumentError('Cannot find executable for where'));
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
 
       expect(() => utils.which(kExecutable), throwsA(isA<ToolExit>()));
@@ -143,11 +143,11 @@ void main() {
     );
   });
 
-  testWithoutContext('If unzip throws a ProcessException with code 2, display an install message', () {
+  testWithoutContext('If unzip throws an ArgumentError, display an install message', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     when(mockProcessManager.runSync(
       <String>['unzip', '-o', '-q', 'foo.zip', '-d', fileSystem.currentDirectory.path],
-    )).thenThrow(const ProcessException('unzip', <String>['-o', '-q', 'foo.zip', '-d'], '', 2));
+    )).thenThrow(ArgumentError());
 
     final OperatingSystemUtils linuxOsUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
