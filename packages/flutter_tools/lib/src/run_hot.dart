@@ -451,12 +451,10 @@ class HotRunner extends ResidentRunner {
     ]);
   }
 
-  Future<void> _launchFromDevFS(String mainScript) async {
-    final String entryUri = globals.fs.path.relative(mainScript, from: projectRootPath);
+  Future<void> _launchFromDevFS() async {
     final List<Future<void>> futures = <Future<void>>[];
     for (final FlutterDevice device in flutterDevices) {
-      final Uri deviceEntryUri = device.devFS.baseUri.resolveUri(
-        globals.fs.path.toUri(entryUri));
+      final Uri deviceEntryUri = device.devFS.baseUri.resolve(_swap ? 'main.dart.swap.dill' : 'main.dart.dill');
       final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(
         globals.fs.path.toUri(getAssetBuildDirectory()));
       futures.add(_launchInView(device,
@@ -536,7 +534,7 @@ class HotRunner extends ResidentRunner {
 
       // The engine handles killing and recreating isolates that it has spawned
       // ("uiIsolates"). The isolates that were spawned from these uiIsolates
-      // will not be restared, and so they must be manually killed.
+      // will not be restarted, and so they must be manually killed.
       final vm_service.VM vm = await device.vmService.getVM();
       for (final vm_service.IsolateRef isolateRef in vm.isolates) {
         if (uiIsolatesIds.contains(isolateRef.id)) {
@@ -555,7 +553,7 @@ class HotRunner extends ResidentRunner {
     }
     await Future.wait(operations);
 
-    await _launchFromDevFS('$mainPath${_swap ? '.swap' : ''}.dill');
+    await _launchFromDevFS();
     restartTimer.stop();
     globals.printTrace('Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
     _addBenchmarkData('hotRestartMillisecondsToFrame',
@@ -570,7 +568,7 @@ class HotRunner extends ResidentRunner {
         try {
           await device.vmService.streamListen('Isolate');
         } on vm_service.RPCError {
-          // Do nothing, we're already subcribed.
+          // Do nothing, we're already subscribed.
         }
         isolateNotifications.add(
           device.vmService.onIsolateEvent.firstWhere((vm_service.Event event) {
@@ -793,7 +791,7 @@ class HotRunner extends ResidentRunner {
     bool pause = false,
   }) async {
     final String deviceEntryUri = device.devFS.baseUri
-      .resolveUri(globals.fs.path.toUri(entryPath)).toString();
+      .resolve(entryPath).toString();
     final vm_service.VM vm = await device.vmService.getVM();
     return <Future<vm_service.ReloadReport>>[
       for (final vm_service.IsolateRef isolateRef in vm.isolates)
@@ -849,10 +847,7 @@ class HotRunner extends ResidentRunner {
     final Stopwatch vmReloadTimer = Stopwatch()..start();
     Map<String, dynamic> firstReloadDetails;
     try {
-      final String entryPath = globals.fs.path.relative(
-        getReloadPath(fullRestart: false, swap: _swap),
-        from: projectRootPath,
-      );
+      const String entryPath = 'main.dart.incremental.dill';
       final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
       for (final FlutterDevice device in flutterDevices) {
         if (_shouldResetAssetDirectory) {

@@ -242,7 +242,7 @@ class _DevFSHttpWriter implements DevFSWriter {
   final String fsName;
   final Uri httpAddress;
 
-  // 3 was chosen to try to limit the varience in the time it takes to execute
+  // 3 was chosen to try to limit the variance in the time it takes to execute
   // `await request.close()` since there is a known bug in Dart where it doesn't
   // always return a status code in response to a PUT request:
   // https://github.com/dart-lang/sdk/issues/43525.
@@ -548,16 +548,13 @@ class DevFS {
     if (!bundleFirstUpload) {
       final String compiledBinary = compilerOutput?.outputFilename;
       if (compiledBinary != null && compiledBinary.isNotEmpty) {
-        final Uri entryUri = _fileSystem.path.toUri(projectRootPath != null
-          ? _fileSystem.path.relative(pathToReload, from: projectRootPath)
-          : pathToReload,
-        );
+        final Uri entryUri = _fileSystem.path.toUri(pathToReload);
         final DevFSFileContent content = DevFSFileContent(_fileSystem.file(compiledBinary));
         syncedBytes += content.size;
         dirtyEntries[entryUri] = content;
       }
     }
-    _logger.printTrace('Updating files');
+    _logger.printTrace('Updating files.');
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri, _httpWriter);
     }

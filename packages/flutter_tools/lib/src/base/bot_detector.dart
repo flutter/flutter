@@ -108,7 +108,7 @@ class AzureDetector {
       request.headers.add('Metadata', true);
       await request.close();
     } on SocketException {
-      // If there is an error on the socket, it probalby means that we are not
+      // If there is an error on the socket, it probably means that we are not
       // running on Azure.
       return _isRunningOnAzure = false;
     } on HttpException {

@@ -956,7 +956,7 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
       ? CupertinoUserInterfaceLevel.of(context, nullOk: nullOk) ?? CupertinoUserInterfaceLevelData.base
       : CupertinoUserInterfaceLevelData.base;
 
-    Color resolved;
+    final Color resolved;
     switch (brightness) {
       case Brightness.light:
         switch (level) {

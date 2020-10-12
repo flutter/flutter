@@ -49,7 +49,7 @@ const Map<String, HardwareType> kKnownHardware = <String, HardwareType>{
 /// A physical Android device or emulator.
 ///
 /// While [isEmulator] attempts to distinguish between the device categories,
-/// this is a best effort process and not a guarantee; certain phyiscal devices
+/// this is a best effort process and not a guarantee; certain physical devices
 /// identify as emulators. These device identifiers may be added to the [kKnownHardware]
 /// map to specify that they are actually physical devices.
 class AndroidDevice extends Device {

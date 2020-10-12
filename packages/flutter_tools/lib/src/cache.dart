@@ -651,7 +651,7 @@ abstract class CachedArtifact extends ArtifactSet {
 /// Ensures that the source files for all of the dependencies for the
 /// flutter_tool are present.
 ///
-/// This does not handle cases wheere the source files are modified or the
+/// This does not handle cases where the source files are modified or the
 /// directory contents are incomplete.
 class PubDependencies extends ArtifactSet {
   PubDependencies({
@@ -1374,7 +1374,7 @@ class IosUsbArtifacts extends CachedArtifact {
 
   // For unknown reasons, users are getting into bad states where libimobiledevice is
   // downloaded but some executables are missing from the zip. The names here are
-  // used for additional download checks below, so we can redownload if they are
+  // used for additional download checks below, so we can re-download if they are
   // missing.
   static const Map<String, List<String>> _kExecutables = <String, List<String>>{
     'libimobiledevice': <String>[

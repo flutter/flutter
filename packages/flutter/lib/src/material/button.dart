@@ -451,7 +451,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         ),
       ),
     );
-    Size minSize;
+    final Size minSize;
     switch (widget.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         minSize = Size(

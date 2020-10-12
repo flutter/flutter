@@ -502,7 +502,7 @@ class XcodeProjectInfo {
 
   /// Checks whether the [buildConfigurations] contains the specified string, without
   /// regard to case.
-  bool hasBuildConfiguratinForBuildMode(String buildMode) {
+  bool hasBuildConfigurationForBuildMode(String buildMode) {
     buildMode = buildMode.toLowerCase();
     for (final String name in buildConfigurations) {
       if (name.toLowerCase() == buildMode) {
@@ -537,7 +537,7 @@ class XcodeProjectInfo {
   /// null, if there is no unique best match.
   String buildConfigurationFor(BuildInfo buildInfo, String scheme) {
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
-    if (hasBuildConfiguratinForBuildMode(expectedConfiguration)) {
+    if (hasBuildConfigurationForBuildMode(expectedConfiguration)) {
       return expectedConfiguration;
     }
     final String baseConfiguration = _baseConfigurationFor(buildInfo);

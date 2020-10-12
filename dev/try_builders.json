@@ -174,11 +174,18 @@
          "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_tools/", "packages/flutter_web_plugins/", "bin/"]
       },
       {
+        "name":"Linux web_e2e_test",
+        "repo":"flutter",
+        "task_name":"linux_web_e2e_test",
+        "enabled":true,
+        "run_if":["examples/hello_world/**" ,"dev/**", "packages/flutter/**", "packages/flutter_driver/**", "packages/flutter_test/**", "packages/flutter_tools/lib/src/test/**", "packages/flutter_web_plugins/**", "bin/**"]
+      },
+      {
          "name":"Linux web_smoke_test",
          "repo":"flutter",
          "task_name":"linux_web_smoke_test",
          "enabled":true,
-         "run_if":["examples/hello_world/**" ,"dev/**", "packages/flutter/**", "packages/flutter_test/**", "packages/flutter_tools/lib/src/test/**", "packages/flutter_web_plugins/**", "bin/**"]
+         "run_if":["examples/hello_world/**" ,"dev/**", "packages/flutter/**", "packages/flutter_driver/**", "packages/flutter_test/**", "packages/flutter_tools/lib/src/test/**", "packages/flutter_web_plugins/**", "bin/**"]
       },
       {
          "name":"Mac build_aar_module_test",

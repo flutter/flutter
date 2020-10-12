@@ -284,10 +284,9 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
       if (debugPaintSizeEnabled) {
         final Size parentSize = getAbsoluteSize();
         final Rect outerRect = offset & parentSize;
-        Size childSize;
         Rect? innerRect;
         if (child != null) {
-          childSize = child!.getAbsoluteSize();
+          final Size childSize = child!.getAbsoluteSize();
           final SliverPhysicalParentData childParentData = child!.parentData! as SliverPhysicalParentData;
           innerRect = (offset + childParentData.paintOffset) & childSize;
           assert(innerRect.top >= outerRect.top);
