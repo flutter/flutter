@@ -81,7 +81,7 @@ class PlatformType {
   String toString() => value;
 }
 
-/// A disovery mechanism for flutter-supported development devices.
+/// A discovery mechanism for flutter-supported development devices.
 abstract class DeviceManager {
   DeviceManager({
     @required Logger logger,
@@ -238,7 +238,7 @@ abstract class DeviceManager {
 
     // Always remove web and fuchsia devices from `--all`. This setting
     // currently requires devices to share a frontend_server and resident
-    // runnner instance. Both web and fuchsia require differently configured
+    // runner instance. Both web and fuchsia require differently configured
     // compilers, and web requires an entirely different resident runner.
     if (hasSpecifiedAllDevices) {
       devices = <Device>[
@@ -270,7 +270,7 @@ abstract class DeviceManager {
     // If there are still multiple devices and the user did not specify to run
     // all, then attempt to prioritize ephemeral devices. For example, if the
     // user only typed 'flutter run' and both an Android device and desktop
-    // device are availible, choose the Android device.
+    // device are available, choose the Android device.
     if (devices.length > 1 && !hasSpecifiedAllDevices) {
       // Note: ephemeral is nullable for device types where this is not well
       // defined.
@@ -626,7 +626,7 @@ abstract class Device {
   /// Create a platform-specific [DevFSWriter] for the given [app], or
   /// null if the device does not support them.
   ///
-  /// For example, the destkop device classes can use a writer which
+  /// For example, the desktop device classes can use a writer which
   /// copies the files across the local file system.
   DevFSWriter createDevFSWriter(
     covariant ApplicationPackage app,
@@ -685,7 +685,7 @@ abstract class Device {
   bool get supportsHotRestart => true;
 
   /// Whether flutter applications running on this device can be terminated
-  /// from the vmservice.
+  /// from the VM Service.
   bool get supportsFlutterExit => true;
 
   /// Whether the device supports taking screenshots of a running flutter
@@ -938,7 +938,7 @@ class DebuggingOptions {
   /// Enable expression evaluation for web target.
   final bool webEnableExpressionEvaluation;
 
-  /// A file where the vmservice URL should be written after the application is started.
+  /// A file where the VM Service URL should be written after the application is started.
   final String vmserviceOutFile;
   final bool fastStart;
 
@@ -1053,7 +1053,7 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   void dispose() { }
 }
 
-// A portforwarder which does not support forwarding ports.
+// A port forwarder which does not support forwarding ports.
 class NoOpDevicePortForwarder implements DevicePortForwarder {
   const NoOpDevicePortForwarder();
 

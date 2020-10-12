@@ -200,7 +200,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
-    String showDescription;
+    final String showDescription;
     if (showLeading && showTrailing) {
       showDescription = 'both sides';
     } else if (showLeading) {

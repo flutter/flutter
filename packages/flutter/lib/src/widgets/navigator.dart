@@ -4358,7 +4358,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       if (route != null) {
         routeJsonable = <String, dynamic>{};
 
-        String description;
+        final String description;
         if (route is TransitionRoute<dynamic>) {
           final TransitionRoute<dynamic> transitionRoute = route;
           description = transitionRoute.debugLabel;
