@@ -37,7 +37,7 @@ typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
 /// A builder for the field in autocomplete.
 ///
 /// See also:
-///   * [AutocompleteCore.optionsFieldBuilder], which is of this type.
+///   * [AutocompleteCore.fieldViewBuilder], which is of this type.
 typedef AutocompleteFieldViewBuilder = Widget Function(
   BuildContext context,
   TextEditingController textEditingController,
@@ -400,9 +400,9 @@ class AutocompleteCore<T extends Object> extends StatefulWidget {
 
   /// Called when an option is selected by the user.
   ///
-  /// [TextEditingController.onChanged] will not be called when the user selects
-  /// an option, even though the field will update with the selected value, so
-  /// use this to be informed of selection.
+  /// Any [TextEditingController] listeners will not be called when the user
+  /// selects an option, even though the field will update with the selected
+  /// value, so use this to be informed of selection.
   final AutocompleteOnSelected<T>? onSelected;
 
   /// A function that returns the current selectable options objects given the
