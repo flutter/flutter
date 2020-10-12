@@ -495,7 +495,6 @@ class SwitchListTile extends StatelessWidget {
     return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context)!.accentColor,
-        tileColor: tileColor,
         child: ListTile(
           leading: leading,
           title: title,
@@ -509,6 +508,7 @@ class SwitchListTile extends StatelessWidget {
           selected: selected,
           autofocus: autofocus,
           shape: shape,
+          tileColor: tileColor,
         ),
       ),
     );

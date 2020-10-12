@@ -429,7 +429,6 @@ class CheckboxListTile extends StatelessWidget {
     return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context)!.accentColor,
-        tileColor: tileColor,
         child: ListTile(
           leading: leading,
           title: title,
@@ -443,6 +442,7 @@ class CheckboxListTile extends StatelessWidget {
           autofocus: autofocus,
           contentPadding: contentPadding,
           shape: shape,
+          tileColor: tileColor,
         ),
       ),
     );
