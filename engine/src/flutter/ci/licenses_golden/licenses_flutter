@@ -1514,6 +1514,10 @@ FILE: ../../../flutter/vulkan/vulkan_window.cc
 FILE: ../../../flutter/vulkan/vulkan_window.h
 FILE: ../../../flutter/web_sdk/libraries.json
 FILE: ../../../flutter/web_sdk/sdk_rewriter.dart
+FILE: ../../../flutter/web_sdk/web_test_utils/lib/environment.dart
+FILE: ../../../flutter/web_sdk/web_test_utils/lib/exceptions.dart
+FILE: ../../../flutter/web_sdk/web_test_utils/lib/goldens.dart
+FILE: ../../../flutter/web_sdk/web_test_utils/lib/image_compare.dart
 ----------------------------------------------------------------------------------------------------
 Copyright 2013 The Flutter Authors. All rights reserved.
 

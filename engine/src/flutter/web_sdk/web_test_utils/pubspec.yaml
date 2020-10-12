@@ -1,0 +1,10 @@
+name: web_test_utils
+
+environment:
+  sdk: ">=2.2.0 <3.0.0"
+
+dependencies:
+  path: 1.8.0-nullsafety.1
+  image: 2.1.13
+  js: 0.6.1+1
+  yaml: 2.2.1
