@@ -476,40 +476,36 @@ void main() {
         });
 
         testWithoutContext('Stdout startProgress on colored terminal', () async {
-          bool done = false;
-          FakeAsync().run((FakeAsync time) {
-            final Logger logger = StdoutLogger(
-              terminal: coloredTerminal,
-              stdio: mockStdio,
-              outputPreferences: OutputPreferences.test(showColor: true),
-              stopwatchFactory: stopwatchFactory,
-            );
-            final Status status = logger.startProgress(
-              'Hello',
-              progressId: null,
-              progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
-            );
-            expect(outputStderr().length, equals(1));
-            expect(outputStderr().first, isEmpty);
-            // the 5 below is the margin that is always included between the message and the time.
-            expect(
-              outputStdout().join('\n'),
-              matches(terminal.supportsEmoji
-                ? r'^Hello {15} {5} {8}[\b]{8} {7}⣽$'
-                : r'^Hello {15} {5} {8}[\b]{8} {7}\\$'),
-            );
-            status.stop();
-            expect(
-              outputStdout().join('\n'),
-              matches(
-                terminal.supportsEmoji
-                ? r'^Hello {15} {5} {8}[\b]{8} {7}⣽[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$'
-                : r'^Hello {15} {5} {8}[\b]{8} {7}\\[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$',
-              ),
-            );
-            done = true;
-          });
-          expect(done, isTrue);
+          final Logger logger = StdoutLogger(
+            terminal: coloredTerminal,
+            stdio: mockStdio,
+            outputPreferences: OutputPreferences.test(showColor: true),
+            stopwatchFactory: stopwatchFactory,
+          );
+          final Status status = logger.startProgress(
+            'Hello',
+            progressId: null,
+            progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
+          );
+          expect(outputStderr().length, equals(1));
+          expect(outputStderr().first, isEmpty);
+          // the 5 below is the margin that is always included between the message and the time.
+          expect(
+            outputStdout().join('\n'),
+            matches(terminal.supportsEmoji
+              ? r'^Hello {15} {5} {8}[\b]{8} {7}⣽$'
+              : r'^Hello {15} {5} {8}[\b]{8} {7}\\$'),
+          );
+          mockStopwatch.elapsed = const Duration(seconds: 4, milliseconds: 100);
+          status.stop();
+          expect(
+            outputStdout().join('\n'),
+            matches(
+              terminal.supportsEmoji
+              ? r'^Hello {15} {5} {8}[\b]{8} {7}⣽[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$'
+              : r'^Hello {15} {5} {8}[\b]{8} {7}\\[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$',
+            ),
+          );
         });
 
         testWithoutContext('Stdout startProgress on colored terminal pauses', () async {
@@ -640,7 +636,6 @@ void main() {
     mocks.MockStdio mockStdio;
     SummaryStatus summaryStatus;
     int called;
-    final RegExp secondDigits = RegExp(r'[^\b]\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
 
     setUp(() {
       mockStdio = mocks.MockStdio();
@@ -924,30 +919,30 @@ void main() {
     });
 
     testWithoutContext('Stdout startProgress on non-color terminal', () async {
-      bool done = false;
-      FakeAsync().run((FakeAsync time) {
-        final Logger logger = StdoutLogger(
-          terminal: AnsiTerminal(
-            stdio: mockStdio,
-            platform: _kNoAnsiPlatform,
-          ),
+      final FakeStopwatch fakeStopwatch = FakeStopwatch();
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
           stdio: mockStdio,
-          outputPreferences: OutputPreferences.test(showColor: false),
-        );
-        final Status status = logger.startProgress(
-          'Hello',
-          progressId: null,
-          progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
-        );
-        expect(outputStderr().length, equals(1));
-        expect(outputStderr().first, isEmpty);
-        // the 5 below is the margin that is always included between the message and the time.
-        expect(outputStdout().join('\n'), matches(r'^Hello {15} {5}$'));
-        status.stop();
-        expect(outputStdout().join('\n'), matches(r'^Hello {15} {5}[\d, ]{4}[\d]\.[\d]s[\n]$'));
-        done = true;
-      });
-      expect(done, isTrue);
+          platform: _kNoAnsiPlatform,
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(showColor: false),
+        stopwatchFactory: FakeStopwatchFactory(fakeStopwatch),
+      );
+      final Status status = logger.startProgress(
+        'Hello',
+        progressId: null,
+        progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
+      );
+      expect(outputStderr().length, equals(1));
+      expect(outputStderr().first, isEmpty);
+      // the 5 below is the margin that is always included between the message and the time.
+      expect(outputStdout().join('\n'), matches(r'^Hello {15} {5}$'));
+
+      fakeStopwatch.elapsed = const Duration(seconds: 4, milliseconds: 123);
+      status.stop();
+
+      expect(outputStdout(), <String>['Hello                        4.1s', '']);
     });
 
     testWithoutContext('SummaryStatus works when canceled', () async {
@@ -959,20 +954,17 @@ void main() {
         stopwatch: FakeStopwatch(),
       );
       summaryStatus.start();
-      List<String> lines = outputStdout();
+      final List<String> lines = outputStdout();
       expect(lines[0], startsWith('Hello world              '));
       expect(lines.length, equals(1));
       expect(lines[0].endsWith('\n'), isFalse);
 
       // Verify a cancel does _not_ print the time and prints a newline.
       summaryStatus.cancel();
-      lines = outputStdout();
-      final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
-      expect(matches, isEmpty);
-      expect(lines[0], endsWith(' '));
-      expect(called, equals(1));
-      expect(lines.length, equals(2));
-      expect(lines[1], equals(''));
+      expect(outputStdout(), <String>[
+        'Hello world              ',
+        '',
+      ]);
 
       // Verify that stopping or canceling multiple times throws.
       expect(summaryStatus.cancel, throwsAssertionError);
@@ -981,21 +973,16 @@ void main() {
 
     testWithoutContext('SummaryStatus works when stopped', () async {
       summaryStatus.start();
-      List<String> lines = outputStdout();
+      final List<String> lines = outputStdout();
       expect(lines[0], startsWith('Hello world              '));
       expect(lines.length, equals(1));
 
       // Verify a stop prints the time.
       summaryStatus.stop();
-      lines = outputStdout();
-      final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
-      expect(matches, isNotNull);
-      expect(matches, hasLength(1));
-      final Match match = matches.first;
-      expect(lines[0], endsWith(match.group(0)));
-      expect(called, equals(1));
-      expect(lines.length, equals(2));
-      expect(lines[1], equals(''));
+      expect(outputStdout(), <String>[
+        'Hello world                   0ms',
+        '',
+      ]);
 
       // Verify that stopping or canceling multiple times throws.
       expect(summaryStatus.stop, throwsAssertionError);
