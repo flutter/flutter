@@ -1149,6 +1149,47 @@ void main() {
         expect(renderObject.clipBehavior, clip);
       }
     });
+
+    testWidgets('clipBehavior test', (WidgetTester tester) async {
+      // Regressing test for https://github.com/flutter/flutter/issues/67343
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      Widget buildView(double width, double height, Clip clipBehavior) {
+        return Center(
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: AndroidView(
+              viewType: 'webview',
+              layoutDirection: TextDirection.ltr,
+              clipBehavior: clipBehavior,
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildView(200.0, 200.0, Clip.none));
+      // Resize the view.
+      await tester.pumpWidget(buildView(100.0, 100.0, Clip.none));
+      // No clip happen when the clip behavior is `Clip.none` .
+      expect(tester.layers.whereType<ClipRectLayer>(), hasLength(0));
+
+      // No clip happen when the clip behavior only change.
+      await tester.pumpWidget(buildView(100.0, 100.0, Clip.hardEdge));
+      expect(tester.layers.whereType<ClipRectLayer>(), hasLength(0));
+
+      // Resize trigger clip when the clip behavior is not `Clip.none` .
+      await tester.pumpWidget(buildView(50.0, 100.0, Clip.hardEdge));
+      expect(tester.layers.whereType<ClipRectLayer>(), hasLength(1));
+      ClipRectLayer clipRectLayer = tester.layers.whereType<ClipRectLayer>().first;
+      expect(clipRectLayer.clipRect, const Rect.fromLTWH(0.0, 0.0, 50.0, 100.0));
+
+      await tester.pumpWidget(buildView(50.0, 50.0, Clip.hardEdge));
+      expect(tester.layers.whereType<ClipRectLayer>(), hasLength(1));
+      clipRectLayer = tester.layers.whereType<ClipRectLayer>().first;
+      expect(clipRectLayer.clipRect, const Rect.fromLTWH(0.0, 0.0, 50.0, 50.0));
+    });
   });
 
   group('AndroidViewSurface', () {
