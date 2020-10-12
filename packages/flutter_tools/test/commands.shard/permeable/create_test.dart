@@ -535,23 +535,6 @@ void main() {
     );
   });
 
-  testUsingContext('legacy app project with-driver-test', () async {
-    return _createAndAnalyzeProject(
-      projectDir,
-      <String>['--with-driver-test', '--template=app'],
-      <String>['lib/main.dart'],
-    );
-  }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      usage: globals.flutterUsage,
-      botDetector: globals.botDetector,
-      platform: globals.platform,
-    ),
-  });
-
   testUsingContext('module project with pub', () async {
     return _createProject(projectDir, <String>[
       '--template=module',

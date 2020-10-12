@@ -5238,6 +5238,84 @@ void main() {
     );
   });
 
+  testWidgets('Send text input state to engine when the input formatter rejects user input', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/67828
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+    final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
+      return const TextEditingValue(text: 'Flutter is the best!');
+    });
+    final TextEditingController controller = TextEditingController();
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
+    Widget builder() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          return MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(devicePixelRatio: 1.0),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Material(
+                    child: EditableText(
+                      controller: controller,
+                      focusNode: focusNode,
+                      style: textStyle,
+                      cursorColor: Colors.red,
+                      backgroundCursorColor: Colors.red,
+                      keyboardType: TextInputType.multiline,
+                      inputFormatters: <TextInputFormatter>[
+                        formatter,
+                      ],
+                      onChanged: (String value) { },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pump();
+
+    log.clear();
+
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+
+    // setEditingState is called when remote value modified by the formatter.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'I will be modified by the formatter.',
+    ));
+    expect(log.length, 1);
+    expect(log, contains(matchesMethodCall(
+      'TextInput.setEditingState',
+      args: allOf(
+        containsPair('text', 'Flutter is the best!'),
+      ),
+    )));
+
+    log.clear();
+
+    state.updateEditingValue(const TextEditingValue(
+      text: 'I will be modified by the formatter.',
+    ));
+    expect(log.length, 1);
+    expect(log, contains(matchesMethodCall(
+      'TextInput.setEditingState',
+      args: allOf(
+        containsPair('text', 'Flutter is the best!'),
+      ),
+    )));
+  });
+
   testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(

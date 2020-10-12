@@ -10,6 +10,14 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
 
+/// A parser for the Intellij and Android Studio plugin JAR files.
+///
+/// This searches on the provided plugin path for a JAR archive, then
+/// unzips it to parse the META-INF/plugin.xml for version information.
+///
+/// See also:
+///   * [IntellijValidator], the validator base class that uses this to check
+///     plugin versions.
 class IntelliJPlugins {
   IntelliJPlugins(this.pluginsPath, {
     @required FileSystem fileSystem
@@ -65,16 +73,19 @@ class IntelliJPlugins {
     final String jarPath = packageName.endsWith('.jar')
         ? _fileSystem.path.join(pluginsPath, packageName)
         : _fileSystem.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
+    final File file = _fileSystem.file(jarPath);
+    if (!file.existsSync()) {
+      return null;
+    }
     try {
-      final Archive archive =
-          ZipDecoder().decodeBytes(_fileSystem.file(jarPath).readAsBytesSync());
-      final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
-      final String content = utf8.decode(file.content as List<int>);
+      final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
+      final ArchiveFile archiveFile = archive.findFile('META-INF/plugin.xml');
+      final String content = utf8.decode(archiveFile.content as List<int>);
       const String versionStartTag = '<version>';
       final int start = content.indexOf(versionStartTag);
       final int end = content.indexOf('</version>', start);
       return content.substring(start + versionStartTag.length, end);
-    } on Exception {
+    } on ArchiveException {
       return null;
     }
   }

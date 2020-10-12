@@ -63,7 +63,7 @@ void main() {
     final Future<void> result = createTestCommandRunner(command)
       .run(const <String>['symbolize']);
 
-    expect(result, throwsToolExit(message: '"--debug-info" is required to symbolicate stack traces.'));
+    expect(result, throwsToolExit(message: '"--debug-info" is required to symbolize stack traces.'));
   });
 
   testUsingContext('symbolize exits when --debug-info file is missing', () async {
