@@ -793,16 +793,14 @@ void main() {
     expect(listeners.length, 2);
 
     // Make sure the first listener can be called re-entrantly
-    // TODO(darrenaustin): figure out how to handle this for NNBD
     final ImageInfo imageInfo = ImageInfo(image: image10x10);
-    listeners[1].onImage(imageInfo, false);
-    listeners[1].onImage(imageInfo, false);
+    listeners[1].onImage(imageInfo.clone(), false);
+    listeners[1].onImage(imageInfo.clone(), false);
 
     // Make sure the second listener can be called re-entrantly.
-    listeners[0].onImage(imageInfo, false);
-    listeners[0].onImage(imageInfo, false);
-
-  }, skip: true);
+    listeners[0].onImage(imageInfo.clone(), false);
+    listeners[0].onImage(imageInfo.clone(), false);
+  });
 
   testWidgets('Precache completes with onError on error', (WidgetTester tester) async {
     dynamic capturedException;
