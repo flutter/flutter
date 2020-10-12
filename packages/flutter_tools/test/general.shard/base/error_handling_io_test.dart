@@ -1005,6 +1005,59 @@ void main() {
 
     expect(whichCalled, 2);
   });
+
+  testWithoutContext('Process manager can run will return false if the executable does not exist', () {
+    int whichCalled = 0;
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final ProcessManager processManager = setUpProcessManager(
+      linuxPlatform,
+      fileSystem,
+       (String executable,
+        List<String> arguments, {
+        Map<String, String> environment,
+        bool includeParentEnvironment,
+        bool runInShell,
+        Encoding stderrEncoding,
+        Encoding stdoutEncoding,
+        String workingDirectory,
+      }) {
+        if (executable == 'which') {
+          whichCalled += 1;
+          return ProcessResult(0, 0, 'bar/foo\n', '');
+        }
+        throw ProcessException(executable, arguments, '', 2);
+      },
+    );
+
+    expect(processManager.canRun('foo'), false);
+  });
+
+  testWithoutContext('Process manager can run will return true if the executable does exist', () {
+    int whichCalled = 0;
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.file('bar/foo').createSync(recursive: true);
+    final ProcessManager processManager = setUpProcessManager(
+      linuxPlatform,
+      fileSystem,
+       (String executable,
+        List<String> arguments, {
+        Map<String, String> environment,
+        bool includeParentEnvironment,
+        bool runInShell,
+        Encoding stderrEncoding,
+        Encoding stdoutEncoding,
+        String workingDirectory,
+      }) {
+        if (executable == 'which') {
+          whichCalled += 1;
+          return ProcessResult(0, 0, 'bar/foo\n', '');
+        }
+        throw ProcessException(executable, arguments, '', 2);
+      },
+    );
+
+    expect(processManager.canRun('foo'), true);
+  });
 }
 
 ProcessManager setUpProcessManager(

@@ -678,14 +678,14 @@ class ErrorHandlingProcessManager implements ProcessManager {
     final String executable = command.first.toString();
     final Map<String, String> workingDirectoryCache = _resolvedExecutables[workingDirectory] ??= <String, String>{};
     final String resolvedExecutable = workingDirectoryCache[executable]
-      ?? _which(executable, workingDirectory);
+      ?? _which(executable, workingDirectory, strict);
     if (resolvedExecutable != executable) {
       workingDirectoryCache[executable] = resolvedExecutable;
     }
     return resolvedExecutable;
   }
 
-  String _which(String execName, String workingDirectory) {
+  String _which(String execName, String workingDirectory, bool strict) {
     // `where` always returns all matches, not just the first one.
     ProcessResult result;
     try {
@@ -727,6 +727,9 @@ class ErrorHandlingProcessManager implements ProcessManager {
       }
     }
     _logger.printTrace('Could not resolve executable for $execName in $workingDirectory.');
+    if (strict) {
+      return null;
+    }
     return execName;
   }
 
