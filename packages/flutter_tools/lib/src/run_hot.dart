@@ -245,6 +245,8 @@ class HotRunner extends ResidentRunner {
     appStartedCompleter?.complete();
 
     if (benchmarkMode) {
+      // Wait multiple seconds for the isolate to have fully started.
+      await Future<void>.delayed(const Duration(seconds: 10));
       // We are running in benchmark mode.
       globals.printStatus('Running in benchmark mode.');
       // Measure time to perform a hot restart.
