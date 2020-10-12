@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/io.dart';
-import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
@@ -169,10 +168,7 @@ class LinuxDoctorValidator extends DoctorValidator {
         binary,
         '--version',
       ]);
-    } on ProcessException catch (err) {
-      if (!isMissingExecutableException(err)) {
-        rethrow;
-      }
+    } on ArgumentError {
       // ignore error.
     }
     if (result == null || result.exitCode != 0) {
@@ -191,10 +187,7 @@ class LinuxDoctorValidator extends DoctorValidator {
         '--exists',
         library,
       ]);
-    } on ProcessException catch (err) {
-      if (!isMissingExecutableException(err)) {
-        rethrow;
-      }
+    } on ArgumentError {
       // ignore error.
     }
     return (result?.exitCode ?? 1) == 0;

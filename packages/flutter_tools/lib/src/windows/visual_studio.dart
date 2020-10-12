@@ -303,6 +303,8 @@ class VisualStudio {
           return installations[0];
         }
       }
+    } on ArgumentError {
+      // Thrown if vswhere doesn't exist; ignore and return null below.
     } on ProcessException {
       // Ignored, return null below.
     } on FormatException {
@@ -418,6 +420,8 @@ class VisualStudio {
           return match.group(1).trim();
         }
       }
+    } on ArgumentError {
+      // Thrown if reg somehow doesn't exist; ignore and return null below.
     } on ProcessException {
       // Ignored, return null below.
     }
