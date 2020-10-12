@@ -165,9 +165,11 @@ String _jsonToMap(dynamic json) {
 }
 
 Set<String> _supportedLocales() {
-  // Assumes that en_US is a supported locale by default.
+  // Assumes that en_US is a supported locale by default. Without this, usage
+  // of the intl package APIs before Flutter populates its set of supported i18n
+  // date patterns and symbols may cause problems.
   //
-  // See https://github.com/flutter/flutter/issues/67644 for context.
+  // For more context, see https://github.com/flutter/flutter/issues/67644.
   final Set<String> supportedLocales = <String>{
     'en_US',
   };

@@ -161,6 +161,7 @@ void main() {
     });
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/67644.
   testWidgets('en_US is initialized correctly by Flutter when DateFormat is used', (WidgetTester tester) async {
     DateFormat dateFormat;
 
@@ -178,7 +179,8 @@ void main() {
         return Container();
       }),
     ));
-    expect(dateFormat.locale, 'en_US');
+
+    expect(dateFormat?.locale, 'en_US');
   });
 }
 
