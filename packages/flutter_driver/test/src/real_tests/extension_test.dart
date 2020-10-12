@@ -891,7 +891,7 @@ void main() {
           children: <Widget>[
             const Text('Foo', key: ValueKey<String>('Text1')),
             const Text('Bar', key: ValueKey<String>('Text2')),
-            FlatButton(
+            TextButton(
               child: const Text('Whatever'),
               key: const ValueKey<String>('Button'),
               onPressed: () {},
