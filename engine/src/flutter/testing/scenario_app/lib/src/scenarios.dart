@@ -14,7 +14,7 @@ import 'scenario.dart';
 import 'send_text_focus_semantics.dart';
 import 'touches_scenario.dart';
 
-typedef ScenarioFactory = Scenario Function();
+typedef ScenarioFactory = Scenario Function(); // ignore: public_member_api_docs
 
 int _viewId = 0;
 
