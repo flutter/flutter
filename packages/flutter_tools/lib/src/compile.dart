@@ -866,7 +866,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 }
 
-/// Convert a file URI into a multiroot scheme URI if provided, otherwise
+/// Convert a file URI into a multi-root scheme URI if provided, otherwise
 /// return unmodified.
 @visibleForTesting
 String toMultiRootPath(Uri fileUri, String scheme, List<String> fileSystemRoots, bool windows) {

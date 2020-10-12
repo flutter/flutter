@@ -242,7 +242,7 @@ class _DevFSHttpWriter implements DevFSWriter {
   final String fsName;
   final Uri httpAddress;
 
-  // 3 was chosen to try to limit the varience in the time it takes to execute
+  // 3 was chosen to try to limit the variance in the time it takes to execute
   // `await request.close()` since there is a known bug in Dart where it doesn't
   // always return a status code in response to a PUT request:
   // https://github.com/dart-lang/sdk/issues/43525.

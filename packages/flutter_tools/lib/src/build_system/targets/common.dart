@@ -165,7 +165,7 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
 ///
 /// Note that this target depends on the `.dart_tool/package_config.json` file
 /// even though it is not listed as an input. Pub inserts a timestamp into
-/// the file which causes unecessary rebuilds, so instead a subset of the contents
+/// the file which causes unnecessary rebuilds, so instead a subset of the contents
 /// are used an input instead.
 class KernelSnapshot extends Target {
   const KernelSnapshot();
