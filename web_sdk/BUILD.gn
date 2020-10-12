@@ -369,7 +369,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline_sound") {
 
   args = [
     "--enable-experiment=non-nullable",
-    "--sound-null-safety ",
+    "--sound-null-safety",
     "--summary-only",
     "--target",
     "ddc",
