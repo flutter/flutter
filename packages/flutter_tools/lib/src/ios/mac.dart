@@ -302,7 +302,6 @@ Future<XcodeBuildResult> buildXcodeProject({
           initialBuildStatus = null;
           buildSubStatus = globals.logger.startProgress(
             line,
-            timeout: timeoutConfiguration.slowOperation,
             progressIndicatorPadding: kDefaultStatusPadding - 7,
           );
         }
@@ -331,7 +330,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final Stopwatch sw = Stopwatch()..start();
-  initialBuildStatus = globals.logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.slowOperation);
+  initialBuildStatus = globals.logger.startProgress('Running Xcode build...');
 
   final RunResult buildResult = await _runBuildWithRetries(buildCommands, app);
 

@@ -136,7 +136,6 @@ Future<File> getGradleAppOut(AndroidProject androidProject) async {
 Future<void> checkGradleDependencies() async {
   final Status progress = globals.logger.startProgress(
     'Ensuring gradle dependencies are up to date...',
-    timeout: timeoutConfiguration.slowOperation,
   );
   final FlutterProject flutterProject = FlutterProject.current();
   await processUtils.run(<String>[
@@ -167,8 +166,7 @@ void createSettingsAarGradle(Directory androidDirectory) {
   final String currentFileContent = currentSettingsFile.readAsStringSync();
 
   final String newSettingsRelativeFile = globals.fs.path.relative(newSettingsFile.path);
-  final Status status = globals.logger.startProgress('✏️  Creating `$newSettingsRelativeFile`...',
-      timeout: timeoutConfiguration.fastOperation);
+  final Status status = globals.logger.startProgress('✏️  Creating `$newSettingsRelativeFile`...');
 
   final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
   final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(flutterRoot, 'packages','flutter_tools',
@@ -270,7 +268,6 @@ Future<void> buildGradleApp({
 
   final Status status = globals.logger.startProgress(
     "Running Gradle task '$assembleTask'...",
-    timeout: timeoutConfiguration.slowOperation,
     multilineOutput: true,
   );
 
@@ -571,7 +568,6 @@ Future<void> buildGradleAar({
   final String aarTask = getAarTaskFor(buildInfo);
   final Status status = globals.logger.startProgress(
     "Running Gradle task '$aarTask'...",
-    timeout: timeoutConfiguration.slowOperation,
     multilineOutput: true,
   );
 

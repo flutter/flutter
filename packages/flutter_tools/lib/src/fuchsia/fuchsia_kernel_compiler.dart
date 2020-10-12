@@ -71,7 +71,6 @@ class FuchsiaKernelCompiler {
     ];
     final Status status = globals.logger.startProgress(
       'Building Fuchsia application...',
-      timeout: null,
     );
     int result;
     try {

@@ -328,7 +328,6 @@ class FuchsiaDevice extends Device {
     final String appName = FlutterProject.current().manifest.appName;
     final Status status = globals.logger.startProgress(
       'Starting Fuchsia application $appName...',
-      timeout: null,
     );
     FuchsiaPackageServer fuchsiaPackageServer;
     bool serverRegistered = false;
@@ -756,7 +755,6 @@ class FuchsiaIsolateDiscoveryProtocol {
     }
     _status ??= globals.logger.startProgress(
       'Waiting for a connection from $_isolateName on ${_device.name}...',
-      timeout: null, // could take an arbitrary amount of time
     );
     unawaited(_findIsolate());  // Completes the _foundUri Future.
     return _foundUri.future.then((Uri uri) {
