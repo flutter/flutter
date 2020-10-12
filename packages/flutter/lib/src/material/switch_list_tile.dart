@@ -377,7 +377,7 @@ class SwitchListTile extends StatelessWidget {
   final Color? inactiveTrackColor;
 
   /// {@macro flutter.material.ListTile.tileColor}
-  final Color tileColor;
+  final Color? tileColor;
 
   /// An image to use on the thumb of this switch when the switch is on.
   final ImageProvider? activeThumbImage;

@@ -322,7 +322,7 @@ class CheckboxListTile extends StatelessWidget {
   final Color? checkColor;
 
   /// {@macro flutter.material.ListTile.tileColor}
-  final Color tileColor;
+  final Color? tileColor;
 
   /// The primary content of the list tile.
   ///
