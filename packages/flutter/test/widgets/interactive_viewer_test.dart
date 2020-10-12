@@ -1218,6 +1218,12 @@ void main() {
         print('justin start');
         expect(a.intersects(b), isTrue);
       });
+
+      // TODO(justinmc): I was seeing errors related to this. I think if one of
+      // the lines is vertical, such as will always happen with an AABB, then
+      // my equations go infinite and break.
+      test('vertical line with infinite slope', () {
+      });
     });
   });
 }

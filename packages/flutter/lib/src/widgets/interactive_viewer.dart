@@ -623,7 +623,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       focalPoint,
     );
     // TODO(justinmc): If rotation would result in viewing beyond the boundary,
-    // don't allow it.
+    // don't allow it. Use _validateMatrix here. And in _matrixScale as well?
     return matrix
       .clone()
       ..translate(focalPointScene.dx, focalPointScene.dy)
@@ -635,11 +635,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // closest translated matrix that is valid. If none exists, return the
   // original matrix.
   //
-  // A valid matrix is defined as one which does not allow the viewport to view
-  // anything outside of the boundary.
-  //
-  // When the matrix includes rotation, the boundary is the axis aligned
-  // bounding box of the original boundary, so it may be larger.
+  // A valid matrix is defined as a matrix where all sides of the viewport
+  // intersect the boundary. This allows the viewport to partially see beyond
+  // the boundary after rotation, but keeps the entire boundary visible.
   Matrix4 _validateMatrix(Matrix4 matrix) {
     // If the boundaries are infinite, then no need to check if the translation
     // fits within them.
@@ -650,37 +648,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // Transform the viewport to determine where its four corners will be after
     // the child has been transformed.
     final Quad nextViewport = _transformViewport(matrix, _viewport);
-    //print('justin _viewport is $_viewport and next viewport is ${_stringifyQuad(nextViewport)}');
-
-    // Expand the boundaries with rotation. This prevents the problem where a
-    // mismatch in orientation between the viewport and boundaries effectively
-    // limits translation. With this approach, all points that are visible with
-    // no rotation are visible after rotation.
-    /*
-    final Quad boundariesAabbQuad = InteractiveViewer.getAxisAlignedBoundingBoxWithRotation(
-      _boundaryRect,
-      _getMatrixRotation(matrix),
-    );
-
-    // If the given translation fits completely within the boundaries, allow it.
-    final Offset offendingDistance = _exceedsBy(boundariesAabbQuad, nextViewport);
-    print('justin viewport ${_stringifyQuad(nextViewport)} \nexceeds ${_stringifyQuad(boundariesAabbQuad)} \nby $offendingDistance\n\n');
-    // TODO(justinmc): At this point, I see that nextViewport appears to be
-    // incorrect? boundariesAabbQuad looks right. In the app, I clearly see past
-    // the child, but numerically nextViewport is not exceeding the boundary.
-    // Calculations for aabb and exceeds seem to be right.
-    // No.
-    // You are misunderstanding what the aabb boundary should be. It will depend
-    // on the size of the transformed viewport! nextViewport is correct.
-    // boundariesAabbQuad needs to adapt to it.
-    // I'm continuing outside of this commented out block.
-    if (offendingDistance == Offset.zero) {
-      return matrix;
-    }
-    */
 
     // If any side of the viewport does not intersect the interior of the
-    // boundary, invalid.
+    // boundary, it's invalid.
     final LineSegment viewportSide01 = LineSegment.vector(
       nextViewport.point0,
       nextViewport.point1,
@@ -697,33 +667,20 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       nextViewport.point3,
       nextViewport.point0,
     );
-    final bool side01Intersects = viewportSide01.intersectsRect(_boundaryRect);
-    final bool side12Intersects = viewportSide12.intersectsRect(_boundaryRect);
-    final bool side23Intersects = viewportSide23.intersectsRect(_boundaryRect);
-    final bool side30Intersects = viewportSide30.intersectsRect(_boundaryRect);
     if (viewportSide01.intersectsRect(_boundaryRect)
         && viewportSide12.intersectsRect(_boundaryRect)
         && viewportSide23.intersectsRect(_boundaryRect)
         && viewportSide30.intersectsRect(_boundaryRect)) {
       return matrix;
     }
-    print('justin invalid. 01:$side01Intersects 12:$side12Intersects 23:$side23Intersects 30:$side30Intersects.');
-    if (!viewportSide12.intersectsRect(_boundaryRect)) {
-      print('justin $viewportSide12 does not intersect $_boundaryRect');
-    }
 
     // Invalid. Find the nearest points on boundaryRect and the viewportSide
     // that doesn't intersect to each other, and move the points on top of each
     // other.
+    // TODO(justinmc): Implement recovery.
     return Matrix4.identity();
 
     /*
-    // TODO(justinmc): It's correct up to here (except that it seems off by a
-    // few pixels, I can't quite see the corner of the child).
-    // Next, get the code working that finds the nearest point that doesn't
-    // exceed. And test getAxisAlignedBoundingBoxWithRotation! And check why the
-    // existing tests are failing.
-
     // Desired translation goes out of bounds, so translate to the nearest
     // in-bounds point instead.
     final Offset nextTotalTranslation = _getMatrixTranslation(matrix);
@@ -1320,20 +1277,26 @@ Offset pointAt(Offset start, double direction, double distance) {
   return fromOrigin + start;
 }
 
+/// Represents a line segment between the two given points.
 @visibleForTesting
 class LineSegment {
+  /// Create a line segments from Offsets.
   const LineSegment(
     this.p0,
     this.p1,
   );
 
+  /// Create a line segments from Vector3s.
   LineSegment.vector(
     Vector3 v0,
     Vector3 v1,
   ) : p0 = Offset(v0.x, v0.y),
       p1 = Offset(v1.x, v1.y);
 
+  /// The first endpoint of the line segment.
   final Offset p0;
+
+  /// The second endpoint of the line segment.
   final Offset p1;
 
   /// The slope of the line segment defined by change in y over change in x.
@@ -1355,7 +1318,7 @@ class LineSegment {
         && offset.dy >= yMin && offset.dy <= yMax;
   }
 
-  /// Inclusively.
+  /// True iff the given line segment intersects this one, inclusively.
   bool intersects(LineSegment lineSegment) {
     // If the slopes are the same, they intersect if they overlap.
     if (lineSegment.slope == slope) {
@@ -1365,34 +1328,37 @@ class LineSegment {
     // If the slopes are different, the corresponding lines (not segments) must
     // overlap. If that point happens between the endpoints of both line
     // segments, then the line segmens intersect.
-    // y = mx + b
-    // y = m1x + b1
-    // mx + b = m1x + b1
-    // mx - m1x = b1 - b
-    // (m - m1) * x = b1 - b
     // x = (b1 - b) / (m - m1)
     final double xIntersection = (lineSegment.lineYIntercept - lineYIntercept)
         / (slope - lineSegment.slope);
+    // TODO(justinmc): This is happening when panning a corner of viewport
+    // outside of boundary after rotation. See test in IV_test.dart and fix it
+    // by handling vertical lines with infinite slope here.
+    if (!xIntersection.isFinite) {
+      print('justin not finite! $xIntersection = (${lineSegment.lineYIntercept} - $lineYIntercept) / ($slope - ${lineSegment.slope})');
+    }
+    assert(xIntersection.isFinite);
 
     // y = m * xIntersection + b
     final double yIntersection = slope * xIntersection + lineYIntercept;
+    assert(yIntersection.isFinite);
     final Offset intersection = Offset(xIntersection, yIntersection);
 
     return contains(intersection) && lineSegment.contains(intersection);
   }
 
+  /// Returns true iff this line segment intersects the given rect, inclusively.
   bool intersectsRect(Rect rect) {
-    // Intersets if either point, or both, is inside of the rectangle.
+    // Intersects if either point, or both, is inside of the rectangle.
     if (rect.contains(p0) || rect.contains(p1)) {
       return true;
     }
 
-    // Otherwise, intersects if it intersects any of the four sides.
+    // Otherwise, intersects the rect if it intersects any of the four sides.
     final LineSegment top = LineSegment(rect.topLeft, rect.topRight);
     final LineSegment right = LineSegment(rect.topRight, rect.bottomRight);
     final LineSegment bottom = LineSegment(rect.bottomRight, rect.bottomLeft);
     final LineSegment left = LineSegment(rect.bottomLeft, rect.topLeft);
-
     return intersects(top) || intersects(right)
         || intersects(bottom) || intersects(left);
   }
