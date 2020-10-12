@@ -610,12 +610,3 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
   }
 }
-
-/// Whether the process exception was thrown due to a mising executable.
-///
-/// On macOS, Linux, and Windows error code 2 indicates a missing file, which
-/// means that the process resolution failed to locate the correct
-/// executable.
-bool isMissingExecutableException(ProcessException processException) {
-  return processException.errorCode == 2;
-}

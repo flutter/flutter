@@ -223,9 +223,8 @@ Future<T> runInContext<T>(
       ),
       ProcessInfo: () => ProcessInfo(),
       ProcessManager: () => ErrorHandlingProcessManager(
+        delegate: const LocalProcessManager(),
         platform: globals.platform,
-        fileSystem: globals.fs,
-        logger: globals.logger,
       ),
       ProcessUtils: () => ProcessUtils(
         processManager: globals.processManager,
