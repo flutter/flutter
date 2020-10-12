@@ -1662,7 +1662,7 @@ class ArtifactUpdater {
   /// Download bytes from [url], throwing non-200 responses as an exception.
   ///
   /// Validates that the md5 of the content bytes matches the provided
-  /// `x-goog-hash` header, if present. This header should contain and md5 hash
+  /// `x-goog-hash` header, if present. This header should contain an md5 hash
   /// if the download source is Google cloud storage.
   ///
   /// See also:
@@ -1675,27 +1675,25 @@ class ArtifactUpdater {
     }
 
     String md5Hash;
+    ByteConversionSink inputSink;
+    StreamController<Digest> digests;
     final List<String> values = response.headers['x-goog-hash'];
     if (values != null) {
       final String rawMd5Hash = values.firstWhere((String value) {
         return value.startsWith('md5=');
       }, orElse: () => null);
-      if (rawMd5Hash != null) {
+      if (rawMd5Hash != null
+          && rawMd5Hash.split('md5=').length > 1
+          && rawMd5Hash.split('md5=')[1].isNotEmpty) {
         md5Hash = rawMd5Hash.split('md5=')[1];
+        _logger.printTrace('Content $url md5 hash: $md5Hash');
+        digests = StreamController<Digest>();
+        inputSink = md5.startChunkedConversion(digests);
       }
-    }
-    ByteConversionSink inputSink;
-    StreamController<Digest> digests;
-    if (md5Hash != null) {
-      _logger.printTrace('Content $url md5 hash: $md5Hash');
-      digests = StreamController<Digest>();
-      inputSink = md5.startChunkedConversion(digests);
     }
     final RandomAccessFile randomAccessFile = file.openSync(mode: FileMode.writeOnly);
     await response.forEach((List<int> chunk) {
-      if (inputSink != null) {
-        inputSink.add(chunk);
-      }
+      inputSink?.add(chunk);
       randomAccessFile.writeFromSync(chunk);
     });
     randomAccessFile.closeSync();
