@@ -55,7 +55,7 @@ void main() {
           .thenThrow(const ProcessException('/usr/bin/xcode-select', <String>['--print-path']));
         expect(xcode.xcodeSelectPath, isNull);
         when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-          .thenThrow(ArgumentError('Invalid argument(s): Cannot find executable for /usr/bin/xcode-select'));
+          .thenThrow(const ProcessException('/usr/bin/xcode-select', <String>['--print-path'], '', 2));
 
         expect(xcode.xcodeSelectPath, isNull);
       });

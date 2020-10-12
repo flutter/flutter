@@ -361,10 +361,6 @@ class IOSDeployDebugger {
       _logger.printTrace('ios-deploy failed: $exception');
       _debuggerState = _IOSDeployDebuggerState.detached;
       _debuggerOutput.addError(exception, stackTrace);
-    } on ArgumentError catch (exception, stackTrace) {
-      _logger.printTrace('ios-deploy failed: $exception');
-      _debuggerState = _IOSDeployDebuggerState.detached;
-      _debuggerOutput.addError(exception, stackTrace);
     }
     // Wait until the debugger attaches, or the attempt fails.
     return debuggerCompleter.future;

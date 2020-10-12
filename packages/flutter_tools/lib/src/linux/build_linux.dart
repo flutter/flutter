@@ -6,6 +6,7 @@ import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -104,7 +105,10 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
       },
       trace: true,
     );
-  } on ArgumentError {
+  } on ProcessException catch (err) {
+    if (!isMissingExecutableException(err)) {
+      rethrow;
+    }
     throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
   }
   if (result != 0) {
@@ -131,7 +135,10 @@ Future<void> _runBuild(Directory buildDir) async {
       },
       trace: true,
     );
-  } on ArgumentError {
+  } on ProcessException catch (err) {
+    if (!isMissingExecutableException(err)) {
+      rethrow;
+    }
     throwToolExit("ninja not found. Run 'flutter doctor' for more information.");
   }
   if (result != 0) {

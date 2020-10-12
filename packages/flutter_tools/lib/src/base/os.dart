@@ -213,7 +213,10 @@ class _PosixUtils extends OperatingSystemUtils {
         throwOnError: true,
         verboseExceptions: true,
       );
-    } on ArgumentError {
+    } on ProcessException catch (err) {
+      if (!isMissingExecutableException(err)) {
+        rethrow;
+      }
       // unzip is not available. this error message is modeled after the download
       // error in bin/internal/update_dart_sdk.sh
       String message = 'Please install unzip.';
@@ -297,7 +300,10 @@ class _WindowsUtils extends OperatingSystemUtils {
     ProcessResult result;
     try {
       result = _processManager.runSync(<String>['where', execName]);
-    } on ArgumentError {
+    } on ProcessException catch (err) {
+      if (!isMissingExecutableException(err)) {
+        rethrow;
+      }
       // `where` could be missing if system32 is not on the PATH.
       throwToolExit(
         'Cannot find the executable for `where`. This can happen if the System32 '
