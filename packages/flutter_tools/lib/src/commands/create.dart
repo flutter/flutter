@@ -133,7 +133,9 @@ class CreateCommand extends FlutterCommand {
       allowed: <String>['java', 'kotlin'],
     );
     argParser.addFlag(
-      'skip-checks',
+      'skip-name-checks',
+      help: 'integration test only parameter to allow creating applications/plugins with '
+        'invalid names.',
       hide: true,
     );
   }
@@ -391,7 +393,7 @@ class CreateCommand extends FlutterCommand {
     }
 
     final String projectName = stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
-    if (!boolArg('skip-checks')) {
+    if (!boolArg('skip-name-checks')) {
       error = _validateProjectName(projectName);
       if (error != null) {
         throwToolExit(error);
