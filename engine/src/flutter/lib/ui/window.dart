@@ -125,7 +125,7 @@ abstract class FlutterView {
   /// system UI. The [padding] and [viewInsets] properties provide information
   /// about how much of each side of the view may be obscured by system UI.
   ///
-  /// This value is the same as [physicalGeometry.size].
+  /// This value is the same as the `size` member of [physicalGeometry].
   ///
   /// See also:
   ///
@@ -309,10 +309,10 @@ class SingletonFlutterWindow extends FlutterWindow {
       : super._(windowId, platformDispatcher);
 
   /// A callback that is invoked whenever the [devicePixelRatio],
-  /// [physicalSize], [padding], [viewInsets], [PlatformDispatcher.views],
-  /// [PlatformDispatcher.screens], or [systemGestureInsets] values change.
+  /// [physicalSize], [padding], [viewInsets], [PlatformDispatcher.views], or
+  /// [systemGestureInsets] values change.
   ///
-  /// {@template flutter.lib.ui.window.forwardWarning}
+  /// {@macro flutter.lib.ui.window.accessorForwardWarning}
   ///
   /// See [PlatformDispatcher.onMetricsChanged] for more information.
   VoidCallback? get onMetricsChanged => platformDispatcher.onMetricsChanged;
@@ -374,7 +374,7 @@ class SingletonFlutterWindow extends FlutterWindow {
 
   /// A callback that is invoked whenever [locale] changes value.
   ///
-  /// {@macro flutter.lib.ui.window.forwardWarning}
+  /// {@macro flutter.lib.ui.window.accessorForwardWarning}
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
@@ -424,7 +424,7 @@ class SingletonFlutterWindow extends FlutterWindow {
 
   /// A callback that is invoked whenever [textScaleFactor] changes value.
   ///
-  /// {@macro flutter.lib.ui.window.forwardWarning}
+  /// {@macro flutter.lib.ui.window.accessorForwardWarning}
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
@@ -448,7 +448,7 @@ class SingletonFlutterWindow extends FlutterWindow {
 
   /// A callback that is invoked whenever [platformBrightness] changes value.
   ///
-  /// {@macro flutter.lib.ui.window.forwardWarning}
+  /// {@macro flutter.lib.ui.window.accessorForwardWarning}
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
@@ -466,7 +466,7 @@ class SingletonFlutterWindow extends FlutterWindow {
   /// time to provide a scene using the [SceneBuilder] API and the [render]
   /// method.
   ///
-  /// {@macro flutter.lib.ui.window.forwardWarning}
+  /// {@macro flutter.lib.ui.window.accessorForwardWarning}
   ///
   /// When possible, this is driven by the hardware VSync signal. This is only
   /// called if [scheduleFrame] has been called since the last time this
@@ -493,7 +493,7 @@ class SingletonFlutterWindow extends FlutterWindow {
   /// A callback that is invoked for each frame after [onBeginFrame] has
   /// completed and after the microtask queue has been drained.
   ///
-  /// {@macro flutter.lib.ui.window.forwardWarning}
+  /// {@macro flutter.lib.ui.window.accessorForwardWarning}
   ///
   /// This can be used to implement a second phase of frame rendering that
   /// happens after any deferred work queued by the [onBeginFrame] phase.
@@ -515,10 +515,10 @@ class SingletonFlutterWindow extends FlutterWindow {
   /// A callback that is invoked to report the [FrameTiming] of recently
   /// rasterized frames.
   ///
-  /// {@macro flutter.lib.ui.window.forwardWarning}
+  /// {@macro flutter.lib.ui.window.accessorForwardWarning}
   ///
   /// It's prefered to use [SchedulerBinding.addTimingsCallback] than to use
-  /// [FlutterWindow.onReportTimings] directly because
+  /// [SingletonFlutterWindow.onReportTimings] directly because
   /// [SchedulerBinding.addTimingsCallback] allows multiple callbacks.
   ///
   /// This can be used to see if the window has missed frames (through
@@ -542,7 +542,7 @@ class SingletonFlutterWindow extends FlutterWindow {
 
   /// A callback that is invoked when pointer data is available.
   ///
-  /// {@macro flutter.lib.ui.window.forwardWarning}
+  /// {@macro flutter.lib.ui.window.accessorForwardWarning}
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
@@ -615,7 +615,7 @@ class SingletonFlutterWindow extends FlutterWindow {
 
   /// A callback that is invoked when the value of [semanticsEnabled] changes.
   ///
-  /// {@macro flutter.lib.ui.window.forwardWarning}
+  /// {@macro flutter.lib.ui.window.accessorForwardWarning}
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
@@ -627,7 +627,7 @@ class SingletonFlutterWindow extends FlutterWindow {
   /// A callback that is invoked whenever the user requests an action to be
   /// performed.
   ///
-  /// {@macro flutter.lib.ui.window.forwardWarning}
+  /// {@macro flutter.lib.ui.window.accessorForwardWarning}
   ///
   /// This callback is used when the user expresses the action they wish to
   /// perform based on the semantics supplied by [updateSemantics].
@@ -644,7 +644,7 @@ class SingletonFlutterWindow extends FlutterWindow {
 
   /// A callback that is invoked when the value of [accessibilityFeatures] changes.
   ///
-  /// {@macro flutter.lib.ui.window.forwardWarning}
+  /// {@macro flutter.lib.ui.window.accessorForwardWarning}
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
@@ -684,7 +684,7 @@ class SingletonFlutterWindow extends FlutterWindow {
   /// Called whenever this window receives a message from a platform-specific
   /// plugin.
   ///
-  /// {@macro flutter.lib.ui.window.forwardWarning}
+  /// {@macro flutter.lib.ui.window.accessorForwardWarning}
   ///
   /// The `name` parameter determines which plugin sent the message. The `data`
   /// parameter is the payload and is typically UTF-8 encoded JSON but can be
@@ -704,7 +704,7 @@ class SingletonFlutterWindow extends FlutterWindow {
   /// Set the debug name associated with this platform dispatcher's root
   /// isolate.
   ///
-  /// {@macro flutter.lib.ui.window.forwardWarning}
+  /// {@macro flutter.lib.ui.window.accessorForwardWarning}
   ///
   /// Normally debug names are automatically generated from the Dart port, entry
   /// point, and source file. For example: `main.dart$main-1234`.
@@ -798,9 +798,214 @@ class AccessibilityFeatures {
 /// [SingletonFlutterWindow].
 ///
 /// This class will be removed once the framework no longer refers to it.
+// In order for the documentation build to succeed, this interface duplicates
+// all of the methods with documentation, overrides them, and calls the super
+// implementation. Once this merges into the framework and the framework
+// references to it can be updated, this class will be removed entirely.
 class Window extends SingletonFlutterWindow {
   Window._(Object windowId, PlatformDispatcher platformDispatcher)
       : super._(windowId, platformDispatcher);
+
+  @override
+  // ignore: unnecessary_overrides
+  double get devicePixelRatio => super.devicePixelRatio;
+
+  @override
+  // ignore: unnecessary_overrides
+  Rect get physicalGeometry => super.physicalGeometry;
+
+  @override
+  // ignore: unnecessary_overrides
+  Size get physicalSize => super.physicalSize;
+
+  @override
+  // ignore: unnecessary_overrides
+  WindowPadding get viewInsets => super.viewInsets;
+
+  @override
+  // ignore: unnecessary_overrides
+  WindowPadding get viewPadding => super.viewPadding;
+
+  @override
+  // ignore: unnecessary_overrides
+  WindowPadding get systemGestureInsets => super.systemGestureInsets;
+
+  @override
+  // ignore: unnecessary_overrides
+  WindowPadding get padding => super.padding;
+
+  @override
+  // ignore: unnecessary_overrides
+  void render(Scene scene) => super.render(scene);
+
+  @override
+  // ignore: unnecessary_overrides
+  VoidCallback? get onMetricsChanged => super.onMetricsChanged;
+  @override
+  // ignore: unnecessary_overrides
+  set onMetricsChanged(VoidCallback? callback) {
+    super.onMetricsChanged = callback;
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  Locale? get locale => super.locale;
+
+  @override
+  // ignore: unnecessary_overrides
+  List<Locale>? get locales => super.locales;
+
+  @override
+  // ignore: unnecessary_overrides
+  Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
+    return super.computePlatformResolvedLocale(supportedLocales);
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  VoidCallback? get onLocaleChanged => super.onLocaleChanged;
+  @override
+  // ignore: unnecessary_overrides
+  set onLocaleChanged(VoidCallback? callback) {
+    super.onLocaleChanged = callback;
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  String get initialLifecycleState => super.initialLifecycleState;
+
+  @override
+  // ignore: unnecessary_overrides
+  double get textScaleFactor => super.textScaleFactor;
+
+  @override
+  // ignore: unnecessary_overrides
+  bool get alwaysUse24HourFormat => super.alwaysUse24HourFormat;
+
+  @override
+  // ignore: unnecessary_overrides
+  VoidCallback? get onTextScaleFactorChanged => super.onTextScaleFactorChanged;
+  @override
+  // ignore: unnecessary_overrides
+  set onTextScaleFactorChanged(VoidCallback? callback) {
+    super.onTextScaleFactorChanged = callback;
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  Brightness get platformBrightness => super.platformBrightness;
+
+  @override
+  // ignore: unnecessary_overrides
+  VoidCallback? get onPlatformBrightnessChanged => super.onPlatformBrightnessChanged;
+  @override
+  // ignore: unnecessary_overrides
+  set onPlatformBrightnessChanged(VoidCallback? callback) {
+    super.onPlatformBrightnessChanged = callback;
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  FrameCallback? get onBeginFrame => super.onBeginFrame;
+  @override
+  // ignore: unnecessary_overrides
+  set onBeginFrame(FrameCallback? callback) {
+    super.onBeginFrame = callback;
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  VoidCallback? get onDrawFrame => super.onDrawFrame;
+  @override
+  // ignore: unnecessary_overrides
+  set onDrawFrame(VoidCallback? callback) {
+    super.onDrawFrame = callback;
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  TimingsCallback? get onReportTimings => super.onReportTimings;
+  @override
+  // ignore: unnecessary_overrides
+  set onReportTimings(TimingsCallback? callback) {
+    super.onReportTimings = callback;
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  PointerDataPacketCallback? get onPointerDataPacket => super.onPointerDataPacket;
+  @override
+  // ignore: unnecessary_overrides
+  set onPointerDataPacket(PointerDataPacketCallback? callback) {
+    super.onPointerDataPacket = callback;
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  String get defaultRouteName => super.defaultRouteName;
+
+  @override
+  // ignore: unnecessary_overrides
+  void scheduleFrame() => super.scheduleFrame();
+
+  @override
+  // ignore: unnecessary_overrides
+  bool get semanticsEnabled => super.semanticsEnabled;
+
+  @override
+  // ignore: unnecessary_overrides
+  VoidCallback? get onSemanticsEnabledChanged => super.onSemanticsEnabledChanged;
+  @override
+  // ignore: unnecessary_overrides
+  set onSemanticsEnabledChanged(VoidCallback? callback) {
+    super.onSemanticsEnabledChanged = callback;
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  SemanticsActionCallback? get onSemanticsAction => super.onSemanticsAction;
+  @override
+  // ignore: unnecessary_overrides
+  set onSemanticsAction(SemanticsActionCallback? callback) {
+    super.onSemanticsAction = callback;
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  AccessibilityFeatures get accessibilityFeatures => super.accessibilityFeatures;
+
+  @override
+  // ignore: unnecessary_overrides
+  VoidCallback? get onAccessibilityFeaturesChanged =>
+      super.onAccessibilityFeaturesChanged;
+  @override
+  // ignore: unnecessary_overrides
+  set onAccessibilityFeaturesChanged(VoidCallback? callback) {
+    super.onAccessibilityFeaturesChanged = callback;
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  void updateSemantics(SemanticsUpdate update) => super.updateSemantics(update);
+
+  @override
+  // ignore: unnecessary_overrides
+  void sendPlatformMessage(String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+    super.sendPlatformMessage(name, data, callback);
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  PlatformMessageCallback? get onPlatformMessage => super.onPlatformMessage;
+  @override
+  // ignore: unnecessary_overrides
+  set onPlatformMessage(PlatformMessageCallback? callback) {
+    super.onPlatformMessage = callback;
+  }
+
+  @override
+  // ignore: unnecessary_overrides
+  void setIsolateDebugName(String name) => super.setIsolateDebugName(name);
 }
 
 /// Describes the contrast of a theme or color palette.

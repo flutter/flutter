@@ -124,7 +124,137 @@ abstract class SingletonFlutterWindow extends FlutterWindow {
   void setIsolateDebugName(String name) => PlatformDispatcher.instance.setIsolateDebugName(name);
 }
 
-abstract class Window extends SingletonFlutterWindow {}
+// This class will go away entirely once references to it are removed from the
+// framework. The many explicit overrides are an artifact of needing to add the
+// same overrides to the one in dart:ui in order to get dartdoc to find the docs
+// for them.
+abstract class Window extends SingletonFlutterWindow {
+  @override
+  double get devicePixelRatio;
+
+  @override
+  Rect get physicalGeometry;
+
+  @override
+  Size get physicalSize;
+
+  @override
+  WindowPadding get viewInsets;
+
+  @override
+  WindowPadding get viewPadding;
+
+  @override
+  WindowPadding get systemGestureInsets;
+
+  @override
+  WindowPadding get padding;
+
+  @override
+  void render(Scene scene);
+
+  @override
+  VoidCallback? get onMetricsChanged;
+  @override
+  set onMetricsChanged(VoidCallback? callback);
+
+  @override
+  Locale? get locale => super.locale;
+
+  @override
+  List<Locale>? get locales => super.locales;
+
+  @override
+  Locale? computePlatformResolvedLocale(List<Locale> supportedLocales);
+
+  @override
+  VoidCallback? get onLocaleChanged;
+  @override
+  set onLocaleChanged(VoidCallback? callback);
+
+  @override
+  String get initialLifecycleState;
+
+  @override
+  double get textScaleFactor;
+
+  @override
+  bool get alwaysUse24HourFormat;
+
+  @override
+  VoidCallback? get onTextScaleFactorChanged;
+  @override
+  set onTextScaleFactorChanged(VoidCallback? callback);
+
+  @override
+  Brightness get platformBrightness;
+
+  @override
+  VoidCallback? get onPlatformBrightnessChanged;
+  @override
+  set onPlatformBrightnessChanged(VoidCallback? callback);
+
+  @override
+  FrameCallback? get onBeginFrame;
+  @override
+  set onBeginFrame(FrameCallback? callback);
+
+  @override
+  VoidCallback? get onDrawFrame;
+  @override
+  set onDrawFrame(VoidCallback? callback);
+
+  @override
+  TimingsCallback? get onReportTimings;
+  @override
+  set onReportTimings(TimingsCallback? callback);
+
+  @override
+  PointerDataPacketCallback? get onPointerDataPacket;
+  @override
+  set onPointerDataPacket(PointerDataPacketCallback? callback);
+
+  @override
+  String get defaultRouteName;
+
+  @override
+  void scheduleFrame();
+
+  @override
+  bool get semanticsEnabled;
+
+  @override
+  VoidCallback? get onSemanticsEnabledChanged;
+  @override
+  set onSemanticsEnabledChanged(VoidCallback? callback);
+
+  @override
+  SemanticsActionCallback? get onSemanticsAction;
+  @override
+  set onSemanticsAction(SemanticsActionCallback? callback);
+
+  @override
+  AccessibilityFeatures get accessibilityFeatures;
+
+  @override
+  VoidCallback? get onAccessibilityFeaturesChanged;
+  @override
+  set onAccessibilityFeaturesChanged(VoidCallback? callback);
+
+  @override
+  void updateSemantics(SemanticsUpdate update);
+
+  @override
+  void sendPlatformMessage(String name, ByteData? data, PlatformMessageResponseCallback? callback);
+
+  @override
+  PlatformMessageCallback? get onPlatformMessage;
+  @override
+  set onPlatformMessage(PlatformMessageCallback? callback);
+
+  @override
+  void setIsolateDebugName(String name);
+}
 
 class AccessibilityFeatures {
   const AccessibilityFeatures._(this._index);
