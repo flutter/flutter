@@ -77,7 +77,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// class AutocompleteBasicExample extends StatelessWidget {
 ///   AutocompleteBasicExample({Key key}) : super(key: key);
 ///
-///   final List<String> _options = <String>[
+///   static final List<String> _options = <String>[
 ///     'aardvark',
 ///     'bobcat',
 ///     'chameleon',
@@ -148,8 +148,6 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///   final String email;
 ///   final String name;
 ///
-///   // The displayStringForOption parameter can be used to get even more
-///   // control over the strings that represent the options objects.
 ///   @override
 ///   String toString() {
 ///     return '$name, $email';
@@ -159,7 +157,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// class AutocompleteCustomTypeExample extends StatelessWidget {
 ///   AutocompleteCustomTypeExample({Key key});
 ///
-///   final List<User> _kUserOptions = <User>[
+///   static final List<User> _userOptions = <User>[
 ///     User(name: 'Alice', email: 'alice@example.com'),
 ///     User(name: 'Bob', email: 'bob@example.com'),
 ///     User(name: 'Charlie', email: 'charlie123@gmail.com'),
@@ -171,7 +169,9 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///   Widget build(BuildContext context) {
 ///     return AutocompleteCore<User>(
 ///       optionsBuilder: (TextEditingValue textEditingValue) {
-///         return _kUserOptions.where((User option) {
+///         return _userOptions.where((User option) {
+///           // Search based on User.toString, which includes both name and
+///           // email, even though the display string is just the name.
 ///           return option.toString().contains(textEditingValue.text.toLowerCase());
 ///         });
 ///       },
@@ -334,7 +334,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                   );
 ///                 },
 ///               ),
-///               RaisedButton(
+///               ElevatedButton(
 ///                 onPressed: () {
 ///                   FocusScope.of(context).requestFocus(new FocusNode());
 ///                   if (!_formKey.currentState.validate()) {
@@ -355,7 +355,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                           ),
 ///                         ),
 ///                         actions: <Widget>[
-///                           FlatButton(
+///                           TextButton(
 ///                             child: Text('Ok'),
 ///                             onPressed: () {
 ///                               Navigator.of(context).pop();
