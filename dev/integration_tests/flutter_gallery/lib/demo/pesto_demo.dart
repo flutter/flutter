@@ -85,7 +85,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
         floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.edit),
           onPressed: () {
-            scaffoldKey.currentState.showSnackBar(const SnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('Not supported.'),
             ));
           },
@@ -110,7 +110,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           icon: const Icon(Icons.search),
           tooltip: 'Search',
           onPressed: () {
-            scaffoldKey.currentState.showSnackBar(const SnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('Not supported.'),
             ));
           },

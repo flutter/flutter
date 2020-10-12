@@ -19,6 +19,7 @@ class BottomAppBarDemo extends StatefulWidget {
 
 class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   // FAB shape
 
@@ -92,7 +93,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
       "When the Scaffold's floating action button location changes, "
       'the floating action button animates to its new position. '
       'The BottomAppBar adapts its shape appropriately.';
-    _scaffoldKey.currentState.showSnackBar(
+    _scaffoldMessengerKey.currentState.showSnackBar(
       const SnackBar(content: Text(text)),
     );
   }
@@ -139,60 +140,65 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: const Text('Bottom app bar'),
-        elevation: 0.0,
-        actions: <Widget>[
-          MaterialDemoDocumentationButton(BottomAppBarDemo.routeName),
-          IconButton(
-            icon: const Icon(Icons.sentiment_very_satisfied, semanticLabel: 'Update shape'),
-            onPressed: () {
-              setState(() {
-                _fabShape = _fabShape == kCircularFab ? kDiamondFab : kCircularFab;
-              });
-            },
+    return ScaffoldMessenger(
+      key: _scaffoldMessengerKey,
+      child: Builder(
+        builder: (BuildContext context) => Scaffold(
+          key: _scaffoldKey,
+          appBar: AppBar(
+            title: const Text('Bottom app bar'),
+            elevation: 0.0,
+            actions: <Widget>[
+              MaterialDemoDocumentationButton(BottomAppBarDemo.routeName),
+              IconButton(
+                icon: const Icon(Icons.sentiment_very_satisfied, semanticLabel: 'Update shape'),
+                onPressed: () {
+                  setState(() {
+                    _fabShape = _fabShape == kCircularFab ? kDiamondFab : kCircularFab;
+                  });
+                },
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Scrollbar(
-        child: ListView(
-          padding: const EdgeInsets.only(bottom: 88.0),
-          children: <Widget>[
-            const _Heading('FAB Shape'),
+          body: Scrollbar(
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 88.0),
+              children: <Widget>[
+                const _Heading('FAB Shape'),
 
-            _RadioItem<Widget>(kCircularFab, _fabShape, _onFabShapeChanged),
-            _RadioItem<Widget>(kDiamondFab, _fabShape, _onFabShapeChanged),
-            _RadioItem<Widget>(kNoFab, _fabShape, _onFabShapeChanged),
+                _RadioItem<Widget>(kCircularFab, _fabShape, _onFabShapeChanged),
+                _RadioItem<Widget>(kDiamondFab, _fabShape, _onFabShapeChanged),
+                _RadioItem<Widget>(kNoFab, _fabShape, _onFabShapeChanged),
 
-            const Divider(),
-            const _Heading('Notch'),
+                const Divider(),
+                const _Heading('Notch'),
 
-            _RadioItem<bool>(kShowNotchTrue, _showNotch, _onShowNotchChanged),
-            _RadioItem<bool>(kShowNotchFalse, _showNotch, _onShowNotchChanged),
+                _RadioItem<bool>(kShowNotchTrue, _showNotch, _onShowNotchChanged),
+                _RadioItem<bool>(kShowNotchFalse, _showNotch, _onShowNotchChanged),
 
-            const Divider(),
-            const _Heading('FAB Position'),
+                const Divider(),
+                const _Heading('FAB Position'),
 
-            _RadioItem<FloatingActionButtonLocation>(kFabEndDocked, _fabLocation, _onFabLocationChanged),
-            _RadioItem<FloatingActionButtonLocation>(kFabCenterDocked, _fabLocation, _onFabLocationChanged),
-            _RadioItem<FloatingActionButtonLocation>(kFabEndFloat, _fabLocation, _onFabLocationChanged),
-            _RadioItem<FloatingActionButtonLocation>(kFabCenterFloat, _fabLocation, _onFabLocationChanged),
+                _RadioItem<FloatingActionButtonLocation>(kFabEndDocked, _fabLocation, _onFabLocationChanged),
+                _RadioItem<FloatingActionButtonLocation>(kFabCenterDocked, _fabLocation, _onFabLocationChanged),
+                _RadioItem<FloatingActionButtonLocation>(kFabEndFloat, _fabLocation, _onFabLocationChanged),
+                _RadioItem<FloatingActionButtonLocation>(kFabCenterFloat, _fabLocation, _onFabLocationChanged),
 
-            const Divider(),
-            const _Heading('App bar color'),
+                const Divider(),
+                const _Heading('App bar color'),
 
-            _ColorsItem(kBabColors, _babColor, _onBabColorChanged),
-          ],
+                _ColorsItem(kBabColors, _babColor, _onBabColorChanged),
+              ],
+            ),
+          ),
+          floatingActionButton: _fabShape.value,
+          floatingActionButtonLocation: _fabLocation.value,
+          bottomNavigationBar: _DemoBottomAppBar(
+            color: _babColor,
+            fabLocation: _fabLocation.value,
+            shape: _selectNotch(),
+          ),
         ),
-      ),
-      floatingActionButton: _fabShape.value,
-      floatingActionButtonLocation: _fabLocation.value,
-      bottomNavigationBar: _DemoBottomAppBar(
-        color: _babColor,
-        fabLocation: _fabLocation.value,
-        shape: _selectNotch(),
       ),
     );
   }
@@ -364,7 +370,7 @@ class _DemoBottomAppBar extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.search, semanticLabel: 'show search action',),
           onPressed: () {
-            Scaffold.of(context).showSnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('This is a dummy search action.')),
             );
           },
@@ -377,7 +383,7 @@ class _DemoBottomAppBar extends StatelessWidget {
             semanticLabel: 'Show menu actions',
           ),
           onPressed: () {
-            Scaffold.of(context).showSnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('This is a dummy menu action.')),
             );
           },

@@ -247,7 +247,7 @@ class StockHomeState extends State<StockHome> {
       stock.percentChange = 100.0 * (1.0 / stock.lastSale);
       stock.lastSale += 1.0;
     });
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('Purchased ${stock.symbol} for ${stock.lastSale}'),
       action: SnackBarAction(
         label: 'BUY MORE',

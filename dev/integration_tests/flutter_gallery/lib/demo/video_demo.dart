@@ -321,7 +321,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
           return;
         }
         if (connectivityResult == ConnectivityResult.none) {
-          widget.scaffoldKey.currentState.showSnackBar(errorSnackBar);
+          ScaffoldMessenger.of(context).showSnackBar(errorSnackBar);
         } else {
           if (!widget.connectedCompleter.isCompleted) {
             widget.connectedCompleter.complete(null);
