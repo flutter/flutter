@@ -286,6 +286,8 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     ]);
     fileSystem.file(fileSystem.path.join('lib', 'other.dart'))
       .createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('foo', 'bar.sksl.json'))
+      .createSync(recursive: true);
 
     await createTestCommandRunner(command).run(
       const <String>[
