@@ -84,8 +84,6 @@ class Xcode {
         ).stdout.trim();
       } on ProcessException {
         // Ignored, return null below.
-      } on ArgumentError {
-        // Ignored, return null below.
       }
     }
     return _xcodeSelectPath;
@@ -276,8 +274,6 @@ class XCDevice {
         ).stdout.trim();
       } on ProcessException catch (exception) {
         _logger.printTrace('Process exception finding xcdevice:\n$exception');
-      } on ArgumentError catch (exception) {
-        _logger.printTrace('Argument exception finding xcdevice:\n$exception');
       }
     }
     return _xcdevicePath;
@@ -314,8 +310,6 @@ class XCDevice {
       _logger.printTrace('xcdevice returned an error:\n${result.stderr}');
     } on ProcessException catch (exception) {
       _logger.printTrace('Process exception running xcdevice list:\n$exception');
-    } on ArgumentError catch (exception) {
-      _logger.printTrace('Argument exception running xcdevice list:\n$exception');
     }
 
     return null;
@@ -407,8 +401,6 @@ class XCDevice {
         _setupDeviceIdentifierByEventStream();
       }));
     } on ProcessException catch (exception, stackTrace) {
-      _deviceIdentifierByEvent.addError(exception, stackTrace);
-    } on ArgumentError catch (exception, stackTrace) {
       _deviceIdentifierByEvent.addError(exception, stackTrace);
     }
   }

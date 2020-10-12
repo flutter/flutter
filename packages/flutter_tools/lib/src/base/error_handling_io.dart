@@ -11,7 +11,10 @@ import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:process/process.dart';
 
 import 'common.dart' show throwToolExit;
+import 'io.dart';
+import 'logger.dart';
 import 'platform.dart';
+import 'process.dart';
 
 // The Flutter tool hits file system and process errors that only the end-user can address.
 // We would like these errors to not hit crash logging. In these cases, we
@@ -53,11 +56,11 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   /// This can be used to bypass the [ErrorHandlingFileSystem] permission exit
   /// checks for situations where failure is acceptable, such as the flutter
   /// persistent settings cache.
-  static void noExitOnFailure(void Function() operation) {
+  static T noExitOnFailure<T>(T Function() operation) {
     final bool previousValue = ErrorHandlingFileSystem._noExitOnFailure;
     try {
       ErrorHandlingFileSystem._noExitOnFailure = true;
-      operation();
+      return operation();
     } finally {
       ErrorHandlingFileSystem._noExitOnFailure = previousValue;
     }
@@ -501,6 +504,44 @@ T _runSync<T>(T Function() op, {
   }
 }
 
+/// Type signature for [io.Process.killPid].
+typedef ProcessKillPid = bool Function(int pid, [io.ProcessSignal signal]);
+
+/// Type signature for [io.Process.run].
+typedef ProcessRun = Future<io.ProcessResult> Function(
+  String executable,
+  List<String> arguments, {
+  String workingDirectory,
+  Map<String, String> environment,
+  bool includeParentEnvironment,
+  bool runInShell,
+  Encoding stdoutEncoding,
+  Encoding stderrEncoding,
+});
+
+/// Type signature for [io.Process.runSync].
+typedef ProcessRunSync = io.ProcessResult Function(
+  String executable,
+  List<String> arguments, {
+  String workingDirectory,
+  Map<String, String> environment,
+  bool includeParentEnvironment,
+  bool runInShell,
+  Encoding stdoutEncoding,
+  Encoding stderrEncoding,
+});
+
+/// Type signature for [io.Process.start].
+typedef ProcessStart = Future<io.Process> Function(
+  String executable,
+  List<String> arguments, {
+  String workingDirectory,
+  Map<String, String> environment,
+  bool includeParentEnvironment,
+  bool runInShell,
+  io.ProcessStartMode mode,
+});
+
 /// A [ProcessManager] that throws a [ToolExit] on certain errors.
 ///
 /// If a [ProcessException] is not caused by the Flutter tool, and can only be
@@ -509,28 +550,47 @@ T _runSync<T>(T Function() op, {
 ///
 /// See also:
 ///   * [ErrorHandlingFileSystem], for a similar file system strategy.
-class ErrorHandlingProcessManager extends ProcessManager {
+class ErrorHandlingProcessManager implements ProcessManager {
   ErrorHandlingProcessManager({
-    @required ProcessManager delegate,
     @required Platform platform,
-  }) : _delegate = delegate,
-       _platform = platform;
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @visibleForTesting ProcessKillPid killPid = io.Process.killPid,
+    @visibleForTesting ProcessRun run = io.Process.run,
+    @visibleForTesting ProcessRunSync runSync = io.Process.runSync,
+    @visibleForTesting ProcessStart start = io.Process.start,
+  }) : _platform = platform,
+       _fileSytem = fileSystem,
+       _logger = logger,
+       _killPid = killPid,
+       _processRun = run,
+       _processRunSync = runSync,
+       _processStart = start;
 
-  final ProcessManager _delegate;
+  final Logger _logger;
+  final FileSystem _fileSytem;
   final Platform _platform;
+  final ProcessKillPid _killPid;
+  final ProcessRun _processRun;
+  final ProcessRunSync _processRunSync;
+  final ProcessStart _processStart;
+
+  // Cached executable paths, the first is the working directory, the next is a map from
+  // executable name to actual path.
+  final Map<String, Map<String, String>> _resolvedExecutables = <String, Map<String, String>>{};
 
   @override
   bool canRun(dynamic executable, {String workingDirectory}) {
-    return _runSync(
-      () => _delegate.canRun(executable, workingDirectory: workingDirectory),
+    return _runSync<bool>(
+      () => _getCommandPath(<dynamic>[executable], workingDirectory, strict: true) != null,
       platform: _platform,
     );
   }
 
   @override
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
-    return _runSync(
-      () => _delegate.killPid(pid, signal),
+    return _runSync<bool>(
+      () => _killPid(pid, signal),
       platform: _platform,
     );
   }
@@ -545,15 +605,18 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Encoding stdoutEncoding = io.systemEncoding,
     Encoding stderrEncoding = io.systemEncoding,
   }) {
-    return _run(() => _delegate.run(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
-    ), platform: _platform);
+    return _run(() {
+      return _processRun(
+        _getCommandPath(command, workingDirectory),
+        _getArguments(command),
+        workingDirectory: workingDirectory,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+        runInShell: runInShell,
+        stdoutEncoding: stdoutEncoding,
+        stderrEncoding: stderrEncoding,
+      );
+    }, platform: _platform);
   }
 
   @override
@@ -565,13 +628,16 @@ class ErrorHandlingProcessManager extends ProcessManager {
     bool runInShell = false,
     io.ProcessStartMode mode = io.ProcessStartMode.normal,
   }) {
-    return _run(() => _delegate.start(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-    ), platform: _platform);
+    return _run(() {
+      return _processStart(
+        _getCommandPath(command, workingDirectory),
+        _getArguments(command),
+        workingDirectory: workingDirectory,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+        runInShell: runInShell,
+      );
+    }, platform: _platform);
   }
 
   @override
@@ -584,15 +650,91 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Encoding stdoutEncoding = io.systemEncoding,
     Encoding stderrEncoding = io.systemEncoding,
   }) {
-    return _runSync(() => _delegate.runSync(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
-    ), platform: _platform);
+    return _runSync(() {
+      return _processRunSync(
+        _getCommandPath(command, workingDirectory),
+        _getArguments(command),
+        workingDirectory: workingDirectory,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+        runInShell: runInShell,
+        stdoutEncoding: stdoutEncoding,
+        stderrEncoding: stderrEncoding,
+      );
+    }, platform: _platform);
+  }
+
+  /// Resolve the first item of [command] to a file or link.
+  ///
+  /// This function will cache each raw command string per working directory,
+  /// so that repeated lookups for the same command will resolve to the same
+  /// executable. If a new executable is installed in a higher priority
+  /// location after a command has already been cached, the older executable
+  /// will be used until the tool restarts.
+  ///
+  /// If the entity cannot be found, return the raw command as is and do not
+  /// cache it.
+  String _getCommandPath(List<dynamic> command, String workingDirectory, { bool strict = false }) {
+    final String executable = command.first.toString();
+    final Map<String, String> workingDirectoryCache = _resolvedExecutables[workingDirectory] ??= <String, String>{};
+    final String resolvedExecutable = workingDirectoryCache[executable]
+      ?? _which(executable, workingDirectory, strict);
+    if (resolvedExecutable != executable) {
+      workingDirectoryCache[executable] = resolvedExecutable;
+    }
+    return resolvedExecutable;
+  }
+
+  String _which(String execName, String workingDirectory, bool strict) {
+    // `where` always returns all matches, not just the first one.
+    ProcessResult result;
+    try {
+      result = _processRunSync(
+        _platform.isWindows ? 'where' : 'which',
+        <String>[execName],
+        workingDirectory: workingDirectory,
+      );
+    } on ProcessException catch (err) {
+      if (!isMissingExecutableException(err) || !_platform.isWindows) {
+        rethrow;
+      }
+      // `where` could be missing if system32 is not on the PATH.
+      throwToolExit(
+        'Cannot find the executable for `where`. This can happen if the System32 '
+        'folder (e.g. C:\\Windows\\System32 ) is removed from the PATH environment '
+        'variable. Ensure that this is present and then try again after restarting '
+        'the terminal and/or IDE.'
+      );
+    }
+    if (result.exitCode != 0) {
+      return execName;
+    }
+    final List<String> lines = (result.stdout as String).trim().split('\n');
+    for (final String line in lines) {
+      final String resolvedPath = line.trim();
+      try {
+        final String candidate = ErrorHandlingFileSystem.noExitOnFailure(() {
+          if (_fileSytem.isFileSync(resolvedPath)) {
+            return resolvedPath;
+          }
+          return null;
+        });
+        if (candidate != null) {
+          return candidate;
+        }
+      } on Exception {
+        // Do nothing and prevent permission issues from causing a tool exit.
+      }
+    }
+    _logger.printTrace('Could not resolve executable for $execName in $workingDirectory.');
+    if (strict) {
+      return null;
+    }
+    return execName;
+  }
+
+  List<String> _getArguments(List<dynamic> command) {
+    return <String>[for (dynamic arg in command.skip(1)) arg.toString()];
   }
 }
 
