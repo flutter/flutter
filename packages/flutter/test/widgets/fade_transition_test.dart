@@ -11,9 +11,7 @@ void main() {
     final DebugPrintCallback oldPrint = debugPrint;
     final List<String> log = <String>[];
     debugPrint = (String? message, { int? wrapWidth }) {
-      if (message != null) {
-        log.add(message);
-      }
+      log.add(message!);
     };
     debugPrintBuildScope = true;
     final AnimationController controller = AnimationController(

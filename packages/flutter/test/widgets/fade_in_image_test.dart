@@ -29,7 +29,8 @@ class FadeInImageParts {
       expect(animatedFadeOutFadeInElement, isNull);
       animatedFadeOutFadeInElement = child as StatefulElement;
     });
-    return animatedFadeOutFadeInElement?.state;
+    expect(animatedFadeOutFadeInElement, isNotNull);
+    return animatedFadeOutFadeInElement!.state;
   }
 
   Element? get semanticsElement {

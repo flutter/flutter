@@ -7,9 +7,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestFlowDelegate extends FlowDelegate {
-  TestFlowDelegate({this.startOffset}) : super(repaint: startOffset);
+  TestFlowDelegate({required this.startOffset}) : super(repaint: startOffset);
 
-  final Animation<double>? startOffset;
+  final Animation<double> startOffset;
 
   @override
   BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) {
@@ -18,7 +18,7 @@ class TestFlowDelegate extends FlowDelegate {
 
   @override
   void paintChildren(FlowPaintingContext context) {
-    double dy = startOffset!.value;
+    double dy = startOffset.value;
     for (int i = 0; i < context.childCount; ++i) {
       context.paintChild(i, transform: Matrix4.translationValues(0.0, dy, 0.0));
       dy += 0.75 * context.getChildSize(i)!.height;
