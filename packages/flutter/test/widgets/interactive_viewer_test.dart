@@ -1121,4 +1121,103 @@ void main() {
       expect(nearestPoint.y, moreOrLessEquals(10.8, epsilon: 0.1));
     });
   });
+
+  group('LineSegment', () {
+    group('contains', () {
+      test('vertical line', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(0.0, 100.0),
+        );
+
+        expect(lineSegment.contains(const Offset(0.0, 0.0)), isTrue);
+        expect(lineSegment.contains(const Offset(0.0, 100.0)), isTrue);
+        expect(lineSegment.contains(const Offset(1.0, 0.0)), isFalse);
+        expect(lineSegment.contains(const Offset(0.0, -1.0)), isFalse);
+        expect(lineSegment.contains(const Offset(0.0, 101.0)), isFalse);
+        expect(lineSegment.contains(const Offset(0.0, 50.0)), isTrue);
+      });
+
+      test('horizontal line', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 0.0),
+        );
+
+        expect(lineSegment.contains(const Offset(0.0, 0.0)), isTrue);
+        expect(lineSegment.contains(const Offset(100.0, 0.0)), isTrue);
+        expect(lineSegment.contains(const Offset(-1.0, 0.0)), isFalse);
+        expect(lineSegment.contains(const Offset(0.0, -1.0)), isFalse);
+        expect(lineSegment.contains(const Offset(1.0, 0.0)), isTrue);
+        expect(lineSegment.contains(const Offset(101.0, 0.0)), isFalse);
+        expect(lineSegment.contains(const Offset(50.0, 0.0)), isTrue);
+      });
+
+      test('sloped line', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+
+        expect(lineSegment.contains(const Offset(0.0, 0.0)), isTrue);
+        expect(lineSegment.contains(const Offset(100.0, 100.0)), isTrue);
+        expect(lineSegment.contains(const Offset(-1.0, 0.0)), isFalse);
+        expect(lineSegment.contains(const Offset(0.0, -1.0)), isFalse);
+        expect(lineSegment.contains(const Offset(1.0, 1.0)), isTrue);
+        expect(lineSegment.contains(const Offset(101.0, 0.0)), isFalse);
+        expect(lineSegment.contains(const Offset(50.0, 50.0)), isTrue);
+      });
+    });
+
+    group('intersects', () {
+      test('same slopes not overlapping', () {
+        const LineSegment a = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(101.0, 101.0),
+          Offset(201.0, 201.0),
+        );
+        expect(a.intersects(b), isFalse);
+      });
+
+      test('same slopes overlapping', () {
+        const LineSegment a = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(100.0, 100.0),
+          Offset(200.0, 200.0),
+        );
+        expect(a.intersects(b), isTrue);
+      });
+
+      test('different slopes not intersecting', () {
+        const LineSegment a = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(0.0, 100.0),
+          Offset(49.0, 51.0),
+        );
+        expect(a.intersects(b), isFalse);
+      });
+
+      test('different slopes intersecting', () {
+        const LineSegment a = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(0.0, 100.0),
+          Offset(100.0, 0.0),
+        );
+        print('justin start');
+        expect(a.intersects(b), isTrue);
+      });
+    });
+  });
 }

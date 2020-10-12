@@ -577,88 +577,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       alignedTranslation.dy,
     );
 
-    // If the boundaries are infinite, then no need to check if the translation
-    // fits within them.
-    if (_boundaryRect.isInfinite) {
-      return nextMatrix;
-    }
-
-    // Transform the viewport to determine where its four corners will be after
-    // the child has been transformed.
-    final Quad nextViewport = _transformViewport(nextMatrix, _viewport);
-    //print('justin _viewport is $_viewport and next viewport is ${_stringifyQuad(nextViewport)}');
-
-    // Expand the boundaries with rotation. This prevents the problem where a
-    // mismatch in orientation between the viewport and boundaries effectively
-    // limits translation. With this approach, all points that are visible with
-    // no rotation are visible after rotation.
-    final Quad boundariesAabbQuad = InteractiveViewer.getAxisAlignedBoundingBoxWithRotation(
-      _boundaryRect,
-      _getMatrixRotation(nextMatrix),
-    );
-
-    // If the given translation fits completely within the boundaries, allow it.
-    final Offset offendingDistance = _exceedsBy(boundariesAabbQuad, nextViewport);
-    print('justin ${_stringifyQuad(nextViewport)} \nexceeds ${_stringifyQuad(boundariesAabbQuad)} \nby $offendingDistance\n\n');
-    // TODO(justinmc): At this point, I see that nextViewport appears to be
-    // incorrect? boundariesAabbQuad looks right. In the app, I clearly see past
-    // the child, but numerically nextViewport is not exceeding the boundary.
-    // Calculations for aabb and exceeds seem to be right.
-    if (offendingDistance == Offset.zero) {
-      return nextMatrix;
-    }
-
-    // TODO(justinmc): It's correct up to here (except that it seems off by a
-    // few pixels, I can't quite see the corner of the child).
-    // Next, get the code working that finds the nearest point that doesn't
-    // exceed. And test getAxisAlignedBoundingBoxWithRotation! And check why the
-    // existing tests are failing.
-
-    // Desired translation goes out of bounds, so translate to the nearest
-    // in-bounds point instead.
-    final Offset nextTotalTranslation = _getMatrixTranslation(nextMatrix);
-    final double currentScale = matrix.getMaxScaleOnAxis();
-    final Offset correctedTotalTranslation = Offset(
-      nextTotalTranslation.dx - offendingDistance.dx * currentScale,
-      nextTotalTranslation.dy - offendingDistance.dy * currentScale,
-    );
-    //print('justin translation $nextTotalTranslation goes out of bounds by $offendingDistance, so correct it to $correctedTotalTranslation');
-    // TODO(justinmc): This needs some work to handle rotation properly. The
-    // idea is that the boundaries are axis aligned (boundariesAabbQuad), but
-    // calculating the translation to put the viewport inside that Quad is more
-    // complicated than this when rotated.
-     // https://github.com/flutter/flutter/issues/57698
-    final Matrix4 correctedMatrix = matrix.clone()..setTranslation(Vector3(
-      correctedTotalTranslation.dx,
-      correctedTotalTranslation.dy,
-      0.0,
-    ));
-
-    // Double check that the corrected translation fits.
-    final Quad correctedViewport = _transformViewport(correctedMatrix, _viewport);
-    final Offset offendingCorrectedDistance = _exceedsBy(boundariesAabbQuad, correctedViewport);
-    if (offendingCorrectedDistance == Offset.zero) {
-      return correctedMatrix;
-    }
-
-    // If the corrected translation doesn't fit in either direction, don't allow
-    // any translation at all. This happens when the viewport is larger than the
-    // entire boundary.
-    if (offendingCorrectedDistance.dx != 0.0 && offendingCorrectedDistance.dy != 0.0) {
-      return matrix.clone();
-    }
-
-    // Otherwise, allow translation in only the direction that fits. This
-    // happens when the viewport is larger than the boundary in one direction.
-    final Offset unidirectionalCorrectedTotalTranslation = Offset(
-      offendingCorrectedDistance.dx == 0.0 ? correctedTotalTranslation.dx : 0.0,
-      offendingCorrectedDistance.dy == 0.0 ? correctedTotalTranslation.dy : 0.0,
-    );
-    return matrix.clone()..setTranslation(Vector3(
-      unidirectionalCorrectedTotalTranslation.dx,
-      unidirectionalCorrectedTotalTranslation.dy,
-      0.0,
-    ));
+    return _validateMatrix(nextMatrix);
   }
 
   // Return a new matrix representing the given matrix after applying the given
@@ -703,11 +622,155 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final Offset focalPointScene = _transformationController.toScene(
       focalPoint,
     );
+    // TODO(justinmc): If rotation would result in viewing beyond the boundary,
+    // don't allow it.
     return matrix
       .clone()
       ..translate(focalPointScene.dx, focalPointScene.dy)
       ..rotateZ(-rotation)
       ..translate(-focalPointScene.dx, -focalPointScene.dy);
+  }
+
+  // If the given matrix is valid, return it. If it is invalid, return the
+  // closest translated matrix that is valid. If none exists, return the
+  // original matrix.
+  //
+  // A valid matrix is defined as one which does not allow the viewport to view
+  // anything outside of the boundary.
+  //
+  // When the matrix includes rotation, the boundary is the axis aligned
+  // bounding box of the original boundary, so it may be larger.
+  Matrix4 _validateMatrix(Matrix4 matrix) {
+    // If the boundaries are infinite, then no need to check if the translation
+    // fits within them.
+    if (_boundaryRect.isInfinite) {
+      return matrix;
+    }
+
+    // Transform the viewport to determine where its four corners will be after
+    // the child has been transformed.
+    final Quad nextViewport = _transformViewport(matrix, _viewport);
+    //print('justin _viewport is $_viewport and next viewport is ${_stringifyQuad(nextViewport)}');
+
+    // Expand the boundaries with rotation. This prevents the problem where a
+    // mismatch in orientation between the viewport and boundaries effectively
+    // limits translation. With this approach, all points that are visible with
+    // no rotation are visible after rotation.
+    /*
+    final Quad boundariesAabbQuad = InteractiveViewer.getAxisAlignedBoundingBoxWithRotation(
+      _boundaryRect,
+      _getMatrixRotation(matrix),
+    );
+
+    // If the given translation fits completely within the boundaries, allow it.
+    final Offset offendingDistance = _exceedsBy(boundariesAabbQuad, nextViewport);
+    print('justin viewport ${_stringifyQuad(nextViewport)} \nexceeds ${_stringifyQuad(boundariesAabbQuad)} \nby $offendingDistance\n\n');
+    // TODO(justinmc): At this point, I see that nextViewport appears to be
+    // incorrect? boundariesAabbQuad looks right. In the app, I clearly see past
+    // the child, but numerically nextViewport is not exceeding the boundary.
+    // Calculations for aabb and exceeds seem to be right.
+    // No.
+    // You are misunderstanding what the aabb boundary should be. It will depend
+    // on the size of the transformed viewport! nextViewport is correct.
+    // boundariesAabbQuad needs to adapt to it.
+    // I'm continuing outside of this commented out block.
+    if (offendingDistance == Offset.zero) {
+      return matrix;
+    }
+    */
+
+    // If any side of the viewport does not intersect the interior of the
+    // boundary, invalid.
+    final LineSegment viewportSide01 = LineSegment.vector(
+      nextViewport.point0,
+      nextViewport.point1,
+    );
+    final LineSegment viewportSide12 = LineSegment.vector(
+      nextViewport.point1,
+      nextViewport.point2,
+    );
+    final LineSegment viewportSide23 = LineSegment.vector(
+      nextViewport.point2,
+      nextViewport.point3,
+    );
+    final LineSegment viewportSide30 = LineSegment.vector(
+      nextViewport.point3,
+      nextViewport.point0,
+    );
+    final bool side01Intersects = viewportSide01.intersectsRect(_boundaryRect);
+    final bool side12Intersects = viewportSide12.intersectsRect(_boundaryRect);
+    final bool side23Intersects = viewportSide23.intersectsRect(_boundaryRect);
+    final bool side30Intersects = viewportSide30.intersectsRect(_boundaryRect);
+    if (viewportSide01.intersectsRect(_boundaryRect)
+        && viewportSide12.intersectsRect(_boundaryRect)
+        && viewportSide23.intersectsRect(_boundaryRect)
+        && viewportSide30.intersectsRect(_boundaryRect)) {
+      return matrix;
+    }
+    print('justin invalid. 01:$side01Intersects 12:$side12Intersects 23:$side23Intersects 30:$side30Intersects.');
+    if (!viewportSide12.intersectsRect(_boundaryRect)) {
+      print('justin $viewportSide12 does not intersect $_boundaryRect');
+    }
+
+    // Invalid. Find the nearest points on boundaryRect and the viewportSide
+    // that doesn't intersect to each other, and move the points on top of each
+    // other.
+    return Matrix4.identity();
+
+    /*
+    // TODO(justinmc): It's correct up to here (except that it seems off by a
+    // few pixels, I can't quite see the corner of the child).
+    // Next, get the code working that finds the nearest point that doesn't
+    // exceed. And test getAxisAlignedBoundingBoxWithRotation! And check why the
+    // existing tests are failing.
+
+    // Desired translation goes out of bounds, so translate to the nearest
+    // in-bounds point instead.
+    final Offset nextTotalTranslation = _getMatrixTranslation(matrix);
+    final Matrix4 currentMatrix = _transformationController.value;
+    final double currentScale = currentMatrix.getMaxScaleOnAxis();
+    final Offset correctedTotalTranslation = Offset(
+      nextTotalTranslation.dx - offendingDistance.dx * currentScale,
+      nextTotalTranslation.dy - offendingDistance.dy * currentScale,
+    );
+    //print('justin translation $nextTotalTranslation goes out of bounds by $offendingDistance, so correct it to $correctedTotalTranslation');
+    // TODO(justinmc): This needs some work to handle rotation properly. The
+    // idea is that the boundaries are axis aligned (boundariesAabbQuad), but
+    // calculating the translation to put the viewport inside that Quad is more
+    // complicated than this when rotated.
+     // https://github.com/flutter/flutter/issues/57698
+    final Matrix4 correctedMatrix = currentMatrix.clone()..setTranslation(Vector3(
+      correctedTotalTranslation.dx,
+      correctedTotalTranslation.dy,
+      0.0,
+    ));
+
+    // Double check that the corrected translation fits.
+    final Quad correctedViewport = _transformViewport(correctedMatrix, _viewport);
+    final Offset offendingCorrectedDistance = _exceedsBy(boundariesAabbQuad, correctedViewport);
+    if (offendingCorrectedDistance == Offset.zero) {
+      return correctedMatrix;
+    }
+
+    // If the corrected translation doesn't fit in either direction, don't allow
+    // any translation at all. This happens when the viewport is larger than the
+    // entire boundary.
+    if (offendingCorrectedDistance.dx != 0.0 && offendingCorrectedDistance.dy != 0.0) {
+      return currentMatrix.clone();
+    }
+
+    // Otherwise, allow translation in only the direction that fits. This
+    // happens when the viewport is larger than the boundary in one direction.
+    final Offset unidirectionalCorrectedTotalTranslation = Offset(
+      offendingCorrectedDistance.dx == 0.0 ? correctedTotalTranslation.dx : 0.0,
+      offendingCorrectedDistance.dy == 0.0 ? correctedTotalTranslation.dy : 0.0,
+    );
+    return currentMatrix.clone()..setTranslation(Vector3(
+      unidirectionalCorrectedTotalTranslation.dx,
+      unidirectionalCorrectedTotalTranslation.dy,
+      0.0,
+    ));
+    */
   }
 
   // Returns true iff the given _GestureType is enabled.
@@ -1255,4 +1318,87 @@ Axis _getPanAxis(Offset point1, Offset point2) {
 Offset pointAt(Offset start, double direction, double distance) {
   final Offset fromOrigin = Offset.fromDirection(direction, distance);
   return fromOrigin + start;
+}
+
+@visibleForTesting
+class LineSegment {
+  const LineSegment(
+    this.p0,
+    this.p1,
+  );
+
+  LineSegment.vector(
+    Vector3 v0,
+    Vector3 v1,
+  ) : p0 = Offset(v0.x, v0.y),
+      p1 = Offset(v1.x, v1.y);
+
+  final Offset p0;
+  final Offset p1;
+
+  /// The slope of the line segment defined by change in y over change in x.
+  double get slope {
+    return (p1.dy - p0.dy) / (p1.dx - p0.dx);
+  }
+
+  /// The y-intercept, if this line segment were a line that continued
+  /// indefinitely.
+  double get lineYIntercept => p0.dy - slope * p0.dx;
+
+  /// True iff the offset lies on the line segment, inclusively.
+  bool contains(Offset offset) {
+    final double xMin = math.min(p0.dx, p1.dx);
+    final double xMax = math.max(p0.dx, p1.dx);
+    final double yMin = math.min(p0.dy, p1.dy);
+    final double yMax = math.max(p0.dy, p1.dy);
+    return offset.dx >= xMin && offset.dx <= xMax
+        && offset.dy >= yMin && offset.dy <= yMax;
+  }
+
+  /// Inclusively.
+  bool intersects(LineSegment lineSegment) {
+    // If the slopes are the same, they intersect if they overlap.
+    if (lineSegment.slope == slope) {
+      return contains(lineSegment.p0) || contains(lineSegment.p1);
+    }
+
+    // If the slopes are different, the corresponding lines (not segments) must
+    // overlap. If that point happens between the endpoints of both line
+    // segments, then the line segmens intersect.
+    // y = mx + b
+    // y = m1x + b1
+    // mx + b = m1x + b1
+    // mx - m1x = b1 - b
+    // (m - m1) * x = b1 - b
+    // x = (b1 - b) / (m - m1)
+    final double xIntersection = (lineSegment.lineYIntercept - lineYIntercept)
+        / (slope - lineSegment.slope);
+
+    // y = m * xIntersection + b
+    final double yIntersection = slope * xIntersection + lineYIntercept;
+    final Offset intersection = Offset(xIntersection, yIntersection);
+
+    return contains(intersection) && lineSegment.contains(intersection);
+  }
+
+  bool intersectsRect(Rect rect) {
+    // Intersets if either point, or both, is inside of the rectangle.
+    if (rect.contains(p0) || rect.contains(p1)) {
+      return true;
+    }
+
+    // Otherwise, intersects if it intersects any of the four sides.
+    final LineSegment top = LineSegment(rect.topLeft, rect.topRight);
+    final LineSegment right = LineSegment(rect.topRight, rect.bottomRight);
+    final LineSegment bottom = LineSegment(rect.bottomRight, rect.bottomLeft);
+    final LineSegment left = LineSegment(rect.bottomLeft, rect.topLeft);
+
+    return intersects(top) || intersects(right)
+        || intersects(bottom) || intersects(left);
+  }
+
+  @override
+  String toString() {
+    return '$p0, $p1';
+  }
 }
