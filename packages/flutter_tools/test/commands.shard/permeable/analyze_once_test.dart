@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -87,7 +86,6 @@ flutter_project:lib/
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = FlutterCommandRunner.defaultFlutterRoot;
     processManager = const LocalProcessManager();
     platform = const LocalPlatform();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
