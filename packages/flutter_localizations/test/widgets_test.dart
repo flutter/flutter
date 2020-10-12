@@ -1277,6 +1277,7 @@ void main() {
           Locale('th'),
           Locale('tr'),
           Locale('vi'),
+		  Locale('tk'),
         ],
         buildContent: (BuildContext context) {
           final Locale locale = Localizations.localeOf(context);
