@@ -2212,8 +2212,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _lastFormattedValue = value;
     }
 
-    // Setting _value here ensures the selection and composing region info is passed.
-    _value = value;
+    if (value == _value) {
+      // If the value was modified by the formatter, the remote should be notified to keep in sync,
+      // if not modified, it will short-circuit.
+      _updateRemoteEditingValueIfNeeded();
+    } else {
+      // Setting _value here ensures the selection and composing region info is passed.
+      _value = value;
+    }
+
     // Use the last formatted value when an identical repeat pass is detected.
     if (isRepeat && textChanged && _lastFormattedValue != null) {
       _value = _lastFormattedValue!;
