@@ -969,7 +969,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         );
       }
 
-      double snackBarYOffsetBase;
+      final double snackBarYOffsetBase;
       if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating) {
         snackBarYOffsetBase = floatingActionButtonRect.top;
       } else {

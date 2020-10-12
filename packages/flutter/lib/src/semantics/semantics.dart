@@ -2029,8 +2029,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   void _addToUpdate(ui.SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
-    Int32List childrenInTraversalOrder;
-    Int32List childrenInHitTestOrder;
+    final Int32List childrenInTraversalOrder;
+    final Int32List childrenInHitTestOrder;
     if (!hasChildren || mergeAllDescendantsIntoThisNode) {
       childrenInTraversalOrder = _kEmptyChildList;
       childrenInHitTestOrder = _kEmptyChildList;

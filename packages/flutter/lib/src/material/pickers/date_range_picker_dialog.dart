@@ -340,11 +340,11 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
     final double textScaleFactor = math.min(mediaQuery.textScaleFactor, 1.3);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
 
-    Widget contents;
-    Size size;
+    final Widget contents;
+    final Size size;
     ShapeBorder? shape;
-    double elevation;
-    EdgeInsets insetPadding;
+    final double elevation;
+    final EdgeInsets insetPadding;
     switch (_entryMode) {
       case DatePickerEntryMode.calendar:
         contents = _CalendarRangePickerDialog(

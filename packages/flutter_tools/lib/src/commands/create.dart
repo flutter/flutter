@@ -62,7 +62,9 @@ class CreateCommand extends FlutterCommand {
       'with-driver-test',
       negatable: true,
       defaultsTo: false,
-      help: "Also add a flutter_driver dependency and generate a sample 'flutter drive' test.",
+      help: '(Deprecated) Also add a flutter_driver dependency and generate a '
+      "sample 'flutter drive' test. This flag has been deprecated, instead see "
+      'package:integration_test at https://pub.dev/packages/integration_test .',
     );
     argParser.addOption(
       'template',
@@ -399,12 +401,19 @@ class CreateCommand extends FlutterCommand {
       throwToolExit(error);
     }
 
+    if (boolArg('with-driver-test')) {
+      globals.printError(
+        '--with-driver-test has been deprecated and will no longer add a flutter '
+        'driver template. Instead, learn how to use package:integration_test by '
+        'visiting https://pub.dev/packages/integration_test .'
+      );
+    }
+
     final Map<String, dynamic> templateContext = _createTemplateContext(
       organization: organization,
       projectName: projectName,
       projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
-      renderDriverTest: boolArg('with-driver-test'),
       withPluginHook: generatePlugin,
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
@@ -663,11 +672,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       generatedCount += _injectGradleWrapper(project);
     }
 
-    if (boolArg('with-driver-test')) {
-      final Directory testDirectory = directory.childDirectory('test_driver');
-      generatedCount += await _renderTemplate('driver', testDirectory, templateContext, overwrite: overwrite);
-    }
-
     if (boolArg('pub')) {
       await pub.get(
         context: PubContext.create,
@@ -721,7 +725,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
     String androidLanguage,
     String iosLanguage,
     String flutterRoot,
-    bool renderDriverTest = false,
     bool withPluginHook = false,
     bool ios = false,
     bool android = false,
@@ -755,7 +758,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android_common.minApiLevel,
       'androidSdkVersion': kAndroidSdkMinVersion,
-      'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
       'pluginClassSnakeCase': pluginClassSnakeCase,
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,

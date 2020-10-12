@@ -757,7 +757,7 @@ class _CupertinoBackGestureController<T> {
     // This curve has been determined through rigorously eyeballing native iOS
     // animations.
     const Curve animationCurve = Curves.fastLinearToSlowEaseIn;
-    bool animateForward;
+    final bool animateForward;
 
     // If the user releases the page before mid screen with sufficient velocity,
     // or after mid screen, we should animate the page out. Otherwise, the page
@@ -912,7 +912,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
     // its parent box one box width on the start side of the box.
     final TextDirection? textDirection = configuration.textDirection;
     assert(textDirection != null);
-    double deltaX;
+    final double deltaX;
     switch (textDirection!) {
       case TextDirection.rtl:
         deltaX = configuration.size!.width;

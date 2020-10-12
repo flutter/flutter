@@ -226,7 +226,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
             // We have duplication reservations for the same global key.
             final Element older = keyToParent[key]!;
             final Element newer = parent;
-            FlutterError error;
+            final FlutterError error;
             if (older.toString() != newer.toString()) {
               error = FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary('Multiple widgets used the same GlobalKey.'),
@@ -3236,7 +3236,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         deactivateChild(child);
       return null;
     }
-    Element newChild;
+    final Element newChild;
     if (child != null) {
       bool hasSameSuperclass = true;
       // When the type of a widget is changed between Stateful and Stateless via

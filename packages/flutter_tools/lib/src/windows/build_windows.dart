@@ -36,7 +36,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       'to learn about adding Windows support to a project.');
   }
 
-  // Ensure that necessary emphemeral files are generated and up to date.
+  // Ensure that necessary ephemeral files are generated and up to date.
   _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
   createPluginSymlinks(windowsProject.parent);
 

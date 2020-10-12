@@ -1190,6 +1190,82 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 
+  testWidgets('DataRow renders default selected row colors', (WidgetTester tester) async {
+    final ThemeData _themeData = ThemeData.light();
+    Widget buildTable({bool selected = false}) {
+      return MaterialApp(
+        theme: _themeData,
+        home: Material(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text('Column1'),
+              ),
+            ],
+            rows: <DataRow>[
+              DataRow(
+                onSelectChanged: (bool? checked) {},
+                selected: selected,
+                cells: const <DataCell>[
+                  DataCell(Text('Content1')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    BoxDecoration lastTableRowBoxDecoration() {
+      final Table table = tester.widget(find.byType(Table));
+      final TableRow tableRow = table.children.last;
+      return tableRow.decoration! as BoxDecoration;
+    }
+
+    await tester.pumpWidget(buildTable(selected: false));
+    expect(lastTableRowBoxDecoration().color, null);
+
+    await tester.pumpWidget(buildTable(selected: true));
+    expect(
+      lastTableRowBoxDecoration().color,
+      _themeData.colorScheme.primary.withOpacity(0.08),
+    );
+  });
+
+  testWidgets('DataRow renders checkbox with colors from Theme', (WidgetTester tester) async {
+    final ThemeData _themeData = ThemeData.light();
+    Widget buildTable() {
+      return MaterialApp(
+        theme: _themeData,
+        home: Material(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text('Column1'),
+              ),
+            ],
+            rows: <DataRow>[
+              DataRow(
+                onSelectChanged: (bool? checked) {},
+                cells: const <DataCell>[
+                  DataCell(Text('Content1')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Checkbox lastCheckbox() {
+      return tester.widgetList<Checkbox>(find.byType(Checkbox)).last;
+    }
+
+    await tester.pumpWidget(buildTable());
+    expect(lastCheckbox().activeColor, _themeData.colorScheme.primary);
+    expect(lastCheckbox().checkColor, _themeData.colorScheme.onPrimary);
+  });
+
   testWidgets('DataRow renders custom colors when selected', (WidgetTester tester) async {
     const Color selectedColor = Colors.green;
     const Color defaultColor = Colors.red;
