@@ -1690,10 +1690,10 @@ class DialogObserver extends NavigatorObserver {
 }
 
 class RouteSettingsObserver extends NavigatorObserver {
-  String routeName;
+  String? routeName;
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route.toString().contains('_CupertinoModalPopupRoute')) {
       routeName = route.settings.name;
     }
