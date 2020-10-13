@@ -265,26 +265,26 @@ class MacOSUtils extends _PosixUtils {
     @required Platform platform,
     @required ProcessManager processManager,
   }) : super(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-  );
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        );
 
   String _name;
 
   @override
   String get name {
     if (_name == null) {
-        final List<RunResult> results = <RunResult>[
-          _processUtils.runSync(<String>['sw_vers', '-productName']),
-          _processUtils.runSync(<String>['sw_vers', '-productVersion']),
-          _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
-        ];
-        if (results.every((RunResult result) => result.exitCode == 0)) {
-          _name =
-          '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} ${getNameForDarwinArch(hardwareArchitecture)}';
-        }
+      final List<RunResult> results = <RunResult>[
+        _processUtils.runSync(<String>['sw_vers', '-productName']),
+        _processUtils.runSync(<String>['sw_vers', '-productVersion']),
+        _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
+      ];
+      if (results.every((RunResult result) => result.exitCode == 0)) {
+        _name =
+            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} ${getNameForDarwinArch(hardwareArchitecture)}';
+      }
       _name ??= super.name;
     }
     return _name;
@@ -298,11 +298,10 @@ class MacOSUtils extends _PosixUtils {
   DarwinArch get hardwareArchitecture {
     if (_hardwareArchitecture == null) {
       final RunResult arm64Check =
-      _processUtils.runSync(<String>['sysctl', 'hw.optional.arm64']);
+          _processUtils.runSync(<String>['sysctl', 'hw.optional.arm64']);
       // hw.optional.arm64 is unavailable on < macOS 11 and exits with 1, assume x86 on failure.
       // On arm64 stdout is "sysctl hw.optional.arm64: 1"
-      if (arm64Check.exitCode == 0 &&
-          arm64Check.stdout.trim().endsWith('1')) {
+      if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
         _hardwareArchitecture = DarwinArch.arm64;
       } else {
         _hardwareArchitecture = DarwinArch.x86_64;
