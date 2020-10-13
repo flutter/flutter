@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:meta/meta.dart';
 
 import '../base/process.dart';
@@ -53,7 +55,7 @@ enum GradleBuildStatus {
 /// [errorMessage] is contained in the error message.
 GradleErrorTest _lineMatcher(List<String> errorMessages) {
   return (String line) {
-    return errorMessages.any((String errorMessage) => line.contains(errorMessage));
+    return errorMessages.any(line.contains);
   };
 }
 
@@ -96,8 +98,11 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
   eventLabel: 'permission-denied',
 );
 
-// Gradle crashes for several known reasons when downloading that are not
-// actionable by flutter.
+/// Gradle crashes for several known reasons when downloading that are not
+/// actionable by Flutter.
+///
+/// The Gradle cache directory must be deleted, otherwise it may attempt to
+/// re-use the bad zip file.
 @visibleForTesting
 final GradleHandledError networkErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
@@ -120,6 +125,13 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
       '$warningMark Gradle threw an error while downloading artifacts from the network. '
       'Retrying to download...'
     );
+    try {
+      final Directory directory = globals.fs.directory(
+        globals.fs.path.join(globals.platform.environment['HOME'], '.gradle'));
+      ErrorHandlingFileSystem.deleteIfExists(directory, recursive: true);
+    } on FileSystemException {
+      // Do nothing.
+    }
     return GradleBuildStatus.retry;
   },
   eventLabel: 'network',

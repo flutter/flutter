@@ -9,10 +9,8 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:path/path.dart' as path;
-import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import 'running_processes.dart';
 import 'task_result.dart';
 import 'utils.dart';
 
@@ -34,12 +32,6 @@ Future<TaskResult> task(TaskFunction task) {
     throw StateError('A task is already registered');
 
   _isTaskRegistered = true;
-
-  // TODO(ianh): allow overriding logging.
-  Logger.root.level = Level.ALL;
-  Logger.root.onRecord.listen((LogRecord rec) {
-    print('${rec.level.name}: ${rec.time}: ${rec.message}');
-  });
 
   final _TaskRunner runner = _TaskRunner(task);
   runner.keepVmAliveUntilTaskRunRequested();
@@ -71,8 +63,6 @@ class _TaskRunner {
 
   final Completer<TaskResult> _completer = Completer<TaskResult>();
 
-  static final Logger logger = Logger('TaskRunner');
-
   /// Signals that this task runner finished running the task.
   Future<TaskResult> get whenDone => _completer.future;
 
@@ -80,16 +70,10 @@ class _TaskRunner {
     try {
       _taskStarted = true;
       print('Running task with a timeout of $taskTimeout.');
-      final String exe = Platform.isWindows ? '.exe' : '';
-      section('Checking running Dart$exe processes');
-      final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(
-        processName: 'dart$exe',
-      ).toSet();
-      beforeRunningDartInstances.forEach(print);
-
       print('enabling configs for macOS, Linux, Windows, and Web...');
       final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
         'config',
+        '-v',
         '--enable-macos-desktop',
         '--enable-windows-desktop',
         '--enable-linux-desktop',
@@ -103,27 +87,7 @@ class _TaskRunner {
       if (taskTimeout != null)
         futureResult = futureResult.timeout(taskTimeout);
 
-      TaskResult result = await futureResult;
-
-      section('Checking running Dart$exe processes after task...');
-      final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
-        processName: 'dart$exe',
-      ).toList();
-      for (final RunningProcessInfo info in afterRunningDartInstances) {
-        if (!beforeRunningDartInstances.contains(info)) {
-          print('$info was leaked by this test.');
-          if (result is TaskResultCheckProcesses) {
-            result = TaskResult.failure('This test leaked dart processes');
-          }
-          final bool killed = await killProcess(info.pid);
-          if (!killed) {
-            print('Failed to kill process ${info.pid}.');
-          } else {
-            print('Killed process id ${info.pid}.');
-          }
-        }
-      }
-
+      final TaskResult result = await futureResult;
       _completer.complete(result);
       return result;
     } on TimeoutException catch (err, stackTrace) {
@@ -152,14 +116,14 @@ class _TaskRunner {
     const Duration taskStartTimeout = Duration(seconds: 60);
     _startTaskTimeout = Timer(taskStartTimeout, () {
       if (!_taskStarted) {
-        logger.severe('Task did not start in $taskStartTimeout.');
+        print('[SEVERE] Task did not start in $taskStartTimeout.');
         _closeKeepAlivePort();
         exitCode = 1;
       }
     });
   }
 
-  /// Disables the keepalive port, allowing the VM to exit.
+  /// Disables the keep-alive port, allowing the VM to exit.
   void _closeKeepAlivePort() {
     _startTaskTimeout?.cancel();
     _keepAlivePort?.close();
