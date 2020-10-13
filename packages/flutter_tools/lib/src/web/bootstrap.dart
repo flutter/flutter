@@ -52,6 +52,7 @@ String generateMainModule({
   @required String entrypoint,
   @required bool nullAssertions,
 }) {
+  // TODO(jonahwilliams): fix typo in dwds and update.
   return '''/* ENTRYPOINT_EXTENTION_MARKER */
 // Create the main module loaded below.
 define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {

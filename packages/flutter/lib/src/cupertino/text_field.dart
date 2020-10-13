@@ -100,7 +100,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
     // this handler. If the clear button widget recognizes the up event,
     // then do not handle it.
     if (_state._clearGlobalKey.currentContext != null) {
-      final RenderBox renderBox = _state._clearGlobalKey.currentContext!.findRenderObject() as RenderBox;
+      final RenderBox renderBox = _state._clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
       final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
       if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
         return;
@@ -653,6 +653,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     if (widget.controller == null) {
       _createLocalController();
     }
+    _effectiveFocusNode.canRequestFocus = widget.enabled ?? true;
   }
 
   @override
@@ -665,11 +666,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       _controller!.dispose();
       _controller = null;
     }
-    final bool isEnabled = widget.enabled ?? true;
-    final bool wasEnabled = oldWidget.enabled ?? true;
-    if (wasEnabled && !isEnabled) {
-      _effectiveFocusNode.unfocus();
-    }
+    _effectiveFocusNode.canRequestFocus = widget.enabled ?? true;
   }
 
   @override
@@ -905,7 +902,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final Color? decorationColor = CupertinoDynamicColor.resolve(widget.decoration?.color, context);
 
     final BoxBorder? border = widget.decoration?.border;
-    Border resolvedBorder = border as Border;
+    Border? resolvedBorder = border as Border?;
     if (border is Border) {
       BorderSide resolveBorderSide(BorderSide side) {
         return side == BorderSide.none

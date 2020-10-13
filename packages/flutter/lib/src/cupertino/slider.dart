@@ -439,7 +439,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   double get _trackLeft => _kPadding;
   double get _trackRight => size.width - _kPadding;
   double get _thumbCenter {
-    double visualPosition;
+    final double visualPosition;
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - _value;
@@ -504,9 +504,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    double visualPosition;
-    Color leftColor;
-    Color rightColor;
+    final double visualPosition;
+    final Color leftColor;
+    final Color rightColor;
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - _position.value;

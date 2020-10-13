@@ -567,7 +567,7 @@ class _AndroidMotionEventConverter {
       return null;
     }
 
-    int action;
+    final int action;
     if (event is PointerDownEvent) {
       action = numPointers == 1
           ? AndroidViewController.kActionDown

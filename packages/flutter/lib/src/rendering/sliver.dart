@@ -1488,7 +1488,7 @@ abstract class RenderSliver extends RenderObject {
         return true;
       assert(p0.dx == p1.dx || p0.dy == p1.dy); // must be axis-aligned
       final double d = (p1 - p0).distance * 0.2;
-      Offset temp;
+      final Offset temp;
       double dx1, dx2, dy1, dy2;
       switch (direction) {
         case GrowthDirection.forward:
@@ -1810,7 +1810,7 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
     }
     final SliverConstraints constraints = this.constraints;
     child!.layout(constraints.asBoxConstraints(), parentUsesSize: true);
-    double childExtent;
+    final double childExtent;
     switch (constraints.axis) {
       case Axis.horizontal:
         childExtent = child!.size.width;

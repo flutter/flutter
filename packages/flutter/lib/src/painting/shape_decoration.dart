@@ -91,7 +91,7 @@ class ShapeDecoration extends Decoration {
   /// [RoundedRectangleBorder]; the [BoxDecoration] class cannot animate the
   /// transition from a [BoxShape.circle] to [BoxShape.rectangle]).
   factory ShapeDecoration.fromBoxDecoration(BoxDecoration source) {
-    ShapeBorder shape;
+    final ShapeBorder shape;
     assert(source.shape != null);
     switch (source.shape) {
       case BoxShape.circle:

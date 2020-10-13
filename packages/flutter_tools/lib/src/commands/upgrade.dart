@@ -37,7 +37,7 @@ class UpgradeCommand extends FlutterCommand {
       ..addOption(
         'working-directory',
         hide: true,
-        help: 'Override the upgrade working directoy for integration testing.'
+        help: 'Override the upgrade working directory for integration testing.'
       );
   }
 
@@ -124,7 +124,7 @@ class UpgradeCommandRunner {
     }
     // If there are uncommitted changes we might be on the right commit but
     // we should still warn.
-    if (!force && await hasUncomittedChanges()) {
+    if (!force && await hasUncommittedChanges()) {
       throwToolExit(
         'Your flutter checkout has local changes that would be erased by '
         'upgrading. If you want to keep these changes, it is recommended that '
@@ -178,7 +178,7 @@ class UpgradeCommandRunner {
     globals.persistentToolState.redisplayWelcomeMessage = true;
   }
 
-  Future<bool> hasUncomittedChanges() async {
+  Future<bool> hasUncommittedChanges() async {
     try {
       final RunResult result = await processUtils.run(
         <String>['git', 'status', '-s'],

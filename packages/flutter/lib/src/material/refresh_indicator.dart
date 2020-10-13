@@ -378,7 +378,10 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
               ));
             return true;
           }());
-          if (refreshResult == null)
+          // `refreshResult` has a non-nullable type, but might be null when
+          // running with weak checking, so we need to null check it anyway (and
+          // ignore the warning that the null-handling logic is dead code).
+          if (refreshResult == null) // ignore: dead_code
             return;
           refreshResult.whenComplete(() {
             if (mounted && _mode == _RefreshIndicatorMode.refresh) {

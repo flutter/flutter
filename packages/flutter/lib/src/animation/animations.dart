@@ -491,8 +491,11 @@ class TrainHoppingAnimation extends Animation<double>
   /// The current train argument must not be null but the next train argument
   /// can be null. If the next train is null, then this object will just proxy
   /// the first animation and never hop.
-  TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain })
-      : assert(_currentTrain != null) {
+  TrainHoppingAnimation(
+    Animation<double> this._currentTrain,
+    this._nextTrain, {
+    this.onSwitchedTrain,
+  }) : assert(_currentTrain != null) {
     if (_nextTrain != null) {
       if (_currentTrain!.value == _nextTrain!.value) {
         _currentTrain = _nextTrain;

@@ -86,7 +86,8 @@ class DriveCommand extends RunCommandBase {
       )
       ..addFlag('build',
         defaultsTo: true,
-        help: 'Build the app before running.',
+        help: '(Deprecated) Build the app before running. To use an existing app, pass the --use-application-binary '
+          'flag with an existing APK',
       )
       ..addOption('driver-port',
         defaultsTo: '4444',
@@ -142,7 +143,6 @@ class DriveCommand extends RunCommandBase {
 
   Device _device;
   Device get device => _device;
-  bool get shouldBuild => boolArg('build');
 
   bool get verboseSystemLogs => boolArg('verbose-system-logs');
   String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
@@ -427,7 +427,7 @@ Future<Device> findTargetDevice({ @required Duration timeout }) async {
     }
     if (devices.length > 1) {
       globals.printStatus("Found ${devices.length} devices with name or id matching '${deviceManager.specifiedDeviceId}':");
-      await Device.printDevices(devices);
+      await Device.printDevices(devices, globals.logger);
       return null;
     }
     return devices.first;
@@ -438,7 +438,7 @@ Future<Device> findTargetDevice({ @required Duration timeout }) async {
     return null;
   } else if (devices.length > 1) {
     globals.printStatus('Found multiple connected devices:');
-    await Device.printDevices(devices);
+    await Device.printDevices(devices, globals.logger);
   }
   globals.printStatus('Using device ${devices.first.name}.');
   return devices.first;
@@ -468,14 +468,6 @@ Future<LaunchResult> _startApp(
 
   final ApplicationPackage package = await command.applicationPackages
       .getPackageForPlatform(await command.device.targetPlatform, command.getBuildInfo());
-
-  if (command.shouldBuild) {
-    globals.printTrace('Installing application package.');
-    if (await command.device.isAppInstalled(package, userIdentifier: userIdentifier)) {
-      await command.device.uninstallApp(package, userIdentifier: userIdentifier);
-    }
-    await command.device.installApp(package, userIdentifier: userIdentifier);
-  }
 
   final Map<String, dynamic> platformArgs = <String, dynamic>{};
   if (command.traceStartup) {
@@ -515,7 +507,6 @@ Future<LaunchResult> _startApp(
       purgePersistentCache: command.purgePersistentCache,
     ),
     platformArgs: platformArgs,
-    prebuiltApplication: !command.shouldBuild,
     userIdentifier: userIdentifier,
   );
 

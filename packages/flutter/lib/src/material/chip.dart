@@ -1924,7 +1924,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         ),
       ),
     );
-    BoxConstraints constraints;
+    final BoxConstraints constraints;
     final Offset densityAdjustment = (widget.visualDensity ?? theme.visualDensity).baseSizeAdjustment;
     switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
@@ -2128,13 +2128,13 @@ class _RenderChipElement extends RenderObjectElement {
   void _updateRenderObject(RenderObject? child, _ChipSlot slot) {
     switch (slot) {
       case _ChipSlot.avatar:
-        renderObject.avatar = child as RenderBox;
+        renderObject.avatar = child as RenderBox?;
         break;
       case _ChipSlot.label:
-        renderObject.label = child as RenderBox;
+        renderObject.label = child as RenderBox?;
         break;
       case _ChipSlot.deleteIcon:
-        renderObject.deleteIcon = child as RenderBox;
+        renderObject.deleteIcon = child as RenderBox?;
         break;
     }
   }
@@ -2385,7 +2385,7 @@ class _RenderChip extends RenderBox {
 
   static Rect _boxRect(RenderBox? box) => box == null ? Rect.zero : _boxParentData(box).offset & box.size;
 
-  static BoxParentData _boxParentData(RenderBox box) => box.parentData as BoxParentData;
+  static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -2570,16 +2570,12 @@ class _RenderChip extends RenderBox {
 
     Offset centerLayout(Size boxSize, double x) {
       assert(contentSize >= boxSize.height);
-      Offset boxOffset;
       switch (textDirection!) {
         case TextDirection.rtl:
-          boxOffset = Offset(x - boxSize.width, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
-          break;
+          return Offset(x - boxSize.width, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
         case TextDirection.ltr:
-          boxOffset = Offset(x, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
-          break;
+          return Offset(x, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
       }
-      return boxOffset;
     }
 
     // These are the offsets to the upper left corners of the boxes (including
@@ -2687,7 +2683,7 @@ class _RenderChip extends RenderBox {
     if (enableAnimation == null || enableAnimation.isCompleted) {
       return Colors.white;
     }
-    ColorTween enableTween;
+    final ColorTween enableTween;
     switch (theme.brightness) {
       case Brightness.light:
         enableTween = ColorTween(
@@ -2907,7 +2903,7 @@ class _LocationAwareInkRippleFactory extends InteractiveInkFeatureFactory {
 
     if (tapIsOnDeleteIcon) {
       final RenderBox currentBox = referenceBox;
-      referenceBox = deleteIconKey.currentContext!.findRenderObject() as RenderBox;
+      referenceBox = deleteIconKey.currentContext!.findRenderObject()! as RenderBox;
       position = referenceBox.globalToLocal(currentBox.localToGlobal(position));
       containedInkWell = false;
     }

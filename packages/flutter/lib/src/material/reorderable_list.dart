@@ -249,7 +249,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     if (_draggingFeedbackSize == null) {
       return _defaultDropAreaExtent;
     }
-    double dropAreaWithoutMargin;
+    final double dropAreaWithoutMargin;
     switch (widget.scrollDirection) {
       case Axis.horizontal:
         dropAreaWithoutMargin = _draggingFeedbackSize!.width;
@@ -381,8 +381,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         if (startIndex != endIndex)
           widget.onReorder(startIndex, endIndex);
         // Animates leftover space in the drop area closed.
-        _ghostController.reverse(from: 0.1);
-        _entranceController.reverse(from: 0.1);
+        _ghostController.reverse(from: 0);
+        _entranceController.reverse(from: 0);
         _dragging = null;
       });
     }
@@ -488,7 +488,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       }
 
       // Determine the size of the drop area to show under the dragging widget.
-      Widget spacing;
+      final Widget spacing;
       switch (widget.scrollDirection) {
         case Axis.horizontal:
           spacing = SizedBox(width: _dropAreaExtent);
@@ -551,7 +551,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       const Key endWidgetKey = Key('DraggableList - End Widget');
-      Widget finalDropArea;
+      final Widget finalDropArea;
       switch (widget.scrollDirection) {
         case Axis.horizontal:
           finalDropArea = SizedBox(

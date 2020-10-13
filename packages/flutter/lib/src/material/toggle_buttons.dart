@@ -767,8 +767,8 @@ class _ToggleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    Color currentColor;
-    Color currentFillColor;
+    final Color currentColor;
+    final Color currentFillColor;
     Color? currentFocusColor;
     Color? currentHoverColor;
     Color? currentSplashColor;
@@ -1053,8 +1053,8 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     }
 
     final double trailingBorderOffset = isLastButton ? trailingBorderSide.width : 0.0;
-    double leftConstraint;
-    double rightConstraint;
+    final double leftConstraint;
+    final double rightConstraint;
 
     switch (textDirection) {
       case TextDirection.ltr:

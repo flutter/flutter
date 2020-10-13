@@ -83,8 +83,7 @@ RenderObject _findRepaintBoundary(Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent as RenderObject;
-    assert(renderObject != null);
+    renderObject = renderObject.parent! as RenderObject;
   }
   return renderObject;
 }
