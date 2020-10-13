@@ -431,7 +431,7 @@ void main() {
             bundlePath: anyNamed('bundlePath'),
             launchArguments: anyNamed('launchArguments'),
             interfaceType: anyNamed('interfaceType')))
-        .thenAnswer((_) => Future<int>.value(0));
+        .thenAnswer((_) async => 0);
 
     when(mockIOSDeployDebugger.launchAndAttach()).thenAnswer((_) async => true);
 
