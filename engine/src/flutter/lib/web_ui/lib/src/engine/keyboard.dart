@@ -177,7 +177,7 @@ int _getMetaState(html.KeyboardEvent event) {
   if (event.getModifierState('Shift')) {
     metaState |= _modifierShift;
   }
-  if (event.getModifierState('Alt')) {
+  if (event.getModifierState('Alt') || event.getModifierState('AltGraph')) {
     metaState |= _modifierAlt;
   }
   if (event.getModifierState('Control')) {
