@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -22,7 +23,6 @@ import 'package:flutter_tools/src/vmservice.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/mocks.dart';
 
 void main() {
   group('drive', () {
@@ -37,7 +37,6 @@ void main() {
 
     setUp(() {
       command = DriveCommand();
-      applyMocksToCommand(command);
       fs = MemoryFileSystem.test();
       tempDir = fs.systemTempDirectory.createTempSync('flutter_drive_test.');
       fs.currentDirectory = tempDir;
@@ -55,6 +54,7 @@ void main() {
       appStopper = (DriveCommand command) {
         throw 'Unexpected call to appStopper';
       };
+      command.applicationPackages = FakeApplicationPackageFactory();
     });
 
     tearDown(() {
@@ -562,35 +562,6 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
-
-      testUsingContext('uses prebuilt app if --no-build arg provided', () async {
-        final Device mockDevice = await appStarterSetup();
-
-        final List<String> args = <String>[
-          'drive',
-          '--no-build',
-          '--target=$testApp',
-          '--no-pub',
-        ];
-        try {
-          await createTestCommandRunner(command).run(args);
-        } on ToolExit catch (e) {
-          expect(e.exitCode, 123);
-          expect(e.message, null);
-        }
-        verify(mockDevice.startApp(
-                null,
-                mainPath: anyNamed('mainPath'),
-                route: anyNamed('route'),
-                debuggingOptions: anyNamed('debuggingOptions'),
-                platformArgs: anyNamed('platformArgs'),
-                prebuiltApplication: true,
-                userIdentifier: anyNamed('userIdentifier'),
-        ));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
     });
 
     group('debugging options', () {
@@ -900,3 +871,9 @@ class MockDevice extends Mock implements Device {
 class MockAndroidDevice extends Mock implements AndroidDevice { }
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService { }
 class MockLaunchResult extends Mock implements LaunchResult { }
+class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
+  @override
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) {
+    return null;
+  }
+}

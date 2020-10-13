@@ -134,12 +134,11 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
     );
-    // TODO(egarciad): Remove this flag. https://github.com/flutter/flutter/issues/52363
     argParser.addFlag(
-      'androidx',
+      'skip-name-checks',
+      help: 'integration test only parameter to allow creating applications/plugins with '
+        'invalid names.',
       hide: true,
-      negatable: true,
-      help: 'Deprecated. Setting this flag has no effect.',
     );
   }
 
@@ -396,9 +395,11 @@ class CreateCommand extends FlutterCommand {
     }
 
     final String projectName = stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
-    error = _validateProjectName(projectName);
-    if (error != null) {
-      throwToolExit(error);
+    if (!boolArg('skip-name-checks')) {
+      error = _validateProjectName(projectName);
+      if (error != null) {
+        throwToolExit(error);
+      }
     }
 
     if (boolArg('with-driver-test')) {
@@ -889,9 +890,10 @@ const Set<String> _packageDependencies = <String>{
   'yaml',
 };
 
-// A valid Dart identifier.
+// A valid Dart identifier that can be used for a package, i.e. no
+// capital letters.
 // https://dart.dev/guides/language/language-tour#important-concepts
-final RegExp _identifierRegExp = RegExp('[a-zA-Z_][a-zA-Z0-9_]*');
+final RegExp _identifierRegExp = RegExp('[a-z_][a-z0-9_]*');
 
 // non-contextual dart keywords.
 //' https://dart.dev/guides/language/language-tour#keywords
