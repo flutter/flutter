@@ -85,7 +85,7 @@ Future<TaskResult> runTask(
     final Map<String, dynamic> taskResultJson = await isolate.invokeExtension('ext.cocoonRunTask') as Map<String, dynamic>;
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     await runner.exitCode;
-    return result;
+    return taskResult;
   } finally {
     if (!runnerFinished)
       runner.kill(ProcessSignal.sigkill);

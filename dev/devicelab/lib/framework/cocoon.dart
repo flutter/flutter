@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show json;
+import 'dart:convert' show json, utf8;
 import 'dart:io';
 
 import 'package:file/file.dart';
@@ -25,8 +25,7 @@ class Cocoon {
     this.taskKey,
     @visibleForTesting Client httpClient,
     @visibleForTesting FileSystem filesystem,
-  }) : _httpClient = AuthenticatedCocoonClient(serviceAccountPath,
-            httpClient: httpClient, filesystem: filesystem);
+  }) : _httpClient = AuthenticatedCocoonClient(serviceAccountPath, httpClient: httpClient, filesystem: filesystem);
 
   /// Id in Cocooon's datastore of the task to make API requests for.
   final String taskKey;
@@ -35,8 +34,7 @@ class Cocoon {
   final AuthenticatedCocoonClient _httpClient;
 
   /// Url used to send results to.
-  static const String baseCocoonApiUrl =
-      'https://flutter-dashboard.appspot.com/api';
+  static const String baseCocoonApiUrl = 'https://flutter-dashboard.appspot.com/api';
 
   /// Send [TaskResult] to Cocoon.
   Future<void> sendTaskResult(String taskKey, TaskResult result) async {
@@ -62,8 +60,7 @@ class Cocoon {
     }
     status['BenchmarkScoreKeys'] = validScoreKeys;
 
-    final Map<String, dynamic> response =
-        await _sendCocoonRequest('update-task-status', status);
+    final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', status);
     if (response['Name'] != null) {
       print('Updated Cocoon with results from this task');
     } else {
@@ -81,8 +78,7 @@ class Cocoon {
     /// as version changes to the backend, datastore issues, or latency issues.
     final Response response = await retry(
       () => _httpClient.post(url, body: json.encode(jsonData)),
-      retryIf: (Exception e) =>
-          e is SocketException || e is TimeoutException || e is ClientException,
+      retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
       maxAttempts: 5,
     );
     return json.decode(response.body) as Map<String, dynamic>;
@@ -110,14 +106,12 @@ class AuthenticatedCocoonClient extends BaseClient {
   final FileSystem _fs;
 
   /// Value contained in the service account token file that can be used in http requests.
-  String get serviceAccountToken =>
-      _serviceAccountToken ?? _readServiceAccountTokenFile();
+  String get serviceAccountToken => _serviceAccountToken ?? _readServiceAccountTokenFile();
   String _serviceAccountToken;
 
   /// Get [serviceAccountToken] from the given service account file.
   String _readServiceAccountTokenFile() {
-    return _serviceAccountToken =
-        _fs.file(_serviceAccountPath).readAsStringSync();
+    return _serviceAccountToken = _fs.file(_serviceAccountPath).readAsStringSync().trim();
   }
 
   @override
