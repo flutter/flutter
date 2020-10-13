@@ -12,7 +12,11 @@ config("ocmock_config") {
 # Target that compiles all sources to .o files but does not produce a static
 # library for use in macOS desktop tests.
 source_set("ocmock_src") {
-  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs -= [
+    "//build/config/compiler:chromium_code",
+    "//build/config/gcc:symbol_visibility_hidden",
+    "//build/config:symbol_visibility_hidden",
+  ]
   all_dependent_configs = [ ":ocmock_config" ]
   cflags = [
     "-fvisibility=default",
