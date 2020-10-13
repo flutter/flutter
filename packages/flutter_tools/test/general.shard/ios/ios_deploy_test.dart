@@ -210,6 +210,21 @@ void main () {
         await iosDeployDebugger.launchAndAttach();
         expect(logger.errorText, contains('Try launching from within Xcode'));
       });
+
+      testWithoutContext('cannot attach', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ios-deploy'],
+            stdout: 'error: process launch failed: timed out waiting for app to launch',
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        await iosDeployDebugger.launchAndAttach();
+        expect(logger.errorText, contains('Could not attach the debugger'));
+      });
     });
 
     testWithoutContext('detach', () async {

@@ -79,7 +79,6 @@ Future<void> buildMacOS({
   final Stopwatch sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress(
     'Building macOS application...',
-    timeout: null,
   );
   int result;
   try {

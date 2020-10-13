@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:archive/archive.dart';
+import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -12,12 +15,13 @@ import 'android/gradle_utils.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
-import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpStatus, ProcessException, SocketException;
+import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpHeaders, HttpStatus, ProcessException, SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
 import 'features.dart';
@@ -534,7 +538,6 @@ class Cache {
   Future<bool> doesRemoteExist(String message, Uri url) async {
     final Status status = _logger.startProgress(
       message,
-      timeout: timeoutConfiguration.slowOperation,
     );
     bool exists;
     try {
@@ -1075,8 +1078,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     );
     gradleUtils.injectGradleWrapperIfNeeded(tempDir);
 
-    final Status status = globals.logger.startProgress('Downloading Android Maven dependencies...',
-        timeout: timeoutConfiguration.slowOperation);
+    final Status status = globals.logger.startProgress('Downloading Android Maven dependencies...');
     final File gradle = tempDir.childFile(
         globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
       );
@@ -1593,7 +1595,6 @@ class ArtifactUpdater {
     while (retries > 0) {
       status = _logger.startProgress(
         message,
-        timeout: null, // This will take a variable amount of time based on network connectivity.
       );
       try {
         _ensureExists(tempFile.parent);
@@ -1610,7 +1611,7 @@ class ArtifactUpdater {
         retries -= 1;
         if (retries == 0) {
           throwToolExit(
-            'Failed to download $url. Ensure you have network connectivity and then try again.',
+            'Failed to download $url. Ensure you have network connectivity and then try again.\n$err',
           );
         }
         continue;
@@ -1656,15 +1657,69 @@ class ArtifactUpdater {
   }
 
   /// Download bytes from [url], throwing non-200 responses as an exception.
+  ///
+  /// Validates that the md5 of the content bytes matches the provided
+  /// `x-goog-hash` header, if present. This header should contain an md5 hash
+  /// if the download source is Google cloud storage.
+  ///
+  /// See also:
+  ///   * https://cloud.google.com/storage/docs/xml-api/reference-headers#xgooghash
   Future<void> _download(Uri url, File file) async {
     final HttpClientRequest request = await _httpClient.getUrl(url);
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok) {
       throw Exception(response.statusCode);
     }
+
+    final String md5Hash = _expectedMd5(response.headers);
+    ByteConversionSink inputSink;
+    StreamController<Digest> digests;
+    if (md5Hash != null) {
+      _logger.printTrace('Content $url md5 hash: $md5Hash');
+      digests = StreamController<Digest>();
+      inputSink = md5.startChunkedConversion(digests);
+    }
+    final RandomAccessFile randomAccessFile = file.openSync(mode: FileMode.writeOnly);
     await response.forEach((List<int> chunk) {
-      file.writeAsBytesSync(chunk, mode: FileMode.append);
+      inputSink?.add(chunk);
+      randomAccessFile.writeFromSync(chunk);
     });
+    randomAccessFile.closeSync();
+    if (inputSink != null) {
+      inputSink.close();
+      final Digest digest = await digests.stream.last;
+      final String rawDigest = base64.encode(digest.bytes);
+      if (rawDigest != md5Hash) {
+        throw Exception(''
+          'Expected $url to have md5 checksum $md5Hash, but was $rawDigest. This '
+          'may indicate a problem with your connection to the Flutter backend servers. '
+          'Please re-try the download after confirming that your network connection is '
+          'stable.'
+        );
+      }
+    }
+  }
+
+  String _expectedMd5(HttpHeaders httpHeaders) {
+    final List<String> values = httpHeaders['x-goog-hash'];
+    if (values == null) {
+      return null;
+    }
+    final String rawMd5Hash = values.firstWhere((String value) {
+      return value.startsWith('md5=');
+    }, orElse: () => null);
+    if (rawMd5Hash == null) {
+      return null;
+    }
+    final List<String> segments = rawMd5Hash.split('md5=');
+    if (segments.length < 2) {
+      return null;
+    }
+    final String md5Hash = segments[1];
+    if (md5Hash.isEmpty) {
+      return null;
+    }
+    return md5Hash;
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
