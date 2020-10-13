@@ -562,35 +562,6 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
-
-      testUsingContext('uses prebuilt app if --no-build arg provided', () async {
-        final Device mockDevice = await appStarterSetup();
-
-        final List<String> args = <String>[
-          'drive',
-          '--no-build',
-          '--target=$testApp',
-          '--no-pub',
-        ];
-        try {
-          await createTestCommandRunner(command).run(args);
-        } on ToolExit catch (e) {
-          expect(e.exitCode, 123);
-          expect(e.message, null);
-        }
-        verify(mockDevice.startApp(
-                null,
-                mainPath: anyNamed('mainPath'),
-                route: anyNamed('route'),
-                debuggingOptions: anyNamed('debuggingOptions'),
-                platformArgs: anyNamed('platformArgs'),
-                prebuiltApplication: true,
-                userIdentifier: anyNamed('userIdentifier'),
-        ));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
     });
 
     group('debugging options', () {
@@ -707,6 +678,11 @@ void main() {
       testOptionThatDefaultsToFalse(
         '--purge-persistent-cache',
         () => debuggingOptions.purgePersistentCache,
+      );
+
+      testOptionThatDefaultsToFalse(
+        '--publish-port',
+            () => !debuggingOptions.disablePortPublication,
       );
     });
   });

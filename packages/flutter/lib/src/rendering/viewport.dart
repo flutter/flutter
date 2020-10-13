@@ -11,6 +11,7 @@ import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
+import 'layer.dart';
 import 'object.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
@@ -629,11 +630,15 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     if (firstChild == null)
       return;
     if (hasVisualOverflow && clipBehavior != Clip.none) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents, clipBehavior: clipBehavior);
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents,
+          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
     } else {
+      _clipRectLayer = null;
       _paintContents(context, offset);
     }
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   void _paintContents(PaintingContext context, Offset offset) {
     for (final RenderSliver child in childrenInPaintOrder) {
@@ -653,7 +658,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       final Canvas canvas = context.canvas;
       RenderSliver? child = firstChild;
       while (child != null) {
-        Size size;
+        final Size size;
         switch (axis) {
           case Axis.vertical:
             size = Size(child.constraints.crossAxisExtent, child.geometry!.layoutExtent);
@@ -751,10 +756,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     }
 
     // `rect` in the new intermediate coordinate system.
-    Rect rectLocal;
+    final Rect rectLocal;
     // Our new reference frame render object's main axis extent.
-    double pivotExtent;
-    GrowthDirection growthDirection;
+    final double pivotExtent;
+    final GrowthDirection growthDirection;
 
     // `leadingScrollOffset` is currently the scrollOffset of our new reference
     // frame (`pivot` or `target`), within `child`.
@@ -815,7 +820,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(child is RenderSliver);
     final RenderSliver sliver = child as RenderSliver;
 
-    double targetMainAxisExtent;
+    final double targetMainAxisExtent;
     // The scroll offset of `rect` within `child`.
     switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
       case AxisDirection.up:
@@ -877,7 +882,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         break;
     }
 
-    double mainAxisExtent;
+    final double mainAxisExtent;
     switch (axis) {
       case Axis.horizontal:
         mainAxisExtent = size.width - extentOfPinnedSlivers;
@@ -1168,7 +1173,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // to `trailingEdgeOffset`, the one on the right by setting it to
     // `leadingEdgeOffset`.
 
-    RevealedOffset targetOffset;
+    final RevealedOffset targetOffset;
     if (leadingEdgeOffset.offset < trailingEdgeOffset.offset) {
       // `descendant` is too big to be visible on screen in its entirety. Let's
       // align it with the edge that requires the least amount of scrolling.
@@ -1448,8 +1453,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     }
     assert(center!.parent == this);
 
-    double mainAxisExtent;
-    double crossAxisExtent;
+    final double mainAxisExtent;
+    final double crossAxisExtent;
     switch (axis) {
       case Axis.vertical:
         mainAxisExtent = size.height;
@@ -1840,8 +1845,8 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
       return;
     }
 
-    double mainAxisExtent;
-    double crossAxisExtent;
+    final double mainAxisExtent;
+    final double crossAxisExtent;
     switch (axis) {
       case Axis.vertical:
         assert(constraints.hasBoundedWidth);

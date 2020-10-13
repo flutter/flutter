@@ -369,6 +369,17 @@ abstract class FlutterCommand extends Command<void> {
     return null;
   }
 
+  void addPublishPort({ bool enabledByDefault = true, bool verboseHelp = false }) {
+    argParser.addFlag('publish-port',
+        negatable: true,
+        hide: !verboseHelp,
+        help: 'Publish the VM service port over mDNS. Disable to prevent the'
+            'local network permission app dialog in debug and profile build modes (iOS devices only.)',
+        defaultsTo: enabledByDefault);
+  }
+
+  bool get disablePortPublication => !boolArg('publish-port');
+
   void usesIpv6Flag() {
     argParser.addFlag(ipv6Flag,
       hide: true,
@@ -542,7 +553,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(FlutterOptions.kNullAssertions,
       help:
         'Perform additional null assertions on the boundaries of migrated and '
-        'unmigrated code. This setting is not currently supported on desktop '
+        'un-migrated code. This setting is not currently supported on desktop '
         'devices.'
     );
   }
@@ -587,7 +598,7 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kPerformanceMeasurementFile,
       help:
         'The name of a file where flutter assemble performance and '
-        'cachedness information will be written in a JSON format.'
+        'cached-ness information will be written in a JSON format.'
     );
   }
 
@@ -763,6 +774,10 @@ abstract class FlutterCommand extends Command<void> {
     final String bundleSkSLPath = argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)
       ? stringArg(FlutterOptions.kBundleSkSLPathOption)
       : null;
+
+    if (bundleSkSLPath != null && !globals.fs.isFileSync(bundleSkSLPath)) {
+      throwToolExit('No SkSL shader bundle found at $bundleSkSLPath.');
+    }
 
     final String performanceMeasurementFile = argParser.options.containsKey(FlutterOptions.kPerformanceMeasurementFile)
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
@@ -1005,13 +1020,18 @@ abstract class FlutterCommand extends Command<void> {
   /// devices and criteria entered by the user on the command line.
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
-  Future<List<Device>> findAllTargetDevices() async {
+  Future<List<Device>> findAllTargetDevices({
+    bool includeUnsupportedDevices = false,
+  }) async {
     if (!globals.doctor.canLaunchAnything) {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
       return null;
     }
     final DeviceManager deviceManager = globals.deviceManager;
-    List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current(), timeout: deviceDiscoveryTimeout);
+    List<Device> devices = await deviceManager.findTargetDevices(
+      includeUnsupportedDevices ? null : FlutterProject.current(),
+      timeout: deviceDiscoveryTimeout,
+    );
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
       globals.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
@@ -1047,7 +1067,7 @@ abstract class FlutterCommand extends Command<void> {
         devices = await deviceManager.getAllConnectedDevices();
       }
       globals.printStatus('');
-      await Device.printDevices(devices);
+      await Device.printDevices(devices, globals.logger);
       return null;
     }
     return devices;
@@ -1057,8 +1077,13 @@ abstract class FlutterCommand extends Command<void> {
   /// devices and criteria entered by the user on the command line.
   /// If a device cannot be found that meets specified criteria,
   /// then print an error message and return null.
-  Future<Device> findTargetDevice() async {
-    List<Device> deviceList = await findAllTargetDevices();
+  ///
+  /// If [includeUnsupportedDevices] is true, the tool does not filter
+  /// the list by the current project support list.
+  Future<Device> findTargetDevice({
+    bool includeUnsupportedDevices = false,
+  }) async {
+    List<Device> deviceList = await findAllTargetDevices(includeUnsupportedDevices: includeUnsupportedDevices);
     if (deviceList == null) {
       return null;
     }
@@ -1066,7 +1091,7 @@ abstract class FlutterCommand extends Command<void> {
       globals.printStatus(userMessages.flutterSpecifyDevice);
       deviceList = await globals.deviceManager.getAllConnectedDevices();
       globals.printStatus('');
-      await Device.printDevices(deviceList);
+      await Device.printDevices(deviceList, globals.logger);
       return null;
     }
     return deviceList.single;
@@ -1165,7 +1190,7 @@ mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
     // If there is no specified target device, fallback to the default
-    // confiugration.
+    // configuration.
     final String rawTargetPlatform = stringArg('target-platform');
     final TargetPlatform targetPlatform = getTargetPlatformForName(rawTargetPlatform);
     if (targetPlatform == null) {

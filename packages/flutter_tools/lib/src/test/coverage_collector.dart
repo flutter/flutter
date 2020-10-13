@@ -279,7 +279,7 @@ void _buildCoverageMap(
       final List<int> hits = (coverage['hits'] as List<dynamic>).cast<int>();
       final List<int> misses = (coverage['misses'] as List<dynamic>).cast<int>();
       final List<dynamic> tokenPositions = scripts[scriptRef['id']]['tokenPosTable'] as List<dynamic>;
-      // The token positions can be null if the script has no coverable lines.
+      // The token positions can be null if the script has no lines that may be covered.
       if (tokenPositions == null) {
         continue;
       }

@@ -18,7 +18,7 @@ import 'package:mockito/mockito.dart';
 import '../src/common.dart';
 import '../src/mocks.dart';
 
-final Platform testPlatform = FakePlatform(environment: <String, String>{});
+final Platform testPlatform = FakePlatform(environment: const <String, String>{});
 
 void main() {
   testWithoutContext('ArtifactUpdater can download a zip archive', () async {
@@ -42,6 +42,97 @@ void main() {
     );
     expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), exists);
+  });
+
+  testWithoutContext('ArtifactUpdater will not validate the md5 hash if the '
+    'x-goog-hash header is present but missing an md5 entry', () async {
+    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final MockHttpClient client = MockHttpClient();
+    client.testRequest.testResponse.headers = FakeHttpHeaders(<String, List<String>>{
+      'x-goog-hash': <String>[],
+    });
+
+    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: client,
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
+        ..createSync(),
+    );
+
+    await artifactUpdater.downloadZipArchive(
+      'test message',
+      Uri.parse('http:///test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    );
+    expect(logger.statusText, contains('test message'));
+    expect(fileSystem.file('out/test'), exists);
+  });
+
+  testWithoutContext('ArtifactUpdater will validate the md5 hash if the '
+    'x-goog-hash header is present', () async {
+    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final MockHttpClient client = MockHttpClient();
+    client.testRequest.testResponse.headers = FakeHttpHeaders(<String, List<String>>{
+      'x-goog-hash': <String>[
+        'foo-bar-baz',
+        'md5=k7iFrf4NoInN9jSQT9WfcQ=='
+      ],
+    });
+
+    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: client,
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
+        ..createSync(),
+    );
+
+    await artifactUpdater.downloadZipArchive(
+      'test message',
+      Uri.parse('http:///test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    );
+    expect(logger.statusText, contains('test message'));
+    expect(fileSystem.file('out/test'), exists);
+  });
+
+  testWithoutContext('ArtifactUpdater will validate the md5 hash if the '
+    'x-goog-hash header is present and throw if it does not match', () async {
+    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final MockHttpClient client = MockHttpClient();
+    client.testRequest.testResponse.headers = FakeHttpHeaders(<String, List<String>>{
+      'x-goog-hash': <String>[
+        'foo-bar-baz',
+        'md5=k7iFrf4SQT9WfcQ=='
+      ],
+    });
+
+    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: client,
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
+        ..createSync(),
+    );
+
+    await expectLater(() async => await artifactUpdater.downloadZipArchive(
+      'test message',
+      Uri.parse('http:///test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    ), throwsToolExit(message: 'k7iFrf4SQT9WfcQ==')); // validate that the hash mismatch message is included.
   });
 
   testWithoutContext('ArtifactUpdater will restart the status ticker if it needs to retry the download', () async {
@@ -353,6 +444,7 @@ class MockHttpClient extends Mock implements HttpClient {
     return testRequest;
   }
 }
+
 class MockHttpClientRequest extends Mock implements HttpClientRequest {
   final MockHttpClientResponse testResponse = MockHttpClientResponse();
 
@@ -361,12 +453,28 @@ class MockHttpClientRequest extends Mock implements HttpClientRequest {
     return testResponse;
   }
 }
+
 class MockHttpClientResponse extends Mock implements HttpClientResponse {
   @override
   int statusCode = HttpStatus.ok;
 
   @override
+  HttpHeaders headers = FakeHttpHeaders(<String, List<String>>{});
+
+  @override
   Future<void> forEach(void Function(List<int> element) action) async {
+    action(<int>[0]);
     return;
+  }
+}
+
+class FakeHttpHeaders extends Fake implements HttpHeaders {
+  FakeHttpHeaders(this.values);
+
+  final Map<String, List<String>> values;
+
+  @override
+  List<String> operator [](String key) {
+    return values[key];
   }
 }

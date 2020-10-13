@@ -393,9 +393,9 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       ),
     );
 
-    Widget picker;
-    IconData entryModeIcon;
-    String entryModeTooltip;
+    final Widget picker;
+    final IconData entryModeIcon;
+    final String entryModeTooltip;
     switch (_entryMode) {
       case DatePickerEntryMode.calendar:
         picker = CalendarDatePicker(

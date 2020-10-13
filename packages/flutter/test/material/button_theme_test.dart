@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -39,13 +37,13 @@ void main() {
   });
 
   testWidgets('ButtonTheme defaults', (WidgetTester tester) async {
-    ButtonTextTheme textTheme;
-    ButtonBarLayoutBehavior layoutBehavior;
-    BoxConstraints constraints;
-    EdgeInsets padding;
-    ShapeBorder shape;
-    bool alignedDropdown;
-    ColorScheme colorScheme;
+    late ButtonTextTheme textTheme;
+    late ButtonBarLayoutBehavior layoutBehavior;
+    late BoxConstraints constraints;
+    late EdgeInsets padding;
+    late ShapeBorder shape;
+    late bool alignedDropdown;
+    late ColorScheme colorScheme;
 
     await tester.pumpWidget(
       ButtonTheme(
@@ -57,7 +55,7 @@ void main() {
             padding = theme.padding as EdgeInsets;
             shape = theme.shape;
             layoutBehavior = theme.layoutBehavior;
-            colorScheme = theme.colorScheme;
+            colorScheme = theme.colorScheme!;
             alignedDropdown = theme.alignedDropdown;
             return Container(
               alignment: Alignment.topLeft,
@@ -121,10 +119,10 @@ void main() {
 
   testWidgets('Theme buttonTheme defaults', (WidgetTester tester) async {
     final ThemeData lightTheme = ThemeData.light();
-    ButtonTextTheme textTheme;
-    BoxConstraints constraints;
-    EdgeInsets padding;
-    ShapeBorder shape;
+    late ButtonTextTheme textTheme;
+    late BoxConstraints constraints;
+    late EdgeInsets padding;
+    late ShapeBorder shape;
 
     const Color disabledColor = Color(0xFF00FF00);
     await tester.pumpWidget(
@@ -133,7 +131,7 @@ void main() {
           disabledColor: disabledColor, // disabled RaisedButton fill color
           buttonTheme: const ButtonThemeData(disabledColor: disabledColor),
           textTheme: lightTheme.textTheme.copyWith(
-            button: lightTheme.textTheme.button.copyWith(
+            button: lightTheme.textTheme.button!.copyWith(
               // The button's height will match because there's no
               // vertical padding by default
               fontSize: 48.0,
@@ -175,10 +173,10 @@ void main() {
   });
 
   testWidgets('Theme buttonTheme ButtonTheme overrides', (WidgetTester tester) async {
-    ButtonTextTheme textTheme;
-    BoxConstraints constraints;
-    EdgeInsets padding;
-    ShapeBorder shape;
+    late ButtonTextTheme textTheme;
+    late BoxConstraints constraints;
+    late EdgeInsets padding;
+    late ShapeBorder shape;
 
     await tester.pumpWidget(
       Theme(
@@ -228,12 +226,12 @@ void main() {
   testWidgets('ButtonTheme alignedDropdown', (WidgetTester tester) async {
     final Key dropdownKey = UniqueKey();
 
-    Widget buildFrame({ bool alignedDropdown, TextDirection textDirection }) {
+    Widget buildFrame({ required bool alignedDropdown, required TextDirection textDirection }) {
       return MaterialApp(
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return Directionality(
             textDirection: textDirection,
-            child: child,
+            child: child!,
           );
         },
         home: ButtonTheme(
@@ -248,7 +246,7 @@ void main() {
                       width: 200.0,
                       child: DropdownButton<String>(
                         key: dropdownKey,
-                        onChanged: (String value) { },
+                        onChanged: (String? value) { },
                         value: 'foo',
                         items: const <DropdownMenuItem<String>>[
                           DropdownMenuItem<String>(
@@ -374,7 +372,7 @@ void main() {
     );
 
     Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('FlatButton')).text.style.color;
+      return tester.renderObject<RenderParagraph>(find.text('FlatButton')).text.style!.color!;
     }
 
     // Default, not disabled.

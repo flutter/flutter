@@ -95,6 +95,7 @@ linter:
     - camel_case_types
     - cancel_subscriptions
     # - cascade_invocations # not yet tested
+    - cast_nullable_to_non_nullable
     # - close_sinks # not reliable enough
     # - comment_references # blocked on https://github.com/flutter/flutter/issues/20765
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
@@ -123,6 +124,7 @@ linter:
     # - no_logic_in_create_state # not yet tested
     # - no_runtimeType_toString # not yet tested
     - non_constant_identifier_names
+    - null_check_on_nullable_type_parameter
     # - null_closures  # not yet tested
     # - omit_local_variable_types # opposite of always_specify_types
     # - one_member_abstracts # too many false positives
@@ -180,6 +182,7 @@ linter:
     - sort_unnamed_constructors_first
     - test_types_in_equals
     - throw_in_finally
+    - tighten_type_of_initializing_formals
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     # - unawaited_futures # too many false positives

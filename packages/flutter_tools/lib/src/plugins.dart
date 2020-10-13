@@ -9,7 +9,11 @@ import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
 import 'base/common.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/os.dart';
+import 'base/platform.dart';
+import 'base/version.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
@@ -68,16 +72,17 @@ class Plugin {
     String name,
     String path,
     YamlMap pluginYaml,
-    List<String> dependencies,
-  ) {
+    List<String> dependencies, {
+    @required FileSystem fileSystem,
+  }) {
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
       throwToolExit('Invalid plugin specification $name.\n${errors.join('\n')}');
     }
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
-      return Plugin._fromMultiPlatformYaml(name, path, pluginYaml, dependencies);
+      return Plugin._fromMultiPlatformYaml(name, path, pluginYaml, dependencies, fileSystem);
     }
-    return Plugin._fromLegacyYaml(name, path, pluginYaml, dependencies);
+    return Plugin._fromLegacyYaml(name, path, pluginYaml, dependencies, fileSystem);
   }
 
   factory Plugin._fromMultiPlatformYaml(
@@ -85,6 +90,7 @@ class Plugin {
     String path,
     dynamic pluginYaml,
     List<String> dependencies,
+    FileSystem fileSystem,
   ) {
     assert (pluginYaml != null && pluginYaml['platforms'] != null,
             'Invalid multi-platform plugin specification $name.');
@@ -100,6 +106,7 @@ class Plugin {
         name,
         platformsYaml[AndroidPlugin.kConfigKey] as YamlMap,
         path,
+        fileSystem,
       );
     }
 
@@ -141,6 +148,7 @@ class Plugin {
     String path,
     dynamic pluginYaml,
     List<String> dependencies,
+    FileSystem fileSystem,
   ) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String pluginClass = pluginYaml['pluginClass'] as String;
@@ -152,6 +160,7 @@ class Plugin {
           package: pluginYaml['androidPackage'] as String,
           pluginClass: pluginClass,
           pluginPath: path,
+          fileSystem: fileSystem,
         );
       }
 
@@ -332,6 +341,7 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
     packageRootPath,
     flutterConfig['plugin'] as YamlMap,
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
+    fileSystem: globals.fs,
   );
 }
 
@@ -429,11 +439,7 @@ const String _kFlutterPluginsDependenciesKey = 'dependencies';
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsDependenciesFile;
   if (plugins.isEmpty) {
-    if (pluginsFile.existsSync()) {
-      pluginsFile.deleteSync();
-      return true;
-    }
-    return false;
+    return ErrorHandlingFileSystem.deleteIfExists(pluginsFile);
   }
 
   final String iosKey = project.ios.pluginConfigKey;
@@ -500,11 +506,7 @@ List<dynamic> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
 bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsFile;
   if (plugins.isEmpty) {
-    if (pluginsFile.existsSync()) {
-      pluginsFile.deleteSync();
-      return true;
-    }
-    return false;
+    return ErrorHandlingFileSystem.deleteIfExists(pluginsFile);
   }
 
   const String info = 'This is a generated file; do not edit or check into version control.';
@@ -935,7 +937,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
 /// that file, rather than the generated file.
 String _cmakeRelativePluginSymlinkDirectoryPath(CmakeBasedProject project) {
   final String makefileDirPath = project.cmakeFile.parent.absolute.path;
-  // CMake alway uses posix-style path separators, regardless of the platform.
+  // CMake always uses posix-style path separators, regardless of the platform.
   final path.Context cmakePathContext = path.Context(style: path.Style.posix);
   final List<String> relativePathComponents = globals.fs.path.split(globals.fs.path.relative(
     project.pluginSymlinkDirectory.absolute.path,
@@ -1045,9 +1047,7 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
   final String filePath = globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.dart');
   if (webPlugins.isEmpty) {
     final File file = globals.fs.file(filePath);
-    if (file.existsSync()) {
-      file.deleteSync();
-    }
+    return ErrorHandlingFileSystem.deleteIfExists(file);
   } else {
     _renderTemplateToFile(
       _dartPluginRegistryTemplate,
@@ -1090,6 +1090,30 @@ void createPluginSymlinks(FlutterProject project, {bool force = false}) {
   }
 }
 
+/// Handler for symlink failures which provides specific instructions for known
+/// failure cases.
+@visibleForTesting
+void handleSymlinkException(FileSystemException e, {
+  @required Platform platform,
+  @required OperatingSystemUtils os,
+}) {
+  if (platform.isWindows && (e.osError?.errorCode ?? 0) == 1314) {
+    final String versionString = RegExp(r'[\d.]+').firstMatch(os.name)?.group(0);
+    final Version version = Version.parse(versionString);
+    // Window 10 14972 is the oldest version that allows creating symlinks
+    // just by enabling developer mode; before that it requires running the
+    // terminal as Administrator.
+    // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
+    final String instructions = (version != null && version >= Version(10, 0, 14972))
+        ? 'Please enable Developer Mode in your system settings. Run\n'
+          '  start ms-settings:developers\n'
+          'to open settings.'
+        : 'You must build from a terminal run as administrator.';
+    throwToolExit('Building with plugins requires symlink support.\n\n' +
+        instructions);
+  }
+}
+
 /// Creates [symlinkDirectory] containing symlinks to each plugin listed in [platformPlugins].
 ///
 /// If [force] is true, the directory will be created only if missing.
@@ -1112,12 +1136,7 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<dynamic> pla
     try {
       link.createSync(path);
     } on FileSystemException catch (e) {
-      if (globals.platform.isWindows && (e.osError?.errorCode ?? 0) == 1314) {
-        throwToolExit(
-          'Building with plugins requires symlink support. '
-          'Please enable Developer Mode in your system settings.\n\n$e'
-        );
-      }
+      handleSymlinkException(e, platform: globals.platform, os: globals.os);
       rethrow;
     }
   }

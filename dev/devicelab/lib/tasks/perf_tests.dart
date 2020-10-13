@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
@@ -281,6 +282,13 @@ TaskFunction createTextfieldPerfTest() {
   ).run;
 }
 
+TaskFunction createTextfieldPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/textfield_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createColorFilterAndFadePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -454,7 +462,7 @@ class StartupTest {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
-      const int iterations = 3;
+      const int iterations = 15;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
       for (int i = 0; i < iterations; ++i) {
         await flutter('run', options: <String>[
@@ -738,6 +746,7 @@ class PerfTestWithSkSL extends PerfTest {
         'run',
         '--verbose',
         '--verbose-system-logs',
+        '--purge-persistent-cache',
         '--profile',
         if (cacheSkSL) '--cache-sksl',
         '-d', _device.deviceId,

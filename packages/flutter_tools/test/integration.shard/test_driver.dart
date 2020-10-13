@@ -588,19 +588,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     );
   }
 
-  Future<void> reloadMethod({ String libraryId, String classId }) async {
-    if (_currentRunningAppId == null) {
-      throw Exception('App has not started yet');
-    }
-    final dynamic reloadMethodResponse = await _sendRequest(
-      'app.reloadMethod',
-      <String, dynamic>{'appId': _currentRunningAppId, 'class': classId, 'library': libraryId},
-    );
-    if (reloadMethodResponse == null || reloadMethodResponse['code'] != 0) {
-      _throwErrorResponse('reloadMethodResponse request failed');
-    }
-  }
-
   Future<void> _restart({ bool fullRestart = false, bool pause = false, bool debounce = false, int debounceDurationOverrideMs }) async {
     if (_currentRunningAppId == null) {
       throw Exception('App has not started yet');
@@ -814,11 +801,11 @@ Stream<String> transformToLines(Stream<List<int>> byteStream) {
 }
 
 Map<String, dynamic> parseFlutterResponse(String line) {
-  if (line.startsWith('[') && line.endsWith(']')) {
+  if (line.startsWith('[') && line.endsWith(']') && line.length > 2) {
     try {
       final Map<String, dynamic> response = castStringKeyedMap(json.decode(line)[0]);
       return response;
-    } on Exception {
+    } on FormatException {
       // Not valid JSON, so likely some other output that was surrounded by [brackets]
       return null;
     }

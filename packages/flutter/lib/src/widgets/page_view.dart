@@ -332,6 +332,29 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   double _pageToUseOnStartup;
 
   @override
+  Future<void> ensureVisible(
+    RenderObject object, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    RenderObject? targetRenderObject,
+  }) {
+    // Since the _PagePosition is intended to cover the available space within
+    // its viewport, stop trying to move the target render object to the center
+    // - otherwise, could end up changing which page is visible and moving the
+    // targetRenderObject out of the viewport.
+    return super.ensureVisible(
+      object,
+      alignment: alignment,
+      duration: duration,
+      curve: curve,
+      alignmentPolicy: alignmentPolicy,
+      targetRenderObject: null,
+    );
+  }
+
+  @override
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
   set viewportFraction(double value) {

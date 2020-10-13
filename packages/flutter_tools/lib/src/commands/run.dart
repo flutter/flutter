@@ -47,7 +47,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       ..addFlag('dump-skp-on-shader-compilation',
         negatable: false,
         help: 'Automatically dump the skp that triggers new shader compilations. '
-            'This is useful for wrting custom ShaderWarmUp to reduce jank. '
+            'This is useful for writing custom ShaderWarmUp to reduce jank. '
             'By default, this is not enabled to reduce the overhead. '
             'This is only available in profile or debug build. ',
       )
@@ -97,6 +97,11 @@ class RunCommand extends RunCommandBase {
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraFrontendOptions();
     addEnableExperimentation(hide: !verboseHelp);
+
+    // By default, the app should to publish the VM service port over mDNS.
+    // This will allow subsequent "flutter attach" commands to connect to the VM
+    // without needing to know the port.
+    addPublishPort(enabledByDefault: true, verboseHelp: verboseHelp);
     argParser
       ..addFlag('start-paused',
         negatable: false,
@@ -136,7 +141,7 @@ class RunCommand extends RunCommandBase {
         help: 'Enable tracing to the endless tracer. This is useful when '
               'recording huge amounts of traces. If we need to use endless buffer to '
               'record startup traces, we can combine the ("--trace-startup"). '
-              'For exemple, flutter run --trace-startup --endless-trace-buffer. ',
+              'For example, flutter run --trace-startup --endless-trace-buffer. ',
       )
       ..addFlag('trace-systrace',
         negatable: false,
@@ -407,6 +412,7 @@ class RunCommand extends RunCommandBase {
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
+        disablePortPublication: disablePortPublication,
         ddsPort: ddsPort,
         verboseSystemLogs: boolArg('verbose-system-logs'),
         initializePlatform: boolArg('web-initialize-platform'),
