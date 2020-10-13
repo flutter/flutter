@@ -27,7 +27,6 @@ part '../../lib/ui/hooks.dart';
 part '../../lib/ui/lerp.dart';
 part '../../lib/ui/natives.dart';
 part '../../lib/ui/painting.dart';
-part '../../lib/ui/platform_dispatcher.dart';
 part '../../lib/ui/pointer.dart';
 part '../../lib/ui/semantics.dart';
 part '../../lib/ui/text.dart';
@@ -45,22 +44,15 @@ void main() {
   PlatformMessageCallback? originalOnPlatformMessage;
   VoidCallback? originalOnTextScaleFactorChanged;
 
-    Object? oldWindowId;
-    double? oldDevicePixelRatio;
-    Rect? oldGeometry;
-
-    WindowPadding? oldPadding;
-    WindowPadding? oldInsets;
-    WindowPadding? oldSystemGestureInsets;
+  double? oldDPR;
+  Size? oldSize;
+  WindowPadding? oldPadding;
+  WindowPadding? oldInsets;
+  WindowPadding? oldSystemGestureInsets;
 
   void setUp() {
-    PlatformDispatcher.instance._viewConfigurations.clear();
-    PlatformDispatcher.instance._views.clear();
-    PlatformDispatcher.instance._viewConfigurations[0] = const ViewConfiguration();
-    PlatformDispatcher.instance._views[0] = FlutterWindow._(0, PlatformDispatcher.instance);
-    oldWindowId = window._windowId;
-    oldDevicePixelRatio = window.devicePixelRatio;
-    oldGeometry = window.viewConfiguration.geometry;
+    oldDPR = window.devicePixelRatio;
+    oldSize = window.physicalSize;
     oldPadding = window.viewPadding;
     oldInsets = window.viewInsets;
     oldSystemGestureInsets = window.systemGestureInsets;
@@ -77,35 +69,34 @@ void main() {
     originalOnTextScaleFactorChanged = window.onTextScaleFactorChanged;
   }
 
-    tearDown() {
-      _updateWindowMetrics(
-        oldWindowId!,                    // window id
-        oldDevicePixelRatio!,            // device pixel ratio
-        oldGeometry!.width,              // width
-        oldGeometry!.height,             // height
-        oldPadding!.top,                 // padding top
-        oldPadding!.right,               // padding right
-        oldPadding!.bottom,              // padding bottom
-        oldPadding!.left,                // padding left
-        oldInsets!.top,                  // inset top
-        oldInsets!.right,                // inset right
-        oldInsets!.bottom,               // inset bottom
-        oldInsets!.left,                 // inset left
-        oldSystemGestureInsets!.top,     // system gesture inset top
-        oldSystemGestureInsets!.right,   // system gesture inset right
-        oldSystemGestureInsets!.bottom,  // system gesture inset bottom
-        oldSystemGestureInsets!.left,    // system gesture inset left
-      );
-      window.onMetricsChanged = originalOnMetricsChanged;
-      window.onLocaleChanged = originalOnLocaleChanged;
-      window.onBeginFrame = originalOnBeginFrame;
-      window.onDrawFrame = originalOnDrawFrame;
-      window.onReportTimings = originalOnReportTimings;
-      window.onPointerDataPacket = originalOnPointerDataPacket;
-      window.onSemanticsEnabledChanged = originalOnSemanticsEnabledChanged;
-      window.onSemanticsAction = originalOnSemanticsAction;
-      window.onPlatformMessage = originalOnPlatformMessage;
-      window.onTextScaleFactorChanged = originalOnTextScaleFactorChanged;
+  void tearDown() {
+    _updateWindowMetrics(
+      oldDPR!,                         // DPR
+      oldSize!.width,                  // width
+      oldSize!.height,                 // height
+      oldPadding!.top,                 // padding top
+      oldPadding!.right,               // padding right
+      oldPadding!.bottom,              // padding bottom
+      oldPadding!.left,                // padding left
+      oldInsets!.top,                  // inset top
+      oldInsets!.right,                // inset right
+      oldInsets!.bottom,               // inset bottom
+      oldInsets!.left,                 // inset left
+      oldSystemGestureInsets!.top,     // system gesture inset top
+      oldSystemGestureInsets!.right,   // system gesture inset right
+      oldSystemGestureInsets!.bottom,  // system gesture inset bottom
+      oldSystemGestureInsets!.left,    // system gesture inset left
+    );
+    window.onMetricsChanged = originalOnMetricsChanged;
+    window.onLocaleChanged = originalOnLocaleChanged;
+    window.onBeginFrame = originalOnBeginFrame;
+    window.onDrawFrame = originalOnDrawFrame;
+    window.onReportTimings = originalOnReportTimings;
+    window.onPointerDataPacket = originalOnPointerDataPacket;
+    window.onSemanticsEnabledChanged = originalOnSemanticsEnabledChanged;
+    window.onSemanticsAction = originalOnSemanticsAction;
+    window.onPlatformMessage = originalOnPlatformMessage;
+    window.onTextScaleFactorChanged = originalOnTextScaleFactorChanged;
   }
 
   void test(String description, void Function() testFunction) {
@@ -164,8 +155,7 @@ void main() {
 
     window.onMetricsChanged!();
     _updateWindowMetrics(
-      0,      // window id
-      0.1234, // device pixel ratio
+      0.1234, // DPR
       0.0,    // width
       0.0,    // height
       0.0,    // padding top
@@ -244,7 +234,7 @@ void main() {
     late Zone innerZone;
     late Zone runZone;
 
-    PlatformDispatcher.instance._setNeedsReportTimings = (bool _) {};
+    window._setNeedsReportTimings = (bool _) {};
 
     runZoned(() {
       innerZone = Zone.current;
@@ -275,7 +265,7 @@ void main() {
     _dispatchPointerDataPacket(testData);
     expectNotEquals(runZone, null);
     expectIdentical(runZone, innerZone);
-    expectIterablesEqual(data.data, PlatformDispatcher._unpackPointerDataPacket(testData).data);
+    expectIterablesEqual(data.data, _unpackPointerDataPacket(testData).data);
   });
 
   test('onSemanticsEnabledChanged preserves callback zone', () {
@@ -291,12 +281,11 @@ void main() {
       };
     });
 
-    final bool newValue = !window.semanticsEnabled; // needed?
-    _updateSemanticsEnabled(newValue);
+    _updateSemanticsEnabled(window._semanticsEnabled);
     expectNotEquals(runZone, null);
     expectIdentical(runZone, innerZone);
     expectNotEquals(enabled, null);
-    expectEquals(enabled, newValue);
+    expectEquals(enabled, window._semanticsEnabled);
   });
 
   test('onSemanticsAction preserves callback zone', () {
@@ -342,45 +331,47 @@ void main() {
 
   test('onTextScaleFactorChanged preserves callback zone', () {
     late Zone innerZone;
-    late Zone runZoneTextScaleFactor;
-    late Zone runZonePlatformBrightness;
-    late double? textScaleFactor;
-    late Brightness? platformBrightness;
+    late Zone runZone;
+    late double textScaleFactor;
 
     runZoned(() {
       innerZone = Zone.current;
       window.onTextScaleFactorChanged = () {
-        runZoneTextScaleFactor = Zone.current;
+        runZone = Zone.current;
         textScaleFactor = window.textScaleFactor;
-      };
-      window.onPlatformBrightnessChanged = () {
-        runZonePlatformBrightness = Zone.current;
-        platformBrightness = window.platformBrightness;
       };
     });
 
     window.onTextScaleFactorChanged!();
-
-    _updateUserSettingsData('{"textScaleFactor": 0.5, "platformBrightness": "light", "alwaysUse24HourFormat": true}');
-    expectNotEquals(runZoneTextScaleFactor, null);
-    expectIdentical(runZoneTextScaleFactor, innerZone);
+    _updateTextScaleFactor(0.5);
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
     expectEquals(textScaleFactor, 0.5);
+  });
 
-    textScaleFactor = null;
-    platformBrightness = null;
+  test('onThemeBrightnessMode preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late Brightness platformBrightness;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onPlatformBrightnessChanged = () {
+        runZone = Zone.current;
+        platformBrightness = window.platformBrightness;
+      };
+    });
 
     window.onPlatformBrightnessChanged!();
-    _updateUserSettingsData('{"textScaleFactor": 0.5, "platformBrightness": "dark", "alwaysUse24HourFormat": true}');
-    expectNotEquals(runZonePlatformBrightness, null);
-    expectIdentical(runZonePlatformBrightness, innerZone);
+    _updatePlatformBrightness('dark');
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
     expectEquals(platformBrightness, Brightness.dark);
-
   });
 
   test('Window padding/insets/viewPadding/systemGestureInsets', () {
     _updateWindowMetrics(
-      0,     // window id
-      0,     // screen id
+      1.0,   // DPR
       800.0, // width
       600.0, // height
       50.0,  // padding top
@@ -403,8 +394,7 @@ void main() {
     expectEquals(window.systemGestureInsets.bottom, 0.0);
 
     _updateWindowMetrics(
-      0,     // window id
-      0,     // screen id
+      1.0,   // DPR
       800.0, // width
       600.0, // height
       50.0,  // padding top
@@ -415,10 +405,10 @@ void main() {
       0.0,   // inset right
       400.0, // inset bottom
       0.0,   // inset left
-      0.0,   // system gesture inset top
-      0.0,   // system gesture inset right
-      44.0,  // system gesture inset bottom
-      0.0,   // system gesture inset left
+      0.0,   // system gesture insets top
+      0.0,   // system gesture insets right
+      44.0,  // system gesture insets bottom
+      0.0,   // system gesture insets left
     );
 
     expectEquals(window.viewInsets.bottom, 400.0);

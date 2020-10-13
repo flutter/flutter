@@ -276,8 +276,8 @@ class EngineAutofillForm {
 
   /// Sends the 'TextInputClient.updateEditingStateWithTag' message to the framework.
   void _sendAutofillEditingState(String? tag, EditingState editingState) {
-    if (EnginePlatformDispatcher.instance._onPlatformMessage != null) {
-      EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
+    if (window._onPlatformMessage != null) {
+      window.invokeOnPlatformMessage(
         'flutter/textinput',
         const JSONMethodCodec().encodeMethodCall(
           MethodCall(
@@ -1363,7 +1363,7 @@ class TextEditingChannel {
         throw StateError(
             'Unsupported method call on the flutter/textinput channel: ${call.method}');
     }
-    EnginePlatformDispatcher.instance._replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+    window._replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
   }
 
   /// Used for submitting the forms attached on the DOM.
@@ -1392,8 +1392,8 @@ class TextEditingChannel {
 
   /// Sends the 'TextInputClient.updateEditingState' message to the framework.
   void updateEditingState(int? clientId, EditingState? editingState) {
-    if (EnginePlatformDispatcher.instance._onPlatformMessage != null) {
-      EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
+    if (window._onPlatformMessage != null) {
+      window.invokeOnPlatformMessage(
         'flutter/textinput',
         const JSONMethodCodec().encodeMethodCall(
           MethodCall('TextInputClient.updateEditingState', <dynamic>[
@@ -1408,8 +1408,8 @@ class TextEditingChannel {
 
   /// Sends the 'TextInputClient.performAction' message to the framework.
   void performAction(int? clientId, String? inputAction) {
-    if (EnginePlatformDispatcher.instance._onPlatformMessage != null) {
-      EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
+    if (window._onPlatformMessage != null) {
+      window.invokeOnPlatformMessage(
         'flutter/textinput',
         const JSONMethodCodec().encodeMethodCall(
           MethodCall(
@@ -1424,8 +1424,8 @@ class TextEditingChannel {
 
   /// Sends the 'TextInputClient.onConnectionClosed' message to the framework.
   void onConnectionClosed(int? clientId) {
-    if (EnginePlatformDispatcher.instance._onPlatformMessage != null) {
-      EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
+    if (window._onPlatformMessage != null) {
+      window.invokeOnPlatformMessage(
         'flutter/textinput',
         const JSONMethodCodec().encodeMethodCall(
           MethodCall(

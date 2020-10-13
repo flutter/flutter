@@ -125,7 +125,9 @@ class PointerBinding {
 
   void _onPointerData(Iterable<ui.PointerData> data) {
     final ui.PointerDataPacket packet = ui.PointerDataPacket(data: data.toList());
-    EnginePlatformDispatcher.instance.invokeOnPointerDataPacket(packet);
+    if (window._onPointerDataPacket != null) {
+      window.invokeOnPointerDataPacket(packet);
+    }
   }
 }
 

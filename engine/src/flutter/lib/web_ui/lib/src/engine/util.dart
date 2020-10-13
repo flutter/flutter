@@ -482,13 +482,13 @@ final ByteData? _fontChangeMessage = JSONMessageCodec().encodeMessage(<String, d
 bool _fontChangeScheduled = false;
 
 FutureOr<void> sendFontChangeMessage() async {
-  if (EnginePlatformDispatcher.instance._onPlatformMessage != null)
+  if (window._onPlatformMessage != null)
     if (!_fontChangeScheduled) {
       _fontChangeScheduled = true;
       // Batch updates into next animationframe.
       html.window.requestAnimationFrame((num _) {
         _fontChangeScheduled = false;
-        EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
+        window.invokeOnPlatformMessage(
           'flutter/system',
           _fontChangeMessage,
               (_) {},

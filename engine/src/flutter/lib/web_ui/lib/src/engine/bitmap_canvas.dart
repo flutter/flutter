@@ -71,7 +71,7 @@ class BitmapCanvas extends EngineCanvas {
 
   /// Keeps track of what device pixel ratio was used when this [BitmapCanvas]
   /// was created.
-  final double _devicePixelRatio = EnginePlatformDispatcher.browserDevicePixelRatio;
+  final double _devicePixelRatio = EngineWindow.browserDevicePixelRatio;
 
   // Compensation for [_initializeViewport] snapping canvas position to 1 pixel.
   int? _canvasPositionX, _canvasPositionY;
@@ -150,13 +150,13 @@ class BitmapCanvas extends EngineCanvas {
 
   static int _widthToPhysical(double width) {
     final double boundsWidth = width + 1;
-    return (boundsWidth * EnginePlatformDispatcher.browserDevicePixelRatio).ceil() +
+    return (boundsWidth * EngineWindow.browserDevicePixelRatio).ceil() +
         2 * kPaddingPixels;
   }
 
   static int _heightToPhysical(double height) {
     final double boundsHeight = height + 1;
-    return (boundsHeight * EnginePlatformDispatcher.browserDevicePixelRatio).ceil() +
+    return (boundsHeight * EngineWindow.browserDevicePixelRatio).ceil() +
         2 * kPaddingPixels;
   }
 
@@ -198,7 +198,7 @@ class BitmapCanvas extends EngineCanvas {
   /// * [PersistedPicture._recycleCanvas] which also uses this method
   ///   for the same reason.
   bool isReusable() {
-    return _devicePixelRatio == EnginePlatformDispatcher.browserDevicePixelRatio;
+    return _devicePixelRatio == EngineWindow.browserDevicePixelRatio;
   }
 
   /// Returns a "data://" URI containing a representation of the image in this

@@ -31,7 +31,7 @@ void testMain() {
       expect(window.onTextScaleFactorChanged, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnTextScaleFactorChanged();
+    window.invokeOnTextScaleFactorChanged();
   });
 
   test('onPlatformBrightnessChanged preserves the zone', () {
@@ -47,7 +47,7 @@ void testMain() {
       expect(window.onPlatformBrightnessChanged, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnPlatformBrightnessChanged();
+    window.invokeOnPlatformBrightnessChanged();
   });
 
   test('onMetricsChanged preserves the zone', () {
@@ -63,7 +63,7 @@ void testMain() {
       expect(window.onMetricsChanged, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnMetricsChanged();
+    window.invokeOnMetricsChanged();
   });
 
   test('onLocaleChanged preserves the zone', () {
@@ -79,7 +79,7 @@ void testMain() {
       expect(window.onLocaleChanged, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnLocaleChanged();
+    window.invokeOnLocaleChanged();
   });
 
   test('onBeginFrame preserves the zone', () {
@@ -95,7 +95,7 @@ void testMain() {
       expect(window.onBeginFrame, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnBeginFrame(null);
+    window.invokeOnBeginFrame(null);
   });
 
   test('onReportTimings preserves the zone', () {
@@ -111,7 +111,7 @@ void testMain() {
       expect(window.onReportTimings, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnReportTimings(null);
+    window.invokeOnReportTimings(null);
   });
 
   test('onDrawFrame preserves the zone', () {
@@ -127,7 +127,7 @@ void testMain() {
       expect(window.onDrawFrame, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnDrawFrame();
+    window.invokeOnDrawFrame();
   });
 
   test('onPointerDataPacket preserves the zone', () {
@@ -143,7 +143,7 @@ void testMain() {
       expect(window.onPointerDataPacket, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnPointerDataPacket(null);
+    window.invokeOnPointerDataPacket(null);
   });
 
   test('onSemanticsEnabledChanged preserves the zone', () {
@@ -159,7 +159,7 @@ void testMain() {
       expect(window.onSemanticsEnabledChanged, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnSemanticsEnabledChanged();
+    window.invokeOnSemanticsEnabledChanged();
   });
 
   test('onSemanticsAction preserves the zone', () {
@@ -175,7 +175,7 @@ void testMain() {
       expect(window.onSemanticsAction, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnSemanticsAction(null, null, null);
+    window.invokeOnSemanticsAction(null, null, null);
   });
 
   test('onAccessibilityFeaturesChanged preserves the zone', () {
@@ -191,7 +191,7 @@ void testMain() {
       expect(window.onAccessibilityFeaturesChanged, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnAccessibilityFeaturesChanged();
+    window.invokeOnAccessibilityFeaturesChanged();
   });
 
   test('onPlatformMessage preserves the zone', () {
@@ -207,7 +207,7 @@ void testMain() {
       expect(window.onPlatformMessage, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnPlatformMessage(null, null, null);
+    window.invokeOnPlatformMessage(null, null, null);
   });
 
   test('sendPlatformMessage preserves the zone', () async {
@@ -290,8 +290,8 @@ void testMain() {
     // Trigger a change notification (reset locales because the notification
     // doesn't actually change the list of languages; the test only observes
     // that the list is populated again).
-    EnginePlatformDispatcher.instance.debugResetLocales();
-    expect(window.locales, isEmpty);
+    window.debugResetLocales();
+    expect(window.locales, null);
     expect(localeChangedCount, 0);
     html.window.dispatchEvent(html.Event('languagechange'));
     expect(window.locales, isNotEmpty);

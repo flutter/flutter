@@ -99,7 +99,6 @@ part 'engine/keyboard.dart';
 part 'engine/mouse_cursor.dart';
 part 'engine/onscreen_logging.dart';
 part 'engine/picture.dart';
-part 'engine/platform_dispatcher.dart';
 part 'engine/platform_views.dart';
 part 'engine/plugins.dart';
 part 'engine/pointer_binding.dart';
@@ -225,17 +224,17 @@ void initializeEngine() {
         // part of the rasterization process, particularly in the HTML
         // renderer, takes place in the `SceneBuilder.build()`.
         _frameTimingsOnBuildStart();
-        if (EnginePlatformDispatcher.instance._onBeginFrame != null) {
-          EnginePlatformDispatcher.instance.invokeOnBeginFrame(
+        if (window._onBeginFrame != null) {
+          window.invokeOnBeginFrame(
               Duration(microseconds: highResTimeMicroseconds));
         }
 
-        if (EnginePlatformDispatcher.instance._onDrawFrame != null) {
+        if (window._onDrawFrame != null) {
           // TODO(yjbanov): technically Flutter flushes microtasks between
           //                onBeginFrame and onDrawFrame. We don't, which hasn't
           //                been an issue yet, but eventually we'll have to
           //                implement it properly.
-          EnginePlatformDispatcher.instance.invokeOnDrawFrame();
+          window.invokeOnDrawFrame();
         }
       });
     }

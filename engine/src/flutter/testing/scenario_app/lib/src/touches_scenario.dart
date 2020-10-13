@@ -10,7 +10,7 @@ import 'scenario.dart';
 /// A scenario that sends back messages when touches are received.
 class TouchesScenario extends Scenario {
   /// Constructor for `TouchesScenario`.
-  TouchesScenario(PlatformDispatcher dispatcher) : super(dispatcher);
+  TouchesScenario(Window window) : super(window);
 
   @override
   void onPointerDataPacket(PointerDataPacket packet) {

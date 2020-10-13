@@ -15,14 +15,14 @@ class InitialRouteReply extends Scenario {
   /// Creates the InitialRouteReply.
   ///
   /// The [window] parameter must not be null.
-  InitialRouteReply(PlatformDispatcher dispatcher)
-      : assert(dispatcher != null),
-        super(dispatcher);
+  InitialRouteReply(Window window)
+      : assert(window != null),
+        super(window);
 
   @override
   void onBeginFrame(Duration duration) {
     sendJsonMethodCall(
-      dispatcher: dispatcher,
+      window: window,
       channel: 'initial_route_test_channel',
       method: window.defaultRouteName,
     );

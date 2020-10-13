@@ -29,7 +29,6 @@ part 'src/ui/natives.dart';
 part 'src/ui/painting.dart';
 part 'src/ui/path.dart';
 part 'src/ui/path_metrics.dart';
-part 'src/ui/platform_dispatcher.dart';
 part 'src/ui/pointer.dart';
 part 'src/ui/semantics.dart';
 part 'src/ui/test_embedding.dart';

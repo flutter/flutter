@@ -188,7 +188,7 @@ bool RuntimeController::SetViewportMetrics(const ViewportMetrics& metrics) {
   platform_data_.viewport_metrics = metrics;
 
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    platform_configuration->get_window(0)->UpdateWindowMetrics(metrics);
+    platform_configuration->window()->UpdateWindowMetrics(metrics);
     return true;
   }
 
@@ -310,7 +310,7 @@ bool RuntimeController::DispatchPointerDataPacket(
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
     TRACE_EVENT1("flutter", "RuntimeController::DispatchPointerDataPacket",
                  "mode", "basic");
-    platform_configuration->get_window(0)->DispatchPointerDataPacket(packet);
+    platform_configuration->window()->DispatchPointerDataPacket(packet);
     return true;
   }
 

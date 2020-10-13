@@ -411,19 +411,16 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
     return;
   }
   NSView* view = _viewController.view;
-  CGRect scaledBounds = [view convertRectToBacking:view.bounds];
-  CGSize scaledSize = scaledBounds.size;
+  CGSize scaledSize = [view convertRectToBacking:view.bounds].size;
   double pixelRatio = view.bounds.size.width == 0 ? 1 : scaledSize.width / view.bounds.size.width;
 
-  const FlutterWindowMetricsEvent windowMetricsEvent = {
-      .struct_size = sizeof(windowMetricsEvent),
+  const FlutterWindowMetricsEvent event = {
+      .struct_size = sizeof(event),
       .width = static_cast<size_t>(scaledSize.width),
       .height = static_cast<size_t>(scaledSize.height),
       .pixel_ratio = pixelRatio,
-      .left = static_cast<size_t>(scaledBounds.origin.x),
-      .top = static_cast<size_t>(scaledBounds.origin.y),
   };
-  FlutterEngineSendWindowMetricsEvent(_engine, &windowMetricsEvent);
+  FlutterEngineSendWindowMetricsEvent(_engine, &event);
 }
 
 - (void)sendPointerEvent:(const FlutterPointerEvent&)event {

@@ -1253,8 +1253,8 @@ class EngineSemanticsOwner {
       _gestureModeClock?.datetime = null;
     }
 
-    if (EnginePlatformDispatcher.instance._onSemanticsEnabledChanged != null) {
-      EnginePlatformDispatcher.instance.invokeOnSemanticsEnabledChanged();
+    if (window._onSemanticsEnabledChanged != null) {
+      window.invokeOnSemanticsEnabledChanged();
     }
   }
 
