@@ -2171,7 +2171,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 
   @override
   String toStringShort() {
-    String type;
+    final String type;
     if (width == double.infinity && height == double.infinity) {
       type = '${objectRuntimeType(this, 'SizedBox')}.expand';
     } else if (width == 0.0 && height == 0.0) {
@@ -2185,7 +2185,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    DiagnosticLevel level;
+    final DiagnosticLevel level;
     if ((width == double.infinity && height == double.infinity) ||
         (width == 0.0 && height == 0.0)) {
       level = DiagnosticLevel.hidden;

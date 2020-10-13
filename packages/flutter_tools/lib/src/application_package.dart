@@ -379,6 +379,12 @@ class BuildableIOSApp extends IOSApp {
   @override
   String get deviceBundlePath => _buildAppPath('iphoneos');
 
+  // Xcode uses this path for the final archive bundle location,
+  // not a top-level output directory.
+  // Specifying `build/ios/archive/Runner` will result in `build/ios/archive/Runner.xcarchive`.
+  String get archiveBundlePath
+    => globals.fs.path.join(getIosBuildDirectory(), 'archive', globals.fs.path.withoutExtension(_hostAppBundleName));
+
   String _buildAppPath(String type) {
     return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);
   }

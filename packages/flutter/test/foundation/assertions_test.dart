@@ -219,7 +219,7 @@ void main() {
 
   test('Malformed FlutterError objects', () {
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[]);
       } on AssertionError catch (e) {
@@ -235,7 +235,7 @@ void main() {
     }
 
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           (ErrorDescription('Error description without a summary'))]);
@@ -261,7 +261,7 @@ void main() {
     }
 
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Error Summary A'),
@@ -298,7 +298,7 @@ void main() {
     }
 
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorDescription('Some description'),
@@ -329,7 +329,7 @@ void main() {
 
   test('User-thrown exceptions have ErrorSummary properties', () {
     {
-      DiagnosticsNode node;
+      final DiagnosticsNode node;
       try {
         throw 'User thrown string';
       } catch (e) {
@@ -340,7 +340,7 @@ void main() {
     }
 
     {
-      DiagnosticsNode node;
+      final DiagnosticsNode node;
       try {
         throw ArgumentError.notNull('myArgument');
       } catch (e) {

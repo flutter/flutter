@@ -369,7 +369,7 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   Future<String> fetchRemoteRevision() async => remoteRevision;
 
   @override
-  Future<bool> hasUncomittedChanges() async => willHaveUncomittedChanges;
+  Future<bool> hasUncommittedChanges() async => willHaveUncomittedChanges;
 
   @override
   Future<void> upgradeChannel(FlutterVersion flutterVersion) async {}

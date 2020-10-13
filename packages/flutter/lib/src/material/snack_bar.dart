@@ -537,7 +537,7 @@ class _SnackBarState extends State<SnackBar> {
       ),
     );
 
-    Widget snackBarTransition;
+    final Widget snackBarTransition;
     if (mediaQueryData.accessibleNavigation) {
       snackBarTransition = snackBar;
     } else if (isFloatingSnackBar) {

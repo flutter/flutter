@@ -535,23 +535,6 @@ void main() {
     );
   });
 
-  testUsingContext('legacy app project with-driver-test', () async {
-    return _createAndAnalyzeProject(
-      projectDir,
-      <String>['--with-driver-test', '--template=app'],
-      <String>['lib/main.dart'],
-    );
-  }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      usage: globals.flutterUsage,
-      botDetector: globals.botDetector,
-      platform: globals.platform,
-    ),
-  });
-
   testUsingContext('module project with pub', () async {
     return _createProject(projectDir, <String>[
       '--template=module',
@@ -2054,7 +2037,7 @@ void main() {
 
     const String projectName = 'foo_BarBaz';
     final Directory projectDir = tempDir.childDirectory(projectName);
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=linux', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=linux', '--skip-name-checks', projectDir.path]);
     final Directory platformDir = projectDir.childDirectory('linux');
 
     const String classFilenameBase = 'foo_bar_baz_plugin';
@@ -2087,7 +2070,7 @@ void main() {
 
     const String projectName = 'foo_BarBaz';
     final Directory projectDir = tempDir.childDirectory(projectName);
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', '--skip-name-checks', projectDir.path]);
     final Directory platformDir = projectDir.childDirectory('windows');
 
     const String classFilenameBase = 'foo_bar_baz_plugin';

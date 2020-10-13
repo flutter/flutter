@@ -16,5 +16,7 @@ void main() {
     expect(isValidPackageName('foo_bar'), true);
     expect(isValidPackageName('_foo_bar'), true);
     expect(isValidPackageName('fizz93'), true);
+
+    expect(isValidPackageName('Foo_bar'), false);
   });
 }

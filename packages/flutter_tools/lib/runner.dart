@@ -258,7 +258,7 @@ Future<int> _exit(int code) async {
       globals.printTrace('exiting with code $code');
       exit(code);
       completer.complete();
-    // This catches all exceptions becauce the error is propagated on the
+    // This catches all exceptions because the error is propagated on the
     // completer.
     } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
       completer.completeError(error, stackTrace);

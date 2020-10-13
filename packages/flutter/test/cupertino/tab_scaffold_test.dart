@@ -1110,6 +1110,110 @@ void main() {
     expect(contents.length, greaterThan(0));
     expect(contents.any((RichText t) => t.textScaleFactor != 99), isFalse);
   });
+
+  testWidgets('state restoration', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        restorationScopeId: 'app',
+        home: CupertinoTabScaffold(
+          restorationId: 'scaffold',
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(
+              4,
+              (int i) => BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
+            ),
+          ),
+          tabBuilder: (BuildContext context, int i) => Text('Content $i'),
+        ),
+      ),
+    );
+
+    expect(find.text('Content 0'), findsOneWidget);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsNothing);
+    expect(find.text('Content 3'), findsNothing);
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Content 0'), findsNothing);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsOneWidget);
+    expect(find.text('Content 3'), findsNothing);
+
+    await tester.restartAndRestore();
+
+    expect(find.text('Content 0'), findsNothing);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsOneWidget);
+    expect(find.text('Content 3'), findsNothing);
+
+    final TestRestorationData data = await tester.getRestorationData();
+
+    await tester.tap(find.text('Tab 1'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Content 0'), findsNothing);
+    expect(find.text('Content 1'), findsOneWidget);
+    expect(find.text('Content 2'), findsNothing);
+    expect(find.text('Content 3'), findsNothing);
+
+    await tester.restoreFrom(data);
+
+    expect(find.text('Content 0'), findsNothing);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsOneWidget);
+    expect(find.text('Content 3'), findsNothing);
+  });
+
+  testWidgets('switch from internal to external controller with state restoration', (WidgetTester tester) async {
+    Widget buildWidget({CupertinoTabController? controller}) {
+      return CupertinoApp(
+        restorationScopeId: 'app',
+        home: CupertinoTabScaffold(
+          controller: controller,
+          restorationId: 'scaffold',
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(
+              4,
+              (int i) => BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
+            ),
+          ),
+          tabBuilder: (BuildContext context, int i) => Text('Content $i'),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+
+    expect(find.text('Content 0'), findsOneWidget);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsNothing);
+    expect(find.text('Content 3'), findsNothing);
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Content 0'), findsNothing);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsOneWidget);
+    expect(find.text('Content 3'), findsNothing);
+
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 3);
+    await tester.pumpWidget(buildWidget(controller: controller));
+
+    expect(find.text('Content 0'), findsNothing);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsNothing);
+    expect(find.text('Content 3'), findsOneWidget);
+
+    await tester.pumpWidget(buildWidget());
+
+    expect(find.text('Content 0'), findsOneWidget);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsNothing);
+    expect(find.text('Content 3'), findsNothing);
+  });
 }
 
 CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {

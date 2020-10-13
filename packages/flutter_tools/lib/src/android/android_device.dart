@@ -49,7 +49,7 @@ const Map<String, HardwareType> kKnownHardware = <String, HardwareType>{
 /// A physical Android device or emulator.
 ///
 /// While [isEmulator] attempts to distinguish between the device categories,
-/// this is a best effort process and not a guarantee; certain phyiscal devices
+/// this is a best effort process and not a guarantee; certain physical devices
 /// identify as emulators. These device identifiers may be added to the [kKnownHardware]
 /// map to specify that they are actually physical devices.
 class AndroidDevice extends Device {
@@ -404,13 +404,40 @@ class AndroidDevice extends Device {
     AndroidApk app, {
     String userIdentifier,
   }) async {
-    if (!app.file.existsSync()) {
-      _logger.printError('"${_fileSystem.path.relative(app.file.path)}" does not exist.');
+    if (!await _isAdbValid()) {
       return false;
     }
+    final bool wasInstalled = await isAppInstalled(app, userIdentifier: userIdentifier);
+    if (wasInstalled && await isLatestBuildInstalled(app)) {
+      _logger.printTrace('Latest build already installed.');
+      return true;
+    }
+    _logger.printTrace('Installing APK.');
+    if (await _installApp(app, userIdentifier: userIdentifier)) {
+      return true;
+    }
+    _logger.printTrace('Warning: Failed to install APK.');
+    if (!wasInstalled) {
+      return false;
+    }
+    _logger.printStatus('Uninstalling old version...');
+    if (!await uninstallApp(app, userIdentifier: userIdentifier)) {
+      _logger.printError('Error: Uninstalling old version failed.');
+      return false;
+    }
+    if (!await _installApp(app, userIdentifier: userIdentifier)) {
+      _logger.printError('Error: Failed to install APK again.');
+      return false;
+    }
+    return true;
+  }
 
-    if (!await _checkForSupportedAdbVersion() ||
-        !await _checkForSupportedAndroidVersion()) {
+  Future<bool> _installApp(
+    AndroidApk app, {
+    String userIdentifier,
+  }) async {
+    if (!app.file.existsSync()) {
+      _logger.printError('"${_fileSystem.path.relative(app.file.path)}" does not exist.');
       return false;
     }
 
@@ -461,8 +488,7 @@ class AndroidDevice extends Device {
     AndroidApk app, {
     String userIdentifier,
   }) async {
-    if (!await _checkForSupportedAdbVersion() ||
-        !await _checkForSupportedAndroidVersion()) {
+    if (!await _isAdbValid()) {
       return false;
     }
 
@@ -487,36 +513,13 @@ class AndroidDevice extends Device {
       _logger.printError('Package uninstall error: $failure');
       return false;
     }
-
     return true;
   }
 
-  Future<bool> _installLatestApp(AndroidApk package, String userIdentifier) async {
-    final bool wasInstalled = await isAppInstalled(package, userIdentifier: userIdentifier);
-    if (wasInstalled) {
-      if (await isLatestBuildInstalled(package)) {
-        _logger.printTrace('Latest build already installed.');
-        return true;
-      }
-    }
-    _logger.printTrace('Installing APK.');
-    if (!await installApp(package, userIdentifier: userIdentifier)) {
-      _logger.printTrace('Warning: Failed to install APK.');
-      if (wasInstalled) {
-        _logger.printStatus('Uninstalling old version...');
-        if (!await uninstallApp(package, userIdentifier: userIdentifier)) {
-          _logger.printError('Error: Uninstalling old version failed.');
-          return false;
-        }
-        if (!await installApp(package, userIdentifier: userIdentifier)) {
-          _logger.printError('Error: Failed to install APK again.');
-          return false;
-        }
-        return true;
-      }
-      return false;
-    }
-    return true;
+  // Whether the adb and Android versions are aligned.
+  bool _adbIsValid;
+  Future<bool> _isAdbValid() async {
+    return _adbIsValid ??= await _checkForSupportedAdbVersion() && await _checkForSupportedAndroidVersion();
   }
 
   AndroidApk _package;
@@ -532,8 +535,7 @@ class AndroidDevice extends Device {
     bool ipv6 = false,
     String userIdentifier,
   }) async {
-    if (!await _checkForSupportedAdbVersion() ||
-        !await _checkForSupportedAndroidVersion()) {
+    if (!await _isAdbValid()) {
       return LaunchResult.failed();
     }
 
@@ -587,7 +589,7 @@ class AndroidDevice extends Device {
     _logger.printTrace("Stopping app '${package.name}' on $name.");
     await stopApp(package, userIdentifier: userIdentifier);
 
-    if (!await _installLatestApp(package, userIdentifier)) {
+    if (!await installApp(package, userIdentifier: userIdentifier)) {
       return LaunchResult.failed();
     }
 
