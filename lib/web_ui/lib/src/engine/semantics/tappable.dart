@@ -40,7 +40,7 @@ class Tappable extends RoleManager {
                 GestureMode.browserGestures) {
               return;
             }
-            EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+            window.invokeOnSemanticsAction(
                 semanticsObject.id, ui.SemanticsAction.tap, null);
           };
           element.addEventListener('click', _clickListener);

@@ -348,7 +348,7 @@ class SkiaObjects {
     if (_addedCleanupCallback) {
       return;
     }
-    EnginePlatformDispatcher.instance.rasterizer!.addPostFrameCallback(postFrameCleanUp);
+    window.rasterizer!.addPostFrameCallback(postFrameCleanUp);
     _addedCleanupCallback = true;
   }
 

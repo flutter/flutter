@@ -466,7 +466,7 @@ flt-glass-pane * {
     }
     _localeSubscription = languageChangeEvent.forTarget(html.window)
       .listen(_languageDidChange);
-    EnginePlatformDispatcher.instance._updateLocales();
+    window._updateLocales();
   }
 
   /// Called immediately after browser window metrics change.
@@ -481,18 +481,18 @@ flt-glass-pane * {
   void _metricsDidChange(html.Event? event) {
     if(isMobile && !window.isRotation() && textEditing.isEditing) {
       window.computeOnScreenKeyboardInsets();
-      EnginePlatformDispatcher.instance.invokeOnMetricsChanged();
+      window.invokeOnMetricsChanged();
     } else {
       window._computePhysicalSize();
       // When physical size changes this value has to be recalculated.
       window.computeOnScreenKeyboardInsets();
-      EnginePlatformDispatcher.instance.invokeOnMetricsChanged();
+      window.invokeOnMetricsChanged();
     }
   }
 
   /// Called immediately after browser window language change.
   void _languageDidChange(html.Event event) {
-    EnginePlatformDispatcher.instance._updateLocales();
+    window._updateLocales();
     if (ui.window.onLocaleChanged != null) {
       ui.window.onLocaleChanged!();
     }

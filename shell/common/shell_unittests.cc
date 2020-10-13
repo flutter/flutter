@@ -1327,7 +1327,7 @@ TEST_F(ShellTest, WaitForFirstFrameInlined) {
   DestroyShell(std::move(shell), std::move(task_runners));
 }
 
-static size_t GetRasterizerResourceCacheBytesSync(const Shell& shell) {
+static size_t GetRasterizerResourceCacheBytesSync(Shell& shell) {
   size_t bytes = 0;
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
