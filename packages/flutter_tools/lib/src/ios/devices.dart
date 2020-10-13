@@ -395,8 +395,8 @@ class IOSDevice extends Device {
     ];
 
     final Status installStatus = _logger.startProgress(
-        'Installing and launching...',
-        timeout: timeoutConfiguration.slowOperation);
+      'Installing and launching...',
+    );
     try {
       ProtocolDiscovery observatoryDiscovery;
       int installationResult = 1;

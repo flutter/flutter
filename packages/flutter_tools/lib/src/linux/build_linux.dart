@@ -46,7 +46,6 @@ Future<void> buildLinux(
 
   final Status status = globals.logger.startProgress(
     'Building Linux application...',
-    timeout: null,
   );
   try {
     final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
