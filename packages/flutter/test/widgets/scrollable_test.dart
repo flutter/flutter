@@ -7,10 +7,12 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
+
+import 'package:flutter_test/flutter_test.dart';
 
 Future<void> pumpTest(
   WidgetTester tester,
@@ -917,6 +919,163 @@ void main() {
     expect(targetMidRightPage1, findsOneWidget);
     expect(targetMidLeftPage1, findsOneWidget);
   });
+
+  testWidgets('ensureVisible does not move TabViews', (WidgetTester tester) async {
+    final TickerProvider vsync = TestTickerProvider();
+    final TabController controller = TabController(
+      length: 3,
+      vsync: vsync,
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TabBarView(
+          controller: controller,
+          children: List<ListView>.generate(
+            3,
+            (int pageIndex) {
+              return ListView(
+                key: Key('list_$pageIndex'),
+                children: List<Widget>.generate(
+                  100,
+                  (int listIndex) {
+                    return Row(
+                      children: <Widget>[
+                        Container(
+                          key: Key('${pageIndex}_${listIndex}_0'),
+                          color: Colors.red,
+                          width: 200,
+                          height: 10,
+                        ),
+                        Container(
+                          key: Key('${pageIndex}_${listIndex}_1'),
+                          color: Colors.blue,
+                          width: 200,
+                          height: 10,
+                        ),
+                        Container(
+                          key: Key('${pageIndex}_${listIndex}_2'),
+                          color: Colors.green,
+                          width: 200,
+                          height: 10,
+                        ),
+                      ]
+                    );
+                  }
+                ),
+              );
+            }
+          )
+        ),
+      ),
+    );
+
+    final Finder targetMidRightPage0 = find.byKey(const Key('0_25_2'));
+    final Finder targetMidRightPage1 = find.byKey(const Key('1_25_2'));
+    final Finder targetMidLeftPage1 = find.byKey(const Key('1_25_0'));
+
+    expect(find.byKey(const Key('list_0')), findsOneWidget);
+    expect(find.byKey(const Key('list_1')), findsNothing);
+    expect(targetMidRightPage0, findsOneWidget);
+    expect(targetMidRightPage1, findsNothing);
+    expect(targetMidLeftPage1, findsNothing);
+
+    await tester.ensureVisible(targetMidRightPage0);
+    await tester.pumpAndSettle();
+    expect(targetMidRightPage0, findsOneWidget);
+    expect(targetMidRightPage1, findsNothing);
+    expect(targetMidLeftPage1, findsNothing);
+
+    controller.index = 1;
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('list_0')), findsNothing);
+    expect(find.byKey(const Key('list_1')), findsOneWidget);
+    await tester.ensureVisible(targetMidRightPage1);
+    await tester.pumpAndSettle();
+
+    expect(targetMidRightPage0, findsNothing);
+    expect(targetMidRightPage1, findsOneWidget);
+    expect(targetMidLeftPage1, findsOneWidget);
+
+    await tester.ensureVisible(targetMidLeftPage1);
+    await tester.pumpAndSettle();
+
+    expect(targetMidRightPage0, findsNothing);
+    expect(targetMidRightPage1, findsOneWidget);
+    expect(targetMidLeftPage1, findsOneWidget);
+  });
+
+  testWidgets('ensureVisible does not move PageViews when there are objects between pageView and target object', (WidgetTester tester) async {
+    final PageController controller = PageController();
+    int count = 0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          children: List<Widget>.generate(3, (int index) {
+            return Row(
+              children: <Widget>[
+                Container(
+                  width: 400,
+                  color: Colors.red,
+                ),
+                Expanded(
+                  child: Container(
+                    color: Colors.green,
+                    width: double.infinity,
+                    height: 50,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Container(
+                        key: Key(index.toString()),
+                        color: Colors.yellow,
+                        height: 50,
+                        width: 200,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            );
+          }),
+        ),
+      ),
+    );
+
+    controller.position.addListener(() {
+      count++;
+    });
+
+    final Finder targetOfPage0 = find.byKey(const Key('0'));
+    final Finder targetOfPage1 = find.byKey(const Key('1'));
+
+    expect(targetOfPage0, findsOneWidget);
+    expect(targetOfPage1, findsNothing);
+
+    // `ensureVisible` should not trigger any scrolling or page changing of pageView.
+    await tester.ensureVisible(targetOfPage0);
+    await tester.pumpAndSettle();
+    expect(count, 0);
+    expect(targetOfPage0, findsOneWidget);
+    expect(targetOfPage1, findsNothing);
+
+    controller.jumpToPage(1);
+    await tester.pumpAndSettle();
+
+    expect(count, 1); // Trigger by `controller.jumpToPage(1)`
+    expect(targetOfPage0, findsNothing);
+    expect(targetOfPage1, findsOneWidget);
+
+    await tester.ensureVisible(targetOfPage1);
+    await tester.pumpAndSettle();
+    expect(count, 1);
+    expect(targetOfPage0, findsNothing);
+    expect(targetOfPage1, findsOneWidget);
+  });
 }
 
 // ignore: must_be_immutable
@@ -948,5 +1107,12 @@ class ExtraSuperPessimisticScrollPhysics extends ScrollPhysics {
   @override
   ScrollPhysics applyTo(ScrollPhysics ancestor) {
     return ExtraSuperPessimisticScrollPhysics(parent: buildParent(ancestor));
+  }
+}
+
+class TestTickerProvider extends TickerProvider {
+  @override
+  Ticker createTicker(TickerCallback onTick) {
+    return Ticker(onTick);
   }
 }

@@ -237,7 +237,6 @@ class HotRunner extends ResidentRunner {
     if (debuggingOptions.fastStart) {
       await restart(
         fullRestart: true,
-        benchmarkMode: !debuggingOptions.startPaused,
         reason: 'restart',
         silent: true,
       );
@@ -246,14 +245,18 @@ class HotRunner extends ResidentRunner {
     appStartedCompleter?.complete();
 
     if (benchmarkMode) {
+      // Wait multiple seconds for the isolate to have fully started.
+      await Future<void>.delayed(const Duration(seconds: 10));
       // We are running in benchmark mode.
       globals.printStatus('Running in benchmark mode.');
       // Measure time to perform a hot restart.
       globals.printStatus('Benchmarking hot restart');
-      await restart(fullRestart: true, benchmarkMode: true);
-      // Wait for notifications to finish. attempt to work around
-      // timing issue caused by sentinel.
-      await Future<void>.delayed(const Duration(seconds: 1));
+      await restart(fullRestart: true);
+      // Wait multiple seconds to stabilize benchmark on slower devicelab hardware.
+      // Hot restart finishes when the new isolate is started, not when the new isolate
+      // is ready. This process can actually take multiple seconds.
+      await Future<void>.delayed(const Duration(seconds: 10));
+
       globals.printStatus('Benchmarking hot reload');
       // Measure time to perform a hot reload.
       await restart(fullRestart: false);
@@ -462,22 +465,10 @@ class HotRunner extends ResidentRunner {
                           deviceAssetsDirectoryUri));
     }
     await Future.wait(futures);
-    if (benchmarkMode) {
-      futures.clear();
-      for (final FlutterDevice device in flutterDevices) {
-        final List<FlutterView> views = await device.vmService.getFlutterViews();
-        for (final FlutterView view in views) {
-          futures.add(device.vmService
-            .flushUIThreadTasks(uiIsolateId: view.uiIsolate.id));
-        }
-      }
-      await Future.wait(futures);
-    }
   }
 
   Future<OperationResult> _restartFromSources({
     String reason,
-    bool benchmarkMode = false,
   }) async {
     final Stopwatch restartTimer = Stopwatch()..start();
     // TODO(aam): Add generator reset logic once we switch to using incremental
@@ -562,32 +553,6 @@ class HotRunner extends ResidentRunner {
     // Send timing analytics.
     globals.flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
 
-    if (benchmarkMode) {
-      final List<Future<void>> isolateNotifications = <Future<void>>[];
-      for (final FlutterDevice device in flutterDevices) {
-        try {
-          await device.vmService.streamListen('Isolate');
-        } on vm_service.RPCError {
-          // Do nothing, we're already subscribed.
-        }
-        isolateNotifications.add(
-          device.vmService.onIsolateEvent.firstWhere((vm_service.Event event) {
-            return event.kind == vm_service.EventKind.kIsolateRunnable;
-          }),
-        );
-      }
-      await Future.wait(isolateNotifications);
-      final List<Future<void>> futures = <Future<void>>[];
-      for (final FlutterDevice device in flutterDevices) {
-        final List<FlutterView> views = await device.vmService.getFlutterViews();
-        for (final FlutterView view in views) {
-          futures.add(device.vmService
-            .flushUIThreadTasks(uiIsolateId: view.uiIsolate.id));
-        }
-      }
-      await Future.wait(futures);
-    }
-
     // Toggle the main dill name after successfully uploading.
     _swap =! _swap;
 
@@ -626,7 +591,6 @@ class HotRunner extends ResidentRunner {
   Future<OperationResult> restart({
     bool fullRestart = false,
     String reason,
-    bool benchmarkMode = false,
     bool silent = false,
     bool pause = false,
   }) async {
@@ -658,7 +622,6 @@ class HotRunner extends ResidentRunner {
         sdkName: sdkName,
         emulator: emulator,
         reason: reason,
-        benchmarkMode: benchmarkMode,
         silent: silent,
       );
       if (!silent) {
@@ -687,7 +650,6 @@ class HotRunner extends ResidentRunner {
     String sdkName,
     bool emulator,
     String reason,
-    bool benchmarkMode,
     bool silent,
   }) async {
     if (!canHotRestart) {
@@ -713,7 +675,6 @@ class HotRunner extends ResidentRunner {
       // handling, at least until we can refactor the underlying code.
       result = await asyncGuard(() => _restartFromSources(
         reason: reason,
-        benchmarkMode: benchmarkMode,
       ));
       if (!result.isOk) {
         restartEvent = 'restart-failed';
