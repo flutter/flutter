@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -347,8 +345,8 @@ void main() {
   });
 
   group('ColoredBox', () {
-    _MockCanvas mockCanvas;
-    _MockPaintingContext mockContext;
+    late _MockCanvas mockCanvas;
+    late _MockPaintingContext mockContext;
     const Color colorToPaint = Color(0xFFABCDEF);
 
     setUp(() {
@@ -456,7 +454,7 @@ void main() {
 
   testWidgets('IgnorePointer ignores pointers', (WidgetTester tester) async {
     final List<String> logs = <String>[];
-    Widget target({bool ignoring}) => Align(
+    Widget target({required bool ignoring}) => Align(
       alignment: Alignment.topLeft,
       child: Directionality(
         textDirection: TextDirection.ltr,
@@ -534,7 +532,7 @@ void main() {
 
   testWidgets('AbsorbPointer absorbs pointers', (WidgetTester tester) async {
     final List<String> logs = <String>[];
-    Widget target({bool absorbing}) => Align(
+    Widget target({required bool absorbing}) => Align(
       alignment: Alignment.topLeft,
       child: Directionality(
         textDirection: TextDirection.ltr,

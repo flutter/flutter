@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
@@ -342,7 +340,7 @@ Future<void> eventFiring(WidgetTester tester) async {
 }
 
 class StringCollector extends StreamBuilderBase<String, List<String>> {
-  const StringCollector({ Key key, Stream<String> stream }) : super(key: key, stream: stream);
+  const StringCollector({ Key? key, Stream<String>? stream }) : super(key: key, stream: stream);
 
   @override
   List<String> initial() => <String>[];
