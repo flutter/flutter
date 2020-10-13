@@ -27,6 +27,19 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		24EBCE9E2534C400008D1687 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		0AC232F424BA71D300A85907 /* SemanticsObjectTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SemanticsObjectTest.mm; sourceTree = "<group>"; };
 		0AC232F724BA71D300A85907 /* FlutterEngineTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterEngineTest.mm; sourceTree = "<group>"; };
@@ -158,8 +171,10 @@
 			buildConfigurationList = 0D6AB6D222BB05E200EEE540 /* Build configuration list for PBXNativeTarget "IosUnitTests" */;
 			buildPhases = (
 				0D6AB6AD22BB05E100EEE540 /* Sources */,
+				242904382534E32900F90C97 /* ShellScript */,
 				0D6AB6AE22BB05E100EEE540 /* Frameworks */,
 				0D6AB6AF22BB05E100EEE540 /* Resources */,
+				24EBCE9E2534C400008D1687 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -245,6 +260,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		242904382534E32900F90C97 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -ex\nxcode_frameworks_dir=\"${TARGET_BUILD_DIR}/${PlugIns/IosUnitTestsTests.xctest/Frameworks/}\"\nmkdir -p \"${xcode_frameworks_dir}\"\nflutter_engine_rel_path=\"../../../../out/${FLUTTER_ENGINE}\"\ncp -f \"${flutter_engine_rel_path}/libios_test_flutter.dylib\" \"${xcode_frameworks_dir}\"\ncp -f \"${flutter_engine_rel_path}/libocmock_shared.dylib\" \"${xcode_frameworks_dir}\"\nif [[ -n \"${EXPANDED_CODE_SIGN_IDENTITY:-}\" ]]; then\n  codesign --force --verbose --sign \"${EXPANDED_CODE_SIGN_IDENTITY}\" -- \"${xcode_frameworks_dir}/libocmock_shared.dylib\"\n  codesign --force --verbose --sign \"${EXPANDED_CODE_SIGN_IDENTITY}\" -- \"${xcode_frameworks_dir}/libios_test_flutter.dylib\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0D6AB6AD22BB05E100EEE540 /* Sources */ = {
@@ -475,9 +510,11 @@
 					../../../../out/$FLUTTER_ENGINE,
 					../../../../out/$FLUTTER_ENGINE/obj/flutter/shell/platform/darwin/ios/,
 					../../../../out/$FLUTTER_ENGINE/obj/third_party/ocmock/,
+					"$(PROJECT_DIR)",
 				);
 				OTHER_LDFLAGS = (
-					"-locmock",
+					"-L../../../../out/$FLUTTER_ENGINE",
+					"-locmock_shared",
 					"-ObjC",
 					"-lios_test_flutter",
 				);
@@ -517,9 +554,11 @@
 					../../../../out/$FLUTTER_ENGINE,
 					../../../../out/$FLUTTER_ENGINE/obj/flutter/shell/platform/darwin/ios/,
 					../../../../out/$FLUTTER_ENGINE/obj/third_party/ocmock/,
+					"$(PROJECT_DIR)",
 				);
 				OTHER_LDFLAGS = (
-					"-locmock",
+					"-L../../../../out/$FLUTTER_ENGINE",
+					"-locmock_shared",
 					"-ObjC",
 					"-lios_test_flutter",
 				);
