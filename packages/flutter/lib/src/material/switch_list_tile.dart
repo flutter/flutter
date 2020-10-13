@@ -346,7 +346,7 @@ class SwitchListTile extends StatelessWidget {
   ///   title: Text('Selection'),
   /// )
   /// ```
-  final ValueChanged<bool>? onChanged;
+  final ValueChanged<bool?>? onChanged;
 
   /// The color to use when this switch is on.
   ///

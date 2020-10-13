@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -316,7 +318,7 @@ void main() {
         Material.of(tester.element(find.byType(Switch))),
         paints
           ..rrect(
-              color: Colors.blue[600]!.withAlpha(0x80),
+              color: Colors.blue[600].withAlpha(0x80),
               rrect: RRect.fromLTRBR(
                   383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
           ..circle(color: const Color(0x33000000))
@@ -606,10 +608,10 @@ void main() {
     expect(value, true);
     expect(semanticEvent, <String, dynamic>{
       'type': 'tap',
-      'nodeId': object.debugSemantics!.id,
+      'nodeId': object.debugSemantics.id,
       'data': <String, dynamic>{},
     });
-    expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
+    expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
     semanticsTester.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
@@ -656,10 +658,10 @@ void main() {
     expect(value, true);
     expect(semanticEvent, <String, dynamic>{
       'type': 'tap',
-      'nodeId': object.debugSemantics!.id,
+      'nodeId': object.debugSemantics.id,
       'data': <String, dynamic>{},
     });
-    expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
+    expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
     semanticsTester.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
@@ -941,7 +943,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test Switch() constructor
     await tester.pumpWidget(
@@ -965,7 +967,7 @@ void main() {
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -987,7 +989,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -1009,7 +1011,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     await tester.pumpAndSettle();
   });
@@ -1018,7 +1020,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/61247.
     bool value = true;
     bool enabled = true;
-    late StateSetter stateSetter;
+    StateSetter stateSetter;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
