@@ -7,6 +7,7 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../build_info.dart';
 import '../globals.dart' as globals;
 import 'common.dart';
 import 'file_system.dart';
@@ -24,6 +25,13 @@ abstract class OperatingSystemUtils {
   }) {
     if (platform.isWindows) {
       return _WindowsUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
+    } else if (platform.isMacOS) {
+      return MacOSUtils(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -246,12 +254,28 @@ class _PosixUtils extends OperatingSystemUtils {
     return _fileSystem.file(path);
   }
 
+  @override
+  String get pathVarSeparator => ':';
+}
+
+class MacOSUtils extends _PosixUtils {
+  MacOSUtils({
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Platform platform,
+    @required ProcessManager processManager,
+  }) : super(
+    fileSystem: fileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
+
   String _name;
 
   @override
   String get name {
     if (_name == null) {
-      if (_platform.isMacOS) {
         final List<RunResult> results = <RunResult>[
           _processUtils.runSync(<String>['sw_vers', '-productName']),
           _processUtils.runSync(<String>['sw_vers', '-productVersion']),
@@ -259,27 +283,33 @@ class _PosixUtils extends OperatingSystemUtils {
         ];
         if (results.every((RunResult result) => result.exitCode == 0)) {
           _name =
-              '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()}';
+          '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} ${getNameForDarwinArch(hardwareArchitecture)}';
         }
-        // Check for Apple Silicon ARM architecture, which requires macOS 11.
-        final RunResult arm64Check =
-            _processUtils.runSync(<String>['sysctl', 'hw.optional.arm64']);
-        // hw.optional.arm64 is unavailable on < macOS 11 and exits with 1, assume x86 on failure.
-        // On arm64 stdout is "sysctl hw.optional.arm64: 1"
-        if (arm64Check.exitCode == 0 &&
-            arm64Check.stdout.trim().endsWith('1')) {
-          _name += ' arm64';
-        } else {
-          _name += ' x86_64';
-        }
-      }
       _name ??= super.name;
     }
     return _name;
   }
 
-  @override
-  String get pathVarSeparator => ':';
+  DarwinArch _hardwareArchitecture;
+
+  /// Physical underlying architecture.
+  ///
+  /// On ARM return arm64, even when this process is running in Rosetta.
+  DarwinArch get hardwareArchitecture {
+    if (_hardwareArchitecture == null) {
+      final RunResult arm64Check =
+      _processUtils.runSync(<String>['sysctl', 'hw.optional.arm64']);
+      // hw.optional.arm64 is unavailable on < macOS 11 and exits with 1, assume x86 on failure.
+      // On arm64 stdout is "sysctl hw.optional.arm64: 1"
+      if (arm64Check.exitCode == 0 &&
+          arm64Check.stdout.trim().endsWith('1')) {
+        _hardwareArchitecture = DarwinArch.arm64;
+      } else {
+        _hardwareArchitecture = DarwinArch.x86_64;
+      }
+    }
+    return _hardwareArchitecture;
+  }
 }
 
 class _WindowsUtils extends OperatingSystemUtils {

@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -146,78 +147,128 @@ void main() {
     });
   });
 
-  testWithoutContext('macos ARM name', () async {
-    fakeProcessManager.addCommands(<FakeCommand>[
-      const FakeCommand(
-        command: <String>[
-          'sw_vers',
-          '-productName',
-        ],
-        stdout: 'product',
-      ),
-      const FakeCommand(
-        command: <String>[
-          'sw_vers',
-          '-productVersion',
-        ],
-        stdout: 'version',
-      ),
-      const FakeCommand(
-        command: <String>[
-          'sw_vers',
-          '-buildVersion',
-        ],
-        stdout: 'build',
-      ),
-      const FakeCommand(
-        command: <String>[
-          'sysctl',
-          'hw.optional.arm64',
-        ],
-        stdout: 'hw.optional.arm64: 1',
-      ),
-    ]);
+  group('macos architecture', () {
+    testWithoutContext('ARM', () async {
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'sysctl',
+            'hw.optional.arm64',
+          ],
+          stdout: 'hw.optional.arm64: 1',
+        ),
+      );
 
-    final OperatingSystemUtils utils =
-        createOSUtils(FakePlatform(operatingSystem: 'macos'));
-    expect(utils.name, 'product version build arm64');
-  });
+      final MacOSUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'macos')) as MacOSUtils;
+      expect(utils.hardwareArchitecture, DarwinArch.arm64);
+    });
 
-  testWithoutContext('macos x86 name', () async {
-    fakeProcessManager.addCommands(<FakeCommand>[
-      const FakeCommand(
-        command: <String>[
-          'sw_vers',
-          '-productName',
-        ],
-        stdout: 'product',
-      ),
-      const FakeCommand(
-        command: <String>[
-          'sw_vers',
-          '-productVersion',
-        ],
-        stdout: 'version',
-      ),
-      const FakeCommand(
-        command: <String>[
-          'sw_vers',
-          '-buildVersion',
-        ],
-        stdout: 'build',
-      ),
-      const FakeCommand(
-        command: <String>[
-          'sysctl',
-          'hw.optional.arm64',
-        ],
-        exitCode: 1,
-      ),
-    ]);
+    testWithoutContext('macOS 11 x86', () async {
+      fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'sysctl',
+              'hw.optional.arm64',
+            ],
+            stdout: 'hw.optional.arm64: 0',
+          ),
+          );
 
-    final OperatingSystemUtils utils =
-        createOSUtils(FakePlatform(operatingSystem: 'macos'));
-    expect(utils.name, 'product version build x86_64');
+      final MacOSUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'macos')) as MacOSUtils;
+      expect(utils.hardwareArchitecture, DarwinArch.x86_64);
+    });
+
+    testWithoutContext('macOS 10 x86', () async {
+      fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'sysctl',
+              'hw.optional.arm64',
+            ],
+            exitCode: 1,
+          ),
+          );
+
+      final MacOSUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'macos')) as MacOSUtils;
+      expect(utils.hardwareArchitecture, DarwinArch.x86_64);
+    });
+
+    testWithoutContext('ARM name', () async {
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'sw_vers',
+            '-productName',
+          ],
+          stdout: 'product',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sw_vers',
+            '-productVersion',
+          ],
+          stdout: 'version',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sw_vers',
+            '-buildVersion',
+          ],
+          stdout: 'build',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sysctl',
+            'hw.optional.arm64',
+          ],
+          stdout: 'hw.optional.arm64: 1',
+        ),
+      ]);
+
+      final OperatingSystemUtils utils =
+          createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      expect(utils.name, 'product version build arm64');
+    });
+
+    testWithoutContext('x86 name', () async {
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'sw_vers',
+            '-productName',
+          ],
+          stdout: 'product',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sw_vers',
+            '-productVersion',
+          ],
+          stdout: 'version',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sw_vers',
+            '-buildVersion',
+          ],
+          stdout: 'build',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sysctl',
+            'hw.optional.arm64',
+          ],
+          exitCode: 1,
+        ),
+      ]);
+
+      final OperatingSystemUtils utils =
+          createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      expect(utils.name, 'product version build x86_64');
+    });
   });
 
   testWithoutContext('If unzip fails, include stderr in exception text', () {
