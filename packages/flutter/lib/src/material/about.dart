@@ -907,7 +907,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
         ),
     ];
 
-    Widget page;
+    final Widget page;
     if (widget.scrollController == null) {
       page = Scaffold(
         appBar: AppBar(

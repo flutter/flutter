@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+
+import 'package:file/file.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/install.dart';
@@ -69,15 +72,15 @@ void main() {
 }
 
 class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeApplicationPackageFactory(this.applicationPackage);
+  FakeApplicationPackageFactory(this.app);
 
-  final ApplicationPackage applicationPackage;
+  final ApplicationPackage app;
 
   @override
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) async {
-    return applicationPackage;
+    return app;
   }
 }
-
-class FakeAndroidApk extends Fake implements AndroidApk {}
 class FakeIOSApp extends Fake implements IOSApp {}
+class FakeAndroidApk extends Fake implements AndroidApk {}
+

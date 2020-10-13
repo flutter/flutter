@@ -390,7 +390,7 @@ abstract class IOSApp extends ApplicationPackage {
   }
 
   static Future<IOSApp> fromIosProject(IosProject project, BuildInfo buildInfo) {
-    if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
+    if (!globals.platform.isMacOS) {
       return null;
     }
     if (!project.exists) {

@@ -285,6 +285,7 @@ void main() {
 
       testUsingContext('updates cache before checking for devices', () async {
         final RunCommand command = RunCommand();
+
         // Called as part of requiredArtifacts()
         when(mockDeviceManager.getDevices()).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[])

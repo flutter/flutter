@@ -167,7 +167,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
       if (width <= 0.0)
         return;
 
-      double left;
+      final double left;
       switch (textDirection) {
         case TextDirection.rtl:
           left = size.width - width - x;

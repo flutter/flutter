@@ -117,7 +117,6 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
-        timeoutConfiguration: timeoutConfiguration,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(
         globals.cocoaPods,
@@ -203,13 +202,11 @@ Future<T> runInContext<T>(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: globals.outputPreferences,
-            timeoutConfiguration: timeoutConfiguration,
           )
         : StdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: globals.outputPreferences,
-            timeoutConfiguration: timeoutConfiguration,
           ),
       MacOSWorkflow: () => MacOSWorkflow(
         featureFlags: featureFlags,
@@ -249,7 +246,6 @@ Future<T> runInContext<T>(
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
-      TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(
         runningOnBot: runningOnBot,
       ),

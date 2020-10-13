@@ -1537,8 +1537,8 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
-    Paint leftTrackPaint;
-    Paint rightTrackPaint;
+    final Paint leftTrackPaint;
+    final Paint rightTrackPaint;
     switch (textDirection) {
       case TextDirection.ltr:
         leftTrackPaint = activePaint;
@@ -1634,8 +1634,8 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
-    Paint leftTrackPaint;
-    Paint rightTrackPaint;
+    final Paint leftTrackPaint;
+    final Paint rightTrackPaint;
     switch (textDirection) {
       case TextDirection.ltr:
         leftTrackPaint = activePaint;
@@ -1777,8 +1777,8 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation!)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
-    Offset leftThumbOffset;
-    Offset rightThumbOffset;
+    final Offset leftThumbOffset;
+    final Offset rightThumbOffset;
     switch (textDirection) {
       case TextDirection.ltr:
         leftThumbOffset = startThumbCenter;
@@ -1917,8 +1917,8 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
     final Paint inactivePaint = Paint()
       ..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
-    Offset leftThumbOffset;
-    Offset rightThumbOffset;
+    final Offset leftThumbOffset;
+    final Offset rightThumbOffset;
     switch (textDirection) {
       case TextDirection.ltr:
         leftThumbOffset = startThumbCenter;
@@ -2144,7 +2144,7 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
     assert(isEnabled != null);
     assert(textDirection != null);
 
-    bool isBetweenThumbs;
+    final bool isBetweenThumbs;
     switch (textDirection) {
       case TextDirection.ltr:
         isBetweenThumbs = startThumbCenter.dx < center.dx && center.dx < endThumbCenter.dx;

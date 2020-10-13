@@ -95,7 +95,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    String label;
+    final String label;
     switch (position) {
       case DecorationPosition.background:
         label = 'bg';
