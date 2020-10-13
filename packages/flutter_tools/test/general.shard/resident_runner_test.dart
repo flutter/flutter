@@ -71,7 +71,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
       id: 'test-breakpoint',
       location: vm_service.SourceLocation(
         tokenPos: 0,
-        script: vm_service.ScriptRef(id: 'test-script', uri: 'lib/foo.dart'),
+        script: vm_service.ScriptRef(id: 'test-script', uri: 'foo.dart'),
       ),
       resolved: true,
     ),
@@ -411,7 +411,7 @@ void main() {
         method: kRunInViewMethod,
         args: <String, Object>{
           'viewId': fakeFlutterView.id,
-          'mainScript': 'lib/main.dart.dill',
+          'mainScript': 'main.dart.dill',
           'assetDirectory': 'build/flutter_assets',
         }
       ),
@@ -606,7 +606,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'lib/main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill'
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -699,7 +699,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'lib/main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill'
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -795,7 +795,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'lib/main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill'
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -875,7 +875,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'lib/main.dart.incremental.dill',
+          'rootLibUri': 'main.dart.incremental.dill',
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -992,7 +992,7 @@ void main() {
         method: kRunInViewMethod,
         args: <String, Object>{
           'viewId': fakeFlutterView.id,
-          'mainScript': 'lib/main.dart.dill',
+          'mainScript': 'main.dart.dill',
           'assetDirectory': 'build/flutter_assets',
         },
       ),
@@ -1074,7 +1074,7 @@ void main() {
         method: kRunInViewMethod,
         args: <String, Object>{
           'viewId': fakeFlutterView.id,
-          'mainScript': 'lib/main.dart.dill',
+          'mainScript': 'main.dart.dill',
           'assetDirectory': 'build/flutter_assets',
         },
       ),
@@ -1136,7 +1136,7 @@ void main() {
         method: kRunInViewMethod,
         args: <String, Object>{
           'viewId': fakeFlutterView.id,
-          'mainScript': 'lib/main.dart.dill',
+          'mainScript': 'main.dart.dill',
           'assetDirectory': 'build/flutter_assets',
         },
       ),
@@ -1170,7 +1170,7 @@ void main() {
         method: kRunInViewMethod,
         args: <String, Object>{
           'viewId': fakeFlutterView.id,
-          'mainScript': 'lib/main.dart.swap.dill',
+          'mainScript': 'main.dart.swap.dill',
           'assetDirectory': 'build/flutter_assets',
         },
       ),
@@ -1204,7 +1204,7 @@ void main() {
         method: kRunInViewMethod,
         args: <String, Object>{
           'viewId': fakeFlutterView.id,
-          'mainScript': 'lib/main.dart.dill',
+          'mainScript': 'main.dart.dill',
           'assetDirectory': 'build/flutter_assets',
         },
       ),
@@ -1457,7 +1457,7 @@ void main() {
     ]);
     await residentRunner.writeSkSL();
 
-    expect(testLogger.statusText, contains('No data was receieved'));
+    expect(testLogger.statusText, contains('No data was received'));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 

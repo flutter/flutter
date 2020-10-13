@@ -689,12 +689,9 @@ class DataTable extends StatelessWidget {
   static const double _dividerThickness = 1.0;
 
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
-  static const Color _grey100Opacity = Color(0x0A000000); // Grey 100 as opacity instead of solid color
-  static const Color _grey300Opacity = Color(0x1E000000); // Dark theme variant is just a guess.
 
   Widget _buildCheckbox({
     required BuildContext context,
-    required Color activeColor,
     required bool? checked,
     required VoidCallback? onRowTap,
     required ValueChanged<bool?>? onCheckboxChanged,
@@ -714,7 +711,9 @@ class DataTable extends StatelessWidget {
         ),
         child: Center(
           child: Checkbox(
-            activeColor: activeColor,
+            // TODO(per): Remove when Checkbox has theme, https://github.com/flutter/flutter/issues/53420.
+            activeColor: themeData.colorScheme.primary,
+            checkColor: themeData.colorScheme.onPrimary,
             value: checked,
             onChanged: onCheckboxChanged,
             tristate: tristate,
@@ -862,13 +861,8 @@ class DataTable extends StatelessWidget {
       ?? theme.dataTableTheme.dataRowColor;
     final MaterialStateProperty<Color?> defaultRowColor = MaterialStateProperty.resolveWith(
       (Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
-          // The color has to be transparent so you can see the ink on
-          // the [Material].
-          // TODO(perclasson): Align with Material specs, use translucent primary color: https://github.com/flutter/flutter/issues/64314.
-          return (Theme.of(context)!.brightness == Brightness.light) ?
-            _grey100Opacity : _grey300Opacity;
-        }
+        if (states.contains(MaterialState.selected))
+          return theme.colorScheme.primary.withOpacity(0.08);
         return null;
       },
     );
@@ -928,7 +922,6 @@ class DataTable extends StatelessWidget {
       tableColumns[0] = FixedColumnWidth(effectiveHorizontalMargin + Checkbox.width + effectiveHorizontalMargin / 2.0);
       tableRows[0].children![0] = _buildCheckbox(
         context: context,
-        activeColor: theme.accentColor,
         checked: someChecked ? null : allChecked,
         onRowTap: null,
         onCheckboxChanged: (bool? checked) => _handleSelectAll(checked, someChecked),
@@ -939,7 +932,6 @@ class DataTable extends StatelessWidget {
       for (final DataRow row in rows) {
         tableRows[rowIndex].children![0] = _buildCheckbox(
           context: context,
-          activeColor: theme.accentColor,
           checked: row.selected,
           onRowTap: () => row.onSelectChanged != null ? row.onSelectChanged!(!row.selected) : null ,
           onCheckboxChanged: row.onSelectChanged,
