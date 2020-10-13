@@ -412,52 +412,6 @@ class PrebuiltIOSApp extends IOSApp {
   String get _bundlePath => bundleDir.path;
 }
 
-class ApplicationPackageStore {
-  ApplicationPackageStore({ this.android, this.iOS, this.fuchsia });
-
-  AndroidApk android;
-  IOSApp iOS;
-  FuchsiaApp fuchsia;
-  LinuxApp linux;
-  MacOSApp macOS;
-  WindowsApp windows;
-
-  Future<ApplicationPackage> getPackageForPlatform(
-    TargetPlatform platform,
-    BuildInfo buildInfo,
-  ) async {
-    switch (platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-        android ??= await AndroidApk.fromAndroidProject(FlutterProject.current().android);
-        return android;
-      case TargetPlatform.ios:
-        iOS ??= await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo);
-        return iOS;
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-        fuchsia ??= FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia);
-        return fuchsia;
-      case TargetPlatform.darwin_x64:
-        macOS ??= MacOSApp.fromMacOSProject(FlutterProject.current().macos);
-        return macOS;
-      case TargetPlatform.linux_x64:
-        linux ??= LinuxApp.fromLinuxProject(FlutterProject.current().linux);
-        return linux;
-      case TargetPlatform.windows_x64:
-        windows ??= WindowsApp.fromWindowsProject(FlutterProject.current().windows);
-        return windows;
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-        return null;
-    }
-    return null;
-  }
-}
-
 class _Entry {
   _Element parent;
   int level;
