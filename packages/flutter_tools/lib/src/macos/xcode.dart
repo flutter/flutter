@@ -282,27 +282,7 @@ class XCDevice {
     );
   }
 
-  bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck && xcdevicePath != null;
-
-  String _xcdevicePath;
-  String get xcdevicePath {
-    if (_xcdevicePath == null) {
-      try {
-        _xcdevicePath = _processUtils
-            .runSync(
-              <String>[..._xcode.xcrunCommand(), '--find', 'xcdevice'],
-              throwOnError: true,
-            )
-            .stdout
-            .trim();
-      } on ProcessException catch (exception) {
-        _logger.printTrace('Process exception finding xcdevice:\n$exception');
-      } on ArgumentError catch (exception) {
-        _logger.printTrace('Argument exception finding xcdevice:\n$exception');
-      }
-    }
-    return _xcdevicePath;
-  }
+  bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck;
 
   Future<List<dynamic>> _getAllDevices({
     bool useCache = false,

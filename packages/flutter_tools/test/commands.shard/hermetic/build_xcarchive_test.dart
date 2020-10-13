@@ -74,6 +74,14 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/ios'
   ]);
 
+  const FakeCommand armCheckCommand = FakeCommand(
+    command: <String>[
+      'sysctl',
+      'hw.optional.arm64',
+    ],
+    exitCode: 1,
+  );
+
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
   FakeCommand setUpMockXcodeBuildHandler({ bool verbose = false, bool showBuildSettings = false, void Function() onRun }) {
@@ -144,6 +152,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
+      armCheckCommand,
       setUpMockXcodeBuildHandler(),
       setUpMockXcodeBuildHandler(showBuildSettings: true),
     ]),
@@ -162,6 +171,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
+      armCheckCommand,
       setUpMockXcodeBuildHandler(verbose: true),
       setUpMockXcodeBuildHandler(verbose: true, showBuildSettings: true),
     ]),
@@ -190,6 +200,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
+      armCheckCommand,
       setUpMockXcodeBuildHandler(onRun: () {
         fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)

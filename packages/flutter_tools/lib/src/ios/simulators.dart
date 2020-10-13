@@ -51,8 +51,12 @@ class IOSSimulatorUtils {
     @required Xcode xcode,
     @required Logger logger,
     @required ProcessManager processManager,
-  }) : _simControl = SimControl(logger: logger, processManager: processManager),
-      _xcode = xcode;
+  })  : _simControl = SimControl(
+          logger: logger,
+          processManager: processManager,
+          xcode: xcode,
+        ),
+        _xcode = xcode;
 
   final SimControl _simControl;
   final Xcode _xcode;
@@ -80,11 +84,14 @@ class SimControl {
   SimControl({
     @required Logger logger,
     @required ProcessManager processManager,
-  }) : _logger = logger,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
+    @required Xcode xcode,
+  })  : _logger = logger,
+        _xcode = xcode,
+        _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   final Logger _logger;
   final ProcessUtils _processUtils;
+  final Xcode _xcode;
 
   /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
@@ -107,7 +114,7 @@ class SimControl {
     //   "pairs": { ... },
 
     final List<String> command = <String>[
-      ...globals.xcode.xcrunCommand(),
+      ..._xcode.xcrunCommand(),
       'simctl',
       'list',
       '--json',
@@ -161,7 +168,7 @@ class SimControl {
 
   Future<bool> isInstalled(String deviceId, String appId) {
     return _processUtils.exitsHappy(<String>[
-      ...globals.xcode.xcrunCommand(),
+      ..._xcode.xcrunCommand(),
       'simctl',
       'get_app_container',
       deviceId,
@@ -174,7 +181,7 @@ class SimControl {
     try {
       result = await _processUtils.run(
         <String>[
-          ...globals.xcode.xcrunCommand(),
+          ..._xcode.xcrunCommand(),
           'simctl',
           'install',
           deviceId,
@@ -193,7 +200,7 @@ class SimControl {
     try {
       result = await _processUtils.run(
         <String>[
-          ...globals.xcode.xcrunCommand(),
+          ..._xcode.xcrunCommand(),
           'simctl',
           'uninstall',
           deviceId,
@@ -212,7 +219,7 @@ class SimControl {
     try {
       result = await _processUtils.run(
         <String>[
-          ...globals.xcode.xcrunCommand(),
+          ..._xcode.xcrunCommand(),
           'simctl',
           'launch',
           deviceId,
@@ -231,7 +238,7 @@ class SimControl {
     try {
       await _processUtils.run(
         <String>[
-          ...globals.xcode.xcrunCommand(),
+          ..._xcode.xcrunCommand(),
           'simctl',
           'io',
           deviceId,
