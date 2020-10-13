@@ -200,33 +200,36 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
 
     // after IntelliJ 2020
     final Directory cacheDir = fileSystem.directory(fileSystem.path.join(platform.environment['LOCALAPPDATA'], 'JetBrains'));
-    if (cacheDir.existsSync()) {
-      for (final Directory dir in cacheDir.listSync().whereType<Directory>()) {
-        final String name = fileSystem.path.basename(dir.path);
-        IntelliJValidator._idToTitle.forEach((String id, String title) {
-          if (name.startsWith(id)) {
-            final String version = name.substring(id.length);
-            String installPath;
-            try {
-              installPath = fileSystem.file(fileSystem.path.join(dir.path, '.home')).readAsStringSync();
-            } on Exception {
-              // ignored
-            }
-            if (installPath != null && fileSystem.isDirectorySync(installPath)) {
-              String pluginsPath;
-              if (fileSystem.isDirectorySync(installPath + '.plugins')) {
-                // IntelliJ 2020.3
-                pluginsPath = installPath + '.plugins';
-                addValidator(title, version, installPath, pluginsPath);
-              } else if (fileSystem.isDirectorySync(fileSystem.path.join(platform.environment['APPDATA'], 'JetBrains', name, 'plugins'))) {
-                // IntelliJ 2020.1 ~ 2020.2
-                pluginsPath = fileSystem.path.join(platform.environment['APPDATA'], 'JetBrains', name, 'plugins');
-                addValidator(title, version, installPath, pluginsPath);
-              }
+    if (!cacheDir.existsSync()) {
+      return validators;
+    }
+    for (final Directory dir in cacheDir.listSync().whereType<Directory>()) {
+      final String name = fileSystem.path.basename(dir.path);
+      IntelliJValidator._idToTitle.forEach((String id, String title) {
+        if (name.startsWith(id)) {
+          final String version = name.substring(id.length);
+          String installPath;
+          try {
+            installPath = fileSystem.file(fileSystem.path.join(dir.path, '.home')).readAsStringSync();
+          } on FileSystemException {
+            // ignored
+          }
+          if (installPath != null && fileSystem.isDirectorySync(installPath)) {
+            String pluginsPath;
+            final String pluginsPathInAppData = fileSystem.path.join(
+                platform.environment['APPDATA'], 'JetBrains', name, 'plugins');
+            if (fileSystem.isDirectorySync(installPath + '.plugins')) {
+              // IntelliJ 2020.3
+              pluginsPath = installPath + '.plugins';
+              addValidator(title, version, installPath, pluginsPath);
+            } else if (fileSystem.isDirectorySync(pluginsPathInAppData)) {
+              // IntelliJ 2020.1 ~ 2020.2
+              pluginsPath = pluginsPathInAppData;
+              addValidator(title, version, installPath, pluginsPath);
             }
           }
-        });
-      }
+        }
+      });
     }
     return validators;
   }
@@ -298,39 +301,47 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
     }
     // after IntelliJ 2020 ~
     final Directory cacheDir = fileSystem.directory(fileSystem.path.join(fileSystemUtils.homeDirPath, '.cache', 'JetBrains'));
-    if (cacheDir.existsSync()) {
-      for (final Directory dir in cacheDir.listSync().whereType<Directory>()) {
-        final String name = fileSystem.path.basename(dir.path);
-        IntelliJValidator._idToTitle.forEach((String id, String title) {
-          if (name.startsWith(id)) {
-            final String version = name.substring(id.length);
-            String installPath;
-            try {
-              installPath = fileSystem.file(fileSystem.path.join(dir.path, '.home')).readAsStringSync();
-            } on Exception {
-              // ignored
-            }
-            if (installPath != null && fileSystem.isDirectorySync(installPath)) {
-              if (installPath.contains(fileSystem.path.join('JetBrains','Toolbox','apps'))) {
-                // via JetBrains ToolBox app
-                if (fileSystem.isDirectorySync(fileSystem.path.join(fileSystemUtils.homeDirPath, '.local', 'share', 'JetBrains', name))) {
-                  // after 2020.2.x
-                  final String pluginsPath = fileSystem.path.join(fileSystemUtils.homeDirPath, '.local', 'share', 'JetBrains', name);
-                  addValidator(title, version, installPath, pluginsPath);
-                } else if (fileSystem.isDirectorySync(installPath + '.plugins')) {
-                  // only 2020.1.X
-                  final String pluginsPath = installPath + '.plugins';
-                  addValidator(title, version, installPath, pluginsPath);
-                }
-              } else {
-                // via tar.gz
-                final String pluginsPath = fileSystem.path.join(fileSystemUtils.homeDirPath, '.local', 'share', 'JetBrains', name);
+    if (!cacheDir.existsSync()) {
+      return validators;
+    }
+    for (final Directory dir in cacheDir.listSync().whereType<Directory>()) {
+      final String name = fileSystem.path.basename(dir.path);
+      IntelliJValidator._idToTitle.forEach((String id, String title) {
+        if (name.startsWith(id)) {
+          final String version = name.substring(id.length);
+          String installPath;
+          try {
+            installPath = fileSystem.file(fileSystem.path.join(dir.path, '.home')).readAsStringSync();
+          } on FileSystemException {
+            // ignored
+          }
+          if (installPath != null && fileSystem.isDirectorySync(installPath)) {
+            final String pluginsPathInUserHomeDir = fileSystem.path.join(
+                fileSystemUtils.homeDirPath,
+                '.local',
+                'share',
+                'JetBrains',
+                name);
+            if (installPath.contains(fileSystem.path.join('JetBrains','Toolbox','apps'))) {
+              // via JetBrains ToolBox app
+              final String pluginsPathInInstallDir = installPath + '.plugins';
+              if (fileSystem.isDirectorySync(pluginsPathInUserHomeDir)) {
+                // after 2020.2.x
+                final String pluginsPath = pluginsPathInUserHomeDir;
+                addValidator(title, version, installPath, pluginsPath);
+              } else if (fileSystem.isDirectorySync(pluginsPathInInstallDir)) {
+                // only 2020.1.X
+                final String pluginsPath = pluginsPathInInstallDir;
                 addValidator(title, version, installPath, pluginsPath);
               }
+            } else {
+              // via tar.gz
+              final String pluginsPath = pluginsPathInUserHomeDir;
+              addValidator(title, version, installPath, pluginsPath);
             }
           }
-        });
-      }
+        }
+      });
     }
     return validators;
   }

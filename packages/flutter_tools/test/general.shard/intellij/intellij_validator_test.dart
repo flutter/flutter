@@ -347,15 +347,17 @@ class IntelliJValidatorTestTarget extends IntelliJValidator {
   String get version => 'test.test.test';
 }
 
+/// A helper to create a Intellij Flutter plugin jar.
+///
+/// These file contents were derived from the META-INF/plugin.xml from an Intellij Flutter
+/// plugin installation.
+///
+/// The file is located in a plugin JAR, which can be located by looking at the plugin
+/// path for the Intellij and Android Studio validators.
+///
+/// If more XML contents are needed, prefer modifying these contents over checking
+/// in another JAR.
 void createIntellijFlutterPluginJar(String pluginJarPath, FileSystem fileSystem, {String version = '0.1.3'}) {
-  /// These file contents were derived from the META-INF/plugin.xml from an Intellij Flutter
-  /// plugin installation.
-  ///
-  /// The file is loacted in a plugin JAR, which can be located by looking at the plugin
-  /// path for the Intellij and Android Studio validators.
-  ///
-  /// If more XML contents are needed, prefer modifying these contents over checking
-  /// in another JAR.
   final String intellijFlutterPluginXml = '''
 <idea-plugin version="2">
   <id>io.flutter</id>
@@ -380,15 +382,18 @@ void createIntellijFlutterPluginJar(String pluginJarPath, FileSystem fileSystem,
 
 }
 
+/// A helper to create a Intellij Dart plugin jar.
+///
+/// This jar contains META-INF/plugin.xml.
+/// Its contents were derived from the META-INF/plugin.xml from an Intellij Dart
+/// plugin installation.
+///
+/// The file is located in a plugin JAR, which can be located by looking at the plugin
+/// path for the Intellij and Android Studio validators.
+///
+/// If more XML contents are needed, prefer modifying these contents over checking
+/// in another JAR.
 void createIntellijDartPluginJar(String pluginJarPath, FileSystem fileSystem) {
-  /// These file contents were derived from the META-INF/plugin.xml from an Intellij Dart
-  /// plugin installation.
-  ///
-  /// The file is loacted in a plugin JAR, which can be located by looking at the plugin
-  /// path for the Intellij and Android Studio validators.
-  ///
-  /// If more XML contents are needed, prefer modifying these contents over checking
-  /// in another JAR.
   const String intellijDartPluginXml = r'''
 <idea-plugin version="2">
   <name>Dart</name>
