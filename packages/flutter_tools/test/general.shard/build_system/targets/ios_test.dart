@@ -73,6 +73,12 @@ void main() {
     processManager.addCommands(<FakeCommand>[
       // Create iphone stub.
       const FakeCommand(command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path']),
+      const FakeCommand(command: <String>[
+        'sysctl',
+        'hw.optional.arm64',
+      ],
+        exitCode: 1,
+      ),
       FakeCommand(command: <String>[
         'xcrun',
         'clang',

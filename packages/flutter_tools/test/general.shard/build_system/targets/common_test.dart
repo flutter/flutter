@@ -472,6 +472,12 @@ void main() {
         '$build/app.dill',
       ]),
       const FakeCommand(command: <String>[
+        'sysctl',
+        'hw.optional.arm64',
+      ],
+        exitCode: 1,
+      ),
+      const FakeCommand(command: <String>[
         'xcrun',
         '--sdk',
         'iphoneos',
@@ -590,6 +596,12 @@ void main() {
         '$build/app.dill',
       ]),
       const FakeCommand(command: <String>[
+        'sysctl',
+        'hw.optional.arm64',
+      ],
+        exitCode: 1,
+      ),
+      const FakeCommand(command: <String>[
         'xcrun',
         '--sdk',
         'iphoneos',
@@ -671,6 +683,12 @@ void main() {
         '--lazy-async-stacks',
         '$build/app.dill',
       ]),
+      const FakeCommand(command: <String>[
+        'sysctl',
+        'hw.optional.arm64',
+      ],
+        exitCode: 1,
+      ),
       const FakeCommand(command: <String>[
         'xcrun',
         '--sdk',

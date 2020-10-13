@@ -192,10 +192,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final List<String> buildCommands = <String>[
-    '/usr/bin/env',
-    'xcrun',
+    ...globals.xcode.xcrunCommand(),
     'xcodebuild',
-    '-configuration', configuration,
+    '-configuration',
+    configuration,
   ];
 
   if (globals.logger.isVerbose) {

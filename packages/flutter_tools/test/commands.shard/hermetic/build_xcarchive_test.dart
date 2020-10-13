@@ -79,7 +79,6 @@ void main() {
   FakeCommand setUpMockXcodeBuildHandler({ bool verbose = false, bool showBuildSettings = false, void Function() onRun }) {
     return FakeCommand(
       command: <String>[
-        '/usr/bin/env',
         'xcrun',
         'xcodebuild',
         '-configuration', 'Release',

@@ -26,7 +26,6 @@ import '../protocol_discovery.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
 
-const String _xcrunPath = '/usr/bin/xcrun';
 const String iosSimulatorId = 'apple_ios_simulator';
 
 class IOSSimulators extends PollingDeviceDiscovery {
@@ -107,7 +106,13 @@ class SimControl {
     //   },
     //   "pairs": { ... },
 
-    final List<String> command = <String>[_xcrunPath, 'simctl', 'list', '--json', section.name];
+    final List<String> command = <String>[
+      ...globals.xcode.xcrunCommand(),
+      'simctl',
+      'list',
+      '--json',
+      section.name,
+    ];
     _logger.printTrace(command.join(' '));
     final RunResult results = await _processUtils.run(command);
     if (results.exitCode != 0) {
@@ -156,7 +161,7 @@ class SimControl {
 
   Future<bool> isInstalled(String deviceId, String appId) {
     return _processUtils.exitsHappy(<String>[
-      _xcrunPath,
+      ...globals.xcode.xcrunCommand(),
       'simctl',
       'get_app_container',
       deviceId,
@@ -168,7 +173,13 @@ class SimControl {
     RunResult result;
     try {
       result = await _processUtils.run(
-        <String>[_xcrunPath, 'simctl', 'install', deviceId, appPath],
+        <String>[
+          ...globals.xcode.xcrunCommand(),
+          'simctl',
+          'install',
+          deviceId,
+          appPath,
+        ],
         throwOnError: true,
       );
     } on ProcessException catch (exception) {
@@ -181,7 +192,13 @@ class SimControl {
     RunResult result;
     try {
       result = await _processUtils.run(
-        <String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId],
+        <String>[
+          ...globals.xcode.xcrunCommand(),
+          'simctl',
+          'uninstall',
+          deviceId,
+          appId,
+        ],
         throwOnError: true,
       );
     } on ProcessException catch (exception) {
@@ -195,7 +212,7 @@ class SimControl {
     try {
       result = await _processUtils.run(
         <String>[
-          _xcrunPath,
+          ...globals.xcode.xcrunCommand(),
           'simctl',
           'launch',
           deviceId,
@@ -213,7 +230,14 @@ class SimControl {
   Future<void> takeScreenshot(String deviceId, String outputPath) async {
     try {
       await _processUtils.run(
-        <String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath],
+        <String>[
+          ...globals.xcode.xcrunCommand(),
+          'simctl',
+          'io',
+          deviceId,
+          'screenshot',
+          outputPath,
+        ],
         throwOnError: true,
       );
     } on ProcessException catch (exception) {
@@ -321,8 +345,6 @@ class IOSSimulator extends Device {
 
   Map<ApplicationPackage, _IOSSimulatorLogReader> _logReaders;
   _IOSSimulatorDevicePortForwarder _portForwarder;
-
-  String get xcrunPath => globals.fs.path.join('/usr', 'bin', 'xcrun');
 
   @override
   Future<bool> isAppInstalled(
@@ -639,7 +661,16 @@ Future<Process> launchDeviceUnifiedLogging (IOSSimulator device, String appName)
   ]);
 
   return globals.processUtils.start(<String>[
-    _xcrunPath, 'simctl', 'spawn', device.id, 'log', 'stream', '--style', 'json', '--predicate', predicate,
+    ...globals.xcode.xcrunCommand(),
+    'simctl',
+    'spawn',
+    device.id,
+    'log',
+    'stream',
+    '--style',
+    'json',
+    '--predicate',
+    predicate,
   ]);
 }
 
