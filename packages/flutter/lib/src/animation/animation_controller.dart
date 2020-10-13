@@ -654,12 +654,20 @@ class AnimationController extends Animation<double>
   ///
   /// The default spring that is driven by this method is critically damped,
   /// but the [springDescription] can be used to drive by a custom spring.
+  /// With this parameter you can make the fling slower, or otherwise faster.
+  ///
+  /// The resulting spring simulation cannot be of type [SpringType.underDamped],
+  /// as this can lead to unexpected look of the produced animation.
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
+  ///
+  ///  See also:
+  ///
+  /// * [SpringType] which describes different types of springs.
   TickerFuture fling({ double velocity = 1.0, SpringDescription? springDescription, AnimationBehavior? animationBehavior }) {
     springDescription ??= _kFlingSpringDescription;
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
@@ -678,8 +686,13 @@ class AnimationController extends Animation<double>
           break;
       }
     }
-    final Simulation simulation = SpringSimulation(springDescription, value, target, velocity * scale)
+    final SpringSimulation simulation = SpringSimulation(springDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
+    assert(
+      simulation.type != SpringType.underDamped,
+      'The resulting spring simulation is of type SpringType.underDamped.\n'
+      'This can lead to unexpected look of the animation, please adjust the springDescription parameter'
+    );
     stop();
     return _startSimulation(simulation);
   }
