@@ -31,7 +31,7 @@ abstract class OperatingSystemUtils {
         processManager: processManager,
       );
     } else if (platform.isMacOS) {
-      return MacOSUtils(
+      return _MacOSUtils(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -119,6 +119,8 @@ abstract class OperatingSystemUtils {
     final String osName = _platform.operatingSystem;
     return osNames.containsKey(osName) ? osNames[osName] : osName;
   }
+
+  HostPlatform get hostPlatform;
 
   List<File> _which(String execName, { bool all = false });
 
@@ -256,10 +258,13 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   String get pathVarSeparator => ':';
+
+  @override
+  HostPlatform hostPlatform = HostPlatform.linux_x64;
 }
 
-class MacOSUtils extends _PosixUtils {
-  MacOSUtils({
+class _MacOSUtils extends _PosixUtils {
+  _MacOSUtils({
     @required FileSystem fileSystem,
     @required Logger logger,
     @required Platform platform,
@@ -283,31 +288,30 @@ class MacOSUtils extends _PosixUtils {
       ];
       if (results.every((RunResult result) => result.exitCode == 0)) {
         _name =
-            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} ${getNameForDarwinArch(hardwareArchitecture)}';
+            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} ${getNameForHostPlatform(hostPlatform)}';
       }
       _name ??= super.name;
     }
     return _name;
   }
 
-  DarwinArch _hardwareArchitecture;
+  HostPlatform _hostPlatform;
 
-  /// Physical underlying architecture.
-  ///
-  /// On ARM return arm64, even when this process is running in Rosetta.
-  DarwinArch get hardwareArchitecture {
-    if (_hardwareArchitecture == null) {
+  // On ARM returns arm64, even when this process is running in Rosetta.
+  @override
+  HostPlatform get hostPlatform {
+    if (_hostPlatform == null) {
       final RunResult arm64Check =
           _processUtils.runSync(<String>['sysctl', 'hw.optional.arm64']);
       // hw.optional.arm64 is unavailable on < macOS 11 and exits with 1, assume x86 on failure.
       // On arm64 stdout is "sysctl hw.optional.arm64: 1"
       if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
-        _hardwareArchitecture = DarwinArch.arm64;
+        _hostPlatform = HostPlatform.darwin_arm;
       } else {
-        _hardwareArchitecture = DarwinArch.x86_64;
+        _hostPlatform = HostPlatform.darwin_x86;
       }
     }
-    return _hardwareArchitecture;
+    return _hostPlatform;
   }
 }
 
@@ -323,6 +327,9 @@ class _WindowsUtils extends OperatingSystemUtils {
     platform: platform,
     processManager: processManager,
   );
+
+  @override
+  HostPlatform hostPlatform = HostPlatform.windows_x64;
 
   @override
   void makeExecutable(File file) {}

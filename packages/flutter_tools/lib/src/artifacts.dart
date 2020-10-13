@@ -485,7 +485,7 @@ TargetPlatform _currentHostPlatform(Platform platform) {
 
 HostPlatform _currentHostPlatformAsHost(Platform platform) {
   if (platform.isMacOS) {
-    return HostPlatform.darwin_x64;
+    return HostPlatform.darwin_x86;
   }
   if (platform.isLinux) {
     return HostPlatform.linux_x64;
@@ -653,7 +653,7 @@ class LocalEngineArtifacts implements Artifacts {
     final HostPlatform hostPlatform = _currentHostPlatformAsHost(_platform);
     if (hostPlatform == HostPlatform.linux_x64) {
       return _fileSystem.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
-    } else if (hostPlatform == HostPlatform.darwin_x64) {
+    } else if (hostPlatform == HostPlatform.darwin_x86) {
       return _fileSystem.path.join(engineOutPath, 'flutter_tester');
     } else if (hostPlatform == HostPlatform.windows_x64) {
       return _fileSystem.path.join(engineOutPath, 'flutter_tester.exe');

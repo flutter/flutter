@@ -147,8 +147,26 @@ void main() {
     });
   });
 
-  group('macos architecture', () {
-    testWithoutContext('ARM', () async {
+  group('host platform', () {
+    testWithoutContext('unknown defaults to Linux', () async {
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'fuchsia'));
+      expect(utils.hostPlatform, HostPlatform.linux_x64);
+    });
+
+    testWithoutContext('Windows', () async {
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      expect(utils.hostPlatform, HostPlatform.windows_x64);
+    });
+
+    testWithoutContext('Linux', () async {
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'linux'));
+      expect(utils.hostPlatform, HostPlatform.linux_x64);
+    });
+
+    testWithoutContext('macOS ARM', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>[
@@ -159,9 +177,9 @@ void main() {
         ),
       );
 
-      final MacOSUtils utils =
-      createOSUtils(FakePlatform(operatingSystem: 'macos')) as MacOSUtils;
-      expect(utils.hardwareArchitecture, DarwinArch.arm64);
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      expect(utils.hostPlatform, HostPlatform.darwin_arm);
     });
 
     testWithoutContext('macOS 11 x86', () async {
@@ -175,9 +193,9 @@ void main() {
           ),
           );
 
-      final MacOSUtils utils =
-      createOSUtils(FakePlatform(operatingSystem: 'macos')) as MacOSUtils;
-      expect(utils.hardwareArchitecture, DarwinArch.x86_64);
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      expect(utils.hostPlatform, HostPlatform.darwin_x86);
     });
 
     testWithoutContext('macOS 10 x86', () async {
@@ -191,12 +209,12 @@ void main() {
           ),
           );
 
-      final MacOSUtils utils =
-      createOSUtils(FakePlatform(operatingSystem: 'macos')) as MacOSUtils;
-      expect(utils.hardwareArchitecture, DarwinArch.x86_64);
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      expect(utils.hostPlatform, HostPlatform.darwin_x86);
     });
 
-    testWithoutContext('ARM name', () async {
+    testWithoutContext('macOS ARM name', () async {
       fakeProcessManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -230,10 +248,10 @@ void main() {
 
       final OperatingSystemUtils utils =
           createOSUtils(FakePlatform(operatingSystem: 'macos'));
-      expect(utils.name, 'product version build arm64');
+      expect(utils.name, 'product version build darwin-arm');
     });
 
-    testWithoutContext('x86 name', () async {
+    testWithoutContext('macOS x86 name', () async {
       fakeProcessManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -267,7 +285,7 @@ void main() {
 
       final OperatingSystemUtils utils =
           createOSUtils(FakePlatform(operatingSystem: 'macos'));
-      expect(utils.name, 'product version build x86_64');
+      expect(utils.name, 'product version build darwin-x86_64');
     });
   });
 
