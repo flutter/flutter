@@ -4,52 +4,66 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-const double _behind_widget_visible_height = 10;
+/// Value extracted from the official sketch iOS UI kit
+const double _kPreviousRouteVisibeHeight = 10.0;
 
-const Radius _default_top_radius = Radius.circular(12);
+/// Value extracted from the official sketch iOS UI kit
+const Radius kCupertinoModalSheetTopRadius = Radius.circular(10.0);
 
-const double _deviceFrameCorners =
-    38.5; //https://kylebashour.com/posts/finding-the-real-iphone-x-corner-radius
+/// Estimated Round corners for iPhone X, XR, 11, 11 Pro
+/// https://kylebashour.com/posts/finding-the-real-iphone-x-corner-radius
+const double _kDeviceFrameCorners = 38.5;
 
-/// Cupertino Bottom Sheet Container
+const Color _kModalBarrierColor = Color.fromRGBO(0, 0, 0, 0.12);
+
+/// Wraps the child into a cupertino modal sheet appareance. This is used to
+/// create a [ModalBottomSheetRoute].
 ///
 /// Clip the child widget to rectangle with top rounded corners and adds
-/// top padding(+safe area padding). This padding [_behind_widget_visible_height]
+/// top padding and top safe area. This padding [_kPreviousRouteVisibeHeight]
 /// is the height that will be displayed from previous route.
-class _CupertinoBottomSheetContainer extends StatelessWidget {
-  final Widget child;
-  final Color? backgroundColor;
-  final Radius topRadius;
+class _CupertinoSheetDecorationBuilder extends StatelessWidget {
+  const _CupertinoSheetDecorationBuilder({
+    Key? key,
+    required this.child,
+    required this.topRadius,
+    this.backgroundColor,
+  }) : super(key: key);
 
-  const _CupertinoBottomSheetContainer(
-      {Key? key,
-      required this.child,
-      this.backgroundColor,
-      required this.topRadius})
-      : super(key: key);
+  /// The child contained by the modal sheet
+  final Widget child;
+
+  /// The color to paint behind the child
+  final Color? backgroundColor;
+
+  /// The top corners of this modal sheet are rounded by this Radius
+  final Radius topRadius;
 
   @override
   Widget build(BuildContext context) {
-    final topSafeAreaPadding = MediaQuery.of(context)?.padding.top ?? 0;
-    final topPadding = _behind_widget_visible_height + topSafeAreaPadding;
-
-    final shadow = BoxShadow(
+    // This should be changed before merging the PR
+    final BoxShadow shadow = BoxShadow(
         blurRadius: 10,
         color: CupertinoColors.black.withOpacity(0.12),
         spreadRadius: 5);
-    final _backgroundColor =
-        backgroundColor ?? CupertinoTheme.of(context).scaffoldBackgroundColor;
-    return Padding(
-      padding: EdgeInsets.only(top: topPadding),
-      child: ClipRRect(
-        borderRadius: BorderRadius.vertical(top: topRadius),
+    final Color backgroundColor = this.backgroundColor ??
+        CupertinoTheme.of(context).scaffoldBackgroundColor;
+    return SafeArea(
+      bottom: false,
+      right: false,
+      left: false,
+      child: Padding(
+        padding: const EdgeInsets.only(top: _kPreviousRouteVisibeHeight),
         child: Container(
-          decoration:
-              BoxDecoration(color: _backgroundColor, boxShadow: [shadow]),
-          width: double.infinity,
+          clipBehavior: Clip.hardEdge,
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            boxShadow: <BoxShadow>[shadow],
+            borderRadius: BorderRadius.vertical(top: topRadius),
+          ),
           child: MediaQuery.removePadding(
             context: context,
-            removeTop: true, //Remove top Safe Area
+            removeTop: true,
             child: child,
           ),
         ),
@@ -61,71 +75,61 @@ class _CupertinoBottomSheetContainer extends StatelessWidget {
 Future<T> showCupertinoModalBottomSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
+  bool useRootNavigator = false,
   Color? backgroundColor,
-  double? elevation,
-  double? closeProgressThreshold,
-  ShapeBorder? shape,
-  Clip? clipBehavior,
-  Color? barrierColor,
   bool expand = false,
-  AnimationController? secondAnimation,
+  bool bounce = true,
+  bool draggable = true,
+  Radius topRadius = kCupertinoModalSheetTopRadius,
+  double? closeProgressThreshold,
+  Color? barrierColor,
+  String? barrierLabel,
+  bool? barrierDismissible,
+  Color? transitionBackgroundColor,
   Curve? animationCurve,
   Curve? previousRouteAnimationCurve,
-  bool useRootNavigator = false,
-  bool bounce = true,
-  bool? isDismissible,
-  bool enableDrag = true,
-  Radius topRadius = _default_top_radius,
   Duration? duration,
   RouteSettings? settings,
-  Color? transitionBackgroundColor,
-  String? barrierLabel,
 }) async {
   assert(context != null);
   assert(builder != null);
   assert(expand != null);
   assert(useRootNavigator != null);
-  assert(enableDrag != null);
+  assert(draggable != null);
   assert(debugCheckHasMediaQuery(context));
 
   return await Navigator.of(context, rootNavigator: useRootNavigator)!.push(
-    CupertinoModalBottomSheetRoute<T>(
-        builder: builder,
-        containerBuilder: (context, _, child) => _CupertinoBottomSheetContainer(
-              child: child,
-              backgroundColor: backgroundColor,
-              topRadius: topRadius,
-            ),
-        secondAnimationController: secondAnimation,
-        expanded: expand,
-        closeProgressThreshold: closeProgressThreshold,
-        barrierLabel: barrierLabel,
-        bounce: bounce,
-        isDismissible: isDismissible ?? !expand,
-        modalBarrierColor:
-            barrierColor ?? CupertinoColors.black.withOpacity(0.12),
-        enableDrag: enableDrag,
-        topRadius: topRadius,
-        animationCurve: animationCurve,
-        previousRouteAnimationCurve: previousRouteAnimationCurve,
-        duration: duration,
-        settings: settings,
-        transitionBackgroundColor:
-            transitionBackgroundColor ?? CupertinoColors.black),
+    _CupertinoModalBottomSheetRoute<T>(
+      builder: builder,
+      sheetBuilder:
+          (BuildContext context, Animation<double> animation, Widget child) {
+        return _CupertinoSheetDecorationBuilder(
+          child: child,
+          backgroundColor: backgroundColor,
+          topRadius: topRadius,
+        );
+      },
+      expanded: expand,
+      bounce: bounce,
+      enableDrag: draggable,
+      closeProgressThreshold: closeProgressThreshold,
+      barrierLabel: barrierLabel,
+      modalBarrierColor: barrierColor,
+      isDismissible: barrierDismissible ?? !expand,
+      topRadius: topRadius,
+      animationCurve: animationCurve,
+      previousRouteAnimationCurve: previousRouteAnimationCurve,
+      duration: duration,
+      settings: settings,
+      transitionBackgroundColor: transitionBackgroundColor,
+    ),
   );
 }
 
-class CupertinoModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
-  final Radius topRadius;
-  final Curve? previousRouteAnimationCurve;
-
-  // Background color behind all routes
-  // Black by default
-  final Color? transitionBackgroundColor;
-
-  CupertinoModalBottomSheetRoute({
+class _CupertinoModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
+  _CupertinoModalBottomSheetRoute({
     required WidgetBuilder builder,
-    required WidgetWithChildBuilder containerBuilder,
+    required WidgetWithChildBuilder sheetBuilder,
     double? closeProgressThreshold,
     String? barrierLabel,
     AnimationController? secondAnimationController,
@@ -139,7 +143,7 @@ class CupertinoModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
     RouteSettings? settings,
     ScrollController? scrollController,
     this.transitionBackgroundColor,
-    this.topRadius = _default_top_radius,
+    this.topRadius = kCupertinoModalSheetTopRadius,
     this.previousRouteAnimationCurve,
   })  : assert(expanded != null),
         assert(isDismissible != null),
@@ -147,12 +151,12 @@ class CupertinoModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
         super(
           closeProgressThreshold: closeProgressThreshold,
           scrollController: scrollController,
-          containerBuilder: containerBuilder,
+          sheetBuilder: sheetBuilder,
           builder: builder,
           bounce: bounce,
           barrierLabel: barrierLabel,
           secondAnimationController: secondAnimationController,
-          modalBarrierColor: modalBarrierColor,
+          modalBarrierColor: modalBarrierColor ?? _kModalBarrierColor,
           isDismissible: isDismissible,
           enableDrag: enableDrag,
           expanded: expanded,
@@ -161,6 +165,15 @@ class CupertinoModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
           duration: duration,
         );
 
+  /// The top corners of this modal sheet are rounded by this Radius
+  final Radius topRadius;
+
+  /// Background color behind all routes. Black by default
+  final Color? transitionBackgroundColor;
+
+  /// Curve for second animation of previous route transition
+  final Curve? previousRouteAnimationCurve;
+
   @override
   Widget buildTransitions(
     BuildContext context,
@@ -168,22 +181,24 @@ class CupertinoModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final paddingTop = MediaQuery.of(context)?.padding.top ?? 0;
-    final distanceWithScale =
-        (paddingTop + _behind_widget_visible_height) * 0.9;
-    final offsetY = secondaryAnimation.value * (paddingTop - distanceWithScale);
-    final scale = 1 - secondaryAnimation.value / 10;
+    final double paddingTop = MediaQuery.of(context)?.padding.top ?? 0;
     return AnimatedBuilder(
-      builder: (context, child) => Transform.translate(
-        offset: Offset(0, offsetY),
-        child: Transform.scale(
-          scale: scale,
-          child: child,
-          alignment: Alignment.topCenter,
-        ),
-      ),
-      child: child,
       animation: secondaryAnimation,
+      child: child,
+      builder: (BuildContext context, Widget? child) {
+        final double progress = secondaryAnimation.value;
+        final double scale = 1 - progress / 10;
+        final double distanceWithScale = (paddingTop + _kPreviousRouteVisibeHeight) * 0.9;
+        final Offset offset = Offset(0, progress * (paddingTop - distanceWithScale));
+        return Transform.translate(
+          offset: offset,
+          child: Transform.scale(
+            scale: scale,
+            child: child,
+            alignment: Alignment.topCenter,
+          ),
+        );
+      },
     );
   }
 
@@ -191,40 +206,42 @@ class CupertinoModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
   Widget getPreviousRouteTransition(BuildContext context,
       Animation<double> secondaryAnimation, Widget child) {
     return _CupertinoModalTransition(
+       body: child,
       secondaryAnimation: secondaryAnimation,
-      body: child,
       animationCurve: previousRouteAnimationCurve,
       topRadius: topRadius,
-      backgroundColor: transitionBackgroundColor ?? CupertinoColors.black,
+      backgroundColor: transitionBackgroundColor,
     );
   }
 }
 
 class _CupertinoModalTransition extends StatelessWidget {
-  final Animation<double> secondaryAnimation;
-  final Radius topRadius;
-  final Curve? animationCurve;
-  final Color backgroundColor;
-
-  final Widget body;
-
   const _CupertinoModalTransition({
     Key? key,
     required this.secondaryAnimation,
     required this.body,
     required this.topRadius,
-    this.backgroundColor = CupertinoColors.black,
+    this.backgroundColor,
     this.animationCurve,
   }) : super(key: key);
 
+  final Widget body;
+
+  final Animation<double> secondaryAnimation;
+  final Radius topRadius;
+  final Curve? animationCurve;
+  final Color? backgroundColor;
+
   @override
   Widget build(BuildContext context) {
-    final paddingTop = MediaQuery.of(context)?.padding.top ?? 0;
+    final double paddingTop = MediaQuery.of(context)?.padding.top ?? 0;
 
-    final phoneWithRoundedCorners = defaultTargetPlatform == TargetPlatform.iOS && paddingTop > 20;
-    final startRoundCorner = phoneWithRoundedCorners ? _deviceFrameCorners : 0;
+    final bool phoneWithRoundedCorners =
+        defaultTargetPlatform == TargetPlatform.iOS && paddingTop > 20;
+    final double startRoundCorner =
+        phoneWithRoundedCorners ? _kDeviceFrameCorners : 0;
 
-    final curvedAnimation = CurvedAnimation(
+    final CurvedAnimation curvedAnimation = CurvedAnimation(
       parent: secondaryAnimation,
       curve: animationCurve ?? Curves.easeOut,
     );
@@ -234,155 +251,30 @@ class _CupertinoModalTransition extends StatelessWidget {
       child: AnimatedBuilder(
         animation: curvedAnimation,
         child: body,
-        builder: (context, child) {
-          final progress = curvedAnimation.value;
-          final yOffset = progress * paddingTop;
-          final scale = 1 - progress / 10;
-          final radius = progress == 0
+        builder: (BuildContext context, Widget? child) {
+          final double progress = curvedAnimation.value;
+          final double yOffset = progress * paddingTop;
+          final double scale = 1 - progress / 10;
+          final double radius = progress == 0
               ? 0.0
               : (1 - progress) * startRoundCorner + progress * topRadius.x;
           return Stack(
             children: <Widget>[
-              Container(color: backgroundColor),
+              Container(color: backgroundColor ?? CupertinoColors.black),
               Transform.translate(
                 offset: Offset(0, yOffset),
                 child: Transform.scale(
                   scale: scale,
                   alignment: Alignment.topCenter,
                   child: ClipRRect(
-                      borderRadius: BorderRadius.circular(radius),
-                      child: child),
+                    borderRadius: BorderRadius.circular(radius),
+                    child: child,
+                  ),
                 ),
               ),
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-class _CupertinoScaffold extends InheritedWidget {
-  final AnimationController animation;
-
-  final Radius topRadius;
-
-  @override
-  final Widget child;
-
-  const _CupertinoScaffold(
-      {Key? key,
-      required this.animation,
-      required this.child,
-      required this.topRadius})
-      : super(key: key, child: child);
-
-  @override
-  bool updateShouldNotify(InheritedWidget oldWidget) {
-    return false;
-  }
-}
-
-//  This is can be removed once MaterialPageRoute suppors animated modals
-class CupertinoScaffold extends StatefulWidget {
-  static _CupertinoScaffold? of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<_CupertinoScaffold>();
-
-  final Widget body;
-  final Radius topRadius;
-  final Color transitionBackgroundColor;
-
-  const CupertinoScaffold({
-    Key? key,
-    required this.body,
-    this.topRadius = _default_top_radius,
-    this.transitionBackgroundColor = CupertinoColors.black,
-  }) : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() => _CupertinoScaffoldState();
-
-  static Future<T> showCupertinoModalBottomSheet<T>({
-    required BuildContext context,
-    double? closeProgressThreshold,
-    required WidgetBuilder builder,
-    Curve? animationCurve,
-    Curve? previousRouteAnimationCurve,
-    Color? backgroundColor,
-    Color? barrierColor,
-    bool expand = false,
-    bool useRootNavigator = false,
-    bool bounce = true,
-    bool? isDismissible,
-    bool enableDrag = true,
-    Duration? duration,
-    RouteSettings? settings,
-    String? barrierLabel,
-  }) async {
-    assert(context != null);
-    assert(builder != null);
-    assert(expand != null);
-    assert(useRootNavigator != null);
-    assert(enableDrag != null);
-    assert(debugCheckHasMediaQuery(context));
-    
-    final scaffold = CupertinoScaffold.of(context)!;
-    final topRadius = scaffold.topRadius;
-    final result = await Navigator.of(context, rootNavigator: useRootNavigator)!
-        .push(CupertinoModalBottomSheetRoute<T>(
-      closeProgressThreshold: closeProgressThreshold,
-      builder: builder,
-      secondAnimationController: scaffold.animation,
-      containerBuilder: (_, __, Widget child) => _CupertinoBottomSheetContainer(
-        child: child,
-        backgroundColor: backgroundColor,
-        topRadius: topRadius,
-      ),
-      expanded: expand,
-      barrierLabel: barrierLabel,
-      bounce: bounce,
-      isDismissible: isDismissible ?? !expand,
-      modalBarrierColor:
-          barrierColor ?? CupertinoColors.black.withOpacity(0.12),
-      enableDrag: enableDrag,
-      topRadius: topRadius,
-      animationCurve: animationCurve,
-      previousRouteAnimationCurve: previousRouteAnimationCurve,
-      duration: duration,
-      settings: settings,
-    ));
-    return result;
-  }
-}
-
-class _CupertinoScaffoldState extends State<CupertinoScaffold>
-    with TickerProviderStateMixin {
-  late AnimationController animationController;
-
-  SystemUiOverlayStyle? lastStyle;
-
-  @override
-  void initState() {
-    animationController = AnimationController(
-        duration: const Duration(milliseconds: 350), vsync: this);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _CupertinoScaffold(
-      animation: animationController,
-      topRadius: widget.topRadius,
-      child: _CupertinoModalTransition(
-        secondaryAnimation: animationController,
-        body: widget.body,
-        topRadius: widget.topRadius,
-        backgroundColor: widget.transitionBackgroundColor,
       ),
     );
   }

@@ -147,7 +147,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
               explicitChildNodes: true,
               child: ModalBottomSheet(
                 expanded: widget.route.expanded,
-                containerBuilder: widget.route.containerBuilder,
+                sheetBuilder: widget.route.sheetBuilder,
                 animationController: widget.route._animationController!,
                 shouldClose: widget.route._hasScopedWillPopCallback
                     ? () async {
@@ -178,7 +178,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T>
     with RouteWithPreviousTransitionMixin<T> {
   ModalBottomSheetRoute({
     this.closeProgressThreshold,
-    required this.containerBuilder,
+    required this.sheetBuilder,
     required this.builder,
     this.scrollController,
     this.barrierLabel,
@@ -198,7 +198,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T>
         super(settings: settings);
 
   final double? closeProgressThreshold;
-  final WidgetWithChildBuilder containerBuilder;
+  final WidgetWithChildBuilder sheetBuilder;
   final WidgetBuilder builder;
   final bool expanded;
   final bool bounce;
@@ -283,7 +283,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T>
 Future<T> showCustomModalBottomSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
-  required WidgetWithChildBuilder containerWidget,
+  required WidgetWithChildBuilder sheetBuilder,
   Color? barrierColor,
   bool bounce = false,
   bool expand = false,
@@ -297,7 +297,7 @@ Future<T> showCustomModalBottomSheet<T>({
 }) async {
   assert(context != null);
   assert(builder != null);
-  assert(containerWidget != null);
+  assert(sheetBuilder != null);
   assert(expand != null);
   assert(useRootNavigator != null);
   assert(isDismissible != null);
@@ -308,7 +308,7 @@ Future<T> showCustomModalBottomSheet<T>({
       .push(ModalBottomSheetRoute<T>(
     builder: builder,
     bounce: bounce,
-    containerBuilder: containerWidget,
+    sheetBuilder: sheetBuilder,
     secondAnimationController: secondAnimation,
     expanded: expand,
     barrierLabel: barrierLabel,

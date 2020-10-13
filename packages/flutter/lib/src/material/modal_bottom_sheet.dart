@@ -8,6 +8,54 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
 
+class _MaterialSheetBuilder extends StatelessWidget {
+  const _MaterialSheetBuilder({
+    Key? key,
+    required this.child,
+    this.backgroundColor,
+    this.elevation,
+    this.theme,
+    this.clipBehavior,
+    this.shape,
+  }) : super(key: key);
+
+  /// The child contained by the modal sheet
+  final Widget child;
+
+  final Color? backgroundColor;
+  final double? elevation;
+  final ThemeData? theme;
+  final Clip? clipBehavior;
+  final ShapeBorder? shape;
+
+  @override
+  Widget build(BuildContext context) {
+    final BottomSheetThemeData? bottomSheetTheme =
+        Theme.of(context)?.bottomSheetTheme;
+    final Color? color = backgroundColor ??
+        bottomSheetTheme?.modalBackgroundColor ??
+        bottomSheetTheme?.backgroundColor;
+    final double elevation =
+        this.elevation ?? bottomSheetTheme?.elevation ?? 0.0;
+    final ShapeBorder? shape = this.shape ?? bottomSheetTheme?.shape;
+    final Clip clipBehavior =
+        this.clipBehavior ?? bottomSheetTheme?.clipBehavior ?? Clip.none;
+
+    final Widget sheet = Material(
+        color: color,
+        elevation: elevation,
+        shape: shape,
+        clipBehavior: clipBehavior,
+        child: child);
+
+    if (theme != null) {
+      return Theme(data: theme!, child: sheet);
+    } else {
+      return sheet;
+    }
+  }
+}
+
 /// Shows a modal material design bottom sheet.
 Future<T> showMaterialModalBottomSheet<T>({
   required BuildContext context,
@@ -35,22 +83,28 @@ Future<T> showMaterialModalBottomSheet<T>({
   assert(enableDrag != null);
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
+
+  final String barrierLabel =
+      MaterialLocalizations.of(context)!.modalBarrierDismissLabel;
   return await Navigator.of(context, rootNavigator: useRootNavigator)!.push(
     ModalBottomSheetRoute<T>(
       builder: builder,
-      containerBuilder: _materialContainerBuilder(
-        context,
-        backgroundColor: backgroundColor,
-        elevation: elevation,
-        shape: shape,
-        clipBehavior: clipBehavior,
-        theme: Theme.of(context, shadowThemeOnly: true),
-      ),
+      sheetBuilder:
+          (BuildContext context, Animation<double> animation, Widget child) {
+        return _MaterialSheetBuilder(
+          child: child,
+          clipBehavior: clipBehavior,
+          theme: Theme.of(context, shadowThemeOnly: true),
+          elevation: elevation,
+          shape: shape,
+          backgroundColor: backgroundColor,
+        );
+      },
       closeProgressThreshold: closeProgressThreshold,
       secondAnimationController: secondAnimation,
       bounce: bounce,
       expanded: expand,
-      barrierLabel: MaterialLocalizations.of(context)!.modalBarrierDismissLabel,
+      barrierLabel: barrierLabel,
       modalLabel: _getRouteLabel(context),
       isDismissible: isDismissible,
       modalBarrierColor: barrierColor,
@@ -62,63 +116,20 @@ Future<T> showMaterialModalBottomSheet<T>({
 }
 
 String _getRouteLabel(BuildContext context) {
-    final platform = Theme.of(context)?.platform ?? defaultTargetPlatform;
-    switch (platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        return '';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        if (MaterialLocalizations.of(context) != null) {
-          return MaterialLocalizations.of(context)!.dialogLabel;
-        } else {
-          return const DefaultMaterialLocalizations().dialogLabel;
-        }
-    }
-}
-
-//Default container builder is the Material Appearance
-WidgetWithChildBuilder _materialContainerBuilder(
-  BuildContext context, {
-  Color? backgroundColor,
-  double? elevation,
-  ThemeData? theme,
-  Clip? clipBehavior,
-  ShapeBorder? shape,
-}) {
-  final BottomSheetThemeData? bottomSheetTheme =
-      Theme.of(context)?.bottomSheetTheme;
-  final Color? color = backgroundColor ??
-      bottomSheetTheme?.modalBackgroundColor ??
-      bottomSheetTheme?.backgroundColor;
-  final double _elevation = elevation ?? bottomSheetTheme?.elevation ?? 0.0;
-  final ShapeBorder? _shape = shape ?? bottomSheetTheme?.shape;
-  final Clip _clipBehavior =
-      clipBehavior ?? bottomSheetTheme?.clipBehavior ?? Clip.none;
-
-  final WidgetWithChildBuilder builder =
-      (BuildContext context, Animation<double> animation, Widget child) =>
-          Material(
-              color: color,
-              elevation: _elevation,
-              shape: _shape,
-              clipBehavior: _clipBehavior,
-              child: child);
-  if (theme != null) {
-    return (BuildContext context, Animation<double> animation, Widget child) =>
-        Theme(
-          data: theme,
-          child: Builder(
-            builder: (BuildContext context) => builder(
-              context,
-              animation,
-              child,
-            ),
-          ),
-        );
-  } else {
-    return builder;
+  final TargetPlatform platform =
+      Theme.of(context)?.platform ?? defaultTargetPlatform;
+  switch (platform) {
+    case TargetPlatform.iOS:
+    case TargetPlatform.linux:
+    case TargetPlatform.macOS:
+    case TargetPlatform.windows:
+      return '';
+    case TargetPlatform.android:
+    case TargetPlatform.fuchsia:
+      if (MaterialLocalizations.of(context) != null) {
+        return MaterialLocalizations.of(context)!.dialogLabel;
+      } else {
+        return const DefaultMaterialLocalizations().dialogLabel;
+      }
   }
 }
