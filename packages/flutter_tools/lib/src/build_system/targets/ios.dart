@@ -244,7 +244,7 @@ class DebugUniversalFramework extends Target {
       '-output',
       lipoOutputFile.path
     ];
-    final RunResult lipoResult = await processUtils.run(
+    final RunResult lipoResult = await globals.processUtils.run(
       lipoCommand,
     );
 

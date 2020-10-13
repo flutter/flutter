@@ -324,7 +324,7 @@ end
           '-output',
           fatFlutterFrameworkBinary.path
         ];
-        final RunResult lipoResult = await processUtils.run(
+        final RunResult lipoResult = await globals.processUtils.run(
           lipoCommand,
           allowReentrantFlutter: false,
         );
@@ -437,7 +437,7 @@ end
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
       ];
 
-      RunResult buildPluginsResult = await processUtils.run(
+      RunResult buildPluginsResult = await globals.processUtils.run(
         pluginsBuildCommand,
         workingDirectory: _project.ios.hostAppRoot.childDirectory('Pods').path,
         allowReentrantFlutter: false,
@@ -463,7 +463,7 @@ end
           'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
         ];
 
-        buildPluginsResult = await processUtils.run(
+        buildPluginsResult = await globals.processUtils.run(
           pluginsBuildCommand,
           workingDirectory: _project.ios.hostAppRoot
             .childDirectory('Pods')
@@ -515,7 +515,7 @@ end
               modeDirectory.childDirectory(podFrameworkName).childFile(binaryName).path
             ];
 
-            final RunResult pluginsLipoResult = await processUtils.run(
+            final RunResult pluginsLipoResult = await globals.processUtils.run(
               lipoCommand,
               workingDirectory: outputDirectory.path,
               allowReentrantFlutter: false,
@@ -546,7 +546,7 @@ end
               modeDirectory.childFile('$binaryName.xcframework').path
             ];
 
-            final RunResult xcframeworkResult = await processUtils.run(
+            final RunResult xcframeworkResult = await globals.processUtils.run(
               xcframeworkCommand,
               workingDirectory: outputDirectory.path,
               allowReentrantFlutter: false,
@@ -623,7 +623,7 @@ end
         armFlutterFrameworkBinary.path
       ];
 
-      RunResult lipoResult = await processUtils.run(
+      RunResult lipoResult = await globals.processUtils.run(
         lipoCommand,
         allowReentrantFlutter: false,
       );
@@ -649,7 +649,7 @@ end
         simulatorFlutterFrameworkBinary.path
       ];
 
-      lipoResult = await processUtils.run(
+      lipoResult = await globals.processUtils.run(
         lipoCommand,
         allowReentrantFlutter: false,
       );
@@ -671,7 +671,7 @@ end
             .path
       ];
 
-      final RunResult xcframeworkResult = await processUtils.run(
+      final RunResult xcframeworkResult = await globals.processUtils.run(
         xcframeworkCommand,
         allowReentrantFlutter: false,
       );
@@ -703,7 +703,7 @@ end
           .path
     ];
 
-    final RunResult xcframeworkResult = await processUtils.run(
+    final RunResult xcframeworkResult = await globals.processUtils.run(
       xcframeworkCommand,
       allowReentrantFlutter: false,
     );
