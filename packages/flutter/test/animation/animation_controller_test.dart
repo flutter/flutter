@@ -257,25 +257,25 @@ void main() {
 
   test('Custom springDescription can be applied', () {
     final AnimationController controller = AnimationController(
-        vsync: const TestVSync(),
-      );
-      final AnimationController customSpringController = AnimationController(
-        vsync: const TestVSync(),
-      );
+      vsync: const TestVSync(),
+    );
+    final AnimationController customSpringController = AnimationController(
+      vsync: const TestVSync(),
+    );
 
-      controller.fling();
-      // Will produce longer and smoother animation than the default.
-      customSpringController.fling(
-        springDescription: SpringDescription.withDampingRatio(
-            mass: 0.01,
-            stiffness: 10.0,
-            ratio: 2.0,
-        ),
-      );
-      tick(const Duration(milliseconds: 0));
-      tick(const Duration(milliseconds: 50));
+    controller.fling();
+    // Will produce longer and smoother animation than the default.
+    customSpringController.fling(
+      springDescription: SpringDescription.withDampingRatio(
+        mass: 0.01,
+        stiffness: 10.0,
+        ratio: 2.0,
+      ),
+    );
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 50));
 
-      expect(customSpringController.value < controller.value, true);
+    expect(customSpringController.value < controller.value, true);
   });
 
   test('lastElapsedDuration control test', () {
