@@ -683,10 +683,15 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       nextViewport.point3,
       nextViewport.point0,
     );
-    if (viewportSide01.intersectsRect(_boundaryRect)
-        && viewportSide12.intersectsRect(_boundaryRect)
-        && viewportSide23.intersectsRect(_boundaryRect)
-        && viewportSide30.intersectsRect(_boundaryRect)) {
+    final LineSegment? invalidSide = <LineSegment?>[
+      viewportSide01,
+      viewportSide12,
+      viewportSide23,
+      viewportSide30,
+    ].firstWhere((LineSegment? side) {
+      return !side!.intersectsRect(_boundaryRect);
+    }, orElse: () => null);
+    if (invalidSide == null) {
       return matrix;
     }
 
@@ -694,6 +699,15 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // that doesn't intersect to each other, and move the points on top of each
     // other.
     // TODO(justinmc): Implement recovery.
+    final _ClosestPoints closestPoints = invalidSide.findClosestPoints(_boundaryRect);
+    final Offset difference = closestPoints.onRect - closestPoints.onLineSegment;
+
+    final Matrix4 correctedMatrix = matrix.clone()
+        ..translate(difference.dx, difference.dy);
+
+    // TODO(justinmc): If the correctedMatrix isn't valid, return matrix.
+    // Otherwise return correctedMatrix.
+
     return Matrix4.identity();
 
     /*
@@ -1408,8 +1422,30 @@ class LineSegment {
         || intersects(bottom) || intersects(left);
   }
 
+  /// Returns the points on the LineSegment and Rect closest to each other.
+  /// Assumes that they do not intersect.
+  _ClosestPoints findClosestPoints(Rect rect) {
+    // TODO(justinmc): Assert that they don't intersect?
+    // TODO(justinmc): Implement.
+    return const _ClosestPoints(
+      onLineSegment: Offset.zero,
+      onRect: Offset.zero,
+    );
+  }
+
   @override
   String toString() {
     return '$p0, $p1';
   }
+}
+
+// A pair of Offsets, used by findClosestPoints to return both points.
+class _ClosestPoints {
+  const _ClosestPoints({
+    required this.onLineSegment,
+    required this.onRect,
+  });
+
+  final Offset onLineSegment;
+  final Offset onRect;
 }
