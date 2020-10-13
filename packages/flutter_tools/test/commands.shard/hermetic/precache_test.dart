@@ -400,7 +400,6 @@ void main() {
       ),
       platform: FakePlatform(environment: <String, String>{}),
     );
-
     await createTestCommandRunner(command).run(const <String>['precache', '--force']);
 
     verify(cache.clearStampFiles()).called(1);
