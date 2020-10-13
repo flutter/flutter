@@ -37,13 +37,18 @@ copy("publish_headers") {
 }
 
 source_set("common_cpp_input") {
-  public = [ "text_input_model.h" ]
+  public = [
+    "text_input_model.h",
+    "text_range.h",
+  ]
 
   sources = [ "text_input_model.cc" ]
 
   configs += [ ":desktop_library_implementation" ]
 
   public_configs = [ "//flutter:config" ]
+
+  deps = [ "//flutter/fml:fml" ]
 
   if (is_win) {
     # For wstring_conversion. See issue #50053.
@@ -137,6 +142,7 @@ if (enable_unittests) {
       "json_message_codec_unittests.cc",
       "json_method_codec_unittests.cc",
       "text_input_model_unittests.cc",
+      "text_range_unittests.cc",
     ]
 
     deps = [
