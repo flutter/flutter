@@ -95,7 +95,6 @@ class ContactsDemo extends StatefulWidget {
 enum AppBarBehavior { normal, pinned, floating, snapping }
 
 class ContactsDemoState extends State<ContactsDemo> {
-  static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final double _appBarHeight = 256.0;
 
   AppBarBehavior _appBarBehavior = AppBarBehavior.pinned;
@@ -109,7 +108,6 @@ class ContactsDemoState extends State<ContactsDemo> {
         platform: Theme.of(context).platform,
       ),
       child: Scaffold(
-        key: _scaffoldKey,
         body: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(

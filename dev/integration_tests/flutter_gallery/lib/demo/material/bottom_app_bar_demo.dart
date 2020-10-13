@@ -18,7 +18,6 @@ class BottomAppBarDemo extends StatefulWidget {
 // for bottom application bar.
 
 class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
-  static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   static final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   // FAB shape
@@ -144,7 +143,6 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
       key: _scaffoldMessengerKey,
       child: Builder(
         builder: (BuildContext context) => Scaffold(
-          key: _scaffoldKey,
           appBar: AppBar(
             title: const Text('Bottom app bar'),
             elevation: 0.0,

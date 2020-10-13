@@ -42,7 +42,6 @@ class LeaveBehindDemo extends StatefulWidget {
 }
 
 class LeaveBehindDemoState extends State<LeaveBehindDemo> {
-  static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   bool _confirmDismiss = true;
   List<LeaveBehindItem> leaveBehindItems;
@@ -146,7 +145,6 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     }
 
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Swipe to dismiss'),
         actions: <Widget>[
