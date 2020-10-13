@@ -5,7 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// Value extracted from the official sketch iOS UI kit
-const double _kPreviousRouteVisibeHeight = 10.0;
+/// It is the top offset that will be displayed from previous route 
+const double _kPreviousRouteVisibeOffset = 10.0;
 
 /// Value extracted from the official sketch iOS UI kit
 const Radius kCupertinoModalSheetTopRadius = Radius.circular(10.0);
@@ -20,8 +21,7 @@ const Color _kModalBarrierColor = Color.fromRGBO(0, 0, 0, 0.12);
 /// create a [ModalBottomSheetRoute].
 ///
 /// Clip the child widget to rectangle with top rounded corners and adds
-/// top padding and top safe area. This padding [_kPreviousRouteVisibeHeight]
-/// is the height that will be displayed from previous route.
+/// top padding and top safe area.
 class _CupertinoSheetDecorationBuilder extends StatelessWidget {
   const _CupertinoSheetDecorationBuilder({
     Key? key,
@@ -53,7 +53,7 @@ class _CupertinoSheetDecorationBuilder extends StatelessWidget {
       right: false,
       left: false,
       child: Padding(
-        padding: const EdgeInsets.only(top: _kPreviousRouteVisibeHeight),
+        padding: const EdgeInsets.only(top: _kPreviousRouteVisibeOffset),
         child: Container(
           clipBehavior: Clip.hardEdge,
           decoration: BoxDecoration(
@@ -188,7 +188,7 @@ class _CupertinoModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
       builder: (BuildContext context, Widget? child) {
         final double progress = secondaryAnimation.value;
         final double scale = 1 - progress / 10;
-        final double distanceWithScale = (paddingTop + _kPreviousRouteVisibeHeight) * 0.9;
+        final double distanceWithScale = (paddingTop + _kPreviousRouteVisibeOffset) * 0.9;
         final Offset offset = Offset(0, progress * (paddingTop - distanceWithScale));
         return Transform.translate(
           offset: offset,
