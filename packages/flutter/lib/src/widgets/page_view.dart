@@ -341,9 +341,17 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     RenderObject? targetRenderObject,
   }) {
     // Since the _PagePosition is intended to cover the available space within
-    // its viewport, stop trying to any scroll, otherwise, could end up changing
-    // which page is visible and moving the render object out of the viewport.
-    return Future<void>.value();
+    // its viewport, stop trying to move the target render object to the center
+    // - otherwise, could end up changing which page is visible and moving the
+    // targetRenderObject out of the viewport.
+    return super.ensureVisible(
+      object,
+      alignment: alignment,
+      duration: duration,
+      curve: curve,
+      alignmentPolicy: alignmentPolicy,
+      targetRenderObject: null,
+    );
   }
 
   @override
