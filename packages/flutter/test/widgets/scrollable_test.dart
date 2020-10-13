@@ -1007,7 +1007,7 @@ void main() {
     expect(targetMidLeftPage1, findsOneWidget);
   });
 
-  testWidgets('ensureVisible does not move PageViews when there are objects between nested scrollable', (WidgetTester tester) async {
+  testWidgets('ensureVisible does not move PageViews when there are objects between pageView and target object', (WidgetTester tester) async {
     final PageController controller = PageController();
     int count = 0;
 
