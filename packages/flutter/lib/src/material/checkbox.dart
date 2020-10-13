@@ -72,9 +72,11 @@ class Checkbox extends StatefulWidget {
     this.visualDensity,
     this.focusNode,
     this.autofocus = false,
+    this.width = 24.0,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(autofocus != null),
+       assert(width != null && width >= 24.0),
        super(key: key);
 
   /// Whether this checkbox is checked.
@@ -182,7 +184,7 @@ class Checkbox extends StatefulWidget {
   final bool autofocus;
 
   /// The width of a checkbox widget.
-  static const double width = 24.0;
+  static const double width;
 
   @override
   _CheckboxState createState() => _CheckboxState();
