@@ -1308,6 +1308,17 @@ class LineSegment {
   /// indefinitely.
   double get lineYIntercept => p0.dy - slope * p0.dx;
 
+  // A subcase of the intercepts method.
+  static bool _isVerticalAndInterceptsNonVertical(LineSegment vertical, LineSegment nonVertical) {
+    // Assert that vertical is indeed vertical.
+    assert(vertical.p0.dx == vertical.p1.dx);
+
+    final double x = vertical.p0.dx;
+    final double intersectionY = nonVertical.slope * x + nonVertical.lineYIntercept;
+    final Offset intersection = Offset(x, intersectionY);
+    return vertical.contains(intersection) && nonVertical.contains(intersection);
+  }
+
   /// True iff the offset lies on the line segment, inclusively.
   bool contains(Offset offset) {
     final double xMin = math.min(p0.dx, p1.dx);
@@ -1325,24 +1336,27 @@ class LineSegment {
       return contains(lineSegment.p0) || contains(lineSegment.p1);
     }
 
-    // If the slopes are different, the corresponding lines (not segments) must
-    // overlap. If that point happens between the endpoints of both line
-    // segments, then the line segmens intersect.
-    // x = (b1 - b) / (m - m1)
-    final double xIntersection = (lineSegment.lineYIntercept - lineYIntercept)
-        / (slope - lineSegment.slope);
-    // TODO(justinmc): This is happening when panning a corner of viewport
-    // outside of boundary after rotation. See test in IV_test.dart and fix it
-    // by handling vertical lines with infinite slope here.
-    if (!xIntersection.isFinite) {
-      print('justin not finite! $xIntersection = (${lineSegment.lineYIntercept} - $lineYIntercept) / ($slope - ${lineSegment.slope})');
+    // Handle if the slopes are different but one line segment is vertical
+    // (infinite slope).
+    if (!slope.isFinite) {
+      return _isVerticalAndInterceptsNonVertical(this, lineSegment);
     }
-    assert(xIntersection.isFinite);
+    if (!lineSegment.slope.isFinite) {
+      return _isVerticalAndInterceptsNonVertical(lineSegment, this);
+    }
 
-    // y = m * xIntersection + b
-    final double yIntersection = slope * xIntersection + lineYIntercept;
-    assert(yIntersection.isFinite);
-    final Offset intersection = Offset(xIntersection, yIntersection);
+    // If the slopes are different and not vertical, the corresponding lines
+    // (not segments) must overlap. If that point happens between the endpoints
+    // of both line segments, then the line segmens intersect.
+    // x = (b1 - b) / (m - m1)
+    final double intersectionX = (lineSegment.lineYIntercept - lineYIntercept)
+        / (slope - lineSegment.slope);
+    assert(intersectionX.isFinite);
+
+    // y = m * intersectionX + b
+    final double intersectionY = slope * intersectionX + lineYIntercept;
+    assert(intersectionY.isFinite);
+    final Offset intersection = Offset(intersectionX, intersectionY);
 
     return contains(intersection) && lineSegment.contains(intersection);
   }

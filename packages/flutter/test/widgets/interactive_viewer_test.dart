@@ -1215,14 +1215,87 @@ void main() {
           Offset(0.0, 100.0),
           Offset(100.0, 0.0),
         );
-        print('justin start');
         expect(a.intersects(b), isTrue);
       });
 
-      // TODO(justinmc): I was seeing errors related to this. I think if one of
-      // the lines is vertical, such as will always happen with an AABB, then
-      // my equations go infinite and break.
-      test('vertical line with infinite slope', () {
+      test('one is vertical and they intersect', () {
+        const LineSegment a = LineSegment(
+          Offset(50.0, 0.0),
+          Offset(50.0, 100.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+        expect(a.intersects(b), isTrue);
+        expect(b.intersects(a), isTrue);
+      });
+
+      test('one is vertical and they do not intersect', () {
+        const LineSegment a = LineSegment(
+          Offset(101.0, 0.0),
+          Offset(101.0, 100.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+        expect(a.intersects(b), isFalse);
+        expect(b.intersects(a), isFalse);
+      });
+
+      test('one is horizontal and they intersect', () {
+        const LineSegment a = LineSegment(
+          Offset(0.0, 50.0),
+          Offset(100.0, 50.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+        print('justin start');
+        expect(a.intersects(b), isTrue);
+        expect(b.intersects(a), isTrue);
+      });
+
+      test('one is horizontal and they do not intersect', () {
+        const LineSegment a = LineSegment(
+          Offset(0.0, 101.0),
+          Offset(100.0, 101.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+        print('justin start');
+        expect(a.intersects(b), isFalse);
+        expect(b.intersects(a), isFalse);
+      });
+
+      test('one is vertical and one is horizontal and they intersect', () {
+        const LineSegment a = LineSegment(
+          Offset(50.0, 0.0),
+          Offset(50.0, 100.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(0.0, 50.0),
+          Offset(100.0, 50.0),
+        );
+        expect(a.intersects(b), isTrue);
+        expect(b.intersects(a), isTrue);
+      });
+
+      test('one is vertical and one is horizontal and they do not intersect', () {
+        const LineSegment a = LineSegment(
+          Offset(101.0, 0.0),
+          Offset(101.0, 100.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(0.0, 50.0),
+          Offset(100.0, 50.0),
+        );
+        expect(a.intersects(b), isFalse);
+        expect(b.intersects(a), isFalse);
       });
     });
   });
