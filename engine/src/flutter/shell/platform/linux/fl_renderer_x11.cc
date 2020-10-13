@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "fl_renderer_x11.h"
+#ifdef GDK_WINDOWING_X11
+
 #include "flutter/shell/platform/linux/egl_utils.h"
 
 struct _FlRendererX11 {
@@ -108,3 +110,5 @@ static void fl_renderer_x11_init(FlRendererX11* self) {}
 FlRendererX11* fl_renderer_x11_new() {
   return FL_RENDERER_X11(g_object_new(fl_renderer_x11_get_type(), nullptr));
 }
+
+#endif  // GDK_WINDOWING_X11

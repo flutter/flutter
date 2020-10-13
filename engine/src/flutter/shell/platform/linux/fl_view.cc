@@ -5,7 +5,9 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 #include <gdk/gdkwayland.h>
+#ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
+#endif
 #include <cstring>
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
@@ -131,17 +133,27 @@ static void fl_view_plugin_registry_iface_init(
   iface->get_registrar_for_plugin = fl_view_get_registrar_for_plugin;
 }
 
+static FlRenderer* fl_view_get_renderer_for_display(GdkDisplay* display) {
+#ifdef GDK_WINDOWING_X11
+  if (GDK_IS_X11_DISPLAY(display)) {
+    return FL_RENDERER(fl_renderer_x11_new());
+  }
+#endif
+
+  if (GDK_IS_WAYLAND_DISPLAY(display)) {
+    return FL_RENDERER(fl_renderer_wayland_new());
+  }
+
+  g_error("Unsupported GDK backend");
+
+  return nullptr;
+}
+
 static void fl_view_constructed(GObject* object) {
   FlView* self = FL_VIEW(object);
 
   GdkDisplay* display = gtk_widget_get_display(GTK_WIDGET(self));
-  if (GDK_IS_X11_DISPLAY(display)) {
-    self->renderer = FL_RENDERER(fl_renderer_x11_new());
-  } else if (GDK_IS_WAYLAND_DISPLAY(display)) {
-    self->renderer = FL_RENDERER(fl_renderer_wayland_new());
-  } else {
-    g_error("Unsupported GDK backend");
-  }
+  self->renderer = fl_view_get_renderer_for_display(display);
   self->engine = fl_engine_new(self->project, self->renderer);
 
   // Create system channel handlers.
