@@ -468,10 +468,12 @@ class IOSDevice extends Device {
         packageName: FlutterProject.current().manifest.appName,
       );
       if (localUri == null) {
+        iosDeployDebugger?.detach();
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);
     } on ProcessException catch (e) {
+      iosDeployDebugger?.detach();
       _logger.printError(e.message);
       return LaunchResult.failed();
     } finally {
