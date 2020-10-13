@@ -120,7 +120,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
 
   String _formatPixels(double value) {
     assert(value > 0.0);
-    String pixels;
+    final String pixels;
     if (value > 10.0) {
       pixels = value.toStringAsFixed(0);
     } else if (value > 1.0) {
@@ -246,7 +246,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         context: ErrorDescription('during layout'),
         informationCollector: () sync* {
           if (debugCreator != null)
-            yield DiagnosticsDebugCreator(debugCreator as Object);
+            yield DiagnosticsDebugCreator(debugCreator!);
           yield* overflowHints!;
           yield describeForError('The specific $runtimeType in question is');
           // TODO(jacobr): this line is ascii art that it would be nice to

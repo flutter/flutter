@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -173,7 +171,7 @@ void main() {
   });
 
   testWidgets('onChanged callbacks are called', (WidgetTester tester) async {
-    String _value;
+    late String _value;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -203,7 +201,7 @@ void main() {
           child: Center(
             child: TextFormField(
               autovalidateMode: AutovalidateMode.always,
-              validator: (String value) {
+              validator: (String? value) {
                 _validateCalled++;
                 return null;
               },
@@ -229,7 +227,7 @@ void main() {
             child: TextFormField(
               enabled: true,
               autovalidateMode: AutovalidateMode.always,
-              validator: (String value) {
+              validator: (String? value) {
                 _validateCalled += 1;
                 return null;
               },
@@ -272,25 +270,25 @@ void main() {
     await tester.pumpWidget(buildFrame(true, false));
     Text helperWidget = tester.widget(find.text(helperText));
     Text counterWidget = tester.widget(find.text(counterText));
-    expect(helperWidget.style.color, isNot(equals(Colors.transparent)));
-    expect(counterWidget.style.color, isNot(equals(Colors.transparent)));
+    expect(helperWidget.style!.color, isNot(equals(Colors.transparent)));
+    expect(counterWidget.style!.color, isNot(equals(Colors.transparent)));
     await tester.pumpWidget(buildFrame(true, true));
     counterWidget = tester.widget(find.text(counterText));
     Text errorWidget = tester.widget(find.text(errorText));
-    expect(helperWidget.style.color, isNot(equals(Colors.transparent)));
-    expect(errorWidget.style.color, isNot(equals(Colors.transparent)));
+    expect(helperWidget.style!.color, isNot(equals(Colors.transparent)));
+    expect(errorWidget.style!.color, isNot(equals(Colors.transparent)));
 
     // When enabled is false, the helper/error and counter are not visible.
     await tester.pumpWidget(buildFrame(false, false));
     helperWidget = tester.widget(find.text(helperText));
     counterWidget = tester.widget(find.text(counterText));
-    expect(helperWidget.style.color, equals(Colors.transparent));
-    expect(counterWidget.style.color, equals(Colors.transparent));
+    expect(helperWidget.style!.color, equals(Colors.transparent));
+    expect(counterWidget.style!.color, equals(Colors.transparent));
     await tester.pumpWidget(buildFrame(false, true));
     errorWidget = tester.widget(find.text(errorText));
     counterWidget = tester.widget(find.text(counterText));
-    expect(counterWidget.style.color, equals(Colors.transparent));
-    expect(errorWidget.style.color, equals(Colors.transparent));
+    expect(counterWidget.style!.color, equals(Colors.transparent));
+    expect(errorWidget.style!.color, equals(Colors.transparent));
   });
 
   testWidgets('passing a buildCounter shows returned widget', (WidgetTester tester) async {
@@ -298,7 +296,7 @@ void main() {
       home: Material(
         child: Center(
             child: TextFormField(
-              buildCounter: (BuildContext context, { int currentLength, int maxLength, bool isFocused }) {
+              buildCounter: (BuildContext context, { int? currentLength, int? maxLength, bool? isFocused }) {
                 return Text('${currentLength.toString()} of ${maxLength.toString()}');
               },
               maxLength: 10,
@@ -431,6 +429,33 @@ void main() {
     expect(find.text('changedValue'), findsOneWidget);
   });
 
+  testWidgets('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
+    bool _called = false;
+
+    late FormFieldState<String> state;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              onChanged: (String value) {
+                _called = true;
+                expect(value, state.value);
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+
+    await tester.enterText(find.byType(TextField), 'Soup');
+
+    expect(_called, true);
+  });
+
   testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -457,7 +482,7 @@ void main() {
           child: Scaffold(
             body: TextFormField(
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: (String value) {
+              validator: (String? value) {
                 _validateCalled++;
                 return null;
               },

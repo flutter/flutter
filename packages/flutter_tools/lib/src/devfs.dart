@@ -207,9 +207,22 @@ class DevFSException implements Exception {
   final String message;
   final dynamic error;
   final StackTrace stackTrace;
+
+  @override
+  String toString() => 'DevFSException($message, $error, $stackTrace)';
 }
 
-class _DevFSHttpWriter {
+/// Interface responsible for syncing asset files to a development device.
+abstract class DevFSWriter {
+  /// Write the assets in [entries] to the target device.
+  ///
+  /// The keys of the map are relative from the [baseUri].
+  ///
+  /// Throws a [DevFSException] if the process fails to complete.
+  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, DevFSWriter parent);
+}
+
+class _DevFSHttpWriter implements DevFSWriter {
   _DevFSHttpWriter(
     this.fsName,
     vm_service.VmService serviceProtocol, {
@@ -229,18 +242,31 @@ class _DevFSHttpWriter {
   final String fsName;
   final Uri httpAddress;
 
-  static const int kMaxInFlight = 6;
+  // 3 was chosen to try to limit the variance in the time it takes to execute
+  // `await request.close()` since there is a known bug in Dart where it doesn't
+  // always return a status code in response to a PUT request:
+  // https://github.com/dart-lang/sdk/issues/43525.
+  static const int kMaxInFlight = 3;
 
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
   Completer<void> _completer;
 
-  Future<void> write(Map<Uri, DevFSContent> entries) async {
-    _client.maxConnectionsPerHost = kMaxInFlight;
-    _completer = Completer<void>();
-    _outstanding = Map<Uri, DevFSContent>.of(entries);
-    _scheduleWrites();
-    await _completer.future;
+  @override
+  Future<void> write(Map<Uri, DevFSContent> entries, Uri devFSBase, [DevFSWriter parent]) async {
+    try {
+      _client.maxConnectionsPerHost = kMaxInFlight;
+      _completer = Completer<void>();
+      _outstanding = Map<Uri, DevFSContent>.of(entries);
+      _scheduleWrites();
+      await _completer.future;
+    } on SocketException catch (socketException, stackTrace) {
+      _logger.printTrace('DevFS sync failed. Lost connection to device: $socketException');
+      throw DevFSException('Lost connection to device.', socketException, stackTrace);
+    } on Exception catch (exception, stackTrace) {
+      _logger.printError('Could not update files on device: $exception');
+      throw DevFSException('Sync failed', exception, stackTrace);
+    }
   }
 
   void _scheduleWrites() {
@@ -270,13 +296,29 @@ class _DevFSHttpWriter {
           _osUtils,
         );
         await request.addStream(contents);
-        final HttpClientResponse response = await request.close();
-        response.listen((_) {},
-          onError: (dynamic error) {
-            _logger.printTrace('error: $error');
-          },
-          cancelOnError: true,
-        );
+        // The contents has already been streamed, closing the request should
+        // not take long but we are experiencing hangs with it, see #63869.
+        //
+        // Once the bug in Dart is solved we can remove the timeout
+        // (https://github.com/dart-lang/sdk/issues/43525).  The timeout was
+        // chosen to be inflated based on the max observed time when running the
+        // tests in "Google Tests".
+        try {
+          final HttpClientResponse response = await request.close().timeout(
+            const Duration(milliseconds: 10000));
+          response.listen((_) {},
+            onError: (dynamic error) {
+              _logger.printTrace('error: $error');
+            },
+            cancelOnError: true,
+          );
+        } on TimeoutException {
+          request.abort();
+          // This should throw "HttpException: Request has been aborted".
+          await request.done;
+          // Just to be safe we rethrow the TimeoutException.
+          rethrow;
+        }
         break;
       } on Exception catch (error, trace) {
         if (!_completer.isCompleted) {
@@ -302,7 +344,7 @@ class UpdateFSReport {
     bool success = false,
     int invalidatedSourcesCount = 0,
     int syncedBytes = 0,
-    this.fastReassemble,
+    this.fastReassembleClassName,
   }) : _success = success,
        _invalidatedSourcesCount = invalidatedSourcesCount,
        _syncedBytes = syncedBytes;
@@ -312,7 +354,7 @@ class UpdateFSReport {
   int get syncedBytes => _syncedBytes;
 
   bool _success;
-  bool fastReassemble;
+  String fastReassembleClassName;
   int _invalidatedSourcesCount;
   int _syncedBytes;
 
@@ -320,11 +362,7 @@ class UpdateFSReport {
     if (!report._success) {
       _success = false;
     }
-    if (report.fastReassemble != null && fastReassemble != null) {
-      fastReassemble &= report.fastReassemble;
-    } else if (report.fastReassemble != null) {
-      fastReassemble = report.fastReassemble;
-    }
+    fastReassembleClassName ??= report.fastReassembleClassName;
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
   }
@@ -364,7 +402,9 @@ class DevFS {
 
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
+  DateTime _previousCompiled;
   PackageConfig lastPackageConfig;
+  File _widgetCacheOutputFile;
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -404,6 +444,34 @@ class DevFS {
     _logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
   }
 
+  /// Mark the [lastCompiled] time to the previous successful compile.
+  ///
+  /// Sometimes a hot reload will be rejected by the VM due to a change in the
+  /// structure of the code not supporting the hot reload. In these cases,
+  /// the best resolution is a hot restart. However, the resident runner
+  /// will not recognize this file as having been changed since the delta
+  /// will already have been accepted. Instead, reset the compile time so
+  /// that the last updated files are included in subsequent compilations until
+  /// a reload is accepted.
+  void resetLastCompiled() {
+    lastCompiled = _previousCompiled;
+  }
+
+
+  /// If the build method of a single widget was modified, return the widget name.
+  ///
+  /// If any other changes were made, or there is an error scanning the file,
+  /// return `null`.
+  String _checkIfSingleWidgetReloadApplied() {
+    if (_widgetCacheOutputFile != null && _widgetCacheOutputFile.existsSync()) {
+      final String widget = _widgetCacheOutputFile.readAsStringSync().trim();
+      if (widget.isNotEmpty) {
+        return widget;
+      }
+    }
+    return null;
+  }
+
   /// Updates files on the device.
   ///
   /// Returns the number of bytes synced.
@@ -414,6 +482,7 @@ class DevFS {
     @required String pathToReload,
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
+    DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
@@ -421,39 +490,16 @@ class DevFS {
     String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
-    bool skipAssets = false,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
     final DateTime candidateCompileTime = DateTime.now();
     lastPackageConfig = packageConfig;
+    _widgetCacheOutputFile = _fileSystem.file('$dillOutputPath.incremental.dill.widget_cache');
 
     // Update modified files
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
-
     int syncedBytes = 0;
-    if (bundle != null && !skipAssets) {
-      _logger.printTrace('Scanning asset files');
-      final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
-      // We write the assets into the AssetBundle working dir so that they
-      // are in the same location in DevFS and the iOS simulator.
-      final String assetDirectory = getAssetBuildDirectory();
-      bundle.entries.forEach((String archivePath, DevFSContent content) {
-        final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
-        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
-          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-        }
-        // Only update assets if they have been modified, or if this is the
-        // first upload of the asset bundle.
-        if (content.isModified || (bundleFirstUpload && archivePath != null)) {
-          dirtyEntries[deviceUri] = content;
-          syncedBytes += content.size;
-          if (archivePath != null && !bundleFirstUpload) {
-            assetPathsToEvict.add(archivePath);
-          }
-        }
-      });
-    }
     if (fullRestart) {
       generator.reset();
     }
@@ -461,16 +507,43 @@ class DevFS {
     // this will produce a full dill. Subsequent invocations will produce incremental
     // dill files that depend on the invalidated files.
     _logger.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
-    final CompilerOutput compilerOutput = await generator.recompile(
+
+    // Await the compiler response after checking if the bundle is updated. This allows the file
+    // stating to be done while waiting for the frontend_server response.
+    final Future<CompilerOutput> pendingCompilerOutput = generator.recompile(
       mainUri,
       invalidatedFiles,
       outputPath: dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packageConfig: packageConfig,
     );
+    if (bundle != null) {
+      // The tool writes the assets into the AssetBundle working dir so that they
+      // are in the same location in DevFS and the iOS simulator.
+      final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
+      final String assetDirectory = getAssetBuildDirectory();
+      bundle.entries.forEach((String archivePath, DevFSContent content) {
+        // If the content is backed by a real file, isModified will file stat and return true if
+        // it was modified since the last time this was called.
+        if (!content.isModified || bundleFirstUpload) {
+          return;
+        }
+        final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
+        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
+          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+        }
+        dirtyEntries[deviceUri] = content;
+        syncedBytes += content.size;
+        if (archivePath != null && !bundleFirstUpload) {
+          assetPathsToEvict.add(archivePath);
+        }
+      });
+    }
+    final CompilerOutput compilerOutput = await pendingCompilerOutput;
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
     }
     // Only update the last compiled time if we successfully compiled.
+    _previousCompiled = lastCompiled;
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
     sources = compilerOutput.sources;
@@ -480,32 +553,62 @@ class DevFS {
     if (!bundleFirstUpload) {
       final String compiledBinary = compilerOutput?.outputFilename;
       if (compiledBinary != null && compiledBinary.isNotEmpty) {
-        final Uri entryUri = _fileSystem.path.toUri(projectRootPath != null
-          ? _fileSystem.path.relative(pathToReload, from: projectRootPath)
-          : pathToReload,
-        );
+        final Uri entryUri = _fileSystem.path.toUri(pathToReload);
         final DevFSFileContent content = DevFSFileContent(_fileSystem.file(compiledBinary));
         syncedBytes += content.size;
         dirtyEntries[entryUri] = content;
       }
     }
-    _logger.printTrace('Updating files');
+    _logger.printTrace('Updating files.');
     if (dirtyEntries.isNotEmpty) {
-      try {
-        await _httpWriter.write(dirtyEntries);
-      } on SocketException catch (socketException, stackTrace) {
-        _logger.printTrace('DevFS sync failed. Lost connection to device: $socketException');
-        throw DevFSException('Lost connection to device.', socketException, stackTrace);
-      } on Exception catch (exception, stackTrace) {
-        _logger.printError('Could not update files on device: $exception');
-        throw DevFSException('Sync failed', exception, stackTrace);
-      }
+      await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri, _httpWriter);
     }
     _logger.printTrace('DevFS: Sync finished');
-    return UpdateFSReport(success: true, syncedBytes: syncedBytes,
-         invalidatedSourcesCount: invalidatedFiles.length);
+    return UpdateFSReport(
+      success: true,
+      syncedBytes: syncedBytes,
+      invalidatedSourcesCount: invalidatedFiles.length,
+      fastReassembleClassName: _checkIfSingleWidgetReloadApplied(),
+    );
   }
 
   /// Converts a platform-specific file path to a platform-independent URL path.
   String _asUriPath(String filePath) => _fileSystem.path.toUri(filePath).path + '/';
+}
+
+/// An implementation of a devFS writer which copies physical files for devices
+/// running on the same host.
+///
+/// DevFS entries which correspond to physical files are copied using [File.copySync],
+/// while entries that correspond to arbitrary string/byte values are written from
+/// memory.
+///
+/// Requires that the file system is the same for both the tool and application.
+class LocalDevFSWriter implements DevFSWriter {
+  LocalDevFSWriter({
+    @required FileSystem fileSystem,
+  }) : _fileSystem = fileSystem;
+
+  final FileSystem _fileSystem;
+
+  @override
+  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, [DevFSWriter parent]) async {
+    try {
+      for (final Uri uri in entries.keys) {
+        final DevFSContent devFSContent = entries[uri];
+        final File destination = _fileSystem.file(baseUri.resolveUri(uri));
+        if (!destination.parent.existsSync()) {
+          destination.parent.createSync(recursive: true);
+        }
+        if (devFSContent is DevFSFileContent) {
+          final File content = devFSContent.file as File;
+          content.copySync(destination.path);
+          continue;
+        }
+        destination.writeAsBytesSync(await devFSContent.contentsAsBytes());
+      }
+    } on FileSystemException catch (err) {
+      throw DevFSException(err.toString());
+    }
+  }
 }

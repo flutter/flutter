@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,8 +24,8 @@ void main() {
       ),
     );
 
-    final TextStyle actualSelectedTextStyle = tester.renderObject<RenderParagraph>(find.text('Abc')).text.style;
-    final TextStyle actualUnselectedTextStyle = tester.renderObject<RenderParagraph>(find.text('Def')).text.style;
+    final TextStyle actualSelectedTextStyle = tester.renderObject<RenderParagraph>(find.text('Abc')).text.style!;
+    final TextStyle actualUnselectedTextStyle = tester.renderObject<RenderParagraph>(find.text('Def')).text.style!;
     expect(actualSelectedTextStyle.fontSize, equals(selectedTextStyle.fontSize));
     expect(actualSelectedTextStyle.fontWeight, equals(selectedTextStyle.fontWeight));
     expect(actualUnselectedTextStyle.fontSize, equals(actualUnselectedTextStyle.fontSize));
@@ -1416,7 +1414,7 @@ void main() {
 
   testWidgets('Extended rail animates the width and labels appear - [textDirection]=LTR', (WidgetTester tester) async {
     bool extended = false;
-    StateSetter stateSetter;
+    late StateSetter stateSetter;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1553,7 +1551,7 @@ void main() {
 
   testWidgets('Extended rail animates the width and labels appear - [textDirection]=RTL', (WidgetTester tester) async {
     bool extended = false;
-    StateSetter stateSetter;
+    late StateSetter stateSetter;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1697,7 +1695,7 @@ void main() {
 
   testWidgets('Extended rail gets wider with longer labels are larger text scale', (WidgetTester tester) async {
     bool extended = false;
-    StateSetter stateSetter;
+    late StateSetter stateSetter;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1708,7 +1706,7 @@ void main() {
               body: Row(
                 children: <Widget>[
                   MediaQuery(
-                    data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+                    data: MediaQuery.of(context)!.copyWith(textScaleFactor: 3.0),
                     child: NavigationRail(
                       selectedIndex: 0,
                       destinations: const <NavigationRailDestination>[
@@ -1747,7 +1745,7 @@ void main() {
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(rail.size.width, equals(332.0));
+    expect(rail.size.width, equals(328.0));
 
     await tester.pumpAndSettle();
     expect(rail.size.width, equals(584.0));
@@ -1755,7 +1753,7 @@ void main() {
 
   testWidgets('Extended rail final width can be changed', (WidgetTester tester) async {
     bool extended = false;
-    StateSetter stateSetter;
+    late StateSetter stateSetter;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1794,10 +1792,69 @@ void main() {
     expect(rail.size.width, equals(300.0));
   });
 
+  /// Regression test for https://github.com/flutter/flutter/issues/65657
+  testWidgets('Extended rail transition does not jump from the beginning', (WidgetTester tester) async {
+    bool extended = false;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    selectedIndex: 0,
+                    destinations: const <NavigationRailDestination>[
+                      NavigationRailDestination(
+                        icon: Icon(Icons.favorite_border),
+                        selectedIcon: Icon(Icons.favorite),
+                        label: Text('Abc'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.bookmark_border),
+                        selectedIcon: Icon(Icons.bookmark),
+                        label: Text('Longer Label'),
+                      ),
+                    ],
+                    extended: extended,
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Finder rail = find.byType(NavigationRail);
+
+    // Before starting the animation, the rail has a width of 72.
+    expect(tester.getSize(rail).width, 72.0);
+
+    stateSetter(() {
+      extended = true;
+    });
+
+    await tester.pump();
+    // Create very close to 0, but non-zero, animation value.
+    await tester.pump(const Duration(milliseconds: 1));
+    // Expect that it has started to extend.
+    expect(tester.getSize(rail).width, greaterThan(72.0));
+    // Expect that it has only extended by a small amount, or that the first
+    // frame does not jump. This helps verify that it is a smooth animation.
+    expect(tester.getSize(rail).width, closeTo(72.0, 1.0));
+  });
+
   testWidgets('Extended rail animation can be consumed', (WidgetTester tester) async {
     bool extended = false;
-    Animation<double> animation;
-    StateSetter stateSetter;
+    late Animation<double> animation;
+    late StateSetter stateSetter;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1840,7 +1897,7 @@ void main() {
   });
 
   testWidgets('onDestinationSelected is called', (WidgetTester tester) async {
-    int selectedIndex;
+    late int selectedIndex;
 
     await _pumpNavigationRail(
       tester,
@@ -2047,14 +2104,14 @@ List<NavigationRailDestination> _destinations() {
 Future<void> _pumpNavigationRail(
   WidgetTester tester, {
   double textScaleFactor = 1.0,
-  NavigationRail navigationRail,
+  required NavigationRail navigationRail,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Builder(
         builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+            data: MediaQuery.of(context)!.copyWith(textScaleFactor: textScaleFactor),
             child: Scaffold(
               body: Row(
                 children: <Widget>[
@@ -2072,7 +2129,7 @@ Future<void> _pumpNavigationRail(
   );
 }
 
-Future<void> _pumpLocalizedTestRail(WidgetTester tester, { NavigationRailLabelType labelType, bool extended = false }) async {
+Future<void> _pumpLocalizedTestRail(WidgetTester tester, { NavigationRailLabelType? labelType, bool extended = false }) async {
   await tester.pumpWidget(
     Localizations(
       locale: const Locale('en', 'US'),
@@ -2125,7 +2182,7 @@ TextStyle _iconStyle(WidgetTester tester, IconData icon) {
       of: find.byIcon(icon),
       matching: find.byType(RichText),
     ),
-  ).text.style;
+  ).text.style!;
 }
 
 Finder _opacityAboveLabel(String text) {

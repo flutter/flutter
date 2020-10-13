@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -113,13 +111,13 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
   /// [RestorationMixin.registerForRestoration].
   T get value {
     assert(isRegistered);
-    return _value;
+    return _value as T;
   }
-  T _value;
+  T? _value;
   set value(T newValue) {
     assert(isRegistered);
     if (newValue != _value) {
-      final T oldValue = _value;
+      final T? oldValue = _value;
       _value = newValue;
       didUpdateValue(oldValue);
     }
@@ -139,7 +137,7 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
   /// Subclasses should call [notifyListeners] from this method, if the new
   /// value changes what [toPrimitives] returns.
   @protected
-  void didUpdateValue(T oldValue);
+  void didUpdateValue(T? oldValue);
 }
 
 // _RestorablePrimitiveValue and its subclasses do not allow null values in
@@ -151,7 +149,7 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
 // these new subclasses could be to add 'N' (for nullable) to the end of a
 // class name (e.g. RestorableIntN, RestorableStringN, etc.) to distinguish them
 // from their non-nullable friends.
-class _RestorablePrimitiveValue<T> extends RestorableValue<T> {
+class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
   _RestorablePrimitiveValue(this._defaultValue)
     : assert(_defaultValue != null),
       assert(debugIsSerializableForRestoration(_defaultValue)),
@@ -169,7 +167,7 @@ class _RestorablePrimitiveValue<T> extends RestorableValue<T> {
   }
 
   @override
-  void didUpdateValue(T oldValue) {
+  void didUpdateValue(T? oldValue) {
     assert(debugIsSerializableForRestoration(value));
     notifyListeners();
   }
@@ -275,22 +273,59 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
   /// [RestorationMixin.registerForRestoration].
   T get value {
     assert(isRegistered);
-    return _value;
+    return _value!;
   }
-  T _value;
+  T? _value;
 
   @override
   void initWithValue(T value) {
     assert(value != null);
     _value?.removeListener(notifyListeners);
     _value = value;
-    _value.addListener(notifyListeners);
+    _value!.addListener(notifyListeners);
   }
 
   @override
   void dispose() {
     super.dispose();
     _value?.removeListener(notifyListeners);
+  }
+}
+
+/// A base class for creating a [RestorableProperty] that stores and restores a
+/// [ChangeNotifier].
+///
+/// This class may be used to implement a [RestorableProperty] for a
+/// [ChangeNotifier], whose information it needs to store in the restoration
+/// data change whenever the [ChangeNotifier] notifies its listeners.
+///
+/// The [RestorationMixin] this property is registered with will call
+/// [toPrimitives] whenever the wrapped [ChangeNotifier] notifies its listeners
+/// to update the information that this property has stored in the restoration
+/// data.
+///
+/// Furthermore, the property will dispose the wrapped [ChangeNotifier] when
+/// either the property itself is disposed or its value is replaced with another
+/// [ChangeNotifier] instance.
+abstract class RestorableChangeNotifier<T extends ChangeNotifier> extends RestorableListenable<T> {
+  @override
+  void initWithValue(T value) {
+    _diposeOldValue();
+    super.initWithValue(value);
+  }
+
+  @override
+  void dispose() {
+    _diposeOldValue();
+    super.dispose();
+  }
+
+  void _diposeOldValue() {
+    if (_value != null) {
+      // Scheduling a microtask for dispose to give other entities a chance
+      // to remove their listeners first.
+      scheduleMicrotask(_value!.dispose);
+    }
   }
 }
 
@@ -301,12 +336,12 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
 /// state restoration, the property will restore [TextEditingController.text] to
 /// the value it had when the restoration data it is getting restored from was
 /// collected.
-class RestorableTextEditingController extends RestorableListenable<TextEditingController> {
+class RestorableTextEditingController extends RestorableChangeNotifier<TextEditingController> {
   /// Creates a [RestorableTextEditingController].
   ///
   /// This constructor treats a null `text` argument as if it were the empty
   /// string.
-  factory RestorableTextEditingController({String text}) => RestorableTextEditingController.fromValue(
+  factory RestorableTextEditingController({String? text}) => RestorableTextEditingController.fromValue(
     text == null ? TextEditingValue.empty : TextEditingValue(text: text),
   );
 
@@ -332,28 +367,5 @@ class RestorableTextEditingController extends RestorableListenable<TextEditingCo
   @override
   Object toPrimitives() {
     return value.text;
-  }
-
-  TextEditingController _controller;
-
-  @override
-  void initWithValue(TextEditingController value) {
-    _disposeControllerIfNecessary();
-    _controller = value;
-    super.initWithValue(value);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _disposeControllerIfNecessary();
-  }
-
-  void _disposeControllerIfNecessary() {
-    if (_controller != null) {
-      // Scheduling a microtask for dispose to give other entities a chance
-      // to remove their listeners first.
-      scheduleMicrotask(_controller.dispose);
-    }
   }
 }

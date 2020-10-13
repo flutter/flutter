@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/gestures.dart';
@@ -15,6 +13,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
+
+// A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
+// for a given TextSelection.
+// This is intended to simulate SkParagraph's implementation of Paragraph.getBoxesForRange,
+// which may return an empty list in some situations where Libtxt would return a list
+// containing an empty box.
+class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
+  RenderParagraphWithEmptySelectionBoxList(
+    InlineSpan text, {
+    required TextDirection textDirection,
+    required this.emptyListSelection,
+  }) : super(text, textDirection: textDirection);
+
+  TextSelection emptyListSelection;
+
+  @override
+  List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
+    if (selection == emptyListSelection) {
+      return <ui.TextBox>[];
+    }
+    return super.getBoxesForSelection(selection);
+  }
+}
 
 void main() {
   test('getOffsetForCaret control test', () {
@@ -34,6 +55,17 @@ void main() {
 
     final Offset offset50 = paragraph.getOffsetForCaret(const TextPosition(offset: 50), caret);
     expect(offset50.dy, greaterThan(offset5.dy));
+  });
+
+  test('getFullHeightForCaret control test', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: _kText,style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5))!;
+    expect(height5, equals(10.0));
   });
 
   test('getPositionForOffset control test', () {
@@ -103,7 +135,11 @@ void main() {
       softWrap: true,
     );
 
-    void relayoutWith({ int maxLines, bool softWrap, TextOverflow overflow }) {
+    void relayoutWith({
+      int? maxLines,
+      required bool softWrap,
+      required TextOverflow overflow,
+    }) {
       paragraph
         ..maxLines = maxLines
         ..softWrap = softWrap
@@ -178,7 +214,7 @@ void main() {
       textDirection: TextDirection.ltr,
     );
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
-    void layoutAt(int maxLines) {
+    void layoutAt(int? maxLines) {
       paragraph.maxLines = maxLines;
       pumpFrame();
     }
@@ -529,10 +565,27 @@ void main() {
     bool failed = false;
     try {
       paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
-    } catch(e) {
+    } on AssertionError catch (e) {
       failed = true;
       expect(e.message, 'MultiTapGestureRecognizer is not supported.');
     }
     expect(failed, true);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  test('assembleSemanticsNode handles text spans that do not yield selection boxes', () {
+    final RenderParagraph paragraph = RenderParagraphWithEmptySelectionBoxList(
+      TextSpan(text: '', children: <InlineSpan>[
+        TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
+        TextSpan(text: 'B', recognizer: TapGestureRecognizer()..onTap = () {}),
+        TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
+      ]),
+      textDirection: TextDirection.rtl,
+      emptyListSelection: const TextSelection(baseOffset: 0, extentOffset: 1),
+    );
+    layout(paragraph);
+
+    final SemanticsNode node = SemanticsNode();
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(node.childrenCount, 2);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 }
