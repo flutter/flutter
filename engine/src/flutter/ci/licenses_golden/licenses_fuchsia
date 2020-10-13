@@ -1,4 +1,4 @@
-Signature: 1298619133eae5b6bd80c2c69ae6c950
+Signature: 8228f7eacf4039e8da93d0a6a32c0396
 
 UNUSED LICENSES:
 
@@ -3222,6 +3222,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/weavestack.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedconfiguration/wlan_deprecated_configuration.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/zx/zx_common.fidl
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/handle_close_many.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/trace.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/validate_string.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/internal/bitset.h
