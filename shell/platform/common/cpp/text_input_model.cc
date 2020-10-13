@@ -38,27 +38,24 @@ void TextInputModel::SetText(const std::string& text) {
   std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
       utf16_converter;
   text_ = utf16_converter.from_bytes(text);
-  selection_base_ = 0;
-  selection_extent_ = 0;
+  selection_ = TextRange(0);
 }
 
 bool TextInputModel::SetSelection(size_t base, size_t extent) {
-  auto max_pos = text_.length();
+  size_t max_pos = text_.length();
   if (base > max_pos || extent > max_pos) {
     return false;
   }
-  selection_base_ = base;
-  selection_extent_ = extent;
+  selection_ = TextRange(base, extent);
   return true;
 }
 
 bool TextInputModel::DeleteSelected() {
-  if (selection_base_ == selection_extent_) {
+  if (selection_.collapsed()) {
     return false;
   }
-  text_.erase(selection_start(), selection_end() - selection_start());
-  selection_base_ = selection_start();
-  selection_extent_ = selection_base_;
+  text_.erase(selection_.start(), selection_.length());
+  selection_ = TextRange(selection_.start());
   return true;
 }
 
@@ -78,9 +75,9 @@ void TextInputModel::AddCodePoint(char32_t c) {
 
 void TextInputModel::AddText(const std::u16string& text) {
   DeleteSelected();
-  text_.insert(selection_extent_, text);
-  selection_extent_ += text.length();
-  selection_base_ = selection_extent_;
+  size_t position = selection_.position();
+  text_.insert(position, text);
+  selection_ = TextRange(position + text.length());
 }
 
 void TextInputModel::AddText(const std::string& text) {
@@ -90,38 +87,36 @@ void TextInputModel::AddText(const std::string& text) {
 }
 
 bool TextInputModel::Backspace() {
-  // If there's a selection, delete it.
   if (DeleteSelected()) {
     return true;
   }
-  // There's no selection; delete the preceding codepoint.
-  if (selection_base_ != 0) {
-    int count = IsTrailingSurrogate(text_.at(selection_base_ - 1)) ? 2 : 1;
-    text_.erase(selection_base_ - count, count);
-    selection_base_ -= count;
-    selection_extent_ = selection_base_;
+  // If there's no selection, delete the preceding codepoint.
+  size_t position = selection_.position();
+  if (position != 0) {
+    int count = IsTrailingSurrogate(text_.at(position - 1)) ? 2 : 1;
+    text_.erase(position - count, count);
+    selection_ = TextRange(position - count);
     return true;
   }
   return false;
 }
 
 bool TextInputModel::Delete() {
-  // If there's a selection, delete it.
   if (DeleteSelected()) {
     return true;
   }
-  // There's no selection; delete the following codepoint.
-  if (selection_base_ != text_.length()) {
-    int count = IsLeadingSurrogate(text_.at(selection_base_)) ? 2 : 1;
-    text_.erase(selection_base_, count);
-    selection_extent_ = selection_base_;
+  // If there's no selection, delete the preceding codepoint.
+  size_t position = selection_.position();
+  if (position != text_.length()) {
+    int count = IsLeadingSurrogate(text_.at(position)) ? 2 : 1;
+    text_.erase(position, count);
     return true;
   }
   return false;
 }
 
 bool TextInputModel::DeleteSurrounding(int offset_from_cursor, int count) {
-  auto start = selection_extent_;
+  size_t start = selection_.extent();
   if (offset_from_cursor < 0) {
     for (int i = 0; i < -offset_from_cursor; i++) {
       // If requested start is before the available text then reduce the
@@ -150,65 +145,53 @@ bool TextInputModel::DeleteSurrounding(int offset_from_cursor, int count) {
   text_.erase(start, end - start);
 
   // Cursor moves only if deleted area is before it.
-  if (offset_from_cursor <= 0) {
-    selection_base_ = start;
-  }
-
-  // Clear selection.
-  selection_extent_ = selection_base_;
+  selection_ = TextRange(offset_from_cursor <= 0 ? start : selection_.start());
 
   return true;
 }
 
 bool TextInputModel::MoveCursorToBeginning() {
-  if (selection_base_ == 0 && selection_extent_ == 0)
+  if (selection_.collapsed() && selection_.position() == 0)
     return false;
-
-  selection_base_ = 0;
-  selection_extent_ = 0;
+  selection_ = TextRange(0);
   return true;
 }
 
 bool TextInputModel::MoveCursorToEnd() {
-  auto max_pos = text_.length();
-  if (selection_base_ == max_pos && selection_extent_ == max_pos)
+  size_t max_pos = text_.length();
+  if (selection_.collapsed() && selection_.position() == max_pos)
     return false;
-
-  selection_base_ = max_pos;
-  selection_extent_ = max_pos;
+  selection_ = TextRange(max_pos);
   return true;
 }
 
 bool TextInputModel::MoveCursorForward() {
-  // If about to move set to the end of the highlight (when not selecting).
-  if (selection_base_ != selection_extent_) {
-    selection_base_ = selection_end();
-    selection_extent_ = selection_base_;
+  // If there's a selection, move to the end of the selection.
+  if (!selection_.collapsed()) {
+    selection_ = TextRange(selection_.end());
     return true;
   }
-  // If not at the end, move the extent forward.
-  if (selection_extent_ != text_.length()) {
-    int count = IsLeadingSurrogate(text_.at(selection_base_)) ? 2 : 1;
-    selection_base_ += count;
-    selection_extent_ = selection_base_;
+  // Otherwise, move the cursor forward.
+  size_t position = selection_.position();
+  if (position != text_.length()) {
+    int count = IsLeadingSurrogate(text_.at(position)) ? 2 : 1;
+    selection_ = TextRange(position + count);
     return true;
   }
   return false;
 }
 
 bool TextInputModel::MoveCursorBack() {
-  // If about to move set to the beginning of the highlight
-  // (when not selecting).
-  if (selection_base_ != selection_extent_) {
-    selection_base_ = selection_start();
-    selection_extent_ = selection_base_;
+  // If there's a selection, move to the beginning of the selection.
+  if (!selection_.collapsed()) {
+    selection_ = TextRange(selection_.start());
     return true;
   }
-  // If not at the start, move the beginning backward.
-  if (selection_base_ != 0) {
-    int count = IsTrailingSurrogate(text_.at(selection_base_ - 1)) ? 2 : 1;
-    selection_base_ -= count;
-    selection_extent_ = selection_base_;
+  // Otherwise, move the cursor backward.
+  size_t position = selection_.position();
+  if (position != 0) {
+    int count = IsTrailingSurrogate(text_.at(position - 1)) ? 2 : 1;
+    selection_ = TextRange(position - count);
     return true;
   }
   return false;
@@ -221,9 +204,9 @@ std::string TextInputModel::GetText() const {
 }
 
 int TextInputModel::GetCursorOffset() const {
-  // Measure the length of the current text up to the cursor.
+  // Measure the length of the current text up to the selection extent.
   // There is probably a much more efficient way of doing this.
-  auto leading_text = text_.substr(0, selection_extent_);
+  auto leading_text = text_.substr(0, selection_.extent());
   std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
       utf8_converter;
   return utf8_converter.to_bytes(leading_text).size();
