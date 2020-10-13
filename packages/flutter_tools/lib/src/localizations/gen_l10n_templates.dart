@@ -112,6 +112,11 @@ const String numberFormatTemplate = '''
     final String @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
 ''';
 
+const String decimalNumberFormatTemplate = '''
+    final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(localeName);
+    final String @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
+''';
+
 const String dateFormatTemplate = '''
     final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(localeName);
     final String @(placeholder)String = @(placeholder)DateFormat.format(@(placeholder));

@@ -84,10 +84,20 @@ String generateNumberFormattingLogic(Message message) {
           return '${parameter.name}: ${parameter.value}';
         },
       );
-      return numberFormatTemplate
-        .replaceAll('@(placeholder)', placeholder.name)
-        .replaceAll('@(format)', placeholder.format)
-        .replaceAll('@(parameters)', parameters.join(',    \n'));
+
+      /// The intl package does not provide named parameter syntax in case of
+      /// [decimalPattern] and [percentPattern]. So, a separate template will be used
+      /// to handle this case.
+      if (placeholder.format == 'decimalPattern' || placeholder.format == 'percentPattern') {
+        return decimalNumberFormatTemplate
+            .replaceAll('@(placeholder)', placeholder.name)
+            .replaceAll('@(format)', placeholder.format);
+      } else {
+        return numberFormatTemplate
+            .replaceAll('@(placeholder)', placeholder.name)
+            .replaceAll('@(format)', placeholder.format)
+            .replaceAll('@(parameters)', parameters.join(',    \n'));
+      }
     });
 
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
