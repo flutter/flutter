@@ -626,6 +626,62 @@ class SliverChildListDelegate extends SliverChildDelegate {
   final SemanticIndexCallback semanticIndexCallback;
 
   /// The widgets to display.
+  ///
+  /// If this list is going to be mutated, it is usually wise to put a [Key] on
+  /// each of the child widgets, so that the framework can match old
+  /// configurations to new configurations and maintain the underlying render
+  /// objects.
+  ///
+  /// Also, a [Widget] in Flutter is immutable, so directly modifying the
+  /// [children] such as `someWidget.children.add(...)` or
+  /// as the example code below will result in incorrect behaviors. Whenever the
+  /// children list is modified, a new list object should be provided.
+  ///
+  /// ```dart
+  /// class SomeWidgetState extends State<SomeWidget> {
+  ///   List<Widget> _children;
+  ///
+  ///   void initState() {
+  ///     _children = [];
+  ///   }
+  ///
+  ///   void someHandler() {
+  ///     setState(() {
+  ///         _children.add(...);
+  ///     });
+  ///   }
+  ///
+  ///   Widget build(...) {
+  ///     // Reusing `List<Widget> _children` here is problematic.
+  ///     return PageView(children: _children);
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// The following code corrects the problem mentioned above.
+  ///
+  /// ```dart
+  /// class SomeWidgetState extends State<SomeWidget> {
+  ///   List<Widget> _children;
+  ///
+  ///   void initState() {
+  ///     _children = [];
+  ///   }
+  ///
+  ///   void someHandler() {
+  ///     setState(() {
+  ///       // The key here allows Flutter to reuse the underlying render
+  ///       // objects even if the children list is recreated.
+  ///       _children.add(ChildWidget(key: ...));
+  ///     });
+  ///   }
+  ///
+  ///   Widget build(...) {
+  ///     // Always create a new list of children as a Widget is immutable.
+  ///     return PageView(children: List.from(_children));
+  ///   }
+  /// }
+  /// ```
   final List<Widget> children;
 
   /// A map to cache key to index lookup for children.
