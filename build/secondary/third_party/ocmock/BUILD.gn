@@ -18,6 +18,10 @@ source_set("ocmock_src") {
     "-fvisibility=default",
     "-Wno-misleading-indentation",
   ]
+  if (is_ios) {
+    cflags += [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
+  }
+
   sources = [
     "$ocmock_path/OCMock/NSInvocation+OCMAdditions.h",
     "$ocmock_path/OCMock/NSInvocation+OCMAdditions.m",
@@ -92,6 +96,14 @@ source_set("ocmock_src") {
     "$ocmock_path/OCMock/OCProtocolMockObject.h",
     "$ocmock_path/OCMock/OCProtocolMockObject.m",
   ]
+
+  libs = [ "Foundation.framework" ]
+}
+
+shared_library("ocmock_shared") {
+  deps = [ ":ocmock_src" ]
+  cflags = [ "-fvisibility=default" ]
+  ldflags = [ "-Wl,-install_name,@rpath/Frameworks/libocmock_shared.dylib" ]
 }
 
 # Generates a static library, used in iOS unit test targets
