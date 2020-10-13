@@ -397,7 +397,7 @@ bool isEmulatorBuildMode(BuildMode mode) {
 }
 
 enum HostPlatform {
-  darwin_x86,
+  darwin_x64,
   darwin_arm,
   linux_x64,
   windows_x64,
@@ -405,8 +405,8 @@ enum HostPlatform {
 
 String getNameForHostPlatform(HostPlatform platform) {
   switch (platform) {
-    case HostPlatform.darwin_x86:
-      return 'darwin-x86';
+    case HostPlatform.darwin_x64:
+      return 'darwin-x64';
     case HostPlatform.darwin_arm:
       return 'darwin-arm';
     case HostPlatform.linux_x64:
@@ -614,7 +614,7 @@ String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
 
 HostPlatform getCurrentHostPlatform() {
   if (globals.platform.isMacOS) {
-    return HostPlatform.darwin_x86;
+    return HostPlatform.darwin_x64;
   }
   if (globals.platform.isLinux) {
     return HostPlatform.linux_x64;

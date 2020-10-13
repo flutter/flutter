@@ -308,7 +308,7 @@ class _MacOSUtils extends _PosixUtils {
       if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
         _hostPlatform = HostPlatform.darwin_arm;
       } else {
-        _hostPlatform = HostPlatform.darwin_x86;
+        _hostPlatform = HostPlatform.darwin_x64;
       }
     }
     return _hostPlatform;

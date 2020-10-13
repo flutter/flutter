@@ -195,7 +195,7 @@ void main() {
 
       final OperatingSystemUtils utils =
       createOSUtils(FakePlatform(operatingSystem: 'macos'));
-      expect(utils.hostPlatform, HostPlatform.darwin_x86);
+      expect(utils.hostPlatform, HostPlatform.darwin_x64);
     });
 
     testWithoutContext('macOS 10 x86', () async {
@@ -211,7 +211,7 @@ void main() {
 
       final OperatingSystemUtils utils =
       createOSUtils(FakePlatform(operatingSystem: 'macos'));
-      expect(utils.hostPlatform, HostPlatform.darwin_x86);
+      expect(utils.hostPlatform, HostPlatform.darwin_x64);
     });
 
     testWithoutContext('macOS ARM name', () async {
@@ -285,7 +285,7 @@ void main() {
 
       final OperatingSystemUtils utils =
           createOSUtils(FakePlatform(operatingSystem: 'macos'));
-      expect(utils.name, 'product version build darwin-x86');
+      expect(utils.name, 'product version build darwin-x64');
     });
   });
 
