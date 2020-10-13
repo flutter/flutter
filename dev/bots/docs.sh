@@ -5,25 +5,6 @@
 
 set -e
 
-function deploy {
-  local total_tries="$1"
-  local remaining_tries=$(($total_tries - 1))
-  shift
-  while [[ "$remaining_tries" -gt 0 ]]; do
-    (cd "$FLUTTER_ROOT/dev/docs" && firebase --debug deploy --token "$FIREBASE_TOKEN" --project "$@" --only hosting) && break
-    remaining_tries=$(($remaining_tries - 1))
-    echo "Error: Unable to deploy documentation to Firebase. Retrying in five seconds... ($remaining_tries tries left)"
-    sleep 5
-  done
-
-  [[ "$remaining_tries" == 0 ]] && {
-    echo "Command still failed after $total_tries tries: '$@'"
-    cat firebase-debug.log || echo "Unable to show contents of firebase-debug.log."
-    return 1
-  }
-  return 0
-}
-
 function script_location() {
   local script_location="${BASH_SOURCE[0]}"
   # Resolve symlinks
@@ -92,16 +73,12 @@ function deploy_docs() {
             # Disable search indexing on the master staging site so searches get only
             # the stable site.
             echo -e "User-agent: *\nDisallow: /" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
-            #export FIREBASE_TOKEN="$FIREBASE_MASTER_TOKEN"
-            #deploy 5 master-docs-flutter-dev
             ;;
         stable)
             echo "$(date): Updating $LUCI_BRANCH docs: https://api.flutter.dev/"
             # Enable search indexing on the master staging site so searches get only
             # the stable site.
             echo -e "# All robots welcome!" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
-            #export FIREBASE_TOKEN="$FIREBASE_PUBLIC_TOKEN"
-            #deploy 5 docs-flutter-dev
             ;;
         *)
             >&2 echo "Docs deployment cannot be run on the $LUCI_BRANCH branch."
@@ -164,7 +141,7 @@ generate_docs
 # Skip publishing docs for PRs and release candidate branches
 #if [[ -n "$LUCI_CI" && -z "$LUCI_PR" ]]; then
 (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
-#(cd "$FLUTTER_ROOT/dev/docs"; create_docset)
-#(cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
+(cd "$FLUTTER_ROOT/dev/docs"; create_docset)
+(cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
 deploy_docs
 #fi
