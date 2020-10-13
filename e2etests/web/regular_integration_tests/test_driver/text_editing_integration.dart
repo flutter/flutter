@@ -179,6 +179,21 @@ void main() {
       'cancelable': true,
     });
 
+    // Press and release AltGr key.
+    // Regression test for https://github.com/flutter/flutter/issues/58979.
+    dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
+      'key': 'AltGraph',
+      'code': 'AltRight',
+      'bubbles': true,
+      'cancelable': true,
+    });
+    dispatchKeyboardEvent(input, 'keyup', <String, dynamic>{
+      'key': 'AltGraph',
+      'code': 'AltRight',
+      'bubbles': true,
+      'cancelable': true,
+    });
+
     // Press Tab. The focus should move to the next TextFormField.
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
       'key': 'Tab',
