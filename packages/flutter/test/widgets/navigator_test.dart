@@ -1389,11 +1389,11 @@ void main() {
 
   testWidgets('arguments for named routes on Navigator', (WidgetTester tester) async {
     late GlobalKey currentRouteKey;
-    final List<Object> arguments = <Object>[];
+    final List<Object?> arguments = <Object?>[];
 
     await tester.pumpWidget(MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
-        arguments.add(settings.arguments!);
+        arguments.add(settings.arguments);
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (BuildContext context) => Center(key: currentRouteKey = GlobalKey(), child: Text(settings.name!)),
@@ -1463,12 +1463,12 @@ void main() {
 
   testWidgets('arguments for named routes on NavigatorState', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-    final List<Object> arguments = <Object>[];
+    final List<Object?> arguments = <Object?>[];
 
     await tester.pumpWidget(MaterialApp(
       navigatorKey: navigatorKey,
       onGenerateRoute: (RouteSettings settings) {
-        arguments.add(settings.arguments!);
+        arguments.add(settings.arguments);
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (BuildContext context) => Center(child: Text(settings.name!)),
@@ -1755,7 +1755,7 @@ void main() {
         initialRoute: '/A/B',
         onGenerateRoute: (RouteSettings settings) {
           return NoAnimationPageRoute(
-            pageBuilder: (_) => Container(key: ValueKey<String?>(settings.name)),
+            pageBuilder: (_) => Container(key: ValueKey<String>(settings.name!)),
           );
         },
       ),
