@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/error_handling_io.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:meta/meta.dart';
 
+import '../base/error_handling_io.dart';
+import '../base/file_system.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../globals.dart' as globals;
@@ -129,8 +129,8 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
       final Directory directory = globals.fs.directory(
         globals.fs.path.join(globals.platform.environment['HOME'], '.gradle'));
       ErrorHandlingFileSystem.deleteIfExists(directory, recursive: true);
-    } on FileSystemException {
-      // Do nothing.
+    } on FileSystemException catch (err) {
+      globals.printTrace('Failed to delete Gradle cache: $err');
     }
     return GradleBuildStatus.retry;
   },
