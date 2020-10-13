@@ -139,9 +139,9 @@ fi
 
 generate_docs
 # Skip publishing docs for PRs and release candidate branches
-#if [[ -n "$LUCI_CI" && -z "$LUCI_PR" ]]; then
-(cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
-(cd "$FLUTTER_ROOT/dev/docs"; create_docset)
-(cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
-deploy_docs
-#fi
+if [[ -n "$LUCI_CI" && -z "$LUCI_PR" ]]; then
+  (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
+  (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
+  (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
+  deploy_docs
+fi
