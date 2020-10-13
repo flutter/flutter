@@ -15,6 +15,7 @@ const double _willPopThreshold = 0.8;
 // Arbitrary value
 const Duration _kBounceAnimationDuration = Duration(milliseconds: 300);
 
+//
 typedef WidgetWithChildBuilder = Widget Function(
     BuildContext context, Animation<double> animation, Widget child);
 
