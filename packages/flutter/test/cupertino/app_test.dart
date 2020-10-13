@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -52,8 +50,8 @@ void main() {
           builder: (BuildContext context) {
             return Column(
               children: <Widget>[
-                Text(CupertinoLocalizations.of(context).selectAllButtonLabel),
-                Text(CupertinoLocalizations.of(context).datePickerMediumDate(
+                Text(CupertinoLocalizations.of(context)!.selectAllButtonLabel),
+                Text(CupertinoLocalizations.of(context)!.datePickerMediumDate(
                   DateTime(2018, 10, 4),
                 )),
               ],
@@ -126,7 +124,7 @@ void main() {
     expect(find.text('non-regular page one'), findsNothing);
     expect(find.text('regular page one'), findsNothing);
     expect(find.text('regular page two'), findsNothing);
-    navigatorKey.currentState.pop();
+    navigatorKey.currentState!.pop();
     await tester.pumpAndSettle();
     expect(find.text('non-regular page two'), findsNothing);
     expect(find.text('non-regular page one'), findsOneWidget);
@@ -158,7 +156,7 @@ void main() {
     );
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location);
+        return Text(information.location!);
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
         delegate.routeInformation = const RouteInformation(
@@ -176,7 +174,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -201,7 +199,7 @@ class SimpleRouteInformationParser extends RouteInformationParser<RouteInformati
 
 class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
   SimpleNavigatorRouterDelegate({
-    @required this.builder,
+    required this.builder,
     this.onPopPage,
   });
 
@@ -209,14 +207,14 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   RouteInformation get routeInformation => _routeInformation;
-  RouteInformation _routeInformation;
+  late RouteInformation _routeInformation;
   set routeInformation(RouteInformation newValue) {
     _routeInformation = newValue;
     notifyListeners();
   }
 
   SimpleRouterDelegateBuilder builder;
-  SimpleNavigatorRouterDelegatePopPage<void> onPopPage;
+  SimpleNavigatorRouterDelegatePopPage<void>? onPopPage;
 
   @override
   Future<void> setNewRoutePath(RouteInformation configuration) {
@@ -225,7 +223,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
   }
 
   bool _handlePopPage(Route<void> route, void data) {
-    return onPopPage(route, data, this);
+    return onPopPage!(route, data, this);
   }
 
   @override
@@ -236,12 +234,12 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
       pages: <Page<void>>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        CupertinoPage<void>(
-          builder: (BuildContext context) => const Text('base'),
+        const CupertinoPage<void>(
+          child:  Text('base'),
         ),
         CupertinoPage<void>(
-          key: ValueKey<String>(routeInformation?.location),
-          builder: (BuildContext context) => builder(context, routeInformation),
+          key: ValueKey<String?>(routeInformation.location),
+          child: builder(context, routeInformation),
         )
       ],
     );

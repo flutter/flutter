@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import '../base/context.dart';
 import '../base/user_messages.dart';
 import '../doctor.dart';
 import 'cocoapods.dart';
 
-CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
-
+/// A validator that confirms cocoapods is in a valid state.
+///
+/// See also:
+///   * [CocoaPods], for the interface to the cocoapods command line tool.
 class CocoaPodsValidator extends DoctorValidator {
   CocoaPodsValidator(
     CocoaPods cocoaPods,

@@ -28,7 +28,7 @@ import 'src/runner/flutter_command_runner.dart';
 // TODO(jonahwilliams): update command type once g3 has rolled.
 Future<int> run(
   List<String> args,
-  dynamic commands, {
+  List<FlutterCommand> Function() commands, {
     bool muteCommandLogging = false,
     bool verbose = false,
     bool verboseHelp = false,
@@ -42,17 +42,11 @@ Future<int> run(
     args = List<String>.of(args);
     args.removeWhere((String option) => option == '-v' || option == '--verbose');
   }
-  List<FlutterCommand> Function() commandGenerator;
-  if (commands is List<FlutterCommand>) {
-    commandGenerator = () => commands;
-  } else {
-    commandGenerator = commands as List<FlutterCommand> Function();
-  }
 
   return runInContext<int>(() async {
     reportCrashes ??= !await globals.isRunningOnBot;
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
-    commandGenerator().forEach(runner.addCommand);
+    commands().forEach(runner.addCommand);
 
     // Initialize the system locale.
     final String systemLocale = await intl_standalone.findSystemLocale();
@@ -264,7 +258,7 @@ Future<int> _exit(int code) async {
       globals.printTrace('exiting with code $code');
       exit(code);
       completer.complete();
-    // This catches all exceptions becauce the error is propagated on the
+    // This catches all exceptions because the error is propagated on the
     // completer.
     } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
       completer.completeError(error, stackTrace);

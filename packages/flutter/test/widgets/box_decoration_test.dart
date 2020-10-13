@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -15,7 +13,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../painting/image_data.dart';
+import '../image_data.dart';
 import '../rendering/mock_canvas.dart';
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
@@ -23,7 +21,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   final Future<void> future;
 
-  static ui.Image image;
+  static late ui.Image image;
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
@@ -270,7 +268,7 @@ Future<void> main() async {
 
   testWidgets('Can hit test on BoxDecoration', (WidgetTester tester) async {
 
-    List<int> itemsTapped;
+    late List<int> itemsTapped;
 
     const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
@@ -307,7 +305,7 @@ Future<void> main() async {
 
   testWidgets('Can hit test on BoxDecoration circle', (WidgetTester tester) async {
 
-    List<int> itemsTapped;
+    late List<int> itemsTapped;
 
     const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
@@ -346,7 +344,7 @@ Future<void> main() async {
   });
 
   testWidgets('Can hit test on BoxDecoration border', (WidgetTester tester) async {
-    List<int> itemsTapped;
+    late List<int> itemsTapped;
     const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
@@ -388,7 +386,7 @@ Future<void> main() async {
     const double width = 50.0;
     const double radius = 12.3;
 
-    List<int> itemsTapped;
+    late List<int> itemsTapped;
     const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
@@ -448,7 +446,7 @@ Future<void> main() async {
     const double width = 50.0;
     const double radius = 12.3;
 
-    List<int> itemsTapped;
+    late List<int> itemsTapped;
     const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
@@ -496,7 +494,7 @@ Future<void> main() async {
     const double width = 50.0;
     const double radius = 20;
 
-    List<int> itemsTapped;
+    late List<int> itemsTapped;
     const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];

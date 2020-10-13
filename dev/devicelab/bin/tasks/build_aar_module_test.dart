@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
+
+final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
+
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
@@ -59,12 +62,12 @@ Future<void> main() async {
       final File modulePubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = modulePubspec.readAsStringSync();
       content = content.replaceFirst(
-        '\ndependencies:\n',
-        '\ndependencies:\n'
-          '  plugin_with_android:\n'
-          '    path: ../plugin_with_android\n'
-          '  plugin_without_android:\n'
-          '    path: ../plugin_without_android\n',
+        '${platformLineSep}dependencies:$platformLineSep',
+        '${platformLineSep}dependencies:$platformLineSep'
+          '  plugin_with_android:$platformLineSep'
+          '    path: ../plugin_with_android$platformLineSep'
+          '  plugin_without_android:$platformLineSep'
+          '    path: ../plugin_without_android$platformLineSep',
       );
       modulePubspec.writeAsStringSync(content, flush: true);
 

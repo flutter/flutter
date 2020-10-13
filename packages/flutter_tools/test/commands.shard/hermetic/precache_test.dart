@@ -11,7 +11,6 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -23,7 +22,7 @@ void main() {
     // Release lock between test cases.
     Cache.releaseLock();
 
-    when(cache.isUpToDate()).thenReturn(false);
+    when(cache.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(false));
     when(cache.updateAll(any)).thenAnswer((Invocation invocation) {
       artifacts = invocation.positionalArguments.first as Set<DevelopmentArtifact>;
       return Future<void>.value(null);
@@ -38,7 +37,6 @@ void main() {
       platform: platform,
       featureFlags: TestFeatureFlags(),
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(const <String>['precache']);
 
     expect(Cache.isLocked(), isTrue);
@@ -60,7 +58,6 @@ void main() {
       featureFlags: TestFeatureFlags(),
       platform: platform,
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(const <String>['precache']);
 
     expect(Cache.isLocked(), isFalse);
@@ -75,7 +72,6 @@ void main() {
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
 
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
@@ -91,7 +87,6 @@ void main() {
       featureFlags: TestFeatureFlags(isWebEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
 
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
@@ -106,7 +101,6 @@ void main() {
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
 
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
@@ -122,7 +116,6 @@ void main() {
       featureFlags: TestFeatureFlags(isMacOSEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
 
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
@@ -137,7 +130,6 @@ void main() {
       featureFlags: TestFeatureFlags(isWindowsEnabled: true),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
 
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
@@ -153,7 +145,6 @@ void main() {
       featureFlags: TestFeatureFlags(isWindowsEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
 
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
@@ -168,7 +159,6 @@ void main() {
       featureFlags: TestFeatureFlags(isLinuxEnabled: true),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
 
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
@@ -184,7 +174,6 @@ void main() {
       featureFlags: TestFeatureFlags(isLinuxEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
 
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
@@ -199,7 +188,6 @@ void main() {
       featureFlags: TestFeatureFlags(isWebEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
 
     expect(createTestCommandRunner(command).run(const <String>['precache',
       '--no-android',
@@ -220,7 +208,6 @@ void main() {
       ),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(
       const <String>[
         'precache',
@@ -256,7 +243,6 @@ void main() {
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(
       const <String>[
         'precache',
@@ -279,7 +265,6 @@ void main() {
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(
       const <String>[
         'precache',
@@ -304,7 +289,6 @@ void main() {
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
 
     await createTestCommandRunner(command).run(
       const <String>[
@@ -334,7 +318,6 @@ void main() {
       ),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
 
     await createTestCommandRunner(command).run(
       const <String>[
@@ -365,7 +348,6 @@ void main() {
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
 
     await createTestCommandRunner(command).run(
       const <String>[
@@ -391,7 +373,6 @@ void main() {
         },
       ),
     );
-    applyMocksToCommand(command);
 
     await createTestCommandRunner(command).run(
       const <String>[
@@ -410,7 +391,7 @@ void main() {
   });
 
   testUsingContext('precache deletes artifact stampfiles when --force is provided', () async {
-    when(cache.isUpToDate()).thenReturn(true);
+    when(cache.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(true));
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
@@ -419,7 +400,6 @@ void main() {
       ),
       platform: FakePlatform(environment: <String, String>{}),
     );
-    applyMocksToCommand(command);
     await createTestCommandRunner(command).run(const <String>['precache', '--force']);
 
     verify(cache.clearStampFiles()).called(1);

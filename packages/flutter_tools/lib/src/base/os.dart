@@ -7,7 +7,9 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../build_info.dart';
 import '../globals.dart' as globals;
+import 'common.dart';
 import 'file_system.dart';
 import 'io.dart';
 import 'logger.dart';
@@ -23,6 +25,13 @@ abstract class OperatingSystemUtils {
   }) {
     if (platform.isWindows) {
       return _WindowsUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
+    } else if (platform.isMacOS) {
+      return _MacOSUtils(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -89,8 +98,6 @@ abstract class OperatingSystemUtils {
   /// Return the File representing a new pipe.
   File makePipe(String path);
 
-  void zip(Directory data, File zipFile);
-
   void unzip(File file, Directory targetDirectory);
 
   void unpack(File gzippedTarFile, Directory targetDirectory);
@@ -112,6 +119,8 @@ abstract class OperatingSystemUtils {
     final String osName = _platform.operatingSystem;
     return osNames.containsKey(osName) ? osNames[osName] : osName;
   }
+
+  HostPlatform get hostPlatform;
 
   List<File> _which(String execName, { bool all = false });
 
@@ -205,23 +214,28 @@ class _PosixUtils extends OperatingSystemUtils {
     ).toList();
   }
 
-  @override
-  void zip(Directory data, File zipFile) {
-    _processUtils.runSync(
-      <String>['zip', '-r', '-q', zipFile.path, '.'],
-      workingDirectory: data.path,
-      throwOnError: true,
-    );
-  }
-
   // unzip -o -q zipfile -d dest
   @override
   void unzip(File file, Directory targetDirectory) {
-    _processUtils.runSync(
-      <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
-      throwOnError: true,
-      verboseExceptions: true,
-    );
+    try {
+      _processUtils.runSync(
+        <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+        throwOnError: true,
+        verboseExceptions: true,
+      );
+    } on ArgumentError {
+      // unzip is not available. this error message is modeled after the download
+      // error in bin/internal/update_dart_sdk.sh
+      String message = 'Please install unzip.';
+      if (_platform.isMacOS) {
+        message = 'Consider running "brew install unzip".';
+      } else if (_platform.isLinux) {
+        message = 'Consider running "sudo apt-get install unzip".';
+      }
+      throwToolExit(
+        'Missing "unzip" tool. Unable to extract ${file.path}.\n$message'
+      );
+    }
   }
 
   // tar -xzf tarball -C dest
@@ -242,29 +256,63 @@ class _PosixUtils extends OperatingSystemUtils {
     return _fileSystem.file(path);
   }
 
+  @override
+  String get pathVarSeparator => ':';
+
+  @override
+  HostPlatform hostPlatform = HostPlatform.linux_x64;
+}
+
+class _MacOSUtils extends _PosixUtils {
+  _MacOSUtils({
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Platform platform,
+    @required ProcessManager processManager,
+  }) : super(
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        );
+
   String _name;
 
   @override
   String get name {
     if (_name == null) {
-      if (_platform.isMacOS) {
-        final List<RunResult> results = <RunResult>[
-          _processUtils.runSync(<String>['sw_vers', '-productName']),
-          _processUtils.runSync(<String>['sw_vers', '-productVersion']),
-          _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
-        ];
-        if (results.every((RunResult result) => result.exitCode == 0)) {
-          _name = '${results[0].stdout.trim()} ${results[1].stdout
-              .trim()} ${results[2].stdout.trim()}';
-        }
+      final List<RunResult> results = <RunResult>[
+        _processUtils.runSync(<String>['sw_vers', '-productName']),
+        _processUtils.runSync(<String>['sw_vers', '-productVersion']),
+        _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
+      ];
+      if (results.every((RunResult result) => result.exitCode == 0)) {
+        _name =
+            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} ${getNameForHostPlatform(hostPlatform)}';
       }
       _name ??= super.name;
     }
     return _name;
   }
 
+  HostPlatform _hostPlatform;
+
+  // On ARM returns arm64, even when this process is running in Rosetta.
   @override
-  String get pathVarSeparator => ':';
+  HostPlatform get hostPlatform {
+    if (_hostPlatform == null) {
+      final RunResult arm64Check =
+          _processUtils.runSync(<String>['sysctl', 'hw.optional.arm64']);
+      // hw.optional.arm64 is unavailable on < macOS 11 and exits with 1, assume x86 on failure.
+      // On arm64 stdout is "sysctl hw.optional.arm64: 1"
+      if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
+        _hostPlatform = HostPlatform.darwin_arm;
+      } else {
+        _hostPlatform = HostPlatform.darwin_x64;
+      }
+    }
+    return _hostPlatform;
+  }
 }
 
 class _WindowsUtils extends OperatingSystemUtils {
@@ -281,6 +329,9 @@ class _WindowsUtils extends OperatingSystemUtils {
   );
 
   @override
+  HostPlatform hostPlatform = HostPlatform.windows_x64;
+
+  @override
   void makeExecutable(File file) {}
 
   @override
@@ -289,7 +340,18 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
-    final ProcessResult result = _processManager.runSync(<String>['where', execName]);
+    ProcessResult result;
+    try {
+      result = _processManager.runSync(<String>['where', execName]);
+    } on ArgumentError {
+      // `where` could be missing if system32 is not on the PATH.
+      throwToolExit(
+        'Cannot find the executable for `where`. This can happen if the System32 '
+        'folder (e.g. C:\\Windows\\System32 ) is removed from the PATH environment '
+        'variable. Ensure that this is present and then try again after restarting '
+        'the terminal and/or IDE.'
+      );
+    }
     if (result.exitCode != 0) {
       return const <File>[];
     }
@@ -298,21 +360,6 @@ class _WindowsUtils extends OperatingSystemUtils {
       return lines.map<File>((String path) => _fileSystem.file(path.trim())).toList();
     }
     return <File>[_fileSystem.file(lines.first.trim())];
-  }
-
-  @override
-  void zip(Directory data, File zipFile) {
-    final Archive archive = Archive();
-    for (final FileSystemEntity entity in data.listSync(recursive: true)) {
-      if (entity is! File) {
-        continue;
-      }
-      final File file = entity as File;
-      final String path = file.fileSystem.path.relative(file.path, from: data.path);
-      final List<int> bytes = file.readAsBytesSync();
-      archive.addFile(ArchiveFile(path, bytes.length, bytes));
-    }
-    zipFile.writeAsBytesSync(ZipEncoder().encode(archive), flush: true);
   }
 
   @override

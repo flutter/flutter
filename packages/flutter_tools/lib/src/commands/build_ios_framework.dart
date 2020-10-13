@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -84,7 +82,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         help: 'Produce xcframeworks that include all valid architectures (Xcode 11 or later).',
       )
       ..addFlag('cocoapods',
-        help: 'Produce a Flutter.podspec instead of an engine Flutter.framework (recomended if host app uses CocoaPods).',
+        help: 'Produce a Flutter.podspec instead of an engine Flutter.framework (recommended if host app uses CocoaPods).',
       )
       ..addOption('output',
         abbr: 'o',
@@ -209,7 +207,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       }
 
       final Status status = globals.logger.startProgress(
-        ' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}', timeout: timeoutConfiguration.slowOperation);
+        ' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
       try {
         // Delete the intermediaries since they would have been copied into our
         // output frameworks.
@@ -232,7 +230,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   /// vendored framework caching.
   @visibleForTesting
   void produceFlutterPodspec(BuildMode mode, Directory modeDirectory, { bool force = false }) {
-    final Status status = globals.logger.startProgress(' ├─Creating Flutter.podspec...', timeout: timeoutConfiguration.fastOperation);
+    final Status status = globals.logger.startProgress(' ├─Creating Flutter.podspec...');
     try {
       final GitTagVersion gitTagVersion = _flutterVersion.gitTagVersion;
       if (!force && (gitTagVersion.x == null || gitTagVersion.y == null || gitTagVersion.z == null || gitTagVersion.commits != 0)) {
@@ -292,7 +290,6 @@ end
   ) async {
     final Status status = globals.logger.startProgress(
       ' ├─Populating Flutter.framework...',
-      timeout: timeoutConfiguration.slowOperation,
     );
     final String engineCacheFlutterFrameworkDirectory = globals.artifacts.getArtifactPath(
       Artifact.flutterFramework,
@@ -349,7 +346,6 @@ end
 
     final Status status = globals.logger.startProgress(
       ' ├─Building App.framework...',
-      timeout: timeoutConfiguration.slowOperation,
     );
     try {
       Target target;
@@ -413,7 +409,8 @@ end
     Directory outputDirectory,
   ) async {
     final Status status = globals.logger.startProgress(
-      ' ├─Building plugins...', timeout: timeoutConfiguration.slowOperation);
+      ' ├─Building plugins...'
+    );
     try {
       // Regardless of the last "flutter build" build mode,
       // copy the corresponding engine.
@@ -574,7 +571,6 @@ end
 
       final Status status = globals.logger.startProgress(
         ' ├─Creating $frameworkBinaryName.xcframework...',
-        timeout: timeoutConfiguration.slowOperation,
       );
       try {
         if (buildInfo.mode == BuildMode.debug) {

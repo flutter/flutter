@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -84,8 +83,7 @@ void main() {
       ..inputs = const <Source>[
         Source.pattern('{PROJECT_DIR}/foo.dart'),
       ];
-    final MockArtifacts artifacts = MockArtifacts();
-    when(artifacts.isLocalEngine).thenReturn(false);
+    final Artifacts artifacts = Artifacts.test();
     environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: artifacts,
@@ -386,7 +384,7 @@ void main() {
     final Environment environmentA = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('a'),
-      artifacts: MockArtifacts(),
+      artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -394,7 +392,7 @@ void main() {
     final Environment environmentB = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('b'),
-      artifacts: MockArtifacts(),
+      artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -406,7 +404,7 @@ void main() {
   testWithoutContext('Additional inputs do not change the build configuration',  () async {
     final Environment environmentA = Environment.test(
       fileSystem.currentDirectory,
-      artifacts: MockArtifacts(),
+      artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -416,7 +414,7 @@ void main() {
     );
     final Environment environmentB = Environment.test(
       fileSystem.currentDirectory,
-      artifacts: MockArtifacts(),
+      artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -473,6 +471,26 @@ void main() {
     expect(environment.outputDir.childFile('.last_build_id'), exists);
     expect(environment.outputDir.childFile('.last_build_id').readAsStringSync(),
       '6666cd76f96956469e7be39d750cc7d9');
+  });
+
+  testWithoutContext('trackSharedBuildDirectory handles a missing output dir', () {
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      outputDir: fileSystem.directory('a/b/c/d'),
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    FlutterBuildSystem(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
+
+    expect(environment.outputDir.childFile('.last_build_id'), exists);
+    expect(environment.outputDir.childFile('.last_build_id').readAsStringSync(),
+      '5954e2278dd01e1c4e747578776eeb94');
   });
 
   testWithoutContext('trackSharedBuildDirectory does not modify .last_build_id when config is identical', () {
@@ -541,7 +559,7 @@ void main() {
       defines: <String, String>{
         'config': 'debug',
       },
-      artifacts: MockArtifacts(),
+      artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       fileSystem: fileSystem,
@@ -552,7 +570,7 @@ void main() {
       defines: <String, String>{
         'config': 'profile',
       },
-      artifacts: MockArtifacts(),
+      artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       fileSystem: fileSystem,
@@ -668,5 +686,3 @@ class TestTarget extends Target {
   @override
   List<Source> outputs = <Source>[];
 }
-
-class MockArtifacts extends Mock implements Artifacts {}

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
@@ -105,7 +103,6 @@ Future<void> _genSnapshot(
   int result;
   final Status status = globals.logger.startProgress(
     'Compiling Fuchsia application to native code...',
-    timeout: null,
   );
   try {
     result = await processUtils.stream(command, trace: true);

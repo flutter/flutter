@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -95,7 +93,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     ));
   }
 
-  bool _autovalidate = false;
+  AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
   bool _formWasEdited = false;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -104,7 +102,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   void _handleSubmitted() {
     final FormState form = _formKey.currentState;
     if (!form.validate()) {
-      _autovalidate = true; // Start validating on every change.
+      _autovalidateMode = AutovalidateMode.always; // Start validating on every change.
       showInSnackBar('Please fix the errors in red before submitting.');
     } else {
       form.save();
@@ -152,11 +150,11 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           title: const Text('This form has errors'),
           content: const Text('Really leave this form?'),
           actions: <Widget> [
-            FlatButton(
+            TextButton(
               child: const Text('YES'),
               onPressed: () { Navigator.of(context).pop(true); },
             ),
-            FlatButton(
+            TextButton(
               child: const Text('NO'),
               onPressed: () { Navigator.of(context).pop(false); },
             ),
@@ -180,7 +178,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
         bottom: false,
         child: Form(
           key: _formKey,
-          autovalidate: _autovalidate,
+          autovalidateMode: _autovalidateMode,
           onWillPop: _warnUserAboutInvalidData,
           child: Scrollbar(
             child: SingleChildScrollView(
@@ -281,7 +279,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   ),
                   const SizedBox(height: 24.0),
                   Center(
-                    child: RaisedButton(
+                    child: ElevatedButton(
                       child: const Text('SUBMIT'),
                       onPressed: _handleSubmitted,
                     ),

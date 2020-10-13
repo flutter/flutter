@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,20 +11,18 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 class TestCanvas implements Canvas {
-  TestCanvas([this.invocations]);
-
-  final List<Invocation> invocations;
+  final List<Invocation> invocations = <Invocation>[];
 
   @override
   void noSuchMethod(Invocation invocation) {
-    invocations?.add(invocation);
+    invocations.add(invocation);
   }
 }
 
 Widget _buildBoilerplate({
   TextDirection textDirection = TextDirection.ltr,
   EdgeInsets padding = EdgeInsets.zero,
-  Widget child,
+  required Widget child,
 }) {
   return Directionality(
     textDirection: textDirection,
@@ -67,15 +63,15 @@ void main() {
       ),
     );
 
-    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Building a list with a scrollbar triggered an animation.');
+    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Building a list with a scrollbar triggered an animation.');
     await tester.tap(find.byType(ListView));
-    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Tapping a block with a scrollbar triggered an animation.');
+    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Tapping a block with a scrollbar triggered an animation.');
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.drag(find.byType(ListView), const Offset(0.0, -10.0));
-    expect(SchedulerBinding.instance.transientCallbackCount, greaterThan(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, greaterThan(0));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
@@ -116,12 +112,11 @@ void main() {
     );
     scrollPainter.update(metrics, AxisDirection.down);
 
-    final List<Invocation> invocations = <Invocation>[];
-    final TestCanvas canvas = TestCanvas(invocations);
+    final TestCanvas canvas = TestCanvas();
     scrollPainter.paint(canvas, const Size(10.0, 100.0));
 
     // Scrollbar is not supposed to draw anything if there isn't enough content.
-    expect(invocations.isEmpty, isTrue);
+    expect(canvas.invocations.isEmpty, isTrue);
   });
 
   testWidgets('Adaptive scrollbar', (WidgetTester tester) async {
@@ -174,7 +169,7 @@ void main() {
 
   testWidgets('Scrollbar passes controller to CupertinoScrollbar', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
-    Widget viewWithScroll(TargetPlatform platform) {
+    Widget viewWithScroll(TargetPlatform? platform) {
       return _buildBoilerplate(
         child: Theme(
           data: ThemeData(
@@ -517,7 +512,7 @@ void main() {
 
   testWidgets('Scrollbar respects thickness and radius', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
-    Widget viewWithScroll({Radius radius}) {
+    Widget viewWithScroll({Radius? radius}) {
       return _buildBoilerplate(
         child: Theme(
           data: ThemeData(),

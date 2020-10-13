@@ -26,7 +26,7 @@ Future<void> buildLinux(
   }) async {
   if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
-      'https://github.com/flutter/flutter/wiki/Desktop-shells#create '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-app '
       'to learn about adding Linux support to a project.');
   }
 
@@ -46,7 +46,6 @@ Future<void> buildLinux(
 
   final Status status = globals.logger.startProgress(
     'Building Linux application...',
-    timeout: null,
   );
   try {
     final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);

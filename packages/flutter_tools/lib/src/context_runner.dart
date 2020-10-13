@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:process/process.dart';
+
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
@@ -13,6 +15,7 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/config.dart';
 import 'base/context.dart';
+import 'base/error_handling_io.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
@@ -22,7 +25,6 @@ import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
-import 'compile.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -45,6 +47,7 @@ import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
 import 'run_hot.dart';
+import 'runner/local_engine.dart';
 import 'version.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio.dart';
@@ -108,7 +111,6 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
-        timeoutConfiguration: timeoutConfiguration,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(
         globals.cocoaPods,
@@ -142,10 +144,14 @@ Future<T> runInContext<T>(
         config: globals.config,
         fuchsiaWorkflow: fuchsiaWorkflow,
         xcDevice: globals.xcdevice,
+        userMessages: globals.userMessages,
+        windowsWorkflow: windowsWorkflow,
         macOSWorkflow: MacOSWorkflow(
           platform: globals.platform,
           featureFlags: featureFlags,
         ),
+        operatingSystemUtils: globals.os,
+        terminal: globals.terminal,
       ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
@@ -178,24 +184,23 @@ Future<T> runInContext<T>(
         xcode: globals.xcode,
         platform: globals.platform,
       ),
-      KernelCompilerFactory: () => KernelCompilerFactory(
+      LocalEngineLocator: () => LocalEngineLocator(
+        userMessages: userMessages,
         logger: globals.logger,
-        processManager: globals.processManager,
-        artifacts: globals.artifacts,
+        platform: globals.platform,
         fileSystem: globals.fs,
+        flutterRoot: Cache.flutterRoot,
       ),
       Logger: () => globals.platform.isWindows
         ? WindowsStdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: globals.outputPreferences,
-            timeoutConfiguration: timeoutConfiguration,
           )
         : StdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: globals.outputPreferences,
-            timeoutConfiguration: timeoutConfiguration,
           ),
       MacOSWorkflow: () => MacOSWorkflow(
         featureFlags: featureFlags,
@@ -214,6 +219,10 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       ProcessInfo: () => ProcessInfo(),
+      ProcessManager: () => ErrorHandlingProcessManager(
+        delegate: const LocalProcessManager(),
+        platform: globals.platform,
+      ),
       ProcessUtils: () => ProcessUtils(
         processManager: globals.processManager,
         logger: globals.logger,
@@ -225,12 +234,12 @@ Future<T> runInContext<T>(
         botDetector: globals.botDetector,
         platform: globals.platform,
         usage: globals.flutterUsage,
-        toolStampFile: globals.cache.getStampFileFor('flutter_tools'),
+        // Avoid a circular dependency by making this access lazy.
+        toolStampFile: () => globals.cache.getStampFileFor('flutter_tools'),
       ),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
-      TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(
         runningOnBot: runningOnBot,
       ),
@@ -248,7 +257,10 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         platform: globals.platform,
       ),
-      WindowsWorkflow: () => const WindowsWorkflow(),
+      WindowsWorkflow: () => WindowsWorkflow(
+        featureFlags: featureFlags,
+        platform: globals.platform,
+      ),
       Xcode: () => Xcode(
         logger: globals.logger,
         processManager: globals.processManager,
