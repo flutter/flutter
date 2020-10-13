@@ -285,7 +285,7 @@ void main() {
 
       final OperatingSystemUtils utils =
           createOSUtils(FakePlatform(operatingSystem: 'macos'));
-      expect(utils.name, 'product version build darwin-x86_64');
+      expect(utils.name, 'product version build darwin-x86');
     });
   });
 
