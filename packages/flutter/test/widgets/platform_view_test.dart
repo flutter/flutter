@@ -1150,7 +1150,7 @@ void main() {
       }
     });
 
-    testWidgets('clipBehavior test', (WidgetTester tester) async {
+    testWidgets('clip is handled correctly during resizing', (WidgetTester tester) async {
       // Regressing test for https://github.com/flutter/flutter/issues/67343
       Widget buildView(double width, double height, Clip clipBehavior) {
         return Center(
@@ -1172,7 +1172,7 @@ void main() {
       // No clip happen when the clip behavior is `Clip.none` .
       expect(tester.layers.whereType<ClipRectLayer>(), hasLength(0));
 
-      // No clip happen when the clip behavior only change.
+      // No clip when only the clip behavior changes while the size remains the same.
       await tester.pumpWidget(buildView(100.0, 100.0, Clip.hardEdge));
       expect(tester.layers.whereType<ClipRectLayer>(), hasLength(0));
 
