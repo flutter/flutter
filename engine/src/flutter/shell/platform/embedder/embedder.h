@@ -461,10 +461,6 @@ typedef struct {
   size_t height;
   /// Scale factor for the physical screen.
   double pixel_ratio;
-  /// Horizontal physical location of the left side of the window on the screen.
-  size_t left;
-  /// Vertical physical location of the top of the window on the screen.
-  size_t top;
 } FlutterWindowMetricsEvent;
 
 /// The phase of the pointer event.

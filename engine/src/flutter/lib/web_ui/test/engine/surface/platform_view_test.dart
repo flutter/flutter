@@ -15,7 +15,7 @@ import 'package:test/test.dart';
 import '../../matchers.dart';
 
 const MethodCodec codec = StandardMethodCodec();
-final EngineSingletonFlutterWindow window = EngineSingletonFlutterWindow(0, EnginePlatformDispatcher.instance);
+final EngineWindow window = EngineWindow();
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

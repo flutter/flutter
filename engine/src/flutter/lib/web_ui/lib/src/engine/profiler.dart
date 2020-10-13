@@ -110,7 +110,7 @@ class Profiler {
 
 /// Whether we are collecting [ui.FrameTiming]s.
 bool get _frameTimingsEnabled {
-  return EnginePlatformDispatcher.instance._onReportTimings != null;
+  return window._onReportTimings != null;
 }
 
 /// Collects frame timings from frames.
@@ -202,7 +202,7 @@ void _frameTimingsOnRasterFinish() {
   _rasterFinishMicros = -1;
   if (now - _frameTimingsLastSubmitTime > _kFrameTimingsSubmitInterval) {
     _frameTimingsLastSubmitTime = now;
-    EnginePlatformDispatcher.instance.invokeOnReportTimings(_frameTimings);
+    window.invokeOnReportTimings(_frameTimings);
     _frameTimings = <ui.FrameTiming>[];
   }
 }

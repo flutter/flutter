@@ -34,7 +34,7 @@ Future<developer.ServiceExtensionResponse> _scheduleFrame(
     Map<String, String> parameters
     ) async {
   // Schedule the frame.
-  PlatformDispatcher.instance.scheduleFrame();
+  window.scheduleFrame();
   // Always succeed.
   return developer.ServiceExtensionResponse.result(json.encode(<String, String>{
     'type': 'Success',
