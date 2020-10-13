@@ -43,8 +43,6 @@ class _ItemData {
 }
 
 // Creates the menu buttons and manages them based on the clipboard status.
-// TODO(justinmc): Could I make this just do the buttons themselves instead of
-// also rendering the _TextSelectionToolbarOverflowableNew?
 class _TextSelectionToolbar extends StatefulWidget {
   const _TextSelectionToolbar({
     Key? key,
@@ -738,7 +736,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   }
 }
 
-// TODO(justinmc): What does this do exactly?
+// The highest-level widget for the whole toolbar.
 class _MaterialTextSelectionToolbarNew extends StatelessWidget {
   const _MaterialTextSelectionToolbarNew({
     Key? key,
@@ -1013,3 +1011,28 @@ class _TextSelectionToolbarOverflowableNewState extends State<_TextSelectionTool
 
 /// Text selection controls that follow the Material Design specification.
 final TextSelectionControls materialTextSelectionControls = _MaterialTextSelectionControls();
+
+// Justin's widget hierarchy directory:
+// _MaterialTextSelectionToolbarNew
+// The highest level, whole thing for the material TSM.
+// Mainly calculates the anchor and passes it on.
+//
+// CustomSingleChildLayout
+// layout: _TextSelectionToolbarLayout
+//   Positions the widget properly on the anchor.
+// widget: _TextSelectionToolbar
+//   Everything else.
+//   Main logic is just creating and managing the buttons.
+//
+// _TextSelectionToolbarOverflowableNew
+// children: _MaterialTextSelectionMenuButtonNew
+// Manages the overflowOpen state and sends it on to the widgets below.
+//
+// _TextSelectionToolbarContainer
+//   Layout only, lines up right edge when overflow is open. Rename?
+// Nested includes a bunch of other stuff:
+//   _MaterialTextSelectionToolbarShapeNew
+//     Just does the shape and elevation of the toolbar.
+//   _TextSelectionToolbarItems
+//     Crazy layout. Positions the buttons and measures overflow.
+//   And creates one _MaterialTextSelectionMenuIconButtonNew
