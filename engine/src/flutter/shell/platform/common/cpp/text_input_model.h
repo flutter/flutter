@@ -5,11 +5,13 @@
 #ifndef FLUTTER_SHELL_PLATFORM_CPP_TEXT_INPUT_MODEL_H_
 #define FLUTTER_SHELL_PLATFORM_CPP_TEXT_INPUT_MODEL_H_
 
-#include <algorithm>
 #include <memory>
 #include <string>
 
+#include "flutter/shell/platform/common/cpp/text_range.h"
+
 namespace flutter {
+
 // Handles underlying text input state, using a simple ASCII model.
 //
 // Ignores special states like "insert mode" for now.
@@ -104,10 +106,10 @@ class TextInputModel {
   int GetCursorOffset() const;
 
   // The position where the selection starts.
-  int selection_base() const { return selection_base_; }
+  int selection_base() const { return selection_.base(); }
 
   // The position of the cursor.
-  int selection_extent() const { return selection_extent_; }
+  int selection_extent() const { return selection_.extent(); }
 
  private:
   // Deletes the current selection, if any.
@@ -117,18 +119,7 @@ class TextInputModel {
   bool DeleteSelected();
 
   std::u16string text_;
-  size_t selection_base_ = 0;
-  size_t selection_extent_ = 0;
-
-  // Returns the left hand side of the selection.
-  size_t selection_start() const {
-    return std::min(selection_base_, selection_extent_);
-  }
-
-  // Returns the right hand side of the selection.
-  size_t selection_end() const {
-    return std::max(selection_base_, selection_extent_);
-  }
+  TextRange selection_ = TextRange(0);
 };
 
 }  // namespace flutter
