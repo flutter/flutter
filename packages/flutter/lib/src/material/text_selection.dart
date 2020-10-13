@@ -30,7 +30,21 @@ const double _kToolbarHeight = 44.0;
 const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
-/// Manages a copy/paste text selection toolbar.
+// Itermediate button data used for building the text selection menu buttons.
+class _ItemData {
+  const _ItemData(
+    this.onPressed,
+    this.label,
+  ) : assert(onPressed != null),
+      assert(label != null);
+
+  final VoidCallback onPressed;
+  final String label;
+}
+
+// Creates the menu buttons and manages them based on the clipboard status.
+// TODO(justinmc): Could I make this just do the buttons themselves instead of
+// also rendering the _TextSelectionToolbarOverflowableNew?
 class _TextSelectionToolbar extends StatefulWidget {
   const _TextSelectionToolbar({
     Key? key,
@@ -55,44 +69,8 @@ class _TextSelectionToolbar extends StatefulWidget {
   _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
 }
 
-// Itermediate button data used for building the text selection menu buttons.
-class _ItemData {
-  const _ItemData(
-    this.onPressed,
-    this.label,
-  ) : assert(onPressed != null),
-      assert(label != null);
-
-  final VoidCallback onPressed;
-  final String label;
-}
-
-// TODO(justinmc): Reduce the scope of this widget. Define it strictly.
-// Maybe it manages the default buttons or something?
 class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
   late ClipboardStatusNotifier _clipboardStatus;
-
-  // Whether or not the overflow menu is open. When it is closed, the menu
-  // items that don't overflow are shown. When it is open, only the overflowing
-  // menu items are shown.
-  bool _overflowOpen = false;
-
-  // The key for _TextSelectionToolbarContainer.
-  UniqueKey _containerKey = UniqueKey();
-
-  // Close the menu and reset layout calculations, as in when the menu has
-  // changed and saved values are no longer relevant. This should be called in
-  // setState or another context where a rebuild is happening.
-  void _reset() {
-    // Change _TextSelectionToolbarContainer's key when the menu changes in
-    // order to cause it to rebuild. This lets it recalculate its
-    // saved width for the new set of children, and it prevents AnimatedSize
-    // from animating the size change.
-    _containerKey = UniqueKey();
-    // If the menu items change, make sure the overflow menu is closed. This
-    // prevents an empty overflow menu.
-    _overflowOpen = false;
-  }
 
   void _onChangedClipboardStatus() {
     setState(() {
@@ -111,13 +89,6 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   @override
   void didUpdateWidget(_TextSelectionToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If the children are changing, the current page should be reset.
-    if (((widget.handleCut == null) != (oldWidget.handleCut == null))
-      || ((widget.handleCopy == null) != (oldWidget.handleCopy == null))
-      || ((widget.handlePaste == null) != (oldWidget.handlePaste == null))
-      || ((widget.handleSelectAll == null) != (oldWidget.handleSelectAll == null))) {
-      _reset();
-    }
     if (oldWidget.clipboardStatus == null && widget.clipboardStatus != null) {
       _clipboardStatus.removeListener(_onChangedClipboardStatus);
       _clipboardStatus.dispose();
@@ -177,47 +148,16 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    // TODO(justinmc):
-    // Can _TextSelectionToolbarContainer be concerned only with the right
-    // alignment thing, super generically? Calling it toolbar container is
-    // confusing.
-    return _TextSelectionToolbarContainer(
-      key: _containerKey,
-      overflowOpen: _overflowOpen,
-      child: AnimatedSize(
-        vsync: this,
-        // This duration was eyeballed on a Pixel 2 emulator running Android
-        // API 28.
-        duration: const Duration(milliseconds: 140),
-        child: _MaterialTextSelectionToolbarShapeNew(
-          child: _TextSelectionToolbarItems(
-            isAbove: widget.isAbove,
-            overflowOpen: _overflowOpen,
-            children: <Widget>[
-              // The navButton that shows and hides the overflow menu is the
-              // first child.
-              _MaterialTextSelectionMenuIconButtonNew(
-                icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
-                onPressed: () {
-                  setState(() {
-                    _overflowOpen = !_overflowOpen;
-                  });
-                },
-                tooltip: _overflowOpen
-                    ? localizations.backButtonTooltip
-                    : localizations.moreButtonTooltip,
-              ),
-              for (int i = 0; i < itemDatas.length; i++)
-                _MaterialTextSelectionMenuButtonNew(
-                  isFirst: i == 0,
-                  isLast: i == itemDatas.length - 1,
-                  onPressed: itemDatas[i].onPressed,
-                  child: Text(itemDatas[i].label),
-                ),
-            ],
-          ),
-        ),
-      ),
+    return _TextSelectionToolbarOverflowableNew(
+      isAbove: widget.isAbove,
+      children: itemDatas.asMap().entries.map((MapEntry<int, _ItemData> entry) {
+        return _MaterialTextSelectionMenuButtonNew(
+          isFirst: entry.key == 0,
+          isLast: entry.key == itemDatas.length - 1,
+          onPressed: entry.value.onPressed,
+          child: Text(entry.value.label),
+        );
+      }).toList(),
     );
   }
 }
@@ -798,6 +738,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   }
 }
 
+// TODO(justinmc): What does this do exactly?
 class _MaterialTextSelectionToolbarNew extends StatelessWidget {
   const _MaterialTextSelectionToolbarNew({
     Key? key,
@@ -969,6 +910,102 @@ class _MaterialTextSelectionMenuIconButtonNew extends StatelessWidget {
         icon: icon,
         onPressed: onPressed,
         tooltip: tooltip,
+      ),
+    );
+  }
+}
+
+// A toolbar containing the given children. If they overflow the width
+// available, then the overflowing children will be displayed in an overflow
+// menu.
+class _TextSelectionToolbarOverflowableNew extends StatefulWidget {
+  const _TextSelectionToolbarOverflowableNew({
+    Key? key,
+    required this.isAbove,
+    required this.children,
+  }) : assert(children.length > 0),
+       super(key: key);
+
+  final List<Widget> children;
+
+  // When true, the toolbar fits above its anchor and will be positioned there.
+  final bool isAbove;
+
+  @override
+  _TextSelectionToolbarOverflowableNewState createState() => _TextSelectionToolbarOverflowableNewState();
+}
+
+class _TextSelectionToolbarOverflowableNewState extends State<_TextSelectionToolbarOverflowableNew> with TickerProviderStateMixin {
+  // Whether or not the overflow menu is open. When it is closed, the menu
+  // items that don't overflow are shown. When it is open, only the overflowing
+  // menu items are shown.
+  bool _overflowOpen = false;
+
+  // The key for _TextSelectionToolbarContainer.
+  UniqueKey _containerKey = UniqueKey();
+
+  // Close the menu and reset layout calculations, as in when the menu has
+  // changed and saved values are no longer relevant. This should be called in
+  // setState or another context where a rebuild is happening.
+  void _reset() {
+    // Change _TextSelectionToolbarContainer's key when the menu changes in
+    // order to cause it to rebuild. This lets it recalculate its
+    // saved width for the new set of children, and it prevents AnimatedSize
+    // from animating the size change.
+    _containerKey = UniqueKey();
+    // If the menu items change, make sure the overflow menu is closed. This
+    // prevents an empty overflow menu.
+    _overflowOpen = false;
+  }
+
+  @override
+  void didUpdateWidget(_TextSelectionToolbarOverflowableNew oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the children are changing, the current page should be reset.
+    if (widget.children != oldWidget.children) {
+      // TODO(justinmc): Do I need to check individual children equality, or
+      // just the List?
+      _reset();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+
+    // TODO(justinmc): Can _TextSelectionToolbarContainer be concerned only with
+    // the right alignment thing, super generically? Calling it toolbar
+    // container is confusing.
+    return _TextSelectionToolbarContainer(
+      key: _containerKey,
+      overflowOpen: _overflowOpen,
+      child: AnimatedSize(
+        vsync: this,
+        // This duration was eyeballed on a Pixel 2 emulator running Android
+        // API 28.
+        duration: const Duration(milliseconds: 140),
+        child: _MaterialTextSelectionToolbarShapeNew(
+          child: _TextSelectionToolbarItems(
+            isAbove: widget.isAbove,
+            overflowOpen: _overflowOpen,
+            children: <Widget>[
+              // The navButton that shows and hides the overflow menu is the
+              // first child.
+              _MaterialTextSelectionMenuIconButtonNew(
+                icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
+                onPressed: () {
+                  setState(() {
+                    _overflowOpen = !_overflowOpen;
+                  });
+                },
+                tooltip: _overflowOpen
+                    ? localizations.backButtonTooltip
+                    : localizations.moreButtonTooltip,
+              ),
+              ...widget.children,
+            ],
+          ),
+        ),
       ),
     );
   }
