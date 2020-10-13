@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -14,7 +12,7 @@ void main() {
 
   testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
     bool didStartDrag = false;
-    double updatedDragDelta;
+    double? updatedDragDelta;
     bool didEndDrag = false;
 
     final Widget widget = GestureDetector(
@@ -69,7 +67,7 @@ void main() {
 
     final Widget widget = GestureDetector(
       dragStartBehavior: DragStartBehavior.down,
-      onVerticalDragUpdate: (DragUpdateDetails details) { dragDistance += details.primaryDelta; },
+      onVerticalDragUpdate: (DragUpdateDetails details) { dragDistance += details.primaryDelta ?? 0; },
       onVerticalDragEnd: (DragEndDetails details) { gestureCount += 1; },
       onHorizontalDragUpdate: (DragUpdateDetails details) { fail('gesture should not match'); },
       onHorizontalDragEnd: (DragEndDetails details) { fail('gesture should not match'); },
@@ -95,7 +93,7 @@ void main() {
 
   testWidgets("Pan doesn't crash", (WidgetTester tester) async {
     bool didStartPan = false;
-    Offset panDelta;
+    Offset? panDelta;
     bool didEndPan = false;
 
     await tester.pumpWidget(
@@ -104,7 +102,7 @@ void main() {
           didStartPan = true;
         },
         onPanUpdate: (DragUpdateDetails details) {
-          panDelta = panDelta == null ? details.delta : panDelta + details.delta;
+          panDelta = (panDelta ?? Offset.zero) + details.delta;
         },
         onPanEnd: (DragEndDetails details) {
           didEndPan = true;
@@ -122,8 +120,8 @@ void main() {
     await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0));
 
     expect(didStartPan, isTrue);
-    expect(panDelta.dx, 20.0);
-    expect(panDelta.dy, 30.0);
+    expect(panDelta!.dx, 20.0);
+    expect(panDelta!.dy, 30.0);
     expect(didEndPan, isTrue);
   });
 
@@ -141,7 +139,7 @@ void main() {
       bool didReceivePointerDown;
       bool didTap;
 
-      Future<void> pumpWidgetTree(HitTestBehavior behavior) {
+      Future<void> pumpWidgetTree(HitTestBehavior? behavior) {
         return tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -501,12 +499,12 @@ void main() {
         ),
       ),
     );
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
 
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -515,31 +513,73 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.3,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
 
     expect(forcePressStart, 0);
     expect(forcePressPeaked, 0);
     expect(forcePressUpdate, 0);
     expect(forcePressEnded, 0);
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
 
     expect(forcePressStart, 1);
     expect(forcePressPeaked, 0);
     expect(forcePressUpdate, 1);
     expect(forcePressEnded, 0);
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.6, pressureMin: 0, pressureMax: 1));
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.7, pressureMin: 0, pressureMax: 1));
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.2, pressureMin: 0, pressureMax: 1));
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.6,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.7,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.2,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.3,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
 
     expect(forcePressStart, 1);
     expect(forcePressPeaked, 0);
     expect(forcePressUpdate, 5);
     expect(forcePressEnded, 0);
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.9, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.9,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
 
     expect(forcePressStart, 1);
     expect(forcePressPeaked, 1);
@@ -573,14 +613,14 @@ void main() {
       ),
     );
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     const double maxPressure = 6.0;
 
     final TestGesture gesture = await tester.createGesture();
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -589,7 +629,13 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.3, pressureMin: 0, pressureMax: maxPressure));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(400.0, 50.0),
+      pressure: 0.3,
+      pressureMin: 0,
+      pressureMax: maxPressure
+    ));
 
     expect(forcePressStart, 0);
     expect(longPressTimes, 0);
@@ -601,7 +647,13 @@ void main() {
     expect(forcePressStart, 0);
 
     // Failed attempt to trigger the force press.
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.5, pressureMin: 0, pressureMax: maxPressure));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(400.0, 50.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: maxPressure
+    ));
 
     expect(longPressTimes, 1);
     expect(forcePressStart, 0);
@@ -626,13 +678,13 @@ void main() {
       ),
     );
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
 
     final TestGesture gesture = await tester.createGesture();
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -641,7 +693,13 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.3,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
 
     expect(forcePressStart, 0);
     expect(horizontalDragStart, 0);
@@ -653,7 +711,13 @@ void main() {
     expect(forcePressStart, 0);
 
     // Failed attempt to trigger the force press.
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
 
     expect(horizontalDragStart, 1);
     expect(forcePressStart, 0);
@@ -666,7 +730,7 @@ void main() {
       await tester.pumpWidget(RawGestureDetector(
         key: key,
       ));
-      key.currentState.debugFillProperties(builder);
+      key.currentState!.debugFillProperties(builder);
 
       final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -701,7 +765,7 @@ void main() {
         child: Container(),
         semantics: _EmptySemanticsGestureDelegate(),
       ));
-      key.currentState.debugFillProperties(builder);
+      key.currentState!.debugFillProperties(builder);
 
       final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -725,7 +789,7 @@ void main() {
         semantics: _EmptySemanticsGestureDelegate(),
         excludeFromSemantics: true,
       ));
-      key.currentState.debugFillProperties(builder);
+      key.currentState!.debugFillProperties(builder);
 
       final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -740,13 +804,12 @@ void main() {
 
     group('error control test', () {
       test('constructor redundant pan and scale', () {
-        FlutterError error;
+        late FlutterError error;
         try {
           GestureDetector(onScaleStart: (_) {}, onPanStart: (_) {},);
         } on FlutterError catch (e) {
           error = e;
         } finally {
-          expect(error, isNotNull);
           expect(
             error.toStringDeep(),
             'FlutterError\n'
@@ -766,7 +829,7 @@ void main() {
       });
 
       test('constructor duplicate drag recognizer', () {
-        FlutterError error;
+        late FlutterError error;
         try {
           GestureDetector(
             onVerticalDragStart: (_) {},
@@ -776,7 +839,6 @@ void main() {
         } on FlutterError catch (e) {
           error = e;
         } finally {
-          expect(error, isNotNull);
           expect(
             error.toStringDeep(),
             'FlutterError\n'
@@ -802,14 +864,13 @@ void main() {
             ),
           ),
         );
-        FlutterError error;
+        late FlutterError error;
         try {
-          key.currentState.replaceGestureRecognizers(
+          key.currentState!.replaceGestureRecognizers(
             <Type, GestureRecognizerFactory>{});
         } on FlutterError catch (e) {
           error = e;
         } finally {
-          expect(error, isNotNull);
           expect(error.diagnostics.last.level, DiagnosticLevel.hint);
           expect(
             error.diagnostics.last.toStringDeep(),
@@ -847,8 +908,8 @@ class _EmptySemanticsGestureDelegate extends SemanticsGestureDelegate {
 /// A [TestVariant] that runs tests multiple times with different buttons.
 class ButtonVariant extends TestVariant<int> {
   const ButtonVariant({
-    @required this.values,
-    @required this.descriptions,
+    required this.values,
+    required this.descriptions,
   }) : assert(values.length != 0); // ignore: prefer_is_empty
 
   @override
@@ -856,12 +917,12 @@ class ButtonVariant extends TestVariant<int> {
 
   final Map<int, String> descriptions;
 
-  static int button;
+  static int button = 0;
 
   @override
   String describeValue(int value) {
     assert(descriptions.containsKey(value), 'Unknown button');
-    return descriptions[value];
+    return descriptions[value]!;
   }
 
   @override

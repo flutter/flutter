@@ -2,16 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('!chrome') // web has different stack traces
-
-import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 
-dynamic getAssertionErrorWithMessage() {
+Object getAssertionErrorWithMessage() {
   try {
     assert(false, 'Message goes here.');
   } catch (e) {
@@ -20,7 +16,7 @@ dynamic getAssertionErrorWithMessage() {
   throw 'assert failed';
 }
 
-dynamic getAssertionErrorWithoutMessage() {
+Object getAssertionErrorWithoutMessage() {
   try {
     assert(false);
   } catch (e) {
@@ -29,7 +25,7 @@ dynamic getAssertionErrorWithoutMessage() {
   throw 'assert failed';
 }
 
-dynamic getAssertionErrorWithLongMessage() {
+Object getAssertionErrorWithLongMessage() {
   try {
     assert(false, 'word ' * 100);
   } catch (e) {
@@ -43,13 +39,13 @@ Future<StackTrace> getSampleStack() async {
 }
 
 Future<void> main() async {
-  final List<String> console = <String>[];
+  final List<String?> console = <String?>[];
 
   final StackTrace sampleStack = await getSampleStack();
 
   setUp(() async {
     expect(debugPrint, equals(debugPrintThrottled));
-    debugPrint = (String message, { int wrapWidth }) {
+    debugPrint = (String? message, { int? wrapWidth }) {
       console.add(message);
     };
   });
@@ -162,22 +158,24 @@ Future<void> main() async {
 
   test('Error reporting - NoSuchMethodError', () async {
     expect(console, isEmpty);
-    final dynamic exception = NoSuchMethodError(5, #foo, <dynamic>[2, 4], null); // ignore: deprecated_member_use
+    final Object exception = NoSuchMethodError.withInvocation(5,
+        Invocation.method(#foo, <dynamic>[2, 4]));
+
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: exception,
     ));
     expect(console.join('\n'), matches(
       r'^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
       r'The following NoSuchMethodError was thrown:\n'
-      r'Receiver: 5\n'
-      r'Tried calling: foo = 2, 4\n'
+      r'int has no foo method accepting arguments \(_, _\)\n'
       r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: exception,
     ));
-    expect(console.join('\n'), 'Another exception was thrown: NoSuchMethodError: Receiver: 5');
+    expect(console.join('\n'),
+      'Another exception was thrown: NoSuchMethodError: int has no foo method accepting arguments (_, _)');
     console.clear();
     FlutterError.resetErrorCount();
   });

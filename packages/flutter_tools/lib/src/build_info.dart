@@ -33,7 +33,7 @@ class BuildInfo {
     this.performanceMeasurementFile,
     this.packagesPath = '.packages',
     this.nullSafetyMode = NullSafetyMode.autodetect,
-    this.analyzeSize,
+    this.codeSizeDirectory,
   });
 
   final BuildMode mode;
@@ -43,7 +43,7 @@ class BuildInfo {
   /// If not provided, defaults to [NullSafetyMode.autodetect].
   final NullSafetyMode nullSafetyMode;
 
-  /// Whether the build should subdset icon fonts.
+  /// Whether the build should subset icon fonts.
   final bool treeShakeIcons;
 
   /// Represents a custom Android product flavor or an Xcode scheme, null for
@@ -57,7 +57,7 @@ class BuildInfo {
   /// The path to the .packages file to use for compilation.
   ///
   /// This is used by package:package_config to locate the actual package_config.json
-  /// file. If not provded, defaults to `.packages`.
+  /// file. If not provided, defaults to `.packages`.
   final String packagesPath;
 
   final List<String> fileSystemRoots;
@@ -114,9 +114,9 @@ class BuildInfo {
   /// rerun tasks.
   final String performanceMeasurementFile;
 
-  /// If provided, an output file where a v8-style heapsnapshot will be written for size
-  /// profiling.
-  final String analyzeSize;
+  /// If provided, an output directory where one or more v8-style heap snapshots
+  /// will be written for code size profiling.
+  final String codeSizeDirectory;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -152,10 +152,14 @@ class BuildInfo {
   String get modeName => getModeName(mode);
   String get friendlyModeName => getFriendlyModeName(mode);
 
-  /// Convert to a structued string encoded structure appropriate for usage as
+  /// the flavor name in the output files is lower-cased (see flutter.gradle),
+  /// so the lower cased flavor name is used to compute the output file name
+  String get lowerCasedFlavor => flavor?.toLowerCase();
+
+  /// Convert to a structured string encoded structure appropriate for usage as
   /// environment variables or to embed in other scripts.
   ///
-  /// Fields that are `null` are excluded from this configration.
+  /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
     return <String, String>{
       if (dartDefines?.isNotEmpty ?? false)
@@ -178,6 +182,8 @@ class BuildInfo {
         'BUNDLE_SKSL_PATH': bundleSkSLPath,
       if (packagesPath != null)
         'PACKAGE_CONFIG': packagesPath,
+      if (codeSizeDirectory != null)
+        'CODE_SIZE_DIRECTORY': codeSizeDirectory,
     };
   }
 }
@@ -419,7 +425,7 @@ enum TargetPlatform {
   fuchsia_x64,
   tester,
   web_javascript,
-  // The arch specific android target platforms are soft-depreacted.
+  // The arch specific android target platforms are soft-deprecated.
   // Instead of using TargetPlatform as a combination arch + platform
   // the code will be updated to carry arch information in [DarwinArch]
   // and [AndroidArch].
@@ -698,7 +704,7 @@ String encodeDartDefines(List<String> defines) {
 /// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
 List<String> decodeDartDefines(Map<String, String> environmentDefines, String key) {
   if (!environmentDefines.containsKey(key) || environmentDefines[key].isEmpty) {
-    return const <String>[];
+    return <String>[];
   }
   return environmentDefines[key]
     .split(',')

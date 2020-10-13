@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -194,7 +193,7 @@ void main() {
   testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {
     FlutterError error;
     try {
-      tester.binding.scheduleFrameCallback(null, rescheduling: true);
+      tester.binding.scheduleFrameCallback((Duration _) { }, rescheduling: true);
     } on FlutterError catch (e) {
       error = e;
     }

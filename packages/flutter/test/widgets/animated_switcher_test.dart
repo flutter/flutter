@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -50,11 +48,11 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 10));
     transition = tester.widget(find.byType(FadeTransition).at(0));
-    expect(transition.opacity.value, closeTo(0.4, 0.01));
+    expect(transition.opacity.value, moreOrLessEquals(0.4, epsilon: 0.01));
     transition = tester.widget(find.byType(FadeTransition).at(1));
-    expect(transition.opacity.value, closeTo(0.4, 0.01));
+    expect(transition.opacity.value, moreOrLessEquals(0.4, epsilon: 0.01));
     transition = tester.widget(find.byType(FadeTransition).at(2));
-    expect(transition.opacity.value, closeTo(0.1, 0.01));
+    expect(transition.opacity.value, moreOrLessEquals(0.1, epsilon: 0.01));
     await tester.pumpAndSettle();
   });
 
@@ -211,9 +209,12 @@ void main() {
   });
 
   testWidgets('AnimatedSwitcher uses custom layout.', (WidgetTester tester) async {
-    Widget newLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
+    Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
       return Column(
-        children: previousChildren + <Widget>[currentChild],
+        children: <Widget>[
+          ...previousChildren,
+          if (currentChild != null) currentChild,
+        ],
       );
     }
 
@@ -230,16 +231,13 @@ void main() {
   });
 
   testWidgets('AnimatedSwitcher uses custom transitions.', (WidgetTester tester) async {
-    final List<Widget> foundChildren = <Widget>[];
-    Widget newLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
-      foundChildren.clear();
-      if (currentChild != null) {
-        foundChildren.add(currentChild);
-      }
-      foundChildren.addAll(previousChildren);
-      return Column(
-        children: foundChildren,
-      );
+    late List<Widget> foundChildren;
+    Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
+      foundChildren = <Widget>[
+        if (currentChild != null) currentChild,
+        ...previousChildren,
+      ];
+      return Column(children: foundChildren);
     }
 
     Widget newTransitionBuilder(Widget child, Animation<double> animation) {
@@ -338,11 +336,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(StatefulTestState.generation, equals(3));
     transition = tester.widget(find.byType(FadeTransition).at(0));
-    expect(transition.opacity.value, closeTo(0.4, 0.01));
+    expect(transition.opacity.value, moreOrLessEquals(0.4, epsilon: 0.01));
     transition = tester.widget(find.byType(FadeTransition).at(1));
-    expect(transition.opacity.value, closeTo(0.4, 0.01));
+    expect(transition.opacity.value, moreOrLessEquals(0.4, epsilon: 0.01));
     transition = tester.widget(find.byType(FadeTransition).at(2));
-    expect(transition.opacity.value, closeTo(0.1, 0.01));
+    expect(transition.opacity.value, moreOrLessEquals(0.1, epsilon: 0.01));
     await tester.pumpAndSettle();
     expect(StatefulTestState.generation, equals(3));
   });
@@ -381,16 +379,13 @@ void main() {
     final UniqueKey containerTwo = UniqueKey();
     final UniqueKey containerThree = UniqueKey();
 
-    final List<Widget> foundChildren = <Widget>[];
-    Widget newLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
-      foundChildren.clear();
-      if (currentChild != null) {
-        foundChildren.add(currentChild);
-      }
-      foundChildren.addAll(previousChildren);
-      return Column(
-        children: foundChildren,
-      );
+    late List<Widget> foundChildren;
+    Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
+      foundChildren = <Widget>[
+        if (currentChild != null) currentChild,
+        ...previousChildren,
+      ];
+      return Column(children: foundChildren);
     }
 
     // Insert three unique children so that we have some previous children.
@@ -472,7 +467,7 @@ void main() {
 }
 
 class StatefulTest extends StatefulWidget {
-  const StatefulTest({Key key}) : super(key: key);
+  const StatefulTest({Key? key}) : super(key: key);
 
   @override
   StatefulTestState createState() => StatefulTestState();

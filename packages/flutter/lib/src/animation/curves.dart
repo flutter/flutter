@@ -182,7 +182,7 @@ class Interval extends Curve {
     assert(end >= 0.0);
     assert(end <= 1.0);
     assert(end >= begin);
-    t = ((t - begin) / (end - begin)).clamp(0.0, 1.0) as double;
+    t = ((t - begin) / (end - begin)).clamp(0.0, 1.0);
     if (t == 0.0 || t == 1.0)
       return t;
     return curve.transform(t);
@@ -738,9 +738,9 @@ class CatmullRomSpline extends Curve2D {
   Offset transformInternal(double t) {
     _initializeIfNeeded();
     final double length = _cubicSegments.length.toDouble();
-    double position;
-    double localT;
-    int index;
+    final double position;
+    final double localT;
+    final int index;
     if (t < 1.0) {
       position = t * length;
       localT = position % 1.0;
@@ -1189,7 +1189,7 @@ class ElasticInCurve extends Curve {
   double transformInternal(double t) {
     final double s = period / 4.0;
     t = t - 1.0;
-    return -math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period) as double;
+    return -math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period);
   }
 
   @override
@@ -1216,7 +1216,7 @@ class ElasticOutCurve extends Curve {
   @override
   double transformInternal(double t) {
     final double s = period / 4.0;
-    return math.pow(2.0, -10 * t) * math.sin((t - s) * (math.pi * 2.0) / period) + 1.0 as double;
+    return math.pow(2.0, -10 * t) * math.sin((t - s) * (math.pi * 2.0) / period) + 1.0;
   }
 
   @override
@@ -1248,7 +1248,7 @@ class ElasticInOutCurve extends Curve {
     if (t < 0.0)
       return -0.5 * math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period);
     else
-      return math.pow(2.0, -10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period) * 0.5 + 1.0 as double;
+      return math.pow(2.0, -10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period) * 0.5 + 1.0;
   }
 
   @override

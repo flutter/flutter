@@ -23,7 +23,6 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import '../web/web_runner.dart';
-import '../widget_cache.dart';
 import 'daemon.dart';
 
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -48,7 +47,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       ..addFlag('dump-skp-on-shader-compilation',
         negatable: false,
         help: 'Automatically dump the skp that triggers new shader compilations. '
-            'This is useful for wrting custom ShaderWarmUp to reduce jank. '
+            'This is useful for writing custom ShaderWarmUp to reduce jank. '
             'By default, this is not enabled to reduce the overhead. '
             'This is only available in profile or debug build. ',
       )
@@ -66,7 +65,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         help: 'A file to write the attached vmservice uri to after an'
           ' application is started.',
         valueHelp: 'project/example/out.txt'
-      );
+      )
+      ..addFlag('disable-service-auth-codes',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'No longer require an authentication code to connect to the VM '
+              'service (not recommended).');
     usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
@@ -75,13 +79,15 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
+    usesDeviceTimeoutOption();
+    addDdsOptions(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
   bool get cacheSkSL => boolArg('cache-sksl');
   bool get dumpSkpOnShaderCompilation => boolArg('dump-skp-on-shader-compilation');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
-
+  bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
   String get route => stringArg('route');
 }
 
@@ -91,6 +97,11 @@ class RunCommand extends RunCommandBase {
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraFrontendOptions();
     addEnableExperimentation(hide: !verboseHelp);
+
+    // By default, the app should to publish the VM service port over mDNS.
+    // This will allow subsequent "flutter attach" commands to connect to the VM
+    // without needing to know the port.
+    addPublishPort(enabledByDefault: true, verboseHelp: verboseHelp);
     argParser
       ..addFlag('start-paused',
         negatable: false,
@@ -130,7 +141,7 @@ class RunCommand extends RunCommandBase {
         help: 'Enable tracing to the endless tracer. This is useful when '
               'recording huge amounts of traces. If we need to use endless buffer to '
               'record startup traces, we can combine the ("--trace-startup"). '
-              'For exemple, flutter run --trace-startup --endless-trace-buffer. ',
+              'For example, flutter run --trace-startup --endless-trace-buffer. ',
       )
       ..addFlag('trace-systrace',
         negatable: false,
@@ -205,11 +216,6 @@ class RunCommand extends RunCommandBase {
               'results out to "refresh_benchmark.json", and exit. This flag is '
               'intended for use in generating automated flutter benchmarks.',
       )
-      ..addFlag('disable-service-auth-codes',
-        negatable: false,
-        hide: !verboseHelp,
-        help: 'No longer require an authentication code to connect to the VM '
-              'service (not recommended).')
       ..addFlag('web-initialize-platform',
         negatable: true,
         defaultsTo: true,
@@ -226,7 +232,6 @@ class RunCommand extends RunCommandBase {
               'Currently this is only supported on Android devices. This option '
               'cannot be paired with --use-application-binary.'
       );
-      addDdsOptions(verboseHelp: verboseHelp);
   }
 
   @override
@@ -407,6 +412,8 @@ class RunCommand extends RunCommandBase {
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
+        disablePortPublication: disablePortPublication,
+        ddsPort: ddsPort,
         verboseSystemLogs: boolArg('verbose-system-logs'),
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
@@ -530,7 +537,7 @@ class RunCommand extends RunCommandBase {
           target: stringArg('target'),
           buildInfo: getBuildInfo(),
           userIdentifier: userIdentifier,
-          widgetCache: WidgetCache(featureFlags: featureFlags),
+          platform: globals.platform,
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner
@@ -591,7 +598,12 @@ class RunCommand extends RunCommandBase {
       (_) {
         appStartedTime = globals.systemClock.now();
         if (stayResident) {
-          TerminalHandler(runner)
+          TerminalHandler(
+            runner,
+            logger: globals.logger,
+            terminal: globals.terminal,
+            signals: globals.signals,
+          )
             ..setupTerminal()
             ..registerSignalHandlers();
         }

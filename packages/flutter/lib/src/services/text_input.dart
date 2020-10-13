@@ -9,6 +9,7 @@ import 'dart:ui' show
   FontWeight,
   Offset,
   Size,
+  Rect,
   TextAffinity,
   TextAlign,
   TextDirection,
@@ -447,6 +448,7 @@ class TextInputConfiguration {
   /// [actionLabel] may be null.
   const TextInputConfiguration({
     this.inputType = TextInputType.text,
+    this.readOnly = false,
     this.obscureText = false,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
@@ -469,6 +471,11 @@ class TextInputConfiguration {
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
+
+  /// Whether the text field can be edited or not.
+  ///
+  /// Defaults to false.
+  final bool readOnly;
 
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
@@ -580,6 +587,7 @@ class TextInputConfiguration {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'inputType': inputType.toJson(),
+      'readOnly': readOnly,
       'obscureText': obscureText,
       'autocorrect': autocorrect,
       'smartDashesType': smartDashesType.index.toString(),
@@ -748,7 +756,17 @@ abstract class TextSelectionDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
 
-  /// Sets the current text input (replaces the whole line).
+  /// Indicates that the user has requested the delegate to replace its current
+  /// text editing state with [value].
+  ///
+  /// The new [value] is treated as user input and thus may subject to input
+  /// formatting.
+  ///
+  /// See also:
+  ///
+  /// * [EditableTextState.textEditingValue]: an implementation that applies
+  ///   additional pre-processing to the specified [value], before updating the
+  ///   text editing state.
   set textEditingValue(TextEditingValue value);
 
   /// Hides the text selection toolbar.
@@ -776,13 +794,14 @@ abstract class TextSelectionDelegate {
 /// See also:
 ///
 ///  * [TextInput.attach]
+///  * [EditableText], a [TextInputClient] implementation.
 abstract class TextInputClient {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const TextInputClient();
 
   /// The current state of the [TextEditingValue] held by this client.
-  TextEditingValue get currentTextEditingValue;
+  TextEditingValue? get currentTextEditingValue;
 
   /// The [AutofillScope] this [TextInputClient] belongs to, if any.
   ///
@@ -797,6 +816,9 @@ abstract class TextInputClient {
   AutofillScope? get currentAutofillScope;
 
   /// Requests that this client update its editing state to the given value.
+  ///
+  /// The new [value] is treated as user input and thus may subject to input
+  /// formatting.
   void updateEditingValue(TextEditingValue value);
 
   /// Requests that this client perform the given action.
@@ -824,7 +846,10 @@ abstract class TextInputClient {
 ///
 /// See also:
 ///
-///  * [TextInput.attach]
+///  * [TextInput.attach], a method used to establish a [TextInputConnection]
+///    between the system's text input and a [TextInputClient].
+///  * [EditableText], a [TextInputClient] that connects to and interacts with
+///    the system's text input using a [TextInputConnection].
 class TextInputConnection {
   TextInputConnection._(this._client)
       : assert(_client != null),
@@ -832,6 +857,7 @@ class TextInputConnection {
 
   Size? _cachedSize;
   Matrix4? _cachedTransform;
+  Rect? _cachedRect;
 
   static int _nextId = 1;
   final int _id;
@@ -873,7 +899,15 @@ class TextInputConnection {
     TextInput._instance._requestAutofill();
   }
 
-  /// Requests that the text input control change its internal state to match the given state.
+  /// Requests that the text input control update itself according to the new
+  /// [TextInputConfiguration].
+  void updateConfig(TextInputConfiguration configuration) {
+    assert(attached);
+    TextInput._instance._updateConfig(configuration);
+  }
+
+  /// Requests that the text input control change its internal state to match
+  /// the given state.
   void setEditingState(TextEditingValue value) {
     assert(attached);
     TextInput._instance._setEditingState(value);
@@ -900,6 +934,29 @@ class TextInputConnection {
         },
       );
     }
+  }
+
+  /// Send the smallest rect that covers the text in the client that's currently
+  /// being composed.
+  ///
+  /// The given `rect` can not be null. If any of the 4 coordinates of the given
+  /// [Rect] is not finite, a [Rect] of size (-1, -1) will be sent instead.
+  ///
+  /// The information is currently only used on iOS, for positioning the IME bar.
+  void setComposingRect(Rect rect) {
+    assert(rect != null);
+    if (rect == _cachedRect)
+      return;
+    _cachedRect = rect;
+    final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
+    TextInput._instance._setComposingTextRect(
+      <String, dynamic>{
+        'width': validRect.width,
+        'height': validRect.height,
+        'x': validRect.left,
+        'y': validRect.top,
+      },
+    );
   }
 
   /// Send text styling information.
@@ -1003,9 +1060,57 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 
 /// An low-level interface to the system's text input control.
 ///
+/// To start interacting with the system's text input control, call [attach] to
+/// establish a [TextInputConnection] between the system's text input control
+/// and a [TextInputClient]. The majority of commands available for
+/// interacting with the text input control reside in the returned
+/// [TextInputConnection]. The communication between the system text input and
+/// the [TextInputClient] is asynchronous.
+///
+/// The platform text input plugin (which represents the system's text input)
+/// and the [TextInputClient] usually maintain their own text editing states
+/// ([TextEditingValue]) separately. They must be kept in sync as long as the
+/// [TextInputClient] is connected. The following methods can be used to send
+/// [TextEditingValue] to update the other party, when either party's text
+/// editing states change:
+///
+/// * The [TextInput.attach] method allows a [TextInputClient] to establish a
+///   connection to the text input. An optional field in its `configuration`
+///   parameter can be used to specify an initial value for the platform text
+///   input plugin's [TextEditingValue].
+///
+/// * The [TextInputClient] sends its [TextEditingValue] to the platform text
+///   input plugin using [TextInputConnection.setEditingState].
+///
+/// * The platform text input plugin sends its [TextEditingValue] to the
+///   connected [TextInputClient] via a "TextInput.setEditingState" message.
+///
+/// * When autofill happens on a disconnected [TextInputClient], the platform
+///   text input plugin sends the [TextEditingValue] to the connected
+///   [TextInputClient]'s [AutofillScope], and the [AutofillScope] will further
+///   relay the value to the correct [TextInputClient].
+///
+/// When synchronizing the [TextEditingValue]s, the communication may get stuck
+/// in an infinite when both parties are trying to send their own update. To
+/// mitigate the problem, only [TextInputClient]s are allowed to alter the
+/// received [TextEditingValue]s while platform text input plugins are to accept
+/// the received [TextEditingValue]s unmodified. More specifically:
+///
+/// * When a [TextInputClient] receives a new [TextEditingValue] from the
+///   platform text input plugin, it's allowed to modify the value (for example,
+///   apply [TextInputFormatter]s). If it decides to do so, it must send the
+///   updated [TextEditingValue] back to the platform text input plugin to keep
+///   the [TextEditingValue]s in sync.
+///
+/// * When the platform text input plugin receives a new value from the
+///   connected [TextInputClient], it must accept the new value as-is, to avoid
+///   sending back an updated value.
+///
 /// See also:
 ///
 ///  * [TextField], a widget in which the user may enter text.
+///  * [EditableText], a [TextInputClient] that connects to [TextInput] when it
+///    wants to take user input from the keyboard.
 class TextInput {
   TextInput._() {
     _channel = SystemChannels.textInput;
@@ -1125,7 +1230,7 @@ class TextInput {
     if (method == 'TextInputClient.requestExistingInputState') {
       assert(_currentConnection!._client != null);
       _attach(_currentConnection!, _currentConfiguration);
-      final TextEditingValue editingValue = _currentConnection!._client.currentTextEditingValue;
+      final TextEditingValue? editingValue = _currentConnection!._client.currentTextEditingValue;
       if (editingValue != null) {
         _setEditingState(editingValue);
       }
@@ -1204,6 +1309,14 @@ class TextInput {
     _scheduleHide();
   }
 
+  void _updateConfig(TextInputConfiguration configuration) {
+    assert(configuration != null);
+    _channel.invokeMethod<void>(
+      'TextInput.updateConfig',
+      configuration.toJson(),
+    );
+  }
+
   void _setEditingState(TextEditingValue value) {
     assert(value != null);
     _channel.invokeMethod<void>(
@@ -1223,6 +1336,13 @@ class TextInput {
   void _setEditableSizeAndTransform(Map<String, dynamic> args) {
     _channel.invokeMethod<void>(
       'TextInput.setEditableSizeAndTransform',
+      args,
+    );
+  }
+
+  void _setComposingTextRect(Map<String, dynamic> args) {
+    _channel.invokeMethod<void>(
+      'TextInput.setMarkedTextRect',
       args,
     );
   }

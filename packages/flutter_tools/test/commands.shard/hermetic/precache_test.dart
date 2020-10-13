@@ -23,7 +23,7 @@ void main() {
     // Release lock between test cases.
     Cache.releaseLock();
 
-    when(cache.isUpToDate()).thenReturn(false);
+    when(cache.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(false));
     when(cache.updateAll(any)).thenAnswer((Invocation invocation) {
       artifacts = invocation.positionalArguments.first as Set<DevelopmentArtifact>;
       return Future<void>.value(null);
@@ -410,7 +410,7 @@ void main() {
   });
 
   testUsingContext('precache deletes artifact stampfiles when --force is provided', () async {
-    when(cache.isUpToDate()).thenReturn(true);
+    when(cache.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(true));
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),

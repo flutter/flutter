@@ -470,6 +470,53 @@ void main() {
     );
   });
 
+  testWidgets('Container transformAlignment', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                color: const Color(0xFF0000FF),
+              ),
+            ),
+            Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                key: key,
+                transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
+                transformAlignment: const Alignment(1.0, 0.0),
+                child: Container(
+                  color: const Color(0xFF00FFFF),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Finder finder = find.byKey(key);
+
+    expect(tester.getSize(finder), equals(const Size(100, 100)));
+
+    expect(tester.getTopLeft(finder), equals(const Offset(100, 100)));
+    expect(tester.getTopRight(finder), equals(const Offset(200, 100)));
+
+    expect(tester.getBottomLeft(finder), equals(const Offset(100, 200)));
+    expect(tester.getBottomRight(finder), equals(const Offset(200, 200)));
+  });
+
   testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
     await tester.pumpWidget(Container(
       clipBehavior: Clip.none,
@@ -500,6 +547,36 @@ void main() {
       find.byType(ClipPath),
       findsOneWidget,
     );
+  });
+
+  testWidgets('getClipPath() works for lots of kinds of decorations', (WidgetTester tester) async {
+    Future<void> test(Decoration decoration) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+              child: RepaintBoundary(
+                child: Container(
+                  clipBehavior: Clip.hardEdge,
+                  decoration: decoration,
+                  child: ColoredBox(
+                    color: Colors.yellow.withOpacity(0.5),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await expectLater(find.byType(Container), matchesGoldenFile('container_test.getClipPath.${decoration.runtimeType}.png'));
+    }
+    await test(const BoxDecoration());
+    await test(const UnderlineTabIndicator());
+    await test(const ShapeDecoration(shape: StadiumBorder()));
+    await test(const FlutterLogoDecoration());
   });
 
   testWidgets('Container is hittable only when having decorations', (WidgetTester tester) async {
@@ -554,6 +631,37 @@ void main() {
 
     await tester.tap(find.byType(Container));
     expect(tapped, false);
+  });
+
+  testWidgets('using clipBehaviour and shadow, should not clip the shadow', (WidgetTester tester) async {
+    final Container container = Container(
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          color: Colors.red,
+          boxShadow: const <BoxShadow>[
+            BoxShadow(
+              color: Colors.blue,
+              offset: Offset.zero,
+              spreadRadius: 10,
+              blurRadius: 20.0,
+            ),
+          ]),
+      child: const SizedBox(width: 50, height: 50),
+    );
+
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: Padding(
+          padding: const EdgeInsets.all(30.0),
+          child: container,
+      )),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('container.clipBehaviour.with.shadow.png'),
+    );
   });
 }
 

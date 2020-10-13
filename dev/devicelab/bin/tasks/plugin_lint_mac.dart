@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -45,10 +45,13 @@ Future<void> main() async {
             'lint',
             objcPodspecPath,
             '--allow-warnings',
+            '--verbose',
           ],
           environment: <String, String>{
             'LANG': 'en_US.UTF-8',
           },
+          // TODO(jmagman): Flutter cannot build against ARM simulators https://github.com/flutter/flutter/issues/64502
+          canFail: true,
         );
       });
 
@@ -63,10 +66,13 @@ Future<void> main() async {
             objcPodspecPath,
             '--allow-warnings',
             '--use-libraries',
+            '--verbose',
           ],
           environment: <String, String>{
             'LANG': 'en_US.UTF-8',
           },
+          // TODO(jmagman): Flutter cannot build against ARM simulators https://github.com/flutter/flutter/issues/64502
+          canFail: true,
         );
       });
 

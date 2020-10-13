@@ -24,10 +24,13 @@
 
 # Flutter repo-specific
 /bin/cache/
+/bin/internal/bootstrap.bat
+/bin/internal/bootstrap.sh
 /bin/mingit/
 /dev/benchmarks/mega_gallery/
 /dev/bots/.recipe_deps
 /dev/bots/android_tools/
+/dev/devicelab/ABresults*.json
 /dev/docs/doc/
 /dev/docs/flutter.docs.zip
 /dev/docs/lib/

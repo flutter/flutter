@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
@@ -93,7 +91,7 @@ String getAarTaskFor(BuildInfo buildInfo) {
 /// For example, when [splitPerAbi] is true, multiple APKs are created.
 Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
-  final String productFlavor = androidBuildInfo.buildInfo.flavor ?? '';
+  final String productFlavor = androidBuildInfo.buildInfo.lowerCasedFlavor ?? '';
   final String flavorString = productFlavor.isEmpty ? '' : '-$productFlavor';
   if (androidBuildInfo.splitPerAbi) {
     return androidBuildInfo.targetArchs.map<String>((AndroidArch arch) {
@@ -357,6 +355,9 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.buildInfo.performanceMeasurementFile != null) {
     command.add('-Pperformance-measurement-file=${androidBuildInfo.buildInfo.performanceMeasurementFile}');
   }
+  if (buildInfo.codeSizeDirectory != null) {
+    command.add('-Pcode-size-directory=${buildInfo.codeSizeDirectory}');
+  }
   command.add(assembleTask);
 
   GradleHandledError detectedGradleError;
@@ -394,7 +395,7 @@ Future<void> buildGradleApp({
       environment: gradleEnvironment,
       mapFunction: consumeLog,
     );
-  } on ProcessException catch(exception) {
+  } on ProcessException catch (exception) {
     consumeLog(exception.toString());
     // Rethrow the exception if the error isn't handled by any of the
     // `localGradleErrors`.
@@ -409,7 +410,7 @@ Future<void> buildGradleApp({
 
   if (exitCode != 0) {
     if (detectedGradleError == null) {
-      BuildEvent('gradle-unkown-failure', flutterUsage: globals.flutterUsage).send();
+      BuildEvent('gradle-unknown-failure', flutterUsage: globals.flutterUsage).send();
       throwToolExit(
         'Gradle task $assembleTask failed with exit code $exitCode',
         exitCode: exitCode,
@@ -467,6 +468,10 @@ Future<void> buildGradleApp({
       ? '' // Don't display the size when building a debug variant.
       : ' (${getSizeAsMB(bundleFile.lengthSync())})';
 
+    if (buildInfo.codeSizeDirectory != null) {
+      await _performCodeSizeAnalysis('aab', bundleFile, androidBuildInfo);
+    }
+
     globals.printStatus(
       '$successMark Built ${globals.fs.path.relative(bundleFile.path)}$appSize.',
       color: TerminalColor.green,
@@ -502,24 +507,40 @@ Future<void> buildGradleApp({
     color: TerminalColor.green,
   );
 
-  // Call size analyzer if --analyze-size flag was provided.
-  if (buildInfo.analyzeSize != null && !globals.platform.isWindows) {
-    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processUtils: ProcessUtils.instance,
-    );
-    final Map<String, Object> output = await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(
-      apk: apkFile,
-      aotSnapshot: globals.fs.file(buildInfo.analyzeSize),
-    );
-    final File outputFile = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'apk-analysis', 'json')
-      ..writeAsStringSync(jsonEncode(output));
-    // This message is used as a sentinel in analyze_apk_size_test.dart
-    globals.printStatus(
-      'A summary of your APK analysis can be found at: ${outputFile.path}',
-    );
+  if (buildInfo.codeSizeDirectory != null) {
+    await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
   }
+}
+
+Future<void> _performCodeSizeAnalysis(
+  String kind,
+  File zipFile,
+  AndroidBuildInfo androidBuildInfo,
+) async {
+  final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    flutterUsage: globals.flutterUsage,
+  );
+  final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
+  final BuildInfo buildInfo = androidBuildInfo.buildInfo;
+  final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
+    .childFile('snapshot.$archName.json');
+  final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
+    .childFile('trace.$archName.json');
+  final Map<String, Object> output = await sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
+    zipFile: zipFile,
+    aotSnapshot: aotSnapshot,
+    precompilerTrace: precompilerTrace,
+    kind: kind,
+  );
+  final File outputFile = globals.fsUtils.getUniqueFile(
+    globals.fs.directory(getBuildDirectory()),'$kind-code-size-analysis', 'json',
+  )..writeAsStringSync(jsonEncode(output));
+  // This message is used as a sentinel in analyze_apk_size_test.dart
+  globals.printStatus(
+    'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
+  );
 }
 
 /// Builds AAR and POM files.
@@ -587,7 +608,7 @@ Future<void> buildGradleAar({
   }
   if (buildInfo.dartObfuscation) {
     if (buildInfo.mode == BuildMode.debug || buildInfo.mode == BuildMode.profile) {
-      globals.printStatus('Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)} mode, building as unobfuscated.');
+      globals.printStatus('Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)} mode, building as un-obfuscated.');
     } else {
       command.add('-Pdart-obfuscation=true');
     }
@@ -880,7 +901,7 @@ Iterable<String> listApkPaths(
   final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
   final List<String> apkPartialName = <String>[
     if (androidBuildInfo.buildInfo.flavor?.isNotEmpty ?? false)
-      androidBuildInfo.buildInfo.flavor,
+      androidBuildInfo.buildInfo.lowerCasedFlavor,
     '$buildType.apk',
   ];
   if (androidBuildInfo.splitPerAbi) {
@@ -917,7 +938,7 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo) {
     // the directory name is `foo_barRelease`.
     fileCandidates.add(
       getBundleDirectory(project)
-        .childDirectory('${buildInfo.flavor}${camelCase('_' + buildInfo.modeName)}')
+        .childDirectory('${buildInfo.lowerCasedFlavor}${camelCase('_' + buildInfo.modeName)}')
         .childFile('app.aab'));
 
     // The Android Gradle plugin 3.5.0 adds the flavor name to file name.
@@ -925,8 +946,8 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo) {
     // the file name name is `app-foo_bar-release.aab`.
     fileCandidates.add(
       getBundleDirectory(project)
-        .childDirectory('${buildInfo.flavor}${camelCase('_' + buildInfo.modeName)}')
-        .childFile('app-${buildInfo.flavor}-${buildInfo.modeName}.aab'));
+        .childDirectory('${buildInfo.lowerCasedFlavor}${camelCase('_' + buildInfo.modeName)}')
+        .childFile('app-${buildInfo.lowerCasedFlavor}-${buildInfo.modeName}.aab'));
   }
   for (final File bundleFile in fileCandidates) {
     if (bundleFile.existsSync()) {

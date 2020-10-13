@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:collection' show LinkedHashMap;
 import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, Image, ImageFilter;
 
@@ -27,11 +24,11 @@ void main() {
 
     layout(fittedBox, phase: EnginePhase.flushSemantics);
     final Matrix4 transform = Matrix4.identity();
-    fittedBox.applyPaintTransform(fittedBox.child, transform);
+    fittedBox.applyPaintTransform(fittedBox.child!, transform);
     expect(transform, Matrix4.zero());
 
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
-    expect(fittedBox.hitTestChildren(hitTestResult), isFalse);
+    expect(fittedBox.hitTestChildren(hitTestResult, position: Offset.zero), isFalse);
   });
 
   test('RenderFittedBox does not paint with empty sizes', () {
@@ -224,7 +221,7 @@ void main() {
     image = await boundary.toImage();
     expect(image.width, equals(20));
     expect(image.height, equals(20));
-    ByteData data = await image.toByteData();
+    ByteData data = (await image.toByteData())!;
 
     int getPixel(int x, int y) => data.getUint32((x + y * image.width) * 4);
 
@@ -233,12 +230,12 @@ void main() {
     expect(getPixel(0, 0), equals(0x00000080));
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
-    final OffsetLayer layer = boundary.debugLayer as OffsetLayer;
+    final OffsetLayer layer = boundary.debugLayer! as OffsetLayer;
 
     image = await layer.toImage(Offset.zero & const Size(20.0, 20.0));
     expect(image.width, equals(20));
     expect(image.height, equals(20));
-    data = await image.toByteData();
+    data = (await image.toByteData())!;
     expect(getPixel(0, 0), equals(0x00000080));
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
@@ -246,7 +243,7 @@ void main() {
     image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0));
     expect(image.width, equals(30));
     expect(image.height, equals(30));
-    data = await image.toByteData();
+    data = (await image.toByteData())!;
     expect(getPixel(0, 0), equals(0x00000000));
     expect(getPixel(10, 10), equals(0x00000080));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
@@ -256,7 +253,7 @@ void main() {
     image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0), pixelRatio: 2.0);
     expect(image.width, equals(60));
     expect(image.height, equals(60));
-    data = await image.toByteData();
+    data = (await image.toByteData())!;
     expect(getPixel(0, 0), equals(0x00000000));
     expect(getPixel(20, 20), equals(0x00000080));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
@@ -491,10 +488,6 @@ void main() {
   });
 
   test('RenderMouseRegion can change properties when detached', () {
-    renderer.initMouseTracker(MouseTracker(
-      renderer.pointerRouter,
-      (_) => <MouseTrackerAnnotation, Matrix4>{} as LinkedHashMap<MouseTrackerAnnotation, Matrix4>,
-    ));
     final RenderMouseRegion object = RenderMouseRegion();
     object
       ..opaque = false
@@ -605,7 +598,7 @@ void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
   expect(L, isNot(Layer));
   expect(renderObject.debugLayer, null);
   layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
-  final Layer layer = renderObject.debugLayer;
+  final Layer layer = renderObject.debugLayer!;
   expect(layer, isA<L>());
   expect(layer, isNotNull);
 
@@ -629,8 +622,8 @@ class _TestPathClipper extends CustomClipper<Path> {
 
 class _TestSemanticsUpdateRenderFractionalTranslation extends RenderFractionalTranslation {
   _TestSemanticsUpdateRenderFractionalTranslation({
-    @required Offset translation,
-    RenderBox child,
+    required Offset translation,
+    RenderBox? child,
   }) : super(translation: translation, child: child);
 
   int markNeedsSemanticsUpdateCallCount = 0;

@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/utils.dart';
+
+import 'task_result.dart';
+import 'utils.dart';
+
+final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';
 
 final List<String> flutterAssets = <String>[
   'assets/flutter_assets/AssetManifest.json',
@@ -160,7 +162,6 @@ class ApkExtractor {
         'packages',
         apkFile.path,
       ],
-      printStdout: false,
     );
     _classes = Set<String>.from(
       packages
@@ -269,8 +270,8 @@ subprojects {
     final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
     content = content.replaceFirst(
-      '\ndependencies:\n',
-      '\ndependencies:\n  $plugin:\n',
+      '${platformLineSep}dependencies:$platformLineSep',
+      '${platformLineSep}dependencies:$platformLineSep  $plugin:$platformLineSep',
     );
     await pubspec.writeAsString(content, flush: true);
   }
@@ -317,7 +318,7 @@ android {
       path.join(parent.path, 'hello', 'pubspec.yaml')
     );
     final String contents = pubspec.readAsStringSync();
-    final String newContents = contents.replaceFirst('# The following section is specific to Flutter.\nflutter:\n', '''
+    final String newContents = contents.replaceFirst('# The following section is specific to Flutter.${platformLineSep}flutter:$platformLineSep', '''
 flutter:
   assets:
     - lib/gallery/example_code.dart

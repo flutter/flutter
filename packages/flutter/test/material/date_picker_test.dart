@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,7 +10,7 @@ import '../rendering/mock_canvas.dart';
 import 'feedback_tester.dart';
 
 class MockClipboard {
-  Object _clipboardData = <String, dynamic>{
+  dynamic _clipboardData = <String, dynamic>{
     'text': null,
   };
 
@@ -31,21 +29,21 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
 
-  DateTime firstDate;
-  DateTime lastDate;
-  DateTime initialDate;
-  DateTime today;
-  SelectableDayPredicate selectableDayPredicate;
-  DatePickerEntryMode initialEntryMode;
-  DatePickerMode initialCalendarMode;
+  late DateTime firstDate;
+  late DateTime lastDate;
+  late DateTime initialDate;
+  late DateTime today;
+  late SelectableDayPredicate? selectableDayPredicate;
+  late DatePickerEntryMode initialEntryMode;
+  late DatePickerMode initialCalendarMode;
 
-  String cancelText;
-  String confirmText;
-  String errorFormatText;
-  String errorInvalidText;
-  String fieldHintText;
-  String fieldLabelText;
-  String helpText;
+  String? cancelText;
+  String? confirmText;
+  String? errorFormatText;
+  String? errorInvalidText;
+  String? fieldHintText;
+  String? fieldLabelText;
+  String? helpText;
 
   final Finder nextMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Next month') ?? false));
   final Finder previousMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Previous month') ?? false));
@@ -88,7 +86,7 @@ void main() {
     Future<void> callback(Future<DateTime> date),
     { TextDirection textDirection = TextDirection.ltr }
   ) async {
-    BuildContext buttonContext;
+    late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Builder(
@@ -123,10 +121,10 @@ void main() {
       fieldHintText: fieldHintText,
       fieldLabelText: fieldLabelText,
       helpText: helpText,
-      builder: (BuildContext context, Widget child) {
+      builder: (BuildContext context, Widget? child) {
         return Directionality(
           textDirection: textDirection,
-          child: child,
+          child: child ?? const SizedBox(),
         );
       },
     );
@@ -141,9 +139,9 @@ void main() {
       confirmText = 'yep';
       helpText = 'help';
       await prepareDatePicker(tester, (Future<DateTime> date) async {
-        expect(find.text(cancelText), findsOneWidget);
-        expect(find.text(confirmText), findsOneWidget);
-        expect(find.text(helpText), findsOneWidget);
+        expect(find.text(cancelText!), findsOneWidget);
+        expect(find.text(confirmText!), findsOneWidget);
+        expect(find.text(helpText!), findsOneWidget);
       });
     });
 
@@ -219,10 +217,10 @@ void main() {
                         initialDate: DateTime.now(),
                         firstDate: DateTime(2018),
                         lastDate: DateTime(2030),
-                        builder: (BuildContext context, Widget child) {
+                        builder: (BuildContext context, Widget? child) {
                           return Directionality(
                             textDirection: textDirection,
-                            child: child,
+                            child: child ?? const SizedBox(),
                           );
                         },
                       );
@@ -273,7 +271,7 @@ void main() {
                       initialDate: DateTime.now(),
                       firstDate: DateTime(2018),
                       lastDate: DateTime(2030),
-                      builder: (BuildContext context, Widget child) => const SizedBox(),
+                      builder: (BuildContext context, Widget? child) => const SizedBox(),
                     );
                   },
                   child: const Text('Show Date Picker'),
@@ -377,10 +375,10 @@ void main() {
                          initialDate: DateTime(2016, DateTime.january, 15),
                          firstDate:DateTime(2001, DateTime.january, 1),
                          lastDate: DateTime(2031, DateTime.december, 31),
-                         builder: (BuildContext context, Widget child) {
+                         builder: (BuildContext context, Widget? child) {
                            return Directionality(
                              textDirection: textDirection,
-                             child: child,
+                             child: child ?? const SizedBox(),
                            );
                          },
                        );
@@ -670,11 +668,11 @@ void main() {
       fieldLabelText = 'label';
       helpText = 'help';
       await prepareDatePicker(tester, (Future<DateTime> date) async {
-        expect(find.text(cancelText), findsOneWidget);
-        expect(find.text(confirmText), findsOneWidget);
-        expect(find.text(fieldHintText), findsOneWidget);
-        expect(find.text(fieldLabelText), findsOneWidget);
-        expect(find.text(helpText), findsOneWidget);
+        expect(find.text(cancelText!), findsOneWidget);
+        expect(find.text(confirmText!), findsOneWidget);
+        expect(find.text(fieldHintText!), findsOneWidget);
+        expect(find.text(fieldLabelText!), findsOneWidget);
+        expect(find.text(helpText!), findsOneWidget);
       });
     });
 
@@ -697,7 +695,7 @@ void main() {
     testWidgets('Toggle to calendar mode keeps selected date', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         final TextField field = textField(tester);
-        field.controller.clear();
+        field.controller!.clear();
 
         await tester.enterText(find.byType(TextField), '12/25/2016');
         await tester.tap(find.byIcon(Icons.calendar_today));
@@ -710,7 +708,7 @@ void main() {
     testWidgets('Entered text returns date', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         final TextField field = textField(tester);
-        field.controller.clear();
+        field.controller!.clear();
 
         await tester.enterText(find.byType(TextField), '12/25/2016');
         await tester.tap(find.text('OK'));
@@ -722,15 +720,15 @@ void main() {
       errorFormatText = 'oops';
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         final TextField field = textField(tester);
-        field.controller.clear();
+        field.controller!.clear();
 
         await tester.pumpAndSettle();
         await tester.enterText(find.byType(TextField), '1225');
-        expect(find.text(errorFormatText), findsNothing);
+        expect(find.text(errorFormatText!), findsNothing);
 
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
-        expect(find.text(errorFormatText), findsOneWidget);
+        expect(find.text(errorFormatText!), findsOneWidget);
       });
     });
 
@@ -738,16 +736,16 @@ void main() {
       errorFormatText = 'oops';
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         final TextField field = textField(tester);
-        field.controller.clear();
+        field.controller!.clear();
 
         await tester.pumpAndSettle();
         await tester.enterText(find.byType(TextField), '20 days, 3 months, 2003');
         expect(find.text('20 days, 3 months, 2003'), findsOneWidget);
-        expect(find.text(errorFormatText), findsNothing);
+        expect(find.text(errorFormatText!), findsNothing);
 
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
-        expect(find.text(errorFormatText), findsOneWidget);
+        expect(find.text(errorFormatText!), findsOneWidget);
       });
     });
 
@@ -755,20 +753,20 @@ void main() {
       errorInvalidText = 'oops';
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         final TextField field = textField(tester);
-        field.controller.clear();
+        field.controller!.clear();
 
         await tester.pumpAndSettle();
         await tester.enterText(find.byType(TextField), '08/10/1969');
-        expect(find.text(errorInvalidText), findsNothing);
+        expect(find.text(errorInvalidText!), findsNothing);
 
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
-        expect(find.text(errorInvalidText), findsOneWidget);
+        expect(find.text(errorInvalidText!), findsOneWidget);
       });
     });
 
     testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
-      BuildContext buttonContext;
+      late BuildContext buttonContext;
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData.light().copyWith(
@@ -825,9 +823,65 @@ void main() {
     });
   });
 
+  group('CalendarDatePicker', () {
+    // Tests for the standalone CalendarDatePicker class
+    testWidgets('Updates to initialDate parameter is reflected in the state', (WidgetTester tester) async {
+      final Key pickerKey = UniqueKey();
+      final DateTime initialDate = DateTime(2020, 1, 21);
+      final DateTime updatedDate = DateTime(1976, 2, 23);
+      const Color selectedColor = Color(0xff2196f3); // default primary color
+
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: CalendarDatePicker(
+            key: pickerKey,
+            initialDate: initialDate,
+            firstDate: DateTime(1970, 1, 1),
+            lastDate: DateTime(2099, 31, 12),
+            onDateChanged: (DateTime value) {},
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      // Month should show as January 2020
+      expect(find.text('January 2020'), findsOneWidget);
+      // Selected date should be painted with a colored circle
+      expect(
+        Material.of(tester.element(find.text('21'))),
+        paints..circle(color: selectedColor, style: PaintingStyle.fill)
+      );
+
+      // Change to the updated initialDate
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: CalendarDatePicker(
+            key: pickerKey,
+            initialDate: updatedDate,
+            firstDate: DateTime(1970, 1, 1),
+            lastDate: DateTime(2099, 31, 12),
+            onDateChanged: (DateTime value) {},
+          ),
+        ),
+      ));
+      // Wait for the page scroll animation to finish
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+      // Month should show as February 1976
+      expect(find.text('January 2020'), findsNothing);
+      expect(find.text('February 1976'), findsOneWidget);
+      // Selected date should be painted with a colored circle
+      expect(
+          Material.of(tester.element(find.text('23'))),
+          paints..circle(color: selectedColor, style: PaintingStyle.fill)
+      );
+
+    });
+  });
+
   group('Haptic feedback', () {
     const Duration hapticFeedbackInterval = Duration(milliseconds: 10);
-    FeedbackTester feedback;
+    late FeedbackTester feedback;
 
     setUp(() {
       feedback = FeedbackTester();
@@ -839,7 +893,7 @@ void main() {
     });
 
     tearDown(() {
-      feedback?.dispose();
+      feedback.dispose();
     });
 
     testWidgets('Selecting date vibrates', (WidgetTester tester) async {
@@ -1467,7 +1521,7 @@ class _DatePickerObserver extends NavigatorObserver {
   int datePickerCount = 0;
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route.toString().contains('_DialogRoute')) {
       datePickerCount++;
     }

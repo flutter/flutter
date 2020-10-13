@@ -79,6 +79,28 @@ void main() {
     });
   });
 
+  testWidgets('Router.of can be null', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(buildBoilerPlate(
+      Text('dummy', key: key)
+    ));
+    final BuildContext textContext = key.currentContext;
+
+    // This should not throw error.
+    Router<dynamic> router = Router.of(textContext, nullOk: true);
+    expect(router, isNull);
+
+    // Test when the nullOk is not specified.
+    bool hasFlutterError = false;
+    try {
+      router = Router.of(textContext);
+    } on FlutterError catch(e) {
+      expect(e.message.startsWith('Router'), isTrue);
+      hasFlutterError = true;
+    }
+    expect(hasFlutterError, isTrue);
+  });
+
   testWidgets('Simple router can handle pop route', (WidgetTester tester) async {
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
     provider.value = const RouteInformation(
@@ -116,6 +138,50 @@ void main() {
 
     await tester.pump();
     expect(find.text('popped'), findsOneWidget);
+  });
+
+  testWidgets('Router throw when passes only routeInformationProvider', (WidgetTester tester) async {
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    try {
+      Router<RouteInformation>(
+        routeInformationProvider: provider,
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext context, RouteInformation information) {
+            return Text(information.location);
+          },
+        ),
+      );
+    } on AssertionError catch(e) {
+      expect(
+        e.message,
+        'You must provide both routeInformationProvider and '
+        'routeInformationParser if this router parses route information. '
+        'Otheriwse, they should both be null.'
+      );
+    }
+  });
+
+  testWidgets('Router throw when passes only routeInformationParser', (WidgetTester tester) async {
+    try {
+      Router<RouteInformation>(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext context, RouteInformation information) {
+            return Text(information.location);
+          },
+        ),
+      );
+    } on AssertionError catch(e) {
+      expect(
+        e.message,
+        'You must provide both routeInformationProvider and '
+        'routeInformationParser if this router parses route information. '
+        'Otheriwse, they should both be null.'
+      );
+    }
   });
 
   testWidgets('PopNavigatorRouterDelegateMixin works', (WidgetTester tester) async {
@@ -434,6 +500,45 @@ void main() {
     expect(reportedRouteInformation.location, 'update');
   });
 
+  testWidgets('router does not report when route information is up to date with route information provider', (WidgetTester tester) async {
+    RouteInformation reportedRouteInformation;
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider(
+      onRouterReport: (RouteInformation information) {
+        reportedRouteInformation = information;
+      }
+    );
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    final SimpleRouterDelegate delegate = SimpleRouterDelegate(reportConfiguration: true);
+    delegate.builder = (BuildContext context, RouteInformation routeInformation) {
+      return Text(routeInformation.location);
+    };
+
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        routeInformationProvider: provider,
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+      )
+    ));
+    expect(find.text('initial'), findsOneWidget);
+    expect(reportedRouteInformation, isNull);
+    // This will cause the router to rebuild.
+    provider.value = const RouteInformation(
+      location: 'update',
+    );
+    // This will schedule the route reporting.
+    delegate.notifyListeners();
+    await tester.pump();
+
+    expect(find.text('initial'), findsNothing);
+    expect(find.text('update'), findsOneWidget);
+    // The router should not report because the route name is already up to
+    // date.
+    expect(reportedRouteInformation, isNull);
+  });
+
   testWidgets('PlatformRouteInformationProvider works', (WidgetTester tester) async {
     final RouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: const RouteInformation(
@@ -624,12 +729,12 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
       pages: <Page<void>>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        MaterialPage<void>(
-          builder: (BuildContext context) => const Text('base'),
+        const MaterialPage<void>(
+          child: Text('base'),
         ),
         MaterialPage<void>(
           key: ValueKey<String>(routeInformation?.location),
-          builder: (BuildContext context) => builder(context, routeInformation),
+          child: builder(context, routeInformation),
         )
       ],
     );

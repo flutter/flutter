@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,18 +12,18 @@ void main() {
   testWidgets('Activity indicator animate property works',
       (WidgetTester tester) async {
     await tester.pumpWidget(buildCupertinoActivityIndicator());
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(1));
 
     await tester.pumpWidget(buildCupertinoActivityIndicator(false));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
 
     await tester.pumpWidget(Container());
 
     await tester.pumpWidget(buildCupertinoActivityIndicator(false));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
 
     await tester.pumpWidget(buildCupertinoActivityIndicator());
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(1));
   });
 
   testWidgets('Activity indicator dark mode', (WidgetTester tester) async {
@@ -74,60 +72,6 @@ void main() {
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('activityIndicator.paused.dark.png'),
-    );
-  });
-
-  testWidgets('Activity indicator with iOS14 style',
-      (WidgetTester tester) async {
-    final Key key = UniqueKey();
-    await tester.pumpWidget(
-      Center(
-        child: MediaQuery(
-          data: const MediaQueryData(platformBrightness: Brightness.light),
-          child: RepaintBoundary(
-            key: key,
-            child: Container(
-              color: CupertinoColors.white,
-              child: const CupertinoActivityIndicator(
-                animating: false,
-                radius: 35,
-                iOSVersionStyle:
-                    CupertinoActivityIndicatorIOSVersionStyle.iOS14,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await expectLater(
-      find.byKey(key),
-      matchesGoldenFile('activityIndicator.iOS14.paused.light.png'),
-    );
-
-    await tester.pumpWidget(
-      Center(
-        child: MediaQuery(
-          data: const MediaQueryData(platformBrightness: Brightness.dark),
-          child: RepaintBoundary(
-            key: key,
-            child: Container(
-              color: CupertinoColors.black,
-              child: const CupertinoActivityIndicator(
-                animating: false,
-                radius: 35,
-                iOSVersionStyle:
-                    CupertinoActivityIndicatorIOSVersionStyle.iOS14,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await expectLater(
-      find.byKey(key),
-      matchesGoldenFile('activityIndicator.iOS14.paused.dark.png'),
     );
   });
 
@@ -209,12 +153,13 @@ void main() {
     // first tick was changed to be at 12 o'clock.
     expect(
       find.byType(CupertinoActivityIndicator),
-      paints..rrect(rrect: const RRect.fromLTRBXY(-10, -50, 10, -100, 10, 10)),
+      paints
+        ..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10)),
     );
   });
 }
 
-Widget buildCupertinoActivityIndicator([bool animating]) {
+Widget buildCupertinoActivityIndicator([bool? animating]) {
   return MediaQuery(
     data: const MediaQueryData(platformBrightness: Brightness.light),
     child: CupertinoActivityIndicator(

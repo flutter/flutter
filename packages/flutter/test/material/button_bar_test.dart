@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -243,7 +241,7 @@ void main() {
   group('button properties override ButtonTheme', () {
 
     testWidgets('default button properties override ButtonTheme properties', (WidgetTester tester) async {
-      BuildContext capturedContext;
+      late BuildContext capturedContext;
       await tester.pumpWidget(
         MaterialApp(
           home: ButtonBar(
@@ -266,7 +264,7 @@ void main() {
     });
 
     testWidgets('ButtonBarTheme button properties override defaults and ButtonTheme properties', (WidgetTester tester) async {
-      BuildContext capturedContext;
+      late BuildContext capturedContext;
       await tester.pumpWidget(
         MaterialApp(
           home: ButtonBarTheme(
@@ -299,7 +297,7 @@ void main() {
     });
 
     testWidgets('ButtonBar button properties override ButtonBarTheme, defaults and ButtonTheme properties', (WidgetTester tester) async {
-      BuildContext capturedContext;
+      late BuildContext capturedContext;
       await tester.pumpWidget(
         MaterialApp(
           home: ButtonBarTheme(
@@ -630,7 +628,7 @@ void main() {
     );
   });
 
-  testWidgets('_RenderButtonBarRow.constraints works before layout', (WidgetTester tester) async {
+  testWidgets('_RenderButtonBarRow.constraints does not work before layout', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: ButtonBar()),
       Duration.zero,
@@ -641,6 +639,6 @@ void main() {
     final RenderBox renderButtonBar = tester.renderObject(buttonBar) as RenderBox;
 
     expect(renderButtonBar.debugNeedsLayout, isTrue);
-    expect(renderButtonBar.constraints, isNull);
+    expect(() => renderButtonBar.constraints, throwsStateError);
   });
 }

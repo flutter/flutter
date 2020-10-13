@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:process/process.dart';
 
 import '../src/common.dart';
@@ -29,12 +27,12 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('flutter run reports an error if an invalid device is supplied', () async {
+  testWithoutContext('flutter run reports an error if an invalid device is supplied', () async {
     // This test forces flutter to check for all possible devices to catch issues
     // like https://github.com/flutter/flutter/issues/21418 which were skipped
     // over because other integration tests run using flutter-tester which short-cuts
     // some of the checks for devices.
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
     const ProcessManager _processManager = LocalProcessManager();
     final ProcessResult _proc = await _processManager.run(
@@ -50,7 +48,7 @@ void main() {
     }
   });
 
-  test('flutter run writes pid-file', () async {
+  testWithoutContext('flutter run writes pid-file', () async {
     final File pidFile = tempDir.childFile('test.pid');
     await _flutter.run(pidFile: pidFile);
     expect(pidFile.existsSync(), isTrue);

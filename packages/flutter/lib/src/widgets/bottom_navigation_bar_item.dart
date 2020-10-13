@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show Color;
 
 import 'framework.dart';
@@ -23,13 +21,19 @@ import 'framework.dart';
 class BottomNavigationBarItem {
   /// Creates an item that is used with [BottomNavigationBar.items].
   ///
-  /// The argument [icon] should not be null and the argument [title] should not be null when used in a Material Design's [BottomNavigationBar].
+  /// The argument [icon] should not be null and the argument [label] should not be null when used in a Material Design's [BottomNavigationBar].
   const BottomNavigationBarItem({
-    @required this.icon,
+    required this.icon,
+    @Deprecated(
+      'Use "label" instead, as it allows for an improved text-scaling experience. '
+      'This feature was deprecated after v1.19.0.'
+    )
     this.title,
-    Widget activeIcon,
+    this.label,
+    Widget? activeIcon,
     this.backgroundColor,
   }) : activeIcon = activeIcon ?? icon,
+       assert(label == null || title == null),
        assert(icon != null);
 
   /// The icon of the item.
@@ -63,7 +67,20 @@ class BottomNavigationBarItem {
   final Widget activeIcon;
 
   /// The title of the item. If the title is not provided only the icon will be shown when not used in a Material Design [BottomNavigationBar].
-  final Widget title;
+  ///
+  /// This field is deprecated, use [label] instead.
+  @Deprecated(
+    'Use "label" instead, as it allows for an improved text-scaling experience. '
+    'This feature was deprecated after v1.19.0.'
+  )
+  final Widget? title;
+
+  /// The text label for this [BottomNavigationBarItem].
+  ///
+  /// This will be used to create a [Text] widget to put in the bottom navigation bar,
+  /// and in Material Design [BottomNavigationBar]s, this will be used to display
+  /// a tooltip on long press of an item in the [BottomNavigationBar].
+  final String? label;
 
   /// The color of the background radial animation for material [BottomNavigationBar].
   ///
@@ -78,5 +95,5 @@ class BottomNavigationBarItem {
   ///
   ///  * [Icon.color] and [ImageIcon.color] to control the foreground color of
   ///    the icons themselves.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 }

@@ -510,7 +510,7 @@ abstract class OutlinedBorder extends ShapeBorder {
 
   /// Returns a copy of this OutlinedBorder that draws its outline with the
   /// specified [side], if [side] is non-null.
-  OutlinedBorder copyWith({ BorderSide side });
+  OutlinedBorder copyWith({ BorderSide? side });
 }
 
 /// Represents the addition of two otherwise-incompatible borders.

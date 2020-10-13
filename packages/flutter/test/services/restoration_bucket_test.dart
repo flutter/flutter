@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -54,7 +53,7 @@ void main() {
     expect(manager.updateScheduled, isFalse);
 
     // Can store null.
-    bucket.write<bool>('value4', null);
+    bucket.write<bool?>('value4', null);
     expect(manager.updateScheduled, isTrue);
     expect(bucket.read<int>('value4'), null);
     manager.doSerialization();
@@ -111,7 +110,7 @@ void main() {
     expect(manager.updateScheduled, isFalse);
 
     // Can store null.
-    child.write<bool>('value4', null);
+    child.write<bool?>('value4', null);
     expect(manager.updateScheduled, isTrue);
     expect(child.read<int>('value4'), null);
     manager.doSerialization();
@@ -327,7 +326,7 @@ void main() {
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner1');
-    final Object rawChildData = rawData[childrenMapKey]['child1'];
+    final Object rawChildData = rawData[childrenMapKey]['child1'] as Object;
     expect(rawChildData, isNotNull);
 
     expect(manager.updateScheduled, isFalse);
@@ -370,9 +369,9 @@ void main() {
     final RestorationBucket child2 = root.claimChild('child2', debugOwner: 'owner1');
     manager.doSerialization();
 
-    final Object rawChild1Data = rawData[childrenMapKey]['child1'];
+    final Object rawChild1Data = rawData[childrenMapKey]['child1'] as Object;
     expect(rawChild1Data, isNotNull);
-    final Object rawChild2Data = rawData[childrenMapKey]['child2'];
+    final Object rawChild2Data = rawData[childrenMapKey]['child2'] as Object;
     expect(rawChild2Data, isNotNull);
 
     expect(child1.restorationId, 'child1');
@@ -396,7 +395,7 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final Object rawChild1Data = rawData[childrenMapKey]['child1'];
+    final Object rawChild1Data = rawData[childrenMapKey]['child1'] as Object;
     expect(rawChild1Data, isNotNull);
 
     final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
@@ -462,7 +461,7 @@ void main() {
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
 
-    final Object childOfChildData = rawData[childrenMapKey]['child1'][childrenMapKey]['childOfChild'];
+    final Object childOfChildData = rawData[childrenMapKey]['child1'][childrenMapKey]['childOfChild'] as Object;
     expect(childOfChildData, isNotEmpty);
 
     root.adoptChild(childOfChild);
@@ -497,7 +496,7 @@ void main() {
     final RestorationBucket childOfChild = child.claimChild('child1', debugOwner: 'owner2');
     childOfChild.write<String>('foo', 'bar');
 
-    final Object childOfChildData = rawData[childrenMapKey]['child1'][childrenMapKey]['child1'];
+    final Object childOfChildData = rawData[childrenMapKey]['child1'][childrenMapKey]['child1'] as Object;
     expect(childOfChildData, isNotEmpty);
 
     expect(manager.updateScheduled, isTrue);
@@ -541,60 +540,12 @@ void main() {
     expect(rawData[childrenMapKey]['child1'][childrenMapKey]['child2'][valuesMapKey]['hello'], 'world');
   });
 
-  test('decommission drops itself from parent and notifies all listeners', () {
-    final MockRestorationManager manager = MockRestorationManager();
-    final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
-
-    final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
-    final RestorationBucket child2 = root.claimChild('child2', debugOwner: 'owner1');
-    final RestorationBucket childOfChild1 = child1.claimChild('child1.1', debugOwner: 'owner1');
-    final RestorationBucket childOfChildOfChild1 = childOfChild1.claimChild('child1.1.1', debugOwner: 'owner1');
-
-    expect(manager.updateScheduled, isTrue);
-    manager.doSerialization();
-    expect(manager.updateScheduled, isFalse);
-
-    bool rootDecommissioned = false;
-    root.addListener(() {
-      rootDecommissioned = true;
-    });
-    bool child1Decommissioned = false;
-    child1.addListener(() {
-      child1Decommissioned = true;
-    });
-    bool child2Decommissioned = false;
-    child2.addListener(() {
-      child2Decommissioned = true;
-    });
-    bool childOfChild1Decommissioned = false;
-    childOfChild1.addListener(() {
-      childOfChild1Decommissioned = true;
-    });
-    bool childOfChildOfChild1Decommissioned = false;
-    childOfChildOfChild1.addListener(() {
-      childOfChildOfChild1Decommissioned = true;
-    });
-
-    expect(rawData[childrenMapKey].containsKey('child1'), isTrue);
-
-    child1.decommission();
-    expect(rootDecommissioned, isFalse);
-    expect(child2Decommissioned, isFalse);
-    expect(child1Decommissioned, isTrue);
-    expect(childOfChild1Decommissioned, isTrue);
-    expect(childOfChildOfChild1Decommissioned, isTrue);
-
-    expect(rawData[childrenMapKey].containsKey('child1'), isFalse);
-  });
-
   test('throws when used after dispose', () {
     final RestorationBucket bucket = RestorationBucket.empty(restorationId: 'foo', debugOwner: null);
     bucket.dispose();
 
     expect(() => bucket.debugOwner, throwsFlutterError);
     expect(() => bucket.restorationId, throwsFlutterError);
-    expect(() => bucket.decommission(), throwsFlutterError);
     expect(() => bucket.read<int>('foo'), throwsFlutterError);
     expect(() => bucket.write('foo', 10), throwsFlutterError);
     expect(() => bucket.remove<int>('foo'), throwsFlutterError);
@@ -604,11 +555,6 @@ void main() {
     expect(() => bucket.adoptChild(child), throwsFlutterError);
     expect(() => bucket.rename('bar'), throwsFlutterError);
     expect(() => bucket.dispose(), throwsFlutterError);
-  });
-
-  test('cannot serialize without manager', () {
-    final RestorationBucket bucket = RestorationBucket.empty(restorationId: 'foo', debugOwner: null);
-    expect(() => bucket.write('foo', 10), throwsAssertionError);
   });
 }
 
