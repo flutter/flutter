@@ -5,6 +5,7 @@
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
+import 'package:pool/pool.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
@@ -408,17 +409,22 @@ class UpdatePackagesCommand extends FlutterCommand {
     final Stopwatch timer = Stopwatch()..start();
     int count = 0;
 
+    final Pool pool = Pool(4);
+    final List<Future<void>> results = <Future<void>>[];
     for (final Directory dir in packages) {
-      await pub.get(
-        context: PubContext.updatePackages,
-        directory: dir.path,
-        checkLastModified: false,
-        offline: offline,
-        generateSyntheticPackage: false,
-      );
-      count += 1;
+      results.add(pool.withResource(() async {
+        await pub.get(
+          context: PubContext.updatePackages,
+          directory: dir.path,
+          checkLastModified: false,
+          offline: true,
+          generateSyntheticPackage: false,
+          status: false,
+        );
+        count += 1;
+      }));
     }
-
+    await Future.wait(results);
     await _downloadCoverageData();
 
     final double seconds = timer.elapsedMilliseconds / 1000.0;

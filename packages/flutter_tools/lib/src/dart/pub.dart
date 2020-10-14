@@ -97,6 +97,7 @@ abstract class Pub {
     bool skipPubspecYamlCheck = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
+    bool status = true,
   });
 
   /// Runs pub in 'batch' mode.
@@ -172,6 +173,7 @@ class _DefaultPub implements Pub {
     bool skipPubspecYamlCheck = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
+    bool status = true,
   }) async {
     directory ??= _fileSystem.currentDirectory.path;
 
@@ -196,9 +198,14 @@ class _DefaultPub implements Pub {
       packageConfigFile: packageConfigFile,
     )) {
       final String command = upgrade ? 'upgrade' : 'get';
-      final Status status = _logger.startProgress(
-        'Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',
-      );
+      Status progress;
+      if (status) {
+        progress = _logger.startProgress(
+          'Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',
+        );
+      } else {
+        _logger.printStatus('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...');
+      }
       final bool verbose = _logger.isVerbose;
       final List<String> args = <String>[
         if (verbose)
@@ -221,10 +228,10 @@ class _DefaultPub implements Pub {
           retry: true,
           flutterRootOverride: flutterRootOverride,
         );
-        status.stop();
+        progress?.stop();
       // The exception is rethrown, so don't catch only Exceptions.
       } catch (exception) { // ignore: avoid_catches_without_on_clauses
-        status.cancel();
+        progress?.cancel();
         rethrow;
       }
     }
