@@ -2148,7 +2148,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
   // TODO(Piinks): Deprecate & defer to ScaffoldMessenger after customers are migrated.
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
-    assert(context.debugDoingBuild, 'SnackBar cannot be shown during build!');
+    assert(!context.debugDoingBuild, 'SnackBar cannot be shown during build!');
 
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
