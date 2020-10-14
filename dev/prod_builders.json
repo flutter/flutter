@@ -67,12 +67,6 @@
          "flaky": false
       },
       {
-         "name": "Linux gradle_jetifier_test",
-         "repo": "flutter",
-         "task_name": "linux_gradle_jetifier_test",
-         "flaky": false
-      },
-      {
          "name": "Linux gradle_non_android_plugin_test",
          "repo": "flutter",
          "task_name": "linux_gradle_non_android_plugin_test",
@@ -88,12 +82,6 @@
          "name": "Linux gradle_plugin_fat_apk_test",
          "repo": "flutter",
          "task_name": "linux_gradle_plugin_fat_apk_test",
-         "flaky": false
-      },
-      {
-         "name": "Linux gradle_r8_test",
-         "repo": "flutter",
-         "task_name": "linux_gradle_r8_test",
          "flaky": false
       },
       {
@@ -199,12 +187,6 @@
          "flaky": false
       },
       {
-         "name": "Mac gradle_jetifier_test",
-         "repo": "flutter",
-         "task_name": "mac_gradle_jetifier_test",
-         "flaky": false
-      },
-      {
          "name": "Mac gradle_non_android_plugin_test",
          "repo": "flutter",
          "task_name": "mac_gradle_non_android_plugin_test",
@@ -226,12 +208,6 @@
          "name": "Mac gradle_plugin_light_apk_test",
          "repo": "flutter",
          "task_name": "mac_gradle_plugin_light_apk_test",
-         "flaky": false
-      },
-      {
-         "name": "Mac gradle_r8_test",
-         "repo": "flutter",
-         "task_name": "mac_gradle_r8_test",
          "flaky": false
       },
       {
@@ -307,12 +283,6 @@
          "flaky": false
       },
       {
-         "name": "Windows gradle_jetifier_test",
-         "repo": "flutter",
-         "task_name": "win_gradle_jetifier_test",
-         "flaky": false
-      },
-      {
          "name": "Windows gradle_plugin_light_apk_test",
          "repo": "flutter",
          "task_name": "win_gradle_plugin_light_apk_test",
@@ -334,12 +304,6 @@
          "name": "Windows gradle_plugin_fat_apk_test",
          "repo": "flutter",
          "task_name": "win_gradle_plugin_fat_apk_test",
-         "flaky": false
-      },
-      {
-         "name": "Windows gradle_r8_test",
-         "repo": "flutter",
-         "task_name": "win_gradle_r8_test",
          "flaky": false
       },
       {

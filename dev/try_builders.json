@@ -70,13 +70,6 @@
          "enabled":true
       },
       {
-         "name":"Linux gradle_jetifier_test",
-         "repo":"flutter",
-         "task_name":"linux_gradle_jetifier_test",
-         "enabled":true,
-         "run_if": ["dev/**", "bin/**"]
-      },
-      {
          "name":"Linux gradle_non_android_plugin_test",
          "repo":"flutter",
          "task_name":"linux_gradle_non_android_plugin_test",
@@ -103,12 +96,6 @@
          "task_name":"linux_gradle_plugin_light_apk_test",
          "enabled":true,
          "run_if": ["dev/**", "bin/**"]
-      },
-      {
-         "name":"Linux gradle_r8_test",
-         "repo":"flutter",
-         "task_name":"linux_gradle_r8_test",
-         "enabled":true
       },
       {
          "name":"Linux module_host_with_custom_build_test",
@@ -227,13 +214,6 @@
          "run_if":["dev/**", "packages/flutter/**", "packages/flutter_goldens/**", "packages/flutter_goldens_client/**", "packages/flutter_test/**", "packages/flutter_tools/lib/src/test/**", "bin/**"]
       },
       {
-         "name":"Mac gradle_jetifier_test",
-         "repo":"flutter",
-         "task_name":"mac_gradle_jetifier_test",
-         "enabled":true,
-         "run_if":["dev/**", "bin/**"]
-      },
-      {
          "name":"Mac gradle_non_android_plugin_test",
          "repo":"flutter",
          "task_name":"mac_gradle_non_android_plugin_test",
@@ -258,13 +238,6 @@
          "name":"Mac gradle_plugin_light_apk_test",
          "repo":"flutter",
          "task_name":"mac_gradle_plugin_light_apk_test",
-         "enabled":true,
-         "run_if":["dev/**", "bin/**"]
-      },
-      {
-         "name":"Mac gradle_r8_test",
-         "repo":"flutter",
-         "task_name":"mac_gradle_r8_test",
          "enabled":true,
          "run_if":["dev/**", "bin/**"]
       },
@@ -351,13 +324,6 @@
          "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
       },
       {
-         "name": "Windows gradle_jetifier_test",
-         "repo": "flutter",
-         "task_name": "win_gradle_jetifier_test",
-         "enabled":true,
-         "run_if":["dev/**", "bin/**"]
-      },
-      {
          "name": "Windows gradle_non_android_plugin_test",
          "repo": "flutter",
          "task_name": "win_gradle_non_android_plugin_test",
@@ -375,13 +341,6 @@
          "name": "Windows gradle_plugin_light_apk_test",
          "repo": "flutter",
          "task_name": "win_gradle_plugin_light_apk_test",
-         "enabled":true,
-         "run_if":["dev/**", "bin/**"]
-      },
-      {
-         "name": "Windows gradle_r8_test",
-         "repo": "flutter",
-         "task_name": "win_gradle_r8_test",
          "enabled":true,
          "run_if":["dev/**", "bin/**"]
       },
