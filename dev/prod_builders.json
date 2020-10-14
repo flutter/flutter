@@ -103,12 +103,6 @@
          "flaky": false
       },
       {
-         "name": "Linux plugin_dependencies_test",
-         "repo": "flutter",
-         "task_name": "linux_plugin_dependencies_test",
-         "flaky": false
-      },
-      {
          "name": "Linux plugin_test",
          "repo": "flutter",
          "task_name": "linux_plugin_test",
@@ -235,12 +229,6 @@
          "flaky": false
       },
       {
-         "name": "Mac plugin_dependencies_test",
-         "repo": "flutter",
-         "task_name": "mac_plugin_dependencies_test",
-         "flaky": false
-      },
-      {
          "name": "Mac plugin_lint_mac",
          "repo": "flutter",
          "task_name": "mac_plugin_lint_mac",
@@ -322,12 +310,6 @@
          "name": "Windows module_test",
          "repo": "flutter",
          "task_name": "win_module_test",
-         "flaky": false
-      },
-      {
-         "name": "Windows plugin_dependencies_test",
-         "repo": "flutter",
-         "task_name": "win_plugin_dependencies_test",
          "flaky": false
       },
       {
