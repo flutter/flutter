@@ -268,6 +268,33 @@ class IOSDevice extends Device {
       _logger.printError(e.message);
       return false;
     }
+
+    if (installationResult == 0) {
+      return true;
+    }
+    _logger.printTrace('application failed to install: $installationResult');
+    // If the initial installation fails, attempt to uninstall the app if
+    // it was already installed. Regardless of whether or not this is successful,
+    // try once more to install.
+    if (await isAppInstalled(app, userIdentifier: userIdentifier)) {
+      _logger.printTrace('Uninstalling previously installed application...');
+      if (!await uninstallApp(app, userIdentifier: userIdentifier)) {
+        _logger.printTrace('Failed to uninstall');
+      }
+    }
+
+    try {
+      installationResult = await _iosDeploy.installApp(
+        deviceId: id,
+        bundlePath: bundle.path,
+        launchArguments: <String>[],
+        interfaceType: interfaceType,
+      );
+    } on ProcessException catch (e) {
+      _logger.printError(e.message);
+      return false;
+    }
+
     if (installationResult != 0) {
       _logger.printError('Could not install ${bundle.path} on $id.');
       _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
