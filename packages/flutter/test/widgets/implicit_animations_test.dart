@@ -382,9 +382,9 @@ abstract class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
   final Widget child = const Placeholder();
   final Duration duration = animationDuration;
 
-  void onChanged(bool? v) {
+  void onChanged(bool v) {
     setState(() {
-      toggle = v!;
+      toggle = v;
     });
   }
 
@@ -402,7 +402,6 @@ abstract class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
     );
   }
 }
-
 
 class _TestAnimatedContainerWidgetState extends _TestAnimatedWidgetState {
   @override
