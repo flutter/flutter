@@ -129,6 +129,7 @@ source_set("flutter_linux") {
     "//flutter/shell/platform/linux/config:gtk",
     "//flutter/shell/platform/linux/config:egl",
     "//flutter/shell/platform/linux/config:wayland-egl",
+    "//flutter/shell/platform/linux/config:x11",
     "//third_party/khronos:khronos_headers",
   ]
 
@@ -172,6 +173,7 @@ executable("flutter_linux_unittests") {
   configs += [
     "//flutter/shell/platform/linux/config:gtk",
     "//flutter/shell/platform/linux/config:wayland-egl",
+    "//flutter/shell/platform/linux/config:x11",
   ]
 
   # Set flag to allow public headers to be directly included (library users should not do this)
