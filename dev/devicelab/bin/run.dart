@@ -113,7 +113,7 @@ Future<void> _runTasks() async {
     print(const JsonEncoder.withIndent('  ').convert(result));
     section('Finished task "$taskName"');
 
-    if (serviceAccountFile.isNotEmpty) {
+    if (serviceAccountFile != null) {
       final Cocoon cocoon = Cocoon(serviceAccountPath: serviceAccountFile, taskKey: taskKey);
       await cocoon.sendTaskResult(taskKey, result);
     }
@@ -216,7 +216,7 @@ File _uniqueFile(String filenameTemplate) {
   File file = File(parts[0] + parts[1]);
   int i = 1;
   while (file.existsSync()) {
-    file = File(parts[0]+i.toString()+parts[1]);
+    file = File(parts[0] + i.toString() + parts[1]);
     i++;
   }
   return file;
@@ -280,21 +280,21 @@ final ArgParser _argParser = ArgParser()
     'device-id',
     abbr: 'd',
     help: 'Target device id (prefixes are allowed, names are not supported).\n'
-          'The option will be ignored if the test target does not run on a\n'
-          'mobile device. This still respects the device operating system\n'
-          'settings in the test case, and will results in error if no device\n'
-          'with given ID/ID prefix is found.',
+        'The option will be ignored if the test target does not run on a\n'
+        'mobile device. This still respects the device operating system\n'
+        'settings in the test case, and will results in error if no device\n'
+        'with given ID/ID prefix is found.',
   )
   ..addOption(
     'ab',
     help: 'Runs an A/B test comparing the default engine with the local\n'
-          'engine build for one task. This option does not support running\n'
-          'multiple tasks. The value is the number of times to run the task.\n'
-          'The task is expected to be a benchmark that reports score keys.\n'
-          'The A/B test collects the metrics collected by the test and\n'
-          'produces a report containing averages, noise, and the speed-up\n'
-          'between the two engines. --local-engine is required when running\n'
-          'an A/B test.',
+        'engine build for one task. This option does not support running\n'
+        'multiple tasks. The value is the number of times to run the task.\n'
+        'The task is expected to be a benchmark that reports score keys.\n'
+        'The A/B test collects the metrics collected by the test and\n'
+        'produces a report containing averages, noise, and the speed-up\n'
+        'between the two engines. --local-engine is required when running\n'
+        'an A/B test.',
     callback: (String value) {
       if (value != null && int.tryParse(value) == null) {
         throw ArgParserException('Option --ab must be a number, but was "$value".');
@@ -304,8 +304,8 @@ final ArgParser _argParser = ArgParser()
   ..addOption(
     'ab-result-file',
     help: 'The filename in which to place the json encoded results of an A/B test.\n'
-          'The filename may contain a single # character to be replaced by a sequence\n'
-          'number if the name already exists.',
+        'The filename may contain a single # character to be replaced by a sequence\n'
+        'number if the name already exists.',
   )
   ..addFlag(
     'all',
@@ -325,30 +325,30 @@ final ArgParser _argParser = ArgParser()
   ..addOption(
     'local-engine',
     help: 'Name of a build output within the engine out directory, if you\n'
-          'are building Flutter locally. Use this to select a specific\n'
-          'version of the engine if you have built multiple engine targets.\n'
-          'This path is relative to --local-engine-src-path/out. This option\n'
-          'is required when running an A/B test (see the --ab option).',
+        'are building Flutter locally. Use this to select a specific\n'
+        'version of the engine if you have built multiple engine targets.\n'
+        'This path is relative to --local-engine-src-path/out. This option\n'
+        'is required when running an A/B test (see the --ab option).',
   )
   ..addFlag(
     'list',
     abbr: 'l',
     help: "Don't actually run the tasks, but list out the tasks that would\n"
-          'have been run, in the order they would have run.',
+        'have been run, in the order they would have run.',
   )
   ..addOption(
     'local-engine-src-path',
     help: 'Path to your engine src directory, if you are building Flutter\n'
-          'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at\n'
-          'the location based on the value of the --flutter-root option.',
+        'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at\n'
+        'the location based on the value of the --flutter-root option.',
   )
   ..addFlag(
     'match-host-platform',
     defaultsTo: true,
     help: 'Only run tests that match the host platform (e.g. do not run a\n'
-          'test with a `required_agent_capabilities` value of "mac/android"\n'
-          'on a windows host). Each test publishes its '
-          '`required_agent_capabilities`\nin the `manifest.yaml` file.',
+        'test with a `required_agent_capabilities` value of "mac/android"\n'
+        'on a windows host). Each test publishes its '
+        '`required_agent_capabilities`\nin the `manifest.yaml` file.',
   )
   ..addOption(
     'service-account-file',
@@ -358,7 +358,7 @@ final ArgParser _argParser = ArgParser()
     'stage',
     abbr: 's',
     help: 'Name of the stage. Runs all tasks for that stage. The tasks and\n'
-          'their stages are read from manifest.yaml.',
+        'their stages are read from manifest.yaml.',
   )
   ..addFlag(
     'silent',

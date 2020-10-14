@@ -43,16 +43,10 @@ void main() {
     });
 
     test('sends expected request from successful task', () async {
-      when(mockClient.send(any)).thenAnswer((Invocation realInvocation) async =>
-          StreamedResponse(Stream<List<int>>.value(exampleResponseBytes), 200));
+      when(mockClient.send(any)).thenAnswer(
+          (Invocation realInvocation) async => StreamedResponse(Stream<List<int>>.value(exampleResponseBytes), 200));
       final TaskResult result = TaskResult.success(<String, dynamic>{});
       await cocoon.sendTaskResult('taskKey', result);
-
-    });
-
-    test('retries on ClientException', () async {
-      when(mockClient.send(any)).thenThrow(ClientException);
-
     });
   });
 
@@ -69,14 +63,19 @@ void main() {
     });
 
     test('reads token from service account file', () {
-      final AuthenticatedCocoonClient client =
-          AuthenticatedCocoonClient(serviceAccountPath, filesystem: fs);
+      final AuthenticatedCocoonClient client = AuthenticatedCocoonClient(serviceAccountPath, filesystem: fs);
+      expect(client.serviceAccountToken, serviceAccountToken);
+    });
+
+    test('reads token from service account file with whitespace', () {
+      final File serviceAccountFile = fs.file(serviceAccountPath)..createSync();
+      serviceAccountFile.writeAsStringSync(serviceAccountToken + ' \n');
+      final AuthenticatedCocoonClient client = AuthenticatedCocoonClient(serviceAccountPath, filesystem: fs);
       expect(client.serviceAccountToken, serviceAccountToken);
     });
 
     test('throws error when service account file not found', () {
-      final AuthenticatedCocoonClient client =
-          AuthenticatedCocoonClient('idontexist', filesystem: fs);
+      final AuthenticatedCocoonClient client = AuthenticatedCocoonClient('idontexist', filesystem: fs);
       expect(() => client.serviceAccountToken, throwsA(isA<FileSystemException>()));
     });
   });
