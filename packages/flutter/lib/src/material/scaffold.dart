@@ -2148,7 +2148,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
   @Deprecated(
     'Use ScaffoldMessenger.showSnackBar. '
-    'This feature was deprecated after v1.23.0-14.0.pre.124.'
+    'This feature was deprecated after v1.23.0-14.0.pre.'
   )
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
@@ -2210,7 +2210,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
   @Deprecated(
     'Use ScaffoldMessenger.removeCurrentSnackBar. '
-    'This feature was deprecated after v1.23.0-14.0.pre.124.'
+    'This feature was deprecated after v1.23.0-14.0.pre.'
   )
   void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
     assert(reason != null);
@@ -2255,7 +2255,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
   @Deprecated(
     'Use ScaffoldMessenger.hideCurrentSnackBar. '
-    'This feature was deprecated after v1.23.0-14.0.pre.124.'
+    'This feature was deprecated after v1.23.0-14.0.pre.'
   )
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
     assert(reason != null);
