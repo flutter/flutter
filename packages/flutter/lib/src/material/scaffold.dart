@@ -305,6 +305,8 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// ```
   /// {@end-tool}
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
+    assert(!context.debugDoingBuild, 'SnackBar cannot be shown during build!');
+
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleStatusChanged);
     if (_snackBars.isEmpty) {
