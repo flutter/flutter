@@ -378,7 +378,11 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///  * [Dart's characters package](https://pub.dev/packages/characters).
   ///  * [Dart's documentation on runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters).
   @visibleForTesting
-  static TextEditingValue truncate(TextEditingValue value, int maxLength) {
+  static TextEditingValue truncate(
+    TextEditingValue value,
+    int maxLength, {
+    bool keepComposing = false,
+  }) {
     final CharacterRange iterator = CharacterRange(value.text);
     if (value.text.characters.length > maxLength) {
       iterator.expandNext(maxLength);
@@ -390,7 +394,12 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
         baseOffset: math.min(value.selection.start, truncated.length),
         extentOffset: math.min(value.selection.end, truncated.length),
       ),
-      composing: TextRange.empty,
+      composing: keepComposing
+        ? TextRange(
+            start: math.min(value.composing.start, truncated.length),
+            end: math.min(value.composing.end, truncated.length),
+          )
+        : TextRange.empty,
     );
   }
 
@@ -417,7 +426,11 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     // Also truncate `newValue` when `composingMaxLengthEnforced` is true.
     return newValue.composing.isValid && !composingMaxLengthEnforced
       ? newValue
-      : truncate(newValue, maxLength);
+      : truncate(
+          newValue,
+          maxLength,
+          keepComposing: oldValue.composing.isValid && composingMaxLengthEnforced,
+        );
   }
 }
 
