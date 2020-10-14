@@ -612,7 +612,7 @@ class IOSSimulator extends Device {
 /// Launches the device log reader process on the host and parses the syslog.
 @visibleForTesting
 Future<Process> launchDeviceSystemLogTool(IOSSimulator device) async {
-  return processUtils.start(<String>['tail', '-n', '0', '-F', device.logFilePath]);
+  return globals.processUtils.start(<String>['tail', '-n', '0', '-F', device.logFilePath]);
 }
 
 /// Launches the device log reader process on the host and parses unified logging.
@@ -638,7 +638,7 @@ Future<Process> launchDeviceUnifiedLogging (IOSSimulator device, String appName)
     notP('eventMessage CONTAINS " libxpc.dylib "'),
   ]);
 
-  return processUtils.start(<String>[
+  return globals.processUtils.start(<String>[
     _xcrunPath, 'simctl', 'spawn', device.id, 'log', 'stream', '--style', 'json', '--predicate', predicate,
   ]);
 }
@@ -647,7 +647,7 @@ Future<Process> launchDeviceUnifiedLogging (IOSSimulator device, String appName)
 Future<Process> launchSystemLogTool(IOSSimulator device) async {
   // Versions of iOS prior to 11 tail the simulator syslog file.
   if (await device.sdkMajorVersion < 11) {
-    return processUtils.start(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
+    return globals.processUtils.start(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
   }
 
   // For iOS 11 and later, all relevant detail is in the device log.

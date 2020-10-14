@@ -218,13 +218,6 @@ TaskFunction createComplexLayoutStartupTest() {
   ).run;
 }
 
-TaskFunction createHelloWorldStartupTest() {
-  return StartupTest(
-    '${flutterDirectory.path}/examples/hello_world',
-    reportMetrics: false,
-  ).run;
-}
-
 TaskFunction createFlutterGalleryCompileTest() {
   return CompileTest('${flutterDirectory.path}/dev/integration_tests/flutter_gallery').run;
 }
@@ -572,7 +565,6 @@ class PerfTest {
   @protected
   Future<TaskResult> internalRun({
       bool cacheSkSL = false,
-      bool noBuild = false,
       String existingApp,
       String writeSkslFileName,
   }) {
@@ -589,7 +581,6 @@ class PerfTest {
         if (needsFullTimeline)
           '--trace-startup', // Enables "endless" timeline event buffering.
         '-t', testTarget,
-        if (noBuild) '--no-build',
         if (testDriver != null)
           ...<String>['--driver', testDriver],
         if (existingApp != null)
@@ -730,7 +721,6 @@ class PerfTestWithSkSL extends PerfTest {
     // that we won't remove the SkSLs generated earlier.
     await super.internalRun(
       cacheSkSL: true,
-      noBuild: true,
       writeSkslFileName: _skslJsonFileName,
     );
   }

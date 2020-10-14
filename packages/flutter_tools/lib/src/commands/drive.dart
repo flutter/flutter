@@ -16,7 +16,6 @@ import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
@@ -86,7 +85,8 @@ class DriveCommand extends RunCommandBase {
       )
       ..addFlag('build',
         defaultsTo: true,
-        help: 'Build the app before running.',
+        help: '(Deprecated) Build the app before running. To use an existing app, pass the --use-application-binary '
+          'flag with an existing APK',
       )
       ..addOption('driver-port',
         defaultsTo: '4444',
@@ -142,7 +142,6 @@ class DriveCommand extends RunCommandBase {
 
   Device _device;
   Device get device => _device;
-  bool get shouldBuild => boolArg('build');
 
   bool get verboseSystemLogs => boolArg('verbose-system-logs');
   String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
@@ -466,16 +465,14 @@ Future<LaunchResult> _startApp(
   globals.printTrace('Stopping previously running application, if any.');
   await appStopper(command);
 
-  final ApplicationPackage package = await command.applicationPackages
-      .getPackageForPlatform(await command.device.targetPlatform, command.getBuildInfo());
-
-  if (command.shouldBuild) {
-    globals.printTrace('Installing application package.');
-    if (await command.device.isAppInstalled(package, userIdentifier: userIdentifier)) {
-      await command.device.uninstallApp(package, userIdentifier: userIdentifier);
-    }
-    await command.device.installApp(package, userIdentifier: userIdentifier);
-  }
+  final File applicationBinary = command.stringArg('use-application-binary') == null
+    ? null
+    : globals.fs.file(command.stringArg('use-application-binary'));
+  final ApplicationPackage package = await command.applicationPackages.getPackageForPlatform(
+    await command.device.targetPlatform,
+    buildInfo: command.getBuildInfo(),
+    applicationBinary: applicationBinary,
+  );
 
   final Map<String, dynamic> platformArgs = <String, dynamic>{};
   if (command.traceStartup) {
@@ -515,8 +512,8 @@ Future<LaunchResult> _startApp(
       purgePersistentCache: command.purgePersistentCache,
     ),
     platformArgs: platformArgs,
-    prebuiltApplication: !command.shouldBuild,
     userIdentifier: userIdentifier,
+    prebuiltApplication: applicationBinary != null,
   );
 
   if (!result.started) {
@@ -538,7 +535,7 @@ Future<void> _runTests(List<String> testArgs, Map<String, String> environment) a
   globals.printTrace('Running driver tests.');
 
   globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(globalPackagesPath));
-  final int result = await processUtils.stream(
+  final int result = await globals.processUtils.stream(
     <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       ...testArgs,
@@ -564,9 +561,10 @@ Future<bool> _stopApp(DriveCommand command) async {
   globals.printTrace('Stopping application.');
   final ApplicationPackage package = await command.applicationPackages.getPackageForPlatform(
     await command.device.targetPlatform,
-    command.getBuildInfo(),
+    buildInfo: command.getBuildInfo(),
   );
   final bool stopped = await command.device.stopApp(package, userIdentifier: command.userIdentifier);
+  await command.device.uninstallApp(package);
   await command._deviceLogSubscription?.cancel();
   return stopped;
 }

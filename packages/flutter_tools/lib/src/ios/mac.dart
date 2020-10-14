@@ -117,7 +117,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-  await removeFinderExtendedAttributes(app.project.hostAppRoot, processUtils, globals.logger);
+  await removeFinderExtendedAttributes(app.project.hostAppRoot, globals.processUtils, globals.logger);
 
   final XcodeProjectInfo projectInfo = await app.project.projectInfo();
   final String scheme = projectInfo.schemeFor(buildInfo);
@@ -302,7 +302,6 @@ Future<XcodeBuildResult> buildXcodeProject({
           initialBuildStatus = null;
           buildSubStatus = globals.logger.startProgress(
             line,
-            timeout: timeoutConfiguration.slowOperation,
             progressIndicatorPadding: kDefaultStatusPadding - 7,
           );
         }
@@ -331,7 +330,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final Stopwatch sw = Stopwatch()..start();
-  initialBuildStatus = globals.logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.slowOperation);
+  initialBuildStatus = globals.logger.startProgress('Running Xcode build...');
 
   final RunResult buildResult = await _runBuildWithRetries(buildCommands, app);
 
@@ -366,7 +365,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   const Duration showBuildSettingsTimeout = Duration(minutes: 1);
   Map<String, String> buildSettings;
   try {
-    final RunResult showBuildSettingsResult = await processUtils.run(
+    final RunResult showBuildSettingsResult = await globals.processUtils.run(
       showBuildSettingsCommand,
       throwOnError: true,
       workingDirectory: app.project.hostAppRoot.path,
@@ -485,7 +484,7 @@ Future<RunResult> _runBuildWithRetries(List<String> buildCommands, BuildableIOSA
     remainingTries--;
     buildRetryDelaySeconds *= 2;
 
-    buildResult = await processUtils.run(
+    buildResult = await globals.processUtils.run(
       buildCommands,
       workingDirectory: app.project.hostAppRoot.path,
       allowReentrantFlutter: true,

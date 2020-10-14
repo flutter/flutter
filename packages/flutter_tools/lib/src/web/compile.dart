@@ -42,7 +42,7 @@ Future<void> buildWeb(
     outputDirectory.createSync(recursive: true);
   }
   await injectPlugins(flutterProject, checkProjects: true);
-  final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);
+  final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();
   try {
     final BuildResult result = await globals.buildSystem.build(const WebServiceWorker(), Environment(

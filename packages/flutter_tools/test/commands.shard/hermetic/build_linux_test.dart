@@ -279,6 +279,8 @@ void main() {
     ]);
     fileSystem.file('lib/other.dart')
       .createSync(recursive: true);
+    fileSystem.file('foo/bar.sksl.json')
+      .createSync(recursive: true);
 
     await createTestCommandRunner(command).run(
       const <String>[

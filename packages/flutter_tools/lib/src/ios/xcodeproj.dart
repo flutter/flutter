@@ -327,8 +327,6 @@ class XcodeProjectInterpreter {
     Duration timeout = const Duration(minutes: 1),
   }) async {
     final Status status = Status.withSpinner(
-      timeout: const TimeoutConfiguration().fastOperation,
-      timeoutConfiguration: const TimeoutConfiguration(),
       stopwatch: Stopwatch(),
       terminal: _terminal,
     );

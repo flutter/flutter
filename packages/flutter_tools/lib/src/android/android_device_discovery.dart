@@ -177,7 +177,6 @@ class AndroidDevices extends PollingDeviceDiscovery {
             logger: _logger,
             platform: _platform,
             processManager: _processManager,
-            timeoutConfiguration: const TimeoutConfiguration(),
           ));
         }
       } else {

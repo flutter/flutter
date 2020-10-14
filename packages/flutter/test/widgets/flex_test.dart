@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -61,18 +59,6 @@ void main() {
 
     final RenderBox box = tester.renderObject(find.byType(SizedBox));
     expect(box.size.width, 100.0);
-  });
-
-  testWidgets('Can pass null for flex', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Row(
-        textDirection: TextDirection.ltr,
-        children: const <Widget>[
-          Expanded(flex: null, child: Text('one', textDirection: TextDirection.ltr)),
-          Flexible(flex: null, child: Text('two', textDirection: TextDirection.ltr)),
-        ],
-      ),
-    );
   });
 
   testWidgets("Doesn't overflow because of floating point accumulated error", (WidgetTester tester) async {
