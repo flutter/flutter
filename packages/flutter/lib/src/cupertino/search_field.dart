@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
+import 'text_field.dart';
+import 'icons.dart';
 
 // This is a light gray color used for UISearchTextField's background.
 const Color _kDefaultBackgroundColor = Color.fromRGBO(239, 239, 240, 1.0);
