@@ -7160,7 +7160,7 @@ class KeyedSubtree extends StatelessWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=xXNOkIuSYuA}
 ///
-/// This widget is a simple inline alternative to defining a StatelessWidget
+/// This widget is a simple inline alternative to defining a [StatelessWidget]
 /// subclass. For example a widget defined and used like this:
 ///
 /// ```dart
@@ -7174,6 +7174,7 @@ class KeyedSubtree extends StatelessWidget {
 ///
 /// Could equally well be defined and used like this, without
 /// definining a new widget class:
+///
 /// ```dart
 /// Center(
 ///   child: Builder(
@@ -7184,7 +7185,7 @@ class KeyedSubtree extends StatelessWidget {
 ///
 /// The difference between either of the previous examples and simply
 /// creating a child directly, without an intervening widget, is the
-/// extra BuildContext element that the additional widget adds. This
+/// extra [BuildContext] element that the additional widget adds. This
 /// is particularly noticeable when the tree contains an inherited
 /// widget that is referred to by a method like [ScaffoldState.of],
 /// which visits the child widget's BuildContext ancestors.
