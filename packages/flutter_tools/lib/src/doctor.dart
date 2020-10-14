@@ -315,7 +315,7 @@ class Doctor {
     }
     final List<_DoctorValidationResult> results = await Future.wait(startValidatorTasks().map(finishValidator));
     progress.finish();
-    
+
     for (final _DoctorValidationResult validationResult in results) {
       final ValidationResult result = validationResult.result;
       final DoctorValidator validator = validationResult.task.validator;
