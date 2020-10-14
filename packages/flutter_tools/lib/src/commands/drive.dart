@@ -491,12 +491,6 @@ Future<LaunchResult> _startApp(
 
   globals.printTrace('Starting application.');
 
-  // Forward device log messages to the terminal window running the "drive" command.
-  final DeviceLogReader logReader = await command.device.getLogReader(app: package);
-  command._deviceLogSubscription = logReader
-    .logLines
-    .listen(globals.printStatus);
-
   final LaunchResult result = await command.device.startApp(
     package,
     mainPath: mainPath,
@@ -518,9 +512,14 @@ Future<LaunchResult> _startApp(
   );
 
   if (!result.started) {
-    await command._deviceLogSubscription.cancel();
     return null;
   }
+
+  // Forward device log messages to the terminal window running the "drive" command.
+  final DeviceLogReader logReader = await command.device.getLogReader(app: package);
+  command._deviceLogSubscription = logReader
+    .logLines
+    .listen(globals.printStatus);
 
   return result;
 }

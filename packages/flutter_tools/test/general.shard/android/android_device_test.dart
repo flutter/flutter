@@ -30,6 +30,20 @@ void main() {
     expect(device.id, '1234');
   });
 
+  testWithoutContext('Can reset log reader singletons', () async {
+    final AndroidDevice device = setUpAndroidDevice();
+    final DeviceLogReader logReader = await device.getLogReader();
+    final DeviceLogReader logReader2 = await device.getLogReader();
+
+    expect(logReader, logReader2);
+
+    device.resetLogReaders();
+
+    final DeviceLogReader logReader3 = await device.getLogReader();
+
+    expect(logReader, isNot(logReader3));
+  });
+
   testWithoutContext('parseAdbDeviceProperties parses adb shell output', () {
     final Map<String, String> properties = parseAdbDeviceProperties(kAdbShellGetprop);
 
