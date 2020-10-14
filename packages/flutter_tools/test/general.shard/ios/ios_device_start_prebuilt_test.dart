@@ -92,6 +92,7 @@ const FakeCommand kAttachDebuggerCommand = FakeCommand(command: <String>[
   '--bundle',
   '/',
   '--debug',
+  '--noninteractive',
   '--no-wifi',
   '--args',
   '--enable-dart-profiling --enable-service-port-fallback --disable-service-auth-codes --observatory-port=60700 --enable-checked-mode --verify-entry-points'
@@ -99,7 +100,7 @@ const FakeCommand kAttachDebuggerCommand = FakeCommand(command: <String>[
   'PATH': '/usr/bin:null',
   'DYLD_LIBRARY_PATH': '/path/to/libraries',
 },
-stdout: '(lldb)     run\nsuccess',
+stdout: '(lldb)     run\nsuccess\n(lldb)     autoexit',
 );
 
 void main() {
@@ -166,7 +167,6 @@ void main() {
     expect(launchResult.started, true);
     expect(launchResult.hasObservatory, true);
     verify(globals.flutterUsage.sendEvent('ios-handshake', 'log-success')).called(1);
-    expect(await device.stopApp(iosApp), false);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
   });
@@ -216,7 +216,6 @@ void main() {
     expect(launchResult.started, true);
     expect(launchResult.hasObservatory, true);
     verify(globals.flutterUsage.sendEvent('ios-handshake', 'log-success')).called(1);
-    expect(await device.stopApp(iosApp), false);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
   });
@@ -302,7 +301,6 @@ void main() {
 
     expect(launchResult.started, true);
     expect(launchResult.hasObservatory, false);
-    expect(await device.stopApp(iosApp), false);
     expect(processManager.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
@@ -325,6 +323,7 @@ void main() {
           '--bundle',
           '/',
           '--debug',
+          '--noninteractive',
           '--no-wifi',
           // The arguments below are determined by what is passed into
           // the debugging options argument to startApp.
@@ -406,64 +405,7 @@ void main() {
     );
 
     expect(launchResult.started, true);
-    expect(await device.stopApp(iosApp), false);
     expect(processManager.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
-  });
-
-  // Still uses context for analytics.
-  testUsingContext(
-      'IOSDevice.startApp detaches lldb when VM service connection fails',
-      () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-
-    final MockIOSDeploy mockIOSDeploy = MockIOSDeploy();
-    final MockIOSDeployDebugger mockIOSDeployDebugger = MockIOSDeployDebugger();
-    when(mockIOSDeploy.prepareDebuggerForLaunch(
-            deviceId: anyNamed('deviceId'),
-            bundlePath: anyNamed('bundlePath'),
-            launchArguments: anyNamed('launchArguments'),
-            interfaceType: anyNamed('interfaceType')))
-        .thenReturn(mockIOSDeployDebugger);
-    when(mockIOSDeploy.installApp(
-            deviceId: anyNamed('deviceId'),
-            bundlePath: anyNamed('bundlePath'),
-            launchArguments: anyNamed('launchArguments'),
-            interfaceType: anyNamed('interfaceType')))
-        .thenAnswer((_) async => 0);
-
-    when(mockIOSDeployDebugger.launchAndAttach()).thenAnswer((_) async => true);
-
-    final IOSDevice device = setUpIOSDevice(
-      fileSystem: fileSystem,
-      iosDeploy: mockIOSDeploy,
-      vmServiceConnector: (String string, {Log log}) async {
-        throw const io.SocketException(
-          'OS Error: Connection refused, errno = 61, address = localhost, port '
-          '= 58943',
-        );
-      },
-    );
-    final IOSApp iosApp = PrebuiltIOSApp(
-      projectBundleId: 'app',
-      bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
-    );
-    device.portForwarder = const NoOpDevicePortForwarder();
-    device.setLogReader(iosApp, FakeDeviceLogReader());
-
-    final LaunchResult launchResult = await device.startApp(
-      iosApp,
-      prebuiltApplication: true,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      platformArgs: <String, dynamic>{},
-      fallbackPollingDelay: Duration.zero,
-      fallbackThrottleTimeout: const Duration(milliseconds: 10),
-    );
-
-    expect(launchResult.started, false);
-    verify(mockIOSDeployDebugger.detach()).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
   });
