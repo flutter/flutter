@@ -88,4 +88,26 @@ TEST_F(FlutterRunnerProductConfigurationTest, MissingMaxFramesInFlight) {
             minimum_reasonable_max_frames_in_flight);
 }
 
+TEST_F(FlutterRunnerProductConfigurationTest, ValidInterceptAllInput) {
+  const std::string json_string = "{ \"intercept_all_input\" : true } ";
+  const uint64_t expected_intercept_all_input = true;
+
+  FlutterRunnerProductConfiguration product_config =
+      FlutterRunnerProductConfiguration(json_string);
+
+  EXPECT_EQ(expected_intercept_all_input,
+            product_config.get_intercept_all_input());
+}
+
+TEST_F(FlutterRunnerProductConfigurationTest, MissingInterceptAllInput) {
+  const std::string json_string = "{ \"intercept_all_input\" : } ";
+  const uint64_t expected_intercept_all_input = false;
+
+  FlutterRunnerProductConfiguration product_config =
+      FlutterRunnerProductConfiguration(json_string);
+
+  EXPECT_EQ(expected_intercept_all_input,
+            product_config.get_intercept_all_input());
+}
+
 }  // namespace flutter_runner_test
