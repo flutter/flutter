@@ -260,17 +260,11 @@ class ParagraphTxt : public Paragraph {
   struct GlyphPosition {
     Range<size_t> code_units;
     Range<double> x_pos;
-    // Tracks the cluster that this glyph position belongs to. For example, in
-    // extended emojis, multiple glyph positions will have the same cluster. The
-    // cluster can be used as a key to distinguish between codepoints that
-    // contribute to the drawing of a single glyph.
-    size_t cluster;
 
     GlyphPosition(double x_start,
                   double x_advance,
                   size_t code_unit_index,
-                  size_t code_unit_width,
-                  size_t cluster);
+                  size_t code_unit_width);
 
     void Shift(double delta);
   };
