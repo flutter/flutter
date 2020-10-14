@@ -38,6 +38,7 @@ class CardTheme with Diagnosticable {
     this.shadowColor,
     this.elevation,
     this.margin,
+    this.padding,
     this.shape,
   }) : assert(elevation == null || elevation >= 0.0);
 
@@ -67,6 +68,12 @@ class CardTheme with Diagnosticable {
   /// `EdgeInsets.all(4.0)`.
   final EdgeInsetsGeometry? margin;
 
+  /// Default value for [Card.padding].
+  ///
+  /// If null, [Card] uses a default padding of 8.0 logical pixels on all sides:
+  /// `EdgeInsets.all(8.0)`.
+  final EdgeInsetsGeometry? padding;
+
   /// Default value for [Card.shape].
   ///
   /// If null, [Card] then uses a [RoundedRectangleBorder] with a circular
@@ -81,6 +88,7 @@ class CardTheme with Diagnosticable {
     Color? shadowColor,
     double? elevation,
     EdgeInsetsGeometry? margin,
+    EdgeInsetsGeometry? padding,
     ShapeBorder? shape,
   }) {
     return CardTheme(
@@ -89,6 +97,7 @@ class CardTheme with Diagnosticable {
       shadowColor: shadowColor ?? this.shadowColor,
       elevation: elevation ?? this.elevation,
       margin: margin ?? this.margin,
+      padding: padding ?? this.padding,
       shape: shape ?? this.shape,
     );
   }
@@ -111,6 +120,7 @@ class CardTheme with Diagnosticable {
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       margin: EdgeInsetsGeometry.lerp(a?.margin, b?.margin, t),
+      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
     );
   }
@@ -123,6 +133,7 @@ class CardTheme with Diagnosticable {
       shadowColor,
       elevation,
       margin,
+      padding,
       shape,
     );
   }
@@ -139,6 +150,7 @@ class CardTheme with Diagnosticable {
         && other.shadowColor == shadowColor
         && other.elevation == elevation
         && other.margin == margin
+        && other.padding == padding
         && other.shape == shape;
   }
 
@@ -150,6 +162,7 @@ class CardTheme with Diagnosticable {
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }

@@ -109,12 +109,13 @@ class Card extends StatelessWidget {
     this.shape,
     this.borderOnForeground = true,
     this.margin,
+    this.padding,
     this.clipBehavior,
     this.child,
     this.semanticContainer = true,
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(borderOnForeground != null),
-       super(key: key);
+  })  : assert(elevation == null || elevation >= 0.0),
+        assert(borderOnForeground != null),
+        super(key: key);
 
   /// The card's background color.
   ///
@@ -170,6 +171,15 @@ class Card extends StatelessWidget {
   /// logical pixels on all sides: `EdgeInsets.all(4.0)`.
   final EdgeInsetsGeometry? margin;
 
+  /// The empty space that surrounds the child.
+  /// 
+  /// Defines the child's outer [Padding.padding]
+  /// 
+  /// If this property is null then [CardTheme.padding] of
+  /// [ThemeData.cardTheme] is used. If that's null, the default padding is 8.0
+  /// logical pixels on all sides: `EdgeInsets.all(8.0)`.
+  final EdgeInsetsGeometry? padding;
+
   /// Whether this widget represents a single semantic container, or if false
   /// a collection of individual semantic nodes.
   ///
@@ -204,14 +214,19 @@ class Card extends StatelessWidget {
           shadowColor: shadowColor ?? cardTheme.shadowColor ?? theme.shadowColor,
           color: color ?? cardTheme.color ?? theme.cardColor,
           elevation: elevation ?? cardTheme.elevation ?? _defaultElevation,
-          shape: shape ?? cardTheme.shape ?? const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(4.0)),
-          ),
+          shape: shape ??
+              cardTheme.shape ??
+              const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(4.0)),
+              ),
           borderOnForeground: borderOnForeground,
           clipBehavior: clipBehavior ?? cardTheme.clipBehavior ?? Clip.none,
           child: Semantics(
             explicitChildNodes: !semanticContainer,
-            child: child,
+            child: Padding(
+              padding: padding ?? cardTheme.padding ?? const EdgeInsets.all(8.0),
+              child: child,
+            ),
           ),
         ),
       ),
