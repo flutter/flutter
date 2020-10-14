@@ -1912,6 +1912,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // If text is obscured, the entire sentence should be treated as one word.
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+    // If the word is a space, try to select the previous word instead.
+    } else if (text?.text != null && word.textInside(text!.text!) == ' '
+        && word.textBefore(text!.text!).isNotEmpty) {
+      final TextPosition positionBeforeSpace = TextPosition(
+        offset: position.offset - 1,
+        affinity: position.affinity,
+      );
+      final TextRange wordBeforeSpace = _textPainter.getWordBoundary(
+        positionBeforeSpace,
+      );
+      return TextSelection(
+        baseOffset: wordBeforeSpace.start,
+        extentOffset: wordBeforeSpace.end,
+      );
     }
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
