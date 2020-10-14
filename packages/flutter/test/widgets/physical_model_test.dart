@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math show pi;
 
 import 'package:flutter/material.dart';
@@ -106,7 +104,7 @@ void main() {
     Future<void> _testStackChildren(
       WidgetTester tester,
       List<Widget> children, {
-      @required int expectedErrorCount,
+      required int expectedErrorCount,
       bool enableCheck = true,
     }) async {
       assert(expectedErrorCount != null);
@@ -117,7 +115,7 @@ void main() {
       }
       debugDisableShadows = false;
       int count = 0;
-      final void Function(FlutterErrorDetails) oldOnError = FlutterError.onError;
+      final void Function(FlutterErrorDetails)? oldOnError = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails details) {
         count++;
       };
