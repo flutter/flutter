@@ -274,7 +274,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     bool usesAndroidX,
     bool shouldBuildPluginAsAar,
   }) async {
-    final RunResult tasksRunResult = await processUtils.run(
+    final RunResult tasksRunResult = await globals.processUtils.run(
       <String>[
         gradleUtils.getExecutable(project),
         'app:tasks' ,

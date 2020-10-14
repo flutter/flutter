@@ -16,7 +16,6 @@ import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
@@ -491,12 +490,6 @@ Future<LaunchResult> _startApp(
 
   globals.printTrace('Starting application.');
 
-  // Forward device log messages to the terminal window running the "drive" command.
-  final DeviceLogReader logReader = await command.device.getLogReader(app: package);
-  command._deviceLogSubscription = logReader
-    .logLines
-    .listen(globals.printStatus);
-
   final LaunchResult result = await command.device.startApp(
     package,
     mainPath: mainPath,
@@ -518,9 +511,14 @@ Future<LaunchResult> _startApp(
   );
 
   if (!result.started) {
-    await command._deviceLogSubscription.cancel();
     return null;
   }
+
+  // Forward device log messages to the terminal window running the "drive" command.
+  final DeviceLogReader logReader = await command.device.getLogReader(app: package);
+  command._deviceLogSubscription = logReader
+    .logLines
+    .listen(globals.printStatus);
 
   return result;
 }
@@ -536,7 +534,7 @@ Future<void> _runTests(List<String> testArgs, Map<String, String> environment) a
   globals.printTrace('Running driver tests.');
 
   globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(globalPackagesPath));
-  final int result = await processUtils.stream(
+  final int result = await globals.processUtils.stream(
     <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       ...testArgs,
@@ -565,6 +563,7 @@ Future<bool> _stopApp(DriveCommand command) async {
     buildInfo: command.getBuildInfo(),
   );
   final bool stopped = await command.device.stopApp(package, userIdentifier: command.userIdentifier);
+  await command.device.uninstallApp(package);
   await command._deviceLogSubscription?.cancel();
   return stopped;
 }
