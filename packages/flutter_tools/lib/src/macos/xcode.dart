@@ -170,6 +170,12 @@ class Xcode {
     return false;
   }
 
+  /// The `xcrun` Xcode command to run or locate development
+  /// tools and properties.
+  ///
+  /// Returns `xcrun` on x86 macOS.
+  /// Returns `/usr/bin/arch -arm64 xcrun` on ARM macOS to force Xcode commands
+  /// to run outside the x86 Rosetta translation, which may cause crashes.
   List<String> xcrunCommand() {
     final List<String> xcrunCommand = <String>[];
     if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
