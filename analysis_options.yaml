@@ -126,7 +126,7 @@ linter:
     # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/sdk/issues/34181
     # - missing_whitespace_between_adjacent_strings # not yet tested
     - no_adjacent_strings_in_list
-    # - no_default_cases # not yet tested
+    # - no_default_cases # too many false positives
     - no_duplicate_case_values
     # - no_logic_in_create_state # not yet tested
     # - no_runtimeType_toString # not yet tested

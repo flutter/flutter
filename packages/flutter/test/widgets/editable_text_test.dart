@@ -3643,8 +3643,6 @@ void main() {
               ),
             );
             break;
-          default:
-            throw TestFailure("HandlePositionInViewport can't be null.");
         }
       }
       expect(state.selectionOverlay!.handlesAreVisible, isTrue);
@@ -4488,8 +4486,6 @@ void main() {
               ),
             );
             break;
-          default:
-            throw TestFailure("HandlePositionInViewport can't be null.");
         }
       }
       expect(state.selectionOverlay!.handlesAreVisible, isTrue);
