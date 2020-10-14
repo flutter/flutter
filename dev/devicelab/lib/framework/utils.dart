@@ -437,6 +437,8 @@ List<String> flutterCommandArgs(String command, List<String> options) {
     if (localEngine != null) ...<String>['--local-engine', localEngine],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
     ...options,
+    if (command == 'drive')
+      '--screenshot-duration=10',
   ];
 }
 
