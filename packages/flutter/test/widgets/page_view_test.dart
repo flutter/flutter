@@ -393,7 +393,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index % 2 == 0
+              color: index.isEven
                 ? const Color(0xFF0000FF)
                 : const Color(0xFF00FF00),
               child: Text(kStates[index]),
@@ -499,7 +499,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index % 2 == 0
+              color: index.isEven
                 ? const Color(0xFF0000FF)
                 : const Color(0xFF00FF00),
               child: Text(kStates[index]),
@@ -543,7 +543,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index % 2 == 0
+              color: index.isEven
                 ? const Color(0xFF0000FF)
                 : const Color(0xFF00FF00),
               child: Text(kStates[index]),
@@ -576,7 +576,7 @@ void main() {
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 height: 200.0,
-                color: index % 2 == 0
+                color: index.isEven
                   ? const Color(0xFF0000FF)
                   : const Color(0xFF00FF00),
                 child: Text(kStates[index]),
@@ -615,7 +615,7 @@ void main() {
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 height: 200.0,
-                color: index % 2 == 0
+                color: index.isEven
                   ? const Color(0xFF0000FF)
                   : const Color(0xFF00FF00),
                   child: Text(index.toString()),

@@ -889,10 +889,10 @@ void main() {
                   (BuildContext context, int index) {
                   return Container(
                     child: Material(
-                      color: index % 2 == 0 ? Colors.yellow : Colors.red,
+                      color: index.isEven ? Colors.yellow : Colors.red,
                       child: InkWell(
                         onTap: () {
-                          index % 2 == 0 ? firstTapped++ : secondTapped++;
+                          index.isEven ? firstTapped++ : secondTapped++;
                         },
                         child: Text('Index $index'),
                       ),
