@@ -126,6 +126,8 @@ abstract class Device {
   /// Emulates pressing the power button, toggling the device's on/off state.
   Future<void> togglePower();
 
+  Future<void> reboot();
+
   /// Unlocks the device.
   ///
   /// Assumes the device doesn't have a secure unlock pattern.
@@ -575,6 +577,11 @@ class AndroidDevice extends Device {
   String toString() {
     return '$deviceId $deviceInfo';
   }
+
+  @override
+  Future<void> reboot() {
+    return adb(<String>['reboot']);
+  }
 }
 
 class IosDeviceDiscovery implements DeviceDiscovery {
@@ -724,6 +731,16 @@ class IosDevice extends Device {
   Future<void> unlock() async {}
 
   @override
+  Future<void> reboot() async {
+    /// This is installed on device lab machines but may not be present locally.
+    try {
+      await Process.run('idevicediagnostics', <String>['-u', deviceId, 'restart']);
+    } catch (err) {
+      print('Failed to reboot: $err');
+    }
+  }
+
+  @override
   Future<void> tap(int x, int y) async {
     throw UnimplementedError();
   }
@@ -783,6 +800,9 @@ class FuchsiaDevice extends Device {
   Stream<String> get logcat {
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> reboot() async { }
 }
 
 /// Path to the `adb` executable.
@@ -846,6 +866,9 @@ class FakeDevice extends Device {
 
   @override
   Future<void> stop(String packageName) async {}
+
+  @override
+  Future<void> reboot() async { }
 }
 
 class FakeDeviceDiscovery implements DeviceDiscovery {

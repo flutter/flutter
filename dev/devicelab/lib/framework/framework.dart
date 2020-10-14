@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'adb.dart';
 import 'running_processes.dart';
 import 'task_result.dart';
 import 'utils.dart';
@@ -104,6 +105,9 @@ class _TaskRunner {
         futureResult = futureResult.timeout(taskTimeout);
 
       TaskResult result = await futureResult;
+      if (result.failed) {
+        await _rebootDevice();
+      }
 
       section('Checking running Dart$exe processes after task...');
       final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
@@ -130,11 +134,20 @@ class _TaskRunner {
       print('Task timed out in framework.dart after $taskTimeout.');
       print(err);
       print(stackTrace);
+      await _rebootDevice();
       return TaskResult.failure('Task timed out after $taskTimeout');
     } finally {
       print('Cleaning up after task...');
       await forceQuitRunningProcesses();
       _closeKeepAlivePort();
+    }
+  }
+
+  Future<void> _rebootDevice() async {
+    print('REBOOTING DEVICE DUE TO FAILURE');
+    final Device device = await devices.workingDevice;
+    if (device != null) {
+      await device.togglePower();
     }
   }
 
