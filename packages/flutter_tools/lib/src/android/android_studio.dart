@@ -333,7 +333,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     } else {
       RunResult result;
       try {
-        result = processUtils.runSync(<String>[javaExecutable, '-version']);
+        result = globals.processUtils.runSync(<String>[javaExecutable, '-version']);
       } on ProcessException catch (e) {
         _validationMessages.add('Failed to run Java: $e');
       }

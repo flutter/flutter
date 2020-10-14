@@ -3,10 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -50,6 +48,7 @@ void main () {
             '--bundle',
             '/',
             '--debug',
+            '--noninteractive',
             '--args',
             <String>[
               '--enable-dart-profiling',
@@ -87,7 +86,7 @@ void main () {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
-            stdout: '(lldb)     run\r\nsuccess\r\nsuccess\r\nLog on attach1\r\n\r\nLog on attach2\r\n\r\n\r\n\r\nPROCESS_STOPPED\r\nLog after process exit',
+            stdout: '(lldb)     run\r\nsuccess\r\n(lldb)     autoexit\r\nsuccess\r\nLog on attach1\r\n\r\nLog on attach2\r\n\r\n\r\n\r\nPROCESS_STOPPED\r\nLog after process exit',
           ),
         ]);
         final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
@@ -111,7 +110,7 @@ void main () {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
-            stdout: '(lldb)     run\r\nsuccess\r\nLog on attach\r\nProcess 100 exited with status = 0\r\nLog after process exit',
+            stdout: '(lldb)     run\r\nsuccess\r\n(lldb)     autoexit\r\nLog on attach\r\nProcess 100 exited with status = 0\r\nLog after process exit',
           ),
         ]);
         final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
@@ -225,26 +224,6 @@ void main () {
         await iosDeployDebugger.launchAndAttach();
         expect(logger.errorText, contains('Could not attach the debugger'));
       });
-    });
-
-    testWithoutContext('detach', () async {
-      final StreamController<List<int>> stdin = StreamController<List<int>>();
-      final Stream<String> stdinStream = stdin.stream.transform<String>(const Utf8Decoder());
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: const <String>[
-            'ios-deploy',
-          ],
-          stdout: '(lldb)     run\nsuccess',
-          stdin: IOSink(stdin.sink),
-        ),
-      ]);
-      final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
-        processManager: processManager,
-      );
-      await iosDeployDebugger.launchAndAttach();
-      iosDeployDebugger.detach();
-      expect(await stdinStream.first, 'process detach');
     });
   });
 
