@@ -504,9 +504,7 @@ Future<LaunchResult> _startApp(
       final File file = globals.fs.file('test_screenshot.png');
       try {
         await command.device.takeScreenshot(file);
-        globals.printStatus('BASE64 SCREENSHOT:');
-        globals.printStatus(base64.encode(file.readAsBytesSync()));
-        globals.printStatus('END SCREENSHOT');
+        globals.printStatus('BASE64 SCREENSHOT:${base64.encode(file.readAsBytesSync())}');
       } on Exception {
         globals.printError('Failed to take screenshot');
       } finally {
