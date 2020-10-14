@@ -2,16 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-List<int> items = <int>[0, 1, 2, 3, 4, 5];
+List<int> items = <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 Widget buildCard(BuildContext context, int index) {
-  if (index >= items.length)
-    return null;
   return Container(
     key: ValueKey<int>(items[index]),
     height: 100.0,
