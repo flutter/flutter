@@ -655,10 +655,10 @@ abstract class FlutterCommand extends Command<void> {
     if (boolArg('profile')) {
       return BuildMode.profile;
     }
-    if (boolArg('release')) {
+    if (releaseResult) {
       return BuildMode.release;
     }
-    if (boolArg('jit-release')) {
+    if (jitReleaseResult) {
       return BuildMode.jitRelease;
     }
     return _defaultBuildMode;
