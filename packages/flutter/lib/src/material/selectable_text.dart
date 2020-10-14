@@ -356,7 +356,7 @@ class SelectableText extends StatefulWidget {
   final bool enableInteractiveSelection;
 
   /// {@macro flutter.widgets.editableText.textSelectionControls}
-  final TextSelectionControls textSelectionControls;
+  final TextSelectionControls? textSelectionControls;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
