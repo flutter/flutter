@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_H_
 
+#include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/context/android_context.h"
@@ -14,12 +15,10 @@
 
 namespace flutter {
 
+class AndroidExternalViewEmbedder;
+
 class AndroidSurface {
  public:
-  using Factory = std::function<std::unique_ptr<AndroidSurface>(
-      std::shared_ptr<AndroidContext> android_context,
-      std::shared_ptr<PlatformViewAndroidJNI> jni_facade)>;
-
   virtual ~AndroidSurface();
 
   virtual bool IsValid() const = 0;
@@ -36,6 +35,15 @@ class AndroidSurface {
   virtual bool ResourceContextClearCurrent() = 0;
 
   virtual bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) = 0;
+};
+
+class AndroidSurfaceFactory {
+ public:
+  AndroidSurfaceFactory() = default;
+
+  virtual ~AndroidSurfaceFactory() = default;
+
+  virtual std::unique_ptr<AndroidSurface> CreateSurface() = 0;
 };
 
 }  // namespace flutter

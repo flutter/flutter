@@ -22,6 +22,25 @@
 
 namespace flutter {
 
+class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
+ public:
+  AndroidSurfaceFactoryImpl(std::shared_ptr<AndroidContext> context,
+                            std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
+
+  ~AndroidSurfaceFactoryImpl() override;
+
+  std::unique_ptr<AndroidSurface> CreateSurface() override;
+
+  void SetExternalViewEmbedder(
+      std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder);
+
+ private:
+  std::shared_ptr<AndroidContext> android_context_;
+  std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+  std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder_;
+
+};
+
 class PlatformViewAndroid final : public PlatformView {
  public:
   static bool Register(JNIEnv* env);
@@ -80,6 +99,7 @@ class PlatformViewAndroid final : public PlatformView {
 
  private:
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+  std::shared_ptr<AndroidSurfaceFactoryImpl> surface_factory_;
 
   PlatformViewAndroidDelegate platform_view_android_delegate_;
 
