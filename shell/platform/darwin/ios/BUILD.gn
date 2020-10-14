@@ -93,6 +93,8 @@ source_set("flutter_framework_source") {
     "ios_context_software.mm",
     "ios_external_texture_gl.h",
     "ios_external_texture_gl.mm",
+    "ios_external_view_embedder.h",
+    "ios_external_view_embedder.mm",
     "ios_render_target_gl.h",
     "ios_render_target_gl.mm",
     "ios_surface.h",
