@@ -401,11 +401,11 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport? viewport = tester.firstRenderObject(find.byType(Text)).parent!.parent as RenderListWheelViewport?;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(ListWheelViewport)) as RenderListWheelViewport;
 
       // Item 0 is in the middle. There are 3 children visible after it, so the
       // value of childCount should be 4.
-      expect(viewport!.childCount, 4);
+      expect(viewport.childCount, 4);
 
       controller.jumpToItem(8);
       await tester.pump();
@@ -438,11 +438,11 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport? viewport = tester.firstRenderObject(find.byType(Text)).parent!.parent as RenderListWheelViewport?;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(ListWheelViewport)) as RenderListWheelViewport;
 
       // The screen is vertically 600px. Since the middle item is centered,
       // half of the first and last items are visible, making 7 children visible.
-      expect(viewport!.childCount, 7);
+      expect(viewport.childCount, 7);
 
       // Pump the same widget again but with double the squeeze.
       await tester.pumpWidget(
@@ -629,7 +629,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport? viewport = tester.firstRenderObject(find.byType(Container)).parent!.parent as RenderListWheelViewport?;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(ListWheelViewport)) as RenderListWheelViewport;
       expect(viewport, paints..transform(
         matrix4: equals(<dynamic>[
           1.0, 0.0, 0.0, 0.0,
@@ -686,7 +686,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport? viewport = tester.firstRenderObject(find.byType(Container)).parent!.parent as RenderListWheelViewport?;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(ListWheelViewport)) as RenderListWheelViewport;
       expect(viewport, paints..transform(
         matrix4: equals(<dynamic>[
           1.0, 0.0, 0.0, 0.0,
@@ -807,7 +807,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport? viewport = tester.firstRenderObject(find.byType(Container)).parent!.parent as RenderListWheelViewport?;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(ListWheelViewport)) as RenderListWheelViewport;
       expect(viewport, paints
         ..transform(
           matrix4: equals(<dynamic>[

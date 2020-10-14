@@ -55,8 +55,7 @@ class TestAutomatedTestWidgetsFlutterBinding extends AutomatedTestWidgetsFlutter
 
   @override
   void allowFirstFrame() {
-    if (onAllowFrame != null)
-      onAllowFrame!();
+    onAllowFrame?.call();
     super.allowFirstFrame();
   }
 }

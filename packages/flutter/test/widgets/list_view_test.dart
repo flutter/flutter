@@ -543,7 +543,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/43380.
     final ScrollController controller = ScrollController();
 
-    Widget buildListView({ required Axis scrollDirection}) {
+    Widget buildListView({ required Axis scrollDirection }) {
       assert(scrollDirection != null);
       return Directionality(
         textDirection: TextDirection.ltr,
