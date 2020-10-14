@@ -21,9 +21,10 @@ namespace flutter {
 class AndroidSurfaceVulkan : public AndroidSurface,
                              public GPUSurfaceVulkanDelegate {
  public:
-  AndroidSurfaceVulkan(std::shared_ptr<AndroidContext> android_context,
-                       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-                       AndroidSurface::Factory surface_factory);
+  AndroidSurfaceVulkan(
+      std::shared_ptr<AndroidContext> android_context,
+      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+      std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder);
 
   ~AndroidSurfaceVulkan() override;
 
@@ -56,8 +57,7 @@ class AndroidSurfaceVulkan : public AndroidSurface,
   fml::RefPtr<vulkan::VulkanProcTable> vk() override;
 
  private:
-  const std::unique_ptr<AndroidExternalViewEmbedder> external_view_embedder_;
-
+  const std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder_;
   fml::RefPtr<vulkan::VulkanProcTable> proc_table_;
   fml::RefPtr<AndroidNativeWindow> native_window_;
 

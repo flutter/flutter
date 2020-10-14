@@ -5,13 +5,14 @@
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 
 #include "flutter/fml/trace_event.h"
+#include "flutter/shell/platform/android/surface/android_surface.h"
 
 namespace flutter {
 
 AndroidExternalViewEmbedder::AndroidExternalViewEmbedder(
     std::shared_ptr<AndroidContext> android_context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    const AndroidSurface::Factory& surface_factory)
+    std::shared_ptr<AndroidSurfaceFactory> surface_factory)
     : ExternalViewEmbedder(),
       android_context_(android_context),
       jni_facade_(jni_facade),

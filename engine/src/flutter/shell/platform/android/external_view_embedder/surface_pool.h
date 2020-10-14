@@ -55,7 +55,7 @@ class SurfacePool {
       GrDirectContext* gr_context,
       std::shared_ptr<AndroidContext> android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-      const AndroidSurface::Factory& surface_factory);
+      std::shared_ptr<AndroidSurfaceFactory> surface_factory);
 
   // Gets the layers in the pool that aren't currently used.
   // This method doesn't mark the layers as unused.
