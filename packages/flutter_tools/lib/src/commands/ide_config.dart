@@ -273,6 +273,7 @@ String _validateFlutterDir(String dirPath, { String flutterRoot }) {
       case FileSystemEntityType.link:
         // Do not overwrite links.
         return "Invalid project root dir: '$dirPath' - refers to a link.";
+      default:
     }
   }
 
