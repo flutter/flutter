@@ -18,9 +18,10 @@ namespace flutter {
 class AndroidSurfaceSoftware final : public AndroidSurface,
                                      public GPUSurfaceSoftwareDelegate {
  public:
-  AndroidSurfaceSoftware(std::shared_ptr<AndroidContext> android_context,
-                         std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-                         AndroidSurface::Factory surface_factory);
+  AndroidSurfaceSoftware(
+      std::shared_ptr<AndroidContext> android_context,
+      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+      std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder);
 
   ~AndroidSurfaceSoftware() override;
 
@@ -56,7 +57,7 @@ class AndroidSurfaceSoftware final : public AndroidSurface,
   ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
  private:
-  const std::unique_ptr<AndroidExternalViewEmbedder> external_view_embedder_;
+  const std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder_;
 
   sk_sp<SkSurface> sk_surface_;
   fml::RefPtr<AndroidNativeWindow> native_window_;

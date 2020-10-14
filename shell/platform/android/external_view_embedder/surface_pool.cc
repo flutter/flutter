@@ -23,7 +23,7 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
     GrDirectContext* gr_context,
     std::shared_ptr<AndroidContext> android_context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    const AndroidSurface::Factory& surface_factory) {
+    std::shared_ptr<AndroidSurfaceFactory> surface_factory) {
   // Destroy current layers in the pool if the frame size has changed.
   if (requested_frame_size_ != current_frame_size_) {
     DestroyLayers(jni_facade);
@@ -33,7 +33,7 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
   // Allocate a new surface if there isn't one available.
   if (available_layer_index_ >= layers_.size()) {
     std::unique_ptr<AndroidSurface> android_surface =
-        surface_factory(android_context, jni_facade);
+        surface_factory->CreateSurface();
 
     FML_CHECK(android_surface && android_surface->IsValid())
         << "Could not create an OpenGL, Vulkan or Software surface to setup "
