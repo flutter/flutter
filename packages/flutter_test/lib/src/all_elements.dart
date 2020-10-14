@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -23,15 +25,35 @@ Iterable<Element> collectAllElementsFrom(
   return CachingIterable<Element>(_DepthFirstChildIterator(rootElement, skipOffstage));
 }
 
+/// Provides a recursive, efficient, depth first search of an element tree.
+///
+/// [Element.visitChildren] does not guarnatee order, but does guarnatee stable
+/// order. This iterator also guarantees stable order, but will iterate in a
+/// right to left order, e.g.:
+///
+///       1
+///     /   \
+///    2     3
+///   / \   / \
+///  4   5 6   7
+///
+/// Will iterate in order 1, 3, 7, 6, 2, 5, 4. This avoids unnecessary
+/// allocation or CPU time, and performance is important here because this
+/// method is on the critical path for flutter_driver and
+/// package:integration_test performance tests.
+///
+/// Perforamnce of this is measured in the all_elements_bench microbenchmark.
 class _DepthFirstChildIterator implements Iterator<Element> {
   _DepthFirstChildIterator(Element rootElement, this.skipOffstage)
-    : _stack = _reverseChildrenOf(rootElement, skipOffstage).toList();
+    : _stack = ListQueue<Element>() {
+    _fillChildren(rootElement);
+  }
 
   final bool skipOffstage;
 
   late Element _current;
 
-  final List<Element> _stack;
+  final ListQueue<Element> _stack;
 
   @override
   Element get current => _current;
@@ -41,21 +63,18 @@ class _DepthFirstChildIterator implements Iterator<Element> {
     if (_stack.isEmpty)
       return false;
 
-    _current = _stack.removeLast();
-    // Stack children in reverse order to traverse first branch first
-    _stack.addAll(_reverseChildrenOf(_current, skipOffstage));
+    _current = _stack.removeFirst();
+    _fillChildren(_current);
 
     return true;
   }
 
-  static Iterable<Element> _reverseChildrenOf(Element element, bool skipOffstage) {
+  void _fillChildren(Element element) {
     assert(element != null);
-    final List<Element> children = <Element>[];
     if (skipOffstage) {
-      element.debugVisitOnstageChildren(children.add);
+      element.debugVisitOnstageChildren(_stack.addFirst);
     } else {
-      element.visitChildren(children.add);
+      element.visitChildren(_stack.addFirst);
     }
-    return children.reversed;
   }
 }
