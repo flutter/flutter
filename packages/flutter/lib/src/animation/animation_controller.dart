@@ -651,9 +651,10 @@ class AnimationController extends Animation<double>
   /// If velocity is positive, the animation will complete, otherwise it will
   /// dismiss.
   ///
-  /// The default spring that is driven by this method is critically damped,
-  /// but the [springDescription] can be used to drive by a custom spring.
-  /// With this parameter you can make the fling slower, or otherwise faster.
+  /// The [springDescription] parameter can be used to specify a custom [SpringType.criticallyDamped]
+  /// or [SpringType.overDamped] spring to drive the animation with. Defaults to null, which uses a
+  /// [SpringType.criticallyDamped] spring. See [SpringDescription.withDampingRatio] for how
+  /// to create a suitable [SpringDescription].
   ///
   /// The resulting spring simulation cannot be of type [SpringType.underDamped],
   /// as this can lead to unexpected look of the produced animation.
@@ -663,10 +664,6 @@ class AnimationController extends Animation<double>
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
-  ///
-  ///  See also:
-  ///
-  /// * [SpringType] which describes different types of springs.
   TickerFuture fling({ double velocity = 1.0, SpringDescription? springDescription, AnimationBehavior? animationBehavior }) {
     springDescription ??= _kFlingSpringDescription;
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
