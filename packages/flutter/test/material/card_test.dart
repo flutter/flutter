@@ -168,6 +168,51 @@ void main() {
     expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
   });
 
+testWidgets('Card padding', (WidgetTester tester) async {
+    const Key contentsKey = ValueKey<String>('contents');
+
+    await tester.pumpWidget(
+      Align(
+        alignment: Alignment.topLeft,
+          child: Card(
+          child: Container(
+            key: contentsKey,
+            color: const Color(0xFF00FF00),
+            width: 100.0,
+            height: 100.0,
+          ),
+        ),
+      ),
+    );
+
+    // Default padding is 8 and default margin is 4
+    expect(tester.getSize(find.byType(Card)), const Size(124.0, 124.0)); // 2 * 4.0 margin + 2 * 8.0 padding
+
+    expect(tester.getTopLeft(find.byKey(contentsKey)), const Offset(12.0, 12.0)); // 4.0 margin + 8.0 padding
+    expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
+
+    await tester.pumpWidget(
+      Align(
+        alignment: Alignment.topLeft,
+          child: Card(
+          padding: EdgeInsets.zero,
+          child: Container(
+            key: contentsKey,
+            color: const Color(0xFF00FF00),
+            width: 100.0,
+            height: 100.0,
+          ),
+        ),
+      ),
+    );
+
+    // Specified padding is zero
+    expect(tester.getSize(find.byType(Card)), const Size(108.0, 108.0)); // 2 * 4.0 margin (default)
+
+    expect(tester.getTopLeft(find.byKey(contentsKey)), const Offset(4.0, 4.0)); // 4.0 margin (default)
+    expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
+  });
+
   testWidgets('Card clipBehavior property passes through to the Material', (WidgetTester tester) async {
     await tester.pumpWidget(const Card());
     expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.none);
