@@ -479,10 +479,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   };
 
   static final Set<LogicalKeyboardKey> _shortcutKeys = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.keyA,
-    LogicalKeyboardKey.keyC,
-    LogicalKeyboardKey.keyV,
-    LogicalKeyboardKey.keyX,
+    LogicalKeyboardKey.lowerA,
+    LogicalKeyboardKey.lowerC,
+    LogicalKeyboardKey.lowerV,
+    LogicalKeyboardKey.lowerX,
     LogicalKeyboardKey.delete,
   };
 
@@ -756,14 +756,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   Future<void> _handleShortcuts(LogicalKeyboardKey key) async {
     assert(selection != null);
     assert(_shortcutKeys.contains(key), 'shortcut key $key not recognized.');
-    if (key == LogicalKeyboardKey.keyC) {
+    if (key == LogicalKeyboardKey.lowerC) {
       if (!selection!.isCollapsed) {
         Clipboard.setData(
             ClipboardData(text: selection!.textInside(_plainText)));
       }
       return;
     }
-    if (key == LogicalKeyboardKey.keyX) {
+    if (key == LogicalKeyboardKey.lowerX) {
       if (!selection!.isCollapsed) {
         Clipboard.setData(ClipboardData(text: selection!.textInside(_plainText)));
         textSelectionDelegate.textEditingValue = TextEditingValue(
@@ -774,7 +774,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
       return;
     }
-    if (key == LogicalKeyboardKey.keyV) {
+    if (key == LogicalKeyboardKey.lowerV) {
       // Snapshot the input before using `await`.
       // See https://github.com/flutter/flutter/issues/11427
       final TextEditingValue value = textSelectionDelegate.textEditingValue;
@@ -791,7 +791,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
       return;
     }
-    if (key == LogicalKeyboardKey.keyA) {
+    if (key == LogicalKeyboardKey.lowerA) {
       _handleSelectionChange(
         selection!.copyWith(
           baseOffset: 0,

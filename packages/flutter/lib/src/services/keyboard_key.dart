@@ -613,6 +613,11 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey digit9 = LogicalKeyboardKey(0x00000000039, debugName: kReleaseMode ? null : 'Digit 9');
 
+  /// Represents the logical "Space" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey space = LogicalKeyboardKey(0x00000000020, debugName: kReleaseMode ? null : 'Space');
+
   /// Represents the logical "Backspace" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -2204,6 +2209,7 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000037: digit7,
     0x0000000038: digit8,
     0x0000000039: digit9,
+    0x0000000020: space,
     0x0000000008: backspace,
     0x0000000009: tab,
     0x000000000d: enter,
@@ -2513,14 +2519,10 @@ class LogicalKeyboardKey extends KeyboardKey {
 
   // A map of keys to the pseudo-key synonym for that key. Used by getSynonyms.
   static final Map<LogicalKeyboardKey, LogicalKeyboardKey> _synonyms = <LogicalKeyboardKey, LogicalKeyboardKey>{
-    shiftLeft: shift,
-    shiftRight: shift,
-    metaLeft: meta,
-    metaRight: meta,
-    altLeft: alt,
-    altRight: alt,
-    controlLeft: control,
-    controlRight: control,
+    shift: shift,
+    meta: meta,
+    alt: alt,
+    control: control,
   };
 }
 

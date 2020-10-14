@@ -993,7 +993,7 @@ class WidgetsApp extends StatefulWidget {
     // Activation
     LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
-    LogicalKeySet(LogicalKeyboardKey.gameButtonA): const ActivateIntent(),
+    // LogicalKeySet(LogicalKeyboardKey.gameButtonA): const ActivateIntent(),
 
     // Dismissal
     LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),

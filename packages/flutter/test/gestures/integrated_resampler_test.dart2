@@ -1,0 +1,657 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// @dart = 2.8
+
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/gestures.dart';
+
+import '../flutter_test_alternative.dart';
+
+typedef EventListener = void Function(PointerEvent event);
+
+const Duration _defaultSamplingOffset = Duration(milliseconds: -38);
+
+class TestMouseTrackerFlutterBinding extends BindingBase with SchedulerBinding, GestureBinding {
+  EventListener listener;
+
+  @override
+  void testHandlePointerEvent(PointerEvent event) {
+    if (listener != null)
+      listener(event);
+    super.testHandlePointerEvent(event);
+  }
+
+  void addEvent(PointerData data) {
+    window.onPointerDataPacket(PointerDataPacket(data: <PointerData>[data]));
+  }
+
+  void pumpTo(Duration duration) {
+    SchedulerBinding.instance.handleBeginFrame(duration - _defaultSamplingOffset);
+    SchedulerBinding.instance.handleDrawFrame();
+  }
+}
+
+TestMouseTrackerFlutterBinding _binding;
+
+void _ensureTestGestureBinding() {
+  _binding ??= TestMouseTrackerFlutterBinding();
+  _binding.resamplingEnabled = true;
+  assert(GestureBinding.instance != null);
+}
+
+void main() {
+  setUp(() {
+    _ensureTestGestureBinding();
+  });
+
+  PointerData _createSimulatedPointerAddedEvent(
+      int timeStampUs,
+      double x,
+      double y,
+  ) {
+    return PointerData(
+        change: PointerChange.add,
+        timeStamp: Duration(microseconds: timeStampUs),
+        physicalX: x * window.devicePixelRatio,
+        physicalY: y * window.devicePixelRatio,
+    );
+  }
+
+  PointerData _createSimulatedPointerRemovedEvent(
+      int timeStampUs,
+      double x,
+      double y,
+  ) {
+    return PointerData(
+        change: PointerChange.remove,
+        timeStamp: Duration(microseconds: timeStampUs),
+        physicalX: x * window.devicePixelRatio,
+        physicalY: y * window.devicePixelRatio,
+    );
+  }
+
+  PointerData _createSimulatedPointerDownEvent(
+      int timeStampUs,
+      double x,
+      double y,
+  ) {
+    return PointerData(
+        change: PointerChange.down,
+        timeStamp: Duration(microseconds: timeStampUs),
+        physicalX: x * window.devicePixelRatio,
+        physicalY: y * window.devicePixelRatio,
+    );
+  }
+
+  PointerData _createSimulatedPointerMoveEvent(
+      int timeStampUs,
+      double x,
+      double y,
+      double deltaX,
+      double deltaY,
+  ) {
+    return PointerData(
+        change: PointerChange.move,
+        timeStamp: Duration(microseconds: timeStampUs),
+        physicalX: x * window.devicePixelRatio,
+        physicalY: y * window.devicePixelRatio,
+        physicalDeltaX: deltaX * window.devicePixelRatio,
+        physicalDeltaY: deltaY * window.devicePixelRatio,
+    );
+  }
+
+  PointerData _createSimulatedPointerUpEvent(
+      int timeStampUs,
+      double x,
+      double y,
+  ) {
+    return PointerData(
+        change: PointerChange.up,
+        timeStamp: Duration(microseconds: timeStampUs),
+        physicalX: x * window.devicePixelRatio,
+        physicalY: y * window.devicePixelRatio,
+    );
+  }
+
+  test('basic', () {
+    final PointerData event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 50.0);
+    final PointerData event1 = _createSimulatedPointerDownEvent(2000, 10.0, 40.0);
+    final PointerData event2 = _createSimulatedPointerMoveEvent(3000, 20.0, 30.0, 10.0, -10.0);
+    final PointerData event3 = _createSimulatedPointerMoveEvent(4000, 30.0, 20.0, 10.0, -10.0);
+    final PointerData event4 = _createSimulatedPointerUpEvent(5000, 40.0, 10.0);
+    final PointerData event5 = _createSimulatedPointerRemovedEvent(6000, 50.0, 0.0);
+
+    _binding
+      ..addEvent(event0)
+      ..addEvent(event1)
+      ..addEvent(event2)
+      ..addEvent(event3)
+      ..addEvent(event4)
+      ..addEvent(event5);
+
+    final List<PointerEvent> result = <PointerEvent>[];
+    _binding.listener = result.add;
+
+    _binding.pumpTo(const Duration(microseconds: 500));
+
+    // No pointer event should have been returned yet.
+    expect(result.isEmpty, true);
+
+    _binding.pumpTo(const Duration(microseconds: 1500));
+
+    // Add pointer event should have been returned.
+    expect(result.length, 1);
+    expect(result[0].timeStamp, const Duration(microseconds: 1500));
+    expect(result[0] is PointerAddedEvent, true);
+    expect(result[0].position.dx, 5.0);
+    expect(result[0].position.dy, 45.0);
+
+    _binding.pumpTo(const Duration(microseconds: 2500));
+
+    // Down pointer event should have been returned.
+    expect(result.length, 2);
+    expect(result[1].timeStamp, const Duration(microseconds: 2500));
+    expect(result[1] is PointerDownEvent, true);
+    expect(result[1].position.dx, 15.0);
+    expect(result[1].position.dy, 35.0);
+
+    _binding.pumpTo(const Duration(microseconds: 3500));
+
+    // Move pointer event should have been returned.
+    expect(result.length, 3);
+    expect(result[2].timeStamp, const Duration(microseconds: 3500));
+    expect(result[2] is PointerMoveEvent, true);
+    expect(result[2].position.dx, 25.0);
+    expect(result[2].position.dy, 25.0);
+    expect(result[2].delta.dx, 10.0);
+    expect(result[2].delta.dy, -10.0);
+
+    _binding.pumpTo(const Duration(microseconds: 4500));
+
+    // Up pointer event should have been returned.
+    expect(result.length, 4);
+    expect(result[3].timeStamp, const Duration(microseconds: 4500));
+    expect(result[3] is PointerUpEvent, true);
+    expect(result[3].position.dx, 35.0);
+    expect(result[3].position.dy, 15.0);
+
+    _binding.pumpTo(const Duration(microseconds: 5500));
+
+    // Remove pointer event should have been returned.
+    expect(result.length, 5);
+    expect(result[4].timeStamp, const Duration(microseconds: 5500));
+    expect(result[4] is PointerRemovedEvent, true);
+    expect(result[4].position.dx, 45.0);
+    expect(result[4].position.dy, 5.0);
+
+    _binding.pumpTo(const Duration(microseconds: 6500));
+
+    // No pointer event should have been returned.
+    expect(result.length, 5);
+  });
+
+  test('stream', () {
+    final PointerData event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 50.0);
+    final PointerData event1 = _createSimulatedPointerDownEvent(2000, 10.0, 40.0);
+    final PointerData event2 = _createSimulatedPointerMoveEvent(3000, 20.0, 30.0, 10.0, -10.0);
+    final PointerData event3 = _createSimulatedPointerMoveEvent(4000, 30.0, 20.0, 10.0, -10.0);
+    final PointerData event4 = _createSimulatedPointerUpEvent(5000, 40.0, 10.0);
+    final PointerData event5 = _createSimulatedPointerRemovedEvent(6000, 50.0, 0.0);
+
+    _binding.addEvent(event0);
+
+    //
+    // Initial sample time a 0.5 ms.
+    //
+
+    final List<PointerEvent> result = <PointerEvent>[];
+    _binding.listener = result.add;
+
+    _binding.pumpTo(const Duration(microseconds: 500));
+
+    // No pointer event should have been returned yet.
+    expect(result.isEmpty, true);
+
+    _binding.addEvent(event1);
+
+    _binding.pumpTo(const Duration(microseconds: 500));
+
+    // No pointer event should have been returned yet.
+    expect(result.isEmpty, true);
+
+    //
+    // Advance sample time to 1.5 ms.
+    //
+
+    _binding.pumpTo(const Duration(microseconds: 1500));
+
+    // Add pointer event should have been returned.
+    expect(result.length, 1);
+    expect(result[0].timeStamp, const Duration(microseconds: 1500));
+    expect(result[0] is PointerAddedEvent, true);
+    expect(result[0].position.dx, 5.0);
+    expect(result[0].position.dy, 45.0);
+
+    _binding.addEvent(event2);
+
+    _binding.pumpTo(const Duration(microseconds: 1500));
+
+    // No more pointer events should have been returned.
+    expect(result.length, 1);
+
+    //
+    // Advance sample time to 2.5 ms.
+    //
+
+    _binding.pumpTo(const Duration(microseconds: 2500));
+
+    // Down pointer event should have been returned.
+    expect(result.length, 2);
+    expect(result[1].timeStamp, const Duration(microseconds: 2500));
+    expect(result[1] is PointerDownEvent, true);
+    expect(result[1].position.dx, 15.0);
+    expect(result[1].position.dy, 35.0);
+
+    _binding.addEvent(event3);
+
+    _binding.pumpTo(const Duration(microseconds: 2500));
+
+    // No more pointer events should have been returned.
+    expect(result.length, 2);
+
+    //
+    // Advance sample time to 3.5 ms.
+    //
+
+    _binding.pumpTo(const Duration(microseconds: 3500));
+
+    // Move pointer event should have been returned.
+    expect(result.length, 3);
+    expect(result[2].timeStamp, const Duration(microseconds: 3500));
+    expect(result[2] is PointerMoveEvent, true);
+    expect(result[2].position.dx, 25.0);
+    expect(result[2].position.dy, 25.0);
+    expect(result[2].delta.dx, 10.0);
+    expect(result[2].delta.dy, -10.0);
+
+    _binding.addEvent(event4);
+
+    _binding.pumpTo(const Duration(microseconds: 3500));
+
+    // No more pointer events should have been returned.
+    expect(result.length, 3);
+
+    //
+    // Advance sample time to 4.5 ms.
+    //
+
+    _binding.pumpTo(const Duration(microseconds: 4500));
+
+    // Up pointer event should have been returned.
+    expect(result.length, 4);
+    expect(result[3].timeStamp, const Duration(microseconds: 4500));
+    expect(result[3] is PointerUpEvent, true);
+    expect(result[3].position.dx, 35.0);
+    expect(result[3].position.dy, 15.0);
+
+    print('===Before add===');
+    _binding.addEvent(event5);
+
+    print('===Before pump===');
+    _binding.pumpTo(const Duration(microseconds: 4500));
+
+    // No more pointer events should have been returned.
+    expect(result.length, 4);
+
+    //
+    // Advance sample time to 5.5 ms.
+    //
+
+    _binding.pumpTo(const Duration(microseconds: 5500));
+
+    // Remove pointer event should have been returned.
+    expect(result.length, 5);
+    expect(result[4].timeStamp, const Duration(microseconds: 5500));
+    expect(result[4] is PointerRemovedEvent, true);
+    expect(result[4].position.dx, 45.0);
+    expect(result[4].position.dy, 5.0);
+
+    //
+    // Advance sample time to 6.5 ms.
+    //
+
+    _binding.pumpTo(const Duration(microseconds: 6500));
+
+    // No pointer events should have been returned.
+    expect(result.length, 5);
+  });
+
+  test('quick tap', () {
+    final PointerData event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerData event1 = _createSimulatedPointerDownEvent(1000, 0.0, 0.0);
+    final PointerData event2 = _createSimulatedPointerUpEvent(1000, 0.0, 0.0);
+    final PointerData event3 = _createSimulatedPointerRemovedEvent(1000, 0.0, 0.0);
+
+    _binding
+      ..addEvent(event0)
+      ..addEvent(event1)
+      ..addEvent(event2)
+      ..addEvent(event3);
+
+    final List<PointerEvent> result = <PointerEvent>[];
+    _binding.listener = result.add;
+
+    _binding.pumpTo(const Duration(microseconds: 1500));
+
+    // All pointer events should have been returned.
+    expect(result.length, 4);
+    expect(result[0].timeStamp, const Duration(microseconds: 1500));
+    expect(result[0] is PointerAddedEvent, true);
+    expect(result[0].position.dx, 0.0);
+    expect(result[0].position.dy, 0.0);
+    expect(result[1].timeStamp, const Duration(microseconds: 1500));
+    expect(result[1] is PointerDownEvent, true);
+    expect(result[1].position.dx, 0.0);
+    expect(result[1].position.dy, 0.0);
+    expect(result[2].timeStamp, const Duration(microseconds: 1500));
+    expect(result[2] is PointerUpEvent, true);
+    expect(result[2].position.dx, 0.0);
+    expect(result[2].position.dy, 0.0);
+    expect(result[3].timeStamp, const Duration(microseconds: 1500));
+    expect(result[3] is PointerRemovedEvent, true);
+    expect(result[3].position.dx, 0.0);
+    expect(result[3].position.dy, 0.0);
+  });
+
+  test('advance slowly', () {
+    final PointerData event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerData event1 = _createSimulatedPointerDownEvent(1000, 0.0, 0.0);
+    final PointerData event2 = _createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
+    final PointerData event3 = _createSimulatedPointerUpEvent(3000, 20.0, 0.0);
+    final PointerData event4 = _createSimulatedPointerRemovedEvent(3000, 20.0, 0.0);
+
+    _binding
+      ..addEvent(event0)
+      ..addEvent(event1)
+      ..addEvent(event2)
+      ..addEvent(event3)
+      ..addEvent(event4);
+
+    final List<PointerEvent> result = <PointerEvent>[];
+    _binding.listener = result.add;
+
+    _binding.pumpTo(const Duration(microseconds: 1500));
+
+    // Added and down pointer events should have been returned.
+    expect(result.length, 2);
+    expect(result[0].timeStamp, const Duration(microseconds: 1500));
+    expect(result[0] is PointerAddedEvent, true);
+    expect(result[0].position.dx, 5.0);
+    expect(result[0].position.dy, 0.0);
+    expect(result[1].timeStamp, const Duration(microseconds: 1500));
+    expect(result[1] is PointerDownEvent, true);
+    expect(result[1].position.dx, 5.0);
+    expect(result[1].position.dy, 0.0);
+
+    _binding.pumpTo(const Duration(microseconds: 1500));
+
+    // No pointer events should have been returned.
+    expect(result.length, 2);
+
+    _binding.pumpTo(const Duration(microseconds: 1750));
+
+    // Move pointer event should have been returned.
+    expect(result.length, 3);
+    expect(result[2].timeStamp, const Duration(microseconds: 1750));
+    expect(result[2] is PointerMoveEvent, true);
+    expect(result[2].position.dx, 7.5);
+    expect(result[2].position.dy, 0.0);
+    expect(result[2].delta.dx, 2.5);
+    expect(result[2].delta.dy, 0.0);
+
+    _binding.pumpTo(const Duration(microseconds: 2000));
+
+    // Another move pointer event should have been returned.
+    expect(result.length, 4);
+    expect(result[3].timeStamp, const Duration(microseconds: 2000));
+    expect(result[3] is PointerMoveEvent, true);
+    expect(result[3].position.dx, 10.0);
+    expect(result[3].position.dy, 0.0);
+    expect(result[3].delta.dx, 2.5);
+    expect(result[3].delta.dy, 0.0);
+
+    _binding.pumpTo(const Duration(microseconds: 2500));
+
+    // Last two pointer events should have been returned.
+    expect(result.length, 6);
+    expect(result[4].timeStamp, const Duration(microseconds: 2500));
+    expect(result[4] is PointerUpEvent, true);
+    expect(result[4].position.dx, 15.0);
+    expect(result[4].position.dy, 0.0);
+    expect(result[5].timeStamp, const Duration(microseconds: 2500));
+    expect(result[5] is PointerRemovedEvent, true);
+    expect(result[5].position.dx, 15.0);
+    expect(result[5].position.dy, 0.0);
+  });
+
+  test('advance fast', () {
+    final PointerData event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerData event1 = _createSimulatedPointerDownEvent(1000, 0.0, 0.0);
+    final PointerData event2 = _createSimulatedPointerMoveEvent(2000, 5.0, 0.0, 5.0, 0.0);
+    final PointerData event3 = _createSimulatedPointerMoveEvent(3000, 20.0, 0.0, 15.0, 0.0);
+    final PointerData event4 = _createSimulatedPointerUpEvent(4000, 30.0, 0.0);
+    final PointerData event5 = _createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
+
+    _binding
+      ..addEvent(event0)
+      ..addEvent(event1)
+      ..addEvent(event2)
+      ..addEvent(event3)
+      ..addEvent(event4)
+      ..addEvent(event5);
+
+    final List<PointerEvent> result = <PointerEvent>[];
+    _binding.listener = result.add;
+
+    _binding.pumpTo(const Duration(microseconds: 2500));
+
+    // Add and down pointer events should have been returned.
+    expect(result.length, 2);
+    expect(result[0].timeStamp, const Duration(microseconds: 2500));
+    expect(result[0] is PointerAddedEvent, true);
+    expect(result[0].position.dx, 12.5);
+    expect(result[0].position.dy, 0.0);
+    expect(result[1].timeStamp, const Duration(microseconds: 2500));
+    expect(result[1] is PointerDownEvent, true);
+    expect(result[1].position.dx, 12.5);
+    expect(result[1].position.dy, 0.0);
+
+    _binding.pumpTo(const Duration(microseconds: 5500));
+
+    // Up and removed pointer events should have been returned.
+    expect(result.length, 4);
+    expect(result[2].timeStamp, const Duration(microseconds: 5500));
+    expect(result[2] is PointerUpEvent, true);
+    expect(result[2].position.dx, 30.0);
+    expect(result[2].position.dy, 0.0);
+    expect(result[3].timeStamp, const Duration(microseconds: 5500));
+    expect(result[3] is PointerRemovedEvent, true);
+    expect(result[3].position.dx, 30.0);
+    expect(result[3].position.dy, 0.0);
+
+    _binding.pumpTo(const Duration(microseconds: 6500));
+
+    // No pointer events should have been returned.
+    expect(result.length, 4);
+  });
+
+  test('skip', () {
+    final PointerData event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerData event1 = _createSimulatedPointerDownEvent(1000, 0.0, 0.0);
+    final PointerData event2 = _createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
+    final PointerData event3 = _createSimulatedPointerUpEvent(3000, 10.0, 0.0);
+    final PointerData event4 = _createSimulatedPointerDownEvent(4000, 20.0, 0.0);
+    final PointerData event5 = _createSimulatedPointerUpEvent(5000, 30.0, 0.0);
+    final PointerData event6 = _createSimulatedPointerRemovedEvent(5000, 30.0, 0.0);
+
+    _binding
+      ..addEvent(event0)
+      ..addEvent(event1)
+      ..addEvent(event2)
+      ..addEvent(event3)
+      ..addEvent(event4)
+      ..addEvent(event5)
+      ..addEvent(event6);
+
+    final List<PointerEvent> result = <PointerEvent>[];
+    _binding.listener = result.add;
+
+    _binding.pumpTo(const Duration(microseconds: 1500));
+
+    // Added and down pointer events should have been returned.
+    expect(result.length, 2);
+    expect(result[0].timeStamp, const Duration(microseconds: 1500));
+    expect(result[0] is PointerAddedEvent, true);
+    expect(result[0].position.dx, 5.0);
+    expect(result[0].position.dy, 0.0);
+    expect(result[1].timeStamp, const Duration(microseconds: 1500));
+    expect(result[1] is PointerDownEvent, true);
+    expect(result[1].position.dx, 5.0);
+    expect(result[1].position.dy, 0.0);
+
+    _binding.pumpTo(const Duration(microseconds: 4500));
+
+    // All remaining pointer events should have been returned.
+    expect(result.length, 6);
+    expect(result[2].timeStamp, const Duration(microseconds: 4500));
+    expect(result[2] is PointerUpEvent, true);
+    expect(result[2].position.dx, 25.0);
+    expect(result[2].position.dy, 0.0);
+    expect(result[3].timeStamp, const Duration(microseconds: 4500));
+    expect(result[3] is PointerDownEvent, true);
+    expect(result[3].position.dx, 25.0);
+    expect(result[3].position.dy, 0.0);
+    expect(result[4].timeStamp, const Duration(microseconds: 4500));
+    expect(result[4] is PointerUpEvent, true);
+    expect(result[4].position.dx, 25.0);
+    expect(result[4].position.dy, 0.0);
+    expect(result[5].timeStamp, const Duration(microseconds: 4500));
+    expect(result[5] is PointerRemovedEvent, true);
+    expect(result[5].position.dx, 25.0);
+    expect(result[5].position.dy, 0.0);
+
+    _binding.pumpTo(const Duration(microseconds: 5500));
+
+    // No pointer events should have been returned.
+    expect(result.length, 6);
+  });
+
+  test('skip all', () {
+    final PointerData event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerData event1 = _createSimulatedPointerDownEvent(1000, 0.0, 0.0);
+    final PointerData event2 = _createSimulatedPointerUpEvent(4000, 30.0, 0.0);
+    final PointerData event3 = _createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
+
+    _binding
+      ..addEvent(event0)
+      ..addEvent(event1)
+      ..addEvent(event2)
+      ..addEvent(event3);
+
+    final List<PointerEvent> result = <PointerEvent>[];
+    _binding.listener = result.add;
+
+    _binding.pumpTo(const Duration(microseconds: 500));
+
+    // No pointer events should have been returned.
+    expect(result.isEmpty, true);
+
+    _binding.pumpTo(const Duration(microseconds: 5500));
+
+    // All remaining pointer events should have been returned.
+    expect(result.length, 4);
+    expect(result[0].timeStamp, const Duration(microseconds: 5500));
+    expect(result[0] is PointerAddedEvent, true);
+    expect(result[0].position.dx, 30.0);
+    expect(result[0].position.dy, 0.0);
+    expect(result[1].timeStamp, const Duration(microseconds: 5500));
+    expect(result[1] is PointerDownEvent, true);
+    expect(result[1].position.dx, 30.0);
+    expect(result[1].position.dy, 0.0);
+    expect(result[2].timeStamp, const Duration(microseconds: 5500));
+    expect(result[2] is PointerUpEvent, true);
+    expect(result[2].position.dx, 30.0);
+    expect(result[2].position.dy, 0.0);
+    expect(result[3].timeStamp, const Duration(microseconds: 5500));
+    expect(result[3] is PointerRemovedEvent, true);
+    expect(result[3].position.dx, 30.0);
+    expect(result[3].position.dy, 0.0);
+
+    _binding.pumpTo(const Duration(microseconds: 6500));
+
+    // No pointer events should have been returned.
+    expect(result.length, 4);
+  });
+
+  test('stop', () {
+    final PointerEventResampler resampler = PointerEventResampler();
+    final PointerData event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerData event1 = _createSimulatedPointerDownEvent(2000, 0.0, 0.0);
+    final PointerData event2 = _createSimulatedPointerMoveEvent(3000, 10.0, 0.0, 10.0, 0.0);
+    final PointerData event3 = _createSimulatedPointerUpEvent(4000, 20.0, 0.0);
+    final PointerData event4 = _createSimulatedPointerRemovedEvent(5000, 20.0, 0.0);
+
+    _binding
+      ..addEvent(event0)
+      ..addEvent(event1)
+      ..addEvent(event2)
+      ..addEvent(event3)
+      ..addEvent(event4);
+
+    final List<PointerEvent> result = <PointerEvent>[];
+    _binding.listener = result.add;
+
+    _binding.pumpTo(const Duration(microseconds: 500));
+
+    // No pointer events should have been returned.
+    expect(result.isEmpty, true);
+
+    resampler.stop(result.add);
+
+    // All pointer events should have been returned with orignal
+    // time stamps and positions.
+    expect(result.length, 5);
+    expect(result[0].timeStamp, const Duration(microseconds: 1000));
+    expect(result[0] is PointerAddedEvent, true);
+    expect(result[0].position.dx, 0.0);
+    expect(result[0].position.dy, 0.0);
+    expect(result[1].timeStamp, const Duration(microseconds: 2000));
+    expect(result[1] is PointerDownEvent, true);
+    expect(result[1].position.dx, 0.0);
+    expect(result[1].position.dy, 0.0);
+    expect(result[2].timeStamp, const Duration(microseconds: 3000));
+    expect(result[2] is PointerMoveEvent, true);
+    expect(result[2].position.dx, 10.0);
+    expect(result[2].position.dy, 0.0);
+    expect(result[2].delta.dx, 10.0);
+    expect(result[2].delta.dy, 0.0);
+    expect(result[3].timeStamp, const Duration(microseconds: 4000));
+    expect(result[3] is PointerUpEvent, true);
+    expect(result[3].position.dx, 20.0);
+    expect(result[3].position.dy, 0.0);
+    expect(result[4].timeStamp, const Duration(microseconds: 5000));
+    expect(result[4] is PointerRemovedEvent, true);
+    expect(result[4].position.dx, 20.0);
+    expect(result[4].position.dy, 0.0);
+
+    _binding.pumpTo(const Duration(microseconds: 10000));
+
+    // No pointer events should have been returned.
+    expect(result.length, 5);
+  });
+}

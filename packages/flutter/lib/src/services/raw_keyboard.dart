@@ -366,7 +366,7 @@ abstract class RawKeyEvent with Diagnosticable {
   ///
   /// Use [isKeyPressed] if you need to know which control key was pressed.
   bool get isControlPressed {
-    return isKeyPressed(LogicalKeyboardKey.controlLeft) || isKeyPressed(LogicalKeyboardKey.controlRight);
+    return isKeyPressed(LogicalKeyboardKey.control);
   }
 
   /// Returns true if a SHIFT modifier key is pressed, regardless of which side
@@ -374,7 +374,7 @@ abstract class RawKeyEvent with Diagnosticable {
   ///
   /// Use [isKeyPressed] if you need to know which shift key was pressed.
   bool get isShiftPressed {
-    return isKeyPressed(LogicalKeyboardKey.shiftLeft) || isKeyPressed(LogicalKeyboardKey.shiftRight);
+    return isKeyPressed(LogicalKeyboardKey.shift);
   }
 
   /// Returns true if a ALT modifier key is pressed, regardless of which side
@@ -388,7 +388,7 @@ abstract class RawKeyEvent with Diagnosticable {
   ///
   /// Use [isKeyPressed] if you need to know which alt key was pressed.
   bool get isAltPressed {
-    return isKeyPressed(LogicalKeyboardKey.altLeft) || isKeyPressed(LogicalKeyboardKey.altRight);
+    return isKeyPressed(LogicalKeyboardKey.alt);
   }
 
   /// Returns true if a META modifier key is pressed, regardless of which side
@@ -396,7 +396,7 @@ abstract class RawKeyEvent with Diagnosticable {
   ///
   /// Use [isKeyPressed] if you need to know which meta key was pressed.
   bool get isMetaPressed {
-    return isKeyPressed(LogicalKeyboardKey.metaLeft) || isKeyPressed(LogicalKeyboardKey.metaRight);
+    return isKeyPressed(LogicalKeyboardKey.meta);
   }
 
   /// Returns an object representing the physical location of this key.
@@ -663,14 +663,14 @@ class RawKeyboard {
   // The map of all modifier keys except Fn, since that is treated differently
   // on some platforms.
   static final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _allModifiersExceptFn = <PhysicalKeyboardKey, LogicalKeyboardKey>{
-    PhysicalKeyboardKey.altLeft: LogicalKeyboardKey.altLeft,
-    PhysicalKeyboardKey.altRight: LogicalKeyboardKey.altRight,
-    PhysicalKeyboardKey.shiftLeft: LogicalKeyboardKey.shiftLeft,
-    PhysicalKeyboardKey.shiftRight: LogicalKeyboardKey.shiftRight,
-    PhysicalKeyboardKey.controlLeft: LogicalKeyboardKey.controlLeft,
-    PhysicalKeyboardKey.controlRight: LogicalKeyboardKey.controlRight,
-    PhysicalKeyboardKey.metaLeft: LogicalKeyboardKey.metaLeft,
-    PhysicalKeyboardKey.metaRight: LogicalKeyboardKey.metaRight,
+    PhysicalKeyboardKey.altLeft: LogicalKeyboardKey.alt,
+    PhysicalKeyboardKey.altRight: LogicalKeyboardKey.alt,
+    PhysicalKeyboardKey.shiftLeft: LogicalKeyboardKey.shift,
+    PhysicalKeyboardKey.shiftRight: LogicalKeyboardKey.shift,
+    PhysicalKeyboardKey.controlLeft: LogicalKeyboardKey.control,
+    PhysicalKeyboardKey.controlRight: LogicalKeyboardKey.control,
+    PhysicalKeyboardKey.metaLeft: LogicalKeyboardKey.meta,
+    PhysicalKeyboardKey.metaRight: LogicalKeyboardKey.meta,
     PhysicalKeyboardKey.capsLock: LogicalKeyboardKey.capsLock,
     PhysicalKeyboardKey.numLock: LogicalKeyboardKey.numLock,
     PhysicalKeyboardKey.scrollLock: LogicalKeyboardKey.scrollLock,
