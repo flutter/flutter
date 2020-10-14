@@ -225,7 +225,7 @@ void main() {
     });
   });
 
-  testWithoutContext('IOSDevice.installApp catches ProcessException from ios-deploy', () async {
+  testWithoutContext('IOSDevice.installApp catches ProcessException from ios-deploy and re-tries', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -244,7 +244,38 @@ void main() {
         ...kDyLdLibEntry,
       }, onRun: () {
         throw const ProcessException('ios-deploy', <String>[]);
-      })
+      }),
+      FakeCommand(command: <String>[
+        iosDeployPath,
+        '--id',
+        '1234',
+        '--exists',
+        '--timeout',
+        '10',
+        '--bundle_id',
+        'app',
+      ]),
+      FakeCommand(command: <String>[
+        iosDeployPath,
+        '--id',
+        '1234',
+        '--uninstall_only',
+        '--bundle_id',
+        'app',
+      ]),
+      FakeCommand(command: <String>[
+        iosDeployPath,
+        '--id',
+        '1234',
+        '--bundle',
+        '/',
+        '--no-wifi',
+      ], environment: const <String, String>{
+        'PATH': '/usr/bin:null',
+        ...kDyLdLibEntry,
+      }, onRun: () {
+        throw const ProcessException('ios-deploy', <String>[]);
+      }),
     ]);
     final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
     final bool wasAppInstalled = await device.installApp(iosApp);

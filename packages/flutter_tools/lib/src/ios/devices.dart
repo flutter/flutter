@@ -266,7 +266,7 @@ class IOSDevice extends Device {
       );
     } on ProcessException catch (e) {
       _logger.printError(e.message);
-      return false;
+      installationResult = 1;
     }
 
     if (installationResult == 0) {
