@@ -7,6 +7,8 @@ import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
+import 'package:html/dom.dart';
+import 'package:html/parser.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
@@ -56,6 +58,9 @@ typedef DwdsLauncher = Future<Dwds> Function({
 // A minimal index for projects that do not yet support web.
 const String _kDefaultIndex = '''
 <html>
+    <head>
+        <base href="/">
+    </head>
     <body>
         <script src="main.dart.js"></script>
     </body>
@@ -108,7 +113,9 @@ class WebAssetServer implements AssetReader {
     this._modules,
     this._digests,
     this._buildInfo,
-  );
+  ) : basePath = _parseBasePathFromIndexHtml(globals.fs.currentDirectory
+            .childDirectory('web')
+            .childFile('index.html'));
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -424,7 +431,7 @@ class WebAssetServer implements AssetReader {
 
     final int length = file.lengthSync();
     // Attempt to determine the file's mime type. if this is not provided some
-    // browsers will refuse to render images/show video et cetera. If the tool
+    // browsers will refuse to render images/show video etc. If the tool
     // cannot determine a mime type, fall back to application/octet-stream.
     String mimeType;
     if (length >= 12) {
@@ -537,7 +544,7 @@ class WebAssetServer implements AssetReader {
     return modules;
   }
 
-  /// Whether to use the cavaskit SDK for rendering.
+  /// Whether to use the canvaskit SDK for rendering.
   bool canvasKitRendering = false;
 
   shelf.Response _serveIndex() {
@@ -811,7 +818,6 @@ class WebDevFS implements DevFS {
     String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
-    bool skipAssets = false,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
@@ -858,9 +864,9 @@ class WebDevFS implements DevFS {
     }
 
     // The tool generates an entrypoint file in a temp directory to handle
-    // the web specific bootrstrap logic. To make it easier for DWDS to handle
+    // the web specific bootstrap logic. To make it easier for DWDS to handle
     // mapping the file name, this is done via an additional file root and
-    // specicial hard-coded scheme.
+    // special hard-coded scheme.
     final CompilerOutput compilerOutput = await generator.recompile(
       Uri(
         scheme: 'org-dartlang-app',
@@ -920,6 +926,11 @@ class WebDevFS implements DevFS {
     'web',
     'dart_stack_trace_mapper.js',
   ));
+
+  @override
+  void resetLastCompiled() {
+    // Not used for web compilation.
+  }
 }
 
 class ReleaseAssetServer {
@@ -1009,17 +1020,67 @@ Future<Directory> _loadDwdsDirectory(FileSystem fileSystem, Logger logger) async
 }
 
 String _stripBasePath(String path, String basePath) {
-  while (path.startsWith('/')) {
-    path = path.substring(1);
-  }
+  path = _stripLeadingSlashes(path);
   if (path.startsWith(basePath)) {
     path = path.substring(basePath.length);
   } else {
     // The given path isn't under base path, return null to indicate that.
     return null;
   }
+  return _stripLeadingSlashes(path);
+}
+
+String _stripLeadingSlashes(String path) {
   while (path.startsWith('/')) {
     path = path.substring(1);
   }
   return path;
 }
+
+String _stripTrailingSlashes(String path) {
+  while (path.endsWith('/')) {
+    path = path.substring(0, path.length - 1);
+  }
+  return path;
+}
+
+String _parseBasePathFromIndexHtml(File indexHtml) {
+  final String htmlContent = indexHtml.existsSync()
+      ? indexHtml.readAsStringSync()
+      : _kDefaultIndex;
+
+  final Document document = parse(htmlContent);
+  final Element baseElement = document.querySelector('base');
+  String baseHref = baseElement?.attributes == null ? null : baseElement.attributes['href'];
+
+  if (baseHref == null) {
+    baseHref = '';
+  } else if (!baseHref.startsWith('/')) {
+    throw ToolExit(
+      'Error: The base href in "web/index.html" must be absolute (i.e. start '
+      'with a "/"), but found: `${baseElement.outerHtml}`.\n'
+      '$basePathExample',
+    );
+  } else if (!baseHref.endsWith('/')) {
+    throw ToolExit(
+      'Error: The base href in "web/index.html" must end with a "/", but found: `${baseElement.outerHtml}`.\n'
+      '$basePathExample',
+    );
+  } else {
+    baseHref = _stripLeadingSlashes(_stripTrailingSlashes(baseHref));
+  }
+
+  return baseHref;
+}
+
+const String basePathExample = '''
+For example, to serve from the root use:
+
+    <base href="/">
+
+To serve from a subpath "foo" (i.e. http://localhost:8080/foo/ instead of http://localhost:8080/) use:
+
+    <base href="/foo/">
+
+For more information, see: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+''';

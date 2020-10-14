@@ -96,7 +96,7 @@ Widget _wrapWithBackground({
   if (updateSystemUiOverlay) {
     final bool isDark = backgroundColor.computeLuminance() < 0.179;
     final Brightness newBrightness = brightness ?? (isDark ? Brightness.dark : Brightness.light);
-    SystemUiOverlayStyle overlayStyle;
+    final SystemUiOverlayStyle overlayStyle;
     switch (newBrightness) {
       case Brightness.dark:
         overlayStyle = SystemUiOverlayStyle.light;
@@ -344,7 +344,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   ///
   /// If a border is null, the navigation bar will not display a border.
   /// {@endtemplate}
-  final Border border;
+  final Border? border;
 
   /// {@template flutter.cupertino.navBar.actionsForegroundColor}
   /// Default color used for text and icons of the [leading] and [trailing]
@@ -652,7 +652,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   final EdgeInsetsDirectional? padding;
 
   /// {@macro flutter.cupertino.navBar.border}
-  final Border border;
+  final Border? border;
 
   /// {@macro flutter.cupertino.navBar.actionsForegroundColor}
   ///
@@ -1376,7 +1376,7 @@ class _BackChevron extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context)!;
-    final TextStyle textStyle = DefaultTextStyle.of(context).style!;
+    final TextStyle textStyle = DefaultTextStyle.of(context).style;
 
     // Replicate the Icon logic here to get a tightly sized icon and add
     // custom non-square padding.
@@ -1450,7 +1450,7 @@ class _BackLabel extends StatelessWidget {
     if (specifiedPreviousTitle != null) {
       return _buildPreviousTitleWidget(context, specifiedPreviousTitle, null);
     } else if (route is CupertinoRouteTransitionMixin<dynamic> && !route!.isFirst) {
-      final CupertinoRouteTransitionMixin<dynamic> cupertinoRoute = route as CupertinoRouteTransitionMixin<dynamic>;
+      final CupertinoRouteTransitionMixin<dynamic> cupertinoRoute = route! as CupertinoRouteTransitionMixin<dynamic>;
       // There is no timing issue because the previousTitle Listenable changes
       // happen during route modifications before the ValueListenableBuilder
       // is built.
@@ -1499,7 +1499,7 @@ class _TransitionableNavigationBar extends StatelessWidget {
   final Widget child;
 
   RenderBox get renderBox {
-    final RenderBox box = componentsKeys.navBarBoxKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox box = componentsKeys.navBarBoxKey.currentContext!.findRenderObject()! as RenderBox;
     assert(
       box.attached,
       '_TransitionableNavigationBar.renderBox should be called when building '
@@ -1729,7 +1729,7 @@ class _NavigationBarComponentsTransition {
     GlobalKey key, {
     required RenderBox from,
   }) {
-    final RenderBox componentBox = key.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox componentBox = key.currentContext!.findRenderObject()! as RenderBox;
     assert(componentBox.attached);
 
     return RelativeRect.fromRect(
@@ -1756,8 +1756,8 @@ class _NavigationBarComponentsTransition {
   }) {
     final RelativeRect fromRect = positionInTransitionBox(fromKey, from: fromNavBarBox);
 
-    final RenderBox fromBox = fromKey.currentContext!.findRenderObject() as RenderBox;
-    final RenderBox toBox = toKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox fromBox = fromKey.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox toBox = toKey.currentContext!.findRenderObject()! as RenderBox;
 
     // We move a box with the size of the 'from' render object such that its
     // upper left corner is at the upper left corner of the 'to' render object.
@@ -1982,7 +1982,7 @@ class _NavigationBarComponentsTransition {
           opacity: fadeOutBy(0.4),
           // Keep the font when transitioning into a non-back-label leading.
           child: DefaultTextStyle(
-            style: bottomLargeTitleTextStyle,
+            style: bottomLargeTitleTextStyle!,
             child: bottomLargeTitle.child,
           ),
         ),
@@ -2038,7 +2038,7 @@ class _NavigationBarComponentsTransition {
     // If it's the first page with a back chevron, shift in slightly from the
     // right.
     if (bottomBackChevron == null) {
-      final RenderBox topBackChevronBox = topComponents.backChevronKey.currentContext!.findRenderObject() as RenderBox;
+      final RenderBox topBackChevronBox = topComponents.backChevronKey.currentContext!.findRenderObject()! as RenderBox;
       from = to.shift(
         Offset(
           forwardDirection * topBackChevronBox.size.width * 2.0,
@@ -2219,7 +2219,7 @@ class _NavigationBarComponentsTransition {
       child: FadeTransition(
         opacity: fadeInFrom(0.3),
         child: DefaultTextStyle(
-          style: topLargeTitleTextStyle,
+          style: topLargeTitleTextStyle!,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           child: topLargeTitle.child,

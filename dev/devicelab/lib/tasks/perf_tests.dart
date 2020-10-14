@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
@@ -217,13 +218,6 @@ TaskFunction createComplexLayoutStartupTest() {
   ).run;
 }
 
-TaskFunction createHelloWorldStartupTest() {
-  return StartupTest(
-    '${flutterDirectory.path}/examples/hello_world',
-    reportMetrics: false,
-  ).run;
-}
-
 TaskFunction createFlutterGalleryCompileTest() {
   return CompileTest('${flutterDirectory.path}/dev/integration_tests/flutter_gallery').run;
 }
@@ -278,6 +272,13 @@ TaskFunction createTextfieldPerfTest() {
     'test_driver/run_app.dart',
     'textfield_perf',
     testDriver: 'test_driver/textfield_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createTextfieldPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/textfield_perf_e2e.dart',
   ).run;
 }
 
@@ -564,7 +565,6 @@ class PerfTest {
   @protected
   Future<TaskResult> internalRun({
       bool cacheSkSL = false,
-      bool noBuild = false,
       String existingApp,
       String writeSkslFileName,
   }) {
@@ -581,7 +581,6 @@ class PerfTest {
         if (needsFullTimeline)
           '--trace-startup', // Enables "endless" timeline event buffering.
         '-t', testTarget,
-        if (noBuild) '--no-build',
         if (testDriver != null)
           ...<String>['--driver', testDriver],
         if (existingApp != null)
@@ -722,7 +721,6 @@ class PerfTestWithSkSL extends PerfTest {
     // that we won't remove the SkSLs generated earlier.
     await super.internalRun(
       cacheSkSL: true,
-      noBuild: true,
       writeSkslFileName: _skslJsonFileName,
     );
   }
@@ -738,6 +736,7 @@ class PerfTestWithSkSL extends PerfTest {
         'run',
         '--verbose',
         '--verbose-system-logs',
+        '--purge-persistent-cache',
         '--profile',
         if (cacheSkSL) '--cache-sksl',
         '-d', _device.deviceId,

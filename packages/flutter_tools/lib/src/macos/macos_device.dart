@@ -8,11 +8,11 @@ import 'package:process/process.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../macos/application_package.dart';
 import '../project.dart';
 import 'build_macos.dart';
@@ -23,7 +23,8 @@ class MacOSDevice extends DesktopDevice {
   MacOSDevice({
     @required ProcessManager processManager,
     @required Logger logger,
-    FileSystem fileSystem,
+    @required FileSystem fileSystem,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _processManager = processManager,
        _logger = logger,
        super(
@@ -32,7 +33,8 @@ class MacOSDevice extends DesktopDevice {
         ephemeral: false,
         processManager: processManager,
         logger: logger,
-        fileSystem: fileSystem ?? globals.fs,
+        fileSystem: fileSystem,
+        operatingSystemUtils: operatingSystemUtils,
       );
 
   final ProcessManager _processManager;
@@ -75,7 +77,7 @@ class MacOSDevice extends DesktopDevice {
   void onAttached(covariant MacOSApp package, BuildMode buildMode, Process process) {
     // Bring app to foreground. Ideally this would be done post-launch rather
     // than post-attach, since this won't run for release builds, but there's
-    // no general-purpose way of knowing when a process is far enoug along in
+    // no general-purpose way of knowing when a process is far enough along in
     // the launch process for 'open' to foreground it.
     _processManager.run(<String>[
       'open', package.applicationBundle(buildMode),
@@ -93,12 +95,14 @@ class MacOSDevices extends PollingDeviceDiscovery {
     @required MacOSWorkflow macOSWorkflow,
     @required ProcessManager processManager,
     @required Logger logger,
-    FileSystem fileSystem,
+    @required FileSystem fileSystem,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _logger = logger,
        _platform = platform,
        _macOSWorkflow = macOSWorkflow,
        _processManager = processManager,
-       _fileSystem = fileSystem ?? globals.fs,
+       _fileSystem = fileSystem,
+       _operatingSystemUtils = operatingSystemUtils,
        super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
@@ -106,6 +110,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fileSystem;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -123,6 +128,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
         processManager: _processManager,
         logger: _logger,
         fileSystem: _fileSystem,
+        operatingSystemUtils: _operatingSystemUtils,
       ),
     ];
   }

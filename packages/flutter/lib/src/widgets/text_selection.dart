@@ -587,7 +587,7 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionHandleChanged(TextSelection newSelection, _TextSelectionHandlePosition position) {
-    TextPosition textPosition;
+    final TextPosition textPosition;
     switch (position) {
       case _TextSelectionHandlePosition.start:
         textPosition = newSelection.base;
@@ -695,7 +695,7 @@ class _TextSelectionHandleOverlayState
       return;
     }
 
-    TextSelection newSelection;
+    final TextSelection newSelection;
     switch (widget.position) {
       case _TextSelectionHandlePosition.start:
         newSelection = TextSelection(
@@ -724,8 +724,8 @@ class _TextSelectionHandleOverlayState
 
   @override
   Widget build(BuildContext context) {
-    LayerLink layerLink;
-    TextSelectionHandleType type;
+    final LayerLink layerLink;
+    final TextSelectionHandleType type;
 
     switch (widget.position) {
       case _TextSelectionHandlePosition.start:
@@ -898,12 +898,12 @@ class TextSelectionGestureDetectorBuilder {
   /// The [State] of the [EditableText] for which the builder will provide a
   /// [TextSelectionGestureDetector].
   @protected
-  EditableTextState? get editableText => delegate.editableTextKey.currentState;
+  EditableTextState get editableText => delegate.editableTextKey.currentState!;
 
   /// The [RenderObject] of the [EditableText] for which the builder will
   /// provide a [TextSelectionGestureDetector].
   @protected
-  RenderEditable get renderEditable => editableText!.renderEditable;
+  RenderEditable get renderEditable => editableText.renderEditable;
 
   /// Handler for [TextSelectionGestureDetector.onTapDown].
   ///
@@ -968,7 +968,7 @@ class TextSelectionGestureDetectorBuilder {
       cause: SelectionChangedCause.forcePress,
     );
     if (shouldShowSelectionToolbar)
-      editableText!.showToolbar();
+      editableText.showToolbar();
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleTapUp].
@@ -1046,7 +1046,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onSingleLongTapEnd(LongPressEndDetails details) {
     if (shouldShowSelectionToolbar)
-      editableText!.showToolbar();
+      editableText.showToolbar();
   }
 
   /// Handler for [TextSelectionGestureDetector.onDoubleTapDown].
@@ -1063,7 +1063,7 @@ class TextSelectionGestureDetectorBuilder {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar)
-        editableText!.showToolbar();
+        editableText.showToolbar();
     }
   }
 
