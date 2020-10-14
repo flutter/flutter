@@ -42,7 +42,7 @@ Iterable<Element> collectAllElementsFrom(
 /// method is on the critical path for flutter_driver and
 /// package:integration_test performance tests.
 ///
-/// Perforamnce of this is measured in the all_elements_bench microbenchmark.
+/// Performance of this is measured in the all_elements_bench microbenchmark.
 class _DepthFirstChildIterator implements Iterator<Element> {
   _DepthFirstChildIterator(Element rootElement, this.skipOffstage)
     : _stack = ListQueue<Element>() {

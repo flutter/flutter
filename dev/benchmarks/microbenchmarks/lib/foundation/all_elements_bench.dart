@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 // ignore: implementation_imports
@@ -14,18 +12,7 @@ import '../common.dart';
 const int _kNumIters = 10000;
 
 Future<void> main() async {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
-
-  List<Widget> _generateStacks(int count) {
-    print('Doing count $count');
-    if (count == 0) {
-      return const <Widget>[ SizedBox.shrink() ];
-    }
-    return List<Widget>.filled(
-      count,
-      Stack(children: _generateStacks(count - 1)),
-    );
-  }
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   runApp(MaterialApp(
     home: Scaffold(
       body: GridView.count(
