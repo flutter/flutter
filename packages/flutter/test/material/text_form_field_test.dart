@@ -10,7 +10,8 @@ import 'package:flutter/rendering.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Passes textAlign to underlying TextField', (WidgetTester tester) async {
+  testWidgets('Passes textAlign to underlying TextField',
+      (WidgetTester tester) async {
     const TextAlign alignment = TextAlign.center;
 
     await tester.pumpWidget(
@@ -32,7 +33,8 @@ void main() {
     expect(textFieldWidget.textAlign, alignment);
   });
 
-  testWidgets('Passes scrollPhysics to underlying TextField', (WidgetTester tester) async {
+  testWidgets('Passes scrollPhysics to underlying TextField',
+      (WidgetTester tester) async {
     const ScrollPhysics scrollPhysics = ScrollPhysics();
 
     await tester.pumpWidget(
@@ -54,7 +56,8 @@ void main() {
     expect(textFieldWidget.scrollPhysics, scrollPhysics);
   });
 
-  testWidgets('Passes textAlignVertical to underlying TextField', (WidgetTester tester) async {
+  testWidgets('Passes textAlignVertical to underlying TextField',
+      (WidgetTester tester) async {
     const TextAlignVertical textAlignVertical = TextAlignVertical.bottom;
 
     await tester.pumpWidget(
@@ -76,7 +79,8 @@ void main() {
     expect(textFieldWidget.textAlignVertical, textAlignVertical);
   });
 
-  testWidgets('Passes textInputAction to underlying TextField', (WidgetTester tester) async {
+  testWidgets('Passes textInputAction to underlying TextField',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -96,8 +100,9 @@ void main() {
     expect(textFieldWidget.textInputAction, TextInputAction.next);
   });
 
-  testWidgets('Passes onEditingComplete to underlying TextField', (WidgetTester tester) async {
-    final VoidCallback onEditingComplete = () { };
+  testWidgets('Passes onEditingComplete to underlying TextField',
+      (WidgetTester tester) async {
+    final VoidCallback onEditingComplete = () {};
 
     await tester.pumpWidget(
       MaterialApp(
@@ -118,7 +123,8 @@ void main() {
     expect(textFieldWidget.onEditingComplete, onEditingComplete);
   });
 
-  testWidgets('Passes cursor attributes to underlying TextField', (WidgetTester tester) async {
+  testWidgets('Passes cursor attributes to underlying TextField',
+      (WidgetTester tester) async {
     const double cursorWidth = 3.14;
     const double cursorHeight = 6.28;
     const Radius cursorRadius = Radius.circular(4);
@@ -149,7 +155,8 @@ void main() {
     expect(textFieldWidget.cursorColor, cursorColor);
   });
 
-  testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
+  testWidgets('onFieldSubmit callbacks are called',
+      (WidgetTester tester) async {
     bool _called = false;
 
     await tester.pumpWidget(
@@ -157,7 +164,9 @@ void main() {
         home: Material(
           child: Center(
             child: TextFormField(
-              onFieldSubmitted: (String value) { _called = true; },
+              onFieldSubmitted: (String value) {
+                _called = true;
+              },
             ),
           ),
         ),
@@ -192,7 +201,8 @@ void main() {
     expect(_value, 'Soup');
   });
 
-  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
+  testWidgets('autovalidateMode is passed to super',
+      (WidgetTester tester) async {
     int _validateCalled = 0;
 
     await tester.pumpWidget(
@@ -217,7 +227,8 @@ void main() {
     expect(_validateCalled, 2);
   });
 
-  testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
+  testWidgets('validate is called if widget is enabled',
+      (WidgetTester tester) async {
     int _validateCalled = 0;
 
     await tester.pumpWidget(
@@ -243,8 +254,8 @@ void main() {
     expect(_validateCalled, 2);
   });
 
-
-  testWidgets('Disabled field hides helper and counter', (WidgetTester tester) async {
+  testWidgets('Disabled field hides helper and counter',
+      (WidgetTester tester) async {
     const String helperText = 'helper text';
     const String counterText = 'counter text';
     const String errorText = 'error text';
@@ -291,13 +302,17 @@ void main() {
     expect(errorWidget.style!.color, equals(Colors.transparent));
   });
 
-  testWidgets('passing a buildCounter shows returned widget', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Center(
+  testWidgets('passing a buildCounter shows returned widget',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
             child: TextFormField(
-              buildCounter: (BuildContext context, { int? currentLength, int? maxLength, bool? isFocused }) {
-                return Text('${currentLength.toString()} of ${maxLength.toString()}');
+              buildCounter: (BuildContext context,
+                  {int? currentLength, int? maxLength, bool? isFocused}) {
+                return Text(
+                    '${currentLength.toString()} of ${maxLength.toString()}');
               },
               maxLength: 10,
             ),
@@ -314,7 +329,8 @@ void main() {
     expect(find.text('5 of 10'), findsOneWidget);
   });
 
-  testWidgets('readonly text form field will hide cursor by default', (WidgetTester tester) async {
+  testWidgets('readonly text form field will hide cursor by default',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -342,7 +358,8 @@ void main() {
     expect(find.text('Select all'), findsOneWidget);
     expect(find.text('Paste'), findsNothing);
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     // Make sure it does not paint caret for a period of time.
@@ -384,22 +401,22 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/54472.
-  testWidgets('reset resets the text fields value to the initialValue', (WidgetTester tester) async {
-    await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: TextFormField(
-                initialValue: 'initialValue',
-              ),
-            ),
+  testWidgets('reset resets the text fields value to the initialValue',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: TextFormField(
+            initialValue: 'initialValue',
           ),
-        )
-    );
+        ),
+      ),
+    ));
 
     await tester.enterText(find.byType(TextFormField), 'changedValue');
 
-    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+    final FormFieldState<String> state =
+        tester.state<FormFieldState<String>>(find.byType(TextFormField));
     state.reset();
 
     expect(find.text('changedValue'), findsNothing);
@@ -407,29 +424,30 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/54472.
-  testWidgets('didChange changes text fields value', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: TextFormField(
-              initialValue: 'initialValue',
-            ),
+  testWidgets('didChange changes text fields value',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: TextFormField(
+            initialValue: 'initialValue',
           ),
         ),
-      )
-    );
+      ),
+    ));
 
     expect(find.text('initialValue'), findsOneWidget);
 
-    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+    final FormFieldState<String> state =
+        tester.state<FormFieldState<String>>(find.byType(TextFormField));
     state.didChange('changedValue');
 
     expect(find.text('initialValue'), findsNothing);
     expect(find.text('changedValue'), findsOneWidget);
   });
 
-  testWidgets('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
+  testWidgets('onChanged callbacks value and FormFieldState.value are sync',
+      (WidgetTester tester) async {
     bool _called = false;
 
     late FormFieldState<String> state;
@@ -470,10 +488,12 @@ void main() {
     );
 
     final TextField widget = tester.widget(find.byType(TextField));
-    expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
+    expect(widget.autofillHints,
+        equals(const <String>[AutofillHints.countryName]));
   });
 
-  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
+  testWidgets('autovalidateMode is passed to super',
+      (WidgetTester tester) async {
     int _validateCalled = 0;
 
     await tester.pumpWidget(
@@ -498,7 +518,9 @@ void main() {
     expect(_validateCalled, 1);
   });
 
-  testWidgets('autovalidateMode and autovalidate should not be used at the same time', (WidgetTester tester) async {
+  testWidgets(
+      'autovalidateMode and autovalidate should not be used at the same time',
+      (WidgetTester tester) async {
     expect(() async {
       await tester.pumpWidget(
         MaterialApp(
@@ -512,6 +534,24 @@ void main() {
           ),
         ),
       );
-      }, throwsAssertionError);
+    }, throwsAssertionError);
+  });
+
+  testWidgets('textSelectionControls is passed to super',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Scaffold(
+            body: TextFormField(
+              textSelectionControls: materialTextSelectionControls,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField widget = tester.widget(find.byType(TextField));
+    expect(widget.textSelectionControls, equals(materialTextSelectionControls));
   });
 }
