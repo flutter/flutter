@@ -632,12 +632,6 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  build_benchmark_ios:
-    description: >
-      Measures iOS build performance across config changes.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   simple_animation_perf_ios:
     description: >
       Measure CPU/GPU usage percentages of a simple animation.
