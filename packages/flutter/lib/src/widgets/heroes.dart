@@ -932,8 +932,8 @@ class HeroMode extends StatelessWidget {
   ///
   /// The [child] and [enabled] arguments must not be null.
   const HeroMode({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.enabled = true,
   }) : assert(child != null),
        assert(enabled != null),
