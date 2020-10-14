@@ -23,6 +23,7 @@ import io.flutter.embedding.engine.dart.PlatformMessageHandler;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.embedding.engine.renderer.RenderSurface;
+import io.flutter.embedding.engine.renderer.SurfaceTextureWrapper;
 import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
@@ -581,14 +582,14 @@ public class FlutterJNI {
    * within Flutter's UI.
    */
   @UiThread
-  public void registerTexture(long textureId, @NonNull SurfaceTexture surfaceTexture) {
+  public void registerTexture(long textureId, @NonNull SurfaceTextureWrapper textureWrapper) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
-    nativeRegisterTexture(nativePlatformViewId, textureId, surfaceTexture);
+    nativeRegisterTexture(nativePlatformViewId, textureId, textureWrapper);
   }
 
   private native void nativeRegisterTexture(
-      long nativePlatformViewId, long textureId, @NonNull SurfaceTexture surfaceTexture);
+      long nativePlatformViewId, long textureId, @NonNull SurfaceTextureWrapper textureWrapper);
 
   /**
    * Call this method to inform Flutter that a texture previously registered with {@link
