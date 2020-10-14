@@ -581,7 +581,7 @@ class PageView extends StatefulWidget {
   /// child that could possibly be displayed in the page view, instead of just
   /// those children that are actually visible.
   ///
-  /// If the children [List] is going to be mutated,
+  /// If the [children] is going to be mutated,
   /// please refer to [SliverChildListDelegate.children] to avoid traps.
   ///
   /// {@template flutter.widgets.pageView.allowImplicitScrolling}

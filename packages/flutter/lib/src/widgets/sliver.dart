@@ -634,29 +634,9 @@ class SliverChildListDelegate extends SliverChildDelegate {
   ///
   /// Also, a [Widget] in Flutter is immutable, so directly modifying the
   /// [children] such as `someWidget.children.add(...)` or
-  /// as the example code below will result in incorrect behaviors. Whenever the
+  /// passing a reference of the original list value to the [children] parameter
+  /// will result in incorrect behaviors. Whenever the
   /// children list is modified, a new list object should be provided.
-  ///
-  /// ```dart
-  /// class SomeWidgetState extends State<SomeWidget> {
-  ///   List<Widget> _children;
-  ///
-  ///   void initState() {
-  ///     _children = [];
-  ///   }
-  ///
-  ///   void someHandler() {
-  ///     setState(() {
-  ///         _children.add(ChildWidget());
-  ///     });
-  ///   }
-  ///
-  ///   Widget build(BuildContext context) {
-  ///     // Reusing `List<Widget> _children` here is problematic.
-  ///     return PageView(children: _children);
-  ///   }
-  /// }
-  /// ```
   ///
   /// The following code corrects the problem mentioned above.
   ///
