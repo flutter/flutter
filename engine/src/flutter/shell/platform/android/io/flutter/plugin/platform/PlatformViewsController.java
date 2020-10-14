@@ -14,6 +14,7 @@ import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -83,7 +84,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // The views returned by `PlatformView#getView()`.
   //
   // This only applies to hybrid composition.
-  private final SparseArray<View> platformViews;
+  private final SparseArray<PlatformView> platformViews;
 
   // The platform view parents that are appended to `FlutterView`.
   // If an entry in `platformViews` doesn't have an entry in this array, the platform view isn't
@@ -143,32 +144,24 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           }
 
           final PlatformView platformView = factory.create(context, request.viewId, createParams);
-          final View view = platformView.getView();
-          if (view == null) {
-            throw new IllegalStateException(
-                "PlatformView#getView() returned null, but an Android view reference was expected.");
-          }
-          if (view.getParent() != null) {
-            throw new IllegalStateException(
-                "The Android view returned from PlatformView#getView() was already added to a parent view.");
-          }
-          platformViews.put(request.viewId, view);
+          platformViews.put(request.viewId, platformView);
         }
 
         @Override
         public void disposeAndroidViewForPlatformView(int viewId) {
           // Hybrid view.
-          final View platformView = platformViews.get(viewId);
+          final PlatformView platformView = platformViews.get(viewId);
           final FlutterMutatorView parentView = platformViewParent.get(viewId);
           if (platformView != null) {
             if (parentView != null) {
-              parentView.removeView(platformView);
+              parentView.removeView(platformView.getView());
             }
             platformViews.remove(viewId);
+            platformView.dispose();
           }
 
           if (parentView != null) {
-            ((FlutterView) flutterView).removeView(parentView);
+            ((ViewGroup) parentView.getParent()).removeView(parentView);
             platformViewParent.remove(viewId);
           }
         }
@@ -311,8 +304,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             vdControllers.get(touch.viewId).dispatchTouchEvent(event);
           } else if (platformViews.get(viewId) != null) {
             final MotionEvent event = toMotionEvent(density, touch, /*usingVirtualDiplays=*/ false);
-            View view = platformViews.get(touch.viewId);
-            view.dispatchTouchEvent(event);
+            View view = platformViews.get(touch.viewId).getView();
+            if (view != null) {
+              view.dispatchTouchEvent(event);
+            }
           } else {
             throw new IllegalStateException("Sending touch to an unknown view with id: " + viewId);
           }
@@ -580,7 +575,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   public View getPlatformViewById(Integer id) {
     // Hybrid composition.
     if (platformViews.get(id) != null) {
-      return platformViews.get(id);
+      return platformViews.get(id).getView();
     }
     VirtualDisplayController controller = vdControllers.get(id);
     if (controller == null) {
@@ -690,6 +685,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       controller.dispose();
     }
     vdControllers.clear();
+
+    while (platformViews.size() > 0) {
+      channelHandler.disposeAndroidViewForPlatformView(platformViews.keyAt(0));
+    }
   }
 
   private void initializeRootImageViewIfNeeded() {
@@ -701,19 +700,27 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   @VisibleForTesting
   void initializePlatformViewIfNeeded(int viewId) {
-    final View view = platformViews.get(viewId);
-    if (view == null) {
+    final PlatformView platformView = platformViews.get(viewId);
+    if (platformView == null) {
       throw new IllegalStateException(
           "Platform view hasn't been initialized from the platform view channel.");
     }
     if (platformViewParent.get(viewId) != null) {
       return;
     }
+    if (platformView.getView() == null) {
+      throw new IllegalStateException(
+          "PlatformView#getView() returned null, but an Android view reference was expected.");
+    }
+    if (platformView.getView().getParent() != null) {
+      throw new IllegalStateException(
+          "The Android view returned from PlatformView#getView() was already added to a parent view.");
+    }
     final FlutterMutatorView parentView =
         new FlutterMutatorView(
             context, context.getResources().getDisplayMetrics().density, androidTouchProcessor);
     platformViewParent.put(viewId, parentView);
-    parentView.addView(view);
+    parentView.addView(platformView.getView());
     ((FlutterView) flutterView).addView(parentView);
   }
 
@@ -740,9 +747,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
     final FrameLayout.LayoutParams layoutParams =
         new FrameLayout.LayoutParams(viewWidth, viewHeight);
-    final View platformView = platformViews.get(viewId);
-    platformView.setLayoutParams(layoutParams);
-    platformView.bringToFront();
+    final View view = platformViews.get(viewId).getView();
+    if (view != null) {
+      view.setLayoutParams(layoutParams);
+      view.bringToFront();
+    }
     currentFrameUsedPlatformViewIds.add(viewId);
   }
 
