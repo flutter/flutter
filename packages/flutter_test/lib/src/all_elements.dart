@@ -39,7 +39,7 @@ Iterable<Element> collectAllElementsFrom(
 ///
 /// Will iterate in order 1, 3, 7, 6, 2, 5, 4. This avoids unnecessary
 /// allocation or CPU time by maintaining a single [ListQueue] to track
-/// iteration and avoiding any reverse iteratino to go in let to right order.
+/// iteration and avoiding any reverse iteratino to go in left to right order.
 /// Performance is important here because this method is on the critical path
 /// for flutter_driver and package:integration_test performance tests.
 ///
