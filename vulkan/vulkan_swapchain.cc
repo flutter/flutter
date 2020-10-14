@@ -113,6 +113,10 @@ VulkanSwapchain::VulkanSwapchain(const VulkanProcTable& p_vk,
 
   VkSurfaceKHR surface_handle = surface.Handle();
 
+  VkImageUsageFlags usage_flags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                                  VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+                                  VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
   const VkSwapchainCreateInfoKHR create_info = {
       .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
       .pNext = nullptr,
@@ -123,7 +127,7 @@ VulkanSwapchain::VulkanSwapchain(const VulkanProcTable& p_vk,
       .imageColorSpace = surface_format_.colorSpace,
       .imageExtent = capabilities_.currentExtent,
       .imageArrayLayers = 1,
-      .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+      .imageUsage = usage_flags,
       .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
       .queueFamilyIndexCount = 0,  // Because of the exclusive sharing mode.
       .pQueueFamilyIndices = nullptr,
@@ -151,7 +155,8 @@ VulkanSwapchain::VulkanSwapchain(const VulkanProcTable& p_vk,
 
   if (!CreateSwapchainImages(skia_context,
                              format_infos[format_index].color_type_,
-                             format_infos[format_index].color_space_)) {
+                             format_infos[format_index].color_space_,
+                             usage_flags)) {
     FML_DLOG(INFO) << "Could not create swapchain images.";
     return;
   }
@@ -210,6 +215,7 @@ SkISize VulkanSwapchain::GetSize() const {
 sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(
     GrDirectContext* gr_context,
     VkImage image,
+    VkImageUsageFlags usage_flags,
     const SkISize& size,
     SkColorType color_type,
     sk_sp<SkColorSpace> color_space) const {
@@ -227,6 +233,8 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(
   image_info.fImageTiling = VK_IMAGE_TILING_OPTIMAL;
   image_info.fImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   image_info.fFormat = surface_format_.format;
+  image_info.fImageUsageFlags = usage_flags;
+  image_info.fSampleCount = 1;
   image_info.fLevelCount = 1;
 
   // TODO(chinmaygarde): Setup the stencil buffer and the sampleCnt.
@@ -246,7 +254,8 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(
 
 bool VulkanSwapchain::CreateSwapchainImages(GrDirectContext* skia_context,
                                             SkColorType color_type,
-                                            sk_sp<SkColorSpace> color_space) {
+                                            sk_sp<SkColorSpace> color_space,
+                                            VkImageUsageFlags usage_flags) {
   std::vector<VkImage> images = GetImages();
 
   if (images.size() == 0) {
@@ -276,8 +285,8 @@ bool VulkanSwapchain::CreateSwapchainImages(GrDirectContext* skia_context,
     images_.emplace_back(std::move(vulkan_image));
 
     // Populate the surface.
-    auto surface = CreateSkiaSurface(skia_context, image, surface_size,
-                                     color_type, color_space);
+    auto surface = CreateSkiaSurface(skia_context, image, usage_flags,
+                                     surface_size, color_type, color_space);
 
     if (surface == nullptr) {
       return false;

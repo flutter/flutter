@@ -344,6 +344,8 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrDirectContext> context,
   image_info.fImageTiling = image_create_info.tiling;
   image_info.fImageLayout = image_create_info.initialLayout;
   image_info.fFormat = image_create_info.format;
+  image_info.fImageUsageFlags = image_create_info.usage;
+  image_info.fSampleCount = 1;
   image_info.fLevelCount = image_create_info.mipLevels;
 
   GrBackendRenderTarget sk_render_target(size.width(), size.height(), 0,
