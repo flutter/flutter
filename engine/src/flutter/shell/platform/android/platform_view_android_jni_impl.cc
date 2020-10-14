@@ -53,7 +53,7 @@ static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_callback_info_class =
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 
-static fml::jni::ScopedJavaGlobalRef<jclass>* g_surface_texture_class = nullptr;
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_texture_wrapper_class = nullptr;
 
 // Called By Native
 
@@ -613,7 +613,8 @@ bool RegisterApi(JNIEnv* env) {
       },
       {
           .name = "nativeRegisterTexture",
-          .signature = "(JJLandroid/graphics/SurfaceTexture;)V",
+          .signature = "(JJLio/flutter/embedding/engine/renderer/"
+                       "SurfaceTextureWrapper;)V",
           .fnPtr = reinterpret_cast<void*>(&RegisterTexture),
       },
       {
@@ -857,15 +858,16 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
-  g_surface_texture_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
-      env, env->FindClass("android/graphics/SurfaceTexture"));
-  if (g_surface_texture_class->is_null()) {
-    FML_LOG(ERROR) << "Could not locate SurfaceTexture class";
+  g_texture_wrapper_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
+      env, env->FindClass(
+               "io/flutter/embedding/engine/renderer/SurfaceTextureWrapper"));
+  if (g_texture_wrapper_class->is_null()) {
+    FML_LOG(ERROR) << "Could not locate SurfaceTextureWrapper class";
     return false;
   }
 
   g_attach_to_gl_context_method = env->GetMethodID(
-      g_surface_texture_class->obj(), "attachToGLContext", "(I)V");
+      g_texture_wrapper_class->obj(), "attachToGLContext", "(I)V");
 
   if (g_attach_to_gl_context_method == nullptr) {
     FML_LOG(ERROR) << "Could not locate attachToGlContext method";
@@ -873,7 +875,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   }
 
   g_update_tex_image_method =
-      env->GetMethodID(g_surface_texture_class->obj(), "updateTexImage", "()V");
+      env->GetMethodID(g_texture_wrapper_class->obj(), "updateTexImage", "()V");
 
   if (g_update_tex_image_method == nullptr) {
     FML_LOG(ERROR) << "Could not locate updateTexImage method";
@@ -881,7 +883,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   }
 
   g_get_transform_matrix_method = env->GetMethodID(
-      g_surface_texture_class->obj(), "getTransformMatrix", "([F)V");
+      g_texture_wrapper_class->obj(), "getTransformMatrix", "([F)V");
 
   if (g_get_transform_matrix_method == nullptr) {
     FML_LOG(ERROR) << "Could not locate getTransformMatrix method";
@@ -889,7 +891,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   }
 
   g_detach_from_gl_context_method = env->GetMethodID(
-      g_surface_texture_class->obj(), "detachFromGLContext", "()V");
+      g_texture_wrapper_class->obj(), "detachFromGLContext", "()V");
 
   if (g_detach_from_gl_context_method == nullptr) {
     FML_LOG(ERROR) << "Could not locate detachFromGlContext method";
