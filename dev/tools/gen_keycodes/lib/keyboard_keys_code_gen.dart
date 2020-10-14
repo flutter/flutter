@@ -15,6 +15,14 @@ String _wrapString(String input) {
   return wrapString(input, prefix: '  /// ');
 }
 
+class _ExplicitKeySpecification {
+  const _ExplicitKeySpecification(this.code, this.name, [this.constantName]);
+
+  final int code;
+  final String name;
+  final String constantName;
+}
+
 /// Generates the keyboard_keys.dart based on the information in the key data
 /// structure given to it.
 class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
@@ -41,35 +49,30 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
   }
 
   static List<LogicalKeyEntry> _alnumLogicalKeys() {
-    final List<LogicalKeyEntry> entries = <LogicalKeyEntry>[];
-    entries.addAll(List<LogicalKeyEntry>.generate(26, (int i) {
-      final int code = i + 'a'.codeUnits[0];
-      final String char = String.fromCharCode(code);
-      return LogicalKeyEntry(
-        name: 'lowercase${char.toUpperCase()}',
-        value: code,
-      )..constantName = 'lower${char.toUpperCase()}';
-    }));
+    final List<_ExplicitKeySpecification> keys = <_ExplicitKeySpecification>[]
+      ..addAll(List<_ExplicitKeySpecification>.generate(26, (int i) {
+        final int code = i + 'a'.codeUnits[0];
+        final String char = String.fromCharCode(code);
+        return _ExplicitKeySpecification(code, 'lowercase${char.toUpperCase()}', 'lower${char.toUpperCase()}');
+      }))
+      ..addAll(List<_ExplicitKeySpecification>.generate(26, (int i) {
+        final int code = i + 'A'.codeUnits[0];
+        final String char = String.fromCharCode(code);
+        return _ExplicitKeySpecification(code, 'uppercase$char', 'upper$char');
+      }))
+      ..addAll(List<_ExplicitKeySpecification>.generate(10, (int i) {
+        final int code = i + '0'.codeUnits[0];
+        final String char = String.fromCharCode(code);
+        return _ExplicitKeySpecification(code, 'digit$char');
+      }))
+      ..add(_ExplicitKeySpecification(' '.codeUnits[0], 'space'));
 
-    entries.addAll(List<LogicalKeyEntry>.generate(26, (int i) {
-      final int code = i + 'A'.codeUnits[0];
-      final String char = String.fromCharCode(code);
-      return LogicalKeyEntry(
-        name: 'uppercase$char',
-        value: code,
-      )..constantName = 'upper$char';
-    }));
-
-    entries.addAll(List<LogicalKeyEntry>.generate(10, (int i) {
-      final int code = i + '0'.codeUnits[0];
-      final String char = String.fromCharCode(code);
-      return LogicalKeyEntry(
-        name: 'digit$char',
-        value: code,
-      );
-    }));
-
-    return entries;
+    return keys.map((_ExplicitKeySpecification key) {
+      final LogicalKeyEntry result = LogicalKeyEntry(name: key.name, value: key.code);
+      if (key.constantName != null)
+        result.constantName = key.constantName;
+      return result;
+    }).toList();
   }
 
   /// Gets the generated definitions of LogicalKeyboardKeys.

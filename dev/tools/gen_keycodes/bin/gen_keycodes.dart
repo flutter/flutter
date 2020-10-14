@@ -297,7 +297,7 @@ Future<void> main(List<String> rawArguments) async {
         codeGenerator = GtkCodeGenerator(physicalData);
         break;
       case 'web':
-        codeGenerator = WebCodeGenerator(physicalData);
+        codeGenerator = WebCodeGenerator(physicalData, logicalData);
         break;
       default:
         assert(false);

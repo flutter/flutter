@@ -6,18 +6,20 @@ import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
 import 'physical_key_data.dart';
+import 'logical_key_data.dart';
 import 'utils.dart';
-
 
 /// Generates the key mapping of Web, based on the information in the key
 /// data structure given to it.
 class WebCodeGenerator extends PlatformCodeGenerator {
-  WebCodeGenerator(PhysicalKeyData keyData) : super(keyData);
+  WebCodeGenerator(PhysicalKeyData keyData, this.logicalData) : super(keyData);
+
+  final LogicalKeyData logicalData;
 
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
   String get _webLogicalKeyCodeMap {
     final StringBuffer result = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final LogicalKeyEntry entry in logicalData.data) {
       if (entry.name != null) {
         result.writeln("  '${entry.name}': ${toHex(entry.flutterId, digits: 10)},");
       }
