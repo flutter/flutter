@@ -395,8 +395,8 @@ class IOSDevice extends Device {
     ];
 
     final Status installStatus = _logger.startProgress(
-        'Installing and launching...',
-        timeout: timeoutConfiguration.slowOperation);
+      'Installing and launching...',
+    );
     try {
       ProtocolDiscovery observatoryDiscovery;
       int installationResult = 1;
@@ -468,10 +468,12 @@ class IOSDevice extends Device {
         packageName: FlutterProject.current().manifest.appName,
       );
       if (localUri == null) {
+        iosDeployDebugger?.detach();
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);
     } on ProcessException catch (e) {
+      iosDeployDebugger?.detach();
       _logger.printError(e.message);
       return LaunchResult.failed();
     } finally {
@@ -887,7 +889,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     while (!connected) {
       _logger.printTrace('Attempting to forward device port $devicePort to host port $hostPort');
       process = await _iproxy.forward(devicePort, hostPort, _id);
-      // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
+      // TODO(ianh): This is a flaky race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
       connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
       if (!connected) {
         process.kill();
@@ -919,7 +921,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
       return;
     }
 
-    _logger.printTrace('Unforwarding port $forwardedPort');
+    _logger.printTrace('Un-forwarding port $forwardedPort');
     forwardedPort.dispose();
   }
 

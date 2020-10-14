@@ -84,7 +84,7 @@ class Config {
 
   /// Fallback directory in the user's home directory if `XDG_CONFIG_HOME` is
   /// not defined.
-  static const String kXdgConfigFalback = '.config';
+  static const String kXdgConfigFallback = '.config';
 
   /// The default name for the Flutter config file.
   static const String kFlutterSettings = 'settings';

@@ -288,7 +288,7 @@ class FlutterDevice {
     }, onDone: () {
       _isListeningForObservatoryUri = false;
       if (!completer.isCompleted && !isWaitingForVm) {
-        completer.completeError('connection to device ended too early');
+        completer.completeError(Exception('connection to device ended too early'));
       }
     });
     _isListeningForObservatoryUri = true;
@@ -328,7 +328,7 @@ class FlutterDevice {
     return vmService.onDone
       .catchError((dynamic error, StackTrace stackTrace) {
         globals.logger.printError(
-          'unhanlded error waiting for vm service exit:\n $error',
+          'unhandled error waiting for vm service exit:\n $error',
           stackTrace: stackTrace,
          );
       })
@@ -356,37 +356,6 @@ class FlutterDevice {
       logger: globals.logger,
     );
     return devFS.create();
-  }
-
-  Future<List<Future<vm_service.ReloadReport>>> reloadSources(
-    String entryPath, {
-    bool pause = false,
-  }) async {
-    final String deviceEntryUri = devFS.baseUri
-      .resolveUri(globals.fs.path.toUri(entryPath)).toString();
-    final vm_service.VM vm = await vmService.getVM();
-    return <Future<vm_service.ReloadReport>>[
-      for (final vm_service.IsolateRef isolateRef in vm.isolates)
-        vmService.reloadSources(
-          isolateRef.id,
-          pause: pause,
-          rootLibUri: deviceEntryUri,
-        )
-    ];
-  }
-
-  Future<void> resetAssetDirectory() async {
-    final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(
-        globals.fs.path.toUri(getAssetBuildDirectory()));
-    assert(deviceAssetsDirectoryUri != null);
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    await Future.wait<void>(views.map<Future<void>>(
-      (FlutterView view) => vmService.setAssetDirectory(
-        assetsDirectory: deviceAssetsDirectoryUri,
-        uiIsolateId: view.uiIsolate.id,
-        viewId: view.id,
-      )
-    ));
   }
 
   Future<void> debugDumpApp() async {
@@ -701,7 +670,6 @@ class FlutterDevice {
   }) async {
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device.name}...',
-      timeout: timeoutConfiguration.fastOperation,
     );
     UpdateFSReport report;
     try {
@@ -813,9 +781,9 @@ abstract class ResidentRunner {
     @required bool swap,
   }) {
     if (!fullRestart) {
-      return '$mainPath.incremental.dill';
+      return 'main.dart.incremental.dill';
     }
-    return '$mainPath${swap ? '.swap' : ''}.dill';
+    return 'main.dart${swap ? '.swap' : ''}.dill';
   }
 
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
@@ -1114,13 +1082,12 @@ abstract class ResidentRunner {
   /// If the device has a connected vmservice, this method will attempt to hide
   /// and restore the debug banner before taking the screenshot.
   ///
-  /// Throws an [AssertionError] if [Devce.supportsScreenshot] is not true.
+  /// Throws an [AssertionError] if [Device.supportsScreenshot] is not true.
   Future<void> screenshot(FlutterDevice device) async {
     assert(device.device.supportsScreenshot);
 
     final Status status = globals.logger.startProgress(
       'Taking screenshot for ${device.device.name}...',
-      timeout: timeoutConfiguration.fastOperation,
     );
     final File outputFile = globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
@@ -1268,7 +1235,6 @@ abstract class ResidentRunner {
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
         'Waiting for ${device.device.name} to report its views...',
-        timeout: const Duration(milliseconds: 200),
       );
       try {
         await device.vmService.getFlutterViews();

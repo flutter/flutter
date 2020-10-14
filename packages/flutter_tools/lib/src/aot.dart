@@ -69,7 +69,6 @@ class AotBuilder {
       final String typeName = globals.artifacts.getEngineType(platform, buildInfo.mode);
       status = globals.logger.startProgress(
         'Building AOT snapshot in ${getFriendlyModeName(buildInfo.mode)} mode ($typeName)...',
-        timeout: timeoutConfiguration.slowOperation,
       );
     }
 
@@ -117,10 +116,10 @@ class AotBuilder {
       PerformanceMeasurement aot;
       if (expectSo) {
         aot = result.performance.values.firstWhere(
-          (PerformanceMeasurement measurement) => measurement.analyicsName == 'android_aot');
+          (PerformanceMeasurement measurement) => measurement.analyticsName == 'android_aot');
       } else {
         aot = result.performance.values.firstWhere(
-          (PerformanceMeasurement measurement) => measurement.analyicsName == 'ios_aot');
+          (PerformanceMeasurement measurement) => measurement.analyticsName == 'ios_aot');
       }
       globals.printStatus('frontend(CompileTime): ${kernel.elapsedMilliseconds} ms.');
       globals.printStatus('snapshot(CompileTime): ${aot.elapsedMilliseconds} ms.');

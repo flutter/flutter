@@ -447,7 +447,7 @@ class SwitchListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget control;
+    final Widget control;
     switch (_switchListTileType) {
       case _SwitchListTileType.adaptive:
         control = Switch.adaptive(

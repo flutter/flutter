@@ -25,6 +25,9 @@ const String noProvisioningProfileErrorTwo = 'Error 0xe8000067';
 const String deviceLockedError = 'e80000e2';
 const String unknownAppLaunchError = 'Error 0xe8000022';
 
+// Another debugger instance is already attached?
+const String processLaunchFailedError = 'error: process launch failed';
+
 class IOSDeploy {
   IOSDeploy({
     @required Artifacts artifacts,
@@ -412,6 +415,13 @@ Error launching app. Try launching from within Xcode via:
     open ios/Runner.xcworkspace
 
 Your Xcode version may be too old for your iOS version.
+═══════════════════════════════════════════════════════════════════════════════════''',
+        emphasis: true);
+  } else if (stdout.contains(processLaunchFailedError)) {
+    logger.printError('''
+═══════════════════════════════════════════════════════════════════════════════════
+Could not attach the debugger.
+Try uninstalling the app from your device and retrying.
 ═══════════════════════════════════════════════════════════════════════════════════''',
         emphasis: true);
   }

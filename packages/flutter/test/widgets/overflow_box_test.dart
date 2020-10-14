@@ -44,7 +44,7 @@ void main() {
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
         .map((DiagnosticsNode n) => n.toString()).toList();
     expect(description, <String>[
-      'alignment: center',
+      'alignment: Alignment.center',
       'minWidth: 1.0',
       'maxWidth: 2.0',
       'minHeight: 3.0',
