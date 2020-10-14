@@ -28,8 +28,8 @@ Iterable<Element> collectAllElementsFrom(
 /// Provides a recursive, efficient, depth first search of an element tree.
 ///
 /// [Element.visitChildren] does not guarnatee order, but does guarnatee stable
-/// order. This iterator also guarantees stable order, but will iterate in a
-/// right to left order, e.g.:
+/// order. This iterator also guarantees stable order, and iterates in a left
+/// to right order:
 ///
 ///       1
 ///     /   \
@@ -37,15 +37,19 @@ Iterable<Element> collectAllElementsFrom(
 ///   / \   / \
 ///  4   5 6   7
 ///
-/// Will iterate in order 1, 3, 7, 6, 2, 5, 4. This avoids unnecessary
-/// allocation or CPU time by maintaining a single [ListQueue] to track
-/// iteration and avoiding any reverse iteratino to go in left to right order.
+/// Will iterate in order 1, 2, 4, 5, 3, 6, 7. A ListQueue is used to allow for
+/// efficient add/remove First/Last and avoid using List.reversed, which has
+/// slightly worse performance.
+///
 /// Performance is important here because this method is on the critical path
 /// for flutter_driver and package:integration_test performance tests.
-///
-/// Performance of this is measured in the all_elements_bench microbenchmark.
+/// Performance is measured in the all_elements_bench microbenchmark.
 /// Any changes to this implementation should check the before and after numbers
 /// on that benchmark to avoid regressions in general performance test overhead.
+///
+/// If we could use RTL order, we could save on performance, but numerous tests
+/// have been written (and developers clearly expect) that LTR order will be
+/// respected.
 class _DepthFirstChildIterator implements Iterator<Element> {
   _DepthFirstChildIterator(Element rootElement, this.skipOffstage)
     : _stack = ListQueue<Element>() {
@@ -66,7 +70,7 @@ class _DepthFirstChildIterator implements Iterator<Element> {
     if (_stack.isEmpty)
       return false;
 
-    _current = _stack.removeFirst();
+    _current = _stack.removeLast();
     _fillChildren(_current);
 
     return true;
@@ -74,10 +78,17 @@ class _DepthFirstChildIterator implements Iterator<Element> {
 
   void _fillChildren(Element element) {
     assert(element != null);
+    // If we did not have to follow LTR order and could instead use RTL,
+    // we could avoid reversing this and the operation would be measurably
+    // faster. Unfortunately, a lot of tests depend on LTR order.
+    final ListQueue<Element> reversed = ListQueue<Element>();
     if (skipOffstage) {
-      element.debugVisitOnstageChildren(_stack.addFirst);
+      element.debugVisitOnstageChildren(reversed.addFirst);
     } else {
-      element.visitChildren(_stack.addFirst);
+      element.visitChildren(reversed.addFirst);
+    }
+    while (reversed.isNotEmpty) {
+      _stack.addLast(reversed.removeFirst());
     }
   }
 }
