@@ -5,10 +5,8 @@
 import("//build/config/linux/pkg_config.gni")
 import("//flutter/shell/platform/glfw/config.gni")
 
-if (build_glfw_shell) {
-  pkg_config("x11") {
-    packages = [ "x11" ]
-  }
+pkg_config("x11") {
+  packages = [ "x11" ]
 }
 
 pkg_config("gtk") {
