@@ -538,7 +538,6 @@ class Cache {
   Future<bool> doesRemoteExist(String message, Uri url) async {
     final Status status = _logger.startProgress(
       message,
-      timeout: timeoutConfiguration.slowOperation,
     );
     bool exists;
     try {
@@ -1079,8 +1078,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     );
     gradleUtils.injectGradleWrapperIfNeeded(tempDir);
 
-    final Status status = globals.logger.startProgress('Downloading Android Maven dependencies...',
-        timeout: timeoutConfiguration.slowOperation);
+    final Status status = globals.logger.startProgress('Downloading Android Maven dependencies...');
     final File gradle = tempDir.childFile(
         globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
       );
@@ -1597,7 +1595,6 @@ class ArtifactUpdater {
     while (retries > 0) {
       status = _logger.startProgress(
         message,
-        timeout: null, // This will take a variable amount of time based on network connectivity.
       );
       try {
         _ensureExists(tempFile.parent);

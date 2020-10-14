@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show jsonEncode;
 
 import 'package:flutter_tools/executable.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -33,7 +32,6 @@ void main() {
       terminal: Terminal.test(),
       stdio: mocks.MockStdio(),
       outputPreferences: OutputPreferences.test(),
-      timeoutConfiguration: const TimeoutConfiguration(),
     );
 
     expect(loggerFactory.createLogger(
@@ -155,19 +153,16 @@ void main() {
     _throwsInvocationFor(() => fakeLogger.sendEvent(message, eventArgs)),
     );
 
-    const Duration timeout = Duration(seconds: 12);
     const String progressId = 'progressId';
     const bool multilineOutput = true;
     const int progressIndicatorPadding = kDefaultStatusPadding * 2;
     expect(
       () => delegatingLogger.startProgress(message,
-        timeout: timeout,
         progressId: progressId,
         multilineOutput: multilineOutput,
         progressIndicatorPadding: progressIndicatorPadding,
       ),
       _throwsInvocationFor(() => fakeLogger.startProgress(message,
-          timeout: timeout,
           progressId: progressId,
           multilineOutput: multilineOutput,
           progressIndicatorPadding: progressIndicatorPadding,
@@ -279,7 +274,6 @@ void main() {
       ),
       stdio: stdio,
       outputPreferences: OutputPreferences.test(),
-      timeoutConfiguration: const TimeoutConfiguration(),
     );
     logger.printStatus('message');
     logger.printError('error message');
@@ -320,7 +314,6 @@ void main() {
       ),
       stdio: stdio,
       outputPreferences: OutputPreferences.test(),
-      timeoutConfiguration: const TimeoutConfiguration(),
     );
     logger.printStatus('message');
     logger.printError('error message');
@@ -359,7 +352,6 @@ void main() {
       ),
       stdio: stdio,
       outputPreferences: OutputPreferences.test(),
-      timeoutConfiguration: const TimeoutConfiguration(),
     );
     logger.printStatus('message');
     logger.printError('error message');
@@ -441,11 +433,9 @@ void main() {
 
           ansiStatus = AnsiStatus(
             message: 'Hello world',
-            timeout: const Duration(seconds: 2),
             padding: 20,
             onFinish: () => called += 1,
             stdio: mockStdio,
-            timeoutConfiguration: const TimeoutConfiguration(),
             stopwatch: stopwatchFactory.createStopwatch(),
             terminal: terminal,
           );
@@ -456,9 +446,7 @@ void main() {
           mockStopwatch = FakeStopwatch();
           FakeAsync().run((FakeAsync time) {
             final AnsiSpinner ansiSpinner = AnsiSpinner(
-              timeout: const Duration(hours: 10),
               stdio: mockStdio,
-              timeoutConfiguration: const TimeoutConfiguration(),
               stopwatch: stopwatchFactory.createStopwatch(),
               terminal: terminal,
             )..start();
@@ -487,72 +475,37 @@ void main() {
           expect(done, isTrue);
         });
 
-        testWithoutContext('AnsiSpinner works (2)', () async {
-          bool done = false;
-          mockStopwatch = FakeStopwatch();
-          FakeAsync().run((FakeAsync time) {
-            final AnsiSpinner ansiSpinner = AnsiSpinner(
-              timeout: const Duration(seconds: 2),
-              stdio: mockStdio,
-              timeoutConfiguration: const TimeoutConfiguration(),
-              stopwatch: mockStopwatch,
-              terminal: terminal,
-            )..start();
-            mockStopwatch.elapsed = const Duration(seconds: 1);
-            doWhileAsync(time, () => ansiSpinner.ticks < 10); // one second
-
-            expect(ansiSpinner.seemsSlow, isFalse);
-            expect(outputStdout().join('\n'), isNot(contains('This is taking an unexpectedly long time.')));
-            mockStopwatch.elapsed = const Duration(seconds: 3);
-            doWhileAsync(time, () => ansiSpinner.ticks < 30); // three seconds
-
-            expect(ansiSpinner.seemsSlow, isTrue);
-            // Check the 2nd line to verify there's a newline before the warning
-            expect(outputStdout()[1], contains('This is taking an unexpectedly long time.'));
-            ansiSpinner.stop();
-            expect(outputStdout().join('\n'), isNot(contains('(!)')));
-            done = true;
-          });
-          expect(done, isTrue);
-        });
-
         testWithoutContext('Stdout startProgress on colored terminal', () async {
-          bool done = false;
-          FakeAsync().run((FakeAsync time) {
-            final Logger logger = StdoutLogger(
-              terminal: coloredTerminal,
-              stdio: mockStdio,
-              outputPreferences: OutputPreferences.test(showColor: true),
-              timeoutConfiguration: const TimeoutConfiguration(),
-              stopwatchFactory: stopwatchFactory,
-            );
-            final Status status = logger.startProgress(
-              'Hello',
-              progressId: null,
-              timeout: const TimeoutConfiguration().slowOperation,
-              progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
-            );
-            expect(outputStderr().length, equals(1));
-            expect(outputStderr().first, isEmpty);
-            // the 5 below is the margin that is always included between the message and the time.
-            expect(
-              outputStdout().join('\n'),
-              matches(terminal.supportsEmoji
-                ? r'^Hello {15} {5} {8}[\b]{8} {7}⣽$'
-                : r'^Hello {15} {5} {8}[\b]{8} {7}\\$'),
-            );
-            status.stop();
-            expect(
-              outputStdout().join('\n'),
-              matches(
-                terminal.supportsEmoji
-                ? r'^Hello {15} {5} {8}[\b]{8} {7}⣽[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$'
-                : r'^Hello {15} {5} {8}[\b]{8} {7}\\[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$',
-              ),
-            );
-            done = true;
-          });
-          expect(done, isTrue);
+          final Logger logger = StdoutLogger(
+            terminal: coloredTerminal,
+            stdio: mockStdio,
+            outputPreferences: OutputPreferences.test(showColor: true),
+            stopwatchFactory: stopwatchFactory,
+          );
+          final Status status = logger.startProgress(
+            'Hello',
+            progressId: null,
+            progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
+          );
+          expect(outputStderr().length, equals(1));
+          expect(outputStderr().first, isEmpty);
+          // the 5 below is the margin that is always included between the message and the time.
+          expect(
+            outputStdout().join('\n'),
+            matches(terminal.supportsEmoji
+              ? r'^Hello {15} {5} {8}[\b]{8} {7}⣽$'
+              : r'^Hello {15} {5} {8}[\b]{8} {7}\\$'),
+          );
+          mockStopwatch.elapsed = const Duration(seconds: 4, milliseconds: 100);
+          status.stop();
+          expect(
+            outputStdout().join('\n'),
+            matches(
+              terminal.supportsEmoji
+              ? r'^Hello {15} {5} {8}[\b]{8} {7}⣽[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$'
+              : r'^Hello {15} {5} {8}[\b]{8} {7}\\[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$',
+            ),
+          );
         });
 
         testWithoutContext('Stdout startProgress on colored terminal pauses', () async {
@@ -563,12 +516,10 @@ void main() {
               terminal: coloredTerminal,
               stdio: mockStdio,
               outputPreferences: OutputPreferences.test(showColor: true),
-              timeoutConfiguration: const TimeoutConfiguration(),
               stopwatchFactory: stopwatchFactory,
             );
             final Status status = logger.startProgress(
               "Knock Knock, Who's There",
-              timeout: const Duration(days: 10),
               progressIndicatorPadding: 10,
             );
             logger.printStatus('Rude Interrupting Cow');
@@ -593,38 +544,6 @@ void main() {
               '\b\b\b\b\b\b\b\b' // clearing the clearing of the spinner
               '    5.0s\n', // replacing it with the time
             );
-            done = true;
-          });
-          expect(done, isTrue);
-        });
-
-        testWithoutContext('AnsiStatus works', () {
-          bool done = false;
-          FakeAsync().run((FakeAsync time) {
-            ansiStatus.start();
-            mockStopwatch.elapsed = const Duration(seconds: 1);
-            doWhileAsync(time, () => ansiStatus.ticks < 10); // one second
-
-            expect(ansiStatus.seemsSlow, isFalse);
-            expect(outputStdout().join('\n'), isNot(contains('This is taking an unexpectedly long time.')));
-            expect(outputStdout().join('\n'), isNot(contains('(!)')));
-            mockStopwatch.elapsed = const Duration(seconds: 3);
-            doWhileAsync(time, () => ansiStatus.ticks < 30); // three seconds
-
-            expect(ansiStatus.seemsSlow, isTrue);
-            expect(outputStdout().join('\n'), contains('This is taking an unexpectedly long time.'));
-
-            // Test that the number of '\b' is correct.
-            for (final String line in outputStdout()) {
-              int currLength = 0;
-              for (int i = 0; i < line.length; i += 1) {
-                currLength += line[i] == '\b' ? -1 : 1;
-                expect(currLength, isNonNegative, reason: 'The following line has overflow backtraces:\n' + jsonEncode(line));
-              }
-            }
-
-            ansiStatus.stop();
-            expect(outputStdout().join('\n'), contains('(!)'));
             done = true;
           });
           expect(done, isTrue);
@@ -717,18 +636,15 @@ void main() {
     mocks.MockStdio mockStdio;
     SummaryStatus summaryStatus;
     int called;
-    final RegExp secondDigits = RegExp(r'[^\b]\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
 
     setUp(() {
       mockStdio = mocks.MockStdio();
       called = 0;
       summaryStatus = SummaryStatus(
         message: 'Hello world',
-        timeout: const TimeoutConfiguration().slowOperation,
         padding: 20,
         onFinish: () => called++,
         stdio: mockStdio,
-        timeoutConfiguration: const TimeoutConfiguration(),
         stopwatch: FakeStopwatch(),
       );
     });
@@ -744,7 +660,6 @@ void main() {
         ),
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
-        timeoutConfiguration: const TimeoutConfiguration(),
       );
       logger.printError('0123456789' * 15);
       final List<String> lines = outputStderr();
@@ -774,7 +689,6 @@ void main() {
         ),
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
-        timeoutConfiguration: const TimeoutConfiguration(),
       );
       logger.printError('0123456789' * 15, indent: 5);
       final List<String> lines = outputStderr();
@@ -798,7 +712,6 @@ void main() {
         ),
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
-        timeoutConfiguration: const TimeoutConfiguration(),
       );
       logger.printError('0123456789' * 15, hangingIndent: 5);
       final List<String> lines = outputStderr();
@@ -822,7 +735,6 @@ void main() {
         ),
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
-        timeoutConfiguration: const TimeoutConfiguration(),
       );
       logger.printError('0123456789' * 15, indent: 4, hangingIndent: 5);
       final List<String> lines = outputStderr();
@@ -846,7 +758,6 @@ void main() {
         ),
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
-        timeoutConfiguration: const TimeoutConfiguration(),
       );
       logger.printStatus('0123456789' * 15);
       final List<String> lines = outputStdout();
@@ -867,7 +778,6 @@ void main() {
         ),
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
-        timeoutConfiguration: const TimeoutConfiguration(),
       );
       logger.printStatus('0123456789' * 15, indent: 5);
       final List<String> lines = outputStdout();
@@ -890,8 +800,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: mockStdio,
-        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
-        timeoutConfiguration: const TimeoutConfiguration(),
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false)
       );
       logger.printStatus('0123456789' * 15, hangingIndent: 5);
       final List<String> lines = outputStdout();
@@ -915,7 +824,6 @@ void main() {
         ),
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
-        timeoutConfiguration: const TimeoutConfiguration(),
       );
       logger.printStatus('0123456789' * 15, indent: 4, hangingIndent: 5);
       final List<String> lines = outputStdout();
@@ -939,7 +847,6 @@ void main() {
         ),
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(showColor: true),
-        timeoutConfiguration: const TimeoutConfiguration(),
       );
       logger.printError('Pants on fire!');
       final List<String> lines = outputStderr();
@@ -957,7 +864,6 @@ void main() {
         ),
         stdio: mockStdio,
         outputPreferences:  OutputPreferences.test(showColor: true),
-        timeoutConfiguration: const TimeoutConfiguration(),
       );
       logger.printStatus('All good.');
 
@@ -975,7 +881,6 @@ void main() {
         ),
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(showColor: true),
-        timeoutConfiguration: const TimeoutConfiguration(),
       );
       logger.printStatus(
         null,
@@ -999,7 +904,6 @@ void main() {
         ),
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(showColor: false),
-        timeoutConfiguration: const TimeoutConfiguration(),
       );
       logger.printStatus(
         null,
@@ -1015,59 +919,52 @@ void main() {
     });
 
     testWithoutContext('Stdout startProgress on non-color terminal', () async {
-      bool done = false;
-      FakeAsync().run((FakeAsync time) {
-        final Logger logger = StdoutLogger(
-          terminal: AnsiTerminal(
-            stdio: mockStdio,
-            platform: _kNoAnsiPlatform,
-          ),
+      final FakeStopwatch fakeStopwatch = FakeStopwatch();
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
           stdio: mockStdio,
-          outputPreferences: OutputPreferences.test(showColor: false),
-          timeoutConfiguration: const TimeoutConfiguration(),
-        );
-        final Status status = logger.startProgress(
-          'Hello',
-          progressId: null,
-          timeout: const TimeoutConfiguration().slowOperation,
-          progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
-        );
-        expect(outputStderr().length, equals(1));
-        expect(outputStderr().first, isEmpty);
-        // the 5 below is the margin that is always included between the message and the time.
-        expect(outputStdout().join('\n'), matches(r'^Hello {15} {5}$'));
-        status.stop();
-        expect(outputStdout().join('\n'), matches(r'^Hello {15} {5}[\d, ]{4}[\d]\.[\d]s[\n]$'));
-        done = true;
-      });
-      expect(done, isTrue);
+          platform: _kNoAnsiPlatform,
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(showColor: false),
+        stopwatchFactory: FakeStopwatchFactory(fakeStopwatch),
+      );
+      final Status status = logger.startProgress(
+        'Hello',
+        progressId: null,
+        progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
+      );
+      expect(outputStderr().length, equals(1));
+      expect(outputStderr().first, isEmpty);
+      // the 5 below is the margin that is always included between the message and the time.
+      expect(outputStdout().join('\n'), matches(r'^Hello {15} {5}$'));
+
+      fakeStopwatch.elapsed = const Duration(seconds: 4, milliseconds: 123);
+      status.stop();
+
+      expect(outputStdout(), <String>['Hello                        4.1s', '']);
     });
 
     testWithoutContext('SummaryStatus works when canceled', () async {
       final SummaryStatus summaryStatus = SummaryStatus(
         message: 'Hello world',
-        timeout: const TimeoutConfiguration().slowOperation,
         padding: 20,
         onFinish: () => called++,
         stdio: mockStdio,
-        timeoutConfiguration: const TimeoutConfiguration(),
         stopwatch: FakeStopwatch(),
       );
       summaryStatus.start();
-      List<String> lines = outputStdout();
+      final List<String> lines = outputStdout();
       expect(lines[0], startsWith('Hello world              '));
       expect(lines.length, equals(1));
       expect(lines[0].endsWith('\n'), isFalse);
 
       // Verify a cancel does _not_ print the time and prints a newline.
       summaryStatus.cancel();
-      lines = outputStdout();
-      final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
-      expect(matches, isEmpty);
-      expect(lines[0], endsWith(' '));
-      expect(called, equals(1));
-      expect(lines.length, equals(2));
-      expect(lines[1], equals(''));
+      expect(outputStdout(), <String>[
+        'Hello world              ',
+        '',
+      ]);
 
       // Verify that stopping or canceling multiple times throws.
       expect(summaryStatus.cancel, throwsAssertionError);
@@ -1076,21 +973,16 @@ void main() {
 
     testWithoutContext('SummaryStatus works when stopped', () async {
       summaryStatus.start();
-      List<String> lines = outputStdout();
+      final List<String> lines = outputStdout();
       expect(lines[0], startsWith('Hello world              '));
       expect(lines.length, equals(1));
 
       // Verify a stop prints the time.
       summaryStatus.stop();
-      lines = outputStdout();
-      final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
-      expect(matches, isNotNull);
-      expect(matches, hasLength(1));
-      final Match match = matches.first;
-      expect(lines[0], endsWith(match.group(0)));
-      expect(called, equals(1));
-      expect(lines.length, equals(2));
-      expect(lines[1], equals(''));
+      expect(outputStdout(), <String>[
+        'Hello world                   0ms',
+        '',
+      ]);
 
       // Verify that stopping or canceling multiple times throws.
       expect(summaryStatus.stop, throwsAssertionError);
@@ -1105,10 +997,9 @@ void main() {
         ),
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(showColor: false),
-        timeoutConfiguration: const TimeoutConfiguration(),
       );
-      logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation).stop();
-      logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation).stop();
+      logger.startProgress('AAA').stop();
+      logger.startProgress('BBB').stop();
       final List<String> output = outputStdout();
 
       expect(output.length, equals(3));
@@ -1129,12 +1020,11 @@ void main() {
           ),
           stdio: mockStdio,
           outputPreferences: OutputPreferences.test(),
-          timeoutConfiguration: const TimeoutConfiguration(),
         ),
         stopwatchFactory: FakeStopwatchFactory(),
       );
-      logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation).stop();
-      logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation).stop();
+      logger.startProgress('AAA').stop();
+      logger.startProgress('BBB').stop();
 
       expect(outputStdout(), <Matcher>[
         matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] AAA$'),
@@ -1153,8 +1043,8 @@ void main() {
         ),
         outputPreferences: OutputPreferences.test(),
       );
-      logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation).stop();
-      logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation).stop();
+      logger.startProgress('AAA').stop();
+      logger.startProgress('BBB').stop();
 
       expect(logger.statusText, 'AAA\nBBB\n');
     });

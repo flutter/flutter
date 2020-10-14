@@ -56,7 +56,6 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
-    timeout: null,
   );
   try {
     await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);

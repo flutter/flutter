@@ -70,7 +70,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         negatable: false,
         hide: !verboseHelp,
         help: 'No longer require an authentication code to connect to the VM '
-              'service (not recommended).');
+              'service (not recommended).'
+      )
+      ..addOption('use-application-binary',
+        help: 'Specify a pre-built application binary to use when running. For android applications, '
+        'this must be the path to an APK. For iOS applications, the path to an IPA. Other device types '
+        'do not yet support prebuilt application binaries',
+        valueHelp: 'path/to/app.apk',
+      );
     usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
@@ -178,10 +185,6 @@ class RunCommand extends RunCommandBase {
               'This flag is not available on the stable channel and is only '
               'applied in debug and profile modes. This option should only '
               'be used for experiments and should not be used by typical users.')
-      ..addOption('use-application-binary',
-        hide: !verboseHelp,
-        help: 'Specify a pre-built application binary to use when running.',
-      )
       ..addOption('project-root',
         hide: !verboseHelp,
         help: 'Specify the project root directory.',
