@@ -30,55 +30,155 @@ const double _kToolbarHeight = 44.0;
 const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
-// Itermediate button data used for building the text selection menu buttons.
-class _ItemData {
-  const _ItemData(
-    this.onPressed,
-    this.label,
-  ) : assert(onPressed != null),
-      assert(label != null);
-
-  final VoidCallback onPressed;
-  final String label;
-}
-
 // Creates the menu buttons and manages them based on the clipboard status.
 class _TextSelectionToolbar extends StatefulWidget {
   const _TextSelectionToolbar({
     Key? key,
-    required this.children,
-    required this.isAbove,
-  }) : assert(children.length > 0),
-       super(key: key);
+    required this.clipboardStatus,
+    required this.delegate,
+    required this.endpoints,
+    required this.globalEditableRegion,
+    required this.handleCut,
+    required this.handleCopy,
+    required this.handlePaste,
+    required this.handleSelectAll,
+    required this.selectionMidpoint,
+    required this.textLineHeight,
+  }) : super(key: key);
 
-  final List<Widget> children;
-
-  // When true, the toolbar fits above its anchor and will be positioned there.
-  final bool isAbove;
+  final ClipboardStatusNotifier clipboardStatus;
+  final TextSelectionDelegate delegate;
+  final List<TextSelectionPoint> endpoints;
+  final Rect globalEditableRegion;
+  final VoidCallback? handleCut;
+  final VoidCallback? handleCopy;
+  final VoidCallback? handlePaste;
+  final VoidCallback? handleSelectAll;
+  final Offset selectionMidpoint;
+  final double textLineHeight;
 
   @override
   _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
 }
 
 class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
+  void _onChangedClipboardStatus() {
+    setState(() {
+      // Inform the widget that the value of clipboardStatus has changed.
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.clipboardStatus.addListener(_onChangedClipboardStatus);
+    widget.clipboardStatus.update();
+  }
+
+  @override
+  void didUpdateWidget(_TextSelectionToolbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.clipboardStatus != oldWidget.clipboardStatus) {
+      widget.clipboardStatus.addListener(_onChangedClipboardStatus);
+      oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+    }
+    widget.clipboardStatus.update();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // When used in an Overlay, it can happen that this is disposed after its
+    // creator has already disposed _clipboardStatus.
+    if (!widget.clipboardStatus.disposed) {
+      widget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // If there are no buttons to be shown, don't render anything.
+    if (widget.handleCut == null && widget.handleCopy == null
+        && widget.handlePaste == null && widget.handleSelectAll == null) {
+      return const SizedBox.shrink();
+    }
     // Don't render the menu until the state of the clipboard is known.
-    /*
+    // If the paste button is desired, don't render anything until the state of
+    // the clipboard is known, since it's used to determine if paste is shown.
     if (widget.handlePaste != null
-        && _clipboardStatus.value == ClipboardStatus.unknown) {
-      return const SizedBox(width: 0.0, height: 0.0);
+        && widget.clipboardStatus.value == ClipboardStatus.unknown) {
+      return const SizedBox.shrink();
     }
 
-    // If there is no option available, build an empty widget.
-    if (itemDatas.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
-    }
-    */
+    // Calculate the positioning of the menu. It is placed above the selection
+    // if there is enough room, or otherwise below.
+    final TextSelectionPoint startTextSelectionPoint = widget.endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = widget.endpoints.length > 1
+      ? widget.endpoints[1]
+      : widget.endpoints[0];
+    const double closedToolbarHeightNeeded = _kToolbarScreenPadding
+      + _kToolbarHeight
+      + _kToolbarContentDistance;
+    final double paddingTop = MediaQuery.of(context)!.padding.top;
+    final double availableHeight = widget.globalEditableRegion.top
+      + startTextSelectionPoint.point.dy
+      - widget.textLineHeight
+      - paddingTop;
+    final bool fitsAbove = closedToolbarHeightNeeded <= availableHeight;
+    final Offset anchor = Offset(
+      widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
+      fitsAbove
+        ? widget.globalEditableRegion.top + startTextSelectionPoint.point.dy - widget.textLineHeight - _kToolbarContentDistance
+        : widget.globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
+    );
 
-    return _TextSelectionToolbarOverflowableNew(
-      isAbove: widget.isAbove,
-      children: widget.children,
+    assert(debugCheckHasMaterialLocalizations(context));
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    return Stack(
+      children: <Widget>[
+        CustomSingleChildLayout(
+          delegate: _TextSelectionToolbarLayoutDelegate(
+            anchor,
+            _kToolbarScreenPadding + paddingTop,
+            fitsAbove,
+          ),
+          child: _TextSelectionToolbarOverflowableNew(
+            isAbove: fitsAbove,
+            children: <Widget>[
+              if (widget.handleCut != null)
+                _MaterialTextSelectionMenuButtonNew(
+                  isFirst: true,
+                  isLast: false,
+                  onPressed: widget.handleCut,
+                  child: Text(localizations.cutButtonLabel),
+                ),
+              if (widget.handleCopy != null)
+                _MaterialTextSelectionMenuButtonNew(
+                  isFirst: false,
+                  isLast: false,
+                  onPressed: widget.handleCopy,
+                  child: Text(localizations.copyButtonLabel),
+                ),
+              if (widget.handlePaste != null
+                  && widget.clipboardStatus.value == ClipboardStatus.pasteable)
+                _MaterialTextSelectionMenuButtonNew(
+                  isFirst: false,
+                  isLast: false,
+                  onPressed: widget.handlePaste,
+                  //child: Text(localizations.pasteButtonLabel),
+                  child: Text(localizations.pasteButtonLabel),
+                ),
+              if (widget.handleSelectAll != null)
+                _MaterialTextSelectionMenuButtonNew(
+                  isFirst: false,
+                  isLast: true,
+                  onPressed: widget.handleSelectAll,
+                  child: Text(localizations.selectAllButtonLabel),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -584,85 +684,17 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
   ) {
-    assert(debugCheckHasMediaQuery(context));
-    assert(debugCheckHasMaterialLocalizations(context));
-
-    // If there are no buttons to be shown, don't render anything.
-    if (!canCut(delegate) && !canCopy(delegate)
-        && !canPaste(delegate) && !canSelectAll(delegate)) {
-      return const SizedBox.shrink();
-    }
-
-    // Calculate the positioning of the menu. It is placed above the selection
-    // if there is enough room, or otherwise below.
-    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
-      ? endpoints[1]
-      : endpoints[0];
-    const double closedToolbarHeightNeeded = _kToolbarScreenPadding
-      + _kToolbarHeight
-      + _kToolbarContentDistance;
-    final double paddingTop = MediaQuery.of(context)!.padding.top;
-    final double availableHeight = globalEditableRegion.top
-      + startTextSelectionPoint.point.dy
-      - textLineHeight
-      - paddingTop;
-    final bool fitsAbove = closedToolbarHeightNeeded <= availableHeight;
-    final Offset anchor = Offset(
-      globalEditableRegion.left + selectionMidpoint.dx,
-      fitsAbove
-        ? globalEditableRegion.top + startTextSelectionPoint.point.dy - textLineHeight - _kToolbarContentDistance
-        : globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
-    );
-
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
-    return Stack(
-      children: <Widget>[
-        CustomSingleChildLayout(
-          delegate: _TextSelectionToolbarLayoutDelegate(
-            anchor,
-            _kToolbarScreenPadding + paddingTop,
-            fitsAbove,
-          ),
-          child: _TextSelectionToolbar(
-            isAbove: fitsAbove,
-            // TODO(justinmc): I'm skeptical this is the way the butttons should be passed...
-            children: <Widget>[
-              if (canCut(delegate))
-                _MaterialTextSelectionMenuButtonNew(
-                  isFirst: true,
-                  isLast: false,
-                  onPressed: () => handleCut(delegate),
-                  child: Text(localizations.cutButtonLabel),
-                ),
-              if (canCopy(delegate))
-                _MaterialTextSelectionMenuButtonNew(
-                  isFirst: false,
-                  isLast: false,
-                  onPressed: () => handleCopy(delegate, clipboardStatus),
-                  child: Text(localizations.copyButtonLabel),
-                ),
-              if (canPaste(delegate))
-                // TODO(justinmc): Should be Pasteable widget wrapping normal button.
-                _MaterialTextSelectionMenuPasteButtonNew(
-                  clipboardStatus: clipboardStatus,
-                  isFirst: false,
-                  isLast: false,
-                  onPressed: () => handlePaste(delegate),
-                  //child: Text(localizations.pasteButtonLabel),
-                  child: Text(localizations.pasteButtonLabel),
-                ),
-              if (canSelectAll(delegate))
-                _MaterialTextSelectionMenuButtonNew(
-                  isFirst: false,
-                  isLast: true,
-                  onPressed: () => handleSelectAll(delegate),
-                  child: Text(localizations.selectAllButtonLabel),
-                ),
-            ],
-          ),
-        ),
-      ],
+    return _TextSelectionToolbar(
+      globalEditableRegion: globalEditableRegion,
+      textLineHeight: textLineHeight,
+      selectionMidpoint: selectionMidpoint,
+      endpoints: endpoints,
+      delegate: delegate,
+      clipboardStatus: clipboardStatus,
+      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
+      handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
+      handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
     );
   }
 
@@ -729,7 +761,6 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
 
 // The Material-styled toolbar outline. Fill it with any widgets you want. No
 // overflow ability.
-// TODO(justinmc): Where is the coloration?
 class _MaterialTextSelectionToolbarShapeNew extends StatelessWidget {
   const _MaterialTextSelectionToolbarShapeNew({
     Key? key,
@@ -796,79 +827,10 @@ class _MaterialTextSelectionMenuButtonNew extends StatelessWidget {
   }
 }
 
-class _MaterialTextSelectionMenuPasteButtonNew extends StatefulWidget {
-  const _MaterialTextSelectionMenuPasteButtonNew({
-    Key? key,
-    required this.child,
-    required this.clipboardStatus,
-    required this.isFirst,
-    required this.isLast,
-    this.onPressed,
-  }) : super(key: key);
-
-  final Widget child;
-  // TODO(justinmc): Really nullable?
-  final ClipboardStatusNotifier clipboardStatus;
-  final bool isFirst;
-  final bool isLast;
-  final VoidCallback? onPressed;
-
-  @override
-  _MaterialTextSelectionMenuPasteButtonNewState createState() => _MaterialTextSelectionMenuPasteButtonNewState();
-}
-
-class _MaterialTextSelectionMenuPasteButtonNewState extends State<_MaterialTextSelectionMenuPasteButtonNew> {
-  void _onChangedClipboardStatus() {
-    setState(() {
-      // Inform the widget that the value of clipboardStatus has changed.
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-    widget.clipboardStatus.update();
-  }
-
-  @override
-  void didUpdateWidget(_MaterialTextSelectionMenuPasteButtonNew oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.clipboardStatus != oldWidget.clipboardStatus) {
-      widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-      oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
-    }
-    widget.clipboardStatus.update();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    // When used in an Overlay, this can be disposed after its creator has
-    // already disposed _clipboardStatus.
-    if (!widget.clipboardStatus.disposed) {
-      widget.clipboardStatus.removeListener(_onChangedClipboardStatus);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.clipboardStatus.value != ClipboardStatus.pasteable) {
-      return const SizedBox.shrink();
-    }
-    return _MaterialTextSelectionMenuButtonNew(
-      isFirst: widget.isFirst,
-      isLast: widget.isLast,
-      onPressed: widget.onPressed,
-      child: widget.child,
-    );
-  }
-}
-
 // A button styled like a Material native Android text selection overflow menu
 // forward and back controls.
 class _MaterialTextSelectionMenuIconButtonNew extends StatelessWidget {
-  _MaterialTextSelectionMenuIconButtonNew({
+  const _MaterialTextSelectionMenuIconButtonNew({
     Key? key,
     required this.icon,
     this.onPressed,
@@ -995,17 +957,20 @@ class _TextSelectionToolbarOverflowableNewState extends State<_TextSelectionTool
 final TextSelectionControls materialTextSelectionControls = _MaterialTextSelectionControls();
 
 // Justin's widget hierarchy directory:
+// _TextSelectionToolbar
+//   Directly handles buildToolbar at the highest level.
+//   Shouldn't be made public, but users may learn from it as an example of how
+//   to use the other public classes.
+//
 // _TextSelectionToolbarLayoutDelegate
 //   Centers the toolbar at the given anchor and ensures it remains on screen.
 //   Should be public I think.
 //
-// _TextSelectionToolbar
-//   Everything else.
-//   Main logic is just creating and managing the buttons.
-//
 // _TextSelectionToolbarOverflowableNew
 // children: _MaterialTextSelectionMenuButtonNew
 // Manages the overflowOpen state and sends it on to the widgets below.
+// Creates everything itself, so maybe should be broken up to have children
+// passed into it.
 //
 // _TextSelectionToolbarContainer
 //   Layout only, lines up right edge when overflow is open.
