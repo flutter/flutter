@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -37,9 +35,7 @@ Iterable<Element> collectAllElementsFrom(
 ///   / \   / \
 ///  4   5 6   7
 ///
-/// Will iterate in order 1, 2, 4, 5, 3, 6, 7. A ListQueue is used to allow for
-/// efficient add/remove First/Last and avoid using List.reversed, which has
-/// slightly worse performance.
+/// Will iterate in order 2, 4, 5, 3, 6, 7.
 ///
 /// Performance is important here because this method is on the critical path
 /// for flutter_driver and package:integration_test performance tests.
@@ -51,8 +47,7 @@ Iterable<Element> collectAllElementsFrom(
 /// have been written (and developers clearly expect) that LTR order will be
 /// respected.
 class _DepthFirstChildIterator implements Iterator<Element> {
-  _DepthFirstChildIterator(Element rootElement, this.skipOffstage)
-    : _stack = ListQueue<Element>() {
+  _DepthFirstChildIterator(Element rootElement, this.skipOffstage) {
     _fillChildren(rootElement);
   }
 
@@ -60,7 +55,7 @@ class _DepthFirstChildIterator implements Iterator<Element> {
 
   late Element _current;
 
-  final ListQueue<Element> _stack;
+  final List<Element> _stack = <Element>[];
 
   @override
   Element get current => _current;
@@ -81,14 +76,16 @@ class _DepthFirstChildIterator implements Iterator<Element> {
     // If we did not have to follow LTR order and could instead use RTL,
     // we could avoid reversing this and the operation would be measurably
     // faster. Unfortunately, a lot of tests depend on LTR order.
-    final ListQueue<Element> reversed = ListQueue<Element>();
+    final List<Element> reversed = <Element>[];
     if (skipOffstage) {
-      element.debugVisitOnstageChildren(reversed.addFirst);
+      element.debugVisitOnstageChildren(reversed.add);
     } else {
-      element.visitChildren(reversed.addFirst);
+      element.visitChildren(reversed.add);
     }
+    // This is faster than _stack.addAll(reversed.reversed), presumably since
+    // we don't actually care about maintaining an iteration pointer.
     while (reversed.isNotEmpty) {
-      _stack.addLast(reversed.removeFirst());
+      _stack.add(reversed.removeLast());
     }
   }
 }
