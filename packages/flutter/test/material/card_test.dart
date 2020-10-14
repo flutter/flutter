@@ -140,9 +140,9 @@ void main() {
 
     // Default margin is 4
     expect(tester.getTopLeft(find.byType(Card)), const Offset(0.0, 0.0));
-    expect(tester.getSize(find.byType(Card)), const Size(108.0, 108.0));
+    expect(tester.getSize(find.byType(Card)), const Size(124.0, 124.0)); // 2 * 4.0 margin + 2 * 8.0 padding
 
-    expect(tester.getTopLeft(find.byKey(contentsKey)), const Offset(4.0, 4.0));
+    expect(tester.getTopLeft(find.byKey(contentsKey)), const Offset(12.0, 12.0)); // 4.0 margin + 8.0 padding
     expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
 
     await tester.pumpWidget(
@@ -162,10 +162,10 @@ void main() {
 
     // Specified margin is zero
     expect(tester.getTopLeft(find.byType(Card)), const Offset(0.0, 0.0));
-    expect(tester.getSize(find.byType(Card)), const Size(100.0, 100.0));
+    expect(tester.getSize(find.byType(Card)), const Size(116.0, 116.0)); // 2 * 8.0 padding (default)
 
-    expect(tester.getTopLeft(find.byKey(contentsKey)), const Offset(0.0, 0.0));
-    expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(contentsKey)), const Offset(8.0, 8.0));
+    expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0)); // 2 * 8.0 padding (default)
   });
 
 testWidgets('Card padding', (WidgetTester tester) async {
