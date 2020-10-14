@@ -683,6 +683,7 @@ class AndroidDevice extends Device {
           return LaunchResult.failed();
         }
       }
+      resetLogReaders();
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
@@ -740,6 +741,14 @@ class AndroidDevice extends Device {
   @override
   void clearLogs() {
     _processUtils.runSync(adbCommandForDevice(<String>['logcat', '-c']));
+  }
+
+  /// Android device log readers are singletons. if they are closed by the
+  /// protocol discovery, the same kind of reader cannot be recreated.
+  @visibleForTesting
+  void resetLogReaders() {
+    _pastLogReader = null;
+    _logReader = null;
   }
 
   @override
