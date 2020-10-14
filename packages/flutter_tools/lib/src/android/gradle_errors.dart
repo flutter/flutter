@@ -123,8 +123,8 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     bool shouldBuildPluginAsAar,
   }) async {
     globals.printError(
-        '$warningMark Gradle threw an error while downloading artifacts from the network. '
-            'Retrying to download...'
+      '$warningMark Gradle threw an error while downloading artifacts from the network. '
+      'Retrying to download...'
     );
     try {
       final String homeDir = globals.platform.environment['HOME'];
