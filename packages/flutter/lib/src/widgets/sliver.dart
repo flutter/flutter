@@ -647,11 +647,11 @@ class SliverChildListDelegate extends SliverChildDelegate {
   ///
   ///   void someHandler() {
   ///     setState(() {
-  ///         _children.add(...);
+  ///         _children.add(ChildWidget());
   ///     });
   ///   }
   ///
-  ///   Widget build(...) {
+  ///   Widget build(BuildContext context) {
   ///     // Reusing `List<Widget> _children` here is problematic.
   ///     return PageView(children: _children);
   ///   }
@@ -672,13 +672,13 @@ class SliverChildListDelegate extends SliverChildDelegate {
   ///     setState(() {
   ///       // The key here allows Flutter to reuse the underlying render
   ///       // objects even if the children list is recreated.
-  ///       _children.add(ChildWidget(key: ...));
+  ///       _children.add(ChildWidget(key: UniqueKey()));
   ///     });
   ///   }
   ///
-  ///   Widget build(...) {
+  ///   Widget build(BuildContext context) {
   ///     // Always create a new list of children as a Widget is immutable.
-  ///     return PageView(children: List.from(_children));
+  ///     return PageView(children: List<Widget>.from(_children));
   ///   }
   /// }
   /// ```
