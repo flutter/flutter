@@ -98,12 +98,14 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
   eventLabel: 'permission-denied',
 );
 
-
 /// Gradle crashes for several known reasons when downloading that are not
 /// actionable by Flutter.
 ///
 /// The Gradle cache directory must be deleted, otherwise it may attempt to
 /// re-use the bad zip file.
+///
+/// See also:
+///  * https://docs.gradle.org/current/userguide/directory_layout.html#dir:gradle_user_home
 @visibleForTesting
 final GradleHandledError networkErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
