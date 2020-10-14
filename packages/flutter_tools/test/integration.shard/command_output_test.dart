@@ -221,4 +221,19 @@ void main() {
     expect(result.exitCode, 1);
     expect(result.stderr, contains('No SkSL shader bundle found at foo/bar/baz.json'));
   });
+
+  testWithoutContext('flutter attach does not support --release', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      '--show-test-device',
+      'attach',
+      '--release',
+    ], workingDirectory: helloWorld);
+
+    expect(result.exitCode, isNot(0));
+    expect(result.stderr, contains('Could not find an option named "release"'));
+  });
 }
