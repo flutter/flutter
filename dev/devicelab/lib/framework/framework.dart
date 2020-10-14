@@ -81,11 +81,15 @@ class _TaskRunner {
       _taskStarted = true;
       print('Running task with a timeout of $taskTimeout.');
       final String exe = Platform.isWindows ? '.exe' : '';
-      section('Checking running Dart$exe processes');
+      section('Checking running Dart$exe and ios-deploy processes');
       final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(
         processName: 'dart$exe',
       ).toSet();
       beforeRunningDartInstances.forEach(print);
+      final Set<RunningProcessInfo> beforeRunningIosDeployInstances = await getRunningProcesses(
+        processName: 'ios-deploy',
+      ).toSet();
+      beforeRunningIosDeployInstances.forEach(print);
 
       print('enabling configs for macOS, Linux, Windows, and Web...');
       final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
@@ -103,18 +107,18 @@ class _TaskRunner {
       if (taskTimeout != null)
         futureResult = futureResult.timeout(taskTimeout);
 
-      TaskResult result = await futureResult;
+      final TaskResult result = await futureResult;
 
-      section('Checking running Dart$exe processes after task...');
+      section('Checking running Dart$exe and ios-deploy processes after task...');
       final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
         processName: 'dart$exe',
       ).toList();
-      for (final RunningProcessInfo info in afterRunningDartInstances) {
-        if (!beforeRunningDartInstances.contains(info)) {
-          print('$info was leaked by this test.');
-          if (result is TaskResultCheckProcesses) {
-            result = TaskResult.failure('This test leaked dart processes');
-          }
+      final Set<RunningProcessInfo> afterRunningIosDeployInstances = await getRunningProcesses(
+        processName: 'ios-deploy',
+      ).toSet();
+      for (final RunningProcessInfo info in afterRunningDartInstances.followedBy(afterRunningIosDeployInstances)) {
+        if (!beforeRunningDartInstances.contains(info) && !beforeRunningIosDeployInstances.contains(info)) {
+          print('[WARNING] $info was leaked by this test.');
           final bool killed = await killProcess(info.pid);
           if (!killed) {
             print('Failed to kill process ${info.pid}.');
