@@ -29,6 +29,36 @@ class MockClipboard {
   }
 }
 
+class MockTextSelectionControls extends TextSelectionControls {
+  @override
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type,
+      double textLineHeight) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Widget buildToolbar(
+      BuildContext context,
+      Rect globalEditableRegion,
+      double textLineHeight,
+      Offset position,
+      List<TextSelectionPoint> endpoints,
+      TextSelectionDelegate delegate,
+      ClipboardStatusNotifier clipboardStatus) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    throw UnimplementedError();
+  }
+}
+
 class PathBoundsMatcher extends Matcher {
   const PathBoundsMatcher({
     this.rectMatcher,
@@ -4126,18 +4156,19 @@ void main() {
 
   testWidgets('textSelectionControls is passed to EditableText',
       (WidgetTester tester) async {
+    final MockTextSelectionControls selectionControl = MockTextSelectionControls();
     await tester.pumpWidget(
        CupertinoApp(
         home: Center(
           child: CupertinoTextField(
-              textSelectionControls: materialTextSelectionControls
+              textSelectionControls: selectionControl
             ),
           ),
         ),
       );
 
     final EditableText widget = tester.widget(find.byType(EditableText));
-    expect(widget.selectionControls, equals(materialTextSelectionControls));
+    expect(widget.selectionControls, equals(selectionControl));
   });
 
 }
