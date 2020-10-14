@@ -252,6 +252,61 @@ void main() {
     expect(wasAppInstalled, false);
   });
 
+   testWithoutContext('IOSDevice.installApp retries installation if it fails once', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final IOSApp iosApp = PrebuiltIOSApp(
+      projectBundleId: 'app',
+      bundleDir: fileSystem.currentDirectory,
+    );
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(command: <String>[
+        iosDeployPath,
+        '--id',
+        '1234',
+        '--bundle',
+        '/',
+        '--no-wifi',
+      ], environment: const <String, String>{
+        'PATH': '/usr/bin:null',
+        ...kDyLdLibEntry,
+      }, exitCode: 1),
+      FakeCommand(command: <String>[
+        iosDeployPath,
+        '--id',
+        '1234',
+        '--exists',
+        '--timeout',
+        '10',
+        '--bundle_id',
+        'app',
+      ]),
+      FakeCommand(command: <String>[
+        iosDeployPath,
+        '--id',
+        '1234',
+        '--uninstall_only',
+        '--bundle_id',
+        'app',
+      ]),
+      FakeCommand(command: <String>[
+        iosDeployPath,
+        '--id',
+        '1234',
+        '--bundle',
+        '/',
+        '--no-wifi',
+      ], environment: const <String, String>{
+        'PATH': '/usr/bin:null',
+        ...kDyLdLibEntry,
+      }),
+    ]);
+    final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
+    final bool wasAppInstalled = await device.installApp(iosApp);
+
+    expect(wasAppInstalled, true);
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
   testWithoutContext('IOSDevice.uninstallApp catches ProcessException from ios-deploy', () async {
     final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app');
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[

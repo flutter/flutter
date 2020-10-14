@@ -255,12 +255,6 @@ class IOSDevice extends Device {
       _logger.printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
       return false;
     }
-    void logFailure() {
-      _logger.printError('Could not install ${bundle.path} on $id.');
-      _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
-      _logger.printError('  open ios/Runner.xcworkspace');
-      _logger.printError('');
-    }
 
     int installationResult;
     try {
@@ -278,12 +272,15 @@ class IOSDevice extends Device {
     if (installationResult == 0) {
       return true;
     }
+    _logger.printTrace('application failed to install: $installationResult');
     // If the initial installation fails, attempt to uninstall the app if
-    // it was already installed.
-    if (!await isAppInstalled(app, userIdentifier: userIdentifier) ||
-        !await uninstallApp(app, userIdentifier: userIdentifier)) {
-      logFailure();
-      return false;
+    // it was already installed. Regardless of whether or not this is successful,
+    // try once more to install.
+    if (await isAppInstalled(app, userIdentifier: userIdentifier)) {
+      _logger.printTrace('Uninstalling previously installed application...');
+      if (!await uninstallApp(app, userIdentifier: userIdentifier)) {
+        _logger.printTrace('Failed to uninstall');
+      }
     }
 
     try {
@@ -299,7 +296,10 @@ class IOSDevice extends Device {
     }
 
     if (installationResult != 0) {
-      logFailure();
+      _logger.printError('Could not install ${bundle.path} on $id.');
+      _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
+      _logger.printError('  open ios/Runner.xcworkspace');
+      _logger.printError('');
       return false;
     }
     return true;
