@@ -38,11 +38,14 @@ Iterable<Element> collectAllElementsFrom(
 ///  4   5 6   7
 ///
 /// Will iterate in order 1, 3, 7, 6, 2, 5, 4. This avoids unnecessary
-/// allocation or CPU time, and performance is important here because this
-/// method is on the critical path for flutter_driver and
-/// package:integration_test performance tests.
+/// allocation or CPU time by maintaining a single [ListQueue] to track
+/// iteration and avoiding any reverse iteratino to go in let to right order.
+/// Performance is important here because this method is on the critical path
+/// for flutter_driver and package:integration_test performance tests.
 ///
 /// Performance of this is measured in the all_elements_bench microbenchmark.
+/// Any changes to this implementation should check the before and after numbers
+/// on that benchmark to avoid regressions in general performance test overhead.
 class _DepthFirstChildIterator implements Iterator<Element> {
   _DepthFirstChildIterator(Element rootElement, this.skipOffstage)
     : _stack = ListQueue<Element>() {
