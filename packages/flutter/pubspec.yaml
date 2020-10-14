@@ -45,6 +45,6 @@ dev_dependencies:
 
 dependency_overrides:
   sky_engine:
-    path: ~/dev/engine/src/out/host_debug_unopt/gen/dart-pkg/sky_engine
+    path: /Users/tongmu/dev/engine/src/out/host_debug_unopt/gen/dart-pkg/sky_engine
   sky_services:
-    path: ~/dev/engine/src/out/host_debug_unopt/gen/dart-pkg/sky_services
+    path: /Users/tongmu/dev/engine/src/out/host_debug_unopt/gen/dart-pkg/sky_services
