@@ -298,21 +298,27 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
-    for (final ValidatorTask validatorTask in startValidatorTasks()) {
-      final DoctorValidator validator = validatorTask.validator;
-      final Status status = Status.withSpinner(
-        stopwatch: Stopwatch(),
-        terminal: globals.terminal,
-      );
-      ValidationResult result;
+    final Progress progress = _logger.createDeterminateProgress();
+    progress.start(validators.length, 'Validating...');
+    Future<_DoctorValidationResult> finishValidator(ValidatorTask validatorTask) async {
       try {
-        result = await validatorTask.result;
-        status.stop();
+        final ValidationResult result = await validatorTask.result;
+        return _DoctorValidationResult(result, validatorTask);
       } on Exception catch (exception, stackTrace) {
-        result = ValidationResult.crash(exception, stackTrace);
-        status.cancel();
+        return _DoctorValidationResult(
+          ValidationResult.crash(exception, stackTrace),
+          validatorTask,
+        );
+      } finally {
+        progress.update(1);
       }
-
+    }
+    final List<_DoctorValidationResult> results = await Future.wait(startValidatorTasks().map(finishValidator));
+    progress.finish();
+    
+    for (final _DoctorValidationResult validationResult in results) {
+      final ValidationResult result = validationResult.result;
+      final DoctorValidator validator = validationResult.task.validator;
       switch (result.type) {
         case ValidationType.crash:
           doctorResult = false;
@@ -509,6 +515,12 @@ class GroupedValidator extends DoctorValidator {
     return ValidationResult(mergedType, mergedMessages,
         statusInfo: statusInfo);
   }
+}
+
+class _DoctorValidationResult {
+  _DoctorValidationResult(this.result, this.task);
+  final ValidationResult result;
+  final ValidatorTask task;
 }
 
 @immutable

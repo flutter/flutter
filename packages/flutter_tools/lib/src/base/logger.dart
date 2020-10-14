@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
@@ -21,6 +22,15 @@ class StopwatchFactory {
 
   /// Create a new [Stopwatch] instance.
   Stopwatch createStopwatch() => Stopwatch();
+}
+
+/// A factory for generating [Timer] instances for [Progress] instances.
+class TimerFactory {
+  /// const constructor so that subclasses may be const.
+  const TimerFactory();
+
+  /// Create a new [Timer] instance.
+  Timer createTimer(Duration duration, void Function(Timer) callback) => Timer.periodic(duration, callback);
 }
 
 typedef VoidCallback = void Function();
@@ -130,6 +140,9 @@ abstract class Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   });
 
+  /// Start a determinate progress display.
+  Progress createDeterminateProgress();
+
   /// Send an event to be emitted.
   ///
   /// Only surfaces a value in machine modes, Loggers may ignore this message in
@@ -217,6 +230,9 @@ class DelegatingLogger implements Logger {
 
   @override
   void clear() => _delegate.clear();
+
+  @override
+  Progress createDeterminateProgress() => _delegate.createDeterminateProgress();
 }
 
 /// If [logger] is a [DelegatingLogger], walks the delegate chain and returns
@@ -386,6 +402,14 @@ class StdoutLogger extends Logger {
     writeToStdOut(_terminal.clearScreen() + '\n');
     _status?.resume();
   }
+
+  @override
+  Progress createDeterminateProgress() {
+    if (_terminal.supportsEmoji) {
+      return UnicodeProgress(stdio: _stdio);
+    }
+    return AsciiProgress(stdio: _stdio);
+  }
 }
 
 /// A [StdoutLogger] which replaces Unicode characters that cannot be printed to
@@ -547,6 +571,11 @@ class BufferLogger extends Logger {
       'name': name,
       'args': args
     }));
+  }
+
+  @override
+  Progress createDeterminateProgress() {
+    return SilentProgress();
   }
 }
 
@@ -1040,5 +1069,199 @@ class AnsiStatus extends AnsiSpinner {
   void resume() {
     _startStatus();
     super.resume();
+  }
+}
+
+/// A handle to a determinate progress bar.
+///
+/// The format is roughly:
+///
+///   ` <LABEL> <███████████         > <PERCENT>% <VALUE>/<MAXIMUM> <UNIT>
+abstract class Progress {
+  /// Display a progress bar with a potential of [maximum] and a [label] to the
+  /// left of the bar.
+  ///
+  /// [unit] may be optionally supplied to display after the value/maximum counter.
+  void start(num maximum, String label, { String unit = '' });
+
+  /// Update the progress bar with an additional [delta] amount of progress.
+  ///
+  /// This value will be added to the current progress amount. If the value
+  /// is increased above the configured maximum, it is treated as complete.
+  void update(num delta);
+
+  /// Complete the current progress bar.
+  void finish();
+}
+
+/// A [Progress] implementation that outputs nothing.
+///
+/// This is useful for machine modes where the progress output will not be
+/// surfaced to a user.
+class SilentProgress extends Progress {
+  bool _started = false;
+
+  @override
+  void finish() {
+    if (!_started) {
+      throw StateError('Progress cannot be finished when it has not been started');
+    }
+  }
+
+  @override
+  void start(num maximum, String label, { String unit = '' }) {
+    if (_started) {
+      throw StateError('Progress cannot be started when it is already started');
+    }
+    _started = true;
+  }
+
+  @override
+  void update(num delta) { }
+}
+
+/// A base class for sharing code between the ascii and unicode progress implementations.
+abstract class _TerminalProgress extends Progress {
+  _TerminalProgress(this._stdio, this._timerFactory);
+
+  static const int barWidth = 30;
+  static const String _backspaceChar = '\b';
+  static const Duration _drawDuration = Duration(milliseconds: 32);
+
+  final Stdio _stdio;
+  final TimerFactory _timerFactory;
+
+  num _maximum;
+  String _label;
+  String _unit;
+
+  Timer _timer;
+  num _value = 0;
+  int previousLine = 0;
+  bool _dirty = true;
+
+  String _formatPercentage(double percentage) {
+    final String value = (percentage * 100).toStringAsFixed(2);
+    if (percentage >= 1) {
+      return '$value %';
+    }
+    if (percentage < 0.1) {
+      return '  $value %';
+    }
+    return ' $value %';
+  }
+
+  @override
+  void finish() {
+    if (_timer == null) {
+      throw StateError('Progress cannot be finished when it has not been started');
+    }
+    _timer.cancel();
+    _draw(null);
+    _stdio.stdoutWrite(
+      '${_backspaceChar * previousLine}'
+      '${' ' * previousLine}'
+      '${_backspaceChar * previousLine}',
+    );
+  }
+
+  @override
+  void start(num maximum, String label, { String unit = '' }) {
+    if (_timer != null) {
+      throw StateError('Progress cannot be started when it is already started');
+    }
+    _maximum = maximum;
+    _label = label;
+    _unit = unit;
+    _timer = _timerFactory.createTimer(_drawDuration, _draw);
+    _draw(_timer);
+  }
+
+  void _draw(Timer timer);
+
+  @override
+  void update(num delta) {
+    _value += delta;
+    _dirty = true;
+  }
+}
+
+/// A [Progress] implementation that does not require unicode support.
+///
+/// This layout is the same as described in [Progress], but extended ascii
+/// `█` and `░` squares are used.
+class AsciiProgress extends _TerminalProgress {
+  AsciiProgress({
+    @required Stdio stdio,
+    @visibleForTesting TimerFactory timerFactory = const TimerFactory(),
+  }) : super(stdio, timerFactory);
+
+  @override
+  void _draw(Timer timer) {
+    if (!_dirty) {
+      return;
+    }
+    final double percentage = math.min(_value / _maximum, 1);
+    final int chunks = (math.min(_value / _maximum, 1) * _TerminalProgress.barWidth).round();
+    final int trailingWhitespace = _TerminalProgress.barWidth - chunks;
+    final int filledChunks = math.max(chunks, 0);
+
+    final String message =
+      ' $_label '
+      '${'█' * filledChunks}'
+      '${'░' * trailingWhitespace}'
+      ' '
+      '${_formatPercentage(percentage)}'
+      '  $_value/$_maximum $_unit';
+    _stdio.stdoutWrite(_TerminalProgress._backspaceChar * (previousLine + 1));
+    _stdio.stdoutWrite(message);
+    previousLine = message.codeUnits.length;
+    _dirty = false;
+  }
+}
+
+/// A [Progress] implementation that requires full unicode support.
+///
+/// This layout is the same as described in [Progress], but unicode filled block
+/// characters are used.
+class UnicodeProgress extends _TerminalProgress {
+  UnicodeProgress({
+    @required Stdio stdio,
+    @visibleForTesting TimerFactory timerFactory = const TimerFactory(),
+  }) : super(stdio, timerFactory);
+
+  static const List<String> characters = <String>[
+    '▏',
+    '▎',
+    '▍',
+    '▌',
+    '▋',
+    '▊',
+    '▉',
+    '█',
+  ];
+
+  @override
+  void _draw(Timer timer) {
+    if (!_dirty) {
+      return;
+    }
+    final double percentage = math.min(_value / _maximum, 1);
+    final int chunks = (math.min(_value / _maximum, 1) * _TerminalProgress.barWidth * characters.length).round();
+    final int filledChunks = chunks ~/ 8;
+    final int partialChunk = chunks % 8;
+    final int trailingWhitespace = _TerminalProgress.barWidth - filledChunks;
+    final String message =
+      ' $_label '
+      '${characters.last * filledChunks}'
+      '${percentage < 1 ? characters[partialChunk] : characters.last}'
+      '${'•' * trailingWhitespace}'
+      ' '
+      '${_formatPercentage(percentage)}'
+      '  $_value/$_maximum $_unit';
+    _stdio.stdoutWrite(_TerminalProgress._backspaceChar * (previousLine + 1));
+    _stdio.stdoutWrite(message);
+    previousLine = message.codeUnits.length;
+    _dirty = false;
   }
 }

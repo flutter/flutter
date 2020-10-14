@@ -1049,6 +1049,131 @@ void main() {
       expect(logger.statusText, 'AAA\nBBB\n');
     });
   });
+
+  testWithoutContext('SilentProgress throws StateError if started twice', () {
+    final Progress progress = SilentProgress();
+    progress.start(1, '');
+
+    expect(() => progress.start(1, ''), throwsStateError);
+  });
+
+  testWithoutContext('SilentProgress throws StateError if stopped before it is started', () {
+    final Progress progress = SilentProgress();
+
+    expect(() => progress.finish(), throwsStateError);
+  });
+
+  testWithoutContext('AsciiProgress throws StateError if started twice', () {
+    final Progress progress = AsciiProgress(stdio: mocks.MockStdio());
+    progress.start(1, '');
+
+    expect(() => progress.start(1, ''), throwsStateError);
+  });
+
+  testWithoutContext('AsciiProgress throws StateError if stopped before it is started', () {
+    final Progress progress = AsciiProgress(stdio: mocks.MockStdio());
+
+    expect(() => progress.finish(), throwsStateError);
+  });
+
+  testWithoutContext('UnicodeProgress throws StateError if started twice', () {
+    final Progress progress = UnicodeProgress(stdio: mocks.MockStdio());
+    progress.start(1, '');
+
+    expect(() => progress.start(1, ''), throwsStateError);
+  });
+
+  testWithoutContext('UnicodeProgress throws StateError if stopped before it is started', () {
+    final Progress progress = UnicodeProgress(stdio: mocks.MockStdio());
+
+    expect(() => progress.finish(), throwsStateError);
+  });
+
+  testWithoutContext('AsciiProgress displays progress bars computed from updated value', () {
+    final FakeTimerFactory timerFactory = FakeTimerFactory();
+    final mocks.MockStdio stdio = mocks.MockStdio();
+    final Progress progress = AsciiProgress(stdio: stdio, timerFactory: timerFactory);
+    progress.start(10, 'LABEL', unit: 'UNIT');
+
+    expect(stdio.writtenToStdout, <String>['\b', ' LABEL ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.00 %  0/10 UNIT']);
+
+    progress.update(3);
+    timerFactory.timerCallback(null);
+
+    expect(stdio.writtenToStdout, <String>[
+      '\b',
+      ' LABEL ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.00 %  0/10 UNIT',
+      '\b' * 58,
+      ' LABEL █████████░░░░░░░░░░░░░░░░░░░░░  30.00 %  3/10 UNIT',
+    ]);
+
+    progress.update(7);
+    timerFactory.timerCallback(null);
+
+    expect(stdio.writtenToStdout, <String>[
+      '\b',
+      ' LABEL ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.00 %  0/10 UNIT',
+      '\b' * 58,
+      ' LABEL █████████░░░░░░░░░░░░░░░░░░░░░  30.00 %  3/10 UNIT',
+      '\b' * 58,
+      ' LABEL ██████████████████████████████ 100.00 %  10/10 UNIT'
+    ]);
+
+    progress.finish();
+
+    expect(stdio.writtenToStdout, <String>[
+      '\b',
+      ' LABEL ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0.00 %  0/10 UNIT',
+      '\b' * 58,
+      ' LABEL █████████░░░░░░░░░░░░░░░░░░░░░  30.00 %  3/10 UNIT',
+      '\b' * 58,
+      ' LABEL ██████████████████████████████ 100.00 %  10/10 UNIT',
+      '${'\b' * 58}                                                          ${'\b' * 58}'
+    ]);
+  });
+
+  testWithoutContext('UnicodeProgress displays progress bars computed from updated value', () {
+    final FakeTimerFactory timerFactory = FakeTimerFactory();
+    final mocks.MockStdio stdio = mocks.MockStdio();
+    final Progress progress = UnicodeProgress(stdio: stdio, timerFactory: timerFactory);
+    progress.start(10, 'LABEL', unit: 'UNIT');
+
+    expect(stdio.writtenToStdout, <String>['\b', ' LABEL ▏••••••••••••••••••••••••••••••   0.00 %  0/10 UNIT']);
+
+    progress.update(3);
+    timerFactory.timerCallback(null);
+
+    expect(stdio.writtenToStdout, <String>[
+      '\b',
+      ' LABEL ▏••••••••••••••••••••••••••••••   0.00 %  0/10 UNIT',
+      '\b' * 59,
+      ' LABEL █████████▏•••••••••••••••••••••  30.00 %  3/10 UNIT',
+    ]);
+
+    progress.update(7);
+    timerFactory.timerCallback(null);
+
+    expect(stdio.writtenToStdout, <String>[
+      '\b',
+      ' LABEL ▏••••••••••••••••••••••••••••••   0.00 %  0/10 UNIT',
+      '\b' * 59,
+      ' LABEL █████████▏•••••••••••••••••••••  30.00 %  3/10 UNIT',
+      '\b' * 59,
+      ' LABEL ███████████████████████████████ 100.00 %  10/10 UNIT'
+    ]);
+
+    progress.finish();
+
+    expect(stdio.writtenToStdout, <String>[
+      '\b',
+      ' LABEL ▏••••••••••••••••••••••••••••••   0.00 %  0/10 UNIT',
+      '\b' * 59,
+      ' LABEL █████████▏•••••••••••••••••••••  30.00 %  3/10 UNIT',
+      '\b' * 59,
+      ' LABEL ███████████████████████████████ 100.00 %  10/10 UNIT',
+      '${'\b' * 59}                                                           ${'\b' * 59}',
+    ]);
+  });
 }
 
 class FakeStopwatch implements Stopwatch {
@@ -1132,3 +1257,18 @@ Matcher _matchesInvocation(Invocation expected) {
 /// to [FakeLogger].
 Matcher _throwsInvocationFor(dynamic Function() fakeCall) =>
   throwsA(_matchesInvocation(_invocationFor(fakeCall)));
+
+class FakeTimerFactory implements TimerFactory {
+  void Function(Timer) timerCallback;
+
+  @override
+  Timer createTimer(Duration duration, void Function(Timer) callback) {
+    timerCallback = callback;
+    return FakeTimer();
+  }
+}
+
+class FakeTimer extends Fake implements Timer {
+  @override
+  void cancel() { }
+}

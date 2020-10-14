@@ -707,6 +707,12 @@ class StreamLogger extends Logger {
 
   @override
   void clear() => _log('[stdout] ${globals.terminal.clearScreen()}\n');
+
+  @override
+  Progress createDeterminateProgress() {
+    _log('[progress]');
+    return SilentProgress();
+  }
 }
 
 class LoggerInterrupted implements Exception {
