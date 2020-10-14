@@ -126,9 +126,11 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
       'Retrying to download...'
     );
     try {
-      final Directory directory = globals.fs.directory(
-        globals.fs.path.join(globals.platform.environment['HOME'], '.gradle'));
-      ErrorHandlingFileSystem.deleteIfExists(directory, recursive: true);
+      final String homeDir = globals.platform.environment['HOME'];
+      if (homeDir != null) {
+        final Directory directory = globals.fs.directory(globals.fs.path.join(homeDir, '.gradle'));
+        ErrorHandlingFileSystem.deleteIfExists(directory, recursive: true);
+      }
     } on FileSystemException catch (err) {
       globals.printTrace('Failed to delete Gradle cache: $err');
     }
