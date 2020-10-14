@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class ScrollPositionListener extends StatefulWidget {
-  const ScrollPositionListener({ Key key, this.child, this.log}) : super(key: key);
+  const ScrollPositionListener({ Key? key, required this.child, required this.log}) : super(key: key);
 
   final Widget child;
   final ValueChanged<String> log;
@@ -18,7 +16,7 @@ class ScrollPositionListener extends StatefulWidget {
 }
 
 class _ScrollPositionListenerState extends State<ScrollPositionListener> {
-  ScrollPosition _position;
+  ScrollPosition? _position;
 
   @override
   void didChangeDependencies() {
@@ -26,7 +24,7 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
     _position?.removeListener(listener);
     _position = Scrollable.of(context)?.position;
     _position?.addListener(listener);
-    widget.log('didChangeDependencies ${_position?.pixels?.toStringAsFixed(1)}');
+    widget.log('didChangeDependencies ${_position?.pixels.toStringAsFixed(1)}');
   }
 
   @override
@@ -39,20 +37,20 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
   Widget build(BuildContext context) => widget.child;
 
   void listener() {
-    widget.log('listener ${_position?.pixels?.toStringAsFixed(1)}');
+    widget.log('listener ${_position?.pixels.toStringAsFixed(1)}');
   }
 
 }
 
 void main() {
   testWidgets('Scrollable.of() dependent rebuilds when Scrollable position changes', (WidgetTester tester) async {
-    String logValue;
+    late String logValue;
     final ScrollController controller = ScrollController();
 
     // Changing the SingleChildScrollView's physics causes the
     // ScrollController's ScrollPosition to be rebuilt.
 
-    Widget buildFrame(ScrollPhysics physics) {
+    Widget buildFrame(ScrollPhysics? physics) {
       return SingleChildScrollView(
         controller: controller,
         physics: physics,
@@ -86,7 +84,7 @@ void main() {
   });
 
   testWidgets('Scrollable.of() is possible using ScrollNotification context', (WidgetTester tester) async {
-    ScrollNotification notification;
+    late ScrollNotification notification;
 
     await tester.pumpWidget(NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification value) {
@@ -102,6 +100,6 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     final StatefulElement scrollableElement = find.byType(Scrollable).evaluate().first as StatefulElement;
-    expect(Scrollable.of(notification.context), equals(scrollableElement.state));
+    expect(Scrollable.of(notification.context!), equals(scrollableElement.state));
   });
 }
