@@ -6050,6 +6050,49 @@ void main() {
       expect(state.currentTextEditingValue.text, 'abcde');
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/68086.
+    testWidgets('enforced composing truncated', (WidgetTester tester) async {
+      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
+        maxLength,
+        composingMaxLengthEnforced: true,
+      );
+      final Widget widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          inputFormatters: <TextInputFormatter>[formatter],
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Initially we're at maxLength with no composing text.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // When it's not longer than `maxLength`, it can still start composing.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde', composing: TextRange(start: 3, end: 5)));
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+
+      // `newValue` will be truncated if `composingMaxLengthEnforced`.
+      state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 3, end: 6)));
+      expect(state.currentTextEditingValue.text, 'abcde');
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+
+      // Reset the value.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start composing with a longer value, it should be the same state.
+      state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 3, end: 6)));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+    });
   });
 
   group('callback errors', () {
