@@ -21,9 +21,12 @@ import 'package:test_api/src/backend/state.dart'; // ignore: implementation_impo
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart';
 
-Declarer _localDeclarer;
+// ignore: deprecated_member_use
+export 'package:test_api/fake.dart' show Fake;
+
+Declarer? _localDeclarer;
 Declarer get _declarer {
-  final Declarer declarer = Zone.current[#test.declarer] as Declarer;
+  final Declarer? declarer = Zone.current[#test.declarer] as Declarer?;
   if (declarer != null) {
     return declarer;
   }
@@ -40,7 +43,7 @@ Declarer get _declarer {
       });
     });
   }
-  return _localDeclarer;
+  return _localDeclarer!;
 }
 
 Future<void> _runGroup(Suite suiteConfig, Group group, List<Group> parents, _Reporter reporter) async {
@@ -49,7 +52,7 @@ Future<void> _runGroup(Suite suiteConfig, Group group, List<Group> parents, _Rep
     final bool skipGroup = group.metadata.skip;
     bool setUpAllSucceeded = true;
     if (!skipGroup && group.setUpAll != null) {
-      final LiveTest liveTest = group.setUpAll.load(suiteConfig, groups: parents);
+      final LiveTest liveTest = group.setUpAll!.load(suiteConfig, groups: parents);
       await _runLiveTest(suiteConfig, liveTest, reporter, countSuccess: false);
       setUpAllSucceeded = liveTest.state.result.isPassing;
     }
@@ -68,7 +71,7 @@ Future<void> _runGroup(Suite suiteConfig, Group group, List<Group> parents, _Rep
     // Even if we're closed or setUpAll failed, we want to run all the
     // teardowns to ensure that any state is properly cleaned up.
     if (!skipGroup && group.tearDownAll != null) {
-      final LiveTest liveTest = group.tearDownAll.load(suiteConfig, groups: parents);
+      final LiveTest liveTest = group.tearDownAll!.load(suiteConfig, groups: parents);
       await _runLiveTest(suiteConfig, liveTest, reporter, countSuccess: false);
     }
   } finally {
@@ -155,12 +158,12 @@ Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, 
 void test(
   Object description,
   dynamic Function() body, {
-  String testOn,
-  Timeout timeout,
+  String? testOn,
+  Timeout? timeout,
   dynamic skip,
   dynamic tags,
-  Map<String, dynamic> onPlatform,
-  int retry,
+  Map<String, dynamic>? onPlatform,
+  int? retry,
 }) {
   _declarer.test(
     description.toString(),
@@ -300,21 +303,21 @@ class _Reporter {
 
   /// The size of `_engine.passed` last time a progress notification was
   /// printed.
-  int _lastProgressPassed;
+  int? _lastProgressPassed;
 
   /// The size of `_engine.skipped` last time a progress notification was
   /// printed.
-  int _lastProgressSkipped;
+  int? _lastProgressSkipped;
 
   /// The size of `_engine.failed` last time a progress notification was
   /// printed.
-  int _lastProgressFailed;
+  int? _lastProgressFailed;
 
   /// The message printed for the last progress notification.
-  String _lastProgressMessage;
+  String? _lastProgressMessage;
 
   /// The suffix added to the last progress notification.
-  String _lastProgressSuffix;
+  String? _lastProgressSuffix;
 
   /// The set of all subscriptions to various streams.
   final Set<StreamSubscription<void>> _subscriptions = <StreamSubscription<void>>{};
@@ -355,14 +358,8 @@ class _Reporter {
   }
 
   /// A callback called when the engine is finished running tests.
-  ///
-  /// [success] will be `true` if all tests passed, `false` if some tests
-  /// failed, and `null` if the engine was closed prematurely.
   void _onDone() {
     final bool success = failed.isEmpty;
-    if (success == null) {
-      return;
-    }
     if (!success) {
       _progressLine('Some tests failed.', color: _red);
     } else if (passed.isEmpty) {
@@ -377,7 +374,7 @@ class _Reporter {
   /// [message] goes after the progress report. If [color] is passed, it's used
   /// as the color for [message]. If [suffix] is passed, it's added to the end
   /// of [message].
-  void _progressLine(String message, { String color, String suffix }) {
+  void _progressLine(String message, { String? color, String? suffix }) {
     // Print nothing if nothing has changed since the last progress line.
     if (passed.length == _lastProgressPassed &&
         skipped.length == _lastProgressSkipped &&
@@ -449,15 +446,15 @@ class _Reporter {
   }
 }
 
-String _indent(String string, { int size, String first }) {
+String _indent(String string, { int? size, String? first }) {
   size ??= first == null ? 2 : first.length;
   return _prefixLines(string, ' ' * size, first: first);
 }
 
-String _prefixLines(String text, String prefix, { String first, String last, String single }) {
+String _prefixLines(String text, String prefix, { String? first, String? last, String? single }) {
   first ??= prefix;
   last ??= prefix;
-  single ??= first ?? last ?? prefix;
+  single ??= first;
   final List<String> lines = text.split('\n');
   if (lines.length == 1) {
     return '$single$text';

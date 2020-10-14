@@ -148,7 +148,7 @@ class FlutterLogoDecoration extends Decoration {
     assert(debugAssertIsValid());
     if (a == null || a is FlutterLogoDecoration) {
       assert(a == null || a.debugAssertIsValid());
-      return FlutterLogoDecoration.lerp(a as FlutterLogoDecoration, this, t);
+      return FlutterLogoDecoration.lerp(a as FlutterLogoDecoration?, this, t);
     }
     return super.lerpFrom(a, t) as FlutterLogoDecoration?;
   }
@@ -158,7 +158,7 @@ class FlutterLogoDecoration extends Decoration {
     assert(debugAssertIsValid());
     if (b == null || b is FlutterLogoDecoration) {
       assert(b == null || b.debugAssertIsValid());
-      return FlutterLogoDecoration.lerp(this, b as FlutterLogoDecoration, t);
+      return FlutterLogoDecoration.lerp(this, b as FlutterLogoDecoration?, t);
     }
     return super.lerpTo(b, t) as FlutterLogoDecoration?;
   }
@@ -330,7 +330,7 @@ class _FlutterLogoPainter extends BoxPainter {
     final Size canvasSize = _config.margin.deflateSize(configuration.size!);
     if (canvasSize.isEmpty)
       return;
-    Size logoSize;
+    final Size logoSize;
     if (_config._position > 0.0) {
       // horizontal style
       logoSize = const Size(820.0, 232.0);
@@ -352,7 +352,7 @@ class _FlutterLogoPainter extends BoxPainter {
       centerSquareHeight,
     );
 
-    Rect logoTargetSquare;
+    final Rect logoTargetSquare;
     if (_config._position > 0.0) {
       // horizontal style
       logoTargetSquare = Rect.fromLTWH(rect.left, rect.top, rect.height, rect.height);

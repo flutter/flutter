@@ -273,7 +273,7 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
   /// [RestorationMixin.registerForRestoration].
   T get value {
     assert(isRegistered);
-    return _value as T;
+    return _value!;
   }
   T? _value;
 
@@ -292,6 +292,43 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
   }
 }
 
+/// A base class for creating a [RestorableProperty] that stores and restores a
+/// [ChangeNotifier].
+///
+/// This class may be used to implement a [RestorableProperty] for a
+/// [ChangeNotifier], whose information it needs to store in the restoration
+/// data change whenever the [ChangeNotifier] notifies its listeners.
+///
+/// The [RestorationMixin] this property is registered with will call
+/// [toPrimitives] whenever the wrapped [ChangeNotifier] notifies its listeners
+/// to update the information that this property has stored in the restoration
+/// data.
+///
+/// Furthermore, the property will dispose the wrapped [ChangeNotifier] when
+/// either the property itself is disposed or its value is replaced with another
+/// [ChangeNotifier] instance.
+abstract class RestorableChangeNotifier<T extends ChangeNotifier> extends RestorableListenable<T> {
+  @override
+  void initWithValue(T value) {
+    _diposeOldValue();
+    super.initWithValue(value);
+  }
+
+  @override
+  void dispose() {
+    _diposeOldValue();
+    super.dispose();
+  }
+
+  void _diposeOldValue() {
+    if (_value != null) {
+      // Scheduling a microtask for dispose to give other entities a chance
+      // to remove their listeners first.
+      scheduleMicrotask(_value!.dispose);
+    }
+  }
+}
+
 /// A [RestorableProperty] that knows how to store and restore a
 /// [TextEditingController].
 ///
@@ -299,7 +336,7 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
 /// state restoration, the property will restore [TextEditingController.text] to
 /// the value it had when the restoration data it is getting restored from was
 /// collected.
-class RestorableTextEditingController extends RestorableListenable<TextEditingController> {
+class RestorableTextEditingController extends RestorableChangeNotifier<TextEditingController> {
   /// Creates a [RestorableTextEditingController].
   ///
   /// This constructor treats a null `text` argument as if it were the empty
@@ -330,28 +367,5 @@ class RestorableTextEditingController extends RestorableListenable<TextEditingCo
   @override
   Object toPrimitives() {
     return value.text;
-  }
-
-  TextEditingController? _controller;
-
-  @override
-  void initWithValue(TextEditingController value) {
-    _disposeControllerIfNecessary();
-    _controller = value;
-    super.initWithValue(value);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _disposeControllerIfNecessary();
-  }
-
-  void _disposeControllerIfNecessary() {
-    if (_controller != null) {
-      // Scheduling a microtask for dispose to give other entities a chance
-      // to remove their listeners first.
-      scheduleMicrotask(_controller!.dispose);
-    }
   }
 }

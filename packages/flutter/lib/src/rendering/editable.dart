@@ -1999,15 +1999,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     offset.applyContentDimensions(0.0, _maxScrollExtent);
   }
 
+  /// Computes the offset to apply to the given [caretRect] so it perfectly
+  /// snaps to physical pixels.
   Offset _getPixelPerfectCursorOffset(Rect caretRect) {
     final Offset caretPosition = localToGlobal(caretRect.topLeft);
     final double pixelMultiple = 1.0 / _devicePixelRatio;
     final double pixelPerfectOffsetX = caretPosition.dx.isFinite
       ? (caretPosition.dx / pixelMultiple).round() * pixelMultiple - caretPosition.dx
-      : caretPosition.dx;
+      : 0;
     final double pixelPerfectOffsetY = caretPosition.dy.isFinite
       ? (caretPosition.dy / pixelMultiple).round() * pixelMultiple - caretPosition.dy
-      : caretPosition.dy;
+      : 0;
     return Offset(pixelPerfectOffsetX, pixelPerfectOffsetY);
   }
 
@@ -2285,12 +2287,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   void paint(PaintingContext context, Offset offset) {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    if (_hasVisualOverflow && clipBehavior != Clip.none)
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents, clipBehavior: clipBehavior);
-    else
+    if (_hasVisualOverflow && clipBehavior != Clip.none) {
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents,
+          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+    } else {
+      _clipRectLayer = null;
       _paintContents(context, offset);
+    }
     _paintHandleLayers(context, getEndpointsForSelection(selection!));
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;

@@ -245,7 +245,12 @@ class Router<T> extends StatefulWidget {
     this.routeInformationParser,
     required this.routerDelegate,
     this.backButtonDispatcher,
-  })  : assert(routeInformationProvider == null || routeInformationParser != null),
+  })  : assert(
+          (routeInformationProvider == null) == (routeInformationParser == null),
+          'You must provide both routeInformationProvider and routeInformationParser '
+          'if this router parses route information. Otheriwse, they should both '
+          'be null.'
+        ),
         assert(routerDelegate != null),
         super(key: key);
 
@@ -297,10 +302,19 @@ class Router<T> extends StatefulWidget {
   /// router to create a [ChildBackButtonDispatcher] for a nested router.
   /// Another use case may be updating the value in [routeInformationProvider]
   /// to navigate to a new route.
-  static Router<dynamic> of(BuildContext context) {
-    final _RouterScope scope = context.dependOnInheritedWidgetOfExactType<_RouterScope>()!;
-    assert(scope != null);
-    return scope.routerState.widget;
+  static Router<dynamic>? of(BuildContext context, {bool nullOk = false}) {
+    final _RouterScope? scope = context.dependOnInheritedWidgetOfExactType<_RouterScope>();
+    assert(() {
+      if (scope == null && !nullOk) {
+        throw FlutterError(
+          'Router operation requested with a context that does not include a Router.\n'
+          'The context used to retrieve the Router must be that of a widget that '
+          'is a descendant of a Router widget.'
+        );
+      }
+      return true;
+    }());
+    return scope?.routerState.widget;
   }
 
   /// Forces the [Router] to run the [callback] and reports the route

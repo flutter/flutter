@@ -1503,7 +1503,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   // Update function to be called whenever the state relating to highlightMode
   // changes.
   void _updateHighlightMode() {
-    FocusHighlightMode newMode;
+    final FocusHighlightMode newMode;
     switch (highlightStrategy) {
       case FocusHighlightStrategy.automatic:
         if (_lastInteractionWasTouch == null) {
@@ -1587,7 +1587,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   final FocusScopeNode rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
 
   void _handlePointerEvent(PointerEvent event) {
-    FocusHighlightMode expectedMode;
+    final FocusHighlightMode expectedMode;
     switch (event.kind) {
       case PointerDeviceKind.touch:
       case PointerDeviceKind.stylus:
@@ -1745,7 +1745,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     properties.add(FlagProperty('haveScheduledUpdate', value: _haveScheduledUpdate, ifTrue: 'UPDATE SCHEDULED'));
     properties.add(DiagnosticsProperty<FocusNode>('primaryFocus', primaryFocus, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('nextFocus', _markedForFocus, defaultValue: null));
-    final Element element = primaryFocus?.context as Element;
+    final Element? element = primaryFocus?.context as Element?;
     if (element != null) {
       properties.add(DiagnosticsProperty<String>('primaryFocusCreator', element.debugGetCreatorChain(20)));
     }

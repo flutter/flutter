@@ -93,7 +93,8 @@ final DecorationTween _kGradientShadowTween = DecorationTween(
 ///  * [CupertinoPageRoute], which is a [PageRoute] that leverages this mixin.
 mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   /// Builds the primary contents of the route.
-  WidgetBuilder get builder;
+  @protected
+  Widget buildContent(BuildContext context);
 
   /// {@template flutter.cupertino.cupertinoRouteTransitionMixin.title}
   /// A title string for this route.
@@ -224,7 +225,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget child = builder(context);
+    final Widget child = buildContent(context);
     final Widget result = Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
@@ -348,11 +349,15 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
   }) : assert(builder != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
-       assert(opaque),
-       super(settings: settings, fullscreenDialog: fullscreenDialog);
+       super(settings: settings, fullscreenDialog: fullscreenDialog) {
+    assert(opaque);
+  }
+
+  /// Builds the primary contents of the route.
+  final WidgetBuilder builder;
 
   @override
-  final WidgetBuilder builder;
+  Widget buildContent(BuildContext context) => builder(context);
 
   @override
   final String? title;
@@ -372,13 +377,14 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
   _PageBasedCupertinoPageRoute({
     required CupertinoPage<T> page,
   }) : assert(page != null),
-       assert(opaque),
-       super(settings: page);
+       super(settings: page) {
+    assert(opaque);
+  }
 
   CupertinoPage<T> get _page => settings as CupertinoPage<T>;
 
   @override
-  WidgetBuilder get builder => _page.builder;
+  Widget buildContent(BuildContext context) => _page.child;
 
   @override
   String? get title => _page.title;
@@ -412,20 +418,20 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
 class CupertinoPage<T> extends Page<T> {
   /// Creates a cupertino page.
   const CupertinoPage({
-    required this.builder,
+    required this.child,
     this.maintainState = true,
     this.title,
     this.fullscreenDialog = false,
     LocalKey? key,
     String? name,
     Object? arguments,
-  }) : assert(builder != null),
+  }) : assert(child != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
        super(key: key, name: name, arguments: arguments);
 
-  /// Builds the primary contents of the route.
-  final WidgetBuilder builder;
+  /// The content to be shown in the [Route] created by this page.
+  final Widget child;
 
   /// {@macro flutter.cupertino.cupertinoRouteTransitionMixin.title}
   final String? title;
@@ -750,7 +756,7 @@ class _CupertinoBackGestureController<T> {
     // This curve has been determined through rigorously eyeballing native iOS
     // animations.
     const Curve animationCurve = Curves.fastLinearToSlowEaseIn;
-    bool animateForward;
+    final bool animateForward;
 
     // If the user releases the page before mid screen with sufficient velocity,
     // or after mid screen, we should animate the page out. Otherwise, the page
@@ -905,7 +911,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
     // its parent box one box width on the start side of the box.
     final TextDirection? textDirection = configuration.textDirection;
     assert(textDirection != null);
-    double deltaX;
+    final double deltaX;
     switch (textDirection!) {
       case TextDirection.rtl:
         deltaX = configuration.size!.width;
@@ -927,6 +933,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     required this.barrierColor,
     required this.barrierLabel,
     required this.builder,
+    bool? barrierDismissible,
     bool? semanticsDismissible,
     required ImageFilter? filter,
     RouteSettings? settings,
@@ -934,10 +941,14 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
          filter: filter,
          settings: settings,
        ) {
+    _barrierDismissible = barrierDismissible;
     _semanticsDismissible = semanticsDismissible;
   }
 
   final WidgetBuilder builder;
+
+  bool? _barrierDismissible;
+
   bool? _semanticsDismissible;
 
   @override
@@ -947,7 +958,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   final Color? barrierColor;
 
   @override
-  bool get barrierDismissible => true;
+  bool get barrierDismissible => _barrierDismissible ?? true;
 
   @override
   bool get semanticsDismissible => _semanticsDismissible ?? false;
@@ -1006,12 +1017,22 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// It is only used when the method is called. Its corresponding widget can be
 /// safely removed from the tree before the popup is closed.
 ///
+/// The `barrierColor` argument determines the [Color] of the barrier underneath
+/// the popup. When unspecified, the barrier color defaults to a light opacity
+/// black scrim based on iOS's dialog screens.
+///
+/// The `barrierDismissible` argument determines whether clicking outside the
+/// popup results in dismissal. It is `true` by default.
+///
 /// The `useRootNavigator` argument is used to determine whether to push the
 /// popup to the [Navigator] furthest from or nearest to the given `context`. It
 /// is `false` by default.
 ///
 /// The `semanticsDismissible` argument is used to determine whether the
 /// semantics of the modal barrier are included in the semantics tree.
+///
+/// The `routeSettings` argument is used to provide [RouteSettings] to the
+/// created Route.
 ///
 /// The `builder` argument typically builds a [CupertinoActionSheet] widget.
 /// Content below the widget is dimmed with a [ModalBarrier]. The widget built
@@ -1032,17 +1053,22 @@ Future<T> showCupertinoModalPopup<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   ImageFilter? filter,
+  Color barrierColor = _kModalBarrierColor,
+  bool barrierDismissible = true,
   bool useRootNavigator = true,
   bool? semanticsDismissible,
+  RouteSettings? routeSettings,
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator)!.push(
     _CupertinoModalPopupRoute<T>(
-      barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
+      barrierColor: CupertinoDynamicColor.resolve(barrierColor, context),
+      barrierDismissible: barrierDismissible,
       barrierLabel: 'Dismiss',
       builder: builder,
       filter: filter,
       semanticsDismissible: semanticsDismissible,
+      settings: routeSettings,
     ),
   );
 }

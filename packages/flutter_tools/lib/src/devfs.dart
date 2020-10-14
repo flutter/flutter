@@ -207,6 +207,9 @@ class DevFSException implements Exception {
   final String message;
   final dynamic error;
   final StackTrace stackTrace;
+
+  @override
+  String toString() => 'DevFSException($message, $error, $stackTrace)';
 }
 
 /// Interface responsible for syncing asset files to a development device.
@@ -239,7 +242,11 @@ class _DevFSHttpWriter implements DevFSWriter {
   final String fsName;
   final Uri httpAddress;
 
-  static const int kMaxInFlight = 6;
+  // 3 was chosen to try to limit the variance in the time it takes to execute
+  // `await request.close()` since there is a known bug in Dart where it doesn't
+  // always return a status code in response to a PUT request:
+  // https://github.com/dart-lang/sdk/issues/43525.
+  static const int kMaxInFlight = 3;
 
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
@@ -289,13 +296,29 @@ class _DevFSHttpWriter implements DevFSWriter {
           _osUtils,
         );
         await request.addStream(contents);
-        final HttpClientResponse response = await request.close();
-        response.listen((_) {},
-          onError: (dynamic error) {
-            _logger.printTrace('error: $error');
-          },
-          cancelOnError: true,
-        );
+        // The contents has already been streamed, closing the request should
+        // not take long but we are experiencing hangs with it, see #63869.
+        //
+        // Once the bug in Dart is solved we can remove the timeout
+        // (https://github.com/dart-lang/sdk/issues/43525).  The timeout was
+        // chosen to be inflated based on the max observed time when running the
+        // tests in "Google Tests".
+        try {
+          final HttpClientResponse response = await request.close().timeout(
+            const Duration(milliseconds: 10000));
+          response.listen((_) {},
+            onError: (dynamic error) {
+              _logger.printTrace('error: $error');
+            },
+            cancelOnError: true,
+          );
+        } on TimeoutException {
+          request.abort();
+          // This should throw "HttpException: Request has been aborted".
+          await request.done;
+          // Just to be safe we rethrow the TimeoutException.
+          rethrow;
+        }
         break;
       } on Exception catch (error, trace) {
         if (!_completer.isCompleted) {
@@ -379,6 +402,7 @@ class DevFS {
 
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
+  DateTime _previousCompiled;
   PackageConfig lastPackageConfig;
   File _widgetCacheOutputFile;
 
@@ -420,6 +444,20 @@ class DevFS {
     _logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
   }
 
+  /// Mark the [lastCompiled] time to the previous successful compile.
+  ///
+  /// Sometimes a hot reload will be rejected by the VM due to a change in the
+  /// structure of the code not supporting the hot reload. In these cases,
+  /// the best resolution is a hot restart. However, the resident runner
+  /// will not recognize this file as having been changed since the delta
+  /// will already have been accepted. Instead, reset the compile time so
+  /// that the last updated files are included in subsequent compilations until
+  /// a reload is accepted.
+  void resetLastCompiled() {
+    lastCompiled = _previousCompiled;
+  }
+
+
   /// If the build method of a single widget was modified, return the widget name.
   ///
   /// If any other changes were made, or there is an error scanning the file,
@@ -452,7 +490,6 @@ class DevFS {
     String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
-    bool skipAssets = false,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
@@ -462,29 +499,7 @@ class DevFS {
 
     // Update modified files
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
-
     int syncedBytes = 0;
-    if (bundle != null && !skipAssets) {
-      final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
-      // We write the assets into the AssetBundle working dir so that they
-      // are in the same location in DevFS and the iOS simulator.
-      final String assetDirectory = getAssetBuildDirectory();
-      bundle.entries.forEach((String archivePath, DevFSContent content) {
-        final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
-        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
-          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-        }
-        // Only update assets if they have been modified, or if this is the
-        // first upload of the asset bundle.
-        if (content.isModified || (bundleFirstUpload && archivePath != null)) {
-          dirtyEntries[deviceUri] = content;
-          syncedBytes += content.size;
-          if (archivePath != null && !bundleFirstUpload) {
-            assetPathsToEvict.add(archivePath);
-          }
-        }
-      });
-    }
     if (fullRestart) {
       generator.reset();
     }
@@ -492,16 +507,43 @@ class DevFS {
     // this will produce a full dill. Subsequent invocations will produce incremental
     // dill files that depend on the invalidated files.
     _logger.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
-    final CompilerOutput compilerOutput = await generator.recompile(
+
+    // Await the compiler response after checking if the bundle is updated. This allows the file
+    // stating to be done while waiting for the frontend_server response.
+    final Future<CompilerOutput> pendingCompilerOutput = generator.recompile(
       mainUri,
       invalidatedFiles,
       outputPath: dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packageConfig: packageConfig,
     );
+    if (bundle != null) {
+      // The tool writes the assets into the AssetBundle working dir so that they
+      // are in the same location in DevFS and the iOS simulator.
+      final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
+      final String assetDirectory = getAssetBuildDirectory();
+      bundle.entries.forEach((String archivePath, DevFSContent content) {
+        // If the content is backed by a real file, isModified will file stat and return true if
+        // it was modified since the last time this was called.
+        if (!content.isModified || bundleFirstUpload) {
+          return;
+        }
+        final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
+        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
+          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+        }
+        dirtyEntries[deviceUri] = content;
+        syncedBytes += content.size;
+        if (archivePath != null && !bundleFirstUpload) {
+          assetPathsToEvict.add(archivePath);
+        }
+      });
+    }
+    final CompilerOutput compilerOutput = await pendingCompilerOutput;
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
     }
     // Only update the last compiled time if we successfully compiled.
+    _previousCompiled = lastCompiled;
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
     sources = compilerOutput.sources;
@@ -511,16 +553,13 @@ class DevFS {
     if (!bundleFirstUpload) {
       final String compiledBinary = compilerOutput?.outputFilename;
       if (compiledBinary != null && compiledBinary.isNotEmpty) {
-        final Uri entryUri = _fileSystem.path.toUri(projectRootPath != null
-          ? _fileSystem.path.relative(pathToReload, from: projectRootPath)
-          : pathToReload,
-        );
+        final Uri entryUri = _fileSystem.path.toUri(pathToReload);
         final DevFSFileContent content = DevFSFileContent(_fileSystem.file(compiledBinary));
         syncedBytes += content.size;
         dirtyEntries[entryUri] = content;
       }
     }
-    _logger.printTrace('Updating files');
+    _logger.printTrace('Updating files.');
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri, _httpWriter);
     }

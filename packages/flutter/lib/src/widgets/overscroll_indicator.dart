@@ -200,7 +200,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
-    String showDescription;
+    final String showDescription;
     if (showLeading && showTrailing) {
       showDescription = 'both sides';
     } else if (showLeading) {
@@ -289,7 +289,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
           assert(notification.overscroll != 0.0);
           if (notification.dragDetails != null) {
             assert(notification.dragDetails!.globalPosition != null);
-            final RenderBox renderer = notification.context!.findRenderObject() as RenderBox;
+            final RenderBox renderer = notification.context!.findRenderObject()! as RenderBox;
             assert(renderer != null);
             assert(renderer.hasSize);
             final Size size = renderer.size;

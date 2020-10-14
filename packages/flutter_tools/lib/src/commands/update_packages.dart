@@ -40,14 +40,14 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'fake_async': '1.2.0-nullsafety.1',
   'js': '0.6.3-nullsafety.1',
   'matcher': '0.12.10-nullsafety.1',
-  'meta': '1.3.0-nullsafety.3',
+  'meta': '1.3.0-nullsafety.4',
   'path': '1.8.0-nullsafety.1',
   'pedantic': '1.10.0-nullsafety.1',
   'pool': '1.5.0-nullsafety.1',
   'source_maps': '0.10.10-nullsafety.1',
   'source_map_stack_trace': '2.1.0-nullsafety.2',
   'source_span': '1.8.0-nullsafety.2',
-  'stack_trace': '1.10.0-nullsafety.1',
+  'stack_trace': '1.10.0-nullsafety.2',
   'stream_channel': '2.1.0-nullsafety.1',
   'string_scanner': '1.1.0-nullsafety.1',
   'term_glyph': '1.2.0-nullsafety.1',
@@ -146,7 +146,6 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<void> _downloadCoverageData() async {
     final Status status = globals.logger.startProgress(
       'Downloading lcov data for package:flutter...',
-      timeout: timeoutConfiguration.slowOperation,
     );
     final String urlBase = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
     final Uri coverageUri = Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info');
@@ -518,7 +517,7 @@ enum DependencyKind {
   // "sdk" dependency in the dependency_overrides section.
   overridden,
 
-  // A depdendency that uses git.
+  // A dependency that uses git.
   git,
 }
 
@@ -812,7 +811,7 @@ class PubspecYaml {
             // Since we're in one of the places where we can list dependencies,
             // remember this as the current last known valid place to insert our
             // transitive dev dependencies. If the section is for regular dependencies,
-            // then also rememeber the line for the end of direct dependencies.
+            // then also remember the line for the end of direct dependencies.
             if (section == Section.dependencies) {
               endOfDirectDependencies = output.length;
             }

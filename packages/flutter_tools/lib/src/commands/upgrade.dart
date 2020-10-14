@@ -37,7 +37,7 @@ class UpgradeCommand extends FlutterCommand {
       ..addOption(
         'working-directory',
         hide: true,
-        help: 'Override the upgrade working directoy for integration testing.'
+        help: 'Override the upgrade working directory for integration testing.'
       );
   }
 
@@ -59,7 +59,7 @@ class UpgradeCommand extends FlutterCommand {
       force: boolArg('force'),
       continueFlow: boolArg('continue'),
       testFlow: stringArg('working-directory') != null,
-      gitTagVersion: GitTagVersion.determine(processUtils),
+      gitTagVersion: GitTagVersion.determine(globals.processUtils),
       flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
         : FlutterVersion(const SystemClock(), _commandRunner.workingDirectory),
@@ -107,7 +107,7 @@ class UpgradeCommandRunner {
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
       // If the commit is a recognized branch and not master,
       // explain that we are avoiding potential damage.
-      if (flutterVersion.channel != 'master' && FlutterVersion.officialChannels.contains(flutterVersion.channel)) {
+      if (flutterVersion.channel != 'master' && kOfficialChannels.contains(flutterVersion.channel)) {
         throwToolExit(
           'Unknown flutter tag. Abandoning upgrade to avoid destroying local '
           'changes. It is recommended to use git directly if not working on '
@@ -124,7 +124,7 @@ class UpgradeCommandRunner {
     }
     // If there are uncommitted changes we might be on the right commit but
     // we should still warn.
-    if (!force && await hasUncomittedChanges()) {
+    if (!force && await hasUncommittedChanges()) {
       throwToolExit(
         'Your flutter checkout has local changes that would be erased by '
         'upgrading. If you want to keep these changes, it is recommended that '
@@ -150,7 +150,7 @@ class UpgradeCommandRunner {
   }
 
   Future<void> flutterUpgradeContinue() async {
-    final int code = await processUtils.stream(
+    final int code = await globals.processUtils.stream(
       <String>[
         globals.fs.path.join('bin', 'flutter'),
         'upgrade',
@@ -178,9 +178,9 @@ class UpgradeCommandRunner {
     globals.persistentToolState.redisplayWelcomeMessage = true;
   }
 
-  Future<bool> hasUncomittedChanges() async {
+  Future<bool> hasUncommittedChanges() async {
     try {
-      final RunResult result = await processUtils.run(
+      final RunResult result = await globals.processUtils.run(
         <String>['git', 'status', '-s'],
         throwOnError: true,
         workingDirectory: workingDirectory,
@@ -205,13 +205,13 @@ class UpgradeCommandRunner {
     String revision;
     try {
       // Fetch upstream branch's commits and tags
-      await processUtils.run(
+      await globals.processUtils.run(
         <String>['git', 'fetch', '--tags'],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
       // '@{u}' means upstream HEAD
-      final RunResult result = await processUtils.run(
+      final RunResult result = await globals.processUtils.run(
           <String>[ 'git', 'rev-parse', '--verify', '@{u}'],
           throwOnError: true,
           workingDirectory: workingDirectory,
@@ -254,7 +254,7 @@ class UpgradeCommandRunner {
   /// to the next release.
   Future<void> attemptReset(String newRevision) async {
     try {
-      await processUtils.run(
+      await globals.processUtils.run(
         <String>['git', 'reset', '--hard', newRevision],
         throwOnError: true,
         workingDirectory: workingDirectory,
@@ -272,7 +272,7 @@ class UpgradeCommandRunner {
   Future<void> precacheArtifacts() async {
     globals.printStatus('');
     globals.printStatus('Upgrading engine...');
-    final int code = await processUtils.stream(
+    final int code = await globals.processUtils.stream(
       <String>[
         globals.fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
       ],
@@ -306,7 +306,7 @@ class UpgradeCommandRunner {
   Future<void> runDoctor() async {
     globals.printStatus('');
     globals.printStatus('Running flutter doctor...');
-    await processUtils.stream(
+    await globals.processUtils.stream(
       <String>[
         globals.fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor',
       ],

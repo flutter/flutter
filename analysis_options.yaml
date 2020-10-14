@@ -95,6 +95,7 @@ linter:
     - camel_case_types
     - cancel_subscriptions
     # - cascade_invocations # not yet tested
+    - cast_nullable_to_non_nullable
     # - close_sinks # not reliable enough
     # - comment_references # blocked on https://github.com/flutter/flutter/issues/20765
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
@@ -123,13 +124,14 @@ linter:
     # - no_logic_in_create_state # not yet tested
     # - no_runtimeType_toString # not yet tested
     - non_constant_identifier_names
+    - null_check_on_nullable_type_parameter
     # - null_closures  # not yet tested
     # - omit_local_variable_types # opposite of always_specify_types
     # - one_member_abstracts # too many false positives
     # - only_throw_errors # https://github.com/flutter/flutter/issues/5792
     - overridden_fields
     - package_api_docs
-    - package_names
+    # - package_names # non conforming packages in sdk
     - package_prefixed_library_names
     # - parameter_assignments # we do this commonly
     - prefer_adjacent_string_concatenation
@@ -176,10 +178,11 @@ linter:
     - slash_for_doc_comments
     # - sort_child_properties_last # not yet tested
     - sort_constructors_first
-    - sort_pub_dependencies
+    # - sort_pub_dependencies # prevents separating pinned transitive dependencies
     - sort_unnamed_constructors_first
     - test_types_in_equals
     - throw_in_finally
+    - tighten_type_of_initializing_formals
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     # - unawaited_futures # too many false positives
