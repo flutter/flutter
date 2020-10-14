@@ -497,6 +497,11 @@ Future<LaunchResult> _startApp(
     .logLines
     .listen(globals.printStatus);
 
+  if (await command.device.isAppInstalled(package, userIdentifier: userIdentifier)) {
+    globals.printTrace('Uninstalling old application...');
+    await command.device.uninstallApp(package, userIdentifier: userIdentifier);
+  }
+
   final LaunchResult result = await command.device.startApp(
     package,
     mainPath: mainPath,
