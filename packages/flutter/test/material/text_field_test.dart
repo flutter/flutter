@@ -6342,6 +6342,24 @@ void main() {
       expect(find.byType(TextButton), findsNWidgets(4));
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('textSelectionControls is passed to EditableText',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Scaffold(
+            body: TextField(
+              textSelectionControls: materialTextSelectionControls,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableText widget = tester.widget(find.byType(EditableText));
+    expect(widget.selectionControls, equals(materialTextSelectionControls));
+  });
+
   testWidgets(
     'Custom toolbar test - Cupertino text select controls',
     (WidgetTester tester) async {

@@ -2805,7 +2805,7 @@ void main() {
 
       // Toolbar shows one button.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS, TargetPlatform.android }));
+    }, variant:  TargetPlatformVariant.all());
 
 
   testWidgets(
@@ -2839,40 +2839,25 @@ void main() {
 
       // Collapsed toolbar shows 2 buttons: copy, select all
       expect(find.byType(TextButton), findsNWidgets(2));
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS, TargetPlatform.android }));
+    }, variant: TargetPlatformVariant.all());
 
- testWidgets(
-    'selectable text uses custom text selection controls',
-    (WidgetTester tester) async {
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: SelectableText('Atwater Peel Sherbrooke Bonaventure',
+ testWidgets('textSelectionControls is passed to EditableText',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Scaffold(
+            body: SelectableText('Atwater Peel Sherbrooke Bonaventure',
               textSelectionControls: materialTextSelectionControls,
-              ),
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
-
-      await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
-      await tester.pump();
-
-      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
-      final TextEditingController controller = editableTextWidget.controller;
-
-      expect(
-        controller.selection,
-        const TextSelection(baseOffset: 0, extentOffset: 7),
-      );
-
-      // Collapsed toolbar shows 2 buttons: copy, select all
-      expect(find.byType(TextButton), findsNWidgets(2));
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS, TargetPlatform.android }));
+    final EditableText widget = tester.widget(find.byType(EditableText));
+    expect(widget.selectionControls, equals(materialTextSelectionControls));
+  });
 
   testWidgets(
     'long press tap cannot initiate a double tap',
