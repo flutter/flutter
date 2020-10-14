@@ -6308,7 +6308,7 @@ void main() {
             child: Center(
               child: TextField(
                 controller: controller,
-                textSelectionControls: materialTextSelectionControls
+                selectionControls: materialTextSelectionControls
               ),
             ),
           ),
@@ -6349,7 +6349,7 @@ void main() {
         home: Material(
           child: Scaffold(
             body: TextField(
-              textSelectionControls: materialTextSelectionControls,
+              selectionControls: materialTextSelectionControls,
             ),
           ),
         ),
@@ -6372,7 +6372,7 @@ void main() {
             child: Center(
               child: TextField(
                 controller: controller,
-                textSelectionControls: cupertinoTextSelectionControls,
+                selectionControls: cupertinoTextSelectionControls,
               ),
             ),
           ),

@@ -2779,7 +2779,7 @@ void main() {
           home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure',
-              textSelectionControls: cupertinoTextSelectionControls,
+              selectionControls: cupertinoTextSelectionControls,
               ),
             ),
           ),
@@ -2817,7 +2817,7 @@ void main() {
           home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure',
-              textSelectionControls: materialTextSelectionControls,
+              selectionControls: materialTextSelectionControls,
               ),
             ),
           ),
@@ -2848,7 +2848,7 @@ void main() {
         home: Material(
           child: Scaffold(
             body: SelectableText('Atwater Peel Sherbrooke Bonaventure',
-              textSelectionControls: materialTextSelectionControls,
+              selectionControls: materialTextSelectionControls,
             ),
           ),
         ),

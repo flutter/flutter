@@ -544,7 +544,7 @@ void main() {
         home: Material(
           child: Scaffold(
             body: TextFormField(
-              textSelectionControls: materialTextSelectionControls,
+              selectionControls: materialTextSelectionControls,
             ),
           ),
         ),
@@ -552,6 +552,6 @@ void main() {
     );
 
     final TextField widget = tester.widget(find.byType(TextField));
-    expect(widget.textSelectionControls, equals(materialTextSelectionControls));
+    expect(widget.selectionControls, equals(materialTextSelectionControls));
   });
 }

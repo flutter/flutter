@@ -4161,7 +4161,7 @@ void main() {
        CupertinoApp(
         home: Center(
           child: CupertinoTextField(
-              textSelectionControls: selectionControl
+              selectionControls: selectionControl
             ),
           ),
         ),
