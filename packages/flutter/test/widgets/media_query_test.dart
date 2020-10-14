@@ -48,7 +48,7 @@ void main() {
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          final MediaQueryData data = MediaQuery.of(context, nullOk: true)!;
+          final MediaQueryData? data = MediaQuery.of(context, nullOk: true);
           expect(data, isNull);
           tested = true;
           return Container();
