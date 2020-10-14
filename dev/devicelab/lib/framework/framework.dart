@@ -30,8 +30,7 @@ bool _isTaskRegistered = false;
 /// It is OK for a [task] to perform many things. However, only one task can be
 /// registered per Dart VM.
 Future<TaskResult> task(TaskFunction task) {
-  if (_isTaskRegistered)
-    throw StateError('A task is already registered');
+  if (_isTaskRegistered) throw StateError('A task is already registered');
 
   _isTaskRegistered = true;
 
@@ -48,16 +47,14 @@ Future<TaskResult> task(TaskFunction task) {
 
 class _TaskRunner {
   _TaskRunner(this.task) {
-    registerExtension('ext.cocoonRunTask',
-        (String method, Map<String, String> parameters) async {
+    registerExtension('ext.cocoonRunTask', (String method, Map<String, String> parameters) async {
       final Duration taskTimeout = parameters.containsKey('timeoutInMinutes')
-        ? Duration(minutes: int.parse(parameters['timeoutInMinutes']))
-        : null;
+          ? Duration(minutes: int.parse(parameters['timeoutInMinutes']))
+          : null;
       final TaskResult result = await run(taskTimeout);
       return ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
-    registerExtension('ext.cocoonRunnerReady',
-        (String method, Map<String, String> parameters) async {
+    registerExtension('ext.cocoonRunnerReady', (String method, Map<String, String> parameters) async {
       return ServiceExtensionResponse.result('"ready"');
     });
   }
@@ -100,8 +97,7 @@ class _TaskRunner {
       }
 
       Future<TaskResult> futureResult = _performTask();
-      if (taskTimeout != null)
-        futureResult = futureResult.timeout(taskTimeout);
+      if (taskTimeout != null) futureResult = futureResult.timeout(taskTimeout);
 
       TaskResult result = await futureResult;
 
@@ -141,8 +137,7 @@ class _TaskRunner {
   /// Causes the Dart VM to stay alive until a request to run the task is
   /// received via the VM service protocol.
   void keepVmAliveUntilTaskRunRequested() {
-    if (_taskStarted)
-      throw StateError('Task already started.');
+    if (_taskStarted) throw StateError('Task already started.');
 
     // Merely creating this port object will cause the VM to stay alive and keep
     // the VM service server running until the port is disposed of.
@@ -171,19 +166,14 @@ class _TaskRunner {
       completer.complete(await task());
     }, onError: (dynamic taskError, Chain taskErrorStack) {
       final String message = 'Task failed: $taskError';
-      stderr
-        ..writeln(message)
-        ..writeln('\nStack trace:')
-        ..writeln(taskErrorStack.terse);
+      stderr..writeln(message)..writeln('\nStack trace:')..writeln(taskErrorStack.terse);
       // IMPORTANT: We're completing the future _successfully_ but with a value
       // that indicates a task failure. This is intentional. At this point we
       // are catching errors coming from arbitrary (and untrustworthy) task
       // code. Our goal is to convert the failure into a readable message.
       // Propagating it further is not useful.
-      if (!completer.isCompleted)
-        completer.complete(TaskResult.failure(message));
+      if (!completer.isCompleted) completer.complete(TaskResult.failure(message));
     });
     return completer.future;
   }
 }
-
