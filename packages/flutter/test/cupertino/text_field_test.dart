@@ -4123,4 +4123,21 @@ void main() {
       matchesGoldenFile('text_field_golden.TextSelectionStyle.2.png'),
     );
   });
+
+  testWidgets('textSelectionControls is passed to EditableText',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+       CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+              textSelectionControls: materialTextSelectionControls
+            ),
+          ),
+        ),
+      );
+
+    final EditableText widget = tester.widget(find.byType(EditableText));
+    expect(widget.selectionControls, equals(materialTextSelectionControls));
+  });
+
 }
