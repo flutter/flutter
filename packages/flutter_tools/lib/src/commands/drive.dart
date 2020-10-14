@@ -468,7 +468,7 @@ Future<LaunchResult> _startApp(
 
   final File applicationBinary = command.stringArg('use-application-binary') == null
     ? null
-    : globals.fs.file( command.stringArg('use-application-binary'));
+    : globals.fs.file(command.stringArg('use-application-binary'));
   final ApplicationPackage package = await command.applicationPackages.getPackageForPlatform(
     await command.device.targetPlatform,
     buildInfo: command.getBuildInfo(),
