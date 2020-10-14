@@ -1953,7 +1953,7 @@ void main() {
                 builder: (BuildContext context) {
                     return GestureDetector(
                       onTap: () {
-                        Scaffold.of(context).showSnackBar(SnackBar(
+                        Scaffold.of(context)!.showSnackBar(SnackBar(
                           content: const Text('Some content'),
                           behavior: SnackBarBehavior.fixed,
                           action: SnackBarAction(
@@ -1990,7 +1990,7 @@ void main() {
                 builder: (BuildContext context) {
                     return GestureDetector(
                       onTap: () {
-                        Scaffold.of(context).showSnackBar(SnackBar(
+                        Scaffold.of(context)!.showSnackBar(SnackBar(
                           content: const Text('Some content'),
                           behavior: SnackBarBehavior.floating,
                           action: SnackBarAction(
