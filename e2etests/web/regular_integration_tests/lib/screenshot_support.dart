@@ -53,8 +53,7 @@ Future<void> runTestWithScreenshots(
   bool updateGoldens = false;
   // We are using an environment variable instead of an argument, since
   // this code is not invoked from the shell but from the `flutter drive`
-  // tool itself. Therefore we do not have control on the command line
-  // arguments.
+  // tool itself, we do not have control on the command line arguments.
   // Please read the README, further info on how to update the goldens.
   final String updateGoldensFlag = io.Platform.environment['UPDATE_GOLDENS'];
   // Validate if the environment variable is set correctly.
@@ -71,25 +70,21 @@ Future<void> runTestWithScreenshots(
   test.integrationDriver(
     driver: driver,
     onScreenshot: (String screenshotName, List<int> screenshotBytes) async {
-      if (browser == 'chrome') {
-        final Image screenshot = decodePng(screenshotBytes);
-        final String result = compareImage(
-          screenshot,
-          updateGoldens,
-          '$screenshotName-$browser.png',
-          PixelComparison.fuzzy,
-          diffRateFailure,
-          forIntegrationTests: true,
-          write: updateGoldens,
-        );
-        if (result == 'OK') {
-          return true;
-        } else {
-          io.stderr.writeln('ERROR: $result');
-          return false;
-        }
-      } else {
+      final Image screenshot = decodePng(screenshotBytes);
+      final String result = compareImage(
+        screenshot,
+        updateGoldens,
+        '$screenshotName-$browser.png',
+        PixelComparison.fuzzy,
+        diffRateFailure,
+        forIntegrationTests: true,
+        write: updateGoldens,
+      );
+      if (result == 'OK') {
         return true;
+      } else {
+        io.stderr.writeln('ERROR: $result');
+        return false;
       }
     },
   );

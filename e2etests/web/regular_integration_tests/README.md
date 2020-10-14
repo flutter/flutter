@@ -55,7 +55,7 @@ Future<void> main() async {
 
 In order to run the tests follow these steps:
 
-1. You can use two different approaches, using [felt](https://github.com/flutter/engine/blob/master/lib/web_ui/dev/README.md) tool will run all the tests, an update all the goldens. For running individual tests, we need to set UPDATE_GOLDENS environment variable.
+1. You can use two different approaches, using [felt](https://github.com/flutter/engine/blob/master/lib/web_ui/dev/README.md) tool will run all the tests, hence update all the goldens. For running individual tests, we need to set UPDATE_GOLDENS environment variable. Screenshots are saved differently per browser, therefore do not forget to also update the screenshots for other browsers. Note that, LUCI is only running screenshot testing for integration tests on Firefox and Chrome.
 
 ```
 felt test --integration-tests-only --update-screenshot-goldens
@@ -65,6 +65,10 @@ felt test --integration-tests-only --update-screenshot-goldens
 UPDATE_GOLDENS=true flutter drive -v --target=test_driver/text_editing_integration.dart -d web-server --release --local-engine=host_debug_unopt
 ```
 
-2. The golden will be under `engine/src/flutter/lib/web_ui/.dart_tool/goldens/engine/web/` directory, you should create a PR for that file and merge it to `flutter/goldens`.
+```
+UPDATE_GOLDENS=true flutter drive -v --target=test_driver/text_editing_integration.dart -d web-server --release --local-engine=host_debug_unopt --browser-name=firefox
+```
+
+2. The golden will be under `engine/src/flutter/lib/web_ui/.dart_tool/goldens/engine/web/` directory, you should create a PR for that file and merge it to `flutter/goldens`. For each browser the browser name would be appended to the end of the golden file such as: `screenshot_name-chrome.png` or `screenshot_name-firefox.png`
 
 3. Get the commit SHA and replace the `revision` in this file: `engine/src/flutter/lib/web_ui/dev/goldens_lock.yaml`
