@@ -373,7 +373,7 @@ void main() {
             tileColor: tileColor,
           ),
         ),
-      )
+      ),
     );
 
     final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
