@@ -322,8 +322,10 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///
   /// The [maxLength] must be null, -1 or greater than zero. If it is null or -1
   /// then no limit is enforced.
-  LengthLimitingTextInputFormatter(this.maxLength)
-    : assert(maxLength == null || maxLength == -1 || maxLength > 0);
+  LengthLimitingTextInputFormatter(
+    this.maxLength, {
+    this.composingMaxLengthEnforced = false,
+  }) : assert(maxLength == null || maxLength == -1 || maxLength > 0);
 
   /// The limit on the number of user-perceived characters that this formatter
   /// will allow.
@@ -362,6 +364,12 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// In addition, if the current value already reached the [maxLength],
   /// composing is not allowed.
   final int? maxLength;
+
+  /// Whether the [maxLength] constraint will be applied when the editing value
+  /// is composing.
+  ///
+  /// Defaults to false.
+  final bool composingMaxLengthEnforced;
 
   /// Truncate the given TextEditingValue to maxLength user-perceived
   /// characters.
@@ -406,7 +414,10 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
 
     // Temporarily exempt `newValue` from the maxLength limit if it has a
     // composing text going, until the composing is finished.
-    return newValue.composing.isValid ? newValue : truncate(newValue, maxLength);
+    // Also truncate `newValue` when `composingMaxLengthEnforced` is true.
+    return newValue.composing.isValid && !composingMaxLengthEnforced
+      ? newValue
+      : truncate(newValue, maxLength);
   }
 }
 
