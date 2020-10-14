@@ -38,7 +38,7 @@ typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
   Iterable<T> options,
 );
 
-/// The type of the [Autocomplete] callback which returns the widget that
+/// The type of the Autocomplete callback which returns the widget that
 /// contains the input [TextField] or [TextFormField].
 ///
 /// See also:
