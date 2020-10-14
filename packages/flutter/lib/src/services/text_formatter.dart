@@ -374,6 +374,12 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// Truncate the given TextEditingValue to maxLength user-perceived
   /// characters.
   ///
+  /// ### Composing text behaviors
+  ///
+  /// If [composingMaxLengthEnforced] and [keepComposing] are both true,
+  /// the truncated value will copy the composing from [value] and generate
+  /// a truncated one.
+  ///
   /// See also:
   ///  * [Dart's characters package](https://pub.dev/packages/characters).
   ///  * [Dart's documentation on runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters).
