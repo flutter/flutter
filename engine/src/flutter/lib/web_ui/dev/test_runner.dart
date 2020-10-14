@@ -103,6 +103,13 @@ class TestCommand extends Command<bool> with ArgUtils {
   /// How many dart2js build tasks are running at the same time.
   final Pool _pool = Pool(8);
 
+  /// Checks if test harness preparation (such as fetching the goldens,
+  /// creating test_results directory or starting ios-simulator) has been done.
+  ///
+  /// If unit tests already did these steps, integration tests do not have to
+  /// repeat them.
+  bool _testPreparationReady = false;
+
   /// Check the flags to see what type of tests are requested.
   TestTypesRequested findTestType() {
     if (boolArg('unit-tests-only') && boolArg('integration-tests-only')) {
@@ -158,7 +165,9 @@ class TestCommand extends Command<bool> with ArgUtils {
   }
 
   Future<bool> runIntegrationTests() async {
-    await _prepare();
+    if(!_testPreparationReady) {
+      await _prepare();
+    }
     return IntegrationTestsManager(
             browser, useSystemFlutter, doUpdateScreenshotGoldens)
         .runTests();
@@ -207,6 +216,7 @@ class TestCommand extends Command<bool> with ArgUtils {
     if (isSafariIOS) {
       await IosSafariArgParser.instance.initIosSimulator();
     }
+    _testPreparationReady = true;
   }
 
   /// Builds all test targets that will be run.
