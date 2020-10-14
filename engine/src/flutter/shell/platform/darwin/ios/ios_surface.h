@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_H_
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#import "flutter/shell/platform/darwin/ios/ios_external_view_embedder.h"
 
 #include <memory>
 
@@ -22,17 +23,18 @@ namespace flutter {
 // mechanism which is still in a release preview.
 bool IsIosEmbeddedViewsPreviewEnabled();
 
-class IOSSurface : public ExternalViewEmbedder {
+class IOSSurface {
  public:
   static std::unique_ptr<IOSSurface> Create(
       std::shared_ptr<IOSContext> context,
       fml::scoped_nsobject<CALayer> layer,
       FlutterPlatformViewsController* platform_views_controller);
 
-  // |ExternalViewEmbedder|
-  virtual ~IOSSurface();
-
   std::shared_ptr<IOSContext> GetContext() const;
+
+  std::shared_ptr<IOSExternalViewEmbedder> GetSurfaceExternalViewEmbedder() const;
+
+  virtual ~IOSSurface();
 
   virtual bool IsValid() const = 0;
 
@@ -51,45 +53,8 @@ class IOSSurface : public ExternalViewEmbedder {
 
  private:
   std::shared_ptr<IOSContext> ios_context_;
-  FlutterPlatformViewsController* platform_views_controller_;
+  std::shared_ptr<IOSExternalViewEmbedder> external_view_embedder_;
 
-  // |ExternalViewEmbedder|
-  SkCanvas* GetRootCanvas() override;
-
-  // |ExternalViewEmbedder|
-  void CancelFrame() override;
-
-  // |ExternalViewEmbedder|
-  void BeginFrame(SkISize frame_size,
-                  GrDirectContext* context,
-                  double device_pixel_ratio,
-                  fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
-
-  // |ExternalViewEmbedder|
-  void PrerollCompositeEmbeddedView(int view_id,
-                                    std::unique_ptr<flutter::EmbeddedViewParams> params) override;
-
-  // |ExternalViewEmbedder|
-  PostPrerollResult PostPrerollAction(
-      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
-
-  // |ExternalViewEmbedder|
-  std::vector<SkCanvas*> GetCurrentCanvases() override;
-
-  // |ExternalViewEmbedder|
-  SkCanvas* CompositeEmbeddedView(int view_id) override;
-
-  // |ExternalViewEmbedder|
-  void SubmitFrame(GrDirectContext* context, std::unique_ptr<SurfaceFrame> frame) override;
-
-  // |ExternalViewEmbedder|
-  void EndFrame(bool should_resubmit_frame,
-                fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
-
-  // |ExternalViewEmbedder|
-  bool SupportsDynamicThreadMerging() override;
-
- public:
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurface);
 };
 

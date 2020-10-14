@@ -53,8 +53,10 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(
 
 IOSSurface::IOSSurface(std::shared_ptr<IOSContext> ios_context,
                        FlutterPlatformViewsController* platform_views_controller)
-    : ios_context_(std::move(ios_context)), platform_views_controller_(platform_views_controller) {
+    : ios_context_(std::move(ios_context)) {
   FML_DCHECK(ios_context_);
+  external_view_embedder_ =
+      std::make_shared<IOSExternalViewEmbedder>(platform_views_controller, ios_context_);
 }
 
 IOSSurface::~IOSSurface() = default;
@@ -63,80 +65,8 @@ std::shared_ptr<IOSContext> IOSSurface::GetContext() const {
   return ios_context_;
 }
 
-// |ExternalViewEmbedder|
-SkCanvas* IOSSurface::GetRootCanvas() {
-  // On iOS, the root surface is created from the on-screen render target. Only the surfaces for the
-  // various overlays are controlled by this class.
-  return nullptr;
-}
-
-// |ExternalViewEmbedder|
-void IOSSurface::CancelFrame() {
-  TRACE_EVENT0("flutter", "IOSSurface::CancelFrame");
-  FML_CHECK(platform_views_controller_ != nullptr);
-  platform_views_controller_->CancelFrame();
-}
-
-// |ExternalViewEmbedder|
-void IOSSurface::BeginFrame(SkISize frame_size,
-                            GrDirectContext* context,
-                            double device_pixel_ratio,
-                            fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  TRACE_EVENT0("flutter", "IOSSurface::BeginFrame");
-  FML_CHECK(platform_views_controller_ != nullptr);
-  platform_views_controller_->SetFrameSize(frame_size);
-}
-
-// |ExternalViewEmbedder|
-void IOSSurface::PrerollCompositeEmbeddedView(int view_id,
-                                              std::unique_ptr<EmbeddedViewParams> params) {
-  TRACE_EVENT0("flutter", "IOSSurface::PrerollCompositeEmbeddedView");
-
-  FML_CHECK(platform_views_controller_ != nullptr);
-  platform_views_controller_->PrerollCompositeEmbeddedView(view_id, std::move(params));
-}
-
-// |ExternalViewEmbedder|
-PostPrerollResult IOSSurface::PostPrerollAction(
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  TRACE_EVENT0("flutter", "IOSSurface::PostPrerollAction");
-  FML_CHECK(platform_views_controller_ != nullptr);
-  PostPrerollResult result = platform_views_controller_->PostPrerollAction(raster_thread_merger);
-  return result;
-}
-
-// |ExternalViewEmbedder|
-std::vector<SkCanvas*> IOSSurface::GetCurrentCanvases() {
-  FML_CHECK(platform_views_controller_ != nullptr);
-  return platform_views_controller_->GetCurrentCanvases();
-}
-
-// |ExternalViewEmbedder|
-SkCanvas* IOSSurface::CompositeEmbeddedView(int view_id) {
-  TRACE_EVENT0("flutter", "IOSSurface::CompositeEmbeddedView");
-  FML_CHECK(platform_views_controller_ != nullptr);
-  return platform_views_controller_->CompositeEmbeddedView(view_id);
-}
-
-// |ExternalViewEmbedder|
-void IOSSurface::SubmitFrame(GrDirectContext* context, std::unique_ptr<SurfaceFrame> frame) {
-  TRACE_EVENT0("flutter", "IOSSurface::SubmitFrame");
-  FML_CHECK(platform_views_controller_ != nullptr);
-  platform_views_controller_->SubmitFrame(std::move(context), ios_context_, std::move(frame));
-  TRACE_EVENT0("flutter", "IOSSurface::DidSubmitFrame");
-}
-
-// |ExternalViewEmbedder|
-void IOSSurface::EndFrame(bool should_resubmit_frame,
-                          fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  TRACE_EVENT0("flutter", "IOSSurface::EndFrame");
-  FML_CHECK(platform_views_controller_ != nullptr);
-  return platform_views_controller_->EndFrame(should_resubmit_frame, raster_thread_merger);
-}
-
-// |ExternalViewEmbedder|
-bool IOSSurface::SupportsDynamicThreadMerging() {
-  return true;
+std::shared_ptr<IOSExternalViewEmbedder> IOSSurface::GetSurfaceExternalViewEmbedder() const {
+  return external_view_embedder_;
 }
 
 }  // namespace flutter

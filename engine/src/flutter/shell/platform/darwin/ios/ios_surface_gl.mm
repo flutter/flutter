@@ -84,7 +84,7 @@ bool IOSSurfaceGL::GLContextPresent(uint32_t fbo_id) {
 
 // |GPUSurfaceGLDelegate|
 ExternalViewEmbedder* IOSSurfaceGL::GetExternalViewEmbedder() {
-  return this;
+  return GetSurfaceExternalViewEmbedder().get();
 }
 
 }  // namespace flutter
