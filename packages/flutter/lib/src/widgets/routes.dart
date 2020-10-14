@@ -881,7 +881,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// The given [BuildContext] will be rebuilt if the state of the route changes
   /// while it is visible (specifically, if [isCurrent] or [canPop] change value).
   @optionalTypeArgs
-  static ModalRoute<T>? of<T extends Object>(BuildContext context) {
+  static ModalRoute<T>? of<T extends Object?>(BuildContext context) {
     final _ModalScopeStatus? widget = context.dependOnInheritedWidgetOfExactType<_ModalScopeStatus>();
     return widget?.route as ModalRoute<T>?;
   }
@@ -1818,7 +1818,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
 ///
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
-Future<T> showGeneralDialog<T extends Object>({
+Future<T> showGeneralDialog<T extends Object?>({
   required BuildContext context,
   required RoutePageBuilder pageBuilder,
   bool barrierDismissible = false,

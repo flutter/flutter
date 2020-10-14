@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/desktop_device.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 
@@ -241,6 +242,12 @@ void main() {
 
     expect(result, 2);
     expect(portForwarder.forwardedPorts.isEmpty, true);
+  });
+
+  testUsingContext('createDevFSWriter returns a LocalDevFSWriter', () {
+    final FakeDesktopDevice device = setUpDesktopDevice();
+
+    expect(device.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());
   });
 }
 

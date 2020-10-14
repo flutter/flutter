@@ -42,7 +42,7 @@ class BuildWebCommand extends BuildSubCommand {
       defaultsTo: false,
       help: 'Whether to generate a sourcemap file. These can be used by browsers '
       'To view and debug the original source code of a compiled and minified Dart '
-      'application. Defaults to false (no sourcemaps produced).'
+      'application. Defaults to false (i.e. no sourcemaps produced).'
     );
     argParser.addOption('pwa-strategy',
       defaultsTo: kOfflineFirst,

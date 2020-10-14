@@ -969,7 +969,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         );
       }
 
-      double snackBarYOffsetBase;
+      final double snackBarYOffsetBase;
       if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating) {
         snackBarYOffsetBase = floatingActionButtonRect.top;
       } else {
@@ -2570,7 +2570,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         clipBehavior: clipBehavior,
       );
     });
-    return _currentBottomSheet as PersistentBottomSheetController<T>;
+    return _currentBottomSheet! as PersistentBottomSheetController<T>;
   }
 
   // Floating Action Button API

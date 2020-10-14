@@ -268,7 +268,6 @@ tasks:
       Measures the runtime performance of textfield on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   color_filter_and_fade_perf__timeline_summary:
     description: >
@@ -281,7 +280,6 @@ tasks:
       Measures the runtime performance of color filter with fade on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   fading_child_animation_perf__timeline_summary:
     description: >
@@ -391,12 +389,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  # hello_world__start_up:
-  #   description: >
-  #     Verifies that Hello World can start on an array of devices.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android_esoteric"]
-
   microbenchmarks:
     description: >
       Runs benchmarks from dev/benchmarks/microbenchmarks.
@@ -479,18 +471,6 @@ tasks:
   image_list_jit_reported_duration:
     description: >
       Measures image loading performance on debug (jit) build.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
-  build_benchmark:
-    description: >
-      Measures APK build performance across config changes.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
-  time_to_development_benchmark__android:
-    description: >
-      Measures time from flutter run until resident runner setup is complete.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
@@ -646,22 +626,9 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  # TODO(fujino): does not pass on iOS13 https://github.com/flutter/flutter/issues/43029
-  # system_debug_ios:
-  #   description: >
-  #     Tests that the Engine correctly initializes the system debugger for debug-mode iOS apps.
-  #   stage: devicelab_ios
-  #   required_agent_capabilities: ["mac/ios"]
-
   macos_chrome_dev_mode:
     description: >
       Run flutter web on the devicelab and hot restart.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  build_benchmark_ios:
-    description: >
-      Measures iOS build performance across config changes.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -676,12 +643,14 @@ tasks:
       A smoke test that runs on macOS Catalina, which is a clone of the Gallery startup latency test.
     stage: devicelab_ios
     required_agent_capabilities: ["mac-catalina/ios"]
+    flaky: true
 
   smoke_catalina_hot_mode_dev_cycle_ios__benchmark:
     description: >
       A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
     stage: devicelab_ios
     required_agent_capabilities: ["mac-catalina/ios"]
+    flaky: true
 
   smoke_catalina_start_up:
     description: >
@@ -701,14 +670,6 @@ tasks:
       Checks the functionality and performance of hot reload on a macOS target platform
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
-
-#  TODO(jonahwilliams): investigate build failures on devicelab infra to re-enable.
-#  mac_enable_twc:
-#    description: >
-#      Verifies that track-widget-creation can be enabled and disabled.
-#    stage: devicelab_ios
-#    required_agent_capabilities: ["mac/ios"]
-#    flaky: true
 
   ios_app_with_extensions_test:
     description: >
@@ -741,12 +702,6 @@ tasks:
       Measures the performance of Dart VM hot patching feature on Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
-
-  # run_without_leak_win:
-  #   description: >
-  #     Checks that `flutter run` does not leak dart.exe on Windows.
-  #   stage: devicelab_win
-  #   required_agent_capabilities: ["windows/android"]
 
   # Tests running on Linux hosts
 
@@ -938,20 +893,6 @@ tasks:
        Verifies that track-widget-creation can be enabled and disabled.
      stage: devicelab
      required_agent_capabilities: ["linux-vm"]
-
-  # run_without_leak_linux:
-  #   description: >
-  #     Checks that `flutter run` does not leak dart on Linux.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
-  #   flaky: true
-
-  # run_without_leak_mac:
-  #   description: >
-  #     Checks that `flutter run` does not leak dart on macOS.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["mac/android"]
-  #   flaky: true
 
   # android_splash_screen_integration_test:
   #   description: >

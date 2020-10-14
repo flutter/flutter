@@ -131,7 +131,6 @@ class Draggable<T extends Object> extends StatefulWidget {
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
        super(key: key);
 
-
   /// The data that will be dropped by this draggable.
   final T? data;
 
@@ -386,7 +385,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   _DragAvatar<T>? _startDrag(Offset position) {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
       return null;
-    Offset dragStartPoint;
+    final Offset dragStartPoint;
     switch (widget.dragAnchor) {
       case DragAnchor.child:
         final RenderBox renderObject = context.findRenderObject()! as RenderBox;

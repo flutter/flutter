@@ -126,7 +126,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
 
 class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> {
   void _handleFocusChange(bool focused) {
-    bool inTraditionalMode;
+    final bool inTraditionalMode;
     switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
         inTraditionalMode = false;
@@ -166,7 +166,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
 
   @override
   Widget build(BuildContext context) {
-    CurvedAnimation opacity;
+    final CurvedAnimation opacity;
     final double unit = 0.5 / (widget.route.items.length + 1.5);
     if (widget.itemIndex == widget.route.selectedIndex) {
       opacity = CurvedAnimation(parent: widget.route.animation!, curve: const Threshold(0.0));
@@ -349,7 +349,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
       return true;
     }());
     assert(textDirection != null);
-    double left;
+    final double left;
     switch (textDirection!) {
       case TextDirection.rtl:
         left = buttonRect.right.clamp(0.0, size.width) - childSize.width;
@@ -1179,7 +1179,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   TextStyle? get _textStyle => widget.style ?? Theme.of(context)!.textTheme.subtitle1;
 
   void _handleTap() {
-    final RenderBox itemBox = context.findRenderObject() as RenderBox;
+    final RenderBox itemBox = context.findRenderObject()! as RenderBox;
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
     final TextDirection? textDirection = Directionality.of(context);
     final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown
@@ -1303,16 +1303,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
-    List<Widget> items;
-    if (_enabled) {
-      items = widget.selectedItemBuilder == null
-        ? List<Widget>.from(widget.items!)
-        : widget.selectedItemBuilder!(context);
-    } else {
-      items = widget.selectedItemBuilder == null
-        ? <Widget>[]
-        : widget.selectedItemBuilder!(context);
-    }
+    // We should explicitly type the items list to be a list of <Widget>,
+    // otherwise, no explicit type adding items maybe trigger a crash/failure
+    // when hint and selectedItemBuilder are provided.
+    final List<Widget> items = widget.selectedItemBuilder == null
+      ? (_enabled ? List<Widget>.from(widget.items!) : <Widget>[])
+      : List<Widget>.from(widget.selectedItemBuilder!(context));
 
     int? hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
@@ -1337,7 +1333,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // If value is null (then _selectedIndex is null) or if disabled then we
     // display the hint or nothing at all.
     final int? index = _enabled ? (_selectedIndex ?? hintIndex) : hintIndex;
-    Widget innerItemsWidget;
+    final Widget innerItemsWidget;
     if (items.isEmpty) {
       innerItemsWidget = Container();
     } else {

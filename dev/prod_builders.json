@@ -25,6 +25,12 @@
          "flaky": false
       },
       {
+         "name": "Linux build_gallery",
+         "repo": "flutter",
+         "task_name": "linux_build_gallery",
+         "flaky": false
+      },
+      {
          "name": "Linux build_tests",
          "repo": "flutter",
          "task_name": "linux_build_tests",
@@ -58,12 +64,6 @@
          "name": "Linux fuchsia_precache",
          "repo": "flutter",
          "task_name": "linux_fuchsia_precache",
-         "flaky": false
-      },
-      {
-         "name": "Linux gradle_fast_start_test",
-         "repo": "flutter",
-         "task_name": "linux_gradle_fast_start_test",
          "flaky": false
       },
       {
@@ -151,10 +151,16 @@
          "flaky": false
       },
       {
-         "name":"Linux web_smoke_test",
+         "name":"Linux web_e2e_test",
          "repo":"flutter",
-         "task_name":"linux_web_smoke_test",
+         "task_name":"linux_web_e2e_test",
          "flaky":false
+      },
+      {
+        "name":"Linux web_smoke_test",
+        "repo":"flutter",
+        "task_name":"linux_web_smoke_test",
+        "flaky":false
       },
       {
          "name": "Mac build_aar_module_test",
@@ -175,6 +181,12 @@
          "flaky": false
       },
       {
+         "name": "Mac build_gallery",
+         "repo": "flutter",
+         "task_name": "mac_build_gallery",
+         "flaky": false
+      },
+      {
          "name": "Mac customer_testing",
          "repo": "flutter",
          "task_name": "mac_customer_testing",
@@ -184,12 +196,6 @@
          "name": "Mac framework_tests",
          "repo": "flutter",
          "task_name": "mac_framework_tests",
-         "flaky": false
-      },
-      {
-         "name": "Mac gradle_fast_start_test",
-         "repo": "flutter",
-         "task_name": "mac_gradle_fast_start_test",
          "flaky": false
       },
       {
@@ -298,12 +304,6 @@
          "name": "Windows framework_tests",
          "repo": "flutter",
          "task_name": "win_framework_tests",
-         "flaky": false
-      },
-      {
-         "name": "Windows gradle_fast_start_test",
-         "repo": "flutter",
-         "task_name": "win_gradle_fast_start_test",
          "flaky": false
       },
       {

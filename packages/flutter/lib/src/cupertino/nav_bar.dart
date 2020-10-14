@@ -96,7 +96,7 @@ Widget _wrapWithBackground({
   if (updateSystemUiOverlay) {
     final bool isDark = backgroundColor.computeLuminance() < 0.179;
     final Brightness newBrightness = brightness ?? (isDark ? Brightness.dark : Brightness.light);
-    SystemUiOverlayStyle overlayStyle;
+    final SystemUiOverlayStyle overlayStyle;
     switch (newBrightness) {
       case Brightness.dark:
         overlayStyle = SystemUiOverlayStyle.light;
@@ -1450,7 +1450,7 @@ class _BackLabel extends StatelessWidget {
     if (specifiedPreviousTitle != null) {
       return _buildPreviousTitleWidget(context, specifiedPreviousTitle, null);
     } else if (route is CupertinoRouteTransitionMixin<dynamic> && !route!.isFirst) {
-      final CupertinoRouteTransitionMixin<dynamic> cupertinoRoute = route as CupertinoRouteTransitionMixin<dynamic>;
+      final CupertinoRouteTransitionMixin<dynamic> cupertinoRoute = route! as CupertinoRouteTransitionMixin<dynamic>;
       // There is no timing issue because the previousTitle Listenable changes
       // happen during route modifications before the ValueListenableBuilder
       // is built.
@@ -1499,7 +1499,7 @@ class _TransitionableNavigationBar extends StatelessWidget {
   final Widget child;
 
   RenderBox get renderBox {
-    final RenderBox box = componentsKeys.navBarBoxKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox box = componentsKeys.navBarBoxKey.currentContext!.findRenderObject()! as RenderBox;
     assert(
       box.attached,
       '_TransitionableNavigationBar.renderBox should be called when building '
@@ -1729,7 +1729,7 @@ class _NavigationBarComponentsTransition {
     GlobalKey key, {
     required RenderBox from,
   }) {
-    final RenderBox componentBox = key.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox componentBox = key.currentContext!.findRenderObject()! as RenderBox;
     assert(componentBox.attached);
 
     return RelativeRect.fromRect(
@@ -1756,8 +1756,8 @@ class _NavigationBarComponentsTransition {
   }) {
     final RelativeRect fromRect = positionInTransitionBox(fromKey, from: fromNavBarBox);
 
-    final RenderBox fromBox = fromKey.currentContext!.findRenderObject() as RenderBox;
-    final RenderBox toBox = toKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox fromBox = fromKey.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox toBox = toKey.currentContext!.findRenderObject()! as RenderBox;
 
     // We move a box with the size of the 'from' render object such that its
     // upper left corner is at the upper left corner of the 'to' render object.
@@ -2038,7 +2038,7 @@ class _NavigationBarComponentsTransition {
     // If it's the first page with a back chevron, shift in slightly from the
     // right.
     if (bottomBackChevron == null) {
-      final RenderBox topBackChevronBox = topComponents.backChevronKey.currentContext!.findRenderObject() as RenderBox;
+      final RenderBox topBackChevronBox = topComponents.backChevronKey.currentContext!.findRenderObject()! as RenderBox;
       from = to.shift(
         Offset(
           forwardDirection * topBackChevronBox.size.width * 2.0,

@@ -103,7 +103,6 @@ Future<void> _genSnapshot(
   int result;
   final Status status = globals.logger.startProgress(
     'Compiling Fuchsia application to native code...',
-    timeout: null,
   );
   try {
     result = await processUtils.stream(command, trace: true);
