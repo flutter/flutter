@@ -25,7 +25,7 @@ dependencies:
   # We import stack_trace because the test packages uses it and we
   # need to be able to unmangle the stack traces that it passed to
   # stack_trace. See https://github.com/dart-lang/test/issues/590
-  stack_trace: 1.10.0-nullsafety.2
+  stack_trace: 1.10.0-nullsafety.4
 
   # Used by globalToLocal et al.
   vector_math: 2.1.0-nullsafety.3
@@ -46,4 +46,4 @@ dependencies:
 dev_dependencies:
   file: 6.0.0-nullsafety.2
 
-# PUBSPEC CHECKSUM: 9743
+# PUBSPEC CHECKSUM: 8c45
