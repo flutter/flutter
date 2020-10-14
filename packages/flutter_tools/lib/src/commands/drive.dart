@@ -466,8 +466,14 @@ Future<LaunchResult> _startApp(
   globals.printTrace('Stopping previously running application, if any.');
   await appStopper(command);
 
-  final ApplicationPackage package = await command.applicationPackages
-    .getPackageForPlatform(await command.device.targetPlatform, buildInfo: command.getBuildInfo());
+  final File applicationBinary = command.stringArg('use-application-binary') == null
+    ? null
+    : globals.fs.file(command.stringArg('use-application-binary'));
+  final ApplicationPackage package = await command.applicationPackages.getPackageForPlatform(
+    await command.device.targetPlatform,
+    buildInfo: command.getBuildInfo(),
+    applicationBinary: applicationBinary,
+  );
 
   final Map<String, dynamic> platformArgs = <String, dynamic>{};
   if (command.traceStartup) {
@@ -508,6 +514,7 @@ Future<LaunchResult> _startApp(
     ),
     platformArgs: platformArgs,
     userIdentifier: userIdentifier,
+    prebuiltApplication: applicationBinary != null,
   );
 
   if (!result.started) {
