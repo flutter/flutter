@@ -95,7 +95,7 @@ void IOSExternalTextureGL::CreateYUVTexturesFromPixelBuffer() {
   }
 }
 
-sk_sp<SkImage> IOSExternalTextureGL::CreateImageFromRGBATexture(GrContext* context,
+sk_sp<SkImage> IOSExternalTextureGL::CreateImageFromRGBATexture(GrDirectContext* context,
                                                                 const SkRect& bounds) {
   GrGLTextureInfo textureInfo = {CVOpenGLESTextureGetTarget(texture_ref_),
                                  CVOpenGLESTextureGetName(texture_ref_), GL_RGBA8_OES};
@@ -106,7 +106,7 @@ sk_sp<SkImage> IOSExternalTextureGL::CreateImageFromRGBATexture(GrContext* conte
   return image;
 }
 
-sk_sp<SkImage> IOSExternalTextureGL::CreateImageFromYUVTextures(GrContext* context,
+sk_sp<SkImage> IOSExternalTextureGL::CreateImageFromYUVTextures(GrDirectContext* context,
                                                                 const SkRect& bounds) {
   GrGLTextureInfo yTextureInfo = {CVOpenGLESTextureGetTarget(y_texture_ref_),
                                   CVOpenGLESTextureGetName(y_texture_ref_), GR_GL_LUMINANCE8};

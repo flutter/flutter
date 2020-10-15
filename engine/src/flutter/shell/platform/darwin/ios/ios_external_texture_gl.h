@@ -60,9 +60,9 @@ class IOSExternalTextureGL final : public Texture {
 
   void CreateRGBATextureFromPixelBuffer();
 
-  sk_sp<SkImage> CreateImageFromYUVTextures(GrContext* context, const SkRect& bounds);
+  sk_sp<SkImage> CreateImageFromYUVTextures(GrDirectContext* context, const SkRect& bounds);
 
-  sk_sp<SkImage> CreateImageFromRGBATexture(GrContext* context, const SkRect& bounds);
+  sk_sp<SkImage> CreateImageFromRGBATexture(GrDirectContext* context, const SkRect& bounds);
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSExternalTextureGL);
 };
