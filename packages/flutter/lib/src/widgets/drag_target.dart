@@ -240,7 +240,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Called when the draggable is being dragged.
   ///
   /// This function will only be called while this widget is still mounted to
-  /// the tree (i.e. [State.mounted] is true).
+  /// the tree (i.e. [State.mounted] is true), and if this widget has actually moved.
   final DragUpdateCallback? onDragUpdate;
 
   /// Called when the draggable is dropped without being accepted by a [DragTarget].
@@ -691,10 +691,11 @@ class _DragAvatar<T extends Object> extends Drag {
 
   @override
   void update(DragUpdateDetails details) {
+    final Offset oldPosition = _position;
     _position += _restrictAxis(details.delta);
     updateDrag(_position);
 
-    if (onDragUpdate != null) {
+    if (onDragUpdate != null && _position != oldPosition) {
       onDragUpdate!(details);
     }
   }
