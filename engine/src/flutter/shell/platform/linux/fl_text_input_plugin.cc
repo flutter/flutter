@@ -90,15 +90,14 @@ static void update_editing_state(FlTextInputPlugin* self) {
   fl_value_append_take(args, fl_value_new_int(self->client_id));
   g_autoptr(FlValue) value = fl_value_new_map();
 
+  TextRange selection = self->text_model->selection();
   fl_value_set_string_take(
       value, kTextKey,
       fl_value_new_string(self->text_model->GetText().c_str()));
-  fl_value_set_string_take(
-      value, kSelectionBaseKey,
-      fl_value_new_int(self->text_model->selection_base()));
-  fl_value_set_string_take(
-      value, kSelectionExtentKey,
-      fl_value_new_int(self->text_model->selection_extent()));
+  fl_value_set_string_take(value, kSelectionBaseKey,
+                           fl_value_new_int(selection.base()));
+  fl_value_set_string_take(value, kSelectionExtentKey,
+                           fl_value_new_int(selection.extent()));
 
   // The following keys are not implemented and set to default values.
   fl_value_set_string_take(value, kSelectionAffinityKey,
@@ -219,7 +218,7 @@ static FlMethodResponse* set_editing_state(FlTextInputPlugin* self,
   }
 
   self->text_model->SetText(text);
-  self->text_model->SetSelection(selection_base, selection_extent);
+  self->text_model->SetSelection(TextRange(selection_base, selection_extent));
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
