@@ -29,15 +29,23 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           textHeightBehavior,
           fontWeight,
           fontStyle,
+          strutStyle,
           ellipsis,
+          locale,
         ) {
     _textDirection = textDirection ?? ui.TextDirection.ltr;
     _fontFamily = fontFamily;
+    _fontSize = fontSize;
+    _fontWeight = fontWeight;
+    _fontStyle = fontStyle;
   }
 
   SkParagraphStyle skParagraphStyle;
   ui.TextDirection? _textDirection;
   String? _fontFamily;
+  double? _fontSize;
+  ui.FontWeight? _fontWeight;
+  ui.FontStyle? _fontStyle;
 
   static SkTextStyleProperties toSkTextStyleProperties(
     String? fontFamily,
@@ -63,6 +71,46 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     return skTextStyle;
   }
 
+  static SkStrutStyleProperties toSkStrutStyleProperties(ui.StrutStyle value) {
+    EngineStrutStyle style = value as EngineStrutStyle;
+    final SkStrutStyleProperties skStrutStyle = SkStrutStyleProperties();
+    if (style._fontFamily != null) {
+      final List<String> fontFamilies = <String>[style._fontFamily!];
+      if (style._fontFamilyFallback != null) {
+        fontFamilies.addAll(style._fontFamilyFallback!);
+      }
+      skStrutStyle.fontFamilies = fontFamilies;
+    } else {
+      // If no strut font family is given, default to Roboto.
+      skStrutStyle.fontFamilies = ['Roboto'];
+    }
+
+    if (style._fontSize != null) {
+      skStrutStyle.fontSize = style._fontSize;
+    }
+
+    if (style._height != null) {
+      skStrutStyle.heightMultiplier = style._height;
+    }
+
+    if (style._leading != null) {
+      skStrutStyle.leading = style._leading;
+    }
+
+    if (style._fontWeight != null || style._fontStyle != null) {
+      skStrutStyle.fontStyle =
+          toSkFontStyle(style._fontWeight, style._fontStyle);
+    }
+
+    if (style._forceStrutHeight != null) {
+      skStrutStyle.forceStrutHeight = style._forceStrutHeight;
+    }
+
+    skStrutStyle.strutEnabled = true;
+
+    return skStrutStyle;
+  }
+
   static SkParagraphStyle toSkParagraphStyle(
     ui.TextAlign? textAlign,
     ui.TextDirection? textDirection,
@@ -73,7 +121,9 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     ui.TextHeightBehavior? textHeightBehavior,
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
+    ui.StrutStyle? strutStyle,
     String? ellipsis,
+    ui.Locale? locale,
   ) {
     final SkParagraphStyleProperties properties = SkParagraphStyleProperties();
 
@@ -85,6 +135,10 @@ class CkParagraphStyle implements ui.ParagraphStyle {
       properties.textDirection = toSkTextDirection(textDirection);
     }
 
+    if (maxLines != null) {
+      properties.maxLines = maxLines;
+    }
+
     if (height != null) {
       properties.heightMultiplier = height;
     }
@@ -93,12 +147,12 @@ class CkParagraphStyle implements ui.ParagraphStyle {
       properties.textHeightBehavior = textHeightBehavior.encode();
     }
 
-    if (maxLines != null) {
-      properties.maxLines = maxLines;
-    }
-
     if (ellipsis != null) {
       properties.ellipsis = ellipsis;
+    }
+
+    if (strutStyle != null) {
+      properties.strutStyle = toSkStrutStyleProperties(strutStyle);
     }
 
     properties.textStyle =
@@ -106,12 +160,39 @@ class CkParagraphStyle implements ui.ParagraphStyle {
 
     return canvasKit.ParagraphStyle(properties);
   }
+
+  CkTextStyle getTextStyle() {
+    return CkTextStyle(
+      fontFamily: _fontFamily,
+      fontSize: _fontSize,
+      fontWeight: _fontWeight,
+      fontStyle: _fontStyle,
+    );
+  }
 }
 
 class CkTextStyle implements ui.TextStyle {
   SkTextStyle skTextStyle;
+
+  ui.Color? color;
+  ui.TextDecoration? decoration;
+  ui.Color? decorationColor;
+  ui.TextDecorationStyle? decorationStyle;
+  double? decorationThickness;
+  ui.FontWeight? fontWeight;
+  ui.FontStyle? fontStyle;
+  ui.TextBaseline? textBaseline;
+  String? fontFamily;
+  List<String>? fontFamilyFallback;
+  double? fontSize;
+  double? letterSpacing;
+  double? wordSpacing;
+  double? height;
+  ui.Locale? locale;
   CkPaint? background;
   CkPaint? foreground;
+  List<ui.Shadow>? shadows;
+  List<ui.FontFeature>? fontFeatures;
 
   factory CkTextStyle({
     ui.Color? color,
@@ -162,8 +243,36 @@ class CkTextStyle implements ui.TextStyle {
       properties.decorationThickness = decorationThickness;
     }
 
+    if (decorationColor != null) {
+      properties.decorationColor = makeFreshSkColor(decorationColor);
+    }
+
+    if (decorationStyle != null) {
+      properties.decorationStyle = toSkTextDecorationStyle(decorationStyle);
+    }
+
+    if (textBaseline != null) {
+      properties.textBaseline = toSkTextBaseline(textBaseline);
+    }
+
     if (fontSize != null) {
       properties.fontSize = fontSize;
+    }
+
+    if (letterSpacing != null) {
+      properties.letterSpacing = letterSpacing;
+    }
+
+    if (wordSpacing != null) {
+      properties.wordSpacing = wordSpacing;
+    }
+
+    if (height != null) {
+      properties.heightMultiplier = height;
+    }
+
+    if (locale != null) {
+      properties.locale = locale.toLanguageTag();
     }
 
     if (fontFamily == null ||
@@ -187,21 +296,103 @@ class CkTextStyle implements ui.TextStyle {
       properties.foregroundColor = makeFreshSkColor(foreground.color);
     }
 
-    // TODO(hterkelsen): Add support for
-    //   - decorationColor
-    //   - decorationStyle
-    //   - textBaseline
-    //   - letterSpacing
-    //   - wordSpacing
-    //   - height
-    //   - locale
-    //   - shadows
-    //   - fontFeatures
+    if (shadows != null) {
+      List<SkTextShadow> ckShadows = <SkTextShadow>[];
+      for (ui.Shadow shadow in shadows) {
+        final ckShadow = SkTextShadow();
+        ckShadow.color = makeFreshSkColor(shadow.color);
+        ckShadow.offset = toSkPoint(shadow.offset);
+        ckShadow.blurRadius = shadow.blurRadius;
+        ckShadows.add(ckShadow);
+      }
+      properties.shadows = ckShadows;
+    }
+
+    if (fontFeatures != null) {
+      List<SkFontFeature> ckFontFeatures = <SkFontFeature>[];
+      for (ui.FontFeature fontFeature in fontFeatures) {
+        SkFontFeature ckFontFeature = SkFontFeature();
+        ckFontFeature.name = fontFeature.feature;
+        ckFontFeature.value = fontFeature.value;
+        ckFontFeatures.add(ckFontFeature);
+      }
+      properties.fontFeatures = ckFontFeatures;
+    }
+
     return CkTextStyle._(
-        canvasKit.TextStyle(properties), foreground, background);
+      canvasKit.TextStyle(properties),
+      color,
+      decoration,
+      decorationColor,
+      decorationStyle,
+      decorationThickness,
+      fontWeight,
+      fontStyle,
+      textBaseline,
+      fontFamily,
+      fontFamilyFallback,
+      fontSize,
+      letterSpacing,
+      wordSpacing,
+      height,
+      locale,
+      background,
+      foreground,
+      shadows,
+      fontFeatures,
+    );
   }
 
-  CkTextStyle._(this.skTextStyle, this.foreground, this.background);
+  /// Merges this text style with [other] and returns the new text style.
+  ///
+  /// The values in this text style are used unless [other] specifically
+  /// overrides it.
+  CkTextStyle mergeWith(CkTextStyle other) {
+    return CkTextStyle(
+      color: other.color ?? color,
+      decoration: other.decoration ?? decoration,
+      decorationColor: other.decorationColor ?? decorationColor,
+      decorationStyle: other.decorationStyle ?? decorationStyle,
+      decorationThickness: other.decorationThickness ?? decorationThickness,
+      fontWeight: other.fontWeight ?? fontWeight,
+      fontStyle: other.fontStyle ?? fontStyle,
+      textBaseline: other.textBaseline ?? textBaseline,
+      fontFamily: other.fontFamily ?? fontFamily,
+      fontFamilyFallback: other.fontFamilyFallback ?? fontFamilyFallback,
+      fontSize: other.fontSize ?? fontSize,
+      letterSpacing: other.letterSpacing ?? letterSpacing,
+      wordSpacing: other.wordSpacing ?? wordSpacing,
+      height: other.height ?? height,
+      locale: other.locale ?? locale,
+      background: other.background ?? background,
+      foreground: other.foreground ?? foreground,
+      shadows: other.shadows ?? shadows,
+      fontFeatures: other.fontFeatures ?? fontFeatures,
+    );
+  }
+
+  CkTextStyle._(
+    this.skTextStyle,
+    this.color,
+    this.decoration,
+    this.decorationColor,
+    this.decorationStyle,
+    this.decorationThickness,
+    this.fontWeight,
+    this.fontStyle,
+    this.textBaseline,
+    this.fontFamily,
+    this.fontFamilyFallback,
+    this.fontSize,
+    this.letterSpacing,
+    this.wordSpacing,
+    this.height,
+    this.locale,
+    this.background,
+    this.foreground,
+    this.shadows,
+    this.fontFeatures,
+  );
 }
 
 SkFontStyle toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
@@ -260,6 +451,9 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
         case _ParagraphCommandType.pushStyle:
           builder.pushStyle(command.style!);
           break;
+        case _ParagraphCommandType.addPlaceholder:
+          builder._addPlaceholder(command.placeholderStyle!);
+          break;
       }
     }
 
@@ -304,10 +498,10 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
   @override
   double get width => skiaObject.getMaxWidth();
 
-  // TODO(hterkelsen): Implement placeholders once it's in CanvasKit
   @override
   List<ui.TextBox> getBoxesForPlaceholders() {
-    return const <ui.TextBox>[];
+    List<List<double>> skRects = skiaObject.getRectsForPlaceholders();
+    return skRectsToTextBoxes(skRects);
   }
 
   @override
@@ -321,22 +515,26 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
       return const <ui.TextBox>[];
     }
 
-    List<SkRect> skRects = skiaObject.getRectsForRange(
+    List<List<double>> skRects = skiaObject.getRectsForRange(
       start,
       end,
       toSkRectHeightStyle(boxHeightStyle),
       toSkRectWidthStyle(boxWidthStyle),
     );
 
+    return skRectsToTextBoxes(skRects);
+  }
+
+  List<ui.TextBox> skRectsToTextBoxes(List<List<double>> skRects) {
     List<ui.TextBox> result = <ui.TextBox>[];
 
     for (int i = 0; i < skRects.length; i++) {
-      final SkRect rect = skRects[i];
+      final List<double> rect = skRects[i];
       result.add(ui.TextBox.fromLTRBD(
-        rect.fLeft,
-        rect.fTop,
-        rect.fRight,
-        rect.fBottom,
+          rect[0],
+          rect[1],
+          rect[2],
+          rect[3],
         _paragraphStyle._textDirection!,
       ));
     }
@@ -404,16 +602,21 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   final SkParagraphBuilder _paragraphBuilder;
   final CkParagraphStyle _style;
   final List<_ParagraphCommand> _commands;
+  int _placeholderCount;
+  final List<double> _placeholderScales;
+  final List<CkTextStyle> _styleStack;
 
   CkParagraphBuilder(ui.ParagraphStyle style)
       : _commands = <_ParagraphCommand>[],
         _style = style as CkParagraphStyle,
+        _placeholderCount = 0,
+        _placeholderScales = <double>[],
+        _styleStack = <CkTextStyle>[],
         _paragraphBuilder = canvasKit.ParagraphBuilder.MakeFromFontProvider(
           style.skParagraphStyle,
           skiaFontCollection.fontProvider,
         );
 
-  // TODO(hterkelsen): Implement placeholders.
   @override
   void addPlaceholder(
     double width,
@@ -423,7 +626,44 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     double? baselineOffset,
     ui.TextBaseline? baseline,
   }) {
-    throw UnimplementedError('addPlaceholder');
+    // Require a baseline to be specified if using a baseline-based alignment.
+    assert((alignment == ui.PlaceholderAlignment.aboveBaseline ||
+            alignment == ui.PlaceholderAlignment.belowBaseline ||
+            alignment == ui.PlaceholderAlignment.baseline)
+        ? baseline != null
+        : true);
+
+    _placeholderCount++;
+    _placeholderScales.add(scale);
+    SkPlaceholderStyleProperties placeholderStyle = toSkPlaceholderStyle(
+      width * scale,
+      height * scale,
+      alignment,
+      (baselineOffset ?? height) * scale,
+      baseline ?? ui.TextBaseline.alphabetic,
+    );
+    _addPlaceholder(placeholderStyle);
+  }
+
+  void _addPlaceholder(SkPlaceholderStyleProperties placeholderStyle) {
+    _commands.add(_ParagraphCommand.addPlaceholder(placeholderStyle));
+    _paragraphBuilder.addPlaceholder(placeholderStyle);
+  }
+
+  static SkPlaceholderStyleProperties toSkPlaceholderStyle(
+    double width,
+    double height,
+    ui.PlaceholderAlignment alignment,
+    double baselineOffset,
+    ui.TextBaseline baseline,
+  ) {
+    final properties = SkPlaceholderStyleProperties();
+    properties.width = width;
+    properties.height = height;
+    properties.alignment = toSkPlaceholderAlignment(alignment);
+    properties.offset = baselineOffset;
+    properties.baseline = toSkTextBaseline(baseline);
+    return properties;
   }
 
   @override
@@ -446,22 +686,28 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   }
 
   @override
-  int get placeholderCount => throw UnimplementedError('placeholderCount');
+  int get placeholderCount => _placeholderCount;
 
-  // TODO(hterkelsen): Implement this once CanvasKit exposes placeholders.
   @override
-  List<double> get placeholderScales => const <double>[];
+  List<double> get placeholderScales => _placeholderScales;
 
   @override
   void pop() {
     _commands.add(const _ParagraphCommand.pop());
+    _styleStack.removeLast();
     _paragraphBuilder.pop();
   }
 
+  CkTextStyle _peekStyle() =>
+      _styleStack.isEmpty ? _style.getTextStyle() : _styleStack.last;
+
   @override
   void pushStyle(ui.TextStyle style) {
-    final CkTextStyle skStyle = style as CkTextStyle;
-    _commands.add(_ParagraphCommand.pushStyle(skStyle));
+    final CkTextStyle baseStyle = _peekStyle();
+    final CkTextStyle ckStyle = style as CkTextStyle;
+    final CkTextStyle skStyle = baseStyle.mergeWith(ckStyle);
+    _styleStack.add(skStyle);
+    _commands.add(_ParagraphCommand.pushStyle(ckStyle));
     if (skStyle.foreground != null || skStyle.background != null) {
       final SkPaint foreground = skStyle.foreground?.skiaObject ?? SkPaint();
       final SkPaint background = skStyle.background?.skiaObject ?? SkPaint();
@@ -477,20 +723,33 @@ class _ParagraphCommand {
   final _ParagraphCommandType type;
   final String? text;
   final CkTextStyle? style;
+  final SkPlaceholderStyleProperties? placeholderStyle;
 
-  const _ParagraphCommand._(this.type, this.text, this.style);
+  const _ParagraphCommand._(
+    this.type,
+    this.text,
+    this.style,
+    this.placeholderStyle,
+  );
 
   const _ParagraphCommand.addText(String text)
-      : this._(_ParagraphCommandType.addText, text, null);
+      : this._(_ParagraphCommandType.addText, text, null, null);
 
-  const _ParagraphCommand.pop() : this._(_ParagraphCommandType.pop, null, null);
+  const _ParagraphCommand.pop()
+      : this._(_ParagraphCommandType.pop, null, null, null);
 
   const _ParagraphCommand.pushStyle(CkTextStyle style)
-      : this._(_ParagraphCommandType.pushStyle, null, style);
+      : this._(_ParagraphCommandType.pushStyle, null, style, null);
+
+  const _ParagraphCommand.addPlaceholder(
+      SkPlaceholderStyleProperties placeholderStyle)
+      : this._(
+            _ParagraphCommandType.addPlaceholder, null, null, placeholderStyle);
 }
 
 enum _ParagraphCommandType {
   addText,
   pop,
   pushStyle,
+  addPlaceholder,
 }

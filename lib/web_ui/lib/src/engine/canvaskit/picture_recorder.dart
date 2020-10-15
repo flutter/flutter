@@ -13,7 +13,7 @@ class CkPictureRecorder implements ui.PictureRecorder {
   CkCanvas beginRecording(ui.Rect bounds) {
     _cullRect = bounds;
     final SkPictureRecorder recorder = _skRecorder = SkPictureRecorder();
-    final SkRect skRect = toSkRect(bounds);
+    final Float32List skRect = toSkRect(bounds);
     final SkCanvas skCanvas = recorder.beginRecording(skRect);
     return _recordingCanvas = CkCanvas(skCanvas);
   }

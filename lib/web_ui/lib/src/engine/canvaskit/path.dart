@@ -11,11 +11,15 @@ part of engine;
 class CkPath implements ui.Path {
   final SkPath _skPath;
 
-  CkPath() : _skPath = SkPath(), _fillType = ui.PathFillType.nonZero {
+  CkPath()
+      : _skPath = SkPath(),
+        _fillType = ui.PathFillType.nonZero {
     _skPath.setFillType(toSkFillType(_fillType));
   }
 
-  CkPath.from(CkPath other) : _skPath = SkPath(other._skPath), _fillType = other.fillType {
+  CkPath.from(CkPath other)
+      : _skPath = SkPath(other._skPath),
+        _fillType = other.fillType {
     _skPath.setFillType(toSkFillType(_fillType));
   }
 
@@ -89,22 +93,10 @@ class CkPath implements ui.Path {
 
   @override
   void addRRect(ui.RRect rrect) {
-    final SkFloat32List skRadii = mallocFloat32List(8);
-    final Float32List radii = skRadii.toTypedArray();
-    radii[0] = rrect.tlRadiusX;
-    radii[1] = rrect.tlRadiusY;
-    radii[2] = rrect.trRadiusX;
-    radii[3] = rrect.trRadiusY;
-    radii[4] = rrect.brRadiusX;
-    radii[5] = rrect.brRadiusY;
-    radii[6] = rrect.blRadiusX;
-    radii[7] = rrect.blRadiusY;
-    _skPath.addRoundRect(
-      toOuterSkRect(rrect),
-      radii,
+    _skPath.addRRect(
+      toSkRRect(rrect),
       false,
     );
-    freeFloat32List(skRadii);
   }
 
   @override
@@ -195,7 +187,7 @@ class CkPath implements ui.Path {
   }
 
   @override
-  ui.Rect getBounds() => _skPath.getBounds().toRect();
+  ui.Rect getBounds() => fromSkRect(_skPath.getBounds());
 
   @override
   void lineTo(double x, double y) {

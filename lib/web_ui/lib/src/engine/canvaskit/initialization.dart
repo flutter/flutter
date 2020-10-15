@@ -20,7 +20,7 @@ const bool canvasKitForceCpuOnly =
 /// NPM, update this URL to `https://unpkg.com/canvaskit-wasm@0.34.0/bin/`.
 const String canvasKitBaseUrl = String.fromEnvironment(
   'FLUTTER_WEB_CANVASKIT_URL',
-  defaultValue: 'https://unpkg.com/canvaskit-wasm@0.17.3/bin/',
+  defaultValue: 'https://unpkg.com/canvaskit-wasm@0.18.1/bin/',
 );
 
 /// Initialize CanvasKit.
