@@ -110,7 +110,7 @@ class AttachCommand extends FlutterCommand {
   final String name = 'attach';
 
   @override
-  final String description = '''
+  final String description = r'''
 Attach to a running app.
 
 For attaching to Android or iOS devices, simply using `flutter attach` is
@@ -118,13 +118,13 @@ usually sufficient. The tool will search for a running Flutter app or module,
 if available. Otherwise, the tool will wait for the next Flutter app or module
 to launch before attaching.
 
-For Fuchsia, the module name must be provided, e.g. `\$flutter attach
+For Fuchsia, the module name must be provided, e.g. `$flutter attach
 --module=mod_name`. This can be called either before or after the application
 is started.
 
 If the app or module is already running and the specific observatory port is
 known, it can be explicitly provided to attach via the command-line, e.g.
-`\$ flutter attach --debug-port 12345`''';
+`$ flutter attach --debug-port 12345`''';
 
   int get debugPort {
     if (argResults['debug-port'] == null) {
