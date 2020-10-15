@@ -6967,12 +6967,12 @@ class Semantics extends SingleChildRenderObjectWidget {
 /// ```dart
 /// MergeSemantics(
 ///   child: Row(
-///     children: [
+///     children: <Widget>[
 ///       Checkbox(
 ///         value: true,
-///         onChanged: (value) {},
+///         onChanged: (bool value) => null,
 ///       ),
-///       Text("Settings"),
+///       const Text("Settings"),
 ///     ],
 ///   ),
 /// )
