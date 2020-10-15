@@ -3069,12 +3069,6 @@ class _RouteEntry extends RouteTransitionRecord {
 
   void dispose() {
     assert(currentState.index < _RouteLifecycle.disposed.index);
-    route.dispose();
-    currentState = _RouteLifecycle.disposed;
-  }
-
-  void gracefullyDispose() {
-    assert(currentState.index < _RouteLifecycle.disposed.index);
     route.gracefullyDispose();
     currentState = _RouteLifecycle.disposed;
   }
@@ -3888,7 +3882,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     for (final _RouteEntry entry in toBeDisposed) {
       for (final OverlayEntry overlayEntry in entry.route.overlayEntries)
         overlayEntry.remove();
-      entry.gracefullyDispose();
+      entry.dispose();
     }
     if (rearrangeOverlay) {
       overlay?.rearrange(_allRouteOverlayEntries);
