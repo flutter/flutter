@@ -10,6 +10,18 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import './keyboard_key.dart';
 
+class KeyboardLocks {
+  // This class only contains static members, and should not be instantiated or
+  // extended.
+  factory KeyboardLocks._() => throw Error();
+
+  static const int capsLock = 0x1;
+
+  static const int numLock = 0x2;
+
+  static const int scrollLock = 0x4;
+}
+
 /// Defines the interface for keyboard key events.
 ///
 /// The event provides an abstraction for the [physicalKey] and [logicalKey],
@@ -35,7 +47,11 @@ import './keyboard_key.dart';
 ///  * [HardwareKeyboardListener], a widget that listens for hardware key events.
 @immutable
 abstract class PhysicalKeyEvent with Diagnosticable {
-  const PhysicalKeyEvent({required this.physicalKey, required this.timeStamp});
+  const PhysicalKeyEvent({
+    required this.physicalKey,
+    required this.timeStamp,
+    required this.lockFlags,
+  });
 
   /// Returns an object representing the physical location of this key.
   ///
@@ -69,6 +85,14 @@ abstract class PhysicalKeyEvent with Diagnosticable {
   /// All events share the same timeStamp origin.
   final Duration timeStamp;
 
+  /// A bitmask indicating whether each lock keys have been turned on after this
+  /// event.
+  ///
+  /// See also:
+  ///
+  ///  * [KeyboardLocks] for possible bits.
+  final int lockFlags;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -87,8 +111,9 @@ class PhysicalKeyDownEvent extends PhysicalKeyEvent {
   const PhysicalKeyDownEvent({
     required Duration timeStamp,
     required PhysicalKeyboardKey physicalKey,
+    required int lockFlags,
     this.repeated = false,
-  }) : super(physicalKey: physicalKey, timeStamp: timeStamp);
+  }) : super(physicalKey: physicalKey, timeStamp: timeStamp, lockFlags: lockFlags);
 
   final bool repeated;
 
@@ -109,7 +134,8 @@ class PhysicalKeyUpEvent extends PhysicalKeyEvent {
   const PhysicalKeyUpEvent({
     required Duration timeStamp,
     required PhysicalKeyboardKey physicalKey,
-  }) : super(physicalKey: physicalKey, timeStamp: timeStamp);
+    required int lockFlags,
+  }) : super(physicalKey: physicalKey, timeStamp: timeStamp, lockFlags: lockFlags);
 }
 
 /// The user has released a key on the keyboard after Flutter lost input focus.
@@ -130,7 +156,8 @@ class PhysicalKeyCancelEvent extends PhysicalKeyEvent {
   const PhysicalKeyCancelEvent({
     required Duration timeStamp,
     required PhysicalKeyboardKey physicalKey,
-  }) : super(physicalKey: physicalKey, timeStamp: timeStamp);
+    required int lockFlags,
+  }) : super(physicalKey: physicalKey, timeStamp: timeStamp, lockFlags: lockFlags);
 }
 
 /// The user has pressed a key on the keyboard before the current application
@@ -152,7 +179,8 @@ class PhysicalKeySyncEvent extends PhysicalKeyEvent {
   const PhysicalKeySyncEvent({
     required Duration timeStamp,
     required PhysicalKeyboardKey physicalKey,
-  }) : super(physicalKey: physicalKey, timeStamp: timeStamp);
+    required int lockFlags,
+  }) : super(physicalKey: physicalKey, timeStamp: timeStamp, lockFlags: lockFlags);
 }
 
 @immutable
@@ -175,12 +203,28 @@ abstract class LogicalKeyEvent with Diagnosticable {
   /// {@endtemplate}
   final LogicalKeyboardKey logicalKey;
 
+  /// The physical key event that triggers this logical key event.
+  ///
+  /// Every logical key event must be triggered by exactly one physical event,
+  /// but one physical event might corresponds to zero or more logical events.
   final PhysicalKeyEvent physicalEvent;
 
   /// Time of event, relative to an arbitrary start point.
   ///
   /// All events share the same timeStamp origin.
+  ///
+  /// This property delegates to the same field of [physicalEvent].
   Duration get timeStamp => physicalEvent.timeStamp;
+
+  /// A bitmask indicating whether each lock keys have been turned on after this
+  /// event.
+  ///
+  /// This property delegates to the same field of [physicalEvent].
+  ///
+  /// See also:
+  ///
+  ///  * [KeyboardLocks] for possible bits.
+  int get lockFlags => physicalEvent.lockFlags;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -394,32 +438,38 @@ class HardwareKeyboard {
     final PhysicalKeyboardKey physicalKey = PhysicalKeyboardKey.findKeyByCode(keyData.key)
         ?? PhysicalKeyboardKey(keyData.key);
     final Duration timeStamp = keyData.timeStamp;
+    final int lockFlags = keyData.lockFlags;
     switch (keyData.change) {
       case ui.KeyChange.down:
         return PhysicalKeyDownEvent(
           physicalKey: physicalKey,
           timeStamp: timeStamp,
+          lockFlags: lockFlags,
         );
       case ui.KeyChange.repeatedDown:
         return PhysicalKeyDownEvent(
           physicalKey: physicalKey,
           timeStamp: timeStamp,
+          lockFlags: lockFlags,
           repeated: true,
         );
       case ui.KeyChange.up:
         return PhysicalKeyUpEvent(
           physicalKey: physicalKey,
           timeStamp: timeStamp,
+          lockFlags: lockFlags,
         );
       case ui.KeyChange.synchronize:
         return PhysicalKeySyncEvent(
           physicalKey: physicalKey,
           timeStamp: timeStamp,
+          lockFlags: lockFlags,
         );
       case ui.KeyChange.cancel:
         return PhysicalKeyCancelEvent(
           physicalKey: physicalKey,
           timeStamp: timeStamp,
+          lockFlags: lockFlags,
         );
     }
   }
