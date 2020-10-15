@@ -60,6 +60,7 @@ class InputDatePickerFormField extends StatefulWidget {
     this.fieldHintText,
     this.fieldLabelText,
     this.autofocus = false,
+    this.controller,
   }) : assert(firstDate != null),
        assert(lastDate != null),
        assert(autofocus != null),
@@ -131,12 +132,18 @@ class InputDatePickerFormField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
 
+  /// Controls the text being edited.
+  ///
+  /// If null, this widget will create its own [TextEditingController] and
+  /// initialize its [TextEditingController.text] with [initialValue].
+  final TextEditingController? controller;
+
   @override
   _InputDatePickerFormFieldState createState() => _InputDatePickerFormFieldState();
 }
 
 class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
-  final TextEditingController _controller = TextEditingController();
+  TextEditingController _controller = TextEditingController();
   DateTime? _selectedDate;
   String? _inputText;
   bool _autoSelected = false;
@@ -145,6 +152,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   void initState() {
     super.initState();
     _selectedDate = widget.initialDate;
+    _controller = widget.controller ?? TextEditingController();
   }
 
   @override

@@ -514,4 +514,25 @@ void main() {
       );
       }, throwsAssertionError);
   });
+
+  testWidgets('InputDatePickerFormField has controller', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: InputDatePickerFormField(
+              firstDate: DateTime.now(),
+              lastDate: DateTime.now(),
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final InputDatePickerFormField widget = tester.widget(find.byType(InputDatePickerFormField));
+    expect(widget.controller, controller);
+  });
 }
