@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -317,6 +318,7 @@ class IOSDevice extends Device {
     String userIdentifier,
   }) async {
     String packageId;
+    final bool screenshotOnConnectionFailure = _platform.environment['FLUTTER_IOS_SCREENSHOT_ON_CONNECTION_FAILURE'] == 'true';
 
     if (!prebuiltApplication) {
       // TODO(chinmaygarde): Use mainPath, route.
@@ -439,6 +441,17 @@ class IOSDevice extends Device {
         installationResult = await iosDeployDebugger.launchAndAttach() ? 0 : 1;
       }
       if (installationResult != 0) {
+        if (screenshotOnConnectionFailure) {
+          final File file = _fileSystem.file('test_screenshot.png');
+          try {
+            await takeScreenshot(file);
+            _logger.printStatus('BASE64 SCREENSHOT:${base64.encode(file.readAsBytesSync())}');
+          } on Exception {
+            _logger.printError('Failed to take screenshot');
+          } finally {
+            ErrorHandlingFileSystem.deleteIfExists(file);
+          }
+        }
         _logger.printError('Could not run ${bundle.path} on $id.');
         _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
         _logger.printError('  open ios/Runner.xcworkspace');

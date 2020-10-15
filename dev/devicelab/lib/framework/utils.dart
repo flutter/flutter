@@ -437,19 +437,17 @@ List<String> flutterCommandArgs(String command, List<String> options) {
     if (localEngine != null) ...<String>['--local-engine', localEngine],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
     ...options,
-    if (command == 'drive')
-      '--screenshot-duration=10',
   ];
 }
 
 Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
-  Map<String, String> environment,
+  Map<String, String> environment = const <String, String>{},
 }) {
   final List<String> args = flutterCommandArgs(command, options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, environment: environment);
+      canFail: canFail, environment: <String, String>{...?environment, 'FLUTTER_IOS_SCREENSHOT_ON_CONNECTION_FAILURE': 'true'});
 }
 
 /// Runs a `flutter` command and returns the standard output as a string.

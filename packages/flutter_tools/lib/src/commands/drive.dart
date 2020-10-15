@@ -128,8 +128,7 @@ class DriveCommand extends RunCommandBase {
         help:
           'Attempts to write an SkSL file when the drive process is finished '
           'to the provided file, overwriting it if necessary.',
-      )
-      ..addOption('screenshot-duration', hide: true, defaultsTo: null);
+      );
   }
 
   @override
@@ -150,9 +149,6 @@ class DriveCommand extends RunCommandBase {
   /// Subscription to log messages printed on the device or simulator.
   // ignore: cancel_subscriptions
   StreamSubscription<String> _deviceLogSubscription;
-
-  Duration _screenshotDuration;
-  Timer _screenshotTimer;
 
   @override
   Future<void> validateCommand() async {
@@ -179,9 +175,6 @@ class DriveCommand extends RunCommandBase {
 
     if (await globals.fs.type(testFile) != FileSystemEntityType.file) {
       throwToolExit('Test file not found: $testFile');
-    }
-    if (stringArg('screenshot-duration') != null) {
-      _screenshotDuration = Duration(seconds: int.parse(stringArg('screenshot-duration')));
     }
 
     String observatoryUri;
@@ -354,7 +347,6 @@ $ex
       }
       throw Exception('Unable to run test: $error\n$stackTrace');
     } finally {
-      _screenshotTimer?.cancel();
       await residentRunner?.exit();
       await driver?.quit();
       if (stringArg('write-sksl-on-exit') != null) {
@@ -497,23 +489,6 @@ Future<LaunchResult> _startApp(
   }
 
   globals.printTrace('Starting application.');
-
-  if (command._screenshotDuration != null && command.device.supportsScreenshot) {
-    globals.printTrace('Starting screenshot service.');
-    command._screenshotTimer = Timer.periodic(command._screenshotDuration, (Timer timer) async {
-      final File file = globals.fs.file('test_screenshot.png');
-      try {
-        await command.device.takeScreenshot(file);
-        globals.printStatus('BASE64 SCREENSHOT:${base64.encode(file.readAsBytesSync())}');
-      } on Exception {
-        globals.printError('Failed to take screenshot');
-      } finally {
-        if (file.existsSync()) {
-          file.deleteSync();
-        }
-      }
-    });
-  }
 
   final LaunchResult result = await command.device.startApp(
     package,
