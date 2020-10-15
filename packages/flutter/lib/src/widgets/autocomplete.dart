@@ -64,6 +64,10 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// This is a core framework widget with very basic UI. Try using Autocomplete
 /// or AutocompleteCupertino before resorting to this widget.
 ///
+/// The user's text input is received in a field built with the
+/// [fieldViewBuilder] parameter. The options to be displayed are determined
+/// using [optionsBuilder] and rendered with [optionsViewBuilder].
+///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to create a very basic autocomplete widget using the
 /// [fieldViewBuilder] and [optionsViewBuilder] parameters.
@@ -391,9 +395,15 @@ class AutocompleteCore<T extends Object> extends StatefulWidget {
        assert(optionsViewBuilder != null);
 
   /// Builds the field whose input is used to get the options.
+  ///
+  /// Pass the provided [TextEditingController] to the field built here so that
+  /// AutocompleteCore can listen for changes.
   final AutocompleteFieldViewBuilder fieldViewBuilder;
 
   /// Builds the selectable options widgets from a list of options objects.
+  ///
+  /// The options are displayed in an Overlay, floating below the field, with a
+  /// width the same as the field.
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
 
   /// Returns the string to display in the field when the option is selected.
