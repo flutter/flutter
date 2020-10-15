@@ -76,6 +76,7 @@ executable("client_wrapper_glfw_unittests") {
     "flutter_engine_unittests.cc",
     "flutter_window_controller_unittests.cc",
     "flutter_window_unittests.cc",
+    "plugin_registrar_glfw_unittests.cc",
   ]
 
   defines = [ "FLUTTER_DESKTOP_LIBRARY" ]
