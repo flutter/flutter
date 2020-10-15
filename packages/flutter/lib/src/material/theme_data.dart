@@ -345,7 +345,7 @@ class ThemeData with Diagnosticable {
     textSelectionHandleColor ??= isDark ? Colors.tealAccent[400]! : primarySwatch[300]!;
     backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
     dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
+    indicatorColor ??= accentColor;
     hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
     errorColor ??= Colors.red[700]!;
     inputDecorationTheme ??= const InputDecorationTheme();
