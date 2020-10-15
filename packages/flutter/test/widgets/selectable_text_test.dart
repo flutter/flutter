@@ -22,7 +22,7 @@ class MockClipboard {
       case 'Clipboard.getData':
         return _clipboardData;
       case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments as dynamic;
+        _clipboardData = methodCall.arguments;
         break;
     }
   }

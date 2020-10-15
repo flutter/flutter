@@ -68,7 +68,7 @@ Widget buildTestWidgets({
 class TestWidget extends SingleChildRenderObjectWidget {
   const TestWidget({
     Key? key,
-    Widget? child,
+    required Widget child,
     required this.label,
     required this.isSemanticBoundary,
   }) : super(key: key, child: child);

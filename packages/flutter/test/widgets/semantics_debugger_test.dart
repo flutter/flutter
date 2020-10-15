@@ -333,7 +333,6 @@ void main() {
     final Key keyBottom = UniqueKey();
 
     bool? valueTop = false;
-    const bool valueBottom = true;
 
     await tester.pumpWidget(
       Directionality(
@@ -351,7 +350,7 @@ void main() {
                 ),
                 Checkbox(
                   key: keyBottom,
-                  value: valueBottom,
+                  value: false,
                   onChanged: null,
                 ),
               ],
@@ -362,14 +361,11 @@ void main() {
     );
 
     await tester.tap(find.byKey(keyTop));
-
     expect(valueTop, isTrue);
     valueTop = false;
     expect(valueTop, isFalse);
 
     await tester.tap(find.byKey(keyBottom));
-
-    expect(valueTop, isFalse);
     expect(valueTop, isFalse);
   });
 
