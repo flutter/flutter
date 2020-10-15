@@ -120,6 +120,10 @@ class GenerateLocalizationsTarget extends Target {
       fileSystem: environment.fileSystem,
     );
 
+    print('GENERATING LOCALIZAITONS -----------');
+    print(environment.projectDir);
+    print(environment.buildDir);
+
     generateLocalizations(
       logger: environment.logger,
       options: options,
