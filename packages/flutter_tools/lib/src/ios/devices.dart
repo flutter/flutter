@@ -5,13 +5,13 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
