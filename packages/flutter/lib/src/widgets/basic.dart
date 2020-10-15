@@ -7187,11 +7187,11 @@ class KeyedSubtree extends StatelessWidget {
 /// creating a child directly, without an intervening widget, is the
 /// extra [BuildContext] element that the additional widget adds. This
 /// is particularly noticeable when the tree contains an inherited
-/// widget that is referred to by a method like [ScaffoldState.of],
+/// widget that is referred to by a method like [Scaffold.of],
 /// which visits the child widget's BuildContext ancestors.
 ///
 /// In the following example the button's `onPressed` callback is unable
-/// to find the enclosing [Scaffold] with [ScaffoldState.of]:
+/// to find the enclosing [ScaffoldState] with [Scaffold.of]:
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
