@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -26,20 +24,20 @@ void main() {
 
     await tester.pumpWidget(
       const Padding(
-        key: GlobalObjectKey<State<StatefulWidget>>(null),
+        key: GlobalObjectKey<State<StatefulWidget>>(Object()),
         padding: EdgeInsets.only(left: 1.0),
       ),
     );
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: Padding(
-        key: GlobalObjectKey<State<StatefulWidget>>(null),
+        key: GlobalObjectKey<State<StatefulWidget>>(Object()),
         padding: EdgeInsetsDirectional.only(start: 1.0),
       ),
     ));
     await tester.pumpWidget(
       const Padding(
-        key: GlobalObjectKey<State<StatefulWidget>>(null),
+        key: GlobalObjectKey<State<StatefulWidget>>(Object()),
         padding: EdgeInsets.only(left: 1.0),
       ),
     );
