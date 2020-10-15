@@ -176,8 +176,7 @@ class CkCanvas {
     skCanvas.drawPicture(picture.skiaObject.skiaObject);
   }
 
-  void drawPoints(CkPaint paint, ui.PointMode pointMode,
-      Float32List points) {
+  void drawPoints(CkPaint paint, ui.PointMode pointMode, Float32List points) {
     skCanvas.drawPoints(
       toSkPointMode(pointMode),
       points,
@@ -230,24 +229,24 @@ class CkCanvas {
 
   void saveLayer(ui.Rect bounds, CkPaint paint) {
     skCanvas.saveLayer(
-      toSkRect(bounds),
       paint.skiaObject,
+      toSkRect(bounds),
+      null,
+      null,
     );
   }
 
   void saveLayerWithoutBounds(CkPaint paint) {
-    final SkCanvasSaveLayerWithoutBoundsOverload override = skCanvas as SkCanvasSaveLayerWithoutBoundsOverload;
-    override.saveLayer(paint.skiaObject);
+    skCanvas.saveLayer(paint.skiaObject, null, null, null);
   }
 
   void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter) {
-    final SkCanvasSaveLayerWithFilterOverload override = skCanvas as SkCanvasSaveLayerWithFilterOverload;
     final CkImageFilter skImageFilter = filter as CkImageFilter;
-    return override.saveLayer(
+    return skCanvas.saveLayer(
       null,
+      toSkRect(bounds),
       skImageFilter.skiaObject,
       0,
-      toSkRect(bounds),
     );
   }
 
