@@ -31,6 +31,7 @@ const Duration _kMenuDuration = Duration(milliseconds: 300);
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
 const double _kMenuHorizontalPadding = 16.0;
 const double _kMenuDividerHeight = 16.0;
+const Color _kMenuDividerColor = Color(0xFF949494);
 const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
 const double _kMenuVerticalPadding = 8.0;
@@ -100,13 +101,17 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16 logical pixels.
-  const PopupMenuDivider({ Key? key, this.height = _kMenuDividerHeight }) : super(key: key);
+  const PopupMenuDivider({ Key key, this.height = _kMenuDividerHeight, this.color = _kMenuDividerColor })
+      : super(key: key);
 
   /// The height of the divider entry.
   ///
   /// Defaults to 16 pixels.
   @override
   final double height;
+
+  @override
+  final Color color;
 
   @override
   bool represents(void value) => false;
@@ -117,7 +122,7 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
 
 class _PopupMenuDividerState extends State<PopupMenuDivider> {
   @override
-  Widget build(BuildContext context) => Divider(height: widget.height);
+  Widget build(BuildContext context) => Divider(height: widget.height, color: widget.color);
 }
 
 // This widget only exists to enable _PopupMenuRoute to save the sizes of
