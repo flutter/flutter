@@ -54,7 +54,7 @@ import '../runner/flutter_command.dart';
 /// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
-    addBuildModeFlags(defaultToRelease: false);
+    addBuildModeFlags(defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions();
     usesIpv6Flag();

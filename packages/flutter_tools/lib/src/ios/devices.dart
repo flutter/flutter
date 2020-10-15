@@ -395,8 +395,8 @@ class IOSDevice extends Device {
     ];
 
     final Status installStatus = _logger.startProgress(
-        'Installing and launching...',
-        timeout: timeoutConfiguration.slowOperation);
+      'Installing and launching...',
+    );
     try {
       ProtocolDiscovery observatoryDiscovery;
       int installationResult = 1;
@@ -468,12 +468,10 @@ class IOSDevice extends Device {
         packageName: FlutterProject.current().manifest.appName,
       );
       if (localUri == null) {
-        iosDeployDebugger?.detach();
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);
     } on ProcessException catch (e) {
-      iosDeployDebugger?.detach();
       _logger.printError(e.message);
       return LaunchResult.failed();
     } finally {
@@ -486,12 +484,7 @@ class IOSDevice extends Device {
     IOSApp app, {
     String userIdentifier,
   }) async {
-    // If the debugger is not attached, killing the ios-deploy process won't stop the app.
-    if (iosDeployDebugger!= null && iosDeployDebugger.debuggerAttached) {
-      // Avoid null.
-      return iosDeployDebugger?.exit() == true;
-    }
-    return false;
+    return iosDeployDebugger?.exit();
   }
 
   @override
@@ -723,8 +716,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
 
     void logMessage(vm_service.Event event) {
-      if (_iosDeployDebugger != null && _iosDeployDebugger.debuggerAttached) {
-        // Prefer the more complete logs from the  attached debugger.
+      if (_iosDeployDebugger != null) {
+        // Prefer the more complete logs from the debugger.
         return;
       }
       final String message = processVmServiceMessage(event);
@@ -739,7 +732,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     ]);
   }
 
-  /// Log reader will listen to [debugger.logLines] and will detach debugger on dispose.
+  /// Log reader will listen to [debugger.logLines].
   set debuggerStream(IOSDeployDebugger debugger) {
     // Logging is gathered from syslog on iOS 13 and earlier.
     if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
@@ -818,7 +811,6 @@ class IOSDeviceLogReader extends DeviceLogReader {
       loggingSubscription.cancel();
     }
     _idevicesyslogProcess?.kill();
-    _iosDeployDebugger?.detach();
   }
 }
 

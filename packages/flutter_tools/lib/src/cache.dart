@@ -538,7 +538,6 @@ class Cache {
   Future<bool> doesRemoteExist(String message, Uri url) async {
     final Status status = _logger.startProgress(
       message,
-      timeout: timeoutConfiguration.slowOperation,
     );
     bool exists;
     try {
@@ -1079,15 +1078,14 @@ class AndroidMavenArtifacts extends ArtifactSet {
     );
     gradleUtils.injectGradleWrapperIfNeeded(tempDir);
 
-    final Status status = globals.logger.startProgress('Downloading Android Maven dependencies...',
-        timeout: timeoutConfiguration.slowOperation);
+    final Status status = globals.logger.startProgress('Downloading Android Maven dependencies...');
     final File gradle = tempDir.childFile(
         globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
       );
     try {
       final String gradleExecutable = gradle.absolute.path;
       final String flutterSdk = globals.fsUtils.escapePath(Cache.flutterRoot);
-      final RunResult processResult = await processUtils.run(
+      final RunResult processResult = await globals.processUtils.run(
         <String>[
           gradleExecutable,
           '-b', globals.fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),
@@ -1597,7 +1595,6 @@ class ArtifactUpdater {
     while (retries > 0) {
       status = _logger.startProgress(
         message,
-        timeout: null, // This will take a variable amount of time based on network connectivity.
       );
       try {
         _ensureExists(tempFile.parent);

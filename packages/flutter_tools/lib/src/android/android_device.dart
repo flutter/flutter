@@ -63,7 +63,6 @@ class AndroidDevice extends Device {
     @required Platform platform,
     @required AndroidSdk androidSdk,
     @required FileSystem fileSystem,
-    TimeoutConfiguration timeoutConfiguration = const TimeoutConfiguration(),
     AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
   }) : _logger = logger,
        _processManager = processManager,
@@ -71,7 +70,6 @@ class AndroidDevice extends Device {
        _platform = platform,
        _fileSystem = fileSystem,
        _androidConsoleSocketFactory = androidConsoleSocketFactory,
-       _timeoutConfiguration = timeoutConfiguration,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(
          id,
@@ -87,7 +85,6 @@ class AndroidDevice extends Device {
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
   final AndroidConsoleSocketFactory _androidConsoleSocketFactory;
-  final TimeoutConfiguration _timeoutConfiguration;
 
   final String productID;
   final String modelID;
@@ -176,12 +173,12 @@ class AndroidDevice extends Device {
       try {
         await console
             .connect()
-            .timeout(_timeoutConfiguration.fastOperation,
+            .timeout(const Duration(seconds: 2),
                 onTimeout: () => throw TimeoutException('Connection timed out'));
 
         return await console
             .getAvdName()
-            .timeout(_timeoutConfiguration.fastOperation,
+            .timeout(const Duration(seconds: 2),
                 onTimeout: () => throw TimeoutException('"avd name" timed out'));
       } finally {
         console.destroy();
@@ -443,7 +440,6 @@ class AndroidDevice extends Device {
 
     final Status status = _logger.startProgress(
       'Installing ${_fileSystem.path.relative(app.file.path)}...',
-      timeout: _timeoutConfiguration.slowOperation,
     );
     final RunResult installResult = await _processUtils.run(
       adbCommandForDevice(<String>[
@@ -687,6 +683,7 @@ class AndroidDevice extends Device {
           return LaunchResult.failed();
         }
       }
+      resetLogReaders();
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
@@ -744,6 +741,14 @@ class AndroidDevice extends Device {
   @override
   void clearLogs() {
     _processUtils.runSync(adbCommandForDevice(<String>['logcat', '-c']));
+  }
+
+  /// Android device log readers are singletons. if they are closed by the
+  /// protocol discovery, the same kind of reader cannot be recreated.
+  @visibleForTesting
+  void resetLogReaders() {
+    _pastLogReader = null;
+    _logReader = null;
   }
 
   @override

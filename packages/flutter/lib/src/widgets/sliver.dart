@@ -213,11 +213,13 @@ class _SaltedValueKey extends ValueKey<Key>{
   const _SaltedValueKey(Key key): assert(key != null), super(key);
 }
 
-/// Called to find the new index of a child based on its key in case of
+/// Called to find the new index of a child based on its `key` in case of
 /// reordering.
 ///
+/// If the child with the `key` is no longer present, null is returned.
+///
 /// Used by [SliverChildBuilderDelegate.findChildIndexCallback].
-typedef ChildIndexGetter = int Function(Key key);
+typedef ChildIndexGetter = int? Function(Key key);
 
 /// A delegate that supplies children for slivers using a builder callback.
 ///
@@ -424,8 +426,8 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// when the order in which children are returned from [builder] changes.
   /// This may result in state-loss.
   ///
-  /// This callback should take an input [Key], and It should return the
-  /// index of the child element with associated key, null if not found.
+  /// This callback should take an input [Key], and it should return the
+  /// index of the child element with that associated key, or null if not found.
   final ChildIndexGetter? findChildIndexCallback;
 
   @override
