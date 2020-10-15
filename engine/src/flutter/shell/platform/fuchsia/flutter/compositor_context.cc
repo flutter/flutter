@@ -14,7 +14,7 @@ namespace flutter_runner {
 class ScopedFrame final : public flutter::CompositorContext::ScopedFrame {
  public:
   ScopedFrame(CompositorContext& context,
-              GrContext* gr_context,
+              GrDirectContext* gr_context,
               SkCanvas* canvas,
               flutter::ExternalViewEmbedder* view_embedder,
               const SkMatrix& root_surface_transformation,
