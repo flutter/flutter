@@ -37,7 +37,10 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 const String kCspMode = 'cspMode';
 
 /// The caching strategy to use for service worker generation.
-const String kServiceWorkerStrategy = 'ServiceWorkerStratgey';
+const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
+
+/// Whether the dart2js build should output source maps.
+const String kSourceMapsEnabled = 'SourceMaps';
 
 /// The caching strategy for the generated service worker.
 enum ServiceWorkerStrategy {
@@ -52,7 +55,7 @@ const String kOfflineFirst = 'offline-first';
 const String kNoneWorker = 'none';
 
 /// Convert a [value] into a [ServiceWorkerStrategy].
-ServiceWorkerStrategy _serviceWorkerStrategyfromString(String value) {
+ServiceWorkerStrategy _serviceWorkerStrategyFromString(String value) {
   switch (value) {
     case kNoneWorker:
       return ServiceWorkerStrategy.none;
@@ -194,6 +197,7 @@ class Dart2JSTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
 
     final List<String> sharedCommandOptions = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
@@ -207,6 +211,8 @@ class Dart2JSTarget extends Target {
         '-Ddart.vm.product=true',
       for (final String dartDefine in decodeDartDefines(environment.defines, kDartDefines))
         '-D$dartDefine',
+      if (!sourceMapsEnabled)
+        '--no-source-maps',
     ];
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
@@ -227,7 +233,7 @@ class Dart2JSTarget extends Target {
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
     final bool csp = environment.defines[kCspMode] == 'true';
 
-    final ProcessResult javaScriptResult = await globals.processManager.run(<String>[
+    final ProcessResult javaScriptResult = await environment.processManager.run(<String>[
       ...sharedCommandOptions,
       if (dart2jsOptimization != null) '-$dart2jsOptimization' else '-O4',
       if (buildMode == BuildMode.profile) '--no-minify',
@@ -423,7 +429,7 @@ class WebServiceWorker extends Target {
     final File serviceWorkerFile = environment.outputDir
       .childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
-    final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyfromString(
+    final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyFromString(
       environment.defines[kServiceWorkerStrategy],
     );
     final String serviceWorker = generateServiceWorker(

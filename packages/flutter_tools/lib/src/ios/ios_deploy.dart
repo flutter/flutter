@@ -25,6 +25,9 @@ const String noProvisioningProfileErrorTwo = 'Error 0xe8000067';
 const String deviceLockedError = 'e80000e2';
 const String unknownAppLaunchError = 'Error 0xe8000022';
 
+// Another debugger instance is already attached?
+const String processLaunchFailedError = 'error: process launch failed';
+
 class IOSDeploy {
   IOSDeploy({
     @required Artifacts artifacts,
@@ -115,14 +118,13 @@ class IOSDeploy {
   /// Returns [IOSDeployDebugger] wrapping attached debugger logic.
   ///
   /// This method does not install the app. Call [IOSDeployDebugger.launchAndAttach()]
-  /// to install and attach the debugger to the specified app bundle.
+  /// to install the specified app bundle.
   IOSDeployDebugger prepareDebuggerForLaunch({
     @required String deviceId,
     @required String bundlePath,
     @required List<String> launchArguments,
     @required IOSDeviceInterface interfaceType,
   }) {
-    // Interactive debug session to support sending the lldb detach command.
     final List<String> launchCommand = <String>[
       'script',
       '-t',
@@ -134,6 +136,7 @@ class IOSDeploy {
       '--bundle',
       bundlePath,
       '--debug',
+      '--noninteractive',
       if (interfaceType != IOSDeviceInterface.network)
         '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
@@ -221,7 +224,7 @@ enum _IOSDeployDebuggerState {
   attached,
 }
 
-/// Wrapper to launch app and attach the debugger with ios-deploy.
+/// Wrapper to launch app with the debugger with ios-deploy.
 class IOSDeployDebugger {
   IOSDeployDebugger({
     @required Logger logger,
@@ -261,15 +264,16 @@ class IOSDeployDebugger {
   Stream<String> get logLines => _debuggerOutput.stream;
   final StreamController<String> _debuggerOutput = StreamController<String>.broadcast();
 
-  bool get debuggerAttached => _debuggerState == _IOSDeployDebuggerState.attached;
   _IOSDeployDebuggerState _debuggerState;
-
   // (lldb)     run
   // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
   static final RegExp _lldbRun = RegExp(r'\(lldb\)\s*run');
 
-  // (lldb)     run
-  // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
+  // (lldb)     autoexit
+  // hhttps://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L61
+  static final RegExp _lldbAutoexit = RegExp(r'\(lldb\)\s*autoexit');
+
+  // From lldb on exit.
   static final RegExp _lldbProcessExit = RegExp(r'Process \d* exited with status =');
 
   /// Launch the app on the device, and attach the debugger.
@@ -292,6 +296,7 @@ class IOSDeployDebugger {
 
         // (lldb)     run
         // success
+        // (lldb)     autoexit
         // 2020-09-15 13:42:25.185474-0700 Runner[477:181141] flutter: Observatory listening on http://127.0.0.1:57782/
         if (_lldbRun.hasMatch(line)) {
           _logger.printTrace(line);
@@ -321,7 +326,7 @@ class IOSDeployDebugger {
           }
           return;
         }
-        if (_debuggerState != _IOSDeployDebuggerState.attached) {
+        if (_debuggerState != _IOSDeployDebuggerState.attached || _lldbAutoexit.hasMatch(line)) {
           _logger.printTrace(line);
           return;
         }
@@ -375,21 +380,6 @@ class IOSDeployDebugger {
     _iosDeployProcess = null;
     return success;
   }
-
-  void detach() {
-    if (!debuggerAttached) {
-      return;
-    }
-
-    try {
-      // Detach lldb from the app process.
-      _iosDeployProcess?.stdin?.writeln('process detach');
-      _debuggerState = _IOSDeployDebuggerState.detached;
-    } on SocketException catch (error) {
-      // Best effort, try to detach, but maybe the app already exited or already detached.
-      _logger.printTrace('Could not detach from debugger: $error');
-    }
-  }
 }
 
 // Maps stdout line stream. Must return original line.
@@ -412,6 +402,13 @@ Error launching app. Try launching from within Xcode via:
     open ios/Runner.xcworkspace
 
 Your Xcode version may be too old for your iOS version.
+═══════════════════════════════════════════════════════════════════════════════════''',
+        emphasis: true);
+  } else if (stdout.contains(processLaunchFailedError)) {
+    logger.printError('''
+═══════════════════════════════════════════════════════════════════════════════════
+Could not attach the debugger.
+Try uninstalling the app from your device and retrying.
 ═══════════════════════════════════════════════════════════════════════════════════''',
         emphasis: true);
   }

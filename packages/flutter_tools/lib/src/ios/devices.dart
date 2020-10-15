@@ -22,7 +22,6 @@ import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
-import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -369,6 +368,7 @@ class IOSDevice extends Device {
       '--enable-service-port-fallback',
       '--disable-service-auth-codes',
       '--observatory-port=$assumedObservatoryPort',
+      if (debuggingOptions.disablePortPublication) '--disable-observatory-publication',
       if (debuggingOptions.startPaused) '--start-paused',
       if (dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
       if (debuggingOptions.useTestFonts) '--use-test-fonts',
@@ -395,8 +395,8 @@ class IOSDevice extends Device {
     ];
 
     final Status installStatus = _logger.startProgress(
-        'Installing and launching...',
-        timeout: timeoutConfiguration.slowOperation);
+      'Installing and launching...',
+    );
     try {
       ProtocolDiscovery observatoryDiscovery;
       int installationResult = 1;
@@ -453,7 +453,6 @@ class IOSDevice extends Device {
       _logger.printTrace('Application launched on the device. Waiting for observatory port.');
       final FallbackDiscovery fallbackDiscovery = FallbackDiscovery(
         logger: _logger,
-        mDnsObservatoryDiscovery: MDnsObservatoryDiscovery.instance,
         portForwarder: portForwarder,
         protocolDiscovery: observatoryDiscovery,
         flutterUsage: globals.flutterUsage,
@@ -485,12 +484,7 @@ class IOSDevice extends Device {
     IOSApp app, {
     String userIdentifier,
   }) async {
-    // If the debugger is not attached, killing the ios-deploy process won't stop the app.
-    if (iosDeployDebugger!= null && iosDeployDebugger.debuggerAttached) {
-      // Avoid null.
-      return iosDeployDebugger?.exit() == true;
-    }
-    return false;
+    return iosDeployDebugger?.exit();
   }
 
   @override
@@ -722,8 +716,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
 
     void logMessage(vm_service.Event event) {
-      if (_iosDeployDebugger != null && _iosDeployDebugger.debuggerAttached) {
-        // Prefer the more complete logs from the  attached debugger.
+      if (_iosDeployDebugger != null) {
+        // Prefer the more complete logs from the debugger.
         return;
       }
       final String message = processVmServiceMessage(event);
@@ -738,7 +732,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     ]);
   }
 
-  /// Log reader will listen to [debugger.logLines] and will detach debugger on dispose.
+  /// Log reader will listen to [debugger.logLines].
   set debuggerStream(IOSDeployDebugger debugger) {
     // Logging is gathered from syslog on iOS 13 and earlier.
     if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
@@ -817,7 +811,6 @@ class IOSDeviceLogReader extends DeviceLogReader {
       loggingSubscription.cancel();
     }
     _idevicesyslogProcess?.kill();
-    _iosDeployDebugger?.detach();
   }
 }
 
@@ -888,7 +881,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     while (!connected) {
       _logger.printTrace('Attempting to forward device port $devicePort to host port $hostPort');
       process = await _iproxy.forward(devicePort, hostPort, _id);
-      // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
+      // TODO(ianh): This is a flaky race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
       connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
       if (!connected) {
         process.kill();
@@ -920,7 +913,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
       return;
     }
 
-    _logger.printTrace('Unforwarding port $forwardedPort');
+    _logger.printTrace('Un-forwarding port $forwardedPort');
     forwardedPort.dispose();
   }
 

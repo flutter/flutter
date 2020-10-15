@@ -531,6 +531,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             debuggingOptions.initializePlatform,
             false,
             kNoneWorker,
+            true,
           );
         }
         await device.device.startApp(
@@ -575,9 +576,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
     final Stopwatch timer = Stopwatch()..start();
     final Status status = globals.logger.startProgress(
       'Performing hot restart...',
-      timeout: supportsServiceProtocol
-          ? timeoutConfiguration.fastOperation
-          : timeoutConfiguration.slowOperation,
       progressId: 'hot.restart',
     );
 
@@ -601,6 +599,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions.initializePlatform,
           false,
           kNoneWorker,
+          true,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -729,7 +728,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
     );
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device.device.name}...',
-      timeout: timeoutConfiguration.fastOperation,
     );
     final UpdateFSReport report = await device.devFS.update(
       mainUri: await _generateEntrypoint(

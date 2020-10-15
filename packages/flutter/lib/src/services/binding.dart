@@ -307,7 +307,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  Future<ByteData?> send(String channel, ByteData? message) {
+  Future<ByteData?>? send(String channel, ByteData? message) {
     final MessageHandler? handler = _mockHandlers[channel];
     if (handler != null)
       return handler(message);

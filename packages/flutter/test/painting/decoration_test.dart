@@ -4,6 +4,7 @@
 
 @TestOn('!chrome')
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui show Image, ColorFilter;
 
 import 'package:flutter/foundation.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/painting.dart';
 import 'package:fake_async/fake_async.dart';
 
 import '../flutter_test_alternative.dart';
+import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';
 
@@ -100,6 +102,31 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   String toString() => '${describeIdentity(this)}()';
 }
 
+class MultiFrameImageProvider extends ImageProvider<MultiFrameImageProvider> {
+  MultiFrameImageProvider(this.completer);
+
+  final MultiImageCompleter completer;
+
+  @override
+  Future<MultiFrameImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<MultiFrameImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(MultiFrameImageProvider key, DecoderCallback decode) {
+    return completer;
+  }
+
+  @override
+  String toString() => '${describeIdentity(this)}()';
+}
+
+class MultiImageCompleter extends ImageStreamCompleter {
+  void testSetImage(ImageInfo info) {
+    setImage(info);
+  }
+}
+
 void main() {
   TestRenderingFlutterBinding(); // initializes the imageCache
 
@@ -107,13 +134,13 @@ void main() {
     const BoxDecoration a = BoxDecoration(color: Color(0xFFFFFFFF));
     const BoxDecoration b = BoxDecoration(color: Color(0x00000000));
 
-    BoxDecoration c = Decoration.lerp(a, b, 0.0) as BoxDecoration;
+    BoxDecoration c = Decoration.lerp(a, b, 0.0)! as BoxDecoration;
     expect(c.color, equals(a.color));
 
-    c = Decoration.lerp(a, b, 0.25) as BoxDecoration;
+    c = Decoration.lerp(a, b, 0.25)! as BoxDecoration;
     expect(c.color, equals(Color.lerp(const Color(0xFFFFFFFF), const Color(0x00000000), 0.25)));
 
-    c = Decoration.lerp(a, b, 1.0) as BoxDecoration;
+    c = Decoration.lerp(a, b, 1.0)! as BoxDecoration;
     expect(c.color, equals(b.color));
   });
 
@@ -153,7 +180,7 @@ void main() {
 
   test('BoxDecorationImageListenerAsync', () async {
     final ui.Image image = await createTestImage(width: 10, height: 10);
-    FakeAsync().run((FakeAsync async)  {
+    FakeAsync().run((FakeAsync async) {
       final ImageProvider imageProvider = AsyncTestImageProvider(image);
       final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
 
@@ -172,6 +199,42 @@ void main() {
       async.flushMicrotasks();
       expect(onChangedCalled, equals(true));
     });
+  });
+
+  test('BoxDecorationImageListener does not change when image is clone', () async {
+    final ui.Image image1 = await createTestImage(width: 10, height: 10, cache: false);
+    final ui.Image image2 = await createTestImage(width: 10, height: 10, cache: false);
+    final MultiImageCompleter completer = MultiImageCompleter();
+    final MultiFrameImageProvider imageProvider = MultiFrameImageProvider(completer);
+    final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
+
+    final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
+    bool onChangedCalled = false;
+    final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
+      onChangedCalled = true;
+    });
+
+    final TestCanvas canvas = TestCanvas();
+    const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size.zero);
+    boxPainter.paint(canvas, Offset.zero, imageConfiguration);
+
+    // The onChanged callback should be invoked asynchronously.
+    expect(onChangedCalled, equals(false));
+
+    completer.testSetImage(ImageInfo(image: image1.clone()));
+    await null;
+
+    expect(onChangedCalled, equals(true));
+    onChangedCalled = false;
+    completer.testSetImage(ImageInfo(image: image1.clone()));
+    await null;
+
+    expect(onChangedCalled, equals(false));
+
+    completer.testSetImage(ImageInfo(image: image2.clone()));
+    await null;
+
+    expect(onChangedCalled, equals(true));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/7289.
@@ -289,8 +352,8 @@ void main() {
       '   When DecorationImagePainter.paint() was called, there was no text\n'
       '   direction provided in the ImageConfiguration object to match.\n'
       '   The DecorationImage was:\n'
-      '     DecorationImage(SynchronousTestImageProvider(), center, match\n'
-      '     text direction, scale: 1.0)\n'
+      '     DecorationImage(SynchronousTestImageProvider(),\n'
+      '     Alignment.center, match text direction, scale: 1.0)\n'
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n'
     );
@@ -613,5 +676,31 @@ void main() {
     // considering DecorationImage scale to be 4.0 and Image scale to be 1.0.
     expect(call.positionalArguments[2].size, const Size(25.0, 25.0));
     expect(call.positionalArguments[2], const Rect.fromLTRB(0.0, 0.0, 25.0, 25.0));
+  });
+
+  test('DecorationImagePainter disposes of image when disposed',  () async {
+    final ImageProvider provider = MemoryImage(Uint8List.fromList(kTransparentImage));
+
+    final ImageStream stream = provider.resolve(ImageConfiguration.empty);
+
+    final Completer<ImageInfo> infoCompleter = Completer<ImageInfo>();
+    void _listener(ImageInfo image, bool syncCall) {
+      assert(!infoCompleter.isCompleted);
+      infoCompleter.complete(image);
+    }
+    stream.addListener(ImageStreamListener(_listener));
+
+    final ImageInfo info = await infoCompleter.future;
+    final int baselineRefCount = info.image.debugGetOpenHandleStackTraces()!.length;
+
+    final DecorationImagePainter painter = DecorationImage(image: provider).createPainter(() {});
+    final Canvas canvas = TestCanvas();
+    painter.paint(canvas, Rect.zero, Path(), ImageConfiguration.empty);
+
+    expect(info.image.debugGetOpenHandleStackTraces()!.length, baselineRefCount + 1);
+    painter.dispose();
+    expect(info.image.debugGetOpenHandleStackTraces()!.length, baselineRefCount);
+
+    info.dispose();
   });
 }

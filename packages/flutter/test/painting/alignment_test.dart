@@ -212,10 +212,10 @@ void main() {
 
   test('AlignmentGeometry toString', () {
     expect(const Alignment(1.0001, 2.0001).toString(), 'Alignment(1.0, 2.0)');
-    expect(const Alignment(0.0, 0.0).toString(), 'center');
-    expect(const Alignment(-1.0, 1.0).add(const AlignmentDirectional(1.0, 0.0)).toString(), 'bottomLeft + AlignmentDirectional.centerEnd');
+    expect(const Alignment(0.0, 0.0).toString(), 'Alignment.center');
+    expect(const Alignment(-1.0, 1.0).add(const AlignmentDirectional(1.0, 0.0)).toString(), 'Alignment.bottomLeft + AlignmentDirectional.centerEnd');
     expect(const Alignment(0.0001, 0.0001).toString(), 'Alignment(0.0, 0.0)');
-    expect(const Alignment(0.0, 0.0).toString(), 'center');
+    expect(const Alignment(0.0, 0.0).toString(), 'Alignment.center');
     expect(const AlignmentDirectional(0.0, 0.0).toString(), 'AlignmentDirectional.center');
     expect(const Alignment(1.0, 1.0).add(const AlignmentDirectional(1.0, 1.0)).toString(), 'Alignment(1.0, 2.0) + AlignmentDirectional.centerEnd');
   });

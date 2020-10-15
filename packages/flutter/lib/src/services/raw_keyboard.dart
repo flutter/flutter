@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:io';
 import 'dart:ui';
 
@@ -265,7 +264,7 @@ abstract class RawKeyEvent with Diagnosticable {
   /// Creates a concrete [RawKeyEvent] class from a message in the form received
   /// on the [SystemChannels.keyEvent] channel.
   factory RawKeyEvent.fromMessage(Map<String, dynamic> message) {
-    RawKeyEventData data;
+    final RawKeyEventData data;
     String? character;
 
     final String keymap = message['keymap'] as String;
@@ -737,7 +736,7 @@ class RawKeyboard {
 }
 
 @immutable
-class _ModifierSidePair extends Object {
+class _ModifierSidePair {
   const _ModifierSidePair(this.modifier, this.side);
 
   final ModifierKey modifier;

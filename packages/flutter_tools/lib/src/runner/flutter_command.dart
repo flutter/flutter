@@ -159,6 +159,7 @@ abstract class FlutterCommand extends Command<void> {
   bool get hidden => deprecated;
 
   bool _excludeDebug = false;
+  bool _excludeRelease = false;
 
   BuildMode _defaultBuildMode;
 
@@ -369,6 +370,17 @@ abstract class FlutterCommand extends Command<void> {
     return null;
   }
 
+  void addPublishPort({ bool enabledByDefault = true, bool verboseHelp = false }) {
+    argParser.addFlag('publish-port',
+        negatable: true,
+        hide: !verboseHelp,
+        help: 'Publish the VM service port over mDNS. Disable to prevent the'
+            'local network permission app dialog in debug and profile build modes (iOS devices only.)',
+        defaultsTo: enabledByDefault);
+  }
+
+  bool get disablePortPublication => !boolArg('publish-port');
+
   void usesIpv6Flag() {
     argParser.addFlag(ipv6Flag,
       hide: true,
@@ -440,10 +452,16 @@ abstract class FlutterCommand extends Command<void> {
   }
   Duration _deviceDiscoveryTimeout;
 
-  void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false, bool excludeDebug = false }) {
+  void addBuildModeFlags({
+    bool defaultToRelease = true,
+    bool verboseHelp = false,
+    bool excludeDebug = false,
+    bool excludeRelease = false,
+  }) {
     // A release build must be the default if a debug build is not possible.
     assert(defaultToRelease || !excludeDebug);
     _excludeDebug = excludeDebug;
+    _excludeRelease = excludeRelease;
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     if (!excludeDebug) {
@@ -454,13 +472,15 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('profile',
       negatable: false,
       help: 'Build a version of your app specialized for performance profiling.');
-    argParser.addFlag('release',
-      negatable: false,
-      help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
-    argParser.addFlag('jit-release',
-      negatable: false,
-      hide: !verboseHelp,
-      help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
+    if (!excludeRelease) {
+      argParser.addFlag('release',
+        negatable: false,
+        help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
+      argParser.addFlag('jit-release',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
+    }
   }
 
   void addSplitDebugInfoOption() {
@@ -542,7 +562,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(FlutterOptions.kNullAssertions,
       help:
         'Perform additional null assertions on the boundaries of migrated and '
-        'unmigrated code. This setting is not currently supported on desktop '
+        'un-migrated code. This setting is not currently supported on desktop '
         'devices.'
     );
   }
@@ -587,7 +607,7 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kPerformanceMeasurementFile,
       help:
         'The name of a file where flutter assemble performance and '
-        'cachedness information will be written in a JSON format.'
+        'cached-ness information will be written in a JSON format.'
     );
   }
 
@@ -617,11 +637,13 @@ abstract class FlutterCommand extends Command<void> {
     // No debug when _excludeDebug is true.
     // If debug is not excluded, then take the command line flag.
     final bool debugResult = !_excludeDebug && boolArg('debug');
+    final bool jitReleaseResult = !_excludeRelease && boolArg('jit-release');
+    final bool releaseResult = !_excludeRelease && boolArg('release');
     final List<bool> modeFlags = <bool>[
       debugResult,
-      boolArg('jit-release'),
+      jitReleaseResult,
       boolArg('profile'),
-      boolArg('release'),
+      releaseResult,
     ];
     if (modeFlags.where((bool flag) => flag).length > 1) {
       throw UsageException('Only one of --debug, --profile, --jit-release, '
@@ -633,10 +655,10 @@ abstract class FlutterCommand extends Command<void> {
     if (boolArg('profile')) {
       return BuildMode.profile;
     }
-    if (boolArg('release')) {
+    if (releaseResult) {
       return BuildMode.release;
     }
-    if (boolArg('jit-release')) {
+    if (jitReleaseResult) {
       return BuildMode.jitRelease;
     }
     return _defaultBuildMode;
@@ -764,6 +786,10 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kBundleSkSLPathOption)
       : null;
 
+    if (bundleSkSLPath != null && !globals.fs.isFileSync(bundleSkSLPath)) {
+      throwToolExit('No SkSL shader bundle found at $bundleSkSLPath.');
+    }
+
     final String performanceMeasurementFile = argParser.options.containsKey(FlutterOptions.kPerformanceMeasurementFile)
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
@@ -805,7 +831,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void setupApplicationPackages() {
-    applicationPackages ??= ApplicationPackageStore();
+    applicationPackages ??= ApplicationPackageFactory.instance;
   }
 
   /// The path to send to Google Analytics. Return null here to disable
@@ -1052,7 +1078,7 @@ abstract class FlutterCommand extends Command<void> {
         devices = await deviceManager.getAllConnectedDevices();
       }
       globals.printStatus('');
-      await Device.printDevices(devices);
+      await Device.printDevices(devices, globals.logger);
       return null;
     }
     return devices;
@@ -1076,7 +1102,7 @@ abstract class FlutterCommand extends Command<void> {
       globals.printStatus(userMessages.flutterSpecifyDevice);
       deviceList = await globals.deviceManager.getAllConnectedDevices();
       globals.printStatus('');
-      await Device.printDevices(deviceList);
+      await Device.printDevices(deviceList, globals.logger);
       return null;
     }
     return deviceList.single;
@@ -1131,7 +1157,7 @@ abstract class FlutterCommand extends Command<void> {
     return help;
   }
 
-  ApplicationPackageStore applicationPackages;
+  ApplicationPackageFactory applicationPackages;
 
   /// Gets the parsed command-line option named [name] as `bool`.
   bool boolArg(String name) => argResults[name] as bool;
@@ -1175,7 +1201,7 @@ mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
     // If there is no specified target device, fallback to the default
-    // confiugration.
+    // configuration.
     final String rawTargetPlatform = stringArg('target-platform');
     final TargetPlatform targetPlatform = getTargetPlatformForName(rawTargetPlatform);
     if (targetPlatform == null) {

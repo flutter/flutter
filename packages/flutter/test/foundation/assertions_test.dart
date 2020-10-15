@@ -57,10 +57,10 @@ void main() {
         '\n'
         'INFO\n'
         '═════════════════════════════════════════════════════════════════\n',
-
     );
     expect(
       FlutterErrorDetails(
+        exception: NullThrownError(),
         library: 'LIBRARY',
         context: ErrorDescription('CONTEXTING'),
         informationCollector: () sync* {
@@ -68,11 +68,10 @@ void main() {
         },
       ).toString(),
       '══╡ EXCEPTION CAUGHT BY LIBRARY ╞════════════════════════════════\n'
-      'The following Null object was thrown CONTEXTING:\n'
-      '  null\n'
+      'The null value was thrown CONTEXTING.\n'
       '\n'
       'INFO\n'
-      '═════════════════════════════════════════════════════════════════\n',
+      '═════════════════════════════════════════════════════════════════\n'
     );
     expect(
       FlutterErrorDetails(
@@ -114,11 +113,10 @@ void main() {
       '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
-      const FlutterErrorDetails().toString(),
+      FlutterErrorDetails(exception: NullThrownError()).toString(),
       '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
-      'The following Null object was thrown:\n'
-      '  null\n'
-      '═════════════════════════════════════════════════════════════════\n',
+      'The null value was thrown.\n'
+      '═════════════════════════════════════════════════════════════════\n'
     );
   });
 
@@ -221,7 +219,7 @@ void main() {
 
   test('Malformed FlutterError objects', () {
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[]);
       } on AssertionError catch (e) {
@@ -237,7 +235,7 @@ void main() {
     }
 
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           (ErrorDescription('Error description without a summary'))]);
@@ -263,7 +261,7 @@ void main() {
     }
 
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Error Summary A'),
@@ -300,7 +298,7 @@ void main() {
     }
 
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorDescription('Some description'),
@@ -331,7 +329,7 @@ void main() {
 
   test('User-thrown exceptions have ErrorSummary properties', () {
     {
-      DiagnosticsNode node;
+      final DiagnosticsNode node;
       try {
         throw 'User thrown string';
       } catch (e) {
@@ -342,7 +340,7 @@ void main() {
     }
 
     {
-      DiagnosticsNode node;
+      final DiagnosticsNode node;
       try {
         throw ArgumentError.notNull('myArgument');
       } catch (e) {

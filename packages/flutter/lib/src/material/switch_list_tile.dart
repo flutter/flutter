@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
@@ -257,9 +255,10 @@ class SwitchListTile extends StatelessWidget {
   /// * [value] determines whether this switch is on or off.
   /// * [onChanged] is called when the user toggles the switch on or off.
   const SwitchListTile({
-    Key key,
-    @required this.value,
-    @required this.onChanged,
+    Key? key,
+    required this.value,
+    required this.onChanged,
+    this.tileColor,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
@@ -275,6 +274,7 @@ class SwitchListTile extends StatelessWidget {
     this.selected = false,
     this.autofocus = false,
     this.controlAffinity = ListTileControlAffinity.platform,
+    this.shape,
   }) : _switchListTileType = _SwitchListTileType.material,
        assert(value != null),
        assert(isThreeLine != null),
@@ -292,9 +292,10 @@ class SwitchListTile extends StatelessWidget {
   /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
   /// [activeThumbImage], [inactiveThumbImage].
   const SwitchListTile.adaptive({
-    Key key,
-    @required this.value,
-    @required this.onChanged,
+    Key? key,
+    required this.value,
+    required this.onChanged,
+    this.tileColor,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
@@ -310,6 +311,7 @@ class SwitchListTile extends StatelessWidget {
     this.selected = false,
     this.autofocus = false,
     this.controlAffinity = ListTileControlAffinity.platform,
+    this.shape,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
        assert(value != null),
        assert(isThreeLine != null),
@@ -346,56 +348,59 @@ class SwitchListTile extends StatelessWidget {
   ///   title: Text('Selection'),
   /// )
   /// ```
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
 
   /// The color to use when this switch is on.
   ///
   /// Defaults to accent color of the current [Theme].
-  final Color activeColor;
+  final Color? activeColor;
 
   /// The color to use on the track when this switch is on.
   ///
   /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
-  final Color activeTrackColor;
+  final Color? activeTrackColor;
 
   /// The color to use on the thumb when this switch is off.
   ///
   /// Defaults to the colors described in the Material design specification.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
-  final Color inactiveThumbColor;
+  final Color? inactiveThumbColor;
 
   /// The color to use on the track when this switch is off.
   ///
   /// Defaults to the colors described in the Material design specification.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
-  final Color inactiveTrackColor;
+  final Color? inactiveTrackColor;
+
+  /// {@macro flutter.material.ListTile.tileColor}
+  final Color? tileColor;
 
   /// An image to use on the thumb of this switch when the switch is on.
-  final ImageProvider activeThumbImage;
+  final ImageProvider? activeThumbImage;
 
   /// An image to use on the thumb of this switch when the switch is off.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
-  final ImageProvider inactiveThumbImage;
+  final ImageProvider? inactiveThumbImage;
 
   /// The primary content of the list tile.
   ///
   /// Typically a [Text] widget.
-  final Widget title;
+  final Widget? title;
 
   /// Additional content displayed below the title.
   ///
   /// Typically a [Text] widget.
-  final Widget subtitle;
+  final Widget? subtitle;
 
   /// A widget to display on the opposite side of the tile from the switch.
   ///
   /// Typically an [Icon] widget.
-  final Widget secondary;
+  final Widget? secondary;
 
   /// Whether this list tile is intended to display three lines of text.
   ///
@@ -406,7 +411,7 @@ class SwitchListTile extends StatelessWidget {
   /// Whether this list tile is part of a vertically dense list.
   ///
   /// If this property is null then its value is based on [ListTileTheme.dense].
-  final bool dense;
+  final bool? dense;
 
   /// The tile's internal padding.
   ///
@@ -415,7 +420,7 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// If null, [ListTile]'s default of `EdgeInsets.symmetric(horizontal: 16.0)`
   /// is used.
-  final EdgeInsetsGeometry contentPadding;
+  final EdgeInsetsGeometry? contentPadding;
 
   /// Whether to render icons and text in the [activeColor].
   ///
@@ -437,9 +442,12 @@ class SwitchListTile extends StatelessWidget {
   /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform].
   final ListTileControlAffinity controlAffinity;
 
+  /// {@macro flutter.material.ListTile.shape}
+  final ShapeBorder? shape;
+
   @override
   Widget build(BuildContext context) {
-    Widget control;
+    final Widget control;
     switch (_switchListTileType) {
       case _SwitchListTileType.adaptive:
         control = Switch.adaptive(
@@ -471,7 +479,7 @@ class SwitchListTile extends StatelessWidget {
         );
     }
 
-    Widget leading, trailing;
+    Widget? leading, trailing;
     switch (controlAffinity) {
       case ListTileControlAffinity.leading:
         leading = control;
@@ -486,7 +494,7 @@ class SwitchListTile extends StatelessWidget {
 
     return MergeSemantics(
       child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).accentColor,
+        selectedColor: activeColor ?? Theme.of(context)!.accentColor,
         child: ListTile(
           leading: leading,
           title: title,
@@ -496,9 +504,11 @@ class SwitchListTile extends StatelessWidget {
           dense: dense,
           contentPadding: contentPadding,
           enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged(!value); } : null,
+          onTap: onChanged != null ? () { onChanged!(!value); } : null,
           selected: selected,
           autofocus: autofocus,
+          shape: shape,
+          tileColor: tileColor,
         ),
       ),
     );

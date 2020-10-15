@@ -5,7 +5,6 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
@@ -17,7 +16,6 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 const String flutterRoot = r'C:\flutter';
@@ -44,7 +42,7 @@ void main() {
 
   ProcessManager processManager;
   MockVisualStudio mockVisualStudio;
-  MockUsage usage;
+  Usage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -54,7 +52,7 @@ void main() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
     mockVisualStudio = MockVisualStudio();
-    usage = MockUsage();
+    usage = Usage.test();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -117,7 +115,6 @@ void main() {
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = mockVisualStudio;
-    applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
 
     expect(createTestCommandRunner(command).run(
@@ -133,7 +130,6 @@ void main() {
   testUsingContext('Windows build fails when there is no windows project', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = mockVisualStudio;
-    applyMocksToCommand(command);
     setUpMockCoreProjectFiles();
     when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
@@ -150,7 +146,6 @@ void main() {
   testUsingContext('Windows build fails on non windows platform', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = mockVisualStudio;
-    applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
@@ -167,7 +162,6 @@ void main() {
   testUsingContext('Windows build does not spew stdout to status logger', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = mockVisualStudio;
-    applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
@@ -193,7 +187,6 @@ void main() {
   testUsingContext('Windows build extracts errors from stdout', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = mockVisualStudio;
-    applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
@@ -250,7 +243,6 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   testUsingContext('Windows verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = mockVisualStudio;
-    applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
@@ -277,7 +269,6 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   testUsingContext('Windows build invokes build and writes generated files', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = mockVisualStudio;
-    applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
@@ -286,6 +277,8 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
       buildCommand('Release'),
     ]);
     fileSystem.file(fileSystem.path.join('lib', 'other.dart'))
+      .createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('foo', 'bar.sksl.json'))
       .createSync(recursive: true);
 
     await createTestCommandRunner(command).run(
@@ -341,7 +334,6 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   testUsingContext('Windows profile build passes Profile configuration', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = mockVisualStudio;
-    applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
@@ -377,7 +369,6 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   testUsingContext('Performs code size analysis and sends analytics', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = mockVisualStudio;
-    applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
@@ -404,12 +395,15 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
       }),
     ]);
 
-    await createTestCommandRunner(command).run(
-      const <String>['windows', '--no-pub', '--analyze-size']
+    // Capture Usage.test() events.
+    final StringBuffer buffer = await capturedConsolePrint(() =>
+      createTestCommandRunner(command).run(
+        const <String>['windows', '--no-pub', '--analyze-size']
+      )
     );
 
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
-    verify(usage.sendEvent('code-size-analysis', 'windows')).called(1);
+    expect(buffer.toString(), contains('event {category: code-size-analysis, action: windows, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     FileSystem: () => fileSystem,
@@ -420,7 +414,4 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}
 class MockVisualStudio extends Mock implements VisualStudio {}
-class MockUsage extends Mock implements Usage {}
