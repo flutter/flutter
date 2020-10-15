@@ -87,6 +87,11 @@ class _TaskRunner {
       ).toSet();
       final Set<RunningProcessInfo> allProcesses = await getRunningProcesses().toSet();
       beforeRunningDartInstances.forEach(print);
+      for (final RunningProcessInfo info in allProcesses) {
+        if (info.commandLine.contains('iproxy')) {
+          print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
+        }
+      }
 
       print('enabling configs for macOS, Linux, Windows, and Web...');
       final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
