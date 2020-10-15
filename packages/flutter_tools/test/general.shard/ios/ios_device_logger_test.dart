@@ -239,6 +239,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       ));
 
       final MockIOSDeployDebugger iosDeployDebugger = MockIOSDeployDebugger();
+      when(iosDeployDebugger.debuggerAttached).thenReturn(true);
 
       final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
         'Message from debugger'
@@ -302,6 +303,24 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       logReader.debuggerStream = iosDeployDebugger;
 
       await streamComplete.future;
+    });
+
+    testWithoutContext('detaches debugger', () async {
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        useSyslog: false,
+      );
+      final MockIOSDeployDebugger iosDeployDebugger = MockIOSDeployDebugger();
+      when(iosDeployDebugger.logLines).thenAnswer((Invocation invocation) => const Stream<String>.empty());
+      logReader.debuggerStream = iosDeployDebugger;
+
+      logReader.dispose();
+      verify(iosDeployDebugger.detach());
     });
   });
 }
