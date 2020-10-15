@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -439,6 +440,7 @@ class IOSDevice extends Device {
         installationResult = await iosDeployDebugger.launchAndAttach() ? 0 : 1;
       }
       if (installationResult != 0) {
+        await _screenshotOnFailure();
         _logger.printError('Could not run ${bundle.path} on $id.');
         _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
         _logger.printError('  open ios/Runner.xcworkspace');
@@ -468,6 +470,7 @@ class IOSDevice extends Device {
         packageName: FlutterProject.current().manifest.appName,
       );
       if (localUri == null) {
+        await _screenshotOnFailure();
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);
@@ -548,6 +551,23 @@ class IOSDevice extends Device {
       logReader.dispose();
     });
     await _portForwarder?.dispose();
+  }
+
+  Future<void> _screenshotOnFailure() async {
+    final bool screenshotOnConnectionFailure = _platform
+      .environment['FLUTTER_IOS_SCREENSHOT_ON_CONNECTION_FAILURE'] == 'true';
+    if (!screenshotOnConnectionFailure) {
+      return;
+    }
+    final File file = _fileSystem.file('test_screenshot.png');
+    try {
+      await takeScreenshot(file);
+      _logger.printStatus('BASE64 SCREENSHOT:${base64.encode(file.readAsBytesSync())}');
+    } on Exception {
+      _logger.printError('Failed to take screenshot');
+    } finally {
+      ErrorHandlingFileSystem.deleteIfExists(file);
+    }
   }
 }
 
