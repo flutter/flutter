@@ -85,6 +85,7 @@ class _TaskRunner {
       final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(
         processName: 'dart$exe',
       ).toSet();
+      final Set<RunningProcessInfo> allProcesses = await getRunningProcesses().toSet();
       beforeRunningDartInstances.forEach(print);
 
       print('enabling configs for macOS, Linux, Windows, and Web...');
@@ -122,6 +123,13 @@ class _TaskRunner {
             print('Killed process id ${info.pid}.');
           }
         }
+      }
+      final Set<RunningProcessInfo> allEndProcesses = await getRunningProcesses().toSet();
+      for (final RunningProcessInfo info in allEndProcesses) {
+        if (allProcesses.contains(info)) {
+          continue;
+        }
+        print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
       }
 
       _completer.complete(result);
