@@ -842,6 +842,7 @@ void main() {
 
   group('Drag and drop - onDragUpdate called if draggable moves along a set axis', () {
     int updated = 0;
+    Offset dragDelta = Offset.zero;
 
     Widget build() {
       return MaterialApp(
@@ -851,20 +852,29 @@ void main() {
               data: 1,
               child: const Text('Source'),
               feedback: const Text('Dragging'),
-              onDragUpdate: (_) => updated++,
+              onDragUpdate: (DragUpdateDetails details) {
+                dragDelta += details.delta;
+                updated++;
+              },
             ),
             Draggable<int>(
               data: 2,
               child: const Text('Vertical Source'),
               feedback: const Text('Vertical Dragging'),
-              onDragUpdate: (_) => updated++,
+              onDragUpdate: (DragUpdateDetails details) {
+                dragDelta += details.delta;
+                updated++;
+              },
               axis: Axis.vertical,
             ),
             Draggable<int>(
               data: 3,
               child: const Text('Horizontal Source'),
               feedback: const Text('Horizontal Dragging'),
-              onDragUpdate: (_) => updated++,
+              onDragUpdate: (DragUpdateDetails details) {
+                dragDelta += details.delta;
+                updated++;
+              },
               axis: Axis.horizontal,
             ),
           ],
@@ -874,6 +884,8 @@ void main() {
 
     testWidgets('Null axis onDragUpdate called only if draggable moves in any direction', (WidgetTester tester) async {
       updated = 0;
+      dragDelta = Offset.zero;
+
       await tester.pumpWidget(build());
 
       expect(updated, 0);
@@ -904,10 +916,14 @@ void main() {
       expect(updated, 1);
       expect(find.text('Source'), findsOneWidget);
       expect(find.text('Dragging'), findsNothing);
+      expect(dragDelta.dx, 10);
+      expect(dragDelta.dy, 10);
     });
 
     testWidgets('Vertical axis onDragUpdate only called if draggable moves vertical', (WidgetTester tester) async {
       updated = 0;
+      dragDelta = Offset.zero;
+
       await tester.pumpWidget(build());
 
       expect(updated, 0);
@@ -938,10 +954,14 @@ void main() {
       expect(updated, 1);
       expect(find.text('Vertical Source'), findsOneWidget);
       expect(find.text('Vertical Dragging'), findsNothing);
+      expect(dragDelta.dx, 0);
+      expect(dragDelta.dy, 10);
     });
 
     testWidgets('Horizontal axis onDragUpdate only called if draggable moves horizontal', (WidgetTester tester) async {
       updated = 0;
+      dragDelta = Offset.zero;
+
       await tester.pumpWidget(build());
 
       expect(updated, 0);
@@ -972,6 +992,8 @@ void main() {
       expect(updated, 1);
       expect(find.text('Horizontal Source'), findsOneWidget);
       expect(find.text('Horizontal Dragging'), findsNothing);
+      expect(dragDelta.dx, 10);
+      expect(dragDelta.dy, 0);
     });
   });
   
