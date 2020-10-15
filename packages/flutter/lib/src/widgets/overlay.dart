@@ -61,6 +61,7 @@ class OverlayEntry {
     required this.builder,
     bool opaque = false,
     bool maintainState = false,
+    this.lockDisposal,
   }) : assert(builder != null),
        assert(opaque != null),
        assert(maintainState != null),
@@ -112,6 +113,8 @@ class OverlayEntry {
     assert(_overlay != null);
     _overlay!._didChangeEntryOpacity();
   }
+
+  final ValueGetter<VoidCallback>? lockDisposal;
 
   OverlayState? _overlay;
   final GlobalKey<_OverlayEntryWidgetState> _key = GlobalKey<_OverlayEntryWidgetState>();
@@ -172,12 +175,27 @@ class _OverlayEntryWidget extends StatefulWidget {
 }
 
 class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
+  VoidCallback? releaseDisposal;
+
+  @override
+  void initState() {
+    releaseDisposal = widget.entry.lockDisposal?.call();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return TickerMode(
       enabled: widget.tickerEnabled,
       child: widget.entry.builder(context),
     );
+  }
+
+  @protected
+  @override
+  void dispose() {
+    releaseDisposal?.call();
+    super.dispose();
   }
 
   void _markNeedsBuild() {

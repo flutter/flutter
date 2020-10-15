@@ -189,7 +189,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         // removing the route and disposing it.
         if (!isActive) {
           navigator!.finalizeRoute(this);
-          assert(overlayEntries.isEmpty);
         }
         break;
     }
@@ -1520,8 +1519,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
-    yield _modalBarrier = OverlayEntry(builder: _buildModalBarrier);
-    yield _modalScope = OverlayEntry(builder: _buildModalScope, maintainState: maintainState);
+    yield _modalBarrier = OverlayEntry(builder: _buildModalBarrier, lockDisposal: lockDisposal);
+    yield _modalScope = OverlayEntry(builder: _buildModalScope, maintainState: maintainState, lockDisposal: lockDisposal);
   }
 
   @override

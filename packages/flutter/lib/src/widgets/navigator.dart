@@ -422,6 +422,34 @@ abstract class Route<T> {
   @mustCallSuper
   void changedExternalState() { }
 
+  int _disposalLockCount = 0;
+  @protected
+  VoidCallback lockDisposal() {
+    _disposalLockCount += 1;
+    bool debugUnlockCalled = false;
+    assert(!_calledDispose);
+    return () {
+      assert(!debugUnlockCalled);
+      assert(() {
+        debugUnlockCalled = true;
+        return true;
+      }());
+      _disposalLockCount -= 1;
+      assert(_disposalLockCount >= 0);
+      if (_disposalLockCount == 0 && _calledDispose) {
+        dispose();
+      }
+    };
+  }
+
+  bool _calledDispose = false;
+  void gracefullyDispose() {
+    _calledDispose = true;
+    if (_disposalLockCount == 0) {
+      dispose();
+    }
+  }
+
   /// Discards any resources used by the object.
   ///
   /// This method should not remove its [overlayEntries] from the [Overlay]. The
@@ -3045,6 +3073,12 @@ class _RouteEntry extends RouteTransitionRecord {
     currentState = _RouteLifecycle.disposed;
   }
 
+  void gracefullyDispose() {
+    assert(currentState.index < _RouteLifecycle.disposed.index);
+    route.gracefullyDispose();
+    currentState = _RouteLifecycle.disposed;
+  }
+
   bool get willBePresent {
     return currentState.index <= _RouteLifecycle.idle.index &&
            currentState.index >= _RouteLifecycle.add.index;
@@ -3854,7 +3888,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     for (final _RouteEntry entry in toBeDisposed) {
       for (final OverlayEntry overlayEntry in entry.route.overlayEntries)
         overlayEntry.remove();
-      entry.dispose();
+      entry.gracefullyDispose();
     }
     if (rearrangeOverlay) {
       overlay?.rearrange(_allRouteOverlayEntries);
