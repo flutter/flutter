@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show window;
 
 import 'package:flutter/material.dart';
@@ -334,7 +332,7 @@ void main() {
     final Key keyTop = UniqueKey();
     final Key keyBottom = UniqueKey();
 
-    bool valueTop = false;
+    bool? valueTop = false;
     const bool valueBottom = true;
 
     await tester.pumpWidget(
@@ -347,7 +345,7 @@ void main() {
                 Checkbox(
                   key: keyTop,
                   value: valueTop,
-                  onChanged: (bool newValue) {
+                  onChanged: (bool? newValue) {
                     valueTop = newValue;
                   },
                 ),
@@ -395,7 +393,7 @@ void main() {
                   key: checkbox,
                   child: Checkbox(
                     value: true,
-                    onChanged: (bool _) { },
+                    onChanged: (bool? _) { },
                   ),
                 ),
                 Semantics(
@@ -403,7 +401,7 @@ void main() {
                   key: checkboxUnchecked,
                   child: Checkbox(
                     value: false,
-                    onChanged: (bool _) { },
+                    onChanged: (bool? _) { },
                   ),
                 ),
                 Semantics(
@@ -495,17 +493,17 @@ void main() {
 }
 
 String _getMessageShownInSemanticsDebugger({
-  @required Key widgetKey,
-  @required Key debuggerKey,
-  @required WidgetTester tester,
+  required Key widgetKey,
+  required Key debuggerKey,
+  required WidgetTester tester,
 }) {
   final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debuggerKey, tester: tester);
   return semanticsDebuggerPainter.getMessage(tester.renderObject(find.byKey(widgetKey)).debugSemantics) as String;
 }
 
 dynamic _getSemanticsDebuggerPainter({
-  @required Key debuggerKey,
-  @required WidgetTester tester,
+  required Key debuggerKey,
+  required WidgetTester tester,
 }) {
   final CustomPaint customPaint = tester.widgetList(find.descendant(
     of: find.byKey(debuggerKey),
