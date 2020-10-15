@@ -47,6 +47,23 @@ class TextRange {
   // Returns true if the range is of length 0.
   bool collapsed() const { return base_ == extent_; }
 
+  // Returns true if the base is greater than the extent.
+  bool reversed() const { return base_ > extent_; }
+
+  // Returns true if |position| is contained within the range.
+  bool Contains(size_t position) const {
+    return position >= start() && position <= end();
+  }
+
+  // Returns true if |range| is contained within the range.
+  bool Contains(const TextRange& range) const {
+    return range.start() >= start() && range.end() <= end();
+  }
+
+  bool operator==(const TextRange& other) const {
+    return base_ == other.base_ && extent_ == other.extent_;
+  }
+
  private:
   size_t base_;
   size_t extent_;

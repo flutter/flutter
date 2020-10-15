@@ -27,8 +27,8 @@ class TextInputModel {
 
   // Attempts to set the text selection.
   //
-  // Returns false if the base or extent are out of bounds.
-  bool SetSelection(size_t base, size_t extent);
+  // Returns false if the selection is not within the bounds of the text.
+  bool SetSelection(const TextRange& range);
 
   // Adds a Unicode code point.
   //
@@ -105,11 +105,8 @@ class TextInputModel {
   // GetText().
   int GetCursorOffset() const;
 
-  // The position where the selection starts.
-  int selection_base() const { return selection_.base(); }
-
-  // The position of the cursor.
-  int selection_extent() const { return selection_.extent(); }
+  // The current selection.
+  TextRange selection() const { return selection_; }
 
  private:
   // Deletes the current selection, if any.
@@ -117,6 +114,9 @@ class TextInputModel {
   // Returns true if any text is deleted. The selection base and extent are
   // reset to the start of the selected range.
   bool DeleteSelected();
+
+  // Returns a range covering the entire text.
+  TextRange text_range() const { return TextRange(0, text_.length()); }
 
   std::u16string text_;
   TextRange selection_ = TextRange(0);

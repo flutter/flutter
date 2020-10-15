@@ -41,12 +41,11 @@ void TextInputModel::SetText(const std::string& text) {
   selection_ = TextRange(0);
 }
 
-bool TextInputModel::SetSelection(size_t base, size_t extent) {
-  size_t max_pos = text_.length();
-  if (base > max_pos || extent > max_pos) {
+bool TextInputModel::SetSelection(const TextRange& range) {
+  if (!text_range().Contains(range)) {
     return false;
   }
-  selection_ = TextRange(base, extent);
+  selection_ = range;
   return true;
 }
 
