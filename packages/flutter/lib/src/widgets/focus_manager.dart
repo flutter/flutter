@@ -38,7 +38,8 @@ bool _focusDebug(String message, [Iterable<String>? details]) {
 ///
 /// Returns a [KeyEventResult], containing a [KeyEventDisposition] that
 /// describes how, and whether, the key event was handled.
-typedef FocusOnKeyCallback = KeyEventResult Function(FocusNode node, RawKeyEvent event);
+// TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
+typedef FocusOnKeyCallback = dynamic Function(FocusNode node, RawKeyEvent event);
 
 /// An attachment point for a [FocusNode].
 ///
@@ -1623,25 +1624,40 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       assert(_focusDebug('No primary focus for key event, ignored: $event'));
       return KeyEventResult.ignored;
     }
-    KeyEventResult result = KeyEventResult.ignored;
+
+    // TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
+    dynamic result = KeyEventResult.ignored;
     for (final FocusNode node in <FocusNode>[_primaryFocus!, ..._primaryFocus!.ancestors]) {
       if (node.onKey != null) {
         result = node.onKey!(node, event);
-        switch (result.disposition) {
-          case KeyEventDisposition.handled:
+        if (result is KeyEventResult) {
+          switch (result.disposition) {
+            case KeyEventDisposition.handled:
+              assert(_focusDebug('Node $node handled key event $event.'));
+              break;
+            case KeyEventDisposition.ignored:
+              assert(_focusDebug('Key event ignored: $event.'));
+              continue;
+            case KeyEventDisposition.skipRemainingHandlers:
+              assert(_focusDebug('Key event stopped propagation: $event.'));
+              break;
+          }
+        } else if (result is bool){
+          if (result) {
+            result = KeyEventResult.handled;
             assert(_focusDebug('Node $node handled key event $event.'));
-            break;
-          case KeyEventDisposition.ignored:
+          } else {
+            result = KeyEventResult.ignored;
             assert(_focusDebug('Key event ignored: $event.'));
             continue;
-          case KeyEventDisposition.skipRemainingHandlers:
-            assert(_focusDebug('Key event stopped propagation: $event.'));
-            break;
+          }
         }
+        assert(result is bool || result is KeyEventResult,
+            'Value returned from onKey handler must be a non-null bool or KeyEventResult, not ${result.runtimeType}');
         break;
       }
     }
-    return result;
+    return result as KeyEventResult;
   }
 
   /// The node that currently has the primary focus.

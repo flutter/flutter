@@ -566,7 +566,8 @@ class KeyEventResult {
 /// The handler should return a [KeyEventResult] with the appropriate
 /// [KeyEventDisposition] set for the intended response. See
 /// [KeyEventDisposition] for a description of the possible responses.
-typedef RawKeyEventHandler = KeyEventResult Function(RawKeyEvent event);
+// TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
+typedef RawKeyEventHandler = dynamic Function(RawKeyEvent event);
 
 /// An interface for listening to raw key events.
 ///
@@ -691,18 +692,23 @@ class RawKeyboard {
     // Send the key event to the keyEventHandler, then send the appropriate
     // response to the platform so that it can resolve the event's handling.
     // Defaults to not handling the event if keyEventHandler is null.
-    final KeyEventResult result = keyEventHandler?.call(event) ?? KeyEventResult.ignored;
+    final dynamic result = keyEventHandler?.call(event) ?? KeyEventResult.ignored;
     late bool handled;
-    switch(result.disposition) {
-      case KeyEventDisposition.handled:
-        handled = true;
-        break;
-      case KeyEventDisposition.ignored:
-      case KeyEventDisposition.skipRemainingHandlers:
-        handled = false;
-        break;
+    if (result is KeyEventResult) {
+      switch (result.disposition) {
+        case KeyEventDisposition.handled:
+          handled = true;
+          break;
+        case KeyEventDisposition.ignored:
+        case KeyEventDisposition.skipRemainingHandlers:
+          handled = false;
+          break;
+      }
+    } else if (result is bool) {
+      handled = result;
     }
-    assert(handled != null, 'keyEventHandler returned null, which is not allowed');
+    assert(handled != null,
+        'keyEventHandler must return a non-null bool or KeyEventResult, not ${result.runtimeType}');
     return <String, dynamic>{ 'handled': handled };
   }
 
