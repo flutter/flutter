@@ -6168,7 +6168,7 @@ void main() {
     });
   });
 
-  testWidgets('selecting a space selects the previous word', (WidgetTester tester) async {
+  testWidgets('selecting a space selects the previous word on Android', (WidgetTester tester) async {
     TextSelection? selection;
     await tester.pumpWidget(
       MaterialApp(
@@ -6221,7 +6221,7 @@ void main() {
     expect(selection, isNotNull);
     expect(selection!.baseOffset, 0);
     expect(selection!.extentOffset, 1);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 }
 
 class MockTextFormatter extends TextInputFormatter {
