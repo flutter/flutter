@@ -221,10 +221,6 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.enable_observatory =
       !command_line.HasOption(FlagForSwitch(Switch::DisableObservatory));
 
-  // Enable mDNS Observatory Publication
-  settings.enable_observatory_publication = !command_line.HasOption(
-      FlagForSwitch(Switch::DisableObservatoryPublication));
-
   // Set Observatory Host
   if (command_line.HasOption(FlagForSwitch(Switch::DeviceObservatoryHost))) {
     command_line.GetOptionValue(FlagForSwitch(Switch::DeviceObservatoryHost),
