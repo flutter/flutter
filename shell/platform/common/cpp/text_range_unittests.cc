@@ -107,6 +107,11 @@ TEST(TextRange, ContainsRangePreStartPosition) {
   EXPECT_FALSE(range.Contains(TextRange(0, 1)));
 }
 
+TEST(TextRange, ContainsRangeSpanningStartPosition) {
+  TextRange range(2, 6);
+  EXPECT_FALSE(range.Contains(TextRange(1, 3)));
+}
+
 TEST(TextRange, ContainsRangeStartPosition) {
   TextRange range(2, 6);
   EXPECT_TRUE(range.Contains(TextRange(2)));
@@ -123,6 +128,11 @@ TEST(TextRange, ContainsRangeEndPosition) {
   EXPECT_TRUE(range.Contains(TextRange(6)));
 }
 
+TEST(TextRange, ContainsRangeSpanningEndPosition) {
+  TextRange range(2, 6);
+  EXPECT_FALSE(range.Contains(TextRange(5, 7)));
+}
+
 TEST(TextRange, ContainsRangePostEndPosition) {
   TextRange range(2, 6);
   EXPECT_FALSE(range.Contains(TextRange(6, 7)));
@@ -131,6 +141,11 @@ TEST(TextRange, ContainsRangePostEndPosition) {
 TEST(TextRange, ContainsRangePreStartPositionReversed) {
   TextRange range(6, 2);
   EXPECT_FALSE(range.Contains(TextRange(0, 1)));
+}
+
+TEST(TextRange, ContainsRangeSpanningStartPositionReversed) {
+  TextRange range(6, 2);
+  EXPECT_FALSE(range.Contains(TextRange(1, 3)));
 }
 
 TEST(TextRange, ContainsRangeStartPositionReversed) {
@@ -142,6 +157,11 @@ TEST(TextRange, ContainsRangeMiddlePositionReversed) {
   TextRange range(6, 2);
   EXPECT_TRUE(range.Contains(TextRange(3, 4)));
   EXPECT_TRUE(range.Contains(TextRange(4, 5)));
+}
+
+TEST(TextRange, ContainsRangeSpanningEndPositionReversed) {
+  TextRange range(6, 2);
+  EXPECT_FALSE(range.Contains(TextRange(5, 7)));
 }
 
 TEST(TextRange, ContainsRangeEndPositionReversed) {
