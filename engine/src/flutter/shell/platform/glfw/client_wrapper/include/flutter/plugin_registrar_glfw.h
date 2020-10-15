@@ -26,7 +26,12 @@ class PluginRegistrarGlfw : public PluginRegistrar {
         FlutterDesktopPluginRegistrarGetWindow(core_registrar));
   }
 
-  virtual ~PluginRegistrarGlfw() = default;
+  virtual ~PluginRegistrarGlfw() {
+    // Must be the first call.
+    ClearPlugins();
+    // Explicitly cleared to facilitate destruction order testing.
+    window_.reset();
+  }
 
   // Prevent copying.
   PluginRegistrarGlfw(PluginRegistrarGlfw const&) = delete;
