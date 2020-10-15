@@ -104,24 +104,27 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///         );
 ///       },
 ///       optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
-///         return Material(
-///           elevation: 4.0,
-///           child: Container(
-///             height: 200.0,
-///             child: ListView.builder(
-///               padding: EdgeInsets.all(8.0),
-///               itemCount: options.length,
-///               itemBuilder: (BuildContext context, int index) {
-///                 final String option = options.elementAt(index);
-///                 return GestureDetector(
-///                   onTap: () {
-///                     onSelected(option);
-///                   },
-///                   child: ListTile(
-///                     title: Text(option),
-///                   ),
-///                 );
-///               },
+///         return Align(
+///           alignment: Alignment.topLeft,
+///           child: Material(
+///             elevation: 4.0,
+///             child: Container(
+///               height: 200.0,
+///               child: ListView.builder(
+///                 padding: EdgeInsets.all(8.0),
+///                 itemCount: options.length,
+///                 itemBuilder: (BuildContext context, int index) {
+///                   final String option = options.elementAt(index);
+///                   return GestureDetector(
+///                     onTap: () {
+///                       onSelected(option);
+///                     },
+///                     child: ListTile(
+///                       title: Text(option),
+///                     ),
+///                   );
+///                 },
+///               ),
 ///             ),
 ///           ),
 ///         );
@@ -189,20 +192,27 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///         );
 ///       },
 ///       optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
-///         return SizedBox(
-///           height: 200.0,
+///         return Align(
+///           alignment: Alignment.topLeft,
 ///           child: Material(
 ///             elevation: 4.0,
-///             child: ListView(
-///               padding: EdgeInsets.all(8.0),
-///               children: options.map((User option) => GestureDetector(
-///                 onTap: () {
-///                   onSelected(option);
+///             child: Container(
+///               height: 200.0,
+///               child: ListView.builder(
+///                 padding: EdgeInsets.all(8.0),
+///                 itemCount: options.length,
+///                 itemBuilder: (BuildContext context, int index) {
+///                   final User option = options.elementAt(index);
+///                   return GestureDetector(
+///                     onTap: () {
+///                       onSelected(option);
+///                     },
+///                     child: ListTile(
+///                       title: Text(option),
+///                     ),
+///                   );
 ///                 },
-///                 child: ListTile(
-///                   title: Text(_displayStringForOption(option)),
-///                 ),
-///               )).toList(),
+///               ),
 ///             ),
 ///           ),
 ///         );
@@ -319,20 +329,27 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                   );
 ///                 },
 ///                 optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
-///                   return Material(
-///                     elevation: 4.0,
-///                     child: SizedBox(
-///                       height: 200.0,
-///                       child: ListView(
-///                         padding: EdgeInsets.all(8.0),
-///                         children: options.map((String option) => GestureDetector(
-///                           onTap: () {
-///                             onSelected(option);
+///                   return Align(
+///                     alignment: Alignment.topLeft,
+///                     child: Material(
+///                       elevation: 4.0,
+///                       child: Container(
+///                         height: 200.0,
+///                         child: ListView.builder(
+///                           padding: EdgeInsets.all(8.0),
+///                           itemCount: options.length,
+///                           itemBuilder: (BuildContext context, int index) {
+///                             final String option = options.elementAt(index);
+///                             return GestureDetector(
+///                               onTap: () {
+///                                 onSelected(option);
+///                               },
+///                               child: ListTile(
+///                                 title: Text(option),
+///                               ),
+///                             );
 ///                           },
-///                           child: ListTile(
-///                             title: Text(option),
-///                           ),
-///                         )).toList(),
+///                         ),
 ///                       ),
 ///                     ),
 ///                   );
@@ -402,8 +419,9 @@ class AutocompleteCore<T extends Object> extends StatefulWidget {
 
   /// Builds the selectable options widgets from a list of options objects.
   ///
-  /// The options are displayed in an Overlay, floating below the field, with a
-  /// width the same as the field.
+  /// The options are displayed floating below the field using a
+  /// [CompositedTransformFollower] inside of an [Overlay], not at the same
+  /// place in the widget tree as AutocompleteCore.
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
 
   /// Returns the string to display in the field when the option is selected.
@@ -501,16 +519,14 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
   // Hide or show the options overlay, if needed.
   void _updateOverlay() {
     if (_shouldShowOptions) {
-      final RenderBox renderBox = context.findRenderObject()! as RenderBox;
       _floatingOptions?.remove();
       _floatingOptions = OverlayEntry(
         builder: (BuildContext context) {
-          return _FloatingOptions<T>(
-            optionsViewBuilder: widget.optionsViewBuilder,
-            fieldSize: renderBox.size,
-            layerLink: _optionsLayerLink,
-            onSelected: _select,
-            options: _options,
+          return CompositedTransformFollower(
+            link: _optionsLayerLink,
+            showWhenUnlinked: false,
+            targetAnchor: Alignment.bottomLeft,
+            child: widget.optionsViewBuilder(context, _select, _options),
           );
         },
       );
@@ -557,43 +573,6 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
           _textEditingController,
           _onFieldSubmitted,
         ),
-      ),
-    );
-  }
-}
-
-// The floating options, meant to be built inside of an Overlay. Will position
-// itself at the bottom of the field indicated by layerLink and fieldSize.
-class _FloatingOptions<T extends Object> extends StatelessWidget {
-  const _FloatingOptions({
-    Key? key,
-    required this.optionsViewBuilder,
-    required this.fieldSize,
-    required this.layerLink,
-    required this.onSelected,
-    required this.options,
-  }) : assert(optionsViewBuilder != null),
-       assert(fieldSize != null),
-       assert(layerLink != null),
-       assert(onSelected != null),
-       assert(options != null),
-       super(key: key);
-
-  final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
-  final Size fieldSize;
-  final LayerLink layerLink;
-  final AutocompleteOnSelected<T> onSelected;
-  final Iterable<T> options;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      width: fieldSize.width,
-      child: CompositedTransformFollower(
-        link: layerLink,
-        showWhenUnlinked: false,
-        targetAnchor: Alignment.bottomLeft,
-        child: optionsViewBuilder(context, onSelected, options),
       ),
     );
   }
