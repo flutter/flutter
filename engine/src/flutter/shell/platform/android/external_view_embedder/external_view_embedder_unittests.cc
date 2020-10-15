@@ -10,10 +10,10 @@
 #include "flutter/fml/raster_thread_merger.h"
 #include "flutter/fml/thread.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
+#include "flutter/shell/platform/android/surface/android_surface.h"
 #include "flutter/shell/platform/android/surface/android_surface_mock.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "shell/platform/android/surface/android_surface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {

@@ -14,8 +14,8 @@
 #include "flutter/shell/platform/android/android_external_texture_gl.h"
 #include "flutter/shell/platform/android/android_surface_gl.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
-#include "shell/platform/android/external_view_embedder/external_view_embedder.h"
-#include "shell/platform/android/surface/android_surface.h"
+#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
+#include "flutter/shell/platform/android/surface/android_surface.h"
 
 #if SHELL_ENABLE_VULKAN
 #include "flutter/shell/platform/android/android_surface_vulkan.h"
