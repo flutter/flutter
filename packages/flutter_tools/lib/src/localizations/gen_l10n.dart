@@ -23,10 +23,6 @@ final String defaultSyntheticPackagePath = globals.fs.path.join('.dart_tool', 'f
 /// localizations tool.
 final String syntheticL10nPackagePath = globals.fs.path.join(defaultSyntheticPackagePath, 'gen_l10n');
 
-const String emptyPubspecTemplate = '''name: synthetic_package
-description: The Flutter application's synthetic package.
-''';
-
 List<String> generateMethodParameters(Message message) {
   assert(message.placeholders.isNotEmpty);
   final Placeholder countPlaceholder = message.isPlural ? message.getCountPlaceholder() : null;

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+const String emptyPubspecTemplate = '''name: synthetic_package
+description: The Flutter application's synthetic package.
+''';
+
 const String fileTemplate = '''
 @(header)
 import 'dart:async';
