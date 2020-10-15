@@ -193,6 +193,7 @@ Widget _chipWithOptionalDeleteButton({
   UniqueKey? labelKey,
   required bool deletable,
   TextDirection textDirection = TextDirection.ltr,
+  bool hasDeleteButtonTooltip = true,
 }){
   return _wrapForChip(
     textDirection: textDirection,
@@ -202,6 +203,7 @@ Widget _chipWithOptionalDeleteButton({
           onPressed: () {},
           onDeleted: deletable ? () {} : null,
           deleteIcon: Icon(Icons.close, key: deleteButtonKey),
+          useDeleteButtonTooltip: hasDeleteButtonTooltip,
           label: Text(
             deletable
               ? 'Chip with Delete Button'
@@ -2678,5 +2680,30 @@ void main() {
       find.byType(FilterChip),
       const Color(0xffff0000),
     );
+  });
+
+  testWidgets('Chip delete button tooltip can be disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _chipWithOptionalDeleteButton(
+        deletable: true,
+        hasDeleteButtonTooltip: false,
+      )
+    );
+
+    // Tap at the delete icon of the chip, which is at the right
+    // side of the chip
+    final Offset topRightOfInkwell = tester.getTopLeft(find.byType(InkWell));
+    final Offset tapLocationOfDeleteButton = topRightOfInkwell + const Offset(8, 8);
+    final TestGesture tapGesture = await tester.startGesture(tapLocationOfDeleteButton);
+
+    await tester.pump();
+
+    // Wait for some more time while pressing and holding the delete button
+    await tester.pumpAndSettle();
+
+    // There should be no tooltip
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    await tapGesture.up();
   });
 }

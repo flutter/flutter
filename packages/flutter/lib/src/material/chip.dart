@@ -258,6 +258,12 @@ abstract class DeletableChipAttributes {
   /// [IconThemeData.color].
   Color? get deleteIconColor;
 
+  /// Whether to use a tooltip on the delete button showing this chip's
+  /// [deleteButtonTooltipMessage].
+  ///
+  /// Defaults to `true`.
+  bool get useDeleteButtonTooltip;
+
   /// The message to be used for the chip's delete button tooltip.
   String? get deleteButtonTooltipMessage;
 }
@@ -566,6 +572,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.deleteIcon,
     this.onDeleted,
     this.deleteIconColor,
+    this.useDeleteButtonTooltip = true,
     this.deleteButtonTooltipMessage,
     this.shape,
     this.clipBehavior = Clip.none,
@@ -611,6 +618,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final VoidCallback? onDeleted;
   @override
   final Color? deleteIconColor;
+  @override
+  final bool useDeleteButtonTooltip;
   @override
   final String? deleteButtonTooltipMessage;
   @override
@@ -722,6 +731,7 @@ class InputChip extends StatelessWidget
     this.deleteIcon,
     this.onDeleted,
     this.deleteIconColor,
+    this.useDeleteButtonTooltip = true,
     this.deleteButtonTooltipMessage,
     this.onPressed,
     this.pressElevation,
@@ -771,6 +781,8 @@ class InputChip extends StatelessWidget
   final VoidCallback? onDeleted;
   @override
   final Color? deleteIconColor;
+  @override
+  final bool useDeleteButtonTooltip;
   @override
   final String? deleteButtonTooltipMessage;
   @override
@@ -1448,6 +1460,7 @@ class RawChip extends StatefulWidget
     Widget? deleteIcon,
     this.onDeleted,
     this.deleteIconColor,
+    this.useDeleteButtonTooltip = true,
     this.deleteButtonTooltipMessage,
     this.onPressed,
     this.onSelected,
@@ -1494,6 +1507,8 @@ class RawChip extends StatefulWidget
   final VoidCallback? onDeleted;
   @override
   final Color? deleteIconColor;
+  @override
+  final bool useDeleteButtonTooltip;
   @override
   final String? deleteButtonTooltipMessage;
   @override
@@ -1767,6 +1782,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   }
 
   Widget? _wrapWithTooltip(String? tooltip, VoidCallback? callback, Widget? child) {
+    if(!widget.useDeleteButtonTooltip){
+      return child;
+    }
     if (child == null || callback == null || tooltip == null) {
       return child;
     }
