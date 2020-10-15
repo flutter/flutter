@@ -268,14 +268,11 @@ class IdeConfigCommand extends FlutterCommand {
 String _validateFlutterDir(String dirPath, { String flutterRoot }) {
   final FileSystemEntityType type = globals.fs.typeSync(dirPath);
 
-  if (type != FileSystemEntityType.notFound) {
-    switch (type) {
-      case FileSystemEntityType.link:
-        // Do not overwrite links.
-        return "Invalid project root dir: '$dirPath' - refers to a link.";
-      default:
-    }
+  switch (type) {
+    case FileSystemEntityType.link:
+      // Do not overwrite links.
+      return "Invalid project root dir: '$dirPath' - refers to a link.";
+    default:
+      return null;
   }
-
-  return null;
 }
