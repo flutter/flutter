@@ -3866,7 +3866,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         overlayEntry.remove();
       entry.route.overlayEntries.clear();
     }
-    // _toBeDisposed.clear();
     if (rearrangeOverlay) {
       overlay?.rearrange(_allRouteOverlayEntries);
     }
