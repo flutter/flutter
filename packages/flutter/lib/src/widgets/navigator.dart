@@ -3853,12 +3853,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       }
     }
 
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
-      for (final _RouteEntry entry in _toBeDisposed) {
-        entry.dispose();
-      }
-      _toBeDisposed.clear();
-    });
     // Lastly, removes the overlay entries of all marked entries and disposes
     // them.
     for (final _RouteEntry entry in _toBeDisposed) {
@@ -3866,12 +3860,29 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         overlayEntry.remove();
       entry.route.overlayEntries.clear();
     }
+    if (_toBeDisposed.isNotEmpty)
+      _scheduleDisposingEntries();
     if (rearrangeOverlay) {
       overlay?.rearrange(_allRouteOverlayEntries);
     }
     if (bucket != null) {
       _serializableHistory.update(_history);
     }
+  }
+
+  bool _scheduledDisposingEntries = false;
+  void _scheduleDisposingEntries() {
+    if (_scheduledDisposingEntries)
+      return;
+    _scheduledDisposingEntries = true;
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      assert(_scheduledDisposingEntries);
+      _scheduledDisposingEntries = false;
+      for (final _RouteEntry entry in _toBeDisposed) {
+        entry.dispose();
+      }
+      _toBeDisposed.clear();
+    });
   }
 
   void _flushObserverNotifications() {
