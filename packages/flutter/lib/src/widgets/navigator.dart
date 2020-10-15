@@ -3431,6 +3431,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     for (final NavigatorObserver observer in _effectiveObservers)
       observer._navigator = null;
     focusScopeNode.dispose();
+    for (final _RouteEntry entry in _toBeDisposed)
+      entry.dispose();
+    _toBeDisposed.clear();
     for (final _RouteEntry entry in _history)
       entry.dispose();
     super.dispose();
@@ -3713,6 +3716,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(() { _debugLocked = false; return true; }());
   }
 
+  final List<_RouteEntry> _toBeDisposed = <_RouteEntry>[];
+
   void _flushHistoryUpdates({bool rearrangeOverlay = true}) {
     assert(_debugLocked && !_debugUpdatingPage);
     // Clean up the list, sending updates to the routes that changed. Notably,
@@ -3726,7 +3731,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     bool canRemoveOrAdd = false; // Whether there is a fully opaque route on top to silently remove or add route underneath.
     Route<dynamic>? poppedRoute; // The route that should trigger didPopNext on the top active route.
     bool seenTopActiveRoute = false; // Whether we've seen the route that would get didPopNext.
-    final List<_RouteEntry> toBeDisposed = <_RouteEntry>[];
     while (index >= 0) {
       switch (entry!.currentState) {
         case _RouteLifecycle.add:
@@ -3814,7 +3818,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           continue;
         case _RouteLifecycle.dispose:
           // Delay disposal until didChangeNext/didChangePrevious have been sent.
-          toBeDisposed.add(_history.removeAt(index));
+          _toBeDisposed.add(_history.removeAt(index));
           entry = next;
           break;
         case _RouteLifecycle.disposed:
@@ -3849,13 +3853,20 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       }
     }
 
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      for (final _RouteEntry entry in _toBeDisposed) {
+        entry.dispose();
+      }
+      _toBeDisposed.clear();
+    });
     // Lastly, removes the overlay entries of all marked entries and disposes
     // them.
-    for (final _RouteEntry entry in toBeDisposed) {
+    for (final _RouteEntry entry in _toBeDisposed) {
       for (final OverlayEntry overlayEntry in entry.route.overlayEntries)
         overlayEntry.remove();
-      entry.dispose();
+      entry.route.overlayEntries.clear();
     }
+    // _toBeDisposed.clear();
     if (rearrangeOverlay) {
       overlay?.rearrange(_allRouteOverlayEntries);
     }

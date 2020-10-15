@@ -102,12 +102,17 @@ Future<void> runNavigatorTest(
   NavigatorState host,
   VoidCallback test,
   List<String> expectations,
+  [List<String>? expectationsAfterAnotherPump,]
 ) async {
   expect(host, isNotNull);
   test();
   expect(results, equals(expectations));
   results.clear();
   await tester.pump();
+  if (expectationsAfterAnotherPump != null) {
+    expect(results, equals(expectationsAfterAnotherPump));
+    results.clear();
+  }
 }
 
 void main() {
@@ -189,6 +194,8 @@ void main() {
         'two: didReplace second',
         'two: didChangeNext third',
         'initial: didChangeNext two',
+      ],
+      <String>[
         'second: dispose',
       ],
     );
@@ -199,6 +206,8 @@ void main() {
       <String>[ // stack is: initial, two
         'third: didPop hello',
         'two: didPopNext third',
+      ],
+      <String>[
         'third: dispose',
       ],
     );
@@ -209,6 +218,8 @@ void main() {
       <String>[ // stack is: initial
         'two: didPop good bye',
         'initial: didPopNext two',
+      ],
+      <String>[
         'two: dispose',
       ],
     );
@@ -268,6 +279,8 @@ void main() {
       host,
       () { host.removeRouteBelow(second); },
       <String>[
+      ],
+      <String>[
         'first: dispose',
       ],
     );
@@ -278,6 +291,8 @@ void main() {
       <String>[
         'third: didPop good bye',
         'second: didPopNext third',
+      ],
+      <String>[
         'third: dispose',
       ],
     );
@@ -310,6 +325,8 @@ void main() {
       () { host.removeRouteBelow(four); },
       <String>[
         'second: didChangeNext four',
+      ],
+      <String>[
         'three: dispose',
       ],
     );
@@ -320,6 +337,8 @@ void main() {
       <String>[
         'four: didPop the end',
         'second: didPopNext four',
+      ],
+      <String>[
         'four: dispose',
       ],
     );
@@ -385,6 +404,8 @@ void main() {
         'b: didReplace B',
         'b: didChangeNext C',
         'A: didChangeNext b',
+      ],
+      <String>[
         'B: dispose',
       ],
     );
@@ -395,6 +416,8 @@ void main() {
       <String>[
         'C: didPop null',
         'b: didPopNext C',
+      ],
+      <String>[
         'C: dispose',
       ],
     );
