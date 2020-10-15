@@ -1,4 +1,4 @@
-Signature: 1e59d8eb25114e6b03e47e82d70c9e95
+Signature: 819d3bc919ec6336e402246f10c994a1
 
 UNUSED LICENSES:
 
@@ -435,7 +435,6 @@ FILE: ../../../third_party/skia/bench/StreamBench.cpp
 FILE: ../../../third_party/skia/bench/SwizzleBench.cpp
 FILE: ../../../third_party/skia/bench/TileImageFilterBench.cpp
 FILE: ../../../third_party/skia/bench/VertexColorSpaceBench.cpp
-FILE: ../../../third_party/skia/experimental/svg/model/SkPEG.h
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGAttribute.cpp
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGAttribute.h
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGAttributeParser.cpp
@@ -619,7 +618,7 @@ FILE: ../../../third_party/skia/src/gpu/GrClipStackClip.cpp
 FILE: ../../../third_party/skia/src/gpu/GrClipStackClip.h
 FILE: ../../../third_party/skia/src/gpu/GrColorSpaceXform.cpp
 FILE: ../../../third_party/skia/src/gpu/GrColorSpaceXform.h
-FILE: ../../../third_party/skia/src/gpu/GrContextPriv.h
+FILE: ../../../third_party/skia/src/gpu/GrDirectContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrFixedClip.h
 FILE: ../../../third_party/skia/src/gpu/GrImageTextureMaker.cpp
 FILE: ../../../third_party/skia/src/gpu/GrImageTextureMaker.h
@@ -2918,7 +2917,7 @@ FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
 FILE: ../../../third_party/skia/modules/skresources/include/SkResources.h
 FILE: ../../../third_party/skia/modules/skresources/src/SkResources.cpp
-FILE: ../../../third_party/skia/samplecode/SampleBackdropBounds.cpp
+FILE: ../../../third_party/skia/samplecode/SampleFilterBounds.cpp
 FILE: ../../../third_party/skia/samplecode/SampleImageFilterDAG.cpp
 FILE: ../../../third_party/skia/src/core/SkImageFilterTypes.cpp
 FILE: ../../../third_party/skia/src/core/SkImageFilterTypes.h
@@ -3115,12 +3114,12 @@ FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrBaseContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrBuffer.h
-FILE: ../../../third_party/skia/src/gpu/GrContextPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/GrContextThreadSafeProxy.cpp
 FILE: ../../../third_party/skia/src/gpu/GrContext_Base.cpp
 FILE: ../../../third_party/skia/src/gpu/GrCpuBuffer.h
 FILE: ../../../third_party/skia/src/gpu/GrDataUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrDataUtils.h
+FILE: ../../../third_party/skia/src/gpu/GrDirectContextPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/GrGpuBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrGpuBuffer.h
 FILE: ../../../third_party/skia/src/gpu/GrImageContext.cpp
