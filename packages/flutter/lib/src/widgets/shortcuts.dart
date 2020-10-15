@@ -335,7 +335,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   ///
   /// Returns a [KeyEventResult.handled] if an action was invoked, otherwise a
   /// [KeyEventResult.skipRemainingHandlers] if [modal] is true, or if it maps to a
-  /// [DoNothingAction] with [DoNothingAction.shouldHandleKey] set to false, and
+  /// [DoNothingAction] with [DoNothingAction.consumesKey] set to false, and
   /// in all other cases returns [KeyEventResult.ignored].
   ///
   /// In order for an action to be invoked (and [KeyEventResult.handled]
@@ -367,7 +367,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
       );
       if (action != null && action.isEnabled(matchedIntent)) {
         Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
-        return action.shouldHandleKey(matchedIntent)
+        return action.consumesKey(matchedIntent)
             ? KeyEventResult.handled
             : KeyEventResult.skipRemainingHandlers;
       }

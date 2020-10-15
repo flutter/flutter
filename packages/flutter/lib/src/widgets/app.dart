@@ -1095,7 +1095,7 @@ class WidgetsApp extends StatefulWidget {
   /// The default value of [WidgetsApp.actions].
   static Map<Type, Action<Intent>> defaultActions = <Type, Action<Intent>>{
     DoNothingIntent: DoNothingAction(),
-    DoNothingAndStopPropagationIntent: DoNothingAction(shouldHandleKey: false),
+    DoNothingAndStopPropagationIntent: DoNothingAction(consumesKey: false),
     RequestFocusIntent: RequestFocusAction(),
     NextFocusIntent: NextFocusAction(),
     PreviousFocusIntent: PreviousFocusAction(),

@@ -404,7 +404,7 @@ void main() {
                 },
                 child: Actions(
                   actions: <Type, Action<Intent>>{
-                    TestIntent: DoNothingAction(shouldHandleKey: false),
+                    TestIntent: DoNothingAction(consumesKey: false),
                   },
                   child: TextField(key: textFieldKey, autofocus: true),
                 ),

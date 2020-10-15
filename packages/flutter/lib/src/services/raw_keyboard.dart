@@ -563,8 +563,9 @@ class KeyEventResult {
 /// A callback type used by [RawKeyboard.keyEventHandler] to send key events to
 /// a handler that can determine if the key has been handled or not.
 ///
-/// The handler should return true if the key has been handled, and false if the
-/// key was not handled.  It must not return null.
+/// The handler should return a [KeyEventResult] with the appropriate
+/// [KeyEventDisposition] set for the intended response. See
+/// [KeyEventDisposition] for a description of the possible responses.
 typedef RawKeyEventHandler = KeyEventResult Function(RawKeyEvent event);
 
 /// An interface for listening to raw key events.

@@ -29,7 +29,7 @@ BuildContext _getParent(BuildContext context) {
   return parent;
 }
 
-/// A class representing a particular configuration of an [Action].
+/// An abstract class representing a particular configuration of an [Action].
 ///
 /// This class is what the [Shortcuts.shortcuts] map has as values, and is used
 /// by an [ActionDispatcher] to look up an action and invoke it, giving it this
@@ -41,7 +41,7 @@ BuildContext _getParent(BuildContext context) {
 ///    [Intent] using the [Actions] widget that most tightly encloses the given
 ///    [BuildContext].
 @immutable
-class Intent with Diagnosticable {
+abstract class Intent with Diagnosticable {
   /// A const constructor for an [Intent].
   const Intent();
 
@@ -105,7 +105,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// widgets to receive the key event.
   ///
   /// The default implementation returns true.
-  bool shouldHandleKey(covariant T intent) => true;
+  bool consumesKey(covariant T intent) => true;
 
   /// Called when the action is to be performed.
   ///
@@ -536,10 +536,16 @@ class Actions extends StatefulWidget {
   /// supplied, then `T` is used.
   static Action<T>? find<T extends Intent>(BuildContext context, {bool nullOk = false, T? intent}) {
     Action<T>? action;
+
     // Specialize the type if a runtime example instance of the intent is given.
     // This allows this function to be called by code that doesn't know the
     // concrete type of the intent at compile time.
     final Type type = intent?.runtimeType ?? T;
+    assert(type != Intent,
+      'The type passed to "find" resolved to "Intent": either a non-Intent'
+      'generic type argument or an example intent derived from Intent must be'
+      'specified. Intent may be used as the generic type as long as the optional'
+      '"intent" argument is passed.');
 
     _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
@@ -1161,7 +1167,7 @@ class DoNothingIntent extends Intent {
 /// Attaching a [DoNothingAndStopPropagationIntent] to a [Shortcuts.shortcuts]
 /// mapping is one way to disable a keyboard shortcut defined by a widget higher
 /// in the widget hierarchy. In addition, the bound [DoNothingAction] will
-/// return false from [DoNothingAction.shouldHandleKey], causing the key bound to
+/// return false from [DoNothingAction.consumesKey], causing the key bound to
 /// this intent to be passed on to the platform embedding as "not handled" with
 /// out passing it to other key handlers in the focus chain (e.g. parent
 /// `Shortcuts` widgets higher up in the chain).
@@ -1184,12 +1190,12 @@ class DoNothingAndStopPropagationIntent extends Intent {
 /// Attaching a [DoNothingAction] to an [Actions.actions] mapping is a way to
 /// disable an action defined by a widget higher in the widget hierarchy.
 ///
-/// If [shouldHandleKey] returns false, then not only will this action do
-/// nothing, but it will also terminate the propagation of the key event used to
-/// trigger it to other widgets in the focus chain and tell the embedding that
-/// the key wasn't handled, allowing text input fields or other non-Flutter
-/// elements to receive that key event. The return value of `shouldHandleKey`
-/// can be set via the `shouldHandleKey` argument to the constructor.
+/// If [consumesKey] returns false, then not only will this action do nothing,
+/// but it will stop the propagation of the key event used to trigger it to
+/// other widgets in the focus chain and tell the embedding that the key wasn't
+/// handled, allowing text input fields or other non-Flutter elements to receive
+/// that key event. The return value of [consumesKey] can be set via the
+/// `consumesKey` argument to the constructor.
 ///
 /// This action can be bound to any [Intent].
 ///
@@ -1202,12 +1208,12 @@ class DoNothingAndStopPropagationIntent extends Intent {
 class DoNothingAction extends Action<Intent> {
   /// Creates a [DoNothingAction].
   ///
-  /// The optional [shouldHandleKey] argument defaults to true.
-  DoNothingAction({bool shouldHandleKey = true}) : _shouldHandleKey = shouldHandleKey;
+  /// The optional [consumesKey] argument defaults to true.
+  DoNothingAction({bool consumesKey = true}) : _consumesKey = consumesKey;
 
   @override
-  bool shouldHandleKey(Intent intent) => _shouldHandleKey;
-  final bool _shouldHandleKey;
+  bool consumesKey(Intent intent) => _consumesKey;
+  final bool _consumesKey;
 
   @override
   void invoke(Intent intent) {}
