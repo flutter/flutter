@@ -347,14 +347,15 @@ void main() {
       setUpMockXcodeBuildHandler('Release', onRun: () {
         fileSystem.file('build/flutter_size_01/snapshot.x86_64.json')
           ..createSync(recursive: true)
-          ..writeAsStringSync('''[
-{
-  "l": "dart:_internal",
-  "c": "SubListIterable",
-  "n": "[Optimized] skip",
-  "s": 2400
-}
-          ]''');
+          ..writeAsStringSync('''
+[
+  {
+    "l": "dart:_internal",
+    "c": "SubListIterable",
+    "n": "[Optimized] skip",
+    "s": 2400
+  }
+]''');
         fileSystem.file('build/flutter_size_01/trace.x86_64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');

@@ -223,30 +223,34 @@ Future<@(class)> @(lookupName)(Locale locale) {
   return null;
 }''';
 
-const String lookupBodyTemplate = '''@(lookupAllCodesSpecified)
-  @(lookupScriptCodeSpecified)
-  @(lookupCountryCodeSpecified)
-  @(lookupLanguageCodeSpecified)''';
+const String lookupBodyTemplate = '''
+@(lookupAllCodesSpecified)
+@(lookupScriptCodeSpecified)
+@(lookupCountryCodeSpecified)
+@(lookupLanguageCodeSpecified)''';
 
 const String switchClauseTemplate = '''case '@(case)': return @(localeClass)();''';
 
 const String switchClauseDeferredLoadingTemplate = '''case '@(case)': return @(library).loadLibrary().then((dynamic _) => @(library).@(localeClass)());''';
 
-const String nestedSwitchTemplate = '''case '@(languageCode)': {
-      switch (locale.@(code)) {
-        @(switchClauses)
-      }
-      break;
-    }''';
-
-const String languageCodeSwitchTemplate = '''@(comment)
-  switch (locale.languageCode) {
+const String nestedSwitchTemplate = '''
+case '@(languageCode)': {
+  switch (locale.@(code)) {
     @(switchClauses)
   }
+  break;
+}''';
+
+const String languageCodeSwitchTemplate = '''
+@(comment)
+switch (locale.languageCode) {
+  @(switchClauses)
+}
 ''';
 
-const String allCodesLookupTemplate = '''// Lookup logic when language+script+country codes are specified.
-  switch (locale.toString()) {
-    @(allCodesSwitchClauses)
-  }
+const String allCodesLookupTemplate = '''
+// Lookup logic when language+script+country codes are specified.
+switch (locale.toString()) {
+  @(allCodesSwitchClauses)
+}
 ''';
