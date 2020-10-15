@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show Shader;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -26,7 +24,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
 
   testWidgets('Bounds rect includes offset', (WidgetTester tester) async {
-    Rect shaderBounds;
+    late Rect shaderBounds;
     Shader recordShaderBounds(Rect bounds) {
       shaderBounds = bounds;
       return createShader(bounds);
