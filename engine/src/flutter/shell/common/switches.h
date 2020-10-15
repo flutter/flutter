@@ -79,6 +79,9 @@ DEF_SWITCH(DisableObservatory,
            "disable-observatory",
            "Disable the Dart Observatory. The observatory is never available "
            "in release mode.")
+DEF_SWITCH(DisableObservatoryPublication,
+           "disable-observatory-publication",
+           "Disable mDNS Dart Observatory publication.")
 DEF_SWITCH(IPv6,
            "ipv6",
            "Bind to the IPv6 localhost address for the Dart Observatory. "
