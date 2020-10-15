@@ -13,10 +13,8 @@ void main() {
   const ProcessManager processManager = LocalProcessManager();
 
   group('run.dart script', () {
-    Future<ProcessResult> runScript(List<String> testNames,
-        [List<String> otherArgs = const <String>[]]) async {
-      final String dart = path.absolute(
-          path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
+    Future<ProcessResult> runScript(List<String> testNames, [List<String> otherArgs = const <String>[]]) async {
+      final String dart = path.absolute(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
       final ProcessResult scriptProcess = processManager.runSync(<String>[
         dart,
         'bin/run.dart',
@@ -26,17 +24,12 @@ void main() {
       return scriptProcess;
     }
 
-    Future<void> expectScriptResult(
-        List<String> testNames,
-        int expectedExitCode,
-        {String deviceId}
-      ) async {
+    Future<void> expectScriptResult(List<String> testNames, int expectedExitCode, {String deviceId}) async {
       final ProcessResult result = await runScript(testNames, <String>[
         if (deviceId != null) ...<String>['-d', deviceId],
       ]);
       expect(result.exitCode, expectedExitCode,
-          reason:
-              '[ stderr from test process ]\n\n${result.stderr}\n\n[ end of stderr ]'
+          reason: '[ stderr from test process ]\n\n${result.stderr}\n\n[ end of stderr ]'
               '\n\n[ stdout from test process ]\n\n${result.stdout}\n\n[ end of stdout ]');
     }
 
@@ -45,8 +38,7 @@ void main() {
     });
 
     test('accepts file paths', () async {
-      await expectScriptResult(
-          <String>['bin/tasks/smoke_test_success.dart'], 0);
+      await expectScriptResult(<String>['bin/tasks/smoke_test_success.dart'], 0);
     });
 
     test('rejects invalid file paths', () async {
@@ -76,15 +68,12 @@ void main() {
     });
 
     test('exits with code 0 when provided a valid device ID', () async {
-      await expectScriptResult(<String>['smoke_test_device'], 0,
-        deviceId: 'FAKE');
+      await expectScriptResult(<String>['smoke_test_device'], 0, deviceId: 'FAKE');
     });
 
     test('exits with code 1 when provided a bad device ID', () async {
-      await expectScriptResult(<String>['smoke_test_device'], 1,
-        deviceId: 'THIS_IS_NOT_VALID');
+      await expectScriptResult(<String>['smoke_test_device'], 1, deviceId: 'THIS_IS_NOT_VALID');
     });
-
 
     test('runs A/B test', () async {
       final ProcessResult result = await runScript(
@@ -137,6 +126,15 @@ void main() {
           'metric2\t123.00 (0.00%)\t123.00 (0.00%)\t1.00x\t\n',
         ),
       );
+    });
+
+    test('fails to upload results to Cocoon if flags given', () async {
+      // CocoonClient will fail to find test-file, and will not send any http requests.
+      final ProcessResult result = await runScript(
+        <String>['smoke_test_success'],
+        <String>['--service-account-file=test-file', '--task-key=task123'],
+      );
+      expect(result.exitCode, 255);
     });
   });
 }

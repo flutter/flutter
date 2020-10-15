@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:http/http.dart';
+import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:retry/retry.dart';
 
@@ -36,6 +37,8 @@ class Cocoon {
   /// Url used to send results to.
   static const String baseCocoonApiUrl = 'https://flutter-dashboard.appspot.com/api';
 
+  static final Logger logger = Logger('CocoonClient');
+
   /// Send [TaskResult] to Cocoon.
   Future<void> sendTaskResult(String taskKey, TaskResult result) async {
     final Map<String, dynamic> status = <String, dynamic>{
@@ -61,13 +64,13 @@ class Cocoon {
     status['BenchmarkScoreKeys'] = validScoreKeys;
 
     final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', status);
+    logger.fine('Coocon response:');
+    logger.fine(response);
     if (response['Name'] != null) {
-      print('Updated Cocoon with results from this task');
+      logger.info('Updated Cocoon with results from this task');
     } else {
-      print('Failed to updated Cocoon with results from this task');
+      logger.severe('Failed to updated Cocoon with results from this task');
     }
-    print('Coocon response:');
-    print(response);
   }
 
   /// Make an API request to Cocoon.

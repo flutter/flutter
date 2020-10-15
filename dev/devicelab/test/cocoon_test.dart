@@ -2,51 +2,57 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:http/http.dart';
+import 'package:http/testing.dart';
 
 import 'package:flutter_devicelab/framework/cocoon.dart';
-import 'package:mockito/mockito.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 
 import 'common.dart';
 
 void main() {
   group('Cocoon', () {
+    const String serviceAccountPath = 'test_account_file';
+    const String serviceAccountToken = 'test_token';
+
     Client mockClient;
-
     Cocoon cocoon;
-
-    const Map<String, dynamic> exampleResponseJson = <String, dynamic>{
-      'Name': 'task name abc',
-      'Status': 'Succeeded',
-    };
-    final List<int> exampleResponseBytes = utf8.encode(json.encode(exampleResponseJson));
+    FileSystem fs;
 
     setUp(() {
-      final FileSystem fs = MemoryFileSystem();
-      const String serviceAccountPath = 'test_account_file';
-      const String serviceAccountToken = 'test_token';
+      fs = MemoryFileSystem();
+
       final File serviceAccountFile = fs.file(serviceAccountPath)..createSync();
       serviceAccountFile.writeAsStringSync(serviceAccountToken);
+    });
 
-      mockClient = MockHttpClient();
+    test('sends expected request from successful task', () async {
+      mockClient = MockClient((Request request) async => Response('{}', 200));
 
       cocoon = Cocoon(
         serviceAccountPath: serviceAccountPath,
         filesystem: fs,
         httpClient: mockClient,
       );
+
+      final TaskResult result = TaskResult.success(<String, dynamic>{});
+      // This should not throw an error.
+      await cocoon.sendTaskResult('taskKey', result);
     });
 
-    test('sends expected request from successful task', () async {
-      when(mockClient.send(any)).thenAnswer(
-          (Invocation realInvocation) async => StreamedResponse(Stream<List<int>>.value(exampleResponseBytes), 200));
+    test('throws client exception on non-200 responses', () async {
+      mockClient = MockClient((Request request) async => Response('', 500));
+
+      cocoon = Cocoon(
+        serviceAccountPath: serviceAccountPath,
+        filesystem: fs,
+        httpClient: mockClient,
+      );
+
       final TaskResult result = TaskResult.success(<String, dynamic>{});
-      await cocoon.sendTaskResult('taskKey', result);
+      expect(() => cocoon.sendTaskResult('taskKey', result), throwsA(isA<ClientException>()));
     });
   });
 
@@ -80,5 +86,3 @@ void main() {
     });
   });
 }
-
-class MockHttpClient extends Mock implements Client {}
