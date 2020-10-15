@@ -196,7 +196,7 @@ void TextInputPlugin::HandleMethodCall(
       base = extent = 0;
     }
     active_model_->SetText(text->value.GetString());
-    active_model_->SetSelection(base, extent);
+    active_model_->SetSelection(TextRange(base, extent));
   } else {
     result->NotImplemented();
     return;
@@ -211,14 +211,14 @@ void TextInputPlugin::SendStateUpdate(const TextInputModel& model) {
   auto& allocator = args->GetAllocator();
   args->PushBack(client_id_, allocator);
 
+  TextRange selection = model.selection();
   rapidjson::Value editing_state(rapidjson::kObjectType);
   editing_state.AddMember(kComposingBaseKey, -1, allocator);
   editing_state.AddMember(kComposingExtentKey, -1, allocator);
   editing_state.AddMember(kSelectionAffinityKey, kAffinityDownstream,
                           allocator);
-  editing_state.AddMember(kSelectionBaseKey, model.selection_base(), allocator);
-  editing_state.AddMember(kSelectionExtentKey, model.selection_extent(),
-                          allocator);
+  editing_state.AddMember(kSelectionBaseKey, selection.base(), allocator);
+  editing_state.AddMember(kSelectionExtentKey, selection.extent(), allocator);
   editing_state.AddMember(kSelectionIsDirectionalKey, false, allocator);
   editing_state.AddMember(
       kTextKey, rapidjson::Value(model.GetText(), allocator).Move(), allocator);

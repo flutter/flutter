@@ -50,4 +50,123 @@ TEST(TextRange, TextRangeFromReversedRange) {
   EXPECT_FALSE(range.collapsed());
 }
 
+TEST(TextRange, ContainsPreStartPosition) {
+  TextRange range(2, 6);
+  EXPECT_FALSE(range.Contains(1));
+}
+
+TEST(TextRange, ContainsStartPosition) {
+  TextRange range(2, 6);
+  EXPECT_TRUE(range.Contains(2));
+}
+
+TEST(TextRange, ContainsMiddlePosition) {
+  TextRange range(2, 6);
+  EXPECT_TRUE(range.Contains(3));
+  EXPECT_TRUE(range.Contains(4));
+}
+
+TEST(TextRange, ContainsEndPosition) {
+  TextRange range(2, 6);
+  EXPECT_TRUE(range.Contains(6));
+}
+
+TEST(TextRange, ContainsPostEndPosition) {
+  TextRange range(2, 6);
+  EXPECT_FALSE(range.Contains(7));
+}
+
+TEST(TextRange, ContainsPreStartPositionReversed) {
+  TextRange range(6, 2);
+  EXPECT_FALSE(range.Contains(1));
+}
+
+TEST(TextRange, ContainsStartPositionReversed) {
+  TextRange range(6, 2);
+  EXPECT_TRUE(range.Contains(2));
+}
+
+TEST(TextRange, ContainsMiddlePositionReversed) {
+  TextRange range(6, 2);
+  EXPECT_TRUE(range.Contains(3));
+  EXPECT_TRUE(range.Contains(4));
+}
+
+TEST(TextRange, ContainsEndPositionReversed) {
+  TextRange range(6, 2);
+  EXPECT_TRUE(range.Contains(6));
+}
+
+TEST(TextRange, ContainsPostEndPositionReversed) {
+  TextRange range(6, 2);
+  EXPECT_FALSE(range.Contains(7));
+}
+
+TEST(TextRange, ContainsRangePreStartPosition) {
+  TextRange range(2, 6);
+  EXPECT_FALSE(range.Contains(TextRange(0, 1)));
+}
+
+TEST(TextRange, ContainsRangeStartPosition) {
+  TextRange range(2, 6);
+  EXPECT_TRUE(range.Contains(TextRange(2)));
+}
+
+TEST(TextRange, ContainsRangeMiddlePosition) {
+  TextRange range(2, 6);
+  EXPECT_TRUE(range.Contains(TextRange(3, 4)));
+  EXPECT_TRUE(range.Contains(TextRange(4, 5)));
+}
+
+TEST(TextRange, ContainsRangeEndPosition) {
+  TextRange range(2, 6);
+  EXPECT_TRUE(range.Contains(TextRange(6)));
+}
+
+TEST(TextRange, ContainsRangePostEndPosition) {
+  TextRange range(2, 6);
+  EXPECT_FALSE(range.Contains(TextRange(6, 7)));
+}
+
+TEST(TextRange, ContainsRangePreStartPositionReversed) {
+  TextRange range(6, 2);
+  EXPECT_FALSE(range.Contains(TextRange(0, 1)));
+}
+
+TEST(TextRange, ContainsRangeStartPositionReversed) {
+  TextRange range(6, 2);
+  EXPECT_TRUE(range.Contains(TextRange(2)));
+}
+
+TEST(TextRange, ContainsRangeMiddlePositionReversed) {
+  TextRange range(6, 2);
+  EXPECT_TRUE(range.Contains(TextRange(3, 4)));
+  EXPECT_TRUE(range.Contains(TextRange(4, 5)));
+}
+
+TEST(TextRange, ContainsRangeEndPositionReversed) {
+  TextRange range(6, 2);
+  EXPECT_TRUE(range.Contains(TextRange(5)));
+}
+
+TEST(TextRange, ContainsRangePostEndPositionReversed) {
+  TextRange range(6, 2);
+  EXPECT_FALSE(range.Contains(TextRange(6, 7)));
+}
+
+TEST(TextRange, ReversedForwardRange) {
+  TextRange range(2, 6);
+  EXPECT_FALSE(range.reversed());
+}
+
+TEST(TextRange, ReversedCollapsedRange) {
+  TextRange range(2, 2);
+  EXPECT_FALSE(range.reversed());
+}
+
+TEST(TextRange, ReversedReversedRange) {
+  TextRange range(6, 2);
+  EXPECT_TRUE(range.reversed());
+}
+
 }  // namespace flutter
