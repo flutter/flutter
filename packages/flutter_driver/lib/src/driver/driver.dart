@@ -67,7 +67,7 @@ enum TimelineStream {
 
 /// How long to wait before showing a message saying that
 /// things seem to be taking a long time.
-@visibleForTesting
+@internal
 const Duration kUnusuallyLongTimeout = Duration(seconds: 5);
 
 /// A convenient accessor to frequently used finders.

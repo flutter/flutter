@@ -218,13 +218,6 @@ TaskFunction createComplexLayoutStartupTest() {
   ).run;
 }
 
-TaskFunction createHelloWorldStartupTest() {
-  return StartupTest(
-    '${flutterDirectory.path}/examples/hello_world',
-    reportMetrics: false,
-  ).run;
-}
-
 TaskFunction createFlutterGalleryCompileTest() {
   return CompileTest('${flutterDirectory.path}/dev/integration_tests/flutter_gallery').run;
 }
