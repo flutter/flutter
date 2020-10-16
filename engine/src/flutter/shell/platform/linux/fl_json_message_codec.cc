@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(cbracken): lint disabled due to rapidjson null deref issue.
-// https://github.com/flutter/flutter/issues/65676
-// FLUTTER_NOLINT
-
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 
 #include <gmodule.h>
