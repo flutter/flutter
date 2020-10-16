@@ -995,11 +995,11 @@ Future<T> showDialog<T>({
     pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
       final Widget pageChild = child ?? Builder(builder: builder!);
       Widget dialog = Builder(
-          builder: (BuildContext context) {
-            return theme != null
-                ? Theme(data: theme, child: pageChild)
-                : pageChild;
-          }
+        builder: (BuildContext context) {
+          return theme != null
+            ? Theme(data: theme, child: pageChild)
+            : pageChild;
+        }
       );
       if (useSafeArea) {
         dialog = SafeArea(child: dialog);
