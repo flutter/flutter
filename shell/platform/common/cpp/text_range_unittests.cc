@@ -50,6 +50,62 @@ TEST(TextRange, TextRangeFromReversedRange) {
   EXPECT_FALSE(range.collapsed());
 }
 
+TEST(TextRange, SetBase) {
+  TextRange range(3, 7);
+  range.set_base(4);
+  EXPECT_EQ(range.base(), size_t(4));
+  EXPECT_EQ(range.extent(), size_t(7));
+}
+
+TEST(TextRange, SetBaseReversed) {
+  TextRange range(7, 3);
+  range.set_base(5);
+  EXPECT_EQ(range.base(), size_t(5));
+  EXPECT_EQ(range.extent(), size_t(3));
+}
+
+TEST(TextRange, SetExtent) {
+  TextRange range(3, 7);
+  range.set_extent(6);
+  EXPECT_EQ(range.base(), size_t(3));
+  EXPECT_EQ(range.extent(), size_t(6));
+}
+
+TEST(TextRange, SetExtentReversed) {
+  TextRange range(7, 3);
+  range.set_extent(4);
+  EXPECT_EQ(range.base(), size_t(7));
+  EXPECT_EQ(range.extent(), size_t(4));
+}
+
+TEST(TextRange, SetStart) {
+  TextRange range(3, 7);
+  range.set_start(5);
+  EXPECT_EQ(range.base(), size_t(5));
+  EXPECT_EQ(range.extent(), size_t(7));
+}
+
+TEST(TextRange, SetStartReversed) {
+  TextRange range(7, 3);
+  range.set_start(5);
+  EXPECT_EQ(range.base(), size_t(7));
+  EXPECT_EQ(range.extent(), size_t(5));
+}
+
+TEST(TextRange, SetEnd) {
+  TextRange range(3, 7);
+  range.set_end(6);
+  EXPECT_EQ(range.base(), size_t(3));
+  EXPECT_EQ(range.extent(), size_t(6));
+}
+
+TEST(TextRange, SetEndReversed) {
+  TextRange range(7, 3);
+  range.set_end(5);
+  EXPECT_EQ(range.base(), size_t(5));
+  EXPECT_EQ(range.extent(), size_t(3));
+}
+
 TEST(TextRange, ContainsPreStartPosition) {
   TextRange range(2, 6);
   EXPECT_FALSE(range.Contains(1));
