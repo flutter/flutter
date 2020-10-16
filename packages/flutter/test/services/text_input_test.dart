@@ -460,7 +460,7 @@ class FakeTextChannel implements MethodChannel {
 
 
   @override
-  void setMockMethodCallHandler(Future<void> Function(MethodCall call)? handler)  => throw UnimplementedError();
+  void setMockMethodCallHandler(Future<void>? Function(MethodCall call)? handler)  => throw UnimplementedError();
 
   @override
   bool checkMockMethodCallHandler(Future<void> Function(MethodCall call)? handler) => throw UnimplementedError();

@@ -907,7 +907,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
         ),
     ];
 
-    Widget page;
+    final Widget page;
     if (widget.scrollController == null) {
       page = Scaffold(
         appBar: AppBar(
@@ -1282,7 +1282,6 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
       case _LayoutMode.lateral:
         return _lateralUI(context);
       case _LayoutMode.auto:
-      default:
         return LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               final double availableWidth = constraints.maxWidth;
@@ -1310,7 +1309,6 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
             case _Focus.master:
               return <Route<void>>[masterPageRoute];
             case _Focus.detail:
-            default:
               return <Route<void>>[
                 masterPageRoute,
                 _detailPageRoute(_cachedDetailArguments)

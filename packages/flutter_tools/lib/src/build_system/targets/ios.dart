@@ -187,8 +187,8 @@ class AotAssemblyProfile extends AotAssemblyBase {
 }
 
 /// Create a trivial App.framework file for debug iOS builds.
-class DebugUniveralFramework extends Target {
-  const DebugUniveralFramework();
+class DebugUniversalFramework extends Target {
+  const DebugUniversalFramework();
 
   @override
   String get name => 'debug_universal_framework';
@@ -236,15 +236,16 @@ class DebugUniveralFramework extends Target {
       throw Exception('Failed to create App.framework.');
     }
     final List<String> lipoCommand = <String>[
-      'xcrun',
+      ...globals.xcode.xcrunCommand(),
       'lipo',
       '-create',
       iphoneFile.path,
       simulatorFile.path,
       '-output',
-      lipoOutputFile.path
+      lipoOutputFile.path,
     ];
-    final RunResult lipoResult = await processUtils.run(
+
+    final RunResult lipoResult = await globals.processUtils.run(
       lipoCommand,
     );
 
@@ -375,7 +376,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
 
   @override
   List<Target> get dependencies => <Target>[
-    const DebugUniveralFramework(),
+    const DebugUniversalFramework(),
     ...super.dependencies,
   ];
 }

@@ -542,8 +542,8 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // thumb selection is determined by the direction of the dx. The left thumb
     // is chosen for negative dx, and the right thumb is chosen for positive dx.
     if (inStartTouchTarget && inEndTouchTarget) {
-      bool towardsStart;
-      bool towardsEnd;
+      final bool towardsStart;
+      final bool towardsEnd;
       switch (textDirection) {
         case TextDirection.ltr:
           towardsStart = dx < 0;
@@ -599,7 +599,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // RectangularSliderValueIndicatorShape is used. In all other cases, the
     // value indicator is assumed to be the same as the active color.
     final RangeSliderValueIndicatorShape valueIndicatorShape = sliderTheme.rangeValueIndicatorShape ?? _defaultValueIndicatorShape;
-    Color valueIndicatorColor;
+    final Color valueIndicatorColor;
     if (valueIndicatorShape is RectangularRangeSliderValueIndicatorShape) {
       valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
     } else {
@@ -1030,8 +1030,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     if (labels == null)
       return;
 
-    String text;
-    TextPainter labelPainter;
+    final String text;
+    final TextPainter labelPainter;
     switch (thumb) {
       case Thumb.start:
         text = labels!.start;
@@ -1280,8 +1280,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     // The visual position is the position of the thumb from 0 to 1 from left
     // to right. In left to right, this is the same as the value, but it is
     // reversed for right to left text.
-    double startVisualPosition;
-    double endVisualPosition;
+    final double startVisualPosition;
+    final double endVisualPosition;
     switch (textDirection) {
       case TextDirection.rtl:
         startVisualPosition = 1.0 - startValue;
@@ -1317,6 +1317,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
     final bool startThumbSelected = _lastThumbSelection == Thumb.start;
     final bool endThumbSelected = _lastThumbSelection == Thumb.end;
+    final Size resolvedscreenSize = screenSize.isEmpty ? size : screenSize;
 
     if (!_overlayAnimation.isDismissed) {
       if (startThumbSelected) {
@@ -1331,6 +1332,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           sliderTheme: _sliderTheme,
           textDirection: _textDirection,
           value: startValue,
+          textScaleFactor: _textScaleFactor,
+          sizeWithOverflow: resolvedscreenSize,
         );
       }
       if (endThumbSelected) {
@@ -1345,6 +1348,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           sliderTheme: _sliderTheme,
           textDirection: _textDirection,
           value: endValue,
+          textScaleFactor: _textScaleFactor,
+          sizeWithOverflow: resolvedscreenSize,
         );
       }
     }
@@ -1392,7 +1397,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final double bottomValue = isLastThumbStart ? endValue : startValue;
     final double topValue = isLastThumbStart ? startValue : endValue;
     final bool shouldPaintValueIndicators = isEnabled && labels != null && !_valueIndicatorAnimation.isDismissed && showValueIndicator;
-    final Size resolvedscreenSize = screenSize.isEmpty ? size : screenSize;
 
     if (shouldPaintValueIndicators) {
       _state.paintBottomValueIndicator = (PaintingContext context, Offset offset) {

@@ -584,15 +584,13 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _compileRequestNeedsConfirmation = true;
     _stdoutHandler._suppressCompilerMessages = request.suppressErrors;
 
-    if (_server == null) {
-      return _compile(
-        request.packageConfig.toPackageUri(request.mainUri)?.toString() ?? request.mainUri.toString(),
-        request.outputPath,
-      );
-    }
-    final String inputKey = Uuid().generateV4();
     final String mainUri = request.packageConfig.toPackageUri(request.mainUri)?.toString() ??
       toMultiRootPath(request.mainUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
+
+    if (_server == null) {
+      return _compile(mainUri, request.outputPath);
+    }
+    final String inputKey = Uuid().generateV4();
 
     _server.stdin.writeln('recompile $mainUri $inputKey');
     _logger.printTrace('<- recompile $mainUri $inputKey');
@@ -866,7 +864,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 }
 
-/// Convert a file URI into a multiroot scheme URI if provided, otherwise
+/// Convert a file URI into a multi-root scheme URI if provided, otherwise
 /// return unmodified.
 @visibleForTesting
 String toMultiRootPath(Uri fileUri, String scheme, List<String> fileSystemRoots, bool windows) {

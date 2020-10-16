@@ -148,9 +148,9 @@ class _TimePickerHeader extends StatelessWidget {
       use24HourDials: use24HourDials,
     );
 
-    EdgeInsets padding;
+    final EdgeInsets padding;
     double? width;
-    Widget controls;
+    final Widget controls;
 
     switch (orientation) {
       case Orientation.portrait:
@@ -603,7 +603,7 @@ class _DayPeriodControl extends StatelessWidget {
       ),
     );
 
-    Widget result;
+    final Widget result;
     switch (orientation) {
       case Orientation.portrait:
         const double width = 52.0;
@@ -1090,7 +1090,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   void _selectHour(int hour) {
     _announceToAccessibility(context, localizations.formatDecimal(hour));
-    TimeOfDay time;
+    final TimeOfDay time;
     if (widget.mode == _TimePickerMode.hour && widget.use24HourDials) {
       time = TimeOfDay(hour: hour, minute: widget.selectedTime.minute);
     } else {
@@ -1230,7 +1230,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     final Color secondaryLabelColor = MaterialStateProperty.resolveAs(pickerTheme.dialTextColor, <MaterialState>{MaterialState.selected}) ?? themeData.colorScheme.onPrimary;
     List<_TappableLabel> primaryLabels;
     List<_TappableLabel> secondaryLabels;
-    int selectedDialValue;
+    final int selectedDialValue;
     switch (widget.mode) {
       case _TimePickerMode.hour:
         if (widget.use24HourDials) {
@@ -1910,8 +1910,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     // to 1.1 as that provides enough space to reasonably fit all the content.
     final double textScaleFactor = math.min(MediaQuery.of(context)!.textScaleFactor, 1.1);
 
-    double timePickerWidth;
-    double timePickerHeight;
+    final double timePickerWidth;
+    final double timePickerHeight;
     switch (_entryMode) {
       case TimePickerEntryMode.dial:
         switch (orientation) {
@@ -1984,7 +1984,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
       ],
     );
 
-    Widget picker;
+    final Widget picker;
     switch (_entryMode) {
       case TimePickerEntryMode.dial:
         final Widget dial = Padding(

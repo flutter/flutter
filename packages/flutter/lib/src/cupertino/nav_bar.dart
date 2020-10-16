@@ -96,13 +96,12 @@ Widget _wrapWithBackground({
   if (updateSystemUiOverlay) {
     final bool isDark = backgroundColor.computeLuminance() < 0.179;
     final Brightness newBrightness = brightness ?? (isDark ? Brightness.dark : Brightness.light);
-    SystemUiOverlayStyle overlayStyle;
+    final SystemUiOverlayStyle overlayStyle;
     switch (newBrightness) {
       case Brightness.dark:
         overlayStyle = SystemUiOverlayStyle.light;
         break;
       case Brightness.light:
-      default:
         overlayStyle = SystemUiOverlayStyle.dark;
         break;
     }

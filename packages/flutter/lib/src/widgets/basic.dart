@@ -2171,7 +2171,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 
   @override
   String toStringShort() {
-    String type;
+    final String type;
     if (width == double.infinity && height == double.infinity) {
       type = '${objectRuntimeType(this, 'SizedBox')}.expand';
     } else if (width == 0.0 && height == 0.0) {
@@ -2185,7 +2185,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    DiagnosticLevel level;
+    final DiagnosticLevel level;
     if ((width == double.infinity && height == double.infinity) ||
         (width == 0.0 && height == 0.0)) {
       level = DiagnosticLevel.hidden;
@@ -7155,13 +7155,87 @@ class KeyedSubtree extends StatelessWidget {
   Widget build(BuildContext context) => child;
 }
 
-/// A platonic widget that calls a closure to obtain its child widget.
+/// A stateless utility widget whose [build] method uses its
+/// [builder] callback to create the widget's child.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=xXNOkIuSYuA}
 ///
+/// This widget is a simple inline alternative to defining a [StatelessWidget]
+/// subclass. For example a widget defined and used like this:
+///
+/// ```dart
+/// class Foo extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) => Text('foo');
+/// }
+///
+/// Center(child: Foo())
+/// ```
+///
+/// Could equally well be defined and used like this, without
+/// definining a new widget class:
+///
+/// ```dart
+/// Center(
+///   child: Builder(
+///     builder: (BuildContext context) => Text('foo');
+///   ),
+/// )
+/// ```
+///
+/// The difference between either of the previous examples and simply
+/// creating a child directly, without an intervening widget, is the
+/// extra [BuildContext] element that the additional widget adds. This
+/// is particularly noticeable when the tree contains an inherited
+/// widget that is referred to by a method like [Scaffold.of],
+/// which visits the child widget's BuildContext ancestors.
+///
+/// In the following example the button's `onPressed` callback is unable
+/// to find the enclosing [ScaffoldState] with [Scaffold.of]:
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: TextButton(
+///         onPressed: () {
+///           // Fails because Scaffold.of() doesn't find anything
+///           // above this widget's context.
+///           print(Scaffold.of(context).hasAppBar);
+///         },
+///         child: Text('hasAppBar'),
+///       )
+///     ),
+///   );
+/// }
+/// ```
+///
+/// A [Builder] widget introduces an additional [BuildContext] element
+/// and so the [Scaffold.of] method succeeds.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Builder(
+///       builder: (BuildContext context) {
+///         return Center(
+///           child: TextButton(
+///             onPressed: () {
+///               print(Scaffold.of(context).hasAppBar);
+///             },
+///             child: Text('hasAppBar'),
+///           ),
+///         );
+///       },
+///     ),
+///   );
+/// }
+/// ```
+///
 /// See also:
 ///
-///  * [StatefulBuilder], a platonic widget which also has state.
+///  * [StatefulBuilder], A stateful utility widget whose [build] method uses its
+///    [builder] callback to create the widget's child.
 class Builder extends StatelessWidget {
   /// Creates a widget that delegates its build to a callback.
   ///
