@@ -11,9 +11,9 @@ import 'package:file/local.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
-import 'package:retry/retry.dart';
 
 import 'task_result.dart';
+import 'utils.dart';
 
 /// Class for test runner to interact with Flutter's infrastructure service, Cocoon.
 ///
