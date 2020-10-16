@@ -27,6 +27,10 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
   NSAssert(self, @"Super init cannot be nil");
 
   _dartBundle = bundle ?: [NSBundle bundleWithIdentifier:kAppBundleIdentifier];
+  _dartEntrypointArguments = [[NSProcessInfo processInfo] arguments];
+  // Remove the first element as it's the binary name
+  _dartEntrypointArguments = [_dartEntrypointArguments
+      subarrayWithRange:NSMakeRange(1, _dartEntrypointArguments.count - 1)];
   return self;
 }
 

@@ -36,6 +36,16 @@ FLUTTER_EXPORT
  */
 @property(nonatomic) bool enableMirrors;
 
+/**
+ * An NSArray of NSStrings to be passed as command line arguments to the Dart entrypoint.
+ *
+ * If this is not explicitly set, this will default to the contents of
+ * [NSProcessInfo arguments], without the binary name.
+ *
+ * Set this to nil to pass no arguments to the Dart entrypoint.
+ */
+@property(nonatomic, nullable) NSArray<NSString*>* dartEntrypointArguments;
+
 @end
 
 #endif  // FLUTTER_FLUTTERDARTPROJECT_H_
