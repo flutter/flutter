@@ -188,11 +188,14 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 ///   Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
 ///     final SomeCommand someCommand = command as SomeCommand;
 ///
-///     // Wait for [Element]:
-///     handlerFactory.waitForElement(finderFactory.createFinder(stubCommand.finder));
+///     // Deserialize [Finder]:
+///     final Finder finder = finderFactory.createFinder(stubCommand.finder);
 ///
-///     // Wait for [Element]s gone:
-///     handlerFactory.waitForAbsentElement(finderFactory.createFinder(stubCommand.finder));
+///     // Wait for [Element]:
+///     handlerFactory.waitForElement(finder);
+///
+///     // Alternatively, wait for [Element] absence:
+///     handlerFactory.waitForAbsentElement(finder);
 ///
 ///     // Submit known [Command]s:
 ///     for (int index = 0; i < someCommand.times; index++) {
@@ -201,7 +204,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 ///
 ///     // Alternatively, use [WidgetController]:
 ///     for (int index = 0; i < stubCommand.times; index++) {
-///       await prober.tap(finderFactory.createFinder(stubCommand.finder));
+///       await prober.tap(finder);
 ///     }
 ///
 ///     return const SomeCommandResult('foo bar');

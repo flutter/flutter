@@ -37,9 +37,10 @@ class StubProberCommandExtension extends CommandExtension {
   @override
   Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
     final StubProberCommand stubCommand = command as StubProberCommand;
-    handlerFactory.waitForElement(finderFactory.createFinder(stubCommand.finder));
+    final Finder finder = finderFactory.createFinder(stubCommand.finder);
+    handlerFactory.waitForElement(finder);
     for (int index = 0; index < stubCommand.times; index++) {
-      await prober.tap(finderFactory.createFinder(stubCommand.finder));
+      await prober.tap(finder);
     }
     return const StubCommandResult('stub response');
   }
