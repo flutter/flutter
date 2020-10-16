@@ -2078,4 +2078,66 @@ void main() {
     final AssertionError error = exceptions.first as AssertionError;
     expect(error.message, contains('Only one API should be used to manage SnackBars.'));
   });
+
+  testWidgets('throws assertion error if Scaffold.showSnackBar is called during build', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> state = GlobalKey();
+    final List<dynamic> exceptions = <dynamic>[];
+
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails errorDetails) {
+      exceptions.add(errorDetails.exception);
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: state,
+          body: Builder(
+            builder: (BuildContext context) {
+              Scaffold.of(context).showSnackBar(
+                const SnackBar(content: Text('Flutter')),
+              );
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+    );
+
+    FlutterError.onError = oldHandler;
+
+    final AssertionError error = exceptions.first as AssertionError;
+    expect(error.message, contains('SnackBar cannot be shown during build!'));
+  });
+
+  testWidgets('throws assertion error if ScaffoldMessenger.showSnackBar is called during build', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> state = GlobalKey();
+    final List<dynamic> exceptions = <dynamic>[];
+
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails errorDetails) {
+      exceptions.add(errorDetails.exception);
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: state,
+          body: Builder(
+            builder: (BuildContext context) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Flutter')),
+              );
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+    );
+
+    FlutterError.onError = oldHandler;
+
+    final AssertionError error = exceptions.first as AssertionError;
+    expect(error.message, contains('SnackBar cannot be shown during build!'));
+  });
 }
