@@ -453,8 +453,9 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   @override
   void didUpdateWidget(RangeSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.onChanged == widget.onChanged)
+    if (oldWidget.onChanged == widget.onChanged) {
       return;
+    }
     final bool wasEnabled = oldWidget.onChanged != null;
     final bool isEnabled = widget.onChanged != null;
     if (wasEnabled != isEnabled) {
@@ -532,9 +533,12 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     Size trackSize,
     double dx, // The horizontal delta or displacement of the drag update.
   ) {
+    final double absFromStart = (tapValue - values.start).abs();
+    final double absFromEnd = (tapValue - values.end).abs();
+
     final double touchRadius = math.max(thumbSize.width, RangeSlider._minTouchTargetWidth) / 2;
-    final bool inStartTouchTarget = (tapValue - values.start).abs() * trackSize.width < touchRadius;
-    final bool inEndTouchTarget = (tapValue - values.end).abs() * trackSize.width < touchRadius;
+    final bool inStartTouchTarget = absFromStart * trackSize.width < touchRadius;
+    final bool inEndTouchTarget = absFromEnd * trackSize.width < touchRadius;
 
     // Use dx if the thumb touch targets overlap. If dx is 0 and the drag
     // position is in both touch targets, no thumb is selected because it is
@@ -554,16 +558,27 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           towardsEnd = dx < 0;
           break;
       }
-      if (towardsStart)
+      if (towardsStart) {
         return Thumb.start;
-      if (towardsEnd)
+      }
+      if (towardsEnd) {
         return Thumb.end;
+      }
     } else {
       // Snap position on the track if its in the inactive range.
-      if (tapValue < values.start || inStartTouchTarget)
+      if (tapValue < values.start || inStartTouchTarget) {
         return Thumb.start;
-      if (tapValue > values.end || inEndTouchTarget)
+      } else if (tapValue > values.end || inEndTouchTarget) {
         return Thumb.end;
+      }
+      // Snap position on the track if its in the active range.
+      else if (tapValue > values.start && tapValue < values.end) {
+        if (absFromStart <= absFromEnd) {
+          return Thumb.start;
+        } else {
+          return Thumb.end;
+        }
+      }
     }
     return null;
   };
@@ -895,8 +910,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   TargetPlatform _platform;
   TargetPlatform get platform => _platform;
   set platform(TargetPlatform value) {
-    if (_platform == value)
+    if (_platform == value) {
       return;
+    }
     _platform = value;
     markNeedsSemanticsUpdate();
   }
@@ -904,8 +920,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   SemanticFormatterCallback? _semanticFormatterCallback;
   SemanticFormatterCallback? get semanticFormatterCallback => _semanticFormatterCallback;
   set semanticFormatterCallback(SemanticFormatterCallback? value) {
-    if (_semanticFormatterCallback == value)
+    if (_semanticFormatterCallback == value) {
       return;
+    }
     _semanticFormatterCallback = value;
     markNeedsSemanticsUpdate();
   }
@@ -923,8 +940,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   RangeLabels? get labels => _labels;
   RangeLabels? _labels;
   set labels(RangeLabels? labels) {
-    if (labels == _labels)
+    if (labels == _labels) {
       return;
+    }
     _labels = labels;
     _updateLabelPainters();
   }
@@ -932,8 +950,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   SliderThemeData get sliderTheme => _sliderTheme;
   SliderThemeData _sliderTheme;
   set sliderTheme(SliderThemeData value) {
-    if (value == _sliderTheme)
+    if (value == _sliderTheme) {
       return;
+    }
     _sliderTheme = value;
     markNeedsPaint();
   }
@@ -941,8 +960,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   ThemeData? get theme => _theme;
   ThemeData? _theme;
   set theme(ThemeData? value) {
-    if (value == _theme)
+    if (value == _theme) {
       return;
+    }
     _theme = value;
     markNeedsPaint();
   }
@@ -950,8 +970,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   double get textScaleFactor => _textScaleFactor;
   double _textScaleFactor;
   set textScaleFactor(double value) {
-    if (value == _textScaleFactor)
+    if (value == _textScaleFactor) {
       return;
+    }
     _textScaleFactor = value;
     _updateLabelPainters();
   }
@@ -959,8 +980,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   Size get screenSize => _screenSize;
   Size _screenSize;
   set screenSize(Size value) {
-    if (value == screenSize)
+    if (value == screenSize) {
       return;
+    }
     _screenSize = value;
     markNeedsPaint();
   }
@@ -968,8 +990,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   ValueChanged<RangeValues>? get onChanged => _onChanged;
   ValueChanged<RangeValues>? _onChanged;
   set onChanged(ValueChanged<RangeValues>? value) {
-    if (value == _onChanged)
+    if (value == _onChanged) {
       return;
+    }
     final bool wasEnabled = isEnabled;
     _onChanged = value;
     if (wasEnabled != isEnabled) {
@@ -985,8 +1008,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (value == _textDirection)
+    if (value == _textDirection) {
       return;
+    }
     _textDirection = value;
     _updateLabelPainters();
   }
@@ -1027,9 +1051,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _updateLabelPainter(Thumb thumb) {
-    if (labels == null)
+    if (labels == null) {
       return;
-
+    }
     String text;
     TextPainter labelPainter;
     switch (thumb) {
@@ -1392,7 +1416,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final double bottomValue = isLastThumbStart ? endValue : startValue;
     final double topValue = isLastThumbStart ? startValue : endValue;
     final bool shouldPaintValueIndicators = isEnabled && labels != null && !_valueIndicatorAnimation.isDismissed && showValueIndicator;
-    final Size resolvedscreenSize = screenSize.isEmpty ? size : screenSize;
+    final Size resolvedScreenSize = screenSize.isEmpty ? size : screenSize;
 
     if (shouldPaintValueIndicators) {
       _state.paintBottomValueIndicator = (PaintingContext context, Offset offset) {
@@ -1411,7 +1435,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
             thumb: bottomThumb,
             value: bottomValue,
             textScaleFactor: textScaleFactor,
-            sizeWithOverflow: resolvedscreenSize,
+            sizeWithOverflow: resolvedScreenSize,
           );
         }
       };
@@ -1437,7 +1461,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         labelPainter: _startLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
         textScaleFactor: textScaleFactor,
-        sizeWithOverflow: resolvedscreenSize,
+        sizeWithOverflow: resolvedScreenSize,
       );
       final double endOffset = sliderTheme.rangeValueIndicatorShape!.getHorizontalShift(
         parentBox: this,
@@ -1445,7 +1469,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         labelPainter: _endLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
         textScaleFactor: textScaleFactor,
-        sizeWithOverflow: resolvedscreenSize,
+        sizeWithOverflow: resolvedScreenSize,
       );
       final double startHalfWidth = sliderTheme.rangeValueIndicatorShape!.getPreferredSize(
         isEnabled,
@@ -1487,7 +1511,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
             thumb: topThumb,
             value: topValue,
             textScaleFactor: textScaleFactor,
-            sizeWithOverflow: resolvedscreenSize,
+            sizeWithOverflow: resolvedScreenSize,
           );
         }
       };
