@@ -377,4 +377,26 @@ void main() {
     final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
     expect(coloredBox.color, tileColor);
   });
+
+  testWidgets('SwitchListTile respects selectedTileColor', (WidgetTester tester) async {
+    const Color selectedTileColor = Colors.black;
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: SwitchListTile(
+            value: false,
+            onChanged: null,
+            title: Text('Title'),
+            selected: true,
+            selectedTileColor: selectedTileColor,
+          ),
+        ),
+      ),
+    );
+
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, equals(selectedTileColor));
+  });
+
 }
