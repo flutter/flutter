@@ -6,8 +6,8 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
+import 'deserialization_factory.dart';
 import 'error.dart';
-import 'factory.dart';
 import 'message.dart';
 
 const List<Type> _supportedKeyValueTypes = <Type>[String, int];
