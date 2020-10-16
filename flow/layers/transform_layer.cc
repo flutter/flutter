@@ -54,7 +54,7 @@ void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
 
-void TransformLayer::UpdateScene(std::shared_ptr<SceneUpdateContext> context) {
+void TransformLayer::UpdateScene(SceneUpdateContext& context) {
   TRACE_EVENT0("flutter", "TransformLayer::UpdateScene");
   FML_DCHECK(needs_system_composite());
 

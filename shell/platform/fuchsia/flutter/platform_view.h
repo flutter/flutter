@@ -14,13 +14,11 @@
 #include <map>
 #include <set>
 
-#include "flow/embedded_views.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/shell/common/platform_view.h"
 
 #include "accessibility_bridge.h"
-#include "shell/platform/fuchsia/flutter/fuchsia_external_view_embedder.h"
 
 namespace flutter_runner {
 
@@ -63,7 +61,6 @@ class PlatformView final : public flutter::PlatformView,
                OnUpdateView on_update_view_callback,
                OnDestroyView on_destroy_view_callback,
                OnCreateSurface on_create_surface_callback,
-               std::shared_ptr<flutter::ExternalViewEmbedder> view_embedder,
                fml::TimeDelta vsync_offset,
                zx_handle_t vsync_event_handle);
 
@@ -172,7 +169,6 @@ class PlatformView final : public flutter::PlatformView,
   OnUpdateView on_update_view_callback_;
   OnDestroyView on_destroy_view_callback_;
   OnCreateSurface on_create_surface_callback_;
-  std::shared_ptr<flutter::ExternalViewEmbedder> external_view_embedder_;
 
   int current_text_input_client_ = 0;
   fidl::Binding<fuchsia::ui::input::InputMethodEditorClient> ime_client_;

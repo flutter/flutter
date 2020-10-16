@@ -85,11 +85,11 @@ void OpacityLayer::Paint(PaintContext& context) const {
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
 
-void OpacityLayer::UpdateScene(std::shared_ptr<SceneUpdateContext> context) {
-  float saved_alpha = context->alphaf();
-  context->set_alphaf(context->alphaf() * (alpha_ / 255.f));
+void OpacityLayer::UpdateScene(SceneUpdateContext& context) {
+  float saved_alpha = context.alphaf();
+  context.set_alphaf(context.alphaf() * (alpha_ / 255.f));
   ContainerLayer::UpdateScene(context);
-  context->set_alphaf(saved_alpha);
+  context.set_alphaf(saved_alpha);
 }
 
 #endif

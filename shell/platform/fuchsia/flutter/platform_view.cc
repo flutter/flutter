@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flow/embedded_views.h"
 #define RAPIDJSON_HAS_STDSTRING 1
 
 #include "platform_view.h"
@@ -67,7 +66,6 @@ PlatformView::PlatformView(
     OnUpdateView on_update_view_callback,
     OnDestroyView on_destroy_view_callback,
     OnCreateSurface on_create_surface_callback,
-    std::shared_ptr<flutter::ExternalViewEmbedder> external_view_embedder,
     fml::TimeDelta vsync_offset,
     zx_handle_t vsync_event_handle)
     : flutter::PlatformView(delegate, std::move(task_runners)),
@@ -82,7 +80,6 @@ PlatformView::PlatformView(
       on_update_view_callback_(std::move(on_update_view_callback)),
       on_destroy_view_callback_(std::move(on_destroy_view_callback)),
       on_create_surface_callback_(std::move(on_create_surface_callback)),
-      external_view_embedder_(external_view_embedder),
       ime_client_(this),
       vsync_offset_(std::move(vsync_offset)),
       vsync_event_handle_(vsync_event_handle) {

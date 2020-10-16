@@ -98,19 +98,18 @@ void ContainerLayer::CheckForChildLayerBelow(PrerollContext* context) {
   // All ContainerLayers make the check in PrerollChildren.
 }
 
-void ContainerLayer::UpdateScene(std::shared_ptr<SceneUpdateContext> context) {
+void ContainerLayer::UpdateScene(SceneUpdateContext& context) {
   UpdateSceneChildren(context);
 }
 
-void ContainerLayer::UpdateSceneChildren(
-    std::shared_ptr<SceneUpdateContext> context) {
+void ContainerLayer::UpdateSceneChildren(SceneUpdateContext& context) {
   FML_DCHECK(needs_system_composite());
 
   std::optional<SceneUpdateContext::Frame> frame;
   if (child_layer_exists_below_) {
     frame.emplace(
         context, SkRRect::MakeRect(paint_bounds()), SK_ColorTRANSPARENT,
-        SkScalarRoundToInt(context->alphaf() * 255), "flutter::ContainerLayer");
+        SkScalarRoundToInt(context.alphaf() * 255), "flutter::ContainerLayer");
     frame->AddPaintLayer(this);
   }
 
