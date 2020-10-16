@@ -227,6 +227,9 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
     paint.setColorFilter(_ckColorFilter?.skiaObject);
     paint.setImageFilter(_imageFilter?.skiaObject);
     paint.setFilterQuality(toSkFilterQuality(_filterQuality));
+    paint.setStrokeCap(toSkStrokeCap(_strokeCap));
+    paint.setStrokeJoin(toSkStrokeJoin(_strokeJoin));
+    paint.setStrokeMiter(_strokeMiterLimit);
     return paint;
   }
 
