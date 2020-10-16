@@ -657,6 +657,7 @@ void main() {
         await tester.tap(find.text('10'));
         await tester.pump();
         expect(find.text('May 2017'), findsOneWidget);
+        expect(find.text('2017'), findsNothing);
       });
     });
   });
