@@ -86,6 +86,8 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
       } catch (Exception ex) {
         Log.e(TAG, "Uncaught exception in binary message listener", ex);
         flutterJNI.invokePlatformMessageEmptyResponseCallback(replyId);
+      } catch (Error err) {
+        handleError(err);
       }
     } else {
       Log.v(TAG, "No registered handler for message. Responding to Dart with empty reply message.");
@@ -103,6 +105,8 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
         callback.reply(reply == null ? null : ByteBuffer.wrap(reply));
       } catch (Exception ex) {
         Log.e(TAG, "Uncaught exception in binary message reply handler", ex);
+      } catch (Error err) {
+        handleError(err);
       }
     }
   }
@@ -123,7 +127,19 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
     return pendingReplies.size();
   }
 
-  private static class Reply implements BinaryMessenger.BinaryReply {
+  // Handles `Error` objects which are not supposed to be caught.
+  //
+  // We forward them to the thread's uncaught exception handler if there is one. If not, they
+  // are rethrown.
+  private static void handleError(Error err) {
+    Thread currentThread = Thread.currentThread();
+    if (currentThread.getUncaughtExceptionHandler() == null) {
+      throw err;
+    }
+    currentThread.getUncaughtExceptionHandler().uncaughtException(currentThread, err);
+  }
+
+  static class Reply implements BinaryMessenger.BinaryReply {
     @NonNull private final FlutterJNI flutterJNI;
     private final int replyId;
     private final AtomicBoolean done = new AtomicBoolean(false);
