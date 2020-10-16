@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_driver/driver_extension.dart';
-import 'package:flutter_driver/flutter_driver.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -19,6 +17,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../common/error.dart';
+import '../common/factory.dart';
 import '../common/find.dart';
 import '../common/message.dart';
 import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
