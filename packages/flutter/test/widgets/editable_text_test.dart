@@ -4738,7 +4738,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -4799,7 +4799,7 @@ void main() {
       state.updateEditingValue(const TextEditingValue(text: 'remote value'));
       tester.testTextInput.log.clear();
 
-      String errorString;
+      String? errorString;
       try {
         state.endBatchEdit();
       } catch (e) {
@@ -4836,7 +4836,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
       inputFormatters: <TextInputFormatter>[LengthLimitingTextInputFormatter(6)],
       onChanged: (String s) => controller.text += ' onChanged',
@@ -4923,7 +4923,7 @@ void main() {
 
     testWidgets('input from changing controller', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: testText);
-      Widget build({ TextEditingController textEditingController }) {
+      Widget build({ TextEditingController? textEditingController }) {
         return MediaQuery(
           data: const MediaQueryData(),
           child: Directionality(
@@ -4935,7 +4935,7 @@ void main() {
               focusNode: FocusNode(),
               cursorColor: Colors.red,
               backgroundCursorColor: Colors.blue,
-              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
               keyboardType: TextInputType.text,
               inputFormatters: <TextInputFormatter>[LengthLimitingTextInputFormatter(6)],
             ),
