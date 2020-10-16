@@ -314,10 +314,10 @@ class BottomNavigationBar extends StatefulWidget {
   /// Defaults to `12.0`.
   final double unselectedFontSize;
 
-  /// Whether the labels are shown for the selected [BottomNavigationBarItem].
+  /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
   final bool? showUnselectedLabels;
 
-  /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
+  /// Whether the labels are shown for the selected [BottomNavigationBarItem].
   final bool showSelectedLabels;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
@@ -381,7 +381,7 @@ class _BottomNavigationTile extends StatelessWidget {
     // need to divide the changes in flex allotment into smaller pieces to
     // produce smooth animation. We do this by multiplying the flex value
     // (which is an integer) by a large number.
-    int size;
+    final int size;
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 
@@ -418,8 +418,8 @@ class _BottomNavigationTile extends StatelessWidget {
     // | text
     // |      <-- Padding equal to 1/2 text height + 1/2 unselectedIconDiff.
     // =======
-    double bottomPadding;
-    double topPadding;
+    final double bottomPadding;
+    final double topPadding;
     if (showSelectedLabels! && !showUnselectedLabels!) {
       bottomPadding = Tween<double>(
         begin: selectedIconDiff / 2.0,
@@ -840,7 +840,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         widget.unselectedFontSize,
       );
 
-    Color themeColor;
+    final Color themeColor;
     switch (themeData.brightness) {
       case Brightness.light:
         themeColor = themeData.primaryColor;
@@ -850,7 +850,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         break;
     }
 
-    ColorTween colorTween;
+    final ColorTween colorTween;
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
         colorTween = ColorTween(
@@ -1051,7 +1051,7 @@ class _RadialPainter extends CustomPainter {
       final Paint paint = Paint()..color = circle.color;
       final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
-      double leftFraction;
+      final double leftFraction;
       switch (textDirection) {
         case TextDirection.rtl:
           leftFraction = 1.0 - circle.horizontalLeadingOffset;

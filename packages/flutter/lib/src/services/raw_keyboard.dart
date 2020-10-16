@@ -264,7 +264,7 @@ abstract class RawKeyEvent with Diagnosticable {
   /// Creates a concrete [RawKeyEvent] class from a message in the form received
   /// on the [SystemChannels.keyEvent] channel.
   factory RawKeyEvent.fromMessage(Map<String, dynamic> message) {
-    RawKeyEventData data;
+    final RawKeyEventData data;
     String? character;
 
     final String keymap = message['keymap'] as String;

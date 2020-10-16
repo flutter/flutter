@@ -1155,7 +1155,7 @@ class _YearPickerState extends State<_YearPicker> {
     const double decorationHeight = 36.0;
     const double decorationWidth = 72.0;
 
-    Color textColor;
+    final Color textColor;
     if (isSelected) {
       textColor = colorScheme.onPrimary;
     } else if (isDisabled) {

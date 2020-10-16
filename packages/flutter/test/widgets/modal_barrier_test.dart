@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,10 +13,10 @@ import 'package:flutter/gestures.dart' show kSecondaryButton, PointerDeviceKind;
 import 'semantics_tester.dart';
 
 void main() {
-  bool tapped;
-  bool hovered;
-  Widget tapTarget;
-  Widget hoverTarget;
+  late bool tapped;
+  late bool hovered;
+  late Widget tapTarget;
+  late Widget hoverTarget;
 
   setUp(() {
     tapped = false;
@@ -418,12 +416,12 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 }
 
 class FirstWidget extends StatelessWidget {
-  const FirstWidget({ Key key }) : super(key: key);
+  const FirstWidget({ Key? key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -438,7 +436,7 @@ class FirstWidget extends StatelessWidget {
 }
 
 class SecondWidget extends StatelessWidget {
-  const SecondWidget({ Key key }) : super(key: key);
+  const SecondWidget({ Key? key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return const ModalBarrier(
@@ -449,7 +447,7 @@ class SecondWidget extends StatelessWidget {
 }
 
 class SecondWidgetWithCompetence extends StatelessWidget {
-  const SecondWidgetWithCompetence({ Key key }) : super(key: key);
+  const SecondWidgetWithCompetence({ Key? key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Stack(

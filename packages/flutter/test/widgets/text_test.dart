@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -127,7 +125,7 @@ void main() {
 
     final RichText text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.text.style.fontSize, 20.0);
+    expect(text.text.style!.fontSize, 20.0);
   });
 
   testWidgets('inline widgets works with ellipsis', (WidgetTester tester) async {
@@ -1007,7 +1005,11 @@ void main() {
   }, semanticsEnabled: true, skip: isBrowser); // Browser semantics have different sizes.
 }
 
-Future<void> _pumpTextWidget({ WidgetTester tester, String text, TextOverflow overflow }) {
+Future<void> _pumpTextWidget({
+  required WidgetTester tester,
+  required String text,
+  required TextOverflow overflow,
+}) {
   return tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,
