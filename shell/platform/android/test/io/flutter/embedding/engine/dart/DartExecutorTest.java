@@ -1,4 +1,4 @@
-package test.io.flutter.embedding.engine.dart;
+package io.flutter.embedding.engine.dart;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
