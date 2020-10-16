@@ -97,7 +97,8 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// ```
 ///
 /// Note: SomeFinder and SomeFinderExtension should be placed in different files
-/// to avoid `dart:ui` import issue.
+/// to avoid `dart:ui` import issue. Imports relative to `dart:ui` can't be 
+/// accessed from host runner, where flutter runtime is not accessible.
 ///
 /// ```dart
 /// class SomeFinder extends SerializableFinder {
@@ -139,7 +140,8 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// ```
 ///
 /// Note: SomeCommand, SomeResult and SomeCommandExtension should be placed in
-/// different files to avoid `dart:ui` import issue.
+/// different files to avoid `dart:ui` import issue. Imports relative to `dart:ui` 
+/// can't be accessed from host runner, where flutter runtime is not accessible.
 ///
 /// ```dart
 /// class SomeCommand extends CommandWithTarget {
