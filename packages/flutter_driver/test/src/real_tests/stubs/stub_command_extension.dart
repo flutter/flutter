@@ -17,6 +17,7 @@ class StubNestedCommandExtension extends CommandExtension {
   @override
   Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
     final StubNestedCommand stubCommand = command as StubNestedCommand;
+    handlerFactory.waitForElement(finderFactory.createFinder(stubCommand.finder));
     for (int index = 0; index < stubCommand.times; index++) {
       await handlerFactory.handleCommand(Tap(stubCommand.finder), prober, finderFactory);
     }
@@ -36,6 +37,7 @@ class StubProberCommandExtension extends CommandExtension {
   @override
   Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
     final StubProberCommand stubCommand = command as StubProberCommand;
+    handlerFactory.waitForElement(finderFactory.createFinder(stubCommand.finder));
     for (int index = 0; index < stubCommand.times; index++) {
       await prober.tap(finderFactory.createFinder(stubCommand.finder));
     }

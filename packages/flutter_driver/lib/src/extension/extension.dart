@@ -188,6 +188,12 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 ///   Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
 ///     final SomeCommand someCommand = command as SomeCommand;
 ///
+///     // Wait for [Element]:
+///     handlerFactory.waitForElement(finderFactory.createFinder(stubCommand.finder));
+///
+///     // Wait for [Element]s gone:
+///     handlerFactory.waitForAbsentElement(finderFactory.createFinder(stubCommand.finder));
+///
 ///     // Submit known [Command]s:
 ///     for (int index = 0; i < someCommand.times; index++) {
 ///       await handlerFactory.handleCommand(Tap(someCommand.finder), prober, finderFactory);

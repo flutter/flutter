@@ -270,7 +270,7 @@ mixin CommandHandlerFactory {
 
   Future<TapResult> _tap(Command command, WidgetController prober, CreateFinderFactory finderFactory) async {
     final Tap tapCommand = command as Tap;
-    final Finder computedFinder = await _waitForElement(
+    final Finder computedFinder = await waitForElement(
       finderFactory.createFinder(tapCommand.finder).hitTestable(),
     );
     await prober.tap(computedFinder);
@@ -279,13 +279,13 @@ mixin CommandHandlerFactory {
 
   Future<WaitForResult> _waitFor(Command command, CreateFinderFactory finderFactory) async {
     final WaitFor waitForCommand = command as WaitFor;
-    await _waitForElement(finderFactory.createFinder(waitForCommand.finder));
+    await waitForElement(finderFactory.createFinder(waitForCommand.finder));
     return const WaitForResult();
   }
 
   Future<WaitForAbsentResult> _waitForAbsent(Command command, CreateFinderFactory finderFactory) async {
     final WaitForAbsent waitForAbsentCommand = command as WaitForAbsent;
-    await _waitForAbsentElement(finderFactory.createFinder(waitForAbsentCommand.finder));
+    await waitForAbsentElement(finderFactory.createFinder(waitForAbsentCommand.finder));
     return const WaitForAbsentResult();
   }
 
@@ -340,7 +340,7 @@ mixin CommandHandlerFactory {
 
   Future<GetSemanticsIdResult> _getSemanticsId(Command command, CreateFinderFactory finderFactory) async {
     final GetSemanticsId semanticsCommand = command as GetSemanticsId;
-    final Finder target = await _waitForElement(finderFactory.createFinder(semanticsCommand.finder));
+    final Finder target = await waitForElement(finderFactory.createFinder(semanticsCommand.finder));
     final Iterable<Element> elements = target.evaluate();
     if (elements.length > 1) {
       throw StateError('Found more than one element with the same ID: $elements');
@@ -359,7 +359,7 @@ mixin CommandHandlerFactory {
 
   Future<GetOffsetResult> _getOffset(Command command, CreateFinderFactory finderFactory) async {
     final GetOffset getOffsetCommand = command as GetOffset;
-    final Finder finder = await _waitForElement(finderFactory.createFinder(getOffsetCommand.finder));
+    final Finder finder = await waitForElement(finderFactory.createFinder(getOffsetCommand.finder));
     final Element element = finder.evaluate().single;
     final RenderBox box = (element.renderObject as RenderBox?)!;
     Offset localPoint;
@@ -386,7 +386,7 @@ mixin CommandHandlerFactory {
 
   Future<DiagnosticsTreeResult> _getDiagnosticsTree(Command command, CreateFinderFactory finderFactory) async {
     final GetDiagnosticsTree diagnosticsCommand = command as GetDiagnosticsTree;
-    final Finder finder = await _waitForElement(finderFactory.createFinder(diagnosticsCommand.finder));
+    final Finder finder = await waitForElement(finderFactory.createFinder(diagnosticsCommand.finder));
     final Element element = finder.evaluate().single;
     DiagnosticsNode diagnosticsNode;
     switch (diagnosticsCommand.diagnosticsType) {
@@ -405,7 +405,7 @@ mixin CommandHandlerFactory {
 
   Future<ScrollResult> _scroll(Command command, WidgetController _prober, CreateFinderFactory finderFactory) async {
     final Scroll scrollCommand = command as Scroll;
-    final Finder target = await _waitForElement(finderFactory.createFinder(scrollCommand.finder));
+    final Finder target = await waitForElement(finderFactory.createFinder(scrollCommand.finder));
     final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.microsecondsPerSecond;
     final Offset delta = Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
     final Duration pause = scrollCommand.duration ~/ totalMoves;
@@ -426,14 +426,14 @@ mixin CommandHandlerFactory {
 
   Future<ScrollResult> _scrollIntoView(Command command, CreateFinderFactory finderFactory) async {
     final ScrollIntoView scrollIntoViewCommand = command as ScrollIntoView;
-    final Finder target = await _waitForElement(finderFactory.createFinder(scrollIntoViewCommand.finder));
+    final Finder target = await waitForElement(finderFactory.createFinder(scrollIntoViewCommand.finder));
     await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: scrollIntoViewCommand.alignment);
     return const ScrollResult();
   }
 
   Future<GetTextResult> _getText(Command command, CreateFinderFactory finderFactory) async {
     final GetText getTextCommand = command as GetText;
-    final Finder target = await _waitForElement(finderFactory.createFinder(getTextCommand.finder));
+    final Finder target = await waitForElement(finderFactory.createFinder(getTextCommand.finder));
 
     final Widget widget = target.evaluate().single.widget;
     String? text;
@@ -504,7 +504,7 @@ mixin CommandHandlerFactory {
   }
 
   /// Runs `finder` repeatedly until it finds one or more [Element]s.
-  Future<Finder> _waitForElement(Finder finder) async {
+  Future<Finder> waitForElement(Finder finder) async {
     if (_frameSync)
       await _waitUntilFrame(() => SchedulerBinding.instance!.transientCallbackCount == 0);
 
@@ -517,7 +517,7 @@ mixin CommandHandlerFactory {
   }
 
   /// Runs `finder` repeatedly until it finds zero [Element]s.
-  Future<Finder> _waitForAbsentElement(Finder finder) async {
+  Future<Finder> waitForAbsentElement(Finder finder) async {
     if (_frameSync)
       await _waitUntilFrame(() => SchedulerBinding.instance!.transientCallbackCount == 0);
 
