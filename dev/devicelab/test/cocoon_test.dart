@@ -14,7 +14,7 @@ import 'common.dart';
 
 void main() {
   group('Cocoon', () {
-    const String serviceAccountPath = 'test_account_file';
+    const String serviceAccountTokenPath = 'test_account_file';
     const String serviceAccountToken = 'test_token';
 
     Client mockClient;
@@ -24,7 +24,7 @@ void main() {
     setUp(() {
       fs = MemoryFileSystem();
 
-      final File serviceAccountFile = fs.file(serviceAccountPath)..createSync();
+      final File serviceAccountFile = fs.file(serviceAccountTokenPath)..createSync();
       serviceAccountFile.writeAsStringSync(serviceAccountToken);
     });
 
@@ -32,27 +32,27 @@ void main() {
       mockClient = MockClient((Request request) async => Response('{}', 200));
 
       cocoon = Cocoon(
-        serviceAccountPath: serviceAccountPath,
+        serviceAccountTokenPath: serviceAccountTokenPath,
         filesystem: fs,
         httpClient: mockClient,
       );
 
       final TaskResult result = TaskResult.success(<String, dynamic>{});
       // This should not throw an error.
-      await cocoon.sendTaskResult('taskKey', result);
+      await cocoon.sendTaskResult(commitSha: 'commit123', taskName: 'taskAbc', result: result);
     });
 
     test('throws client exception on non-200 responses', () async {
       mockClient = MockClient((Request request) async => Response('', 500));
 
       cocoon = Cocoon(
-        serviceAccountPath: serviceAccountPath,
+        serviceAccountTokenPath: serviceAccountTokenPath,
         filesystem: fs,
         httpClient: mockClient,
       );
 
       final TaskResult result = TaskResult.success(<String, dynamic>{});
-      expect(() => cocoon.sendTaskResult('taskKey', result), throwsA(isA<ClientException>()));
+      expect(() => cocoon.sendTaskResult(commitSha: 'commit123', taskName: 'taskAbc', result: result), throwsA(isA<ClientException>()));
     });
   });
 

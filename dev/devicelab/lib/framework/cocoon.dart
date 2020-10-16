@@ -21,14 +21,11 @@ import 'utils.dart';
 /// To retrieve these results, the test runner needs to send results back so so the database can be updated.
 class Cocoon {
   Cocoon({
-    String serviceAccountPath,
-    this.taskKey,
+    String serviceAccountTokenPath,
     @visibleForTesting Client httpClient,
     @visibleForTesting FileSystem filesystem,
-  }) : _httpClient = AuthenticatedCocoonClient(serviceAccountPath, httpClient: httpClient, filesystem: filesystem);
+  }) : _httpClient = AuthenticatedCocoonClient(serviceAccountTokenPath, httpClient: httpClient, filesystem: filesystem);
 
-  /// Id in Cocooon's datastore of the task to make API requests for.
-  final String taskKey;
 
   /// Client to make http requests to Cocoon.
   final AuthenticatedCocoonClient _httpClient;
@@ -39,9 +36,10 @@ class Cocoon {
   static final Logger logger = Logger('CocoonClient');
 
   /// Send [TaskResult] to Cocoon.
-  Future<void> sendTaskResult(String taskKey, TaskResult result) async {
+  Future<void> sendTaskResult({String commitSha, String taskName, TaskResult result}) async {
     final Map<String, dynamic> status = <String, dynamic>{
-      'TaskKey': taskKey,
+      'CommitSha': commitSha,
+      'TaskName': taskName,
       'NewStatus': result.succeeded ? 'Succeeded' : 'Failed',
     };
 
@@ -90,7 +88,7 @@ class Cocoon {
 /// [HttpClient] for sending authenticated requests to Cocoon.
 class AuthenticatedCocoonClient extends BaseClient {
   AuthenticatedCocoonClient(
-    this._serviceAccountPath, {
+    this._serviceAccountTokenPath, {
     @visibleForTesting Client httpClient,
     @visibleForTesting FileSystem filesystem,
   })  : _delegate = httpClient ?? Client(),
@@ -99,7 +97,7 @@ class AuthenticatedCocoonClient extends BaseClient {
   /// Authentication token to have the ability to upload and record test results.
   ///
   /// This is intended to only be passed on automated runs on LUCI post-submit.
-  final String _serviceAccountPath;
+  final String _serviceAccountTokenPath;
 
   /// Underlying [HttpClient] to send requests to.
   final Client _delegate;
@@ -113,7 +111,7 @@ class AuthenticatedCocoonClient extends BaseClient {
 
   /// Get [serviceAccountToken] from the given service account file.
   String _readServiceAccountTokenFile() {
-    return _serviceAccountToken = _fs.file(_serviceAccountPath).readAsStringSync().trim();
+    return _serviceAccountToken = _fs.file(_serviceAccountTokenPath).readAsStringSync().trim();
   }
 
   @override

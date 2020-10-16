@@ -19,8 +19,13 @@ ArgResults args;
 
 List<String> _taskNames = <String>[];
 
-/// Suppresses standard output, prints only standard error output.
-bool silent;
+/// Git commit sha of the current running tests.
+///
+/// Only used if [serviceAccountTokenFile] is passed.
+String commitSha;
+
+/// The device-id to run test on.
+String deviceId;
 
 /// The build of the local engine to use.
 ///
@@ -33,18 +38,13 @@ String localEngineSrcPath;
 /// Whether to exit on first test failure.
 bool exitOnFirstTestFailure;
 
-/// The device-id to run test on.
-String deviceId;
-
 /// File containing a service account token.
 ///
-/// If passed, the test run results will be recorded by Flutter infrastructure.
-String serviceAccountFile;
+/// If passed, the test run results will be uploaded to Flutter infrastructure.
+String serviceAccountTokenFile;
 
-/// Key for the task to upload to in Flutter infrastructure.
-/// 
-/// Only used if [serviceAccountFile] is passed.
-String taskKey;
+/// Suppresses standard output, prints only standard error output.
+bool silent;
 
 /// Runs tasks.
 ///
@@ -85,13 +85,13 @@ Future<void> main(List<String> rawArgs) async {
     return;
   }
 
-  silent = args['silent'] as bool;
+  commitSha = args['commit-sha'] as String;
+  deviceId = args['device-id'] as String;
   localEngine = args['local-engine'] as String;
   localEngineSrcPath = args['local-engine-src-path'] as String;
   exitOnFirstTestFailure = args['exit'] as bool;
-  deviceId = args['device-id'] as String;
-  serviceAccountFile = args['service-account-file'] as String;
-  taskKey = args['task-key'] as String;
+  serviceAccountTokenFile = args['service-account-token-file'] as String;
+  silent = args['silent'] as bool;
 
   if (args.wasParsed('ab')) {
     await _runABTest();
@@ -115,9 +115,9 @@ Future<void> _runTasks() async {
     print(const JsonEncoder.withIndent('  ').convert(result));
     section('Finished task "$taskName"');
 
-    if (serviceAccountFile != null) {
-      final Cocoon cocoon = Cocoon(serviceAccountPath: serviceAccountFile, taskKey: taskKey);
-      await cocoon.sendTaskResult(taskKey, result);
+    if (serviceAccountTokenFile != null) {
+      final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
+      await cocoon.sendTaskResult(commitSha: commitSha, taskName: taskName, result: result);
     }
 
     if (!result.succeeded) {
@@ -315,6 +315,10 @@ final ArgParser _argParser = ArgParser()
     help: 'Runs all tasks defined in manifest.yaml in alphabetical order.',
   )
   ..addOption(
+    'commit-sha',
+    help: '[Flutter infrastructure] Commit sha to upload results to Cocoon.',
+  )
+  ..addOption(
     'continue-from',
     abbr: 'c',
     help: 'With --all or --stage, continue from the given test.',
@@ -353,7 +357,7 @@ final ArgParser _argParser = ArgParser()
           '`required_agent_capabilities`\nin the `manifest.yaml` file.',
   )
   ..addOption(
-    'service-account-file',
+    'service-account-token-file',
     help: '[Flutter infrastructure] Authentication for uploading results.',
   )
   ..addOption(
@@ -366,10 +370,6 @@ final ArgParser _argParser = ArgParser()
     'silent',
     negatable: true,
     defaultsTo: false,
-  )
-  ..addOption(
-    'task-key',
-    help: '[Flutter infrastructure] Task key to upload results to.',
   )
   ..addMultiOption(
     'test',

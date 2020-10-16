@@ -138,14 +138,14 @@ void main() {
         ),
       );
     });
-  
+
     test('fails to upload results to Cocoon if flags given', () async {
       // CocoonClient will fail to find test-file, and will not send any http requests.
       final ProcessResult result = await runScript(
         <String>['smoke_test_success'],
         <String>['--service-account-file=test-file', '--task-key=task123'],
       );
-      expect(result.exitCode, 255);
+      expect(result.exitCode, 1);
     });
   });
 }
