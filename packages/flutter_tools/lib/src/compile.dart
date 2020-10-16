@@ -600,7 +600,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         message = fileUri.toString();
       } else {
         message = request.packageConfig.toPackageUri(fileUri)?.toString() ??
-          toMultiRootPath(request.mainUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
+          toMultiRootPath(fileUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
       }
       _server.stdin.writeln(message);
       _logger.printTrace(message.toString());
