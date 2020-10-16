@@ -23,8 +23,9 @@ FlutterPlatformViewLayer::FlutterPlatformViewLayer(
 
 FlutterPlatformViewLayer::~FlutterPlatformViewLayer() = default;
 
-FlutterPlatformViewsController::FlutterPlatformViewsController()
-    : layer_pool_(std::make_unique<FlutterPlatformViewLayerPool>()),
+FlutterPlatformViewsController::FlutterPlatformViewsController(
+    std::shared_ptr<IOSSurfaceFactory> surface_factory)
+    : layer_pool_(std::make_unique<FlutterPlatformViewLayerPool>(surface_factory)),
       weak_factory_(std::make_unique<fml::WeakPtrFactory<FlutterPlatformViewsController>>(this)){};
 
 FlutterPlatformViewsController::~FlutterPlatformViewsController() = default;

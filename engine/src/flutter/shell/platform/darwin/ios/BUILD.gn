@@ -99,6 +99,8 @@ source_set("flutter_framework_source") {
     "ios_render_target_gl.mm",
     "ios_surface.h",
     "ios_surface.mm",
+    "ios_surface_factory.h",
+    "ios_surface_factory.mm",
     "ios_surface_gl.h",
     "ios_surface_gl.mm",
     "ios_surface_software.h",
