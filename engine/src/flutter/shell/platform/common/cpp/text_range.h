@@ -21,19 +21,43 @@ class TextRange {
 
   virtual ~TextRange() = default;
 
-  // Returns the base position of the range.
+  // The base position of the range.
   size_t base() const { return base_; }
 
-  // Returns the extent position of the range.
+  // Sets the base position of the range.
+  void set_base(size_t pos) { base_ = pos; }
+
+  // The extent position of the range.
   size_t extent() const { return extent_; }
 
-  // Returns the lesser of the base and extent positions.
+  // Sets the extent position of the range.
+  void set_extent(size_t pos) { extent_ = pos; }
+
+  // The lesser of the base and extent positions.
   size_t start() const { return std::min(base_, extent_); }
 
-  // Returns the greater of the base and extent positions.
+  // Sets the start position of the range.
+  void set_start(size_t pos) {
+    if (base_ <= extent_) {
+      base_ = pos;
+    } else {
+      extent_ = pos;
+    }
+  }
+
+  // The greater of the base and extent positions.
   size_t end() const { return std::max(base_, extent_); }
 
-  // Returns the position of a collapsed range.
+  // Sets the end position of the range.
+  void set_end(size_t pos) {
+    if (base_ <= extent_) {
+      extent_ = pos;
+    } else {
+      base_ = pos;
+    }
+  }
+
+  // The position of a collapsed range.
   //
   // Asserts that the range is of length 0.
   size_t position() const {
@@ -41,7 +65,7 @@ class TextRange {
     return extent_;
   }
 
-  // Returns the length of the range.
+  // The length of the range.
   size_t length() const { return end() - start(); }
 
   // Returns true if the range is of length 0.
