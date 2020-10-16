@@ -711,7 +711,7 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
     while (child != null) {
       final ListBodyParentData childParentData = child.parentData! as ListBodyParentData;
       final Rect rect = (childParentData.offset + offset) & child.size;
-      if (i % 2 == 0)
+      if (i.isEven)
         _paintShadows(context.canvas, rect);
       child = childParentData.nextSibling;
 

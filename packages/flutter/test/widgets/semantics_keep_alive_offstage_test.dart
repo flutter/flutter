@@ -99,7 +99,7 @@ Widget _buildTestWidget({
               controller: controller,
               children: List<Widget>.generate(10, (int i) {
                 return Container(
-                  color: i % 2 == 0 ? Colors.red : Colors.blue,
+                  color: i.isEven ? Colors.red : Colors.blue,
                   height: 250.0,
                   child: Text('Item $i'),
                 );
