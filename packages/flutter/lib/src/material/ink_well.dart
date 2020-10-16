@@ -1104,6 +1104,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
               onLongPress: widget.onLongPress != null ? () => _handleLongPress(context) : null,
               behavior: HitTestBehavior.opaque,
               excludeFromSemantics: widget.excludeFromSemantics,
+              excludeTapFromSemantics: widget.onTap == null,
               child: widget.child,
             ),
           ),

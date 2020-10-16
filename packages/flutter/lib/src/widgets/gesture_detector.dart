@@ -264,6 +264,7 @@ class GestureDetector extends StatelessWidget {
     this.onScaleEnd,
     this.behavior,
     this.excludeFromSemantics = false,
+    this.excludeTapFromSemantics = false,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(excludeFromSemantics != null),
        assert(dragStartBehavior != null),
@@ -736,6 +737,14 @@ class GestureDetector extends StatelessWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
+  /// Whether to exclude the tap gesture from the semantics tree.
+  ///
+  /// For example, The [InkWell] widget must always create a tap handler to
+  /// create ink responses if it has either onTap or onLongPress provided. The
+  /// parent widget may not have a "semantic" onTap handler, however, and so
+  /// the semantics must not be included.
+  final bool excludeTapFromSemantics;
+
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], gesture drag behavior will
@@ -921,6 +930,7 @@ class GestureDetector extends StatelessWidget {
       gestures: gestures,
       behavior: behavior,
       excludeFromSemantics: excludeFromSemantics,
+      excludeTapFromSemantics: excludeTapFromSemantics,
       child: child,
     );
   }
@@ -984,6 +994,7 @@ class RawGestureDetector extends StatefulWidget {
     this.gestures = const <Type, GestureRecognizerFactory>{},
     this.behavior,
     this.excludeFromSemantics = false,
+    this.excludeTapFromSemantics = false,
     this.semantics,
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
@@ -1015,6 +1026,14 @@ class RawGestureDetector extends StatefulWidget {
   /// tree directly and so having a gesture to show it would result in
   /// duplication of information.
   final bool excludeFromSemantics;
+
+  /// Whether to exclude the tap gesture from the semantics tree.
+  ///
+  /// For example, The [InkWell] widget must always create a tap handler to
+  /// create ink responses if it has either onTap or onLongPress provided. The
+  /// parent widget may not have a "semantic" onTap handler, however, and so
+  /// the semantics must not be included.
+  final bool excludeTapFromSemantics;
 
   /// Describes the semantics notations that should be added to the underlying
   /// render object [RenderSemanticsGestureHandler].
@@ -1311,7 +1330,7 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
     assert(!detectorState.widget.excludeFromSemantics);
     final Map<Type, GestureRecognizer> recognizers = detectorState._recognizers!;
     renderObject
-      ..onTap = _getTapHandler(recognizers)
+      ..onTap = detectorState.widget.excludeTapFromSemantics ? null : _getTapHandler(recognizers)
       ..onLongPress = _getLongPressHandler(recognizers)
       ..onHorizontalDragUpdate = _getHorizontalDragUpdateHandler(recognizers)
       ..onVerticalDragUpdate = _getVerticalDragUpdateHandler(recognizers);
