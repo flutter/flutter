@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
-import 'dart:io' hide exit;
+import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
 
@@ -32,7 +32,7 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
     expectNonZeroExit: expectNonZeroExit,
     // Capture the output so it's not printed to the console by default.
     outputMode: OutputMode.capture,
-    outputListener: (String line, Process process) {
+    outputListener: (String line, io.Process process) {
       output.add(line);
     },
   );
@@ -48,7 +48,7 @@ class Command {
   Command._(this.process, this._time, this._savedStdout, this._savedStderr);
 
   /// The raw process that was launched for this command.
-  final Process process;
+  final io.Process process;
 
   final Stopwatch _time;
   final Future<List<List<int>>> _savedStdout;
@@ -100,14 +100,14 @@ Future<Command> startCommand(String executable, List<String> arguments, {
   Map<String, String> environment,
   OutputMode outputMode = OutputMode.print,
   bool Function(String) removeLine,
-  void Function(String, Process) outputListener,
+  void Function(String, io.Process) outputListener,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
-  final String relativeWorkingDir = path.relative(workingDirectory ?? Directory.current.path);
+  final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
   printProgress('RUNNING', relativeWorkingDir, commandDescription);
 
   final Stopwatch time = Stopwatch()..start();
-  final Process process = await Process.start(executable, arguments,
+  final io.Process process = await io.Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
   );
@@ -128,8 +128,8 @@ Future<Command> startCommand(String executable, List<String> arguments, {
   switch (outputMode) {
     case OutputMode.print:
       await Future.wait<void>(<Future<void>>[
-        stdout.addStream(stdoutSource),
-        stderr.addStream(process.stderr),
+        io.stdout.addStream(stdoutSource),
+        io.stderr.addStream(process.stderr),
       ]);
       break;
     case OutputMode.capture:
@@ -164,10 +164,10 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
   OutputMode outputMode = OutputMode.print,
   bool skip = false,
   bool Function(String) removeLine,
-  void Function(String, Process) outputListener,
+  void Function(String, io.Process) outputListener,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
-  final String relativeWorkingDir = path.relative(workingDirectory ?? Directory.current.path);
+  final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
   if (skip) {
     printProgress('SKIPPING', relativeWorkingDir, commandDescription);
     return null;
@@ -183,22 +183,22 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
 
   final CommandResult result = await command.onExit;
 
-  if ((exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && exitCode != expectedExitCode)) {
+  if ((result.exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && result.exitCode != expectedExitCode)) {
     // Print the output when we get unexpected results (unless output was
     // printed already).
     switch (outputMode) {
       case OutputMode.print:
         break;
       case OutputMode.capture:
-        stdout.writeln(result.flattenedStdout);
-        stderr.writeln(result.flattenedStderr);
+        io.stdout.writeln(result.flattenedStdout);
+        io.stderr.writeln(result.flattenedStderr);
         break;
     }
     exitWithError(<String>[
       if (failureMessage != null)
         failureMessage
       else
-        '${bold}ERROR: ${red}Last command exited with $exitCode (expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'}).$reset',
+        '${bold}ERROR: ${red}Last command exited with ${result.exitCode} (expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'}).$reset',
       '${bold}Command: $green$commandDescription$reset',
       '${bold}Relative working directory: $cyan$relativeWorkingDir$reset',
     ]);
@@ -227,10 +227,4 @@ enum OutputMode {
   /// Use this mode in tests that need to inspect the output of a command, or
   /// when the output should not be printed to console.
   capture,
-}
-
-/// Stores command output from [runCommand] when used with [OutputMode.capture].
-class CapturedOutput {
-  String stdout;
-  String stderr;
 }
