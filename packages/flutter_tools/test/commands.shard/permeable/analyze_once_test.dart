@@ -75,7 +75,8 @@ void main() {
     } else {
       flutterRootUri.write(canonicalizedFlutterRootPath);
     }
-    final String dotPackagesSrc = '''# Generated
+    final String dotPackagesSrc = '''
+# Generated
 flutter:$flutterRootUri/packages/flutter/lib/
 sky_engine:$flutterRootUri/bin/cache/pkg/sky_engine/lib/
 flutter_project:lib/

@@ -22,7 +22,6 @@ final ProcessUtils processUtils = ProcessUtils(processManager: processManager, l
   ),
   stdio: stdio,
   outputPreferences: OutputPreferences.test(wrapText: true),
-  timeoutConfiguration: const TimeoutConfiguration(),
 ));
 final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 

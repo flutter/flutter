@@ -37,7 +37,7 @@ Future<void> main() async {
         '   constraints: BoxConstraints(25.0<=w<=100.0, 25.0<=h<=100.0)\n'
         '   size: Size(25.0, 25.0)\n'
         '   image: $squareImage\n'
-        '   alignment: center\n'
+        '   alignment: Alignment.center\n'
         '   invertColors: false\n'
         '   filterQuality: low\n'
       ),

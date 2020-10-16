@@ -119,7 +119,6 @@ class GenerateLocalizationsTarget extends Target {
       logger: environment.logger,
       fileSystem: environment.fileSystem,
     );
-
     generateLocalizations(
       logger: environment.logger,
       options: options,

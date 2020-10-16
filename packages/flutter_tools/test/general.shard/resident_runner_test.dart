@@ -1319,7 +1319,8 @@ void main() {
   testUsingContext('ResidentRunner can run source generation', () => testbed.run(() async {
     final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
-    arbFile.writeAsStringSync('''{
+    arbFile.writeAsStringSync('''
+{
   "helloWorld": "Hello, World!",
   "@helloWorld": {
     "description": "Sample description"
@@ -1339,7 +1340,8 @@ void main() {
     // to app_en.arb.
     final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
       ..createSync(recursive: true);
-    arbFile.writeAsStringSync('''{
+    arbFile.writeAsStringSync('''
+{
   "helloWorld": "Hello, World!",
   "@helloWorld": {
     "description": "Sample description"

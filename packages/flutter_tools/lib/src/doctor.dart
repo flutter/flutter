@@ -301,9 +301,6 @@ class Doctor {
     for (final ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = Status.withSpinner(
-        timeout: timeoutConfiguration.fastOperation,
-        slowWarningCallback: () => validator.slowWarning,
-        timeoutConfiguration: timeoutConfiguration,
         stopwatch: Stopwatch(),
         terminal: globals.terminal,
       );
