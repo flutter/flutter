@@ -459,6 +459,7 @@ action("robolectric_tests") {
     "test/io/flutter/embedding/engine/PluginComponentTest.java",
     "test/io/flutter/embedding/engine/RenderingComponentTest.java",
     "test/io/flutter/embedding/engine/dart/DartExecutorTest.java",
+    "test/io/flutter/embedding/engine/dart/DartMessengerTest.java",
     "test/io/flutter/embedding/engine/loader/ApplicationInfoLoaderTest.java",
     "test/io/flutter/embedding/engine/loader/FlutterLoaderTest.java",
     "test/io/flutter/embedding/engine/mutatorsstack/FlutterMutatorViewTest.java",
