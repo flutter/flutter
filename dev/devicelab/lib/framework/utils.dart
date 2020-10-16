@@ -280,12 +280,12 @@ Future<Process> startProcess(
   final String finalWorkingDirectory = workingDirectory ?? cwd;
   print('\nExecuting: $command in $finalWorkingDirectory'
       + (environment != null ? ' with environment $environment' : ''));
-  environment ??= <String, String>{};
-  environment['BOT'] = isBot ? 'true' : 'false';
-  environment['FLUTTER_IOS_SCREENSHOT_ON_CONNECTION_FAILURE'] = 'true';
+  final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
+  newEnvironment['BOT'] = isBot ? 'true' : 'false';
+  newEnvironment['FLUTTER_IOS_SCREENSHOT_ON_CONNECTION_FAILURE'] = 'true';
   final Process process = await _processManager.start(
     <String>[executable, ...arguments],
-    environment: environment,
+    environment: newEnvironment,
     workingDirectory: finalWorkingDirectory,
   );
   final ProcessInfo processInfo = ProcessInfo(command, process);
