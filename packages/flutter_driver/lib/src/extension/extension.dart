@@ -189,12 +189,12 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 ///     final SomeCommand someCommand = command as SomeCommand;
 ///
 ///     // Submit known [Command]s:
-///     for (int i = 0; i < someCommand.times; i++) {
+///     for (int index = 0; i < someCommand.times; index++) {
 ///       await handlerFactory.handleCommand(Tap(someCommand.finder), prober, finderFactory);
 ///     }
 ///
 ///     // Alternatively, use [WidgetController]:
-///     for (int i = 0; i < stubCommand.times; i++) {
+///     for (int index = 0; i < stubCommand.times; index++) {
 ///       await prober.tap(finderFactory.createFinder(stubCommand.finder));
 ///     }
 ///
@@ -257,7 +257,7 @@ abstract class CommandExtension {
   /// @override
   /// Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
   ///   final StubNestedCommand stubCommand = command as StubNestedCommand;
-  ///   for (int i = 0; i < stubCommand.times; i++) {
+  ///   for (int index = 0; i < stubCommand.times; index++) {
   ///     await handlerFactory.handleCommand(Tap(stubCommand.finder), prober, finderFactory);
   ///   }
   ///   return const StubCommandResult('stub response');
@@ -268,7 +268,7 @@ abstract class CommandExtension {
   ///   @override
   /// Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory) async {
   ///   final StubProberCommand stubCommand = command as StubProberCommand;
-  ///   for (int i = 0; i < stubCommand.times; i++) {
+  ///   for (int index = 0; i < stubCommand.times; index++) {
   ///     await prober.tap(finderFactory.createFinder(stubCommand.finder));
   ///   }
   ///   return const StubCommandResult('stub response');
