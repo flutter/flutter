@@ -51,7 +51,7 @@ class Dialog extends StatelessWidget {
     this.shape,
     this.child,
   }) : assert(clipBehavior != null),
-        super(key: key);
+       super(key: key);
 
   /// {@template flutter.material.dialog.backgroundColor}
   /// The background color of the surface of this [Dialog].
@@ -122,7 +122,7 @@ class Dialog extends StatelessWidget {
   final Widget? child;
 
   static const RoundedRectangleBorder _defaultDialogShape =
-  RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
   static const double _defaultElevation = 24.0;
 
   @override
@@ -256,8 +256,8 @@ class AlertDialog extends StatelessWidget {
     this.shape,
     this.scrollable = false,
   }) : assert(contentPadding != null),
-        assert(clipBehavior != null),
-        super(key: key);
+       assert(clipBehavior != null),
+       super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -407,7 +407,7 @@ class AlertDialog extends StatelessWidget {
   ///
   /// * [ButtonBar], which [actions] configures to lay itself out.
   @Deprecated(
-      'Use actionsButtonSpacing.'
+    'Use actionsButtonSpacing.'
   )
   final EdgeInsetsGeometry? buttonPadding;
 
@@ -450,11 +450,11 @@ class AlertDialog extends StatelessWidget {
   /// allowing all overflowed content to be visible while still showing the
   /// button bar.
   @Deprecated(
-      'Set scrollable to `true`. This parameter will be removed and '
-          'was introduced to migrate AlertDialog to be scrollable by '
-          'default. For more information, see '
-          'https://flutter.dev/docs/release/breaking-changes/scrollable_alert_dialog. '
-          'This feature was deprecated after v1.13.2.'
+    'Set scrollable to `true`. This parameter will be removed and '
+    'was introduced to migrate AlertDialog to be scrollable by '
+    'default. For more information, see '
+    'https://flutter.dev/docs/release/breaking-changes/scrollable_alert_dialog. '
+    'This feature was deprecated after v1.13.2.'
   )
   final bool scrollable;
 
@@ -747,8 +747,8 @@ class SimpleDialog extends StatelessWidget {
     this.semanticLabel,
     this.shape,
   }) : assert(titlePadding != null),
-        assert(contentPadding != null),
-        super(key: key);
+       assert(contentPadding != null),
+       super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -976,10 +976,10 @@ Future<T> showDialog<T>({
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   @Deprecated(
-      'Instead of using the "child" argument, return the child from a closure '
-          'provided to the "builder" argument. This will ensure that the BuildContext '
-          'is appropriate for widgets built in the dialog. '
-          'This feature was deprecated after v0.2.3.'
+    'Instead of using the "child" argument, return the child from a closure '
+    'provided to the "builder" argument. This will ensure that the BuildContext '
+    'is appropriate for widgets built in the dialog. '
+    'This feature was deprecated after v0.2.3.'
   )
   Widget? child,
 }) {
