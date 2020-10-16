@@ -1310,7 +1310,7 @@ void main() {
       textDirection: TextDirection.ltr,
     ));
 
-    // Add tap handler back and confirm additon to semantic actions.
+    // Add tap handler back and confirm addition back to semantic actions.
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Material(
