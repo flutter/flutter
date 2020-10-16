@@ -139,10 +139,10 @@ void main() {
     }
 
     await tester.pumpWidget(build(
-        NestedScrollView(
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[const SliverAppBar()],
-          body: Container(height: 2000.0),
-        )
+      NestedScrollView(
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[const SliverAppBar()],
+        body: Container(height: 2000.0),
+      )
     ));
 
     // 1st, check that the render object has received the default clip behavior.
@@ -212,7 +212,7 @@ void main() {
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 500));
     final TestGesture gesture1 = await tester.startGesture(
-        tester.getCenter(find.text('aaa1'))
+      tester.getCenter(find.text('aaa1'))
     );
     await gesture1.moveBy(const Offset(0.0, 200.0));
     await tester.pumpAndSettle();
@@ -222,7 +222,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('aaa2'), findsOneWidget);
   },
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('NestedScrollView', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
@@ -475,119 +475,119 @@ void main() {
     int buildCount = 0;
     await tester.pumpWidget(
       MaterialApp(home: Material(child:
-      // THE FOLLOWING SECTION IS FROM THE NestedScrollView DOCUMENTATION
-      // (EXCEPT FOR THE CHANGES TO THE buildCount COUNTER)
-      DefaultTabController(
-        length: _tabs.length, // This is the number of tabs.
-        child: NestedScrollView(
-          dragStartBehavior: DragStartBehavior.down,
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            buildCount += 1; // THIS LINE IS NOT IN THE ORIGINAL -- ADDED FOR TEST
-            // These are the slivers that show up in the "outer" scroll view.
-            return <Widget>[
-              SliverOverlapAbsorber(
-                // This widget takes the overlapping behavior of the
-                // SliverAppBar, and redirects it to the SliverOverlapInjector
-                // below. If it is missing, then it is possible for the nested
-                // "inner" scroll view below to end up under the SliverAppBar
-                // even when the inner scroll view thinks it has not been
-                // scrolled. This is not necessary if the
-                // "headerSliverBuilder" only builds widgets that do not
-                // overlap the next sliver.
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                sliver: SliverAppBar(
-                  title: const Text('Books'), // This is the title in the app bar.
-                  pinned: true,
-                  expandedHeight: 150.0,
-                  // The "forceElevated" property causes the SliverAppBar to
-                  // show a shadow. The "innerBoxIsScrolled" parameter is true
-                  // when the inner scroll view is scrolled beyond its "zero"
-                  // point, i.e. when it appears to be scrolled below the
-                  // SliverAppBar. Without this, there are cases where the
-                  // shadow would appear or not appear inappropriately,
-                  // because the SliverAppBar is not actually aware of the
-                  // precise position of the inner scroll views.
-                  forceElevated: innerBoxIsScrolled,
-                  bottom: TabBar(
-                    // These are the widgets to put in each tab in the tab
-                    // bar.
-                    tabs: _tabs.map<Widget>((String name) => Tab(text: name)).toList(),
-                    dragStartBehavior: DragStartBehavior.down,
+        // THE FOLLOWING SECTION IS FROM THE NestedScrollView DOCUMENTATION
+        // (EXCEPT FOR THE CHANGES TO THE buildCount COUNTER)
+        DefaultTabController(
+          length: _tabs.length, // This is the number of tabs.
+          child: NestedScrollView(
+            dragStartBehavior: DragStartBehavior.down,
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              buildCount += 1; // THIS LINE IS NOT IN THE ORIGINAL -- ADDED FOR TEST
+              // These are the slivers that show up in the "outer" scroll view.
+              return <Widget>[
+                SliverOverlapAbsorber(
+                  // This widget takes the overlapping behavior of the
+                  // SliverAppBar, and redirects it to the SliverOverlapInjector
+                  // below. If it is missing, then it is possible for the nested
+                  // "inner" scroll view below to end up under the SliverAppBar
+                  // even when the inner scroll view thinks it has not been
+                  // scrolled. This is not necessary if the
+                  // "headerSliverBuilder" only builds widgets that do not
+                  // overlap the next sliver.
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: SliverAppBar(
+                    title: const Text('Books'), // This is the title in the app bar.
+                    pinned: true,
+                    expandedHeight: 150.0,
+                    // The "forceElevated" property causes the SliverAppBar to
+                    // show a shadow. The "innerBoxIsScrolled" parameter is true
+                    // when the inner scroll view is scrolled beyond its "zero"
+                    // point, i.e. when it appears to be scrolled below the
+                    // SliverAppBar. Without this, there are cases where the
+                    // shadow would appear or not appear inappropriately,
+                    // because the SliverAppBar is not actually aware of the
+                    // precise position of the inner scroll views.
+                    forceElevated: innerBoxIsScrolled,
+                    bottom: TabBar(
+                      // These are the widgets to put in each tab in the tab
+                      // bar.
+                      tabs: _tabs.map<Widget>((String name) => Tab(text: name)).toList(),
+                      dragStartBehavior: DragStartBehavior.down,
+                    ),
                   ),
                 ),
-              ),
-            ];
-          },
-          body: TabBarView(
-            dragStartBehavior: DragStartBehavior.down,
-            // These are the contents of the tab views, below the tabs.
-            children: _tabs.map<Widget>((String name) {
-              return SafeArea(
-                top: false,
-                bottom: false,
-                child: Builder(
-                  // This Builder is needed to provide a BuildContext that is
-                  // "inside" the NestedScrollView, so that
-                  // sliverOverlapAbsorberHandleFor() can find the
-                  // NestedScrollView.
-                  builder: (BuildContext context) {
-                    return CustomScrollView(
-                      // The "controller" and "primary" members should be left
-                      // unset, so that the NestedScrollView can control this
-                      // inner scroll view.
-                      // If the "controller" property is set, then this scroll
-                      // view will not be associated with the
-                      // NestedScrollView. The PageStorageKey should be unique
-                      // to this ScrollView; it allows the list to remember
-                      // its scroll position when the tab view is not on the
-                      // screen.
-                      key: PageStorageKey<String>(name),
-                      dragStartBehavior: DragStartBehavior.down,
-                      slivers: <Widget>[
-                        SliverOverlapInjector(
-                          // This is the flip side of the
-                          // SliverOverlapAbsorber above.
-                          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                        ),
-                        SliverPadding(
-                          padding: const EdgeInsets.all(8.0),
-                          // In this example, the inner scroll view has
-                          // fixed-height list items, hence the use of
-                          // SliverFixedExtentList. However, one could use any
-                          // sliver widget here, e.g. SliverList or
-                          // SliverGrid.
-                          sliver: SliverFixedExtentList(
-                            // The items in this example are fixed to 48
-                            // pixels high. This matches the Material Design
-                            // spec for ListTile widgets.
-                            itemExtent: 48.0,
-                            delegate: SliverChildBuilderDelegate(
-                                  (BuildContext context, int index) {
-                                // This builder is called for each child.
-                                // In this example, we just number each list
-                                // item.
-                                return ListTile(
-                                  title: Text('Item $index'),
-                                );
-                              },
-                              // The childCount of the
-                              // SliverChildBuilderDelegate specifies how many
-                              // children this inner list has. In this
-                              // example, each tab has a list of exactly 30
-                              // items, but this is arbitrary.
-                              childCount: 30,
+              ];
+            },
+            body: TabBarView(
+              dragStartBehavior: DragStartBehavior.down,
+              // These are the contents of the tab views, below the tabs.
+              children: _tabs.map<Widget>((String name) {
+                return SafeArea(
+                  top: false,
+                  bottom: false,
+                  child: Builder(
+                    // This Builder is needed to provide a BuildContext that is
+                    // "inside" the NestedScrollView, so that
+                    // sliverOverlapAbsorberHandleFor() can find the
+                    // NestedScrollView.
+                    builder: (BuildContext context) {
+                      return CustomScrollView(
+                        // The "controller" and "primary" members should be left
+                        // unset, so that the NestedScrollView can control this
+                        // inner scroll view.
+                        // If the "controller" property is set, then this scroll
+                        // view will not be associated with the
+                        // NestedScrollView. The PageStorageKey should be unique
+                        // to this ScrollView; it allows the list to remember
+                        // its scroll position when the tab view is not on the
+                        // screen.
+                        key: PageStorageKey<String>(name),
+                        dragStartBehavior: DragStartBehavior.down,
+                        slivers: <Widget>[
+                          SliverOverlapInjector(
+                            // This is the flip side of the
+                            // SliverOverlapAbsorber above.
+                            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                          ),
+                          SliverPadding(
+                            padding: const EdgeInsets.all(8.0),
+                            // In this example, the inner scroll view has
+                            // fixed-height list items, hence the use of
+                            // SliverFixedExtentList. However, one could use any
+                            // sliver widget here, e.g. SliverList or
+                            // SliverGrid.
+                            sliver: SliverFixedExtentList(
+                              // The items in this example are fixed to 48
+                              // pixels high. This matches the Material Design
+                              // spec for ListTile widgets.
+                              itemExtent: 48.0,
+                              delegate: SliverChildBuilderDelegate(
+                                (BuildContext context, int index) {
+                                  // This builder is called for each child.
+                                  // In this example, we just number each list
+                                  // item.
+                                  return ListTile(
+                                    title: Text('Item $index'),
+                                  );
+                                },
+                                // The childCount of the
+                                // SliverChildBuilderDelegate specifies how many
+                                // children this inner list has. In this
+                                // example, each tab has a list of exactly 30
+                                // items, but this is arbitrary.
+                                childCount: 30,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              );
-            }).toList(),
+                        ],
+                      );
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
           ),
         ),
-      ),
         // END
       )),
     );
@@ -625,7 +625,7 @@ void main() {
     _checkPhysicalLayer(elevation: 0);
     // scroll down
     final TestGesture gesture0 = await tester.startGesture(
-        tester.getCenter(find.text('Item 2'))
+      tester.getCenter(find.text('Item 2'))
     );
     await gesture0.moveBy(const Offset(0.0, -120.0)); // tiny bit more than the pinned app bar height (56px * 2)
     await tester.pump();
@@ -644,7 +644,7 @@ void main() {
     _checkPhysicalLayer(elevation: 4);
     // scroll down
     final TestGesture gesture1 = await tester.startGesture(
-        tester.getCenter(find.text('Item 2'))
+      tester.getCenter(find.text('Item 2'))
     );
     await gesture1.moveBy(const Offset(0.0, -800.0));
     await tester.pump();
@@ -658,7 +658,7 @@ void main() {
     _checkPhysicalLayer(elevation: 4);
     // swipe left to bring in tap on the right
     final TestGesture gesture2 = await tester.startGesture(
-        tester.getCenter(find.byType(NestedScrollView))
+      tester.getCenter(find.byType(NestedScrollView))
     );
     await gesture2.moveBy(const Offset(-400.0, 0.0));
     await tester.pump();
@@ -667,10 +667,10 @@ void main() {
     expect(find.text('Item 2'), findsOneWidget);
     expect(find.text('Item 0'), findsOneWidget);
     expect(tester.getTopLeft(
-        find.ancestor(
-          of: find.text('Item 0'),
-          matching: find.byType(ListTile),
-        )).dy,
+      find.ancestor(
+        of: find.text('Item 0'),
+        matching: find.byType(ListTile),
+      )).dy,
       tester.getBottomLeft(find.byType(AppBar)).dy + 8.0,
     );
     _checkPhysicalLayer(elevation: 4);
@@ -690,7 +690,7 @@ void main() {
     expect(buildCount, expectedBuildCount);
     // peek left to see it's still in the right place
     final TestGesture gesture3 = await tester.startGesture(
-        tester.getCenter(find.byType(NestedScrollView))
+      tester.getCenter(find.byType(NestedScrollView))
     );
     await gesture3.moveBy(const Offset(400.0, 0.0));
     await tester.pump(); // bring the left page into view
@@ -717,7 +717,7 @@ void main() {
     _checkPhysicalLayer(elevation: 0);
     // scroll back up
     final TestGesture gesture4 = await tester.startGesture(
-        tester.getCenter(find.byType(NestedScrollView))
+      tester.getCenter(find.byType(NestedScrollView))
     );
     await gesture4.moveBy(const Offset(0.0, 200.0)); // expands the appbar again
     await tester.pump();
@@ -731,7 +731,7 @@ void main() {
     _checkPhysicalLayer(elevation: 0);
     // peek left to see it's now back at zero
     final TestGesture gesture5 = await tester.startGesture(
-        tester.getCenter(find.byType(NestedScrollView))
+      tester.getCenter(find.byType(NestedScrollView))
     );
     await gesture5.moveBy(const Offset(400.0, 0.0));
     await tester.pump(); // bring the left page into view
@@ -792,7 +792,7 @@ void main() {
       const Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0),
     );
     final TestGesture gesture = await tester.startGesture(
-        const Offset(10.0, 10.0)
+      const Offset(10.0, 10.0)
     );
     await gesture.moveBy(const Offset(0.0, -10.0)); // scroll up
     await tester.pump();
@@ -1038,7 +1038,7 @@ void main() {
     });
 
     testWidgets('NestedScrollViewState.outerController should correspond to NestedScrollView.controller', (
-        WidgetTester tester) async {
+      WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       final ScrollController scrollController = ScrollController();
 
@@ -1262,44 +1262,44 @@ void main() {
       bool expanded = false,
     }) {
       return MaterialApp(
-          home: Scaffold(
-              body: NestedScrollView(
-                  key: nestedKey,
-                  controller: controller,
-                  floatHeaderSlivers: nestedFloat,
-                  headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                    return <Widget>[
-                      SliverOverlapAbsorber(
-                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                        sliver: SliverAppBar(
-                          key: appBarKey,
-                          title: const Text('Test Title'),
-                          floating: floating,
-                          pinned: pinned,
-                          snap: snap,
-                          expandedHeight: expanded ? 200.0 : 0.0,
-                        ),
-                      ),
-                    ];
-                  },
-                  body: Builder(
-                      builder: (BuildContext context) {
-                        return CustomScrollView(
-                          slivers: <Widget>[
-                            SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
-                            SliverFixedExtentList(
-                                itemExtent: 50.0,
-                                delegate: SliverChildBuilderDelegate(
-                                      (BuildContext context, int index) => ListTile(title: Text('Item $index')),
-                                  childCount: 30,
-                                )
-                            ),
-                          ],
-                        );
-                      }
-                  )
-              )
+        home: Scaffold(
+          body: NestedScrollView(
+            key: nestedKey,
+            controller: controller,
+            floatHeaderSlivers: nestedFloat,
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverOverlapAbsorber(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: SliverAppBar(
+                    key: appBarKey,
+                    title: const Text('Test Title'),
+                    floating: floating,
+                    pinned: pinned,
+                    snap: snap,
+                    expandedHeight: expanded ? 200.0 : 0.0,
+                  ),
+                ),
+              ];
+            },
+            body: Builder(
+              builder: (BuildContext context) {
+                return CustomScrollView(
+                  slivers: <Widget>[
+                    SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+                    SliverFixedExtentList(
+                      itemExtent: 50.0,
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) => ListTile(title: Text('Item $index')),
+                        childCount: 30,
+                      )
+                    ),
+                  ],
+                );
+              }
+            )
           )
+        )
       );
     }
 
@@ -1832,15 +1832,15 @@ void main() {
               ];
             },
             body: ListView.builder(
-                itemCount: 50,
-                itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text('Item $index'),
-                      )
-                  );
-                }
+              itemCount: 50,
+              itemBuilder: (BuildContext context, int index) {
+                return Container(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Item $index'),
+                  )
+                );
+              }
             ),
           ),
         ),
