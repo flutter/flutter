@@ -427,7 +427,7 @@ abstract class Route<T> {
   ///
   /// This method increases the lock count by 1, and returns a callback that
   /// reduces the lock count by 1 and potentially calls [dispose] if the count
-  /// reduces to 0. Having a non-zero lock count prevents [proposeDispose] from
+  /// reduces to 0. Having a non-zero lock count prevents [proposeToDispose] from
   /// calling [dispose] immediately. The returned callback must be called exactly
   /// once.
   ///

@@ -116,7 +116,7 @@ class OverlayEntry {
 
   /// A function that indicates the mounting and unmounting of the overlay widget.
   ///
-  /// If [lockDisposal] is not null, it will be called when the widget returned
+  /// If [onWidgetStatusChanged] is not null, it will be called when the widget returned
   /// by [builder] is mounted ([State.initState]), and the callback that it
   /// returns will be called when the widget is unmounted ([State.dispose]).
   ///
