@@ -96,7 +96,7 @@ class RuntimeController : public PlatformConfigurationClient {
   ///                                         code in isolate scope when the VM
   ///                                         is about to be notified that the
   ///                                         engine is going to be idle.
-  /// @param[in]  platform_data                 The window data (if exists).
+  /// @param[in]  platform_data               The window data (if exists).
   /// @param[in]  isolate_create_callback     The isolate create callback. This
   ///                                         allows callers to run native code
   ///                                         in isolate scope on the UI task
@@ -133,10 +133,39 @@ class RuntimeController : public PlatformConfigurationClient {
   ~RuntimeController() override;
 
   //----------------------------------------------------------------------------
-  /// @brief      Clone the the runtime controller. This re-creates the root
-  ///             isolate with the same snapshots and copies all window data to
-  ///             the new instance. This is usually only used in the debug
-  ///             runtime mode to support the cold-restart scenario.
+  /// @brief      Launches the isolate using the window data associated with
+  ///             this runtime controller. Before this call, the Dart isolate
+  ///             has not been initialized. On successful return, the caller can
+  ///             assume that the isolate is in the
+  ///             `DartIsolate::Phase::Running` phase.
+  ///
+  ///             This call will fail if a root isolate is already running. To
+  ///             re-create an isolate with the window data associated with this
+  ///             runtime controller, `Clone`  this runtime controller and
+  ///             Launch an isolate in that runtime controller instead.
+  ///
+  /// @param[in]  dart_entrypoint          The dart entrypoint. If
+  ///                                      `std::nullopt` or empty, `main` will
+  ///                                      be attempted.
+  /// @param[in]  dart_entrypoint_library  The dart entrypoint library. If
+  ///                                      `std::nullopt` or empty, the core
+  ///                                      library will be attempted.
+  /// @param[in]  isolate_configuration    The isolate configuration
+  ///
+  /// @return     If the isolate could be launched and guided to the
+  ///             `DartIsolate::Phase::Running` phase.
+  ///
+  [[nodiscard]] bool LaunchRootIsolate(
+      std::optional<std::string> dart_entrypoint,
+      std::optional<std::string> dart_entrypoint_library,
+      std::unique_ptr<IsolateConfiguration> isolate_configuration);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Clone the the runtime controller. Launching an isolate with a
+  ///             cloned runtime controller will use the same snapshots and
+  ///             copies all window data to the new instance. This is usually
+  ///             only used in the debug runtime mode to support the
+  ///             cold-restart scenario.
   ///
   /// @return     A clone of the existing runtime controller.
   ///
@@ -428,29 +457,20 @@ class RuntimeController : public PlatformConfigurationClient {
   tonic::DartErrorHandleType GetLastError();
 
   //----------------------------------------------------------------------------
-  /// @brief      Get a weak pointer to the root Dart isolate. This isolate may
-  ///             only be locked on the UI task runner. Callers use this
-  ///             accessor to transition to the root isolate to the running
-  ///             phase. Note that it might take times if the isolate is not yet
-  ///             created, which should be done in a subsequence task after
-  ///             constructing `RuntimeController`, or it should get a quick
-  ///             return otherwise.
+  /// @brief      Get the service ID of the root isolate if the root isolate is
+  ///             running.
   ///
-  /// @return     The root isolate reference.
+  /// @return     The root isolate service id.
   ///
-  std::weak_ptr<DartIsolate> GetRootIsolate();
+  std::optional<std::string> GetRootIsolateServiceID() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Get the return code specified by the root isolate (if one is
   ///             present).
   ///
-  /// @bug        Change this method to return `std::optional<uint32_t>`
-  ///             instead.
+  /// @return     The root isolate return code if the isolate has specified one.
   ///
-  /// @return     The root isolate return code. The first argument in the pair
-  ///             indicates if one is specified by the root isolate.
-  ///
-  std::pair<bool, uint32_t> GetRootIsolateReturnCode();
+  std::optional<uint32_t> GetRootIsolateReturnCode();
 
  protected:
   /// Constructor for Mocks.
@@ -489,11 +509,10 @@ class RuntimeController : public PlatformConfigurationClient {
   // `RuntimeController`, be careful to use it directly while it might have not
   // been created yet. Call `GetRootIsolate()` instead which guarantees that.
   std::weak_ptr<DartIsolate> root_isolate_;
-  std::pair<bool, uint32_t> root_isolate_return_code_ = {false, 0};
+  std::optional<uint32_t> root_isolate_return_code_;
   const fml::closure isolate_create_callback_;
   const fml::closure isolate_shutdown_callback_;
   std::shared_ptr<const fml::Mapping> persistent_isolate_data_;
-  fml::WeakPtrFactory<RuntimeController> weak_factory_;
 
   PlatformConfiguration* GetPlatformConfigurationIfAvailable();
 
@@ -530,6 +549,16 @@ class RuntimeController : public PlatformConfigurationClient {
   // |PlatformConfigurationClient|
   std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocale(
       const std::vector<std::string>& supported_locale_data) override;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Get a weak pointer to the root Dart isolate. This isolate may
+  ///             only be locked on the UI task runner. Callers use this
+  ///             accessor to transition to the root isolate to the running
+  ///             phase.
+  ///
+  /// @return     The root isolate reference.
+  ///
+  std::weak_ptr<DartIsolate> GetRootIsolate();
 
   FML_DISALLOW_COPY_AND_ASSIGN(RuntimeController);
 };

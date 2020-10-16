@@ -139,7 +139,7 @@ source_set("fml") {
       "platform/darwin/string_range_sanitization.mm",
     ]
 
-    libs += [ "Foundation.framework" ]
+    frameworks = [ "Foundation.framework" ]
   }
 
   if (is_android) {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "filesystem/file.h"
+#include "tonic/filesystem/filesystem/file.h"
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -23,8 +23,8 @@
 typedef SSIZE_T ssize_t;
 #endif
 
-#include "filesystem/eintr_wrapper.h"
-#include "filesystem/portable_unistd.h"
+#include "tonic/filesystem/filesystem/eintr_wrapper.h"
+#include "tonic/filesystem/filesystem/portable_unistd.h"
 
 namespace filesystem {
 namespace {

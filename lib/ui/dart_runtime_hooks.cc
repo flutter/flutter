@@ -1,6 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// FLUTTER_NOLINT
 
 #include "flutter/lib/ui/dart_runtime_hooks.h"
 
@@ -62,17 +63,19 @@ void DartRuntimeHooks::RegisterNatives(tonic::DartLibraryNatives* natives) {
 
 static void PropagateIfError(Dart_Handle result) {
   if (Dart_IsError(result)) {
+    FML_LOG(ERROR) << "Dart Error: " << ::Dart_GetError(result);
     Dart_PropagateError(result);
   }
 }
 
-static Dart_Handle GetFunction(Dart_Handle builtin_library, const char* name) {
+static Dart_Handle InvokeFunction(Dart_Handle builtin_library,
+                                  const char* name) {
   Dart_Handle getter_name = ToDart(name);
   return Dart_Invoke(builtin_library, getter_name, 0, nullptr);
 }
 
 static void InitDartInternal(Dart_Handle builtin_library, bool is_ui_isolate) {
-  Dart_Handle print = GetFunction(builtin_library, "_getPrintClosure");
+  Dart_Handle print = InvokeFunction(builtin_library, "_getPrintClosure");
 
   Dart_Handle internal_library = Dart_LookupLibrary(ToDart("dart:_internal"));
 
@@ -112,7 +115,7 @@ static void InitDartAsync(Dart_Handle builtin_library, bool is_ui_isolate) {
   Dart_Handle schedule_microtask;
   if (is_ui_isolate) {
     schedule_microtask =
-        GetFunction(builtin_library, "_getScheduleMicrotaskClosure");
+        InvokeFunction(builtin_library, "_getScheduleMicrotaskClosure");
   } else {
     Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
     Dart_Handle method_name =
@@ -130,21 +133,24 @@ static void InitDartIO(Dart_Handle builtin_library,
                        const std::string& script_uri) {
   Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
   Dart_Handle platform_type =
-      Dart_GetType(io_lib, ToDart("_Platform"), 0, nullptr);
+      Dart_GetNonNullableType(io_lib, ToDart("_Platform"), 0, nullptr);
   if (!script_uri.empty()) {
     Dart_Handle result = Dart_SetField(platform_type, ToDart("_nativeScript"),
                                        ToDart(script_uri));
     PropagateIfError(result);
   }
-  Dart_Handle locale_closure =
-      GetFunction(builtin_library, "_getLocaleClosure");
+  // typedef _LocaleClosure = String Function();
+  Dart_Handle /* _LocaleClosure? */ locale_closure =
+      InvokeFunction(builtin_library, "_getLocaleClosure");
+  PropagateIfError(locale_closure);
+  //   static String Function()? _localeClosure;
   Dart_Handle result =
       Dart_SetField(platform_type, ToDart("_localeClosure"), locale_closure);
   PropagateIfError(result);
 
   // Register dart:io service extensions used for network profiling.
   Dart_Handle network_profiling_type =
-      Dart_GetType(io_lib, ToDart("_NetworkProfiling"), 0, nullptr);
+      Dart_GetNonNullableType(io_lib, ToDart("_NetworkProfiling"), 0, nullptr);
   PropagateIfError(network_profiling_type);
   result = Dart_Invoke(network_profiling_type,
                        ToDart("_registerServiceExtension"), 0, nullptr);

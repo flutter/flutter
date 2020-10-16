@@ -53,6 +53,8 @@ source_set("runtime") {
     "dart_vm_lifecycle.h",
     "embedder_resources.cc",
     "embedder_resources.h",
+    "isolate_configuration.cc",
+    "isolate_configuration.h",
     "platform_data.cc",
     "platform_data.h",
     "ptrace_check.h",
@@ -112,6 +114,7 @@ if (enable_unittests) {
       "dart_lifecycle_unittests.cc",
       "dart_service_isolate_unittests.cc",
       "dart_vm_unittests.cc",
+      "type_conversions_unittests.cc",
     ]
 
     public_configs = [ "//flutter:export_dynamic_symbols" ]

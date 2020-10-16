@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/common/isolate_configuration.h"
+#include "flutter/runtime/isolate_configuration.h"
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/runtime/dart_vm.h"
@@ -32,6 +32,11 @@ class AppSnapshotIsolateConfiguration final : public IsolateConfiguration {
     return isolate.PrepareForRunningFromPrecompiledCode();
   }
 
+  // |IsolateConfiguration|
+  bool IsNullSafetyEnabled(const DartSnapshot& snapshot) override {
+    return snapshot.IsNullSafetyEnabled(nullptr);
+  }
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(AppSnapshotIsolateConfiguration);
 };
@@ -49,6 +54,11 @@ class KernelIsolateConfiguration : public IsolateConfiguration {
     return isolate.PrepareForRunningFromKernel(std::move(kernel_));
   }
 
+  // |IsolateConfiguration|
+  bool IsNullSafetyEnabled(const DartSnapshot& snapshot) override {
+    return snapshot.IsNullSafetyEnabled(kernel_.get());
+  }
+
  private:
   std::unique_ptr<const fml::Mapping> kernel_;
 
@@ -60,7 +70,12 @@ class KernelListIsolateConfiguration final : public IsolateConfiguration {
   KernelListIsolateConfiguration(
       std::vector<std::future<std::unique_ptr<const fml::Mapping>>>
           kernel_pieces)
-      : kernel_pieces_(std::move(kernel_pieces)) {}
+      : kernel_piece_futures_(std::move(kernel_pieces)) {
+    if (kernel_piece_futures_.empty()) {
+      FML_LOG(ERROR) << "Attempted to create kernel list configuration without "
+                        "any kernel blobs.";
+    }
+  }
 
   // |IsolateConfiguration|
   bool DoPrepareIsolate(DartIsolate& isolate) override {
@@ -68,11 +83,22 @@ class KernelListIsolateConfiguration final : public IsolateConfiguration {
       return false;
     }
 
-    for (size_t i = 0; i < kernel_pieces_.size(); i++) {
-      bool last_piece = i + 1 == kernel_pieces_.size();
+    ResolveKernelPiecesIfNecessary();
 
-      if (!isolate.PrepareForRunningFromKernel(kernel_pieces_[i].get(),
-                                               last_piece)) {
+    if (resolved_kernel_pieces_.empty()) {
+      FML_DLOG(ERROR) << "No kernel pieces provided to prepare this isolate.";
+      return false;
+    }
+
+    for (size_t i = 0; i < resolved_kernel_pieces_.size(); i++) {
+      if (!resolved_kernel_pieces_[i]) {
+        FML_DLOG(ERROR) << "This kernel list isolate configuration was already "
+                           "used to prepare an isolate.";
+        return false;
+      }
+      const bool last_piece = i + 1 == resolved_kernel_pieces_.size();
+      if (!isolate.PrepareForRunningFromKernel(
+              std::move(resolved_kernel_pieces_[i]), last_piece)) {
         return false;
       }
     }
@@ -80,8 +106,36 @@ class KernelListIsolateConfiguration final : public IsolateConfiguration {
     return true;
   }
 
+  // |IsolateConfiguration|
+  bool IsNullSafetyEnabled(const DartSnapshot& snapshot) override {
+    ResolveKernelPiecesIfNecessary();
+    const auto kernel = resolved_kernel_pieces_.empty()
+                            ? nullptr
+                            : resolved_kernel_pieces_.front().get();
+    return snapshot.IsNullSafetyEnabled(kernel);
+  }
+
+  // This must be call as late as possible before accessing any of the kernel
+  // pieces. This will delay blocking on the futures for as long as possible. So
+  // far, only Fuchsia depends on this optimization and only on the non-AOT
+  // configs.
+  void ResolveKernelPiecesIfNecessary() {
+    if (resolved_kernel_pieces_.size() == kernel_piece_futures_.size()) {
+      return;
+    }
+
+    resolved_kernel_pieces_.clear();
+    for (auto& piece : kernel_piece_futures_) {
+      // The get() call will xfer the unique pointer out and leave an empty
+      // future in the original vector.
+      resolved_kernel_pieces_.emplace_back(piece.get());
+    }
+  }
+
  private:
-  std::vector<std::future<std::unique_ptr<const fml::Mapping>>> kernel_pieces_;
+  std::vector<std::future<std::unique_ptr<const fml::Mapping>>>
+      kernel_piece_futures_;
+  std::vector<std::unique_ptr<const fml::Mapping>> resolved_kernel_pieces_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(KernelListIsolateConfiguration);
 };
@@ -150,10 +204,6 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
     return CreateForAppSnapshot();
   }
 
-  if (!asset_manager) {
-    return nullptr;
-  }
-
   if (settings.application_kernels) {
     return CreateForKernelList(settings.application_kernels());
   }
@@ -165,7 +215,13 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
     return nullptr;
   }
 
-  // Running from kernel snapshot.
+  if (!asset_manager) {
+    FML_DLOG(ERROR) << "No asset manager specified when attempting to create "
+                       "isolate configuration.";
+    return nullptr;
+  }
+
+  // Running from kernel snapshot. Requires asset manager.
   {
     std::unique_ptr<fml::Mapping> kernel =
         asset_manager->GetAsMapping(settings.application_kernel_asset);
@@ -174,7 +230,14 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
     }
   }
 
-  // Running from kernel divided into several pieces (for sharing).
+  // Running from kernel divided into several pieces (for sharing). Requires
+  // asset manager and io worker.
+
+  if (!io_worker) {
+    FML_DLOG(ERROR) << "No IO worker specified to load kernel pieces.";
+    return nullptr;
+  }
+
   {
     std::unique_ptr<fml::Mapping> kernel_list =
         asset_manager->GetAsMapping(settings.application_kernel_list_asset);
@@ -206,6 +269,10 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::CreateForKernelList(
     std::vector<std::unique_ptr<const fml::Mapping>> kernel_pieces) {
   std::vector<std::future<std::unique_ptr<const fml::Mapping>>> pieces;
   for (auto& piece : kernel_pieces) {
+    if (!piece) {
+      FML_DLOG(ERROR) << "Invalid kernel piece.";
+      continue;
+    }
     std::promise<std::unique_ptr<const fml::Mapping>> promise;
     pieces.push_back(promise.get_future());
     promise.set_value(std::move(piece));

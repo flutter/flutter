@@ -139,6 +139,9 @@ class DartSnapshot : public fml::RefCountedThreadSafe<DartSnapshot> {
   ///
   const uint8_t* GetInstructionsMapping() const;
 
+  bool IsNullSafetyEnabled(
+      const fml::Mapping* application_kernel_mapping) const;
+
  private:
   std::shared_ptr<const fml::Mapping> data_;
   std::shared_ptr<const fml::Mapping> instructions_;

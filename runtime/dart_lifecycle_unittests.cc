@@ -1,6 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// FLUTTER_NOLINT
 
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/paths.h"
@@ -8,6 +9,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
+#include "flutter/runtime/isolate_configuration.h"
 #include "flutter/testing/fixture_test.h"
 
 namespace flutter {
@@ -50,57 +52,34 @@ static std::shared_ptr<DartIsolate> CreateAndRunRootIsolate(
   FML_CHECK(entrypoint.size() > 0);
   TaskRunners runners("io.flutter.test", task_runner, task_runner, task_runner,
                       task_runner);
-  auto isolate_weak = DartIsolate::CreateRootIsolate(
-      vm.GetSettings(),                   // settings
-      vm.GetIsolateSnapshot(),            // isolate_snapshot
-      runners,                            // task_runners
-      {},                                 // window
-      {},                                 // snapshot_delegate
-      {},                                 // hint_freed_delegate
-      {},                                 // io_manager
-      {},                                 // unref_queue
-      {},                                 // image_decoder
-      "main.dart",                        // advisory_script_uri
-      entrypoint.c_str(),                 // advisory_script_entrypoint
-      nullptr,                            // flags
-      settings.isolate_create_callback,   // isolate create callback
-      settings.isolate_shutdown_callback  // isolate shutdown callback
-  );
 
-  auto isolate = isolate_weak.lock();
+  auto isolate_configuration =
+      IsolateConfiguration::InferFromSettings(settings);
+
+  auto isolate =
+      DartIsolate::CreateRunningRootIsolate(
+          vm.GetSettings(),                    // settings
+          vm.GetIsolateSnapshot(),             // isolate_snapshot
+          runners,                             // task_runners
+          {},                                  // window
+          {},                                  // snapshot_delegate
+          {},                                  // hint_freed_delegate
+          {},                                  // io_manager
+          {},                                  // unref_queue
+          {},                                  // image_decoder
+          "main.dart",                         // advisory_script_uri
+          entrypoint.c_str(),                  // advisory_script_entrypoint
+          DartIsolate::Flags{},                // flags
+          settings.isolate_create_callback,    // isolate create callback
+          settings.isolate_shutdown_callback,  // isolate shutdown callback,
+          entrypoint,                          // dart entrypoint
+          std::nullopt,                        // dart entrypoint library
+          std::move(isolate_configuration)     // isolate configuration
+          )
+          .lock();
 
   if (!isolate) {
-    FML_LOG(ERROR) << "Could not create valid isolate.";
-    return nullptr;
-  }
-
-  if (DartVM::IsRunningPrecompiledCode()) {
-    if (!isolate->PrepareForRunningFromPrecompiledCode()) {
-      FML_LOG(ERROR)
-          << "Could not prepare to run the isolate from precompiled code.";
-      return nullptr;
-    }
-
-  } else {
-    if (!isolate->PrepareForRunningFromKernels(
-            settings.application_kernels())) {
-      FML_LOG(ERROR) << "Could not prepare isolate from application kernels.";
-      return nullptr;
-    }
-  }
-
-  if (isolate->GetPhase() != DartIsolate::Phase::Ready) {
-    FML_LOG(ERROR) << "Isolate was not ready.";
-    return nullptr;
-  }
-
-  if (!isolate->Run(entrypoint, {}, settings.root_isolate_create_callback)) {
-    FML_LOG(ERROR) << "Could not run entrypoint: " << entrypoint << ".";
-    return nullptr;
-  }
-
-  if (isolate->GetPhase() != DartIsolate::Phase::Running) {
-    FML_LOG(ERROR) << "Isolate was not Running.";
+    FML_LOG(ERROR) << "Could not launch the root isolate.";
     return nullptr;
   }
 

@@ -12,7 +12,7 @@ executable("font-subset") {
 
   libs = []
   if (is_mac) {
-    libs += [
+    frameworks = [
       "Foundation.framework",
       "CoreGraphics.framework",
       "CoreText.framework",
