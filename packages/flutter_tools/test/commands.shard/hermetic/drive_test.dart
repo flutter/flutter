@@ -45,13 +45,13 @@ void main() {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       setExitFunctionForTests();
-      appStarter = (DriveCommand command, Uri webUri) {
+      appStarter = (DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) {
         throw 'Unexpected call to appStarter';
       };
       testRunner = (List<String> testArgs, Map<String, String> environment) {
         throw 'Unexpected call to testRunner';
       };
-      appStopper = (DriveCommand command) {
+      appStopper = (DriveCommand command, ApplicationPackage package) {
         throw 'Unexpected call to appStopper';
       };
       command.applicationPackages = FakeApplicationPackageFactory();
@@ -99,7 +99,7 @@ void main() {
 
     testUsingContext('returns 1 when app fails to run', () async {
       testDeviceManager.addDevice(MockDevice());
-      appStarter = expectAsync2((DriveCommand command, Uri webUri) async => null);
+      appStarter = expectAsync4((DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) async => null);
 
       final String testApp = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -201,7 +201,7 @@ void main() {
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-      appStarter = expectAsync2((DriveCommand command, Uri webUri) async {
+      appStarter = expectAsync4((DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) async {
         return LaunchResult.succeeded();
       });
       testRunner = expectAsync2((List<String> testArgs, Map<String, String> environment) async {
@@ -211,7 +211,7 @@ void main() {
           'VM_SERVICE_URL': 'null',
         });
       });
-      appStopper = expectAsync1((DriveCommand command) async {
+      appStopper = expectAsync2((DriveCommand command, ApplicationPackage package) async {
         return true;
       });
 
@@ -242,13 +242,13 @@ void main() {
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-      appStarter = expectAsync2((DriveCommand command, Uri webUri) async {
+      appStarter = expectAsync4((DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) async {
         return LaunchResult.succeeded();
       });
       testRunner = (List<String> testArgs, Map<String, String> environment) async {
         throwToolExit(null, exitCode: 123);
       };
-      appStopper = expectAsync1((DriveCommand command) async {
+      appStopper = expectAsync2((DriveCommand command, ApplicationPackage package) async {
         return true;
       });
 
@@ -281,7 +281,7 @@ void main() {
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-      appStarter = expectAsync2((DriveCommand command, Uri webUri) async {
+      appStarter = expectAsync4((DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) async {
         return LaunchResult.succeeded();
       });
       testRunner = expectAsync2((List<String> testArgs, Map<String, String> environment) async {
@@ -294,7 +294,7 @@ void main() {
           ]
         );
       });
-      appStopper = expectAsync1((DriveCommand command) async {
+      appStopper = expectAsync2((DriveCommand command, ApplicationPackage package) async {
         return true;
       });
 
@@ -324,7 +324,7 @@ void main() {
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-      appStarter = expectAsync2((DriveCommand command, Uri webUri) async {
+      appStarter = expectAsync4((DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) async {
         return LaunchResult.succeeded();
       });
       testRunner = expectAsync2((List<String> testArgs, Map<String, String> environment) async {
@@ -336,7 +336,7 @@ void main() {
           ]
         );
       });
-      appStopper = expectAsync1((DriveCommand command) async {
+      appStopper = expectAsync2((DriveCommand command, ApplicationPackage package) async {
         return true;
       });
 
@@ -493,8 +493,8 @@ void main() {
         testRunner = (List<String> testArgs, Map<String, String> environment) async {
           throwToolExit(null, exitCode: 123);
         };
-        appStopper = expectAsync1(
-            (DriveCommand command) async {
+        appStopper = expectAsync2(
+            (DriveCommand command, ApplicationPackage package) async {
               return true;
             },
             count: 2,
@@ -603,8 +603,8 @@ void main() {
         testRunner = (List<String> testArgs, Map<String, String> environment) async {
           throwToolExit(null, exitCode: 123);
         };
-        appStopper = expectAsync1(
-          (DriveCommand command) async {
+        appStopper = expectAsync2(
+          (DriveCommand command, ApplicationPackage package) async {
             return true;
           },
           count: 2,
