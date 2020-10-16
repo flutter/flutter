@@ -988,7 +988,7 @@ void main() {
 
   group('extension commands', () {
     int invokes = 0;
-    final VoidCallback mockCallback = () => invokes++;
+    final VoidCallback stubCallback = () => invokes++;
 
     final Widget debugTree = Directionality(
       textDirection: TextDirection.ltr,
@@ -998,7 +998,7 @@ void main() {
             FlatButton(
               child: const Text('Whatever'),
               key: const ValueKey<String>('Button'),
-              onPressed: mockCallback,
+              onPressed: stubCallback,
             ),
           ],
         ),
@@ -1049,7 +1049,6 @@ void main() {
       await tester.pumpWidget(debugTree);
 
       const int times = 10;
-      invokes = 0;
       final StubCommandResult result = await invokeCommand(ByValueKey('Button'), times);
       expect(result.resultParam, 'stub response');
       expect(invokes, times);
