@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/shell/platform/common/cpp/text_input_model.h"
 
@@ -39,22 +38,75 @@ void TextInputModel::SetText(const std::string& text) {
       utf16_converter;
   text_ = utf16_converter.from_bytes(text);
   selection_ = TextRange(0);
+  composing_range_ = TextRange(0);
 }
 
 bool TextInputModel::SetSelection(const TextRange& range) {
-  if (!text_range().Contains(range)) {
+  if (composing_ && !range.collapsed()) {
+    return false;
+  }
+  if (!editable_range().Contains(range)) {
     return false;
   }
   selection_ = range;
   return true;
 }
 
+bool TextInputModel::SetComposingRange(const TextRange& range,
+                                       size_t cursor_offset) {
+  if (!composing_ || !text_range().Contains(range)) {
+    return false;
+  }
+  composing_range_ = range;
+  selection_ = TextRange(range.start() + cursor_offset);
+  return true;
+}
+
+void TextInputModel::BeginComposing() {
+  composing_ = true;
+  composing_range_ = TextRange(selection_.start());
+}
+
+void TextInputModel::UpdateComposingText(const std::string& composing_text) {
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
+      utf16_converter;
+  std::u16string text = utf16_converter.from_bytes(composing_text);
+
+  // Preserve selection if we get a no-op update to the composing region.
+  if (text.length() == 0 && composing_range_.collapsed()) {
+    return;
+  }
+  DeleteSelected();
+  text_.replace(composing_range_.start(), composing_range_.length(), text);
+  composing_range_.set_end(composing_range_.start() + text.length());
+  selection_ = TextRange(composing_range_.end());
+}
+
+void TextInputModel::CommitComposing() {
+  // Preserve selection if no composing text was entered.
+  if (composing_range_.collapsed()) {
+    return;
+  }
+  composing_range_ = TextRange(composing_range_.end());
+  selection_ = composing_range_;
+}
+
+void TextInputModel::EndComposing() {
+  composing_ = false;
+  composing_range_ = TextRange(0);
+}
+
 bool TextInputModel::DeleteSelected() {
   if (selection_.collapsed()) {
     return false;
   }
-  text_.erase(selection_.start(), selection_.length());
-  selection_ = TextRange(selection_.start());
+  size_t start = selection_.start();
+  text_.erase(start, selection_.length());
+  selection_ = TextRange(start);
+  if (composing_) {
+    // This occurs only immediately after composing has begun with a selection.
+    composing_range_ = selection_;
+  }
   return true;
 }
 
@@ -74,6 +126,12 @@ void TextInputModel::AddCodePoint(char32_t c) {
 
 void TextInputModel::AddText(const std::u16string& text) {
   DeleteSelected();
+  if (composing_) {
+    // Delete the current composing text, set the cursor to composing start.
+    text_.erase(composing_range_.start(), composing_range_.length());
+    selection_ = TextRange(composing_range_.start());
+    composing_range_.set_end(composing_range_.start() + text.length());
+  }
   size_t position = selection_.position();
   text_.insert(position, text);
   selection_ = TextRange(position + text.length());
@@ -89,12 +147,15 @@ bool TextInputModel::Backspace() {
   if (DeleteSelected()) {
     return true;
   }
-  // If there's no selection, delete the preceding codepoint.
+  // There is no selection. Delete the preceding codepoint.
   size_t position = selection_.position();
-  if (position != 0) {
+  if (position != editable_range().start()) {
     int count = IsTrailingSurrogate(text_.at(position - 1)) ? 2 : 1;
     text_.erase(position - count, count);
     selection_ = TextRange(position - count);
+    if (composing_) {
+      composing_range_.set_end(composing_range_.end() - count);
+    }
     return true;
   }
   return false;
@@ -104,36 +165,40 @@ bool TextInputModel::Delete() {
   if (DeleteSelected()) {
     return true;
   }
-  // If there's no selection, delete the preceding codepoint.
+  // There is no selection. Delete the preceding codepoint.
   size_t position = selection_.position();
-  if (position != text_.length()) {
+  if (position < editable_range().end()) {
     int count = IsLeadingSurrogate(text_.at(position)) ? 2 : 1;
     text_.erase(position, count);
+    if (composing_) {
+      composing_range_.set_end(composing_range_.end() - count);
+    }
     return true;
   }
   return false;
 }
 
 bool TextInputModel::DeleteSurrounding(int offset_from_cursor, int count) {
+  size_t max_pos = editable_range().end();
   size_t start = selection_.extent();
   if (offset_from_cursor < 0) {
     for (int i = 0; i < -offset_from_cursor; i++) {
       // If requested start is before the available text then reduce the
       // number of characters to delete.
-      if (start == 0) {
+      if (start == editable_range().start()) {
         count = i;
         break;
       }
       start -= IsTrailingSurrogate(text_.at(start - 1)) ? 2 : 1;
     }
   } else {
-    for (int i = 0; i < offset_from_cursor && start != text_.length(); i++) {
+    for (int i = 0; i < offset_from_cursor && start != max_pos; i++) {
       start += IsLeadingSurrogate(text_.at(start)) ? 2 : 1;
     }
   }
 
   auto end = start;
-  for (int i = 0; i < count && end != text_.length(); i++) {
+  for (int i = 0; i < count && end != max_pos; i++) {
     end += IsLeadingSurrogate(text_.at(start)) ? 2 : 1;
   }
 
@@ -141,25 +206,33 @@ bool TextInputModel::DeleteSurrounding(int offset_from_cursor, int count) {
     return false;
   }
 
-  text_.erase(start, end - start);
+  auto deleted_length = end - start;
+  text_.erase(start, deleted_length);
 
   // Cursor moves only if deleted area is before it.
   selection_ = TextRange(offset_from_cursor <= 0 ? start : selection_.start());
 
+  // Adjust composing range.
+  if (composing_) {
+    composing_range_.set_end(composing_range_.end() - deleted_length);
+  }
   return true;
 }
 
 bool TextInputModel::MoveCursorToBeginning() {
-  if (selection_.collapsed() && selection_.position() == 0)
+  size_t min_pos = editable_range().start();
+  if (selection_.collapsed() && selection_.position() == min_pos) {
     return false;
-  selection_ = TextRange(0);
+  }
+  selection_ = TextRange(min_pos);
   return true;
 }
 
 bool TextInputModel::MoveCursorToEnd() {
-  size_t max_pos = text_.length();
-  if (selection_.collapsed() && selection_.position() == max_pos)
+  size_t max_pos = editable_range().end();
+  if (selection_.collapsed() && selection_.position() == max_pos) {
     return false;
+  }
   selection_ = TextRange(max_pos);
   return true;
 }
@@ -172,7 +245,7 @@ bool TextInputModel::MoveCursorForward() {
   }
   // Otherwise, move the cursor forward.
   size_t position = selection_.position();
-  if (position != text_.length()) {
+  if (position != editable_range().end()) {
     int count = IsLeadingSurrogate(text_.at(position)) ? 2 : 1;
     selection_ = TextRange(position + count);
     return true;
@@ -188,7 +261,7 @@ bool TextInputModel::MoveCursorBack() {
   }
   // Otherwise, move the cursor backward.
   size_t position = selection_.position();
-  if (position != 0) {
+  if (position != editable_range().start()) {
     int count = IsTrailingSurrogate(text_.at(position - 1)) ? 2 : 1;
     selection_ = TextRange(position - count);
     return true;
