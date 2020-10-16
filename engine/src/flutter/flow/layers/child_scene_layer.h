@@ -26,7 +26,7 @@ class ChildSceneLayer : public Layer {
 
   void Paint(PaintContext& context) const override;
 
-  void UpdateScene(SceneUpdateContext& context) override;
+  void UpdateScene(std::shared_ptr<SceneUpdateContext> context) override;
 
  private:
   zx_koid_t layer_id_ = ZX_KOID_INVALID;
