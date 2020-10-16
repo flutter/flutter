@@ -448,7 +448,7 @@ class SwitchListTile extends StatelessWidget {
   final ShapeBorder? shape;
 
   /// The color of the tile if it's selected.
-  /// 
+  ///
   final Color? selectedTileColor;
 
   @override
