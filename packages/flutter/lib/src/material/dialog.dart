@@ -51,7 +51,7 @@ class Dialog extends StatelessWidget {
     this.shape,
     this.child,
   }) : assert(clipBehavior != null),
-       super(key: key);
+        super(key: key);
 
   /// {@template flutter.material.dialog.backgroundColor}
   /// The background color of the surface of this [Dialog].
@@ -122,7 +122,7 @@ class Dialog extends StatelessWidget {
   final Widget? child;
 
   static const RoundedRectangleBorder _defaultDialogShape =
-    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+  RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
   static const double _defaultElevation = 24.0;
 
   @override
@@ -243,9 +243,10 @@ class AlertDialog extends StatelessWidget {
     this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.contentTextStyle,
     this.actions,
-    this.actionsPadding = EdgeInsets.zero,
-    this.actionsOverflowDirection,
-    this.actionsOverflowButtonSpacing,
+    this.actionsPadding = const EdgeInsets.symmetric(horizontal: 8),
+    this.actionsOverflowDirection = VerticalDirection.down,
+    this.actionsOverflowButtonSpacing = 0,
+    this.actionsButtonSpacing = 8,
     this.buttonPadding,
     this.backgroundColor,
     this.elevation,
@@ -255,8 +256,8 @@ class AlertDialog extends StatelessWidget {
     this.shape,
     this.scrollable = false,
   }) : assert(contentPadding != null),
-       assert(clipBehavior != null),
-       super(key: key);
+        assert(clipBehavior != null),
+        super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -311,13 +312,13 @@ class AlertDialog extends StatelessWidget {
   /// Typically this is a list of [TextButton] widgets. It is recommended to
   /// set the [Text.textAlign] to [TextAlign.end] for the [Text] within the
   /// [TextButton], so that buttons whose labels wrap to an extra line align
-  /// with the overall [ButtonBar]'s alignment within the dialog.
+  /// with the overall [OverflowBar]'s alignment within the dialog.
   ///
-  /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
+  /// These widgets will be wrapped in a [OverflowBar], which introduces 8 pixels
   /// of padding on each side.
   ///
   /// If the [title] is not null but the [content] _is_ null, then an extra 20
-  /// pixels of padding is added above the [ButtonBar] to separate the [title]
+  /// pixels of padding is added above the [OverflowBar] to separate the [title]
   /// from the [actions].
   final List<Widget>? actions;
 
@@ -327,9 +328,7 @@ class AlertDialog extends StatelessWidget {
   /// and the edges of the dialog.
   ///
   /// If are no [actions], then no padding will be included. The padding around
-  /// the button bar defaults to zero. It is also important to note that
-  /// [buttonPadding] may contribute to the padding on the edges of [actions] as
-  /// well.
+  /// the button bar defaults to zero.
   ///
   /// {@tool snippet}
   /// This is an example of a set of actions aligned with the content widget.
@@ -348,7 +347,7 @@ class AlertDialog extends StatelessWidget {
   ///
   /// See also:
   ///
-  /// * [ButtonBar], which [actions] configures to lay itself out.
+  /// * [OverflowBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry actionsPadding;
 
   /// The vertical direction of [actions] if the children overflow
@@ -362,14 +361,12 @@ class AlertDialog extends StatelessWidget {
   /// property is set to [VerticalDirection.up], since it "starts" at the
   /// bottom and "ends" at the top.
   ///
-  /// If null then it will use the surrounding
-  /// [ButtonBarThemeData.overflowDirection]. If that is null, it will
-  /// default to [VerticalDirection.down].
+  /// Defaults to [VerticalDirection.down].
   ///
   /// See also:
   ///
-  /// * [ButtonBar], which [actions] configures to lay itself out.
-  final VerticalDirection? actionsOverflowDirection;
+  /// * [OverflowBar], which [actions] configures to lay itself out.
+  final VerticalDirection actionsOverflowDirection;
 
   /// The spacing between [actions] when the button bar overflows.
   ///
@@ -383,9 +380,19 @@ class AlertDialog extends StatelessWidget {
   /// might visually be 36px in height, it might still take up to
   /// 48px vertically.
   ///
-  /// If null then no spacing will be added in between buttons in
-  /// an overflow state.
-  final double? actionsOverflowButtonSpacing;
+  /// Defaults to 0.0.
+  ///
+  final double actionsOverflowButtonSpacing;
+
+  /// The spacing between [actions] when the button bar does not overflow.
+  ///
+  /// If the widgets in [actions] fit into a single row, they are
+  /// arranged into a row. This parameter provides additional
+  /// horizontal space in between buttons when it does not overflow.
+  ///
+  /// Defaults to 8.0.
+  ///
+  final double actionsButtonSpacing;
 
   /// The padding that surrounds each button in [actions].
   ///
@@ -399,6 +406,9 @@ class AlertDialog extends StatelessWidget {
   /// See also:
   ///
   /// * [ButtonBar], which [actions] configures to lay itself out.
+  @Deprecated(
+      'Use actionsButtonSpacing.'
+  )
   final EdgeInsetsGeometry? buttonPadding;
 
   /// {@macro flutter.material.dialog.backgroundColor}
@@ -440,11 +450,11 @@ class AlertDialog extends StatelessWidget {
   /// allowing all overflowed content to be visible while still showing the
   /// button bar.
   @Deprecated(
-    'Set scrollable to `true`. This parameter will be removed and '
-    'was introduced to migrate AlertDialog to be scrollable by '
-    'default. For more information, see '
-    'https://flutter.dev/docs/release/breaking-changes/scrollable_alert_dialog. '
-    'This feature was deprecated after v1.13.2.'
+      'Set scrollable to `true`. This parameter will be removed and '
+          'was introduced to migrate AlertDialog to be scrollable by '
+          'default. For more information, see '
+          'https://flutter.dev/docs/release/breaking-changes/scrollable_alert_dialog. '
+          'This feature was deprecated after v1.13.2.'
   )
   final bool scrollable;
 
@@ -513,12 +523,14 @@ class AlertDialog extends StatelessWidget {
 
 
     if (actions != null) {
-      actionsWidget = Padding(
+      actionsWidget = Container(
+        alignment: AlignmentDirectional.centerEnd,
+        constraints: const BoxConstraints(minHeight: 52.0),
         padding: actionsPadding,
-        child: ButtonBar(
-          buttonPadding: buttonPadding,
+        child: OverflowBar(
+          spacing: actionsButtonSpacing,
+          overflowSpacing: actionsOverflowButtonSpacing,
           overflowDirection: actionsOverflowDirection,
-          overflowButtonSpacing: actionsOverflowButtonSpacing,
           children: actions!,
         ),
       );
@@ -735,8 +747,8 @@ class SimpleDialog extends StatelessWidget {
     this.semanticLabel,
     this.shape,
   }) : assert(titlePadding != null),
-       assert(contentPadding != null),
-       super(key: key);
+        assert(contentPadding != null),
+        super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -964,10 +976,10 @@ Future<T> showDialog<T>({
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   @Deprecated(
-    'Instead of using the "child" argument, return the child from a closure '
-    'provided to the "builder" argument. This will ensure that the BuildContext '
-    'is appropriate for widgets built in the dialog. '
-    'This feature was deprecated after v0.2.3.'
+      'Instead of using the "child" argument, return the child from a closure '
+          'provided to the "builder" argument. This will ensure that the BuildContext '
+          'is appropriate for widgets built in the dialog. '
+          'This feature was deprecated after v0.2.3.'
   )
   Widget? child,
 }) {
@@ -983,11 +995,11 @@ Future<T> showDialog<T>({
     pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
       final Widget pageChild = child ?? Builder(builder: builder!);
       Widget dialog = Builder(
-        builder: (BuildContext context) {
-          return theme != null
-            ? Theme(data: theme, child: pageChild)
-            : pageChild;
-        }
+          builder: (BuildContext context) {
+            return theme != null
+                ? Theme(data: theme, child: pageChild)
+                : pageChild;
+          }
       );
       if (useSafeArea) {
         dialog = SafeArea(child: dialog);
