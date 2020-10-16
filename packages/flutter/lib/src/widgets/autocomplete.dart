@@ -208,7 +208,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                       onSelected(option);
 ///                     },
 ///                     child: ListTile(
-///                       title: Text(option),
+///                       title: Text(_displayStringForOption(option)),
 ///                     ),
 ///                   );
 ///                 },
