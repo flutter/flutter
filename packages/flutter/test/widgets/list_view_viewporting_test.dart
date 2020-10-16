@@ -509,7 +509,7 @@ void main() {
               itemBuilder: (_, int i) => Container(
                 height: 200.0,
                 width: 200.0,
-                color: i % 2 == 0 ? Colors.black : Colors.red,
+                color: i.isEven ? Colors.black : Colors.red,
               ),
             ),
           ),
