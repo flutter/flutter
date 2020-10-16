@@ -300,8 +300,10 @@ class CupertinoSearchTextField extends StatelessWidget {
         child: IconTheme(child: suffixIcon, data: iconThemeData),
         onTap: onSuffixTap ??
             () {
-              controller?.text = '';
-              onChanged?.call('');
+              if (controller?.text != '') {
+                controller?.text = '';
+                onChanged?.call('');
+              }
             },
       ),
       padding: suffixInsets,
