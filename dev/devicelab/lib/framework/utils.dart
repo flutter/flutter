@@ -282,6 +282,7 @@ Future<Process> startProcess(
       + (environment != null ? ' with environment $environment' : ''));
   environment ??= <String, String>{};
   environment['BOT'] = isBot ? 'true' : 'false';
+  environment['FLUTTER_IOS_SCREENSHOT_ON_CONNECTION_FAILURE'] = 'true';
   final Process process = await _processManager.start(
     <String>[executable, ...arguments],
     environment: environment,
@@ -447,7 +448,7 @@ Future<int> flutter(String command, {
 }) {
   final List<String> args = flutterCommandArgs(command, options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, environment: <String, String>{...?environment, 'FLUTTER_IOS_SCREENSHOT_ON_CONNECTION_FAILURE': 'true'});
+    canFail: canFail, environment: environment);
 }
 
 /// Runs a `flutter` command and returns the standard output as a string.
