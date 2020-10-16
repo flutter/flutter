@@ -119,7 +119,6 @@ class GenerateLocalizationsTarget extends Target {
       logger: environment.logger,
       fileSystem: environment.fileSystem,
     );
-
     generateLocalizations(
       logger: environment.logger,
       options: options,
@@ -197,7 +196,7 @@ class LocalizationOptions {
 
   /// The `--header-file` argument.
   ///
-  /// A file containing the header to preprend to the generated
+  /// A file containing the header to prepend to the generated
   /// Dart localizations.
   final Uri headerFile;
 

@@ -261,21 +261,21 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       );
     }
 
-    final double? resolvedElevation = resolve<double>((ButtonStyle? style) => style?.elevation);
-    final TextStyle? resolvedTextStyle = resolve<TextStyle>((ButtonStyle? style) => style?.textStyle);
-    Color? resolvedBackgroundColor = resolve<Color>((ButtonStyle? style) => style?.backgroundColor);
-    final Color? resolvedForegroundColor = resolve<Color>((ButtonStyle? style) => style?.foregroundColor);
-    final Color? resolvedShadowColor = resolve<Color>((ButtonStyle? style) => style?.shadowColor);
-    final EdgeInsetsGeometry? resolvedPadding = resolve<EdgeInsetsGeometry>((ButtonStyle? style) => style?.padding);
-    final Size? resolvedMinimumSize = resolve<Size>((ButtonStyle? style) => style?.minimumSize);
-    final BorderSide? resolvedSide = resolve<BorderSide>((ButtonStyle? style) => style?.side);
-    final OutlinedBorder? resolvedShape = resolve<OutlinedBorder>((ButtonStyle? style) => style?.shape);
+    final double? resolvedElevation = resolve<double?>((ButtonStyle? style) => style?.elevation);
+    final TextStyle? resolvedTextStyle = resolve<TextStyle?>((ButtonStyle? style) => style?.textStyle);
+    Color? resolvedBackgroundColor = resolve<Color?>((ButtonStyle? style) => style?.backgroundColor);
+    final Color? resolvedForegroundColor = resolve<Color?>((ButtonStyle? style) => style?.foregroundColor);
+    final Color? resolvedShadowColor = resolve<Color?>((ButtonStyle? style) => style?.shadowColor);
+    final EdgeInsetsGeometry? resolvedPadding = resolve<EdgeInsetsGeometry?>((ButtonStyle? style) => style?.padding);
+    final Size? resolvedMinimumSize = resolve<Size?>((ButtonStyle? style) => style?.minimumSize);
+    final BorderSide? resolvedSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side);
+    final OutlinedBorder? resolvedShape = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape);
 
     final MaterialStateMouseCursor resolvedMouseCursor = _MouseCursor(
       (Set<MaterialState> states) => effectiveValue((ButtonStyle? style) => style?.mouseCursor?.resolve(states)),
     );
 
-    final MaterialStateProperty<Color> overlayColor = MaterialStateProperty.resolveWith<Color>(
+    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) => effectiveValue((ButtonStyle? style) => style?.overlayColor?.resolve(states)),
     );
 
@@ -371,7 +371,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       ),
     );
 
-    Size minSize;
+    final Size minSize;
     switch (resolvedTapTargetSize!) {
       case MaterialTapTargetSize.padded:
         minSize = Size(
@@ -401,10 +401,10 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
 class _MouseCursor extends MaterialStateMouseCursor {
   const _MouseCursor(this.resolveCallback);
 
-  final MaterialPropertyResolver<MouseCursor> resolveCallback;
+  final MaterialPropertyResolver<MouseCursor?> resolveCallback;
 
   @override
-  MouseCursor? resolve(Set<MaterialState> states) => resolveCallback(states);
+  MouseCursor resolve(Set<MaterialState> states) => resolveCallback(states)!;
 
   @override
   String get debugDescription => 'ButtonStyleButton_MouseCursor';
@@ -483,7 +483,7 @@ class _RenderInputPadding extends RenderShiftedBox {
       final double height = math.max(child!.size.width, minSize.width);
       final double width = math.max(child!.size.height, minSize.height);
       size = constraints.constrain(Size(height, width));
-      final BoxParentData childParentData = child!.parentData as BoxParentData;
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
     } else {
       size = Size.zero;

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -54,7 +53,7 @@ void main() {
     expect(manager.updateScheduled, isFalse);
 
     // Can store null.
-    bucket.write<bool>('value4', null);
+    bucket.write<bool?>('value4', null);
     expect(manager.updateScheduled, isTrue);
     expect(bucket.read<int>('value4'), null);
     manager.doSerialization();
@@ -111,7 +110,7 @@ void main() {
     expect(manager.updateScheduled, isFalse);
 
     // Can store null.
-    child.write<bool>('value4', null);
+    child.write<bool?>('value4', null);
     expect(manager.updateScheduled, isTrue);
     expect(child.read<int>('value4'), null);
     manager.doSerialization();
@@ -327,7 +326,7 @@ void main() {
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner1');
-    final Object rawChildData = rawData[childrenMapKey]['child1'];
+    final Object rawChildData = rawData[childrenMapKey]['child1'] as Object;
     expect(rawChildData, isNotNull);
 
     expect(manager.updateScheduled, isFalse);
@@ -370,9 +369,9 @@ void main() {
     final RestorationBucket child2 = root.claimChild('child2', debugOwner: 'owner1');
     manager.doSerialization();
 
-    final Object rawChild1Data = rawData[childrenMapKey]['child1'];
+    final Object rawChild1Data = rawData[childrenMapKey]['child1'] as Object;
     expect(rawChild1Data, isNotNull);
-    final Object rawChild2Data = rawData[childrenMapKey]['child2'];
+    final Object rawChild2Data = rawData[childrenMapKey]['child2'] as Object;
     expect(rawChild2Data, isNotNull);
 
     expect(child1.restorationId, 'child1');
@@ -396,7 +395,7 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final Object rawChild1Data = rawData[childrenMapKey]['child1'];
+    final Object rawChild1Data = rawData[childrenMapKey]['child1'] as Object;
     expect(rawChild1Data, isNotNull);
 
     final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
@@ -462,7 +461,7 @@ void main() {
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
 
-    final Object childOfChildData = rawData[childrenMapKey]['child1'][childrenMapKey]['childOfChild'];
+    final Object childOfChildData = rawData[childrenMapKey]['child1'][childrenMapKey]['childOfChild'] as Object;
     expect(childOfChildData, isNotEmpty);
 
     root.adoptChild(childOfChild);
@@ -497,7 +496,7 @@ void main() {
     final RestorationBucket childOfChild = child.claimChild('child1', debugOwner: 'owner2');
     childOfChild.write<String>('foo', 'bar');
 
-    final Object childOfChildData = rawData[childrenMapKey]['child1'][childrenMapKey]['child1'];
+    final Object childOfChildData = rawData[childrenMapKey]['child1'][childrenMapKey]['child1'] as Object;
     expect(childOfChildData, isNotEmpty);
 
     expect(manager.updateScheduled, isTrue);

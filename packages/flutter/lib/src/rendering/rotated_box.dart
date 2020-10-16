@@ -9,6 +9,7 @@ import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
+import 'layer.dart';
 import 'object.dart';
 
 const double _kQuarterTurnsInRadians = math.pi / 2.0;
@@ -41,7 +42,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     markNeedsLayout();
   }
 
-  bool get _isVertical => quarterTurns % 2 == 1;
+  bool get _isVertical => quarterTurns.isOdd;
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -108,9 +109,15 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null)
-      context.pushTransform(needsCompositing, offset, _paintTransform!, _paintChild);
+    if (child != null) {
+      _transformLayer = context.pushTransform(needsCompositing, offset, _paintTransform!, _paintChild,
+          oldLayer: _transformLayer);
+    } else {
+      _transformLayer = null;
+    }
   }
+
+  TransformLayer? _transformLayer;
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {

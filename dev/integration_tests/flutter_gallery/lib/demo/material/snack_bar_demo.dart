@@ -40,16 +40,16 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
           const Text(_text1),
           const Text(_text2),
           Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               child: const Text('SHOW A SNACKBAR'),
               onPressed: () {
                 final int thisSnackBarIndex = _snackBarIndex++;
-                Scaffold.of(context).showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text('This is snackbar #$thisSnackBarIndex.'),
                   action: SnackBarAction(
                     label: 'ACTION',
                     onPressed: () {
-                      Scaffold.of(context).showSnackBar(SnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text("You pressed snackbar $thisSnackBarIndex's action."),
                       ));
                     },

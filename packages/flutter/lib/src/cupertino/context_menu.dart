@@ -40,7 +40,7 @@ typedef _ContextMenuPreviewBuilderChildless = Widget Function(
 // paintBounds in global coordinates.
 Rect _getRect(GlobalKey globalKey) {
   assert(globalKey.currentContext != null);
-  final RenderBox renderBoxContainer = globalKey.currentContext!.findRenderObject() as RenderBox;
+  final RenderBox renderBoxContainer = globalKey.currentContext!.findRenderObject()! as RenderBox;
   final Offset containerOffset = renderBoxContainer.localToGlobal(
     renderBoxContainer.paintBounds.topLeft,
   );
@@ -652,7 +652,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
         return AlignmentDirectional.topCenter;
       case _ContextMenuLocation.right:
         return AlignmentDirectional.topEnd;
-      default:
+      case _ContextMenuLocation.left:
         return AlignmentDirectional.topStart;
     }
   }
@@ -671,7 +671,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
           ? childRect.bottomRight
           : childRect.topRight;
         return (target - Offset(sheetRect.width, 0.0)) & sheetRect.size;
-      default:
+      case _ContextMenuLocation.left:
         final Offset target = orientation == Orientation.portrait
           ? childRect.bottomLeft
           : childRect.topLeft;
@@ -978,7 +978,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         return orientation == Orientation.portrait
           ? Alignment.bottomCenter
           : Alignment.topLeft;
-      default:
+      case _ContextMenuLocation.left:
         return orientation == Orientation.portrait
           ? Alignment.bottomCenter
           : Alignment.topRight;
@@ -1060,7 +1060,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         return orientation == Orientation.portrait
           ? <Widget>[child, spacer, sheet]
           : <Widget>[sheet, spacer, child];
-      default:
+      case _ContextMenuLocation.left:
         return <Widget>[child, spacer, sheet];
     }
   }
@@ -1233,7 +1233,7 @@ class _ContextMenuSheet extends StatelessWidget {
           ),
           menu,
         ];
-      default:
+      case _ContextMenuLocation.left:
         return <Widget>[
           menu,
           const Spacer(

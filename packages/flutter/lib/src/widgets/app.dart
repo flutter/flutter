@@ -568,14 +568,15 @@ class WidgetsApp extends StatefulWidget {
   final List<NavigatorObserver>? navigatorObservers;
 
   /// {@template flutter.widgets.widgetsApp.builder}
-  /// A builder for inserting widgets above the [Navigator] but below the other
-  /// widgets created by the [WidgetsApp] widget, or for replacing the
-  /// [Navigator] entirely.
+  /// A builder for inserting widgets above the [Navigator] or - when the
+  /// [WidgetsApp.router] constructor is used - above the [Router] but below the
+  /// other widgets created by the [WidgetsApp] widget, or for replacing the
+  /// [Navigator]/[Router] entirely.
   ///
   /// For example, from the [BuildContext] passed to this method, the
   /// [Directionality], [Localizations], [DefaultTextStyle], [MediaQuery], etc,
   /// are all available. They can also be overridden in a way that impacts all
-  /// the routes in the [Navigator].
+  /// the routes in the [Navigator] or [Router].
   ///
   /// This is rarely useful, but can be used in applications that wish to
   /// override those defaults, e.g. to force the application into right-to-left
@@ -586,18 +587,22 @@ class WidgetsApp extends StatefulWidget {
   /// [Localizations], consider [onGenerateTitle] instead.
   ///
   /// The [builder] callback is passed two arguments, the [BuildContext] (as
-  /// `context`) and a [Navigator] widget (as `child`).
+  /// `context`) and a [Navigator] or [Router] widget (as `child`).
   ///
-  /// If no routes are provided using [home], [routes], [onGenerateRoute], or
-  /// [onUnknownRoute], the `child` will be null, and it is the responsibility
-  /// of the [builder] to provide the application's routing machinery.
+  /// If no routes are provided to the regular [WidgetsApp] constructor using
+  /// [home], [routes], [onGenerateRoute], or [onUnknownRoute], the `child` will
+  /// be null, and it is the responsibility of the [builder] to provide the
+  /// application's routing machinery.
   ///
-  /// If routes _are_ provided using one or more of those properties, then
-  /// `child` is not null, and the returned value should include the `child` in
-  /// the widget subtree; if it does not, then the application will have no
-  /// navigator and the [navigatorKey], [home], [routes], [onGenerateRoute],
-  /// [onUnknownRoute], [initialRoute], and [navigatorObservers] properties will
-  /// have no effect.
+  /// If routes _are_ provided to the regular [WidgetsApp] constructor using one
+  /// or more of those properties or if the [WidgetsApp.router] constructor is
+  /// used, then `child` is not null, and the returned value should include the
+  /// `child` in the widget subtree; if it does not, then the application will
+  /// have no [Navigator] or [Router] and the routing related properties (i.e.
+  /// [navigatorKey], [home], [routes], [onGenerateRoute], [onUnknownRoute],
+  /// [initialRoute], [navigatorObservers], [routeInformationProvider],
+  /// [backButtonDispatcher], [routerDelegate], and [routeInformationParser])
+  /// are ignored.
   ///
   /// If [builder] is null, it is as if a builder was specified that returned
   /// the `child` directly. If it is null, routes must be provided using one of
@@ -605,8 +610,9 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// Unless a [Navigator] is provided, either implicitly from [builder] being
   /// null, or by a [builder] including its `child` argument, or by a [builder]
-  /// explicitly providing a [Navigator] of its own, widgets and APIs such as
-  /// [Hero], [Navigator.push] and [Navigator.pop], will not function.
+  /// explicitly providing a [Navigator] of its own, or by the [routerDelegate]
+  /// building one, widgets and APIs such as [Hero], [Navigator.push] and
+  /// [Navigator.pop], will not function.
   /// {@endtemplate}
   final TransitionBuilder? builder;
 
@@ -1113,11 +1119,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    if (_usesRouter) {
-      _updateRouter();
-    } else {
-      _updateNavigator();
-    }
+    _updateRouting();
     _locale = _resolveLocales(WidgetsBinding.instance!.window.locales, widget.supportedLocales);
     WidgetsBinding.instance!.addObserver(this);
   }
@@ -1125,12 +1127,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   @override
   void didUpdateWidget(WidgetsApp oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.routeInformationProvider != widget.routeInformationProvider) {
-      _updateRouter();
-    }
-    if (widget.navigatorKey != oldWidget.navigatorKey) {
-      _updateNavigator();
-    }
+    _updateRouting(oldWidget: oldWidget);
   }
 
   @override
@@ -1140,29 +1137,52 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     super.dispose();
   }
 
+  void _updateRouting({WidgetsApp? oldWidget}) {
+    if (_usesRouter) {
+      assert(!_usesNavigator);
+      _navigator = null;
+      if (oldWidget == null || oldWidget.routeInformationProvider != widget.routeInformationProvider) {
+        _defaultRouteInformationProvider?.dispose();
+        _defaultRouteInformationProvider = null;
+        if (widget.routeInformationProvider == null) {
+          _defaultRouteInformationProvider = PlatformRouteInformationProvider(
+            initialRouteInformation: RouteInformation(
+              location: _initialRouteName,
+            ),
+          );
+        }
+      }
+    } else if (_usesNavigator) {
+      assert(!_usesRouter);
+      _defaultRouteInformationProvider?.dispose();
+      _defaultRouteInformationProvider = null;
+      if (oldWidget == null || widget.navigatorKey != oldWidget.navigatorKey) {
+        _navigator = widget.navigatorKey ?? GlobalObjectKey<NavigatorState>(this);
+      }
+      assert(_navigator != null);
+    } else {
+      assert(widget.builder != null);
+      assert(!_usesRouter);
+      assert(!_usesNavigator);
+      _navigator = null;
+      _defaultRouteInformationProvider?.dispose();
+      _defaultRouteInformationProvider = null;
+    }
+    // If we use a navigator, we have a navigator key.
+    assert(_usesNavigator == (_navigator != null));
+  }
+
   bool get _usesRouter => widget.routerDelegate != null;
+  bool get _usesNavigator => widget.home != null || widget.routes?.isNotEmpty == true || widget.onGenerateRoute != null || widget.onUnknownRoute != null;
 
   // ROUTER
+
   RouteInformationProvider? get _effectiveRouteInformationProvider => widget.routeInformationProvider ?? _defaultRouteInformationProvider;
   PlatformRouteInformationProvider? _defaultRouteInformationProvider;
-
-  void _updateRouter() {
-    _defaultRouteInformationProvider?.dispose();
-    if (widget.routeInformationProvider == null)
-      _defaultRouteInformationProvider = PlatformRouteInformationProvider(
-        initialRouteInformation: RouteInformation(
-          location: _initialRouteName,
-        ),
-      );
-  }
 
   // NAVIGATOR
 
   GlobalKey<NavigatorState>? _navigator;
-
-  void _updateNavigator() {
-    _navigator = widget.navigatorKey ?? GlobalObjectKey<NavigatorState>(this);
-  }
 
   Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
     final String? name = settings.name;
@@ -1476,7 +1496,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    Widget routing;
+    Widget? routing;
     if (_usesRouter) {
       assert(_effectiveRouteInformationProvider != null);
       routing = Router<Object>(
@@ -1485,7 +1505,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         routerDelegate: widget.routerDelegate!,
         backButtonDispatcher: widget.backButtonDispatcher,
       );
-    } else {
+    } else if (_usesNavigator) {
       assert(_navigator != null);
       routing = Navigator(
         restorationScopeId: 'nav',
@@ -1512,12 +1532,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     } else {
       assert(routing != null);
-      result = routing;
+      result = routing!;
     }
 
     if (widget.textStyle != null) {
       result = DefaultTextStyle(
-        style: widget.textStyle,
+        style: widget.textStyle!,
         child: result,
       );
     }
@@ -1566,7 +1586,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       return true;
     }());
 
-    Widget title;
+    final Widget title;
     if (widget.onGenerateTitle != null) {
       title = Builder(
         // This Builder exists to provide a context below the Localizations widget.

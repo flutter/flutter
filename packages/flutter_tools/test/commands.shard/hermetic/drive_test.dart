@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -22,7 +23,6 @@ import 'package:flutter_tools/src/vmservice.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/mocks.dart';
 
 void main() {
   group('drive', () {
@@ -37,7 +37,6 @@ void main() {
 
     setUp(() {
       command = DriveCommand();
-      applyMocksToCommand(command);
       fs = MemoryFileSystem.test();
       tempDir = fs.systemTempDirectory.createTempSync('flutter_drive_test.');
       fs.currentDirectory = tempDir;
@@ -46,15 +45,16 @@ void main() {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       setExitFunctionForTests();
-      appStarter = (DriveCommand command, Uri webUri) {
+      appStarter = (DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) {
         throw 'Unexpected call to appStarter';
       };
       testRunner = (List<String> testArgs, Map<String, String> environment) {
         throw 'Unexpected call to testRunner';
       };
-      appStopper = (DriveCommand command) {
+      appStopper = (DriveCommand command, ApplicationPackage package) {
         throw 'Unexpected call to appStopper';
       };
+      command.applicationPackages = FakeApplicationPackageFactory();
     });
 
     tearDown(() {
@@ -99,7 +99,7 @@ void main() {
 
     testUsingContext('returns 1 when app fails to run', () async {
       testDeviceManager.addDevice(MockDevice());
-      appStarter = expectAsync2((DriveCommand command, Uri webUri) async => null);
+      appStarter = expectAsync4((DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) async => null);
 
       final String testApp = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -201,7 +201,7 @@ void main() {
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-      appStarter = expectAsync2((DriveCommand command, Uri webUri) async {
+      appStarter = expectAsync4((DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) async {
         return LaunchResult.succeeded();
       });
       testRunner = expectAsync2((List<String> testArgs, Map<String, String> environment) async {
@@ -211,7 +211,7 @@ void main() {
           'VM_SERVICE_URL': 'null',
         });
       });
-      appStopper = expectAsync1((DriveCommand command) async {
+      appStopper = expectAsync2((DriveCommand command, ApplicationPackage package) async {
         return true;
       });
 
@@ -242,13 +242,13 @@ void main() {
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-      appStarter = expectAsync2((DriveCommand command, Uri webUri) async {
+      appStarter = expectAsync4((DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) async {
         return LaunchResult.succeeded();
       });
       testRunner = (List<String> testArgs, Map<String, String> environment) async {
         throwToolExit(null, exitCode: 123);
       };
-      appStopper = expectAsync1((DriveCommand command) async {
+      appStopper = expectAsync2((DriveCommand command, ApplicationPackage package) async {
         return true;
       });
 
@@ -281,7 +281,7 @@ void main() {
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-      appStarter = expectAsync2((DriveCommand command, Uri webUri) async {
+      appStarter = expectAsync4((DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) async {
         return LaunchResult.succeeded();
       });
       testRunner = expectAsync2((List<String> testArgs, Map<String, String> environment) async {
@@ -294,7 +294,7 @@ void main() {
           ]
         );
       });
-      appStopper = expectAsync1((DriveCommand command) async {
+      appStopper = expectAsync2((DriveCommand command, ApplicationPackage package) async {
         return true;
       });
 
@@ -324,7 +324,7 @@ void main() {
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-      appStarter = expectAsync2((DriveCommand command, Uri webUri) async {
+      appStarter = expectAsync4((DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) async {
         return LaunchResult.succeeded();
       });
       testRunner = expectAsync2((List<String> testArgs, Map<String, String> environment) async {
@@ -336,7 +336,7 @@ void main() {
           ]
         );
       });
-      appStopper = expectAsync1((DriveCommand command) async {
+      appStopper = expectAsync2((DriveCommand command, ApplicationPackage package) async {
         return true;
       });
 
@@ -493,8 +493,8 @@ void main() {
         testRunner = (List<String> testArgs, Map<String, String> environment) async {
           throwToolExit(null, exitCode: 123);
         };
-        appStopper = expectAsync1(
-            (DriveCommand command) async {
+        appStopper = expectAsync2(
+            (DriveCommand command, ApplicationPackage package) async {
               return true;
             },
             count: 2,
@@ -562,35 +562,6 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
-
-      testUsingContext('uses prebuilt app if --no-build arg provided', () async {
-        final Device mockDevice = await appStarterSetup();
-
-        final List<String> args = <String>[
-          'drive',
-          '--no-build',
-          '--target=$testApp',
-          '--no-pub',
-        ];
-        try {
-          await createTestCommandRunner(command).run(args);
-        } on ToolExit catch (e) {
-          expect(e.exitCode, 123);
-          expect(e.message, null);
-        }
-        verify(mockDevice.startApp(
-                null,
-                mainPath: anyNamed('mainPath'),
-                route: anyNamed('route'),
-                debuggingOptions: anyNamed('debuggingOptions'),
-                platformArgs: anyNamed('platformArgs'),
-                prebuiltApplication: true,
-                userIdentifier: anyNamed('userIdentifier'),
-        ));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
     });
 
     group('debugging options', () {
@@ -632,8 +603,8 @@ void main() {
         testRunner = (List<String> testArgs, Map<String, String> environment) async {
           throwToolExit(null, exitCode: 123);
         };
-        appStopper = expectAsync1(
-          (DriveCommand command) async {
+        appStopper = expectAsync2(
+          (DriveCommand command, ApplicationPackage package) async {
             return true;
           },
           count: 2,
@@ -707,6 +678,11 @@ void main() {
       testOptionThatDefaultsToFalse(
         '--purge-persistent-cache',
         () => debuggingOptions.purgePersistentCache,
+      );
+
+      testOptionThatDefaultsToFalse(
+        '--publish-port',
+            () => !debuggingOptions.disablePortPublication,
       );
     });
   });
@@ -895,3 +871,9 @@ class MockDevice extends Mock implements Device {
 class MockAndroidDevice extends Mock implements AndroidDevice { }
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService { }
 class MockLaunchResult extends Mock implements LaunchResult { }
+class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
+  @override
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) {
+    return null;
+  }
+}

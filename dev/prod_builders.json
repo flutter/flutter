@@ -25,6 +25,12 @@
          "flaky": false
       },
       {
+         "name": "Linux build_gallery",
+         "repo": "flutter",
+         "task_name": "linux_build_gallery",
+         "flaky": false
+      },
+      {
          "name": "Linux build_tests",
          "repo": "flutter",
          "task_name": "linux_build_tests",
@@ -61,18 +67,6 @@
          "flaky": false
       },
       {
-         "name": "Linux gradle_fast_start_test",
-         "repo": "flutter",
-         "task_name": "linux_gradle_fast_start_test",
-         "flaky": false
-      },
-      {
-         "name": "Linux gradle_jetifier_test",
-         "repo": "flutter",
-         "task_name": "linux_gradle_jetifier_test",
-         "flaky": false
-      },
-      {
          "name": "Linux gradle_non_android_plugin_test",
          "repo": "flutter",
          "task_name": "linux_gradle_non_android_plugin_test",
@@ -91,12 +85,6 @@
          "flaky": false
       },
       {
-         "name": "Linux gradle_r8_test",
-         "repo": "flutter",
-         "task_name": "linux_gradle_r8_test",
-         "flaky": false
-      },
-      {
          "name": "Linux module_custom_host_app_name_test",
          "repo": "flutter",
          "task_name": "linux_module_custom_host_app_name_test",
@@ -112,12 +100,6 @@
          "name": "Linux module_test",
          "repo": "flutter",
          "task_name": "linux_module_test",
-         "flaky": false
-      },
-      {
-         "name": "Linux plugin_dependencies_test",
-         "repo": "flutter",
-         "task_name": "linux_plugin_dependencies_test",
          "flaky": false
       },
       {
@@ -151,10 +133,16 @@
          "flaky": false
       },
       {
-         "name":"Linux web_smoke_test",
+         "name":"Linux web_e2e_test",
          "repo":"flutter",
-         "task_name":"linux_web_smoke_test",
+         "task_name":"linux_web_e2e_test",
          "flaky":false
+      },
+      {
+        "name":"Linux web_smoke_test",
+        "repo":"flutter",
+        "task_name":"linux_web_smoke_test",
+        "flaky":false
       },
       {
          "name": "Mac build_aar_module_test",
@@ -175,6 +163,12 @@
          "flaky": false
       },
       {
+         "name": "Mac build_gallery",
+         "repo": "flutter",
+         "task_name": "mac_build_gallery",
+         "flaky": false
+      },
+      {
          "name": "Mac customer_testing",
          "repo": "flutter",
          "task_name": "mac_customer_testing",
@@ -184,18 +178,6 @@
          "name": "Mac framework_tests",
          "repo": "flutter",
          "task_name": "mac_framework_tests",
-         "flaky": false
-      },
-      {
-         "name": "Mac gradle_fast_start_test",
-         "repo": "flutter",
-         "task_name": "mac_gradle_fast_start_test",
-         "flaky": false
-      },
-      {
-         "name": "Mac gradle_jetifier_test",
-         "repo": "flutter",
-         "task_name": "mac_gradle_jetifier_test",
          "flaky": false
       },
       {
@@ -223,12 +205,6 @@
          "flaky": false
       },
       {
-         "name": "Mac gradle_r8_test",
-         "repo": "flutter",
-         "task_name": "mac_gradle_r8_test",
-         "flaky": false
-      },
-      {
          "name": "Mac module_custom_host_app_name_test",
          "repo": "flutter",
          "task_name": "mac_module_custom_host_app_name_test",
@@ -250,12 +226,6 @@
          "name": "Mac module_test_ios",
          "repo": "flutter",
          "task_name": "mac_module_test_ios",
-         "flaky": false
-      },
-      {
-         "name": "Mac plugin_dependencies_test",
-         "repo": "flutter",
-         "task_name": "mac_plugin_dependencies_test",
          "flaky": false
       },
       {
@@ -301,18 +271,6 @@
          "flaky": false
       },
       {
-         "name": "Windows gradle_fast_start_test",
-         "repo": "flutter",
-         "task_name": "win_gradle_fast_start_test",
-         "flaky": false
-      },
-      {
-         "name": "Windows gradle_jetifier_test",
-         "repo": "flutter",
-         "task_name": "win_gradle_jetifier_test",
-         "flaky": false
-      },
-      {
          "name": "Windows gradle_plugin_light_apk_test",
          "repo": "flutter",
          "task_name": "win_gradle_plugin_light_apk_test",
@@ -337,12 +295,6 @@
          "flaky": false
       },
       {
-         "name": "Windows gradle_r8_test",
-         "repo": "flutter",
-         "task_name": "win_gradle_r8_test",
-         "flaky": false
-      },
-      {
          "name": "Windows module_custom_host_app_name_test",
          "repo": "flutter",
          "task_name": "win_module_custom_host_app_name_test",
@@ -358,12 +310,6 @@
          "name": "Windows module_test",
          "repo": "flutter",
          "task_name": "win_module_test",
-         "flaky": false
-      },
-      {
-         "name": "Windows plugin_dependencies_test",
-         "repo": "flutter",
-         "task_name": "win_plugin_dependencies_test",
          "flaky": false
       },
       {

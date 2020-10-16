@@ -69,7 +69,7 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
         final double offsetY = row * cellSize.height;
         // Retain every other layer, so we exercise the update path 50% of the
         // time and the retain path the other 50%.
-        final bool shouldRetain = oldLayer != null && (row + col) % 2 == 0;
+        final bool shouldRetain = oldLayer != null && (row + col).isEven;
         if (shouldRetain) {
           sceneBuilder.addRetained(oldLayer);
         } else {

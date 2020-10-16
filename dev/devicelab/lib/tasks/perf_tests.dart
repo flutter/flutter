@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
@@ -214,13 +215,6 @@ TaskFunction createFlutterGalleryStartupTest() {
 TaskFunction createComplexLayoutStartupTest() {
   return StartupTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
-  ).run;
-}
-
-TaskFunction createHelloWorldStartupTest() {
-  return StartupTest(
-    '${flutterDirectory.path}/examples/hello_world',
-    reportMetrics: false,
   ).run;
 }
 
@@ -571,7 +565,6 @@ class PerfTest {
   @protected
   Future<TaskResult> internalRun({
       bool cacheSkSL = false,
-      bool noBuild = false,
       String existingApp,
       String writeSkslFileName,
   }) {
@@ -588,7 +581,6 @@ class PerfTest {
         if (needsFullTimeline)
           '--trace-startup', // Enables "endless" timeline event buffering.
         '-t', testTarget,
-        if (noBuild) '--no-build',
         if (testDriver != null)
           ...<String>['--driver', testDriver],
         if (existingApp != null)
@@ -729,7 +721,6 @@ class PerfTestWithSkSL extends PerfTest {
     // that we won't remove the SkSLs generated earlier.
     await super.internalRun(
       cacheSkSL: true,
-      noBuild: true,
       writeSkslFileName: _skslJsonFileName,
     );
   }
@@ -745,6 +736,7 @@ class PerfTestWithSkSL extends PerfTest {
         'run',
         '--verbose',
         '--verbose-system-logs',
+        '--purge-persistent-cache',
         '--profile',
         if (cacheSkSL) '--cache-sksl',
         '-d', _device.deviceId,
@@ -1384,7 +1376,7 @@ class ReportedDurationTest {
 class ListStatistics {
   factory ListStatistics(Iterable<int> data) {
     assert(data.isNotEmpty);
-    assert(data.length % 2 == 1);
+    assert(data.length.isOdd);
     final List<int> sortedData = data.toList()..sort();
     return ListStatistics._(
       sortedData.first,

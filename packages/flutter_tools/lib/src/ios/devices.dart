@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -22,7 +23,6 @@ import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
-import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -369,6 +369,7 @@ class IOSDevice extends Device {
       '--enable-service-port-fallback',
       '--disable-service-auth-codes',
       '--observatory-port=$assumedObservatoryPort',
+      if (debuggingOptions.disablePortPublication) '--disable-observatory-publication',
       if (debuggingOptions.startPaused) '--start-paused',
       if (dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
       if (debuggingOptions.useTestFonts) '--use-test-fonts',
@@ -395,8 +396,8 @@ class IOSDevice extends Device {
     ];
 
     final Status installStatus = _logger.startProgress(
-        'Installing and launching...',
-        timeout: timeoutConfiguration.slowOperation);
+      'Installing and launching...',
+    );
     try {
       ProtocolDiscovery observatoryDiscovery;
       int installationResult = 1;
@@ -439,6 +440,7 @@ class IOSDevice extends Device {
         installationResult = await iosDeployDebugger.launchAndAttach() ? 0 : 1;
       }
       if (installationResult != 0) {
+        await _screenshotOnFailure();
         _logger.printError('Could not run ${bundle.path} on $id.');
         _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
         _logger.printError('  open ios/Runner.xcworkspace');
@@ -453,7 +455,6 @@ class IOSDevice extends Device {
       _logger.printTrace('Application launched on the device. Waiting for observatory port.');
       final FallbackDiscovery fallbackDiscovery = FallbackDiscovery(
         logger: _logger,
-        mDnsObservatoryDiscovery: MDnsObservatoryDiscovery.instance,
         portForwarder: portForwarder,
         protocolDiscovery: observatoryDiscovery,
         flutterUsage: globals.flutterUsage,
@@ -469,10 +470,13 @@ class IOSDevice extends Device {
         packageName: FlutterProject.current().manifest.appName,
       );
       if (localUri == null) {
+        await _screenshotOnFailure();
+        iosDeployDebugger?.detach();
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);
     } on ProcessException catch (e) {
+      iosDeployDebugger?.detach();
       _logger.printError(e.message);
       return LaunchResult.failed();
     } finally {
@@ -554,6 +558,23 @@ class IOSDevice extends Device {
       logReader.dispose();
     });
     await _portForwarder?.dispose();
+  }
+
+  Future<void> _screenshotOnFailure() async {
+    final bool screenshotOnConnectionFailure = _platform
+      .environment['FLUTTER_IOS_SCREENSHOT_ON_CONNECTION_FAILURE'] == 'true';
+    if (!screenshotOnConnectionFailure) {
+      return;
+    }
+    final File file = _fileSystem.file('test_screenshot.png');
+    try {
+      await takeScreenshot(file);
+      _logger.printStatus('BASE64 SCREENSHOT:${base64.encode(file.readAsBytesSync())}');
+    } on Exception {
+      _logger.printError('Failed to take screenshot');
+    } finally {
+      ErrorHandlingFileSystem.deleteIfExists(file);
+    }
   }
 }
 
@@ -888,7 +909,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     while (!connected) {
       _logger.printTrace('Attempting to forward device port $devicePort to host port $hostPort');
       process = await _iproxy.forward(devicePort, hostPort, _id);
-      // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
+      // TODO(ianh): This is a flaky race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
       connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
       if (!connected) {
         process.kill();
@@ -920,7 +941,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
       return;
     }
 
-    _logger.printTrace('Unforwarding port $forwardedPort');
+    _logger.printTrace('Un-forwarding port $forwardedPort');
     forwardedPort.dispose();
   }
 

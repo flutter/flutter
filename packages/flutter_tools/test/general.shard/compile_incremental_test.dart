@@ -23,6 +23,7 @@ import '../src/mocks.dart';
 void main() {
   ProcessManager mockProcessManager;
   ResidentCompiler generator;
+  ResidentCompiler generatorWithScheme;
   MockProcess mockFrontendServer;
   MockStdIn mockFrontendServerStdIn;
   MockStream mockFrontendServerStdErr;
@@ -42,6 +43,18 @@ void main() {
       processManager: mockProcessManager,
       artifacts: Artifacts.test(),
       platform: FakePlatform(operatingSystem: 'linux'),
+    );
+    generatorWithScheme = ResidentCompiler(
+      'sdkroot',
+      buildMode: BuildMode.debug,
+      logger: testLogger,
+      processManager: mockProcessManager,
+      artifacts: Artifacts.test(),
+      platform: FakePlatform(operatingSystem: 'linux'),
+      fileSystemRoots: <String>[
+        '/foo/bar/fizz',
+      ],
+      fileSystemScheme: 'scheme',
     );
 
     when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
@@ -75,6 +88,26 @@ void main() {
       packageConfig: PackageConfig.empty,
     );
     expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
+    verifyNoMoreInteractions(mockFrontendServerStdIn);
+    expect(testLogger.errorText, equals('line1\nline2\n'));
+    expect(output.outputFilename, equals('/path/to/main.dart.dill'));
+  });
+
+  testWithoutContext('incremental compile single dart compile with filesystem scheme', () async {
+    when(mockFrontendServer.stdout)
+        .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
+          Future<List<int>>.value(utf8.encode(
+            'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0'
+          ))
+        ));
+
+    final CompilerOutput output = await generatorWithScheme.recompile(
+      Uri.parse('file:///foo/bar/fizz/main.dart'),
+        null /* invalidatedFiles */,
+      outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
+    );
+    expect(mockFrontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
     verifyNoMoreInteractions(mockFrontendServerStdIn);
     expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
@@ -135,6 +168,47 @@ void main() {
       'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
     // No sources returned from reject command.
     await _reject(streamController, generator, mockFrontendServerStdIn, 'result abc\nabc\n',
+      r'^reject\n$');
+    verifyNoMoreInteractions(mockFrontendServerStdIn);
+    expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
+    expect(testLogger.errorText, equals(
+      'line0\nline1\n'
+      'line1\nline2\n'
+      'line1\nline2\n'
+    ));
+  });
+
+  testWithoutContext('incremental compile and recompile with filesystem scheme', () async {
+    final StreamController<List<int>> streamController = StreamController<List<int>>();
+    when(mockFrontendServer.stdout)
+        .thenAnswer((Invocation invocation) => streamController.stream);
+    streamController.add(utf8.encode('result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'));
+    await generatorWithScheme.recompile(
+      Uri.parse('file:///foo/bar/fizz/main.dart'),
+      null, /* invalidatedFiles */
+      outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
+    );
+    expect(mockFrontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
+
+    // No accept or reject commands should be issued until we
+    // send recompile request.
+    await _accept(streamController, generatorWithScheme, mockFrontendServerStdIn, '');
+    await _reject(streamController, generatorWithScheme, mockFrontendServerStdIn, '', '');
+
+    await _recompile(streamController, generatorWithScheme, mockFrontendServerStdIn,
+      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
+      mainUri: Uri.parse('file:///foo/bar/fizz/main.dart'),
+      expectedUri: 'scheme:///main.dart');
+
+    await _accept(streamController, generatorWithScheme, mockFrontendServerStdIn, r'^accept\n$');
+
+    await _recompile(streamController, generatorWithScheme, mockFrontendServerStdIn,
+      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
+      mainUri: Uri.parse('file:///foo/bar/fizz/main.dart'),
+      expectedUri: 'scheme:///main.dart');
+    // No sources returned from reject command.
+    await _reject(streamController, generatorWithScheme, mockFrontendServerStdIn, 'result abc\nabc\n',
       r'^reject\n$');
     verifyNoMoreInteractions(mockFrontendServerStdIn);
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
@@ -214,17 +288,21 @@ Future<void> _recompile(
   StreamController<List<int>> streamController,
   ResidentCompiler generator,
   MockStdIn mockFrontendServerStdIn,
-  String mockCompilerOutput,
-  { bool suppressErrors = false }
-) async {
+  String mockCompilerOutput, {
+  bool suppressErrors = false,
+  Uri mainUri,
+  String expectedUri = '/path/to/main.dart',
+}) async {
+  mainUri ??= Uri.parse('/path/to/main.dart');
+
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
   scheduleMicrotask(() {
     streamController.add(utf8.encode(mockCompilerOutput));
   });
   final CompilerOutput output = await generator.recompile(
-    Uri.parse('/path/to/main.dart'),
-    <Uri>[Uri.parse('/path/to/main.dart')],
+    mainUri,
+    <Uri>[mainUri],
     outputPath: '/build/',
     packageConfig: PackageConfig.empty,
     suppressErrors: suppressErrors,
@@ -236,6 +314,7 @@ Future<void> _recompile(
 
   // Test that uuid matches at beginning and end.
   expect(parts[2], equals(parts[4]));
+  expect(parts[1], equals(expectedUri));
   mockFrontendServerStdIn.stdInWrites.clear();
 }
 

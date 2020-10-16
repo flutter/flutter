@@ -75,6 +75,7 @@ Future<void> main(List<String> rawArgs) async {
   final Directory datePatternsDirectory = Directory(path.join(pathToIntl, 'src', 'data', 'dates', 'patterns'));
   final Map<String, File> patternFiles = _listIntlData(datePatternsDirectory);
   final StringBuffer buffer = StringBuffer();
+  final Set<String> supportedLocales = _supportedLocales();
 
   buffer.writeln(
 '''
@@ -94,7 +95,7 @@ Future<void> main(List<String> rawArgs) async {
   buffer.writeln('const Map<String, dynamic> dateSymbols = <String, dynamic> {');
   symbolFiles.forEach((String locale, File data) {
     currentLocale = locale;
-    if (_supportedLocales().contains(locale))
+    if (supportedLocales.contains(locale))
       buffer.writeln(_jsonToMapEntry(locale, json.decode(data.readAsStringSync())));
   });
   currentLocale = null;
@@ -107,7 +108,7 @@ Future<void> main(List<String> rawArgs) async {
 /// supported by flutter_localizations.''');
   buffer.writeln('const Map<String, Map<String, String>> datePatterns = <String, Map<String, String>> {');
   patternFiles.forEach((String locale, File data) {
-    if (_supportedLocales().contains(locale)) {
+    if (supportedLocales.contains(locale)) {
       final Map<String, dynamic> patterns = json.decode(data.readAsStringSync()) as Map<String, dynamic>;
       buffer.writeln("'$locale': <String, String>{");
       patterns.forEach((String key, dynamic value) {
@@ -164,13 +165,21 @@ String _jsonToMap(dynamic json) {
 }
 
 Set<String> _supportedLocales() {
-  final Set<String> supportedLocales = <String>{};
+  // Assumes that en_US is a supported locale by default. Without this, usage
+  // of the intl package APIs before Flutter populates its set of supported i18n
+  // date patterns and symbols may cause problems.
+  //
+  // For more context, see https://github.com/flutter/flutter/issues/67644.
+  final Set<String> supportedLocales = <String>{
+    'en_US',
+  };
   final RegExp filenameRE = RegExp(r'(?:material|cupertino)_(\w+)\.arb$');
   final Directory supportedLocalesDirectory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
   for (final FileSystemEntity entity in supportedLocalesDirectory.listSync()) {
     final String filePath = entity.path;
-    if (FileSystemEntity.isFileSync(filePath) && filenameRE.hasMatch(filePath))
+    if (FileSystemEntity.isFileSync(filePath) && filenameRE.hasMatch(filePath)) {
       supportedLocales.add(filenameRE.firstMatch(filePath)[1]);
+    }
   }
 
   return supportedLocales;

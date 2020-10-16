@@ -163,6 +163,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   @override
   void initState() {
     super.initState();
+    _mode = widget.initialCalendarMode;
     _initWidgetState();
   }
 
@@ -190,7 +191,6 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   }
 
   void _initWidgetState() {
-    _mode = widget.initialCalendarMode;
     _currentDisplayedMonthDate = DateTime(widget.initialDate.year, widget.initialDate.month);
     _selectedDate = widget.initialDate;
   }
@@ -1155,7 +1155,7 @@ class _YearPickerState extends State<_YearPicker> {
     const double decorationHeight = 36.0;
     const double decorationWidth = 72.0;
 
-    Color textColor;
+    final Color textColor;
     if (isSelected) {
       textColor = colorScheme.onPrimary;
     } else if (isDisabled) {
