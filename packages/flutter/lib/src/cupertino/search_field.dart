@@ -3,174 +3,289 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
-import 'text_field.dart';
+
+import 'colors.dart';
 import 'icons.dart';
+import 'text_field.dart';
 
-// This is a light gray color used for UISearchTextField's background.
-const Color _kDefaultBackgroundColor = Color.fromRGBO(239, 239, 240, 1.0);
-
-// This is approximately the corner radius used in UISearchTextField.
-// Note that UISearchTextField uses continuous corners, as opposed to circular.
-const BorderRadius _kDefaultBorderRadius =
-    BorderRadius.all(Radius.circular(9.0));
-
-// This is a dark gray color used for UISearchTextField's tint color.
-const Color _kDefaultItemColor = Color.fromRGBO(132, 132, 136, 1.0);
-
-// This is a dark gray color used for UISearchTextField's placeholder color.
-const TextStyle _kDefaultPlaceholderStyle =
-    TextStyle(color: Color.fromRGBO(142, 142, 147, 1.0));
-
-// These are insets used to mimick UISearchTextField's search icon placement.
-const EdgeInsets _kDefaultPrefixInsets = EdgeInsets.fromLTRB(6, 0, 0, 4);
-
-// These are insets used to mimick UISearchTextField's X-Mark icon placement.
-const EdgeInsets _kDefaultSuffixInsets = EdgeInsets.fromLTRB(0, 0, 5, 2);
-
-// These are insets used to mimick UISearchTextField's text placement.
-const EdgeInsets _kDefaultContentPadding = EdgeInsets.fromLTRB(3.8, 8, 5, 8);
-
-// The suffix mode determines whether the X-Mark appears during editing.
-const OverlayVisibilityMode _kDefaultSuffixMode = OverlayVisibilityMode.editing;
-
-// This is a decoration that uses the default background color and border radius
-const BoxDecoration _kDefaultBoxDecoration = BoxDecoration(
-  color: _kDefaultBackgroundColor,
-  borderRadius: _kDefaultBorderRadius,
-);
-
-// The default placeholder seen in UISearchTextField.
-const String _kDefaultPlaceholder = 'Search';
-
-// This returns the icon sizes, which scales with the accessibility font size.
-double _scaledIconSize(BuildContext context) {
-  return MediaQuery.textScaleFactorOf(context) * 20.0;
-}
-
-// Creates the search icon which is used as a prefix.
-Widget _defaultPrefix(Color itemColor) {
-  return Builder(
-    builder: (BuildContext context) => Icon(
-      CupertinoIcons.search,
-      color: itemColor,
-      size: _scaledIconSize(context),
-    ),
-  );
-}
-
-// Creates the X-Mark icon which is used as a suffix. It accepts a tap action.
-Widget _defaultSuffix(Color itemColor, Function() onTap) {
-  return Builder(
-    builder: (BuildContext context) => GestureDetector(
-      child: Icon(
-        CupertinoIcons.xmark_circle_fill,
-        color: itemColor,
-        size: _scaledIconSize(context),
-      ),
-      onTap: onTap,
-    ),
-  );
-}
-
-/// A [CupertinoTextField] that mimicks the look and behavior of UIKit's
-/// [UISearchTextField].
-class CupertinoSearchTextField extends CupertinoTextField {
-  ///
+/// A [CupertinoTextField] that mimics the look and behavior of UIKit's
+/// `UISearchTextField`.
+///
+/// This control defaults to showing the basic parts of a `UISearchTextField`,
+/// like the 'Search' placeholder, prefix-ed Search icon, and suffix-ed
+/// X-Mark icon.
+///
+/// To control the text that is displayed in the text field, use the
+/// [controller]. For example, to set the initial value of the text field, use
+/// a [controller] that already contains some text such as:
+///
+/// {@tool snippet}
+///
+/// ```dart
+/// class MyPrefilledSearch extends StatefulWidget {
+///   @override
+///   _MyPrefilledSearchState createState() => _MyPrefilledSearchState();
+/// }
+///
+/// class _MyPrefilledSearchState extends State<MyPrefilledSearch> {
+///   TextEditingController _textController;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _textController = TextEditingController(text: 'initial text');
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return CupertinoSearchTextField(controller: _textController);
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// It is recommended to pass a [ValueChanged<String>] to both [onChanged] and
+/// [onSubmitted] parameters in order to be notified once the value of the
+/// field changes or is submitted by the keyboard:
+///
+/// /// {@tool snippet}
+///
+/// ```dart
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return CupertinoSearchTextField(
+///       onChanged: (value) {
+///         print("The text has changed to: " + value);
+///       },
+///       onSubmitted: (value) {
+///         print("Submitted text: " + value);
+///       },
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+class CupertinoSearchTextField extends StatefulWidget {
   /// Creates a [CupertinoTextField] that mimicks the look and behavior of UIKit's
-  /// [UISearchTextField].
+  /// `UISearchTextField`.
   ///
   /// Similar to [CupertinoTextField], to provide a prefilled text entry, pass
   /// in a [TextEditingController] with an initial value to the [controller]
-  /// parameter. The [controller] property must not be null.
+  /// parameter.
   ///
-  /// The [onChanged] parameter takes a [Function(String)] which is invoked
+  /// The [onChanged] parameter takes a [ValueChanged<String>] which is invoked
   /// upon a change in the text field's value.
   ///
-  /// The [onSubmitted] parameter takes a [Function(String)] which is invoked
+  /// The [onSubmitted] parameter takes a [ValueChanged<String>] which is invoked
   /// when the keyboard submits.
   ///
   /// To provide a hint placeholder text that appears when the text entry is
   /// empty, pass a [String] to the [placeholder] parameter. This defaults to
   /// 'Search'.
+  // TODO(DanielEdrisian): Localize the 'Search' placeholder.
   ///
-  /// To set the placeholder color and style, pass a [TextStyle] to the
-  /// [placeholderStyle] parameter. This defaults to the default gray iOS color.
+  /// The [style] and [placeholderStyle] properties allow changing the style of
+  /// the text and placeholder of the textfield. [placeholderStyle] defaults
+  /// to the gray [CupertinoColors.secondaryLabel] iOS color.
   ///
   /// To set the text field's background color and border radius, pass a
   /// [BoxDecoration] to the [decoration] parameter. This defaults to the
-  /// default gray iOS background color and 9 px corner radius.
+  /// default translucent tertiarySystemFill iOS color and 9 px corner radius.
+  // TODO(DanielEdrisian): Must make border radius continuous, see
+  // https://github.com/flutter/flutter/issues/13914.
   ///
-  /// To set the text field's text padding, pass an [EdgeInsets] to the
-  /// [padding] parameter. This defaults to the default iOS padding.
+  /// The [itemColor] and [itemSize] properties allow changing the icon color
+  /// and icon size of the search icon (prefix) and X-Mark (suffix).
+  /// They default to [CupertinoColors.secondaryLabel] and [20.0].
   ///
-  /// To set the icon colors for the search icon (prefix) and X-Mark (suffix),
-  /// pass a [Color] to the [itemColor] parameter. This defaults to the dark
-  /// gray iOS color.
+  /// The [padding], [prefixInsets], and [suffixInsets] let you set the padding
+  /// insets for text, the search icon (prefix), and the X-Mark icon (suffix).
+  /// They default to values that replicate the `UISearchTextField` look. These
+  /// default fields were determined using the comparison tool in
+  /// https://github.com/flutter/platform_tests/.
   ///
-  /// To set the padding insets for the search icon (prefix), pass an
-  /// [EdgeInsets] to the [prefixInsets] parameter. This defaults to the default
-  /// iOS insets.
+  /// To customize the suffix icon, pass an [Icon] to [suffixIcon]. This
+  /// defaults to the X-Mark.
   ///
-  /// To set the padding insets for the X-Mark icon (suffix), pass an
-  /// [EdgeInsets] to the [suffixInsets] parameter. This defaults to the default
-  /// iOS insets.
-  ///
-  /// To dictate when the X-Mark (suffix) should be on, a.k.a. only on when
+  /// To dictate when the X-Mark (suffix) should be visible, a.k.a. only on when
   /// editing, not editing, on always, or on never, pass a
   /// [OverlayVisibilityMode] to [suffixMode]. This defaults to only on when
   /// editing.
   ///
-  /// To customize the X-Mark (suffix) action, pass a [Function()] to [onSuffixTap].
-  /// This defaults to clearing the text.
-  ///
-  CupertinoSearchTextField({
-    TextEditingController? controller,
-    Function(String)? onChanged,
-    Function(String)? onSubmitted,
-    String placeholder = _kDefaultPlaceholder,
-    TextStyle placeholderStyle = _kDefaultPlaceholderStyle,
-    BoxDecoration? decoration = _kDefaultBoxDecoration,
-    Color backgroundColor = _kDefaultBackgroundColor,
-    BorderRadius borderRadius = _kDefaultBorderRadius,
-    EdgeInsets padding = _kDefaultContentPadding,
-    Color itemColor = _kDefaultItemColor,
-    EdgeInsets prefixInsets = _kDefaultPrefixInsets,
-    EdgeInsets suffixInsets = _kDefaultSuffixInsets,
-    OverlayVisibilityMode suffixMode = _kDefaultSuffixMode,
-    Function()? onSuffixTap,
-  })  : assert(controller != null),
-        super(
-          controller: controller,
-          // If backgroundColor or borderRadius have been passed as params,
-          // make a new BoxDecoration. Otherwise, use default.
-          decoration: (backgroundColor != null || borderRadius != null)
-              ? BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: borderRadius,
-                )
-              : (decoration ?? _kDefaultBoxDecoration),
-          // This is the search icon widget.
-          prefix: Padding(
-            child: _defaultPrefix(itemColor),
-            padding: prefixInsets,
-          ),
-          // This is the X-Mark widget. If onTap has been passed as a param,
-          // use it as the X-Mark's tapping action. Otherwise, default to
-          // clearing the text.
-          suffix: Padding(
-            child: _defaultSuffix(
-                itemColor,
-                onSuffixTap ??
-                    () {
-                      controller!.text = '';
-                    }),
-            padding: suffixInsets,
-          ),
-          suffixMode: suffixMode,
-          placeholder: placeholder,
-          placeholderStyle: placeholderStyle,
-          padding: padding,
-          onChanged: onChanged,
-          onSubmitted: onSubmitted,
+  /// To customize the X-Mark (suffix) action, pass a [VoidCallback] to
+  /// [onSuffixTap]. This defaults to clearing the text.
+  const CupertinoSearchTextField({
+    Key? key,
+    this.controller,
+    this.onChanged,
+    this.onSubmitted,
+    this.style,
+    this.placeholder = 'Search',
+    this.placeholderStyle,
+    this.decoration,
+    this.backgroundColor = CupertinoColors.tertiarySystemFill,
+    this.borderRadius = const BorderRadius.all(Radius.circular(9.0)),
+    this.padding = const EdgeInsets.fromLTRB(3.8, 8, 5, 8),
+    this.itemColor = CupertinoColors.secondaryLabel,
+    this.itemSize = 20.0,
+    this.prefixInsets = const EdgeInsets.fromLTRB(6, 0, 0, 4),
+    this.suffixInsets = const EdgeInsets.fromLTRB(0, 0, 5, 2),
+    this.suffixIcon = const Icon(CupertinoIcons.xmark_circle_fill),
+    this.suffixMode = OverlayVisibilityMode.editing,
+    this.onSuffixTap,
+  }) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _CupertinoSearchTextFieldState();
+
+  /// Similar to [CupertinoTextField], to provide a prefilled text entry, pass
+  /// in a [TextEditingController] with an initial value to the [controller]
+  /// parameter.
+  final TextEditingController? controller;
+
+  /// The [onChanged] parameter takes a [ValueChanged<String>] which is invoked
+  /// upon a change in the text field's value.
+  final ValueChanged<String>? onChanged;
+
+  /// The [onSubmitted] parameter takes a [ValueChanged<String>] which is invoked
+  /// when the keyboard submits.
+  final ValueChanged<String>? onSubmitted;
+
+  /// The [style] property allows changing the style of the text. Defaults
+  /// to the gray [CupertinoColors.secondaryLabel] iOS color.
+  final TextStyle? style;
+
+  /// The [placeholder] parameter lets you provide a hint placeholder text that
+  /// appears when the text entry is empty. This defaults to 'Search'.
+  // TODO(DanielEdrisian): Localize the 'Search' placeholder.
+  final String? placeholder;
+
+  /// The [placeholderStyle] property allows changing the style of the
+  /// placeholder of the textfield. Defaults to the gray
+  /// [CupertinoColors.secondaryLabel] iOS color.
+  final TextStyle? placeholderStyle;
+
+  /// The [decoration] property lets you set the decoration for the text field.
+  /// This property is automatically set using the [backgroundColor] and
+  /// [borderRadius] properties, which both have default values. Therefore,
+  /// [decoration] has a default value upon building the widget. It is designed
+  /// to mimic the look of a `UISearchTextField`.
+  final BoxDecoration? decoration;
+
+  /// The [backgroundColor] property lets you set the [decoration] property's
+  /// background color. Defaults to the translucent
+  /// [CupertinoColors.tertiarySystemFill] iOS color.
+  final Color? backgroundColor;
+
+  /// The [borderRadius] property lets you set the [decoration] property's
+  /// border radius. Defaults to 9 px circular corner radius.
+  // TODO(DanielEdrisian): Must make border radius continuous, see
+  // https://github.com/flutter/flutter/issues/13914.
+  final BorderRadius borderRadius;
+
+  /// The [padding] property lets you set the padding insets for the text and
+  /// placeholder. Defaults to padding that replicates the `UISearchTextField`
+  /// look. The inset values were determined using the comparison tool in
+  /// https://github.com/flutter/platform_tests/.
+  final EdgeInsets padding;
+  final Color? itemColor;
+  final double itemSize;
+
+  /// The [prefixInsets] property lets you set the padding insets for the
+  /// suffix. Defaults to padding that replicates the `UISearchTextField` suffix
+  /// look. The inset values were determined using the comparison tool in
+  /// https://github.com/flutter/platform_tests/.
+  final EdgeInsets prefixInsets;
+
+  /// The [suffixInsets] property lets you set the padding insets for the
+  /// prefix. Defaults to padding that replicates the `UISearchTextField` prefix
+  /// look. The inset values were determined using the comparison tool in
+  /// https://github.com/flutter/platform_tests/.
+  final EdgeInsets suffixInsets;
+
+  /// The [suffixIcon] property sets the suffix widget's icon. Defaults to
+  /// the X-Mark [CupertinoIcons.xmark_circle_fill]. The suffix is customizable
+  /// so that users can override it with other options, like a bookmark icon.
+  final Icon suffixIcon;
+
+  /// The [suffixMode] property dictates when the X-Mark (suffix) should be
+  /// visible, a.k.a. only on when editing, not editing, on always, or on never.
+  /// This defaults to only on when editing.
+  final OverlayVisibilityMode suffixMode;
+
+  /// The [onSuffixTap] property lets you customize the X-Mark (suffix) action.
+  /// This defaults to clearing the text. The suffix action is customizable
+  /// so that users can override it with other functionality, that isn't
+  /// necessarily clearing text.
+  final VoidCallback? onSuffixTap;
+}
+
+class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> {
+  @override
+  Widget build(BuildContext context) {
+    // The icon size will be scaled by a factor of the accessibility text scale,
+    // to follow the behavior of `UISearchTextField`.
+    final double scaledIconSize =
+        MediaQuery.textScaleFactorOf(context) * widget.itemSize;
+
+    // If decoration was not provided, create a decoration with the provided
+    // background color and border radius (which both have default values).
+    final BoxDecoration decoration = widget.decoration ??
+        BoxDecoration(
+          color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
+          borderRadius: widget.borderRadius,
         );
+
+    final TextStyle placeholderStyle = widget.placeholderStyle ??
+        TextStyle(
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.secondaryLabel, context),
+        );
+
+    final Color? itemColor =
+        CupertinoDynamicColor.resolve(widget.itemColor, context);
+
+    final IconThemeData iconThemeData =
+        IconThemeData(color: itemColor, size: scaledIconSize);
+
+    final Widget prefix = Padding(
+      child: IconTheme(
+          child: const Icon(CupertinoIcons.search), data: iconThemeData),
+      padding: widget.prefixInsets,
+    );
+
+    // TODO(DanielEdrisian): Replace [GestureDetector] with a [CupertinoButton].
+    // The reason why I went with [GestureDetector] was because
+    // [CupertinoButton] was messing with the content size of the entire
+    // search field. Must find a way to get it working with a button, so that
+    // touch-down has that fading effect.
+    final Widget suffix = Padding(
+      child: GestureDetector(
+        child: IconTheme(child: widget.suffixIcon, data: iconThemeData),
+        onTap: widget.onSuffixTap ??
+            () {
+              widget.controller!.text = '';
+              if (widget.onChanged != null) {
+                widget.onChanged!('');
+              }
+            },
+      ),
+      padding: widget.suffixInsets,
+    );
+
+    return CupertinoTextField(
+      controller: widget.controller,
+      decoration: decoration,
+      style: widget.style,
+      prefix: prefix,
+      suffix: suffix,
+      suffixMode: widget.suffixMode,
+      placeholder: widget.placeholder,
+      placeholderStyle: placeholderStyle,
+      padding: widget.padding,
+      onChanged: widget.onChanged,
+      onSubmitted: widget.onSubmitted,
+    );
+  }
 }
