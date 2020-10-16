@@ -8,9 +8,9 @@
 #include <memory>
 #include <utility>
 
-#include "filesystem/file.h"
-#include "filesystem/path.h"
 #include "tonic/common/macros.h"
+#include "tonic/filesystem/filesystem/file.h"
+#include "tonic/filesystem/filesystem/path.h"
 #include "tonic/parsers/packages_map.h"
 
 namespace tonic {

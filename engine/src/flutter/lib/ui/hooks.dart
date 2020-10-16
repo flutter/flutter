@@ -53,14 +53,14 @@ void _updateWindowMetrics(
   _invoke(window.onMetricsChanged, window._onMetricsChangedZone);
 }
 
-typedef _LocaleClosure = String? Function();
-
-String? _localeClosure() {
+String _localeClosure() {
   if (window.locale == null) {
-    return null;
+    return '';
   }
   return window.locale.toString();
 }
+
+typedef _LocaleClosure = String Function();
 
 @pragma('vm:entry-point')
 // ignore: unused_element
@@ -210,9 +210,7 @@ void _drawFrame() {
 }
 
 // ignore: always_declare_return_types, prefer_generic_function_type_aliases
-typedef _UnaryFunction(Null args);
-// ignore: always_declare_return_types, prefer_generic_function_type_aliases
-typedef _BinaryFunction(Null args, Null message);
+typedef _ListStringArgFunction(List<String> args);
 
 @pragma('vm:entry-point')
 // ignore: unused_element
@@ -221,11 +219,7 @@ void _runMainZoned(Function startMainIsolateFunction,
                    List<String> args) {
   startMainIsolateFunction((){
     runZonedGuarded<void>(() {
-      if (userMainFunction is _BinaryFunction) {
-        // This seems to be undocumented but supported by the command line VM.
-        // Let's do the same in case old entry-points are ported to Flutter.
-        (userMainFunction as dynamic)(args, '');
-      } else if (userMainFunction is _UnaryFunction) {
+      if (userMainFunction is _ListStringArgFunction) {
         (userMainFunction as dynamic)(args);
       } else {
         userMainFunction();

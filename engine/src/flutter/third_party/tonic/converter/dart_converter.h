@@ -6,10 +6,12 @@
 #define LIB_CONVERTER_TONIC_DART_CONVERTER_H_
 
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "tonic/common/macros.h"
+#include "tonic/logging/dart_error.h"
 
 namespace tonic {
 
@@ -279,15 +281,80 @@ struct DartConverter<const char*> {
 ////////////////////////////////////////////////////////////////////////////////
 // Collections
 
+inline Dart_Handle LookupNonNullableType(const std::string& library_name,
+                                         const std::string& type_name) {
+  auto library =
+      Dart_LookupLibrary(DartConverter<std::string>::ToDart(library_name));
+  if (LogIfError(library)) {
+    return library;
+  }
+  auto type_string = DartConverter<std::string>::ToDart(type_name);
+  if (LogIfError(type_string)) {
+    return type_string;
+  }
+  auto type = Dart_GetNonNullableType(library, type_string, 0, nullptr);
+  if (LogIfError(type)) {
+    return type;
+  }
+  return type;
+}
+
+template <typename T,
+          std::enable_if_t<std::is_same<std::string, T>::value, int> = 0>
+Dart_Handle ToDartTypeHandle() {
+  return LookupNonNullableType("dart:core", "String");
+}
+
+template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+Dart_Handle ToDartTypeHandle() {
+  return LookupNonNullableType("dart:core", "int");
+}
+
+template <typename T,
+          std::enable_if_t<std::is_floating_point<T>::value, int> = 0>
+Dart_Handle ToDartTypeHandle() {
+  return LookupNonNullableType("dart:core", "double");
+}
+
+template <typename T>
+Dart_Handle CreateZeroInitializedDartObject(
+    Dart_Handle type_handle_or_null = ::Dart_Null()) {
+  if constexpr (std::is_same<std::string, T>::value) {
+    return ::Dart_EmptyString();
+  } else if constexpr (std::is_integral<T>::value) {
+    return ::Dart_NewIntegerFromUint64(0u);
+  } else if constexpr (std::is_floating_point<T>::value) {
+    return ::Dart_NewDouble(0.0);
+  } else {
+    auto object = ::Dart_New(type_handle_or_null, ::Dart_Null(), 0, nullptr);
+    LogIfError(object);
+    return object;
+  }
+  return ::Dart_Null();
+}
+
 template <typename T, typename Enable = void>
 struct DartListFactory {
-  static Dart_Handle NewList(intptr_t length) { return Dart_NewList(length); }
-};
-
-template <>
-struct DartListFactory<std::string> {
-  static Dart_Handle NewList(intptr_t length) {
-    return Dart_NewListOf(Dart_CoreType_String, length);
+  static Dart_Handle NewList(Dart_Handle type_handle, intptr_t length) {
+    bool is_nullable = false;
+    auto is_nullable_handle = ::Dart_IsNullableType(type_handle, &is_nullable);
+    if (LogIfError(is_nullable_handle)) {
+      return is_nullable_handle;
+    }
+    if (is_nullable) {
+      auto list = ::Dart_NewListOfType(type_handle, length);
+      LogIfError(list);
+      return list;
+    } else {
+      auto sentinel = CreateZeroInitializedDartObject<T>(type_handle);
+      if (LogIfError(sentinel)) {
+        return sentinel;
+      }
+      auto list = ::Dart_NewListOfTypeFilled(type_handle, sentinel, length);
+      LogIfError(list);
+      return list;
+    }
+    return ::Dart_Null();
   }
 };
 
@@ -297,7 +364,8 @@ struct DartConverter<std::vector<T>> {
   using ConverterType = typename DartConverterTypes<T>::ConverterType;
 
   static Dart_Handle ToDart(const std::vector<ValueType>& val) {
-    Dart_Handle list = DartListFactory<ValueType>::NewList(val.size());
+    Dart_Handle list = DartListFactory<ValueType>::NewList(
+        ToDartTypeHandle<ValueType>(), val.size());
     if (Dart_IsError(list))
       return list;
     for (size_t i = 0; i < val.size(); i++) {

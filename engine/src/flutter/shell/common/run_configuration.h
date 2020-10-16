@@ -14,7 +14,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/unique_fd.h"
-#include "flutter/shell/common/isolate_configuration.h"
+#include "flutter/runtime/isolate_configuration.h"
 
 namespace flutter {
 

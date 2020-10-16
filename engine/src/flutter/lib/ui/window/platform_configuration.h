@@ -19,20 +19,6 @@
 #include "flutter/lib/ui/window/window.h"
 #include "third_party/tonic/dart_persistent_value.h"
 
-namespace tonic {
-class DartLibraryNatives;
-
-// So tonic::ToDart<std::vector<int64_t>> returns List<int> instead of
-// List<dynamic>.
-template <>
-struct DartListFactory<int64_t> {
-  static Dart_Handle NewList(intptr_t length) {
-    return Dart_NewListOf(Dart_CoreType_Int, length);
-  }
-};
-
-}  // namespace tonic
-
 namespace flutter {
 class FontCollection;
 class PlatformMessage;

@@ -32,13 +32,7 @@ void testIsolateShutdown() {  }
 
 @pragma('vm:entry-point')
 void testCanSaveCompilationTrace() {
-  List<int> trace;
-  try {
-    trace = saveCompilationTrace();
-  } catch (exception) {
-    print('Could not save compilation trace: ' + exception);
-  }
-  notifyResult(trace != null && trace.isNotEmpty);
+  notifyResult(saveCompilationTrace().isNotEmpty);
 }
 
 void notifyResult(bool success) native 'NotifyNative';
@@ -58,5 +52,44 @@ void testCanLaunchSecondaryIsolate() {
 
 @pragma('vm:entry-point')
 void testCanRecieveArguments(List<String> args) {
-  notifyResult(args != null && args.length == 1 && args[0] == 'arg1');
+  notifyResult(args.length == 1 && args[0] == 'arg1');
+}
+
+@pragma('vm:entry-point')
+void trampoline() {
+  notifyNative();
+}
+
+void notifySuccess(bool success) native 'NotifySuccess';
+
+@pragma('vm:entry-point')
+void testCanConvertEmptyList(List<int> args){
+  notifySuccess(args.length == 0);
+}
+
+@pragma('vm:entry-point')
+void testCanConvertListOfStrings(List<String> args){
+  notifySuccess(args.length == 4 &&
+                args[0] == 'tinker' &&
+                args[1] == 'tailor' &&
+                args[2] == 'soldier' &&
+                args[3] == 'sailor');
+}
+
+@pragma('vm:entry-point')
+void testCanConvertListOfDoubles(List<double> args){
+  notifySuccess(args.length == 4 &&
+                args[0] == 1.0 &&
+                args[1] == 2.0 &&
+                args[2] == 3.0 &&
+                args[3] == 4.0);
+}
+
+@pragma('vm:entry-point')
+void testCanConvertListOfInts(List<int> args){
+  notifySuccess(args.length == 4 &&
+                args[0] == 1 &&
+                args[1] == 2 &&
+                args[2] == 3 &&
+                args[3] == 4);
 }
