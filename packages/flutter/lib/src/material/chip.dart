@@ -262,9 +262,12 @@ abstract class DeletableChipAttributes {
   /// [deleteButtonTooltipMessage].
   ///
   /// Defaults to `true`.
-  bool get useDeleteButtonTooltip;
+  bool? get useDeleteButtonTooltip;
 
   /// The message to be used for the chip's delete button tooltip.
+  ///
+  /// Will be shown only if this chip's [useDeleteButtonTooltip] is `true`
+  /// (the default).
   String? get deleteButtonTooltipMessage;
 }
 
@@ -619,7 +622,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   @override
   final Color? deleteIconColor;
   @override
-  final bool useDeleteButtonTooltip;
+  final bool? useDeleteButtonTooltip;
   @override
   final String? deleteButtonTooltipMessage;
   @override
@@ -782,7 +785,7 @@ class InputChip extends StatelessWidget
   @override
   final Color? deleteIconColor;
   @override
-  final bool useDeleteButtonTooltip;
+  final bool? useDeleteButtonTooltip;
   @override
   final String? deleteButtonTooltipMessage;
   @override
@@ -1508,7 +1511,7 @@ class RawChip extends StatefulWidget
   @override
   final Color? deleteIconColor;
   @override
-  final bool useDeleteButtonTooltip;
+  final bool? useDeleteButtonTooltip;
   @override
   final String? deleteButtonTooltipMessage;
   @override
@@ -1588,6 +1591,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   final GlobalKey deleteIconKey = GlobalKey();
 
   bool get hasDeleteButton => widget.onDeleted != null;
+  bool get hasDeleteButtonTooltip => widget.useDeleteButtonTooltip ?? true;
   bool get hasAvatar => widget.avatar != null;
 
   bool get canTap {
@@ -1782,7 +1786,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   }
 
   Widget? _wrapWithTooltip(String? tooltip, VoidCallback? callback, Widget? child) {
-    if(!widget.useDeleteButtonTooltip){
+    if(!hasDeleteButtonTooltip){
       return child;
     }
     if (child == null || callback == null || tooltip == null) {
