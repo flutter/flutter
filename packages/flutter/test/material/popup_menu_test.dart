@@ -1696,6 +1696,38 @@ void main() {
       lessThan(600 - windowPaddingBottom), // Device height is 600.
     );
   });
+
+  testWidgets('iconSize parameter tests', (WidgetTester tester) async {
+    final PopupMenuItemBuilder<PopupMenuItem<String>> itemBuilder = (BuildContext _) {
+      return <PopupMenuEntry<PopupMenuItem<String>>>[];
+    };
+
+    Widget builder({required bool provideIconSize, double iconSize = 34}) {
+      final PopupMenuButton<PopupMenuItem<String>> popupMenuButton =
+        !provideIconSize
+          ? PopupMenuButton<PopupMenuItem<String>>(itemBuilder: itemBuilder)
+            : PopupMenuButton<PopupMenuItem<String>>(
+                itemBuilder: itemBuilder,
+                iconSize: iconSize,
+              );
+
+      return MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: popupMenuButton,
+          ),
+        ),
+      );
+    }
+
+    // iconSize is not provided so it should have its default values
+    await tester.pumpWidget(builder(provideIconSize: false));
+    expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 24);
+
+    // When provided, iconSize has the provided value
+    await tester.pumpWidget(builder(provideIconSize: true, iconSize: 50));
+    expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 50);
+  });
 }
 
 class TestApp extends StatefulWidget {
