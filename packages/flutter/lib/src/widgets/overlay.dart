@@ -187,11 +187,11 @@ class _OverlayEntryWidget extends StatefulWidget {
 }
 
 class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
-  VoidCallback? releaseDisposal;
+  VoidCallback? onUnmount;
 
   @override
   void initState() {
-    releaseDisposal = widget.entry.lockDisposal?.call();
+    onUnmount = widget.entry.onWidgetStatusChanged?.call();
     super.initState();
   }
 
@@ -206,7 +206,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   @protected
   @override
   void dispose() {
-    releaseDisposal?.call();
+    onUnmount?.call();
     super.dispose();
   }
 

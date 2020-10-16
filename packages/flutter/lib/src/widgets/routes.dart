@@ -1519,8 +1519,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
-    yield _modalBarrier = OverlayEntry(builder: _buildModalBarrier, lockDisposal: lockDisposal);
-    yield _modalScope = OverlayEntry(builder: _buildModalScope, maintainState: maintainState, lockDisposal: lockDisposal);
+    yield _modalBarrier = OverlayEntry(builder: _buildModalBarrier, onWidgetStatusChanged: lockDisposal);
+    yield _modalScope = OverlayEntry(builder: _buildModalScope, maintainState: maintainState, onWidgetStatusChanged: lockDisposal);
   }
 
   @override
