@@ -288,7 +288,7 @@ class FlutterDevice {
     }, onDone: () {
       _isListeningForObservatoryUri = false;
       if (!completer.isCompleted && !isWaitingForVm) {
-        completer.completeError('connection to device ended too early');
+        completer.completeError(Exception('connection to device ended too early'));
       }
     });
     _isListeningForObservatoryUri = true;
@@ -670,7 +670,6 @@ class FlutterDevice {
   }) async {
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device.name}...',
-      timeout: timeoutConfiguration.fastOperation,
     );
     UpdateFSReport report;
     try {
@@ -878,7 +877,6 @@ abstract class ResidentRunner {
       processManager: globals.processManager,
       projectDir: globals.fs.currentDirectory,
     );
-    globals.logger.printTrace('Starting incremental build...');
     _lastBuild = await globals.buildSystem.buildIncremental(
       const GenerateLocalizationsTarget(),
       _environment,
@@ -1089,7 +1087,6 @@ abstract class ResidentRunner {
 
     final Status status = globals.logger.startProgress(
       'Taking screenshot for ${device.device.name}...',
-      timeout: timeoutConfiguration.fastOperation,
     );
     final File outputFile = globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
@@ -1237,7 +1234,6 @@ abstract class ResidentRunner {
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
         'Waiting for ${device.device.name} to report its views...',
-        timeout: const Duration(milliseconds: 200),
       );
       try {
         await device.vmService.getFlutterViews();

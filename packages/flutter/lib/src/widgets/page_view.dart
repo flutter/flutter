@@ -341,9 +341,17 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     RenderObject? targetRenderObject,
   }) {
     // Since the _PagePosition is intended to cover the available space within
-    // its viewport, stop trying to any scroll, otherwise, could end up changing
-    // which page is visible and moving the render object out of the viewport.
-    return Future<void>.value();
+    // its viewport, stop trying to move the target render object to the center
+    // - otherwise, could end up changing which page is visible and moving the
+    // targetRenderObject out of the viewport.
+    return super.ensureVisible(
+      object,
+      alignment: alignment,
+      duration: duration,
+      curve: curve,
+      alignmentPolicy: alignmentPolicy,
+      targetRenderObject: null,
+    );
   }
 
   @override
@@ -580,6 +588,10 @@ class PageView extends StatefulWidget {
   /// children because constructing the [List] requires doing work for every
   /// child that could possibly be displayed in the page view, instead of just
   /// those children that are actually visible.
+  ///
+  /// Like other widgets in the framework, this widget expects that
+  /// the [children] list will not be mutated after it has been passed in here.
+  /// See the documentation at [SliverChildListDelegate.children] for more details.
   ///
   /// {@template flutter.widgets.pageView.allowImplicitScrolling}
   /// The [allowImplicitScrolling] parameter must not be null. If true, the

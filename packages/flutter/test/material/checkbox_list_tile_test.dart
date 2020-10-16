@@ -239,4 +239,24 @@ void main() {
 
     expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
   });
+
+  testWidgets('CheckboxListTile respects tileColor', (WidgetTester tester) async {
+    const Color tileColor = Colors.black;
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: CheckboxListTile(
+            value: false,
+            onChanged: null,
+            title: Text('Title'),
+            tileColor: tileColor,
+          ),
+        ),
+      ),
+    );
+
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, equals(tileColor));
+  });
 }

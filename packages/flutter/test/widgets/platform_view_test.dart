@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('!chrome')
 import 'dart:async';
 import 'dart:typed_data';
@@ -65,7 +63,7 @@ void main() {
       );
 
       final FakeAndroidPlatformView fakeView = viewsController.views.first;
-      final Uint8List rawCreationParams = fakeView.creationParams;
+      final Uint8List rawCreationParams = fakeView.creationParams!;
       final ByteData byteData = ByteData.view(
           rawCreationParams.buffer,
           rawCreationParams.offsetInBytes,
@@ -141,7 +139,7 @@ void main() {
         ]),
       );
 
-      viewsController.resizeCompleter.complete();
+      viewsController.resizeCompleter!.complete();
       await tester.pump();
 
       expect(
@@ -946,7 +944,7 @@ void main() {
       expect(semantics.transform, Matrix4.translationValues(600, 500, 0));
       expect(semantics.childrenCount, 0);
 
-      viewsController.createCompleter.complete();
+      viewsController.createCompleter!.complete();
       await tester.pumpAndSettle();
 
       expect(semantics.platformViewId, currentViewId + 1);
@@ -992,8 +990,8 @@ void main() {
           ),
       );
       final Element containerElement = tester.element(find.byKey(containerKey));
-      final FocusNode androidViewFocusNode = androidViewFocusWidget.focusNode;
-      final FocusNode containerFocusNode = Focus.of(containerElement);
+      final FocusNode androidViewFocusNode = androidViewFocusWidget.focusNode!;
+      final FocusNode containerFocusNode = Focus.of(containerElement)!;
 
       containerFocusNode.requestFocus();
 
@@ -1036,16 +1034,16 @@ void main() {
         ),
       );
 
-      viewsController.createCompleter.complete();
+      viewsController.createCompleter!.complete();
 
 
       final Element containerElement = tester.element(find.byKey(containerKey));
-      final FocusNode containerFocusNode = Focus.of(containerElement);
+      final FocusNode containerFocusNode = Focus.of(containerElement)!;
 
       containerFocusNode.requestFocus();
       await tester.pump();
 
-      int lastPlatformViewTextClient;
+      late int lastPlatformViewTextClient;
       SystemChannels.textInput.setMockMethodCallHandler((MethodCall call) {
         if (call.method == 'TextInput.setPlatformViewClient') {
           lastPlatformViewTextClient = call.arguments as int;
@@ -1085,10 +1083,10 @@ void main() {
         ),
       );
 
-      viewsController.createCompleter.complete();
+      viewsController.createCompleter!.complete();
 
       final Element containerElement = tester.element(find.byKey(containerKey));
-      final FocusNode containerFocusNode = Focus.of(containerElement);
+      final FocusNode containerFocusNode = Focus.of(containerElement)!;
 
       containerFocusNode.requestFocus();
       await tester.pump();
@@ -1149,10 +1147,48 @@ void main() {
         expect(renderObject.clipBehavior, clip);
       }
     });
+
+    testWidgets('clip is handled correctly during resizing', (WidgetTester tester) async {
+      // Regressing test for https://github.com/flutter/flutter/issues/67343
+      Widget buildView(double width, double height, Clip clipBehavior) {
+        return Center(
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: AndroidView(
+              viewType: 'webview',
+              layoutDirection: TextDirection.ltr,
+              clipBehavior: clipBehavior,
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildView(200.0, 200.0, Clip.none));
+      // Resize the view.
+      await tester.pumpWidget(buildView(100.0, 100.0, Clip.none));
+      // No clip happen when the clip behavior is `Clip.none` .
+      expect(tester.layers.whereType<ClipRectLayer>(), hasLength(0));
+
+      // No clip when only the clip behavior changes while the size remains the same.
+      await tester.pumpWidget(buildView(100.0, 100.0, Clip.hardEdge));
+      expect(tester.layers.whereType<ClipRectLayer>(), hasLength(0));
+
+      // Resize trigger clip when the clip behavior is not `Clip.none` .
+      await tester.pumpWidget(buildView(50.0, 100.0, Clip.hardEdge));
+      expect(tester.layers.whereType<ClipRectLayer>(), hasLength(1));
+      ClipRectLayer clipRectLayer = tester.layers.whereType<ClipRectLayer>().first;
+      expect(clipRectLayer.clipRect, const Rect.fromLTWH(0.0, 0.0, 50.0, 100.0));
+
+      await tester.pumpWidget(buildView(50.0, 50.0, Clip.hardEdge));
+      expect(tester.layers.whereType<ClipRectLayer>(), hasLength(1));
+      clipRectLayer = tester.layers.whereType<ClipRectLayer>().first;
+      expect(clipRectLayer.clipRect, const Rect.fromLTWH(0.0, 0.0, 50.0, 50.0));
+    });
   });
 
   group('AndroidViewSurface', () {
-    FakeAndroidViewController controller;
+    late FakeAndroidViewController controller;
 
     setUp(() {
       controller = FakeAndroidViewController(0);
@@ -1276,7 +1312,7 @@ void main() {
         ),
       );
 
-      viewsController.creationDelay.complete();
+      viewsController.creationDelay!.complete();
 
       expect(
         viewsController.views,
@@ -1340,7 +1376,7 @@ void main() {
       );
 
       final FakeUiKitView fakeView = viewsController.views.first;
-      final Uint8List rawCreationParams = fakeView.creationParams;
+      final Uint8List rawCreationParams = fakeView.creationParams!;
       final ByteData byteData = ByteData.view(
           rawCreationParams.buffer,
           rawCreationParams.offsetInBytes,
@@ -1956,7 +1992,7 @@ void main() {
   });
 
   group('Common PlatformView', () {
-    FakePlatformViewController controller;
+    late FakePlatformViewController controller;
 
     setUp((){
       controller = FakePlatformViewController(0);
@@ -2219,9 +2255,9 @@ void main() {
 
     testWidgets('PlatformViewLink Widget init, should create a SizedBox widget before onPlatformViewCreated and a PlatformViewSurface after', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      int createdPlatformViewId;
+      late int createdPlatformViewId;
 
-      PlatformViewCreatedCallback onPlatformViewCreatedCallBack;
+      late PlatformViewCreatedCallback onPlatformViewCreatedCallBack;
 
       final PlatformViewLink platformViewLink = PlatformViewLink(
         viewType: 'webview',
@@ -2251,7 +2287,7 @@ void main() {
     });
 
     testWidgets('PlatformViewLink Widget dispose', (WidgetTester tester) async {
-      FakePlatformViewController disposedController;
+      late FakePlatformViewController disposedController;
       final PlatformViewLink platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params){
@@ -2416,8 +2452,8 @@ void main() {
 
     testWidgets('PlatformViewLink manages the focus properly', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
-      FakePlatformViewController controller;
-      ValueChanged<bool> focusChanged;
+      late FakePlatformViewController controller;
+      late ValueChanged<bool> focusChanged;
       final PlatformViewLink platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params){
@@ -2453,9 +2489,9 @@ void main() {
               matching: find.byType(Focus),
           ),
       );
-      final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode;
+      final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode!;
       final Element containerElement = tester.element(find.byKey(containerKey));
-      final FocusNode containerFocusNode = Focus.of(containerElement);
+      final FocusNode containerFocusNode = Focus.of(containerElement)!;
 
       containerFocusNode.requestFocus();
       await tester.pump();

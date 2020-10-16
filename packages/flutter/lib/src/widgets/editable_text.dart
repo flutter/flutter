@@ -2233,7 +2233,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       // Always pass the text through the whitespace directionality formatter to
       // maintain expected behavior with carets on trailing whitespace.
-      value = _whitespaceFormatter.formatEditUpdate(_value, value);
+      // TODO(LongCatIsLooong): The if statement here is for retaining the
+      // previous behavior. The input formatter logic will be updated in an
+      // upcoming PR.
+      if (widget.inputFormatters?.isNotEmpty ?? false)
+        value = _whitespaceFormatter.formatEditUpdate(_value, value);
     }
 
     // Put all optional user callback invocations in a batch edit to prevent

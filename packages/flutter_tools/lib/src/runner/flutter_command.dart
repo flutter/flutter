@@ -159,6 +159,7 @@ abstract class FlutterCommand extends Command<void> {
   bool get hidden => deprecated;
 
   bool _excludeDebug = false;
+  bool _excludeRelease = false;
 
   BuildMode _defaultBuildMode;
 
@@ -451,10 +452,16 @@ abstract class FlutterCommand extends Command<void> {
   }
   Duration _deviceDiscoveryTimeout;
 
-  void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false, bool excludeDebug = false }) {
+  void addBuildModeFlags({
+    bool defaultToRelease = true,
+    bool verboseHelp = false,
+    bool excludeDebug = false,
+    bool excludeRelease = false,
+  }) {
     // A release build must be the default if a debug build is not possible.
     assert(defaultToRelease || !excludeDebug);
     _excludeDebug = excludeDebug;
+    _excludeRelease = excludeRelease;
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     if (!excludeDebug) {
@@ -465,13 +472,15 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('profile',
       negatable: false,
       help: 'Build a version of your app specialized for performance profiling.');
-    argParser.addFlag('release',
-      negatable: false,
-      help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
-    argParser.addFlag('jit-release',
-      negatable: false,
-      hide: !verboseHelp,
-      help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
+    if (!excludeRelease) {
+      argParser.addFlag('release',
+        negatable: false,
+        help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
+      argParser.addFlag('jit-release',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
+    }
   }
 
   void addSplitDebugInfoOption() {
@@ -628,11 +637,13 @@ abstract class FlutterCommand extends Command<void> {
     // No debug when _excludeDebug is true.
     // If debug is not excluded, then take the command line flag.
     final bool debugResult = !_excludeDebug && boolArg('debug');
+    final bool jitReleaseResult = !_excludeRelease && boolArg('jit-release');
+    final bool releaseResult = !_excludeRelease && boolArg('release');
     final List<bool> modeFlags = <bool>[
       debugResult,
-      boolArg('jit-release'),
+      jitReleaseResult,
       boolArg('profile'),
-      boolArg('release'),
+      releaseResult,
     ];
     if (modeFlags.where((bool flag) => flag).length > 1) {
       throw UsageException('Only one of --debug, --profile, --jit-release, '
@@ -644,10 +655,10 @@ abstract class FlutterCommand extends Command<void> {
     if (boolArg('profile')) {
       return BuildMode.profile;
     }
-    if (boolArg('release')) {
+    if (releaseResult) {
       return BuildMode.release;
     }
-    if (boolArg('jit-release')) {
+    if (jitReleaseResult) {
       return BuildMode.jitRelease;
     }
     return _defaultBuildMode;
@@ -820,7 +831,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void setupApplicationPackages() {
-    applicationPackages ??= ApplicationPackageStore();
+    applicationPackages ??= ApplicationPackageFactory.instance;
   }
 
   /// The path to send to Google Analytics. Return null here to disable
@@ -1146,7 +1157,7 @@ abstract class FlutterCommand extends Command<void> {
     return help;
   }
 
-  ApplicationPackageStore applicationPackages;
+  ApplicationPackageFactory applicationPackages;
 
   /// Gets the parsed command-line option named [name] as `bool`.
   bool boolArg(String name) => argResults[name] as bool;
