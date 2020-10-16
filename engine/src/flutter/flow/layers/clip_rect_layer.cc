@@ -36,7 +36,7 @@ void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
 
-void ClipRectLayer::UpdateScene(std::shared_ptr<SceneUpdateContext> context) {
+void ClipRectLayer::UpdateScene(SceneUpdateContext& context) {
   TRACE_EVENT0("flutter", "ClipRectLayer::UpdateScene");
   FML_DCHECK(needs_system_composite());
 

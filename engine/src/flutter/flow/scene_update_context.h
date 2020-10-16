@@ -46,15 +46,15 @@ class SceneUpdateContext : public flutter::ExternalViewEmbedder {
  public:
   class Entity {
    public:
-    Entity(std::shared_ptr<SceneUpdateContext> context);
+    Entity(SceneUpdateContext& context);
     virtual ~Entity();
 
-    std::shared_ptr<SceneUpdateContext> context() { return context_; }
+    SceneUpdateContext& context() { return context_; }
     scenic::EntityNode& entity_node() { return entity_node_; }
     virtual scenic::ContainerNode& embedder_node() { return entity_node_; }
 
    private:
-    std::shared_ptr<SceneUpdateContext> context_;
+    SceneUpdateContext& context_;
     Entity* const previous_entity_;
 
     scenic::EntityNode entity_node_;
@@ -62,9 +62,8 @@ class SceneUpdateContext : public flutter::ExternalViewEmbedder {
 
   class Transform : public Entity {
    public:
-    Transform(std::shared_ptr<SceneUpdateContext> context,
-              const SkMatrix& transform);
-    Transform(std::shared_ptr<SceneUpdateContext> context,
+    Transform(SceneUpdateContext& context, const SkMatrix& transform);
+    Transform(SceneUpdateContext& context,
               float scale_x,
               float scale_y,
               float scale_z);
@@ -80,7 +79,7 @@ class SceneUpdateContext : public flutter::ExternalViewEmbedder {
     // When layer is not nullptr, the frame is associated with a layer subtree
     // rooted with that layer. The frame may then create a surface that will be
     // retained for that layer.
-    Frame(std::shared_ptr<SceneUpdateContext> context,
+    Frame(SceneUpdateContext& context,
           const SkRRect& rrect,
           SkColor color,
           SkAlpha opacity,
@@ -105,8 +104,7 @@ class SceneUpdateContext : public flutter::ExternalViewEmbedder {
 
   class Clip : public Entity {
    public:
-    Clip(std::shared_ptr<SceneUpdateContext> context,
-         const SkRect& shape_bounds);
+    Clip(SceneUpdateContext& context, const SkRect& shape_bounds);
     ~Clip() = default;
   };
 
