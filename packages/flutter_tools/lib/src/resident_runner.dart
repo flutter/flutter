@@ -877,7 +877,6 @@ abstract class ResidentRunner {
       processManager: globals.processManager,
       projectDir: globals.fs.currentDirectory,
     );
-    globals.logger.printTrace('Starting incremental build...');
     _lastBuild = await globals.buildSystem.buildIncremental(
       const GenerateLocalizationsTarget(),
       _environment,

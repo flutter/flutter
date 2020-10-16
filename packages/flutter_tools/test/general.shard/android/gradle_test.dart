@@ -1457,13 +1457,14 @@ plugin1=${plugin1.path}
 
       fileSystem.file('foo/snapshot.arm64-v8a.json')
         ..createSync(recursive: true)
-        ..writeAsStringSync(r'''[
-{
-  "l": "dart:_internal",
-  "c": "SubListIterable",
-  "n": "[Optimized] skip",
-  "s": 2400
-}
+        ..writeAsStringSync(r'''
+[
+  {
+    "l": "dart:_internal",
+    "c": "SubListIterable",
+    "n": "[Optimized] skip",
+    "s": 2400
+  }
 ]''');
       fileSystem.file('foo/trace.arm64-v8a.json')
         ..createSync(recursive: true)

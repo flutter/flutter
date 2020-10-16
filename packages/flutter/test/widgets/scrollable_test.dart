@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -16,11 +14,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<void> pumpTest(
   WidgetTester tester,
-  TargetPlatform platform, {
+  TargetPlatform? platform, {
   bool scrollable = true,
   bool reverse = false,
-  ScrollController controller,
-  Widget Function(Widget) wrapper,
+  ScrollController? controller,
 }) async {
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
@@ -84,7 +81,7 @@ double getScrollOffset(WidgetTester tester, {bool last = true}) {
 double getScrollVelocity(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
   final ScrollPosition position = viewport.offset as ScrollPosition;
-  return position.activity.velocity;
+  return position.activity!.velocity;
 }
 
 void resetScrollOffset(WidgetTester tester) {
@@ -775,7 +772,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity.delegate.goBallistic(4000);
+    Scrollable.of(find.byType(SizedBox).evaluate().first)!.position.activity!.delegate.goBallistic(4000);
 
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
@@ -804,7 +801,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)!.position;
     final SuperPessimisticScrollPhysics physics = position.physics as SuperPessimisticScrollPhysics;
 
     expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
@@ -817,7 +814,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    position.activity.delegate.goBallistic(4000);
+    position.activity!.delegate.goBallistic(4000);
 
     await tester.pumpAndSettle();
 
@@ -848,7 +845,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)!.position;
 
     expect(find.byKey(const ValueKey<String>('Cheap box 0')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
@@ -859,7 +856,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    position.activity.delegate.goBallistic(4000);
+    position.activity!.delegate.goBallistic(4000);
 
     await tester.pumpAndSettle();
 
@@ -1043,7 +1040,7 @@ void main() {
 
 // ignore: must_be_immutable
 class SuperPessimisticScrollPhysics extends ScrollPhysics {
-  SuperPessimisticScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+  SuperPessimisticScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   int count = 0;
 
@@ -1054,13 +1051,13 @@ class SuperPessimisticScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  ScrollPhysics applyTo(ScrollPhysics ancestor) {
+  ScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return SuperPessimisticScrollPhysics(parent: buildParent(ancestor));
   }
 }
 
 class ExtraSuperPessimisticScrollPhysics extends ScrollPhysics {
-  const ExtraSuperPessimisticScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+  const ExtraSuperPessimisticScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   @override
   bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
@@ -1068,7 +1065,7 @@ class ExtraSuperPessimisticScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  ScrollPhysics applyTo(ScrollPhysics ancestor) {
+  ScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return ExtraSuperPessimisticScrollPhysics(parent: buildParent(ancestor));
   }
 }

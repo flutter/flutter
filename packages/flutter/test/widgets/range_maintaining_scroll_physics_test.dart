@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class ExpandingBox extends StatefulWidget {
-  const ExpandingBox({this.collapsedSize, this.expandedSize});
+  const ExpandingBox({ required this.collapsedSize, required this.expandedSize });
 
   final double collapsedSize;
   final double expandedSize;
@@ -19,7 +17,7 @@ class ExpandingBox extends StatefulWidget {
 }
 
 class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClientMixin<ExpandingBox>{
-  double _height;
+  late double _height;
 
   @override
   void initState() {

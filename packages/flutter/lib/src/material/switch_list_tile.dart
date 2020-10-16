@@ -258,6 +258,7 @@ class SwitchListTile extends StatelessWidget {
     Key? key,
     required this.value,
     required this.onChanged,
+    this.tileColor,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
@@ -294,6 +295,7 @@ class SwitchListTile extends StatelessWidget {
     Key? key,
     required this.value,
     required this.onChanged,
+    this.tileColor,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
@@ -346,7 +348,7 @@ class SwitchListTile extends StatelessWidget {
   ///   title: Text('Selection'),
   /// )
   /// ```
-  final ValueChanged<bool?>? onChanged;
+  final ValueChanged<bool>? onChanged;
 
   /// The color to use when this switch is on.
   ///
@@ -373,6 +375,9 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
   final Color? inactiveTrackColor;
+
+  /// {@macro flutter.material.ListTile.tileColor}
+  final Color? tileColor;
 
   /// An image to use on the thumb of this switch when the switch is on.
   final ImageProvider? activeThumbImage;
@@ -503,6 +508,7 @@ class SwitchListTile extends StatelessWidget {
           selected: selected,
           autofocus: autofocus,
           shape: shape,
+          tileColor: tileColor,
         ),
       ),
     );

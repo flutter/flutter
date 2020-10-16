@@ -41,6 +41,17 @@ void main() {
     expect(logger.traceText, contains('.metadata version is malformed.'));
   });
 
+  testWithoutContext('project metadata fields are empty when file is not valid yaml', () {
+    metadataFile.writeAsStringSync(' channel: @something');
+    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, logger);
+    expect(projectMetadata.projectType, isNull);
+    expect(projectMetadata.versionChannel, isNull);
+    expect(projectMetadata.versionRevision, isNull);
+
+    expect(logger.traceText, contains('.metadata project_type version is malformed.'));
+    expect(logger.traceText, contains('.metadata version is malformed.'));
+  });
+
   testWithoutContext('projectType is populated when version is malformed', () {
     metadataFile
       ..createSync()
