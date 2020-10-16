@@ -16,7 +16,6 @@
 #include <lib/ui/scenic/cpp/view_ref_pair.h>
 #include <lib/zx/event.h>
 
-#include "flow/embedded_views.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/shell.h"
@@ -72,9 +71,9 @@ class Engine final {
 
   std::optional<SessionConnection> session_connection_;
   std::optional<VulkanSurfaceProducer> surface_producer_;
-  std::shared_ptr<FuchsiaExternalViewEmbedder> external_view_embedder_;
+  std::optional<FuchsiaExternalViewEmbedder> external_view_embedder_;
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
-  std::shared_ptr<flutter::SceneUpdateContext> legacy_external_view_embedder_;
+  std::optional<flutter::SceneUpdateContext> legacy_external_view_embedder_;
 #endif
 
   std::unique_ptr<IsolateConfigurator> isolate_configurator_;
@@ -100,7 +99,6 @@ class Engine final {
   void CreateView(int64_t view_id, bool hit_testable, bool focusable);
   void UpdateView(int64_t view_id, bool hit_testable, bool focusable);
   void DestroyView(int64_t view_id);
-  std::shared_ptr<flutter::ExternalViewEmbedder> GetExternalViewEmbedder();
 
   std::unique_ptr<flutter::Surface> CreateSurface();
 

@@ -21,7 +21,7 @@ class ContainerLayer : public Layer {
   void Paint(PaintContext& context) const override;
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
   void CheckForChildLayerBelow(PrerollContext* context) override;
-  void UpdateScene(std::shared_ptr<SceneUpdateContext> context) override;
+  void UpdateScene(SceneUpdateContext& context) override;
 #endif
 
   const std::vector<std::shared_ptr<Layer>>& layers() const { return layers_; }
@@ -33,7 +33,7 @@ class ContainerLayer : public Layer {
   void PaintChildren(PaintContext& context) const;
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
-  void UpdateSceneChildren(std::shared_ptr<SceneUpdateContext> context);
+  void UpdateSceneChildren(SceneUpdateContext& context);
 #endif
 
   // Try to prepare the raster cache for a given layer.

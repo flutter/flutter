@@ -32,7 +32,7 @@ class LayerTree {
                bool ignore_raster_cache = false);
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
-  void UpdateScene(std::shared_ptr<SceneUpdateContext> context);
+  void UpdateScene(SceneUpdateContext& context);
 #endif
 
   void Paint(CompositorContext::ScopedFrame& frame,

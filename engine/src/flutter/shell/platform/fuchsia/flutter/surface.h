@@ -16,14 +16,14 @@ namespace flutter_runner {
 class Surface final : public flutter::Surface {
  public:
   Surface(std::string debug_label,
-          std::shared_ptr<flutter::ExternalViewEmbedder> view_embedder,
+          flutter::ExternalViewEmbedder* view_embedder,
           GrDirectContext* gr_context);
 
   ~Surface() override;
 
  private:
   const std::string debug_label_;
-  std::shared_ptr<flutter::ExternalViewEmbedder> view_embedder_;
+  flutter::ExternalViewEmbedder* view_embedder_;
   GrDirectContext* gr_context_;
 
   // |flutter::Surface|
