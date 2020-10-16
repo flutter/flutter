@@ -26,10 +26,10 @@ void ChildSceneLayer::Paint(PaintContext& context) const {
   FML_NOTREACHED();
 }
 
-void ChildSceneLayer::UpdateScene(SceneUpdateContext& context) {
+void ChildSceneLayer::UpdateScene(std::shared_ptr<SceneUpdateContext> context) {
   TRACE_EVENT0("flutter", "ChildSceneLayer::UpdateScene");
   FML_DCHECK(needs_system_composite());
-  context.UpdateView(layer_id_, offset_, size_, hit_testable_);
+  context->UpdateView(layer_id_, offset_, size_, hit_testable_);
 }
 
 }  // namespace flutter

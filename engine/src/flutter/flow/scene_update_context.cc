@@ -215,29 +215,30 @@ void SceneUpdateContext::DestroyView(int64_t view_id) {
   ViewHolder::Destroy(view_id);
 }
 
-SceneUpdateContext::Entity::Entity(SceneUpdateContext& context)
+SceneUpdateContext::Entity::Entity(std::shared_ptr<SceneUpdateContext> context)
     : context_(context),
-      previous_entity_(context.top_entity_),
-      entity_node_(context.session_.get()) {
-  context.top_entity_ = this;
+      previous_entity_(context->top_entity_),
+      entity_node_(context->session_.get()) {
+  context->top_entity_ = this;
 }
 
 SceneUpdateContext::Entity::~Entity() {
   if (previous_entity_) {
     previous_entity_->embedder_node().AddChild(entity_node_);
   } else {
-    context_.root_node_.AddChild(entity_node_);
+    context_->root_node_.AddChild(entity_node_);
   }
 
-  FML_DCHECK(context_.top_entity_ == this);
-  context_.top_entity_ = previous_entity_;
+  FML_DCHECK(context_->top_entity_ == this);
+  context_->top_entity_ = previous_entity_;
 }
 
-SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
-                                         const SkMatrix& transform)
+SceneUpdateContext::Transform::Transform(
+    std::shared_ptr<SceneUpdateContext> context,
+    const SkMatrix& transform)
     : Entity(context),
-      previous_scale_x_(context.top_scale_x_),
-      previous_scale_y_(context.top_scale_y_) {
+      previous_scale_x_(context->top_scale_x_),
+      previous_scale_y_(context->top_scale_y_) {
   entity_node().SetLabel("flutter::Transform");
   if (!transform.isIdentity()) {
     // TODO(SCN-192): The perspective and shear components in the matrix
@@ -255,8 +256,8 @@ SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
                              decomposition.scale().y,  //
                              1.f                       //
       );
-      context.top_scale_x_ *= decomposition.scale().x;
-      context.top_scale_y_ *= decomposition.scale().y;
+      context->top_scale_x_ *= decomposition.scale().x;
+      context->top_scale_y_ *= decomposition.scale().y;
 
       entity_node().SetRotation(decomposition.rotation().x,  //
                                 decomposition.rotation().y,  //
@@ -267,45 +268,46 @@ SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
   }
 }
 
-SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
-                                         float scale_x,
-                                         float scale_y,
-                                         float scale_z)
+SceneUpdateContext::Transform::Transform(
+    std::shared_ptr<SceneUpdateContext> context,
+    float scale_x,
+    float scale_y,
+    float scale_z)
     : Entity(context),
-      previous_scale_x_(context.top_scale_x_),
-      previous_scale_y_(context.top_scale_y_) {
+      previous_scale_x_(context->top_scale_x_),
+      previous_scale_y_(context->top_scale_y_) {
   entity_node().SetLabel("flutter::Transform");
   if (scale_x != 1.f || scale_y != 1.f || scale_z != 1.f) {
     entity_node().SetScale(scale_x, scale_y, scale_z);
-    context.top_scale_x_ *= scale_x;
-    context.top_scale_y_ *= scale_y;
+    context->top_scale_x_ *= scale_x;
+    context->top_scale_y_ *= scale_y;
   }
 }
 
 SceneUpdateContext::Transform::~Transform() {
-  context().top_scale_x_ = previous_scale_x_;
-  context().top_scale_y_ = previous_scale_y_;
+  context()->top_scale_x_ = previous_scale_x_;
+  context()->top_scale_y_ = previous_scale_y_;
 }
 
-SceneUpdateContext::Frame::Frame(SceneUpdateContext& context,
+SceneUpdateContext::Frame::Frame(std::shared_ptr<SceneUpdateContext> context,
                                  const SkRRect& rrect,
                                  SkColor color,
                                  SkAlpha opacity,
                                  std::string label)
     : Entity(context),
-      previous_elevation_(context.top_elevation_),
+      previous_elevation_(context->top_elevation_),
       rrect_(rrect),
       color_(color),
       opacity_(opacity),
-      opacity_node_(context.session_.get()),
+      opacity_node_(context->session_.get()),
       paint_bounds_(SkRect::MakeEmpty()) {
   // Increment elevation trackers before calculating any local elevation.
-  // |UpdateView| can modify context.next_elevation_, which is why it is
+  // |UpdateView| can modify context->next_elevation_, which is why it is
   // neccesary to track this addtional state.
-  context.top_elevation_ += kScenicZElevationBetweenLayers;
-  context.next_elevation_ += kScenicZElevationBetweenLayers;
+  context->top_elevation_ += kScenicZElevationBetweenLayers;
+  context->next_elevation_ += kScenicZElevationBetweenLayers;
 
-  float local_elevation = context.next_elevation_ - previous_elevation_;
+  float local_elevation = context->next_elevation_ - previous_elevation_;
   entity_node().SetTranslation(0.f, 0.f, -local_elevation);
   entity_node().SetLabel(label);
   entity_node().AddChild(opacity_node_);
@@ -318,11 +320,11 @@ SceneUpdateContext::Frame::Frame(SceneUpdateContext& context,
 }
 
 SceneUpdateContext::Frame::~Frame() {
-  context().top_elevation_ = previous_elevation_;
+  context()->top_elevation_ = previous_elevation_;
 
   // Add a part which represents the frame's geometry for clipping purposes
-  context().CreateFrame(entity_node(), rrect_, color_, opacity_, paint_bounds_,
-                        std::move(paint_layers_));
+  context()->CreateFrame(entity_node(), rrect_, color_, opacity_, paint_bounds_,
+                         std::move(paint_layers_));
 }
 
 void SceneUpdateContext::Frame::AddPaintLayer(Layer* layer) {
@@ -331,7 +333,7 @@ void SceneUpdateContext::Frame::AddPaintLayer(Layer* layer) {
   paint_bounds_.join(layer->paint_bounds());
 }
 
-SceneUpdateContext::Clip::Clip(SceneUpdateContext& context,
+SceneUpdateContext::Clip::Clip(std::shared_ptr<SceneUpdateContext> context,
                                const SkRect& shape_bounds)
     : Entity(context) {
   entity_node().SetLabel("flutter::Clip");
