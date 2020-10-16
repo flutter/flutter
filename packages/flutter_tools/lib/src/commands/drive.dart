@@ -563,7 +563,6 @@ Future<bool> _stopApp(DriveCommand command) async {
     buildInfo: command.getBuildInfo(),
   );
   final bool stopped = await command.device.stopApp(package, userIdentifier: command.userIdentifier);
-  await command.device.uninstallApp(package);
   await command._deviceLogSubscription?.cancel();
   return stopped;
 }
