@@ -29,7 +29,7 @@ class EmbedderSurfaceGL final : public EmbedderSurface,
   EmbedderSurfaceGL(
       GLDispatchTable gl_dispatch_table,
       bool fbo_reset_after_present,
-      std::unique_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
+      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 
   ~EmbedderSurfaceGL() override;
 
@@ -38,7 +38,7 @@ class EmbedderSurfaceGL final : public EmbedderSurface,
   GLDispatchTable gl_dispatch_table_;
   bool fbo_reset_after_present_;
 
-  std::unique_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
+  std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
 
   // |EmbedderSurface|
   bool IsValid() const override;
