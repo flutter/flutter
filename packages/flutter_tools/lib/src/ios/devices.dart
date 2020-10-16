@@ -471,10 +471,12 @@ class IOSDevice extends Device {
       );
       if (localUri == null) {
         await _screenshotOnFailure();
+        iosDeployDebugger?.detach();
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);
     } on ProcessException catch (e) {
+      iosDeployDebugger?.detach();
       _logger.printError(e.message);
       return LaunchResult.failed();
     } finally {
@@ -487,7 +489,12 @@ class IOSDevice extends Device {
     IOSApp app, {
     String userIdentifier,
   }) async {
-    return iosDeployDebugger?.exit();
+    // If the debugger is not attached, killing the ios-deploy process won't stop the app.
+    if (iosDeployDebugger!= null && iosDeployDebugger.debuggerAttached) {
+      // Avoid null.
+      return iosDeployDebugger?.exit() == true;
+    }
+    return false;
   }
 
   @override
@@ -736,8 +743,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
 
     void logMessage(vm_service.Event event) {
-      if (_iosDeployDebugger != null) {
-        // Prefer the more complete logs from the debugger.
+      if (_iosDeployDebugger != null && _iosDeployDebugger.debuggerAttached) {
+        // Prefer the more complete logs from the  attached debugger.
         return;
       }
       final String message = processVmServiceMessage(event);
@@ -752,7 +759,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     ]);
   }
 
-  /// Log reader will listen to [debugger.logLines].
+  /// Log reader will listen to [debugger.logLines] and will detach debugger on dispose.
   set debuggerStream(IOSDeployDebugger debugger) {
     // Logging is gathered from syslog on iOS 13 and earlier.
     if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
@@ -831,6 +838,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       loggingSubscription.cancel();
     }
     _idevicesyslogProcess?.kill();
+    _iosDeployDebugger?.detach();
   }
 }
 
