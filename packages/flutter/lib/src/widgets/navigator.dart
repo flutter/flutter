@@ -479,6 +479,7 @@ abstract class Route<T> {
 
   /// Discards any resources used by the object.
   ///
+  /// Overwrite this method to customize how subclasses should discard resources.
   /// This method should not remove its [overlayEntries] from the [Overlay]. The
   /// object's owner is in charge of doing that.
   ///
@@ -3096,7 +3097,7 @@ class _RouteEntry extends RouteTransitionRecord {
 
   void dispose() {
     assert(currentState.index < _RouteLifecycle.disposed.index);
-    route.gracefullyDispose();
+    route.proposeToDispose();
     currentState = _RouteLifecycle.disposed;
   }
 
