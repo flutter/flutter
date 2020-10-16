@@ -1010,6 +1010,8 @@ FILE: ../../../flutter/shell/platform/darwin/ios/ios_render_target_gl.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_render_target_gl.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_factory.h
+FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_factory.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_gl.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_gl.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_metal.h
