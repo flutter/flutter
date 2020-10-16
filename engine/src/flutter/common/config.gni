@@ -28,6 +28,7 @@ feature_defines_list = [
   "FLUTTER_RUNTIME_MODE_PROFILE=2",
   "FLUTTER_RUNTIME_MODE_RELEASE=3",
   "FLUTTER_RUNTIME_MODE_JIT_RELEASE=4",
+  "DART_LEGACY_API=[[deprecated]]",
 ]
 
 if (flutter_runtime_mode == "debug") {

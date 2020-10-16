@@ -8,8 +8,8 @@
 #include <string>
 #include <vector>
 
-#include "filesystem/eintr_wrapper.h"
-#include "filesystem/portable_unistd.h"
+#include "tonic/filesystem/filesystem/eintr_wrapper.h"
+#include "tonic/filesystem/filesystem/portable_unistd.h"
 
 namespace filesystem {
 

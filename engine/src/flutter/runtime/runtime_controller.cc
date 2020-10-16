@@ -1,6 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// FLUTTER_NOLINT
 
 #include "flutter/runtime/runtime_controller.h"
 
@@ -11,6 +12,7 @@
 #include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/lib/ui/window/window.h"
+#include "flutter/runtime/isolate_configuration.h"
 #include "flutter/runtime/runtime_delegate.h"
 #include "third_party/tonic/dart_message_handler.h"
 
@@ -18,10 +20,7 @@ namespace flutter {
 
 RuntimeController::RuntimeController(RuntimeDelegate& client,
                                      TaskRunners p_task_runners)
-    : client_(client),
-      vm_(nullptr),
-      task_runners_(p_task_runners),
-      weak_factory_(this) {}
+    : client_(client), vm_(nullptr), task_runners_(p_task_runners) {}
 
 RuntimeController::RuntimeController(
     RuntimeDelegate& p_client,
@@ -55,82 +54,7 @@ RuntimeController::RuntimeController(
       platform_data_(std::move(p_platform_data)),
       isolate_create_callback_(p_isolate_create_callback),
       isolate_shutdown_callback_(p_isolate_shutdown_callback),
-      persistent_isolate_data_(std::move(p_persistent_isolate_data)),
-      weak_factory_(this) {
-  // Create the root isolate as soon as the runtime controller is initialized,
-  // but not using a synchronous way to avoid blocking the platform thread a
-  // long time as it is waiting while creating `Shell` on that platform thread.
-  // It will be run at a later point when the engine provides a run
-  // configuration and then runs the isolate.
-  create_and_config_root_isolate_ =
-      std::async(std::launch::deferred, [self = weak_factory_.GetWeakPtr()]() {
-        if (!self) {
-          return;
-        }
-
-        auto strong_root_isolate =
-            DartIsolate::CreateRootIsolate(
-                self->vm_->GetVMData()->GetSettings(),                //
-                self->isolate_snapshot_,                              //
-                self->task_runners_,                                  //
-                std::make_unique<PlatformConfiguration>(self.get()),  //
-                self->snapshot_delegate_,                             //
-                self->hint_freed_delegate_,                           //
-                self->io_manager_,                                    //
-                self->unref_queue_,                                   //
-                self->image_decoder_,                                 //
-                self->advisory_script_uri_,                           //
-                self->advisory_script_entrypoint_,                    //
-                nullptr,                                              //
-                self->isolate_create_callback_,                       //
-                self->isolate_shutdown_callback_                      //
-                )
-                .lock();
-
-        FML_CHECK(strong_root_isolate) << "Could not create root isolate.";
-
-        // The root isolate ivar is weak.
-        self->root_isolate_ = strong_root_isolate;
-
-        strong_root_isolate->SetReturnCodeCallback([self](uint32_t code) {
-          if (!self) {
-            return;
-          }
-
-          self->root_isolate_return_code_ = {true, code};
-        });
-
-        if (auto* platform_configuration =
-                self->GetPlatformConfigurationIfAvailable()) {
-          tonic::DartState::Scope scope(strong_root_isolate);
-          platform_configuration->DidCreateIsolate();
-          if (!self->FlushRuntimeStateToIsolate()) {
-            FML_DLOG(ERROR) << "Could not setup initial isolate state.";
-          }
-        } else {
-          FML_DCHECK(false)
-              << "RuntimeController created without window binding.";
-        }
-
-        FML_DCHECK(Dart_CurrentIsolate() == nullptr);
-
-        self->client_.OnRootIsolateCreated();
-        return;
-      });
-
-  // We're still trying to create the root isolate as soon as possible here on
-  // the UI thread although it's deferred a little bit by
-  // std::async(std::launch::deferred, ...). So the callers of `GetRootIsolate`
-  // should get a quick return after this UI thread task.
-  task_runners_.GetUITaskRunner()->PostTask(
-      [self = weak_factory_.GetWeakPtr()]() {
-        if (!self) {
-          return;
-        }
-
-        self->GetRootIsolate();
-      });
-}
+      persistent_isolate_data_(std::move(p_persistent_isolate_data)) {}
 
 RuntimeController::~RuntimeController() {
   FML_DCHECK(Dart_CurrentIsolate() == nullptr);
@@ -418,20 +342,82 @@ tonic::DartErrorHandleType RuntimeController::GetLastError() {
   return root_isolate ? root_isolate->GetLastError() : tonic::kNoError;
 }
 
+bool RuntimeController::LaunchRootIsolate(
+    std::optional<std::string> dart_entrypoint,
+    std::optional<std::string> dart_entrypoint_library,
+    std::unique_ptr<IsolateConfiguration> isolate_configuration) {
+  if (root_isolate_.lock()) {
+    FML_LOG(ERROR) << "Root isolate was already running.";
+    return false;
+  }
+
+  auto strong_root_isolate =
+      DartIsolate::CreateRunningRootIsolate(
+          vm_->GetVMData()->GetSettings(),                //
+          isolate_snapshot_,                              //
+          task_runners_,                                  //
+          std::make_unique<PlatformConfiguration>(this),  //
+          snapshot_delegate_,                             //
+          hint_freed_delegate_,                           //
+          io_manager_,                                    //
+          unref_queue_,                                   //
+          image_decoder_,                                 //
+          advisory_script_uri_,                           //
+          advisory_script_entrypoint_,                    //
+          DartIsolate::Flags{},                           //
+          isolate_create_callback_,                       //
+          isolate_shutdown_callback_,                     //
+          dart_entrypoint,                                //
+          dart_entrypoint_library,                        //
+          std::move(isolate_configuration)                //
+          )
+          .lock();
+
+  if (!strong_root_isolate) {
+    FML_LOG(ERROR) << "Could not create root isolate.";
+    return false;
+  }
+
+  // The root isolate ivar is weak.
+  root_isolate_ = strong_root_isolate;
+
+  // Capture by `this` here is safe because the callback is made by the dart
+  // state itself. The isolate (and its Dart state) is owned by this object and
+  // it will be collected before this object.
+  strong_root_isolate->SetReturnCodeCallback(
+      [this](uint32_t code) { root_isolate_return_code_ = code; });
+
+  if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
+    tonic::DartState::Scope scope(strong_root_isolate);
+    platform_configuration->DidCreateIsolate();
+    if (!FlushRuntimeStateToIsolate()) {
+      FML_DLOG(ERROR) << "Could not setup initial isolate state.";
+    }
+  } else {
+    FML_DCHECK(false) << "RuntimeController created without window binding.";
+  }
+
+  FML_DCHECK(Dart_CurrentIsolate() == nullptr);
+  return true;
+}
+
+std::optional<std::string> RuntimeController::GetRootIsolateServiceID() const {
+  if (auto isolate = root_isolate_.lock()) {
+    return isolate->GetServiceId();
+  }
+  return std::nullopt;
+}
+
 std::weak_ptr<DartIsolate> RuntimeController::GetRootIsolate() {
   std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   if (root_isolate) {
     return root_isolate_;
   }
 
-  // Root isolate is not yet created, get it and do some configuration.
-  FML_DCHECK(create_and_config_root_isolate_.valid());
-  create_and_config_root_isolate_.get();
-
   return root_isolate_;
 }
 
-std::pair<bool, uint32_t> RuntimeController::GetRootIsolateReturnCode() {
+std::optional<uint32_t> RuntimeController::GetRootIsolateReturnCode() {
   return root_isolate_return_code_;
 }
 

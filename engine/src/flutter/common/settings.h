@@ -10,6 +10,7 @@
 #include <chrono>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -50,12 +51,11 @@ using UnhandledExceptionCallback =
     std::function<bool(const std::string& /* error */,
                        const std::string& /* stack trace */)>;
 
-// TODO(chinmaygarde): Deprecate all the "path" struct members in favor of the
+// TODO(26783): Deprecate all the "path" struct members in favor of the
 // callback that generates the mapping from these paths.
-// https://github.com/flutter/flutter/issues/26783
 using MappingCallback = std::function<std::unique_ptr<fml::Mapping>(void)>;
-using MappingsCallback =
-    std::function<std::vector<std::unique_ptr<const fml::Mapping>>(void)>;
+using Mappings = std::vector<std::unique_ptr<const fml::Mapping>>;
+using MappingsCallback = std::function<Mappings(void)>;
 
 using FrameRasterizedCallback = std::function<void(const FrameTiming&)>;
 

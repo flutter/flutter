@@ -23,7 +23,11 @@ struct DartConverter<DartConverterMapping> {
       return Dart_Null();
     }
 
-    auto dart_list_handle = Dart_NewListOf(Dart_CoreType_Int, val->GetSize());
+    auto dart_list_handle = Dart_NewListOfTypeFilled(
+        ToDartTypeHandle<size_t>(),                 // type
+        CreateZeroInitializedDartObject<size_t>(),  // sentinel
+        val->GetSize()                              // size
+    );
 
     if (Dart_IsError(dart_list_handle)) {
       FML_LOG(ERROR) << "Error while attempting to allocate a list: "

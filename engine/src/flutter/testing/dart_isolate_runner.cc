@@ -1,8 +1,11 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// FLUTTER_NOLINT
 
 #include "flutter/testing/dart_isolate_runner.h"
+
+#include "flutter/runtime/isolate_configuration.h"
 
 namespace flutter {
 namespace testing {
@@ -47,55 +50,29 @@ AutoIsolateShutdown::~AutoIsolateShutdown() {
   return true;
 }
 
-void RunDartCodeInIsolate(DartVMRef& vm_ref,
-                          std::unique_ptr<AutoIsolateShutdown>& result,
-                          const Settings& settings,
-                          const TaskRunners& task_runners,
-                          std::string entrypoint,
-                          const std::vector<std::string>& args,
-                          const std::string& fixtures_path,
-                          fml::WeakPtr<IOManager> io_manager) {
+std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolateOnUITaskRunner(
+    DartVMRef& vm_ref,
+    const Settings& p_settings,
+    const TaskRunners& task_runners,
+    std::string entrypoint,
+    const std::vector<std::string>& args,
+    const std::string& fixtures_path,
+    fml::WeakPtr<IOManager> io_manager) {
   FML_CHECK(task_runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
   if (!vm_ref) {
-    return;
+    return nullptr;
   }
 
   auto vm_data = vm_ref.GetVMData();
 
   if (!vm_data) {
-    return;
+    return nullptr;
   }
 
-  auto weak_isolate = DartIsolate::CreateRootIsolate(
-      vm_data->GetSettings(),             // settings
-      vm_data->GetIsolateSnapshot(),      // isolate snapshot
-      std::move(task_runners),            // task runners
-      nullptr,                            // window
-      {},                                 // snapshot delegate
-      {},                                 // hint freed delegate
-      io_manager,                         // io manager
-      {},                                 // unref queue
-      {},                                 // image decoder
-      "main.dart",                        // advisory uri
-      "main",                             // advisory entrypoint
-      nullptr,                            // flags
-      settings.isolate_create_callback,   // isolate create callback
-      settings.isolate_shutdown_callback  // isolate shutdown callback
-  );
+  auto settings = p_settings;
 
-  auto root_isolate = std::make_unique<AutoIsolateShutdown>(
-      weak_isolate.lock(), task_runners.GetUITaskRunner());
-
-  if (!root_isolate->IsValid()) {
-    FML_LOG(ERROR) << "Could not create isolate.";
-    return;
-  }
-
-  if (root_isolate->get()->GetPhase() != DartIsolate::Phase::LibrariesSetup) {
-    FML_LOG(ERROR) << "Created isolate is in unexpected phase.";
-    return;
-  }
+  settings.dart_entrypoint_args = args;
 
   if (!DartVM::IsRunningPrecompiledCode()) {
     auto kernel_file_path =
@@ -103,7 +80,7 @@ void RunDartCodeInIsolate(DartVMRef& vm_ref,
 
     if (!fml::IsFile(kernel_file_path)) {
       FML_LOG(ERROR) << "Could not locate kernel file.";
-      return;
+      return nullptr;
     }
 
     auto kernel_file = fml::OpenFile(kernel_file_path.c_str(), false,
@@ -111,46 +88,56 @@ void RunDartCodeInIsolate(DartVMRef& vm_ref,
 
     if (!kernel_file.is_valid()) {
       FML_LOG(ERROR) << "Kernel file descriptor was invalid.";
-      return;
+      return nullptr;
     }
 
     auto kernel_mapping = std::make_unique<fml::FileMapping>(kernel_file);
 
     if (kernel_mapping->GetMapping() == nullptr) {
       FML_LOG(ERROR) << "Could not setup kernel mapping.";
-      return;
+      return nullptr;
     }
 
-    if (!root_isolate->get()->PrepareForRunningFromKernel(
-            std::move(kernel_mapping))) {
-      FML_LOG(ERROR)
-          << "Could not prepare to run the isolate from the kernel file.";
-      return;
-    }
-  } else {
-    if (!root_isolate->get()->PrepareForRunningFromPrecompiledCode()) {
-      FML_LOG(ERROR)
-          << "Could not prepare to run the isolate from precompiled code.";
-      return;
-    }
+    settings.application_kernels = fml::MakeCopyable(
+        [kernel_mapping = std::move(kernel_mapping)]() mutable -> Mappings {
+          Mappings mappings;
+          mappings.emplace_back(std::move(kernel_mapping));
+          return mappings;
+        });
   }
 
-  if (root_isolate->get()->GetPhase() != DartIsolate::Phase::Ready) {
-    FML_LOG(ERROR) << "Isolate is in unexpected phase.";
-    return;
+  auto isolate_configuration =
+      IsolateConfiguration::InferFromSettings(settings);
+
+  auto isolate =
+      DartIsolate::CreateRunningRootIsolate(
+          settings,                            // settings
+          vm_data->GetIsolateSnapshot(),       // isolate snapshot
+          std::move(task_runners),             // task runners
+          nullptr,                             // window
+          {},                                  // snapshot delegate
+          {},                                  // hint freed delegate
+          io_manager,                          // io manager
+          {},                                  // unref queue
+          {},                                  // image decoder
+          "main.dart",                         // advisory uri
+          entrypoint.c_str(),                  // advisory entrypoint
+          DartIsolate::Flags{},                // flags
+          settings.isolate_create_callback,    // isolate create callback
+          settings.isolate_shutdown_callback,  // isolate shutdown callback
+          entrypoint,                          // entrypoint
+          std::nullopt,                        // library
+          std::move(isolate_configuration)     // isolate configuration
+          )
+          .lock();
+
+  if (!isolate) {
+    FML_LOG(ERROR) << "Could not create running isolate.";
+    return nullptr;
   }
 
-  if (!root_isolate->get()->Run(entrypoint, args,
-                                settings.root_isolate_create_callback)) {
-    FML_LOG(ERROR) << "Could not run the method \"" << entrypoint
-                   << "\" in the isolate.";
-    return;
-  }
-
-  root_isolate->get()->AddIsolateShutdownCallback(
-      settings.root_isolate_shutdown_callback);
-
-  result = std::move(root_isolate);
+  return std::make_unique<AutoIsolateShutdown>(isolate,
+                                               task_runners.GetUITaskRunner());
 }
 
 std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
@@ -165,8 +152,9 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetUITaskRunner(), fml::MakeCopyable([&]() mutable {
-        RunDartCodeInIsolate(vm_ref, result, settings, task_runners, entrypoint,
-                             args, fixtures_path, io_manager);
+        result = RunDartCodeInIsolateOnUITaskRunner(
+            vm_ref, settings, task_runners, entrypoint, args, fixtures_path,
+            io_manager);
         latch.Signal();
       }));
   latch.Wait();

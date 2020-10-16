@@ -79,12 +79,12 @@ class SemanticsActionData {
   const SemanticsActionData(this.id, this.action, this.args);
   final int id;
   final SemanticsAction action;
-  final ByteData args;
+  final ByteData? args;
 }
 
 Future<SemanticsActionData> get semanticsAction {
   final Completer<SemanticsActionData> actionReceived = Completer<SemanticsActionData>();
-  window.onSemanticsAction = (int id, SemanticsAction action, ByteData args) {
+  window.onSemanticsAction = (int id, SemanticsAction action, ByteData? args) {
     actionReceived.complete(SemanticsActionData(id, action, args));
   };
   return actionReceived.future;
@@ -115,12 +115,52 @@ void a11y_main() async { // ignore: non_constant_identifier_names
       transform: kTestTransform,
       childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
       childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
+      actions: 0,
+      flags: 0,
+      maxValueLength: 0,
+      currentValueLength: 0,
+      textSelectionBase: 0,
+      textSelectionExtent: 0,
+      platformViewId: 0,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      scrollPosition: 0.0,
+      scrollExtentMax: 0.0,
+      scrollExtentMin: 0.0,
+      elevation: 0.0,
+      thickness: 0.0,
+      hint: "",
+      value: "",
+      increasedValue: "",
+      decreasedValue: "",
+      additionalActions: Int32List(0),
     )
     ..updateNode(
       id: 84,
       label: 'B: leaf',
       rect: Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
       transform: kTestTransform,
+      actions: 0,
+      flags: 0,
+      maxValueLength: 0,
+      currentValueLength: 0,
+      textSelectionBase: 0,
+      textSelectionExtent: 0,
+      platformViewId: 0,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      scrollPosition: 0.0,
+      scrollExtentMax: 0.0,
+      scrollExtentMin: 0.0,
+      elevation: 0.0,
+      thickness: 0.0,
+      hint: "",
+      value: "",
+      increasedValue: "",
+      decreasedValue: "",
+      additionalActions: Int32List(0),
+      childrenInHitTestOrder: Int32List(0),
+      childrenInTraversalOrder: Int32List(0),
     )
     ..updateNode(
       id: 96,
@@ -129,6 +169,25 @@ void a11y_main() async { // ignore: non_constant_identifier_names
       transform: kTestTransform,
       childrenInTraversalOrder: Int32List.fromList(<int>[128]),
       childrenInHitTestOrder: Int32List.fromList(<int>[128]),
+      actions: 0,
+      flags: 0,
+      maxValueLength: 0,
+      currentValueLength: 0,
+      textSelectionBase: 0,
+      textSelectionExtent: 0,
+      platformViewId: 0,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      scrollPosition: 0.0,
+      scrollExtentMax: 0.0,
+      scrollExtentMin: 0.0,
+      elevation: 0.0,
+      thickness: 0.0,
+      hint: "",
+      value: "",
+      increasedValue: "",
+      decreasedValue: "",
+      additionalActions: Int32List(0),
     )
     ..updateNode(
       id: 128,
@@ -137,6 +196,25 @@ void a11y_main() async { // ignore: non_constant_identifier_names
       transform: kTestTransform,
       additionalActions: Int32List.fromList(<int>[21]),
       platformViewId: 0x3f3,
+      actions: 0,
+      flags: 0,
+      maxValueLength: 0,
+      currentValueLength: 0,
+      textSelectionBase: 0,
+      textSelectionExtent: 0,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      scrollPosition: 0.0,
+      scrollExtentMax: 0.0,
+      scrollExtentMin: 0.0,
+      elevation: 0.0,
+      thickness: 0.0,
+      hint: "",
+      value: "",
+      increasedValue: "",
+      decreasedValue: "",
+      childrenInHitTestOrder: Int32List(0),
+      childrenInTraversalOrder: Int32List(0),
     )
     ..updateCustomAction(
       id: 21,
@@ -148,7 +226,7 @@ void a11y_main() async { // ignore: non_constant_identifier_names
 
   // Await semantics action from embedder.
   final SemanticsActionData data = await semanticsAction;
-  final List<int> actionArgs = <int>[data.args.getInt8(0), data.args.getInt8(1)];
+  final List<int> actionArgs = <int>[data.args!.getInt8(0), data.args!.getInt8(1)];
   notifySemanticsAction(data.id, data.action.index, actionArgs);
 
   // Await semantics disabled from embedder.
@@ -159,20 +237,20 @@ void a11y_main() async { // ignore: non_constant_identifier_names
 
 @pragma('vm:entry-point')
 void platform_messages_response() {
-  window.onPlatformMessage = (String name, ByteData data, PlatformMessageResponseCallback callback) {
-    callback(data);
+  window.onPlatformMessage = (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+    callback!(data);
   };
   signalNativeTest();
 }
 
 @pragma('vm:entry-point')
 void platform_messages_no_response() {
-  window.onPlatformMessage = (String name, ByteData data, PlatformMessageResponseCallback callback) {
-    var list = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+  window.onPlatformMessage = (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+    var list = data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
     signalNativeMessage(utf8.decode(list));
     // This does nothing because no one is listening on the other side. But complete the loop anyway
     // to make sure all null checking on response handles in the engine is in place.
-    callback(data);
+    callback!(data);
   };
   signalNativeTest();
 }
@@ -180,10 +258,10 @@ void platform_messages_no_response() {
 @pragma('vm:entry-point')
 void null_platform_messages() {
   window.onPlatformMessage =
-      (String name, ByteData data, PlatformMessageResponseCallback callback) {
+      (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
     // This checks if the platform_message null data is converted to Flutter null.
     signalNativeMessage((null == data).toString());
-    callback(data);
+    callback!(data);
   };
   signalNativeTest();
 }
@@ -507,7 +585,7 @@ void can_display_platform_view_with_pixel_ratio() {
 @pragma('vm:entry-point')
 void can_receive_locale_updates() {
   window.onLocaleChanged = (){
-    signalNativeCount(window.locales.length);
+    signalNativeCount(window.locales!.length);
   };
   signalNativeTest();
 }

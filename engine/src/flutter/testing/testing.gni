@@ -80,6 +80,7 @@ template("dart_snapshot_kernel") {
       rebase_path("$root_out_dir/flutter_patched_sdk"),
       "--target",
       "flutter",
+      "--enable-experiment=non-nullable",
       "--output-dill",
       rebase_path(invoker.dart_kernel, root_out_dir),
       "--depfile",

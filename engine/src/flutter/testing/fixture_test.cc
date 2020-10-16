@@ -1,6 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// FLUTTER_NOLINT
 
 #include "flutter/testing/fixture_test.h"
 
@@ -40,10 +41,16 @@ void FixtureTest::SetSnapshotsAndAssets(Settings& settings) {
   if (DartVM::IsRunningPrecompiledCode()) {
     FML_CHECK(PrepareSettingsForAOTWithSymbols(settings, aot_symbols_));
   } else {
-    settings.application_kernels = [this]() {
+    settings.application_kernels = [this]() -> Mappings {
       std::vector<std::unique_ptr<const fml::Mapping>> kernel_mappings;
-      kernel_mappings.emplace_back(
-          fml::FileMapping::CreateReadOnly(assets_dir_, "kernel_blob.bin"));
+      auto kernel_mapping =
+          fml::FileMapping::CreateReadOnly(assets_dir_, "kernel_blob.bin");
+      if (!kernel_mapping || !kernel_mapping->IsValid()) {
+        FML_LOG(ERROR) << "Could not find kernel blob for test fixture not "
+                          "running in precompiled mode.";
+        return kernel_mappings;
+      }
+      kernel_mappings.emplace_back(std::move(kernel_mapping));
       return kernel_mappings;
     };
   }

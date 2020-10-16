@@ -20,7 +20,7 @@ DartClassProvider::~DartClassProvider() {}
 Dart_Handle DartClassProvider::GetClassByName(const char* class_name) {
   Dart_Handle name_handle = ToDart(class_name);
   Dart_Handle class_handle =
-      Dart_GetType(library_.value(), name_handle, 0, nullptr);
+      Dart_GetNonNullableType(library_.value(), name_handle, 0, nullptr);
   TONIC_DCHECK(!Dart_IsError(class_handle));
   return class_handle;
 }

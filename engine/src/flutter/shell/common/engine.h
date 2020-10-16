@@ -608,14 +608,9 @@ class Engine final : public RuntimeDelegate,
   ///
   /// @see        `UIIsolateHasLivePorts`
   ///
-  //  TODO(chinmaygarde): Use std::optional instead of the pair now that it is
-  //  available.
+  /// @return     The return code (if specified) by the isolate.
   ///
-  /// @return     A pair containing a boolean value indicating if the isolate
-  ///             set a "return value" and that value if present. When the first
-  ///             item of the pair is false, second item is meaningless.
-  ///
-  std::pair<bool, uint32_t> GetUIIsolateReturnCode();
+  std::optional<uint32_t> GetUIIsolateReturnCode();
 
   //----------------------------------------------------------------------------
   /// @brief      Indicates to the Flutter application that it has obtained a
@@ -836,8 +831,6 @@ class Engine final : public RuntimeDelegate,
   void HandleAssetPlatformMessage(fml::RefPtr<PlatformMessage> message);
 
   bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
-
-  RunStatus PrepareAndLaunchIsolate(RunConfiguration configuration);
 
   friend class testing::ShellTest;
 

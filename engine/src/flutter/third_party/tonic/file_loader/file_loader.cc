@@ -8,11 +8,11 @@
 #include <memory>
 #include <utility>
 
-#include "filesystem/file.h"
-#include "filesystem/path.h"
-#include "filesystem/portable_unistd.h"
 #include "tonic/common/macros.h"
 #include "tonic/converter/dart_converter.h"
+#include "tonic/filesystem/filesystem/file.h"
+#include "tonic/filesystem/filesystem/path.h"
+#include "tonic/filesystem/filesystem/portable_unistd.h"
 #include "tonic/parsers/packages_map.h"
 
 namespace tonic {

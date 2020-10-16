@@ -1,6 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// FLUTTER_NOLINT
 
 #include "flutter/runtime/dart_isolate.h"
 
@@ -10,6 +11,7 @@
 #include "flutter/fml/thread.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
+#include "flutter/runtime/isolate_configuration.h"
 #include "flutter/testing/dart_isolate_runner.h"
 #include "flutter/testing/fixture_test.h"
 #include "flutter/testing/testing.h"
@@ -46,25 +48,32 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
                            GetCurrentTaskRunner(),  //
                            GetCurrentTaskRunner()   //
   );
-  auto weak_isolate = DartIsolate::CreateRootIsolate(
-      vm_data->GetSettings(),             // settings
-      vm_data->GetIsolateSnapshot(),      // isolate snapshot
-      std::move(task_runners),            // task runners
-      nullptr,                            // window
-      {},                                 // snapshot delegate
-      {},                                 // hint freed delegate
-      {},                                 // io manager
-      {},                                 // unref queue
-      {},                                 // image decoder
-      "main.dart",                        // advisory uri
-      "main",                             // advisory entrypoint,
-      nullptr,                            // flags
-      settings.isolate_create_callback,   // isolate create callback
-      settings.isolate_shutdown_callback  // isolate shutdown callback
+
+  auto isolate_configuration =
+      IsolateConfiguration::InferFromSettings(settings);
+
+  auto weak_isolate = DartIsolate::CreateRunningRootIsolate(
+      vm_data->GetSettings(),              // settings
+      vm_data->GetIsolateSnapshot(),       // isolate snapshot
+      std::move(task_runners),             // task runners
+      nullptr,                             // window
+      {},                                  // snapshot delegate
+      {},                                  // hint freed delegate
+      {},                                  // io manager
+      {},                                  // unref queue
+      {},                                  // image decoder
+      "main.dart",                         // advisory uri
+      "main",                              // advisory entrypoint,
+      DartIsolate::Flags{},                // flags
+      settings.isolate_create_callback,    // isolate create callback
+      settings.isolate_shutdown_callback,  // isolate shutdown callback
+      "main",                              // dart entrypoint
+      std::nullopt,                        // dart entrypoint library
+      std::move(isolate_configuration)     // isolate configuration
   );
   auto root_isolate = weak_isolate.lock();
   ASSERT_TRUE(root_isolate);
-  ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::LibrariesSetup);
+  ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
   ASSERT_TRUE(root_isolate->Shutdown());
 }
 
@@ -81,25 +90,30 @@ TEST_F(DartIsolateTest, IsolateShutdownCallbackIsInIsolateScope) {
                            GetCurrentTaskRunner(),  //
                            GetCurrentTaskRunner()   //
   );
-  auto weak_isolate = DartIsolate::CreateRootIsolate(
-      vm_data->GetSettings(),             // settings
-      vm_data->GetIsolateSnapshot(),      // isolate snapshot
-      std::move(task_runners),            // task runners
-      nullptr,                            // window
-      {},                                 // snapshot delegate
-      {},                                 // hint freed delegate
-      {},                                 // io manager
-      {},                                 // unref queue
-      {},                                 // image decoder
-      "main.dart",                        // advisory uri
-      "main",                             // advisory entrypoint
-      nullptr,                            // flags
-      settings.isolate_create_callback,   // isolate create callback
-      settings.isolate_shutdown_callback  // isolate shutdown callback
+  auto isolate_configuration =
+      IsolateConfiguration::InferFromSettings(settings);
+  auto weak_isolate = DartIsolate::CreateRunningRootIsolate(
+      vm_data->GetSettings(),              // settings
+      vm_data->GetIsolateSnapshot(),       // isolate snapshot
+      std::move(task_runners),             // task runners
+      nullptr,                             // window
+      {},                                  // snapshot delegate
+      {},                                  // hint freed delegate
+      {},                                  // io manager
+      {},                                  // unref queue
+      {},                                  // image decoder
+      "main.dart",                         // advisory uri
+      "main",                              // advisory entrypoint
+      DartIsolate::Flags{},                // flags
+      settings.isolate_create_callback,    // isolate create callback
+      settings.isolate_shutdown_callback,  // isolate shutdown callback
+      "main",                              // dart entrypoint
+      std::nullopt,                        // dart entrypoint library
+      std::move(isolate_configuration)     // isolate configuration
   );
   auto root_isolate = weak_isolate.lock();
   ASSERT_TRUE(root_isolate);
-  ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::LibrariesSetup);
+  ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
   size_t destruction_callback_count = 0;
   root_isolate->AddIsolateShutdownCallback([&destruction_callback_count]() {
     ASSERT_NE(Dart_CurrentIsolate(), nullptr);

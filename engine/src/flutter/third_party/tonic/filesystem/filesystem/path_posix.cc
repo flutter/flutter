@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "filesystem/path.h"
+#include "tonic/filesystem/filesystem/path.h"
 
 #include <dirent.h>
 #include <sys/stat.h>
@@ -17,8 +17,8 @@
 #include <list>
 #include <memory>
 
-#include "filesystem/portable_unistd.h"
 #include "tonic/common/build_config.h"
+#include "tonic/filesystem/filesystem/portable_unistd.h"
 
 namespace filesystem {
 namespace {

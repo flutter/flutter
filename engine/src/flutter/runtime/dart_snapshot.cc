@@ -1,6 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// FLUTTER_NOLINT
 
 #include "flutter/runtime/dart_snapshot.h"
 
@@ -11,6 +12,7 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/snapshot/snapshot.h"
 #include "flutter/runtime/dart_vm.h"
+#include "third_party/dart/runtime/include/dart_api.h"
 
 namespace flutter {
 
@@ -200,6 +202,18 @@ const uint8_t* DartSnapshot::GetDataMapping() const {
 
 const uint8_t* DartSnapshot::GetInstructionsMapping() const {
   return instructions_ ? instructions_->GetMapping() : nullptr;
+}
+
+bool DartSnapshot::IsNullSafetyEnabled(const fml::Mapping* kernel) const {
+  return ::Dart_DetectNullSafety(
+      nullptr,           // script_uri (unsupported by Flutter)
+      nullptr,           // package_config (package resolution of parent used)
+      nullptr,           // original_working_directory (no package config)
+      GetDataMapping(),  // snapshot_data
+      GetInstructionsMapping(),                 // snapshot_instructions
+      kernel ? kernel->GetMapping() : nullptr,  // kernel_buffer
+      kernel ? kernel->GetSize() : 0u           // kernel_buffer_size
+  );
 }
 
 }  // namespace flutter

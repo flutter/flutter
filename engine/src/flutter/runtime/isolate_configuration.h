@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_COMMON_ISOLATE_CONFIGURATION_H_
-#define FLUTTER_SHELL_COMMON_ISOLATE_CONFIGURATION_H_
+#ifndef FLUTTER_SHELL_RUNTIME_ISOLATE_CONFIGURATION_H_
+#define FLUTTER_SHELL_RUNTIME_ISOLATE_CONFIGURATION_H_
 
 #include <future>
 #include <memory>
@@ -50,7 +50,10 @@ class IsolateConfiguration {
   ///             for which this run configuration is used is collected.
   ///
   /// @param[in]  settings       The settings
-  /// @param[in]  asset_manager  The asset manager
+  /// @param[in]  asset_manager  The optional asset manager. This is used when
+  ///                            using the legacy settings fields that specify
+  ///                            the asset by name instead of a mappings
+  ///                            callback.
   /// @param[in]  io_worker      An optional IO worker. Specify `nullptr` is a
   ///                            worker should not be used or one is not
   ///                            available.
@@ -58,10 +61,10 @@ class IsolateConfiguration {
   /// @return     An isolate configuration if one can be inferred from the
   ///             settings. If not, returns `nullptr`.
   ///
-  static std::unique_ptr<IsolateConfiguration> InferFromSettings(
+  [[nodiscard]] static std::unique_ptr<IsolateConfiguration> InferFromSettings(
       const Settings& settings,
-      std::shared_ptr<AssetManager> asset_manager,
-      fml::RefPtr<fml::TaskRunner> io_worker);
+      std::shared_ptr<AssetManager> asset_manager = nullptr,
+      fml::RefPtr<fml::TaskRunner> io_worker = nullptr);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates an AOT isolate configuration using snapshot symbols
@@ -152,7 +155,9 @@ class IsolateConfiguration {
   ///             returns true, the engine will not move the isolate to the
   ///             `DartIsolate::Phase::Ready` phase for subsequent run.
   ///
-  bool PrepareIsolate(DartIsolate& isolate);
+  [[nodiscard]] bool PrepareIsolate(DartIsolate& isolate);
+
+  virtual bool IsNullSafetyEnabled(const DartSnapshot& snapshot) = 0;
 
  protected:
   virtual bool DoPrepareIsolate(DartIsolate& isolate) = 0;
@@ -163,4 +168,4 @@ class IsolateConfiguration {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_COMMON_ISOLATE_CONFIGURATION_H_
+#endif  // FLUTTER_SHELL_RUNTIME_ISOLATE_CONFIGURATION_H_

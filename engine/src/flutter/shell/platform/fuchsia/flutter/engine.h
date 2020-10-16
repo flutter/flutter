@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_ENGINE_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_ENGINE_H_
 
+#include <optional>
+
 #include <fuchsia/intl/cpp/fidl.h>
 #include <fuchsia/io/cpp/fidl.h>
 #include <fuchsia/ui/gfx/cpp/fidl.h>
@@ -56,7 +58,7 @@ class Engine final {
 
   // Returns the Dart return code for the root isolate if one is present. This
   // call is thread safe and synchronous. This call must be made infrequently.
-  std::pair<bool, uint32_t> GetEngineReturnCode() const;
+  std::optional<uint32_t> GetEngineReturnCode() const;
 
 #if !defined(DART_PRODUCT)
   void WriteProfileToTrace() const;
