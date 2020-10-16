@@ -146,19 +146,19 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// class SomeCommand extends CommandWithTarget {
 ///   SomeCommand(SerializableFinder finder, this.times, {Duration? timeout})
 ///       : super(finder, timeout: timeout);
-/// 
+///
 ///   SomeCommand.deserialize(Map<String, String> json, DeserializeFinderFactory finderFactory)
 ///       : times = int.parse(json['times']!),
 ///         super.deserialize(json, finderFactory);
-/// 
+///
 ///   @override
 ///   Map<String, String> serialize() {
 ///     return super.serialize()..addAll(<String, String>{'times': '$times'});
 ///   }
-/// 
+///
 ///   @override
 ///   String get kind => 'SomeCommand';
-/// 
+///
 ///   final int times;
 /// }
 ///```
