@@ -7,6 +7,7 @@
 
 #include <functional>
 
+#include "flow/embedded_views.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -49,7 +50,7 @@ class PlatformViewEmbedder final : public PlatformView {
       flutter::TaskRunners task_runners,
       EmbedderSurfaceSoftware::SoftwareDispatchTable software_dispatch_table,
       PlatformDispatchTable platform_dispatch_table,
-      std::unique_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
+      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 
 #ifdef SHELL_ENABLE_GL
   // Creates a platform view that sets up an OpenGL rasterizer.
@@ -59,7 +60,7 @@ class PlatformViewEmbedder final : public PlatformView {
       EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table,
       bool fbo_reset_after_present,
       PlatformDispatchTable platform_dispatch_table,
-      std::unique_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
+      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 #endif
 
   ~PlatformViewEmbedder() override;
@@ -74,6 +75,7 @@ class PlatformViewEmbedder final : public PlatformView {
       fml::RefPtr<flutter::PlatformMessage> message) override;
 
  private:
+  std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
   std::unique_ptr<EmbedderSurface> embedder_surface_;
   PlatformDispatchTable platform_dispatch_table_;
 
