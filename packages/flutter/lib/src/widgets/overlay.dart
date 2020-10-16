@@ -61,7 +61,7 @@ class OverlayEntry {
     required this.builder,
     bool opaque = false,
     bool maintainState = false,
-    this.lockDisposal,
+    this.onWidgetStatusChanged,
   }) : assert(builder != null),
        assert(opaque != null),
        assert(maintainState != null),
@@ -114,7 +114,19 @@ class OverlayEntry {
     _overlay!._didChangeEntryOpacity();
   }
 
-  final ValueGetter<VoidCallback>? lockDisposal;
+  /// A function that indicates the mounting and unmounting of the overlay widget.
+  ///
+  /// If [lockDisposal] is not null, it will be called when the widget returned
+  /// by [builder] is mounted ([State.initState]), and the callback that it
+  /// returns will be called when the widget is unmounted ([State.dispose]).
+  ///
+  /// This is usually used by [Route] to ensure that its resources are not
+  /// disposed until its children widgets are no longer alive.
+  ///
+  /// See also:
+  ///
+  ///  * [Route.lockDisposal], which is typically provided to this parameter.
+  final ValueGetter<VoidCallback>? onWidgetStatusChanged;
 
   OverlayState? _overlay;
   final GlobalKey<_OverlayEntryWidgetState> _key = GlobalKey<_OverlayEntryWidgetState>();

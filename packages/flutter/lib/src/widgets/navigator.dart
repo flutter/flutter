@@ -423,6 +423,23 @@ abstract class Route<T> {
   void changedExternalState() { }
 
   int _disposalLockCount = 0;
+  /// Lock [proposeToDispose] until the returned callback is invoked.
+  ///
+  /// This method increases the lock count by 1, and returns a callback that
+  /// reduces the lock count by 1 and potentially calls [dispose] if the count
+  /// reduces to 0. Having a non-zero lock count prevents [proposeDispose] from
+  /// calling [dispose] immediately. The returned callback must be called exactly
+  /// once.
+  ///
+  /// This is used when the route has children that depends on some resources of
+  /// the route and lives beyond when the route is removed from the navigator.
+  /// For example, [TransitionRoute]'s animation controller is used by the
+  /// children widgets, which might not be disposed until the next frame after
+  /// the removal of the route.
+  ///
+  /// See also:
+  ///
+  ///  * [OverlayEntry.onWidgetStatusChanged], which uses this method.
   @protected
   VoidCallback lockDisposal() {
     _disposalLockCount += 1;
@@ -443,7 +460,17 @@ abstract class Route<T> {
   }
 
   bool _calledDispose = false;
-  void gracefullyDispose() {
+  /// Schedule to discard resources used by the object the next moment it's safe
+  /// to do so.
+  ///
+  /// This method is controlled by [lockDisposal]. If the lock count is 0, then
+  /// this method will immediately call [dispose]. Otherwise [dispose] will be
+  /// called the next time the lock count reaches 0.
+  ///
+  /// This method should only be called by the object's owner; typically the
+  /// [Navigator] owns a route and so will call this method when the route is
+  /// removed, after which the route is no longer referenced by the navigator.
+  void proposeToDispose() {
     _calledDispose = true;
     if (_disposalLockCount == 0) {
       dispose();
@@ -458,9 +485,9 @@ abstract class Route<T> {
   /// After this is called, the object is not in a usable state and should be
   /// discarded.
   ///
-  /// This method should only be called by the object's owner; typically the
-  /// [Navigator] owns a route and so will call this method when the route is
-  /// removed, after which the route is no longer referenced by the navigator.
+  /// This method should not be called directly; instead, the object's owner should
+  /// call [proposeToDispose], which will wait until all [lockDisposal] calls have
+  /// been unlocked to safely release resources.
   @mustCallSuper
   @protected
   void dispose() {
