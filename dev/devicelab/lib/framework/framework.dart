@@ -85,7 +85,13 @@ class _TaskRunner {
       final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(
         processName: 'dart$exe',
       ).toSet();
+      final Set<RunningProcessInfo> allProcesses = await getRunningProcesses().toSet();
       beforeRunningDartInstances.forEach(print);
+      for (final RunningProcessInfo info in allProcesses) {
+        if (info.commandLine.contains('iproxy')) {
+          print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
+        }
+      }
 
       print('enabling configs for macOS, Linux, Windows, and Web...');
       final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
@@ -122,6 +128,13 @@ class _TaskRunner {
             print('Killed process id ${info.pid}.');
           }
         }
+      }
+      final Set<RunningProcessInfo> allEndProcesses = await getRunningProcesses().toSet();
+      for (final RunningProcessInfo info in allEndProcesses) {
+        if (allProcesses.contains(info)) {
+          continue;
+        }
+        print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
       }
 
       _completer.complete(result);

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -16,41 +14,41 @@ void main() {
   StructureErrorTestWidgetInspectorService.runTests();
 }
 
-typedef InspectorServiceExtensionCallback = FutureOr<Map<String, Object>> Function(Map<String, String> parameters);
+typedef InspectorServiceExtensionCallback = FutureOr<Map<String, Object?>> Function(Map<String, String> parameters);
 
 class StructureErrorTestWidgetInspectorService extends Object with WidgetInspectorService {
   final Map<String, InspectorServiceExtensionCallback> extensions = <String, InspectorServiceExtensionCallback>{};
 
-  final Map<String, List<Map<Object, Object>>> eventsDispatched = <String, List<Map<Object, Object>>>{};
+  final Map<String, List<Map<Object, Object?>>> eventsDispatched = <String, List<Map<Object, Object?>>>{};
 
   @override
   void registerServiceExtension({
-    @required String name,
-    @required FutureOr<Map<String, Object>> callback(Map<String, String> parameters),
+    required String name,
+    required FutureOr<Map<String, Object?>> callback(Map<String, String> parameters),
   }) {
     assert(!extensions.containsKey(name));
     extensions[name] = callback;
   }
 
   @override
-  void postEvent(String eventKind, Map<Object, Object> eventData) {
+  void postEvent(String eventKind, Map<Object, Object?> eventData) {
     getEventsDispatched(eventKind).add(eventData);
   }
 
-  List<Map<Object, Object>> getEventsDispatched(String eventKind) {
-    return eventsDispatched.putIfAbsent(eventKind, () => <Map<Object, Object>>[]);
+  List<Map<Object, Object?>> getEventsDispatched(String eventKind) {
+    return eventsDispatched.putIfAbsent(eventKind, () => <Map<Object, Object?>>[]);
   }
 
-  Iterable<Map<Object, Object>> getServiceExtensionStateChangedEvents(String extensionName) {
+  Iterable<Map<Object, Object?>> getServiceExtensionStateChangedEvents(String extensionName) {
     return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
-      .where((Map<Object, Object> event) => event['extension'] == extensionName);
+      .where((Map<Object, Object?> event) => event['extension'] == extensionName);
   }
 
   Future<String> testBoolExtension(String name, Map<String, String> arguments) async {
     expect(extensions, contains(name));
     // Encode and decode to JSON to match behavior using a real service
     // extension where only JSON is allowed.
-    return json.decode(json.encode(await extensions[name](arguments)))['enabled'] as String;
+    return json.decode(json.encode(await extensions[name]!(arguments)))['enabled'] as String;
   }
 
 
@@ -59,9 +57,9 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
     WidgetInspectorService.instance = service;
 
     test('ext.flutter.inspector.structuredErrors still report error to original on error', () async {
-      final FlutterExceptionHandler oldHandler = FlutterError.onError;
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
 
-      FlutterErrorDetails actualError;
+      late FlutterErrorDetails actualError;
       // Creates a spy onError. This spy needs to be set before widgets binding
       // initializes.
       FlutterError.onError = (FlutterErrorDetails details) {

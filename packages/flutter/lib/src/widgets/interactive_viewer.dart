@@ -710,7 +710,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         return widget.scaleEnabled;
 
       case _GestureType.pan:
-      default:
+      case null:
         return widget.panEnabled;
     }
   }
@@ -1238,7 +1238,6 @@ Offset _alignAxis(Offset offset, Axis axis) {
     case Axis.horizontal:
       return Offset(offset.dx, 0.0);
     case Axis.vertical:
-    default:
       return Offset(0.0, offset.dy);
   }
 }

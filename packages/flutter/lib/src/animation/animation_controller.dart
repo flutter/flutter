@@ -878,7 +878,7 @@ class _RepeatingSimulation extends Simulation {
 
     final double totalTimeInSeconds = timeInSeconds + _initialT;
     final double t = (totalTimeInSeconds / _periodInSeconds) % 1.0;
-    final bool _isPlayingReverse = (totalTimeInSeconds ~/ _periodInSeconds) % 2 == 1;
+    final bool _isPlayingReverse = (totalTimeInSeconds ~/ _periodInSeconds).isOdd;
 
     if (reverse && _isPlayingReverse) {
       directionSetter(_AnimationDirection.reverse);

@@ -280,11 +280,12 @@ Future<Process> startProcess(
   final String finalWorkingDirectory = workingDirectory ?? cwd;
   print('\nExecuting: $command in $finalWorkingDirectory'
       + (environment != null ? ' with environment $environment' : ''));
-  environment ??= <String, String>{};
-  environment['BOT'] = isBot ? 'true' : 'false';
+  final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
+  newEnvironment['BOT'] = isBot ? 'true' : 'false';
+  newEnvironment['FLUTTER_IOS_SCREENSHOT_ON_CONNECTION_FAILURE'] = 'true';
   final Process process = await _processManager.start(
     <String>[executable, ...arguments],
-    environment: environment,
+    environment: newEnvironment,
     workingDirectory: finalWorkingDirectory,
   );
   final ProcessInfo processInfo = ProcessInfo(command, process);
@@ -443,11 +444,11 @@ List<String> flutterCommandArgs(String command, List<String> options) {
 Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
-  Map<String, String> environment,
+  Map<String, String> environment = const <String, String>{},
 }) {
   final List<String> args = flutterCommandArgs(command, options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, environment: environment);
+    canFail: canFail, environment: environment);
 }
 
 /// Runs a `flutter` command and returns the standard output as a string.

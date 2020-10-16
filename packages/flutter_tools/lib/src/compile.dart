@@ -584,15 +584,13 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _compileRequestNeedsConfirmation = true;
     _stdoutHandler._suppressCompilerMessages = request.suppressErrors;
 
-    if (_server == null) {
-      return _compile(
-        request.packageConfig.toPackageUri(request.mainUri)?.toString() ?? request.mainUri.toString(),
-        request.outputPath,
-      );
-    }
-    final String inputKey = Uuid().generateV4();
     final String mainUri = request.packageConfig.toPackageUri(request.mainUri)?.toString() ??
       toMultiRootPath(request.mainUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
+
+    if (_server == null) {
+      return _compile(mainUri, request.outputPath);
+    }
+    final String inputKey = Uuid().generateV4();
 
     _server.stdin.writeln('recompile $mainUri $inputKey');
     _logger.printTrace('<- recompile $mainUri $inputKey');
@@ -602,7 +600,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         message = fileUri.toString();
       } else {
         message = request.packageConfig.toPackageUri(fileUri)?.toString() ??
-          toMultiRootPath(request.mainUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
+          toMultiRootPath(fileUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
       }
       _server.stdin.writeln(message);
       _logger.printTrace(message.toString());

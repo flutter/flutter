@@ -102,7 +102,6 @@ Widget _wrapWithBackground({
         overlayStyle = SystemUiOverlayStyle.light;
         break;
       case Brightness.light:
-      default:
         overlayStyle = SystemUiOverlayStyle.dark;
         break;
     }

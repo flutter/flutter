@@ -989,7 +989,7 @@ class _HighlightPainter extends CustomPainter {
           paint,
         );
         break;
-      default:
+      case _HighlightPainterStyle.none:
         break;
     }
   }

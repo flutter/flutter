@@ -213,11 +213,13 @@ class _SaltedValueKey extends ValueKey<Key>{
   const _SaltedValueKey(Key key): assert(key != null), super(key);
 }
 
-/// Called to find the new index of a child based on its key in case of
+/// Called to find the new index of a child based on its `key` in case of
 /// reordering.
 ///
+/// If the child with the `key` is no longer present, null is returned.
+///
 /// Used by [SliverChildBuilderDelegate.findChildIndexCallback].
-typedef ChildIndexGetter = int Function(Key key);
+typedef ChildIndexGetter = int? Function(Key key);
 
 /// A delegate that supplies children for slivers using a builder callback.
 ///
@@ -424,8 +426,8 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// when the order in which children are returned from [builder] changes.
   /// This may result in state-loss.
   ///
-  /// This callback should take an input [Key], and It should return the
-  /// index of the child element with associated key, null if not found.
+  /// This callback should take an input [Key], and it should return the
+  /// index of the child element with that associated key, or null if not found.
   final ChildIndexGetter? findChildIndexCallback;
 
   @override
@@ -626,6 +628,42 @@ class SliverChildListDelegate extends SliverChildDelegate {
   final SemanticIndexCallback semanticIndexCallback;
 
   /// The widgets to display.
+  ///
+  /// If this list is going to be mutated, it is usually wise to put a [Key] on
+  /// each of the child widgets, so that the framework can match old
+  /// configurations to new configurations and maintain the underlying render
+  /// objects.
+  ///
+  /// Also, a [Widget] in Flutter is immutable, so directly modifying the
+  /// [children] such as `someWidget.children.add(...)` or
+  /// passing a reference of the original list value to the [children] parameter
+  /// will result in incorrect behaviors. Whenever the
+  /// children list is modified, a new list object should be provided.
+  ///
+  /// The following code corrects the problem mentioned above.
+  ///
+  /// ```dart
+  /// class SomeWidgetState extends State<SomeWidget> {
+  ///   List<Widget> _children;
+  ///
+  ///   void initState() {
+  ///     _children = [];
+  ///   }
+  ///
+  ///   void someHandler() {
+  ///     setState(() {
+  ///       // The key here allows Flutter to reuse the underlying render
+  ///       // objects even if the children list is recreated.
+  ///       _children.add(ChildWidget(key: UniqueKey()));
+  ///     });
+  ///   }
+  ///
+  ///   Widget build(BuildContext context) {
+  ///     // Always create a new list of children as a Widget is immutable.
+  ///     return PageView(children: List<Widget>.from(_children));
+  ///   }
+  /// }
+  /// ```
   final List<Widget> children;
 
   /// A map to cache key to index lookup for children.
