@@ -35,8 +35,6 @@
 
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
 - (instancetype)initWithContentsScale:(CGFloat)contentsScale;
-- (std::unique_ptr<flutter::IOSSurface>)createSurface:
-    (std::shared_ptr<flutter::IOSContext>)ios_context;
 
 @end
 
