@@ -19,9 +19,7 @@ import 'package:flutter_driver/src/common/text.dart';
 import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/extension/extension.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
-import 'stubs/mock_callback.dart';
 import 'stubs/stub_command.dart';
 import 'stubs/stub_command_extension.dart';
 import 'stubs/stub_finder.dart';
@@ -989,7 +987,8 @@ void main() {
   });
 
   group('extension commands', () {
-    final VoidCallback mockCallback = MockCallback();
+    int invokes = 0;
+    final VoidCallback mockCallback = () => invokes++;
 
     final Widget debugTree = Directionality(
       textDirection: TextDirection.ltr,
@@ -1005,6 +1004,10 @@ void main() {
         ),
       ),
     );
+
+    setUp(() {
+      invokes = 0;
+    });
 
     testWidgets('unknown extension command', (WidgetTester tester) async {
       final FlutterDriverExtension driverExtension = FlutterDriverExtension(
@@ -1046,9 +1049,10 @@ void main() {
       await tester.pumpWidget(debugTree);
 
       const int times = 10;
+      invokes = 0;
       final StubCommandResult result = await invokeCommand(ByValueKey('Button'), times);
       expect(result.resultParam, 'stub response');
-      verify(mockCallback.call()).called(times);
+      expect(invokes, times);
     });
 
     testWidgets('prober command', (WidgetTester tester) async {
@@ -1073,7 +1077,7 @@ void main() {
       const int times = 10;
       final StubCommandResult result = await invokeCommand(ByValueKey('Button'), times);
       expect(result.resultParam, 'stub response');
-      verify(mockCallback.call()).called(times);
+      expect(invokes, times);
     });
   });
 
