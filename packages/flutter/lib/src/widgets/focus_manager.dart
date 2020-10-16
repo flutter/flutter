@@ -31,8 +31,9 @@ bool _focusDebug(String message, [Iterable<String>? details]) {
   return true;
 }
 
-/// An enum that describes how to handle a key event.
-enum KeyEventDisposition {
+/// An enum that describes how to handle a key event handled by a
+/// [FocusOnKeyCallback].
+enum KeyEventResult {
   /// The key event has been handled, and the event should not be propagated to
   /// other key event handlers.
   handled,
@@ -47,58 +48,13 @@ enum KeyEventDisposition {
   skipRemainingHandlers,
 }
 
-/// A class that represents a result returned from a [RawKeyEventHandler], which
-/// is invoked when a key event is received.
-class KeyEventResult {
-  /// Const constructor for a [KeyEventResult].
-  ///
-  /// Takes a [disposition] to describe how to handle the event after the
-  /// [RawKeyEventHandler] is called.
-  const KeyEventResult(this.disposition);
-
-  /// The [KeyEventDisposition] of the result. This describes how to handle
-  /// the event after the callback has been called.
-  final KeyEventDisposition disposition;
-
-  /// A constant that may be used to return a "handled" result from a
-  /// [RawKeyEventHandler] to indicate that a key event should not be propagated
-  /// further.
-  ///
-  /// See also:
-  ///
-  ///   * [KeyEventDisposition], the enum that describes the possible key event
-  ///     dispositions.
-  static const KeyEventResult handled = KeyEventResult(KeyEventDisposition.handled);
-
-  /// A constant that may be used to return a "ignored" result from a
-  /// [RawKeyEventHandler] to indicate that a key should continue to be
-  /// propagated to other key handlers.
-  ///
-  /// See also:
-  ///
-  ///   * [KeyEventDisposition], the enum that describes the possible key event
-  ///     dispositions.
-  static const KeyEventResult ignored = KeyEventResult(KeyEventDisposition.ignored);
-
-  /// A constant that may be used to return a "skipRemainingHandlers" result from a
-  /// [RawKeyEventHandler] to indicate that the key event was not handled, but
-  /// should not be propagated to other Flutter handlers. This allows text
-  /// fields and non-Flutter components to still receive the event.
-  ///
-  /// See also:
-  ///
-  ///   * [KeyEventDisposition], the enum that describes the possible key event
-  ///     dispositions.
-  static const KeyEventResult skipRemainingHandlers = KeyEventResult(KeyEventDisposition.skipRemainingHandlers);
-}
-
 /// Signature of a callback used by [Focus.onKey] and [FocusScope.onKey]
 /// to receive key events.
 ///
 /// The [node] is the node that received the event.
 ///
-/// Returns a [KeyEventResult], containing a [KeyEventDisposition] that
-/// describes how, and whether, the key event was handled.
+/// Returns a [KeyEventResult] that describes how, and whether, the key event
+/// was handled.
 // TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
 typedef FocusOnKeyCallback = dynamic Function(FocusNode node, RawKeyEvent event);
 
@@ -1694,16 +1650,16 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         assert(result is bool || result is KeyEventResult,
             'Value returned from onKey handler must be a non-null bool or KeyEventResult, not ${result.runtimeType}');
         if (result is KeyEventResult) {
-          switch (result.disposition) {
-            case KeyEventDisposition.handled:
+          switch (result) {
+            case KeyEventResult.handled:
               assert(_focusDebug('Node $node handled key event $event.'));
               handled = true;
               break;
-            case KeyEventDisposition.skipRemainingHandlers:
+            case KeyEventResult.skipRemainingHandlers:
               assert(_focusDebug('Node $node stopped key event propagation: $event.'));
-              handled = true;
+              handled = false;
               break;
-            case KeyEventDisposition.ignored:
+            case KeyEventResult.ignored:
               continue;
           }
         } else if (result is bool){
