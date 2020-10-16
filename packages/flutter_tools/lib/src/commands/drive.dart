@@ -246,7 +246,19 @@ class DriveCommand extends RunCommandBase {
         webUri = residentRunner.uri;
       }
 
-      final LaunchResult result = await appStarter(this, webUri, package, applicationBinary != null);
+      // Attempt to launch the application up to 3 times, to validate whether it
+      // is possible to reduce flakiness by hardnening the launch code.
+      int attempt = 0;
+      LaunchResult result;
+      while (attempt < 3) {
+        // On attempts past 1, assume the application is built correctly and re-use it.
+        result = await appStarter(this, webUri, package, applicationBinary != null || attempt > 0);
+        if (result != null) {
+          break;
+        }
+        attempt += 1;
+        globals.printError('Application failed to start on attempt: $attempt');
+      }
       if (result == null) {
         throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
       }
