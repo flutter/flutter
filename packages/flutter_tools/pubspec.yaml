@@ -117,4 +117,6 @@ dartdoc:
 
 dependency_overrides:
   dwds:
-    path: /Users/grouma/Projects/webdev/dwds
+    git:
+      url: git@github.com:dart-lang/webdev.git
+      path: dwds

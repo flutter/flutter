@@ -205,9 +205,7 @@ class WebAssetServer implements AssetReader {
 
       // Return a version string for all active modules. This is populated
       // along with the `moduleProvider` update logic.
-      Future<Map<String, String>> _digestProvider(
-              MetadataProvider provider) async =>
-          digests;
+      Future<Map<String, String>> _digestProvider() async => digests;
 
       // Ensure dwds is present and provide middleware to avoid trying to
       // load the through the isolate APIs.
