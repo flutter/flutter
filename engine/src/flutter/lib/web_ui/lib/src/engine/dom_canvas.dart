@@ -28,7 +28,7 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
   }
 
   @override
-  void clipRect(ui.Rect rect) {
+  void clipRect(ui.Rect rect, ui.ClipOp op) {
     throw UnimplementedError();
   }
 
