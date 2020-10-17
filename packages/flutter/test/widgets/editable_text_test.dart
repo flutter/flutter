@@ -4002,8 +4002,8 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 21,
-          extentOffset: 21,
+          baseOffset: 20,
+          extentOffset: 20,
           affinity: TextAffinity.downstream,
         ),
       ),
