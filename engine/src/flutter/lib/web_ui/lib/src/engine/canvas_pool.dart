@@ -210,8 +210,13 @@ class _CanvasPool extends _SaveStackTracking {
         } else if (clipEntry.rrect != null) {
           _clipRRect(ctx, clipEntry.rrect!);
         } else if (clipEntry.path != null) {
-          _runPath(ctx, clipEntry.path as SurfacePath);
-          ctx.clip();
+          final SurfacePath path = clipEntry.path as SurfacePath;
+          _runPath(ctx, path);
+          if (path.fillType == ui.PathFillType.nonZero) {
+            ctx.clip();
+          } else {
+            ctx.clip('evenodd');
+          }
         }
       }
     }
@@ -443,7 +448,11 @@ class _CanvasPool extends _SaveStackTracking {
     if (_canvas != null) {
       html.CanvasRenderingContext2D ctx = context;
       _runPath(ctx, path as SurfacePath);
-      ctx.clip();
+      if (path.fillType == ui.PathFillType.nonZero) {
+        ctx.clip();
+      } else {
+        ctx.clip('evenodd');
+      }
     }
   }
 
