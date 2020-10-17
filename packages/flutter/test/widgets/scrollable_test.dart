@@ -324,7 +324,7 @@ void main() {
   });
 
   testWidgets('Holding scroll and Scroll pointer signal will update ScrollDirection.forward / ScrollDirection.reverse', (WidgetTester tester) async {
-    ScrollDirection lastUserScrollingDirection;
+    ScrollDirection? lastUserScrollingDirection;
 
     final ScrollController controller = ScrollController();
     await pumpTest(tester, TargetPlatform.fuchsia, controller: controller);
