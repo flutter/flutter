@@ -1081,6 +1081,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     );
 
     if (_innerPositions.isEmpty) {
+      // Does not enter overscroll.
       _outerPosition!.applyClampedPointerSignalUpdate(delta);
     } else if (delta > 0.0) {
       // Dragging "up" - delta is positive
