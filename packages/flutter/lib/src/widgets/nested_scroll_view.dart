@@ -1075,34 +1075,53 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   void pointerScroll(double delta) {
     assert(delta != 0.0);
 
-    delta = -delta;
-
     goIdle();
     updateUserScrollDirection(
-        delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
+        delta < 0.0 ? ScrollDirection.forward : ScrollDirection.reverse
+    );
+
     if (_innerPositions.isEmpty) {
       _outerPosition!.applyClampedPointerSignalUpdate(delta);
+    } else if (delta > 0.0) {
+      // Dragging "up" - delta is positive
+      // Prioritize getting rid of any inner overscroll, and then the outer
+      // view, so that the app bar will scroll out of the way asap.
+      double outerDelta = delta;
+      for (final _NestedScrollPosition position in _innerPositions) {
+        if (position.pixels < 0.0) { // This inner position is in overscroll.
+          final double potentialOuterDelta = position.applyClampedPointerSignalUpdate(delta);
+          // In case there are multiple positions in varying states of
+          // overscroll, the first to 'reach' the outer view above takes
+          // precedence.
+          outerDelta = math.max(outerDelta, potentialOuterDelta);
+        }
+      }
+      if (outerDelta != 0.0) {
+        final double innerDelta = _outerPosition!.applyClampedPointerSignalUpdate(
+            outerDelta
+        );
+        if (innerDelta != 0.0) {
+          for (final _NestedScrollPosition position in _innerPositions)
+            position.applyClampedPointerSignalUpdate(innerDelta);
+        }
+      }
     } else {
+      // Dragging "down" - delta is negative
       double innerDelta = delta;
       // Apply delta to the outer header first if it is configured to float.
-      if (delta > 0.0 && _floatHeaderSlivers)
+      if (_floatHeaderSlivers)
         innerDelta = _outerPosition!.applyClampedPointerSignalUpdate(delta);
 
-      // Scroll "up", apply delta to the outerPosition scroll extent.
-      if(delta < 0.0 && innerDelta != 0.0)
-        innerDelta = _outerPosition!.applyClampedPointerSignalUpdate(innerDelta);
-
       if (innerDelta != 0.0) {
-        double outerDelta = delta > 0.0 ? 0 : innerDelta;
+        // Apply the innerDelta, if we have not floated in the outer scrollable,
+        // any leftover delta after this will be passed on to the outer
+        // scrollable by the outerDelta.
+        double outerDelta = 0.0; // it will go negative if it changes
         for (final _NestedScrollPosition position in _innerPositions) {
-            final double potentialOuterDelta =
-                position.applyClampedPointerSignalUpdate(innerDelta);
-            outerDelta = math.max(outerDelta, potentialOuterDelta);
+          final double overscroll = position.applyClampedPointerSignalUpdate(innerDelta);
+          outerDelta = math.min(outerDelta, overscroll);
         }
-
-        // Scroll "down", Apply the maximum delta of innerPositions to
-        // outerPosition.
-        if (delta > 0.0 && outerDelta != 0.0)
+        if (outerDelta != 0.0)
           _outerPosition!.applyClampedPointerSignalUpdate(outerDelta);
       }
     }
@@ -1433,20 +1452,20 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   double applyClampedPointerSignalUpdate(double delta) {
     assert(delta != 0.0);
 
-    final double min = delta < 0.0
+    final double min = delta > 0.0
         ? -double.infinity
         : math.min(minScrollExtent, pixels);
     // The logic for max is equivalent but on the other side.
-    final double max = delta > 0.0
+    final double max = delta < 0.0
         ? double.infinity
         : math.max(maxScrollExtent, pixels);
-    final double newPixels = (pixels - delta).clamp(min, max);
+    final double newPixels = (pixels + delta).clamp(min, max);
     final double clampedDelta = newPixels - pixels;
     if (clampedDelta == 0.0)
       return delta;
     forcePixels(newPixels);
     didUpdateScrollPositionBy(clampedDelta);
-    return delta + clampedDelta;
+    return delta - clampedDelta;
   }
 
   @override
