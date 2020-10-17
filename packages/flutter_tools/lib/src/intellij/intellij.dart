@@ -72,7 +72,7 @@ class IntelliJPlugins {
   ArchiveFile _findPluginXml(String packageName) {
     final List<String> mainJarPathList = <String>[];
     if (packageName.endsWith('.jar')) {
-      // package exists(checked in _hasPackage
+      // package exists (checked in _hasPackage)
       mainJarPathList.add(_fileSystem.path.join(pluginsPath, packageName));
     } else {
       final String packageLibPath =
