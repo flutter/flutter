@@ -18,7 +18,7 @@ RunCommand() {
 # pipe goes to stdout of the Flutter build process directly.
 StreamOutput() {
   if [[ -n "$SCRIPT_OUTPUT_STREAM_FILE" ]]; then
-    echo "$1" > $SCRIPT_OUTPUT_STREAM_FILE
+    echo "$1" > "$SCRIPT_OUTPUT_STREAM_FILE"
   fi
 }
 
@@ -33,7 +33,7 @@ AssertExists() {
     else
       EchoError "The path $1 does not exist"
     fi
-    exit -1
+    exit 1
   fi
   return 0
 }
@@ -42,7 +42,8 @@ ParseFlutterBuildMode() {
   # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
   # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
   # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
-  local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
+  local build_mode;
+  build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
 
   case "$build_mode" in
     *release*) build_mode="release";;
@@ -59,7 +60,7 @@ ParseFlutterBuildMode() {
       EchoError "configuration, or adding an appropriate value for FLUTTER_BUILD_MODE to the"
       EchoError ".xcconfig file for the current build configuration (${CONFIGURATION})."
       EchoError "========================================================================"
-      exit -1;;
+      exit 1;;
   esac
   echo "${build_mode}"
 }
@@ -98,7 +99,8 @@ BuildApp() {
   # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
   # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
   # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
-  local build_mode="$(ParseFlutterBuildMode)"
+  local build_mode
+  build_mode="$(ParseFlutterBuildMode)"
   local artifact_variant="unknown"
   case "$build_mode" in
     release ) artifact_variant="ios-release";;
@@ -133,7 +135,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
       EchoError "or"
       EchoError "  flutter build ios --local-engine=ios_${build_mode}_unopt"
       EchoError "========================================================================"
-      exit -1
+      exit 1
     fi
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
     flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
@@ -176,22 +178,22 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
 
   RunCommand "${FLUTTER_ROOT}/bin/flutter"                                \
     ${verbose_flag}                                                       \
-    ${flutter_engine_flag}                                                \
-    ${local_engine_flag}                                                  \
+    "${flutter_engine_flag}"                                              \
+    "${local_engine_flag}"                                                \
     assemble                                                              \
     --output="${derived_dir}/"                                            \
-    ${performance_measurement_option}                                     \
+    "${performance_measurement_option}"                                   \
     -dTargetPlatform=ios                                                  \
     -dTargetFile="${target_path}"                                         \
-    -dBuildMode=${build_mode}                                             \
+    -dBuildMode="${build_mode}"                                           \
     -dIosArchs="${ARCHS}"                                                 \
     -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                \
     -dTreeShakeIcons="${TREE_SHAKE_ICONS}"                                \
     -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                      \
     -dDartObfuscation="${DART_OBFUSCATION}"                               \
     -dEnableBitcode="${bitcode_flag}"                                     \
-    ${bundle_sksl_path}                                                   \
-    ${code_size_directory}                                                \
+    "${bundle_sksl_path}"                                                 \
+    "${code_size_directory}"                                              \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"             \
     --DartDefines="${DART_DEFINES}"                                       \
     --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                   \
@@ -199,7 +201,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."
-    exit -1
+    exit 1
   fi
   StreamOutput "done"
   StreamOutput " └─Compiling, linking and signing..."
@@ -213,9 +215,10 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
 # Returns the CFBundleExecutable for the specified framework directory.
 GetFrameworkExecutablePath() {
   local framework_dir="$1"
-
-  local plist_path="${framework_dir}/Info.plist"
-  local executable="$(defaults read "${plist_path}" CFBundleExecutable)"
+  local plist_path
+  local executable
+  plist_path="${framework_dir}/Info.plist"
+  executable="$(defaults read "${plist_path}" CFBundleExecutable)"
   echo "${framework_dir}/${executable}"
 }
 
@@ -230,8 +233,10 @@ LipoExecutable() {
   # Extract architecture-specific framework executables.
   local all_executables=()
   for arch in "${archs[@]}"; do
-    local output="${executable}_${arch}"
-    local lipo_info="$(lipo -info "${executable}")"
+    local output
+    local lipo_info
+    output="${executable}_${arch}"
+    lipo_info="$(lipo -info "${executable}")"
     if [[ "${lipo_info}" == "Non-fat file:"* ]]; then
       if [[ "${lipo_info}" != *"${arch}" ]]; then
         echo "Non-fat binary ${executable} is not ${arch}. Running lipo -info:"
@@ -251,7 +256,7 @@ LipoExecutable() {
 
   # Generate a merged binary from the architecture-specific executables.
   # Skip this step for non-fat executables.
-  if [[ ${#all_executables[@]} > 0 ]]; then
+  if [[ ${#all_executables[@]} -gt 0 ]]; then
     local merged="${executable}_merged"
     lipo -output "${merged}" -create "${all_executables[@]}"
 
@@ -265,8 +270,8 @@ LipoExecutable() {
 ThinFramework() {
   local framework_dir="$1"
   shift
-
-  local executable="$(GetFrameworkExecutablePath "${framework_dir}")"
+  local executable
+  executable="$(GetFrameworkExecutablePath "${framework_dir}")"
   LipoExecutable "${executable}" "$@"
 }
 
@@ -325,7 +330,8 @@ EmbedFlutterFrameworks() {
 
 # Add the observatory publisher Bonjour service to the produced app bundle Info.plist.
 AddObservatoryBonjourService() {
-  local build_mode="$(ParseFlutterBuildMode)"
+  local build_mode
+  build_mode="$(ParseFlutterBuildMode)"
   # Debug and profile only.
   if [[ "${build_mode}" == "release" ]]; then
     return
@@ -334,7 +340,7 @@ AddObservatoryBonjourService() {
 
   if [[ ! -f "${built_products_plist}" ]]; then
     EchoError "error: ${INFOPLIST_PATH} does not exist. The Flutter \"Thin Binary\" build phase must run after \"Copy Bundle Resources\"."
-    exit -1
+    exit 1
   fi
   # If there are already NSBonjourServices specified by the app (uncommon), insert the observatory service name to the existing list.
   if plutil -extract NSBonjourServices xml1 -o - "${built_products_plist}"; then
@@ -360,7 +366,7 @@ EmbedAndThinFrameworks() {
 if [[ $# == 0 ]]; then
   # Named entry points were introduced in Flutter v0.0.7.
   EchoError "error: Your Xcode project is incompatible with this version of Flutter. Run \"rm -rf ios/Runner.xcodeproj\" and \"flutter create .\" to regenerate."
-  exit -1
+  exit 1
 else
   case $1 in
     "build")

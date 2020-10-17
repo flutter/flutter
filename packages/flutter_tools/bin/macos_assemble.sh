@@ -51,7 +51,7 @@ if [[ -n "$LOCAL_ENGINE" ]]; then
     EchoError "or"
     EchoError "  flutter build macos --local-engine=host_${build_mode}_unopt"
     EchoError "========================================================================"
-    exit -1
+    exit 1
   fi
   local_engine_flag="--local-engine=${LOCAL_ENGINE}"
 fi
@@ -79,10 +79,10 @@ fi
 
 RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     ${verbose_flag}                                                         \
-    ${flutter_engine_flag}                                                  \
-    ${local_engine_flag}                                                    \
+    "${flutter_engine_flag}"                                                \
+    "${local_engine_flag}"                                                  \
     assemble                                                                \
-    ${performance_measurement_option}                                       \
+    "${performance_measurement_option}"                                     \
     -dTargetPlatform=darwin-x64                                             \
     -dTargetFile="${target_path}"                                           \
     -dBuildMode="${build_mode}"                                             \
@@ -90,8 +90,8 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     -dDartObfuscation="${DART_OBFUSCATION}"                                 \
     -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                  \
     -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                        \
-    ${bundle_sksl_path}                                                     \
-    ${code_size_directory}                                                  \
+    "${bundle_sksl_path}"                                                   \
+    "${code_size_directory}"                                                \
     --DartDefines="${DART_DEFINES}"                                         \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"               \
     --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \
