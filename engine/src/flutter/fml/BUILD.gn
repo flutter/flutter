@@ -249,6 +249,7 @@ if (enable_unittests) {
       "command_line_unittest.cc",
       "file_unittest.cc",
       "hash_combine_unittests.cc",
+      "logging_unittests.cc",
       "memory/ref_counted_unittest.cc",
       "memory/task_runner_checker_unittest.cc",
       "memory/weak_ptr_unittest.cc",

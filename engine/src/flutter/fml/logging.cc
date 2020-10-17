@@ -93,7 +93,7 @@ LogMessage::~LogMessage() {
 #endif
 
   if (severity_ >= LOG_FATAL) {
-    abort();
+    KillProcess();
   }
 }
 
@@ -103,6 +103,10 @@ int GetVlogVerbosity() {
 
 bool ShouldCreateLogMessage(LogSeverity severity) {
   return severity >= GetMinLogLevel();
+}
+
+void KillProcess() {
+  abort();
 }
 
 }  // namespace fml
