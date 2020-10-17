@@ -605,7 +605,7 @@ class TextField extends StatefulWidget {
   )
   final bool maxLengthEnforced;
 
-  /// {@macro flutter.services.MaxLengthEnforcement}
+  /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
   final MaxLengthEnforcement maxLengthEnforcement;
 
   /// {@macro flutter.widgets.editableText.onChanged}
