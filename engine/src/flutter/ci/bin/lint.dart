@@ -17,7 +17,7 @@ import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 import 'package:process_runner/process_runner.dart';
 
-String _linterOutputHeader = '''
+const String _linterOutputHeader = '''
 ┌──────────────────────────┐
 │ Engine Clang Tidy Linter │
 └──────────────────────────┘
@@ -25,6 +25,8 @@ The following errors have been reported by the Engine Clang Tidy Linter.  For
 more information on addressing these issues please see:
 https://github.com/flutter/flutter/wiki/Engine-Clang-Tidy-Linter
 ''';
+
+const String issueUrlPrefix = 'https://github.com/flutter/flutter/issues';
 
 class Command {
   Directory directory = Directory('');
@@ -109,23 +111,59 @@ File buildFileAsRepoFile(String buildFile, Directory repoPath) {
   return result;
 }
 
-Future<String> shouldIgnoreFile(File file) async {
-  if (path.split(file.path).contains('third_party')) {
-    return 'third_party';
-  } else {
-    final RegExp exp = RegExp(r'//\s*FLUTTER_NOLINT');
-    await for (String line
-        in file.openRead().transform(utf8.decoder).transform(const LineSplitter())) {
-      if (exp.hasMatch(line)) {
-        return 'FLUTTER_NOLINT';
-      } else if (line.isNotEmpty && line[0] != '\n' && line[0] != '/') {
-        // Quick out once we find a line that isn't empty or a comment.  The
-        // FLUTTER_NOLINT must show up before the first real code.
-        return '';
-      }
-    }
-    return '';
+/// Lint actions to apply to a file.
+enum LintAction {
+  /// Run the linter over the file.
+  lint,
+
+  /// Ignore files under third_party/.
+  skipThirdParty,
+
+  /// Ignore due to a well-formed FLUTTER_NOLINT comment.
+  skipNoLint,
+
+  /// Fail due to a malformed FLUTTER_NOLINT comment.
+  failMalformedNoLint,
+}
+
+bool isThirdPartyFile(File file) {
+  return path.split(file.path).contains('third_party');
+}
+
+Future<LintAction> getLintAction(File file) async {
+  if (isThirdPartyFile(file)) {
+    return LintAction.skipThirdParty;
   }
+
+  // Check for FlUTTER_NOLINT at top of file.
+  final RegExp exp = RegExp('\/\/\\s*FLUTTER_NOLINT(: $issueUrlPrefix/\\d+)?');
+  final Stream<String> lines = file.openRead()
+    .transform(utf8.decoder)
+    .transform(const LineSplitter());
+  await for (String line in lines) {
+    final RegExpMatch match = exp.firstMatch(line);
+    if (match != null) {
+      return match.group(1) != null
+        ? LintAction.skipNoLint
+        : LintAction.failMalformedNoLint;
+    } else if (line.isNotEmpty && line[0] != '\n' && line[0] != '/') {
+      // Quick out once we find a line that isn't empty or a comment.  The
+      // FLUTTER_NOLINT must show up before the first real code.
+      return LintAction.lint;
+    }
+  }
+  return LintAction.lint;
+}
+
+WorkerJob createLintJob(Command command, String checks, String tidyPath) {
+  final String tidyArgs = calcTidyArgs(command);
+  final List<String> args = <String>[command.file.path, checks, '--'];
+  args.addAll(tidyArgs?.split(' ') ?? <String>[]);
+  return WorkerJob(
+    <String>[tidyPath, ...args],
+    workingDirectory: command.directory,
+    name: 'clang-tidy on ${command.file.path}',
+  );
 }
 
 void _usage(ArgParser parser, {int exitCode = 1}) {
@@ -226,19 +264,23 @@ void main(List<String> arguments) async {
   final List<WorkerJob> jobs = <WorkerJob>[];
   for (Command command in changedFileBuildCommands) {
     final String relativePath = path.relative(command.file.path, from: repoPath.parent.path);
-    final String ignoreReason = await shouldIgnoreFile(command.file);
-    if (ignoreReason.isEmpty) {
-      final String tidyArgs = calcTidyArgs(command);
-      final List<String> args = <String>[command.file.path, checks, '--'];
-      args.addAll(tidyArgs?.split(' ') ?? <String>[]);
-      print('🔶 linting $relativePath');
-      jobs.add(WorkerJob(
-        <String>[tidyPath, ...args],
-        workingDirectory: command.directory,
-        name: 'clang-tidy on ${command.file.path}',
-      ));
-    } else {
-      print('🔷 ignoring $relativePath ($ignoreReason)');
+    final LintAction action = await getLintAction(command.file);
+    switch (action) {
+      case LintAction.skipNoLint:
+        print('🔷 ignoring $relativePath (FLUTTER_NOLINT)');
+        break;
+      case LintAction.failMalformedNoLint:
+        print('❌ malformed opt-out $relativePath');
+        print('   Required format: // FLUTTER_NOLINT: $issueUrlPrefix/ISSUE_ID');
+        exitCode = 1;
+        break;
+      case LintAction.lint:
+        print('🔶 linting $relativePath');
+        jobs.add(createLintJob(command, checks, tidyPath));
+        break;
+      case LintAction.skipThirdParty:
+        print('🔷 ignoring $relativePath (third_party)');
+        break;
     }
   }
   final ProcessPool pool = ProcessPool();
@@ -260,5 +302,7 @@ void main(List<String> arguments) async {
   print('\n');
   if (exitCode == 0) {
     print('No lint problems found.');
+  } else {
+    print('Lint problems found.');
   }
 }
