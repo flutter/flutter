@@ -12,9 +12,7 @@ import 'text_editing.dart';
 import 'text_input.dart';
 
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
-/// How would the length limitation behave in [LengthLimitingTextInputFormatter].
-///
-/// {@macro flutter.services.lengthLimitingTextInputFormatter.maxLength}
+/// How would the length limitation enforces in [LengthLimitingTextInputFormatter].
 /// {@endtemplate}
 enum MaxLengthEnforcement {
   /// Truncate but lifted limitation for composing.
