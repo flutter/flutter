@@ -500,7 +500,7 @@ class CupertinoTextField extends StatefulWidget {
   @Deprecated(
     'Use maxLengthEnforcement parameter which provide more specific '
     'behaviour related max length limitation. '
-    'This feature was deprecated after v1.23.0-19.0.pre.23.'
+    'This feature was deprecated after v1.23.0-19.0.pre.'
   )
   final bool maxLengthEnforced;
 
