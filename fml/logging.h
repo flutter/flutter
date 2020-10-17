@@ -43,6 +43,8 @@ int GetVlogVerbosity();
 // LOG_FATAL and above is always true.
 bool ShouldCreateLogMessage(LogSeverity severity);
 
+[[noreturn]] void KillProcess();
+
 }  // namespace fml
 
 #define FML_LOG_STREAM(severity) \
@@ -87,9 +89,10 @@ bool ShouldCreateLogMessage(LogSeverity severity);
 #define FML_DCHECK(condition) FML_EAT_STREAM_PARAMETERS(condition)
 #endif
 
-#define FML_NOTREACHED() FML_DCHECK(false)
-
-#define FML_NOTIMPLEMENTED() \
-  FML_LOG(ERROR) << "Not implemented in: " << __PRETTY_FUNCTION__
+#define FML_UNREACHABLE()                          \
+  {                                                \
+    FML_LOG(ERROR) << "Reached unreachable code."; \
+    ::fml::KillProcess();                          \
+  }
 
 #endif  // FLUTTER_FML_LOGGING_H_
