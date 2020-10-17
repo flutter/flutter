@@ -390,9 +390,10 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///
   /// ### Composing text behaviors
   ///
-  /// If [composingMaxLengthEnforced] and [keepComposing] are both true,
-  /// the truncated value will copy the composing from [value] and generate
-  /// a truncated one.
+  /// The composing range of [value] will be set to [TextRange.empty]
+  /// if [keepComposingRange] is false and the truncated value's length is more
+  /// than [value]'s. Otherwise only the part that exceeds [maxLength]
+  /// will be truncated.
   ///
   /// See also:
   ///  * [Dart's characters package](https://pub.dev/packages/characters).
@@ -401,7 +402,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   static TextEditingValue truncate(
     TextEditingValue value,
     int maxLength, {
-    bool keepComposing = false,
+    bool keepComposingRange = false,
   }) {
     final CharacterRange iterator = CharacterRange(value.text);
     if (value.text.characters.length > maxLength) {
@@ -414,7 +415,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
         baseOffset: math.min(value.selection.start, truncated.length),
         extentOffset: math.min(value.selection.end, truncated.length),
       ),
-      composing: keepComposing
+      composing: keepComposingRange && truncated.length > value.composing.start
         ? TextRange(
             start: math.min(value.composing.start, truncated.length),
             end: math.min(value.composing.end, truncated.length),
@@ -450,7 +451,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
       : truncate(
           newValue,
           maxLength,
-          keepComposing: oldValue.composing.isValid && composingMaxLengthEnforced,
+          keepComposingRange: oldValue.composing.isValid,
         );
   }
 }
