@@ -99,7 +99,7 @@ class MockEngineCanvas implements EngineCanvas {
   }
 
   @override
-  void clipRect(Rect rect) {
+  void clipRect(Rect rect, ClipOp op) {
     _called('clipRect', arguments: rect);
   }
 

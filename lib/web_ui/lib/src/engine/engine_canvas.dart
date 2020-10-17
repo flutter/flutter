@@ -33,7 +33,7 @@ abstract class EngineCanvas {
 
   void transform(Float32List matrix4);
 
-  void clipRect(ui.Rect rect);
+  void clipRect(ui.Rect rect, ui.ClipOp clipOp);
 
   void clipRRect(ui.RRect rrect);
 
@@ -222,7 +222,7 @@ mixin SaveStackTracking on EngineCanvas {
   ///
   /// Classes that override this method must call `super.clipRect()`.
   @override
-  void clipRect(ui.Rect rect) {
+  void clipRect(ui.Rect rect, ui.ClipOp op) {
     _clipStack ??= <_SaveClipEntry>[];
     _clipStack!.add(_SaveClipEntry.rect(rect, _currentTransform.clone()));
   }

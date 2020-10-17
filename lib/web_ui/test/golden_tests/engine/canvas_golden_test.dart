@@ -157,9 +157,9 @@ void testMain() async {
 
     canvas = BitmapCanvas(canvasSize);
     canvas.debugChildOverdraw = true;
-    canvas.clipRect(outerClip);
+    canvas.clipRect(outerClip, ClipOp.intersect);
     canvas.drawParagraph(paragraph, const Offset(8.5, 8.5));
-    canvas.clipRect(innerClip);
+    canvas.clipRect(innerClip, ClipOp.intersect);
     canvas.drawParagraph(paragraph, Offset(8.5, 8.5 + innerClip.top));
 
     expect(

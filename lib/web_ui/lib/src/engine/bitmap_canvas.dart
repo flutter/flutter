@@ -271,8 +271,18 @@ class BitmapCanvas extends EngineCanvas {
   }
 
   @override
-  void clipRect(ui.Rect rect) {
-    _canvasPool.clipRect(rect);
+  void clipRect(ui.Rect rect, ui.ClipOp op) {
+    if (op == ui.ClipOp.difference) {
+      // Create 2 rectangles inside each other that represents
+      // clip area difference using even-odd fill rule.
+      final SurfacePath path = new SurfacePath();
+      path.fillType = ui.PathFillType.evenOdd;
+      path.addRect(ui.Rect.fromLTWH(0, 0, _bounds.width, _bounds.height));
+      path.addRect(rect);
+      _canvasPool.clipPath(path);
+    } else {
+      _canvasPool.clipRect(rect);
+    }
   }
 
   @override
@@ -466,7 +476,7 @@ class BitmapCanvas extends EngineCanvas {
     } else {
       if (requiresClipping) {
         save();
-        clipRect(dst);
+        clipRect(dst, ui.ClipOp.intersect);
       }
       double targetLeft = dst.left;
       double targetTop = dst.top;

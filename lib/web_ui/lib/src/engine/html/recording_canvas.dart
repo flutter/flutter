@@ -275,7 +275,7 @@ class RecordingCanvas {
 
   void clipRect(ui.Rect rect, ui.ClipOp clipOp) {
     assert(!_recordingEnded);
-    final PaintClipRect command = PaintClipRect(rect, clipOp);
+    final DrawCommand command = PaintClipRect(rect, clipOp);
     switch (clipOp) {
       case ui.ClipOp.intersect:
         _paintBounds.clipRect(rect, command);
@@ -810,7 +810,7 @@ class PaintClipRect extends DrawCommand {
 
   @override
   void apply(EngineCanvas canvas) {
-    canvas.clipRect(rect);
+    canvas.clipRect(rect, clipOp);
   }
 
   @override
