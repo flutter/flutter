@@ -996,7 +996,7 @@ abstract class FlutterCommand extends Command<void> {
       );
       // All done updating dependencies. Release the cache lock.
       Cache.releaseLock();
-      await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
+      await project.regeneratePlatformSpecificTooling();
     } else {
       Cache.releaseLock();
     }

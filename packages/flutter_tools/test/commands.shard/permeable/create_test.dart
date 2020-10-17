@@ -662,6 +662,65 @@ void main() {
     expect(testLogger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
   });
 
+  testUsingContext('app does not include desktop or web by default', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('linux').existsSync(), false);
+    expect(projectDir.childDirectory('macos').existsSync(), false);
+    expect(projectDir.childDirectory('windows').existsSync(), false);
+    expect(projectDir.childDirectory('web').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+  });
+
+  testUsingContext('plugin does not include desktop or web by default',
+      () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(
+        <String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    expect(projectDir.childDirectory('linux').existsSync(), false);
+    expect(projectDir.childDirectory('macos').existsSync(), false);
+    expect(projectDir.childDirectory('windows').existsSync(), false);
+    expect(projectDir.childDirectory('web').existsSync(), false);
+    expect(
+        projectDir
+            .childDirectory('example')
+            .childDirectory('linux')
+            .existsSync(),
+        false);
+    expect(
+        projectDir
+            .childDirectory('example')
+            .childDirectory('macos')
+            .existsSync(),
+        false);
+    expect(
+        projectDir
+            .childDirectory('example')
+            .childDirectory('windows')
+            .existsSync(),
+        false);
+    expect(
+        projectDir.childDirectory('example').childDirectory('web').existsSync(),
+        false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+  });
+
   testUsingContext('app supports Linux if requested', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -670,26 +729,26 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--platforms=linux',
+      projectDir.path,
+    ]);
 
-    expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt').existsSync(), true);
+    expect(
+        projectDir
+            .childDirectory('linux')
+            .childFile('CMakeLists.txt')
+            .existsSync(),
+        true);
+    expect(projectDir.childDirectory('android').existsSync(), false);
+    expect(projectDir.childDirectory('ios').existsSync(), false);
+    expect(projectDir.childDirectory('windows').existsSync(), false);
+    expect(projectDir.childDirectory('macos').existsSync(), false);
+    expect(projectDir.childDirectory('web').existsSync(), false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-  });
-
-  testUsingContext('app does not include Linux by default', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--no-pub', projectDir.path]);
-
-    expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt').existsSync(), false);
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
   testUsingContext('plugin supports Linux if requested', () async {
@@ -704,7 +763,31 @@ void main() {
 
     expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('linux').existsSync(), true);
-        validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+    expect(
+        projectDir
+            .childDirectory('example')
+            .childDirectory('android')
+            .existsSync(),
+        false);
+    expect(
+        projectDir.childDirectory('example').childDirectory('ios').existsSync(),
+        false);
+    expect(
+        projectDir
+            .childDirectory('example')
+            .childDirectory('windows')
+            .existsSync(),
+        false);
+    expect(
+        projectDir
+            .childDirectory('example')
+            .childDirectory('macos')
+            .existsSync(),
+        false);
+    expect(
+        projectDir.childDirectory('example').childDirectory('web').existsSync(),
+        false);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
       'linux',
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform']);
@@ -712,7 +795,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
-  testUsingContext('plugin does not include Linux by default', () async {
+  testUsingContext('app supports macOS if requested', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -720,27 +803,26 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--platforms=macos',
+      projectDir.path,
+    ]);
 
-    expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt').existsSync(), false);
-    expect(projectDir.childDirectory('example').childDirectory('linux').existsSync(), false);
+    expect(
+        projectDir
+            .childDirectory('macos')
+            .childDirectory('Runner.xcworkspace')
+            .existsSync(),
+        true);
+    expect(projectDir.childDirectory('android').existsSync(), false);
+    expect(projectDir.childDirectory('ios').existsSync(), false);
+    expect(projectDir.childDirectory('linux').existsSync(), false);
+    expect(projectDir.childDirectory('windows').existsSync(), false);
+    expect(projectDir.childDirectory('web').existsSync(), false);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
-  });
-
-  testUsingContext('app does not include macOS by default', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--no-pub', projectDir.path]);
-
-    expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), false);
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('plugin supports macOS if requested', () async {
@@ -755,28 +837,36 @@ void main() {
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), true);
+    expect(
+        projectDir
+            .childDirectory('example')
+            .childDirectory('linux')
+            .existsSync(),
+        false);
+    expect(
+        projectDir
+            .childDirectory('example')
+            .childDirectory('android')
+            .existsSync(),
+        false);
+    expect(
+        projectDir.childDirectory('example').childDirectory('ios').existsSync(),
+        false);
+    expect(
+        projectDir
+            .childDirectory('example')
+            .childDirectory('windows')
+            .existsSync(),
+        false);
+    expect(
+        projectDir.childDirectory('example').childDirectory('web').existsSync(),
+        false);
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
       'macos',
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-  });
-
-  testUsingContext('plugin does not include macOS by default', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-
-    expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), false);
-    expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), false);
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 
   testUsingContext('app supports Windows if requested', () async {
@@ -787,9 +877,21 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--platforms=windows',
+      projectDir.path,
+    ]);
 
-    expect(projectDir.childDirectory('windows').childFile('CMakeLists.txt').existsSync(), true);
+    expect(projectDir.childDirectory('windows').childFile('CMakeLists.txt')
+            .existsSync(),
+        true);
+    expect(projectDir.childDirectory('android').existsSync(), false);
+    expect(projectDir.childDirectory('ios').existsSync(), false);
+    expect(projectDir.childDirectory('linux').existsSync(), false);
+    expect(projectDir.childDirectory('macos').existsSync(), false);
+    expect(projectDir.childDirectory('web').existsSync(), false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -813,21 +915,6 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
-  testUsingContext('app does not include Windows by default', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--no-pub', projectDir.path]);
-
-    expect(projectDir.childDirectory('windows').childFile('CMakeLists.txt').existsSync(), false);
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
-  });
-
   testUsingContext('plugin supports Windows if requested', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -840,6 +927,30 @@ void main() {
 
     expect(projectDir.childDirectory('windows').childFile('CMakeLists.txt').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), true);
+    expect(
+        projectDir
+            .childDirectory('example')
+            .childDirectory('android')
+            .existsSync(),
+        false);
+    expect(
+        projectDir.childDirectory('example').childDirectory('ios').existsSync(),
+        false);
+    expect(
+        projectDir
+            .childDirectory('example')
+            .childDirectory('linux')
+            .existsSync(),
+        false);
+    expect(
+        projectDir
+            .childDirectory('example')
+            .childDirectory('macos')
+            .existsSync(),
+        false);
+    expect(
+        projectDir.childDirectory('example').childDirectory('web').existsSync(),
+        false);
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
       'windows'
     ], pluginClass: 'FlutterProjectPlugin',
@@ -848,7 +959,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
-  testUsingContext('plugin does not include Windows by default', () async {
+  testUsingContext('app supports web if requested', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -856,12 +967,23 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--platforms=web',
+      projectDir.path,
+    ]);
 
-    expect(projectDir.childDirectory('windows').childFile('CMakeLists.txt').existsSync(), false);
-    expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), false);
+    expect(
+        projectDir.childDirectory('web').childFile('index.html').existsSync(),
+        true);
+    expect(projectDir.childDirectory('android').existsSync(), false);
+    expect(projectDir.childDirectory('ios').existsSync(), false);
+    expect(projectDir.childDirectory('linux').existsSync(), false);
+    expect(projectDir.childDirectory('macos').existsSync(), false);
+    expect(projectDir.childDirectory('windows').existsSync(), false);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
   });
 
   testUsingContext('plugin uses new platform schema', () async {
