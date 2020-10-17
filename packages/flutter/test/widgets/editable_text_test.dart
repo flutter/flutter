@@ -6093,6 +6093,43 @@ void main() {
       state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 3, end: 6)));
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
+
+    testWidgets('composing range removed if it\'s overflowed the truncated value\'s length', (WidgetTester tester) async {
+      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
+        maxLength,
+        maxLengthEnforcement: MaxLengthEnforcement.truncateComposing,
+      );
+      final Widget widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          inputFormatters: <TextInputFormatter>[formatter],
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Initially we're not at maxLength with no composing text.
+      state.updateEditingValue(const TextEditingValue(text: 'abc'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start composing.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde', composing: TextRange(start: 3, end: 5)));
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+
+      // Reset the value.
+      state.updateEditingValue(const TextEditingValue(text: 'abc'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start composing with a range already overflowed the truncated length.
+      state.updateEditingValue(const TextEditingValue(text: 'abcdefgh', composing: TextRange(start: 5, end: 7)));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+    });
   });
 
   group('callback errors', () {
