@@ -261,7 +261,7 @@ abstract class DeletableChipAttributes {
   /// Whether to use a tooltip on the delete button showing this chip's
   /// [deleteButtonTooltipMessage].
   ///
-  /// Defaults to `true`.
+  /// If null, defaults to `true`.
   bool? get useDeleteButtonTooltip;
 
   /// The message to be used for the chip's delete button tooltip.
