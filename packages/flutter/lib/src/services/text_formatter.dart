@@ -445,7 +445,6 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     // Temporarily exempt `newValue` from the maxLength limit if it has a
     // composing text going and no enforcement to the composing value, until
     // the composing is finished.
-    // Also truncate `newValue` when `composingMaxLengthEnforced` is true.
     return newValue.composing.isValid && maxLengthEnforcement != MaxLengthEnforcement.truncateComposing
       ? newValue
       : truncate(

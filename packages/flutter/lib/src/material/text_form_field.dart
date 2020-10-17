@@ -162,7 +162,13 @@ class TextFormField extends FormField<String> {
       'This feature was deprecated after v1.19.0.'
     )
     bool autovalidate = false,
+    @Deprecated(
+      'Use maxLengthEnforcement parameter which provide more specific '
+      'behaviour related max length limitation. '
+      'This feature was deprecated after v1.23.0-19.0.pre.'
+    )
     bool maxLengthEnforced = true,
+    MaxLengthEnforcement maxLengthEnforcement = MaxLengthEnforcement.regular,
     int? maxLines = 1,
     int? minLines,
     bool expands = false,
@@ -201,6 +207,7 @@ class TextFormField extends FormField<String> {
          'autovalidate and autovalidateMode should not be used together.'
        ),
        assert(maxLengthEnforced != null),
+       assert(maxLengthEnforcement != null),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
@@ -258,6 +265,7 @@ class TextFormField extends FormField<String> {
            smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
            enableSuggestions: enableSuggestions,
            maxLengthEnforced: maxLengthEnforced,
+           maxLengthEnforcement: maxLengthEnforcement,
            maxLines: maxLines,
            minLines: minLines,
            expands: expands,
