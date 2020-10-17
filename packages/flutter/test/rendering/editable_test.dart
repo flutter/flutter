@@ -976,8 +976,8 @@ void main() {
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight);
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
 
@@ -992,8 +992,8 @@ void main() {
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
 
