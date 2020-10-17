@@ -598,6 +598,11 @@ class TextField extends StatefulWidget {
   /// If [maxLength] is set, [maxLengthEnforced] indicates whether or not to
   /// enforce the limit, or merely provide a character counter and warning when
   /// [maxLength] is exceeded.
+  @Deprecated(
+    'Use maxLengthEnforcement parameter which provide more specific '
+    'behaviour related max length limitation. '
+    'This feature was deprecated after v1.23.0-19.0.pre.23.'
+  )
   final bool maxLengthEnforced;
 
   /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
