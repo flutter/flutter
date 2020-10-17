@@ -70,10 +70,10 @@ class IntelliJPlugins {
   }
 
   ArchiveFile _findPluginXml(String packageName) {
-    final List<String> mainJarPathList = <String>[];
+    final List<File> mainJarFileList = <File>[];
     if (packageName.endsWith('.jar')) {
       // package exists (checked in _hasPackage)
-      mainJarPathList.add(_fileSystem.path.join(pluginsPath, packageName));
+      mainJarFileList.add(_fileSystem.file(_fileSystem.path.join(pluginsPath, packageName)));
     } else {
       final String packageLibPath =
           _fileSystem.path.join(pluginsPath, packageName, 'lib');
@@ -81,25 +81,21 @@ class IntelliJPlugins {
         return null;
       }
       // Collect the files with a file suffix of .jar/.zip that contains the plugin.xml file
-      final List<FileSystemEntity> pluginJarPaths = _fileSystem
+      final List<File> pluginJarFiles = _fileSystem
           .directory(_fileSystem.path.join(pluginsPath, packageName, 'lib'))
           .listSync()
-          .where((FileSystemEntity element) {
-            final String name = element.basename;
-            if (element.statSync().type == FileSystemEntityType.file &&
-                (name.endsWith('.jar') || name.endsWith('.zip'))) {
-              return true;
-            } else {
-              return false;
-            }
+          .whereType<File>()
+          .where((File file) {
+            final String fileExt= _fileSystem.path.extension(file.path);
+            return fileExt == '.jar' || fileExt == '.zip';
           })
           .toList();
 
-      if (pluginJarPaths.isEmpty) {
+      if (pluginJarFiles.isEmpty) {
         return null;
       }
       // Prefer file with the same suffix as the package name
-      pluginJarPaths.sort((FileSystemEntity a, FileSystemEntity b) {
+      pluginJarFiles.sort((File a, File b) {
         final bool aStartWithPackageName =
             a.basename.toLowerCase().startsWith(packageName.toLowerCase());
         final bool bStartWithPackageName =
@@ -109,12 +105,10 @@ class IntelliJPlugins {
         }
         return a.basename.length - b.basename.length;
       });
-      mainJarPathList.addAll(pluginJarPaths.map((FileSystemEntity entry) => entry.path));
+      mainJarFileList.addAll(pluginJarFiles);
     }
 
-    final Iterator<String> itr = mainJarPathList.iterator;
-    while (itr.moveNext()) {
-      final File file = _fileSystem.file(itr.current);
+    for (final File file in mainJarFileList) {
       final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
       final ArchiveFile archiveFile = archive.findFile('META-INF/plugin.xml');
       if (archiveFile != null) {
