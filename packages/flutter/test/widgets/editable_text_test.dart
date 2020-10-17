@@ -6055,7 +6055,7 @@ void main() {
     testWidgets('enforced composing truncated', (WidgetTester tester) async {
       final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
         maxLength,
-        composingMaxLengthEnforced: true,
+        maxLengthEnforcement: MaxLengthEnforcement.truncateComposing,
       );
       final Widget widget = MaterialApp(
         home: EditableText(

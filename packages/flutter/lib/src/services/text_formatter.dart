@@ -11,6 +11,20 @@ import 'package:flutter/foundation.dart';
 import 'text_editing.dart';
 import 'text_input.dart';
 
+/// How would the length limitation behave in [LengthLimitingTextInputFormatter].
+///
+/// {@macro flutter.services.lengthLimitingTextInputFormatter.maxLength}
+enum MaxLengthEnforcement {
+  /// Truncate but lifted limitation for composing.
+  regular,
+
+  /// Always truncate value even if it's composing.
+  truncateComposing,
+
+  /// Display a warning tips but not truncate the value.
+  warningOnly,
+}
+
 /// A [TextInputFormatter] can be optionally injected into an [EditableText]
 /// to provide as-you-type validation and formatting of the text being edited.
 ///
@@ -324,7 +338,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// then no limit is enforced.
   LengthLimitingTextInputFormatter(
     this.maxLength, {
-    this.composingMaxLengthEnforced = false,
+    this.maxLengthEnforcement = MaxLengthEnforcement.regular,
   }) : assert(maxLength == null || maxLength == -1 || maxLength > 0);
 
   /// The limit on the number of user-perceived characters that this formatter
@@ -369,7 +383,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// is composing.
   ///
   /// Defaults to false.
-  final bool composingMaxLengthEnforced;
+  final MaxLengthEnforcement maxLengthEnforcement;
 
   /// Truncate the given TextEditingValue to maxLength user-perceived
   /// characters.
@@ -428,9 +442,10 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     }
 
     // Temporarily exempt `newValue` from the maxLength limit if it has a
-    // composing text going, until the composing is finished.
+    // composing text going and no enforcement to the composing value, until
+    // the composing is finished.
     // Also truncate `newValue` when `composingMaxLengthEnforced` is true.
-    return newValue.composing.isValid && !composingMaxLengthEnforced
+    return newValue.composing.isValid && maxLengthEnforcement != MaxLengthEnforcement.truncateComposing
       ? newValue
       : truncate(
           newValue,

@@ -206,9 +206,10 @@ class CupertinoTextField extends StatefulWidget {
   /// must not be null.
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
-  /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
-  /// [scrollPadding], [suffixMode], [textAlign], [selectionHeightStyle],
-  /// [selectionWidthStyle], and [enableSuggestions] properties must not be null.
+  /// [expands], [maxLengthEnforced], [maxLengthEnforcement], [obscureText],
+  /// [prefixMode], [readOnly], [scrollPadding], [suffixMode], [textAlign],
+  /// [selectionHeightStyle], [selectionWidthStyle], and [enableSuggestions]
+  /// properties must not be null.
   ///
   /// See also:
   ///
@@ -255,6 +256,7 @@ class CupertinoTextField extends StatefulWidget {
     this.expands = false,
     this.maxLength,
     this.maxLengthEnforced = true,
+    this.maxLengthEnforcement = MaxLengthEnforcement.regular,
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
@@ -286,6 +288,7 @@ class CupertinoTextField extends StatefulWidget {
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(maxLengthEnforced != null),
+       assert(maxLengthEnforcement != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        assert(selectionHeightStyle != null),
@@ -474,9 +477,10 @@ class CupertinoTextField extends StatefulWidget {
   /// If set, a character counter will be displayed below the
   /// field, showing how many characters have been entered and how many are
   /// allowed. After [maxLength] characters have been input, additional input
-  /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
-  /// enforces the length with a [LengthLimitingTextInputFormatter], which is
-  /// evaluated after the supplied [inputFormatters], if any.
+  /// is ignored, unless [maxLengthEnforced] is set to false or
+  /// [maxLengthEnforcement] is [MaxLengthEnforcement.warningOnly].
+  /// The TextField enforces the length with a [LengthLimitingTextInputFormatter],
+  /// which is evaluated after the supplied [inputFormatters], if any.
   ///
   /// This value must be either null or greater than zero. If set to null
   /// (the default), there is no limit to the number of characters allowed.
@@ -494,6 +498,9 @@ class CupertinoTextField extends StatefulWidget {
   /// enforce the limit, or merely provide a character counter and warning when
   /// [maxLength] is exceeded.
   final bool maxLengthEnforced;
+
+  /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
+  final MaxLengthEnforcement maxLengthEnforcement;
 
   /// {@macro flutter.widgets.editableText.onChanged}
   final ValueChanged<String>? onChanged;
@@ -610,6 +617,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
+    properties.add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: MaxLengthEnforcement.regular));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
@@ -876,7 +884,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     final bool enabled = widget.enabled ?? true;
     final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context)!.devicePixelRatio, 0);
-    if (widget.maxLength != null && widget.maxLengthEnforced) {
+    if (widget.maxLength != null &&
+      (widget.maxLengthEnforced || widget.maxLengthEnforcement != MaxLengthEnforcement.warningOnly)) {
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
     }
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
