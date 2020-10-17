@@ -556,7 +556,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
           handleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,
         );
       // A collapsed handle anchors itself so that it's centered.
-      default:
+      case TextSelectionHandleType.collapsed:
         return Offset(
           handleSize.width / 2,
           textLineHeight + (handleSize.height - textLineHeight) / 2,
