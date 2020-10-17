@@ -1443,12 +1443,10 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   // Returns the amount of delta that was not used.
   //
-  // Positive delta means going down (exposing stuff above), negative delta
+  // Negative delta means going down (exposing stuff above), positive delta
   // going up (exposing stuff below).
   //
-  // The method is actually very similar to [applyClampedDragUpdate] in that
-  // it also doesn't enter an overscroll situation.
-  // But the method doesn't take into account the effects of [ScrollPhysics].
+  // The method doesn't take into account the effects of [ScrollPhysics].
   double applyClampedPointerSignalUpdate(double delta) {
     assert(delta != 0.0);
 
