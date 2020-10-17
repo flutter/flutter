@@ -6167,61 +6167,6 @@ void main() {
       expect(error.toString(), contains(errorText));
     });
   });
-
-  testWidgets('selecting a space selects the previous word on Android', (WidgetTester tester) async {
-    TextSelection? selection;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: TextEditingController(text: ' blah blah'),
-          focusNode: focusNode,
-          readOnly: true,
-          toolbarOptions: const ToolbarOptions(
-            paste: true,
-            cut: true,
-            selectAll: true,
-            copy: true,
-          ),
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
-          onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
-            selection = newSelection;
-          },
-        ),
-      ),
-    );
-
-    expect(selection, isNull);
-
-    // Put the cursor at the end of the field.
-    await tester.tapAt(textOffsetToPosition(tester, 10));
-    expect(selection, isNotNull);
-    expect(selection!.baseOffset, 10);
-    expect(selection!.extentOffset, 10);
-
-    // Long press on the second space and the previous word is selected.
-    await tester.longPressAt(textOffsetToPosition(tester, 5));
-    await tester.pumpAndSettle();
-    expect(selection, isNotNull);
-    expect(selection!.baseOffset, 1);
-    expect(selection!.extentOffset, 5);
-
-    // Put the cursor at the end of the field.
-    await tester.tapAt(textOffsetToPosition(tester, 10));
-    expect(selection, isNotNull);
-    expect(selection!.baseOffset, 10);
-    expect(selection!.extentOffset, 10);
-
-    // Long press on the first space and the space is selected because there is
-    // no previous word.
-    await tester.longPressAt(textOffsetToPosition(tester, 0));
-    await tester.pumpAndSettle();
-    expect(selection, isNotNull);
-    expect(selection!.baseOffset, 0);
-    expect(selection!.extentOffset, 1);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 }
 
 class MockTextFormatter extends TextInputFormatter {

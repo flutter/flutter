@@ -1912,30 +1912,36 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // If text is obscured, the entire sentence should be treated as one word.
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
-    // If the word is a space, on mobile try to select the previous word
-    // instead.
-    } else if (text?.text != null && word.textInside(text!.text!) == ' '
-        && word.textBefore(text!.text!).isNotEmpty) {
+    // If the word is a space, on iOS try to select the previous word instead.
+    } else if (text?.text != null
+        && _isWhitespace(text!.text!.codeUnitAt(position.offset))
+        && position.offset > 0) {
       assert(defaultTargetPlatform != null);
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
+          int startIndex = position.offset - 1;
+          while (startIndex > 0 && _isWhitespace(text!.text!.codeUnitAt(startIndex))) {
+            startIndex--;
+          }
+          if (startIndex > 0) {
+            final TextPosition positionBeforeSpace = TextPosition(
+              offset: startIndex,
+              affinity: position.affinity,
+            );
+            final TextRange wordBeforeSpace = _textPainter.getWordBoundary(
+              positionBeforeSpace,
+            );
+            startIndex = wordBeforeSpace.start;
+          }
+          return TextSelection(
+            baseOffset: startIndex,
+            extentOffset: position.offset,
+          );
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
-          final TextPosition positionBeforeSpace = TextPosition(
-            offset: position.offset - 1,
-            affinity: position.affinity,
-          );
-          final TextRange wordBeforeSpace = _textPainter.getWordBoundary(
-            positionBeforeSpace,
-          );
-          return TextSelection(
-            baseOffset: wordBeforeSpace.start,
-            extentOffset: wordBeforeSpace.end,
-          );
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-          _caretPrototype = Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, cursorHeight - 2.0 * _kCaretHeightOffset);
           break;
       }
     }
