@@ -889,8 +889,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     final bool enabled = widget.enabled ?? true;
     final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context)!.devicePixelRatio, 0);
-    if (widget.maxLength != null &&
-      (widget.maxLengthEnforced || widget.maxLengthEnforcement != MaxLengthEnforcement.warningOnly)) {
+    if (widget.maxLength != null && widget.maxLengthEnforced) {
       formatters.add(LengthLimitingTextInputFormatter(
         widget.maxLength,
         maxLengthEnforcement: widget.maxLengthEnforcement,

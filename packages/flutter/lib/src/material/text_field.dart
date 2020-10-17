@@ -1103,8 +1103,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
-    if (widget.maxLength != null &&
-      (widget.maxLengthEnforced || widget.maxLengthEnforcement != MaxLengthEnforcement.warningOnly)) {
+    if (widget.maxLength != null && widget.maxLengthEnforced) {
       formatters.add(LengthLimitingTextInputFormatter(
         widget.maxLength,
         maxLengthEnforcement: widget.maxLengthEnforcement,

@@ -428,7 +428,10 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ) {
     final int? maxLength = this.maxLength;
 
-    if (maxLength == null || maxLength == -1 || newValue.text.characters.length <= maxLength)
+    if (maxLength == null
+      || maxLength == -1
+      || newValue.text.characters.length <= maxLength
+      || maxLengthEnforcement == MaxLengthEnforcement.warningOnly)
       return newValue;
 
     assert(maxLength > 0);
