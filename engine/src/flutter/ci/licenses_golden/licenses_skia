@@ -1,4 +1,4 @@
-Signature: 05f66a144cd90f4b3f945c832b2e6354
+Signature: 8a3d5e40f57c4443b0ec386868b3f2f2
 
 UNUSED LICENSES:
 
@@ -3902,7 +3902,6 @@ FILE: ../../../third_party/skia/gm/ycbcrimage.cpp
 FILE: ../../../third_party/skia/include/core/SkYUVAInfo.h
 FILE: ../../../third_party/skia/include/core/SkYUVAPixmaps.h
 FILE: ../../../third_party/skia/include/gpu/GrBackendSurfaceMutableState.h
-FILE: ../../../third_party/skia/include/gpu/GrYUVABackendTextures.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DTypes.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DTypesMinimal.h
@@ -3941,7 +3940,6 @@ FILE: ../../../third_party/skia/src/gpu/GrUniformDataManager.cpp
 FILE: ../../../third_party/skia/src/gpu/GrUniformDataManager.h
 FILE: ../../../third_party/skia/src/gpu/GrUnrefDDLTask.h
 FILE: ../../../third_party/skia/src/gpu/GrUtil.cpp
-FILE: ../../../third_party/skia/src/gpu/GrYUVABackendTextures.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DAMDMemoryAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DAMDMemoryAllocator.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DAttachment.cpp
