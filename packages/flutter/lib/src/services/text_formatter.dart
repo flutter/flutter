@@ -379,7 +379,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// composing is not allowed.
   final int? maxLength;
 
-  /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
+  /// {@macro flutter.services.MaxLengthEnforcement}
   final MaxLengthEnforcement maxLengthEnforcement;
 
   /// Truncate the given TextEditingValue to maxLength user-perceived

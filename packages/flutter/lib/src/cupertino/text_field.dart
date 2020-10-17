@@ -504,7 +504,7 @@ class CupertinoTextField extends StatefulWidget {
   )
   final bool maxLengthEnforced;
 
-  /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
+  /// {@macro flutter.services.MaxLengthEnforcement}
   final MaxLengthEnforcement maxLengthEnforcement;
 
   /// {@macro flutter.widgets.editableText.onChanged}
