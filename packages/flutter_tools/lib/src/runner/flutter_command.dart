@@ -114,6 +114,7 @@ class FlutterOptions {
   static const String kDeviceTimeout = 'device-timeout';
   static const String kAnalyzeSize = 'analyze-size';
   static const String kNullAssertions = 'null-assertions';
+  static const String kAndroidGradleDaemon = 'android-gradle-daemon';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -611,6 +612,14 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addAndroidSpecificBuildOptions({ bool hide = false }) {
+    argParser.addFlag(
+      FlutterOptions.kAndroidGradleDaemon,
+      help: 'Control whether a Gradle daemon is started when building or running on Android.',
+      defaultsTo: true,
+    );
+  }
+
   /// Adds build options common to all of the desktop build commands.
   void addCommonDesktopBuildOptions({ bool verboseHelp = false }) {
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -764,6 +773,9 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kSplitDebugInfoOption)
       : null;
 
+    final bool androidGradleDaemon = !argParser.options.containsKey(FlutterOptions.kAndroidGradleDaemon)
+      || boolArg(FlutterOptions.kAndroidGradleDaemon);
+
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
         '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
@@ -827,6 +839,7 @@ abstract class FlutterCommand extends Command<void> {
       packagesPath: globalResults['packages'] as String ?? '.packages',
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
+      androidGradleDaemon: androidGradleDaemon,
     );
   }
 

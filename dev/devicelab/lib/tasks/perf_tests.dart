@@ -347,6 +347,7 @@ TaskFunction createsScrollSmoothnessPerfTest() {
       await flutter('packages', options: <String>['get']);
 
       await flutter('drive', options: <String>[
+        '--no-android-gradle-daemon',
         '-v',
         '--verbose-system-logs',
         '--profile',
@@ -395,6 +396,7 @@ TaskFunction createFramePolicyIntegrationTest() {
       await flutter('packages', options: <String>['get']);
 
       await flutter('drive', options: <String>[
+        '--no-android-gradle-daemon',
         '-v',
         '--verbose-system-logs',
         '--profile',
@@ -459,6 +461,7 @@ class StartupTest {
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
       for (int i = 0; i < iterations; ++i) {
         await flutter('run', options: <String>[
+          '--no-android-gradle-daemon',
           '--verbose',
           '--profile',
           '--trace-startup',
@@ -575,6 +578,7 @@ class PerfTest {
       await flutter('packages', options: <String>['get']);
 
       await flutter('drive', options: <String>[
+        '--no-android-gradle-daemon',
         '-v',
         '--verbose-system-logs',
         '--profile',
