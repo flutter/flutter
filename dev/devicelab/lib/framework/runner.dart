@@ -122,4 +122,3 @@ Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
     }
   }
 }
-
