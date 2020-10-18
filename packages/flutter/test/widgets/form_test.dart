@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   testWidgets('onSaved callback is called', (WidgetTester tester) async {
@@ -864,6 +865,7 @@ void main() {
                 key: formKey,
                 child: TextFormField(
                   maxLength: 5,
+                  maxLengthEnforcement: MaxLengthEnforcement.composingUnenforced,
                   onSaved: (String? value) { fieldValue = value; },
                   validator: (String? value) => (value != null && value.length > 5) ? 'Exceeded' : null,
                 ),
