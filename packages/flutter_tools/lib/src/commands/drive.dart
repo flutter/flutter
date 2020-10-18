@@ -4,21 +4,21 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/application_package.dart';
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_device.dart';
+import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
 import '../drive/web_driver_service.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart' show FlutterCommandResult, FlutterOptions;
+import '../web/web_device.dart';
 import 'run.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
