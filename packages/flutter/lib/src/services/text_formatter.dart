@@ -13,15 +13,28 @@ import 'text_input.dart';
 
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
 /// How would the length limitation enforces in [LengthLimitingTextInputFormatter].
+///
+///  * For the behavior that enforce max length on the editing value entirely,
+/// choose [MaxLengthEnforcement.enforced], which is similar to Gboard and
+/// iOS native IME.
+///
+///  * For the behavior that exempt composing [TextEditingValue] while editing,
+/// choose [MaxLengthEnforcement.composingUnenforced]. A value without composing
+/// will still be truncated eventually.
+///
+///  * For the behavior that not enforcing the [TextEditingValue] but display
+/// a warning on the length counter, choose [MaxLengthEnforcement.warningOnly].
 /// {@endtemplate}
 enum MaxLengthEnforcement {
-  /// Truncate but lifted limitation for composing.
-  regular,
+  /// Enforce max length on the editing value entirely, which is similar to
+  /// Gboard and iOS native IME.
+  enforced,
 
-  /// Always truncate value even if it's composing.
-  truncateComposing,
+  /// Users can still input if the current value is composing while it reached
+  /// the max length limit. After composing ends, the value will be truncated.
+  composingUnenforced,
 
-  /// Display a warning tips but not truncate the value.
+  /// No enforcement applied to the editing value. Only a warning will displayed.
   warningOnly,
 }
 
@@ -338,7 +351,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// then no limit is enforced.
   LengthLimitingTextInputFormatter(
     this.maxLength, {
-    this.maxLengthEnforcement = MaxLengthEnforcement.regular,
+    this.maxLengthEnforcement = MaxLengthEnforcement.enforced,
   }) : assert(maxLength == null || maxLength == -1 || maxLength > 0);
 
   /// The limit on the number of user-perceived characters that this formatter
@@ -445,7 +458,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     // Temporarily exempt `newValue` from the maxLength limit if it has a
     // composing text going and no enforcement to the composing value, until
     // the composing is finished.
-    return newValue.composing.isValid && maxLengthEnforcement != MaxLengthEnforcement.truncateComposing
+    return newValue.composing.isValid && maxLengthEnforcement != MaxLengthEnforcement.enforced
       ? newValue
       : truncate(
           newValue,
