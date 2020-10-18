@@ -164,7 +164,7 @@ class TextFormField extends FormField<String> {
     bool autovalidate = false,
     @Deprecated(
       'Use maxLengthEnforcement parameter which provide more specific '
-      'behaviour related max length limitation. '
+      'behaviour related to the maxLength limit. '
       'This feature was deprecated after v1.23.0-19.0.pre.'
     )
     bool maxLengthEnforced = true,
