@@ -512,8 +512,8 @@ class _Decoration {
     this.suffix,
     this.prefixIcon,
     this.suffixIcon,
-    this.prefixIconAlignment = Alignment.center,
-    this.suffixIconAlignment = Alignment.center,
+    this.prefixIconAlignment,
+    this.suffixIconAlignment,
     this.helperError,
     this.counter,
     this.container,
@@ -541,8 +541,8 @@ class _Decoration {
   final Widget? suffix;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
-  final Alignment prefixIconAlignment;
-  final Alignment suffixIconAlignment;
+  final Alignment? prefixIconAlignment;
+  final Alignment? suffixIconAlignment;
   final Widget? helperError;
   final Widget? counter;
   final Widget? container;
@@ -1320,6 +1320,23 @@ class _RenderDecoration extends RenderBox {
       return box.size.width;
     }
 
+    double customLayout(RenderBox box, double x, double y) {
+      _boxParentData(box).offset = Offset(
+        x,
+        (height! - box.size.height) *
+          (
+            ((2 * y) + 2) > 2 
+            ? y
+            : (
+              ((2 * y) + 2) == 0 
+                ? 0 
+                : (1 / ((2 * y) + 2))
+            )
+              ),
+        );
+      return box.size.width;
+    }
+
     final double left = contentPadding.left;
     final double right = overallWidth - contentPadding.right;
 
@@ -1345,7 +1362,7 @@ class _RenderDecoration extends RenderBox {
         double end = left;
         if (prefixIcon != null) {
           start += contentPadding.left;
-          start -= centerLayout(prefixIcon!, start - prefixIcon!.size.width);
+          start -= customLayout(prefixIcon!, start - prefixIcon!.size.width, (decoration.prefixIconAlignment ?? Alignment.center).y);
         }
         if (label != null) {
           if (decoration.alignLabelWithHint) {
@@ -1362,7 +1379,7 @@ class _RenderDecoration extends RenderBox {
           baselineLayout(hint!, start - hint!.size.width);
         if (suffixIcon != null) {
           end -= contentPadding.left;
-          end += centerLayout(suffixIcon!, end);
+          end += customLayout(suffixIcon!, end, (decoration.suffixIconAlignment ?? Alignment.center).y);
         }
         if (suffix != null)
           end += baselineLayout(suffix!, end);
@@ -1373,7 +1390,7 @@ class _RenderDecoration extends RenderBox {
         double end = right;
         if (prefixIcon != null) {
           start -= contentPadding.left;
-          start += centerLayout(prefixIcon!, start);
+          start +=  customLayout(prefixIcon!, start, (decoration.prefixIconAlignment ?? Alignment.center).y);
         }
         if (label != null) {
           if (decoration.alignLabelWithHint) {
@@ -1390,7 +1407,7 @@ class _RenderDecoration extends RenderBox {
           baselineLayout(hint!, start);
         if (suffixIcon != null) {
           end += contentPadding.right;
-          end -= centerLayout(suffixIcon!, end - suffixIcon!.size.width);
+          end -= customLayout(suffixIcon!, end - suffixIcon!.size.width, (decoration.suffixIconAlignment ?? Alignment.center).y);
         }
         if (suffix != null)
           end -= baselineLayout(suffix!, end - suffix!.size.width);
@@ -2240,7 +2257,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final Widget? prefixIcon = decoration!.prefixIcon == null ? null :
       Align(
-        alignment: decoration!.prefixIconAlignment,
+        alignment: decoration!.prefixIconAlignment ?? Alignment.center,
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
@@ -2262,7 +2279,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final Widget? suffixIcon = decoration!.suffixIcon == null ? null :
       Align(
-        alignment: decoration!.suffixIconAlignment,
+        alignment: decoration!.suffixIconAlignment ?? Alignment.center,
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
@@ -2357,6 +2374,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         hint: hint,
         prefix: prefix,
         suffix: suffix,
+        prefixIconAlignment: decoration!.prefixIconAlignment ?? Alignment.center,
+        suffixIconAlignment: decoration!.suffixIconAlignment ?? Alignment.center,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         helperError: helperError,
@@ -2514,13 +2533,13 @@ class InputDecoration {
     this.isDense,
     this.contentPadding,
     this.prefixIcon,
-    this.prefixIconAlignment = Alignment.center,
+    this.prefixIconAlignment,
     this.prefixIconConstraints,
     this.prefix,
     this.prefixText,
     this.prefixStyle,
     this.suffixIcon,
-    this.suffixIconAlignment = Alignment.center,
+    this.suffixIconAlignment,
     this.suffix,
     this.suffixText,
     this.suffixStyle,
@@ -2582,14 +2601,14 @@ class InputDecoration {
        contentPadding = EdgeInsets.zero,
        isCollapsed = true,
        prefixIcon = null,
-       prefixIconAlignment = Alignment.center,
+       prefixIconAlignment = null,
        prefix = null,
        prefixText = null,
        prefixStyle = null,
        prefixIconConstraints = null,
        suffix = null,
        suffixIcon = null,
-       suffixIconAlignment = Alignment.center,
+       suffixIconAlignment = null,
        suffixText = null,
        suffixStyle = null,
        suffixIconConstraints = null,
@@ -2827,7 +2846,7 @@ class InputDecoration {
   /// Used to align the [prefixIcon] relative to the position of the text box.
   ///
   /// The default value is [Alignment.center].
-  final Alignment prefixIconAlignment;
+  final Alignment? prefixIconAlignment;
 
   /// The constraints for the prefix icon.
   ///
@@ -2960,7 +2979,7 @@ class InputDecoration {
   /// Used to align the [suffixIcon] relative to the position of the text box.
   ///
   /// The default value is [Alignment.center].
-  final Alignment suffixIconAlignment;
+  final Alignment? suffixIconAlignment;
 
   /// Optional widget to place on the line after the input.
   ///
@@ -3325,13 +3344,13 @@ class InputDecoration {
     bool? isDense,
     EdgeInsetsGeometry? contentPadding,
     Widget? prefixIcon,
-    Alignment prefixIconalignment = Alignment.center,
+    Alignment? prefixIconAlignment,
     Widget? prefix,
     String? prefixText,
     BoxConstraints? prefixIconConstraints,
     TextStyle? prefixStyle,
     Widget? suffixIcon,
-    Alignment suffixIconAlignment = Alignment.center,
+    Alignment? suffixIconAlignment,
     Widget? suffix,
     String? suffixText,
     TextStyle? suffixStyle,
@@ -3372,13 +3391,13 @@ class InputDecoration {
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
       prefixIcon: prefixIcon ?? this.prefixIcon,
-      prefixIconAlignment: prefixIconAlignment,
+      prefixIconAlignment: prefixIconAlignment ?? this.prefixIconAlignment,
       prefix: prefix ?? this.prefix,
       prefixText: prefixText ?? this.prefixText,
       prefixStyle: prefixStyle ?? this.prefixStyle,
       prefixIconConstraints: prefixIconConstraints ?? this.prefixIconConstraints,
       suffixIcon: suffixIcon ?? this.suffixIcon,
-      suffixIconAlignment: suffixIconAlignment,
+      suffixIconAlignment: suffixIconAlignment ?? this.suffixIconAlignment,
       suffix: suffix ?? this.suffix,
       suffixText: suffixText ?? this.suffixText,
       suffixStyle: suffixStyle ?? this.suffixStyle,
