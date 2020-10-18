@@ -924,6 +924,13 @@ void main() {
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
     await webAssetServer.dispose();
   });
+
+  test('responds to POST requests with 404 not found', () => testbed.run(() async {
+    final Response response = await webAssetServer.handleRequest(
+      Request('POST', Uri.parse('http://foobar/something')),
+    );
+    expect(response.statusCode, 404);
+  }));
 }
 
 class MockHttpServer extends Mock implements HttpServer {}

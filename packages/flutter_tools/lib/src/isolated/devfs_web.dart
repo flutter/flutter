@@ -333,6 +333,11 @@ class WebAssetServer implements AssetReader {
   // handle requests for JavaScript source, dart sources maps, or asset files.
   @visibleForTesting
   Future<shelf.Response> handleRequest(shelf.Request request) async {
+    if (request.method == 'POST') {
+      // Assets are served via GET only.
+      return shelf.Response.notFound('');
+    }
+
     final String requestPath = _stripBasePath(request.url.path, basePath);
 
     if (requestPath == null) {
