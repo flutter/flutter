@@ -397,6 +397,9 @@ bool RuntimeController::LaunchRootIsolate(
   }
 
   FML_DCHECK(Dart_CurrentIsolate() == nullptr);
+
+  client_.OnRootIsolateCreated();
+
   return true;
 }
 
