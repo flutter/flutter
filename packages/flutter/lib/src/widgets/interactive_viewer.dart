@@ -701,14 +701,39 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // TODO(justinmc): Implement recovery.
     final _ClosestPoints closestPoints = invalidSide.findClosestPoints(_boundaryRect);
     final Offset difference = closestPoints.onRect - closestPoints.onLineSegment;
+    print('justin closest point onrect ${closestPoints.onRect}, online ${closestPoints.onLineSegment}, so move by $difference');
 
     final Matrix4 correctedMatrix = matrix.clone()
         ..translate(difference.dx, difference.dy);
+    final Quad correctedNextViewport = _transformViewport(correctedMatrix, _viewport);
 
-    // TODO(justinmc): If the correctedMatrix isn't valid, return matrix.
-    // Otherwise return correctedMatrix.
+    final LineSegment correctedViewportSide01 = LineSegment.vector(
+      correctedNextViewport.point0,
+      correctedNextViewport.point1,
+    );
+    final LineSegment correctedViewportSide12 = LineSegment.vector(
+      correctedNextViewport.point1,
+      correctedNextViewport.point2,
+    );
+    final LineSegment correctedViewportSide23 = LineSegment.vector(
+      correctedNextViewport.point2,
+      correctedNextViewport.point3,
+    );
+    final LineSegment correctedViewportSide30 = LineSegment.vector(
+      correctedNextViewport.point3,
+      correctedNextViewport.point0,
+    );
 
-    return Matrix4.identity();
+    // TODO(justinmc): Instead of identity matrix, return the original matrix?
+    // If the corrected matrix is still invalid, return the identity matrix.
+    if (!correctedViewportSide01.intersectsRect(_boundaryRect)
+        || !correctedViewportSide12.intersectsRect(_boundaryRect)
+        || !correctedViewportSide23.intersectsRect(_boundaryRect)
+        || !correctedViewportSide30.intersectsRect(_boundaryRect)) {
+      return Matrix4.identity();
+    }
+
+    return correctedMatrix;
 
     /*
     // Desired translation goes out of bounds, so translate to the nearest
@@ -1353,14 +1378,19 @@ class LineSegment {
   /// indefinitely.
   double get lineYIntercept => p0.dy - slope * p0.dx;
 
-  // A subcase of the intercepts method.
-  static bool _isVerticalAndInterceptsNonVertical(LineSegment vertical, LineSegment nonVertical) {
+  /// A subcase of the linesIntersectAt method.
+  static Offset _isVerticalAndInterceptsNonVerticalLineAt(LineSegment vertical, LineSegment nonVertical) {
     // Assert that vertical is indeed vertical.
     assert(vertical.p0.dx == vertical.p1.dx);
 
     final double x = vertical.p0.dx;
     final double intersectionY = nonVertical.slope * x + nonVertical.lineYIntercept;
-    final Offset intersection = Offset(x, intersectionY);
+    return Offset(x, intersectionY);
+  }
+
+  // A subcase of the intercepts method.
+  static bool _isVerticalAndInterceptsNonVertical(LineSegment vertical, LineSegment nonVertical) {
+    final Offset intersection = _isVerticalAndInterceptsNonVerticalLineAt(vertical, nonVertical);
     return vertical.contains(intersection) && nonVertical.contains(intersection);
   }
 
@@ -1372,6 +1402,36 @@ class LineSegment {
     final double yMax = math.max(p0.dy, p1.dy);
     return offset.dx >= xMin && offset.dx <= xMax
         && offset.dy >= yMin && offset.dy <= yMax;
+  }
+
+  /// For the infintely long lines represented by these line segments, return
+  /// the point at which they intersect, or null if parallel.
+  Offset? linesIntersectAt(LineSegment lineSegment) {
+    // Return null if the lines are parallel, even if they overlap.
+    if (slope == lineSegment.slope) {
+      return null;
+    }
+
+    // Handle if the slopes are different but one line segment is vertical
+    // (infinite slope).
+    if (!slope.isFinite) {
+      return _isVerticalAndInterceptsNonVerticalLineAt(this, lineSegment);
+    }
+    if (!lineSegment.slope.isFinite) {
+      return _isVerticalAndInterceptsNonVerticalLineAt(lineSegment, this);
+    }
+
+    // If the slopes are different and not vertical, the corresponding lines
+    // must intersect.
+    // x = (b1 - b) / (m - m1)
+    final double intersectionX = (lineSegment.lineYIntercept - lineYIntercept)
+        / (slope - lineSegment.slope);
+    assert(intersectionX.isFinite);
+
+    // y = m * intersectionX + b
+    final double intersectionY = slope * intersectionX + lineYIntercept;
+    assert(intersectionY.isFinite);
+    return Offset(intersectionX, intersectionY);
   }
 
   /// True iff the given line segment intersects this one, inclusively.
@@ -1422,10 +1482,58 @@ class LineSegment {
         || intersects(bottom) || intersects(left);
   }
 
+  static double _distanceBetweenPoints(Offset a, Offset b) {
+    return math.sqrt(math.pow(b.dx - a.dx, 2) - math.pow(b.dy - a.dy, 2));
+  }
+
+  // Assuming that the given point is on the extended line of this line segment,
+  // returns the closest point on the line segment to it.
+  Offset findClosestPointOnLineSegmentToPointOnLine(Offset pointOnLine) {
+    if (contains(pointOnLine)) {
+      return pointOnLine;
+    }
+    final double d0 = _distanceBetweenPoints(pointOnLine, p0);
+    final double d1 = _distanceBetweenPoints(pointOnLine, p1);
+    return d0.abs() <= d1.abs() ? p0 : p1;
+  }
+
+  /// Returns the closest point on each line segment to the other line segment.
+  _ClosestPoints findClosestPointsLineSegment(LineSegment lineSegment) {
+    final Offset? lineIntersection = linesIntersectAt(lineSegment);
+
+    // If they don't intersect, return any two closest points.
+    if (lineIntersection == null) {
+      // TODO(justinmc)
+    }
+
+    // Otherwise, the closest points on the line segments are the closest points
+    // to the line intersection.
+    return _ClosestPoints(
+      a: findClosestPointOnLineSegmentToPointOnLine(lineIntersection!),
+      b: lineSegment.findClosestPointOnLineSegmentToPointOnLine(lineIntersection),
+    );
+  }
+
   /// Returns the points on the LineSegment and Rect closest to each other.
   /// Assumes that they do not intersect.
-  _ClosestPoints findClosestPoints(Rect rect) {
-    // TODO(justinmc): Assert that they don't intersect?
+  _ClosestPoints findClosestPointsRect(Rect rect) {
+    assert(!intersectsRect(rect));
+
+    final LineSegment top = LineSegment(rect.topLeft, rect.topRight);
+    final _ClosestPoints toTop = findClosestPointsLineSegment(top);
+    final LineSegment right = LineSegment(rect.topRight, rect.bottomRight);
+    final _ClosestPoints toRight = findClosestPointsLineSegment(top);
+    final LineSegment bottom = LineSegment(rect.bottomRight, rect.bottomLeft);
+    final _ClosestPoints toBottom = findClosestPointsLineSegment(top);
+    final LineSegment left = LineSegment(rect.bottomLeft, rect.topLeft);
+    final _ClosestPoints toLeft = findClosestPointsLineSegment(top);
+
+
+    // TODO(justinmc): Find distance between two closestpoints for each side,
+    // and return the closest.
+
+
+
     // TODO(justinmc): Implement.
     return const _ClosestPoints(
       onLineSegment: Offset.zero,
@@ -1439,6 +1547,7 @@ class LineSegment {
   }
 }
 
+/*
 // A pair of Offsets, used by findClosestPoints to return both points.
 class _ClosestPoints {
   const _ClosestPoints({
@@ -1448,4 +1557,16 @@ class _ClosestPoints {
 
   final Offset onLineSegment;
   final Offset onRect;
+}
+*/
+
+// A pair of Offsets, used by findClosestPoints to return both points.
+class _ClosestPoints {
+  const _ClosestPoints({
+    required this.a,
+    required this.b,
+  });
+
+  final Offset a;
+  final Offset b;
 }
