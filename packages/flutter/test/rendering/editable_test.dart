@@ -953,9 +953,7 @@ void main() {
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
         text: '012345',  // Thumbs up
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
       ),
       selection: const TextSelection.collapsed(
         offset: 0,

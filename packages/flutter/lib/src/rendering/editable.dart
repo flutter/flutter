@@ -678,7 +678,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         if (rightArrow && newSelection.extentOffset < _plainText.length) {
           int nextExtent;
           if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
-          // if (false) {
             nextExtent = newSelection.end;
           } else {
             nextExtent = nextCharacter(newSelection.extentOffset, _plainText);
@@ -693,9 +692,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
             previousExtent = newSelection.start;
           } else {
-            previousExtent = previousCharacter(
-                newSelection.extentOffset, _plainText
-            );
+            previousExtent = previousCharacter(newSelection.extentOffset, _plainText);
           }
           final int distance = newSelection.extentOffset - previousExtent;
           newSelection = newSelection.copyWith(extentOffset: previousExtent);
