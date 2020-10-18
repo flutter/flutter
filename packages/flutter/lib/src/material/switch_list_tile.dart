@@ -447,7 +447,7 @@ class SwitchListTile extends StatelessWidget {
   /// {@macro flutter.material.ListTile.shape}
   final ShapeBorder? shape;
 
-  /// The color of the tile if it's selected.
+  /// {@macro flutter.material.ListTile.selectedTileColor}
   final Color? selectedTileColor;
 
   @override
