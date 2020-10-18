@@ -596,7 +596,10 @@ class AndroidDevice extends Device {
 
     if (debuggingOptions.debuggingEnabled) {
       observatoryDiscovery = ProtocolDiscovery.observatory(
-        await getLogReader(),
+        await AdbLogReader.createLogReader(
+          this,
+          _processManager,
+        ),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -670,7 +673,6 @@ class AndroidDevice extends Device {
     // device has printed "Observatory is listening on...".
     _logger.printTrace('Waiting for observatory port to be available...');
 
-    // TODO(danrubel): Waiting for observatory services can be made common across all devices.
     try {
       Uri observatoryUri;
       if (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) {
@@ -1042,7 +1044,7 @@ class AdbLogReader extends DeviceLogReader {
   Stream<String> get logLines => _linesController.stream;
 
   void _start() {
-    // We expect logcat streams to occasionally contain invalid utf-8,
+    // Logcat streams will occasionally contain invalid utf-8,
     // see: https://github.com/flutter/flutter/pull/8864.
     const Utf8Decoder decoder = Utf8Decoder(reportErrors: false);
     _adbProcess.stdout.transform<String>(decoder)

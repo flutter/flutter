@@ -147,8 +147,8 @@ class DriveCommand extends RunCommandBase {
   String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
   /// Subscription to log messages printed on the device or simulator.
-  // ignore: cancel_subscriptions
   StreamSubscription<String> _deviceLogSubscription;
+  vm_service.VmService vmService;
 
   @override
   Future<void> validateCommand() async {
@@ -359,15 +359,13 @@ $ex
       await driver?.quit();
       if (stringArg('write-sksl-on-exit') != null) {
         final File outputFile = globals.fs.file(stringArg('write-sksl-on-exit'));
-        final vm_service.VmService vmService = await connectToVmService(
-          Uri.parse(observatoryUri),
-        );
         final FlutterView flutterView = (await vmService.getFlutterViews()).first;
         final Map<String, Object> result = await vmService.getSkSLs(
           viewId: flutterView.id
         );
         await sharedSkSlWriter(_device, result, outputFile: outputFile);
       }
+      await _deviceLogSubscription?.cancel();
       if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
         globals.printStatus('Leaving the application running.');
       } else {
@@ -491,12 +489,6 @@ Future<LaunchResult> _startApp(
 
   globals.printTrace('Starting application.');
 
-  // Forward device log messages to the terminal window running the "drive" command.
-  final DeviceLogReader logReader = await command.device.getLogReader(app: applicationPackage);
-  command._deviceLogSubscription = logReader
-    .logLines
-    .listen(globals.printStatus);
-
   final LaunchResult result = await command.device.startApp(
     applicationPackage,
     mainPath: mainPath,
@@ -518,9 +510,17 @@ Future<LaunchResult> _startApp(
   );
 
   if (!result.started) {
-    await command._deviceLogSubscription.cancel();
     return null;
   }
+  // Forward device log messages to the terminal window running the "drive" command.
+  final DeviceLogReader logReader = await command.device.getLogReader(app: applicationPackage);
+  command._deviceLogSubscription = logReader
+    .logLines
+    .listen(globals.printStatus);
+  command.vmService = await connectToVmService(result.observatoryUri);
+  final vm_service.VM vm = await command.vmService.getVM();
+  logReader.appPid = vm.pid;
+  logReader.connectedVMService = command.vmService;
 
   return result;
 }
