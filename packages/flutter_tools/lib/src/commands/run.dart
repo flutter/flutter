@@ -96,6 +96,73 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
   String get route => stringArg('route');
+
+
+  String get _traceAllowlist {
+    final String deprecatedValue = stringArg('trace-whitelist');
+    if (deprecatedValue != null) {
+      globals.printError('--trace-whitelist has been deprecated, use --trace-allowlist instead');
+    }
+    return stringArg('trace-allowlist') ?? deprecatedValue;
+  }
+
+  bool get runningWithPrebuiltApplication => argResults['use-application-binary'] != null;
+
+  /// Create a debugging options instance for the current `run` or `drive` invocation.
+  DebuggingOptions createDebuggingOptions() {
+    final BuildInfo buildInfo = getBuildInfo();
+    final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
+      ? int.parse(stringArg('web-browser-debug-port'))
+      : null;
+    if (buildInfo.mode.isRelease) {
+      return DebuggingOptions.disabled(
+        buildInfo,
+        initializePlatform: boolArg('web-initialize-platform'),
+        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
+        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
+        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
+        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
+        webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
+        webBrowserDebugPort: browserDebugPort,
+      );
+    } else {
+      return DebuggingOptions.enabled(
+        buildInfo,
+        startPaused: boolArg('start-paused'),
+        disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+        disableDds: boolArg('disable-dds'),
+        dartFlags: stringArg('dart-flags') ?? '',
+        useTestFonts: boolArg('use-test-fonts'),
+        enableSoftwareRendering: boolArg('enable-software-rendering'),
+        skiaDeterministicRendering: boolArg('skia-deterministic-rendering'),
+        traceSkia: boolArg('trace-skia'),
+        traceAllowlist: _traceAllowlist,
+        traceSystrace: boolArg('trace-systrace'),
+        endlessTraceBuffer: boolArg('endless-trace-buffer'),
+        dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
+        cacheSkSL: cacheSkSL,
+        purgePersistentCache: purgePersistentCache,
+        deviceVmServicePort: deviceVmservicePort,
+        hostVmServicePort: hostVmservicePort,
+        disablePortPublication: disablePortPublication,
+        ddsPort: ddsPort,
+        verboseSystemLogs: boolArg('verbose-system-logs'),
+        initializePlatform: boolArg('web-initialize-platform'),
+        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
+        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
+        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
+        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
+        webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
+        webBrowserDebugPort: browserDebugPort,
+        webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
+        vmserviceOutFile: stringArg('vmservice-out-file'),
+        fastStart: boolArg('fast-start')  && !runningWithPrebuiltApplication,
+        nullAssertions: boolArg('null-assertions'),
+      );
+    }
+  }
 }
 
 class RunCommand extends RunCommandBase {
@@ -341,9 +408,6 @@ class RunCommand extends RunCommandBase {
     return getBuildInfo().isDebug && shouldUseHotMode;
   }
 
-  bool get runningWithPrebuiltApplication =>
-      argResults['use-application-binary'] != null;
-
   bool get stayResident => boolArg('resident');
   bool get awaitFirstFrameWhenTracing => boolArg('await-first-frame-when-tracing');
 
@@ -367,73 +431,6 @@ class RunCommand extends RunCommandBase {
       && devices.every((Device device) => device is! AndroidDevice)) {
       throwToolExit(
         '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
-      );
-    }
-  }
-
-  String get _traceAllowlist {
-    final String deprecatedValue = stringArg('trace-whitelist');
-    if (deprecatedValue != null) {
-      globals.printError('--trace-whitelist has been deprecated, use --trace-allowlist instead');
-    }
-    return stringArg('trace-allowlist') ?? deprecatedValue;
-  }
-
-  DebuggingOptions _createDebuggingOptions() {
-    final BuildInfo buildInfo = getBuildInfo();
-    final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
-      ? int.parse(stringArg('web-browser-debug-port'))
-      : null;
-    if (buildInfo.mode.isRelease) {
-      return DebuggingOptions.disabled(
-        buildInfo,
-        initializePlatform: boolArg('web-initialize-platform'),
-        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
-        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
-        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
-        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
-        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
-        webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
-        webBrowserDebugPort: browserDebugPort,
-      );
-    } else {
-      return DebuggingOptions.enabled(
-        buildInfo,
-        startPaused: boolArg('start-paused'),
-        disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
-        disableDds: boolArg('disable-dds'),
-        dartFlags: stringArg('dart-flags') ?? '',
-        useTestFonts: boolArg('use-test-fonts'),
-        enableSoftwareRendering: boolArg('enable-software-rendering'),
-        skiaDeterministicRendering: boolArg('skia-deterministic-rendering'),
-        traceSkia: boolArg('trace-skia'),
-        traceAllowlist: _traceAllowlist,
-        traceSystrace: boolArg('trace-systrace'),
-        endlessTraceBuffer: boolArg('endless-trace-buffer'),
-        dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
-        cacheSkSL: cacheSkSL,
-        purgePersistentCache: purgePersistentCache,
-        deviceVmServicePort: deviceVmservicePort,
-        hostVmServicePort: hostVmservicePort,
-        disablePortPublication: disablePortPublication,
-        ddsPort: ddsPort,
-        verboseSystemLogs: boolArg('verbose-system-logs'),
-        initializePlatform: boolArg('web-initialize-platform'),
-        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
-        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
-        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
-        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
-        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
-        webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
-        webBrowserDebugPort: browserDebugPort,
-        webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
-        vmserviceOutFile: stringArg('vmservice-out-file'),
-        // Allow forcing fast-start to off to prevent doing more work on devices that
-        // don't support it.
-        fastStart: boolArg('fast-start')
-          && !runningWithPrebuiltApplication
-          && devices.every((Device device) => device.supportsFastStart),
-        nullAssertions: boolArg('null-assertions'),
       );
     }
   }
@@ -463,7 +460,7 @@ class RunCommand extends RunCommandBase {
         final String applicationBinaryPath = stringArg('use-application-binary');
         app = await daemon.appDomain.startApp(
           devices.first, globals.fs.currentDirectory.path, targetFile, route,
-          _createDebuggingOptions(), hotMode,
+          createDebuggingOptions(), hotMode,
           applicationBinary: applicationBinaryPath == null
               ? null
               : globals.fs.file(applicationBinaryPath),
@@ -533,7 +530,6 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices)
         await FlutterDevice.create(
           device,
-          flutterProject: flutterProject,
           fileSystemRoots: stringsArg('filesystem-root'),
           fileSystemScheme: stringArg('filesystem-scheme'),
           experimentalFlags: expFlags,
@@ -555,7 +551,7 @@ class RunCommand extends RunCommandBase {
       runner = HotRunner(
         flutterDevices,
         target: targetFile,
-        debuggingOptions: _createDebuggingOptions(),
+        debuggingOptions: createDebuggingOptions(),
         benchmarkMode: boolArg('benchmark'),
         applicationBinary: applicationBinaryPath == null
             ? null
@@ -571,7 +567,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         flutterProject: flutterProject,
         ipv6: ipv6,
-        debuggingOptions: _createDebuggingOptions(),
+        debuggingOptions: createDebuggingOptions(),
         stayResident: stayResident,
         urlTunneller: null,
       );
@@ -579,7 +575,7 @@ class RunCommand extends RunCommandBase {
       runner = ColdRunner(
         flutterDevices,
         target: targetFile,
-        debuggingOptions: _createDebuggingOptions(),
+        debuggingOptions: createDebuggingOptions(),
         traceStartup: traceStartup,
         awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
         applicationBinary: applicationBinaryPath == null
