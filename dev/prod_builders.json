@@ -16,7 +16,7 @@
          "name": "Linux customer_testing",
          "repo": "flutter",
          "task_name": "linux_customer_testing",
-         "flaky": false
+         "flaky": true
       },
       {
          "name": "Linux docs",
