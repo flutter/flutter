@@ -10,9 +10,6 @@ import '../features.dart';
 
 
 /// The macOS-specific implementation of a [Workflow].
-///
-/// This workflow requires the flutter-desktop-embedding as a sibling
-/// repository to the flutter repo.
 class MacOSWorkflow implements Workflow {
   const MacOSWorkflow({
     @required Platform platform,

@@ -283,7 +283,7 @@ void main() {
           method: kRunInViewMethod,
           args: <String, Object>{
             'viewId': fakeFlutterView.id,
-            'mainScript': 'lib/main.dart.dill',
+            'mainScript': 'main.dart.dill',
             'assetDirectory': 'build/flutter_assets',
           }
         ),
@@ -291,7 +291,7 @@ void main() {
           method: kRunInViewMethod,
           args: <String, Object>{
             'viewId': fakeFlutterView.id,
-            'mainScript': 'lib/main.dart.dill',
+            'mainScript': 'main.dart.dill',
             'assetDirectory': 'build/flutter_assets',
           }
         ),
@@ -383,7 +383,7 @@ void main() {
           method: kRunInViewMethod,
           args: <String, Object>{
             'viewId': fakeFlutterView.id,
-            'mainScript': 'lib/main.dart.dill',
+            'mainScript': 'main.dart.dill',
             'assetDirectory': 'build/flutter_assets',
           }
         ),

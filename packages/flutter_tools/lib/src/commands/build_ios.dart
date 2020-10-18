@@ -134,7 +134,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
     final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(
       TargetPlatform.ios,
-      buildInfo,
+      buildInfo: buildInfo,
     ) as BuildableIOSApp;
 
     if (app == null) {

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,11 +9,11 @@ import 'package:flutter/src/services/keyboard_key.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext context, ActionDispatcher dispatcher});
+typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
 
 class TestAction extends CallbackAction<TestIntent> {
   TestAction({
-    @required OnInvokeCallback onInvoke,
+    required OnInvokeCallback onInvoke,
   })  : assert(onInvoke != null),
         super(onInvoke: onInvoke);
 
@@ -25,11 +23,11 @@ class TestAction extends CallbackAction<TestIntent> {
 class TestDispatcher extends ActionDispatcher {
   const TestDispatcher({this.postInvoke});
 
-  final PostInvokeCallback postInvoke;
+  final PostInvokeCallback? postInvoke;
 
   @override
-  Object invokeAction(Action<TestIntent> action, Intent intent, [BuildContext context]) {
-    final Object result = super.invokeAction(action, intent, context);
+  Object? invokeAction(Action<TestIntent> action, Intent intent, [BuildContext? context]) {
+    final Object? result = super.invokeAction(action, intent, context);
     postInvoke?.call(action: action, intent: intent, context: context, dispatcher: this);
     return result;
   }
@@ -45,7 +43,7 @@ class TestShortcutManager extends ShortcutManager {
   List<LogicalKeyboardKey> keys;
 
   @override
-  bool handleKeypress(BuildContext context, RawKeyEvent event, {LogicalKeySet keysPressed}) {
+  bool handleKeypress(BuildContext context, RawKeyEvent event, {LogicalKeySet? keysPressed}) {
     keys.add(event.logicalKey);
     return super.handleKeypress(context, event, keysPressed: keysPressed);
   }
@@ -239,7 +237,7 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(Shortcuts.of(containerKey.currentContext), isNotNull);
+      expect(Shortcuts.of(containerKey.currentContext!), isNotNull);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
@@ -277,7 +275,7 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(Shortcuts.of(containerKey.currentContext), isNotNull);
+      expect(Shortcuts.of(containerKey.currentContext!), isNotNull);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
@@ -317,7 +315,7 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(Shortcuts.of(containerKey.currentContext), isNotNull);
+      expect(Shortcuts.of(containerKey.currentContext!), isNotNull);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, isFalse);
       expect(pressedKeys, isEmpty);

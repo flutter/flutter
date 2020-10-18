@@ -343,7 +343,7 @@ abstract class CmakeBasedProject {
   /// the build.
   File get generatedCmakeConfigFile;
 
-  /// Includable CMake with rules and variables for plugin builds.
+  /// Included CMake with rules and variables for plugin builds.
   File get generatedPluginCmakeFile;
 
   /// The directory to write plugin symlinks.

@@ -2037,7 +2037,7 @@ void main() {
 
     const String projectName = 'foo_BarBaz';
     final Directory projectDir = tempDir.childDirectory(projectName);
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=linux', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=linux', '--skip-name-checks', projectDir.path]);
     final Directory platformDir = projectDir.childDirectory('linux');
 
     const String classFilenameBase = 'foo_bar_baz_plugin';
@@ -2070,7 +2070,7 @@ void main() {
 
     const String projectName = 'foo_BarBaz';
     final Directory projectDir = tempDir.childDirectory(projectName);
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', '--skip-name-checks', projectDir.path]);
     final Directory platformDir = projectDir.childDirectory('windows');
 
     const String classFilenameBase = 'foo_bar_baz_plugin';

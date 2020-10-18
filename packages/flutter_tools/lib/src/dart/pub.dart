@@ -198,7 +198,6 @@ class _DefaultPub implements Pub {
       final String command = upgrade ? 'upgrade' : 'get';
       final Status status = _logger.startProgress(
         'Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',
-        timeout: const TimeoutConfiguration().slowOperation,
       );
       final bool verbose = _logger.isVerbose;
       final List<String> args = <String>[

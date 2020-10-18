@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,14 +15,6 @@ void main() {
     expect(() => RestorableBool(true).value, throwsAssertionError);
     expect(() => RestorableTextEditingController().value, throwsAssertionError);
     expect(() => _TestRestorableValue().value, throwsAssertionError);
-  });
-
-  testWidgets('cannot initialize with null', (WidgetTester tester) async {
-    expect(() => RestorableNum<num>(null), throwsAssertionError);
-    expect(() => RestorableDouble(null), throwsAssertionError);
-    expect(() => RestorableInt(null), throwsAssertionError);
-    expect(() => RestorableString(null).value, throwsAssertionError);
-    expect(() => RestorableBool(null).value, throwsAssertionError);
   });
 
   testWidgets('work when not in restoration scope', (WidgetTester tester) async {
@@ -117,22 +107,6 @@ void main() {
     expect(state.controllerValue.value.text, 'blabla');
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
-  });
-
-  testWidgets('cannot set to null', (WidgetTester tester) async {
-    await tester.pumpWidget(const RootRestorationScope(
-      restorationId: 'root-child',
-      child: _RestorableWidget(),
-    ));
-
-    expect(find.text('hello world'), findsOneWidget);
-    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
-
-    expect(() => state.numValue.value = null, throwsAssertionError);
-    expect(() => state.doubleValue.value = null, throwsAssertionError);
-    expect(() => state.intValue.value = null, throwsAssertionError);
-    expect(() => state.stringValue.value = null, throwsAssertionError);
-    expect(() => state.boolValue.value = null, throwsAssertionError);
   });
 
   testWidgets('restore to older state', (WidgetTester tester) async {
@@ -320,7 +294,7 @@ class _TestRestorableValue extends RestorableValue<Object> {
   int didUpdateValueCallCount = 0;
 
   @override
-  void didUpdateValue(Object oldValue) {
+  void didUpdateValue(Object? oldValue) {
     didUpdateValueCallCount++;
     notifyListeners();
   }
@@ -337,7 +311,7 @@ class _TestRestorableValue extends RestorableValue<Object> {
 }
 
 class _RestorableWidget extends StatefulWidget {
-  const _RestorableWidget({Key key}) : super(key: key);
+  const _RestorableWidget({Key? key}) : super(key: key);
 
   @override
   State<_RestorableWidget> createState() => _RestorableWidgetState();
@@ -353,7 +327,7 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   final _TestRestorableValue objectValue = _TestRestorableValue();
 
   @override
-  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(numValue, 'num');
     registerForRestoration(doubleValue, 'double');
     registerForRestoration(intValue, 'int');
@@ -369,7 +343,7 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
 
   @override
   Widget build(BuildContext context) {
-    return Text(stringValue.value ?? 'null', textDirection: TextDirection.ltr,);
+    return Text(stringValue.value, textDirection: TextDirection.ltr,);
   }
 
   @override

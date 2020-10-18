@@ -136,10 +136,9 @@ Future<File> getGradleAppOut(AndroidProject androidProject) async {
 Future<void> checkGradleDependencies() async {
   final Status progress = globals.logger.startProgress(
     'Ensuring gradle dependencies are up to date...',
-    timeout: timeoutConfiguration.slowOperation,
   );
   final FlutterProject flutterProject = FlutterProject.current();
-  await processUtils.run(<String>[
+  await globals.processUtils.run(<String>[
       gradleUtils.getExecutable(flutterProject),
       'dependencies',
     ],
@@ -167,8 +166,7 @@ void createSettingsAarGradle(Directory androidDirectory) {
   final String currentFileContent = currentSettingsFile.readAsStringSync();
 
   final String newSettingsRelativeFile = globals.fs.path.relative(newSettingsFile.path);
-  final Status status = globals.logger.startProgress('✏️  Creating `$newSettingsRelativeFile`...',
-      timeout: timeoutConfiguration.fastOperation);
+  final Status status = globals.logger.startProgress('✏️  Creating `$newSettingsRelativeFile`...');
 
   final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
   final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(flutterRoot, 'packages','flutter_tools',
@@ -270,7 +268,6 @@ Future<void> buildGradleApp({
 
   final Status status = globals.logger.startProgress(
     "Running Gradle task '$assembleTask'...",
-    timeout: timeoutConfiguration.slowOperation,
     multilineOutput: true,
   );
 
@@ -388,7 +385,7 @@ Future<void> buildGradleApp({
   final Stopwatch sw = Stopwatch()..start();
   int exitCode = 1;
   try {
-    exitCode = await processUtils.stream(
+    exitCode = await globals.processUtils.stream(
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
@@ -410,7 +407,7 @@ Future<void> buildGradleApp({
 
   if (exitCode != 0) {
     if (detectedGradleError == null) {
-      BuildEvent('gradle-unkown-failure', flutterUsage: globals.flutterUsage).send();
+      BuildEvent('gradle-unknown-failure', flutterUsage: globals.flutterUsage).send();
       throwToolExit(
         'Gradle task $assembleTask failed with exit code $exitCode',
         exitCode: exitCode,
@@ -571,7 +568,6 @@ Future<void> buildGradleAar({
   final String aarTask = getAarTaskFor(buildInfo);
   final Status status = globals.logger.startProgress(
     "Running Gradle task '$aarTask'...",
-    timeout: timeoutConfiguration.slowOperation,
     multilineOutput: true,
   );
 
@@ -608,7 +604,7 @@ Future<void> buildGradleAar({
   }
   if (buildInfo.dartObfuscation) {
     if (buildInfo.mode == BuildMode.debug || buildInfo.mode == BuildMode.profile) {
-      globals.printStatus('Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)} mode, building as unobfuscated.');
+      globals.printStatus('Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)} mode, building as un-obfuscated.');
     } else {
       command.add('-Pdart-obfuscation=true');
     }
@@ -653,7 +649,7 @@ Future<void> buildGradleAar({
   final Stopwatch sw = Stopwatch()..start();
   RunResult result;
   try {
-    result = await processUtils.run(
+    result = await globals.processUtils.run(
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,

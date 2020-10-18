@@ -26,7 +26,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
     final List<String> options = <String>[
-      '--hot', '-d', deviceIdOverride, '--benchmark', '--verbose', '--resident', '--output-dill', path.join('build', 'app.dill')
+      '--hot', '-d', deviceIdOverride, '--benchmark', '--verbose', '--resident',
     ];
     int hotReloadCount = 0;
     Map<String, dynamic> twoReloadsData;

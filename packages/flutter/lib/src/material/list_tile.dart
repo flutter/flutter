@@ -888,10 +888,12 @@ class ListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// {@template flutter.material.ListTile.tileColor}
   /// Defines the background color of `ListTile` when [selected] is false.
   ///
   /// When the value is null, the `tileColor` is set to [ListTileTheme.tileColor]
   /// if it's not null and to [Colors.transparent] if it's null.
+  /// {@endtemplate}
   final Color? tileColor;
 
   /// Defines the background color of `ListTile` when [selected] is true.
@@ -1567,13 +1569,13 @@ class _RenderListTile extends RenderBox {
     final Size leadingSize = _layoutBox(leading, iconConstraints);
     final Size trailingSize = _layoutBox(trailing, iconConstraints);
     assert(
-      tileWidth != leadingSize.width,
+      tileWidth != leadingSize.width || tileWidth == 0.0,
       'Leading widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
       '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'
     );
     assert(
-      tileWidth != trailingSize.width,
+      tileWidth != trailingSize.width || tileWidth == 0.0,
       'Trailing widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
       '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'

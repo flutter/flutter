@@ -170,7 +170,7 @@ class AndroidAot extends AotElfBase {
 
   /// The selected build mode.
   ///
-  /// This is restricted to [BuildMode.profile] or [BuildMode.relese].
+  /// This is restricted to [BuildMode.profile] or [BuildMode.release].
   final BuildMode buildMode;
 
   @override

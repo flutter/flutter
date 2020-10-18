@@ -61,6 +61,8 @@ import 'theme.dart';
 ///
 ///  * [CupertinoTabScaffold], a tabbed application root layout that can be
 ///    controlled by a [CupertinoTabController].
+///  * [RestorableCupertinoTabController], which is a restorable version
+///    of this controller.
 class CupertinoTabController extends ChangeNotifier {
   /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold]
   /// and [CupertinoTabBar].
@@ -211,6 +213,7 @@ class CupertinoTabScaffold extends StatefulWidget {
     this.controller,
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
+    this.restorationId,
   }) : assert(tabBar != null),
        assert(tabBuilder != null),
        assert(
@@ -289,12 +292,46 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// Defaults to true and cannot be null.
   final bool resizeToAvoidBottomInset;
 
+  /// Restoration ID to save and restore the state of the [CupertinoTabScaffold].
+  ///
+  /// This property only has an effect when no [controller] has been provided:
+  /// If it is non-null (and no [controller] has been provided), the scaffold
+  /// will persist and restore the currently selected tab index. If a
+  /// [controller] has been provided, it is the responsibility of the owner of
+  /// that controller to persist and restore it, e.g. by using a
+  /// [RestorableCupertinoTabController].
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  final String? restorationId;
+
   @override
   _CupertinoTabScaffoldState createState() => _CupertinoTabScaffoldState();
 }
 
-class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
-  CupertinoTabController? _controller;
+class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with RestorationMixin {
+  RestorableCupertinoTabController? _internalController;
+  CupertinoTabController get _controller =>  widget.controller ?? _internalController!.value;
+
+  @override
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    _restoreInternalController();
+  }
+
+  void _restoreInternalController() {
+    if (_internalController != null) {
+      registerForRestoration(_internalController!, 'controller');
+      _internalController!.value.addListener(_onCurrentIndexChange);
+    }
+  }
 
   @override
   void initState() {
@@ -302,30 +339,33 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     _updateTabController();
   }
 
-  void _updateTabController({ bool shouldDisposeOldController = false }) {
-    final CupertinoTabController newController =
-      // User provided a new controller, update `_controller` with it.
-      widget.controller
-      ?? CupertinoTabController(initialIndex: widget.tabBar.currentIndex);
-
-    if (newController == _controller) {
-      return;
+  void _updateTabController([CupertinoTabController? oldWidgetController]) {
+    if (widget.controller == null && _internalController == null) {
+      // No widget-provided controller: create an internal controller.
+      _internalController = RestorableCupertinoTabController(initialIndex: widget.tabBar.currentIndex);
+      if (!restorePending) {
+        _restoreInternalController(); // Also adds the listener to the controller.
+      }
     }
-
-    if (shouldDisposeOldController) {
-      _controller?.dispose();
-    } else if (_controller?._isDisposed == false) {
-      _controller!.removeListener(_onCurrentIndexChange);
+    if (widget.controller != null && _internalController != null) {
+      // Use the widget-provided controller.
+      unregisterFromRestoration(_internalController!);
+      _internalController!.dispose();
+      _internalController = null;
     }
-
-    newController.addListener(_onCurrentIndexChange);
-    _controller = newController;
+    if (oldWidgetController != widget.controller) {
+      // The widget-provided controller has changed: move listeners.
+      if (oldWidgetController?._isDisposed == false) {
+        oldWidgetController!.removeListener(_onCurrentIndexChange);
+      }
+      widget.controller?.addListener(_onCurrentIndexChange);
+    }
   }
 
   void _onCurrentIndexChange() {
     assert(
-      _controller!.index >= 0 && _controller!.index < widget.tabBar.items.length,
-      "The $runtimeType's current index ${_controller!.index} is "
+      _controller.index >= 0 && _controller.index < widget.tabBar.items.length,
+      "The $runtimeType's current index ${_controller.index} is "
       'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs'
     );
 
@@ -338,11 +378,11 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   void didUpdateWidget(CupertinoTabScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
-      _updateTabController(shouldDisposeOldController: oldWidget.controller == null);
-    } else if (_controller!.index >= widget.tabBar.items.length) {
+      _updateTabController(oldWidget.controller);
+    } else if (_controller.index >= widget.tabBar.items.length) {
       // If a new [tabBar] with less than (_controller.index + 1) items is provided,
       // clamp the current index.
-      _controller!.index = widget.tabBar.items.length - 1;
+      _controller.index = widget.tabBar.items.length - 1;
     }
   }
 
@@ -352,7 +392,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     MediaQueryData newMediaQuery = MediaQuery.of(context)!;
 
     Widget content = _TabSwitchingView(
-      currentTabIndex: _controller!.index,
+      currentTabIndex: _controller.index,
       tabCount: widget.tabBar.items.length,
       tabBuilder: widget.tabBuilder,
     );
@@ -415,9 +455,9 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
               // our own listener to update the [_controller.currentIndex] on top of a possibly user
               // provided callback.
               child: widget.tabBar.copyWith(
-                currentIndex: _controller!.index,
+                currentIndex: _controller.index,
                 onTap: (int newIndex) {
-                  _controller!.index = newIndex;
+                  _controller.index = newIndex;
                   // Chain the user's original callback.
                   widget.tabBar.onTap?.call(newIndex);
                 },
@@ -431,13 +471,10 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
   @override
   void dispose() {
-    // Only dispose `_controller` when the state instance owns it.
-    if (widget.controller == null) {
-      _controller?.dispose();
-    } else if (_controller?._isDisposed == false) {
-      _controller!.removeListener(_onCurrentIndexChange);
+    if (widget.controller?._isDisposed == false) {
+      _controller.removeListener(_onCurrentIndexChange);
     }
-
+    _internalController?.dispose();
     super.dispose();
   }
 }
@@ -553,5 +590,41 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
         );
       }),
     );
+  }
+}
+
+/// A [RestorableProperty] that knows how to store and restore a
+/// [CupertinoTabController].
+///
+/// The [CupertinoTabController] is accessible via the [value] getter. During
+/// state restoration, the property will restore [CupertinoTabController.index]
+/// to the value it had when the restoration data it is getting restored from
+/// was collected.
+class RestorableCupertinoTabController extends RestorableChangeNotifier<CupertinoTabController> {
+  /// Creates a [RestorableCupertinoTabController] to control the tab index of
+  /// [CupertinoTabScaffold] and [CupertinoTabBar].
+  ///
+  /// The `initialIndex` must not be null and defaults to 0. The value must be
+  /// greater than or equal to 0, and less than the total number of tabs.
+  RestorableCupertinoTabController({ int initialIndex = 0 })
+    : assert(initialIndex != null),
+      assert(initialIndex >= 0),
+      _initialIndex = initialIndex;
+
+  final int _initialIndex;
+
+  @override
+  CupertinoTabController createDefaultValue() {
+    return CupertinoTabController(initialIndex: _initialIndex);
+  }
+
+  @override
+  CupertinoTabController fromPrimitives(Object data) {
+    return CupertinoTabController(initialIndex: data as int);
+  }
+
+  @override
+  Object? toPrimitives() {
+    return value.index;
   }
 }

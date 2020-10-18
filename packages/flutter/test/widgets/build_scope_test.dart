@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 import 'test_widgets.dart';
 
 class ProbeWidget extends StatefulWidget {
-  const ProbeWidget({ Key key }) : super(key: key);
+  const ProbeWidget({ Key? key }) : super(key: key);
   @override
   ProbeWidgetState createState() => ProbeWidgetState();
 }
@@ -39,7 +37,7 @@ class ProbeWidgetState extends State<ProbeWidget> {
 }
 
 class BadWidget extends StatelessWidget {
-  const BadWidget(this.parentState, { Key key }) : super(key: key);
+  const BadWidget(this.parentState, { Key? key }) : super(key: key);
 
   final BadWidgetParentState parentState;
 
@@ -51,7 +49,7 @@ class BadWidget extends StatelessWidget {
 }
 
 class BadWidgetParent extends StatefulWidget {
-  const BadWidgetParent({ Key key }) : super(key: key);
+  const BadWidgetParent({ Key? key }) : super(key: key);
   @override
   BadWidgetParentState createState() => BadWidgetParentState();
 }
@@ -71,7 +69,7 @@ class BadWidgetParentState extends State<BadWidgetParent> {
 }
 
 class BadDisposeWidget extends StatefulWidget {
-  const BadDisposeWidget({ Key key }) : super(key: key);
+  const BadDisposeWidget({ Key? key }) : super(key: key);
   @override
   BadDisposeWidgetState createState() => BadDisposeWidgetState();
 }
@@ -91,8 +89,8 @@ class BadDisposeWidgetState extends State<BadDisposeWidget> {
 
 class StatefulWrapper extends StatefulWidget {
   const StatefulWrapper({
-    Key key,
-    this.child,
+    Key? key,
+    required this.child,
   }) : super(key: key);
 
   final Widget child;
@@ -107,8 +105,8 @@ class StatefulWrapperState extends State<StatefulWrapper> {
     setState(() { built = null; });
   }
 
-  int built;
-  int oldBuilt;
+  int? built;
+  late int oldBuilt;
 
   static int buildId = 0;
 
@@ -122,8 +120,8 @@ class StatefulWrapperState extends State<StatefulWrapper> {
 
 class Wrapper extends StatelessWidget {
   const Wrapper({
-    Key key,
-    this.child,
+    Key? key,
+    required this.child,
   }) : super(key: key);
 
   final Widget child;
@@ -148,11 +146,11 @@ void main() {
       right: const ProbeWidget(key: Key('c')),
     ));
     expect(ProbeWidgetState.buildCount, equals(2));
-    final FlipWidgetState flipState1 = flipKey.currentState as FlipWidgetState;
+    final FlipWidgetState flipState1 = flipKey.currentState! as FlipWidgetState;
     flipState1.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));
-    final FlipWidgetState flipState2 = flipKey.currentState as FlipWidgetState;
+    final FlipWidgetState flipState2 = flipKey.currentState! as FlipWidgetState;
     flipState2.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));
@@ -178,7 +176,7 @@ void main() {
     final GlobalKey key2 = GlobalKey(debugLabel: 'key2');
 
     bool didMiddle = false;
-    Widget middle;
+    late Widget middle;
     final List<StateSetter> setStates = <StateSetter>[];
     Widget builder(BuildContext context, StateSetter setState) {
       setStates.add(setState);
@@ -214,7 +212,7 @@ void main() {
 
     for (final StatefulWrapperState state in tester.stateList<StatefulWrapperState>(find.byType(StatefulWrapper))) {
       expect(state.built, isNotNull);
-      state.oldBuilt = state.built;
+      state.oldBuilt = state.built!;
       state.trigger();
     }
     for (final StateSetter setState in setStates)

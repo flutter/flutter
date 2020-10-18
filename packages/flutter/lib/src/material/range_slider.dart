@@ -1317,6 +1317,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
     final bool startThumbSelected = _lastThumbSelection == Thumb.start;
     final bool endThumbSelected = _lastThumbSelection == Thumb.end;
+    final Size resolvedscreenSize = screenSize.isEmpty ? size : screenSize;
 
     if (!_overlayAnimation.isDismissed) {
       if (startThumbSelected) {
@@ -1331,6 +1332,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           sliderTheme: _sliderTheme,
           textDirection: _textDirection,
           value: startValue,
+          textScaleFactor: _textScaleFactor,
+          sizeWithOverflow: resolvedscreenSize,
         );
       }
       if (endThumbSelected) {
@@ -1345,6 +1348,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           sliderTheme: _sliderTheme,
           textDirection: _textDirection,
           value: endValue,
+          textScaleFactor: _textScaleFactor,
+          sizeWithOverflow: resolvedscreenSize,
         );
       }
     }
@@ -1392,7 +1397,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final double bottomValue = isLastThumbStart ? endValue : startValue;
     final double topValue = isLastThumbStart ? startValue : endValue;
     final bool shouldPaintValueIndicators = isEnabled && labels != null && !_valueIndicatorAnimation.isDismissed && showValueIndicator;
-    final Size resolvedscreenSize = screenSize.isEmpty ? size : screenSize;
 
     if (shouldPaintValueIndicators) {
       _state.paintBottomValueIndicator = (PaintingContext context, Offset offset) {

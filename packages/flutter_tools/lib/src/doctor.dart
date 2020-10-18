@@ -301,9 +301,6 @@ class Doctor {
     for (final ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = Status.withSpinner(
-        timeout: timeoutConfiguration.fastOperation,
-        slowWarningCallback: () => validator.slowWarning,
-        timeoutConfiguration: timeoutConfiguration,
         stopwatch: Stopwatch(),
         terminal: globals.terminal,
       );
@@ -596,7 +593,7 @@ class ValidationResult {
 /// on the cause and/or solution to the validation failure.
 @immutable
 class ValidationMessage {
-  /// Create a validation message with information for a passing validatior.
+  /// Create a validation message with information for a passing validator.
   ///
   /// By default this is not displayed unless the doctor is run in
   /// verbose mode.
@@ -663,7 +660,7 @@ class ValidationMessage {
   int get hashCode => type.hashCode ^ message.hashCode ^ contextUrl.hashCode;
 }
 
-/// A validator that checks the version of Flutter, as well as some auxillary information
+/// A validator that checks the version of Flutter, as well as some auxiliary information
 /// such as the pub or Flutter cache overrides.
 ///
 /// This is primarily useful for diagnosing issues on Github bug reports by displaying

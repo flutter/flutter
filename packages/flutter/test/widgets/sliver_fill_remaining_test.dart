@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +19,7 @@ void main() {
   );
   Widget boilerplate(
     List<Widget> slivers, {
-      ScrollController controller,
+      ScrollController? controller,
       Axis scrollDirection = Axis.vertical,
     }) {
     return MaterialApp(

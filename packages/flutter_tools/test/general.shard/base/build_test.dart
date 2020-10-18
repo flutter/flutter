@@ -16,6 +16,14 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
+const FakeCommand kARMCheckCommand = FakeCommand(
+  command: <String>[
+    'sysctl',
+    'hw.optional.arm64',
+  ],
+  exitCode: 1,
+);
+
 const FakeCommand kSdkPathCommand = FakeCommand(
   command: <String>[
     'xcrun',
@@ -272,6 +280,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -334,6 +343,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -393,6 +403,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -451,6 +462,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -506,6 +518,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[

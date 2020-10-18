@@ -937,7 +937,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
 /// that file, rather than the generated file.
 String _cmakeRelativePluginSymlinkDirectoryPath(CmakeBasedProject project) {
   final String makefileDirPath = project.cmakeFile.parent.absolute.path;
-  // CMake alway uses posix-style path separators, regardless of the platform.
+  // CMake always uses posix-style path separators, regardless of the platform.
   final path.Context cmakePathContext = path.Context(style: path.Style.posix);
   final List<String> relativePathComponents = globals.fs.path.split(globals.fs.path.relative(
     project.pluginSymlinkDirectory.absolute.path,

@@ -71,7 +71,6 @@ void main() {
       logger: logger,
       platform: FakePlatform(),
       xcodeProjectInterpreter: mockXcodeProjectInterpreter,
-      timeoutConfiguration: const TimeoutConfiguration(),
     );
     pretendPodVersionIs('1.8.0');
     fileSystem.file(fileSystem.path.join(

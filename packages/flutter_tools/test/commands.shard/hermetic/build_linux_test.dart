@@ -279,6 +279,8 @@ void main() {
     ]);
     fileSystem.file('lib/other.dart')
       .createSync(recursive: true);
+    fileSystem.file('foo/bar.sksl.json')
+      .createSync(recursive: true);
 
     await createTestCommandRunner(command).run(
       const <String>[
@@ -380,14 +382,15 @@ set(BINARY_NAME "fizz_bar")
       ninjaCommand('release', onRun: () {
         fileSystem.file('build/flutter_size_01/snapshot.linux-x64.json')
           ..createSync(recursive: true)
-          ..writeAsStringSync('''[
-{
-  "l": "dart:_internal",
-  "c": "SubListIterable",
-  "n": "[Optimized] skip",
-  "s": 2400
-}
-          ]''');
+          ..writeAsStringSync('''
+[
+  {
+    "l": "dart:_internal",
+    "c": "SubListIterable",
+    "n": "[Optimized] skip",
+    "s": 2400
+  }
+]''');
         fileSystem.file('build/flutter_size_01/trace.linux-x64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
