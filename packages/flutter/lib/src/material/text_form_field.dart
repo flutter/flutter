@@ -168,7 +168,7 @@ class TextFormField extends FormField<String> {
       'This feature was deprecated after v1.23.0-19.0.pre.'
     )
     bool maxLengthEnforced = true,
-    MaxLengthEnforcement maxLengthEnforcement = MaxLengthEnforcement.regular,
+    MaxLengthEnforcement maxLengthEnforcement = MaxLengthEnforcement.enforced,
     int? maxLines = 1,
     int? minLines,
     bool expands = false,
