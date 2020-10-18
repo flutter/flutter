@@ -1325,11 +1325,11 @@ class _RenderDecoration extends RenderBox {
         x,
         (height! - box.size.height) *
           (
-            ((2 * y) + 2) > 2 
+            ((2 * y) + 2) > 2
             ? y
             : (
-              ((2 * y) + 2) == 0 
-                ? 0 
+              ((2 * y) + 2) == 0
+                ? 0
                 : (1 / ((2 * y) + 2))
             )
               ),
