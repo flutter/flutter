@@ -15,6 +15,25 @@ import '../doctor.dart';
 /// This searches on the provided plugin path for a JAR archive, then
 /// unzips it to parse the META-INF/plugin.xml for version information.
 ///
+/// In particular, the Intellij Flutter plugin has a different structure depending on the version.
+///
+/// For flutter-intellij plugin v49 or lower:
+///   flutter-intellij/lib/flutter-intellij.jar ( includes META-INF/plugin.xml )
+///
+/// For flutter-intellij plugin v50 or higher and for Intellij 2020.2:
+///   flutter-intellij/lib/flutter-intellij-X.Y.Z.jar
+///                        flutter-idea-X.Y.Z.jar ( includes META-INF/plugin.xml )
+///                        flutter-studio-X.Y.Z.jar
+///
+/// For flutter-intellij plugin v50 or higher and for Intellij 2020.3:
+///   flutter-intellij/lib/flutter-intellij-X.Y.Z.jar
+///                        flutter-idea-X.Y.Z.jar ( includes META-INF/plugin.xml )
+///
+/// where X.Y.Z is the version number.
+///
+/// Intellij Flutter plugin's files can be found here:
+///   https://plugins.jetbrains.com/plugin/9212-flutter/versions/stable
+///
 /// See also:
 ///   * [IntellijValidator], the validator base class that uses this to check
 ///     plugin versions.
