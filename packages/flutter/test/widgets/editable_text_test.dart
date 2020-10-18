@@ -6220,7 +6220,10 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/65374.
     testWidgets('will not cause crash while the TextEditingValue is composing', (WidgetTester tester) async {
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
+      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
+        maxLength,
+        maxLengthEnforcement: MaxLengthEnforcement.composingUnenforced,
+      );
       final Widget widget = MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
@@ -6253,7 +6256,10 @@ void main() {
     });
 
     testWidgets('handles composing text correctly, continued', (WidgetTester tester) async {
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
+      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
+        maxLength,
+        maxLengthEnforcement: MaxLengthEnforcement.composingUnenforced,
+      );
       final Widget widget = MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
@@ -6291,10 +6297,7 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
     testWidgets('enforced composing truncated', (WidgetTester tester) async {
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
-        maxLength,
-        maxLengthEnforcement: MaxLengthEnforcement.truncateComposing,
-      );
+      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
       final Widget widget = MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
@@ -6333,10 +6336,7 @@ void main() {
     });
 
     testWidgets('composing range removed if it\'s overflowed the truncated value\'s length', (WidgetTester tester) async {
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
-        maxLength,
-        maxLengthEnforcement: MaxLengthEnforcement.truncateComposing,
-      );
+      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
       final Widget widget = MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
