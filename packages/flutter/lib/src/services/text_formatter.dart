@@ -412,7 +412,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
         baseOffset: math.min(value.selection.start, truncated.length),
         extentOffset: math.min(value.selection.end, truncated.length),
       ),
-      composing: keepComposingRange && truncated.length > value.composing.start
+      composing: keepComposingRange && truncated.length > value.composing.start && !value.composing.isCollapsed
         ? TextRange(
             start: math.min(value.composing.start, truncated.length),
             end: math.min(value.composing.end, truncated.length),
