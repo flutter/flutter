@@ -209,7 +209,6 @@ void main() {
     // Plugins
     expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
     expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
-    
     // Main
     expect(generated, contains('entrypoint.main();'));
   }));
@@ -255,9 +254,6 @@ void main() {
     // Plugins
     expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
     expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
-
-    // Platform
-    expect(generated, contains('if (false) {'));
 
     // Main
     expect(generated, contains('entrypoint.main();'));
