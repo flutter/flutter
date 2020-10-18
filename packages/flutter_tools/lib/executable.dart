@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
-import 'src/artifacts.dart';
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -42,7 +40,6 @@ import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
-import 'src/drive/drive_service.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
@@ -101,12 +98,6 @@ Future<void> main(List<String> args) async {
     DriveCommand(verboseHelp: verboseHelp,
       fileSystem: globals.fs,
       logger: globals.logger,
-      flutterDriverFactory: FlutterDriverFactory(
-        applicationPackageFactory: ApplicationPackageFactory.instance,
-        dartSdkPath: globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
-        logger: globals.logger,
-        processUtils: globals.processUtils,
-      ),
     ),
     EmulatorsCommand(),
     FormatCommand(),

@@ -4,7 +4,10 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_device.dart';
@@ -14,6 +17,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
 import '../drive/web_driver_service.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart' show FlutterCommandResult, FlutterOptions;
 import 'run.dart';
 
@@ -40,7 +44,7 @@ import 'run.dart';
 class DriveCommand extends RunCommandBase {
   DriveCommand({
     bool verboseHelp = false,
-    @required FlutterDriverFactory flutterDriverFactory,
+    @visibleForTesting FlutterDriverFactory flutterDriverFactory,
     @required FileSystem fileSystem,
     @required Logger logger,
   }) : _flutterDriverFactory = flutterDriverFactory,
@@ -126,7 +130,7 @@ class DriveCommand extends RunCommandBase {
           'Dart VM running The test script.');
   }
 
-  final FlutterDriverFactory _flutterDriverFactory;
+  FlutterDriverFactory _flutterDriverFactory;
   final FileSystem _fileSystem;
   final Logger _logger;
 
@@ -143,6 +147,9 @@ class DriveCommand extends RunCommandBase {
   Device get device => _device;
 
   String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+
+  @override
+  bool get startPausedDefault => true;
 
   @override
   Future<void> validateCommand() async {
@@ -164,7 +171,13 @@ class DriveCommand extends RunCommandBase {
     if (await _fileSystem.type(testFile) != FileSystemEntityType.file) {
       throwToolExit('Test file not found: $testFile');
     }
-    final bool web = stringsArg('device').any((String device) => device.contains('chrome') || device.contains('web'));
+    final bool web = _device is WebServerDevice || _device is ChromiumDevice;
+    _flutterDriverFactory ??= FlutterDriverFactory(
+      applicationPackageFactory: ApplicationPackageFactory.instance,
+      logger: _logger,
+      processUtils: globals.processUtils,
+      dartSdkPath: globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+   );
     final DriverService driverService = _flutterDriverFactory.createDriverService(web);
     if (web) {
       _device = WebDriverDevice(

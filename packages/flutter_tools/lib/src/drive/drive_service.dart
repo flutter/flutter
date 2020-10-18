@@ -144,7 +144,7 @@ class FlutterDriverService extends DriverService {
         userIdentifier: userIdentifier,
         prebuiltApplication: prebuiltApplication,
       );
-      if (result != null) {
+      if (result != null && result.started) {
         break;
       }
       // On attempts past 1, assume the application is built correctly and re-use it.
@@ -152,7 +152,7 @@ class FlutterDriverService extends DriverService {
       prebuiltApplication = true;
       _logger.printError('Application failed to start on attempt: $attempt');
     }
-    if (result == null) {
+    if (result == null || !result.started) {
       throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
     }
     _vmServiceUri = result.observatoryUri.toString();
@@ -169,11 +169,12 @@ class FlutterDriverService extends DriverService {
       // application, DDS will already be running remotely and this call will fail.
       // This can be ignored to continue to use the existing remote DDS instance.
     }
-
+    _vmService = await _vmServiceConnector(Uri.parse(_vmServiceUri), device: _device);
     final DeviceLogReader logReader = await device.getLogReader(app: _applicationPackage);
     logReader.logLines.listen(_logger.printStatus);
 
-    _vmService = await _vmServiceConnector(Uri.parse(_vmServiceUri), device: _device);
+    final vm_service.VM vm = await _vmService.getVM();
+    logReader.appPid = vm.pid;
   }
 
   @override
