@@ -935,6 +935,68 @@ void main() {
     expect(delegate.textEditingValue.text, '');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
+  test('arrow keys with selection text', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: '012345',  // Thumbs up
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
+    );
+
+    layout(editable);
+    editable.hasFocus = true;
+
+    editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight);
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 4);
+
+    editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight);
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 4);
+
+    editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 2);
+
+    editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 2);
+
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
+
   test('getEndpointsForSelection handles empty characters', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final RenderEditable editable = RenderEditable(

@@ -3989,7 +3989,6 @@ void main() {
       reason: 'on $platform',
     );
 
-    // Move forward one character to reset the selection.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
@@ -4002,8 +4001,8 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 21,
-          extentOffset: 21,
+          baseOffset: 20,
+          extentOffset: 20,
           affinity: TextAffinity.downstream,
         ),
       ),
@@ -4024,8 +4023,8 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 21,
-          extentOffset: 40,
+          baseOffset: 20,
+          extentOffset: 39,
           affinity: TextAffinity.downstream,
         ),
       ),
@@ -4049,7 +4048,7 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 21,
+          baseOffset: 20,
           extentOffset: testText.length,
           affinity: TextAffinity.downstream,
         ),
@@ -4071,8 +4070,8 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 21,
-          extentOffset: 58,
+          baseOffset: 20,
+          extentOffset: 57,
           affinity: TextAffinity.downstream,
         ),
       ),
@@ -4094,7 +4093,7 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 21,
+          baseOffset: 20,
           extentOffset: 72,
           affinity: TextAffinity.downstream,
         ),
@@ -4117,7 +4116,7 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 21,
+          baseOffset: 20,
           extentOffset: 55,
           affinity: TextAffinity.downstream,
         ),
