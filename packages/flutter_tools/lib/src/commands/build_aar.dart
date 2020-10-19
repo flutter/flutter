@@ -43,7 +43,6 @@ class BuildAarCommand extends BuildSubCommand {
     usesTrackWidgetCreation(verboseHelp: false);
     addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
-    addAndroidSpecificBuildOptions(hide: !verboseHelp);
     argParser
       ..addMultiOption(
         'target-platform',
