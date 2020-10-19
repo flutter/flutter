@@ -43,7 +43,6 @@ class TrackWidgetCreationEnabledTask {
       final Process runProcess = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         flutterCommandArgs('run', <String>[
-          '--no-android-gradle-daemon',
           ...?additionalArgs,
           '--vmservice-out-file=info',
           '--track-widget-creation',
@@ -79,7 +78,6 @@ class TrackWidgetCreationEnabledTask {
       final Process runProcess = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         flutterCommandArgs('run', <String>[
-          '--no-android-gradle-daemon',
            ...?additionalArgs,
            '--vmservice-out-file=info',
           '--no-track-widget-creation',

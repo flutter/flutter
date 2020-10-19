@@ -34,7 +34,6 @@ class BuildInfo {
     this.packagesPath = '.packages',
     this.nullSafetyMode = NullSafetyMode.autodetect,
     this.codeSizeDirectory,
-    this.androidGradleDaemon = true,
   });
 
   final BuildMode mode;
@@ -118,20 +117,6 @@ class BuildInfo {
   /// If provided, an output directory where one or more v8-style heap snapshots
   /// will be written for code size profiling.
   final String codeSizeDirectory;
-
-  /// Whether to enable the Gradle daemon when performing an Android build.
-  ///
-  /// Starting the daemon is the default behavior of the gradle wrapper script created
-  /// in a Flutter project. Setting this value to false will cause the tool to pass
-  /// `--no-daemon` to the gradle wrapper script, preventing it from spawning a daemon
-  /// process.
-  ///
-  /// For one-off builds or CI systems, preventing the daemon from spawning will
-  /// reduce system resource usage, at the cost of any subsequent builds starting
-  /// up slightly slower.
-  ///
-  /// The Gradle daemon may also be disabled in the Android application's properties file.
-  final bool androidGradleDaemon;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);

@@ -70,7 +70,6 @@ class GalleryTransitionTest {
         await flutter(
           'build',
           options: <String>[
-            '--no-android-gradle-daemon',
             'apk',
             '--profile',
             '-t',
