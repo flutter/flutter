@@ -615,7 +615,11 @@ abstract class FlutterCommand extends Command<void> {
   void addAndroidSpecificBuildOptions({ bool hide = false }) {
     argParser.addFlag(
       FlutterOptions.kAndroidGradleDaemon,
-      help: 'Control whether a Gradle daemon is started when building or running on Android.',
+      help: 'Whether to enable the Gradle daemon when performing an Android build. '
+        'Starting the daemon is the default behavior of the gradle wrapper script created '
+        ' in a Flutter project. Setting this flag to false will cause the tool to pass '
+        "'--no-daemon' to the gradle wrapper script, which will cause the daemon process to "
+        'be terminated after the build is completed',
       defaultsTo: true,
     );
   }
