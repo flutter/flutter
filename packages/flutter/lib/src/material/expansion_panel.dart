@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/material/colors.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -231,6 +232,8 @@ class ExpansionPanelList extends StatefulWidget {
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
     this.elevation = 2,
+    this.expandedColor = Colors.black54,
+    this.expandColor = Colors.black54,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
@@ -322,6 +325,8 @@ class ExpansionPanelList extends StatefulWidget {
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
     this.elevation = 2,
+    this.expandedColor = Colors.black54,
+    this.expandColor = Colors.black54,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
@@ -365,6 +370,16 @@ class ExpansionPanelList extends StatefulWidget {
   /// By default, 16px of space is added to the header vertically (above and below)
   /// during expansion.
   final EdgeInsets expandedHeaderPadding;
+
+  /// Defines color for the [ExpansionPanel]'s [ExpandIcon] when [ExpansionPanel.isExpanded] is true.
+  ///
+  /// If `expandedColor` is null, the default [Colors.black54] is used.
+  final Color? expandedColor;
+
+  /// Defines color for the [ExpansionPanel]'s [ExpandIcon] when [ExpansionPanel.isExpanded] is false.
+  ///
+  /// If `expandedColor` is null, the default [Colors.black54] is used.
+  final Color? expandColor;
 
   /// Defines color for the divider when [ExpansionPanel.isExpanded] is false.
   ///
@@ -489,6 +504,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         margin: const EdgeInsetsDirectional.only(end: 8.0),
         child: ExpandIcon(
           isExpanded: _isChildExpanded(index),
+          expandedColor: widget.expandedColor,
+          color: widget.expandColor,
           padding: const EdgeInsets.all(16.0),
           onPressed: !child.canTapOnHeader
               ? (bool isExpanded) => _handlePressed(isExpanded, index)
