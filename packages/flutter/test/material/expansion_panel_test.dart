@@ -14,12 +14,16 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
     this.expandedHeaderPadding,
     this.dividerColor,
     this.elevation = 2,
+    this.expandedColor = Colors.black54,
+    this.expandColor = Colors.black54,
   }) : super(key: key);
 
   final Key? firstPanelKey;
   final Key? secondPanelKey;
   final bool canTapOnHeader;
   final Color? dividerColor;
+  final Color? expandedColor;
+  final Color? expandColor;
   final int elevation;
 
   /// If null, the default [ExpansionPanelList]'s expanded header padding value is applied via [defaultExpandedHeaderPadding]
@@ -48,6 +52,8 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
         });
       },
       dividerColor: widget.dividerColor,
+      expandColor: widget.expandColor,
+      expandedColor: widget.expandedColor,
       elevation: widget.elevation,
       children: <ExpansionPanel>[
         ExpansionPanel(
@@ -1346,6 +1352,63 @@ void main() {
     box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     expect(box.size.height, equals(128.0)); // _kPanelHeaderCollapsedHeight + 80.0 (double padding)
     expect(box.size.width, equals(736.0));
+  });
+
+  testWidgets('ExpandIcon default expanded color', (WidgetTester tester) async {
+    const Color expandedColor = Colors.black54;
+    await tester.pumpWidget(const MaterialApp(
+      home: SingleChildScrollView(
+        child: SimpleExpansionPanelListTestWidget(),
+      ),
+    ));
+
+    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon).last);
+
+    expect(expandIcon.expandedColor, expandedColor);
+  });
+
+  testWidgets('ExpandIcon color respects expandedColor', (WidgetTester tester) async {
+    const Color expandedColor = Colors.red;
+    await tester.pumpWidget(const MaterialApp(
+      home: SingleChildScrollView(
+        child: SimpleExpansionPanelListTestWidget(
+          expandedColor: expandedColor,
+        ),
+      ),
+    ));
+
+    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon).last);
+
+    expect(expandIcon.expandedColor, expandedColor);
+  });
+
+  testWidgets('ExpandIcon default expand color', (WidgetTester tester) async {
+    const Color defaultColor = Colors.black54;
+    await tester.pumpWidget(const MaterialApp(
+      home: SingleChildScrollView(
+        child: SimpleExpansionPanelListTestWidget(),
+      ),
+    ));
+
+    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon).first);
+
+    expect(expandIcon.color, defaultColor);
+  });
+
+
+  testWidgets('ExpandIcon color respects expandColor', (WidgetTester tester) async {
+    const Color expandColor = Colors.red;
+    await tester.pumpWidget(const MaterialApp(
+      home: SingleChildScrollView(
+        child: SimpleExpansionPanelListTestWidget(
+          expandColor: expandColor,
+        ),
+      ),
+    ));
+
+    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon).first);
+
+    expect(expandIcon.color, expandColor);
   });
 
   testWidgets('ExpansionPanelList respects dividerColor', (WidgetTester tester) async {
