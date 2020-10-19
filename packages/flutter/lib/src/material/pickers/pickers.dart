@@ -13,6 +13,7 @@ export 'date_picker_deprecated.dart';
 export 'date_picker_dialog.dart' show showDatePicker;
 export 'date_range_picker_dialog.dart' show showDateRangePicker;
 export 'input_date_picker.dart' show InputDatePickerFormField;
+export 'input_time_picker.dart' show InputTimePickerFormField;
 
 // TODO(ianh): Not exporting everything is unusual and we should
 // probably change to just exporting everything and making sure it's
