@@ -395,7 +395,6 @@ keep this 2
       location = "self:">
    </FileRef>
  </Workspace>
-
 ''');
         expect(testLogger.statusText, contains('Upgrading contents.xcworkspacedata'));
       });
