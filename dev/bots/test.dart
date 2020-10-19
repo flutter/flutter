@@ -537,7 +537,7 @@ Future<void> _runFrameworkTests() async {
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
       await _runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
-        options: <String>[trackWidgetCreationOption, ...nullSafetyOptions],
+        options: <String>[trackWidgetCreationOption, ...nullSafetyOptions, '--sound-null-safety'],
         tableData: bigqueryApi?.tabledata,
         tests: <String>[ path.join('test', 'widgets') + path.separator ],
       );
