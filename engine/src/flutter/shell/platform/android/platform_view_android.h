@@ -25,12 +25,14 @@ namespace flutter {
 class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  public:
   AndroidSurfaceFactoryImpl(std::shared_ptr<AndroidContext> context,
-                            std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-                            std::weak_ptr<AndroidExternalViewEmbedder> external_view_embedder);
+                            std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
 
   ~AndroidSurfaceFactoryImpl() override;
 
   std::unique_ptr<AndroidSurface> CreateSurface() override;
+
+  void SetExternalViewEmbedder(
+      std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder);
 
  private:
   std::shared_ptr<AndroidContext> android_context_;
