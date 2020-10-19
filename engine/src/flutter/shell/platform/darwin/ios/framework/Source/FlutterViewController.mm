@@ -1024,6 +1024,58 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self updateViewportMetrics];
 }
 
+- (void)dispatchPresses:(NSSet<UIPress*>*)presses API_AVAILABLE(ios(13.4)) {
+  if (@available(iOS 13.4, *)) {
+    for (UIPress* press in presses) {
+      if (press.key == nil || press.phase == UIPressPhaseStationary ||
+          press.phase == UIPressPhaseChanged) {
+        continue;
+      }
+      NSMutableDictionary* keyMessage = [@{
+        @"keymap" : @"ios",
+        @"type" : @"unknown",
+        @"keyCode" : @(press.key.keyCode),
+        @"modifiers" : @(press.key.modifierFlags),
+        @"characters" : press.key.characters,
+        @"charactersIgnoringModifiers" : press.key.charactersIgnoringModifiers
+      } mutableCopy];
+
+      if (press.phase == UIPressPhaseBegan) {
+        keyMessage[@"type"] = @"keydown";
+      } else if (press.phase == UIPressPhaseEnded || press.phase == UIPressPhaseCancelled) {
+        keyMessage[@"type"] = @"keyup";
+      }
+
+      [[_engine.get() keyEventChannel] sendMessage:keyMessage];
+    }
+  }
+}
+
+- (void)pressesBegan:(NSSet<UIPress*>*)presses withEvent:(UIEvent*)event API_AVAILABLE(ios(9.0)) {
+  if (@available(iOS 13.4, *)) {
+    [self dispatchPresses:presses];
+  }
+}
+
+- (void)pressesChanged:(NSSet<UIPress*>*)presses withEvent:(UIEvent*)event API_AVAILABLE(ios(9.0)) {
+  if (@available(iOS 13.4, *)) {
+    [self dispatchPresses:presses];
+  }
+}
+
+- (void)pressesEnded:(NSSet<UIPress*>*)presses withEvent:(UIEvent*)event API_AVAILABLE(ios(9.0)) {
+  if (@available(iOS 13.4, *)) {
+    [self dispatchPresses:presses];
+  }
+}
+
+- (void)pressesCancelled:(NSSet<UIPress*>*)presses
+               withEvent:(UIEvent*)event API_AVAILABLE(ios(9.0)) {
+  if (@available(iOS 13.4, *)) {
+    [self dispatchPresses:presses];
+  }
+}
+
 #pragma mark - Orientation updates
 
 - (void)onOrientationPreferencesUpdated:(NSNotification*)notification {

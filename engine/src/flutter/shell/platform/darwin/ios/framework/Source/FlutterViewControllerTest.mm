@@ -62,6 +62,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
 @interface FlutterViewController (Tests)
 - (void)surfaceUpdated:(BOOL)appeared;
 - (void)performOrientationUpdate:(UIInterfaceOrientationMask)new_preferences;
+- (void)dispatchPresses:(NSSet<UIPress*>*)presses;
 @end
 
 @implementation FlutterViewControllerTest
@@ -547,6 +548,152 @@ typedef enum UIAccessibilityContrast : NSInteger {
   [viewController beginAppearanceTransition:NO animated:NO];
   [viewController endAppearanceTransition];
   OCMVerify([engine notifyLowMemory]);
+}
+
+- (void)testValidKeyUpEvent API_AVAILABLE(ios(13.4)) {
+  if (@available(iOS 13.4, *)) {
+    // noop
+  } else {
+    return;
+  }
+
+  id engine = OCMClassMock([FlutterEngine class]);
+
+  id keyEventChannel = OCMClassMock([FlutterBasicMessageChannel class]);
+  OCMStub([engine keyEventChannel]).andReturn(keyEventChannel);
+
+  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:engine
+                                                                    nibName:nil
+                                                                     bundle:nil];
+
+  id testSet = [self fakeUiPressSetForPhase:UIPressPhaseBegan
+                                    keyCode:UIKeyboardHIDUsageKeyboardA
+                              modifierFlags:UIKeyModifierShift
+                                 characters:@"a"
+                charactersIgnoringModifiers:@"A"];
+
+  // Exercise behavior under test.
+  [vc dispatchPresses:testSet];
+
+  // Verify behavior.
+  OCMVerify([keyEventChannel
+      sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
+        return [message[@"keymap"] isEqualToString:@"ios"] &&
+               [message[@"type"] isEqualToString:@"keydown"] &&
+               [message[@"keyCode"] isEqualToNumber:[NSNumber numberWithInt:4]] &&
+               [message[@"modifiers"] isEqualToNumber:[NSNumber numberWithInt:131072]] &&
+               [message[@"characters"] isEqualToString:@"a"] &&
+               [message[@"charactersIgnoringModifiers"] isEqualToString:@"A"];
+      }]]);
+
+  // Clean up mocks
+  [engine stopMocking];
+  [keyEventChannel stopMocking];
+}
+
+- (void)testValidKeyDownEvent API_AVAILABLE(ios(13.4)) {
+  if (@available(iOS 13.4, *)) {
+    // noop
+  } else {
+    return;
+  }
+
+  id engine = OCMClassMock([FlutterEngine class]);
+
+  id keyEventChannel = OCMClassMock([FlutterBasicMessageChannel class]);
+  OCMStub([engine keyEventChannel]).andReturn(keyEventChannel);
+
+  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:engine
+                                                                    nibName:nil
+                                                                     bundle:nil];
+
+  id testSet = [self fakeUiPressSetForPhase:UIPressPhaseEnded
+                                    keyCode:UIKeyboardHIDUsageKeyboardA
+                              modifierFlags:UIKeyModifierShift
+                                 characters:@"a"
+                charactersIgnoringModifiers:@"A"];
+
+  // Exercise behavior under test.
+  [vc dispatchPresses:testSet];
+
+  // Verify behavior.
+  OCMVerify([keyEventChannel
+      sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
+        return [message[@"keymap"] isEqualToString:@"ios"] &&
+               [message[@"type"] isEqualToString:@"keyup"] &&
+               [message[@"keyCode"] isEqualToNumber:[NSNumber numberWithInt:4]] &&
+               [message[@"modifiers"] isEqualToNumber:[NSNumber numberWithInt:131072]] &&
+               [message[@"characters"] isEqualToString:@"a"] &&
+               [message[@"charactersIgnoringModifiers"] isEqualToString:@"A"];
+      }]]);
+
+  // Clean up mocks
+  [engine stopMocking];
+  [keyEventChannel stopMocking];
+}
+
+- (void)testIgnoredKeyEvents API_AVAILABLE(ios(13.4)) {
+  if (@available(iOS 13.4, *)) {
+    // noop
+  } else {
+    return;
+  }
+
+  id engine = OCMClassMock([FlutterEngine class]);
+
+  id keyEventChannel = OCMClassMock([FlutterBasicMessageChannel class]);
+  OCMStub([engine keyEventChannel]).andReturn(keyEventChannel);
+
+  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:engine
+                                                                    nibName:nil
+                                                                     bundle:nil];
+
+  id emptySet = [NSSet set];
+  id ignoredSet = [self fakeUiPressSetForPhase:UIPressPhaseStationary
+                                       keyCode:UIKeyboardHIDUsageKeyboardA
+                                 modifierFlags:UIKeyModifierShift
+                                    characters:@"a"
+                   charactersIgnoringModifiers:@"A"];
+
+  id mockUiPress = OCMClassMock([UIPress class]);
+  OCMStub([mockUiPress phase]).andReturn(UIPressPhaseBegan);
+  id emptyKeySet = [NSSet setWithArray:@[ mockUiPress ]];
+  // Exercise behavior under test.
+  [vc dispatchPresses:emptySet];
+  [vc dispatchPresses:ignoredSet];
+  [vc dispatchPresses:emptyKeySet];
+
+  // Verify behavior.
+  OCMVerify(never(), [keyEventChannel sendMessage:[OCMArg any]]);
+
+  // Clean up mocks
+  [engine stopMocking];
+  [keyEventChannel stopMocking];
+}
+
+- (NSSet<UIPress*>*)fakeUiPressSetForPhase:(UIPressPhase)phase
+                                   keyCode:(UIKeyboardHIDUsage)keyCode
+                             modifierFlags:(UIKeyModifierFlags)modifierFlags
+                                characters:(NSString*)characters
+               charactersIgnoringModifiers:(NSString*)charactersIgnoringModifiers
+    API_AVAILABLE(ios(13.4)) {
+  if (@available(iOS 13.4, *)) {
+    // noop
+  } else {
+    return [NSSet set];
+  }
+  id mockUiPress = OCMClassMock([UIPress class]);
+  OCMStub([mockUiPress phase]).andReturn(phase);
+
+  id mockUiKey = OCMClassMock([UIKey class]);
+  OCMStub([mockUiKey keyCode]).andReturn(keyCode);
+  OCMStub([mockUiKey modifierFlags]).andReturn(modifierFlags);
+  OCMStub([mockUiKey characters]).andReturn(characters);
+  OCMStub([mockUiKey charactersIgnoringModifiers]).andReturn(charactersIgnoringModifiers);
+
+  OCMStub([mockUiPress key]).andReturn(mockUiKey);
+
+  return [NSSet setWithArray:@[ mockUiPress ]];
 }
 
 @end
