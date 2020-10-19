@@ -229,8 +229,8 @@ class FlutterProject {
     return manifest;
   }
 
-  /// Re-generates project files necessary to make Gradle builds work on Android
-  /// and CocoaPods+Xcode work on iOS, for app and module projects only.
+  /// Reapplies template files and regenerates project files and plugin
+  /// registrants for app and module projects only.
   ///
   /// Will not create project platform directories if they do not already exist.
   Future<void> regeneratePlatformSpecificTooling() async {
@@ -246,8 +246,8 @@ class FlutterProject {
     );
   }
 
-  /// Generates project files necessary to make Gradle builds work on Android
-  /// and CocoaPods+Xcode work on iOS, for app and module projects only.
+  /// Applies template files and generates project files and plugin
+  /// registrants for app and module projects only for the specified platforms.
   Future<void> ensureReadyForPlatformSpecificTooling({
     bool androidPlatform = false,
     bool iosPlatform = false,
