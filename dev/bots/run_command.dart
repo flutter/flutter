@@ -211,7 +211,7 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
 String _flattenToString(List<List<int>> chunks) =>
   utf8.decode(chunks.expand<int>((List<int> ints) => ints).toList());
 
-/// Specifies what to do with command output from [runCommand] and [startCommand].
+/// Specifies what to do with the command output from [runCommand] and [startCommand].
 enum OutputMode {
   /// Forwards standard output and standard error streams to the test process'
   /// respective standard streams.
