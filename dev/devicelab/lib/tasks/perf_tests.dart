@@ -467,6 +467,7 @@ class StartupTest {
             '-v',
             '--profile',
             '--target-platform=android-arm,android-arm64',
+            '--machine',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
           break;
@@ -475,8 +476,9 @@ class StartupTest {
             'ios',
              '-v',
             '--profile',
+            '--machine',
           ]);
-          applicationBinaryPath = '$testDirectory/build/ios/iphoneos/Runner.app';
+          applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
           break;
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.fake:
@@ -1459,4 +1461,13 @@ class _UnzipListEntry {
   final int uncompressedSize;
   final int compressedSize;
   final String path;
+}
+
+String _findIosAppInBuildDirectory(String searchDirectory) {
+  for (final FileSystemEntity entity in Directory(searchDirectory).listSync()) {
+    if (entity.path.endsWith('.app')) {
+      return entity.path;
+    }
+  }
+  return null;
 }
