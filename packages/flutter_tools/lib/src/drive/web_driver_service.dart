@@ -38,7 +38,6 @@ class WebDriverService extends DriverService {
 
   ResidentRunner _residentRunner;
   WebDriverDevice _webDriverDevice;
-  Uri _vmServiecUri;
   ApplicationPackage _applicationPackage;
 
   @override
@@ -74,20 +73,17 @@ class WebDriverService extends DriverService {
       target: mainPath,
       ipv6: ipv6,
       debuggingOptions: debuggingOptions,
-      stayResident: true,
+      stayResident: false,
       urlTunneller: null,
       flutterProject: FlutterProject.current(),
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     final int result = await _residentRunner.run(
       appStartedCompleter: appStartedCompleter,
-      connectionInfoCompleter: connectionInfoCompleter,
       route: route,
     );
-    if (result == 0 && buildInfo.isDebug) {
-      final DebugConnectionInfo connectionInfo = await connectionInfoCompleter.future;
-      _vmServiecUri = connectionInfo.httpUri;
+    if (result != 0) {
+      throwToolExit(null);
     }
   }
 
@@ -99,8 +95,6 @@ class WebDriverService extends DriverService {
       testFile,
       '-rexpanded',
     ], environment: <String, String>{
-      if (_vmServiecUri != null)
-        'VM_SERVICE_URL': _vmServiecUri.toString(),
       ..._webDriverDevice._additionalDriverEnvironment(),
       ...environment,
     });

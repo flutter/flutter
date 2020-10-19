@@ -143,9 +143,6 @@ class DriveCommand extends RunCommandBase {
   @override
   final List<String> aliases = <String>['driver'];
 
-  Device _device;
-  Device get device => _device;
-
   String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
   @override
@@ -171,7 +168,12 @@ class DriveCommand extends RunCommandBase {
     if (await _fileSystem.type(testFile) != FileSystemEntityType.file) {
       throwToolExit('Test file not found: $testFile');
     }
-    final bool web = _device is WebServerDevice || _device is ChromiumDevice;
+    Device device = await findTargetDevice(includeUnsupportedDevices: stringArg('use-application-binary') == null);
+    if (device == null) {
+      throwToolExit(null);
+    }
+
+    final bool web = device is WebServerDevice || device is ChromiumDevice;
     _flutterDriverFactory ??= FlutterDriverFactory(
       applicationPackageFactory: ApplicationPackageFactory.instance,
       logger: _logger,
@@ -180,7 +182,7 @@ class DriveCommand extends RunCommandBase {
    );
     final DriverService driverService = _flutterDriverFactory.createDriverService(web);
     if (web) {
-      _device = WebDriverDevice(
+      device = WebDriverDevice(
         chromeBinary: stringArg('chrome-binary'),
         headless: boolArg('headless'),
         browserDimension: stringArg('browser-dimension').split(','),
@@ -188,12 +190,8 @@ class DriveCommand extends RunCommandBase {
         driverPort: stringArg('driver-port'),
         androidEmulator: boolArg('android-emulator'),
       );
-    } else {
-      _device = await findTargetDevice(includeUnsupportedDevices: stringArg('use-application-binary') == null);
-      if (device == null) {
-        throwToolExit(null);
-      }
     }
+
     final BuildInfo buildInfo = getBuildInfo();
     final DebuggingOptions debuggingOptions = createDebuggingOptions();
     final File applicationBinary = stringArg('use-application-binary') == null
