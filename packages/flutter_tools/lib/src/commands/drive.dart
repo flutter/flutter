@@ -15,7 +15,6 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
-import '../drive/web_driver_service.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart' show FlutterCommandResult, FlutterOptions;
 import '../web/web_device.dart';
@@ -168,7 +167,7 @@ class DriveCommand extends RunCommandBase {
     if (await _fileSystem.type(testFile) != FileSystemEntityType.file) {
       throwToolExit('Test file not found: $testFile');
     }
-    Device device = await findTargetDevice(includeUnsupportedDevices: stringArg('use-application-binary') == null);
+    final Device device = await findTargetDevice(includeUnsupportedDevices: stringArg('use-application-binary') == null);
     if (device == null) {
       throwToolExit(null);
     }
@@ -181,16 +180,16 @@ class DriveCommand extends RunCommandBase {
       dartSdkPath: globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
    );
     final DriverService driverService = _flutterDriverFactory.createDriverService(web);
-    if (web) {
-      device = WebDriverDevice(
-        chromeBinary: stringArg('chrome-binary'),
-        headless: boolArg('headless'),
-        browserDimension: stringArg('browser-dimension').split(','),
-        browserName: stringArg('browser-name'),
-        driverPort: stringArg('driver-port'),
-        androidEmulator: boolArg('android-emulator'),
-      );
-    }
+    // if (web) {
+    //   device = WebDriverDevice(
+    //     chromeBinary: stringArg('chrome-binary'),
+    //     headless: boolArg('headless'),
+    //     browserDimension: stringArg('browser-dimension').split(','),
+    //     browserName: stringArg('browser-name'),
+    //     driverPort: stringArg('driver-port'),
+    //     androidEmulator: boolArg('android-emulator'),
+    //   );
+    // }
 
     final BuildInfo buildInfo = getBuildInfo();
     final DebuggingOptions debuggingOptions = createDebuggingOptions();
@@ -210,6 +209,8 @@ class DriveCommand extends RunCommandBase {
       platformArgs: <String, Object>{
         if (traceStartup)
           'trace-startup': traceStartup,
+        if (web)
+          '--no-launch-chrome': true,
       }
     );
 
@@ -217,6 +218,14 @@ class DriveCommand extends RunCommandBase {
       testFile,
       stringsArg('test-arguments'),
       <String, String>{},
+      chromeBinary: stringArg('chrome-binary'),
+      headless: boolArg('headless'),
+      browserDimension: stringArg('browser-dimension').split(','),
+      browserName: stringArg('browser-name'),
+      driverPort: stringArg('driver-port') != null
+        ? int.tryParse(stringArg('driver-port'))
+        : null,
+      androidEmulator: boolArg('android-emulator'),
     );
 
     if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {

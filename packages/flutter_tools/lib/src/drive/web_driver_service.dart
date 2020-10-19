@@ -9,7 +9,6 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
-import '../application_package.dart';
 import '../base/common.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -18,27 +17,22 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
-import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'drive_service.dart';
 
 /// An implementation of the driver service for web debug and release applications.
 class WebDriverService extends DriverService {
   WebDriverService({
-    @required ApplicationPackageFactory applicationPackageFactory,
     @required ProcessUtils processUtils,
     @required String dartSdkPath,
-  }) : _applicationPackageFactory = applicationPackageFactory,
-       _processUtils = processUtils,
+  }) : _processUtils = processUtils,
        _dartSdkPath = dartSdkPath;
 
-  final ApplicationPackageFactory _applicationPackageFactory;
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
 
   ResidentRunner _residentRunner;
-  WebDriverDevice _webDriverDevice;
-  ApplicationPackage _applicationPackage;
+  Uri _webUri;
 
   @override
   Future<void> start(
@@ -52,16 +46,6 @@ class WebDriverService extends DriverService {
     String mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
   }) async {
-    _applicationPackage = await _applicationPackageFactory.getPackageForPlatform(
-      TargetPlatform.web_javascript,
-      buildInfo: buildInfo,
-      applicationBinary: applicationBinary,
-    ) as WebApplicationPackage;
-    if (device is WebDriverDevice) {
-      _webDriverDevice = device;
-    } else {
-      throwToolExit('Expected a web driver device, but found $device');
-    }
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       target: mainPath,
@@ -82,27 +66,83 @@ class WebDriverService extends DriverService {
       appStartedCompleter: appStartedCompleter,
       route: route,
     );
+    _webUri = _residentRunner.uri;
     if (result != 0) {
       throwToolExit(null);
     }
   }
 
   @override
-  Future<int> startTest(String testFile, List<String> arguments, Map<String, String> environment) async {
-    return _processUtils.stream(<String>[
+  Future<int> startTest(String testFile, List<String> arguments, Map<String, String> environment, {
+    bool headless,
+    String chromeBinary,
+    String browserName,
+    bool androidEmulator,
+    int driverPort,
+    List<String> browserDimension,
+  }) async {
+    async_io.WebDriver webDriver;
+    final Browser browser = _browserNameToEnum(browserName);
+    try {
+      webDriver = await async_io.createDriver(
+        uri: Uri.parse('http://localhost:$driverPort/'),
+        desired: getDesiredCapabilities(browser, headless, chromeBinary),
+        spec: async_io.WebDriverSpec.Auto
+      );
+    } on Exception catch (ex) {
+      throwToolExit(
+        'Unable to start WebDriver Session for Flutter for Web testing. \n'
+        'Make sure you have the correct WebDriver Server running at $driverPort. \n'
+        'Make sure the WebDriver Server matches option --browser-name. \n'
+        '$ex'
+      );
+    }
+
+    final bool isAndroidChrome = browser == Browser.androidChrome;
+    // Do not set the window size for android chrome browser.
+    if (!isAndroidChrome) {
+      assert(browserDimension.length == 2);
+      int x;
+      int y;
+      try {
+        x = int.parse(browserDimension[0]);
+        y = int.parse(browserDimension[1]);
+      } on FormatException catch (ex) {
+        throwToolExit('Dimension provided to --browser-dimension is invalid: $ex');
+      }
+      final async_io.Window window = await webDriver.window;
+      await window.setLocation(const math.Point<int>(0, 0));
+      await window.setSize(math.Rectangle<int>(0, 0, x, y));
+    }
+    final int result = await _processUtils.stream(<String>[
       _dartSdkPath,
       ...arguments,
       testFile,
       '-rexpanded',
     ], environment: <String, String>{
-      ..._webDriverDevice._additionalDriverEnvironment(),
+      'VM_SERVICE_URL': _webUri.toString(),
+      ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),
       ...environment,
     });
+    await webDriver.quit();
+    return result;
   }
 
   @override
   Future<void> stop({File writeSkslOnExit, String userIdentifier}) async {
-    await _webDriverDevice.stopApp(_applicationPackage);
+    await _residentRunner.cleanupAtFinish();
+  }
+
+  Map<String, String> _additionalDriverEnvironment(async_io.WebDriver webDriver, String browserName, bool androidEmulator) {
+    return <String, String>{
+      'DRIVER_SESSION_ID': webDriver.id,
+      'DRIVER_SESSION_URI': webDriver.uri.toString(),
+      'DRIVER_SESSION_SPEC': webDriver.spec.toString(),
+      'DRIVER_SESSION_CAPABILITIES': json.encode(webDriver.capabilities),
+      'SUPPORT_TIMELINE_ACTION': (_browserNameToEnum(browserName) == Browser.chrome).toString(),
+      'FLUTTER_WEB_TEST': 'true',
+      'ANDROID_CHROME_ON_EMULATOR': (_browserNameToEnum(browserName) == Browser.androidChrome && androidEmulator).toString(),
+    };
   }
 }
 
@@ -207,147 +247,6 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
       };
     default:
       throw UnsupportedError('Browser $browser not supported.');
-  }
-}
-
-class WebDriverDevice extends Device {
-  WebDriverDevice({
-    @required this.headless,
-    @required this.chromeBinary,
-    @required this.browserName,
-    @required this.androidEmulator,
-    @required this.driverPort,
-    @required this.browserDimension,
- }) : super('web-driver', platformType: PlatformType.web, category: Category.web, ephemeral: true);
-
-  final bool headless;
-  final String chromeBinary;
-  final String browserName;
-  final bool androidEmulator;
-  final String driverPort;
-  final List<String> browserDimension;
-
-  async_io.WebDriver _webDriver;
-
-  Map<String, String> _additionalDriverEnvironment() {
-    return <String, String>{
-      'DRIVER_SESSION_ID': _webDriver.id,
-      'DRIVER_SESSION_URI': _webDriver.uri.toString(),
-      'DRIVER_SESSION_SPEC': _webDriver.spec.toString(),
-      'DRIVER_SESSION_CAPABILITIES': json.encode(_webDriver.capabilities),
-      'SUPPORT_TIMELINE_ACTION': (_browserNameToEnum(browserName) == Browser.chrome).toString(),
-      'FLUTTER_WEB_TEST': 'true',
-      'ANDROID_CHROME_ON_EMULATOR': (_browserNameToEnum(browserName) == Browser.androidChrome && androidEmulator).toString(),
-    };
-  }
-
-  @override
-  void clearLogs() { }
-
-  @override
-  Future<void> dispose() async { }
-
-  @override
-  Future<String> get emulatorId => null;
-
-  @override
-  FutureOr<DeviceLogReader> getLogReader({covariant ApplicationPackage app, bool includePastLogs = false}) => NoOpDeviceLogReader('web-driver');
-
-  @override
-  Future<bool> installApp(covariant ApplicationPackage app, {String userIdentifier}) async {
-    return true;
-  }
-
-  @override
-  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String userIdentifier}) async {
-    return false;
-  }
-
-  @override
-  Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app) async {
-    return false;
-  }
-
-  @override
-  Future<bool> get isLocalEmulator async => false;
-
-  @override
-  bool isSupported() {
-    return true;
-  }
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) {
-    return flutterProject.web.existsSync();
-  }
-
-  @override
-  String get name => 'web-driver';
-
-  @override
-  DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
-
-  @override
-  Future<String> get sdkNameAndVersion async => 'web-driver';
-
-  @override
-  Future<LaunchResult> startApp(
-    covariant WebApplicationPackage package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
-    bool prebuiltApplication = false,
-    bool ipv6 = false,
-    String userIdentifier,
-  }) async {
-    final Browser browser = _browserNameToEnum(browserName);
-    try {
-      _webDriver = await async_io.createDriver(
-        uri: Uri.parse('http://localhost:$driverPort/'),
-        desired: getDesiredCapabilities(browser, headless, chromeBinary),
-        spec: async_io.WebDriverSpec.Auto
-      );
-    } on Exception catch (ex) {
-      throwToolExit(
-        'Unable to start WebDriver Session for Flutter for Web testing. \n'
-        'Make sure you have the correct WebDriver Server running at $driverPort. \n'
-        'Make sure the WebDriver Server matches option --browser-name. \n'
-        '$ex'
-      );
-    }
-
-    final bool isAndroidChrome = browser == Browser.androidChrome;
-    // Do not set the window size for android chrome browser.
-    if (!isAndroidChrome) {
-      assert(browserDimension.length == 2);
-      int x;
-      int y;
-      try {
-        x = int.parse(browserDimension[0]);
-        y = int.parse(browserDimension[1]);
-      } on FormatException catch (ex) {
-        throwToolExit('Dimension provided to --browser-dimension is invalid: $ex');
-      }
-      final async_io.Window window = await _webDriver.window;
-      await window.setLocation(const math.Point<int>(0, 0));
-      await window.setSize(math.Rectangle<int>(0, 0, x, y));
-    }
-    return LaunchResult.succeeded();
-  }
-
-  @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {String userIdentifier}) async {
-    await _webDriver.quit(closeSession: true);
-    return true;
-  }
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
-
-  @override
-  Future<bool> uninstallApp(covariant ApplicationPackage app, {String userIdentifier}) async {
-    return true;
   }
 }
 

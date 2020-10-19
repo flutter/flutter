@@ -38,7 +38,6 @@ class FlutterDriverFactory {
       return WebDriverService(
         processUtils: _processUtils,
         dartSdkPath: _dartSdkPath,
-        applicationPackageFactory: _applicationPackageFactory,
       );
     }
     return FlutterDriverService(
@@ -70,8 +69,14 @@ abstract class DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment,
-  );
+    Map<String, String> environment, {
+    bool headless,
+    String chromeBinary,
+    String browserName,
+    bool androidEmulator,
+    int driverPort,
+    List<String> browserDimension,
+  });
 
   /// Stop the running application and uninstall it from the device.
   ///
@@ -124,6 +129,14 @@ class FlutterDriverService extends DriverService {
     Map<String, Object> platformArgs = const <String, Object>{},
     String mainPath,
   }) async {
+    if (buildInfo.isRelease) {
+      throwToolExit(
+        'Flutter Driver (non-web) does not support running in release mode.\n'
+        '\n'
+        'Use --profile mode for testing application performance.\n'
+        'Use --debug (default) mode for testing correctness (with assertions).'
+      );
+    }
     _device = device;
     final TargetPlatform targetPlatform = await device.targetPlatform;
     _applicationPackage = await _applicationPackageFactory.getPackageForPlatform(
@@ -178,7 +191,17 @@ class FlutterDriverService extends DriverService {
   }
 
   @override
-  Future<int> startTest(String testFile, List<String> arguments, Map<String, String> environment) async {
+  Future<int> startTest(
+    String testFile,
+    List<String> arguments,
+    Map<String, String> environment, {
+    bool headless,
+    String chromeBinary,
+    String browserName,
+    bool androidEmulator,
+    int driverPort,
+    List<String> browserDimension,
+  }) async {
     return _processUtils.stream(<String>[
       _dartSdkPath,
       ...arguments,
