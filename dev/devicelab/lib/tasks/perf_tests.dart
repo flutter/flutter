@@ -455,11 +455,9 @@ class StartupTest {
   Future<TaskResult> run() async {
     return await inDirectory<TaskResult>(testDirectory, () async {
       final String deviceId = (await devices.workingDevice).deviceId;
-      await flutter('packages', options: <String>['get']);
-
-      const int iterations = 15;
+      const int iterations = 5;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
-      for (int i = 0; i < iterations; ++i) {
+      for (int i = 0; i < iterations; i += 1) {
         await flutter('run', options: <String>[
           '--no-android-gradle-daemon',
           '--verbose',
@@ -472,6 +470,12 @@ class StartupTest {
           file('$testDirectory/build/start_up_info.json').readAsStringSync(),
         ) as Map<String, dynamic>;
         results.add(data);
+
+        await flutter('install', options: <String>[
+          '--uninstall-only',
+          '-d',
+          deviceId,
+        ]);
       }
 
       final Map<String, dynamic> averageResults = _average(results, iterations);
