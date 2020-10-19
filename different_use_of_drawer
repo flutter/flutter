@@ -1,0 +1,139 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  MyApp({Key key}) : super(key: key);
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          //leading: IconButton(icon: Icon(Icons.menu), onPressed: () {}),
+          title: Text('hi'),
+          backgroundColor: Colors.red,
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'John Doe',
+                    ),
+                    OutlineButton(
+                        child: new Text("Button"),
+                        onPressed: () {
+                          print('object');
+                        },
+                        shape: new RoundedRectangleBorder(
+                            borderRadius: new BorderRadius.circular(30.0))),
+                  ],
+                ),
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('images/fi.jpg'),
+                    fit: BoxFit.fill,
+                  ),
+                ),
+              ),
+              ListTile(
+                  leading: Icon(Icons.message),
+                  title:
+                      OutlineButton(child: Text('message'), onPressed: null)),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('Profile'),
+              ),
+              ListTile(
+                  leading: Icon(Icons.message),
+                  title:
+                      OutlineButton(child: Text('message'), onPressed: null)),
+              ListTile(
+                  leading: Icon(Icons.message),
+                  title:
+                      OutlineButton(child: Text('message'), onPressed: null)),
+              ListTile(
+                  leading: Icon(Icons.message),
+                  title:
+                      OutlineButton(child: Text('message'), onPressed: null)),
+              ListTile(
+                  leading: Icon(Icons.message),
+                  title:
+                      OutlineButton(child: Text('message'), onPressed: null)),
+              ListTile(
+                  leading: Icon(Icons.message),
+                  title:
+                      OutlineButton(child: Text('message'), onPressed: null)),
+              ListTile(
+                  leading: Icon(Icons.message),
+                  title:
+                      OutlineButton(child: Text('message'), onPressed: null)),
+              ListTile(
+                  leading: Icon(Icons.message),
+                  title:
+                      OutlineButton(child: Text('message'), onPressed: null)),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('Profile'),
+              ),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('Profile'),
+              ),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('Profile'),
+              ),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('Profile'),
+              ),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('Profile'),
+              ),
+              ListTile(
+                leading: Icon(Icons.settings),
+                title: Text('Settings'),
+              ),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('Profile'),
+              ),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('Profile'),
+              ),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('Profile'),
+              ),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('Profile'),
+              ),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('Profile'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
