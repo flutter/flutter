@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'icons.dart';
 import 'text_field.dart';
+import 'button.dart';
 
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
 /// `UISearchTextField`.
@@ -51,7 +54,6 @@ import 'text_field.dart';
 /// /// {@tool snippet}
 ///
 /// ```dart
-///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return CupertinoSearchTextField(
@@ -66,7 +68,7 @@ import 'text_field.dart';
 /// }
 /// ```
 /// {@end-tool}
-class CupertinoSearchTextField extends StatelessWidget {
+class CupertinoSearchTextField extends StatefulWidget {
   /// Creates a [CupertinoTextField] that mimicks the look and behavior of UIKit's
   /// `UISearchTextField`.
   ///
@@ -126,14 +128,16 @@ class CupertinoSearchTextField extends StatelessWidget {
     this.decoration,
     this.backgroundColor,
     this.borderRadius,
-    this.padding = const EdgeInsets.fromLTRB(3.8, 8, 5, 8),
+    this.padding = const EdgeInsetsDirectional.fromSTEB(3.8, 8, 5, 8),
     Color this.itemColor = CupertinoColors.secondaryLabel,
     this.itemSize = 20.0,
-    this.prefixInsets = const EdgeInsets.fromLTRB(6, 0, 0, 4),
-    this.suffixInsets = const EdgeInsets.fromLTRB(0, 0, 5, 2),
+    this.prefixInsets = const EdgeInsetsDirectional.fromSTEB(6, 0, 0, 4),
+    this.suffixInsets = const EdgeInsetsDirectional.fromSTEB(0, 0, 5, 2),
     this.suffixIcon = const Icon(CupertinoIcons.xmark_circle_fill),
     this.suffixMode = OverlayVisibilityMode.editing,
     this.onSuffixTap,
+    this.restorationId,
+    this.focusNode,
   })  : assert(placeholder != null),
         assert(padding != null),
         assert(itemColor != null),
@@ -160,7 +164,7 @@ class CupertinoSearchTextField extends StatelessWidget {
   ///
   /// Similar to [CupertinoTextField], to provide a prefilled text entry, pass
   /// in a [TextEditingController] with an initial value to the [controller]
-  /// parameter.
+  /// parameter. Defaults to creating its own [TextEditingController].
   final TextEditingController? controller;
 
   /// Invoked upon user input.
@@ -176,9 +180,9 @@ class CupertinoSearchTextField extends StatelessWidget {
 
   /// A hint placeholder text that appears when the text entry is empty.
   ///
-  /// Defaults to 'Search'.
+  /// Cannot be null. Defaults to 'Search'.
   // TODO(DanielEdrisian): Localize the 'Search' placeholder.
-  final String? placeholder;
+  final String placeholder;
 
   /// Sets the style of the placeholder of the textfield.
   ///
@@ -195,59 +199,60 @@ class CupertinoSearchTextField extends StatelessWidget {
 
   /// Set the [decoration] property's background color.
   ///
-  /// Defaults to the translucent [CupertinoColors.tertiarySystemFill]
-  /// iOS color.
+  /// Can't be set along with the [decorator]. Defaults to the translucent
+  /// [CupertinoColors.tertiarySystemFill] iOS color.
   final Color? backgroundColor;
 
   /// Sets the [decoration] property's border radius.
   ///
-  /// Defaults to 9 px circular corner radius.
+  /// Can't be set along with the [decorator]. Defaults to 9 px circular
+  /// corner radius.
   // TODO(DanielEdrisian): Must make border radius continuous, see
   // https://github.com/flutter/flutter/issues/13914.
   final BorderRadius? borderRadius;
 
   /// Sets the padding insets for the text and placeholder.
   ///
-  /// Defaults to padding that replicates the `UISearchTextField`
+  /// Cannot be null. Defaults to padding that replicates the `UISearchTextField`
   /// look. The inset values were determined using the comparison tool in
   /// https://github.com/flutter/platform_tests/.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// Sets the color for the suffix and prefix icons.
   ///
-  /// Defaults to [CupertinoColors.secondaryLabel].
-  final Color? itemColor;
+  /// Cannot be null. Defaults to [CupertinoColors.secondaryLabel].
+  final Color itemColor;
 
   /// Sets the base icon size for the suffix and prefix icons.
   ///
-  /// The size of the icon is scaled using the accessibility font
+  /// Cannot be null. The size of the icon is scaled using the accessibility font
   /// scale settings. Defaults to [20.0].
   final double itemSize;
 
   /// Sets the padding insets for the suffix.
   ///
-  /// Defaults to padding that replicates the `UISearchTextField` suffix
+  /// Cannot be null. Defaults to padding that replicates the `UISearchTextField` suffix
   /// look. The inset values were determined using the comparison tool in
   /// https://github.com/flutter/platform_tests/.
-  final EdgeInsets prefixInsets;
+  final EdgeInsetsGeometry prefixInsets;
 
   /// Sets the padding insets for the prefix.
   ///
-  /// Defaults to padding that replicates the `UISearchTextField` prefix
+  /// Cannot be null. Defaults to padding that replicates the `UISearchTextField` prefix
   /// look. The inset values were determined using the comparison tool in
   /// https://github.com/flutter/platform_tests/.
-  final EdgeInsets suffixInsets;
+  final EdgeInsetsGeometry suffixInsets;
 
   /// Sets the suffix widget's icon.
   ///
-  /// Defaults to the X-Mark [CupertinoIcons.xmark_circle_fill]. The suffix is
+  /// Cannot be null. Defaults to the X-Mark [CupertinoIcons.xmark_circle_fill]. The suffix is
   /// customizable so that users can override it with other options, like a
   /// bookmark icon.
   final Icon suffixIcon;
 
   /// Dictates when the X-Mark (suffix) should be visible.
   ///
-  /// Defaults to only on when editing.
+  /// Cannot be null. Defaults to only on when editing.
   final OverlayVisibilityMode suffixMode;
 
   /// Sets the X-Mark (suffix) action.
@@ -257,70 +262,142 @@ class CupertinoSearchTextField extends StatelessWidget {
   /// necessarily clearing text.
   final VoidCallback? onSuffixTap;
 
+  /// {@macro flutter.material.textfield.restorationId}
+  final String? restorationId;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  @override
+  State<StatefulWidget> createState() => _CupertinoSearchTextFieldState();
+}
+
+class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
+    with
+        RestorationMixin,
+        AutomaticKeepAliveClientMixin<CupertinoSearchTextField> {
+  RestorableTextEditingController? _controller;
+  TextEditingController get _effectiveController =>
+      widget.controller ?? _controller!.value;
+  FocusNode? _focusNode;
+
+  FocusNode get _effectiveFocusNode =>
+      widget.focusNode ?? (_focusNode ??= FocusNode());
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller == null) {
+      _createLocalController();
+    }
+  }
+
+  @override
+  void didUpdateWidget(CupertinoSearchTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller == null && oldWidget.controller != null) {
+      _createLocalController(oldWidget.controller!.value);
+    } else if (widget.controller != null && oldWidget.controller == null) {
+      unregisterFromRestoration(_controller!);
+      _controller!.dispose();
+      _controller = null;
+    }
+  }
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    if (_controller != null) {
+      _registerController();
+    }
+  }
+
+  void _registerController() {
+    assert(_controller != null);
+    registerForRestoration(_controller!, 'controller');
+    _controller!.value.addListener(updateKeepAlive);
+  }
+
+  void _createLocalController([TextEditingValue? value]) {
+    assert(_controller == null);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
+    if (!restorePending) {
+      _registerController();
+    }
+  }
+
+  @override
+  String? get restorationId => widget.restorationId;
+
+  @override
+  bool get wantKeepAlive => _controller?.value.text.isNotEmpty == true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context); // See AutomaticKeepAliveClientMixin.
+
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
     final double scaledIconSize =
-        MediaQuery.textScaleFactorOf(context) * itemSize;
+        MediaQuery.textScaleFactorOf(context) * widget.itemSize;
 
     // If decoration was not provided, create a decoration with the provided
     // background color and border radius.
-    final BoxDecoration decoration = this.decoration ??
+    final BoxDecoration decoration = widget.decoration ??
         BoxDecoration(
           color: CupertinoDynamicColor.resolve(
-              backgroundColor ?? CupertinoColors.tertiarySystemFill, context),
-          borderRadius:
-              borderRadius ?? const BorderRadius.all(Radius.circular(9.0)),
+              widget.backgroundColor ?? CupertinoColors.tertiarySystemFill,
+              context),
+          borderRadius: widget.borderRadius ??
+              const BorderRadius.all(Radius.circular(9.0)),
         );
 
-    final TextStyle placeholderStyle = this.placeholderStyle ??
+    final TextStyle placeholderStyle = widget.placeholderStyle ??
         TextStyle(
           color: CupertinoDynamicColor.resolve(
               CupertinoColors.secondaryLabel, context),
         );
 
     final IconThemeData iconThemeData = IconThemeData(
-        color: CupertinoDynamicColor.resolve(itemColor, context),
+        color: CupertinoDynamicColor.resolve(widget.itemColor, context),
         size: scaledIconSize);
 
     final Widget prefix = Padding(
       child: IconTheme(
           child: const Icon(CupertinoIcons.search), data: iconThemeData),
-      padding: prefixInsets,
+      padding: widget.prefixInsets,
     );
 
-    // TODO(DanielEdrisian): Replace [GestureDetector] with a [CupertinoButton].
-    // The reason why I went with [GestureDetector] was because
-    // [CupertinoButton] was messing with the content size of the entire
-    // search field. Must find a way to get it working with a button, so that
-    // touch-down has that fading effect.
     final Widget suffix = Padding(
-      child: GestureDetector(
-        child: IconTheme(child: suffixIcon, data: iconThemeData),
-        onTap: onSuffixTap ??
+      child: CupertinoButton(
+        child: IconTheme(child: widget.suffixIcon, data: iconThemeData),
+        onPressed: widget.onSuffixTap ??
             () {
-              if (controller?.text != '') {
-                controller?.text = '';
-                onChanged?.call('');
-              }
+              final bool textChanged = _effectiveController.text.isNotEmpty;
+              _effectiveController.clear();
+              if (widget.onChanged != null && textChanged)
+                widget.onChanged!(_effectiveController.text);
             },
+        minSize: 0.0,
+        padding: EdgeInsets.zero,
       ),
-      padding: suffixInsets,
+      padding: widget.suffixInsets,
     );
 
     return CupertinoTextField(
-      controller: controller,
+      controller: _effectiveController,
       decoration: decoration,
-      style: style,
+      style: widget.style,
       prefix: prefix,
       suffix: suffix,
-      suffixMode: suffixMode,
-      placeholder: placeholder,
+      suffixMode: widget.suffixMode,
+      placeholder: widget.placeholder,
       placeholderStyle: placeholderStyle,
-      padding: padding,
-      onChanged: onChanged,
-      onSubmitted: onSubmitted,
+      padding: widget.padding,
+      onChanged: widget.onChanged,
+      onSubmitted: widget.onSubmitted,
+      focusNode: _effectiveFocusNode,
     );
   }
 }
