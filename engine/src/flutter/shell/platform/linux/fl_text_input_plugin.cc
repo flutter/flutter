@@ -183,12 +183,13 @@ static FlMethodResponse* set_client(FlTextInputPlugin* self, FlValue* args) {
   // Clear the multiline flag, then set it only if the field is multiline.
   self->input_multiline = FALSE;
   FlValue* input_type_value =
-      fl_value_lookup(config_value, fl_value_new_string(kTextInputTypeKey));
+      fl_value_lookup_string(config_value, kTextInputTypeKey);
   if (fl_value_get_type(input_type_value) == FL_VALUE_TYPE_MAP) {
-    FlValue* input_type_name = fl_value_lookup(
-        input_type_value, fl_value_new_string(kTextInputTypeNameKey));
-    if (fl_value_equal(input_type_name,
-                       fl_value_new_string(kMultilineInputType))) {
+    FlValue* input_type_name =
+        fl_value_lookup_string(input_type_value, kTextInputTypeNameKey);
+    if (fl_value_get_type(input_type_name) == FL_VALUE_TYPE_STRING &&
+        g_strcmp0(fl_value_get_string(input_type_name), kMultilineInputType) ==
+            0) {
       self->input_multiline = TRUE;
     }
   }
