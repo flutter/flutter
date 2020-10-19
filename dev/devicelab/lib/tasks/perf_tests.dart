@@ -477,6 +477,10 @@ class StartupTest {
             '--profile',
           ]);
           applicationBinaryPath = '$testDirectory/build/ios/iphoneos/Runner.app';
+          // TODO(jonahwilliams): fix this lookup to use a machine mode.
+          if (!File(applicationBinaryPath).existsSync()) {
+            applicationBinaryPath = '"$testDirectory/build/ios/iphoneos/Flutter Gallery.app"';
+          }
           break;
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.fake:
