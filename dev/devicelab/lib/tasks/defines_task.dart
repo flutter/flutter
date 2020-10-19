@@ -17,6 +17,7 @@ Future<TaskResult> runDartDefinesTask() async {
     await flutter('packages', options: <String>['get']);
 
     await flutter('drive', options: <String>[
+      '--no-android-gradle-daemon',
       '--verbose',
       '-d',
       deviceId,
