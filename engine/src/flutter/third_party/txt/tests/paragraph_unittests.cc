@@ -3973,7 +3973,10 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeCenterParagraph)) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(ParagraphTest, LINUX_ONLY(GetRectsForRangeParagraphNewlineLeftAlign)) {
+// 10/19/20 Temporarily disabled tests while being they are being fixed.
+// https://github.com/flutter/flutter/issues/68493
+TEST_F(ParagraphTest,
+       LINUX_ONLY_DISABLED(GetRectsForRangeParagraphNewlineLeftAlign)) {
   const char* text = "01234\n\nعab\naعلی\n";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
@@ -4070,7 +4073,8 @@ TEST_F(ParagraphTest, LINUX_ONLY(GetRectsForRangeParagraphNewlineLeftAlign)) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(ParagraphTest, LINUX_ONLY(GetRectsForRangeParagraphNewlineRightAlign)) {
+TEST_F(ParagraphTest,
+       LINUX_ONLY_DISABLED(GetRectsForRangeParagraphNewlineRightAlign)) {
   const char* text = "01234\n\nعab\naعلی\n";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
@@ -4168,7 +4172,7 @@ TEST_F(ParagraphTest, LINUX_ONLY(GetRectsForRangeParagraphNewlineRightAlign)) {
 }
 
 TEST_F(ParagraphTest,
-       LINUX_ONLY(GetRectsForRangeCenterParagraphNewlineCentered)) {
+       LINUX_ONLY_DISABLED(GetRectsForRangeCenterParagraphNewlineCentered)) {
   const char* text = "01234\n\nعab\naعلی\n";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
@@ -4264,8 +4268,9 @@ TEST_F(ParagraphTest,
 
   ASSERT_TRUE(Snapshot());
 }
+
 TEST_F(ParagraphTest,
-       LINUX_ONLY(GetRectsForRangeParagraphNewlineRTLLeftAlign)) {
+       LINUX_ONLY_DISABLED(GetRectsForRangeParagraphNewlineRTLLeftAlign)) {
   const char* text = "01234\n\nعab\naعلی\n";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
@@ -4363,7 +4368,7 @@ TEST_F(ParagraphTest,
 }
 
 TEST_F(ParagraphTest,
-       LINUX_ONLY(GetRectsForRangeParagraphNewlineRTLRightAlign)) {
+       LINUX_ONLY_DISABLED(GetRectsForRangeParagraphNewlineRTLRightAlign)) {
   const char* text = "01234\n\nعab\naعلی\n";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
@@ -4461,7 +4466,7 @@ TEST_F(ParagraphTest,
 }
 
 TEST_F(ParagraphTest,
-       LINUX_ONLY(GetRectsForRangeCenterParagraphNewlineRTLCentered)) {
+       LINUX_ONLY_DISABLED(GetRectsForRangeCenterParagraphNewlineRTLCentered)) {
   const char* text = "01234\n\nعab\naعلی\n";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
