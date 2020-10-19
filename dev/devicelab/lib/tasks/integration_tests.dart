@@ -130,6 +130,7 @@ class DriverTest {
       await flutter('packages', options: <String>['get']);
 
       final List<String> options = <String>[
+        '--no-android-gradle-daemon',
         '-v',
         '-t',
         testTarget,
