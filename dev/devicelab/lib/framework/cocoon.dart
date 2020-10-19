@@ -35,8 +35,28 @@ class Cocoon {
 
   static final Logger logger = Logger('CocoonClient');
 
+  String get commitSha => _commitSha ?? _readCommitSha();
+  String _commitSha;
+
+  /// Parse the local repo for the current running commit.
+  String _readCommitSha() {
+    final ProcessResult result = Process.runSync('git', <String>['rev-parse', 'HEAD']);
+    if (result.exitCode != 0) {
+      throw Exception(result.stderr);
+    }
+
+    _commitSha = result.stdout as String;
+    return _commitSha;
+  }
+
   /// Send [TaskResult] to Cocoon.
-  Future<void> sendTaskResult({String commitSha, String taskName, TaskResult result}) async {
+  Future<void> sendTaskResult({String taskName, TaskResult result}) async {
+    // Skip logging on test runs
+    Logger.root.level = Level.ALL;
+    Logger.root.onRecord.listen((LogRecord rec) {
+      print('${rec.level.name}: ${rec.time}: ${rec.message}');
+    });
+
     final Map<String, dynamic> status = <String, dynamic>{
       'CommitSha': commitSha,
       'TaskName': taskName,
@@ -61,11 +81,10 @@ class Cocoon {
     status['BenchmarkScoreKeys'] = validScoreKeys;
 
     final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', status);
-    logger.fine('Coocon response:');
-    logger.fine(response);
     if (response['Name'] != null) {
       logger.info('Updated Cocoon with results from this task');
     } else {
+      logger.info(response);
       logger.severe('Failed to updated Cocoon with results from this task');
     }
   }

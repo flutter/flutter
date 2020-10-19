@@ -39,7 +39,7 @@ void main() {
 
       final TaskResult result = TaskResult.success(<String, dynamic>{});
       // This should not throw an error.
-      await cocoon.sendTaskResult(commitSha: 'commit123', taskName: 'taskAbc', result: result);
+      await cocoon.sendTaskResult(taskName: 'taskAbc', result: result);
     });
 
     test('throws client exception on non-200 responses', () async {
@@ -52,7 +52,7 @@ void main() {
       );
 
       final TaskResult result = TaskResult.success(<String, dynamic>{});
-      expect(() => cocoon.sendTaskResult(commitSha: 'commit123', taskName: 'taskAbc', result: result), throwsA(isA<ClientException>()));
+      expect(() => cocoon.sendTaskResult(taskName: 'taskAbc', result: result), throwsA(isA<ClientException>()));
     });
   });
 

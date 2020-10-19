@@ -19,11 +19,6 @@ ArgResults args;
 
 List<String> _taskNames = <String>[];
 
-/// Git commit sha of the current running tests.
-///
-/// Only used if [serviceAccountTokenFile] is passed.
-String commitSha;
-
 /// The device-id to run test on.
 String deviceId;
 
@@ -85,7 +80,6 @@ Future<void> main(List<String> rawArgs) async {
     return;
   }
 
-  commitSha = args['commit-sha'] as String;
   deviceId = args['device-id'] as String;
   localEngine = args['local-engine'] as String;
   localEngineSrcPath = args['local-engine-src-path'] as String;
@@ -117,7 +111,7 @@ Future<void> _runTasks() async {
 
     if (serviceAccountTokenFile != null) {
       final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
-      await cocoon.sendTaskResult(commitSha: commitSha, taskName: taskName, result: result);
+      await cocoon.sendTaskResult(taskName: taskName, result: result);
     }
 
     if (!result.succeeded) {
@@ -313,10 +307,6 @@ final ArgParser _argParser = ArgParser()
     'all',
     abbr: 'a',
     help: 'Runs all tasks defined in manifest.yaml in alphabetical order.',
-  )
-  ..addOption(
-    'commit-sha',
-    help: '[Flutter infrastructure] Commit sha to upload results to Cocoon.',
   )
   ..addOption(
     'continue-from',
