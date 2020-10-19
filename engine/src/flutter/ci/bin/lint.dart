@@ -28,6 +28,11 @@ https://github.com/flutter/flutter/wiki/Engine-Clang-Tidy-Linter
 
 const String issueUrlPrefix = 'https://github.com/flutter/flutter/issues';
 
+/// Symbol definitions passed to clang-tidy.
+const List<String> clangTidyDefineArgs = <String>[
+  "-DSK_VULKAN", // See: https://github.com/flutter/flutter/issues/68331
+];
+
 class Command {
   Directory directory = Directory('');
   String command = '';
@@ -46,6 +51,7 @@ String calcTidyArgs(Command command) {
   String result = command.command;
   result = result.replaceAll(RegExp(r'\S*clang/bin/clang'), '');
   result = result.replaceAll(RegExp(r'-MF \S*'), '');
+  result += ' ' + clangTidyDefineArgs.join(' ');
   return result;
 }
 
