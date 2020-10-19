@@ -70,8 +70,8 @@ class GalleryTransitionTest {
         await flutter(
           'build',
           options: <String>[
-            '--no-android-gradle-daemon',
             'apk',
+            '--no-android-gradle-daemon',
             '--profile',
             '-t',
             'test_driver/$testFile.dart',
