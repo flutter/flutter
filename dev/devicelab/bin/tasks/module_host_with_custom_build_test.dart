@@ -33,7 +33,7 @@ Future<void> main() async {
       'precache',
       options: <String>['--android', '--no-ios'],
     );
-    
+
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
     final Directory projectDir = Directory(path.join(tempDir.path, 'hello'));
     try {

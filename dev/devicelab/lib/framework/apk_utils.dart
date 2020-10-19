@@ -379,10 +379,6 @@ class FlutterPluginProject {
   String get releaseArmApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk','app-armeabi-v7a-release.apk');
   String get releaseArm64ApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-arm64-v8a-release.apk');
   String get releaseBundlePath => path.join(examplePath, 'build', 'app', 'outputs', 'bundle', 'release', 'app.aab');
-
-  // Future<void> runGradleTask(String task, {List<String> options}) async {
-  //   return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
-  // }
 }
 
 class FlutterModuleProject {
