@@ -32,6 +32,7 @@ const List<int> kTransparentImage = <int>[
 void main() {
   Testbed testbed;
   WebAssetServer webAssetServer;
+  ReleaseAssetServer releaseAssetServer;
   Platform linux;
   PackageConfig packages;
   Platform windows;
@@ -55,6 +56,14 @@ void main() {
         null,
         null,
         null,
+      );
+      releaseAssetServer = ReleaseAssetServer(
+        globals.fs.file('main.dart').uri,
+        fileSystem: null,
+        flutterRoot: null,
+        platform: null,
+        webBuildDirectory: null,
+        basePath: null,
       );
     });
   });
@@ -925,8 +934,15 @@ void main() {
     await webAssetServer.dispose();
   });
 
-  test('responds to POST requests with 404 not found', () => testbed.run(() async {
+  test('WebAssetServer responds to POST requests with 404 not found', () => testbed.run(() async {
     final Response response = await webAssetServer.handleRequest(
+      Request('POST', Uri.parse('http://foobar/something')),
+    );
+    expect(response.statusCode, 404);
+  }));
+
+  test('ReleaseAssetServer responds to POST requests with 404 not found', () => testbed.run(() async {
+    final Response response = await releaseAssetServer.handle(
       Request('POST', Uri.parse('http://foobar/something')),
     );
     expect(response.statusCode, 404);

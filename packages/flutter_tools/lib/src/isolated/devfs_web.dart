@@ -333,7 +333,7 @@ class WebAssetServer implements AssetReader {
   // handle requests for JavaScript source, dart sources maps, or asset files.
   @visibleForTesting
   Future<shelf.Response> handleRequest(shelf.Request request) async {
-    if (request.method == 'POST') {
+    if (request.method != 'GET') {
       // Assets are served via GET only.
       return shelf.Response.notFound('');
     }
@@ -974,6 +974,11 @@ class ReleaseAssetServer {
   ];
 
   Future<shelf.Response> handle(shelf.Request request) async {
+    if (request.method != 'GET') {
+      // Assets are served via GET only.
+      return shelf.Response.notFound('');
+    }
+
     Uri fileUri;
     final String requestPath = _stripBasePath(request.url.path, basePath);
 
