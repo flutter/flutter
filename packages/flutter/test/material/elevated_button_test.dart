@@ -375,6 +375,82 @@ void main() {
     expect(didLongPressButton, isTrue);
   });
 
+   testWidgets('ElevatedButton.icon onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
+    bool wasPressed;
+    Finder elevatedButton;
+
+    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ElevatedButton.icon(
+          label: const Text('button'),
+          icon:const Icon(Icons.ac_unit),
+          onPressed: onPressed,
+          onLongPress: onLongPress,
+        ),
+      );
+    }
+
+    // onPressed not null, onLongPress null.
+    wasPressed = false;
+    await tester.pumpWidget(
+      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
+    );
+    elevatedButton = find.byType(ElevatedButton);
+    expect(tester.widget<ElevatedButton>(elevatedButton).enabled, true);
+    await tester.tap(elevatedButton);
+    expect(wasPressed, true);
+
+    // onPressed null, onLongPress not null.
+    wasPressed = false;
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
+    );
+    elevatedButton = find.byType(ElevatedButton);
+    expect(tester.widget<ElevatedButton>(elevatedButton).enabled, true);
+    await tester.longPress(elevatedButton);
+    expect(wasPressed, true);
+
+    // onPressed null, onLongPress null.
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: null),
+    );
+    elevatedButton = find.byType(ElevatedButton);
+    expect(tester.widget<ElevatedButton>(elevatedButton).enabled, false);
+  });
+
+  testWidgets('ElevatedButton.icon onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
+    bool didPressButton = false;
+    bool didLongPressButton = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ElevatedButton.icon(
+          onPressed: () {
+            didPressButton = true;
+          },
+          onLongPress: () {
+            didLongPressButton = true;
+          },
+          label: const Text('button'),
+          icon:const Icon(Icons.ac_unit),
+        ),
+      ),
+    );
+
+    final Finder elevatedButton = find.byType(ElevatedButton);
+    expect(tester.widget<ElevatedButton>(elevatedButton).enabled, true);
+
+    expect(didPressButton, isFalse);
+    await tester.tap(elevatedButton);
+    expect(didPressButton, isTrue);
+
+    expect(didLongPressButton, isFalse);
+    await tester.longPress(elevatedButton);
+    expect(didLongPressButton, isTrue);
+  });
+
   testWidgets('Does ElevatedButton work with hover', (WidgetTester tester) async {
     const Color hoverColor = Color(0xff001122);
 
