@@ -61,7 +61,6 @@ void ResetAnchor(CALayer* layer);
 
 class IOSContextGL;
 class IOSSurface;
-class IOSSurfaceFactory;
 
 struct FlutterPlatformViewLayer {
   FlutterPlatformViewLayer(fml::scoped_nsobject<UIView> overlay_view,
@@ -88,9 +87,7 @@ struct FlutterPlatformViewLayer {
 // This class isn't thread safe.
 class FlutterPlatformViewLayerPool {
  public:
-  FlutterPlatformViewLayerPool(std::shared_ptr<IOSSurfaceFactory> ios_surface_factory)
-      : ios_surface_factory_(ios_surface_factory) {}
-
+  FlutterPlatformViewLayerPool() = default;
   ~FlutterPlatformViewLayerPool() = default;
 
   // Gets a layer from the pool if available, or allocates a new one.
@@ -121,14 +118,12 @@ class FlutterPlatformViewLayerPool {
   size_t available_layer_index_ = 0;
   std::vector<std::shared_ptr<FlutterPlatformViewLayer>> layers_;
 
-  const std::shared_ptr<IOSSurfaceFactory> ios_surface_factory_;
-
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformViewLayerPool);
 };
 
 class FlutterPlatformViewsController {
  public:
-  FlutterPlatformViewsController(std::shared_ptr<IOSSurfaceFactory> surface_factory);
+  FlutterPlatformViewsController();
 
   ~FlutterPlatformViewsController();
 
