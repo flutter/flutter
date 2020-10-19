@@ -28,9 +28,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
-#import "flutter/shell/platform/darwin/ios/ios_context.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface_factory.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "flutter/shell/profiling/sampling_profiler.h"
@@ -65,7 +63,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   fml::WeakPtr<FlutterViewController> _viewController;
   fml::scoped_nsobject<FlutterObservatoryPublisher> _publisher;
 
-  std::shared_ptr<flutter::IOSSurfaceFactory> _surfaceFactory;
   std::unique_ptr<flutter::FlutterPlatformViewsController> _platformViewsController;
   std::unique_ptr<flutter::ProfilerMetricsIOS> _profiler_metrics;
   std::unique_ptr<flutter::SamplingProfiler> _profiler;
@@ -131,7 +128,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   _pluginPublications = [NSMutableDictionary new];
   _registrars = [[NSMutableDictionary alloc] init];
-  [self ensurePlatformViewController];
+  _platformViewsController.reset(new flutter::FlutterPlatformViewsController());
 
   _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
   _connections.reset(new flutter::ConnectionCollection());
@@ -163,16 +160,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                object:nil];
 
   return self;
-}
-
-- (void)ensurePlatformViewController {
-  if (!_platformViewsController) {
-    auto renderingApi = flutter::GetRenderingAPIForProcess(FlutterView.forceSoftwareRendering);
-    _surfaceFactory = flutter::IOSSurfaceFactory::Create(renderingApi);
-    auto pvc = new flutter::FlutterPlatformViewsController(_surfaceFactory);
-    _surfaceFactory->SetPlatformViewsController(pvc);
-    _platformViewsController.reset(pvc);
-  }
 }
 
 - (void)dealloc {
@@ -533,13 +520,13 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                  threadHostType};
 
   // Lambda captures by pointers to ObjC objects are fine here because the
-  // create call is synchronous.
+  // create call is
+  // synchronous.
   flutter::Shell::CreateCallback<flutter::PlatformView> on_create_platform_view =
-      [self](flutter::Shell& shell) {
-        [self ensurePlatformViewController];
+      [](flutter::Shell& shell) {
         return std::make_unique<flutter::PlatformViewIOS>(
             shell, flutter::GetRenderingAPIForProcess(FlutterView.forceSoftwareRendering),
-            self->_surfaceFactory, shell.GetTaskRunners());
+            shell.GetTaskRunners());
       };
 
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
@@ -567,6 +554,9 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     [self setupChannels];
     [self onLocaleUpdated:nil];
     [self initializeDisplays];
+    if (!_platformViewsController) {
+      _platformViewsController.reset(new flutter::FlutterPlatformViewsController());
+    }
     _publisher.reset([[FlutterObservatoryPublisher alloc]
         initWithEnableObservatoryPublication:settings.enable_observatory_publication]);
     [self maybeSetupPlatformViewChannels];
