@@ -529,7 +529,7 @@ Future<void> _runAddToAppLifeCycleTests() async {
 
 Future<void> _runFrameworkTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
-  final List<String> nullSafetyOptions = <String>['--null-assertions', '--no-sound-null-safety'];
+  final List<String> nullSafetyOptions = <String>['--null-assertions'];
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
