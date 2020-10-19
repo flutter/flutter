@@ -454,9 +454,35 @@ class StartupTest {
 
   Future<TaskResult> run() async {
     return await inDirectory<TaskResult>(testDirectory, () async {
-      final String deviceId = (await devices.workingDevice).deviceId;
+      final Device device = await devices.workingDevice;
       const int iterations = 5;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
+
+      section('Building application');
+      String applicationBinaryPath;
+      switch (deviceOperatingSystem) {
+        case DeviceOperatingSystem.android:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm,android-arm64',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
+        case DeviceOperatingSystem.ios:
+          await flutter('build', options: <String>[
+            'ios',
+             '-v',
+            '--profile',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/ios/iphoneos/Runner.app';
+          break;
+        case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.fake:
+          break;
+      }
+
       for (int i = 0; i < iterations; i += 1) {
         await flutter('run', options: <String>[
           '--no-android-gradle-daemon',
@@ -464,7 +490,9 @@ class StartupTest {
           '--profile',
           '--trace-startup',
           '-d',
-          deviceId,
+          device.deviceId,
+          if (applicationBinaryPath != null)
+            '--use-application-binary=$applicationBinaryPath',
         ]);
         final Map<String, dynamic> data = json.decode(
           file('$testDirectory/build/start_up_info.json').readAsStringSync(),
@@ -474,7 +502,7 @@ class StartupTest {
         await flutter('install', options: <String>[
           '--uninstall-only',
           '-d',
-          deviceId,
+          device.deviceId,
         ]);
       }
 
