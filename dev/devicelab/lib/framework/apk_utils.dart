@@ -119,9 +119,23 @@ Future<String> _evalApkAnalyzer(
   String workingDirectory,
 }) async {
   final String javaHome = await findJavaHome();
+
+   final String apkAnalyzer = path
+     .join(_androidHome, 'cmdline-tools', 'latest', 'bin', Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer');
+   if (canRun(apkAnalyzer)) {
+     return eval(
+       apkAnalyzer,
+       args,
+       printStdout: printStdout,
+       workingDirectory: workingDirectory,
+       environment: <String, String>{
+         'JAVA_HOME': javaHome,
+       },
+     );
+   }
+
   final String javaBinary = path.join(javaHome, 'bin', 'java');
   assert(canRun(javaBinary));
-
   final String androidTools = path.join(_androidHome, 'tools');
   final String libs = path.join(androidTools, 'lib');
   assert(Directory(libs).existsSync());
@@ -366,9 +380,9 @@ class FlutterPluginProject {
   String get releaseArm64ApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-arm64-v8a-release.apk');
   String get releaseBundlePath => path.join(examplePath, 'build', 'app', 'outputs', 'bundle', 'release', 'app.aab');
 
-  Future<void> runGradleTask(String task, {List<String> options}) async {
-    return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
-  }
+  // Future<void> runGradleTask(String task, {List<String> options}) async {
+  //   return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
+  // }
 }
 
 class FlutterModuleProject {

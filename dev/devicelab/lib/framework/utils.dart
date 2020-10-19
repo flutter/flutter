@@ -463,6 +463,15 @@ Future<String> evalFlutter(String command, {
       canFail: canFail, environment: environment, stderr: stderr);
 }
 
+Future<ProcessResult> executeFlutter(String command, {
+  List<String> options = const <String>[],
+}) async {
+   final List<String> args = flutterCommandArgs(command, options);
+  return _processManager.run(
+    <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
+  );
+}
+
 String get dartBin =>
     path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
 

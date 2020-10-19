@@ -29,6 +29,11 @@ Future<void> main() async {
 
     section('Create Flutter module project');
 
+    await flutter(
+      'precache',
+      options: <String>['--android', '--no-ios'],
+    );
+    
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
     final Directory projectDir = Directory(path.join(tempDir.path, 'hello'));
     try {
