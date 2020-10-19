@@ -384,7 +384,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ElevatedButton.icon(
           label: const Text('button'),
-          icon:const Icon(Icons.add),
+          icon: const Icon(Icons.add),
           onPressed: onPressed,
           onLongPress: onLongPress,
         ),
@@ -434,7 +434,7 @@ void main() {
             didLongPressButton = true;
           },
           label: const Text('button'),
-          icon:const Icon(Icons.add),
+          icon: const Icon(Icons.add),
         ),
       ),
     );
