@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
-#include <memory>
 
 #include <utility>
 
@@ -47,11 +46,9 @@ void PlatformViewIOS::AccessibilityBridgePtr::reset(AccessibilityBridge* bridge)
 
 PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
                                  IOSRenderingAPI rendering_api,
-                                 std::shared_ptr<IOSSurfaceFactory> surface_factory,
                                  flutter::TaskRunners task_runners)
     : PlatformView(delegate, std::move(task_runners)),
       ios_context_(IOSContext::Create(rendering_api)),
-      ios_surface_factory_(surface_factory),
       accessibility_bridge_([this](bool enabled) { PlatformView::SetSemanticsEnabled(enabled); }) {}
 
 PlatformViewIOS::~PlatformViewIOS() = default;
@@ -105,9 +102,8 @@ void PlatformViewIOS::attachView() {
   FML_DCHECK(owner_controller_.get().isViewLoaded)
       << "FlutterViewController's view should be loaded "
          "before attaching to PlatformViewIOS.";
-  auto flutter_view = static_cast<FlutterView*>(owner_controller_.get().view);
-  auto ca_layer = fml::scoped_nsobject<CALayer>{[[flutter_view layer] retain]};
-  ios_surface_ = ios_surface_factory_->CreateSurface(ca_layer);
+  ios_surface_ =
+      [static_cast<FlutterView*>(owner_controller_.get().view) createSurface:ios_context_];
   FML_DCHECK(ios_surface_ != nullptr);
 
   if (accessibility_bridge_) {

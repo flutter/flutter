@@ -19,7 +19,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface_factory.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 @class FlutterViewController;
@@ -42,7 +41,6 @@ class PlatformViewIOS final : public PlatformView {
  public:
   explicit PlatformViewIOS(PlatformView::Delegate& delegate,
                            IOSRenderingAPI rendering_api,
-                           std::shared_ptr<IOSSurfaceFactory> surface_factory,
                            flutter::TaskRunners task_runners);
 
   ~PlatformViewIOS() override;
@@ -126,7 +124,6 @@ class PlatformViewIOS final : public PlatformView {
   std::mutex ios_surface_mutex_;
   std::unique_ptr<IOSSurface> ios_surface_;
   std::shared_ptr<IOSContext> ios_context_;
-  std::shared_ptr<IOSSurfaceFactory> ios_surface_factory_;
   PlatformMessageRouter platform_message_router_;
   AccessibilityBridgePtr accessibility_bridge_;
   fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;

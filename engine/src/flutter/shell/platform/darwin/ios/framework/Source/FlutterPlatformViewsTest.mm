@@ -121,16 +121,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto surface_factory = flutter::IOSSurfaceFactory::Create(flutter::IOSRenderingAPI::kSoftware);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
-      /*ios_surface_factory=*/surface_factory,
       /*task_runners=*/runners);
 
-  auto flutterPlatformViewsController =
-      std::make_unique<flutter::FlutterPlatformViewsController>(surface_factory);
-  surface_factory->SetPlatformViewsController(flutterPlatformViewsController.get());
+  auto flutterPlatformViewsController = std::make_unique<flutter::FlutterPlatformViewsController>();
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
@@ -179,16 +175,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto surface_factory = flutter::IOSSurfaceFactory::Create(flutter::IOSRenderingAPI::kSoftware);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
-      /*ios_surface_factory=*/surface_factory,
       /*task_runners=*/runners);
 
-  auto flutterPlatformViewsController =
-      std::make_unique<flutter::FlutterPlatformViewsController>(surface_factory);
-  surface_factory->SetPlatformViewsController(flutterPlatformViewsController.get());
+  auto flutterPlatformViewsController = std::make_unique<flutter::FlutterPlatformViewsController>();
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
@@ -238,16 +230,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto surface_factory = flutter::IOSSurfaceFactory::Create(flutter::IOSRenderingAPI::kSoftware);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
-      /*ios_surface_factory=*/surface_factory,
       /*task_runners=*/runners);
 
-  auto flutterPlatformViewsController =
-      std::make_unique<flutter::FlutterPlatformViewsController>(surface_factory);
-  surface_factory->SetPlatformViewsController(flutterPlatformViewsController.get());
+  auto flutterPlatformViewsController = std::make_unique<flutter::FlutterPlatformViewsController>();
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
@@ -313,16 +301,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto surface_factory = flutter::IOSSurfaceFactory::Create(flutter::IOSRenderingAPI::kSoftware);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
-      /*ios_surface_factory=*/surface_factory,
       /*task_runners=*/runners);
 
-  auto flutterPlatformViewsController =
-      std::make_unique<flutter::FlutterPlatformViewsController>(surface_factory);
-  surface_factory->SetPlatformViewsController(flutterPlatformViewsController.get());
+  auto flutterPlatformViewsController = std::make_unique<flutter::FlutterPlatformViewsController>();
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
@@ -389,16 +373,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto surface_factory = flutter::IOSSurfaceFactory::Create(flutter::IOSRenderingAPI::kSoftware);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
-      /*ios_surface_factory=*/surface_factory,
       /*task_runners=*/runners);
 
-  auto flutterPlatformViewsController =
-      std::make_unique<flutter::FlutterPlatformViewsController>(surface_factory);
-  surface_factory->SetPlatformViewsController(flutterPlatformViewsController.get());
+  auto flutterPlatformViewsController = std::make_unique<flutter::FlutterPlatformViewsController>();
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
@@ -465,16 +445,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto surface_factory = flutter::IOSSurfaceFactory::Create(flutter::IOSRenderingAPI::kSoftware);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
-      /*ios_surface_factory=*/surface_factory,
       /*task_runners=*/runners);
 
-  auto flutterPlatformViewsController =
-      std::make_unique<flutter::FlutterPlatformViewsController>(surface_factory);
-  surface_factory->SetPlatformViewsController(flutterPlatformViewsController.get());
+  auto flutterPlatformViewsController = std::make_unique<flutter::FlutterPlatformViewsController>();
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
@@ -542,16 +518,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto surface_factory = flutter::IOSSurfaceFactory::Create(flutter::IOSRenderingAPI::kSoftware);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
-      /*ios_surface_factory=*/surface_factory,
       /*task_runners=*/runners);
 
-  auto flutterPlatformViewsController =
-      std::make_unique<flutter::FlutterPlatformViewsController>(surface_factory);
-  surface_factory->SetPlatformViewsController(flutterPlatformViewsController.get());
+  auto flutterPlatformViewsController = std::make_unique<flutter::FlutterPlatformViewsController>();
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
