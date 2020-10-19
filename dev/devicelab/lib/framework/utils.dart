@@ -466,9 +466,10 @@ Future<String> evalFlutter(String command, {
 Future<ProcessResult> executeFlutter(String command, {
   List<String> options = const <String>[],
 }) async {
-   final List<String> args = flutterCommandArgs(command, options);
+  final List<String> args = flutterCommandArgs(command, options);
   return _processManager.run(
     <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
+    workingDirectory: cwd,
   );
 }
 
