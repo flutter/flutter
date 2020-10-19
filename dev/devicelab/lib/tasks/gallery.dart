@@ -71,6 +71,7 @@ class GalleryTransitionTest {
           'build',
           options: <String>[
             'apk',
+            '--no-android-gradle-daemon',
             '--profile',
             '-t',
             'test_driver/$testFile.dart',
