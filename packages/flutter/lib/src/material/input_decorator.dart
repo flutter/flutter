@@ -249,7 +249,7 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
   }
 }
 
-// Used to "shake" the floating label to the left to the left and right
+// Used to "shake" the floating label to the left and right
 // when the errorText first appears.
 class _Shaker extends AnimatedWidget {
   const _Shaker({
@@ -2325,8 +2325,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       floatingLabelHeight = (4.0 + 0.75 * inlineLabelStyle.fontSize) * MediaQuery.textScaleFactorOf(context);
       if (decoration.filled == true) { // filled == null same as filled == false
         contentPadding = decorationContentPadding ?? (decorationIsDense
-          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+          ? const EdgeInsets.fromLTRB(16.0, 8.0, 12.0, 8.0)
+          : const EdgeInsets.fromLTRB(16.0, 12.0, 12.0, 12.0));
       } else {
         // Not left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
@@ -2338,8 +2338,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     } else {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? (decorationIsDense
-        ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
-        : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
+        ? const EdgeInsets.fromLTRB(16.0, 20.0, 12.0, 12.0)
+        : const EdgeInsets.fromLTRB(16.0, 24.0, 12.0, 16.0));
     }
 
     return _Decorator(
