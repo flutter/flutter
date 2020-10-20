@@ -2,7 +2,7 @@ name: customer_testing
 description: Tool to run the tests listed in the flutter/tests repository.
 
 environment:
-  sdk: any
+  sdk: '>=2.9.0 <3.0.0'
 
 dependencies:
   args: 1.6.0
