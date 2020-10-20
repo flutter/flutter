@@ -6,10 +6,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button.dart';
 import 'colors.dart';
 import 'icons.dart';
 import 'text_field.dart';
-import 'button.dart';
 
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
 /// `UISearchTextField`.
@@ -69,8 +69,8 @@ import 'button.dart';
 /// ```
 /// {@end-tool}
 class CupertinoSearchTextField extends StatefulWidget {
-  /// Creates a [CupertinoTextField] that mimicks the look and behavior of UIKit's
-  /// `UISearchTextField`.
+  /// Creates a [CupertinoTextField] that mimicks the look and behavior of
+  /// UIKit's `UISearchTextField`.
   ///
   /// Similar to [CupertinoTextField], to provide a prefilled text entry, pass
   /// in a [TextEditingController] with an initial value to the [controller]
@@ -79,8 +79,8 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// The [onChanged] parameter takes a [ValueChanged<String>] which is invoked
   /// upon a change in the text field's value.
   ///
-  /// The [onSubmitted] parameter takes a [ValueChanged<String>] which is invoked
-  /// when the keyboard submits.
+  /// The [onSubmitted] parameter takes a [ValueChanged<String>] which is
+  /// invoked when the keyboard submits.
   ///
   /// To provide a hint placeholder text that appears when the text entry is
   /// empty, pass a [String] to the [placeholder] parameter. This defaults to
@@ -213,9 +213,9 @@ class CupertinoSearchTextField extends StatefulWidget {
 
   /// Sets the padding insets for the text and placeholder.
   ///
-  /// Cannot be null. Defaults to padding that replicates the `UISearchTextField`
-  /// look. The inset values were determined using the comparison tool in
-  /// https://github.com/flutter/platform_tests/.
+  /// Cannot be null. Defaults to padding that replicates the
+  /// `UISearchTextField` look. The inset values were determined using the
+  /// comparison tool in https://github.com/flutter/platform_tests/.
   final EdgeInsetsGeometry padding;
 
   /// Sets the color for the suffix and prefix icons.
@@ -225,29 +225,29 @@ class CupertinoSearchTextField extends StatefulWidget {
 
   /// Sets the base icon size for the suffix and prefix icons.
   ///
-  /// Cannot be null. The size of the icon is scaled using the accessibility font
-  /// scale settings. Defaults to [20.0].
+  /// Cannot be null. The size of the icon is scaled using the accessibility
+  /// font scale settings. Defaults to [20.0].
   final double itemSize;
 
   /// Sets the padding insets for the suffix.
   ///
-  /// Cannot be null. Defaults to padding that replicates the `UISearchTextField` suffix
-  /// look. The inset values were determined using the comparison tool in
-  /// https://github.com/flutter/platform_tests/.
+  /// Cannot be null. Defaults to padding that replicates the
+  /// `UISearchTextField` suffix look. The inset values were determined using
+  /// the comparison tool in https://github.com/flutter/platform_tests/.
   final EdgeInsetsGeometry prefixInsets;
 
   /// Sets the padding insets for the prefix.
   ///
-  /// Cannot be null. Defaults to padding that replicates the `UISearchTextField` prefix
-  /// look. The inset values were determined using the comparison tool in
-  /// https://github.com/flutter/platform_tests/.
+  /// Cannot be null. Defaults to padding that replicates the
+  /// `UISearchTextField` prefix look. The inset values were determined using
+  /// the comparison tool in https://github.com/flutter/platform_tests/.
   final EdgeInsetsGeometry suffixInsets;
 
   /// Sets the suffix widget's icon.
   ///
-  /// Cannot be null. Defaults to the X-Mark [CupertinoIcons.xmark_circle_fill]. The suffix is
-  /// customizable so that users can override it with other options, like a
-  /// bookmark icon.
+  /// Cannot be null. Defaults to the X-Mark [CupertinoIcons.xmark_circle_fill].
+  /// The suffix is customizable so that users can override it with other
+  /// options, like a bookmark icon.
   final Icon suffixIcon;
 
   /// Dictates when the X-Mark (suffix) should be visible.
@@ -276,9 +276,16 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     with
         RestorationMixin,
         AutomaticKeepAliveClientMixin<CupertinoSearchTextField> {
+  /// Default value for the border radius. Radius value was determined using the
+  /// comparison tool in https://github.com/flutter/platform_tests/.
+  final BorderRadius _kDefaultBorderRadius =
+      const BorderRadius.all(Radius.circular(9.0));
+
   RestorableTextEditingController? _controller;
+
   TextEditingController get _effectiveController =>
       widget.controller ?? _controller!.value;
+
   FocusNode? _focusNode;
 
   FocusNode get _effectiveFocusNode =>
@@ -349,8 +356,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
           color: CupertinoDynamicColor.resolve(
               widget.backgroundColor ?? CupertinoColors.tertiarySystemFill,
               context),
-          borderRadius: widget.borderRadius ??
-              const BorderRadius.all(Radius.circular(9.0)),
+          borderRadius: widget.borderRadius ?? _kDefaultBorderRadius,
         );
 
     final TextStyle placeholderStyle = widget.placeholderStyle ??
