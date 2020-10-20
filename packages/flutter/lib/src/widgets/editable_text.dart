@@ -156,7 +156,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// change the controller's [value].
   set text(String? newText) {
     value = value.copyWith(
-      text: newText,
+      text: newText ?? '',
       selection: const TextSelection.collapsed(offset: -1),
       composing: TextRange.empty,
     );
