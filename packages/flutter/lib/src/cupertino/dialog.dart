@@ -95,7 +95,7 @@ const double _kMaxRegularTextScaleFactor = 1.4;
 // Accessibility mode on iOS is determined by the text scale factor that the
 // user has selected.
 bool _isInAccessibilityMode(BuildContext context) {
-  final MediaQueryData? data = MediaQuery.of(context, nullOk: true);
+  final MediaQueryData? data = MediaQuery.maybeOf(context);
   return data != null && data.textScaleFactor > _kMaxRegularTextScaleFactor;
 }
 
@@ -228,18 +228,18 @@ class CupertinoAlertDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     final bool isInAccessibilityMode = _isInAccessibilityMode(context);
-    final double textScaleFactor = MediaQuery.of(context)!.textScaleFactor;
+    final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
     return CupertinoUserInterfaceLevel(
       data: CupertinoUserInterfaceLevelData.elevated,
       child: MediaQuery(
-        data: MediaQuery.of(context)!.copyWith(
+        data: MediaQuery.of(context).copyWith(
           // iOS does not shrink dialog content below a 1.0 scale factor
           textScaleFactor: math.max(textScaleFactor, 1.0),
         ),
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return AnimatedPadding(
-              padding: MediaQuery.of(context)!.viewInsets +
+              padding: MediaQuery.of(context).viewInsets +
                   const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
               duration: insetAnimationDuration,
               curve: insetAnimationCurve,
@@ -388,7 +388,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoDialog(
-      dividerThickness: _kDividerThickness / MediaQuery.of(context)!.devicePixelRatio,
+      dividerThickness: _kDividerThickness / MediaQuery.of(context).devicePixelRatio,
       isInAccessibilityMode: _isInAccessibilityMode(context),
       dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context)!,
     );
@@ -877,7 +877,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
       );
     }
 
-    final double textScaleFactor = MediaQuery.of(context)!.textScaleFactor;
+    final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
     final List<Widget> titleContentGroup = <Widget>[
       if (title != null)
         Padding(
@@ -954,7 +954,7 @@ class _CupertinoAlertActionSection extends StatefulWidget {
 class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSection> {
   @override
   Widget build(BuildContext context) {
-    final double devicePixelRatio = MediaQuery.of(context)!.devicePixelRatio;
+    final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     final List<Widget> interactiveButtons = <Widget>[];
     for (int i = 0; i < widget.children.length; i += 1) {

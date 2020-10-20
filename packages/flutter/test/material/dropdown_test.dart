@@ -2086,7 +2086,7 @@ void main() {
         builder: (BuildContext context, StateSetter setState) {
           return MaterialApp(
             builder: (BuildContext context, Widget? child) {
-              mediaQuery = MediaQuery.of(context)!;
+              mediaQuery = MediaQuery.of(context);
               return MediaQuery(
                 data: mediaQuery,
                 child: child!,
