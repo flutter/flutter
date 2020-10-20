@@ -25,18 +25,4 @@ struct TextBox {
 
 }  // namespace flutter
 
-namespace tonic {
-
-template <>
-struct DartConverter<flutter::TextBox> {
-  static Dart_Handle ToDart(const flutter::TextBox& val);
-};
-
-template <>
-struct DartListFactory<flutter::TextBox> {
-  static Dart_Handle NewList(intptr_t length);
-};
-
-}  // namespace tonic
-
 #endif  // FLUTTER_LIB_UI_TEXT_TEXT_BOX_H_
