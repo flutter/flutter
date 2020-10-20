@@ -1729,6 +1729,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   bool hitTestSelf(Offset position) => true;
 
+  @override
+  @protected
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    final TextPosition textPosition = _textPainter.getPositionForOffset(position);
+    final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
+    if (span != null && span is HitTestTarget) {
+      result.add(HitTestEntry(span as HitTestTarget));
+      return true;
+    }
+    return false;
+  }
+
   late TapGestureRecognizer _tap;
   late LongPressGestureRecognizer _longPress;
 
@@ -1737,14 +1749,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent) {
       assert(!debugNeedsLayout);
-      // Checks if there is any gesture recognizer in the text span.
-      final Offset offset = entry.localPosition;
-      final TextPosition position = _textPainter.getPositionForOffset(offset);
-      final InlineSpan? span = _textPainter.text!.getSpanForPosition(position);
-      if (span != null && span is TextSpan) {
-        final TextSpan textSpan = span;
-        textSpan.recognizer?.addPointer(event);
-      }
+      // // Checks if there is any gesture recognizer in the text span.
+      // final Offset offset = entry.localPosition;
+      // final TextPosition position = _textPainter.getPositionForOffset(offset);
+      // final InlineSpan? span = _textPainter.text!.getSpanForPosition(position);
+      // if (span != null && span is TextSpan) {
+      //   final TextSpan textSpan = span;
+      //   textSpan.recognizer?.addPointer(event);
+      // }
 
       if (!ignorePointer && onSelectionChanged != null) {
         // Propagates the pointer event to selection handlers.

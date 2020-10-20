@@ -433,6 +433,18 @@ class RenderParagraph extends RenderBox
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    // Hit test text spans
+    late final bool hitText;
+    final TextPosition textPosition = _textPainter.getPositionForOffset(position);
+    final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
+    if (span != null && span is HitTestTarget) {
+      result.add(HitTestEntry(span as HitTestTarget));
+      hitText = true;
+    } else {
+      hitText = false;
+    }
+
+    // Hit test render object children
     RenderBox? child = firstChild;
     while (child != null) {
       final TextParentData textParentData = child.parentData! as TextParentData;
@@ -462,24 +474,7 @@ class RenderParagraph extends RenderBox
       }
       child = childAfter(child);
     }
-    return false;
-  }
-
-  @override
-  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
-    assert(debugHandleEvent(event, entry));
-    if (event is! PointerDownEvent)
-      return;
-    _layoutTextWithConstraints(constraints);
-    final Offset offset = entry.localPosition;
-    final TextPosition position = _textPainter.getPositionForOffset(offset);
-    final InlineSpan? span = _textPainter.text!.getSpanForPosition(position);
-    if (span == null) {
-      return;
-    }
-    if (span is TextSpan) {
-      span.recognizer?.addPointer(event);
-    }
+    return hitText;
   }
 
   bool _needsClipping = false;

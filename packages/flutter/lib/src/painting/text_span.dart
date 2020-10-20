@@ -61,7 +61,7 @@ import 'text_style.dart';
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
-class TextSpan extends InlineSpan {
+class TextSpan extends InlineSpan implements HitTestTarget {
   /// Creates a [TextSpan] with the given values.
   ///
   /// For the object to be useful, at least one of [text] or
@@ -186,6 +186,12 @@ class TextSpan extends InlineSpan {
   /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
   /// ```
   final String? semanticsLabel;
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    if (event is PointerDownEvent)
+      recognizer?.addPointer(event);
+  }
 
   /// Apply the [style], [text], and [children] of this object to the
   /// given [ParagraphBuilder], from which a [Paragraph] can be obtained.
