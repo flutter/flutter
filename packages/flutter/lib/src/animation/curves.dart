@@ -1308,7 +1308,6 @@ class ElasticInOutCurve extends Curve {
 class Curves {
   // This class is not meant to be instatiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   Curves._();
 
   /// A linear animation curve.

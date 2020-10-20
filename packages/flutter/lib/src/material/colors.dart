@@ -198,7 +198,6 @@ class MaterialAccentColor extends ColorSwatch<int> {
 class Colors {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   Colors._();
 
   /// Completely invisible.

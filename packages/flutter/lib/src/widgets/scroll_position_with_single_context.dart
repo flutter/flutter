@@ -202,7 +202,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     goBallistic(0.0);
   }
 
-  @Deprecated('This will lead to bugs.') // ignore: flutter_deprecation_syntax, https://github.com/flutter/flutter/issues/44609
+  @Deprecated('This will lead to bugs.')
   @override
   void jumpToWithoutSettling(double value) {
     goIdle();

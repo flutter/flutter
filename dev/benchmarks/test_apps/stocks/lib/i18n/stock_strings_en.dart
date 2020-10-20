@@ -6,8 +6,6 @@
 import 'package:intl/intl.dart' as intl;
 import 'stock_strings.dart';
 
-// ignore_for_file: unnecessary_brace_in_string_interps
-
 /// The translations for English (`en`).
 class StockStringsEn extends StockStrings {
   StockStringsEn([String locale = 'en']) : super(locale);

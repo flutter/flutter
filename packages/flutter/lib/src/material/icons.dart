@@ -61,7 +61,6 @@ import 'package:flutter/widgets.dart';
 class Icons {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   Icons._();
 
   // Generated code: do not hand-edit.

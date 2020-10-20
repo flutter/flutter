@@ -12,7 +12,6 @@ import 'system_channels.dart';
 class HapticFeedback {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   HapticFeedback._();
 
   /// Provides vibration haptic feedback to the user for a short duration.

@@ -50,7 +50,8 @@ class UniqueKey extends LocalKey {
   /// The key cannot be created with a const constructor because that implies
   /// that all instantiated keys would be the same instance and therefore not
   /// be unique.
-  // ignore: prefer_const_constructors_in_immutables , never use const for this class
+  // Never use const for this class.
+  // ignore: prefer_const_constructors_in_immutables
   UniqueKey();
 
   @override
@@ -352,7 +353,8 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   /// Creates a global key with a debugging label.
   ///
   /// The label does not affect the key's identity.
-  // ignore: prefer_const_constructors_in_immutables , never use const for this class
+  // Never use const for this class.
+  // ignore: prefer_const_constructors_in_immutables
   LabeledGlobalKey(this._debugLabel) : super.constructor();
 
   final String? _debugLabel;
@@ -1922,7 +1924,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
     assert(() {
       for (int index = 0; index < children.length; index++) {
         // TODO(a14n): remove this check to have a lot more const widget
-        if (children[index] == null) { // ignore: dead_code
+        if (children[index] == null) {
           throw FlutterError(
               "$runtimeType's children must not contain any null values, "
                   'but a null value was found at index $index'

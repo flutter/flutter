@@ -80,7 +80,6 @@ import 'theme.dart';
 class Feedback {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   Feedback._();
 
   /// Provides platform-specific feedback for a tap.

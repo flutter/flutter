@@ -1397,7 +1397,7 @@ abstract class RenderBox extends RenderObject {
       // `height` has a non-nullable return type, but might be null when
       // running with weak checking, so we need to null check it anyway (and
       // ignore the warning that the null-handling logic is dead code).
-      if (height == null) { // ignore: dead_code
+      if (height == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMinIntrinsicWidth was null.'),
           ErrorDescription('The argument to getMinIntrinsicWidth must not be negative or null.'),
@@ -1545,7 +1545,7 @@ abstract class RenderBox extends RenderObject {
       // `height` has a non-nullable return type, but might be null when
       // running with weak checking, so we need to null check it anyway (and
       // ignore the warning that the null-handling logic is dead code).
-      if (height == null) { // ignore: dead_code
+      if (height == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMaxIntrinsicWidth was null.'),
           ErrorDescription('The argument to getMaxIntrinsicWidth must not be negative or null.'),
@@ -1627,7 +1627,7 @@ abstract class RenderBox extends RenderObject {
       // `width` has a non-nullable return type, but might be null when
       // running with weak checking, so we need to null check it anyway (and
       // ignore the warning that the null-handling logic is dead code).
-      if (width == null) { // ignore: dead_code
+      if (width == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMinIntrinsicHeight was null.'),
           ErrorDescription('The argument to getMinIntrinsicHeight must not be negative or null.'),
@@ -1708,7 +1708,7 @@ abstract class RenderBox extends RenderObject {
       // `width` has a non-nullable return type, but might be null when
       // running with weak checking, so we need to null check it anyway (and
       // ignore the warning that the null-handling logic is dead code).
-      if (width == null) { // ignore: dead_code
+      if (width == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMaxIntrinsicHeight was null.'),
           ErrorDescription('The argument to getMaxIntrinsicHeight must not be negative or null.'),

@@ -33,7 +33,6 @@ import 'platform_channel.dart';
 class BinaryMessages {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   BinaryMessages._();
 
   /// The messenger which sends the platform messages, not null.

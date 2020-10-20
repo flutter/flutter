@@ -6,8 +6,6 @@
 import 'package:intl/intl.dart' as intl;
 import 'stock_strings.dart';
 
-// ignore_for_file: unnecessary_brace_in_string_interps
-
 /// The translations for Spanish Castilian (`es`).
 class StockStringsEs extends StockStrings {
   StockStringsEs([String locale = 'es']) : super(locale);

@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:path/path.dart' as path;
 
 import '../../src/common.dart';
 import '../../src/context.dart';

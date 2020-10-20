@@ -380,7 +380,6 @@ class FakeHttpClientRequest implements HttpClientRequest {
 
   // TODO(zichangguo): remove the ignore after the change in dart:io lands.
   @override
-  // ignore: override_on_non_overriding_member
   void abort([Object exception, StackTrace stackTrace]) {}
 }
 

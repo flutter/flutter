@@ -70,7 +70,6 @@ void main() {
         LogicalKeyboardKey.keyC,
         LogicalKeyboardKey.keyD,
       );
-      // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2026
       final LogicalKeySet setFromSet = LogicalKeySet.fromSet(<LogicalKeyboardKey>{
         LogicalKeyboardKey.keyA,
         LogicalKeyboardKey.keyB,
@@ -126,7 +125,6 @@ void main() {
         LogicalKeyboardKey.keyB,
         LogicalKeyboardKey.keyA,
       );
-      // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2026
       final LogicalKeySet set4 = LogicalKeySet.fromSet(<LogicalKeyboardKey>{
         LogicalKeyboardKey.keyD,
         LogicalKeyboardKey.keyC,
@@ -142,7 +140,6 @@ void main() {
       expect(map.containsKey(LogicalKeySet(LogicalKeyboardKey.keyA)), isTrue);
       expect(
           set2,
-          // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2026
           equals(LogicalKeySet.fromSet(<LogicalKeyboardKey>{
             LogicalKeyboardKey.keyA,
             LogicalKeyboardKey.keyB,

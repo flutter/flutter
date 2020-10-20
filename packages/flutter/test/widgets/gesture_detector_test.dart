@@ -910,7 +910,7 @@ class ButtonVariant extends TestVariant<int> {
   const ButtonVariant({
     required this.values,
     required this.descriptions,
-  }) : assert(values.length != 0); // ignore: prefer_is_empty
+  }) : assert(values.length != 0);
 
   @override
   final List<int> values;

@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:path/path.dart' as path;
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';

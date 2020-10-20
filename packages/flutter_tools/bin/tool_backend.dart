@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 // Do not add package imports to this file.
-import 'dart:convert'; // ignore: dart_convert_import.
-import 'dart:io'; // ignore: dart_io_import.
+import 'dart:convert';
+import 'dart:io';
 
 /// Executes the required flutter tasks for a desktop build.
 Future<void> main(List<String> arguments) async {

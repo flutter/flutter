@@ -156,7 +156,7 @@ void testUsingContext(
               _printBufferedErrors(context);
               rethrow;
             }
-          }, onError: (Object error, StackTrace stackTrace) { // ignore: deprecated_member_use
+          }, onError: (Object error, StackTrace stackTrace) {
             print(error);
             print(stackTrace);
             _printBufferedErrors(context);

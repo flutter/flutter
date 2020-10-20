@@ -1438,7 +1438,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
     // `_borderRadius` has a non-nullable return type, but might be null when
     // running with weak checking, so we need to null check it anyway (and
     // ignore the warning that the null-handling logic is dead code).
-    assert(_borderRadius != null || clipper != null);// ignore: dead_code
+    assert(_borderRadius != null || clipper != null);
   }
 
   /// The border radius of the rounded corners.

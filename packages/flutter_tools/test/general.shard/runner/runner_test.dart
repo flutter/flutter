@@ -68,7 +68,7 @@ void main() {
           ));
           return null;
         },
-        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+        onError: (Object error, StackTrace stack) {
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error, 'test exit');
@@ -119,7 +119,7 @@ void main() {
           ));
           return null;
         },
-        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+        onError: (Object error, StackTrace stack) {
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error, 'test exit');
@@ -155,7 +155,7 @@ void main() {
         ));
         return null;
         },
-        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+        onError: (Object error, StackTrace stack) {
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error, 'test exit');

@@ -12,7 +12,6 @@ import 'platform_channel.dart';
 class SystemChannels {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   SystemChannels._();
 
   /// A JSON [MethodChannel] for navigation.

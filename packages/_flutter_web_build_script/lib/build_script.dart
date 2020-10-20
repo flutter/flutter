@@ -18,7 +18,7 @@ import 'package:build_test/src/debug_test_builder.dart';
 import 'package:build_web_compilers/build_web_compilers.dart';
 import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:path/path.dart' as path;
 import 'package:test_core/backend.dart'; // ignore: deprecated_member_use
 import 'package:build_runner_core/src/util/constants.dart' as core;
 

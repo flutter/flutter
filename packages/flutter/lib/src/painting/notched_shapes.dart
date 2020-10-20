@@ -151,10 +151,11 @@ class AutomaticNotchedShape extends NotchedShape {
   final ShapeBorder? guest;
 
   @override
-  Path getOuterPath(Rect hostRect, Rect? guestRect) { // ignore: avoid_renaming_method_parameters, the
-    // parameters are renamed over the baseclass because they would clash
-    // with properties of this object, and the use of all four of them in
-    // the code below is really confusing if they have the same names.
+  // The parameters are renamed over the baseclass because they would clash
+  // with properties of this object, and the use of all four of them in the code
+  // below is really confusing if they have the same names.
+  // ignore: avoid_renaming_method_parameters
+  Path getOuterPath(Rect hostRect, Rect? guestRect) {
     final Path hostPath = host.getOuterPath(hostRect);
     if (guest != null && guestRect != null) {
       final Path guestPath = guest!.getOuterPath(guestRect);

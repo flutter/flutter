@@ -235,7 +235,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
       // `child` has a non-nullable return type, but might be null when
       // running with weak checking, so we need to null check it anyway (and
       // ignore the warning that the null-handling logic is dead code).
-      if (child == null) { // ignore: dead_code
+      if (child == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The builder for route "${settings.name}" returned null.'),
           ErrorDescription('Route builders must never return null.'),

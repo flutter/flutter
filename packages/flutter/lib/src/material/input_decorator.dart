@@ -41,7 +41,8 @@ class _InputBorderGap extends ChangeNotifier {
   }
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, this class is not used in collection
+  // This class is not used in collection.
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
     if (identical(this, other))
       return true;
@@ -53,7 +54,8 @@ class _InputBorderGap extends ChangeNotifier {
   }
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, this class is not used in collection
+  // This class is not used in collection.
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode => hashValues(start, extent);
 }
 

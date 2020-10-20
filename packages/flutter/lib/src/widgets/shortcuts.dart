@@ -81,7 +81,8 @@ class KeySet<T extends KeyboardKey> {
   final HashSet<T> _keys;
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, to remove in NNBD with a late final hashcode
+  // To remove in NNBD with a late final hashcode.
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
@@ -99,7 +100,8 @@ class KeySet<T extends KeyboardKey> {
   int? _hashCode;
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, to remove in NNBD with a late final hashcode
+  // To remove in NNBD with a late final hashcode.
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode {
     // Return cached hash code if available.
     if (_hashCode != null) {

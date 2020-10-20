@@ -92,7 +92,7 @@ class NetworkImage
         chunkCallback: (int bytes, int total) {
       chunkEvents.add(ImageChunkEvent(
           cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
-    }) as Future<ui.Codec>; // ignore: undefined_function
+    }) as Future<ui.Codec>;
   }
 
   @override
