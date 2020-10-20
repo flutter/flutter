@@ -35,6 +35,9 @@ class Cocoon {
 
   static final Logger logger = Logger('CocoonClient');
 
+  String get commitBranch => _commitBranch ?? _readCommitBranch();
+  String _commitBranch;
+
   String get commitSha => _commitSha ?? _readCommitSha();
   String _commitSha;
 
@@ -49,6 +52,17 @@ class Cocoon {
     return _commitSha;
   }
 
+  /// Parse the local repo for the current running branch.
+  String _readCommitBranch() {
+    final ProcessResult result = Process.runSync('git', <String>['rev-parse', '--abbrev-ref', 'HEAD']);
+    if (result.exitCode != 0) {
+      throw Exception(result.stderr);
+    }
+
+    _commitBranch = result.stdout as String;
+    return _commitBranch;
+  }
+
   /// Send [TaskResult] to Cocoon.
   Future<void> sendTaskResult({String taskName, TaskResult result}) async {
     // Skip logging on test runs
@@ -58,6 +72,7 @@ class Cocoon {
     });
 
     final Map<String, dynamic> status = <String, dynamic>{
+      'CommitBranch': commitBranch,
       'CommitSha': commitSha,
       'TaskName': taskName,
       'NewStatus': result.succeeded ? 'Succeeded' : 'Failed',
