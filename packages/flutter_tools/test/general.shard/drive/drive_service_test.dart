@@ -212,6 +212,7 @@ void main() {
 
     expect(device.didStopApp, true);
     expect(device.didUninstallApp, true);
+    expect(device.didDispose, true);
   });
 
   // FlutterVersion requires context.
@@ -301,6 +302,7 @@ class FakeDevice extends Fake implements Device {
   LaunchResult result;
   bool didStopApp = false;
   bool didUninstallApp = false;
+  bool didDispose = false;
   bool failOnce = false;
 
   @override
@@ -346,6 +348,11 @@ class FakeDevice extends Fake implements Device {
   Future<bool> uninstallApp(covariant ApplicationPackage app, {String userIdentifier}) async {
     didUninstallApp = true;
     return true;
+  }
+
+  @override
+  Future<void> dispose() async {
+    didDispose = true;
   }
 }
 
