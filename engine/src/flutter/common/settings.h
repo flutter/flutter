@@ -175,6 +175,14 @@ struct Settings {
   // call is made.
   fml::closure root_isolate_shutdown_callback;
   fml::closure isolate_shutdown_callback;
+  // A callback made in the isolate scope of the service isolate when it is
+  // launched. Care must be taken to ensure that callers are assigning callbacks
+  // to the settings object used to launch the VM. If an existing VM is used to
+  // launch an isolate using these settings, the callback will be ignored as the
+  // service isolate has already been launched. Also, this callback will only be
+  // made in the modes in which the service isolate is eligible for launch
+  // (debug and profile).
+  fml::closure service_isolate_create_callback;
   // The callback made on the UI thread in an isolate scope when the engine
   // detects that the framework is idle. The VM also uses this time to perform
   // tasks suitable when idling. Due to this, embedders are still advised to be

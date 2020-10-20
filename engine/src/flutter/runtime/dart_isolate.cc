@@ -698,6 +698,14 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
 
   flags->load_vmservice_library = true;
 
+#if (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+  // TODO(68663): The service isolate in debug mode is always launched without
+  // sound null safety. Fix after the isolate snapshot data is created with the
+  // right flags.
+  flags->null_safety =
+      vm_data->GetIsolateSnapshot()->IsNullSafetyEnabled(nullptr);
+#endif
+
   std::weak_ptr<DartIsolate> weak_service_isolate =
       DartIsolate::CreateRootIsolate(
           vm_data->GetSettings(),         // settings
@@ -737,6 +745,10 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
     // Error is populated by call to startup.
     FML_DLOG(ERROR) << *error;
     return nullptr;
+  }
+
+  if (auto callback = vm_data->GetSettings().service_isolate_create_callback) {
+    callback();
   }
 
   if (auto service_protocol = DartVMRef::GetServiceProtocol()) {
