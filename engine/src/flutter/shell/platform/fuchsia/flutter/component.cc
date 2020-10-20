@@ -481,7 +481,7 @@ class FileInNamespaceBuffer final : public fml::Mapping {
     }
     uintptr_t addr;
     zx_status_t status =
-        zx::vmar::root_self()->map(0, buffer.vmo, 0, buffer.size, flags, &addr);
+        zx::vmar::root_self()->map(flags, 0, buffer.vmo, 0, buffer.size, &addr);
     if (status != ZX_OK) {
       FML_LOG(FATAL) << "Failed to map " << path << ": "
                      << zx_status_get_string(status);
