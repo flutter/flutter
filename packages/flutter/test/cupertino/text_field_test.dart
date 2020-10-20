@@ -4154,8 +4154,7 @@ void main() {
     );
   });
 
-  testWidgets('textSelectionControls is passed to EditableText',
-      (WidgetTester tester) async {
+  testWidgets('textSelectionControls is passed to EditableText', (WidgetTester tester) async {
     final MockTextSelectionControls selectionControl = MockTextSelectionControls();
     await tester.pumpWidget(
        CupertinoApp(
@@ -4170,5 +4169,4 @@ void main() {
     final EditableText widget = tester.widget(find.byType(EditableText));
     expect(widget.selectionControls, equals(selectionControl));
   });
-
 }

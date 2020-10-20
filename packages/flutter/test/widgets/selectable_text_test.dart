@@ -2771,7 +2771,7 @@ void main() {
     },
   );
 
-    testWidgets(
+  testWidgets(
     'long press selects word and shows custom toolbar (Android)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2805,8 +2805,7 @@ void main() {
 
       // Toolbar shows one button.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    }, variant:  TargetPlatformVariant.all());
-
+  }, variant:  TargetPlatformVariant.all());
 
   testWidgets(
     'long press selects word and shows custom toolbar (iOS)',
@@ -2839,24 +2838,24 @@ void main() {
 
       // Collapsed toolbar shows 2 buttons: copy, select all
       expect(find.byType(TextButton), findsNWidgets(2));
-    }, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.all());
 
  testWidgets('textSelectionControls is passed to EditableText',
       (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Scaffold(
-            body: SelectableText('Atwater Peel Sherbrooke Bonaventure',
-              selectionControls: materialTextSelectionControls,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Scaffold(
+              body: SelectableText('Atwater Peel Sherbrooke Bonaventure',
+                selectionControls: materialTextSelectionControls,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    final EditableText widget = tester.widget(find.byType(EditableText));
-    expect(widget.selectionControls, equals(materialTextSelectionControls));
+      final EditableText widget = tester.widget(find.byType(EditableText));
+      expect(widget.selectionControls, equals(materialTextSelectionControls));
   });
 
   testWidgets(

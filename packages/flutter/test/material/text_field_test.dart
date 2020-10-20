@@ -6295,8 +6295,7 @@ void main() {
       expect(find.byType(TextButton), findsNWidgets(4));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
-
-  testWidgets('Custom toolbar test - Android text select controls', (WidgetTester tester) async {
+  testWidgets('Custom toolbar test - Android text selection controls', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
@@ -6326,7 +6325,7 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   testWidgets(
-    'Custom toolbar test - Cupertino text select controls',
+    'Custom toolbar test - Cupertino text selection controls',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
