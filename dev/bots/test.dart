@@ -129,6 +129,13 @@ Future<void> main(List<String> args) async {
   print('$clock ${bold}Test successful.$reset');
 }
 
+/// Returns whether or not macOS desktop tests should be run.
+///
+/// The branch restrictions here should stay in sync with features.dart.
+bool _shouldRunMacOS(String branch) {
+  return Platform.isMacOS && (branch != 'beta' && branch != 'stable');
+}
+
 /// Verify the Flutter Engine is the revision in
 /// bin/cache/internal/engine.version.
 Future<void> _validateEngineHash() async {
@@ -390,7 +397,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
     }
   }
-  if (Platform.isMacOS && (branch != 'beta' && branch != 'stable')) {
+  if (_shouldRunMacOS(branch)) {
     if (Directory(path.join(examplePath, 'macos')).existsSync()) {
       await _flutterBuildMacOS(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
       await _flutterBuildMacOS(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
