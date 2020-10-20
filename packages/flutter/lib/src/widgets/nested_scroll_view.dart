@@ -1358,11 +1358,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       forcePixels(actualNewPixels);
       didUpdateScrollPositionBy(offset);
     }
-    final double remainingDelta =  delta + offset;
-    // Since we handle overscroll as a separate operation, a clamped delta can be
-    // applied more than once before the remainder is used in applyFullDragUpdate.
-    // This many operations leaves room for precision errors.
-    return precisionErrorTolerance > remainingDelta ? 0.0 : remainingDelta;
+    return delta + offset;
   }
 
   // Returns the overscroll.
