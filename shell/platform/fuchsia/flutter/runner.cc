@@ -45,9 +45,9 @@ uintptr_t GetICUData(const fuchsia::mem::Buffer& icu_data) {
     return 0u;
 
   uintptr_t data = 0u;
-  zx_status_t status = zx::vmar::root_self()->map(
-      0, icu_data.vmo, 0, static_cast<size_t>(data_size), ZX_VM_PERM_READ,
-      &data);
+  zx_status_t status =
+      zx::vmar::root_self()->map(ZX_VM_PERM_READ, 0, icu_data.vmo, 0,
+                                 static_cast<size_t>(data_size), &data);
   if (status == ZX_OK) {
     return data;
   }
