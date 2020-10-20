@@ -12,18 +12,28 @@ import 'text_editing.dart';
 import 'text_input.dart';
 
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
-/// How would the length limitation enforces in [LengthLimitingTextInputFormatter].
+/// Determines how the [maxLength] limit should be enforced.
 ///
-///  * For the behavior that enforce max length on the editing value entirely,
-/// choose [MaxLengthEnforcement.enforced], which is similar to Gboard and
-/// iOS native IME.
+/// Defaults to [MaxLengthEnforcement.enforced].
 ///
-///  * For the behavior that exempt composing [TextEditingValue] while editing,
-/// choose [MaxLengthEnforcement.composingUnenforced]. A value without composing
-/// will still be truncated eventually.
+/// ### [MaxLengthEnforcement.enforced] versus
+/// [MaxLengthEnforcement.allowComposingTextToFinish]
 ///
-///  * For the behavior that not enforcing the [TextEditingValue] but display
-/// a warning on the length counter, choose [MaxLengthEnforcement.warningOnly].
+/// Both [MaxLengthEnforcement.enforced]
+/// and [MaxLengthEnforcement.allowComposingTextToFinish] make sure the final length
+/// of the text does not exceed the max length specified.
+/// The difference is that [MaxLengthEnforcement.enforced] truncates the text
+/// whenever a new character is inserted into the text field,
+/// while [MaxLengthEnforcement.allowComposingTextToFinish] does not truncate when
+/// the user has unfinished composing text, allowing the "placeholder" text to
+/// temporarily exceed the max length limit, which provides a better
+/// user experience for entering ideographic characters (e.g., CJK characters)
+/// via composing on phonetic keyboards.
+///
+/// However, some input methods (Gboard for example) initiate text composition
+/// even for Latin characters. If the text field should only take
+/// Latin characters or numbers (e.g., verification code),
+/// [MaxLengthEnforcement.allowComposingTextToFinish] is generally a better fit.
 /// {@endtemplate}
 enum MaxLengthEnforcement {
   /// Enforce max length on the editing value entirely, which is similar to
@@ -444,7 +454,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     if (maxLength == null
       || maxLength == -1
       || newValue.text.characters.length <= maxLength
-      || maxLengthEnforcement == MaxLengthEnforcement.warningOnly)
+      || maxLengthEnforcement == MaxLengthEnforcement.none)
       return newValue;
 
     assert(maxLength > 0);
