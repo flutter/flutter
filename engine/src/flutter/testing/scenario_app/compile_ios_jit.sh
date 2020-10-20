@@ -74,7 +74,8 @@ echo "Compiling JIT Snapshot..."
 
 "$DEVICE_TOOLS/gen_snapshot" --deterministic \
   --enable-asserts \
-  --causal_async_stacks \
+  --no-causal_async_stacks \
+  --lazy_async_stacks \
   --isolate_snapshot_instructions="$OUTDIR/isolate_snapshot_instr" \
   --snapshot_kind=app-jit \
   --load_vm_snapshot_data="$DEVICE_TOOLS/../gen/flutter/lib/snapshot/vm_isolate_snapshot.bin" \
