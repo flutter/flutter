@@ -129,7 +129,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (discrete LTR)', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(30, 70);
+    RangeValues values = const RangeValues(20, 70);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -163,11 +163,11 @@ void main() {
 
     // No thumbs get select when tapping between the thumbs outside the touch
     // boundaries
-    expect(values, equals(const RangeValues(30, 70)));
+    expect(values, equals(const RangeValues(20, 70)));
     // taps at 0.5
     await tester.tap(find.byType(RangeSlider));
     await tester.pumpAndSettle();
-    expect(values, equals(const RangeValues(30, 70)));
+    expect(values, equals(const RangeValues(20, 50)));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -179,7 +179,7 @@ void main() {
     await tester.tapAt(leftTarget);
     await tester.pumpAndSettle();
     expect(values.start.round(), equals(10));
-    expect(values.end.round(), equals(70));
+    expect(values.end.round(), equals(50));
 
     // The end thumb is selected when tapping the right inactive track.
     await tester.pump();
@@ -191,7 +191,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (discrete RTL)', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(30, 70);
+    RangeValues values = const RangeValues(20, 70);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -225,11 +225,11 @@ void main() {
 
     // No thumbs get select when tapping between the thumbs outside the touch
     // boundaries
-    expect(values, equals(const RangeValues(30, 70)));
+    expect(values, equals(const RangeValues(20, 70)));
     // taps at 0.5
     await tester.tap(find.byType(RangeSlider));
     await tester.pumpAndSettle();
-    expect(values, equals(const RangeValues(30, 70)));
+    expect(values, equals(const RangeValues(20, 50)));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -240,7 +240,7 @@ void main() {
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.1;
     await tester.tapAt(leftTarget);
     await tester.pumpAndSettle();
-    expect(values.start.round(), equals(30));
+    expect(values.start.round(), equals(20));
     expect(values.end.round(), equals(90));
 
     // The end thumb is selected when tapping the right inactive track.
