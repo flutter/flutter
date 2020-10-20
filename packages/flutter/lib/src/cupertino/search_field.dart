@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'icons.dart';
+import 'localizations.dart';
 import 'text_field.dart';
 
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
@@ -123,7 +124,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.style,
-    String this.placeholder = 'Search',
+    this.placeholder,
     this.placeholderStyle,
     this.decoration,
     this.backgroundColor,
@@ -138,8 +139,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.onSuffixTap,
     this.restorationId,
     this.focusNode,
-  })  : assert(placeholder != null),
-        assert(padding != null),
+  })  : assert(padding != null),
         assert(itemColor != null),
         assert(itemSize != null),
         assert(prefixInsets != null),
@@ -180,9 +180,8 @@ class CupertinoSearchTextField extends StatefulWidget {
 
   /// A hint placeholder text that appears when the text entry is empty.
   ///
-  /// Cannot be null. Defaults to 'Search'.
-  // TODO(DanielEdrisian): Localize the 'Search' placeholder.
-  final String placeholder;
+  /// Defaults to 'Search' localized in each supported language.
+  final String? placeholder;
 
   /// Sets the style of the placeholder of the textfield.
   ///
@@ -344,6 +343,16 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
+    final String placeholder = widget.placeholder ??
+        CupertinoLocalizations.of(context)?.searchTextFieldPlaceholerLabel ??
+        'Search';
+
+    final TextStyle placeholderStyle = widget.placeholderStyle ??
+        TextStyle(
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.secondaryLabel, context),
+        );
+
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
     final double scaledIconSize =
@@ -357,12 +366,6 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
               widget.backgroundColor ?? CupertinoColors.tertiarySystemFill,
               context),
           borderRadius: widget.borderRadius ?? _kDefaultBorderRadius,
-        );
-
-    final TextStyle placeholderStyle = widget.placeholderStyle ??
-        TextStyle(
-          color: CupertinoDynamicColor.resolve(
-              CupertinoColors.secondaryLabel, context),
         );
 
     final IconThemeData iconThemeData = IconThemeData(
@@ -398,7 +401,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       prefix: prefix,
       suffix: suffix,
       suffixMode: widget.suffixMode,
-      placeholder: widget.placeholder,
+      placeholder: placeholder,
       placeholderStyle: placeholderStyle,
       padding: widget.padding,
       onChanged: widget.onChanged,
