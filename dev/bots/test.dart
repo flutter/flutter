@@ -398,14 +398,6 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no macos directory, skipping macOS');
     }
   }
-  if (Platform.isWindows && (branch != 'beta' && branch != 'stable')) {
-    if (Directory(path.join(examplePath, 'windows')).existsSync()) {
-      await _flutterBuildWin32(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
-      await _flutterBuildWin32(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
-    } else {
-      print('Example project ${path.basename(examplePath)} has no windows directory, skipping Win32');
-    }
-  }
 }
 
 Future<void> _flutterBuildApk(String relativePathToApplication, {
@@ -456,21 +448,6 @@ Future<void> _flutterBuildMacOS(String relativePathToApplication, {
   await runCommand(flutter, <String>['config', '--enable-macos-desktop']);
   print('${green}Testing macOS build$reset for $cyan$relativePathToApplication$reset...');
   await _flutterBuild(relativePathToApplication, 'macOS', 'macos',
-    release: release,
-    verifyCaching: verifyCaching,
-    additionalArgs: additionalArgs
-  );
-}
-
-Future<void> _flutterBuildWin32(String relativePathToApplication, {
-  @required bool release,
-  bool verifyCaching = false,
-  List<String> additionalArgs = const <String>[],
-}) async {
-  assert(Platform.isWindows);
-  await runCommand(flutter, <String>['config', '--enable-windows-desktop']);
-  print('${green}Testing Windows build$reset for $cyan$relativePathToApplication$reset...');
-  await _flutterBuild(relativePathToApplication, 'Windows', 'windows',
     release: release,
     verifyCaching: verifyCaching,
     additionalArgs: additionalArgs
