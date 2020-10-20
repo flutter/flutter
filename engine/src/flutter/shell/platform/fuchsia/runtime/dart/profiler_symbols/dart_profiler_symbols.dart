@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.9
+
 // On Fuchsia, in lieu of the ELF dynamic symbol table consumed through dladdr,
 // the Dart VM profiler consumes symbols produced by this tool, which have the
 // format
