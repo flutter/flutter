@@ -48,6 +48,11 @@ const String singleEsMessageArbFileString = '''
 {
   "title": "Título"
 }''';
+const String twoEsMessageArbFileString = '''
+{
+  "title": "Título",
+  "subtitle": "Subtitular"
+}''';
 const String singleZhMessageArbFileString = '''
 {
   "title": "标题"
@@ -543,7 +548,7 @@ void main() {
   });
 
   test(
-    'untranslated messages suggestion is printed when useSyntheticPackage = false',
+    'untranslated messages suggestion is printed when translation is missing',
     () {
       final BufferLogger testLogger = BufferLogger.test();
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -561,7 +566,6 @@ void main() {
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
-            useSyntheticPackage: false,
           )
           ..loadResources()
           ..writeOutputFiles(testLogger);
@@ -574,13 +578,14 @@ void main() {
   );
 
   test(
-    'unimplemented messages suggestion is not printed when useSyntheticPackage = true',
+    'unimplemented messages suggestion is not printed when all messages '
+    'are fully translated',
     () {
       final BufferLogger testLogger = BufferLogger.test();
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true)
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(twoMessageArbFileString)
-        ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
+        ..childFile(esArbFileName).writeAsStringSync(twoMessageArbFileString);
 
       LocalizationsGenerator generator;
       try {
@@ -592,7 +597,6 @@ void main() {
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
-            useSyntheticPackage: true,
           )
           ..loadResources()
           ..writeOutputFiles(testLogger);

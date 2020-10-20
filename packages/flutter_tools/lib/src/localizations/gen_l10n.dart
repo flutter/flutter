@@ -1073,7 +1073,7 @@ class LocalizationsGenerator {
 
     if (_untranslatedMessagesFile != null) {
       _generateUntranslatedMessagesFile(logger);
-    } else if (_untranslatedMessagesFile == null && !_useSyntheticPackage) {
+    } else if (_unimplementedMessages.isNotEmpty) {
       _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
         logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
       });
