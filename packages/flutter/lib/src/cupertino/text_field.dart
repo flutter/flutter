@@ -478,7 +478,7 @@ class CupertinoTextField extends StatefulWidget {
   /// field, showing how many characters have been entered and how many are
   /// allowed. After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false or
-  /// [maxLengthEnforcement] is [MaxLengthEnforcement.warningOnly].
+  /// [maxLengthEnforcement] is [MaxLengthEnforcement.none].
   /// The TextField enforces the length with a [LengthLimitingTextInputFormatter],
   /// which is evaluated after the supplied [inputFormatters], if any.
   ///

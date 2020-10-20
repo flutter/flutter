@@ -303,7 +303,7 @@ class TextField extends StatefulWidget {
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false or
-  /// [maxLengthEnforcement] is [MaxLengthEnforcement.warningOnly].
+  /// [maxLengthEnforcement] is [MaxLengthEnforcement.none].
   /// The text field enforces the length with a [LengthLimitingTextInputFormatter],
   /// which is evaluated after the supplied [inputFormatters], if any.
   /// The [maxLength] value must be either null or greater than zero.
@@ -571,7 +571,7 @@ class TextField extends StatefulWidget {
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforced] is set to false or
-  /// [maxLengthEnforcement] is [MaxLengthEnforcement.warningOnly].
+  /// [maxLengthEnforcement] is [MaxLengthEnforcement.none].
   /// The text field enforces the length with a [LengthLimitingTextInputFormatter],
   /// which is evaluated after the supplied [inputFormatters], if any.
   ///
@@ -584,7 +584,7 @@ class TextField extends StatefulWidget {
   /// character count.
   ///
   /// If [maxLengthEnforced] is set to false or [maxLengthEnforcement] is
-  /// [MaxLengthEnforcement.warningOnly], then more than [maxLength]
+  /// [MaxLengthEnforcement.none], then more than [maxLength]
   /// characters may be entered, but the error counter and divider will switch
   /// to the [decoration]'s [InputDecoration.errorStyle] when the limit is
   /// exceeded.
@@ -1248,7 +1248,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           animation: controller, // changes the _currentLength
           builder: (BuildContext context, Widget? child) {
             return Semantics(
-              maxValueLength: (widget.maxLengthEnforced || widget.maxLengthEnforcement != MaxLengthEnforcement.warningOnly)
+              maxValueLength: (widget.maxLengthEnforced || widget.maxLengthEnforcement != MaxLengthEnforcement.none)
                 && widget.maxLength != null && widget.maxLength! > 0
                   ? widget.maxLength
                   : null,

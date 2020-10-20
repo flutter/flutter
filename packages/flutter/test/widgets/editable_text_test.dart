@@ -6222,7 +6222,7 @@ void main() {
     testWidgets('will not cause crash while the TextEditingValue is composing', (WidgetTester tester) async {
       final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
         maxLength,
-        maxLengthEnforcement: MaxLengthEnforcement.composingUnenforced,
+        maxLengthEnforcement: MaxLengthEnforcement.allowComposingTextToFinish,
       );
       final Widget widget = MaterialApp(
         home: EditableText(
@@ -6258,7 +6258,7 @@ void main() {
     testWidgets('handles composing text correctly, continued', (WidgetTester tester) async {
       final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
         maxLength,
-        maxLengthEnforcement: MaxLengthEnforcement.composingUnenforced,
+        maxLengthEnforcement: MaxLengthEnforcement.allowComposingTextToFinish,
       );
       final Widget widget = MaterialApp(
         home: EditableText(

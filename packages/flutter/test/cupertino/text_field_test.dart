@@ -4149,8 +4149,8 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('using warningOnly.', (WidgetTester tester) async {
-      const MaxLengthEnforcement enforcement = MaxLengthEnforcement.warningOnly;
+    testWidgets('using none enforcement.', (WidgetTester tester) async {
+      const MaxLengthEnforcement enforcement = MaxLengthEnforcement.none;
       final TextEditingController controller = TextEditingController();
 
       await setupWidget(tester, controller, enforcement);
@@ -4195,8 +4195,8 @@ void main() {
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
 
-    testWidgets('using composingUnenforced.', (WidgetTester tester) async {
-      const MaxLengthEnforcement enforcement = MaxLengthEnforcement.composingUnenforced;
+    testWidgets('using allowComposingTextToFinish.', (WidgetTester tester) async {
+      const MaxLengthEnforcement enforcement = MaxLengthEnforcement.allowComposingTextToFinish;
       final TextEditingController controller = TextEditingController();
 
       await setupWidget(tester, controller, enforcement);

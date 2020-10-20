@@ -32,10 +32,10 @@ enum MaxLengthEnforcement {
 
   /// Users can still input if the current value is composing while it reached
   /// the max length limit. After composing ends, the value will be truncated.
-  composingUnenforced,
+  allowComposingTextToFinish,
 
-  /// No enforcement applied to the editing value. Only a warning will displayed.
-  warningOnly,
+  /// No enforcement applied to the editing value.
+  none,
 }
 
 /// A [TextInputFormatter] can be optionally injected into an [EditableText]
