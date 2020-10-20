@@ -594,6 +594,9 @@ class AndroidDevice extends Device {
 
     if (debuggingOptions.debuggingEnabled) {
       observatoryDiscovery = ProtocolDiscovery.observatory(
+        // Avoid using getLogReader, which returns a singleton instance, because the
+        // observatory discovery will dipose at the end. This prevents logs from being
+        // surfaced during `flutter drive`.
         await AdbLogReader.createLogReader(
           this,
           _processManager,
