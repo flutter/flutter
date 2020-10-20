@@ -507,6 +507,76 @@ void main() {
   });
 
   test(
+    'unimplemented messages suggestion is printed when useSyntheticPackage = false',
+    () {
+      final BufferLogger testLogger = BufferLogger.test();
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(twoMessageArbFileString)
+        ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
+
+      LocalizationsGenerator generator;
+      try {
+        generator = LocalizationsGenerator(fs);
+        generator
+          ..initialize(
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            useSyntheticPackage: false,
+          )
+          ..loadResources()
+          ..writeOutputFiles()
+          ..outputUnimplementedMessages(
+            null,
+            testLogger,
+          );
+      } on L10nException catch (e) {
+        fail('Generating output should not fail: \n${e.message}');
+      }
+
+      expect(testLogger.statusText, contains('To see a detailed report, use the --untranslated-messages-file'));
+    },
+  );
+
+  test(
+    'unimplemented messages suggestion is not printed when useSyntheticPackage = true',
+    () {
+      final BufferLogger testLogger = BufferLogger.test();
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(twoMessageArbFileString)
+        ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
+
+      LocalizationsGenerator generator;
+      try {
+        generator = LocalizationsGenerator(fs);
+        generator
+          ..initialize(
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            useSyntheticPackage: true,
+          )
+          ..loadResources()
+          ..writeOutputFiles()
+          ..outputUnimplementedMessages(
+            null,
+            testLogger,
+          );
+      } on L10nException catch (e) {
+        fail('Generating output should not fail: \n${e.message}');
+      }
+
+      expect(testLogger.statusText, '');
+    },
+  );
+
+  test(
     'uses inputPathString as outputPathString when the outputPathString is '
     'null while not using the synthetic package option',
     () {

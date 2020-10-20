@@ -1078,18 +1078,24 @@ class LocalizationsGenerator {
       );
     }
 
-    if (untranslatedMessagesFile == null || untranslatedMessagesFile == '') {
-      _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
-        logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
-      });
-      logger.printStatus(
-        'To see a detailed report, use the --untranslated-messages-file \n'
-        'option in the tool to generate a JSON format file containing \n'
-        'all messages that need to be translated.'
-      );
-    } else {
-      _writeUnimplementedMessagesFile(untranslatedMessagesFile);
+    final bool willGenerateUntranslatedMessagesFile = untranslatedMessagesFile != null && untranslatedMessagesFile.isNotEmpty;
+    if (!willGenerateUntranslatedMessagesFile) {
+      // If using synthetic package strategy, do not log status because
+      // it will be printed on every reload/refresh.
+      if (!_useSyntheticPackage) {
+        _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
+          logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
+        });
+        logger.printStatus(
+          'To see a detailed report, use the --untranslated-messages-file \n'
+          'option in the tool to generate a JSON format file containing \n'
+          'all messages that need to be translated.'
+        );
+      }
+      return;
     }
+
+    _writeUnimplementedMessagesFile(untranslatedMessagesFile);
   }
 
   void _writeUnimplementedMessagesFile(String untranslatedMessagesFile) {
