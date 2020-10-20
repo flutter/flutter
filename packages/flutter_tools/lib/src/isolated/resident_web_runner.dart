@@ -655,7 +655,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
 
       final bool hasWebPlugins = (await findPlugins(flutterProject))
         .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-      await injectPlugins(flutterProject, checkProjects: true);
+      await injectPlugins(flutterProject, webPlatform: true);
 
       final Uri generatedUri = globals.fs.currentDirectory
         .childDirectory('lib')

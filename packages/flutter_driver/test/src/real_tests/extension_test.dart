@@ -995,7 +995,7 @@ void main() {
       child: Center(
         child: Column(
           children: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Whatever'),
               key: const ValueKey<String>('Button'),
               onPressed: stubCallback,

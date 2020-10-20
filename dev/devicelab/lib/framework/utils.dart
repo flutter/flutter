@@ -463,6 +463,16 @@ Future<String> evalFlutter(String command, {
       canFail: canFail, environment: environment, stderr: stderr);
 }
 
+Future<ProcessResult> executeFlutter(String command, {
+  List<String> options = const <String>[],
+}) async {
+  final List<String> args = flutterCommandArgs(command, options);
+  return _processManager.run(
+    <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
+    workingDirectory: cwd,
+  );
+}
+
 String get dartBin =>
     path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
 
@@ -725,4 +735,35 @@ Future<int> gitClone({String path, String repo}) async {
     path,
         () => exec('git', <String>['clone', repo]),
   );
+}
+
+/// Call [fn] retrying so long as [retryIf] return `true` for the exception
+/// thrown and [maxAttempts] has not been reached.
+///
+/// If no [retryIf] function is given this will retry any for any [Exception]
+/// thrown. To retry on an [Error], the error must be caught and _rethrown_
+/// as an [Exception].
+///
+/// Waits a constant duration of [delayDuration] between every retry attempt.
+Future<T> retry<T>(
+  FutureOr<T> Function() fn, {
+  FutureOr<bool> Function(Exception) retryIf,
+  int maxAttempts = 5,
+  Duration delayDuration = const Duration(seconds: 3),
+}) async {
+  int attempt = 0;
+  while (true) {
+    attempt++; // first invocation is the first attempt
+    try {
+      return await fn();
+    } on Exception catch (e) {
+      if (attempt >= maxAttempts ||
+          (retryIf != null && !(await retryIf(e)))) {
+        rethrow;
+      }
+    }
+
+    // Sleep for a delay
+    await Future<void>.delayed(delayDuration);
+  }
 }
