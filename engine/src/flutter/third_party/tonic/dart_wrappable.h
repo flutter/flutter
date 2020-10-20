@@ -166,18 +166,6 @@ struct DartConverter<PTR<T>> {
   }
 };
 
-template <template <typename T> class PTR, typename T>
-struct DartListFactory<
-    PTR<T>,
-    typename std::enable_if<
-        std::is_convertible<T*, const DartWrappable*>::value>::type> {
-  static Dart_Handle NewList(intptr_t length) {
-    Dart_PersistentHandle type = T::GetDartType(DartState::Current());
-    TONIC_DCHECK(!LogIfError(type));
-    return Dart_NewListOfType(Dart_HandleFromPersistent(type), length);
-  }
-};
-
 template <typename T>
 inline T* GetReceiver(Dart_NativeArguments args) {
   intptr_t receiver;
