@@ -58,7 +58,7 @@ class ShaderBuilder {
   ShaderDeclaration? _fragmentColorDeclaration;
 
   ShaderBuilder(this.version) : isWebGl2 = version == WebGLVersion.webgl2,
-    _isFragmentShader = false;
+        _isFragmentShader = false;
 
   ShaderBuilder.fragment(this.version) :
         isWebGl2 = version == WebGLVersion.webgl2,
@@ -238,9 +238,23 @@ class ShaderMethod {
   final String returnType = 'void';
   final String name;
   final List<String> _statements = [];
+  int _indentLevel = 1;
+
+  void indent() {
+    ++_indentLevel;
+  }
+
+  void unindent() {
+    assert(_indentLevel != 1);
+    --_indentLevel;
+  }
 
   void addStatement(String statement) {
-    _statements.add(statement);
+    if (assertionsEnabled) {
+      _statements.add('  ' * _indentLevel + statement);
+    } else {
+      _statements.add(statement);
+    }
   }
 
   void write(StringBuffer buffer) {

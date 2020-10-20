@@ -201,7 +201,7 @@ void testMain() {
           'precision mediump float;\n'
           'uniform float ${variable.name};\n'
           'void main() {\n'
-          'f1 = 5.0;\n'
+          '  f1 = 5.0;\n'
           '}\n');
     });
   });

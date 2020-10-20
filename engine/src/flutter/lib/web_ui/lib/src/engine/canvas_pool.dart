@@ -763,7 +763,7 @@ class ContextStateHandle {
   /// Sets paint properties on the current canvas.
   ///
   /// [tearDownPaint] must be called after calling this method.
-  void setUpPaint(SurfacePaintData paint) {
+  void setUpPaint(SurfacePaintData paint, ui.Rect? shaderBounds) {
     if (assertionsEnabled) {
       assert(!_debugIsPaintSetUp);
       _debugIsPaintSetUp = true;
@@ -778,7 +778,7 @@ class ContextStateHandle {
     if (paint.shader != null) {
       final EngineGradient engineShader = paint.shader as EngineGradient;
       final Object paintStyle =
-          engineShader.createPaintStyle(_canvasPool.context);
+          engineShader.createPaintStyle(_canvasPool.context, shaderBounds);
       fillStyle = paintStyle;
       strokeStyle = paintStyle;
     } else if (paint.color != null) {
