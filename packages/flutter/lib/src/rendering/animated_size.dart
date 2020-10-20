@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'box.dart';
+import 'layer.dart';
 import 'object.dart';
 import 'shifted_box.dart';
 
@@ -81,10 +82,13 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     AlignmentGeometry alignment = Alignment.center,
     TextDirection? textDirection,
     RenderBox? child,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(vsync != null),
        assert(duration != null),
        assert(curve != null),
+       assert(clipBehavior != null),
        _vsync = vsync,
+       _clipBehavior = clipBehavior,
        super(child: child, alignment: alignment, textDirection: textDirection) {
     _controller = AnimationController(
       vsync: vsync,
@@ -137,6 +141,20 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     if (value == _animation.curve)
       return;
     _animation.curve = value;
+  }
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.hardEdge;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
   }
 
   /// Whether the size is being currently animated towards the child's size.
@@ -275,11 +293,15 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null && _hasVisualOverflow) {
+    if (child != null && _hasVisualOverflow && clipBehavior != Clip.none) {
       final Rect rect = Offset.zero & size;
-      context.pushClipRect(needsCompositing, offset, rect, super.paint);
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, rect, super.paint,
+          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
     } else {
+      _clipRectLayer = null;
       super.paint(context, offset);
     }
   }
+
+  ClipRectLayer? _clipRectLayer;
 }

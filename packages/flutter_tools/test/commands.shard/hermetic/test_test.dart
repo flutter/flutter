@@ -26,7 +26,7 @@ void main() {
   MemoryFileSystem fs;
 
   setUp(() {
-    fs = MemoryFileSystem();
+    fs = MemoryFileSystem.test();
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     fs.directory('test').childFile('some_test.dart').createSync(recursive: true);
@@ -168,6 +168,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String excludeTags,
     bool enableObservatory = false,
     bool startPaused = false,
+    bool disableDds = false,
     bool disableServiceAuthCodes = false,
     bool ipv6 = false,
     bool machine = false,

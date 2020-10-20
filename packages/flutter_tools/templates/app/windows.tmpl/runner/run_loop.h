@@ -1,7 +1,7 @@
-#ifndef RUN_LOOP_H_
-#define RUN_LOOP_H_
+#ifndef RUNNER_RUN_LOOP_H_
+#define RUNNER_RUN_LOOP_H_
 
-#include <flutter/flutter_view_controller.h>
+#include <flutter/flutter_engine.h>
 
 #include <chrono>
 #include <set>
@@ -22,11 +22,11 @@ class RunLoop {
 
   // Registers the given Flutter instance for event servicing.
   void RegisterFlutterInstance(
-      flutter::FlutterViewController* flutter_instance);
+      flutter::FlutterEngine* flutter_instance);
 
   // Unregisters the given Flutter instance from event servicing.
   void UnregisterFlutterInstance(
-      flutter::FlutterViewController* flutter_instance);
+      flutter::FlutterEngine* flutter_instance);
 
  private:
   using TimePoint = std::chrono::steady_clock::time_point;
@@ -34,7 +34,7 @@ class RunLoop {
   // Processes all currently pending messages for registered Flutter instances.
   TimePoint ProcessFlutterMessages();
 
-  std::set<flutter::FlutterViewController*> flutter_instances_;
+  std::set<flutter::FlutterEngine*> flutter_instances_;
 };
 
-#endif  // RUN_LOOP_H_
+#endif  // RUNNER_RUN_LOOP_H_

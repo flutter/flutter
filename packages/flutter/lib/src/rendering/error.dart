@@ -91,7 +91,7 @@ class RenderErrorBox extends RenderBox {
   /// See also:
   ///
   ///  * [minimumWidth], which controls how wide the box must be before the
-  //     horizontal padding is applied.
+  ///    horizontal padding is applied.
   static EdgeInsets padding = const EdgeInsets.fromLTRB(64.0, 96.0, 64.0, 12.0);
 
   /// The width below which the horizontal padding is not applied.

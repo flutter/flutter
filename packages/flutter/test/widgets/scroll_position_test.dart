@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
 import 'dart:ui';
 
-import 'package:meta/meta.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -17,8 +13,8 @@ ScrollController _controller = ScrollController(
 
 class ThePositiveNumbers extends StatelessWidget {
   const ThePositiveNumbers({
-    Key key,
-    @required this.from,
+    Key? key,
+    required this.from,
   }) : super(key: key);
   final int from;
   @override
@@ -94,7 +90,7 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
   expect(find.text('16'), findsNothing, reason: 'with maintainState: $maintainState');
   expect(find.text('100'), findsNothing, reason: 'with maintainState: $maintainState');
 
-  navigatorKey.currentState.pushNamed('/second');
+  navigatorKey.currentState!.pushNamed('/second');
   await tester.pump(); // navigating always takes two frames, one to start...
   await tester.pump(const Duration(seconds: 1)); // ...and one to end the transition
 
@@ -115,7 +111,7 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
   expect(find.text('10010'), findsNothing, reason: 'with maintainState: $maintainState');
   expect(find.text('10100'), findsNothing, reason: 'with maintainState: $maintainState');
 
-  navigatorKey.currentState.pop();
+  navigatorKey.currentState!.pop();
   await tester.pump(); // again, navigating always takes two frames
 
   // Ensure we don't clamp the scroll offset even during the navigation.

@@ -529,6 +529,10 @@ linter:
     );
     final List<String> stderr = result.stderr.toString().trim().split('\n');
     final List<String> stdout = result.stdout.toString().trim().split('\n');
+    // Remove output from building the flutter tool.
+    stderr.removeWhere((String line) {
+      return line.startsWith('Building flutter tool...');
+    });
     // Check out the stderr to see if the analyzer had it's own issues.
     if (stderr.isNotEmpty && (stderr.first.contains(' issues found. (ran in ') || stderr.first.contains(' issue found. (ran in '))) {
       // The "23 issues found" message goes onto stderr, which is concatenated first.

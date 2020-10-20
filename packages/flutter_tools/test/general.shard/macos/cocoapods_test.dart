@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -73,7 +71,6 @@ void main() {
       logger: logger,
       platform: FakePlatform(),
       xcodeProjectInterpreter: mockXcodeProjectInterpreter,
-      timeoutConfiguration: const TimeoutConfiguration(),
     );
     pretendPodVersionIs('1.8.0');
     fileSystem.file(fileSystem.path.join(
@@ -304,7 +301,7 @@ void main() {
         ..writeAsStringSync('Existing release config');
 
       final FlutterProject project = FlutterProject.fromPath('project');
-      await injectPlugins(project, checkProjects: true);
+      await injectPlugins(project, iosPlatform: true);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
       expect(debugContents, contains(

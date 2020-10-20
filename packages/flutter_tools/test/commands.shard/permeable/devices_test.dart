@@ -79,6 +79,4 @@ void main() {
   });
 }
 
-class MockDeviceManager extends Mock implements DeviceManager {
-
-}
+class MockDeviceManager extends Mock implements DeviceManager {}

@@ -2,33 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
-
-class TestImage implements ui.Image {
-  TestImage({ this.width, this.height });
-
-  @override
-  final int width;
-
-  @override
-  final int height;
-
-  @override
-  void dispose() { }
-
-  @override
-  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
-    throw UnsupportedError('Cannot encode test image');
-  }
-}
 
 class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
@@ -40,17 +18,23 @@ class TestCanvas implements Canvas {
 }
 
 void main() {
+  late ui.Image image300x300;
+  late ui.Image image300x200;
+  setUpAll(() async {
+    image300x300 = await createTestImage(width: 300, height: 300, cache: false);
+    image300x200 = await createTestImage(width: 300, height: 200, cache: false);
+  });
+
   setUp(() {
     debugFlushLastFrameImageSizeInfo();
   });
 
-  test('Cover and align', () {
-    final TestImage image = TestImage(width: 300, height: 300);
+  test('Cover and align', () async {
     final TestCanvas canvas = TestCanvas();
     paintImage(
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
-      image: image,
+      image: image300x300,
       fit: BoxFit.cover,
       alignment: const Alignment(-1.0, 0.0),
     );
@@ -60,28 +44,27 @@ void main() {
     });
 
     expect(command, isNotNull);
-    expect(command.positionalArguments[0], equals(image));
+    expect(command.positionalArguments[0], equals(image300x300));
     expect(command.positionalArguments[1], equals(const Rect.fromLTWH(0.0, 75.0, 300.0, 150.0)));
     expect(command.positionalArguments[2], equals(const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0)));
   });
 
-  test('debugInvertOversizedImages', () {
+  test('debugInvertOversizedImages', () async {
     debugInvertOversizedImages = true;
-    final FlutterExceptionHandler oldFlutterError = FlutterError.onError;
+    final FlutterExceptionHandler? oldFlutterError = FlutterError.onError;
 
     final List<String> messages = <String>[];
     FlutterError.onError = (FlutterErrorDetails details) {
       messages.add(details.exceptionAsString());
     };
 
-    final TestImage image = TestImage(width: 300, height: 300);
     final TestCanvas canvas = TestCanvas();
     const Rect rect = Rect.fromLTWH(50.0, 50.0, 200.0, 100.0);
 
     paintImage(
       canvas: canvas,
       rect: rect,
-      image: image,
+      image: image300x300,
       debugImageLabel: 'TestImage',
       fit: BoxFit.fill,
     );
@@ -126,19 +109,18 @@ void main() {
   });
 
   testWidgets('Reports Image painting', (WidgetTester tester) async {
-    ImageSizeInfo imageSizeInfo;
+    late ImageSizeInfo imageSizeInfo;
     int count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
       count += 1;
       imageSizeInfo = info;
     };
 
-    final TestImage image = TestImage(width: 300, height: 300);
     final TestCanvas canvas = TestCanvas();
     paintImage(
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
-      image: image,
+      image: image300x300,
       debugImageLabel: 'test.png',
     );
 
@@ -156,7 +138,7 @@ void main() {
     paintImage(
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
-      image: image,
+      image: image300x300,
       debugImageLabel: 'test.png',
     );
 
@@ -166,19 +148,18 @@ void main() {
   });
 
   testWidgets('Reports Image painting - change per frame', (WidgetTester tester) async {
-    ImageSizeInfo imageSizeInfo;
+    late ImageSizeInfo imageSizeInfo;
     int count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
       count += 1;
       imageSizeInfo = info;
     };
 
-    final TestImage image = TestImage(width: 300, height: 300);
     final TestCanvas canvas = TestCanvas();
     paintImage(
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
-      image: image,
+      image: image300x300,
       debugImageLabel: 'test.png',
     );
 
@@ -196,7 +177,7 @@ void main() {
     paintImage(
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 150.0),
-      image: image,
+      image: image300x300,
       debugImageLabel: 'test.png',
     );
 
@@ -210,19 +191,18 @@ void main() {
   });
 
   testWidgets('Reports Image painting - no debug label', (WidgetTester tester) async {
-    ImageSizeInfo imageSizeInfo;
+    late ImageSizeInfo imageSizeInfo;
     int count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
       count += 1;
       imageSizeInfo = info;
     };
 
-    final TestImage image = TestImage(width: 300, height: 200);
     final TestCanvas canvas = TestCanvas();
     paintImage(
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
-      image: image,
+      image: image300x200,
     );
 
     expect(count, 1);

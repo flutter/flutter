@@ -37,11 +37,11 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
     super.dispose();
   }
 
-  bool _handleKeyEvent(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleKeyEvent(FocusNode node, RawKeyEvent event) {
     setState(() {
       _event = event;
     });
-    return false;
+    return KeyEventResult.ignored;
   }
 
   String _asHex(int value) => value != null ? '0x${value.toRadixString(16)}' : 'null';
@@ -79,6 +79,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           final String modifierList = data.modifiersPressed.keys.map<String>(_getEnumName).join(', ').replaceAll('Modifier', '');
           final List<Widget> dataText = <Widget>[
             Text('${_event.runtimeType}'),
+            if (_event.character?.isNotEmpty ?? false) Text('character produced: "${_event.character}"'),
             Text('modifiers set: $modifierList'),
           ];
           if (data is RawKeyEventDataAndroid) {
@@ -114,6 +115,10 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             dataText.add(Text('scanCode: ${data.scanCode}'));
             dataText.add(Text('characterCodePoint: ${data.characterCodePoint}'));
             dataText.add(Text('modifiers: ${data.modifiers} (${_asHex(data.modifiers)})'));
+          } else if (data is RawKeyEventDataWeb) {
+            dataText.add(Text('key: ${data.key}'));
+            dataText.add(Text('code: ${data.code}'));
+            dataText.add(Text('metaState: ${data.metaState} (${_asHex(data.metaState)})'));
           }
           dataText.add(Text('logical: ${_event.logicalKey}'));
           dataText.add(Text('physical: ${_event.physicalKey}'));

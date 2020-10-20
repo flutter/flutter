@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestFlowDelegate extends FlowDelegate {
-  TestFlowDelegate({this.startOffset}) : super(repaint: startOffset);
+  TestFlowDelegate({required this.startOffset}) : super(repaint: startOffset);
 
   final Animation<double> startOffset;
 
@@ -23,7 +21,7 @@ class TestFlowDelegate extends FlowDelegate {
     double dy = startOffset.value;
     for (int i = 0; i < context.childCount; ++i) {
       context.paintChild(i, transform: Matrix4.translationValues(0.0, dy, 0.0));
-      dy += 0.75 * context.getChildSize(i).height;
+      dy += 0.75 * context.getChildSize(i)!.height;
     }
   }
 
@@ -149,12 +147,70 @@ void main() {
         ],
       ),
     );
-    ContainerLayer layer = RendererBinding.instance.renderView.debugLayer;
+    ContainerLayer? layer = RendererBinding.instance!.renderView.debugLayer;
     while (layer != null && layer is! OpacityLayer)
-      layer = layer.firstChild as ContainerLayer;
+      layer = layer.firstChild as ContainerLayer?;
     expect(layer, isA<OpacityLayer>());
-    final OpacityLayer opacityLayer = layer as OpacityLayer;
-    expect(opacityLayer.alpha, equals(opacity * 255));
-    expect(layer.firstChild, isA<TransformLayer>());
+    final OpacityLayer? opacityLayer = layer as OpacityLayer?;
+    expect(opacityLayer!.alpha, equals(opacity * 255));
+    expect(layer!.firstChild, isA<TransformLayer>());
+  });
+
+  testWidgets('Flow can set and update clipBehavior', (WidgetTester tester) async {
+    const double opacity = 0.2;
+    await tester.pumpWidget(
+      Flow(
+        delegate: OpacityFlowDelegate(opacity),
+        children: const <Widget>[
+          SizedBox(width: 100.0, height: 100.0),
+        ],
+      ),
+    );
+
+    // By default, clipBehavior should be Clip.hardEdge
+    final RenderFlow renderObject = tester.renderObject(find.byType(Flow));
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    for(final Clip clip in Clip.values) {
+      await tester.pumpWidget(
+        Flow(
+          delegate: OpacityFlowDelegate(opacity),
+          children: const <Widget>[
+            SizedBox(width: 100.0, height: 100.0),
+          ],
+          clipBehavior: clip,
+        ),
+      );
+      expect(renderObject.clipBehavior, clip);
+    }
+  });
+
+  testWidgets('Flow.unwrapped can set and update clipBehavior', (WidgetTester tester) async {
+    const double opacity = 0.2;
+    await tester.pumpWidget(
+      Flow.unwrapped(
+        delegate: OpacityFlowDelegate(opacity),
+        children: const <Widget>[
+          SizedBox(width: 100.0, height: 100.0),
+        ],
+      ),
+    );
+
+    // By default, clipBehavior should be Clip.hardEdge
+    final RenderFlow renderObject = tester.renderObject(find.byType(Flow));
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    for(final Clip clip in Clip.values) {
+      await tester.pumpWidget(
+        Flow.unwrapped(
+          delegate: OpacityFlowDelegate(opacity),
+          children: const <Widget>[
+            SizedBox(width: 100.0, height: 100.0),
+          ],
+          clipBehavior: clip,
+        ),
+      );
+      expect(renderObject.clipBehavior, clip);
+    }
   });
 }

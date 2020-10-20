@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -481,7 +479,7 @@ void main() {
   testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(FittedBox(fit: BoxFit.none, child: Container()));
     final RenderFittedBox renderObject = tester.allRenderObjects.whereType<RenderFittedBox>().first;
-    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+    expect(renderObject.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(FittedBox(fit: BoxFit.none, child: Container(), clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
@@ -595,12 +593,11 @@ void main() {
 
 List<Type> getLayers() {
   final List<Type> layers = <Type>[];
-  Layer layer = RendererBinding.instance.renderView.debugLayer;
-  while (layer is ContainerLayer) {
-    final ContainerLayer container = layer as ContainerLayer;
+  Layer? container = RendererBinding.instance!.renderView.debugLayer;
+  while (container is ContainerLayer) {
     layers.add(container.runtimeType);
     expect(container.firstChild, same(container.lastChild));
-    layer = container.firstChild;
+    container = container.firstChild;
   }
   return layers;
 }

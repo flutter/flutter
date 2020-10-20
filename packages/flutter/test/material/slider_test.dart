@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -12,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -32,18 +31,16 @@ class LoggingThumbShape extends SliderComponentShape {
   void paint(
     PaintingContext context,
     Offset thumbCenter, {
-    Animation<double> activationAnimation,
-    Animation<double> enableAnimation,
-    bool isEnabled,
-    bool isDiscrete,
-    bool onActiveTrack,
-    TextPainter labelPainter,
-    RenderBox parentBox,
-    SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    double value,
-    double textScaleFactor,
-    Size sizeWithOverflow,
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
   }) {
     log.add(thumbCenter);
     final Paint thumbPaint = Paint()..color = Colors.red;
@@ -53,7 +50,7 @@ class LoggingThumbShape extends SliderComponentShape {
 
 class TallSliderTickMarkShape extends SliderTickMarkShape {
   @override
-  Size getPreferredSize({SliderThemeData sliderTheme, bool isEnabled}) {
+  Size getPreferredSize({required SliderThemeData sliderTheme, required bool isEnabled}) {
     return const Size(10.0, 200.0);
   }
 
@@ -61,12 +58,12 @@ class TallSliderTickMarkShape extends SliderTickMarkShape {
   void paint(
     PaintingContext context,
     Offset offset, {
-    Offset thumbCenter,
-    RenderBox parentBox,
-    SliderThemeData sliderTheme,
-    Animation<double> enableAnimation,
-    bool isEnabled,
-    TextDirection textDirection,
+    required Offset thumbCenter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required bool isEnabled,
+    required TextDirection textDirection,
   }) {
     final Paint paint = Paint()..color = Colors.red;
     context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, 10.0, 20.0), paint);
@@ -77,8 +74,8 @@ void main() {
   testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
-    double startValue;
-    double endValue;
+    double? startValue;
+    double? endValue;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -122,18 +119,18 @@ void main() {
     startValue = null;
     endValue = null;
     await tester.pump(); // No animation should start.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
 
     final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     final Offset bottomRight = tester.getBottomRight(find.byKey(sliderKey));
 
     final Offset target = topLeft + (bottomRight - topLeft) / 4.0;
     await tester.tapAt(target);
-    expect(value, closeTo(0.25, 0.05));
+    expect(value, moreOrLessEquals(0.25, epsilon: 0.05));
     expect(startValue, equals(0.5));
-    expect(endValue, closeTo(0.25, 0.05));
+    expect(endValue, moreOrLessEquals(0.25, epsilon: 0.05));
     await tester.pump(); // No animation should start.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
   });
 
   testWidgets('Slider can move when tapped (RTL)', (WidgetTester tester) async {
@@ -172,23 +169,23 @@ void main() {
     await tester.tap(find.byKey(sliderKey));
     expect(value, equals(0.5));
     await tester.pump(); // No animation should start.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
 
     final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     final Offset bottomRight = tester.getBottomRight(find.byKey(sliderKey));
 
     final Offset target = topLeft + (bottomRight - topLeft) / 4.0;
     await tester.tapAt(target);
-    expect(value, closeTo(0.75, 0.05));
+    expect(value, moreOrLessEquals(0.75, epsilon: 0.05));
     await tester.pump(); // No animation should start.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
   });
 
   testWidgets("Slider doesn't send duplicate change events if tapped on the same value", (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
-    double startValue;
-    double endValue;
+    late double startValue;
+    late double endValue;
     int updates = 0;
     int startValueUpdates = 0;
     int endValueUpdates = 0;
@@ -283,19 +280,19 @@ void main() {
     expect(value, equals(0.5));
     await tester.pump(const Duration(milliseconds: 100));
     // Starts with the position animation and value indicator
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
     await tester.pump(const Duration(milliseconds: 100));
     // Value indicator is longer than position.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(1));
     await tester.pump(const Duration(milliseconds: 100));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
     await tester.pump(const Duration(milliseconds: 100));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
     await tester.pump(const Duration(milliseconds: 100));
     // Shown for long enough, value indicator is animated closed.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(1));
     await tester.pump(const Duration(milliseconds: 101));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
   });
 
   testWidgets('Discrete Slider repaints and animates when dragged', (WidgetTester tester) async {
@@ -352,20 +349,20 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 5);
-    expect(log.last.dx, closeTo(386.6, 0.1));
+    expect(log.last.dx, moreOrLessEquals(386.6, epsilon: 0.1));
     // With no more gesture or value changes, the thumb position should still
     // be redrawn in the animated position.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 7);
-    expect(log.last.dx, closeTo(344.5, 0.1));
+    expect(log.last.dx, moreOrLessEquals(344.5, epsilon: 0.1));
     // Final position.
     await tester.pump(const Duration(milliseconds: 80));
     expectedLog.add(const Offset(24.0, 300.0));
     expect(value, equals(0.0));
     expect(log.length, 8);
-    expect(log.last.dx, closeTo(24.0, 0.1));
+    expect(log.last.dx, moreOrLessEquals(24.0, epsilon: 0.1));
     await gesture.up();
   });
 
@@ -467,20 +464,20 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 5);
-    expect(log.last.dx, closeTo(386.6, 0.1));
+    expect(log.last.dx, moreOrLessEquals(386.6, epsilon: 0.1));
     // With no more gesture or value changes, the thumb position should still
     // be redrawn in the animated position.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 7);
-    expect(log.last.dx, closeTo(344.5, 0.1));
+    expect(log.last.dx, moreOrLessEquals(344.5, epsilon: 0.1));
     // Final position.
     await tester.pump(const Duration(milliseconds: 80));
     expectedLog.add(const Offset(24.0, 300.0));
     expect(value, equals(0.0));
     expect(log.length, 8);
-    expect(log.last.dx, closeTo(24.0, 0.1));
+    expect(log.last.dx, moreOrLessEquals(24.0, epsilon: 0.1));
     await gesture.up();
   });
 
@@ -531,13 +528,13 @@ void main() {
     expect(value, equals(80.0));
 
     await tester.pump(); // Starts animation.
-    expect(SchedulerBinding.instance.transientCallbackCount, greaterThan(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, greaterThan(0));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     // Animation complete.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
   });
 
   testWidgets('Slider can be given zero values', (WidgetTester tester) async {
@@ -617,12 +614,12 @@ void main() {
     final SliderThemeData sliderTheme = theme.sliderTheme;
     double value = 0.45;
     Widget buildApp({
-      Color activeColor,
-      Color inactiveColor,
-      int divisions,
+      Color? activeColor,
+      Color? inactiveColor,
+      int? divisions,
       bool enabled = true,
     }) {
-      final ValueChanged<double> onChanged = !enabled
+      final ValueChanged<double>? onChanged = !enabled
         ? null
         : (double d) {
             value = d;
@@ -654,7 +651,7 @@ void main() {
 
     await tester.pumpWidget(buildApp());
 
-    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
     final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Check default theme for enabled widget.
@@ -981,7 +978,7 @@ void main() {
     double value = 0.0;
 
     Widget buildSlider({
-      double textScaleFactor,
+      required double textScaleFactor,
       bool isDiscrete = true,
       ShowValueIndicator show = ShowValueIndicator.onlyForDiscrete,
     }) {
@@ -994,8 +991,8 @@ void main() {
                 data: MediaQueryData(textScaleFactor: textScaleFactor),
                 child: Material(
                   child: Theme(
-                    data: Theme.of(context).copyWith(
-                      sliderTheme: Theme.of(context).sliderTheme.copyWith(showValueIndicator: show),
+                    data: Theme.of(context)!.copyWith(
+                      sliderTheme: Theme.of(context)!.sliderTheme.copyWith(showValueIndicator: show),
                     ),
                     child: Center(
                       child: OverflowBox(
@@ -1128,7 +1125,7 @@ void main() {
 
   testWidgets('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
     Widget buildSlider({
-      int divisions,
+      required int divisions,
     }) {
       return MaterialApp(
         home: Directionality(
@@ -1159,7 +1156,7 @@ void main() {
       ),
     );
 
-    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
 
     // 5 tick marks and a thumb.
     expect(material, paintsExactlyCountTimes(#drawCircle, 6));
@@ -1218,14 +1215,14 @@ void main() {
     }
 
     Future<void> testReparenting(bool reparent) async {
-      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
       final Offset center = tester.getCenter(find.byType(Slider));
       // Move to 0.0.
       TestGesture gesture = await tester.startGesture(Offset.zero);
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+      expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
       expect(
         material,
         paints
@@ -1241,7 +1238,7 @@ void main() {
       await tester.pump();
       // Wait for animations to start.
       await tester.pump(const Duration(milliseconds: 25));
-      expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
+      expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
       expect(
         material,
         paints
@@ -1261,7 +1258,7 @@ void main() {
 
       // Move a little further in the animations.
       await tester.pump(const Duration(milliseconds: 10));
-      expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
+      expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
       expect(
         material,
         paints
@@ -1275,7 +1272,7 @@ void main() {
       );
       // Wait for animations to finish.
       await tester.pumpAndSettle();
-      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+      expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
       expect(
         material,
         paints
@@ -1289,7 +1286,7 @@ void main() {
       );
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+      expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
       expect(
         material,
         paints
@@ -1348,7 +1345,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
                           actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
                           value: '50%',
                           increasedValue: '55%',
@@ -1406,6 +1403,7 @@ void main() {
                             SemanticsFlag.hasEnabledState,
                             // isFocusable is delayed by 1 frame.
                             SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider,
                           ],
                           value: '50%',
                           increasedValue: '55%',
@@ -1446,6 +1444,7 @@ void main() {
                           id: 4,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isSlider,
                           ],
                           value: '50%',
                           increasedValue: '55%',
@@ -1511,7 +1510,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
                           actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
                           value: '50%',
                           increasedValue: '60%',
@@ -1565,7 +1564,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 5,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState],
+                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isSlider],
                           value: '50%',
                           increasedValue: '60%',
                           decreasedValue: '40%',
@@ -1626,7 +1625,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
                           actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
                           value: '40',
                           increasedValue: '60',
@@ -1932,8 +1931,8 @@ void main() {
     );
     SliderThemeData theme = baseTheme.sliderTheme;
     double value = 0.45;
-    Widget buildApp({ SliderThemeData sliderTheme, int divisions, bool enabled = true }) {
-      final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
+    Widget buildApp({ required SliderThemeData sliderTheme, int? divisions, bool enabled = true }) {
+      final ValueChanged<double>? onChanged = enabled ? (double d) => value = d : null;
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -1961,9 +1960,9 @@ void main() {
     }
 
     Future<void> expectValueIndicator({
-      bool isVisible,
-      SliderThemeData theme,
-      int divisions,
+      required bool isVisible,
+      required SliderThemeData theme,
+      int? divisions,
       bool enabled = true,
     }) async {
       // Discrete enabled widget.
@@ -2061,9 +2060,7 @@ void main() {
     double value = 0.0;
 
     Widget buildApp({
-      Color activeColor,
-      Color inactiveColor,
-      int divisions,
+      int? divisions,
       bool enabled = true,
     }) {
       return MaterialApp(
@@ -2089,12 +2086,12 @@ void main() {
                   ElevatedButton(
                     child: const Text('Next'),
                     onPressed: () {
-                      Navigator.of(context).pushReplacement(
+                      Navigator.of(context)!.pushReplacement(
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
                             return ElevatedButton(
                               child: const Text('Inner page'),
-                              onPressed: () { Navigator.of(context).pop(); },
+                              onPressed: () { Navigator.of(context)!.pop(); },
                             );
                           },
                         ),
@@ -2279,7 +2276,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test Slider.adaptive() constructor
     await tester.pumpWidget(
@@ -2302,7 +2299,7 @@ void main() {
       )
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -2324,7 +2321,7 @@ void main() {
       )
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
   testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {
@@ -2358,5 +2355,117 @@ void main() {
       'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
       'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
     ]);
+  });
+
+  testWidgets('Slider track paints correctly when the shape is rectangular', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+            sliderTheme: const SliderThemeData(
+              trackShape: RectangularSliderTrackShape(),
+            ),
+        ),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData.fromWindow(window),
+            child: const Material(
+              child: Center(
+                child: Slider(
+                  value: 0.5,
+                  onChanged: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    // The active track rect should start at 24.0 pixels,
+    // and there should not have a gap between active and inactive track.
+    expect(renderObject,
+        paints
+          ..rect(rect: const Rect.fromLTRB(24.0, 298.0, 400.0, 302.0)) // active track Rect.
+          ..rect(rect: const Rect.fromLTRB(400.0, 298.0, 776.0, 302.0)) // inactive track Rect.
+    );
+  });
+
+  testWidgets('Slider can be painted in a narrower constraint', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: SizedBox(
+                height: 10.0,
+                width: 10.0,
+                child: Slider(
+                  value: 0.5,
+                  onChanged: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    expect(renderObject,
+        paints
+          // active track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(-14.0, 2.0, 5.0, 8.0, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
+          // inactive track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(5.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+          // thumb
+          ..circle(x: 5.0, y: 5.0, radius: 10.0, )
+    );
+  });
+
+  testWidgets('Update the divisions and value at the same time for Slider', (WidgetTester tester) async {
+    // Regress test for https://github.com/flutter/flutter/issues/65943
+    Widget buildFrame(double maxValue) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Slider.adaptive(
+              value: 5,
+              max: maxValue,
+              divisions: maxValue.toInt(),
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(10));
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    // Update the divisions from 10 to 15, the thumb should be paint at the correct position.
+    await tester.pumpWidget(buildFrame(15));
+    await tester.pumpAndSettle(); // Finish the animation.
+
+    late RRect activeTrackRRect;
+    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
+      if (method != #drawRRect)
+        return false;
+      activeTrackRRect = arguments[0] as RRect;
+      return true;
+    }));
+
+    // The thumb should at one-third(5 / 15) of the Slider.
+    // The right of the active track shape is the position of the thumb.
+    // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
+    expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
   });
 }

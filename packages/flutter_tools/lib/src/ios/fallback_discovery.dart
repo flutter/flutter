@@ -8,7 +8,6 @@ import 'package:vm_service/vm_service.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../device.dart';
-import '../mdns_discovery.dart';
 import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
 
@@ -17,36 +16,23 @@ typedef VmServiceConnector = Future<VmService> Function(String, {Log log});
 /// A protocol for discovery of a vmservice on an attached iOS device with
 /// multiple fallbacks.
 ///
-/// On versions of iOS 13 and greater, libimobiledevice can no longer listen to
-/// logs directly. The only way to discover an active observatory is through the
-/// mDNS protocol. However, there are a number of circumstances where this breaks
-/// down, such as when the device is connected to certain wifi networks or with
-/// certain hotspot connections enabled.
-///
-/// Another approach to discover a vmservice is to attempt to assign a
+/// First, it tries to discover a vmservice by assigning a
 /// specific port and then attempt to connect. This may fail if the port is
 /// not available. This port value should be either random, or otherwise
 /// generated with application specific input. This reduces the chance of
 /// accidentally connecting to another running flutter application.
 ///
-/// Finally, if neither of the above approaches works, we can still attempt
-/// to parse logs.
-///
-/// To improve the overall resilience of the process, this class combines the
-/// three discovery strategies. First it assigns a port and attempts to connect.
-/// Then if this fails it falls back to mDNS, then finally attempting to scan
-/// logs.
+/// If that does not work, attempt to scan logs from the attached debugger
+/// and parse the connected port logged by the engine.
 class FallbackDiscovery {
   FallbackDiscovery({
     @required DevicePortForwarder portForwarder,
-    @required MDnsObservatoryDiscovery mDnsObservatoryDiscovery,
     @required Logger logger,
     @required ProtocolDiscovery protocolDiscovery,
     @required Usage flutterUsage,
     @required VmServiceConnector vmServiceConnectUri,
     Duration pollingDelay,
   }) : _logger = logger,
-       _mDnsObservatoryDiscovery = mDnsObservatoryDiscovery,
        _portForwarder = portForwarder,
        _protocolDiscovery = protocolDiscovery,
        _flutterUsage = flutterUsage,
@@ -56,7 +42,6 @@ class FallbackDiscovery {
   static const String _kEventName = 'ios-handshake';
 
   final DevicePortForwarder _portForwarder;
-  final MDnsObservatoryDiscovery _mDnsObservatoryDiscovery;
   final Logger _logger;
   final ProtocolDiscovery _protocolDiscovery;
   final Usage _flutterUsage;
@@ -82,52 +67,28 @@ class FallbackDiscovery {
     }
 
     try {
-      final Uri result = await _mDnsObservatoryDiscovery.getObservatoryUri(
-        packageId,
-        device,
-        usesIpv6: usesIpv6,
-        hostVmservicePort: hostVmservicePort,
-      );
-      if (result != null) {
-        UsageEvent(
-          _kEventName,
-          'mdns-success',
-          flutterUsage: _flutterUsage,
-        ).send();
-        return result;
-      }
-    } on Exception catch (err) {
-      _logger.printTrace(err.toString());
-    }
-    _logger.printTrace('Failed to connect with mDNS, falling back to log scanning');
-    UsageEvent(
-      _kEventName,
-      'mdns-failure',
-      flutterUsage: _flutterUsage,
-    ).send();
-
-    try {
       final Uri result = await _protocolDiscovery.uri;
       if (result != null) {
         UsageEvent(
           _kEventName,
-          'fallback-success',
+          'log-success',
           flutterUsage: _flutterUsage,
         ).send();
         return result;
       }
     } on ArgumentError {
-    // In the event of an invalid InternetAddress, this code attempts to catch
-    // an ArgumentError from protocol_discovery.dart
+      // In the event of an invalid InternetAddress, this code attempts to catch
+      // an ArgumentError from protocol_discovery.dart
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
     }
     _logger.printTrace('Failed to connect with log scanning');
     UsageEvent(
       _kEventName,
-      'fallback-failure',
+      'log-failure',
       flutterUsage: _flutterUsage,
     ).send();
+
     return null;
   }
 
@@ -148,7 +109,7 @@ class FallbackDiscovery {
       assumedWsUri = Uri.parse('ws://localhost:$hostPort/ws');
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
-      _logger.printTrace('Failed to connect directly, falling back to mDNS');
+      _logger.printTrace('Failed to connect directly, falling back to log scanning');
       _sendFailureEvent(err, assumedDevicePort);
       return null;
     }
@@ -156,9 +117,10 @@ class FallbackDiscovery {
     // Attempt to connect to the VM service 5 times.
     int attempts = 0;
     Exception firstException;
+    VmService vmService;
     while (attempts < 5) {
       try {
-        final VmService vmService = await _vmServiceConnectUri(
+        vmService = await _vmServiceConnectUri(
           assumedWsUri.toString(),
         );
         final VM vm = await vmService.getVM();
@@ -167,15 +129,17 @@ class FallbackDiscovery {
             isolateRefs.id,
           );
           final LibraryRef library = isolateResponse.rootLib;
-          if (library != null && library.uri.startsWith('package:$packageName')) {
+          if (library != null &&
+             (library.uri.startsWith('package:$packageName') ||
+              library.uri.startsWith(RegExp(r'file:\/\/\/.*\/' + packageName)))) {
             UsageEvent(
               _kEventName,
               'success',
               flutterUsage: _flutterUsage,
             ).send();
 
-            // We absolutely must dispose this vmService instance, otherwise
-            // DDS will fail to start.
+            // This vmService instance must be disposed of, otherwise DDS will
+            // fail to start.
             vmService.dispose();
             return Uri.parse('http://localhost:$hostPort');
           }
@@ -184,6 +148,10 @@ class FallbackDiscovery {
         // No action, we might have failed to connect.
         firstException ??= err;
         _logger.printTrace(err.toString());
+      } finally {
+        // This vmService instance must be disposed of, otherwise DDS will
+        // fail to start.
+        vmService?.dispose();
       }
 
       // No exponential backoff is used here to keep the amount of time the
@@ -193,7 +161,7 @@ class FallbackDiscovery {
       await Future<void>.delayed(_pollingDelay);
       attempts += 1;
     }
-    _logger.printTrace('Failed to connect directly, falling back to mDNS');
+    _logger.printTrace('Failed to connect directly, falling back to log scanning');
     _sendFailureEvent(firstException, assumedDevicePort);
     return null;
   }

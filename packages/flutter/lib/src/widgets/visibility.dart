@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -55,8 +53,8 @@ class Visibility extends StatelessWidget {
   /// The [maintainAnimation] argument can only be set if [maintainState] is
   /// set.
   const Visibility({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.replacement = const SizedBox.shrink(),
     this.visible = true,
     this.maintainState = false,
@@ -300,8 +298,8 @@ class SliverVisibility extends StatelessWidget {
   /// The [maintainAnimation] argument can only be set if [maintainState] is
   /// set.
   const SliverVisibility({
-    Key key,
-    @required this.sliver,
+    Key? key,
+    required this.sliver,
     this.replacementSliver = const SliverToBoxAdapter(),
     this.visible = true,
     this.maintainState = false,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter/widgets.dart';
@@ -14,7 +12,7 @@ void main() {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
 
-    final TestWidgetState state = key.currentState;
+    final TestWidgetState state = key.currentState!;
     expect(state.mounted, true);
 
     final DisposableBuildContext context = DisposableBuildContext(state);
@@ -27,14 +25,15 @@ void main() {
     expect(() => context.context, throwsAssertionError);
 
     context.dispose();
-    expect(context.context, state.context);
+    expect(context.context, null);
+    expect(() => state.context, throwsFlutterError);
 
     expect(() => DisposableBuildContext(state), throwsAssertionError);
   });
 }
 
 class TestWidget extends StatefulWidget {
-  const TestWidget(Key key) : super(key: key);
+  const TestWidget(Key? key) : super(key: key);
 
   @override
   State<TestWidget> createState() => TestWidgetState();

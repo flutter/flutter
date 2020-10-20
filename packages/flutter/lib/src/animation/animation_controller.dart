@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 
-import 'dart:async';
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -397,7 +396,7 @@ class AnimationController extends Animation<double>
   }
 
   void _internalSetValue(double newValue) {
-    _value = newValue.clamp(lowerBound, upperBound) as double; // ignore: unnecessary_cast
+    _value = newValue.clamp(lowerBound, upperBound);
     if (_value == lowerBound) {
       _status = AnimationStatus.dismissed;
     } else if (_value == upperBound) {
@@ -581,7 +580,7 @@ class AnimationController extends Animation<double>
     stop();
     if (simulationDuration == Duration.zero) {
       if (value != target) {
-        _value = target.clamp(lowerBound, upperBound) as double; // ignore: unnecessary_cast
+        _value = target.clamp(lowerBound, upperBound);
         notifyListeners();
       }
       _status = (_direction == _AnimationDirection.forward) ?
@@ -646,18 +645,27 @@ class AnimationController extends Animation<double>
     _checkStatusChanged();
   }
 
-  /// Drives the animation with a critically damped spring (within [lowerBound]
-  /// and [upperBound]) and initial velocity.
+  /// Drives the animation with a spring (within [lowerBound] and [upperBound])
+  /// and initial velocity.
   ///
   /// If velocity is positive, the animation will complete, otherwise it will
   /// dismiss.
+  ///
+  /// The [springDescription] parameter can be used to specify a custom [SpringType.criticallyDamped]
+  /// or [SpringType.overDamped] spring to drive the animation with. Defaults to null, which uses a
+  /// [SpringType.criticallyDamped] spring. See [SpringDescription.withDampingRatio] for how
+  /// to create a suitable [SpringDescription].
+  ///
+  /// The resulting spring simulation cannot be of type [SpringType.underDamped],
+  /// as this can lead to unexpected look of the produced animation.
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
-  TickerFuture fling({ double velocity = 1.0, AnimationBehavior? animationBehavior }) {
+  TickerFuture fling({ double velocity = 1.0, SpringDescription? springDescription, AnimationBehavior? animationBehavior }) {
+    springDescription ??= _kFlingSpringDescription;
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     final double target = velocity < 0.0 ? lowerBound - _kFlingTolerance.distance
                                          : upperBound + _kFlingTolerance.distance;
@@ -674,8 +682,13 @@ class AnimationController extends Animation<double>
           break;
       }
     }
-    final Simulation simulation = SpringSimulation(_kFlingSpringDescription, value, target, velocity * scale)
+    final SpringSimulation simulation = SpringSimulation(springDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
+    assert(
+      simulation.type != SpringType.underDamped,
+      'The resulting spring simulation is of type SpringType.underDamped.\n'
+      'This can lead to unexpected look of the animation, please adjust the springDescription parameter'
+    );
     stop();
     return _startSimulation(simulation);
   }
@@ -710,7 +723,7 @@ class AnimationController extends Animation<double>
     assert(!isAnimating);
     _simulation = simulation;
     _lastElapsedDuration = Duration.zero;
-    _value = simulation.x(0.0).clamp(lowerBound, upperBound) as double; // ignore: unnecessary_cast
+    _value = simulation.x(0.0).clamp(lowerBound, upperBound);
     final TickerFuture result = _ticker!.start();
     _status = (_direction == _AnimationDirection.forward) ?
       AnimationStatus.forward :
@@ -787,7 +800,7 @@ class AnimationController extends Animation<double>
     _lastElapsedDuration = elapsed;
     final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
     assert(elapsedInSeconds >= 0.0);
-    _value = _simulation!.x(elapsedInSeconds).clamp(lowerBound, upperBound) as double; // ignore: unnecessary_cast
+    _value = _simulation!.x(elapsedInSeconds).clamp(lowerBound, upperBound);
     if (_simulation!.isDone(elapsedInSeconds)) {
       _status = (_direction == _AnimationDirection.forward) ?
         AnimationStatus.completed :
@@ -822,7 +835,7 @@ class _InterpolationSimulation extends Simulation {
 
   @override
   double x(double timeInSeconds) {
-    final double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0) as double; // ignore: unnecessary_cast
+    final double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
     if (t == 0.0)
       return _begin;
     else if (t == 1.0)
@@ -865,7 +878,7 @@ class _RepeatingSimulation extends Simulation {
 
     final double totalTimeInSeconds = timeInSeconds + _initialT;
     final double t = (totalTimeInSeconds / _periodInSeconds) % 1.0;
-    final bool _isPlayingReverse = (totalTimeInSeconds ~/ _periodInSeconds) % 2 == 1;
+    final bool _isPlayingReverse = (totalTimeInSeconds ~/ _periodInSeconds).isOdd;
 
     if (reverse && _isPlayingReverse) {
       directionSetter(_AnimationDirection.reverse);
