@@ -9,6 +9,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/scheduler/binding.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
@@ -305,7 +306,25 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// ```
   /// {@end-tool}
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
-    assert(!context.debugDoingBuild, 'SnackBar cannot be shown during build!');
+    assert(() {
+      if (SchedulerBinding?.instance!.schedulerPhase.index >= SchedulerPhase.persistentCallbacks.index) {
+        // Build/layout has begun, we should not call setState right now.
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'ScaffoldState.showSnackBar was called during build.'
+          ),
+          ErrorDescription(
+            'While the widget tree was being built, showSnackBar'
+            'scheduled a new frame to rebuild the widget tree.'
+          ),
+          ErrorHint(
+            'Consider scheduling the frame in a post-frame callback using '
+            'SchedulerBinding.addPostFrameCallback when calling showSnackBar.'
+          )
+        ]);
+      }
+      return true;
+    }());
 
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleStatusChanged);
@@ -2150,7 +2169,25 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
   // TODO(Piinks): Deprecate & defer to ScaffoldMessenger after customers are migrated.
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
-    assert(!context.debugDoingBuild, 'SnackBar cannot be shown during build!');
+    assert(() {
+      if (SchedulerBinding?.instance!.schedulerPhase.index >= SchedulerPhase.persistentCallbacks.index) {
+        // Build/layout has begun, we should not call setState right now.
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'ScaffoldState.showSnackBar was called during build.'
+          ),
+          ErrorDescription(
+            'While the widget tree was being built, showSnackBar'
+            'scheduled a new frame to rebuild the widget tree.'
+          ),
+          ErrorHint(
+            'Consider scheduling the frame in a post-frame callback using '
+            'SchedulerBinding.addPostFrameCallback when calling showSnackBar.'
+          )
+        ]);
+      }
+      return true;
+    }());
 
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);

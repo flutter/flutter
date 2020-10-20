@@ -2107,7 +2107,7 @@ void main() {
     FlutterError.onError = oldHandler;
 
     final AssertionError error = exceptions.first as AssertionError;
-    expect(error.message, contains('SnackBar cannot be shown during build!'));
+    expect(error.message, contains('ScaffoldState.showSnackBar was called during build.'));
   });
 
   testWidgets('throws assertion error if ScaffoldMessenger.showSnackBar is called during build', (WidgetTester tester) async {
@@ -2138,6 +2138,6 @@ void main() {
     FlutterError.onError = oldHandler;
 
     final AssertionError error = exceptions.first as AssertionError;
-    expect(error.message, contains('SnackBar cannot be shown during build!'));
+    expect(error.message, contains('ScaffoldState.showSnackBar was called during build.'));
   });
 }
