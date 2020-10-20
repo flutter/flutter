@@ -39,9 +39,7 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
 
   // Close the stream controller after the command is complete. Otherwise,
   // the yield* will never finish.
-  command.whenComplete(() {
-    output.close();
-  });
+  command.whenComplete(output.close);
 
   yield* output.stream;
 }
