@@ -1079,7 +1079,15 @@ class EditableText extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
 
   /// {@template flutter.widgets.editableText.onAppPrivateCommand}
-  /// Called when the result of an app private command is received.
+  /// This is used to receive a command from the input method.
+  ///
+  /// Called when the result of [TextInputClient.performPrivateCommand] is
+  /// received.
+  ///
+  /// See also:
+  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#sendAppPrivateCommand],
+  ///     which is the Android documentation for sendAppPrivateCommand, used to
+  ///     receive a command from the input method.
   /// {@endtemplate}
   final AppPrivateCommandCallback? onAppPrivateCommand;
 
