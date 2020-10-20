@@ -423,7 +423,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   @override
   String get selectAllButtonLabel => 'Select All';
 
-    @override
+  @override
   String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
