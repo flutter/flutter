@@ -42,10 +42,8 @@ const String outOfDatePluginsPodfileConsequence = '''
   If you have local Podfile edits you would like to keep, see https://github.com/flutter/flutter/issues/45197 for instructions.''';
 
 const String cocoaPodsInstallInstructions = '''
-  sudo gem install cocoapods''';
-
-const String cocoaPodsUpgradeInstructions = '''
-  sudo gem install cocoapods''';
+  sudo gem install cocoapods
+If you are using a Ruby version manager, you may need to run without sudo.''';
 
 const String podfileMigrationInstructions = '''
   rm ios/Podfile''';
@@ -205,7 +203,7 @@ class CocoaPods {
           'Warning: CocoaPods is installed but broken. Skipping pod install.\n'
           '$brokenCocoaPodsConsequence\n'
           'To re-install:\n'
-          '$cocoaPodsUpgradeInstructions\n',
+          '$cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         return false;
@@ -214,7 +212,7 @@ class CocoaPods {
           'Warning: Unknown CocoaPods version installed.\n'
           '$unknownCocoaPodsConsequence\n'
           'To upgrade:\n'
-          '$cocoaPodsUpgradeInstructions\n',
+          '$cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         break;
@@ -223,7 +221,7 @@ class CocoaPods {
           'Warning: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
           'To upgrade:\n'
-          '$cocoaPodsUpgradeInstructions\n',
+          '$cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         return false;
@@ -232,7 +230,7 @@ class CocoaPods {
           'Warning: CocoaPods recommended version $cocoaPodsRecommendedVersion or greater not installed.\n'
           'Pods handling may fail on some projects involving plugins.\n'
           'To upgrade:\n'
-          '$cocoaPodsUpgradeInstructions\n',
+          '$cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         break;
