@@ -1440,8 +1440,7 @@ void main() {
         appBarKey: appBarKey,
       ));
 
-      final Offset scrollEventLocation =
-      tester.getCenter(find.byType(NestedScrollView));
+      final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
       final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
       // Create a hover event so that |testPointer| has a location when generating the scroll.
       testPointer.hover(scrollEventLocation);
@@ -1499,8 +1498,7 @@ void main() {
         appBarKey: appBarKey,
       ));
 
-      final Offset scrollEventLocation =
-      tester.getCenter(find.byType(NestedScrollView));
+      final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
       final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
       // Create a hover event so that |testPointer| has a location when generating the scroll.
       testPointer.hover(scrollEventLocation);
@@ -1947,8 +1945,7 @@ void main() {
         appBarKey: appBarKey,
       ));
 
-      final Offset scrollEventLocation =
-      tester.getCenter(find.byType(NestedScrollView));
+      final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
       final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
       // Create a hover event so that |testPointer| has a location when generating the scroll.
       testPointer.hover(scrollEventLocation);
@@ -2009,8 +2006,7 @@ void main() {
         appBarKey: appBarKey,
       ));
 
-      final Offset scrollEventLocation =
-      tester.getCenter(find.byType(NestedScrollView));
+      final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
       final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
       // Create a hover event so that |testPointer| has a location when generating the scroll.
       testPointer.hover(scrollEventLocation);
@@ -2159,8 +2155,7 @@ void main() {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(buildTest(controller: controller));
 
-    final Offset scrollEventLocation =
-        tester.getCenter(find.byType(NestedScrollView));
+    final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
@@ -2236,8 +2231,7 @@ void main() {
 
     expect(lastUserScrollingDirection, ScrollDirection.reverse);
 
-    final Offset scrollEventLocation =
-        tester.getCenter(find.byType(NestedScrollView));
+    final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
