@@ -1,4 +1,4 @@
-Signature: 77782200a533f205decafbf6638866e7
+Signature: 6eda764c8f865c27dbd3344f2c0d854d
 
 UNUSED LICENSES:
 
@@ -3902,6 +3902,7 @@ FILE: ../../../third_party/skia/gm/ycbcrimage.cpp
 FILE: ../../../third_party/skia/include/core/SkYUVAInfo.h
 FILE: ../../../third_party/skia/include/core/SkYUVAPixmaps.h
 FILE: ../../../third_party/skia/include/gpu/GrBackendSurfaceMutableState.h
+FILE: ../../../third_party/skia/include/gpu/GrYUVABackendTextures.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DTypes.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DTypesMinimal.h
@@ -3940,6 +3941,7 @@ FILE: ../../../third_party/skia/src/gpu/GrUniformDataManager.cpp
 FILE: ../../../third_party/skia/src/gpu/GrUniformDataManager.h
 FILE: ../../../third_party/skia/src/gpu/GrUnrefDDLTask.h
 FILE: ../../../third_party/skia/src/gpu/GrUtil.cpp
+FILE: ../../../third_party/skia/src/gpu/GrYUVABackendTextures.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DAMDMemoryAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DAMDMemoryAllocator.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DAttachment.cpp
@@ -4065,35 +4067,6 @@ FILE: ../../../third_party/skia/experimental/skrive/src/reader/BinaryReader.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/reader/JsonReader.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/reader/StreamReader.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/reader/StreamReader.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGAttribute.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGAttributeParser.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGCircle.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGClipPath.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGContainer.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGDOM.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGDefs.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGEllipse.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGG.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGGradient.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGHiddenContainer.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGIDMapper.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGLine.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGLinearGradient.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGNode.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGPath.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGPattern.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGPoly.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGRadialGradient.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGRect.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGRenderContext.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGSVG.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGShape.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGStop.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGText.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGTransformableNode.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGTypes.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGUse.h
-FILE: ../../../third_party/skia/experimental/svg/model/SkSVGValue.h
 FILE: ../../../third_party/skia/gm/3d.cpp
 FILE: ../../../third_party/skia/gm/bc1_transparency.cpp
 FILE: ../../../third_party/skia/gm/bicubic.cpp
