@@ -457,7 +457,6 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   Color? get _outlineColor {
     // If outline color is a `MaterialStateProperty`, it will be used in all
     // states, otherwise we determine the outline color in the current state.
-    print(widget.borderSide?.color.runtimeType);
     if (widget.borderSide?.color is MaterialStateProperty<Color?>)
       return widget.borderSide!.color;
     if (!widget.enabled)
@@ -472,8 +471,6 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
       return widget.borderSide!;
 
     final Color themeColor = Theme.of(context)!.colorScheme.onSurface.withOpacity(0.12);
-
-    print(_outlineColor);
 
     return BorderSide(
       color: _outlineColor ?? themeColor,

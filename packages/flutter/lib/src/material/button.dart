@@ -395,9 +395,6 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   Widget build(BuildContext context) {
     final Color? effectiveTextColor = MaterialStateProperty.resolveAs<Color?>(widget.textStyle?.color, _states);
     final ShapeBorder? effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder?>(widget.shape, _states);
-    print('--');
-    print(_states);
-    print((effectiveShape as dynamic).side);
     final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
     final MouseCursor? effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(
