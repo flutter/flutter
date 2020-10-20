@@ -22,7 +22,9 @@ void main() {
 
 void testMain() async {
   setUp(() async {
-    debugShowClipLayers = true;
+    // To debug test failures uncomment the following to visualize clipping
+    // layers:
+    // debugShowClipLayers = true;
     SurfaceSceneBuilder.debugForgetFrameScene();
     for (html.Node scene in html.document.querySelectorAll('flt-scene')) {
       scene.remove();
@@ -545,7 +547,6 @@ void _testCullRectComputation() {
     'renders clipped text with high quality',
     () async {
       // To reproduce blurriness we need real clipping.
-      debugShowClipLayers = false;
       final Paragraph paragraph =
           (ParagraphBuilder(ParagraphStyle(fontFamily: 'Roboto'))..addText('Am I blurry?')).build();
       paragraph.layout(const ParagraphConstraints(width: 1000));

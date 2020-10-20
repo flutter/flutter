@@ -113,7 +113,8 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   }) {
     assert(clipBehavior != null); // ignore: unnecessary_null_comparison
     assert(clipBehavior != ui.Clip.none);
-    return _pushSurface(PersistedClipRect(oldLayer as PersistedClipRect?, rect)) as ui.ClipRectEngineLayer;
+    return _pushSurface(PersistedClipRect(oldLayer as PersistedClipRect?, rect, clipBehavior))
+        as ui.ClipRectEngineLayer;
   }
 
   /// Pushes a rounded-rectangular clip operation onto the operation stack.

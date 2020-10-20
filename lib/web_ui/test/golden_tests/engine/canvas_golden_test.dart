@@ -93,28 +93,31 @@ void testMain() async {
     // compensate by shifting the contents of the canvas in the opposite
     // direction.
     canvas = BitmapCanvas(const Rect.fromLTWH(0.5, 0.5, 60, 60));
-
+    canvas.clipRect(const Rect.fromLTWH(0, 0, 50, 50), ClipOp.intersect);
     drawMisalignedLines(canvas);
 
     appendToScene();
 
-    await matchGoldenFile('misaligned_canvas_test.png', region: region);
+    await matchGoldenFile('misaligned_canvas_test.png', region: region,
+      maxDiffRatePercent: 1.0);
   });
 
   test('fill the whole canvas with color even when transformed', () async {
     canvas = BitmapCanvas(const Rect.fromLTWH(0, 0, 50, 50));
-
+    canvas.clipRect(const Rect.fromLTWH(0, 0, 50, 50), ClipOp.intersect);
     canvas.translate(25, 25);
     canvas.drawColor(const Color.fromRGBO(0, 255, 0, 1.0), BlendMode.src);
 
     appendToScene();
 
-    await matchGoldenFile('bitmap_canvas_fills_color_when_transformed.png', region: region);
+    await matchGoldenFile('bitmap_canvas_fills_color_when_transformed.png',
+        region: region,
+        maxDiffRatePercent: 5.0);
   });
 
   test('fill the whole canvas with paint even when transformed', () async {
     canvas = BitmapCanvas(const Rect.fromLTWH(0, 0, 50, 50));
-
+    canvas.clipRect(const Rect.fromLTWH(0, 0, 50, 50), ClipOp.intersect);
     canvas.translate(25, 25);
     canvas.drawPaint(SurfacePaintData()
       ..color = const Color.fromRGBO(0, 255, 0, 1.0)
@@ -122,7 +125,9 @@ void testMain() async {
 
     appendToScene();
 
-    await matchGoldenFile('bitmap_canvas_fills_paint_when_transformed.png', region: region);
+    await matchGoldenFile('bitmap_canvas_fills_paint_when_transformed.png',
+        region: region,
+        maxDiffRatePercent: 5.0);
   });
 
   // This test reproduces text blurriness when two pieces of text appear inside
@@ -245,7 +250,7 @@ void testMain() async {
     await matchGoldenFile(
       'bitmap_canvas_draws_text_on_top_of_canvas.png',
       region: canvasSize,
-      maxDiffRatePercent: 0.0,
+      maxDiffRatePercent: 1.0,
       pixelComparison: PixelComparison.precise,
     );
   });
