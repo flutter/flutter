@@ -46,7 +46,7 @@ void main () {
       MockXcode mockXcode;
 
       setUp(() {
-        memoryFileSystem = MemoryFileSystem();
+        memoryFileSystem = MemoryFileSystem.test();
         mockXcode = MockXcode();
         xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
 
@@ -265,7 +265,7 @@ keep this 2
       File xcodeWorkspaceSharedSettings;
 
       setUp(() {
-        memoryFileSystem = MemoryFileSystem();
+        memoryFileSystem = MemoryFileSystem.test();
         xcodeWorkspaceSharedSettings = memoryFileSystem.file('WorkspaceSettings.xcsettings');
 
         testLogger = BufferLogger(
@@ -345,7 +345,7 @@ keep this 2
       File xcodeProjectInfoFile;
 
       setUp(() {
-        memoryFileSystem = MemoryFileSystem();
+        memoryFileSystem = MemoryFileSystem.test();
         xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
 
         testLogger = BufferLogger(

@@ -77,6 +77,13 @@ ssh-keygen -y -f $pkey > key.pub
 fuchsia_ctl pave -i $1 --public-key "key.pub"
 echo "$(date) END:PAVING --------------------------------------------"
 
+echo "$(date) START:WAIT_DEVICE_READY -------------------------------"
+for i in {1..10}; do
+  fuchsia_ctl ssh \
+      --identity-file $pkey \
+      -c "echo up" && break || sleep 15;
+done
+echo "$(date) END:WAIT_DEVICE_READY ---------------------------------"
 
 echo "$(date) START:PUSH_PACKAGES -------------------------------"
 fuchsia_ctl push-packages \

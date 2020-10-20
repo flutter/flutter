@@ -20,7 +20,6 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -56,6 +55,8 @@ void main() {
       BuildInfo.debug,
       false,
       false,
+      null,
+      true,
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
@@ -95,7 +96,6 @@ void main() {
 
   testUsingContext('Builds a web bundle - end to end', () async {
     final BuildCommand buildCommand = BuildCommand();
-    applyMocksToCommand(buildCommand);
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     final List<String> dependencies = <String>[
       fileSystem.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'web.dart'),

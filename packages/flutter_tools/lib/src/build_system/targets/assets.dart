@@ -176,7 +176,7 @@ DevFSContent processSkSLBundle(String bundlePath, {
     bundle['platform'] as String);
   if (bundleTargetPlatform != targetPlatform) {
     logger.printError(
-      'The SkSL bundle was created for $bundleTargetPlatform, but the curent '
+      'The SkSL bundle was created for $bundleTargetPlatform, but the current '
       'platform is $targetPlatform. This may lead to less efficient shader '
       'caching.'
     );

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void testConfig(
   String description,
-  String expectedStringValue, {
+  String? expectedStringValue, {
   Map<Type, dynamic> otherExpectedValues = const <Type, dynamic>{int: isNull},
 }) {
   final String actualStringValue = Zone.current[String] as String;

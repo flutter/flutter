@@ -8,6 +8,7 @@ import 'package:flutter/animation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'box.dart';
+import 'layer.dart';
 import 'object.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
@@ -617,7 +618,7 @@ class RenderListWheelViewport
   /// This relies on the [childManager] maintaining [ListWheelParentData.index].
   int indexOf(RenderBox child) {
     assert(child != null);
-    final ListWheelParentData childParentData = child.parentData as ListWheelParentData;
+    final ListWheelParentData childParentData = child.parentData! as ListWheelParentData;
     assert(childParentData.index != null);
     return childParentData.index!;
   }
@@ -644,7 +645,7 @@ class RenderListWheelViewport
 
   void _layoutChild(RenderBox child, BoxConstraints constraints, int index) {
     child.layout(constraints, parentUsesSize: true);
-    final ListWheelParentData childParentData = child.parentData as ListWheelParentData;
+    final ListWheelParentData childParentData = child.parentData! as ListWheelParentData;
     // Centers the child horizontally.
     final double crossPosition = size.width / 2.0 - child.size.width / 2.0;
     childParentData.offset = Offset(crossPosition, indexToScrollOffset(index));
@@ -784,18 +785,22 @@ class RenderListWheelViewport
   void paint(PaintingContext context, Offset offset) {
     if (childCount > 0) {
       if (_shouldClipAtCurrentOffset() && clipBehavior != Clip.none) {
-        context.pushClipRect(
+        _clipRectLayer = context.pushClipRect(
           needsCompositing,
           offset,
           Offset.zero & size,
           _paintVisibleChildren,
           clipBehavior: clipBehavior,
+          oldLayer: _clipRectLayer,
         );
       } else {
+        _clipRectLayer = null;
         _paintVisibleChildren(context, offset);
       }
     }
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
@@ -989,7 +994,7 @@ class RenderListWheelViewport
   /// painting coordinates** system.
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final ListWheelParentData parentData = child.parentData as ListWheelParentData;
+    final ListWheelParentData parentData = child.parentData! as ListWheelParentData;
     transform.translate(0.0, _getUntransformedPaintingCoordinateY(parentData.offset.dy));
   }
 
@@ -1015,9 +1020,9 @@ class RenderListWheelViewport
     // `child` will be the last RenderObject before the viewport when walking up from `target`.
     RenderObject child = target;
     while (child.parent != this)
-      child = child.parent as RenderObject;
+      child = child.parent! as RenderObject;
 
-    final ListWheelParentData parentData = child.parentData as ListWheelParentData;
+    final ListWheelParentData parentData = child.parentData! as ListWheelParentData;
     final double targetOffset = parentData.offset.dy; // the so-called "centerPosition"
 
     final Matrix4 transform = target.getTransformTo(child);

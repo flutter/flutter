@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/process.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
@@ -43,7 +40,7 @@ class FormatCommand extends FlutterCommand {
   List<String> get aliases => const <String>['dartfmt'];
 
   @override
-  final String description = 'Format one or more dart files.';
+  final String description = 'Format one or more Dart files.';
 
   @override
   String get invocation => '${runner.executableName} $name <one or more paths>';
@@ -74,7 +71,7 @@ class FormatCommand extends FlutterCommand {
       ...argResults.rest,
     ];
 
-    final int result = await processUtils.stream(command);
+    final int result = await globals.processUtils.stream(command);
     if (result != 0) {
       throwToolExit('Formatting failed: $result', exitCode: result);
     }

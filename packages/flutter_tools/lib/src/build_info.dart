@@ -34,6 +34,7 @@ class BuildInfo {
     this.packagesPath = '.packages',
     this.nullSafetyMode = NullSafetyMode.autodetect,
     this.codeSizeDirectory,
+    this.androidGradleDaemon = true,
   });
 
   final BuildMode mode;
@@ -43,7 +44,7 @@ class BuildInfo {
   /// If not provided, defaults to [NullSafetyMode.autodetect].
   final NullSafetyMode nullSafetyMode;
 
-  /// Whether the build should subdset icon fonts.
+  /// Whether the build should subset icon fonts.
   final bool treeShakeIcons;
 
   /// Represents a custom Android product flavor or an Xcode scheme, null for
@@ -57,7 +58,7 @@ class BuildInfo {
   /// The path to the .packages file to use for compilation.
   ///
   /// This is used by package:package_config to locate the actual package_config.json
-  /// file. If not provded, defaults to `.packages`.
+  /// file. If not provided, defaults to `.packages`.
   final String packagesPath;
 
   final List<String> fileSystemRoots;
@@ -114,9 +115,23 @@ class BuildInfo {
   /// rerun tasks.
   final String performanceMeasurementFile;
 
-  /// If provided, an output directory where one or more v8-style heapsnapshots
+  /// If provided, an output directory where one or more v8-style heap snapshots
   /// will be written for code size profiling.
   final String codeSizeDirectory;
+
+  /// Whether to enable the Gradle daemon when performing an Android build.
+  ///
+  /// Starting the daemon is the default behavior of the gradle wrapper script created
+  /// in a Flutter project. Setting this value to false will cause the tool to pass
+  /// `--no-daemon` to the gradle wrapper script, preventing it from spawning a daemon
+  /// process.
+  ///
+  /// For one-off builds or CI systems, preventing the daemon from spawning will
+  /// reduce system resource usage, at the cost of any subsequent builds starting
+  /// up slightly slower.
+  ///
+  /// The Gradle daemon may also be disabled in the Android application's properties file.
+  final bool androidGradleDaemon;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -152,10 +167,14 @@ class BuildInfo {
   String get modeName => getModeName(mode);
   String get friendlyModeName => getFriendlyModeName(mode);
 
-  /// Convert to a structued string encoded structure appropriate for usage as
+  /// the flavor name in the output files is lower-cased (see flutter.gradle),
+  /// so the lower cased flavor name is used to compute the output file name
+  String get lowerCasedFlavor => flavor?.toLowerCase();
+
+  /// Convert to a structured string encoded structure appropriate for usage as
   /// environment variables or to embed in other scripts.
   ///
-  /// Fields that are `null` are excluded from this configration.
+  /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
     return <String, String>{
       if (dartDefines?.isNotEmpty ?? false)
@@ -394,6 +413,7 @@ bool isEmulatorBuildMode(BuildMode mode) {
 
 enum HostPlatform {
   darwin_x64,
+  darwin_arm,
   linux_x64,
   windows_x64,
 }
@@ -402,6 +422,8 @@ String getNameForHostPlatform(HostPlatform platform) {
   switch (platform) {
     case HostPlatform.darwin_x64:
       return 'darwin-x64';
+    case HostPlatform.darwin_arm:
+      return 'darwin-arm';
     case HostPlatform.linux_x64:
       return 'linux-x64';
     case HostPlatform.windows_x64:
@@ -414,6 +436,7 @@ String getNameForHostPlatform(HostPlatform platform) {
 enum TargetPlatform {
   android,
   ios,
+  // darwin_arm64 not yet supported, macOS desktop targets run in Rosetta as x86.
   darwin_x64,
   linux_x64,
   windows_x64,
@@ -421,7 +444,7 @@ enum TargetPlatform {
   fuchsia_x64,
   tester,
   web_javascript,
-  // The arch specific android target platforms are soft-depreacted.
+  // The arch specific android target platforms are soft-deprecated.
   // Instead of using TargetPlatform as a combination arch + platform
   // the code will be updated to carry arch information in [DarwinArch]
   // and [AndroidArch].

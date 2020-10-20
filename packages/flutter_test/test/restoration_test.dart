@@ -73,9 +73,9 @@ void main() {
 }
 
 class _RestorableWidget extends StatefulWidget {
-  const _RestorableWidget({Key key, this.restorationId}) : super(key: key);
+  const _RestorableWidget({Key? key, this.restorationId}) : super(key: key);
 
-  final String restorationId;
+  final String? restorationId;
 
   @override
   State<_RestorableWidget> createState() => _RestorableWidgetState();
@@ -88,7 +88,7 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   double doubleValue = 1.0; // Not restorable.
 
   @override
-  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(stringValue, 'string');
     registerForRestoration(intValue, 'int');
   }
@@ -107,5 +107,5 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   }
 
   @override
-  String get restorationId => widget.restorationId;
+  String? get restorationId => widget.restorationId;
 }

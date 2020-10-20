@@ -389,6 +389,9 @@ class MethodChannel {
   ///
   /// This method is useful for tests or test harnesses that want to assert the
   /// handler for the specified channel has not been altered by a previous test.
+  ///
+  /// Passing null for the `handler` returns true if the handler for the channel
+  /// is not set.
   bool checkMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) => _methodChannelHandlers[this] == handler;
 
   /// Sets a mock callback for intercepting method invocations on this channel.
@@ -409,7 +412,7 @@ class MethodChannel {
   /// return value of the call. The value will be encoded using
   /// [MethodCodec.encodeSuccessEnvelope], to act as if platform plugin had
   /// returned that value.
-  void setMockMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
+  void setMockMethodCallHandler(Future<dynamic>? Function(MethodCall call)? handler) {
     _methodChannelMockHandlers[this] = handler;
     binaryMessenger.setMockMessageHandler(
       name,
@@ -422,9 +425,12 @@ class MethodChannel {
   ///
   /// This method is useful for tests or test harnesses that want to assert the
   /// handler for the specified channel has not been altered by a previous test.
+  ///
+  /// Passing null for the `handler` returns true if the handler for the channel
+  /// is not set.
   bool checkMockMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) => _methodChannelMockHandlers[this] == handler;
 
-  Future<ByteData?> _handleAsMethodCall(ByteData? message, Future<dynamic> handler(MethodCall call)) async {
+  Future<ByteData?> _handleAsMethodCall(ByteData? message, Future<dynamic>? handler(MethodCall call)) async {
     final MethodCall call = codec.decodeMethodCall(message);
     try {
       return codec.encodeSuccessEnvelope(await handler(call));

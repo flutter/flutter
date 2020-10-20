@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -15,7 +17,6 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -49,7 +50,7 @@ final Platform notMacosPlatform = FakePlatform(
 
 void main() {
   FileSystem fileSystem;
-  MockUsage usage;
+  Usage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -57,7 +58,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    usage = MockUsage();
+    usage = Usage.test();
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -112,7 +113,7 @@ void main() {
     createCoreMockProjectFiles();
 
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'macos']
+      const <String>['build', 'macos', '--no-pub']
     ), throwsToolExit(message: 'No macOS desktop project configured'));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
@@ -129,7 +130,7 @@ void main() {
       .createSync(recursive: true);
 
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'macos']
+      const <String>['build', 'macos', '--no-pub']
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
@@ -143,7 +144,7 @@ void main() {
     createMinimalMockProjectFiles();
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'macos', '--debug']
+      const <String>['build', 'macos', '--debug', '--no-pub']
     );
     expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
     expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
@@ -162,7 +163,7 @@ void main() {
     createMinimalMockProjectFiles();
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'macos', '--debug']
+      const <String>['build', 'macos', '--debug', '--no-pub']
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -178,7 +179,7 @@ void main() {
     createMinimalMockProjectFiles();
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'macos', '--debug', '-v']
+      const <String>['build', 'macos', '--debug', '--no-pub', '-v']
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -195,7 +196,7 @@ void main() {
     createMinimalMockProjectFiles();
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'macos', '--profile']
+      const <String>['build', 'macos', '--profile', '--no-pub']
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -212,8 +213,56 @@ void main() {
     createMinimalMockProjectFiles();
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'macos', '--release']
+      const <String>['build', 'macos', '--release', '--no-pub']
     );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      setUpMockXcodeBuildHandler('Release')
+    ]),
+    Platform: () => macosPlatform,
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('macOS build supports standard desktop build options', () async {
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
+    fileSystem.file('lib/other.dart')
+      .createSync(recursive: true);
+    fileSystem.file('foo/bar.sksl.json')
+      .createSync(recursive: true);
+
+    await createTestCommandRunner(command).run(
+      const <String>[
+        'build',
+        'macos',
+        '--target=lib/other.dart',
+        '--no-pub',
+        '--track-widget-creation',
+        '--split-debug-info=foo/',
+        '--enable-experiment=non-nullable',
+        '--obfuscate',
+        '--dart-define=foo.bar=2',
+        '--dart-define=fizz.far=3',
+        '--tree-shake-icons',
+        '--bundle-sksl-path=foo/bar.sksl.json',
+      ]
+    );
+    final List<String> contents = fileSystem
+      .file('./macos/Flutter/ephemeral/Flutter-Generated.xcconfig')
+      .readAsLinesSync();
+
+    expect(contents, containsAll(<String>[
+      'DART_DEFINES=foo.bar%3D2,fizz.far%3D3',
+      'DART_OBFUSCATION=true',
+      'EXTRA_FRONT_END_OPTIONS=--enable-experiment%3Dnon-nullable',
+      'EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment%3Dnon-nullable',
+      'SPLIT_DEBUG_INFO=foo/',
+      'TRACK_WIDGET_CREATION=true',
+      'TREE_SHAKE_ICONS=true',
+      'FLUTTER_TARGET=lib/other.dart',
+      'BUNDLE_SKSL_PATH=foo/bar.sksl.json',
+    ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -232,6 +281,7 @@ void main() {
         'build',
         'macos',
         '--debug',
+        '--no-pub',
         '--build-name=1.2.3',
         '--build-number=42',
       ],
@@ -254,7 +304,7 @@ void main() {
   testUsingContext('Refuses to build for macOS when feature is disabled', () {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
-    expect(() => runner.run(<String>['build', 'macos']),
+    expect(() => runner.run(<String>['build', 'macos', '--no-pub']),
       throwsToolExit());
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
@@ -282,26 +332,30 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
 
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'macos', '--analyze-size']
+    // Capture Usage.test() events.
+    final StringBuffer buffer = await capturedConsolePrint(() =>
+      createTestCommandRunner(command).run(
+        const <String>['build', 'macos', '--no-pub', '--analyze-size']
+      )
     );
 
     expect(testLogger.statusText, contains('A summary of your macOS bundle analysis can be found at'));
-    verify(usage.sendEvent('code-size-analysis', 'macos')).called(1);
+    expect(buffer.toString(), contains('event {category: code-size-analysis, action: macos, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpMockXcodeBuildHandler('Release', onRun: () {
         fileSystem.file('build/flutter_size_01/snapshot.x86_64.json')
           ..createSync(recursive: true)
-          ..writeAsStringSync('''[
-{
-  "l": "dart:_internal",
-  "c": "SubListIterable",
-  "n": "[Optimized] skip",
-  "s": 2400
-}
-          ]''');
+          ..writeAsStringSync('''
+[
+  {
+    "l": "dart:_internal",
+    "c": "SubListIterable",
+    "n": "[Optimized] skip",
+    "s": 2400
+  }
+]''');
         fileSystem.file('build/flutter_size_01/trace.x86_64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
@@ -313,5 +367,3 @@ void main() {
     Usage: () => usage,
   });
 }
-
-class MockUsage extends Mock implements Usage {}

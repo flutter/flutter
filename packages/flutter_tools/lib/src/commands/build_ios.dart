@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -21,25 +19,14 @@ import 'build.dart';
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host. For producing deployment
 /// .ipas, see https://flutter.dev/docs/deployment/ios.
-class BuildIOSCommand extends BuildSubCommand {
-  BuildIOSCommand({ @required bool verboseHelp }) {
-    addTreeShakeIconsFlag();
-    addSplitDebugInfoOption();
-    addBuildModeFlags(defaultToRelease: true);
-    usesTargetOption();
-    usesFlavorOption();
-    usesPubOption();
-    usesBuildNumberOption();
-    usesBuildNameOption();
-    addDartObfuscationOption();
-    usesDartDefineOption();
-    usesExtraFrontendOptions();
-    addEnableExperimentation(hide: !verboseHelp);
-    addBuildPerformanceFile(hide: !verboseHelp);
-    addBundleSkSLPathOption(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
-    usesAnalyzeSizeFlag();
+class BuildIOSCommand extends _BuildIOSSubCommand {
+  BuildIOSCommand({ @required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
     argParser
+      ..addFlag('config-only',
+        help: 'Update the project configuration without performing a build. '
+          'This can be used in CI/CD process that create an archive to avoid '
+          'performing duplicate work.'
+      )
       ..addFlag('simulator',
         help: 'Build for the iOS simulator instead of the device. This changes '
           'the default build mode to debug if otherwise unspecified.',
@@ -57,54 +44,123 @@ class BuildIOSCommand extends BuildSubCommand {
   final String description = 'Build an iOS application bundle (Mac OS X host only).';
 
   @override
+  final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
+
+  @override
+  bool get forSimulator => boolArg('simulator');
+
+  @override
+  bool get configOnly => boolArg('config-only');
+
+  @override
+  bool get shouldCodesign => boolArg('codesign');
+}
+
+/// Builds an .xcarchive for an iOS app to be generated for App Store submission.
+/// Can only be run on a macOS host.
+/// For producing deployment .ipas, see https://flutter.dev/docs/deployment/ios.
+class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
+  BuildIOSArchiveCommand({ @required bool verboseHelp }) : super(verboseHelp: verboseHelp);
+
+  @override
+  final String name = 'xcarchive';
+
+  @override
+  final String description = 'Build an iOS archive bundle (Mac OS X host only).';
+
+  @override
+  final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.archive;
+
+  @override
+  final bool forSimulator = false;
+
+  @override
+  final bool configOnly = false;
+
+  @override
+  final bool shouldCodesign = true;
+}
+
+abstract class _BuildIOSSubCommand extends BuildSubCommand {
+  _BuildIOSSubCommand({ @required bool verboseHelp }) {
+    addTreeShakeIconsFlag();
+    addSplitDebugInfoOption();
+    addBuildModeFlags(defaultToRelease: true);
+    usesTargetOption();
+    usesFlavorOption();
+    usesPubOption();
+    usesBuildNumberOption();
+    usesBuildNameOption();
+    addDartObfuscationOption();
+    usesDartDefineOption();
+    usesExtraFrontendOptions();
+    addEnableExperimentation(hide: !verboseHelp);
+    addBuildPerformanceFile(hide: !verboseHelp);
+    addBundleSkSLPathOption(hide: !verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
+    usesAnalyzeSizeFlag();
+  }
+
+  @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     DevelopmentArtifact.iOS,
   };
 
+  XcodeBuildAction get xcodeBuildAction;
+  bool get forSimulator;
+  bool get configOnly;
+  bool get shouldCodesign;
+
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final bool forSimulator = boolArg('simulator');
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
+    final BuildInfo buildInfo = getBuildInfo();
 
     if (!globals.platform.isMacOS) {
-      throwToolExit('Building for iOS is only supported on the Mac.');
+      throwToolExit('Building for iOS is only supported on macOS.');
+    }
+    if (forSimulator && !buildInfo.supportsSimulator) {
+      throwToolExit('${toTitleCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
+    }
+    if (configOnly && buildInfo.codeSizeDirectory != null) {
+      throwToolExit('Cannot analyze code size without performing a full build.');
+    }
+    if (!forSimulator && !shouldCodesign) {
+      globals.printStatus(
+        'Warning: Building for device with codesigning disabled. You will '
+        'have to manually codesign before deploying to device.',
+      );
     }
 
-    final BuildInfo buildInfo = getBuildInfo();
     final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(
       TargetPlatform.ios,
-      buildInfo,
+      buildInfo: buildInfo,
     ) as BuildableIOSApp;
 
     if (app == null) {
       throwToolExit('Application not configured for iOS');
     }
 
-    final bool shouldCodesign = boolArg('codesign');
-
-    if (!forSimulator && !shouldCodesign) {
-      globals.printStatus('Warning: Building for device with codesigning disabled. You will '
-        'have to manually codesign before deploying to device.');
-    }
-    if (forSimulator && !buildInfo.supportsSimulator) {
-      throwToolExit('${toTitleCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
-    }
-
     final String logTarget = forSimulator ? 'simulator' : 'device';
-
     final String typeName = globals.artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
-    globals.printStatus('Building $app for $logTarget ($typeName)...');
+    if (xcodeBuildAction == XcodeBuildAction.build) {
+      globals.printStatus('Building $app for $logTarget ($typeName)...');
+    } else {
+      globals.printStatus('Archiving $app...');
+    }
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
       targetOverride: targetFile,
       buildForDevice: !forSimulator,
       codesign: shouldCodesign,
+      configOnly: configOnly,
+      buildAction: xcodeBuildAction,
     );
 
     if (!result.success) {
       await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger);
-      throwToolExit('Encountered error while building for $logTarget.');
+      throwToolExit('Encountered error while ${xcodeBuildAction.name}ing for $logTarget.');
     }
 
     if (buildInfo.codeSizeDirectory != null) {

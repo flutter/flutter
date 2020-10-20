@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -176,6 +175,25 @@ void main() {
 
       await crashReportSender.sendReport(
         error: StateError('Test bad state error'),
+        stackTrace: null,
+        getFlutterVersion: () => 'test-version',
+        command: 'crash',
+      );
+
+      expect(logger.errorText, contains('Failed to send crash report due to a network error'));
+    });
+
+    testWithoutContext('should print an explanatory message when there is a ClientException', () async {
+      final CrashReportSender crashReportSender = CrashReportSender(
+        client: CrashingCrashReportSender(const HttpException('no internets')),
+        usage: mockUsage,
+        platform: platform,
+        logger: logger,
+        operatingSystemUtils: operatingSystemUtils,
+      );
+
+      await crashReportSender.sendReport(
+        error: ClientException('Test bad state error'),
         stackTrace: null,
         getFlutterVersion: () => 'test-version',
         command: 'crash',

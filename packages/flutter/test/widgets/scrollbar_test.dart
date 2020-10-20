@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+
+import '../flutter_test_alternative.dart' show Fake;
 
 const Color _kScrollbarColor = Color(0xFF123456);
 const double _kThickness = 2.5;
@@ -20,10 +19,10 @@ ScrollbarPainter _buildPainter({
   double thickness = _kThickness,
   double mainAxisMargin = 0.0,
   double crossAxisMargin = 0.0,
-  Radius radius,
+  Radius? radius,
   double minLength = _kMinThumbExtent,
-  double minOverscrollLength,
-  ScrollMetrics scrollMetrics,
+  double? minOverscrollLength,
+  required ScrollMetrics scrollMetrics,
 }) {
   return ScrollbarPainter(
     color: color,
@@ -39,14 +38,24 @@ ScrollbarPainter _buildPainter({
   )..update(scrollMetrics, scrollMetrics.axisDirection);
 }
 
-class _DrawRectOnceCanvas extends Mock implements Canvas { }
+class _DrawRectOnceCanvas extends Fake implements Canvas {
+  List<Rect> rects = <Rect>[];
+
+  @override
+  void drawRect(Rect rect, Paint paint) {
+    rects.add(rect);
+  }
+}
 
 void main() {
   final _DrawRectOnceCanvas testCanvas = _DrawRectOnceCanvas();
   ScrollbarPainter painter;
-  Rect captureRect() => verify(testCanvas.drawRect(captureAny, any)).captured.single as Rect;
 
-  tearDown(() => painter = null);
+  Rect captureRect() => testCanvas.rects.removeLast();
+
+  tearDown(() {
+    testCanvas.rects.clear();
+  });
 
   final ScrollMetrics defaultMetrics = FixedScrollMetrics(
     minScrollExtent: 0,
@@ -124,14 +133,14 @@ void main() {
         startingMetrics.copyWith(pixels: maxExtent - 0.01),
       ];
 
-      double lastCoefficient;
+      late double lastCoefficient;
       for (final ScrollMetrics metrics in metricsList) {
         painter.update(metrics, metrics.axisDirection);
         painter.paint(testCanvas, size);
 
         final Rect rect = captureRect();
         final double newCoefficient = metrics.pixels/rect.top;
-        lastCoefficient ??= newCoefficient;
+        lastCoefficient = newCoefficient;
 
         expect(rect.top >= 0, true);
         expect(rect.bottom <= maxExtent, true);
@@ -411,7 +420,7 @@ void main() {
       AxisDirection.down,
     );
     p.paint(testCanvas, size);
-    expect(captureRect().height, closeTo(fullThumbExtent, .000001));
+    expect(captureRect().height, moreOrLessEquals(fullThumbExtent, epsilon: 1e-6));
 
     // Scrolling just to the very end also gives a full sized thumb.
     p.update(
@@ -421,7 +430,7 @@ void main() {
       AxisDirection.down,
     );
     p.paint(testCanvas, size);
-    expect(captureRect().height, closeTo(fullThumbExtent, .000001));
+    expect(captureRect().height, moreOrLessEquals(fullThumbExtent, epsilon: 1e-6));
 
     // Scrolling just past the end shrinks the thumb slightly.
     p.update(
@@ -431,7 +440,7 @@ void main() {
       AxisDirection.down,
     );
     p.paint(testCanvas, size);
-    expect(captureRect().height, closeTo(fullThumbExtent, 2.0));
+    expect(captureRect().height, moreOrLessEquals(fullThumbExtent, epsilon: 2.0));
 
     // Scrolling way past the end shrinks the thumb to minimum.
     p.update(
@@ -471,13 +480,12 @@ void main() {
         )
         .takeWhile((ScrollMetrics metrics) => !metrics.outOfRange);
 
-        Rect previousRect;
+        Rect? previousRect;
 
         for (final ScrollMetrics metrics in metricsList) {
           painter.update(metrics, metrics.axisDirection);
           painter.paint(testCanvas, size);
           final Rect rect = captureRect();
-
           if (previousRect != null) {
             if (rect.height == size.height) {
               // Size of the scrollbar is too large for the view port

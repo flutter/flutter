@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:matcher/matcher.dart';
 
 import 'package:vm_service/vm_service.dart';
@@ -47,7 +45,7 @@ void batch1() {
     );
   }
 
-  test('flutter run expression evaluation - can evaluate trivial expressions in top level function', () async {
+  testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in top level function', () async {
     await initProject();
     await _flutter.run(withDebugger: true);
     await breakInTopLevelFunction(_flutter);
@@ -55,7 +53,7 @@ void batch1() {
     await cleanProject();
   });
 
-  test('flutter run expression evaluation - can evaluate trivial expressions in build method', () async {
+  testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in build method', () async {
     await initProject();
     await _flutter.run(withDebugger: true);
     await breakInBuildMethod(_flutter);
@@ -63,7 +61,7 @@ void batch1() {
     await cleanProject();
   });
 
-  test('flutter run expression evaluation - can evaluate complex expressions in top level function', () async {
+  testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in top level function', () async {
     await initProject();
     await _flutter.run(withDebugger: true);
     await breakInTopLevelFunction(_flutter);
@@ -71,7 +69,7 @@ void batch1() {
     await cleanProject();
   });
 
-  test('flutter run expression evaluation - can evaluate complex expressions in build method', () async {
+  testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in build method', () async {
     await initProject();
     await _flutter.run(withDebugger: true);
     await breakInBuildMethod(_flutter);
@@ -79,7 +77,7 @@ void batch1() {
     await cleanProject();
   });
 
-  test('flutter run expression evaluation - can evaluate expressions returning complex objects in top level function', () async {
+  testWithoutContext('flutter run expression evaluation - can evaluate expressions returning complex objects in top level function', () async {
     await initProject();
     await _flutter.run(withDebugger: true);
     await breakInTopLevelFunction(_flutter);
@@ -87,7 +85,7 @@ void batch1() {
     await cleanProject();
   });
 
-  test('flutter run expression evaluation - can evaluate expressions returning complex objects in build method', () async {
+  testWithoutContext('flutter run expression evaluation - can evaluate expressions returning complex objects in build method', () async {
     await initProject();
     await _flutter.run(withDebugger: true);
     await breakInBuildMethod(_flutter);
@@ -112,7 +110,7 @@ void batch2() {
     tryToDelete(tempDir);
   }
 
-  test('flutter test expression evaluation - can evaluate trivial expressions in a test', () async {
+  testWithoutContext('flutter test expression evaluation - can evaluate trivial expressions in a test', () async {
     await initProject();
     await _flutter.test(
       withDebugger: true,
@@ -123,7 +121,7 @@ void batch2() {
     await cleanProject();
   });
 
-  test('flutter test expression evaluation - can evaluate complex expressions in a test', () async {
+  testWithoutContext('flutter test expression evaluation - can evaluate complex expressions in a test', () async {
     await initProject();
     await _flutter.test(
       withDebugger: true,
@@ -134,7 +132,7 @@ void batch2() {
     await cleanProject();
   });
 
-  test('flutter test expression evaluation - can evaluate expressions returning complex objects in a test', () async {
+  testWithoutContext('flutter test expression evaluation - can evaluate expressions returning complex objects in a test', () async {
     await initProject();
     await _flutter.test(
       withDebugger: true,

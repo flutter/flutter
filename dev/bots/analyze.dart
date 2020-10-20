@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' hide exit;
@@ -64,9 +63,6 @@ Future<void> run(List<String> arguments) async {
 
   print('$clock Test package imports...');
   await verifyNoTestPackageImports(flutterRoot);
-
-  print('$clock Generated plugin registrants...');
-  await verifyGeneratedPluginRegistrants(flutterRoot);
 
   print('$clock Bad imports (framework)...');
   await verifyNoBadImportsInFlutter(flutterRoot);
@@ -366,44 +362,6 @@ Future<void> verifyNoTestPackageImports(String workingDirectory) async {
       "Rather than depending on 'package:test' directly, use one of the shims:",
       ...shims,
       "This insulates us from breaking changes in 'package:test'."
-    ]);
-  }
-}
-
-Future<void> verifyGeneratedPluginRegistrants(String flutterRoot) async {
-  final Directory flutterRootDir = Directory(flutterRoot);
-
-  final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};
-
-  for (final File file in flutterRootDir.listSync(recursive: true).whereType<File>().where(_isGeneratedPluginRegistrant)) {
-    final String package = _getPackageFor(file, flutterRootDir);
-    final List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
-    registrants.add(file);
-  }
-
-  final Set<String> outOfDate = <String>{};
-
-  for (final String package in packageToRegistrants.keys) {
-    final Map<File, String> fileToContent = <File, String>{};
-    for (final File f in packageToRegistrants[package]) {
-      fileToContent[f] = f.readAsStringSync();
-    }
-    await runCommand(flutter, <String>['inject-plugins'],
-      workingDirectory: package,
-      outputMode: OutputMode.discard,
-    );
-    for (final File registrant in fileToContent.keys) {
-      if (registrant.readAsStringSync() != fileToContent[registrant]) {
-        outOfDate.add(registrant.path);
-      }
-    }
-  }
-
-  if (outOfDate.isNotEmpty) {
-    exitWithError(<String>[
-      '${bold}The following GeneratedPluginRegistrants are out of date:$reset',
-      for (String registrant in outOfDate) ' - $registrant',
-      '\nRun "flutter inject-plugins" in the package that\'s out of date.',
     ]);
   }
 }
@@ -1142,6 +1100,8 @@ Iterable<File> _allFiles(String workingDirectory, String extension, { @required 
         continue;
       if (path.basename(entity.path) == 'gradlew.bat')
         continue;
+      if (path.basename(entity.path) == '.DS_Store')
+        continue;
       if (extension == null || path.extension(entity.path) == '.$extension') {
         matches += 1;
         yield entity;
@@ -1293,20 +1253,12 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
   return null;
 }
 
-String _getPackageFor(File entity, Directory flutterRootDir) {
-  for (Directory dir = entity.parent; dir != flutterRootDir; dir = dir.parent) {
-    if (File(path.join(dir.path, 'pubspec.yaml')).existsSync()) {
-      return dir.path;
-    }
-  }
-  throw ArgumentError('$entity is not within a dart package.');
-}
-
 bool _isGeneratedPluginRegistrant(File file) {
   final String filename = path.basename(file.path);
   return !file.path.contains('.pub-cache')
       && (filename == 'GeneratedPluginRegistrant.java' ||
           filename == 'GeneratedPluginRegistrant.h' ||
           filename == 'GeneratedPluginRegistrant.m' ||
-          filename == 'generated_plugin_registrant.dart');
+          filename == 'generated_plugin_registrant.dart' ||
+          filename == 'generated_plugin_registrant.h');
 }

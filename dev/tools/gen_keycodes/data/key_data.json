@@ -2535,7 +2535,9 @@
       "gtk": [
         "quoteleft"
       ],
-      "windows": null
+      "windows": [
+        "OEM_3"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -2558,7 +2560,9 @@
       "gtk": [
         96
       ],
-      "windows": null
+      "windows": [
+        192
+      ]
     }
   },
   "comma": {
@@ -8110,7 +8114,9 @@
       "windows": null
     },
     "scanCodes": {
-      "android": null,
+      "android": [
+        583
+      ],
       "usb": 786891,
       "linux": 583,
       "xkb": 591,

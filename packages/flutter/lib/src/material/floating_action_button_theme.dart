@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -48,63 +46,63 @@ class FloatingActionButtonThemeData with Diagnosticable {
 
   /// Color to be used for the unselected, enabled [FloatingActionButton]'s
   /// foreground.
-  final Color foregroundColor;
+  final Color? foregroundColor;
 
   /// Color to be used for the unselected, enabled [FloatingActionButton]'s
   /// background.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// The color to use for filling the button when the button has input focus.
-  final Color focusColor;
+  final Color? focusColor;
 
   /// The color to use for filling the button when the button has a pointer
   /// hovering over it.
-  final Color hoverColor;
+  final Color? hoverColor;
 
   /// The splash color for this [FloatingActionButton]'s [InkWell].
-  final Color splashColor;
+  final Color? splashColor;
 
   /// The z-coordinate to be used for the unselected, enabled
   /// [FloatingActionButton]'s elevation foreground.
-  final double elevation;
+  final double? elevation;
 
   /// The z-coordinate at which to place this button relative to its parent when
   /// the button has the input focus.
   ///
   /// This controls the size of the shadow below the floating action button.
-  final double focusElevation;
+  final double? focusElevation;
 
   /// The z-coordinate at which to place this button relative to its parent when
   /// the button is enabled and has a pointer hovering over it.
   ///
   /// This controls the size of the shadow below the floating action button.
-  final double hoverElevation;
+  final double? hoverElevation;
 
   /// The z-coordinate to be used for the disabled [FloatingActionButton]'s
   /// elevation foreground.
-  final double disabledElevation;
+  final double? disabledElevation;
 
   /// The z-coordinate to be used for the selected, enabled
   /// [FloatingActionButton]'s elevation foreground.
-  final double highlightElevation;
+  final double? highlightElevation;
 
   /// The shape to be used for the floating action button's [Material].
-  final ShapeBorder shape;
+  final ShapeBorder? shape;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   FloatingActionButtonThemeData copyWith({
-    Color foregroundColor,
-    Color backgroundColor,
-    Color focusColor,
-    Color hoverColor,
-    Color splashColor,
-    double elevation,
-    double focusElevation,
-    double hoverElevation,
-    double disabledElevation,
-    double highlightElevation,
-    ShapeBorder shape,
+    Color? foregroundColor,
+    Color? backgroundColor,
+    Color? focusColor,
+    Color? hoverColor,
+    Color? splashColor,
+    double? elevation,
+    double? focusElevation,
+    double? hoverElevation,
+    double? disabledElevation,
+    double? highlightElevation,
+    ShapeBorder? shape,
   }) {
     return FloatingActionButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
@@ -126,7 +124,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static FloatingActionButtonThemeData lerp(FloatingActionButtonThemeData a, FloatingActionButtonThemeData b, double t) {
+  static FloatingActionButtonThemeData? lerp(FloatingActionButtonThemeData? a, FloatingActionButtonThemeData? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;

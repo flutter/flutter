@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'colors.dart';
@@ -16,22 +14,22 @@ class CupertinoIconThemeData extends IconThemeData with Diagnosticable {
   /// The opacity applies to both explicit and default icon colors. The value
   /// is clamped between 0.0 and 1.0.
   const CupertinoIconThemeData({
-    Color color,
-    double opacity,
-    double size
+    Color? color,
+    double? opacity,
+    double? size,
   }) : super(color: color, opacity: opacity, size: size);
 
   /// Called by [IconTheme.of] to resolve [color] against the given [BuildContext].
   @override
   IconThemeData resolve(BuildContext context) {
-    final Color resolvedColor = CupertinoDynamicColor.resolve(color, context);
+    final Color? resolvedColor = CupertinoDynamicColor.resolve(color, context);
     return resolvedColor == color ? this : copyWith(color: resolvedColor);
   }
 
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
   @override
-  CupertinoIconThemeData copyWith({ Color color, double opacity, double size }) {
+  CupertinoIconThemeData copyWith({ Color? color, double? opacity, double? size }) {
     return CupertinoIconThemeData(
       color: color ?? this.color,
       opacity: opacity ?? this.opacity,
