@@ -19,7 +19,7 @@ Future<void> main(List<String> rawArgs) async {
   final ProcessResult result = await Process.run(
     'flutter',
     <String>[
-      'generate_localizations',
+      'gen-l10n',
       ...rawArgs,
     ],
   );
