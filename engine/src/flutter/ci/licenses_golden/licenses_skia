@@ -1,4 +1,4 @@
-Signature: a4bdc89922c88658a86abd8284af6921
+Signature: 41a3732cd420fc510eeec5ac7809b7f4
 
 UNUSED LICENSES:
 
@@ -1283,6 +1283,7 @@ FILE: ../../../third_party/skia/infra/bots/test_skia_bundled.isolate
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/linux64/isolate.sha1
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/mac64/isolate.sha1
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/win64/isolate.exe.sha1
+FILE: ../../../third_party/skia/infra/bots/wasm_gm_tests.isolate
 FILE: ../../../third_party/skia/infra/bots/whole_repo.isolate
 FILE: ../../../third_party/skia/infra/canvaskit/docker/canvaskit-emsdk/Dockerfile
 FILE: ../../../third_party/skia/infra/config/recipes.cfg
@@ -6493,6 +6494,7 @@ FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_render_sk
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_skottie_frames/perf_puppeteer_skottie_frames.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_skottie_frames/perf_puppeteer_skottie_frames_test.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/run_gn_to_bp/run_gn_to_bp.go
+FILE: ../../../third_party/skia/infra/bots/task_drivers/run_wasm_gm_tests/run_wasm_gm_tests.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 The Chromium Authors. All rights reserved.
 
