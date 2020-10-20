@@ -180,17 +180,6 @@ class DriveCommand extends RunCommandBase {
       dartSdkPath: globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
    );
     final DriverService driverService = _flutterDriverFactory.createDriverService(web);
-    // if (web) {
-    //   device = WebDriverDevice(
-    //     chromeBinary: stringArg('chrome-binary'),
-    //     headless: boolArg('headless'),
-    //     browserDimension: stringArg('browser-dimension').split(','),
-    //     browserName: stringArg('browser-name'),
-    //     driverPort: stringArg('driver-port'),
-    //     androidEmulator: boolArg('android-emulator'),
-    //   );
-    // }
-
     final BuildInfo buildInfo = getBuildInfo();
     final DebuggingOptions debuggingOptions = createDebuggingOptions();
     final File applicationBinary = stringArg('use-application-binary') == null
