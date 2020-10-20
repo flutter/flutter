@@ -208,9 +208,7 @@ String? svgFilterFromBlendMode(
     case ui.BlendMode.dstOver:
     case ui.BlendMode.clear:
     case ui.BlendMode.srcOver:
-      assert(
-          false,
-          'Invalid svg filter request for blend-mode '
+      assert(false, 'Invalid svg filter request for blend-mode '
           '$colorFilterBlendMode');
       break;
   }
@@ -234,7 +232,7 @@ int _filterIdCounter = 0;
 // A' = a1*R + a2*G + a3*B + a4*A + a5
 String _srcInColorFilterToSvg(ui.Color? color) {
   _filterIdCounter += 1;
-  return '$kSvgResourceHeader'
+  return '<svg width="0" height="0">'
       '<filter id="_fcf$_filterIdCounter" '
       'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
       '<feColorMatrix values="0 0 0 0 1 ' // Ignore input, set it to absolute.
@@ -251,7 +249,7 @@ String _srcInColorFilterToSvg(ui.Color? color) {
 
 String _srcOutColorFilterToSvg(ui.Color? color) {
   _filterIdCounter += 1;
-  return '$kSvgResourceHeader'
+  return '<svg width="0" height="0">'
       '<filter id="_fcf$_filterIdCounter" '
       'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
       '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
@@ -263,7 +261,7 @@ String _srcOutColorFilterToSvg(ui.Color? color) {
 
 String _xorColorFilterToSvg(ui.Color? color) {
   _filterIdCounter += 1;
-  return '$kSvgResourceHeader'
+  return '<svg width="0" height="0">'
       '<filter id="_fcf$_filterIdCounter" '
       'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
       '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
@@ -278,7 +276,7 @@ String _xorColorFilterToSvg(ui.Color? color) {
 String _compositeColorFilterToSvg(
     ui.Color? color, double k1, double k2, double k3, double k4) {
   _filterIdCounter += 1;
-  return '$kSvgResourceHeader'
+  return '<svg width="0" height="0">'
       '<filter id="_fcf$_filterIdCounter" '
       'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
       '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
@@ -297,7 +295,7 @@ String _modulateColorFilterToSvg(ui.Color color) {
   final double r = color.red / 255.0;
   final double b = color.blue / 255.0;
   final double g = color.green / 255.0;
-  return '$kSvgResourceHeader'
+  return '<svg width="0" height="0">'
       '<filter id="_fcf$_filterIdCounter" '
       'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
       '<feColorMatrix values="0 0 0 0 $r ' // Ignore input, set it to absolute.
@@ -314,7 +312,7 @@ String _modulateColorFilterToSvg(ui.Color color) {
 String _blendColorFilterToSvg(ui.Color? color, String? feBlend,
     {bool swapLayers = false}) {
   _filterIdCounter += 1;
-  return '$kSvgResourceHeader'
+  return '<svg width="0" height="0">'
           '<filter id="_fcf$_filterIdCounter" filterUnits="objectBoundingBox" '
           'x="0%" y="0%" width="100%" height="100%">'
           '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
