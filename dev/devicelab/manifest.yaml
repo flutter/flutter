@@ -416,12 +416,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: [ "mac/android" ]
 
-  commands_test:
-    description: >
-      Runs tests of flutter run commands.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
   service_extensions_test:
     description: >
       Validates our service protocol extensions.
