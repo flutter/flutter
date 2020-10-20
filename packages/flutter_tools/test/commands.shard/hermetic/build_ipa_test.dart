@@ -3,321 +3,322 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/build_ipa.dart';
+import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/testbed.dart';
 
-class FakeXcodeProjectInterpreterWithBuildSettings
-    extends FakeXcodeProjectInterpreter {
+class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
-    String scheme,
-    Duration timeout = const Duration(minutes: 1),
-  }) async {
+      String projectPath, {
+        String scheme,
+        Duration timeout = const Duration(minutes: 1),
+      }) async {
     return <String, String>{
       'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+      'DEVELOPMENT_TEAM': 'abc',
     };
   }
 }
 
+final Platform macosPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{
+    'FLUTTER_ROOT': '/',
+  }
+);
+final Platform notMacosPlatform = FakePlatform(
+  operatingSystem: 'linux',
+  environment: <String, String>{
+    'FLUTTER_ROOT': '/',
+  }
+);
+
 void main() {
-  FakePlatform platform;
-  FakeXcodeProjectInterpreterWithBuildSettings xcodeProjectInterpreter;
   FileSystem fileSystem;
+  Usage usage;
   BufferLogger logger;
-  File exportOptions;
+
+  setUpAll(() {
+    Cache.disableLocking();
+  });
 
   setUp(() {
-    Cache.disableLocking();
-    platform = FakePlatform(
-      operatingSystem: 'macos',
-      environment: <String, String>{
-        'FLUTTER_ROOT': '/',
-      },
-    );
-    xcodeProjectInterpreter = FakeXcodeProjectInterpreterWithBuildSettings();
     fileSystem = MemoryFileSystem.test();
+    usage = Usage.test();
     logger = BufferLogger.test();
-    exportOptions = fileSystem.file('ExportOptions.plist');
+  });
+
+  // Sets up the minimal mock project files necessary to look like a Flutter project.
+  void createCoreMockProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-  });
+    fileSystem.file('.packages').createSync();
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+  }
 
-  testUsingContext('validates macOS', () async {
-    final BuildIPACommand command = BuildIPACommand(
-      platform: FakePlatform(operatingSystem: 'linux'),
-      xcodeProjectInterpreter: xcodeProjectInterpreter,
-      fileSystem: fileSystem,
-      logger: logger,
-      processManager: FakeProcessManager.any(),
-    );
+  // Sets up the minimal mock project files necessary for iOS builds to succeed.
+  void createMinimalMockProjectFiles() {
+    fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcodeproj')).createSync(recursive: true);
+    fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcworkspace')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj')).createSync();
+    createCoreMockProjectFiles();
+  }
 
-    await expectToolExitLater(
-      createTestCommandRunner(command).run(<String>['ipa']),
-      equals('Building for iOS is only supported on macOS.'),
+  const FakeCommand xattrCommand = FakeCommand(command: <String>[
+    'xattr', '-r', '-d', 'com.apple.FinderInfo', '/ios'
+  ]);
+
+  const FakeCommand armCheckCommand = FakeCommand(
+    command: <String>[
+      'sysctl',
+      'hw.optional.arm64',
+    ],
+    exitCode: 1,
+  );
+
+  // Creates a FakeCommand for the xcodebuild call to build the app
+  // in the given configuration.
+  FakeCommand setUpMockXcodeBuildHandler({ bool verbose = false, bool showBuildSettings = false, void Function() onRun }) {
+    return FakeCommand(
+      command: <String>[
+        'xcrun',
+        'xcodebuild',
+        '-configuration', 'Release',
+        if (verbose)
+          'VERBOSE_SCRIPT_LOGGING=YES'
+        else
+          '-quiet',
+        '-workspace', 'Runner.xcworkspace',
+        '-scheme', 'Runner',
+        'BUILD_DIR=/build/ios',
+        '-sdk', 'iphoneos',
+        'FLUTTER_SUPPRESS_ANALYTICS=true',
+        'COMPILER_INDEX_STORE_ENABLE=NO',
+        '-archivePath', '/build/ios/archive/Runner',
+        'archive',
+        if (showBuildSettings)
+          '-showBuildSettings',
+      ],
+      stdout: 'STDOUT STUFF',
+      onRun: onRun,
     );
+  }
+
+  const FakeCommand exportArchiveCommand = FakeCommand(
+    command: <String>[
+      'xcrun',
+      'xcodebuild',
+      '-exportArchive',
+      '-archivePath',
+      '/build/ios/archive/Runner.xcarchive',
+      '-exportPath',
+      '/build/ios/ipa',
+      '-exportOptionsPlist',
+      '/ExportOptions.plist'
+    ],
+  );
+
+  testUsingContext('ipa build fails when there is no ios project', () async {
+    final BuildCommand command = BuildCommand();
+    createCoreMockProjectFiles();
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['build', 'ipa', '--no-pub']
+    ), throwsToolExit(message: 'Application not configured for iOS'));
   }, overrides: <Type, Generator>{
-    Platform: () => platform,
+    Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Logger: () => logger,
-    XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('validates export plist', () async {
-    final BuildIPACommand command = BuildIPACommand(
-      platform: platform,
-      xcodeProjectInterpreter: xcodeProjectInterpreter,
-      fileSystem: fileSystem,
-      logger: logger,
-      processManager: FakeProcessManager.any(),
-    );
+  testUsingContext('ipa build fails on non-macOS platform', () async {
+    final BuildCommand command = BuildCommand();
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.packages').createSync();
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
+      .createSync(recursive: true);
 
-    await expectToolExitLater(
-      createTestCommandRunner(command).run(<String>['ipa']),
-      contains('--export-options-plist file is required.'),
-    );
+    expect(createTestCommandRunner(command).run(
+      const <String>['build', 'ipa', '--no-pub']
+    ), throwsToolExit());
   }, overrides: <Type, Generator>{
-    Platform: () => platform,
+    Platform: () => notMacosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Logger: () => logger,
-    XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('validates export plist exists', () async {
-    final BuildIPACommand command = BuildIPACommand(
-      platform: platform,
-      xcodeProjectInterpreter: xcodeProjectInterpreter,
-      fileSystem: fileSystem,
-      logger: logger,
-      processManager: FakeProcessManager.any(),
-    );
+  testUsingContext('ipa build fails when export plist does not exist',
+      () async {
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
 
     await expectToolExitLater(
-      createTestCommandRunner(command)
-          .run(<String>['ipa', '--export-options-plist', 'bogus.plist']),
+      createTestCommandRunner(command).run(<String>[
+        'build',
+        'ipa',
+        '--export-options-plist',
+        'bogus.plist',
+        '--no-pub',
+      ]),
       contains('property list does not exist'),
     );
   }, overrides: <Type, Generator>{
-    Platform: () => platform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Logger: () => logger,
-    XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('validates export plist is file', () async {
+  testUsingContext('ipa build fails when export plist is not a file', () async {
     final Directory bogus = fileSystem.directory('bogus')..createSync();
-    final BuildIPACommand command = BuildIPACommand(
-      platform: platform,
-      xcodeProjectInterpreter: xcodeProjectInterpreter,
-      fileSystem: fileSystem,
-      logger: logger,
-      processManager: FakeProcessManager.any(),
-    );
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
 
     await expectToolExitLater(
-      createTestCommandRunner(command)
-          .run(<String>['ipa', '--export-options-plist', bogus.path]),
+      createTestCommandRunner(command).run(<String>[
+        'build',
+        'ipa',
+        '--export-options-plist',
+        bogus.path,
+        '--no-pub',
+      ]),
       contains('is not a file.'),
     );
   }, overrides: <Type, Generator>{
-    Platform: () => platform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Logger: () => logger,
-    XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('validates Xcode installed', () async {
-    exportOptions.createSync();
-    xcodeProjectInterpreter.isInstalled = false;
-    final BuildIPACommand command = BuildIPACommand(
-      platform: platform,
-      xcodeProjectInterpreter: xcodeProjectInterpreter,
-      fileSystem: fileSystem,
-      logger: logger,
-      processManager: FakeProcessManager.any(),
-    );
-    await expectToolExitLater(
-      createTestCommandRunner(command)
-          .run(<String>['ipa', '--export-options-plist', exportOptions.path]),
-      equals('Cannot find "xcodebuild". Run "flutter doctor".'),
+  testUsingContext('ipa build invokes xcode build', () async {
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ipa', '--no-pub']
     );
   }, overrides: <Type, Generator>{
-    Platform: () => platform,
     FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    Logger: () => logger,
-    XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      xattrCommand,
+      armCheckCommand,
+      setUpMockXcodeBuildHandler(),
+      setUpMockXcodeBuildHandler(showBuildSettings: true),
+    ]),
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('validates iOS project', () async {
-    exportOptions.createSync();
-    final BuildIPACommand command = BuildIPACommand(
-      platform: platform,
-      xcodeProjectInterpreter: xcodeProjectInterpreter,
-      fileSystem: fileSystem,
-      logger: logger,
-      processManager: FakeProcessManager.any(),
-    );
+  testUsingContext('ipa build invokes xcode build with verbosity', () async {
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
 
-    await expectToolExitLater(
-      createTestCommandRunner(command)
-          .run(<String>['ipa', '--export-options-plist', exportOptions.path]),
-      equals('Application not configured for iOS.'),
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ipa', '--no-pub', '-v']
     );
   }, overrides: <Type, Generator>{
-    Platform: () => platform,
     FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    Logger: () => logger,
-    XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      xattrCommand,
+      armCheckCommand,
+      setUpMockXcodeBuildHandler(verbose: true),
+      setUpMockXcodeBuildHandler(verbose: true, showBuildSettings: true),
+    ]),
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  group('with iOS project', () {
-    setUp(() {
-      exportOptions.createSync();
-      fileSystem
-          .directory(fileSystem.path.join('ios', 'Runner.xcodeproj'))
-          .createSync(recursive: true);
-      fileSystem
-          .directory(fileSystem.path.join('ios', 'Runner.xcworkspace'))
-          .createSync(recursive: true);
-      fileSystem
-          .file(fileSystem.path
-              .join('ios', 'Runner.xcodeproj', 'project.pbxproj'))
-          .createSync();
-      fileSystem.file('.packages').createSync();
-      fileSystem
-          .file(fileSystem.path.join('lib', 'main.dart'))
-          .createSync(recursive: true);
-    });
+  testUsingContext('Performs code size analysis and sends analytics', () async {
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
 
-    testUsingContext('validates xcarchive present', () async {
-      final BuildIPACommand command = BuildIPACommand(
-        platform: platform,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-      );
+    fileSystem.file('build/ios/Release-iphoneos/Runner.app/Frameworks/App.framework/App')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
 
-      await expectToolExitLater(
-        createTestCommandRunner(command)
-            .run(<String>['ipa', '--export-options-plist', exportOptions.path]),
-        contains('xcarchive not found'),
-      );
-    }, overrides: <Type, Generator>{
-      Platform: () => platform,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => logger,
-      XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-    });
+    // Capture Usage.test() events.
+    final StringBuffer buffer = await capturedConsolePrint(() =>
+      createTestCommandRunner(command).run(
+        const <String>['build', 'ipa', '--no-pub', '--analyze-size']
+      )
+    );
 
-    group('with xcarchive', () {
-      Directory xcarchivePath;
-      String outputPath;
-      setUp(() {
-        xcarchivePath = fileSystem.directory(
-            fileSystem.path.join('build', 'ios', 'archive', 'Runner.xcarchive'))
-          ..createSync(recursive: true);
-        outputPath = fileSystem.path
-            .absolute(fileSystem.path.join('build', 'ios', 'ipa'));
-      });
+    expect(testLogger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
+    expect(buffer.toString(), contains('event {category: code-size-analysis, action: ios, label: null, value: null, cd33: '));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      xattrCommand,
+      armCheckCommand,
+      setUpMockXcodeBuildHandler(onRun: () {
+        fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+[
+  {
+    "l": "dart:_internal",
+    "c": "SubListIterable",
+    "n": "[Optimized] skip",
+    "s": 2400
+  }
+]''');
+        fileSystem.file('build/flutter_size_01/trace.arm64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{}');
+      }),
+      setUpMockXcodeBuildHandler(showBuildSettings: true),
+    ]),
+    Platform: () => macosPlatform,
+    FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
+    Usage: () => usage,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
 
-      testUsingContext('shows xcodebuild error on failure', () async {
-        final FakeProcessManager processManager =
-            FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'xcodebuild',
-              '-exportArchive',
-              '-archivePath',
-              fileSystem.path.absolute(xcarchivePath.path),
-              '-exportPath',
-              outputPath,
-              '-exportOptionsPlist',
-              exportOptions.path,
-            ],
-            stderr:
-                'error: exportArchive: exportOptionsPlist error for key "method": expected one of {app-store, ad-hoc, enterprise, development, validation}, but found developmentasdasd\n'
-                ' Error Domain=IDEFoundationErrorDomain Code=1 "exportOptionsPlist error for key "method": expected one of {app-store, ad-hoc, enterprise, development, validation}, but found developmentasdasd"',
-            exitCode: 70,
-          ),
-        ]);
+  testUsingContext('ipa build invokes xcode build export archive', () async {
+    final String outputPath =
+        fileSystem.path.absolute(fileSystem.path.join('build', 'ios', 'ipa'));
+    final File exportOptions = fileSystem.file('ExportOptions.plist')
+      ..createSync();
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
 
-        final BuildIPACommand command = BuildIPACommand(
-          platform: platform,
-          xcodeProjectInterpreter: xcodeProjectInterpreter,
-          fileSystem: fileSystem,
-          logger: logger,
-          processManager: processManager,
-        );
+    await createTestCommandRunner(command).run(
+      <String>[
+        'build',
+        'ipa',
+        '--no-pub',
+        '--export-options-plist',
+        exportOptions.path,
+      ],
+    );
 
-        await expectToolExitLater(
-          createTestCommandRunner(command).run(
-              <String>['ipa', '--export-options-plist', exportOptions.path]),
-          allOf(
-              contains(
-                  'error: exportArchive: exportOptionsPlist error for key "method"'),
-              isNot(contains('Error Domain=IDEFoundationErrorDomain'))),
-        );
-        expect(processManager.hasRemainingExpectations, isFalse);
-      }, overrides: <Type, Generator>{
-        Platform: () => platform,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-      });
-
-      testUsingContext('shows output directory on success', () async {
-        final FakeProcessManager processManager =
-            FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'xcodebuild',
-              '-exportArchive',
-              '-archivePath',
-              fileSystem.path.absolute(xcarchivePath.path),
-              '-exportPath',
-              fileSystem.path.absolute(outputPath),
-              '-exportOptionsPlist',
-              exportOptions.path,
-            ],
-          ),
-        ]);
-
-        final BuildIPACommand command = BuildIPACommand(
-          platform: platform,
-          xcodeProjectInterpreter: xcodeProjectInterpreter,
-          fileSystem: fileSystem,
-          logger: logger,
-          processManager: processManager,
-        );
-
-        await createTestCommandRunner(command)
-            .run(<String>['ipa', '--export-options-plist', exportOptions.path]);
-        expect(logger.statusText, contains('Built IPA to $outputPath.'));
-        expect(processManager.hasRemainingExpectations, isFalse);
-      }, overrides: <Type, Generator>{
-        Platform: () => platform,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-      });
-    });
+    expect(logger.statusText, contains('Built IPA to $outputPath.'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+          xattrCommand,
+          armCheckCommand,
+          setUpMockXcodeBuildHandler(),
+          setUpMockXcodeBuildHandler(showBuildSettings: true),
+          exportArchiveCommand,
+        ]),
+    Platform: () => macosPlatform,
+    Logger: () => logger,
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 }

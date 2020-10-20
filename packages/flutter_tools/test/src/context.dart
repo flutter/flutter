@@ -376,10 +376,8 @@ class FakeUsage implements Usage {
 }
 
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter() : isInstalled = true;
-
   @override
-  bool isInstalled;
+  bool get isInstalled => true;
 
   @override
   String get versionText => 'Xcode 11.0';
