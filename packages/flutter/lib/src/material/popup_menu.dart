@@ -112,7 +112,7 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
 
   /// The color of the divider if it's selected.
   @override
-  final Color? color;
+  final Color color;
 
   @override
   bool represents(void value) => false;
