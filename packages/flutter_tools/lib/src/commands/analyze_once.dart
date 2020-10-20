@@ -137,7 +137,6 @@ class AnalyzeOnce extends AnalyzeBase {
       progress = argResults['preamble'] as bool
           ? logger.startProgress(
             'Analyzing $message...',
-            timeout: timeoutConfiguration.slowOperation,
           )
           : null;
 
@@ -182,8 +181,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (errorCount > 0) {
       logger.printStatus('');
-      // We consider any level of error to be an error exit (we don't report different levels).
-      throwToolExit(errorsMessage);
+      throwToolExit(errorsMessage, exitCode: _isFatal(errors) ? 1 : 0);
     }
 
     if (argResults['congratulate'] as bool) {
@@ -193,5 +191,22 @@ class AnalyzeOnce extends AnalyzeBase {
     if (server.didServerErrorOccur) {
       throwToolExit('Server error(s) occurred. (ran in ${seconds}s)');
     }
+  }
+
+  bool _isFatal(List<AnalysisError> errors) {
+    for (final AnalysisError error in errors) {
+      final AnalysisSeverity severityLevel = error.writtenError.severityLevel;
+      if (severityLevel == AnalysisSeverity.error) {
+        return true;
+      }
+      if (severityLevel == AnalysisSeverity.warning &&
+        (argResults['fatal-warnings'] as bool || argResults['fatal-infos'] as bool)) {
+        return true;
+      }
+      if (severityLevel == AnalysisSeverity.info && argResults['fatal-infos'] as bool) {
+        return true;
+      }
+    }
+    return false;
   }
 }

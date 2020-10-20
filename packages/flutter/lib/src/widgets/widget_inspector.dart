@@ -970,7 +970,7 @@ mixin WidgetInspectorService {
   void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     _structuredExceptionHandler = _reportError;
     if (isStructuredErrorsEnabled()) {
-      FlutterError.onError = _structuredExceptionHandler!;
+      FlutterError.onError = _structuredExceptionHandler;
     }
     _registerServiceExtensionCallback = registerServiceExtensionCallback;
     assert(!_debugServiceExtensionsRegistered);
@@ -2284,10 +2284,8 @@ class _WidgetInspectorState extends State<WidgetInspector>
     if (_lastPointerLocation != null) {
       _inspectAt(_lastPointerLocation!);
 
-      if (selection != null) {
-        // Notify debuggers to open an inspector on the object.
-        developer.inspect(selection.current);
-      }
+      // Notify debuggers to open an inspector on the object.
+      developer.inspect(selection.current);
     }
     setState(() {
       // Only exit select mode if there is a button to return to select mode.

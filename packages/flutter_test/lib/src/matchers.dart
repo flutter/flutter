@@ -468,6 +468,7 @@ Matcher matchesSemantics({
   bool hasToggledState = false,
   bool isToggled = false,
   bool hasImplicitScrolling = false,
+  bool isSlider = false,
   // Actions //
   bool hasTapAction = false,
   bool hasLongPressAction = false,
@@ -519,6 +520,7 @@ Matcher matchesSemantics({
     if (hasToggledState) SemanticsFlag.hasToggledState,
     if (isToggled) SemanticsFlag.isToggled,
     if (hasImplicitScrolling) SemanticsFlag.hasImplicitScrolling,
+    if (isSlider) SemanticsFlag.isSlider
   ];
 
   final List<SemanticsAction> actions = <SemanticsAction>[
@@ -1362,7 +1364,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   bool renderObjectMatchesM(Map<dynamic, dynamic> matchState, RenderPhysicalShape renderObject) {
     if (renderObject.clipper.runtimeType != ShapeBorderClipper)
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
-    final ShapeBorderClipper shapeClipper = renderObject.clipper as ShapeBorderClipper;
+    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
 
     if (borderRadius != null && !assertRoundedRectangle(shapeClipper, borderRadius!, matchState))
       return false;
@@ -1430,7 +1432,7 @@ class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, Re
   bool renderObjectMatchesM(Map<dynamic, dynamic> matchState, RenderPhysicalShape renderObject) {
     if (renderObject.clipper.runtimeType != ShapeBorderClipper)
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
-    final ShapeBorderClipper shapeClipper = renderObject.clipper as ShapeBorderClipper;
+    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
 
     if (shapeClipper.shape != shape)
       return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
@@ -1469,7 +1471,7 @@ class _ClipsWithBoundingRect extends _MatchRenderObject<RenderClipPath, RenderCl
   bool renderObjectMatchesM(Map<dynamic, dynamic> matchState, RenderClipPath renderObject) {
     if (renderObject.clipper.runtimeType != ShapeBorderClipper)
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
-    final ShapeBorderClipper shapeClipper = renderObject.clipper as ShapeBorderClipper;
+    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
     if (shapeClipper.shape.runtimeType != RoundedRectangleBorder)
       return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
     final RoundedRectangleBorder border = shapeClipper.shape as RoundedRectangleBorder;
@@ -1504,7 +1506,7 @@ class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderC
   bool renderObjectMatchesM(Map<dynamic, dynamic> matchState, RenderClipPath renderObject) {
     if (renderObject.clipper.runtimeType != ShapeBorderClipper)
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
-    final ShapeBorderClipper shapeClipper = renderObject.clipper as ShapeBorderClipper;
+    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
     if (shapeClipper.shape.runtimeType != RoundedRectangleBorder)
       return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
     final RoundedRectangleBorder border = shapeClipper.shape as RoundedRectangleBorder;
@@ -1527,7 +1529,7 @@ class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, RenderCli
   bool renderObjectMatchesM(Map<dynamic, dynamic> matchState, RenderClipPath renderObject) {
     if (renderObject.clipper.runtimeType != ShapeBorderClipper)
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
-    final ShapeBorderClipper shapeClipper = renderObject.clipper as ShapeBorderClipper;
+    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
     if (shapeClipper.shape != shape)
       return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
     return true;

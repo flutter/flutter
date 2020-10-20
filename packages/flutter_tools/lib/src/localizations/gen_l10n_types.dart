@@ -104,7 +104,7 @@ const Set<String> _validNumberFormats = <String>{
 // The names of the NumberFormat factory constructors which have named
 // parameters rather than positional parameters.
 //
-// This helps the tool correctly generate number formmatting code correctly.
+// This helps the tool correctly generate number formatting code correctly.
 //
 // Example of code that uses named parameters:
 // final NumberFormat format = NumberFormat.compact(
@@ -176,7 +176,7 @@ class OptionalParameter {
 // Each placeholder can optionally specify a valid Dart type. If the type
 // is NumberFormat or DateFormat then a format which matches one of the
 // type's factory constructors can also be specified. In this example the
-// date placeholder is to be formated with DateFormat.yMMMMd:
+// date placeholder is to be formatted with DateFormat.yMMMMd:
 //
 // "helloWorldOn": "Hello World on {date}",
 // "@helloWorldOn": {

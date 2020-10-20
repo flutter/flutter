@@ -8,7 +8,6 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
@@ -79,11 +78,10 @@ Future<void> buildMacOS({
   final Stopwatch sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress(
     'Building macOS application...',
-    timeout: null,
   );
   int result;
   try {
-    result = await processUtils.stream(<String>[
+    result = await globals.processUtils.stream(<String>[
       '/usr/bin/env',
       'xcrun',
       'xcodebuild',

@@ -28,7 +28,7 @@ import 'platform.dart';
 ///
 /// Cf. If there is some hope that the tool can continue when an operation fails
 /// with an error, then that error/operation should not be handled here. For
-/// example, the tool should gernerally be able to continue executing even if it
+/// example, the tool should generally be able to continue executing even if it
 /// fails to delete a file.
 class ErrorHandlingFileSystem extends ForwardingFileSystem {
   ErrorHandlingFileSystem({
@@ -61,6 +61,40 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
     } finally {
       ErrorHandlingFileSystem._noExitOnFailure = previousValue;
     }
+  }
+
+  /// Delete the file or directory and return true if it exists, take no
+  /// action and return false if it does not.
+  ///
+  /// This method should be preferred to checking if it exists and
+  /// then deleting, because it handles the edge case where the file or directory
+  /// is deleted by a different program between the two calls.
+  static bool deleteIfExists(FileSystemEntity file, {bool recursive = false}) {
+    if (!file.existsSync()) {
+      return false;
+    }
+    try {
+      file.deleteSync(recursive: recursive);
+    } on FileSystemException catch (err) {
+      // Certain error codes indicate the file could not be found. It could have
+      // been deleted by a different program while the tool was running.
+      // if it still exists, the file likely exists on a read-only volume.
+      //
+      // On windows this is error code 2: ERROR_FILE_NOT_FOUND, and on
+      // macOS/Linux it is error code 2/ENOENT: No such file or directory.
+      const int kSystemCannotFindFile = 2;
+      if (err?.osError?.errorCode != kSystemCannotFindFile || _noExitOnFailure) {
+        rethrow;
+      }
+      if (file.existsSync()) {
+        throwToolExit(
+          'The Flutter tool tried to delete the file or directory ${file.path} but was '
+          'unable to. This may be due to the file and/or project\'s location on a read-only '
+          'volume. Consider relocating the project and trying again',
+        );
+      }
+    }
+    return true;
   }
 
   static bool _noExitOnFailure = false;
@@ -474,7 +508,7 @@ T _runSync<T>(T Function() op, {
 /// as a [ToolExit] using [throwToolExit].
 ///
 /// See also:
-///   * [ErrorHandlngFileSystem], for a similar file system strategy.
+///   * [ErrorHandlingFileSystem], for a similar file system strategy.
 class ErrorHandlingProcessManager extends ProcessManager {
   ErrorHandlingProcessManager({
     @required ProcessManager delegate,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -373,7 +371,7 @@ class _TickerWatchingWidget extends StatefulWidget {
 }
 
 class _TickerWatchingWidgetState extends State<_TickerWatchingWidget> with SingleTickerProviderStateMixin {
-  Ticker ticker;
+  late Ticker ticker;
 
   @override
   void initState() {

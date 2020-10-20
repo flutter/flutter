@@ -370,8 +370,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
     final ThemeData theme = Theme.of(context)!;
     final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
-    TextStyle defaultTextStyle;
-    BoxDecoration defaultDecoration;
+    final TextStyle defaultTextStyle;
+    final BoxDecoration defaultDecoration;
     if (theme.brightness == Brightness.dark) {
       defaultTextStyle = theme.textTheme.bodyText2!.copyWith(
         color: Colors.black,
@@ -515,7 +515,7 @@ class _TooltipOverlay extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: height),
               child: DefaultTextStyle(
-                style: Theme.of(context)!.textTheme.bodyText2,
+                style: Theme.of(context)!.textTheme.bodyText2!,
                 child: Container(
                   decoration: decoration,
                   padding: padding,

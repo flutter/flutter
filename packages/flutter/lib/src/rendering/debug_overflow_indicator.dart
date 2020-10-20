@@ -120,7 +120,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
 
   String _formatPixels(double value) {
     assert(value > 0.0);
-    String pixels;
+    final String pixels;
     if (value > 10.0) {
       pixels = value.toStringAsFixed(0);
     } else if (value > 1.0) {

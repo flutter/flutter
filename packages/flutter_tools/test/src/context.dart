@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
@@ -126,7 +127,6 @@ void testUsingContext(
           Usage: () => FakeUsage(),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
           FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
-          TimeoutConfiguration: () => const TimeoutConfiguration(),
           PlistParser: () => FakePlistParser(),
           Signals: () => FakeSignals(),
           Pub: () => ThrowingPub(), // prevent accidentally using pub.
@@ -295,6 +295,9 @@ class FakeOperatingSystemUtils implements OperatingSystemUtils {
   ProcessResult makeExecutable(File file) => null;
 
   @override
+  HostPlatform hostPlatform = HostPlatform.linux_x64;
+
+  @override
   void chmod(FileSystemEntity entity, String mode) { }
 
   @override
@@ -305,9 +308,6 @@ class FakeOperatingSystemUtils implements OperatingSystemUtils {
 
   @override
   File makePipe(String path) => null;
-
-  @override
-  void zip(Directory data, File zipFile) { }
 
   @override
   void unzip(File file, Directory targetDirectory) { }

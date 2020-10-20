@@ -28,7 +28,7 @@ class AsymmetricView extends StatelessWidget {
     return List<Container>.generate(_listItemCount(products.length), (int index) {
       double width = .59 * MediaQuery.of(context).size.width;
       Widget column;
-      if (index % 2 == 0) {
+      if (index.isEven) {
         /// Even cases
         final int bottom = _evenCasesIndex(index);
         column = TwoProductCardColumn(

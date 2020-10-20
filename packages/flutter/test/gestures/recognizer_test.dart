@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 
 class TestGestureRecognizer extends GestureRecognizer {
-  TestGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  TestGestureRecognizer({ Object? debugOwner }) : super(debugOwner: debugOwner);
 
   @override
   String get debugDescription => 'debugDescription content';

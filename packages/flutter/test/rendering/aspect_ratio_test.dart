@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -117,7 +115,7 @@ void main() {
     });
     expect(errors, hasLength(2));
     expect(errors.first.exception, isFlutterError);
-    expect(errors.first.exception.toStringDeep(),
+    expect((errors.first.exception as FlutterError).toStringDeep(),
       'FlutterError\n'
       '   RenderAspectRatio has unbounded constraints.\n'
       '   This RenderAspectRatio was given an aspect ratio of 0.5 but was\n'

@@ -1307,7 +1307,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Used in debug messages.
   Object? debugCreator;
 
-  void _debugReportException(String method, dynamic exception, StackTrace stack) {
+  void _debugReportException(String method, Object exception, StackTrace stack) {
     FlutterError.reportError(FlutterErrorDetails(
       exception: exception,
       stack: stack,

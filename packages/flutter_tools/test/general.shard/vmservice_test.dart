@@ -104,31 +104,10 @@ void main() {
       null,
       null,
       null,
-      null,
       mockVMService,
     );
 
     verify(mockVMService.registerService('reloadSources', 'Flutter Tools')).called(1);
-  }, overrides: <Type, Generator>{
-    Logger: () => BufferLogger.test()
-  });
-
-  testUsingContext('VmService registers reloadMethod', () async {
-    Future<void> reloadMethod({  String classId, String libraryId,}) async {}
-
-    final MockVMService mockVMService = MockVMService();
-    setUpVmService(
-      null,
-      null,
-      null,
-      null,
-      reloadMethod,
-      null,
-      null,
-      mockVMService,
-    );
-
-    verify(mockVMService.registerService('reloadMethod', 'Flutter Tools')).called(1);
   }, overrides: <Type, Generator>{
     Logger: () => BufferLogger.test()
   });
@@ -144,7 +123,6 @@ void main() {
       mockDevice,
       null,
       null,
-      null,
       mockVMService,
     );
 
@@ -156,7 +134,6 @@ void main() {
   testUsingContext('VmService registers flutterGetSkSL service', () async {
     final MockVMService mockVMService = MockVMService();
     setUpVmService(
-      null,
       null,
       null,
       null,
@@ -182,7 +159,6 @@ void main() {
       null,
       null,
       null,
-      null,
       (vm_service.Event event) async => 'hello',
       mockVMService,
     );
@@ -194,7 +170,6 @@ void main() {
   testUsingContext('VMService returns correct FlutterVersion', () async {
     final MockVMService mockVMService = MockVMService();
     setUpVmService(
-      null,
       null,
       null,
       null,

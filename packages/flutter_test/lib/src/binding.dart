@@ -101,11 +101,11 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   int get pendingMessageCount => _pendingMessages.length;
 
   @override
-  Future<ByteData?> send(String channel, ByteData? message) {
-    final Future<ByteData?> resultFuture = delegate.send(channel, message);
-    // Removes the future itself from the [_pendingMessages] list when it
-    // completes.
+  Future<ByteData?>? send(String channel, ByteData? message) {
+    final Future<ByteData?>? resultFuture = delegate.send(channel, message);
     if (resultFuture != null) {
+      // Removes the future itself from the [_pendingMessages] list when it
+      // completes.
       _pendingMessages.add(resultFuture);
       resultFuture.whenComplete(() => _pendingMessages.remove(resultFuture));
     }
@@ -686,7 +686,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     };
     final Completer<void> testCompleter = Completer<void>();
     final VoidCallback testCompletionHandler = _createTestCompletionHandler(description, testCompleter);
-    void handleUncaughtError(dynamic exception, StackTrace stack) {
+    void handleUncaughtError(Object exception, StackTrace stack) {
       if (testCompleter.isCompleted) {
         // Well this is not a good sign.
         // Ideally, once the test has failed we would stop getting errors from the test.
@@ -765,7 +765,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _parentZone!.run<void>(testCompletionHandler);
     }
     final ZoneSpecification errorHandlingZoneSpecification = ZoneSpecification(
-      handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone, dynamic exception, StackTrace stack) {
+      handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone, Object exception, StackTrace stack) {
         handleUncaughtError(exception, stack);
       }
     );
@@ -1013,7 +1013,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     return realAsyncZone.run<Future<T>>(() {
       _pendingAsyncTasks = Completer<void>();
-      return callback().catchError((dynamic exception, StackTrace stack) {
+      return callback().catchError((Object exception, StackTrace stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
@@ -1780,8 +1780,7 @@ class _LiveTestRenderView extends RenderView {
     _label ??= TextPainter(textAlign: TextAlign.left, textDirection: TextDirection.ltr);
     _label!.text = TextSpan(text: value, style: _labelStyle);
     _label!.layout();
-    if (onNeedPaint != null)
-      onNeedPaint();
+    onNeedPaint();
   }
 
   @override

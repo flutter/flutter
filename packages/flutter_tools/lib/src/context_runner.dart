@@ -47,6 +47,7 @@ import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
 import 'run_hot.dart';
+import 'runner/local_engine.dart';
 import 'version.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio.dart';
@@ -110,7 +111,6 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
-        timeoutConfiguration: timeoutConfiguration,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(
         globals.cocoaPods,
@@ -144,10 +144,14 @@ Future<T> runInContext<T>(
         config: globals.config,
         fuchsiaWorkflow: fuchsiaWorkflow,
         xcDevice: globals.xcdevice,
+        userMessages: globals.userMessages,
+        windowsWorkflow: windowsWorkflow,
         macOSWorkflow: MacOSWorkflow(
           platform: globals.platform,
           featureFlags: featureFlags,
         ),
+        operatingSystemUtils: globals.os,
+        terminal: globals.terminal,
       ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
@@ -180,18 +184,23 @@ Future<T> runInContext<T>(
         xcode: globals.xcode,
         platform: globals.platform,
       ),
+      LocalEngineLocator: () => LocalEngineLocator(
+        userMessages: userMessages,
+        logger: globals.logger,
+        platform: globals.platform,
+        fileSystem: globals.fs,
+        flutterRoot: Cache.flutterRoot,
+      ),
       Logger: () => globals.platform.isWindows
         ? WindowsStdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: globals.outputPreferences,
-            timeoutConfiguration: timeoutConfiguration,
           )
         : StdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: globals.outputPreferences,
-            timeoutConfiguration: timeoutConfiguration,
           ),
       MacOSWorkflow: () => MacOSWorkflow(
         featureFlags: featureFlags,
@@ -231,7 +240,6 @@ Future<T> runInContext<T>(
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
-      TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(
         runningOnBot: runningOnBot,
       ),
@@ -249,7 +257,10 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         platform: globals.platform,
       ),
-      WindowsWorkflow: () => const WindowsWorkflow(),
+      WindowsWorkflow: () => WindowsWorkflow(
+        featureFlags: featureFlags,
+        platform: globals.platform,
+      ),
       Xcode: () => Xcode(
         logger: globals.logger,
         processManager: globals.processManager,

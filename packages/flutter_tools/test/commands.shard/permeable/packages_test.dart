@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -182,9 +183,7 @@ void main() {
       ].expand<String>((List<String> list) => list);
       for (final String path in allFiles) {
         final File file = globals.fs.file(globals.fs.path.join(projectPath, path));
-        if (file.existsSync()) {
-          file.deleteSync();
-        }
+        ErrorHandlingFileSystem.deleteIfExists(file);
       }
     }
 

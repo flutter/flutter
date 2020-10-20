@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -33,7 +31,7 @@ void main() {
     await tester.pumpWidget(
       WidgetsApp(
         key: key,
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return const Placeholder();
         },
         color: const Color(0xFF123456),
@@ -43,17 +41,17 @@ void main() {
   });
 
   testWidgets('WidgetsApp can override default key bindings', (WidgetTester tester) async {
-    bool checked = false;
+    bool? checked = false;
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       WidgetsApp(
         key: key,
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return Material(
             child: Checkbox(
               value: checked,
               autofocus: true,
-              onChanged: (bool value) {
+              onChanged: (bool? value) {
                 checked = value;
               },
             ),
@@ -79,12 +77,12 @@ void main() {
         shortcuts: <LogicalKeySet, Intent> {
           LogicalKeySet(LogicalKeyboardKey.space): const TestIntent(),
         },
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return Material(
             child: Checkbox(
               value: checked,
               autofocus: true,
-              onChanged: (bool value) {
+              onChanged: (bool? value) {
                 checked = value;
               },
             ),
@@ -104,16 +102,16 @@ void main() {
   });
 
   testWidgets('WidgetsApp default activation key mappings work', (WidgetTester tester) async {
-    bool checked = false;
+    bool? checked = false;
 
     await tester.pumpWidget(
       WidgetsApp(
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return Material(
             child: Checkbox(
               value: checked,
               autofocus: true,
-              onChanged: (bool value) {
+              onChanged: (bool? value) {
                 checked = value;
               },
             ),
@@ -147,15 +145,15 @@ void main() {
 
   group('error control test', () {
     Future<void> expectFlutterError({
-      GlobalKey<NavigatorState> key,
-      Widget widget,
-      WidgetTester tester,
-      String errorMessage,
+      required GlobalKey<NavigatorState> key,
+      required Widget widget,
+      required WidgetTester tester,
+      required String errorMessage,
     }) async {
       await tester.pumpWidget(widget);
-      FlutterError error;
+      late FlutterError error;
       try {
-        key.currentState.pushNamed('/path');
+        key.currentState!.pushNamed('/path');
       } on FlutterError catch (e) {
         error = e;
       } finally {
@@ -258,7 +256,7 @@ void main() {
     expect(find.text('non-regular page two'), findsOneWidget);
     expect(find.text('non-regular page one'), findsNothing);
     expect(find.text('regular page'), findsNothing);
-    navigatorKey.currentState.pop();
+    navigatorKey.currentState!.pop();
     await tester.pumpAndSettle();
     expect(find.text('non-regular page two'), findsNothing);
     expect(find.text('non-regular page one'), findsOneWidget);
@@ -273,7 +271,7 @@ void main() {
     );
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location);
+        return Text(information.location!);
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
         delegate.routeInformation = const RouteInformation(
@@ -292,7 +290,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -300,8 +298,9 @@ void main() {
   testWidgets('WidgetsApp.router has correct default', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location);
+        return Text(information.location!);
       },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) => true,
     );
     await tester.pumpWidget(WidgetsApp.router(
       routeInformationParser: SimpleRouteInformationParser(),
@@ -331,22 +330,22 @@ class SimpleRouteInformationParser extends RouteInformationParser<RouteInformati
 
 class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
   SimpleNavigatorRouterDelegate({
-    @required this.builder,
-    this.onPopPage,
+    required this.builder,
+    required this.onPopPage,
   });
 
   @override
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   RouteInformation get routeInformation => _routeInformation;
-  RouteInformation _routeInformation;
+  late RouteInformation _routeInformation;
   set routeInformation(RouteInformation newValue) {
     _routeInformation = newValue;
     notifyListeners();
   }
 
-  SimpleRouterDelegateBuilder builder;
-  SimpleNavigatorRouterDelegatePopPage<void> onPopPage;
+  final SimpleRouterDelegateBuilder builder;
+  final SimpleNavigatorRouterDelegatePopPage<void> onPopPage;
 
   @override
   Future<void> setNewRoutePath(RouteInformation configuration) {
@@ -370,7 +369,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
           child: Text('base'),
         ),
         MaterialPage<void>(
-          key: ValueKey<String>(routeInformation?.location),
+          key: ValueKey<String>(routeInformation.location!),
           child: builder(context, routeInformation),
         )
       ],

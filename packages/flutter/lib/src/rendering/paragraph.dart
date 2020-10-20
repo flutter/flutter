@@ -46,7 +46,7 @@ class TextParentData extends ContainerBoxParentData<RenderBox> {
   @override
   String toString() {
     final List<String> values = <String>[
-      if (offset != null) 'offset=$offset',
+      'offset=$offset',
       if (scale != null) 'scale=$scale',
       super.toString(),
     ];
@@ -819,14 +819,12 @@ class RenderParagraph extends RenderBox
     String? workingLabel;
     for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
       if (info.requiresOwnNode) {
-        if (workingText != null) {
-          combined.add(InlineSpanSemanticsInformation(
-            workingText,
-            semanticsLabel: workingLabel ?? workingText,
-          ));
-          workingText = '';
-          workingLabel = null;
-        }
+        combined.add(InlineSpanSemanticsInformation(
+          workingText,
+          semanticsLabel: workingLabel ?? workingText,
+        ));
+        workingText = '';
+        workingLabel = null;
         combined.add(info);
       } else {
         workingText += info.text;
@@ -838,14 +836,10 @@ class RenderParagraph extends RenderBox
         }
       }
     }
-    if (workingText != null) {
-      combined.add(InlineSpanSemanticsInformation(
-        workingText,
-        semanticsLabel: workingLabel,
-      ));
-    } else { // ignore: dead_code
-      assert(workingLabel != null);
-    }
+    combined.add(InlineSpanSemanticsInformation(
+      workingText,
+      semanticsLabel: workingLabel,
+    ));
     return combined;
   }
 
@@ -891,6 +885,7 @@ class RenderParagraph extends RenderBox
         extentOffset: start + info.text.length,
       );
       final List<ui.TextBox> rects = getBoxesForSelection(selection);
+      start += info.text.length;
       if (rects.isEmpty) {
         continue;
       }
@@ -958,7 +953,6 @@ class RenderParagraph extends RenderBox
         newChildCache.addLast(newChild);
         newChildren.add(newChild);
       }
-      start += info.text.length;
     }
     _cachedChildNodes = newChildCache;
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);

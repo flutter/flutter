@@ -79,13 +79,13 @@ class BuildBundleCommand extends BuildSubCommand {
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
     final String projectDir = globals.fs.file(targetFile).parent.parent.path;
-    final FlutterProject futterProject = FlutterProject.fromPath(projectDir);
-    if (futterProject == null) {
+    final FlutterProject flutterProject = FlutterProject.fromPath(projectDir);
+    if (flutterProject == null) {
       return const <CustomDimensions, String>{};
     }
     return <CustomDimensions, String>{
       CustomDimensions.commandBuildBundleTargetPlatform: stringArg('target-platform'),
-      CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}',
+      CustomDimensions.commandBuildBundleIsModule: '${flutterProject.isModule}',
     };
   }
 

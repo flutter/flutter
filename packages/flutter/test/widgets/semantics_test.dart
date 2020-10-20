@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math';
 import 'dart:ui';
 
@@ -21,7 +19,7 @@ void main() {
   });
 
   testWidgets('Semantics shutdown and restart', (WidgetTester tester) async {
-    SemanticsTester semantics = SemanticsTester(tester);
+    SemanticsTester? semantics = SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -436,7 +434,7 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics));
 
     // Do the actions work?
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     int expectedLength = 1;
     for (final SemanticsAction action in allActions) {
       switch (action) {
@@ -574,7 +572,7 @@ void main() {
       ],
     );
 
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
 
     expect(semantics, hasSemantics(expectedSemantics));
     semanticsOwner.performAction(expectedId, SemanticsAction.tap);
@@ -1101,5 +1099,5 @@ void main() {
 }
 
 class CustomSortKey extends OrdinalSortKey {
-  const CustomSortKey(double order, {String name}) : super(order, name: name);
+  const CustomSortKey(double order, {String? name}) : super(order, name: name);
 }
