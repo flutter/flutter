@@ -37,10 +37,13 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
     },
   );
 
-  yield* output.stream;
+  // Close the stream controller after the command is complete. Otherwise,
+  // the yield* will never finish.
+  command.whenComplete(() {
+    output.close();
+  });
 
-  // Don't check the exit code because `runCommand` already does that.
-  await command;
+  yield* output.stream;
 }
 
 /// Represents a running process launched using [startCommand].
