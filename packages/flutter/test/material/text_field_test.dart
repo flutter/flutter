@@ -6355,7 +6355,7 @@ void main() {
       expect(find.byType(CupertinoButton), findsNWidgets(3));
   }, variant: TargetPlatformVariant.all());
 
-    testWidgets('selectionControls is passed to EditableText',
+  testWidgets('selectionControls is passed to EditableText',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -6372,7 +6372,6 @@ void main() {
     final EditableText widget = tester.widget(find.byType(EditableText));
     expect(widget.selectionControls, equals(materialTextSelectionControls));
   });
-
 
   testWidgets(
     'double tap on top of cursor also selects word',
