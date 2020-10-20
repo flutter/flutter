@@ -80,7 +80,10 @@ source_set("flutter_linux_sources") {
              "fl_standard_message_codec_private.h",
            ]
 
-  configs += [ "//flutter/shell/platform/linux/config:gtk" ]
+  configs += [
+    "//flutter/shell/platform/linux/config:gtk",
+    "//flutter/shell/platform/linux/config:wayland-client",
+  ]
 
   sources = [
     "egl_utils.cc",
