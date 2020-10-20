@@ -236,15 +236,16 @@ class DebugUniversalFramework extends Target {
       throw Exception('Failed to create App.framework.');
     }
     final List<String> lipoCommand = <String>[
-      'xcrun',
+      ...globals.xcode.xcrunCommand(),
       'lipo',
       '-create',
       iphoneFile.path,
       simulatorFile.path,
       '-output',
-      lipoOutputFile.path
+      lipoOutputFile.path,
     ];
-    final RunResult lipoResult = await processUtils.run(
+
+    final RunResult lipoResult = await globals.processUtils.run(
       lipoCommand,
     );
 

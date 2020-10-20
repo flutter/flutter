@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -48,7 +46,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
 
     await tester.pumpWidget(
       Center(
@@ -58,7 +56,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
 
     await tester.pumpWidget(
       Center(
@@ -69,7 +67,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
 
     await tester.pumpWidget(
       Center(
@@ -80,7 +78,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(100.0, 100.0)));
+    expect(patient.currentContext!.size, equals(const Size(100.0, 100.0)));
 
     await tester.pumpWidget(
       Center(
@@ -91,7 +89,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
@@ -100,7 +98,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
@@ -109,7 +107,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
   });
 
   testWidgets('SizedBox - container child', (WidgetTester tester) async {
@@ -123,7 +121,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
@@ -134,7 +132,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 0.0)));
 
     await tester.pumpWidget(
       Center(
@@ -146,7 +144,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
 
     await tester.pumpWidget(
       Center(
@@ -158,7 +156,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(100.0, 100.0)));
+    expect(patient.currentContext!.size, equals(const Size(100.0, 100.0)));
 
     await tester.pumpWidget(
       Center(
@@ -170,7 +168,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
@@ -180,7 +178,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
@@ -190,6 +188,6 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
   });
 }

@@ -516,20 +516,32 @@ class KeyEventSimulator {
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
+  /// Returns true if the key event was handled by the framework.
+  ///
   /// See also:
   ///
   ///  - [simulateKeyUpEvent] to simulate the corresponding key up event.
-  static Future<void> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) async {
-    return TestAsyncUtils.guard<void>(() async {
+  static Future<bool> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) async {
+    return await TestAsyncUtils.guard<bool>(() async {
       platform ??= Platform.operatingSystem;
       assert(_osIsSupported(platform!), 'Platform $platform not supported for key simulation');
 
       final Map<String, dynamic> data = getKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey);
+      bool result = false;
       await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData? data) { },
+        (ByteData? data) {
+          if (data == null) {
+            return;
+          }
+          final Map<String, dynamic> decoded = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
+          if (decoded['handled'] as bool) {
+            result = true;
+          }
+        }
       );
+      return result;
     });
   }
 
@@ -543,20 +555,32 @@ class KeyEventSimulator {
   /// system. Defaults to the operating system that the test is running on. Some
   /// platforms (e.g. Windows, iOS) are not yet supported.
   ///
+  /// Returns true if the key event was handled by the framework.
+  ///
   /// See also:
   ///
   ///  - [simulateKeyDownEvent] to simulate the corresponding key down event.
-  static Future<void> simulateKeyUpEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) async {
-    return TestAsyncUtils.guard<void>(() async {
+  static Future<bool> simulateKeyUpEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) async {
+    return TestAsyncUtils.guard<bool>(() async {
       platform ??= Platform.operatingSystem;
       assert(_osIsSupported(platform!), 'Platform $platform not supported for key simulation');
 
       final Map<String, dynamic> data = getKeyData(key, platform: platform!, isDown: false, physicalKey: physicalKey);
+      bool result = false;
       await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData? data) { },
+        (ByteData? data) {
+          if (data == null) {
+            return;
+          }
+          final Map<String, dynamic> decoded = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
+          if (decoded['handled'] as bool) {
+            result = true;
+          }
+        }
       );
+      return result;
     });
   }
 }
@@ -576,10 +600,12 @@ class KeyEventSimulator {
 ///
 /// Keys that are down when the test completes are cleared after each test.
 ///
+/// Returns true if the key event was handled by the framework.
+///
 /// See also:
 ///
 ///  - [simulateKeyUpEvent] to simulate the corresponding key up event.
-Future<void> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) {
+Future<bool> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) {
   return KeyEventSimulator.simulateKeyDownEvent(key, platform: platform, physicalKey: physicalKey);
 }
 
@@ -596,9 +622,11 @@ Future<void> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, Phy
 /// system. Defaults to the operating system that the test is running on. Some
 /// platforms (e.g. Windows, iOS) are not yet supported.
 ///
+/// Returns true if the key event was handled by the framework.
+///
 /// See also:
 ///
 ///  - [simulateKeyDownEvent] to simulate the corresponding key down event.
-Future<void> simulateKeyUpEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) {
+Future<bool> simulateKeyUpEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) {
   return KeyEventSimulator.simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
 }

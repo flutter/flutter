@@ -1945,7 +1945,7 @@ void main() {
                   });
                 },
                 selectedItemBuilder: (BuildContext context) {
-                  return items.map<Widget>((String item) {
+                  return items.map((String item) {
                     return Text('You have selected: $item');
                   }).toList();
                 },

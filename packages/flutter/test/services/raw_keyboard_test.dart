@@ -756,7 +756,7 @@ void main() {
         Focus(
           focusNode: focusNode,
           onKey: (FocusNode node, RawKeyEvent event) {
-            return true; // handle all events.
+            return KeyEventResult.handled; // handle all events.
           },
           child: const SizedBox(),
         ),

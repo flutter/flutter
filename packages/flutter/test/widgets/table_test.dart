@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
 class TestStatefulWidget extends StatefulWidget {
-  const TestStatefulWidget({ Key key }) : super(key: key);
+  const TestStatefulWidget({ Key? key }) : super(key: key);
 
   @override
   TestStatefulWidgetState createState() => TestStatefulWidgetState();
@@ -22,7 +20,7 @@ class TestStatefulWidgetState extends State<TestStatefulWidget> {
 }
 
 class TestChildWidget extends StatefulWidget {
-  const TestChildWidget({ Key key }) : super(key: key);
+  const TestChildWidget({ Key? key }) : super(key: key);
 
   @override
   TestChildState createState() => TestChildState();
@@ -877,7 +875,7 @@ void main() {
       ),
     );
     await tester.pumpWidget(table);
-    final RenderObjectElement element = key0.currentContext as RenderObjectElement;
+    final RenderObjectElement element = key0.currentContext! as RenderObjectElement;
     expect(element, hasAGoodToStringDeep);
     expect(
       element.toStringDeep(minLevel: DiagnosticLevel.info),
@@ -959,7 +957,7 @@ void main() {
   testWidgets(
     'Table widget requires all TableRows to have non-null children',
     (WidgetTester tester) async {
-      FlutterError error;
+      FlutterError? error;
       try {
         await tester.pumpWidget(
           Directionality(
@@ -976,7 +974,7 @@ void main() {
         error = e;
       } finally {
         expect(error, isNotNull);
-        expect(error.toStringDeep(), contains('The children property of TableRow must not be null.'));
+        expect(error!.toStringDeep(), contains('The children property of TableRow must not be null.'));
       }
   });
 

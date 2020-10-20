@@ -253,8 +253,8 @@ void _testIsMapSuperset(Map<String, String> newCodepoints, Map<String, String> o
   final Set<String> oldCodepointsSet = oldCodepoints.keys.toSet();
 
   if (!newCodepointsSet.containsAll(oldCodepointsSet)) {
-    stderr.writeln(
-      '''Error: New codepoints file does not contain all the existing codepoints.\n
+    stderr.writeln('''
+Error: New codepoints file does not contain all the existing codepoints.\n
         Missing: ${oldCodepointsSet.difference(newCodepointsSet)}
         ''',
     );

@@ -255,7 +255,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         dropAreaWithoutMargin = _draggingFeedbackSize!.width;
         break;
       case Axis.vertical:
-      default:
         dropAreaWithoutMargin = _draggingFeedbackSize!.height;
         break;
     }
@@ -349,7 +348,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       case Axis.horizontal:
         return Row(children: children);
       case Axis.vertical:
-      default:
         return Column(children: children);
     }
   }
@@ -494,7 +492,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           spacing = SizedBox(width: _dropAreaExtent);
           break;
         case Axis.vertical:
-        default:
           spacing = SizedBox(height: _dropAreaExtent);
           break;
       }
@@ -561,7 +558,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           );
           break;
         case Axis.vertical:
-        default:
           finalDropArea = SizedBox(
             key: endWidgetKey,
             height: _defaultDropAreaExtent,
