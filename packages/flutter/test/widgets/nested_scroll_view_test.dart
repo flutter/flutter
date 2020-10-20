@@ -1458,8 +1458,7 @@ void main() {
       // Scroll away the outer scroll view and some of the inner scroll view.
       // We will not scroll back the same amount to indicate that we are
       // floating in before reaching the top of the inner scrollable.
-      await tester
-          .sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
       await tester.pump();
       expect(find.text('Test Title'), findsNothing);
       expect(find.text('Item 1'), findsNothing);
@@ -1467,8 +1466,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
 
       // The outer scrollable should float back in, inner should not change
-      await tester
-          .sendEventToBinding(testPointer.scroll(const Offset(0.0, -50.0)));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -50.0)));
       await tester.pump();
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsNothing);
@@ -2204,9 +2202,9 @@ void main() {
       200.0,
     );
 
+    // Regression test for https://github.com/flutter/flutter/issues/55362
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // The offset is the responsibility of innerPosition.
-    // Related to https://github.com/flutter/flutter/issues/55362
     testPointer.hover(const Offset(0, 201));
 
     await tester
