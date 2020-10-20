@@ -31,5 +31,6 @@ void main() {
     expect(localizations.timerPickerSecondLabel(0), isNotNull);
 
     expect(localizations.modalBarrierDismissLabel, isNotNull);
+    expect(localizations.searchTextFieldPlaceholerLabel, isNotNull);
   });
 }
