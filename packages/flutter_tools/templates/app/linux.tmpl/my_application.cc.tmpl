@@ -6,11 +6,12 @@
 
 struct _MyApplication {
   GtkApplication parent_instance;
+  char** dart_entrypoint_args;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
-static int my_application_command_line(GApplication* application, GApplicationCommandLine *cmd_line) {
+static void my_application_activate(GApplication* application) {
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
   GtkHeaderBar *header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
@@ -22,9 +23,8 @@ static int my_application_command_line(GApplication* application, GApplicationCo
   gtk_widget_show(GTK_WIDGET(window));
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
-  char** args = g_application_command_line_get_arguments(cmd_line, nullptr);
-  // Strip out the first argument, as that is the binary name
-  fl_dart_project_set_dart_entrypoint_arguments(project, ++args);
+  MyApplication* my_app = MY_APPLICATION(application);
+  fl_dart_project_set_dart_entrypoint_arguments(project, my_app->dart_entrypoint_args);
 
   FlView* view = fl_view_new(project);
   gtk_widget_show(GTK_WIDGET(view));
@@ -33,19 +33,37 @@ static int my_application_command_line(GApplication* application, GApplicationCo
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
 
   gtk_widget_grab_focus(GTK_WIDGET(view));
+}
+
+static gboolean my_application_local_command_line(GApplication* application, gchar ***arguments, int *exit_status) {
+  MyApplication* my_app = MY_APPLICATION(application);
+  my_app->dart_entrypoint_args = *arguments;
+  // Strip out the first argument as it is the binary name
+  my_app->dart_entrypoint_args++;
+
+  g_autoptr(GError) error = nullptr;
+
+  if (!g_application_register(application, NULL, &error)) {
+     g_printerr("Failed to register: %s\n", error->message);
+     *exit_status = 1;
+     return true;
+  }
+
+  g_application_activate(application);
+  *exit_status = 0;
 
   return true;
 }
 
-static void my_application_class_init(MyApplicationClass* klass) {}
+static void my_application_class_init(MyApplicationClass* klass) {
+  G_APPLICATION_CLASS(klass)->activate = my_application_activate;
+  G_APPLICATION_CLASS(klass)->local_command_line = my_application_local_command_line;
+}
 
 static void my_application_init(MyApplication* self) {}
 
 MyApplication* my_application_new() {
-  MyApplication* my_app = MY_APPLICATION(g_object_new(my_application_get_type(),
-                                         "application-id", APPLICATION_ID,
-                                         "flags", G_APPLICATION_HANDLES_COMMAND_LINE,
-                                         nullptr));
-  g_signal_connect(my_app, "command-line", G_CALLBACK(my_application_command_line), nullptr);
-  return my_app;
+  return MY_APPLICATION(g_object_new(my_application_get_type(),
+                                     "application-id", APPLICATION_ID,
+                                     nullptr));
 }
