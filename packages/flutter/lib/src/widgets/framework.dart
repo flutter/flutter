@@ -50,8 +50,7 @@ class UniqueKey extends LocalKey {
   /// The key cannot be created with a const constructor because that implies
   /// that all instantiated keys would be the same instance and therefore not
   /// be unique.
-  // Never use const for this class.
-  // ignore: prefer_const_constructors_in_immutables
+  // ignore: prefer_const_constructors_in_immutables , never use const for this class
   UniqueKey();
 
   @override
@@ -353,8 +352,7 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   /// Creates a global key with a debugging label.
   ///
   /// The label does not affect the key's identity.
-  // Never use const for this class.
-  // ignore: prefer_const_constructors_in_immutables
+  // ignore: prefer_const_constructors_in_immutables , never use const for this class
   LabeledGlobalKey(this._debugLabel) : super.constructor();
 
   final String? _debugLabel;
