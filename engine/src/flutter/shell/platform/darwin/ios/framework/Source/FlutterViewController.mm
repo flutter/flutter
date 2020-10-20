@@ -1031,14 +1031,14 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
           press.phase == UIPressPhaseChanged) {
         continue;
       }
-      NSMutableDictionary* keyMessage = [@{
+      NSMutableDictionary* keyMessage = [[@{
         @"keymap" : @"ios",
         @"type" : @"unknown",
         @"keyCode" : @(press.key.keyCode),
         @"modifiers" : @(press.key.modifierFlags),
         @"characters" : press.key.characters,
         @"charactersIgnoringModifiers" : press.key.charactersIgnoringModifiers
-      } mutableCopy];
+      } mutableCopy] autorelease];
 
       if (press.phase == UIPressPhaseBegan) {
         keyMessage[@"type"] = @"keydown";
