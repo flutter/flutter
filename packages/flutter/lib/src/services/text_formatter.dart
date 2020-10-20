@@ -12,10 +12,6 @@ import 'text_editing.dart';
 import 'text_input.dart';
 
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
-/// Determines how the [maxLength] limit should be enforced.
-///
-/// Defaults to [MaxLengthEnforcement.enforced].
-///
 /// ### [MaxLengthEnforcement.enforced] versus
 /// [MaxLengthEnforcement.allowComposingTextToFinish]
 ///
@@ -402,6 +398,10 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// composing is not allowed.
   final int? maxLength;
 
+  /// Determines how the [maxLength] limit should be enforced.
+  ///
+  /// Defaults to [MaxLengthEnforcement.enforced].
+  ///
   /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
   final MaxLengthEnforcement maxLengthEnforcement;
 
