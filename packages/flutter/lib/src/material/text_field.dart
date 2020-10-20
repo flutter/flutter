@@ -1243,6 +1243,15 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       },
     );
 
+    final int? semanticsMaxValueLength;
+    if (maxLengthEnforcement != MaxLengthEnforcement.none &&
+      widget.maxLength != null &&
+      widget.maxLength! > 0) {
+      semanticsMaxValueLength = widget.maxLength;
+    } else {
+      semanticsMaxValueLength = null;
+    }
+
     return MouseRegion(
       cursor: effectiveMouseCursor,
       onEnter: (PointerEnterEvent event) => _handleHover(true),
@@ -1253,10 +1262,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           animation: controller, // changes the _currentLength
           builder: (BuildContext context, Widget? child) {
             return Semantics(
-              maxValueLength: (widget.maxLengthEnforced || widget.maxLengthEnforcement != MaxLengthEnforcement.none)
-                && widget.maxLength != null && widget.maxLength! > 0
-                  ? widget.maxLength
-                  : null,
+              maxValueLength: semanticsMaxValueLength,
               currentValueLength: _currentLength,
               onTap: () {
                 if (!_effectiveController.selection.isValid)
