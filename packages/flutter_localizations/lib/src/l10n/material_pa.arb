@@ -79,5 +79,6 @@
   "inputTimeModeButtonLabel": "ਲਿਖਤ ਇਨਪੁੱਟ ਮੋਡ 'ਤੇ ਜਾਓ",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 ਲਾਇਸੰਸ",
-  "licensesPackageDetailTextOther": "$licenseCount ਲਾਇਸੰਸ"
+  "licensesPackageDetailTextOther": "$licenseCount ਲਾਇਸੰਸ",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

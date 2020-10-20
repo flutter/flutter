@@ -80,5 +80,6 @@
   "inputTimeModeButtonLabel": "رفتن به حالت ورودی نوشتاری",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "۱ پروانه",
-  "licensesPackageDetailTextOther": "$licenseCount پروانه"
+  "licensesPackageDetailTextOther": "$licenseCount پروانه",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

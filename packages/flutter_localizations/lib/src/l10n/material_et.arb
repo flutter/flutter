@@ -80,5 +80,6 @@
   "inputTimeModeButtonLabel": "Lülitumine tekstisisestusrežiimile",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 litsents",
-  "licensesPackageDetailTextOther": "$licenseCount litsentsi"
+  "licensesPackageDetailTextOther": "$licenseCount litsentsi",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

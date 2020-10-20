@@ -83,5 +83,6 @@
   "inputTimeModeButtonLabel": "Prebacivanje na način rada unosa teksta",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 licenca",
-  "licensesPackageDetailTextOther": "$licenseCount licenci"
+  "licensesPackageDetailTextOther": "$licenseCount licenci",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

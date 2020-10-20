@@ -151,6 +151,11 @@
     "description": "The label for select-all buttons and menu items."
   },
 
+  "searchTextFieldPlaceholerLabel": "Search",
+  "@searchTextFieldPlaceholerLabel": {
+    "description": "The default placeholder used in [CupertinoSearchTextField]."
+  },
+
   "viewLicensesButtonLabel": "VIEW LICENSES",
   "@viewLicensesButtonLabel": {
     "description": "The label for the button in the about box that leads the user to a list of all licenses that apply to the application."

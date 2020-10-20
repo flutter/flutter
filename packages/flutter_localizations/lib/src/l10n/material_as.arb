@@ -79,5 +79,6 @@
   "inputTimeModeButtonLabel": "পাঠ ইনপুটৰ ম’ডলৈ সলনি কৰক",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "১ খন অনুজ্ঞাপত্ৰ",
-  "licensesPackageDetailTextOther": "$licenseCount খন অনুজ্ঞাপত্ৰ"
+  "licensesPackageDetailTextOther": "$licenseCount খন অনুজ্ঞাপত্ৰ",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

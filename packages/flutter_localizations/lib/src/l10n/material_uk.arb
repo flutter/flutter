@@ -86,5 +86,6 @@
   "inputTimeModeButtonLabel": "Перейти в режим введення цифр",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 ліцензія",
-  "licensesPackageDetailTextOther": "$licenseCount ліцензії"
+  "licensesPackageDetailTextOther": "$licenseCount ліцензії",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

@@ -81,5 +81,6 @@
   "inputTimeModeButtonLabel": "मजकूर इनपुट मोडवर स्विच करा",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "एक परवाना",
-  "licensesPackageDetailTextOther": "$licenseCount परवाने"
+  "licensesPackageDetailTextOther": "$licenseCount परवाने",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

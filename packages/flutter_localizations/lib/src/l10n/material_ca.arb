@@ -80,5 +80,6 @@
   "inputTimeModeButtonLabel": "Canvia al mode d'introducció de text",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 llicència",
-  "licensesPackageDetailTextOther": "$licenseCount llicències"
+  "licensesPackageDetailTextOther": "$licenseCount llicències",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

@@ -79,5 +79,6 @@
   "inputTimeModeButtonLabel": "Vaqtni yozib tanlash rejimi",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 ta litsenziya",
-  "licensesPackageDetailTextOther": "$licenseCount ta litsenziya"
+  "licensesPackageDetailTextOther": "$licenseCount ta litsenziya",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

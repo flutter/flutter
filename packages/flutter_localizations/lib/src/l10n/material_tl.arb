@@ -80,5 +80,6 @@
   "inputTimeModeButtonLabel": "Lumipat sa text input mode",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 lisensya",
-  "licensesPackageDetailTextOther": "$licenseCount na lisensya"
+  "licensesPackageDetailTextOther": "$licenseCount na lisensya",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

@@ -80,5 +80,6 @@
   "inputTimeModeButtonLabel": "切换到文本输入模式",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 份许可",
-  "licensesPackageDetailTextOther": "$licenseCount 份许可"
+  "licensesPackageDetailTextOther": "$licenseCount 份许可",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

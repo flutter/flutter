@@ -81,5 +81,6 @@
   "inputTimeModeButtonLabel": "Cambiar al modo de introducción de texto",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 licencia",
-  "licensesPackageDetailTextOther": "$licenseCount licencias"
+  "licensesPackageDetailTextOther": "$licenseCount licencias",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

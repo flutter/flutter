@@ -79,5 +79,6 @@
   "inputTimeModeButtonLabel": "টেক্সট ইনপুট মোডে পাল্টান",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "১টি লাইসেন্স",
-  "licensesPackageDetailTextOther": "$licenseCountটি লাইসেন্স"
+  "licensesPackageDetailTextOther": "$licenseCountটি লাইসেন্স",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

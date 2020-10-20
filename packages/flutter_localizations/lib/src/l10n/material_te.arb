@@ -79,5 +79,6 @@
   "inputTimeModeButtonLabel": "టెక్స్ట్ ఇన్‌పుట్ మోడ్‌కు మారుస్తుంది",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 లైసెన్స్",
-  "licensesPackageDetailTextOther": "$licenseCount లైసెన్స్‌లు"
+  "licensesPackageDetailTextOther": "$licenseCount లైసెన్స్‌లు",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

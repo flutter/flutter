@@ -80,5 +80,6 @@
   "inputTimeModeButtonLabel": "Valitse syöttötavaksi teksti",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 lisenssi",
-  "licensesPackageDetailTextOther": "$licenseCount lisenssiä"
+  "licensesPackageDetailTextOther": "$licenseCount lisenssiä",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

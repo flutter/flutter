@@ -79,5 +79,6 @@
   "inputTimeModeButtonLabel": "ወደ ጽሑፍ ግቤት ሁነታ ቀይር",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 ፈቃድ",
-  "licensesPackageDetailTextOther": "$licenseCount ፈቃዶች"
+  "licensesPackageDetailTextOther": "$licenseCount ፈቃዶች",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

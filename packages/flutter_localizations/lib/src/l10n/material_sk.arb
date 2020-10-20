@@ -86,5 +86,6 @@
   "inputTimeModeButtonLabel": "Prepnúť na textový režim vstupu",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 licencia",
-  "licensesPackageDetailTextOther": "$licenseCount licencií"
+  "licensesPackageDetailTextOther": "$licenseCount licencií",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

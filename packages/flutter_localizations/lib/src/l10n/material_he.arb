@@ -86,5 +86,6 @@
   "inputTimeModeButtonLabel": "מעבר להזנת טקסט",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "רישיון אחד",
-  "licensesPackageDetailTextOther": "$licenseCount רישיונות"
+  "licensesPackageDetailTextOther": "$licenseCount רישיונות",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

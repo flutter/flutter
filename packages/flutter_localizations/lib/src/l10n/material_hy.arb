@@ -85,5 +85,6 @@
   "inputTimeModeButtonLabel": "Անցնել տեքստի մուտքագրման ռեժիմին",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 լիցենզիա",
-  "licensesPackageDetailTextOther": "$licenseCount լիցենզիա"
+  "licensesPackageDetailTextOther": "$licenseCount լիցենզիա",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

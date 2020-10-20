@@ -81,5 +81,6 @@
   "inputTimeModeButtonLabel": "உரை உள்ளீட்டு முறைக்கு மாற்றும்",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 உரிமம்",
-  "licensesPackageDetailTextOther": "$licenseCount உரிமங்கள்"
+  "licensesPackageDetailTextOther": "$licenseCount உரிமங்கள்",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

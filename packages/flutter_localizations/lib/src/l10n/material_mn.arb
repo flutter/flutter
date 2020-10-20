@@ -81,5 +81,6 @@
   "inputTimeModeButtonLabel": "Текст оруулах горим руу сэлгэх",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 лиценз",
-  "licensesPackageDetailTextOther": "$licenseCount лиценз"
+  "licensesPackageDetailTextOther": "$licenseCount лиценз",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

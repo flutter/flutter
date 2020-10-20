@@ -78,5 +78,6 @@
   "collapsedIconTapHint": "Vis",
   "remainingTextFieldCharacterCountOne": "1 tegn gjenstår",
   "remainingTextFieldCharacterCountOther": "$remainingCount tegn gjenstår",
-  "refreshIndicatorSemanticLabel": "Laster inn på nytt"
+  "refreshIndicatorSemanticLabel": "Laster inn på nytt",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

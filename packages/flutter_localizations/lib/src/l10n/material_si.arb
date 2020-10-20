@@ -79,5 +79,6 @@
   "inputTimeModeButtonLabel": "පෙළ ආදාන ප්‍රකාරයට මාරු කරන්න",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "බලපත්‍ර 1",
-  "licensesPackageDetailTextOther": "බලපත්‍ර $licenseCount"
+  "licensesPackageDetailTextOther": "බලපත්‍ර $licenseCount",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

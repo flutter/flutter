@@ -87,5 +87,6 @@
   "inputTimeModeButtonLabel": "Перейти в режим ввода текста",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 лицензия",
-  "licensesPackageDetailTextOther": "$licenseCount лицензии"
+  "licensesPackageDetailTextOther": "$licenseCount лицензии",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

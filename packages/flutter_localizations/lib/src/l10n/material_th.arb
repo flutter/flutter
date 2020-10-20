@@ -80,5 +80,6 @@
   "inputTimeModeButtonLabel": "สลับไปใช้โหมดป้อนข้อมูลข้อความ",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "ใบอนุญาต 1 ใบ",
-  "licensesPackageDetailTextOther": "ใบอนุญาต $licenseCount ใบ"
+  "licensesPackageDetailTextOther": "ใบอนุญาต $licenseCount ใบ",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

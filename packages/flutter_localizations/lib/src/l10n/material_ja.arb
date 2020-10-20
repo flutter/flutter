@@ -80,5 +80,6 @@
   "inputTimeModeButtonLabel": "テキスト入力モードに切り替えます",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "ライセンス: 1 件",
-  "licensesPackageDetailTextOther": "ライセンス: $licenseCount 件"
+  "licensesPackageDetailTextOther": "ライセンス: $licenseCount 件",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

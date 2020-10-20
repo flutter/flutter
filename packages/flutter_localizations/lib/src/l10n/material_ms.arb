@@ -81,5 +81,6 @@
   "inputTimeModeButtonLabel": "Beralih kepada mod input teks",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 lesen",
-  "licensesPackageDetailTextOther": "$licenseCount lesen"
+  "licensesPackageDetailTextOther": "$licenseCount lesen",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

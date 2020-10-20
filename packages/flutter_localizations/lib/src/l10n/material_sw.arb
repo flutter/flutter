@@ -81,5 +81,6 @@
   "inputTimeModeButtonLabel": "Tumia programu ya kuingiza data ya maandishi",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "Leseni moja",
-  "licensesPackageDetailTextOther": "Leseni $licenseCount"
+  "licensesPackageDetailTextOther": "Leseni $licenseCount",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

@@ -84,5 +84,6 @@
   "inputTimeModeButtonLabel": "Comutați la modul de introducere a textului",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "O licență",
-  "licensesPackageDetailTextOther": "$licenseCount de licențe"
+  "licensesPackageDetailTextOther": "$licenseCount de licențe",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

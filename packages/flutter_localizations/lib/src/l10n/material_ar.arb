@@ -90,5 +90,6 @@
   "inputTimeModeButtonLabel": "التبديل إلى وضع \"إدخال النص\"",
   "licensesPackageDetailTextZero": "ما مِن تراخيص",
   "licensesPackageDetailTextOne": "ترخيص واحد",
-  "licensesPackageDetailTextOther": "$licenseCount ترخيص"
+  "licensesPackageDetailTextOther": "$licenseCount ترخيص",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

@@ -80,5 +80,6 @@
   "inputTimeModeButtonLabel": "Byt till text som inmatningsläge",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 licens",
-  "licensesPackageDetailTextOther": "$licenseCount licenser"
+  "licensesPackageDetailTextOther": "$licenseCount licenser",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

@@ -79,5 +79,6 @@
   "inputTimeModeButtonLabel": "Shintshela kwimodi yokufaka yombhalo",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "ilayisense e-1",
-  "licensesPackageDetailTextOther": "amalayisense angu-$licenseCount"
+  "licensesPackageDetailTextOther": "amalayisense angu-$licenseCount",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

@@ -79,5 +79,6 @@
   "inputTimeModeButtonLabel": "Текст киргизүү режимине которулуу",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 уруксаттама",
-  "licensesPackageDetailTextOther": "$licenseCount уруксаттама"
+  "licensesPackageDetailTextOther": "$licenseCount уруксаттама",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

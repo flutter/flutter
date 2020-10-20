@@ -80,5 +80,6 @@
   "inputTimeModeButtonLabel": "Chuyển sang chế độ nhập văn bản",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 giấy phép",
-  "licensesPackageDetailTextOther": "$licenseCount giấy phép"
+  "licensesPackageDetailTextOther": "$licenseCount giấy phép",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

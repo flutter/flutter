@@ -79,5 +79,6 @@
   "inputTimeModeButtonLabel": "ଟେକ୍ସଟ୍ ଇନପୁଟ୍ ମୋଡକୁ ସ୍ୱିଚ୍ କରନ୍ତୁ",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1ଟି ଲାଇସେନ୍ସ",
-  "licensesPackageDetailTextOther": "$licenseCountଟି ଲାଇସେନ୍ସ"
+  "licensesPackageDetailTextOther": "$licenseCountଟି ଲାଇସେନ୍ସ",
+  "searchTextFieldPlaceholerLabel": "Search"
 }
