@@ -829,7 +829,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///    calling this method automatically.
 ///  * [SemanticsConfiguration.namesRoute], for a description of edge triggered
 ///    semantics.
-Future<T> showMenu<T>({
+Future<T?> showMenu<T>({
   required BuildContext context,
   required RelativeRect position,
   required List<PopupMenuEntry<T>> items,

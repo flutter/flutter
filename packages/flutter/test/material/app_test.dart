@@ -258,7 +258,7 @@ void main() {
                   child: ElevatedButton(
                       child: const Text('X'),
                       onPressed: () async {
-                        result = Navigator.of(context)!.pushNamed('/a');
+                        result = Navigator.of(context)!.pushNamed<Object?>('/a');
                       },
                   ),
                 );

@@ -62,7 +62,7 @@ abstract class OverlayRoute<T> extends Route<T> {
   bool get finishedWhenPopped => true;
 
   @override
-  bool didPop(T result) {
+  bool didPop(T? result) {
     final bool returnValue = super.didPop(result);
     assert(returnValue);
     if (finishedWhenPopped)
@@ -235,7 +235,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   @override
-  bool didPop(T result) {
+  bool didPop(T? result) {
     assert(_controller != null, '$runtimeType.didPop called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _result = result;
@@ -631,7 +631,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   }
 
   @override
-  bool didPop(T result) {
+  bool didPop(T? result) {
     if (_localHistory != null && _localHistory!.isNotEmpty) {
       final LocalHistoryEntry entry = _localHistory!.removeLast();
       assert(entry._owner == this);
@@ -1818,7 +1818,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
 ///
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
-Future<T> showGeneralDialog<T extends Object?>({
+Future<T?> showGeneralDialog<T extends Object?>({
   required BuildContext context,
   required RoutePageBuilder pageBuilder,
   bool barrierDismissible = false,

@@ -374,7 +374,7 @@ void main() {
   });
 
   testWidgets('Closing nested search returns to search', (WidgetTester tester) async {
-    final List<String> nestedSearchResults = <String>[];
+    final List<String?> nestedSearchResults = <String?>[];
     final _TestSearchDelegate nestedSearchDelegate = _TestSearchDelegate(
       suggestions: 'Nested Suggestions',
       result: 'Nested Result',
@@ -389,7 +389,7 @@ void main() {
               tooltip: 'Nested Search',
               icon: const Icon(Icons.search),
               onPressed: () async {
-                final String result = await showSearch(
+                final String? result = await showSearch(
                   context: context,
                   delegate: nestedSearchDelegate,
                 );
@@ -467,7 +467,7 @@ void main() {
               tooltip: 'Nested Search',
               icon: const Icon(Icons.search),
               onPressed: () async {
-                final String result = await showSearch(
+                final String? result = await showSearch(
                   context: context,
                   delegate: nestedSearchDelegate,
                 );
@@ -719,7 +719,7 @@ class TestHomePage extends StatelessWidget {
                 tooltip: 'Search',
                 icon: const Icon(Icons.search),
                 onPressed: () async {
-                  String selectedResult;
+                  String? selectedResult;
                   if (passInInitialQuery) {
                     selectedResult = await showSearch<String>(
                       context: context,

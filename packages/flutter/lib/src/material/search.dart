@@ -49,7 +49,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [SearchDelegate] to define the content of the search page.
-Future<T> showSearch<T>({
+Future<T?> showSearch<T>({
   required BuildContext context,
   required SearchDelegate<T> delegate,
   String? query = '',
@@ -387,7 +387,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  void didComplete(T result) {
+  void didComplete(T? result) {
     super.didComplete(result);
     assert(delegate._route == this);
     delegate._route = null;
