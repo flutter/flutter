@@ -47,7 +47,7 @@ class EnginePicture implements ui.Picture {
   @override
   Future<ui.Image> toImage(int width, int height) async {
     final ui.Rect imageRect = ui.Rect.fromLTRB(0, 0, width.toDouble(), height.toDouble());
-    final BitmapCanvas canvas = BitmapCanvas(imageRect);
+    final BitmapCanvas canvas = BitmapCanvas.imageData(imageRect);
     recordingCanvas!.apply(canvas, imageRect);
     final String imageDataUrl = canvas.toDataUrl();
     final html.ImageElement imageElement = html.ImageElement()

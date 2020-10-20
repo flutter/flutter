@@ -68,75 +68,16 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
 
   @override
   void drawRect(ui.Rect rect, SurfacePaintData paint) {
-    _drawRect(rect, paint, 'draw-rect');
-  }
-
-  html.Element _drawRect(ui.Rect rect, SurfacePaintData paint, String tagName) {
-    assert(paint.shader == null);
-    final html.Element rectangle = html.Element.tag(tagName);
-    assert(() {
-      rectangle.setAttribute('flt-rect', '$rect');
-      rectangle.setAttribute('flt-paint', '$paint');
-      return true;
-    }());
-    String effectiveTransform;
-    final bool isStroke = paint.style == ui.PaintingStyle.stroke;
-    final double strokeWidth = paint.strokeWidth ?? 0.0;
-    final double left = math.min(rect.left, rect.right);
-    final double right = math.max(rect.left, rect.right);
-    final double top = math.min(rect.top, rect.bottom);
-    final double bottom = math.max(rect.top, rect.bottom);
-    if (currentTransform.isIdentity()) {
-      if (isStroke) {
-        effectiveTransform =
-            'translate(${left - (strokeWidth / 2.0)}px, ${top - (strokeWidth / 2.0)}px)';
-      } else {
-        effectiveTransform = 'translate(${left}px, ${top}px)';
-      }
-    } else {
-      // Clone to avoid mutating _transform.
-      final Matrix4 translated = currentTransform.clone();
-      if (isStroke) {
-        translated.translate(
-            left - (strokeWidth / 2.0), top - (strokeWidth / 2.0));
-      } else {
-        translated.translate(left, top);
-      }
-      effectiveTransform = matrix4ToCssTransform(translated);
-    }
-    final html.CssStyleDeclaration style = rectangle.style;
-    style
-      ..position = 'absolute'
-      ..transformOrigin = '0 0 0'
-      ..transform = effectiveTransform;
-
-    final String cssColor =
-        paint.color == null ? '#000000' : colorToCssString(paint.color)!;
-
-    if (paint.maskFilter != null) {
-      style.filter = 'blur(${paint.maskFilter!.webOnlySigma}px)';
-    }
-
-    if (isStroke) {
-      style
-        ..width = '${right - left - strokeWidth}px'
-        ..height = '${bottom - top - strokeWidth}px'
-        ..border = '${strokeWidth}px solid $cssColor';
-    } else {
-      style
-        ..width = '${right - left}px'
-        ..height = '${bottom - top}px'
-        ..backgroundColor = cssColor;
-    }
-
-    currentElement.append(rectangle);
-    return rectangle;
+    currentElement.append(_buildDrawRectElement(rect, paint, 'draw-rect',
+        currentTransform));
   }
 
   @override
   void drawRRect(ui.RRect rrect, SurfacePaintData paint) {
-    html.Element element = _drawRect(rrect.outerRect, paint, 'draw-rrect');
-    element.style.borderRadius = '${rrect.blRadiusX.toStringAsFixed(3)}px';
+    html.Element element = _buildDrawRectElement(rrect.outerRect,
+        paint, 'draw-rrect', currentTransform);
+    _applyRRectBorderRadius(element.style, rrect);
+    currentElement.append(element);
   }
 
   @override
@@ -198,4 +139,109 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
   void endOfPaint() {
     // No reuse of elements yet to handle here. Noop.
   }
+}
+
+html.HtmlElement _buildDrawRectElement(ui.Rect rect, SurfacePaintData paint, String tagName,
+    Matrix4 transform) {
+  assert(paint.shader == null);
+  final html.HtmlElement rectangle = html.Element.tag(tagName) as html.HtmlElement;
+  assert(() {
+    rectangle.setAttribute('flt-rect', '$rect');
+    rectangle.setAttribute('flt-paint', '$paint');
+    return true;
+  }());
+  String effectiveTransform;
+  final bool isStroke = paint.style == ui.PaintingStyle.stroke;
+  final double strokeWidth = paint.strokeWidth ?? 0.0;
+  final double left = math.min(rect.left, rect.right);
+  final double right = math.max(rect.left, rect.right);
+  final double top = math.min(rect.top, rect.bottom);
+  final double bottom = math.max(rect.top, rect.bottom);
+  if (transform.isIdentity()) {
+    if (isStroke) {
+      effectiveTransform =
+      'translate(${left - (strokeWidth / 2.0)}px, ${top - (strokeWidth / 2.0)}px)';
+    } else {
+      effectiveTransform = 'translate(${left}px, ${top}px)';
+    }
+  } else {
+    // Clone to avoid mutating _transform.
+    final Matrix4 translated = transform.clone();
+    if (isStroke) {
+      translated.translate(
+          left - (strokeWidth / 2.0), top - (strokeWidth / 2.0));
+    } else {
+      translated.translate(left, top);
+    }
+    effectiveTransform = matrix4ToCssTransform(translated);
+  }
+  final html.CssStyleDeclaration style = rectangle.style;
+  style
+    ..position = 'absolute'
+    ..transformOrigin = '0 0 0'
+    ..transform = effectiveTransform;
+
+  final String cssColor =
+  paint.color == null ? '#000000' : colorToCssString(paint.color)!;
+
+  if (paint.maskFilter != null) {
+    style.filter = 'blur(${paint.maskFilter!.webOnlySigma}px)';
+  }
+
+  if (isStroke) {
+    style
+      ..width = '${right - left - strokeWidth}px'
+      ..height = '${bottom - top - strokeWidth}px'
+      ..border = '${strokeWidth}px solid $cssColor';
+  } else {
+    style
+      ..width = '${right - left}px'
+      ..height = '${bottom - top}px'
+      ..backgroundColor = cssColor;
+  }
+  return rectangle;
+}
+
+void _applyRRectBorderRadius(html.CssStyleDeclaration style, ui.RRect rrect) {
+  if (rrect.tlRadiusX == rrect.trRadiusX &&
+      rrect.tlRadiusX == rrect.blRadiusX &&
+      rrect.tlRadiusX == rrect.brRadiusX &&
+      rrect.tlRadiusX == rrect.tlRadiusY &&
+      rrect.trRadiusX == rrect.trRadiusY &&
+      rrect.blRadiusX == rrect.blRadiusY &&
+      rrect.brRadiusX == rrect.brRadiusY) {
+    style.borderRadius = '${rrect.blRadiusX.toStringAsFixed(3)}px';
+    return;
+  }
+  // Non-uniform. Apply each corner radius.
+  style.borderTopLeftRadius = '${rrect.tlRadiusX.toStringAsFixed(3)}px '
+      '${rrect.tlRadiusY.toStringAsFixed(3)}px';
+  style.borderTopRightRadius = '${rrect.trRadiusX.toStringAsFixed(3)}px '
+      '${rrect.trRadiusY.toStringAsFixed(3)}px';
+  style.borderBottomLeftRadius = '${rrect.blRadiusX.toStringAsFixed(3)}px '
+      '${rrect.blRadiusY.toStringAsFixed(3)}px';
+  style.borderBottomRightRadius = '${rrect.brRadiusX.toStringAsFixed(3)}px '
+      '${rrect.brRadiusY.toStringAsFixed(3)}px';
+}
+
+html.Element _pathToSvgElement(SurfacePath path, SurfacePaintData paint,
+    String width, String height) {
+  final StringBuffer sb = StringBuffer();
+  sb.write(
+      '<svg viewBox="0 0 $width $height" width="${width}px" height="${height}px">');
+  sb.write('<path ');
+  if (paint.style == ui.PaintingStyle.stroke) {
+    sb.write('stroke="${colorToCssString(paint.color)}" ');
+    sb.write('stroke-width="${paint.strokeWidth}" ');
+  } else if (paint.color != null) {
+    sb.write('fill="${colorToCssString(paint.color)}" ');
+  }
+  if (path.fillType == ui.PathFillType.evenOdd) {
+    sb.write('fill-rule="evenodd" ');
+  }
+  sb.write('d="');
+  pathToSvg(path, sb);
+  sb.write('"></path>');
+  sb.write('</svg>');
+  return html.Element.html(sb.toString(), treeSanitizer: _NullTreeSanitizer());
 }

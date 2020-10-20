@@ -133,7 +133,8 @@ void testMain() {
         () {
       final PersistedScene scene1 = PersistedScene(null);
       final PersistedClipRect clip1 =
-          PersistedClipRect(null, const Rect.fromLTRB(10, 10, 20, 20));
+          PersistedClipRect(null, const Rect.fromLTRB(10, 10, 20, 20),
+              Clip.antiAlias);
       final PersistedOpacity opacity = PersistedOpacity(null, 100, Offset.zero);
       final MockPersistedPicture picture = MockPersistedPicture();
 
@@ -158,7 +159,8 @@ void testMain() {
       // because the clip didn't change no repaints should happen.
       final PersistedScene scene2 = PersistedScene(scene1);
       final PersistedClipRect clip2 =
-          PersistedClipRect(clip1, const Rect.fromLTRB(10, 10, 20, 20));
+          PersistedClipRect(clip1, const Rect.fromLTRB(10, 10, 20, 20),
+              Clip.antiAlias);
       clip1.state = PersistedSurfaceState.pendingUpdate;
       scene2.appendChild(clip2);
       opacity.state = PersistedSurfaceState.pendingRetention;
@@ -176,7 +178,8 @@ void testMain() {
       // This should cause the picture to repaint despite being retained.
       final PersistedScene scene3 = PersistedScene(scene2);
       final PersistedClipRect clip3 =
-          PersistedClipRect(clip2, const Rect.fromLTRB(10, 10, 50, 50));
+          PersistedClipRect(clip2, const Rect.fromLTRB(10, 10, 50, 50),
+          Clip.antiAlias);
       clip2.state = PersistedSurfaceState.pendingUpdate;
       scene3.appendChild(clip3);
       opacity.state = PersistedSurfaceState.pendingRetention;
@@ -234,6 +237,7 @@ void testMain() {
       builder.pop();
 
       html.HtmlElement content = builder.build().webOnlyRootElement;
+      html.document.body.append(content);
       expect(content.querySelector('canvas').style.zIndex, '-1');
 
       // Force update to scene which will utilize reuse code path.
@@ -627,8 +631,16 @@ Picture _drawPicture() {
   final EnginePictureRecorder recorder = PictureRecorder();
   final RecordingCanvas canvas =
   recorder.beginRecording(const Rect.fromLTRB(0, 0, 400, 400));
+  Shader gradient = Gradient.radial(
+      Offset(100, 100), 50, [
+    const Color.fromARGB(255, 0, 0, 0),
+    const Color.fromARGB(255, 0, 0, 255)
+  ]);
   canvas.drawCircle(
-      Offset(offsetX + 10, offsetY + 10), 10, Paint()..style = PaintingStyle.fill);
+      Offset(offsetX + 10, offsetY + 10), 10,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..shader = gradient);
   canvas.drawCircle(
       Offset(offsetX + 60, offsetY + 10),
       10,
@@ -656,8 +668,16 @@ Picture _drawPathImagePath() {
   final EnginePictureRecorder recorder = PictureRecorder();
   final RecordingCanvas canvas =
   recorder.beginRecording(const Rect.fromLTRB(0, 0, 400, 400));
+  Shader gradient = Gradient.radial(
+      Offset(100, 100), 50, [
+    const Color.fromARGB(255, 0, 0, 0),
+    const Color.fromARGB(255, 0, 0, 255)
+  ]);
   canvas.drawCircle(
-      Offset(offsetX + 10, offsetY + 10), 10, Paint()..style = PaintingStyle.fill);
+      Offset(offsetX + 10, offsetY + 10), 10,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..shader = gradient);
   canvas.drawCircle(
       Offset(offsetX + 60, offsetY + 10),
       10,
@@ -671,6 +691,11 @@ Picture _drawPathImagePath() {
         ..style = PaintingStyle.fill
         ..color = const Color.fromRGBO(0, 255, 0, 1));
   canvas.drawImage(createTestImage(), Offset(0, 0), Paint());
+  canvas.drawCircle(
+      Offset(offsetX + 10, offsetY + 10), 10,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..shader = gradient);
   canvas.drawCircle(
       Offset(offsetX + 60, offsetY + 60),
       10,
