@@ -387,7 +387,7 @@ $ex
         await appStopper(this, package);
       }
 
-      await device.dispose();
+      await device?.dispose();
     }
 
     return FlutterCommandResult.success();
