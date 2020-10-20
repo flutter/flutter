@@ -240,5 +240,6 @@ class FlutterDriverService extends DriverService {
     } on Exception catch (err) {
       _logger.printError('Failed to uninstall app due to unhandled error: $err');
     }
+    await _device.dispose();
   }
 }
