@@ -7168,7 +7168,7 @@ void main() {
       'smartQuotesType: disabled',
       'maxLines: 10',
       'maxLength: 100',
-      'maxLength not enforced',
+      'maxLengthEnforcement: none',
       'textInputAction: done',
       'textAlign: end',
       'textDirection: ltr',
