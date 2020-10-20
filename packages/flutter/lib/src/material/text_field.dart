@@ -599,8 +599,8 @@ class TextField extends StatefulWidget {
   /// enforce the limit, or merely provide a character counter and warning when
   /// [maxLength] is exceeded.
   @Deprecated(
-    'Use maxLengthEnforcement parameter which provide more specific '
-    'behaviour related to the maxLength limit. '
+    'Use maxLengthEnforcement parameter which provides more specific '
+    'behavior related to the maxLength limit. '
     'This feature was deprecated after v1.23.0-19.0.pre.'
   )
   final bool maxLengthEnforced;
