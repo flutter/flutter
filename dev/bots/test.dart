@@ -390,14 +390,6 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
     }
   }
-  if (Platform.isLinux && (branch != 'beta' && branch != 'stable')) {
-    if (Directory(path.join(examplePath, 'linux')).existsSync()) {
-      await _flutterBuildLinux(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
-      await _flutterBuildLinux(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
-    } else {
-      print('Example project ${path.basename(examplePath)} has no linux directory, skipping Linux');
-    }
-  }
   if (Platform.isMacOS && (branch != 'beta' && branch != 'stable')) {
     if (Directory(path.join(examplePath, 'macos')).existsSync()) {
       await _flutterBuildMacOS(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -449,21 +441,6 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
     );
   }
   await _flutterBuild(relativePathToApplication, 'IPA', 'ios',
-    release: release,
-    verifyCaching: verifyCaching,
-    additionalArgs: additionalArgs
-  );
-}
-
-Future<void> _flutterBuildLinux(String relativePathToApplication, {
-  @required bool release,
-  bool verifyCaching = false,
-  List<String> additionalArgs = const <String>[],
-}) async {
-  assert(Platform.isLinux);
-  await runCommand(flutter, <String>['config', '--enable-linux-desktop']);
-  print('${green}Testing Linux build$reset for $cyan$relativePathToApplication$reset...');
-  await _flutterBuild(relativePathToApplication, 'Linux', 'linux',
     release: release,
     verifyCaching: verifyCaching,
     additionalArgs: additionalArgs
