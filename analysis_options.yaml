@@ -216,7 +216,7 @@ linter:
     # - unsafe_html # not yet tested
     - use_full_hex_values_for_flutter_colors
     # - use_function_type_syntax_for_parameters # not yet tested
-    # - use_is_even_rather_than_modulo # not yet tested
+    - use_is_even_rather_than_modulo
     # - use_key_in_widget_constructors # not yet tested
     - use_late_for_private_fields_and_variables
     # - use_raw_strings # not yet tested

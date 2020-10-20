@@ -46,7 +46,7 @@ Future<void> main() async {
 
     watch.start();
     while (watch.elapsed < kBenchmarkTime) {
-      renderView.configuration = (iterations % 2 == 0) ? big : small;
+      renderView.configuration = iterations.isEven ? big : small;
       await tester.pumpBenchmark(Duration(milliseconds: iterations * 16));
       iterations += 1;
     }

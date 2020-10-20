@@ -3989,7 +3989,6 @@ void main() {
       reason: 'on $platform',
     );
 
-    // Move forward one character to reset the selection.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
@@ -4002,8 +4001,8 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 21,
-          extentOffset: 21,
+          baseOffset: 20,
+          extentOffset: 20,
           affinity: TextAffinity.downstream,
         ),
       ),
@@ -4024,8 +4023,8 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 21,
-          extentOffset: 40,
+          baseOffset: 20,
+          extentOffset: 39,
           affinity: TextAffinity.downstream,
         ),
       ),
@@ -4049,7 +4048,7 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 21,
+          baseOffset: 20,
           extentOffset: testText.length,
           affinity: TextAffinity.downstream,
         ),
@@ -4071,8 +4070,8 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 21,
-          extentOffset: 58,
+          baseOffset: 20,
+          extentOffset: 57,
           affinity: TextAffinity.downstream,
         ),
       ),
@@ -4094,7 +4093,7 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 21,
+          baseOffset: 20,
           extentOffset: 72,
           affinity: TextAffinity.downstream,
         ),
@@ -4117,7 +4116,7 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 21,
+          baseOffset: 20,
           extentOffset: 55,
           affinity: TextAffinity.downstream,
         ),
@@ -4738,7 +4737,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -4799,7 +4798,7 @@ void main() {
       state.updateEditingValue(const TextEditingValue(text: 'remote value'));
       tester.testTextInput.log.clear();
 
-      String errorString;
+      String? errorString;
       try {
         state.endBatchEdit();
       } catch (e) {
@@ -4836,7 +4835,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
       inputFormatters: <TextInputFormatter>[LengthLimitingTextInputFormatter(6)],
       onChanged: (String s) => controller.text += ' onChanged',
@@ -4923,7 +4922,7 @@ void main() {
 
     testWidgets('input from changing controller', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: testText);
-      Widget build({ TextEditingController textEditingController }) {
+      Widget build({ TextEditingController? textEditingController }) {
         return MediaQuery(
           data: const MediaQueryData(),
           child: Directionality(
@@ -4935,7 +4934,7 @@ void main() {
               focusNode: FocusNode(),
               cursorColor: Colors.red,
               backgroundCursorColor: Colors.blue,
-              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
               keyboardType: TextInputType.text,
               inputFormatters: <TextInputFormatter>[LengthLimitingTextInputFormatter(6)],
             ),
