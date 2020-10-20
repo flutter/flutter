@@ -1444,8 +1444,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   // Returns the amount of delta that was not used.
   //
-  // Negative delta means going down (exposing stuff above), positive delta
-  // going up (exposing stuff below).
+  // Negative delta represents a forward ScrollDirection, while the positive
+  // would be a reverse ScrollDirection.
   //
   // The method doesn't take into account the effects of [ScrollPhysics].
   double applyClampedPointerSignalUpdate(double delta) {
