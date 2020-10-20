@@ -5116,9 +5116,9 @@ abstract class _RestorationInformation {
 
   factory _RestorationInformation.fromSerializableData(Object data) {
     assert(data != null);
-    final List<Object> casted = data as List<Object>;
+    final List<Object?> casted = data as List<Object?>;
     assert(casted.isNotEmpty);
-    final _RouteRestorationType type = _RouteRestorationType.values[casted[0] as int];
+    final _RouteRestorationType type = _RouteRestorationType.values[casted[0]! as int];
     switch (type) {
       case _RouteRestorationType.named:
         return _NamedRestorationInformation.fromSerializableData(casted.sublist(1));
@@ -5167,11 +5167,11 @@ class _NamedRestorationInformation extends _RestorationInformation {
     required this.restorationScopeId,
   }) : assert(name != null), super(_RouteRestorationType.named);
 
-  factory _NamedRestorationInformation.fromSerializableData(List<Object> data) {
+  factory _NamedRestorationInformation.fromSerializableData(List<Object?> data) {
     assert(data.length >= 2);
     return _NamedRestorationInformation(
-      restorationScopeId: data[0] as int,
-      name: data[1] as String,
+      restorationScopeId: data[0]! as int,
+      name: data[1]! as String,
       arguments: data.length > 2 ? data[2] : null,
     );
   }
@@ -5206,11 +5206,11 @@ class _AnonymousRestorationInformation extends _RestorationInformation {
     required this.restorationScopeId,
   }) : assert(routeBuilder != null), super(_RouteRestorationType.anonymous);
 
-  factory _AnonymousRestorationInformation.fromSerializableData(List<Object> data) {
+  factory _AnonymousRestorationInformation.fromSerializableData(List<Object?> data) {
     assert(data.length > 1);
-    final RestorableRouteBuilder routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1] as int))! as RestorableRouteBuilder;
+    final RestorableRouteBuilder routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1]! as int))! as RestorableRouteBuilder;
     return _AnonymousRestorationInformation(
-      restorationScopeId: data[0] as int,
+      restorationScopeId: data[0]! as int,
       routeBuilder: routeBuilder,
       arguments: data.length > 2 ? data[2] : null,
     );
@@ -5385,8 +5385,8 @@ class _HistoryProperty extends RestorableProperty<Map<String?, List<Object>>?> {
   @override
   Map<String?, List<Object>>? fromPrimitives(Object data) {
     final Map<dynamic, dynamic> casted = data as Map<dynamic, dynamic>;
-    return casted.map<String, List<Object>>((dynamic key, dynamic value) => MapEntry<String, List<Object>>(
-      key as String,
+    return casted.map<String?, List<Object>>((dynamic key, dynamic value) => MapEntry<String?, List<Object>>(
+      key as String?,
       List<Object>.from(value as List<dynamic>, growable: true),
     ));
   }

@@ -90,8 +90,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// This future completes once the animation has been dismissed. That will be
   /// after [popped], because [popped] typically completes before the animation
   /// even starts, as soon as the route is popped.
-  Future<T> get completed => _transitionCompleter.future;
-  final Completer<T> _transitionCompleter = Completer<T>();
+  Future<T?> get completed => _transitionCompleter.future;
+  final Completer<T?> _transitionCompleter = Completer<T?>();
 
   /// {@template flutter.widgets.transitionRoute.transitionDuration}
   /// The duration the transition going forwards.

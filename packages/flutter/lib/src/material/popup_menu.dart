@@ -1088,7 +1088,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
-      showMenu<T>(
+      showMenu<T?>(
         context: context,
         elevation: widget.elevation ?? popupMenuTheme.elevation,
         items: items,
@@ -1098,7 +1098,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         color: widget.color ?? popupMenuTheme.color,
         captureInheritedThemes: widget.captureInheritedThemes,
       )
-      .then<void>((T newValue) {
+      .then<void>((T? newValue) {
         if (!mounted)
           return null;
         if (newValue == null) {

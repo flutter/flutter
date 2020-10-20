@@ -80,7 +80,7 @@ void main() {
     // regression test for https://github.com/flutter/flutter/issues/18145
 
     final _TestSearchDelegate delegate = _TestSearchDelegate();
-    final List<String> selectedResults = <String>[];
+    final List<String?> selectedResults = <String?>[];
 
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
@@ -105,7 +105,7 @@ void main() {
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
 
-    expect(selectedResults, <void>[null]);
+    expect(selectedResults, <String?>[null]);
 
     // We are on the homepage again
     expect(find.text('HomeBody'), findsOneWidget);
@@ -702,7 +702,7 @@ class TestHomePage extends StatelessWidget {
     this.initialQuery,
   }) : super(key: key);
 
-  final List<String>? results;
+  final List<String?>? results;
   final SearchDelegate<String> delegate;
   final bool passInInitialQuery;
   final String? initialQuery;

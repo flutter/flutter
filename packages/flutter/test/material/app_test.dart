@@ -249,7 +249,7 @@ void main() {
   });
 
   testWidgets('Return value from pop is correct', (WidgetTester tester) async {
-    late Future<Object> result;
+    late Future<Object?> result;
     await tester.pumpWidget(
         MaterialApp(
           home: Builder(
