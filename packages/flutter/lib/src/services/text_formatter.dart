@@ -451,30 +451,33 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ) {
     final int? maxLength = this.maxLength;
 
-    if (maxLength == null
-      || maxLength == -1
-      || newValue.text.characters.length <= maxLength
-      || maxLengthEnforcement == MaxLengthEnforcement.none)
+    if (maxLength == null || maxLength == -1 || newValue.text.characters.length <= maxLength)
       return newValue;
 
     assert(maxLength > 0);
 
-    // If already at the maximum and tried to enter even more, keep the old
-    // value.
-    if (oldValue.text.characters.length == maxLength && !oldValue.composing.isValid) {
-      return oldValue;
-    }
+    switch (maxLengthEnforcement) {
+      case MaxLengthEnforcement.none:
+        return newValue;
+      case MaxLengthEnforcement.enforced:
+      case MaxLengthEnforcement.allowComposingTextToFinish:
+        // If already at the maximum and tried to enter even more, keep the old
+        // value.
+        if (oldValue.text.characters.length == maxLength && !oldValue.composing.isValid) {
+          return oldValue;
+        }
 
-    // Temporarily exempt `newValue` from the maxLength limit if it has a
-    // composing text going and no enforcement to the composing value, until
-    // the composing is finished.
-    return newValue.composing.isValid && maxLengthEnforcement != MaxLengthEnforcement.enforced
-      ? newValue
-      : truncate(
-          newValue,
-          maxLength,
-          keepComposingRange: oldValue.composing.isValid,
-        );
+        // Temporarily exempt `newValue` from the maxLength limit if it has a
+        // composing text going and no enforcement to the composing value, until
+        // the composing is finished.
+        return newValue.composing.isValid && maxLengthEnforcement != MaxLengthEnforcement.enforced
+            ? newValue
+            : truncate(
+                newValue,
+                maxLength,
+                keepComposingRange: oldValue.composing.isValid,
+              );
+    }
   }
 }
 
