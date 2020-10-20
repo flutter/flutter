@@ -7140,7 +7140,7 @@ void main() {
       autocorrect: false,
       maxLines: 10,
       maxLength: 100,
-      maxLengthEnforced: false,
+      maxLengthEnforcement: MaxLengthEnforcement.none,
       smartDashesType: SmartDashesType.disabled,
       smartQuotesType: SmartQuotesType.disabled,
       enabled: false,

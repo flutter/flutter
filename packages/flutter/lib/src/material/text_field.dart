@@ -393,6 +393,10 @@ class TextField extends StatefulWidget {
        assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
        assert(maxLengthEnforcement != null),
+       assert(
+         maxLengthEnforced || maxLengthEnforcement == MaxLengthEnforcement.enforced,
+         'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
+       ),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        assert(selectionHeightStyle != null),
@@ -1103,12 +1107,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
-    if (widget.maxLength != null && widget.maxLengthEnforced) {
-      formatters.add(LengthLimitingTextInputFormatter(
-        widget.maxLength,
-        maxLengthEnforcement: widget.maxLengthEnforcement,
-      ));
-    }
+    final MaxLengthEnforcement maxLengthEnforcement = widget.maxLengthEnforced
+      ? widget.maxLengthEnforcement
+      : MaxLengthEnforcement.none;
+    formatters.add(LengthLimitingTextInputFormatter(
+      widget.maxLength,
+      maxLengthEnforcement: maxLengthEnforcement,
+    ));
 
     final TextSelectionControls textSelectionControls;
     final bool paintCursorAboveText;

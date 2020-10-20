@@ -289,6 +289,10 @@ class CupertinoTextField extends StatefulWidget {
        assert(enableSuggestions != null),
        assert(maxLengthEnforced != null),
        assert(maxLengthEnforcement != null),
+       assert(
+         maxLengthEnforced || maxLengthEnforcement == MaxLengthEnforcement.enforced,
+         'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
+       ),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        assert(selectionHeightStyle != null),
@@ -889,12 +893,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     final bool enabled = widget.enabled ?? true;
     final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context)!.devicePixelRatio, 0);
-    if (widget.maxLength != null && widget.maxLengthEnforced) {
-      formatters.add(LengthLimitingTextInputFormatter(
-        widget.maxLength,
-        maxLengthEnforcement: widget.maxLengthEnforcement,
-      ));
-    }
+    final MaxLengthEnforcement maxLengthEnforcement = widget.maxLengthEnforced
+      ? widget.maxLengthEnforcement
+      : MaxLengthEnforcement.none;
+    formatters.add(LengthLimitingTextInputFormatter(
+      widget.maxLength,
+      maxLengthEnforcement: maxLengthEnforcement,
+    ));
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
 
     final TextStyle? resolvedStyle = widget.style?.copyWith(

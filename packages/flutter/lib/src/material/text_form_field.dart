@@ -208,6 +208,10 @@ class TextFormField extends FormField<String> {
        ),
        assert(maxLengthEnforced != null),
        assert(maxLengthEnforcement != null),
+       assert(
+         maxLengthEnforced || maxLengthEnforcement == MaxLengthEnforcement.enforced,
+         'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
+       ),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
