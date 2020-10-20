@@ -768,14 +768,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Any active animation is canceled. If the user is currently scrolling, that
   /// action is canceled.
   ///
-  /// If this method changes the scroll position, a sequence of start/update/end
-  /// scroll notifications will be dispatched.
+  /// This method dispatches the start/update/end sequence of scrolling
+  /// notifications.
   ///
-  /// [pointerScroll] is very similar to [jumpTo], but [pointerScroll] will
-  /// update [ScrollDirection.forward] / [ScrollDirection.reverse].
+  /// This method is very similar to [jumpTo], but [pointerScroll] will
+  /// update the [ScrollDirection].
   ///
-  /// The method is used to process the pointer signal, where delta given
-  /// [ScrollPosition] the calculated target value to slide.
   // TODO(YeungKC): Support trackpad scroll, https://github.com/flutter/flutter/issues/23604.
   void pointerScroll(double delta);
 
