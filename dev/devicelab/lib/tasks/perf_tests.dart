@@ -347,6 +347,7 @@ TaskFunction createsScrollSmoothnessPerfTest() {
       await flutter('packages', options: <String>['get']);
 
       await flutter('drive', options: <String>[
+        '--no-android-gradle-daemon',
         '-v',
         '--verbose-system-logs',
         '--profile',
@@ -395,6 +396,7 @@ TaskFunction createFramePolicyIntegrationTest() {
       await flutter('packages', options: <String>['get']);
 
       await flutter('drive', options: <String>[
+        '--no-android-gradle-daemon',
         '-v',
         '--verbose-system-logs',
         '--profile',
@@ -452,23 +454,56 @@ class StartupTest {
 
   Future<TaskResult> run() async {
     return await inDirectory<TaskResult>(testDirectory, () async {
-      final String deviceId = (await devices.workingDevice).deviceId;
-      await flutter('packages', options: <String>['get']);
-
-      const int iterations = 15;
+      final Device device = await devices.workingDevice;
+      const int iterations = 5;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
-      for (int i = 0; i < iterations; ++i) {
+
+      section('Building application');
+      String applicationBinaryPath;
+      switch (deviceOperatingSystem) {
+        case DeviceOperatingSystem.android:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm,android-arm64',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
+        case DeviceOperatingSystem.ios:
+          await flutter('build', options: <String>[
+            'ios',
+             '-v',
+            '--profile',
+          ]);
+          applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
+          break;
+        case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.fake:
+          break;
+      }
+
+      for (int i = 0; i < iterations; i += 1) {
         await flutter('run', options: <String>[
+          '--no-android-gradle-daemon',
           '--verbose',
           '--profile',
           '--trace-startup',
           '-d',
-          deviceId,
+          device.deviceId,
+          if (applicationBinaryPath != null)
+            '--use-application-binary=$applicationBinaryPath',
         ]);
         final Map<String, dynamic> data = json.decode(
           file('$testDirectory/build/start_up_info.json').readAsStringSync(),
         ) as Map<String, dynamic>;
         results.add(data);
+
+        await flutter('install', options: <String>[
+          '--uninstall-only',
+          '-d',
+          device.deviceId,
+        ]);
       }
 
       final Map<String, dynamic> averageResults = _average(results, iterations);
@@ -575,6 +610,7 @@ class PerfTest {
       await flutter('packages', options: <String>['get']);
 
       await flutter('drive', options: <String>[
+        '--no-android-gradle-daemon',
         '-v',
         '--verbose-system-logs',
         '--profile',
@@ -1090,6 +1126,7 @@ class MemoryTest {
       }
 
       await adb.cancel();
+      await flutter('install', options: <String>['--uninstall-only', '-d', device.deviceId]);
 
       final ListStatistics startMemoryStatistics = ListStatistics(_startMemory);
       final ListStatistics endMemoryStatistics = ListStatistics(_endMemory);
@@ -1423,4 +1460,13 @@ class _UnzipListEntry {
   final int uncompressedSize;
   final int compressedSize;
   final String path;
+}
+
+String _findIosAppInBuildDirectory(String searchDirectory) {
+  for (final FileSystemEntity entity in Directory(searchDirectory).listSync()) {
+    if (entity.path.endsWith('.app')) {
+      return entity.path;
+    }
+  }
+  return null;
 }
