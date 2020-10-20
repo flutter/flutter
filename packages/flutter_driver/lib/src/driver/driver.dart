@@ -6,9 +6,8 @@
 
 import 'dart:io';
 
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
-import 'package:vm_service_client/vm_service_client.dart';
+import 'package:vm_service/vm_service.dart' as vms;
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../common/diagnostics_tree.dart';
@@ -97,14 +96,13 @@ abstract class FlutterDriver {
   @visibleForTesting
   factory FlutterDriver.connectedTo({
     FlutterWebConnection webConnection,
-    VMServiceClient serviceClient,
-    rpc.Peer peer,
-    VMIsolate appIsolate,
+    vms.VmService serviceClient,
+    vms.Isolate appIsolate,
   }) {
     if (webConnection != null) {
       return WebFlutterDriver.connectedTo(webConnection);
     }
-    return VMServiceFlutterDriver.connectedTo(serviceClient, peer, appIsolate);
+    return VMServiceFlutterDriver.connectedTo(serviceClient, appIsolate);
   }
 
   /// Connects to a Flutter application.
@@ -132,10 +130,6 @@ abstract class FlutterDriver {
   /// `isolateNumber` is set, as this is already enough information to connect
   /// to an isolate.
   ///
-  /// `headers` optionally specifies HTTP headers to be included in the
-  /// [WebSocket] connection. This is only used for [VMServiceFlutterDriver]
-  /// connections.
-  ///
   /// `browser` specifies which FlutterDriver implementation to use. If not
   /// speicifed or set to false, [VMServiceFlutterDriver] implementation
   /// will be used. Otherwise, [WebFlutterDriver] implementation will be used.
@@ -150,26 +144,24 @@ abstract class FlutterDriver {
     int isolateNumber,
     Pattern fuchsiaModuleTarget,
     Duration timeout,
-    Map<String, dynamic> headers,
   }) async {
     if (Platform.environment['FLUTTER_WEB_TEST'] != null) {
       return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl, timeout: timeout);
     }
     return VMServiceFlutterDriver.connect(
-              dartVmServiceUrl: dartVmServiceUrl,
-              printCommunication: printCommunication,
-              logCommunicationToFile: logCommunicationToFile,
-              isolateNumber: isolateNumber,
-              fuchsiaModuleTarget: fuchsiaModuleTarget,
-              headers: headers,
+      dartVmServiceUrl: dartVmServiceUrl,
+      printCommunication: printCommunication,
+      logCommunicationToFile: logCommunicationToFile,
+      isolateNumber: isolateNumber,
+      fuchsiaModuleTarget: fuchsiaModuleTarget,
     );
   }
 
   /// Getter of appIsolate.
-  VMIsolate get appIsolate => throw UnimplementedError();
+  vms.Isolate get appIsolate => throw UnimplementedError();
 
   /// Getter of serviceClient.
-  VMServiceClient get serviceClient => throw UnimplementedError();
+  vms.VmService get serviceClient => throw UnimplementedError();
 
   /// Getter of webDriver.
   async_io.WebDriver get webDriver => throw UnimplementedError();
