@@ -761,9 +761,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @override
   void jumpTo(double value);
 
-  /// Jumps the scrolling position from current value to delta without animation
-  /// and without checking if new value is in range, taking min/max scroll
-  /// extent into account.
+  /// Changes the scrolling position based on a pointer signal from current
+  /// value to delta without animation and without checking if new value is in
+  /// range, taking min/max scroll extent into account.
   ///
   /// Any active animation is canceled. If the user is currently scrolling, that
   /// action is canceled.
