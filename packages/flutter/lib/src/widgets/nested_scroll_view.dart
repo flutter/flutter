@@ -1346,7 +1346,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       // If pixels < 0.0, then we are currently in overscroll. The max should be
       // 0.0, representing the end of the overscrolled portion.
       : pixels < 0.0 ? 0.0 : math.max(maxScrollExtent, pixels);
-    print('Range for clamped drag, min: $min, max: $max');
     final double oldPixels = pixels;
     final double newPixels = (pixels - delta).clamp(min, max);
     final double clampedDelta = newPixels - pixels;
@@ -1360,6 +1359,9 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       didUpdateScrollPositionBy(offset);
     }
     final double remainingDelta =  delta + offset;
+    // Since we handle overscroll as a separate operation, a clamped delta can be
+    // applied more than once before the remainder is used in applyFullDragUpdate.
+    // This many operations leaves room for precision errors.
     return precisionErrorTolerance > remainingDelta ? 0.0 : remainingDelta;
   }
 
