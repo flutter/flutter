@@ -79,6 +79,5 @@
   "inputTimeModeButtonLabel": "Mətn daxiletmə rejiminə keçin",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 lisenziya",
-  "licensesPackageDetailTextOther": "$licenseCount lisenziya",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount lisenziya"
 }

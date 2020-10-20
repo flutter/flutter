@@ -80,6 +80,5 @@
   "inputTimeModeButtonLabel": "Metin giriş moduna geç",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 lisans",
-  "licensesPackageDetailTextOther": "$licenseCount lisans",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount lisans"
 }

@@ -80,6 +80,5 @@
   "inputTimeModeButtonLabel": "ប្ដូរទៅ​មុខងារ​បញ្ចូល​អក្សរ",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "អាជ្ញាបណ្ណ 1",
-  "licensesPackageDetailTextOther": "អាជ្ញាបណ្ណ $licenseCount",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "អាជ្ញាបណ្ណ $licenseCount"
 }

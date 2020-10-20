@@ -261,9 +261,6 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Soek';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Kies alles';
 
   @override
@@ -568,9 +565,6 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'ይፈልጉ';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'ሁሉንም ምረጥ';
@@ -879,9 +873,6 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'بحث';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'اختيار الكل';
 
   @override
@@ -1186,9 +1177,6 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'সন্ধান কৰক';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
@@ -1497,9 +1485,6 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Axtarın';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Hamısını seçin';
 
   @override
@@ -1804,9 +1789,6 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Пошук';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Выбраць усе';
@@ -2115,9 +2097,6 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Търсене';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Избиране на всички';
 
   @override
@@ -2422,9 +2401,6 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'খুঁজুন';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'সব বেছে নিন';
@@ -2733,9 +2709,6 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Pretražite';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Odaberi sve';
 
   @override
@@ -3040,9 +3013,6 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Cerca';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Selecciona-ho tot';
@@ -3351,9 +3321,6 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Hledat';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Vybrat vše';
 
   @override
@@ -3660,9 +3627,6 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Søg';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Markér alt';
 
   @override
@@ -3967,9 +3931,6 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Suchen';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Alle auswählen';
@@ -4317,9 +4278,6 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Αναζήτηση';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Επιλογή όλων';
 
   @override
@@ -4624,9 +4582,6 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Search';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Select all';
@@ -5494,9 +5449,6 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Buscar';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Seleccionar todo';
@@ -8388,9 +8340,6 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Otsing';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Vali kõik';
 
   @override
@@ -8695,9 +8644,6 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Bilatu';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Hautatu guztiak';
@@ -9006,9 +8952,6 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'جستجو';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'انتخاب همه';
 
   @override
@@ -9313,9 +9256,6 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Haku';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Valitse kaikki';
@@ -9624,9 +9564,6 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Maghanap';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Piliin lahat';
 
   @override
@@ -9931,9 +9868,6 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Rechercher';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Tout sélectionner';
@@ -10344,9 +10278,6 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Buscar';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Seleccionar todo';
 
   @override
@@ -10651,9 +10582,6 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Suchen';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Alle auswählen';
@@ -10962,9 +10890,6 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'શોધો';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'બધા પસંદ કરો';
 
   @override
@@ -11269,9 +11194,6 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'חיפוש';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'בחירת הכול';
@@ -11580,9 +11502,6 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'खोजें';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'सभी को चुनें';
 
   @override
@@ -11887,9 +11806,6 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Pretražite';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Odaberi sve';
@@ -12198,9 +12114,6 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Keresés';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Összes kijelölése';
 
   @override
@@ -12505,9 +12418,6 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Որոնել';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Նշել բոլորը';
@@ -12816,9 +12726,6 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Telusuri';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Pilih semua';
 
   @override
@@ -13123,9 +13030,6 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Leit';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Velja allt';
@@ -13434,9 +13338,6 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Cerca';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Seleziona tutto';
 
   @override
@@ -13741,9 +13642,6 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => '検索';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'すべて選択';
@@ -14052,9 +13950,6 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ძიება';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'ყველას არჩევა';
 
   @override
@@ -14359,9 +14254,6 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Іздеу';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Барлығын таңдау';
@@ -14670,9 +14562,6 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ស្វែងរក';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'ជ្រើសរើស​ទាំងអស់';
 
   @override
@@ -14977,9 +14866,6 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
@@ -15288,9 +15174,6 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get searchFieldLabel => '검색';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => '전체 선택';
 
   @override
@@ -15595,9 +15478,6 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Издөө';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Баарын тандоо';
@@ -15906,9 +15786,6 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ຊອກຫາ';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'ເລືອກທັງໝົດ';
 
   @override
@@ -16213,9 +16090,6 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Paieška';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Pasirinkti viską';
@@ -16524,9 +16398,6 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Meklēt';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Atlasīt visu';
 
   @override
@@ -16831,9 +16702,6 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Пребарувајте';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Избери ги сите';
@@ -17142,9 +17010,6 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'തിരയുക';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'എല്ലാം തിരഞ്ഞെടുക്കുക';
 
   @override
@@ -17449,9 +17314,6 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Хайх';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Бүгдийг сонгох';
@@ -17760,9 +17622,6 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'शोध';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'सर्व निवडा';
 
   @override
@@ -18067,9 +17926,6 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Cari';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Pilih semua';
@@ -18378,9 +18234,6 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ရှာဖွေရန်';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'အားလုံး ရွေးရန်';
 
   @override
@@ -18685,9 +18538,6 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Søk';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Velg alle';
@@ -18996,9 +18846,6 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'खोज्नुहोस्';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'सबै बटनहरू चयन गर्नुहोस्';
 
   @override
@@ -19303,9 +19150,6 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Zoeken';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Alles selecteren';
@@ -19614,9 +19458,6 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Søk';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Velg alle';
 
   @override
@@ -19921,9 +19762,6 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'ଖୋଜନ୍ତୁ';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'ସବୁ ଚୟନ କରନ୍ତୁ';
@@ -20232,9 +20070,6 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ਖੋਜੋ';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'ਸਭ ਚੁਣੋ';
 
   @override
@@ -20539,9 +20374,6 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Szukaj';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Zaznacz wszystko';
@@ -20850,9 +20682,6 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'لټون';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'غوره کړئ';
 
   @override
@@ -21157,9 +20986,6 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Pesquisa';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Selecionar tudo';
@@ -21594,9 +21420,6 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Căutați';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Selectați tot';
 
   @override
@@ -21901,9 +21724,6 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Поиск';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Выбрать все';
@@ -22212,9 +22032,6 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'සෙවීම';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'සියල්ල තෝරන්න';
 
   @override
@@ -22519,9 +22336,6 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Hľadať';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Vybrať všetko';
@@ -22830,9 +22644,6 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Iskanje';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Izberi vse';
 
   @override
@@ -23139,9 +22950,6 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Kërko';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Zgjidh të gjitha';
 
   @override
@@ -23446,9 +23254,6 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Претражите';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Изабери све';
@@ -24057,9 +23862,6 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Sök';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Markera allt';
 
   @override
@@ -24364,9 +24166,6 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Tafuta';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Chagua vyote';
@@ -24675,9 +24474,6 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'தேடல்';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'அனைத்தையும் தேர்ந்தெடு';
 
   @override
@@ -24982,9 +24778,6 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'వెతుకు';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'అన్నింటినీ ఎంచుకోండి';
@@ -25293,9 +25086,6 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ค้นหา';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'เลือกทั้งหมด';
 
   @override
@@ -25600,9 +25390,6 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Maghanap';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Piliin lahat';
@@ -25911,9 +25698,6 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Ara';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Tümünü seç';
 
   @override
@@ -26218,9 +26002,6 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Пошук';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Вибрати всі';
@@ -26529,9 +26310,6 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'تلاش';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'سبھی کو منتخب کریں';
 
   @override
@@ -26836,9 +26614,6 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Qidirish';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Hammasi';
@@ -27147,9 +26922,6 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Tìm kiếm';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
-
-  @override
   String get selectAllButtonLabel => 'Chọn tất cả';
 
   @override
@@ -27454,9 +27226,6 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => '搜索';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => '全选';
@@ -28171,9 +27940,6 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Sesha';
-
-  @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Khetha konke';

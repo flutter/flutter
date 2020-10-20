@@ -79,6 +79,5 @@
   "inputTimeModeButtonLabel": "Skiptu yfir í textainnslátt",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 leyfi",
-  "licensesPackageDetailTextOther": "$licenseCount leyfi",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount leyfi"
 }

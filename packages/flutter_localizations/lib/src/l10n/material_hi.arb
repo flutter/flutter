@@ -80,6 +80,5 @@
   "inputTimeModeButtonLabel": "टेक्स्ट के इनपुट मोड पर स्विच करें",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 लाइसेंस",
-  "licensesPackageDetailTextOther": "$licenseCount लाइसेंस",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount लाइसेंस"
 }

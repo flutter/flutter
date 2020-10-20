@@ -81,6 +81,5 @@
   "inputTimeModeButtonLabel": "Мәтін енгізу режиміне ауысу",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 лицензия",
-  "licensesPackageDetailTextOther": "$licenseCount лицензия",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount лицензия"
 }

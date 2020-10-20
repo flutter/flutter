@@ -86,6 +86,5 @@
   "inputTimeModeButtonLabel": "Perjungti į teksto įvesties režimą",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 licencija",
-  "licensesPackageDetailTextOther": "$licenseCount licencijų",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount licencijų"
 }

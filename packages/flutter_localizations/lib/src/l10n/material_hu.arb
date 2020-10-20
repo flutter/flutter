@@ -80,6 +80,5 @@
   "inputTimeModeButtonLabel": "Váltás szövegbeviteli módra",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 licenc",
-  "licensesPackageDetailTextOther": "$licenseCount licenc",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount licenc"
 }

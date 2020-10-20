@@ -83,6 +83,5 @@
   "inputTimeModeButtonLabel": "Пређите на режим уноса текста",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 лиценца",
-  "licensesPackageDetailTextOther": "$licenseCount лиценци",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount лиценци"
 }

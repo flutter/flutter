@@ -80,6 +80,5 @@
   "inputTimeModeButtonLabel": "텍스트 입력 모드로 전환",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "라이선스 1개",
-  "licensesPackageDetailTextOther": "라이선스 $licenseCount개",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "라이선스 $licenseCount개"
 }

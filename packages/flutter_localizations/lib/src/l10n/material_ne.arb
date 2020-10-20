@@ -79,6 +79,5 @@
   "inputTimeModeButtonLabel": "पाठ इनपुट मोड प्रयोग गर्नुहोस्",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "एउटा इजाजतपत्र",
-  "licensesPackageDetailTextOther": "$licenseCount वटा इजाजतपत्र",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount वटा इजाजतपत्र"
 }

@@ -85,6 +85,5 @@
   "inputTimeModeButtonLabel": "Пераход у рэжым уводу тэксту",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 ліцэнзія",
-  "licensesPackageDetailTextOther": "$licenseCount ліцэнзіі",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount ліцэнзіі"
 }

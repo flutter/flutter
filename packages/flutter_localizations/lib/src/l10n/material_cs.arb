@@ -86,6 +86,5 @@
   "inputTimeModeButtonLabel": "Přepnout na režim zadávání textu",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 licence",
-  "licensesPackageDetailTextOther": "$licenseCount licencí",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount licencí"
 }

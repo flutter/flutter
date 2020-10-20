@@ -79,6 +79,5 @@
   "inputTimeModeButtonLabel": "Aldatu testua idazteko modura",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 lizentzia",
-  "licensesPackageDetailTextOther": "$licenseCount lizentzia",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount lizentzia"
 }

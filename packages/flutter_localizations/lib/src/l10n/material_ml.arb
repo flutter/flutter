@@ -79,6 +79,5 @@
   "inputTimeModeButtonLabel": "ടെക്‌സ്‌റ്റ് ഇൻപുട്ട് മോഡിലേക്ക് മാറുക",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "ഒരു ലൈസൻസ്",
-  "licensesPackageDetailTextOther": "$licenseCount ലൈസൻസുകൾ",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount ലൈസൻസുകൾ"
 }

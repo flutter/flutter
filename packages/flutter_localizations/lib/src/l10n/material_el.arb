@@ -80,6 +80,5 @@
   "inputTimeModeButtonLabel": "Εναλλαγή στη λειτουργία εισαγωγής κειμένου",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 άδεια",
-  "licensesPackageDetailTextOther": "$licenseCount άδειες",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount άδειες"
 }

@@ -79,6 +79,5 @@
   "inputTimeModeButtonLabel": "Kalo te modaliteti i hyrjes së tekstit",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 licencë",
-  "licensesPackageDetailTextOther": "$licenseCount licenca",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount licenca"
 }

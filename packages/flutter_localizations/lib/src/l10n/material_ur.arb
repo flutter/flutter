@@ -80,6 +80,5 @@
   "inputTimeModeButtonLabel": "ٹیکسٹ ان پٹ وضع پر سوئچ کریں",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 لائسنس",
-  "licensesPackageDetailTextOther": "$licenseCount لائسنسز",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount لائسنسز"
 }

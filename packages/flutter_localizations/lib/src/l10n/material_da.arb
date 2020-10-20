@@ -80,6 +80,5 @@
   "inputTimeModeButtonLabel": "Skift til indtastning",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 licens",
-  "licensesPackageDetailTextOther": "$licenseCount licenser",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount licenser"
 }

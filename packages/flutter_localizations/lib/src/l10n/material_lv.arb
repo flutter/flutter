@@ -81,6 +81,5 @@
   "inputTimeModeButtonLabel": "Pārslēgties uz teksta ievades režīmu",
   "licensesPackageDetailTextZero": "Nav licenču",
   "licensesPackageDetailTextOne": "1 licence",
-  "licensesPackageDetailTextOther": "$licenseCount licences",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount licences"
 }

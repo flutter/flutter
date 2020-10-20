@@ -81,6 +81,5 @@
   "inputTimeModeButtonLabel": "Cambiar ao modo de escritura dos números",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 licenza",
-  "licensesPackageDetailTextOther": "$licenseCount licenzas",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount licenzas"
 }

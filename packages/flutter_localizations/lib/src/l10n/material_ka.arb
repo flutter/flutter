@@ -79,6 +79,5 @@
   "inputTimeModeButtonLabel": "ტექსტის შეყვანის რეჟიმზე გადართვა",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 ლიცენზია",
-  "licensesPackageDetailTextOther": "$licenseCount ლიცენზია",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount ლიცენზია"
 }

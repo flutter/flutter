@@ -79,6 +79,5 @@
   "inputTimeModeButtonLabel": "Skakel oor na teksinvoermodus",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 lisensie",
-  "licensesPackageDetailTextOther": "$licenseCount lisensies",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount lisensies"
 }

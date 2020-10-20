@@ -79,6 +79,5 @@
   "inputTimeModeButtonLabel": "ສະຫຼັບໄປໃຊ້ໂໝດປ້ອນຂໍ້ຄວາມ",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 ໃບອະນຸຍາດ",
-  "licensesPackageDetailTextOther": "$licenseCount ໃບອະນຸຍາດ",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "$licenseCount ໃບອະນຸຍາດ"
 }

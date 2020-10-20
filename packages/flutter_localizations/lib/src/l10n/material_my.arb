@@ -79,6 +79,5 @@
   "inputTimeModeButtonLabel": "စာသား ထည့်သွင်းမှုမုဒ်သို့ ပြောင်းရန်",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "လိုင်စင် 1 ခု",
-  "licensesPackageDetailTextOther": "လိုင်စင် $licenseCount ခု",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "licensesPackageDetailTextOther": "လိုင်စင် $licenseCount ခု"
 }
