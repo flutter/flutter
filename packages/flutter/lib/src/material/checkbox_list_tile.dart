@@ -389,7 +389,7 @@ class CheckboxListTile extends StatelessWidget {
   /// {@macro flutter.material.ListTile.shape}
   final ShapeBorder? shape;
 
-  /// {@macro flutter.material.ListTile.selectedTileColor}
+  /// If non-null, defines the background color when [CheckboxListTile.selected] is true.
   final Color? selectedTileColor;
 
   void _handleValueChange() {

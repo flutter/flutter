@@ -125,12 +125,10 @@ class ListTileTheme extends InheritedTheme {
   /// If [ListTile.tileColor] is provided, [tileColor] is ignored.
   final Color? tileColor;
 
-  /// {@template flutter.material.ListTile.selectedTileColor}
   /// If specified, defines the background color for `ListTile` when
   /// [ListTile.selected] is true.
   ///
   /// If [ListTile.selectedTileColor] is provided, [selectedTileColor] is ignored.
-  /// {@endtemplate}
   final Color? selectedTileColor;
 
   /// The closest instance of this class that encloses the given context.
