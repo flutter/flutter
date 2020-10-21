@@ -891,7 +891,7 @@ mixin WidgetInspectorService {
           }
           index++;
         }
-        assert(index == parameters.length);
+        assert(index == args.length);
         return <String, Object?>{'result': await callback(args)};
       },
     );
