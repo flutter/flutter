@@ -440,7 +440,7 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
   await _flutterBuild(relativePathToApplication, 'IPA', 'ios',
     release: release,
     verifyCaching: verifyCaching,
-    additionalArgs: additionalArgs
+    additionalArgs: [...additionalArgs, '--no-codesign'],
   );
 }
 
