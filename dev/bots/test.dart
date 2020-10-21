@@ -132,8 +132,8 @@ Future<void> main(List<String> args) async {
 /// Returns whether or not macOS desktop tests should be run.
 ///
 /// The branch restrictions here should stay in sync with features.dart.
-bool _shouldRunMacOS(String branch) {
-  return Platform.isMacOS && (branch != 'beta' && branch != 'stable');
+bool _shouldRunMacOS() {
+  return Platform.isMacOS && (branchName != 'beta' && branchName != 'stable');
 }
 
 /// Verify the Flutter Engine is the revision in
@@ -347,13 +347,12 @@ Future<void> _runBuildTests() async {
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
 
-  final String branch = Platform.environment['CIRRUS_BRANCH'];
   // The tests are randomly distributed into subshards so as to get a uniform
   // distribution of costs, but the seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
     for (final FileSystemEntity exampleDirectory in exampleDirectories)
         () => _runExampleProjectBuildTests(exampleDirectory),
-    if (branch != 'beta' && branch != 'stable')
+    if (branchName != 'beta' && branchName != 'stable')
       ...<ShardRunner>[
         // Web compilation tests.
           () =>  _flutterBuildDart2js(
@@ -382,7 +381,6 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
   final List<String> additionalArgs = hasNullSafety
     ? <String>['--enable-experiment', 'non-nullable', '--no-sound-null-safety']
     : <String>[];
-  final String branch = Platform.environment['CIRRUS_BRANCH'];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
     await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
     await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -397,7 +395,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
     }
   }
-  if (_shouldRunMacOS(branch)) {
+  if (_shouldRunMacOS()) {
     if (Directory(path.join(examplePath, 'macos')).existsSync()) {
       await _flutterBuildMacOS(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
       await _flutterBuildMacOS(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -1331,6 +1329,16 @@ String get gitHash {
       return Platform.environment['CIRRUS_CHANGE_IN_REPO'];
     case CiProviders.luci:
       return 'HEAD'; // TODO(dnfield): Set this in the env for LUCI.
+  }
+  return '';
+}
+
+String get branchName {
+  switch(ciProvider) {
+    case CiProviders.cirrus:
+      return Platform.environment['CIRRUS_BRANCH'];
+    case CiProviders.luci:
+      return Platform.environment['CIRRUS_BRANCH']; // ???
   }
   return '';
 }
