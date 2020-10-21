@@ -347,7 +347,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       // `where` could be missing if system32 is not on the PATH.
       throwToolExit(
         'Cannot find the executable for `where`. This can happen if the System32 '
-        r'folder (e.g. C:\Windows\System32 ) is removed from the PATH environment '
+        'folder (e.g. C:\\Windows\\System32 ) is removed from the PATH environment '
         'variable. Ensure that this is present and then try again after restarting '
         'the terminal and/or IDE.'
       );

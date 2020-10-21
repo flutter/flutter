@@ -261,19 +261,6 @@ String describeLocale(String tag) {
 /// foo$bar = 'foo\$bar'
 /// ```
 String generateString(String value) {
-  if (<String>['\n', '\f', '\t', '\r', '\b'].every((String pattern) => !value.contains(pattern))) {
-    final bool hasDollar = value.contains(r'$');
-    final bool hasBackslash = value.contains(r'\');
-    final bool hasQuote = value.contains("'");
-    final bool hasDoubleQuote = value.contains('"');
-    if (!hasQuote) {
-      return hasBackslash || hasDollar ? "r'$value'" : "'$value'";
-    }
-    if (!hasDoubleQuote) {
-      return hasBackslash || hasDollar ? 'r"$value"' : '"$value"';
-    }
-  }
-
   const String backslash = '__BACKSLASH__';
   assert(
     !value.contains(backslash),
@@ -285,17 +272,17 @@ String generateString(String value) {
   value = value
     // Replace backslashes with a placeholder for now to properly parse
     // other special characters.
-    .replaceAll(r'\', backslash)
-    .replaceAll(r'$', r'\$')
-    .replaceAll("'", r"\'")
-    .replaceAll('"', r'\"')
-    .replaceAll('\n', r'\n')
-    .replaceAll('\f', r'\f')
-    .replaceAll('\t', r'\t')
-    .replaceAll('\r', r'\r')
-    .replaceAll('\b', r'\b')
+    .replaceAll('\\', backslash)
+    .replaceAll('\$', '\\\$')
+    .replaceAll("'", "\\'")
+    .replaceAll('"', '\\"')
+    .replaceAll('\n', '\\n')
+    .replaceAll('\f', '\\f')
+    .replaceAll('\t', '\\t')
+    .replaceAll('\r', '\\r')
+    .replaceAll('\b', '\\b')
     // Reintroduce escaped backslashes into generated Dart string.
-    .replaceAll(backslash, r'\\');
+    .replaceAll(backslash, '\\\\');
 
   return "'$value'";
 }
