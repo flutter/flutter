@@ -302,8 +302,8 @@ class TextField extends StatefulWidget {
   /// [TextField.noMaxLength] then only the current length is displayed.
   ///
   /// After [maxLength] characters have been input, additional input
-  /// is ignored, unless [maxLengthEnforced] is set to false or
-  /// [maxLengthEnforcement] is [MaxLengthEnforcement.none].
+  /// is ignored, unless [maxLengthEnforcement] is set to
+  /// [MaxLengthEnforcement.none].
   /// The text field enforces the length with a [LengthLimitingTextInputFormatter],
   /// which is evaluated after the supplied [inputFormatters], if any.
   /// The [maxLength] value must be either null or greater than zero.
