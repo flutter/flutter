@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -17,14 +15,14 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 class TestIcon extends StatefulWidget {
-  const TestIcon({ Key key }) : super(key: key);
+  const TestIcon({ Key? key }) : super(key: key);
 
   @override
   TestIconState createState() => TestIconState();
 }
 
 class TestIconState extends State<TestIcon> {
-  IconThemeData iconTheme;
+  late IconThemeData iconTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +32,7 @@ class TestIconState extends State<TestIcon> {
 }
 
 class TestText extends StatefulWidget {
-  const TestText(this.text, { Key key }) : super(key: key);
+  const TestText(this.text, { Key? key }) : super(key: key);
 
   final String text;
 
@@ -43,7 +41,7 @@ class TestText extends StatefulWidget {
 }
 
 class TestTextState extends State<TestText> {
-  TextStyle textStyle;
+  late TextStyle textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -58,11 +56,11 @@ void main() {
 
     final Key leadingKey = GlobalKey();
     final Key trailingKey = GlobalKey();
-    bool hasSubtitle;
+    late bool hasSubtitle;
 
     const double leftPadding = 10.0;
     const double rightPadding = 20.0;
-    Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, double textScaleFactor = 1.0, double subtitleScaleFactor }) {
+    Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, double textScaleFactor = 1.0, double? subtitleScaleFactor }) {
       hasSubtitle = isTwoLine || isThreeLine;
       subtitleScaleFactor ??= textScaleFactor;
       return MaterialApp(
@@ -259,16 +257,16 @@ void main() {
     final Key subtitleKey = UniqueKey();
     final Key leadingKey = UniqueKey();
     final Key trailingKey = UniqueKey();
-    ThemeData theme;
+    late ThemeData theme;
 
     Widget buildFrame({
       bool enabled = true,
       bool dense = false,
       bool selected = false,
-      ShapeBorder shape,
-      Color selectedColor,
-      Color iconColor,
-      Color textColor,
+      ShapeBorder? shape,
+      Color? selectedColor,
+      Color? iconColor,
+      Color? textColor,
     }) {
       return MaterialApp(
         home: Material(
@@ -281,7 +279,7 @@ void main() {
               textColor: textColor,
               child: Builder(
                 builder: (BuildContext context) {
-                  theme = Theme.of(context);
+                  theme = Theme.of(context)!;
                   return ListTile(
                     enabled: enabled,
                     selected: selected,
@@ -304,9 +302,9 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(4.0)),
     );
 
-    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color;
-    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color;
-    ShapeBorder inkWellBorder() => tester.widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell))).customBorder;
+    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
+    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
+    ShapeBorder inkWellBorder() => tester.widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell))).customBorder!;
 
     // A selected ListTile's leading, trailing, and text get the primary color by default
     await tester.pumpWidget(buildFrame(selected: true));
@@ -1175,10 +1173,10 @@ void main() {
     );
     await tester.pump(); // Let the focus take effect.
 
-    final FocusNode tileNode = Focus.of(childKey.currentContext);
-    tileNode.requestFocus();
+    final FocusNode? tileNode = Focus.of(childKey.currentContext!);
+    tileNode!.requestFocus();
     await tester.pump(); // Let the focus take effect.
-    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isTrue);
+    expect(Focus.of(childKey.currentContext!, nullOk: true)!.hasPrimaryFocus, isTrue);
 
     expect(tileNode.hasPrimaryFocus, isTrue);
     await tester.pumpWidget(
@@ -1199,7 +1197,7 @@ void main() {
     );
 
     expect(tester.binding.focusManager.primaryFocus, isNot(equals(tileNode)));
-    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!, nullOk: true)!.hasPrimaryFocus, isFalse);
   });
 
   testWidgets('ListTile can autofocus unless disabled.', (WidgetTester tester) async {
@@ -1224,7 +1222,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isTrue);
+    expect(Focus.of(childKey.currentContext!, nullOk: true)!.hasPrimaryFocus, isTrue);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1245,7 +1243,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!, nullOk: true)!.hasPrimaryFocus, isFalse);
   });
 
   testWidgets('ListTile is focusable and has correct focus color', (WidgetTester tester) async {
@@ -1480,7 +1478,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -1498,7 +1496,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -1516,7 +1514,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     // Test default cursor when onTap or onLongPress is null
     await tester.pumpWidget(
@@ -1532,7 +1530,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
@@ -1612,7 +1610,7 @@ void main() {
   });
 
   testWidgets('ListTile respects ListTileTheme\'s tileColor & selectedTileColor', (WidgetTester tester) async {
-    ListTileTheme theme;
+    late ListTileTheme theme;
     bool isSelected = false;
 
     await tester.pumpWidget(

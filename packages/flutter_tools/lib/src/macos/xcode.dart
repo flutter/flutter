@@ -13,6 +13,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -63,13 +64,21 @@ class Xcode {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required XcodeProjectInterpreter xcodeProjectInterpreter,
-  }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  })  : _platform = platform,
+        _fileSystem = fileSystem,
+        _xcodeProjectInterpreter = xcodeProjectInterpreter,
+        _operatingSystemUtils = OperatingSystemUtils(
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
+        _processUtils =
+            ProcessUtils(logger: logger, processManager: processManager);
 
   final Platform _platform;
   final ProcessUtils _processUtils;
+  final OperatingSystemUtils _operatingSystemUtils;
   final FileSystem _fileSystem;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
 
@@ -110,7 +119,7 @@ class Xcode {
     if (_eulaSigned == null) {
       try {
         final RunResult result = _processUtils.runSync(
-          <String>['/usr/bin/xcrun', 'clang'],
+          <String>[...xcrunCommand(), 'clang'],
         );
         if (result.stdout != null && result.stdout.contains('license')) {
           _eulaSigned = false;
@@ -135,7 +144,7 @@ class Xcode {
         // This command will error if additional components need to be installed in
         // xcode 9.2 and above.
         final RunResult result = _processUtils.runSync(
-          <String>['/usr/bin/xcrun', 'simctl', 'list'],
+          <String>[...xcrunCommand(), 'simctl', 'list'],
         );
         _isSimctlInstalled = result.stderr == null || result.stderr == '';
       } on ProcessException {
@@ -161,16 +170,35 @@ class Xcode {
     return false;
   }
 
+  /// The `xcrun` Xcode command to run or locate development
+  /// tools and properties.
+  ///
+  /// Returns `xcrun` on x86 macOS.
+  /// Returns `/usr/bin/arch -arm64 xcrun` on ARM macOS to force Xcode commands
+  /// to run outside the x86 Rosetta translation, which may cause crashes.
+  List<String> xcrunCommand() {
+    final List<String> xcrunCommand = <String>[];
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+      // Force Xcode commands to run outside Rosetta.
+      xcrunCommand.addAll(<String>[
+        '/usr/bin/arch',
+        '-arm64',
+      ]);
+    }
+    xcrunCommand.add('xcrun');
+    return xcrunCommand;
+  }
+
   Future<RunResult> cc(List<String> args) {
     return _processUtils.run(
-      <String>['xcrun', 'cc', ...args],
+      <String>[...xcrunCommand(), 'cc', ...args],
       throwOnError: true,
     );
   }
 
   Future<RunResult> clang(List<String> args) {
     return _processUtils.run(
-      <String>['xcrun', 'clang', ...args],
+      <String>[...xcrunCommand(), 'clang', ...args],
       throwOnError: true,
     );
   }
@@ -178,7 +206,7 @@ class Xcode {
   Future<String> sdkLocation(SdkType sdk) async {
     assert(sdk != null);
     final RunResult runResult = await _processUtils.run(
-      <String>['xcrun', '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
+      <String>[...xcrunCommand(), '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
     );
     if (runResult.exitCode != 0) {
       throwToolExit('Could not find SDK location: ${runResult.stderr}');
@@ -260,28 +288,7 @@ class XCDevice {
     );
   }
 
-  bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck && xcdevicePath != null;
-
-  String _xcdevicePath;
-  String get xcdevicePath {
-    if (_xcdevicePath == null) {
-      try {
-        _xcdevicePath = _processUtils.runSync(
-          <String>[
-            'xcrun',
-            '--find',
-            'xcdevice'
-          ],
-          throwOnError: true,
-        ).stdout.trim();
-      } on ProcessException catch (exception) {
-        _logger.printTrace('Process exception finding xcdevice:\n$exception');
-      } on ArgumentError catch (exception) {
-        _logger.printTrace('Argument exception finding xcdevice:\n$exception');
-      }
-    }
-    return _xcdevicePath;
-  }
+  bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck;
 
   Future<List<dynamic>> _getAllDevices({
     bool useCache = false,
@@ -298,7 +305,7 @@ class XCDevice {
       // USB-tethered devices should be found quickly. 1 second timeout is faster than the default.
       final RunResult result = await _processUtils.run(
         <String>[
-          'xcrun',
+          ..._xcode.xcrunCommand(),
           'xcdevice',
           'list',
           '--timeout',
@@ -352,7 +359,7 @@ class XCDevice {
           '-t',
           '0',
           '/dev/null',
-          'xcrun',
+          ..._xcode.xcrunCommand(),
           'xcdevice',
           'observe',
           '--both',

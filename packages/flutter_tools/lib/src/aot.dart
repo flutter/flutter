@@ -69,7 +69,6 @@ class AotBuilder {
       final String typeName = globals.artifacts.getEngineType(platform, buildInfo.mode);
       status = globals.logger.startProgress(
         'Building AOT snapshot in ${getFriendlyModeName(buildInfo.mode)} mode ($typeName)...',
-        timeout: timeoutConfiguration.slowOperation,
       );
     }
 

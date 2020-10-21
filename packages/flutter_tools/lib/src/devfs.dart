@@ -296,16 +296,11 @@ class _DevFSHttpWriter implements DevFSWriter {
           _osUtils,
         );
         await request.addStream(contents);
-        // The contents has already been streamed, closing the request should
-        // not take long but we are experiencing hangs with it, see #63869.
-        //
         // Once the bug in Dart is solved we can remove the timeout
-        // (https://github.com/dart-lang/sdk/issues/43525).  The timeout was
-        // chosen to be inflated based on the max observed time when running the
-        // tests in "Google Tests".
+        // (https://github.com/dart-lang/sdk/issues/43525).
         try {
           final HttpClientResponse response = await request.close().timeout(
-            const Duration(milliseconds: 10000));
+            const Duration(seconds: 60));
           response.listen((_) {},
             onError: (dynamic error) {
               _logger.printTrace('error: $error');
@@ -499,14 +494,31 @@ class DevFS {
 
     // Update modified files
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
-
     int syncedBytes = 0;
+    if (fullRestart) {
+      generator.reset();
+    }
+    // On a full restart, or on an initial compile for the attach based workflow,
+    // this will produce a full dill. Subsequent invocations will produce incremental
+    // dill files that depend on the invalidated files.
+    _logger.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
+
+    // Await the compiler response after checking if the bundle is updated. This allows the file
+    // stating to be done while waiting for the frontend_server response.
+    final Future<CompilerOutput> pendingCompilerOutput = generator.recompile(
+      mainUri,
+      invalidatedFiles,
+      outputPath: dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
+      packageConfig: packageConfig,
+    );
     if (bundle != null) {
-      final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
       // The tool writes the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
+      final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
       final String assetDirectory = getAssetBuildDirectory();
       bundle.entries.forEach((String archivePath, DevFSContent content) {
+        // If the content is backed by a real file, isModified will file stat and return true if
+        // it was modified since the last time this was called.
         if (!content.isModified || bundleFirstUpload) {
           return;
         }
@@ -521,19 +533,7 @@ class DevFS {
         }
       });
     }
-    if (fullRestart) {
-      generator.reset();
-    }
-    // On a full restart, or on an initial compile for the attach based workflow,
-    // this will produce a full dill. Subsequent invocations will produce incremental
-    // dill files that depend on the invalidated files.
-    _logger.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
-    final CompilerOutput compilerOutput = await generator.recompile(
-      mainUri,
-      invalidatedFiles,
-      outputPath: dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
-      packageConfig: packageConfig,
-    );
+    final CompilerOutput compilerOutput = await pendingCompilerOutput;
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
     }

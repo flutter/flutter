@@ -38,7 +38,6 @@ List<String> _xattrArgs(FlutterProject flutterProject) {
 }
 
 const List<String> kRunReleaseArgs = <String>[
-  '/usr/bin/env',
   'xcrun',
   'xcodebuild',
   '-configuration',
@@ -103,6 +102,7 @@ void main() {
       );
       mockXcode = MockXcode();
       when(mockXcode.isVersionSatisfactory).thenReturn(true);
+      when(mockXcode.xcrunCommand()).thenReturn(<String>['xcrun']);
       fileSystem.file('foo/.packages')
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');

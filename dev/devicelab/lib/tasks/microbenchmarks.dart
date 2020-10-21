@@ -55,6 +55,7 @@ TaskFunction createMicrobenchmarkTask() {
       ...await _runMicrobench('lib/stocks/animation_bench.dart'),
       ...await _runMicrobench('lib/language/sync_star_bench.dart'),
       ...await _runMicrobench('lib/language/sync_star_semantics_bench.dart'),
+      ...await _runMicrobench('lib/foundation/all_elements_bench.dart'),
       ...await _runMicrobench('lib/foundation/change_notifier_bench.dart'),
  };
 

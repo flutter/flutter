@@ -880,17 +880,18 @@ mixin WidgetInspectorService {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        const String argPrefix = 'arg';
         final List<String> args = <String>[];
-        parameters.forEach((String name, String value) {
-          if (name.startsWith(argPrefix)) {
-            final int index = int.parse(name.substring(argPrefix.length));
-            if (index >= args.length) {
-              args.length = index + 1;
-            }
-            args[index] = value;
+        int index = 0;
+        while (true) {
+          final String name = 'arg$index';
+          if (parameters.containsKey(name)) {
+            args.add(parameters[name]!);
+          } else {
+            break;
           }
-        });
+          index++;
+        }
+        assert(index == parameters.length);
         return <String, Object?>{'result': await callback(args)};
       },
     );

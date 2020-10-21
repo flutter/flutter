@@ -1363,8 +1363,6 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           estimatedColumnWidths[_PickerColumnType.month.index]!,
         ];
         break;
-      default:
-        assert(false, 'date order is not specified');
     }
 
     final List<Widget> pickers = <Widget>[];

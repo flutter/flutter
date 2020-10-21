@@ -143,7 +143,6 @@ Future<void> main(List<String> args) async {
           outputPreferences: globals.outputPreferences,
           terminal: globals.terminal,
           stdio: globals.stdio,
-          timeoutConfiguration: timeoutConfiguration,
         );
         return loggerFactory.createLogger(
           daemon: daemon,
@@ -163,17 +162,14 @@ class LoggerFactory {
     @required Terminal terminal,
     @required Stdio stdio,
     @required OutputPreferences outputPreferences,
-    @required TimeoutConfiguration timeoutConfiguration,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _terminal = terminal,
        _stdio = stdio,
-       _timeoutConfiguration = timeoutConfiguration,
        _stopwatchFactory = stopwatchFactory,
        _outputPreferences = outputPreferences;
 
   final Terminal _terminal;
   final Stdio _stdio;
-  final TimeoutConfiguration _timeoutConfiguration;
   final StopwatchFactory _stopwatchFactory;
   final OutputPreferences _outputPreferences;
 
@@ -190,7 +186,6 @@ class LoggerFactory {
         terminal: _terminal,
         stdio: _stdio,
         outputPreferences: _outputPreferences,
-        timeoutConfiguration: _timeoutConfiguration,
         stopwatchFactory: _stopwatchFactory,
       );
     } else {
@@ -198,7 +193,6 @@ class LoggerFactory {
         terminal: _terminal,
         stdio: _stdio,
         outputPreferences: _outputPreferences,
-        timeoutConfiguration: _timeoutConfiguration,
         stopwatchFactory: _stopwatchFactory
       );
     }

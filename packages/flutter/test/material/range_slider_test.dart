@@ -1775,6 +1775,7 @@ void main() {
             children:  <Matcher>[
               matchesSemantics(
                 isEnabled: true,
+                isSlider: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -1784,6 +1785,7 @@ void main() {
               ),
               matchesSemantics(
                 isEnabled: true,
+                isSlider: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show Brightness;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -50,7 +48,7 @@ void main() {
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          final MediaQueryData data = MediaQuery.of(context, nullOk: true);
+          final MediaQueryData? data = MediaQuery.of(context, nullOk: true);
           expect(data, isNull);
           tested = true;
           return Container();
@@ -61,10 +59,10 @@ void main() {
   });
 
   testWidgets('MediaQueryData is sane', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
-    expect(data.size, equals(WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio));
+    expect(data.size, equals(WidgetsBinding.instance!.window.physicalSize / WidgetsBinding.instance!.window.devicePixelRatio));
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
@@ -74,7 +72,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
     final MediaQueryData copied = data.copyWith();
     expect(copied.size, data.size);
     expect(copied.devicePixelRatio, data.devicePixelRatio);
@@ -103,7 +101,7 @@ void main() {
     const EdgeInsets customViewInsets = EdgeInsets.all(1.67262);
     const EdgeInsets customSystemGestureInsets = EdgeInsets.all(1.5556);
 
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
     final MediaQueryData copied = data.copyWith(
       size: customSize,
       devicePixelRatio: customDevicePixelRatio,
@@ -144,7 +142,7 @@ void main() {
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
 
-    MediaQueryData unpadded;
+    late MediaQueryData unpadded;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
@@ -171,7 +169,7 @@ void main() {
               removeBottom: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context);
+                  unpadded = MediaQuery.of(context)!;
                   return Container();
                 },
               ),
@@ -203,7 +201,7 @@ void main() {
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
 
-    MediaQueryData unpadded;
+    late MediaQueryData unpadded;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
@@ -227,7 +225,7 @@ void main() {
               context: context,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context);
+                  unpadded = MediaQuery.of(context)!;
                   return Container();
                 },
               ),
@@ -259,7 +257,7 @@ void main() {
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
 
-    MediaQueryData unpadded;
+    late MediaQueryData unpadded;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
@@ -286,7 +284,7 @@ void main() {
               removeBottom: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context);
+                  unpadded = MediaQuery.of(context)!;
                   return Container();
                 },
               ),
@@ -318,7 +316,7 @@ void main() {
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
 
-    MediaQueryData unpadded;
+    late MediaQueryData unpadded;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
@@ -342,7 +340,7 @@ void main() {
               removeBottom: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context);
+                  unpadded = MediaQuery.of(context)!;
                   return Container();
                 },
               ),
@@ -374,7 +372,7 @@ void main() {
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
 
-    MediaQueryData unpadded;
+    late MediaQueryData unpadded;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
@@ -401,7 +399,7 @@ void main() {
               removeBottom: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context);
+                  unpadded = MediaQuery.of(context)!;
                   return Container();
                 },
               ),
@@ -433,7 +431,7 @@ void main() {
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
 
-    MediaQueryData unpadded;
+    late MediaQueryData unpadded;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
@@ -457,7 +455,7 @@ void main() {
               removeLeft: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context);
+                  unpadded = MediaQuery.of(context)!;
                   return Container();
                 },
               ),
@@ -482,8 +480,8 @@ void main() {
   });
 
   testWidgets('MediaQuery.textScaleFactorOf', (WidgetTester tester) async {
-    double outsideTextScaleFactor;
-    double insideTextScaleFactor;
+    late double outsideTextScaleFactor;
+    late double insideTextScaleFactor;
 
     await tester.pumpWidget(
       Builder(
@@ -509,8 +507,8 @@ void main() {
   });
 
   testWidgets('MediaQuery.platformBrightnessOf', (WidgetTester tester) async {
-    Brightness outsideBrightness;
-    Brightness insideBrightness;
+    late Brightness outsideBrightness;
+    late Brightness insideBrightness;
 
     await tester.pumpWidget(
       Builder(
@@ -536,8 +534,8 @@ void main() {
   });
 
   testWidgets('MediaQuery.highContrastOf', (WidgetTester tester) async {
-    bool outsideHighContrast;
-    bool insideHighContrast;
+    late bool outsideHighContrast;
+    late bool insideHighContrast;
 
     await tester.pumpWidget(
       Builder(
@@ -563,8 +561,8 @@ void main() {
   });
 
   testWidgets('MediaQuery.boldTextOverride', (WidgetTester tester) async {
-    bool outsideBoldTextOverride;
-    bool insideBoldTextOverride;
+    late bool outsideBoldTextOverride;
+    late bool insideBoldTextOverride;
 
     await tester.pumpWidget(
       Builder(
@@ -588,159 +586,4 @@ void main() {
     expect(outsideBoldTextOverride, false);
     expect(insideBoldTextOverride, true);
   });
-
-  test('size parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(size: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('size != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('devicePixelRatio parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(devicePixelRatio: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('devicePixelRatio != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('textScaleFactor parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(textScaleFactor: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('textScaleFactor != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('platformBrightness parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(platformBrightness: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('platformBrightness != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('padding parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(padding: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('padding != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('viewInsets parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(viewInsets: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('viewInsets != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('systemGestureInsets parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(systemGestureInsets: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('systemGestureInsets != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('viewPadding parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(viewPadding: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('viewPadding != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('alwaysUse24HourFormat parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(alwaysUse24HourFormat: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('alwaysUse24HourFormat != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('accessibleNavigation parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(accessibleNavigation: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('accessibleNavigation != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('invertColors parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(invertColors: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('invertColors != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('highContrast parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(highContrast: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('highContrast != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('disableAnimations parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(disableAnimations: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('disableAnimations != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('boldText parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(boldText: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('boldText != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
 }

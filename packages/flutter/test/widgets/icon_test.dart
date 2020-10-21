@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
@@ -25,7 +23,7 @@ void main() {
       ),
     );
     final RichText text = tester.widget(find.byType(RichText));
-    expect(text.text.style.color, const Color(0xFF666666).withOpacity(0.5));
+    expect(text.text.style!.color, const Color(0xFF666666).withOpacity(0.5));
   });
 
   testWidgets('Icon sizing - no theme, default size', (WidgetTester tester) async {
@@ -125,7 +123,7 @@ void main() {
     );
 
     final RichText richText = tester.firstWidget(find.byType(RichText));
-    expect(richText.text.style.fontFamily, equals('Roboto'));
+    expect(richText.text.style!.fontFamily, equals('Roboto'));
   });
 
   testWidgets('Icon with semantic label', (WidgetTester tester) async {

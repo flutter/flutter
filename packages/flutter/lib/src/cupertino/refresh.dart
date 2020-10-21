@@ -467,7 +467,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
       case RefreshIndicatorMode.done:
         // When the user lets go, the standard transition is to shrink the spinner.
         return CupertinoActivityIndicator(radius: radius * percentageComplete);
-      default:
+      case RefreshIndicatorMode.inactive:
         // Anything else doesn't show anything.
         return Container();
     }

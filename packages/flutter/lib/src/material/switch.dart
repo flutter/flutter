@@ -149,7 +149,7 @@ class Switch extends StatefulWidget {
   ///   },
   /// )
   /// ```
-  final ValueChanged<bool?>? onChanged;
+  final ValueChanged<bool>? onChanged;
 
   /// The color to use when this switch is on.
   ///
@@ -440,7 +440,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final Color activeTrackColor;
   final Color inactiveTrackColor;
   final ImageConfiguration configuration;
-  final ValueChanged<bool?>? onChanged;
+  final ValueChanged<bool>? onChanged;
   final BoxConstraints additionalConstraints;
   final DragStartBehavior dragStartBehavior;
   final bool hasFocus;
@@ -463,7 +463,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       activeTrackColor: activeTrackColor,
       inactiveTrackColor: inactiveTrackColor,
       configuration: configuration,
-      onChanged: onChanged,
+      onChanged: onChanged != null ? _handleValueChanged : null,
       textDirection: Directionality.of(context)!,
       additionalConstraints: additionalConstraints,
       hasFocus: hasFocus,
@@ -487,13 +487,24 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..activeTrackColor = activeTrackColor
       ..inactiveTrackColor = inactiveTrackColor
       ..configuration = configuration
-      ..onChanged = onChanged
+      ..onChanged = onChanged != null ? _handleValueChanged : null
       ..textDirection = Directionality.of(context)!
       ..additionalConstraints = additionalConstraints
       ..dragStartBehavior = dragStartBehavior
       ..hasFocus = hasFocus
       ..hovering = hovering
       ..vsync = state;
+  }
+
+  void _handleValueChanged(bool? value) {
+    // Wrap the onChanged callback because the RenderToggleable supports tri-state
+    // values (i.e. value can be null), but the Switch doesn't. We pass false
+    // for the tristate param to RenderToggleable, so value should never
+    // be null.
+    assert(value != null);
+    if (onChanged != null) {
+      onChanged!(value!);
+    }
   }
 }
 
@@ -649,7 +660,6 @@ class _RenderSwitch extends RenderToggleable {
         positionController.reverse();
     }
   }
-
 
   @override
   void detach() {

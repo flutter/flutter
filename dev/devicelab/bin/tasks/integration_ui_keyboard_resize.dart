@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_devicelab/tasks/integration_tests.dart';
+import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/tasks/build_benchmarks.dart';
 
 Future<void> main() async {
-  await task(createAndroidBuildBenchmarkTask());
+  deviceOperatingSystem = DeviceOperatingSystem.android;
+  await task(createEndToEndKeyboardTest());
 }

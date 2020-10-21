@@ -47,7 +47,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'source_maps': '0.10.10-nullsafety.1',
   'source_map_stack_trace': '2.1.0-nullsafety.2',
   'source_span': '1.8.0-nullsafety.2',
-  'stack_trace': '1.10.0-nullsafety.2',
+  'stack_trace': '1.10.0-nullsafety.4',
   'stream_channel': '2.1.0-nullsafety.1',
   'string_scanner': '1.1.0-nullsafety.1',
   'term_glyph': '1.2.0-nullsafety.1',
@@ -146,7 +146,6 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<void> _downloadCoverageData() async {
     final Status status = globals.logger.startProgress(
       'Downloading lcov data for package:flutter...',
-      timeout: timeoutConfiguration.slowOperation,
     );
     final String urlBase = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
     final Uri coverageUri = Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info');
