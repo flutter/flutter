@@ -99,7 +99,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///  * [CalendarDatePicker], which provides the calendar grid used by the date picker dialog.
 ///  * [InputDatePickerFormField], which provides a text input field for entering dates.
 ///
-Future<DateTime> showDatePicker({
+Future<DateTime?> showDatePicker({
   required BuildContext context,
   required DateTime initialDate,
   required DateTime firstDate,

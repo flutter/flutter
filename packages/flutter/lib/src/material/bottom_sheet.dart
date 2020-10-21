@@ -644,7 +644,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
 ///    that grows and then becomes scrollable once it reaches its maximum size.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
-Future<T> showModalBottomSheet<T>({
+Future<T?> showModalBottomSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   Color? backgroundColor,
