@@ -1716,8 +1716,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       await service.testExtension('setPubRootDirectories', <String, String>{'isolateId': '34'});
       service.setSelection(elementA, 'my-group');
-      Map<String, Object?> jsonObject = (await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}))! as Map<String, Object?>;
-      Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
+      final Map<String, Object?> jsonObject = (await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}))! as Map<String, Object?>;
+      final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
       expect(creationLocation, isNotNull);
       final String fileA = creationLocation['file']! as String;
       expect(fileA, endsWith('widget_inspector_test.dart'));
