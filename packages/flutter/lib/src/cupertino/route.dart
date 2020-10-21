@@ -1049,7 +1049,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///  * [CupertinoActionSheet], which is the widget usually returned by the
 ///    `builder` argument to [showCupertinoModalPopup].
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
-Future<T> showCupertinoModalPopup<T>({
+Future<T?> showCupertinoModalPopup<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   ImageFilter? filter,
@@ -1134,7 +1134,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
-Future<T> showCupertinoDialog<T>({
+Future<T?> showCupertinoDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   bool useRootNavigator = true,
