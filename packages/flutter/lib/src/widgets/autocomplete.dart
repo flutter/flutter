@@ -480,16 +480,11 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
     final Iterable<T> options = widget.optionsBuilder(
       _textEditingController.value,
     );
-    setState(() {
-      _options = options;
-      if (_selection != null) {
-        final String selectionString = widget.displayStringForOption(_selection!);
-        if (_textEditingController.text == selectionString) {
-          return;
-        }
-      }
+    _options = options;
+    if (_selection == null
+        || _textEditingController.text != widget.displayStringForOption(_selection!)) {
       _selection = null;
-    });
+    }
     _updateOverlay();
   }
 
@@ -506,17 +501,15 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
     if (nextSelection == _selection) {
       return;
     }
-    setState(() {
-      _selection = nextSelection;
-      final String selectionString = nextSelection == null
-          ? ''
-          : widget.displayStringForOption(nextSelection);
-      _textEditingController.value = TextEditingValue(
-        selection: TextSelection.collapsed(offset: selectionString.length),
-        text: selectionString,
-      );
-      widget.onSelected?.call(_selection);
-    });
+    _selection = nextSelection;
+    final String selectionString = nextSelection == null
+        ? ''
+        : widget.displayStringForOption(nextSelection);
+    _textEditingController.value = TextEditingValue(
+      selection: TextSelection.collapsed(offset: selectionString.length),
+      text: selectionString,
+    );
+    widget.onSelected?.call(_selection);
   }
 
   // Hide or show the options overlay, if needed.
