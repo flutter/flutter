@@ -403,13 +403,17 @@ class AutocompleteCore<T extends Object> extends StatefulWidget {
   ///
   /// [fieldViewBuilder] and [optionsViewBuilder] must not be null.
   const AutocompleteCore({
+    Key? key,
     required this.fieldViewBuilder,
     required this.optionsViewBuilder,
     required this.optionsBuilder,
     this.displayStringForOption = _defaultStringForOption,
     this.onSelected,
-  }) : assert(fieldViewBuilder != null),
-       assert(optionsViewBuilder != null);
+  }) : assert(displayStringForOption != null),
+       assert(fieldViewBuilder != null),
+       assert(optionsBuilder != null),
+       assert(optionsViewBuilder != null),
+       super(key: key);
 
   /// Builds the field whose input is used to get the options.
   ///
@@ -476,7 +480,6 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
     final Iterable<T> options = widget.optionsBuilder(
       _textEditingController.value,
     );
-    assert(options != null);
     setState(() {
       _options = options;
       if (_selection != null) {
