@@ -276,7 +276,7 @@ enum IconStyle {
 }
 
 extension IconStyleSuffix on IconStyle {
-  // The suffix for the 'material-icons' HTML class
+  // The suffix for the 'material-icons' HTML class.
   String suffix() {
     switch (this) {
       case IconStyle.outlined: return '-outlined';
@@ -288,7 +288,7 @@ extension IconStyleSuffix on IconStyle {
 }
 
 class _Icon {
-  // Parse tokenPair (e.g. {"6_ft_apart_outlined": "e004"})
+  // Parse tokenPair (e.g. {"6_ft_apart_outlined": "e004"}).
   _Icon(MapEntry<String, String> tokenPair) {
     id = tokenPair.key;
     hexCodepoint = tokenPair.value;
