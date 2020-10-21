@@ -61,8 +61,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// A widget for helping the user make a selection by entering some text and
 /// choosing from among a list of options.
 ///
-/// This is a core framework widget with very basic UI. Try using Autocomplete
-/// or AutocompleteCupertino before resorting to this widget.
+/// This is a core framework widget with very basic UI.
 ///
 /// The user's text input is received in a field built with the
 /// [fieldViewBuilder] parameter. The options to be displayed are determined
@@ -135,6 +134,12 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// ```
 /// {@end-tool}
 ///
+/// The type parameter T represents the type of the options. Most commonly this
+/// is a String, as in the example above. However, it's also possible to use
+/// another type with a `toString` method, or a custom [displayStringForOption].
+/// Options will be compared using `==`, so it may be beneficial to override
+/// [Object.==] and [Object.hashCode] for custom types.
+///
 /// {@tool dartpad --template=freeform}
 /// This example is similar to the previous example, but it uses a custom T data
 /// type instead of directly using String.
@@ -158,6 +163,19 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///   @override
 ///   String toString() {
 ///     return '$name, $email';
+///   }
+///
+///   @override
+///   bool operator ==(Object other) {
+///     if (other.runtimeType != runtimeType)
+///       return false;
+///     return other is User
+///         && other.name == name
+///         && other.email == email;
+///   }
+///
+///   @override
+///     int get hashCode => hashValues(email, name);
 ///   }
 /// }
 ///
