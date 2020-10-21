@@ -4192,7 +4192,7 @@ void main() {
 
       state.updateEditingValue(const TextEditingValue(text: 'abcdef'));
       expect(state.currentTextEditingValue.text, 'abcde');
-      expect(state.currentTextEditingValue.composing, TextRange.empty);
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
     });
 
     testWidgets('using allowComposingTextToFinish.', (WidgetTester tester) async {
