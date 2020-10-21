@@ -148,19 +148,19 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
     return {};
   }
 
-  if (!isolate->RunFromLibrary(dart_entrypoint_library,               //
-                               dart_entrypoint,                       //
-                               settings.dart_entrypoint_args,         //
-                               settings.root_isolate_create_callback  //
+  if (settings.root_isolate_create_callback) {
+    // Isolate callbacks always occur in isolate scope and before user code has
+    // had a chance to run.
+    tonic::DartState::Scope scope(isolate.get());
+    settings.root_isolate_create_callback(*isolate.get());
+  }
+
+  if (!isolate->RunFromLibrary(dart_entrypoint_library,       //
+                               dart_entrypoint,               //
+                               settings.dart_entrypoint_args  //
                                )) {
     FML_LOG(ERROR) << "Could not run the run main Dart entrypoint.";
     return {};
-  }
-
-  if (settings.root_isolate_create_callback) {
-    // Isolate callbacks always occur in isolate scope.
-    tonic::DartState::Scope scope(isolate.get());
-    settings.root_isolate_create_callback();
   }
 
   if (settings.root_isolate_shutdown_callback) {
@@ -617,8 +617,7 @@ bool DartIsolate::MarkIsolateRunnable() {
 
 bool DartIsolate::RunFromLibrary(std::optional<std::string> library_name,
                                  std::optional<std::string> entrypoint,
-                                 const std::vector<std::string>& args,
-                                 const fml::closure& on_run) {
+                                 const std::vector<std::string>& args) {
   TRACE_EVENT0("flutter", "DartIsolate::RunFromLibrary");
   if (phase_ != Phase::Ready) {
     return false;
@@ -644,9 +643,6 @@ bool DartIsolate::RunFromLibrary(std::optional<std::string> library_name,
 
   phase_ = Phase::Running;
 
-  if (on_run) {
-    on_run();
-  }
   return true;
 }
 

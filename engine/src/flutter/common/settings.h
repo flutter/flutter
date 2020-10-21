@@ -59,6 +59,8 @@ using MappingsCallback = std::function<Mappings(void)>;
 
 using FrameRasterizedCallback = std::function<void(const FrameTiming&)>;
 
+class DartIsolate;
+
 struct Settings {
   Settings();
 
@@ -169,7 +171,9 @@ struct Settings {
   TaskObserverRemove task_observer_remove;
   // The main isolate is current when this callback is made. This is a good spot
   // to perform native Dart bindings for libraries not built in.
-  fml::closure root_isolate_create_callback;
+  std::function<void(const DartIsolate&)> root_isolate_create_callback;
+  // TODO(68738): Update isolate callbacks in settings to accept an additional
+  // DartIsolate parameter.
   fml::closure isolate_create_callback;
   // The isolate is not current and may have already been destroyed when this
   // call is made.

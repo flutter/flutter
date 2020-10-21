@@ -375,5 +375,32 @@ TEST_F(DartIsolateTest, CanCreateServiceIsolate) {
   ASSERT_TRUE(root_isolate->Shutdown());
 }
 
+TEST_F(DartIsolateTest,
+       RootIsolateCreateCallbackIsMadeOnceAndBeforeIsolateRunning) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  size_t create_callback_count = 0u;
+  settings.root_isolate_create_callback =
+      [&create_callback_count](const auto& isolate) {
+        ASSERT_EQ(isolate.GetPhase(), DartIsolate::Phase::Ready);
+        create_callback_count++;
+        ASSERT_NE(::Dart_CurrentIsolate(), nullptr);
+      };
+  auto vm_ref = DartVMRef::Create(settings);
+  TaskRunners task_runners(GetCurrentTestName(),    //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner()   //
+  );
+  {
+    auto isolate = RunDartCodeInIsolate(vm_ref, settings, task_runners, "main",
+                                        {}, GetFixturesPath());
+    ASSERT_TRUE(isolate);
+    ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
+  }
+  ASSERT_EQ(create_callback_count, 1u);
+}
+
 }  // namespace testing
 }  // namespace flutter
