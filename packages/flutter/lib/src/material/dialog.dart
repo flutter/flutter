@@ -408,6 +408,7 @@ class AlertDialog extends StatelessWidget {
   /// * [ButtonBar], which [actions] configures to lay itself out.
   @Deprecated(
     'Use actionsButtonSpacing.'
+    'This feature was deprecated after v1.24.0-1.0.pre.'
   )
   final EdgeInsetsGeometry? buttonPadding;
 
