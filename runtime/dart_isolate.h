@@ -342,20 +342,14 @@ class DartIsolate : public UIDartState {
   ///                           supplied entrypoint.
   /// @param[in]  entrypoint    The entrypoint in `library_name`
   /// @param[in]  args          A list of string arguments to the entrypoint.
-  /// @param[in]  on_run        A callback to run in isolate scope after the
-  ///                           main entrypoint has been invoked. There is no
-  ///                           isolate scope current on the thread once this
-  ///                           method returns.
   ///
   /// @return     If the isolate successfully transitioned to the running phase
   ///             and the main entrypoint was invoked.
   ///
   [[nodiscard]] bool RunFromLibrary(std::optional<std::string> library_name,
                                     std::optional<std::string> entrypoint,
-                                    const std::vector<std::string>& args,
-                                    const fml::closure& on_run = nullptr);
+                                    const std::vector<std::string>& args);
 
- public:
   //----------------------------------------------------------------------------
   /// @brief      Transition the isolate to the `Phase::Shutdown` phase. The
   ///             only thing left to do is to collect the isolate.

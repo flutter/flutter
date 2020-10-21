@@ -841,9 +841,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   if (SAFE_ACCESS(args, root_isolate_create_callback, nullptr) != nullptr) {
     VoidCallback callback =
         SAFE_ACCESS(args, root_isolate_create_callback, nullptr);
-    settings.root_isolate_create_callback = [callback, user_data]() {
-      callback(user_data);
-    };
+    settings.root_isolate_create_callback =
+        [callback, user_data](const auto& isolate) { callback(user_data); };
   }
 
   flutter::PlatformViewEmbedder::UpdateSemanticsNodesCallback
