@@ -1,4 +1,4 @@
-Signature: 41a3732cd420fc510eeec5ac7809b7f4
+Signature: 0e8ec177a82c430d86c666c78510f189
 
 UNUSED LICENSES:
 
@@ -1696,7 +1696,6 @@ FILE: ../../../third_party/skia/src/effects/SkPackBits.cpp
 FILE: ../../../third_party/skia/src/effects/SkTableMaskFilter.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAttachment.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAttachment.h
-FILE: ../../../third_party/skia/src/gpu/GrContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrGpu.h
 FILE: ../../../third_party/skia/src/gpu/GrGpuResource.cpp
 FILE: ../../../third_party/skia/src/gpu/GrNativeRect.h
@@ -5602,6 +5601,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLRehydrator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLRehydrator.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructor.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLIRNode.cpp
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLNodeArrayWrapper.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google LLC.
 
@@ -6344,7 +6344,6 @@ ORIGIN: ../../../third_party/skia/include/gpu/GrConfig.h + ../../../third_party/
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/gpu/GrConfig.h
 FILE: ../../../third_party/skia/include/gpu/GrTypes.h
-FILE: ../../../third_party/skia/include/private/GrContext.h
 FILE: ../../../third_party/skia/src/core/SkImageInfo.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterClip.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterClip.h
