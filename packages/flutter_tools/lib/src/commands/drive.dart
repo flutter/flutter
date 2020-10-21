@@ -386,6 +386,8 @@ $ex
         globals.printStatus('Stopping application instance.');
         await appStopper(this, package);
       }
+
+      await device?.dispose();
     }
 
     return FlutterCommandResult.success();

@@ -228,6 +228,7 @@ void main() {
         '10',
       ];
       await createTestCommandRunner(command).run(args);
+      verify(mockDevice.dispose());
       expect(testLogger.errorText, isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
@@ -529,6 +530,7 @@ void main() {
                 prebuiltApplication: false,
                 userIdentifier: anyNamed('userIdentifier'),
         ));
+        verify(mockDevice.dispose());
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -558,6 +560,7 @@ void main() {
                 prebuiltApplication: false,
                 userIdentifier: anyNamed('userIdentifier'),
         ));
+        verify(mockDevice.dispose());
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
