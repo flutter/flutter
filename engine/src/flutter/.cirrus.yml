@@ -74,4 +74,4 @@ task:
         bin/flutter analyze --dartdocs --flutter-repo --local-engine=host_debug_unopt
       test_framework_script: |
         cd $FRAMEWORK_PATH/flutter/packages/flutter
-        ../../bin/flutter test --local-engine=host_debug_unopt
+        ../../bin/flutter test --local-engine=host_debug_unopt --null-assertions --sound-null-safety --enable-experiment=non-nullable
