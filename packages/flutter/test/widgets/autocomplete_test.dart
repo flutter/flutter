@@ -80,6 +80,15 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsNothing);
 
+      // Focus the empty field. All the options are displayed.
+      textEditingController.value = const TextEditingValue(
+        text: '',
+        selection: TextSelection(baseOffset: 0, extentOffset: 0),
+      );
+      await tester.pump();
+      expect(find.byKey(optionsKey), findsOneWidget);
+      expect(lastOptions.length, kOptions.length);
+
       // Enter text. The options are filtered by the text.
       textEditingController.value = const TextEditingValue(
         text: 'ele',
@@ -378,6 +387,63 @@ void main() {
       final Offset optionsOffsetOpen = tester.getTopLeft(find.byKey(optionsKey));
       expect(optionsOffsetOpen.dy, isNot(equals(optionsOffset.dy)));
       expect(optionsOffsetOpen.dy, fieldOffset.dy + fieldSize.height);
+    });
+
+    testWidgets('can prevent options from showing by returning an empty iterable', (WidgetTester tester) async {
+      final GlobalKey fieldKey = GlobalKey();
+      final GlobalKey optionsKey = GlobalKey();
+      Iterable<String> lastOptions;
+      AutocompleteOnSelected<String> lastOnSelected;
+      TextEditingController textEditingController;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AutocompleteCore<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              if (textEditingValue.text == null || textEditingValue.text == '') {
+                return const Iterable<String>.empty();
+              }
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
+              textEditingController ??= fieldTextEditingController;
+              return Container(key: fieldKey);
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              lastOnSelected = onSelected;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      );
+
+      // The field is always rendered, but the options are not unless needed.
+      expect(find.byKey(fieldKey), findsOneWidget);
+      expect(find.byKey(optionsKey), findsNothing);
+
+      // Focus the empty field. The options are not displayed because
+      // optionsBuilder returns nothing for an empty field query.
+      textEditingController.value = const TextEditingValue(
+        text: '',
+        selection: TextSelection(baseOffset: 0, extentOffset: 0),
+      );
+      await tester.pump();
+      expect(find.byKey(optionsKey), findsNothing);
+
+      // Enter text. Now the options appear, filtered by the text.
+      textEditingController.value = const TextEditingValue(
+        text: 'ele',
+        selection: TextSelection(baseOffset: 3, extentOffset: 3),
+      );
+      await tester.pump();
+      expect(find.byKey(fieldKey), findsOneWidget);
+      expect(find.byKey(optionsKey), findsOneWidget);
+      expect(lastOptions.length, 2);
+      expect(lastOptions.elementAt(0), 'chameleon');
+      expect(lastOptions.elementAt(1), 'elephant');
     });
   });
 }
