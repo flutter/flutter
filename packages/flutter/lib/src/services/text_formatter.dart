@@ -7,7 +7,6 @@ import 'dart:math' as math;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import 'text_editing.dart';
 import 'text_input.dart';
@@ -32,12 +31,6 @@ import 'text_input.dart';
 /// Latin characters or numbers (e.g., verification code),
 /// [MaxLengthEnforcement.allowComposingTextToFinish] is generally a better fit.
 /// {@endtemplate}
-///
-/// See also:
-///
-///  * [TextField.maxLengthEnforcement] which is used in conjunction with
-///  [TextField.maxLength] to limit the length of user input. [TextField] also
-///  provides a character counter to provide visual feedback.
 enum MaxLengthEnforcement {
   /// Keep the length of the text input from exceeding the max length even when
   /// the text has unfinished composing region.
