@@ -266,8 +266,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @protected
   @mustCallSuper
   void resolvePointer(int pointer, GestureDisposition disposition) {
-    final Map<int, GestureArenaEntry> localEntries = Map<int, GestureArenaEntry>.from(_entries);
-    final GestureArenaEntry? entry = localEntries[pointer];
+    final GestureArenaEntry? entry = _entries[pointer];
     if (entry != null) {
       _entries.remove(pointer);
       entry.resolve(disposition);
