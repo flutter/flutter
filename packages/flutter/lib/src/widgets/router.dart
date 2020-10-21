@@ -989,7 +989,10 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
 
   @override
   void takePriority() {
-    parent.takePriority();
+    if (parent is ChildBackButtonDispatcher) {
+      final ChildBackButtonDispatcher cascadingParent = parent as ChildBackButtonDispatcher;
+      cascadingParent.parent.deferTo(cascadingParent);
+    }
     parent.deferTo(this);
     super.takePriority();
   }
