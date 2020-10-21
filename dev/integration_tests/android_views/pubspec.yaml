@@ -1,6 +1,8 @@
 name: platform_views
 description: An integration test for embedded platform views
 version: 1.0.0+1
+environment:
+  sdk: '>=2.9.0 <3.0.0'
 
 dependencies:
   flutter:
