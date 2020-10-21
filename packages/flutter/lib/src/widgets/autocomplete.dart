@@ -24,7 +24,7 @@ typedef AutocompleteOptionsBuilder<T extends Object> = Iterable<T> Function(Text
 ///
 /// See also:
 ///   * [AutocompleteCore.onSelected], which is of this type.
-typedef AutocompleteOnSelected<T extends Object> = void Function(T? option);
+typedef AutocompleteOnSelected<T extends Object> = void Function(T option);
 
 /// The type of the [AutocompleteCore] callback which returns a [Widget] that
 /// displays the specified [options] and calls [onSelected] if the user
@@ -481,8 +481,8 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
       _textEditingController.value,
     );
     _options = options;
-    if (_selection == null
-        || _textEditingController.text != widget.displayStringForOption(_selection!)) {
+    if (_selection != null
+        && _textEditingController.text != widget.displayStringForOption(_selection!)) {
       _selection = null;
     }
     _updateOverlay();
@@ -497,7 +497,7 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
   }
 
   // Select the given option and update the widget.
-  void _select(T? nextSelection) {
+  void _select(T nextSelection) {
     if (nextSelection == _selection) {
       return;
     }
@@ -509,7 +509,7 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
       selection: TextSelection.collapsed(offset: selectionString.length),
       text: selectionString,
     );
-    widget.onSelected?.call(_selection);
+    widget.onSelected?.call(_selection!);
   }
 
   // Hide or show the options overlay, if needed.
