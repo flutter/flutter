@@ -233,7 +233,7 @@ void main() {
 
     final BuildContext context = tester.element(find.text('Go'));
 
-    final Future<int> result = showDialog<int>(
+    final Future<int?> result = showDialog<int>(
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
@@ -273,7 +273,7 @@ void main() {
       ),
     );
 
-    final Future<int> result = showDialog<int>(
+    final Future<int?> result = showDialog<int>(
       context: navigator.currentContext!,
       builder: (BuildContext context) {
         return SimpleDialog(
@@ -1382,7 +1382,7 @@ void main() {
     final List<int> dismissedItems = <int>[];
 
     // Dismiss is confirmed IFF confirmDismiss() returns true.
-    Future<bool> confirmDismiss (DismissDirection dismissDirection) {
+    Future<bool?> confirmDismiss (DismissDirection dismissDirection) async {
       return showDialog<bool>(
         context: _scaffoldKey.currentContext!,
         barrierDismissible: true, // showDialog() returns null if tapped outside the dialog
@@ -1762,7 +1762,7 @@ void main() {
     final BuildContext context = tester.element(find.text('Go'));
     const RouteSettings exampleSetting = RouteSettings(name: 'simple');
 
-    final Future<int> result = showDialog<int>(
+    final Future<int?> result = showDialog<int>(
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(

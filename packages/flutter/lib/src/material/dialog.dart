@@ -955,7 +955,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * <https://material.io/design/components/dialogs.html>
-Future<T> showDialog<T>({
+Future<T?> showDialog<T>({
   required BuildContext context,
   WidgetBuilder? builder,
   bool barrierDismissible = true,

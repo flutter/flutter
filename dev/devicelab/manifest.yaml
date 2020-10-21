@@ -235,6 +235,7 @@ tasks:
       with SkSL shader warm-up with e2e.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
+    flaky: true
 
   backdrop_filter_perf__timeline_summary:
     description: >
@@ -415,12 +416,6 @@ tasks:
       Runs end-to-end Flutter tests on Android.
     stage: devicelab
     required_agent_capabilities: [ "mac/android" ]
-
-  commands_test:
-    description: >
-      Runs tests of flutter run commands.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
 
   service_extensions_test:
     description: >

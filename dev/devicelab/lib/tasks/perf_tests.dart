@@ -1126,6 +1126,7 @@ class MemoryTest {
       }
 
       await adb.cancel();
+      await flutter('install', options: <String>['--uninstall-only', '-d', device.deviceId]);
 
       final ListStatistics startMemoryStatistics = ListStatistics(_startMemory);
       final ListStatistics endMemoryStatistics = ListStatistics(_endMemory);

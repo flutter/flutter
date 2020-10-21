@@ -105,7 +105,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///    select a single date.
 ///  * [DateTimeRange], which is used to describe a date range.
 ///
-Future<DateTimeRange> showDateRangePicker({
+Future<DateTimeRange?> showDateRangePicker({
   required BuildContext context,
   DateTimeRange? initialDateRange,
   required DateTime firstDate,
