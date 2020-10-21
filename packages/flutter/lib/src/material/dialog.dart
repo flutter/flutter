@@ -522,7 +522,7 @@ class AlertDialog extends StatelessWidget {
     }
 
 
-    if (actions != null) {
+    if (actions != null && actions!.isNotEmpty) {
       actionsWidget = Container(
         alignment: AlignmentDirectional.centerEnd,
         constraints: const BoxConstraints(minHeight: 52.0),
@@ -539,27 +539,27 @@ class AlertDialog extends StatelessWidget {
     List<Widget> columnChildren;
     if (scrollable) {
       columnChildren = <Widget>[
-        if (title != null || content != null)
+        if (titleWidget != null || contentWidget != null)
           Flexible(
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  if (title != null) titleWidget!,
-                  if (content != null) contentWidget!,
+                  if (titleWidget != null) titleWidget,
+                  if (contentWidget != null) contentWidget,
                 ],
               ),
             ),
           ),
-        if (actions != null)
-          actionsWidget!,
+        if (actionsWidget != null)
+          actionsWidget,
       ];
     } else {
       columnChildren = <Widget>[
-        if (title != null) titleWidget!,
-        if (content != null) Flexible(child: contentWidget!),
-        if (actions != null) actionsWidget!,
+        if (titleWidget != null) titleWidget,
+        if (contentWidget != null) Flexible(child: contentWidget),
+        if (actionsWidget != null) actionsWidget,
       ];
     }
 
