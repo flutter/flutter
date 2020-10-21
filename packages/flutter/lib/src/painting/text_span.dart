@@ -98,23 +98,23 @@ class TextSpan extends InlineSpan implements HitTestTarget {
 
   /// A gesture recognizer that will receive events that hit this span.
   ///
-  /// [InlineSpan] itself does not implement hit testing or event dispatch. The
-  /// object that manages the [InlineSpan] painting is also responsible for
+  /// [TextSpan] itself does not implement hit testing or event dispatch. The
+  /// object that manages the [TextSpan] painting is also responsible for
   /// dispatching events. In the rendering library, that is the
   /// [RenderParagraph] object, which corresponds to the [RichText] widget in
   /// the widgets layer; these objects do not bubble events in [InlineSpan]s,
   /// so a [recognizer] is only effective for events that directly hit the
-  /// [text] of that [InlineSpan], not any of its [children].
+  /// [text] of that [TextSpan], not any of its [children].
   ///
-  /// [InlineSpan] also does not manage the lifetime of the gesture recognizer.
+  /// [TextSpan] also does not manage the lifetime of the gesture recognizer.
   /// The code that owns the [GestureRecognizer] object must call
-  /// [GestureRecognizer.dispose] when the [InlineSpan] object is no longer
+  /// [GestureRecognizer.dispose] when the [TextSpan] object is no longer
   /// used.
   ///
   /// {@tool snippet}
   ///
   /// This example shows how to manage the lifetime of a gesture recognizer
-  /// provided to an [InlineSpan] object. It defines a `BuzzingText` widget
+  /// provided to an [TextSpan] object. It defines a `BuzzingText` widget
   /// which uses the [HapticFeedback] class to vibrate the device when the user
   /// long-presses the "find the" span, which is underlined in wavy green. The
   /// hit-testing is handled by the [RichText] widget.
@@ -171,6 +171,10 @@ class TextSpan extends InlineSpan implements HitTestTarget {
   /// }
   /// ```
   /// {@end-tool}
+  @Deprecated(
+    "TextSpan's support for recognizers will be moved to ReactiveTextSpan. Use ReactiveTextSpan instead. "
+    'This feature was deprecated after v1.24.' // TODO: Finalize version
+  )
   @override
   final GestureRecognizer? recognizer;
 

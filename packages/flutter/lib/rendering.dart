@@ -53,6 +53,7 @@ export 'src/rendering/performance_overlay.dart';
 export 'src/rendering/platform_view.dart';
 export 'src/rendering/proxy_box.dart';
 export 'src/rendering/proxy_sliver.dart';
+export 'src/rendering/reactive_text_span.dart';
 export 'src/rendering/rotated_box.dart';
 export 'src/rendering/shifted_box.dart';
 export 'src/rendering/sliver.dart';
