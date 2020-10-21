@@ -368,6 +368,64 @@ void main() {
     expect(find.text('popped inner2'), findsOneWidget);
   });
 
+  testWidgets('ChildBackButtonDispatcher can be disposed without calling take priority', (WidgetTester tester) async {
+
+    final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
+    BackButtonDispatcher innerDispatcher = ChildBackButtonDispatcher(outerDispatcher);
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        backButtonDispatcher: outerDispatcher,
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext context, RouteInformation? information) {
+            // Creates the sub-router.
+            return Column(
+              children: <Widget>[
+                const Text('initial'),
+                Router<RouteInformation>(
+                  backButtonDispatcher: innerDispatcher,
+                  routerDelegate: SimpleRouterDelegate(
+                    builder: (BuildContext context, RouteInformation? innerInformation) {
+                      return Container();
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      )
+    ));
+
+    // Creates a new child back button dispatcher and rebuild, this will cause
+    // the old one be disposed without calling the take prioirty method. 
+    innerDispatcher = ChildBackButtonDispatcher(outerDispatcher);
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        backButtonDispatcher: outerDispatcher,
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext context, RouteInformation? information) {
+            // Creates the sub-router.
+            return Column(
+              children: <Widget>[
+                const Text('initial'),
+                Router<RouteInformation>(
+                  backButtonDispatcher: innerDispatcher,
+                  routerDelegate: SimpleRouterDelegate(
+                    builder: (BuildContext context, RouteInformation? innerInformation) {
+                      return Container();
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      )
+    ));
+
+    // expect(tester.takeException(), isNull);
+  });
+
   testWidgets('router does report URL change correctly', (WidgetTester tester) async {
     RouteInformation? reportedRouteInformation;
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider(

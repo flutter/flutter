@@ -921,9 +921,9 @@ abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> 
   /// additionally attempt to claim priority from its parent, whereas removing
   /// the last child does not.)
   void forget(ChildBackButtonDispatcher child) {
-    assert(_children != null);
-    assert(_children!.contains(child));
-    _children!.remove(child);
+    if(_children != null) {
+      _children!.remove(child);
+    }
   }
 }
 
@@ -989,6 +989,7 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
 
   @override
   void takePriority() {
+    parent.takePriority();
     parent.deferTo(this);
     super.takePriority();
   }
