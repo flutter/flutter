@@ -759,11 +759,14 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
+    final RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
+    expect(tooltipRenderParagraph.textSize.height, equals(10.0));
+
     final RenderBox tip = tester.renderObject(
       _findTooltipContainer(tooltipText),
     );
     expect(tip.size.height, equals(24.0));
-    expect(tip.size.width, equals(58.0));
+    expect(tip.size.width, equals(46.0));
     expect(tip, paints..rrect(
       rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
       color: const Color(0xe6616161),

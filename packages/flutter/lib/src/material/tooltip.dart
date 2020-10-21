@@ -238,6 +238,18 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
   }
 
+  double _getDefaultFontSize() {
+    final ThemeData theme = Theme.of(context)!;
+    switch (theme.platform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return 10.0;
+      default:
+        return 14.0;
+    }
+  }
+
   // Forces a rebuild if a mouse has been added or removed.
   void _handleMouseTrackerChange() {
     if (!mounted) {
@@ -398,6 +410,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (theme.brightness == Brightness.dark) {
       defaultTextStyle = theme.textTheme.bodyText2!.copyWith(
         color: Colors.black,
+        fontSize: _getDefaultFontSize(),
       );
       defaultDecoration = BoxDecoration(
         color: Colors.white.withOpacity(0.9),
@@ -406,6 +419,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     } else {
       defaultTextStyle = theme.textTheme.bodyText2!.copyWith(
         color: Colors.white,
+        fontSize: _getDefaultFontSize(),
       );
       defaultDecoration = BoxDecoration(
         color: Colors.grey[700]!.withOpacity(0.9),
