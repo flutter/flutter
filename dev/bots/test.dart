@@ -1338,7 +1338,7 @@ String get branchName {
     case CiProviders.cirrus:
       return Platform.environment['CIRRUS_BRANCH'];
     case CiProviders.luci:
-      return Platform.environment['CIRRUS_BRANCH']; // ???
+      return Platform.environment['LUCI_BRANCH'];
   }
   return '';
 }
