@@ -1333,6 +1333,7 @@ String get gitHash {
   return '';
 }
 
+/// Returns the name of the branch being tested.
 String get branchName {
   switch(ciProvider) {
     case CiProviders.cirrus:
