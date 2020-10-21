@@ -208,12 +208,10 @@ void main() {
   testWidgets(
     'prefix widget is in front of the text',
     (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoSearchTextField(
-              focusNode: focusNode,
               controller: TextEditingController(text: 'input'),
             ),
           ),
@@ -447,29 +445,26 @@ void main() {
   testWidgets(
     'custom suffix onTap overrides default clearing behavior',
     (WidgetTester tester) async {
-      String value = 'text entry';
-      final TextEditingController controller = TextEditingController();
+      final TextEditingController controller =
+          TextEditingController(text: 'Text');
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoSearchTextField(
               controller: controller,
-              onChanged: (String newValue) => value = newValue,
               onSuffixTap: () {},
             ),
           ),
         ),
       );
 
-      controller.text = value;
       await tester.pump();
 
       await tester.tap(find.byIcon(CupertinoIcons.xmark_circle_fill));
       await tester.pump();
 
       expect(controller.text, isNotEmpty);
-      expect(find.text('text entry'), findsOneWidget);
-      expect(value, isNotEmpty);
+      expect(find.text('Text'), findsOneWidget);
     },
   );
 }

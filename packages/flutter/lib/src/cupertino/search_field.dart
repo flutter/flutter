@@ -245,8 +245,8 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// Sets the suffix widget's icon.
   ///
   /// Cannot be null. Defaults to the X-Mark [CupertinoIcons.xmark_circle_fill].
-  /// The suffix is customizable so that users can override it with other
-  /// options, like a bookmark icon.
+  /// "To change the functionality of the suffix icon, provide a custom
+  /// onSuffixTap callback and specify an intuitive suffixIcon.
   final Icon suffixIcon;
 
   /// Dictates when the X-Mark (suffix) should be visible.
@@ -272,9 +272,7 @@ class CupertinoSearchTextField extends StatefulWidget {
 }
 
 class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
-    with
-        RestorationMixin,
-        AutomaticKeepAliveClientMixin<CupertinoSearchTextField> {
+    with RestorationMixin {
   /// Default value for the border radius. Radius value was determined using the
   /// comparison tool in https://github.com/flutter/platform_tests/.
   final BorderRadius _kDefaultBorderRadius =
@@ -284,11 +282,6 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
 
   TextEditingController get _effectiveController =>
       widget.controller ?? _controller!.value;
-
-  FocusNode? _focusNode;
-
-  FocusNode get _effectiveFocusNode =>
-      widget.focusNode ?? (_focusNode ??= FocusNode());
 
   @override
   void initState() {
@@ -320,7 +313,6 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   void _registerController() {
     assert(_controller != null);
     registerForRestoration(_controller!, 'controller');
-    _controller!.value.addListener(updateKeepAlive);
   }
 
   void _createLocalController([TextEditingValue? value]) {
@@ -336,22 +328,23 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   @override
   String? get restorationId => widget.restorationId;
 
-  @override
-  bool get wantKeepAlive => _controller?.value.text.isNotEmpty == true;
+  VoidCallback _getDefaultOnSuffixTap() {
+    return () {
+      final bool textChanged = _effectiveController.text.isNotEmpty;
+      _effectiveController.clear();
+      if (widget.onChanged != null && textChanged)
+        widget.onChanged!(_effectiveController.text);
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // See AutomaticKeepAliveClientMixin.
-
     final String placeholder = widget.placeholder ??
         CupertinoLocalizations.of(context)?.searchTextFieldPlaceholerLabel ??
         'Search';
 
     final TextStyle placeholderStyle = widget.placeholderStyle ??
-        TextStyle(
-          color: CupertinoDynamicColor.resolve(
-              CupertinoColors.secondaryLabel, context),
-        );
+        const TextStyle(color: CupertinoColors.secondaryLabel);
 
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
@@ -362,9 +355,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     // background color and border radius.
     final BoxDecoration decoration = widget.decoration ??
         BoxDecoration(
-          color: CupertinoDynamicColor.resolve(
-              widget.backgroundColor ?? CupertinoColors.tertiarySystemFill,
-              context),
+          color: widget.backgroundColor ?? CupertinoColors.tertiarySystemFill,
           borderRadius: widget.borderRadius ?? _kDefaultBorderRadius,
         );
 
@@ -381,13 +372,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     final Widget suffix = Padding(
       child: CupertinoButton(
         child: IconTheme(child: widget.suffixIcon, data: iconThemeData),
-        onPressed: widget.onSuffixTap ??
-            () {
-              final bool textChanged = _effectiveController.text.isNotEmpty;
-              _effectiveController.clear();
-              if (widget.onChanged != null && textChanged)
-                widget.onChanged!(_effectiveController.text);
-            },
+        onPressed: widget.onSuffixTap ?? _getDefaultOnSuffixTap(),
         minSize: 0.0,
         padding: EdgeInsets.zero,
       ),
@@ -406,7 +391,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       padding: widget.padding,
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
-      focusNode: _effectiveFocusNode,
+      focusNode: widget.focusNode,
     );
   }
 }
