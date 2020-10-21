@@ -397,7 +397,7 @@ void main() {
     ));
 
     // Creates a new child back button dispatcher and rebuild, this will cause
-    // the old one be disposed without calling the take prioirty method. 
+    // the old one be disposed without calling the take prioirty method.
     innerDispatcher = ChildBackButtonDispatcher(outerDispatcher);
     await tester.pumpWidget(buildBoilerPlate(
       Router<RouteInformation>(
