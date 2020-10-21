@@ -334,7 +334,7 @@ class _Icon {
   String get dartDoc =>
       '/// <i class="material-icons${style.suffix()} md-36">$shortId</i> &#x2014; material icon named "$name".';
 
-  String get declaration => 
+  String get declaration =>
       "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: 'MaterialIcons'$mirroredInRTL);";
 
   String get fullDeclaration => '''\n  $dartDoc\n  $declaration\n''';
