@@ -4294,10 +4294,11 @@ void main() {
 
     // Click for Focus.
     await tester.tap(find.byType(TextField));
-    // The default animation duration is 200 millisecond.
+    // Default animation duration is 200 millisecond.
     await tester.pumpFrames(target, const Duration(milliseconds: 100));
 
     expect(getLabelRect(tester).width > labelWidth, isTrue);
+    expect(getLabelRect(tester).width < floatedLabelWidth, isTrue);
 
     await tester.pumpAndSettle();
 
