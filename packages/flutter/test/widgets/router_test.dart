@@ -423,7 +423,7 @@ void main() {
       )
     ));
 
-    // expect(tester.takeException(), isNull);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('router does report URL change correctly', (WidgetTester tester) async {
