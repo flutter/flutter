@@ -75,6 +75,11 @@ int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
   ? int.parse(Platform.environment['WEB_SHARD_COUNT'])
   : 8;
 
+/// The number of shards the long-running Web tests are split into.
+///
+/// WARNING: this number must match the shard count in LUCI configs.
+const int kWebLongRunningTestShardCount = 3;
+
 /// Tests that we don't run on Web for various reasons.
 //
 // TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
@@ -122,6 +127,7 @@ Future<void> main(List<String> args) async {
       'tool_tests': _runToolTests,
       'web_tests': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
+      'web_long_running_tests': _runWebLongRunningTests,
     });
   } on ExitException catch (error) {
     error.apply();
@@ -811,6 +817,125 @@ Future<void> _runWebUnitTests() async {
   };
 
   await selectSubshard(subshards);
+}
+
+/// Coarse-grained integration tests running on the Web.
+///
+/// These tests are sharded into [kWebLongRunningTestShardCount] shards.
+Future<void> _runWebLongRunningTests() async {
+  final List<ShardRunner> tests = <ShardRunner>[
+    () => _runGalleryE2eWebTest('debug'),
+    () => _runGalleryE2eWebTest('debug', canvasKit: true),
+    () => _runGalleryE2eWebTest('profile'),
+    () => _runGalleryE2eWebTest('profile', canvasKit: true),
+    () => _runGalleryE2eWebTest('release'),
+    () => _runGalleryE2eWebTest('release', canvasKit: true),
+  ].map(_withChromeDriver).toList();
+  await _selectIndexedSubshard(tests, kWebLongRunningTestShardCount);
+}
+
+// The `chromedriver` process created by this test.
+//
+// If an existing chromedriver is already available on port 4444, the existing
+// process is reused and this variable remains null.
+Command _chromeDriver;
+
+/// Creates a shard runner that runs the given [originalRunner] with ChromeDriver
+/// enabled.
+ShardRunner _withChromeDriver(ShardRunner originalRunner) {
+  return () async {
+    try {
+      await _ensureChromeDriverIsRunning();
+      await originalRunner();
+    } finally {
+      await _stopChromeDriver();
+    }
+  };
+}
+
+Future<bool> _isChromeDriverRunning() async {
+  try {
+    (await Socket.connect('localhost', 4444)).destroy();
+    return true;
+  } on SocketException {
+    return false;
+  }
+}
+
+Future<void> _ensureChromeDriverIsRunning() async {
+  // If we cannot connect to ChromeDriver, assume it is not running. Launch it.
+  if (!await _isChromeDriverRunning()) {
+    print('Starting chromedriver');
+    // Assume chromedriver is in the PATH.
+    _chromeDriver = await startCommand(
+      'chromedriver',
+      <String>['--port=4444'],
+    );
+    while (!await _isChromeDriverRunning()) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      print('Waiting for chromedriver to start up.');
+    }
+  }
+
+  final HttpClient client = HttpClient();
+  final Uri chromeDriverUrl = Uri.parse('http://localhost:4444/status');
+  final HttpClientRequest request = await client.getUrl(chromeDriverUrl);
+  final HttpClientResponse response = await request.close();
+  final Map<String, dynamic> webDriverStatus = json.decode(await response.transform(utf8.decoder).join('')) as Map<String, dynamic>;
+  client.close();
+  final bool webDriverReady = webDriverStatus['value']['ready'] as bool;
+  if (!webDriverReady) {
+    throw Exception('WebDriver not available.');
+  }
+}
+
+Future<void> _stopChromeDriver() async {
+  if (_chromeDriver == null) {
+    return;
+  }
+  _chromeDriver.process.kill();
+  while (await _isChromeDriverRunning()) {
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    print('Waiting for chromedriver to stop.');
+  }
+}
+
+/// Exercises the old gallery in a browser for a long period of time, looking
+/// for memory leaks and dangling pointers.
+///
+/// This is not a performance test.
+///
+/// If [canvasKit] is set to true, runs the test in CanvasKit mode.
+///
+/// The test is written using `package:integration_test` (despite the "e2e" in
+/// the name, which is there for historic reasons).
+Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false }) async {
+  print('${green}Running flutter_gallery integration test in --$buildMode using ${canvasKit ? 'CanvasKit' : 'HTML'} renderer.$reset');
+  final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery');
+  await runCommand(
+    flutter,
+    <String>[ 'clean' ],
+    workingDirectory: testAppDirectory,
+  );
+  await runCommand(
+    flutter,
+    <String>[
+      'drive',
+      if (canvasKit)
+        '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+      '--driver=test_driver/transitions_perf_e2e_test.dart',
+      '--target=test_driver/transitions_perf_e2e.dart',
+      '--browser-name=chrome',
+      '-d',
+      'web-server',
+      '--$buildMode',
+    ],
+    workingDirectory: testAppDirectory,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    },
+  );
+  print('${green}Integration test passed.$reset');
 }
 
 Future<void> _runWebIntegrationTests() async {

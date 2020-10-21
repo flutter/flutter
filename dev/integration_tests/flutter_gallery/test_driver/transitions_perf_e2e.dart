@@ -14,8 +14,6 @@ import 'package:flutter_gallery/demo_lists.dart';
 
 import 'run_demos.dart';
 
-const List<String> kSkippedDemos = <String>[];
-
 // All of the gallery demos, identified as "title@category".
 //
 // These names are reported by the test app, see _handleMessages()
