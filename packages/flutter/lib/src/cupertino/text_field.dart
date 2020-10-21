@@ -255,6 +255,11 @@ class CupertinoTextField extends StatefulWidget {
     this.minLines,
     this.expands = false,
     this.maxLength,
+    @Deprecated(
+      'Use maxLengthEnforcement parameter which provides more specific '
+      'behavior related to the maxLength limit. '
+      'This feature was deprecated after v1.23.0-19.0.pre.'
+    )
     this.maxLengthEnforced = true,
     this.maxLengthEnforcement = MaxLengthEnforcement.enforced,
     this.onChanged,
@@ -494,7 +499,8 @@ class CupertinoTextField extends StatefulWidget {
   /// If [maxLength] is set, [maxLengthEnforced] indicates whether or not to
   /// enforce the limit.
   ///
-  /// If false, additional input beyond [maxLength] is ignored.
+  /// If true, prevents the field from allowing more than [maxLength]
+  /// characters.
   @Deprecated(
     'Use maxLengthEnforcement parameter which provides more specific '
     'behavior related to the maxLength limit. '
