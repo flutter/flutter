@@ -444,7 +444,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
       ),
       composing: keepComposingRange && truncated.length > value.composing.start && !value.composing.isCollapsed
         ? TextRange(
-            start: math.min(value.composing.start, truncated.length),
+            start: value.composing.start,
             end: math.min(value.composing.end, truncated.length),
           )
         : TextRange.empty,
