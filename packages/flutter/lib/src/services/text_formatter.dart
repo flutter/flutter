@@ -32,8 +32,8 @@ import 'text_input.dart';
 /// [MaxLengthEnforcement.allowComposingTextToFinish] is generally a better fit.
 /// {@endtemplate}
 enum MaxLengthEnforcement {
-  /// Enforce max length on the editing value entirely, which is similar to
-  /// Gboard and iOS native IME.
+  /// Keep the length of the text input from exceeding the max length even when
+  /// the text has unfinished composing region.
   enforced,
 
   /// Users can still input if the current value is composing while it reached
