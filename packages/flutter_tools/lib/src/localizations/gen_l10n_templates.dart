@@ -23,8 +23,8 @@ import 'package:intl/intl.dart' as intl;
 /// Callers can lookup localized strings with an instance of @(class) returned
 /// by `@(class).of(context)`.
 ///
-/// Applications need to include `@(class).delegate()` in their app\'s
-/// localizationDelegates list, and the locales they support in the app\'s
+/// Applications need to include `@(class).delegate()` in their app's
+/// localizationDelegates list, and the locales they support in the app's
 /// supportedLocales list. For example:
 ///
 /// ```
@@ -215,17 +215,17 @@ const String loadBodyDeferredLoadingTemplate = '''return @(lookupName)(locale);'
 
 // DELEGATE LOOKUP TEMPLATES
 
-const String lookupFunctionTemplate = '''
+const String lookupFunctionTemplate = r'''
 @(class) @(lookupName)(Locale locale) {
   @(lookupBody)
-  assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
+  assert(false, '@(class).delegate failed to load unsupported locale "$locale"');
   return null;
 }''';
 
-const String lookupFunctionDeferredLoadingTemplate = '''
+const String lookupFunctionDeferredLoadingTemplate = r'''
 Future<@(class)> @(lookupName)(Locale locale) {
   @(lookupBody)
-  assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
+  assert(false, '@(class).delegate failed to load unsupported locale "$locale"');
   return null;
 }''';
 

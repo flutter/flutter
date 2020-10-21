@@ -565,7 +565,7 @@ class Actions extends StatefulWidget {
       if (action == null) {
         throw FlutterError('Unable to find an action for a $type in an $Actions widget '
             'in the given context.\n'
-            "$Actions.find() was called on a context that doesn\'t contain an "
+            "$Actions.find() was called on a context that doesn't contain an "
             '$Actions widget with a mapping for the given intent type.\n'
             'The context used was:\n'
             '  $context\n'

@@ -71,7 +71,7 @@ void main() {
     if (platform.isWindows) {
       flutterRootUri
           ..write('/')
-          ..write(canonicalizedFlutterRootPath.replaceAll('\\', '/'));
+          ..write(canonicalizedFlutterRootPath.replaceAll(r'\', '/'));
     } else {
       flutterRootUri.write(canonicalizedFlutterRootPath);
     }
