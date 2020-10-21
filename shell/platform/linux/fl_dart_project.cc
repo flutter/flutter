@@ -19,6 +19,7 @@ struct _FlDartProject {
   gchar* aot_library_path;
   gchar* assets_path;
   gchar* icu_data_path;
+  gchar** dart_entrypoint_args;
 };
 
 G_DEFINE_TYPE(FlDartProject, fl_dart_project, G_TYPE_OBJECT)
@@ -42,6 +43,7 @@ static void fl_dart_project_dispose(GObject* object) {
   g_clear_pointer(&self->aot_library_path, g_free);
   g_clear_pointer(&self->assets_path, g_free);
   g_clear_pointer(&self->icu_data_path, g_free);
+  g_clear_pointer(&self->dart_entrypoint_args, g_strfreev);
 
   G_OBJECT_CLASS(fl_dart_project_parent_class)->dispose(object);
 }
@@ -96,6 +98,20 @@ G_MODULE_EXPORT const gchar* fl_dart_project_get_icu_data_path(
     FlDartProject* self) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(self), nullptr);
   return self->icu_data_path;
+}
+
+G_MODULE_EXPORT gchar** fl_dart_project_get_dart_entrypoint_arguments(
+    FlDartProject* self) {
+  g_return_val_if_fail(FL_IS_DART_PROJECT(self), nullptr);
+  return self->dart_entrypoint_args;
+}
+
+G_MODULE_EXPORT void fl_dart_project_set_dart_entrypoint_arguments(
+    FlDartProject* self,
+    char** argv) {
+  g_return_if_fail(FL_IS_DART_PROJECT(self));
+  g_clear_pointer(&self->dart_entrypoint_args, g_strfreev);
+  self->dart_entrypoint_args = g_strdupv(argv);
 }
 
 GPtrArray* fl_dart_project_get_switches(FlDartProject* self) {

@@ -96,6 +96,30 @@ const gchar* fl_dart_project_get_assets_path(FlDartProject* project);
  */
 const gchar* fl_dart_project_get_icu_data_path(FlDartProject* project);
 
+/**
+ * fl_dart_project_set_dart_entrypoint_arguments:
+ * @project: an #FlDartProject.
+ * @argv: a pointer to a NULL-terminated array of C strings containing the
+ * command line arguments.
+ *
+ * Sets the command line arguments to be passed through to the Dart
+ * entrypoint function.
+ */
+void fl_dart_project_set_dart_entrypoint_arguments(FlDartProject* project,
+                                                   char** argv);
+
+/**
+ * fl_dart_project_get_dart_entrypoint_arguments:
+ * @project: an #FlDartProject.
+ *
+ * Gets the command line arguments to be passed through to the Dart entrypoint
+ * function.
+ *
+ * Returns: a NULL-terminated array of strings containing the command line
+ * arguments to be passed to the Dart entrypoint.
+ */
+gchar** fl_dart_project_get_dart_entrypoint_arguments(FlDartProject* project);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_DART_PROJECT_H_
