@@ -306,14 +306,6 @@ abstract class RawKeyEvent with Diagnosticable {
             modifiers: message['modifiers'] as int? ?? 0);
         character = message['characters'] as String?;
         break;
-      // case 'ios':
-      //   data = RawKeyEventDataMacOs(
-      //       characters: message['characters'] as String? ?? '',
-      //       charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
-      //       keyCode: message['keyCode'] as int? ?? 0,
-      //       modifiers: message['modifiers'] as int? ?? 0);
-      //   character = message['characters'] as String?;
-      //   break;
       case 'linux':
         final int unicodeScalarValues = message['unicodeScalarValues'] as int? ?? 0;
         data = RawKeyEventDataLinux(
