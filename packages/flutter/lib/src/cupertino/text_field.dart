@@ -512,6 +512,9 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// Defaults to [MaxLengthEnforcement.enforced].
   ///
+  /// If [MaxLengthEnforcement.none] is set, additional input beyond [maxLength]
+  /// will not be enforced by the limit.
+  ///
   /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
   final MaxLengthEnforcement maxLengthEnforcement;
 
