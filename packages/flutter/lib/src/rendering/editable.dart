@@ -484,6 +484,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     LogicalKeyboardKey.keyV,
     LogicalKeyboardKey.keyX,
     LogicalKeyboardKey.delete,
+    LogicalKeyboardKey.backspace,
   };
 
   static final Set<LogicalKeyboardKey> _nonModifierKeys = <LogicalKeyboardKey>{
@@ -544,7 +545,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // as the _handleKeyEvent method
       _handleShortcuts(key);
     } else if (key == LogicalKeyboardKey.delete) {
-      _handleDelete();
+      _handleDelete(forward: true);
+    } else if (key == LogicalKeyboardKey.backspace) {
+      _handleDelete(forward: false);
     }
   }
 
@@ -813,22 +816,27 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
-  void _handleDelete() {
+  void _handleDelete({ required bool forward }) {
     assert(_selection != null);
-    final String textAfter = selection!.textAfter(_plainText);
-    if (textAfter.isNotEmpty) {
-      final int deleteCount = nextCharacter(0, textAfter);
-      textSelectionDelegate.textEditingValue = TextEditingValue(
-        text: selection!.textBefore(_plainText)
-          + selection!.textAfter(_plainText).substring(deleteCount),
-        selection: TextSelection.collapsed(offset: selection!.start),
-      );
-    } else {
-      textSelectionDelegate.textEditingValue = TextEditingValue(
-        text: selection!.textBefore(_plainText),
-        selection: TextSelection.collapsed(offset: selection!.start),
-      );
+    String textBefore = selection!.textBefore(_plainText);
+    String textAfter = selection!.textAfter(_plainText);
+    int cursorPosition = selection!.start;
+    // If not deleting a selection, delete the next/previous character.
+    if (selection!.isCollapsed) {
+      if (!forward && textBefore.isNotEmpty) {
+        final int characterBoundary = previousCharacter(textBefore.length, textBefore);
+        textBefore = textBefore.substring(0, characterBoundary);
+        cursorPosition = characterBoundary;
+      }
+      if (forward && textAfter.isNotEmpty) {
+        final int deleteCount = nextCharacter(0, textAfter);
+        textAfter = textAfter.substring(deleteCount);
+      }
     }
+    textSelectionDelegate.textEditingValue = TextEditingValue(
+      text: textBefore + textAfter,
+      selection: TextSelection.collapsed(offset: cursorPosition),
+    );
   }
 
   /// Marks the render object as needing to be laid out again and have its text
