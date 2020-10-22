@@ -6,8 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
-import 'reorderable_list.dart';
-import 'text_theme.dart';
 import 'time.dart';
 import 'typography.dart';
 

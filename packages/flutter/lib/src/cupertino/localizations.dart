@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'date_picker.dart';
 import 'debug.dart';
 
 /// Determines the order of the columns inside [CupertinoDatePicker] in
