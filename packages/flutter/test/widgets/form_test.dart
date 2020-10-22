@@ -849,7 +849,7 @@ void main() {
     expect(() => builder(), throwsAssertionError);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/65374.
+  // Regression test for https://github.com/flutter/flutter/issues/63753.
   testWidgets('Validate form should return correct validation if the value is composing', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? fieldValue;
