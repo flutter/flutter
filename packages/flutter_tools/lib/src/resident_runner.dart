@@ -70,7 +70,6 @@ class FlutterDevice {
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
-    @required FlutterProject flutterProject,
     @required String target,
     @required BuildInfo buildInfo,
     @required Platform platform,

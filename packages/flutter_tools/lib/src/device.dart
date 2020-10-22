@@ -847,7 +847,6 @@ class DebuggingOptions {
     this.disablePortPublication = false,
     this.deviceVmServicePort,
     this.ddsPort,
-    this.initializePlatform = true,
     this.hostname,
     this.port,
     this.webEnableExposeUrl,
@@ -862,7 +861,6 @@ class DebuggingOptions {
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
-      this.initializePlatform = true,
       this.port,
       this.hostname,
       this.webEnableExposeUrl,
@@ -913,8 +911,6 @@ class DebuggingOptions {
   final bool purgePersistentCache;
   final bool useTestFonts;
   final bool verboseSystemLogs;
-  /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
-  final bool initializePlatform;
   final int hostVmServicePort;
   final int deviceVmServicePort;
   final bool disablePortPublication;
