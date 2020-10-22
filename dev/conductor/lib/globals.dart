@@ -14,4 +14,4 @@ const String kHelp = 'help';
 const String kForce = 'force';
 const String kSkipTagging = 'skip-tagging';
 
-const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
+const String kUpstreamRemote = 'https://github.com/flutter/flutter.git';

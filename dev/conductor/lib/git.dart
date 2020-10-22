@@ -6,14 +6,15 @@ import 'dart:io';
 
 /// A wrapper around git process calls that can be mocked for unit testing.
 class Git {
-  const Git();
+  Git(this.workingDirectory);
+
+  final String workingDirectory;
 
   String getOutput(
     String command,
-    String explanation, {
-    String workingDirectory,
-  }) {
-    final ProcessResult result = _run(command, workingDirectory);
+    String explanation
+  ) {
+    final ProcessResult result = _run(command);
     if ((result.stderr as String).isEmpty && result.exitCode == 0)
       return (result.stdout as String).trim();
     _reportFailureAndExit(result, explanation);
@@ -22,10 +23,9 @@ class Git {
 
   void run(
     String command,
-    String explanation, {
-    String workingDirectory,
-  }) {
-    final ProcessResult result = _run(command, workingDirectory);
+    String explanation
+  ) {
+    final ProcessResult result = _run(command);
     if (result.exitCode != 0) {
       _reportFailureAndExit(result, explanation);
     }
@@ -43,7 +43,7 @@ class Git {
     );
   }
 
-  ProcessResult _run(String command, String workingDirectory) {
+  ProcessResult _run(String command) {
     return Process.runSync(
       'git',
       command.split(' '),

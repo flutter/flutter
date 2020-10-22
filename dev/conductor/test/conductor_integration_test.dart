@@ -14,13 +14,12 @@ import './common.dart';
 
 void main() {
   group('test', () {
-    Git git;
     Stdio stdio;
     Platform platform;
     FileSystem fileSystem;
+    const String usageString = 'Usage: flutter conductor.';
 
     setUp(() {
-      git = const Git();
       stdio = VerboseStdio(
         stdout: io.stdout,
         stderr: io.stderr,
@@ -34,7 +33,7 @@ void main() {
       final Repository frameworkFakeUpstream = Repository(
         name: 'framework-fake-upstream',
         upstream: kUpstreamRemote,
-        git: git,
+        git: Git(kUpstreamRemote),
         stdio: stdio,
         platform: platform,
         fileSystem: fileSystem,
@@ -43,7 +42,7 @@ void main() {
       final Repository framework = Repository(
         name: 'framework',
         upstream: frameworkFakeUpstream.directory.path,
-        git: git,
+        git: Git(frameworkFakeUpstream.directory.path),
         stdio: stdio,
         platform: platform,
         fileSystem: fileSystem,
@@ -57,7 +56,7 @@ void main() {
       );
 
       run(
-        usage: 'usage string',
+        usage: usageString,
         argResults: fakeArgResults,
         git: git,
         stdio: stdio,

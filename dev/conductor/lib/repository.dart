@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-//import 'dart:io' as io;
+import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -57,9 +57,21 @@ class Repository {
   Directory get directory => checkouts.childDirectory(name);
 
   Directory get checkouts {
-    // Ensure not a test
-    assert(platform.script.scheme != 'data');
-    final String filePath = platform.script.toFilePath();
+    String filePath;
+    // If a test
+    if (platform.script.scheme == 'data') {
+      final RegExp pattern = RegExp(
+        r'(file:\/\/[^"]*[/\\]conductor[/\\][^"]+\.dart)',
+        multiLine: true,
+      );
+      final Match match = pattern.firstMatch(Uri.decodeFull(platform.script.path));
+      if (match == null) {
+        throw Exception('Cannot determine path of script!');
+      }
+      filePath = Uri.parse(match.group(1)).path;
+    } else {
+      filePath = platform.script.toFilePath();
+    }
     final String checkoutsDirname = fileSystem.path.normalize(
       fileSystem.path.join(
         fileSystem.path.dirname(filePath),
