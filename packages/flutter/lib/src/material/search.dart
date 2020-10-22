@@ -49,7 +49,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [SearchDelegate] to define the content of the search page.
-Future<T> showSearch<T>({
+Future<T?> showSearch<T>({
   required BuildContext context,
   required SearchDelegate<T> delegate,
   String? query = '',
@@ -92,6 +92,7 @@ Future<T> showSearch<T>({
 /// ## Handling emojis and other complex characters
 /// {@macro flutter.widgets.editableText.complexCharacters}
 abstract class SearchDelegate<T> {
+
   /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
   /// [textInputAction].
   ///
@@ -258,8 +259,7 @@ abstract class SearchDelegate<T> {
   ///
   ///  * [showResults] to show the search results.
   void showSuggestions(BuildContext context) {
-    assert(_focusNode != null,
-        '_focusNode must be set by route before showSuggestions is called.');
+    assert(_focusNode != null, '_focusNode must be set by route before showSuggestions is called.');
     _focusNode!.requestFocus();
     _currentBody = _SearchBody.suggestions;
   }
@@ -313,11 +313,9 @@ abstract class SearchDelegate<T> {
 
   final TextEditingController _queryTextController = TextEditingController();
 
-  final ProxyAnimation _proxyAnimation =
-      ProxyAnimation(kAlwaysDismissedAnimation);
+  final ProxyAnimation _proxyAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
 
-  final ValueNotifier<_SearchBody?> _currentBodyNotifier =
-      ValueNotifier<_SearchBody?>(null);
+  final ValueNotifier<_SearchBody?> _currentBodyNotifier = ValueNotifier<_SearchBody?>(null);
 
   _SearchBody? get _currentBody => _currentBodyNotifier.value;
   set _currentBody(_SearchBody? value) {
@@ -401,7 +399,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  void didComplete(T result) {
+  void didComplete(T? result) {
     super.didComplete(result);
     assert(delegate._route == this);
     delegate._route = null;
@@ -463,8 +461,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     if (widget.delegate != oldWidget.delegate) {
       oldWidget.delegate._queryTextController.removeListener(_onQueryChanged);
       widget.delegate._queryTextController.addListener(_onQueryChanged);
-      oldWidget.delegate._currentBodyNotifier
-          .removeListener(_onSearchBodyChanged);
+      oldWidget.delegate._currentBodyNotifier.removeListener(_onSearchBodyChanged);
       widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
       oldWidget.delegate._focusNode = null;
       widget.delegate._focusNode = focusNode;
@@ -472,8 +469,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   }
 
   void _onFocusChanged() {
-    if (focusNode.hasFocus &&
-        widget.delegate._currentBody != _SearchBody.suggestions) {
+    if (focusNode.hasFocus && widget.delegate._currentBody != _SearchBody.suggestions) {
       widget.delegate.showSuggestions(context);
     }
   }
@@ -494,12 +490,12 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    final String searchFieldLabel = widget.delegate.searchFieldLabel ??
-        MaterialLocalizations.of(context)!.searchFieldLabel;
-    final TextStyle? searchFieldStyle = widget.delegate.searchFieldStyle ??
-        theme.inputDecorationTheme.hintStyle;
+    final String searchFieldLabel = widget.delegate.searchFieldLabel
+      ?? MaterialLocalizations.of(context)!.searchFieldLabel;
+    final TextStyle? searchFieldStyle = widget.delegate.searchFieldStyle
+      ?? theme.inputDecorationTheme.hintStyle;
     Widget? body;
-    switch (widget.delegate._currentBody) {
+    switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
         body = KeyedSubtree(
           key: const ValueKey<_SearchBody>(_SearchBody.suggestions),
