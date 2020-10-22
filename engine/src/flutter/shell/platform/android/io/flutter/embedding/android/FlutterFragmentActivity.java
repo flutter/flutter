@@ -646,13 +646,18 @@ public class FlutterFragmentActivity extends FragmentActivity
    *
    * If both preferences are set, the {@code Intent} preference takes priority.
    *
+   * <p>If none is set, the {@link FlutterActivityAndFragmentDelegate} retrieves the initial route
+   * from the {@code Intent} through the Intent.getData() instead.
+   *
    * <p>The reason that a {@code <meta-data>} preference is supported is because this {@code
    * Activity} might be the very first {@code Activity} launched, which means the developer won't
    * have control over the incoming {@code Intent}.
    *
    * <p>Subclasses may override this method to directly control the initial route.
+   *
+   * <p>If this method returns null, the {@link FlutterActivityAndFragmentDelegate} retrieves the
+   * initial route from the {@code Intent} through the Intent.getData() instead.
    */
-  @NonNull
   protected String getInitialRoute() {
     if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE)) {
       return getIntent().getStringExtra(EXTRA_INITIAL_ROUTE);
@@ -664,9 +669,9 @@ public class FlutterFragmentActivity extends FragmentActivity
       Bundle metadata = activityInfo.metaData;
       String desiredInitialRoute =
           metadata != null ? metadata.getString(INITIAL_ROUTE_META_DATA_KEY) : null;
-      return desiredInitialRoute != null ? desiredInitialRoute : DEFAULT_INITIAL_ROUTE;
+      return desiredInitialRoute;
     } catch (PackageManager.NameNotFoundException e) {
-      return DEFAULT_INITIAL_ROUTE;
+      return null;
     }
   }
 
