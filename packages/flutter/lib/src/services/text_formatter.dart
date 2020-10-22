@@ -414,32 +414,19 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// Truncate the given TextEditingValue to maxLength user-perceived
   /// characters.
   ///
-  /// ### Composing text behaviors
-  ///
-  /// The composing range of [value] will be set to [TextRange.empty]
-  /// if [keepComposingRange] is false and the truncated value's length is more
-  /// than [value]'s. Otherwise only the part that exceeds [maxLength]
-  /// will be truncated.
-  ///
   /// See also:
   ///  * [Dart's characters package](https://pub.dev/packages/characters).
   ///  * [Dart's documentation on runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters).
   @visibleForTesting
-  static TextEditingValue truncate(
-    TextEditingValue value,
-    int maxLength, {
-    bool keepComposingRange = false,
-  }) {
+  static TextEditingValue truncate(TextEditingValue value, int maxLength) {
     final CharacterRange iterator = CharacterRange(value.text);
     if (value.text.characters.length > maxLength) {
       iterator.expandNext(maxLength);
     }
     final String truncated = iterator.current;
 
-    final bool shouldKeepComposingRange = keepComposingRange &&
-      !value.composing.isCollapsed &&
-      truncated.length > value.composing.start &&
-      value.composing.start != math.min(value.composing.end, truncated.length);
+    final bool shouldKeepComposingRange = !value.composing.isCollapsed &&
+      truncated.length > math.max(value.composing.start, value.composing.end);
     final TextRange composing = shouldKeepComposingRange
       ? TextRange(
           start: value.composing.start,
@@ -464,8 +451,11 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ) {
     final int? maxLength = this.maxLength;
 
-    if (maxLength == null || maxLength == -1 || newValue.text.characters.length <= maxLength)
+    if (maxLength == null ||
+      maxLength == -1 ||
+      newValue.text.characters.length <= maxLength) {
       return newValue;
+    }
 
     assert(maxLength > 0);
 
@@ -480,11 +470,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
         }
 
         // Enforced to return a truncated value.
-        return truncate(
-          newValue,
-          maxLength,
-          keepComposingRange: oldValue.composing.isValid,
-        );
+        return truncate(newValue, maxLength);
       case MaxLengthEnforcement.allowComposingTextToFinish:
         // If already at the maximum and tried to enter even more, and the old
         // value is not composing, keep the old value.
@@ -495,13 +481,11 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
         // Temporarily exempt `newValue` from the maxLength limit if it has a
         // composing text going and no enforcement to the composing value, until
         // the composing is finished.
-        return newValue.composing.isValid
-            ? newValue
-            : truncate(
-                newValue,
-                maxLength,
-                keepComposingRange: oldValue.composing.isValid,
-              );
+        if (newValue.composing.isValid) {
+          return newValue;
+        }
+
+        return truncate(newValue, maxLength);
     }
   }
 }
