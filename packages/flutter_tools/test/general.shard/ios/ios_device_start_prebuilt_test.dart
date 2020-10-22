@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -17,7 +16,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/ios/fallback_discovery.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
@@ -132,12 +130,6 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
-      vmServiceConnector: (String string, {Log log}) async {
-        throw const io.SocketException(
-          'OS Error: Connection refused, errno = 61, address = localhost, port '
-          '= 58943',
-        );
-      },
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -182,12 +174,6 @@ void main() {
       sdkVersion: '12.4.4',
       processManager: processManager,
       fileSystem: fileSystem,
-      vmServiceConnector: (String string, {Log log}) async {
-        throw const io.SocketException(
-          'OS Error: Connection refused, errno = 61, address = localhost, port '
-              '= 58943',
-        );
-      },
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -231,12 +217,6 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
-      vmServiceConnector: (String string, {Log log}) async {
-        throw const io.SocketException(
-          'OS Error: Connection refused, errno = 61, address = localhost, port '
-          '= 58943',
-        );
-      },
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -359,12 +339,6 @@ void main() {
       sdkVersion: '13.3',
       processManager: processManager,
       fileSystem: fileSystem,
-      vmServiceConnector: (String string, {Log log}) async {
-        throw const io.SocketException(
-          'OS Error: Connection refused, errno = 61, address = localhost, port '
-          '= 58943',
-        );
-      },
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -438,12 +412,6 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       fileSystem: fileSystem,
       iosDeploy: mockIOSDeploy,
-      vmServiceConnector: (String string, {Log log}) async {
-        throw const io.SocketException(
-          'OS Error: Connection refused, errno = 61, address = localhost, port '
-          '= 58943',
-        );
-      },
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -474,7 +442,6 @@ IOSDevice setUpIOSDevice({
   FileSystem fileSystem,
   Logger logger,
   ProcessManager processManager,
-  VmServiceConnector vmServiceConnector,
   IOSDeploy iosDeploy,
 }) {
   final Artifacts artifacts = Artifacts.test();
@@ -490,7 +457,6 @@ IOSDevice setUpIOSDevice({
     ],
   );
 
-  vmServiceConnector ??= (String uri, {Log log}) async => MockVmService();
   return IOSDevice('123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
@@ -514,7 +480,6 @@ IOSDevice setUpIOSDevice({
     ),
     cpuArchitecture: DarwinArch.arm64,
     interfaceType: IOSDeviceInterface.usb,
-    vmServiceConnectUri: vmServiceConnector,
   );
 }
 

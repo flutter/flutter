@@ -350,7 +350,6 @@ IOSDevice setUpIOSDevice({
     ),
     cpuArchitecture: DarwinArch.arm64,
     interfaceType: IOSDeviceInterface.usb,
-    vmServiceConnectUri: (String string, {Log log}) async => MockVmService(),
   );
 }
 
