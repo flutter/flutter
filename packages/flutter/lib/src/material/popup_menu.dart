@@ -848,7 +848,6 @@ Future<T?> showMenu<T>({
   assert(captureInheritedThemes != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  String? label = semanticLabel;
   switch (Theme.of(context)!.platform) {
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
@@ -857,7 +856,7 @@ Future<T?> showMenu<T>({
     case TargetPlatform.fuchsia:
     case TargetPlatform.linux:
     case TargetPlatform.windows:
-      label ??= MaterialLocalizations.of(context).popupMenuLabel;
+      semanticLabel ??= MaterialLocalizations.of(context).popupMenuLabel;
   }
 
   return Navigator.of(context, rootNavigator: useRootNavigator)!.push(_PopupMenuRoute<T>(
@@ -865,7 +864,7 @@ Future<T?> showMenu<T>({
     items: items,
     initialValue: initialValue,
     elevation: elevation,
-    semanticLabel: label,
+    semanticLabel: semanticLabel,
     theme: Theme.of(context, shadowThemeOnly: true),
     popupMenuTheme: PopupMenuTheme.of(context),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
