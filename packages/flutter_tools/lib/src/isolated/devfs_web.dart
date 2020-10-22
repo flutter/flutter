@@ -9,6 +9,7 @@ import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
+import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
@@ -222,6 +223,10 @@ class WebAssetServer implements AssetReader {
           return innerHandler(request);
         };
       };
+
+      logging.Logger.root.onRecord.listen((logging.LogRecord event) {
+        globals.printTrace('${event.loggerName}: ${event.message}');
+      });
 
       // In debug builds, spin up DWDS and the full asset server.
       final Dwds dwds = await dwdsLauncher(
