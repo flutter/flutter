@@ -178,8 +178,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///   }
 ///
 ///   @override
-///     int get hashCode => hashValues(email, name);
-///   }
+///   int get hashCode => hashValues(email, name);
 /// }
 ///
 /// class AutocompleteCustomTypeExample extends StatelessWidget {
