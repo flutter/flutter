@@ -145,7 +145,7 @@ class TextFormField extends FormField<String> {
     StrutStyle? strutStyle,
     TextDirection? textDirection,
     TextAlign textAlign = TextAlign.start,
-    TextAlignVertical? textAlignVertical,
+    VerticalAlignment? textAlignVertical,
     bool autofocus = false,
     bool readOnly = false,
     ToolbarOptions? toolbarOptions,
