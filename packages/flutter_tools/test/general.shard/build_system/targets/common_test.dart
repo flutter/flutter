@@ -717,7 +717,7 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=8.0',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
