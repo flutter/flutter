@@ -196,8 +196,7 @@ const int kMinColumnWidth = 10;
 ///          [arguments]
 /// ```
 ///
-/// If [columnWidth] is not specified, then the column width will be the
-/// [outputPreferences.wrapColumn], which is set with the --wrap-column option.
+/// [columnWidth] as well as [shouldWrap] have to be provided.
 ///
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// unchanged. If [shouldWrap] is specified, then it overrides the
