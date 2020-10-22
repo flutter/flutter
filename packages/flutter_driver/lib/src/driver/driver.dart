@@ -91,8 +91,8 @@ abstract class FlutterDriver {
   FlutterDriver();
 
   /// Creates a driver that uses a connection provided by either the combination
-  /// of [webConnection], or the combination of [serviceClient],
-  /// [peer] and [appIsolate]
+  /// of [webConnection], or the combination of [serviceClient] and [appIsolate]
+  /// for the VM.
   @visibleForTesting
   factory FlutterDriver.connectedTo({
     FlutterWebConnection webConnection,

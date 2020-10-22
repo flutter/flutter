@@ -28,7 +28,7 @@ import 'timeline.dart';
 /// An implementation of the Flutter Driver over the vmservice protocol.
 class VMServiceFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
-  /// [serviceClient], [_peer] and [appIsolate].
+  /// [serviceClient] and [appIsolate].
   VMServiceFlutterDriver.connectedTo(
     this._serviceClient,
     this._appIsolate, {
