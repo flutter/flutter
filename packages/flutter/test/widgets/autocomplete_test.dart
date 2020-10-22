@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class User {
   const User({
-    this.email,
-    this.name,
+    required this.email,
+    required this.name,
   });
 
   final String email;
@@ -51,10 +49,10 @@ void main() {
     testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
-      Iterable<String> lastOptions;
-      AutocompleteOnSelected<String> lastOnSelected;
-      FocusNode focusNode;
-      TextEditingController textEditingController;
+      late Iterable<String> lastOptions;
+      late AutocompleteOnSelected<String> lastOnSelected;
+      late FocusNode focusNode;
+      late TextEditingController textEditingController;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -66,8 +64,8 @@ void main() {
                 });
               },
               fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-                focusNode ??= fieldFocusNode;
-                textEditingController ??= fieldTextEditingController;
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
                 return TextField(
                   key: fieldKey,
                   focusNode: focusNode,
@@ -135,11 +133,11 @@ void main() {
     testWidgets('can filter and select a list of custom User options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
-      Iterable<User> lastOptions;
-      AutocompleteOnSelected<User> lastOnSelected;
-      User lastUserSelected;
-      FocusNode focusNode;
-      TextEditingController textEditingController;
+      late Iterable<User> lastOptions;
+      late AutocompleteOnSelected<User> lastOnSelected;
+      late User lastUserSelected;
+      late FocusNode focusNode;
+      late TextEditingController textEditingController;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -154,8 +152,8 @@ void main() {
                 lastUserSelected = selected;
               },
               fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-                focusNode ??= fieldFocusNode;
-                textEditingController ??= fieldTextEditingController;
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
                 return TextField(
                   key: fieldKey,
                   focusNode: focusNode,
@@ -213,12 +211,12 @@ void main() {
     testWidgets('can specify a custom display string for a list of custom User options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
-      Iterable<User> lastOptions;
-      AutocompleteOnSelected<User> lastOnSelected;
-      User lastUserSelected;
-      final AutocompleteOptionToString<User> displayStringForOption = (User option) => option.name;
-      FocusNode focusNode;
-      TextEditingController textEditingController;
+      late Iterable<User> lastOptions;
+      late AutocompleteOnSelected<User> lastOnSelected;
+      late User lastUserSelected;
+      late final AutocompleteOptionToString<User> displayStringForOption = (User option) => option.name;
+      late FocusNode focusNode;
+      late TextEditingController textEditingController;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -236,8 +234,8 @@ void main() {
                 lastUserSelected = selected;
               },
               fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-                textEditingController ??= fieldTextEditingController;
-                focusNode ??= fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                focusNode = fieldFocusNode;
                 return TextField(
                   key: fieldKey,
                   focusNode: focusNode,
@@ -296,10 +294,10 @@ void main() {
     testWidgets('onFieldSubmitted selects the first option', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
-      Iterable<String> lastOptions;
-      VoidCallback lastOnFieldSubmitted;
-      FocusNode focusNode;
-      TextEditingController textEditingController;
+      late Iterable<String> lastOptions;
+      late VoidCallback lastOnFieldSubmitted;
+      late FocusNode focusNode;
+      late TextEditingController textEditingController;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -311,8 +309,8 @@ void main() {
                 });
               },
               fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-                textEditingController ??= fieldTextEditingController;
-                focusNode ??= fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                focusNode = fieldFocusNode;
                 lastOnFieldSubmitted = onFieldSubmitted;
                 return TextField(
                   key: fieldKey,
@@ -354,10 +352,10 @@ void main() {
     testWidgets('options follow field when it moves', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
-      StateSetter setState;
+      late StateSetter setState;
       Alignment alignment = Alignment.center;
-      FocusNode focusNode;
-      TextEditingController textEditingController;
+      late FocusNode focusNode;
+      late TextEditingController textEditingController;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -374,8 +372,8 @@ void main() {
                       });
                     },
                     fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-                      focusNode ??= fieldFocusNode;
-                      textEditingController ??= fieldTextEditingController;
+                      focusNode = fieldFocusNode;
+                      textEditingController = fieldTextEditingController;
                       return TextFormField(
                         controller: fieldTextEditingController,
                         focusNode: focusNode,
@@ -428,9 +426,9 @@ void main() {
     testWidgets('can prevent options from showing by returning an empty iterable', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
-      Iterable<String> lastOptions;
-      FocusNode focusNode;
-      TextEditingController textEditingController;
+      late Iterable<String> lastOptions;
+      late FocusNode focusNode;
+      late TextEditingController textEditingController;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -445,8 +443,8 @@ void main() {
                 });
               },
               fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-                focusNode ??= fieldFocusNode;
-                textEditingController ??= fieldTextEditingController;
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
                 return TextField(
                   key: fieldKey,
                   focusNode: focusNode,
