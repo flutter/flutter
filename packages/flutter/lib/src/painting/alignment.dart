@@ -682,6 +682,7 @@ class VerticalAlignment {
 @Deprecated(
   'This class is deprecated.'
   'Use VerticalAlignment instead, which has the same interface.'
+  'This feature was deprecated after 1.24.0-1.0'
 )
 class TextAlignVertical extends VerticalAlignment {
   /// Creates a TextAlignVertical from any y value between -1.0 and 1.0.
