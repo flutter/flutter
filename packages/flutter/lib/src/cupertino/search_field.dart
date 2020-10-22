@@ -198,13 +198,13 @@ class CupertinoSearchTextField extends StatefulWidget {
 
   /// Set the [decoration] property's background color.
   ///
-  /// Can't be set along with the [decorator]. Defaults to the translucent
+  /// Can't be set along with the [decoration]. Defaults to the translucent
   /// [CupertinoColors.tertiarySystemFill] iOS color.
   final Color? backgroundColor;
 
   /// Sets the [decoration] property's border radius.
   ///
-  /// Can't be set along with the [decorator]. Defaults to 9 px circular
+  /// Can't be set along with the [decoration]. Defaults to 9 px circular
   /// corner radius.
   // TODO(DanielEdrisian): Must make border radius continuous, see
   // https://github.com/flutter/flutter/issues/13914.
