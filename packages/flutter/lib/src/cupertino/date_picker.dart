@@ -623,7 +623,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     super.didChangeDependencies();
 
     textDirectionFactor = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
-    localizations = CupertinoLocalizations.of(context)!;
+    localizations = CupertinoLocalizations.of(context);
 
     alignCenterLeft = textDirectionFactor == 1 ? Alignment.centerLeft : Alignment.centerRight;
     alignCenterRight = textDirectionFactor == 1 ? Alignment.centerRight : Alignment.centerLeft;
@@ -1113,7 +1113,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     super.didChangeDependencies();
 
     textDirectionFactor = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
-    localizations = CupertinoLocalizations.of(context)!;
+    localizations = CupertinoLocalizations.of(context);
 
     alignCenterLeft = textDirectionFactor == 1 ? Alignment.centerLeft : Alignment.centerRight;
     alignCenterRight = textDirectionFactor == 1 ? Alignment.centerRight : Alignment.centerLeft;
@@ -1621,7 +1621,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     super.didChangeDependencies();
 
     textDirection = Directionality.of(context)!;
-    localizations = CupertinoLocalizations.of(context)!;
+    localizations = CupertinoLocalizations.of(context);
 
     _measureLabelMetrics();
   }

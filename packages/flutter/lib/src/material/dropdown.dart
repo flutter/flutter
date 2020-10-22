@@ -253,7 +253,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
     // When the menu is dismissed we just fade the entire thing out
     // in the first 0.25s.
     assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final _DropdownRoute<T> route = widget.route;
     final List<Widget> children = <Widget>[
       for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex)
@@ -1216,7 +1216,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       elevation: widget.elevation,
       theme: Theme.of(context, shadowThemeOnly: true),
       style: _textStyle!,
-      barrierLabel: MaterialLocalizations.of(context)!.modalBarrierDismissLabel,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       itemHeight: widget.itemHeight,
       dropdownColor: widget.dropdownColor,
     );
