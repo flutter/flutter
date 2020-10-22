@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -73,7 +71,7 @@ void main() {
           builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                   content: const Text(text),
                   duration: const Duration(seconds: 2),
                   action: SnackBarAction(label: 'ACTION', onPressed: () {}),
@@ -111,7 +109,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                     content: const Text(text),
                     duration: const Duration(seconds: 2),
                     action: SnackBarAction(label: action, onPressed: () {}),
@@ -136,7 +134,7 @@ void main() {
     expect(material.color, snackBarTheme.backgroundColor);
     expect(material.elevation, snackBarTheme.elevation);
     expect(material.shape, snackBarTheme.shape);
-    expect(button.text.style.color, snackBarTheme.actionTextColor);
+    expect(button.text.style!.color, snackBarTheme.actionTextColor);
   });
 
   testWidgets('SnackBar widget properties take priority over theme', (WidgetTester tester) async {
@@ -155,7 +153,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                     backgroundColor: backgroundColor,
                     elevation: elevation,
                     shape: shape,
@@ -185,7 +183,7 @@ void main() {
     expect(material.color, backgroundColor);
     expect(material.elevation, elevation);
     expect(material.shape, shape);
-    expect(button.text.style.color, textColor);
+    expect(button.text.style!.color, textColor);
   });
 
   testWidgets('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {
@@ -202,7 +200,7 @@ void main() {
           builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                   content: const Text('I am a snack bar.'),
                   duration: const Duration(seconds: 2),
                   action: SnackBarAction(label: 'ACTION', onPressed: () {}),
@@ -244,7 +242,7 @@ void main() {
           builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                   content: const Text('I am a snack bar.'),
                   duration: const Duration(seconds: 2),
                   action: SnackBarAction(label: 'ACTION', onPressed: () {}),

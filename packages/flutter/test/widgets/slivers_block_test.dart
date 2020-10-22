@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -61,7 +59,7 @@ void verify(WidgetTester tester, List<Offset> answerKey, String text) {
   expect(testAnswers, equals(answerKey));
   final String foundText =
     tester.widgetList<Text>(find.byType(Text))
-    .map<String>((Text widget) => widget.data)
+    .map<String>((Text widget) => widget.data!)
     .reduce((String value, String element) => value + element);
   expect(foundText, equals(text));
 }

@@ -622,7 +622,7 @@ class _RailDestination extends StatelessWidget {
       style: labelTextStyle,
       child: label,
     );
-    Widget content;
+    final Widget content;
     switch (labelType) {
       case NavigationRailLabelType.none:
         final Widget iconPart = SizedBox(

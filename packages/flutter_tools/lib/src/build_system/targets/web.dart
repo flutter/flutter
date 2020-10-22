@@ -22,9 +22,6 @@ import 'assets.dart';
 import 'common.dart';
 import 'localizations.dart';
 
-/// Whether web builds should call the platform initialization logic.
-const String kInitializePlatform = 'InitializePlatform';
-
 /// Whether the application has web plugins.
 const String kHasWebPlugins = 'HasWebPlugins';
 
@@ -37,7 +34,7 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 const String kCspMode = 'cspMode';
 
 /// The caching strategy to use for service worker generation.
-const String kServiceWorkerStrategy = 'ServiceWorkerStratgey';
+const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
 /// Whether the dart2js build should output source maps.
 const String kSourceMapsEnabled = 'SourceMaps';
@@ -55,7 +52,7 @@ const String kOfflineFirst = 'offline-first';
 const String kNoneWorker = 'none';
 
 /// Convert a [value] into a [ServiceWorkerStrategy].
-ServiceWorkerStrategy _serviceWorkerStrategyfromString(String value) {
+ServiceWorkerStrategy _serviceWorkerStrategyFromString(String value) {
   switch (value) {
     case kNoneWorker:
       return ServiceWorkerStrategy.none;
@@ -89,7 +86,6 @@ class WebEntrypointTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final String targetFile = environment.defines[kTargetFile];
-    final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
     // TODO(jonahwilliams): support configuration of this file.
@@ -137,9 +133,7 @@ import '$mainImport' as entrypoint;
 
 Future<void> main() async {
   registerPlugins(webPluginRegistry);
-  if ($shouldInitializePlatform) {
-    await ui.webOnlyInitializePlatform();
-  }
+  await ui.webOnlyInitializePlatform();
   entrypoint.main();
 }
 ''';
@@ -152,9 +146,7 @@ import 'dart:ui' as ui;
 import '$mainImport' as entrypoint;
 
 Future<void> main() async {
-  if ($shouldInitializePlatform) {
-    await ui.webOnlyInitializePlatform();
-  }
+  await ui.webOnlyInitializePlatform();
   entrypoint.main();
 }
 ''';
@@ -429,7 +421,7 @@ class WebServiceWorker extends Target {
     final File serviceWorkerFile = environment.outputDir
       .childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
-    final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyfromString(
+    final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyFromString(
       environment.defines[kServiceWorkerStrategy],
     );
     final String serviceWorker = generateServiceWorker(

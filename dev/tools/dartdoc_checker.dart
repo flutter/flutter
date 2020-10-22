@@ -56,12 +56,6 @@ void checkForUnresolvedDirectives(String htmlOutputPath) {
         continue;
       }
       canaryFiles.remove(path.basename(entity.path));
-
-      // TODO(goderbauer): Remove this exception when https://github.com/dart-lang/dartdoc/issues/2272 is fixed.
-      if (entity.path.endsWith('-class.html') || entity.path.endsWith('-library.html') ) {
-        continue;
-      }
-
       count += _scanFile(entity);
     } else if (entity is Directory) {
       canaryLibraries.remove(path.basename(entity.path));

@@ -22,9 +22,7 @@ void main() {
     ]);
 
     // Development tools.
-    expect(result.stdout, isNot(contains('ide-config')));
     expect(result.stdout, isNot(contains('update-packages')));
-    expect(result.stdout, isNot(contains('inject-plugins')));
 
     // Deprecated.
     expect(result.stdout, isNot(contains('make-host-app-editable')));
@@ -187,18 +185,17 @@ void main() {
   });
 
   testWithoutContext('will load bootstrap script before starting', () async {
-    final String flutterBin =
-        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
     final File bootstrap = fileSystem.file(fileSystem.path.join(
-        getFlutterRoot(),
-        'bin',
-        'internal',
-        platform.isWindows ? 'bootstrap.bat' : 'bootstrap.sh'));
+      getFlutterRoot(),
+      'bin',
+      'internal',
+      platform.isWindows ? 'bootstrap.bat' : 'bootstrap.sh'),
+    );
 
     try {
       bootstrap.writeAsStringSync('echo TESTING 1 2 3');
-
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
@@ -208,5 +205,35 @@ void main() {
     } finally {
       bootstrap.deleteSync();
     }
+  });
+
+  testWithoutContext('Providing sksl bundle with missing file with tool exit', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'build',
+      'apk',
+      '--bundle-sksl-path=foo/bar/baz.json', // This file does not exist.
+    ], workingDirectory: helloWorld);
+
+    expect(result.exitCode, 1);
+    expect(result.stderr, contains('No SkSL shader bundle found at foo/bar/baz.json'));
+  });
+
+  testWithoutContext('flutter attach does not support --release', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      '--show-test-device',
+      'attach',
+      '--release',
+    ], workingDirectory: helloWorld);
+
+    expect(result.exitCode, isNot(0));
+    expect(result.stderr, contains('Could not find an option named "release"'));
   });
 }

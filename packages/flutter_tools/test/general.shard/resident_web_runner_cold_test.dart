@@ -70,9 +70,9 @@ void main() {
 
   test('Can successfully run and connect without vmservice', () => testbed.run(() async {
     _setupMocks();
-    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
+    final FakeStatusLogger fakeStatusLogger = globals.logger as FakeStatusLogger;
     final MockStatus mockStatus = MockStatus();
-    delegateLogger.status = mockStatus;
+    fakeStatusLogger.status = mockStatus;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -83,7 +83,7 @@ void main() {
     verify(mockStatus.stop()).called(1);
   }, overrides: <Type, Generator>{
     BuildSystem: () => mockBuildSystem,
-    Logger: () => DelegateLogger(BufferLogger(
+    Logger: () => FakeStatusLogger(BufferLogger(
       terminal: AnsiTerminal(
         stdio: null,
         platform: const LocalPlatform(),

@@ -629,7 +629,7 @@ class FlutterErrorDetails with Diagnosticable {
     } else if (exception is num) {
       properties.add(ErrorDescription('The number $exception was $verb.'));
     } else {
-      DiagnosticsNode errorName;
+      final DiagnosticsNode errorName;
       if (exception is AssertionError) {
         errorName = ErrorDescription('assertion');
       } else if (exception is String) {

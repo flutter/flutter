@@ -371,15 +371,17 @@ class _ToolbarRenderBox extends RenderShiftedBox {
     }
 
     final _ToolbarParentData childParentData = child!.parentData! as _ToolbarParentData;
-    context.pushClipPath(
+    _clipPathLayer = context.pushClipPath(
       needsCompositing,
       offset + childParentData.offset,
       Offset.zero & child!.size,
       _clipPath(),
       (PaintingContext innerContext, Offset innerOffset) => innerContext.paintChild(child!, innerOffset),
+      oldLayer: _clipPathLayer
     );
   }
 
+  ClipPathLayer? _clipPathLayer;
   Paint? _debugPaint;
 
   @override
@@ -554,7 +556,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
           handleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,
         );
       // A collapsed handle anchors itself so that it's centered.
-      default:
+      case TextSelectionHandleType.collapsed:
         return Offset(
           handleSize.width / 2,
           textLineHeight + (handleSize.height - textLineHeight) / 2,
@@ -779,7 +781,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     }
     if (slot is IndexedSlot) {
       assert(renderObject.debugValidateChild(child));
-      renderObject.insert(child as RenderBox, after: slot.value?.renderObject as RenderBox);
+      renderObject.insert(child as RenderBox, after: slot.value?.renderObject as RenderBox?);
       return;
     }
     assert(false, 'slot must be _CupertinoTextSelectionToolbarItemsSlot or IndexedSlot');

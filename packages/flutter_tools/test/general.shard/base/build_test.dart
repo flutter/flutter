@@ -16,6 +16,14 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
+const FakeCommand kARMCheckCommand = FakeCommand(
+  command: <String>[
+    'sysctl',
+    'hw.optional.arm64',
+  ],
+  exitCode: 1,
+);
+
 const FakeCommand kSdkPathCommand = FakeCommand(
   command: <String>[
     'xcrun',
@@ -26,7 +34,7 @@ const FakeCommand kSdkPathCommand = FakeCommand(
 );
 
 const List<String> kDefaultClang = <String>[
-  '-miphoneos-version-min=9.0',
+  '-miphoneos-version-min=8.0',
   '-dynamiclib',
   '-Xlinker',
   '-rpath',
@@ -46,7 +54,7 @@ const List<String> kDefaultClang = <String>[
 ];
 
 const List<String> kBitcodeClang = <String>[
-  '-miphoneos-version-min=9.0',
+  '-miphoneos-version-min=8.0',
   '-dynamiclib',
   '-Xlinker',
   '-rpath',
@@ -272,6 +280,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -334,6 +343,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -393,6 +403,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -451,6 +462,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -506,6 +518,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[

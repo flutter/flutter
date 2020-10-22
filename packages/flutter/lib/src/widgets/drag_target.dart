@@ -385,7 +385,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   _DragAvatar<T>? _startDrag(Offset position) {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
       return null;
-    Offset dragStartPoint;
+    final Offset dragStartPoint;
     switch (widget.dragAnchor) {
       case DragAnchor.child:
         final RenderBox renderObject = context.findRenderObject()! as RenderBox;

@@ -249,13 +249,12 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     if (_draggingFeedbackSize == null) {
       return _defaultDropAreaExtent;
     }
-    double dropAreaWithoutMargin;
+    final double dropAreaWithoutMargin;
     switch (widget.scrollDirection) {
       case Axis.horizontal:
         dropAreaWithoutMargin = _draggingFeedbackSize!.width;
         break;
       case Axis.vertical:
-      default:
         dropAreaWithoutMargin = _draggingFeedbackSize!.height;
         break;
     }
@@ -349,7 +348,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       case Axis.horizontal:
         return Row(children: children);
       case Axis.vertical:
-      default:
         return Column(children: children);
     }
   }
@@ -488,13 +486,12 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       }
 
       // Determine the size of the drop area to show under the dragging widget.
-      Widget spacing;
+      final Widget spacing;
       switch (widget.scrollDirection) {
         case Axis.horizontal:
           spacing = SizedBox(width: _dropAreaExtent);
           break;
         case Axis.vertical:
-        default:
           spacing = SizedBox(height: _dropAreaExtent);
           break;
       }
@@ -551,7 +548,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       const Key endWidgetKey = Key('DraggableList - End Widget');
-      Widget finalDropArea;
+      final Widget finalDropArea;
       switch (widget.scrollDirection) {
         case Axis.horizontal:
           finalDropArea = SizedBox(
@@ -561,7 +558,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           );
           break;
         case Axis.vertical:
-        default:
           finalDropArea = SizedBox(
             key: endWidgetKey,
             height: _defaultDropAreaExtent,

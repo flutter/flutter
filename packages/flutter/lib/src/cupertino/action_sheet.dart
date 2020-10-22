@@ -275,7 +275,7 @@ class CupertinoActionSheet extends StatelessWidget {
     ];
 
     final Orientation orientation = MediaQuery.of(context)!.orientation;
-    double actionSheetWidth;
+    final double actionSheetWidth;
     if (orientation == Orientation.portrait) {
       actionSheetWidth = MediaQuery.of(context)!.size.width - (_kEdgeHorizontalPadding * 2);
     } else {

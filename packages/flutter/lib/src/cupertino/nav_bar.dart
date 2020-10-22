@@ -96,13 +96,12 @@ Widget _wrapWithBackground({
   if (updateSystemUiOverlay) {
     final bool isDark = backgroundColor.computeLuminance() < 0.179;
     final Brightness newBrightness = brightness ?? (isDark ? Brightness.dark : Brightness.light);
-    SystemUiOverlayStyle overlayStyle;
+    final SystemUiOverlayStyle overlayStyle;
     switch (newBrightness) {
       case Brightness.dark:
         overlayStyle = SystemUiOverlayStyle.light;
         break;
       case Brightness.light:
-      default:
         overlayStyle = SystemUiOverlayStyle.dark;
         break;
     }
@@ -1380,15 +1379,18 @@ class _BackChevron extends StatelessWidget {
 
     // Replicate the Icon logic here to get a tightly sized icon and add
     // custom non-square padding.
-    Widget iconWidget = Text.rich(
-      TextSpan(
-        text: String.fromCharCode(CupertinoIcons.back.codePoint),
-        style: TextStyle(
-          inherit: false,
-          color: textStyle.color,
-          fontSize: 34.0,
-          fontFamily: CupertinoIcons.back.fontFamily,
-          package: CupertinoIcons.back.fontPackage,
+    Widget iconWidget = Padding(
+      padding: const EdgeInsetsDirectional.only(start: 6, end: 2),
+      child: Text.rich(
+        TextSpan(
+          text: String.fromCharCode(CupertinoIcons.back.codePoint),
+          style: TextStyle(
+            inherit: false,
+            color: textStyle.color,
+            fontSize: 30.0,
+            fontFamily: CupertinoIcons.back.fontFamily,
+            package: CupertinoIcons.back.fontPackage,
+          ),
         ),
       ),
     );
