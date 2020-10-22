@@ -771,14 +771,14 @@ void main() {
     const Color activeEnabledColor = Color(0x00000001);
     const Color activeDisabledColor = Color(0x00000002);
 
-    Color getTextColor(Set<MaterialState> states) {
+    Color getActiveColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return activeDisabledColor;
       }
       return activeEnabledColor;
     }
 
-    final Color activeColor = MaterialStateColor.resolveWith(getTextColor);
+    final Color activeColor = MaterialStateColor.resolveWith(getActiveColor);
 
     Widget buildFrame({required bool enabled}) {
       return Material(
@@ -816,14 +816,14 @@ void main() {
     const Color activeEnabledColor = Color(0x00000001);
     const Color activeDisabledColor = Color(0x00000002);
 
-    Color getTextColor(Set<MaterialState> states) {
+    Color getActiveColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return activeDisabledColor;
       }
       return activeEnabledColor;
     }
 
-    final Color activeColor = MaterialStateColor.resolveWith(getTextColor);
+    final Color activeColor = MaterialStateColor.resolveWith(getActiveColor);
 
     Widget buildFrame({required bool enabled}) {
       return Material(
