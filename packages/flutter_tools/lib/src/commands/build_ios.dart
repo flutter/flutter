@@ -102,7 +102,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       final FileSystemEntityType type = globals.fs.typeSync(exportOptionsPlist);
       if (type == FileSystemEntityType.notFound) {
         throwToolExit(
-            '"$exportOptionsPlist" property list does not exist. See "man xcodebuild" for available keys.');
+            '"$exportOptionsPlist" property list does not exist.');
       } else if (type != FileSystemEntityType.file) {
         throwToolExit(
             '"$exportOptionsPlist" is not a file. See "xcodebuild -h" for available keys.');
