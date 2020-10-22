@@ -103,7 +103,7 @@ void main() {
     expect(localizations.licensesPackageDetailText(100).contains(r'$licensesCount'), isFalse);
   });
 
-  testWidgets('CupertinoLocalizations.of throws', (WidgetTester tester) async {
+  testWidgets('MaterialLocalizations.of throws', (WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
@@ -119,11 +119,11 @@ void main() {
     );
 
     expect(() => MaterialLocalizations.of(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
-          (AssertionError e) => e.message,
+      (AssertionError e) => e.message,
       'message',
-      contains('No CupertinoLocalizations found'),
+      contains('No MaterialLocalizations found'),
     )));
 
-    expect(MaterialLocalizations.of(localizationsAvailable.currentContext!), isTrue);
+    expect(MaterialLocalizations.of(localizationsAvailable.currentContext!), isA<MaterialLocalizations>());
   });
 }

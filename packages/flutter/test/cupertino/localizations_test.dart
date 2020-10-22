@@ -54,6 +54,6 @@ void main() {
       contains('No CupertinoLocalizations found'),
     )));
 
-    expect(CupertinoLocalizations.of(localizationsAvailable.currentContext!), isTrue);
+    expect(CupertinoLocalizations.of(localizationsAvailable.currentContext!), isA<CupertinoLocalizations>());
   });
 }
