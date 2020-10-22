@@ -425,6 +425,18 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesWebRendererOption() {
+    argParser.addOption('web-renderer',
+      defaultsTo: 'html',
+      allowed: <String>['auto', 'canvaskit', 'html'],
+      help: 'Experimental. Which rendering backend to use for Flutter Web.'
+          'auto      - Use the HTML renderer on mobile devices,'
+          '            and CanvasKit on desktop devices. '
+          'canvaskit - Always use the CanvasK it renderer.'
+          'html      - Default. Always use the HTML renderer.',
+    );
+  }
+
   void usesDeviceUserOption() {
     argParser.addOption(FlutterOptions.kDeviceUser,
       help: 'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',

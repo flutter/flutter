@@ -29,6 +29,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
     usesDartDefineOption();
     usesFlavorOption();
+    usesWebRendererOption();
     argParser
       ..addFlag('trace-startup',
         negatable: false,
@@ -560,6 +561,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: createDebuggingOptions(),
         stayResident: stayResident,
         urlTunneller: null,
+        webRenderer: stringArg('web-renderer'),
       );
     } else {
       runner = ColdRunner(

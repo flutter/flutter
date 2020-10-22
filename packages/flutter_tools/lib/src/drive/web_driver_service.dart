@@ -60,6 +60,7 @@ class WebDriverService extends DriverService {
       stayResident: false,
       urlTunneller: null,
       flutterProject: FlutterProject.current(),
+      webRenderer: platformArgs['web-renderer'] as String,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
     final int result = await _residentRunner.run(

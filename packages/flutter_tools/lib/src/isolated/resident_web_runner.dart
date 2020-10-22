@@ -52,6 +52,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required DebuggingOptions debuggingOptions,
     @required UrlTunneller urlTunneller,
     bool machine = false,
+    @required String webRenderer,
   }) {
     return _ResidentWebRunner(
       device,
@@ -62,6 +63,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       stayResident: stayResident,
       urlTunneller: urlTunneller,
       machine: machine,
+      webRenderer: webRenderer,
     );
   }
 }
@@ -80,6 +82,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
     bool machine = false,
+    @required this.webRenderer,
   }) : super(
           <FlutterDevice>[device],
           target: target ?? globals.fs.path.join('lib', 'main.dart'),
@@ -92,6 +95,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
   FlutterDevice get device => flutterDevices.first;
   final FlutterProject flutterProject;
   DateTime firstBuildTime;
+  final String webRenderer;
 
   // Used with the new compiler to generate a bootstrap file containing plugins
   // and platform initialization.
@@ -440,6 +444,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     bool stayResident = true,
     @required this.urlTunneller,
     bool machine = false,
+    @required String webRenderer,
   }) : super(
           device,
           flutterProject: flutterProject,
@@ -448,6 +453,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           ipv6: ipv6,
           stayResident: stayResident,
           machine: machine,
+          webRenderer: webRenderer,
         );
 
   final UrlTunneller urlTunneller;
@@ -494,6 +500,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
 
     try {
       return await asyncGuard(() async {
+        if (debuggingOptions.buildInfo.isDebug) {
+          final List<String> dartDefines = updateDartDefines(
+              debuggingOptions.buildInfo.dartDefines, webRenderer);
+          debuggingOptions.buildInfo.dartDefines.clear();
+          debuggingOptions.buildInfo.dartDefines.addAll(dartDefines);
+        }
+
         final ExpressionCompiler expressionCompiler =
           debuggingOptions.webEnableExpressionEvaluation
               ? WebExpressionCompiler(device.generator)
@@ -531,6 +544,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             false,
             kNoneWorker,
             true,
+            webRenderer,
           );
         }
         await device.device.startApp(
@@ -598,6 +612,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           false,
           kNoneWorker,
           true,
+          webRenderer,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -851,6 +866,10 @@ class _ResidentWebRunner extends ResidentWebRunner {
   @override
   Future<bool> toggleCanvaskit() async {
     final WebDevFS webDevFS = device.devFS as WebDevFS;
+    if (webDevFS.webAssetServer.autoDetect) {
+      globals.logger.printStatus('Unable to toggle Canvaskit because it is in auto detect mode.');
+      return webDevFS.webAssetServer.canvasKitRendering;
+    }
     webDevFS.webAssetServer.canvasKitRendering = !webDevFS.webAssetServer.canvasKitRendering;
     await _wipConnection?.sendCommand('Page.reload');
     return webDevFS.webAssetServer.canvasKitRendering;

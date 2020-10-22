@@ -359,7 +359,7 @@ class WebAssetServer implements AssetReader {
     // Attempt to look up the file by URI.
     final String webServerPath = requestPath.replaceFirst('.dart.js', '.dart.lib.js');
     if (_files.containsKey(requestPath) || _files.containsKey(webServerPath)) {
-      final List<int> bytes = getFile(requestPath)  ?? getFile(webServerPath);
+      final List<int> bytes = getFile(requestPath) ?? getFile(webServerPath);
       // Use the underlying buffer hashCode as a revision string. This buffer is
       // replaced whenever the frontend_server produces new output files, which
       // will also change the hashCode.
@@ -549,6 +549,9 @@ class WebAssetServer implements AssetReader {
     return modules;
   }
 
+  /// Whether to automatically detect which rendering backend to use.
+  bool autoDetect = false;
+
   /// Whether to use the canvaskit SDK for rendering.
   bool canvasKitRendering = false;
 
@@ -572,28 +575,56 @@ class WebAssetServer implements AssetReader {
   // Attempt to resolve `path` to a dart file.
   File _resolveDartFile(String path) {
     // Return the actual file objects so that local engine changes are automatically picked up.
-    switch (path) {
-      case 'dart_sdk.js':
-        if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-          return globals.fs.file(canvasKitRendering
-            ? globals.artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSdk)
-            : globals.artifacts.getArtifactPath(Artifact.webPrecompiledSdk));
-        } else {
-          return globals.fs.file(canvasKitRendering
-            ? globals.artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdk)
-            : globals.artifacts.getArtifactPath(Artifact.webPrecompiledSoundSdk));
-        }
-        break;
-      case 'dart_sdk.js.map':
-        if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-          return globals.fs.file(canvasKitRendering
-            ? globals.artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSdkSourcemaps)
-            : globals.artifacts.getArtifactPath(Artifact.webPrecompiledSdkSourcemaps));
-        } else {
-          return globals.fs.file(canvasKitRendering
-            ? globals.artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps)
-            : globals.artifacts.getArtifactPath(Artifact.webPrecompiledSoundSdkSourcemaps));
-        }
+    if (autoDetect) {
+      switch (path) {
+        case 'dart_sdk.js':
+          return globals.fs.file(
+              _buildInfo.nullSafetyMode == NullSafetyMode.unsound
+              ? globals.artifacts.getArtifactPath(
+              Artifact.webPrecompiledCanvaskitAndHtmlSdk)
+              : globals.artifacts.getArtifactPath(
+              Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk));
+          break;
+        case 'dart_sdk.js.map':
+            return globals.fs.file(
+            _buildInfo.nullSafetyMode == NullSafetyMode.unsound
+            ? globals.artifacts.getArtifactPath(
+            Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps)
+            : globals.artifacts.getArtifactPath(
+            Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps));
+      }
+    } else {
+      switch (path) {
+        case 'dart_sdk.js':
+          if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
+            return globals.fs.file(canvasKitRendering
+                ? globals.artifacts.getArtifactPath(
+                Artifact.webPrecompiledCanvaskitSdk)
+                : globals.artifacts.getArtifactPath(
+                Artifact.webPrecompiledSdk));
+          } else {
+            return globals.fs.file(canvasKitRendering
+                ? globals.artifacts.getArtifactPath(
+                Artifact.webPrecompiledCanvaskitSoundSdk)
+                : globals.artifacts.getArtifactPath(
+                Artifact.webPrecompiledSoundSdk));
+          }
+          break;
+        case 'dart_sdk.js.map':
+          if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
+            return globals.fs.file(canvasKitRendering
+                ? globals.artifacts.getArtifactPath(
+                Artifact.webPrecompiledCanvaskitSdkSourcemaps)
+                : globals.artifacts.getArtifactPath(
+                Artifact.webPrecompiledSdkSourcemaps));
+          } else {
+            return globals.fs.file(canvasKitRendering
+                ? globals.artifacts.getArtifactPath(
+                Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps)
+                : globals.artifacts.getArtifactPath(
+                Artifact.webPrecompiledSoundSdkSourcemaps));
+          }
+      }
     }
     // This is the special generated entrypoint.
     if (path == 'web_entrypoint.dart') {
@@ -779,8 +810,12 @@ class WebDevFS implements DevFS {
       expressionCompiler,
       testMode: testMode,
     );
-    if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
-      webAssetServer.canvasKitRendering = true;
+    if (buildInfo.dartDefines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
+      webAssetServer.autoDetect = true;
+    } else {
+      if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
+        webAssetServer.canvasKitRendering = true;
+      }
     }
     if (hostname == 'any') {
       _baseUri = Uri.http('localhost:$port', '');
