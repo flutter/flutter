@@ -680,8 +680,7 @@ class VerticalAlignment {
 ///  * [InputDecorator.textAlignVertical], which defines the alignment of
 ///    prefix, input, and suffix within an [InputDecorator].
 @Deprecated(
-  'This class is deprecated.'
-  'Use VerticalAlignment instead, which has the same interface.'
+  'This class is deprecated. Use VerticalAlignment instead, which has the same interface.'
   'This feature was deprecated after 1.24.0-1.0'
 )
 class TextAlignVertical extends VerticalAlignment {
