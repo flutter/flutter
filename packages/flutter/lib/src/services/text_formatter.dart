@@ -425,22 +425,18 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     }
     final String truncated = iterator.current;
 
-    final bool shouldKeepComposingRange = !value.composing.isCollapsed &&
-      truncated.length > math.max(value.composing.start, value.composing.end);
-    final TextRange composing = shouldKeepComposingRange
-      ? TextRange(
-          start: value.composing.start,
-          end: math.min(value.composing.end, truncated.length),
-        )
-      : TextRange.empty;
-
     return TextEditingValue(
       text: truncated,
       selection: value.selection.copyWith(
         baseOffset: math.min(value.selection.start, truncated.length),
         extentOffset: math.min(value.selection.end, truncated.length),
       ),
-      composing: composing,
+      composing: !value.composing.isCollapsed && truncated.length > value.composing.start
+        ? TextRange(
+            start: value.composing.start,
+            end: math.min(value.composing.end, truncated.length),
+          )
+        : TextRange.empty,
     );
   }
 
