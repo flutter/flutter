@@ -491,7 +491,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   Future<void> _forceRebuild() {
-    print('renderViewElement $renderViewElement');
     if (renderViewElement != null) {
       buildOwner!.reassemble(renderViewElement!);
       return endOfFrame;
