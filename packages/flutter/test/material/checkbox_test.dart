@@ -766,6 +766,65 @@ void main() {
 
     await tester.pumpAndSettle();
   });
+
+//  testWidgets('Checkbox active disabled color can be set using a stateful color', (WidgetTester tester) async {
+//    const Color activeEnabledColor = Color(0x00000001);
+//    const Color activeDisabledColor = Color(0x00000002);
+//    const Color inactiveEnabledColor = Color(0x00000003);
+//    const Color inactiveDisabledColor = Color(0x00000004);
+//
+//    Color getTextColor(Set<MaterialState> states) {
+//      if (states.contains(MaterialState.disabled)) {
+//        return states.contains(MaterialState.selected)
+//             ? activeDisabledColor
+//             : inactiveDisabledColor;
+//      }
+//      return states.contains(MaterialState.selected)
+//           ? activeEnabledColor
+//           : inactiveEnabledColor;
+//    }
+//
+//    final Color activeColor = MaterialStateColor.resolveWith(getTextColor);
+//
+//    Widget buildFrame({required bool enabled, required bool active}) {
+//      return Material(
+//        child: Theme(
+//          data: ThemeData(),
+//          child: StatefulBuilder(
+//            builder: (BuildContext context, StateSetter setState) {
+//              return Checkbox(
+//                value: active,
+//                activeColor: activeColor,
+//                onChanged: enabled ? (bool? value) { } : null,
+//              );
+//            },
+//          ),
+//        ),
+//      );
+//    }
+//
+//    RenderToggleable getCheckboxRenderer() {
+//      return tester.renderObject<RenderToggleable>(find.byWidgetPredicate((Widget widget) {
+//        return widget.runtimeType.toString() == '_CheckboxRenderObjectWidget';
+//      }));
+//    }
+//
+//    await tester.pumpWidget(buildFrame(enabled: true, active: true));
+//    await tester.pumpAndSettle();
+//    expect(getCheckboxRenderer(), paints..rrect(color: activeEnabledColor));
+//
+//    await tester.pumpWidget(buildFrame(enabled: true, active: false));
+//    await tester.pumpAndSettle();
+//    expect(getCheckboxRenderer(), paints..rrect(color: inactiveEnabledColor));
+//
+//    await tester.pumpWidget(buildFrame(enabled: false, active: true));
+//    await tester.pumpAndSettle();
+//    expect(getCheckboxRenderer(), paints..rrect(color: activeDisabledColor));
+//
+//    await tester.pumpWidget(buildFrame(enabled: false, active: false));
+//    await tester.pumpAndSettle();
+//    expect(getCheckboxRenderer(), paints..rrect(color: inactiveDisabledColor));
+//  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
