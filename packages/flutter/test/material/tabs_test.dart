@@ -2771,6 +2771,52 @@ void main() {
     await tester.pump();
     expect(tabController.animation!.value, pageController.page);
   });
+
+  testWidgets('Does not instantiate intermediate tabs during animation', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/14316.
+    final List<String> log = <String>[];
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 5,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: <Widget>[
+                Tab(text: 'car'),
+                Tab(text: 'transit'),
+                Tab(text: 'bike'),
+                Tab(text: 'boat'),
+                Tab(text: 'bus'),
+              ],
+            ),
+            title: const Text('Tabs Test'),
+          ),
+          body: TabBarView(
+            children: <Widget>[
+              TabBody(index: 0, log: log),
+              TabBody(index: 1, log: log),
+              TabBody(index: 2, log: log),
+              TabBody(index: 3, log: log),
+              TabBody(index: 4, log: log),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('3'), findsNothing);
+    expect(log, <String>['init: 0']);
+
+    await tester.tap(find.text('boat'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('0'), findsNothing);
+    expect(find.text('3'), findsOneWidget);
+
+    // No other tab got instantiated during the animation.
+    expect(log, <String>['init: 0', 'init: 3', 'dispose: 0']);
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
@@ -2826,3 +2872,41 @@ class TabBarDemo extends StatelessWidget {
 }
 
 class MockScrollMetrics extends Fake implements ScrollMetrics {}
+
+class TabBody extends StatefulWidget {
+  const TabBody({ Key? key, required this.index, required this.log }) : super(key: key);
+
+  final int index;
+  final List<String> log;
+
+  @override
+  State<TabBody> createState() => TabBodyState();
+}
+
+class TabBodyState extends State<TabBody> {
+  @override
+  void initState() {
+    widget.log.add('init: ${widget.index}');
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(TabBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // To keep the logging straight, widgets must not change their index.
+    assert(oldWidget.index == widget.index);
+  }
+
+  @override
+  void dispose() {
+    widget.log.add('dispose: ${widget.index}');
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('${widget.index}'),
+    );
+  }
+}

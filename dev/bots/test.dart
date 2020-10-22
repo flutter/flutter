@@ -129,6 +129,13 @@ Future<void> main(List<String> args) async {
   print('$clock ${bold}Test successful.$reset');
 }
 
+/// Returns whether or not macOS desktop tests should be run.
+///
+/// The branch restrictions here should stay in sync with features.dart.
+bool _shouldRunMacOS() {
+  return Platform.isMacOS && (branchName != 'beta' && branchName != 'stable');
+}
+
 /// Verify the Flutter Engine is the revision in
 /// bin/cache/internal/engine.version.
 Future<void> _validateEngineHash() async {
@@ -308,22 +315,12 @@ Future<void> _runToolTests() async {
       final String suffix = Platform.isWindows && subshard == 'commands'
         ? 'permeable'
         : '';
-      // Try out tester on unit test shard
-      if (subshard == 'general') {
-        await _pubRunTester(
-          toolsPath,
-          testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
-          // Detect unit test time regressions (poor time delay handling, etc).
-          perTestTimeout: (subshard == 'general') ? 15 : null,
-        );
-      } else {
-        await _pubRunTest(
-          toolsPath,
-          forceSingleCore: true,
-          testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
-          enableFlutterToolAsserts: true,
-        );
-      }
+      await _pubRunTest(
+        toolsPath,
+        forceSingleCore: subshard != 'general',
+        testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
+        enableFlutterToolAsserts: subshard != 'general',
+      );
     },
   );
 
@@ -340,13 +337,12 @@ Future<void> _runBuildTests() async {
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
 
-  final String branch = Platform.environment['CIRRUS_BRANCH'];
   // The tests are randomly distributed into subshards so as to get a uniform
   // distribution of costs, but the seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
     for (final FileSystemEntity exampleDirectory in exampleDirectories)
         () => _runExampleProjectBuildTests(exampleDirectory),
-    if (branch != 'beta' && branch != 'stable')
+    if (branchName != 'beta' && branchName != 'stable')
       ...<ShardRunner>[
         // Web compilation tests.
           () =>  _flutterBuildDart2js(
@@ -389,6 +385,14 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
     }
   }
+  if (_shouldRunMacOS()) {
+    if (Directory(path.join(examplePath, 'macos')).existsSync()) {
+      await _flutterBuildMacOS(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+      await _flutterBuildMacOS(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+    } else {
+      print('Example project ${path.basename(examplePath)} has no macos directory, skipping macOS');
+    }
+  }
 }
 
 Future<void> _flutterBuildApk(String relativePathToApplication, {
@@ -397,43 +401,11 @@ Future<void> _flutterBuildApk(String relativePathToApplication, {
   List<String> additionalArgs = const <String>[],
 }) async {
   print('${green}Testing APK build$reset for $cyan$relativePathToApplication$reset...');
-  await runCommand(flutter,
-    <String>[
-      'build',
-      'apk',
-      ...additionalArgs,
-      if (release)
-        '--release'
-      else
-        '--debug',
-      '-v',
-    ],
-    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+  await _flutterBuild(relativePathToApplication, 'APK', 'apk',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
   );
-
-  if (verifyCaching) {
-    print('${green}Testing APK cache$reset for $cyan$relativePathToApplication$reset...');
-    await runCommand(flutter,
-      <String>[
-        'build',
-        'apk',
-        '--performance-measurement-file=perf.json',
-        ...additionalArgs,
-        if (release)
-          '--release'
-        else
-          '--debug',
-        '-v',
-      ],
-      workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    );
-    final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
-    if (!_allTargetsCached(file)) {
-      print('${red}Not all build targets cached after second run.$reset');
-      print('The target performance data was: ${file.readAsStringSync()}');
-      exit(1);
-    }
-  }
 }
 
 Future<void> _flutterBuildIpa(String relativePathToApplication, {
@@ -455,12 +427,41 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
       },
     );
   }
+  await _flutterBuild(relativePathToApplication, 'IPA', 'ios',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: <String>[...additionalArgs, '--no-codesign'],
+  );
+}
+
+Future<void> _flutterBuildMacOS(String relativePathToApplication, {
+  @required bool release,
+  bool verifyCaching = false,
+  List<String> additionalArgs = const <String>[],
+}) async {
+  assert(Platform.isMacOS);
+  await runCommand(flutter, <String>['config', '--enable-macos-desktop']);
+  print('${green}Testing macOS build$reset for $cyan$relativePathToApplication$reset...');
+  await _flutterBuild(relativePathToApplication, 'macOS', 'macos',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
+  );
+}
+
+Future<void> _flutterBuild(
+  String relativePathToApplication,
+  String platformLabel,
+  String platformBuildName, {
+  @required bool release,
+  bool verifyCaching = false,
+  List<String> additionalArgs = const <String>[],
+}) async {
   await runCommand(flutter,
     <String>[
       'build',
-      'ios',
+      platformBuildName,
       ...additionalArgs,
-      '--no-codesign',
       if (release)
         '--release'
       else
@@ -469,15 +470,15 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
     ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
+
   if (verifyCaching) {
-    print('${green}Testing IPA cache$reset for $cyan$relativePathToApplication$reset...');
+    print('${green}Testing $platformLabel cache$reset for $cyan$relativePathToApplication$reset...');
     await runCommand(flutter,
       <String>[
         'build',
-        'ios',
+        platformBuildName,
         '--performance-measurement-file=perf.json',
         ...additionalArgs,
-        '--no-codesign',
         if (release)
           '--release'
         else
@@ -614,7 +615,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata, options: mixedModeNullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
@@ -930,68 +931,6 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
       'FLUTTER_WEB': 'true',
       'FLUTTER_LOW_RESOURCE_MODE': 'true',
     },
-  );
-}
-
-const String _supportedTesterVersion = '0.0.2-dev7';
-
-Future<void> _pubRunTester(String workingDirectory, {
-  List<String> testPaths,
-  bool forceSingleCore = false,
-  int perTestTimeout,
-}) async {
-  int cpus;
-  final String cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
-  if (cpuVariable != null) {
-    cpus = int.tryParse(cpuVariable, radix: 10);
-    if (cpus == null) {
-      print('${red}The CPU environment variable, if set, must be set to the integer number of available cores.$reset');
-      print('Actual value: "$cpuVariable"');
-      exit(1);
-    }
-  } else {
-    cpus = 2; // Don't default to 1, otherwise we won't catch race conditions.
-  }
-  // Integration tests that depend on external processes like chrome
-  // can get stuck if there are multiple instances running at once.
-  if (forceSingleCore) {
-    cpus = 1;
-  }
-  final List<String> args = <String>[
-    'global',
-    'activate',
-    'tester',
-    _supportedTesterVersion
-  ];
-  final Map<String, String> pubEnvironment = <String, String>{
-    'FLUTTER_ROOT': flutterRoot,
-  };
-  if (Directory(pubCache).existsSync()) {
-    pubEnvironment['PUB_CACHE'] = pubCache;
-  }
-  await runCommand(
-    pub,
-    args,
-    workingDirectory: workingDirectory,
-    environment: pubEnvironment,
-  );
-  await runCommand(
-    pub,
-    <String>[
-      'global',
-      'run',
-      'tester',
-      '-j$cpus',
-      '-v',
-      '--ci',
-      if (perTestTimeout != null)
-        '--timeout=$perTestTimeout'
-      else
-        '--timeout=-1',
-      ...testPaths,
-    ],
-    workingDirectory: workingDirectory,
-    environment: pubEnvironment,
   );
 }
 
@@ -1319,6 +1258,17 @@ String get gitHash {
       return Platform.environment['CIRRUS_CHANGE_IN_REPO'];
     case CiProviders.luci:
       return 'HEAD'; // TODO(dnfield): Set this in the env for LUCI.
+  }
+  return '';
+}
+
+/// Returns the name of the branch being tested.
+String get branchName {
+  switch(ciProvider) {
+    case CiProviders.cirrus:
+      return Platform.environment['CIRRUS_BRANCH'];
+    case CiProviders.luci:
+      return Platform.environment['LUCI_BRANCH'];
   }
   return '';
 }
