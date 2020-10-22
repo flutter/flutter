@@ -160,6 +160,7 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
   }
 
   if (!runtime_controller_->LaunchRootIsolate(
+          settings_,                                 //
           configuration.GetEntrypoint(),             //
           configuration.GetEntrypointLibrary(),      //
           configuration.TakeIsolateConfiguration())  //
