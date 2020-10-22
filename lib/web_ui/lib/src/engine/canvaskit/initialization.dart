@@ -5,8 +5,40 @@
 // @dart = 2.10
 part of engine;
 
-/// EXPERIMENTAL: Enable the Skia-based rendering backend.
-const bool experimentalUseSkia =
+/// A JavaScript entrypoint that allows developer to set rendering backend
+/// at runtime before launching the application.
+@JS('window.flutterWebRenderer')
+external String? get requestedRendererType;
+
+/// Whether to use CanvasKit as the rendering backend.
+bool get useCanvasKit =>
+    _autoDetect ? _detectRenderer() : _useSkia;
+
+/// Returns true if CanvasKit is used.
+///
+/// Otherwise, returns false.
+bool _detectRenderer() {
+  if (requestedRendererType != null) {
+    return requestedRendererType! == 'canvaskit';
+  }
+  // If requestedRendererType is not specified, use CanvasKit for desktop and
+  // html for mobile.
+  return isDesktop;
+}
+
+/// Auto detect which rendering backend to use.
+///
+/// Using flutter tools option "--web-render=auto" would set the value to true.
+/// Otherwise, it would be false.
+const bool _autoDetect =
+    bool.fromEnvironment('FLUTTER_WEB_AUTO_DETECT', defaultValue: false);
+
+/// Enable the Skia-based rendering backend.
+///
+/// Using flutter tools option "--web-render=canvaskit" would set the value to
+/// true.
+/// Using flutter tools option "--web-render=html" would set the value to false.
+const bool _useSkia =
     bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
 
 // If set to true, forces CPU-only rendering (i.e. no WebGL).

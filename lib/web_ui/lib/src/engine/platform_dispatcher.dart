@@ -377,7 +377,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         return;
 
       case 'flutter/platform_views':
-        if (experimentalUseSkia) {
+        if (useCanvasKit) {
           rasterizer!.surface.viewEmbedder
               .handlePlatformViewCall(data, callback);
         } else {
@@ -482,7 +482,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///    painting.
   @override
   void render(ui.Scene scene, [ui.FlutterView? view]) {
-    if (experimentalUseSkia) {
+    if (useCanvasKit) {
       // "Build finish" and "raster start" happen back-to-back because we
       // render on the same thread, so there's no overhead from hopping to
       // another thread.
@@ -839,7 +839,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   @visibleForTesting
   late Rasterizer? rasterizer =
-      experimentalUseSkia ? Rasterizer(Surface(HtmlViewEmbedder())) : null;
+      useCanvasKit ? Rasterizer(Surface(HtmlViewEmbedder())) : null;
 
   /// In Flutter, platform messages are exchanged between threads so the
   /// messages and responses have to be exchanged asynchronously. We simulate

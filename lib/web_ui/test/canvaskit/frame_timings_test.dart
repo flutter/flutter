@@ -22,7 +22,7 @@ void testMain() {
     });
 
     test('Using CanvasKit', () {
-      expect(experimentalUseSkia, true);
+      expect(useCanvasKit, true);
     });
 
     test('collects frame timings', () async {
