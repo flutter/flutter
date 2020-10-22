@@ -461,18 +461,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
     assert(() {
       registerBoolServiceExtension(
-        name: 'invertOversizedImages',
-        getter: () async => debugInvertOversizedImages,
-        setter: (bool value) async {
-          if (debugInvertOversizedImages != value) {
-            debugInvertOversizedImages = value;
-            return _forceRebuild();
-          }
-          return Future<void>.value();
-        },
-      );
-
-      registerBoolServiceExtension(
         name: 'debugAllowBanner',
         getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
         setter: (bool value) {
@@ -503,6 +491,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   Future<void> _forceRebuild() {
+    print('renderViewElement $renderViewElement');
     if (renderViewElement != null) {
       buildOwner!.reassemble(renderViewElement!);
       return endOfFrame;
