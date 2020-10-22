@@ -129,6 +129,13 @@ Future<void> main(List<String> args) async {
   print('$clock ${bold}Test successful.$reset');
 }
 
+/// Returns whether or not macOS desktop tests should be run.
+///
+/// The branch restrictions here should stay in sync with features.dart.
+bool _shouldRunMacOS() {
+  return Platform.isMacOS && (branchName != 'beta' && branchName != 'stable');
+}
+
 /// Verify the Flutter Engine is the revision in
 /// bin/cache/internal/engine.version.
 Future<void> _validateEngineHash() async {
@@ -330,13 +337,12 @@ Future<void> _runBuildTests() async {
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
 
-  final String branch = Platform.environment['CIRRUS_BRANCH'];
   // The tests are randomly distributed into subshards so as to get a uniform
   // distribution of costs, but the seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
     for (final FileSystemEntity exampleDirectory in exampleDirectories)
         () => _runExampleProjectBuildTests(exampleDirectory),
-    if (branch != 'beta' && branch != 'stable')
+    if (branchName != 'beta' && branchName != 'stable')
       ...<ShardRunner>[
         // Web compilation tests.
           () =>  _flutterBuildDart2js(
@@ -379,6 +385,14 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
     }
   }
+  if (_shouldRunMacOS()) {
+    if (Directory(path.join(examplePath, 'macos')).existsSync()) {
+      await _flutterBuildMacOS(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+      await _flutterBuildMacOS(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+    } else {
+      print('Example project ${path.basename(examplePath)} has no macos directory, skipping macOS');
+    }
+  }
 }
 
 Future<void> _flutterBuildApk(String relativePathToApplication, {
@@ -387,43 +401,11 @@ Future<void> _flutterBuildApk(String relativePathToApplication, {
   List<String> additionalArgs = const <String>[],
 }) async {
   print('${green}Testing APK build$reset for $cyan$relativePathToApplication$reset...');
-  await runCommand(flutter,
-    <String>[
-      'build',
-      'apk',
-      ...additionalArgs,
-      if (release)
-        '--release'
-      else
-        '--debug',
-      '-v',
-    ],
-    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+  await _flutterBuild(relativePathToApplication, 'APK', 'apk',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
   );
-
-  if (verifyCaching) {
-    print('${green}Testing APK cache$reset for $cyan$relativePathToApplication$reset...');
-    await runCommand(flutter,
-      <String>[
-        'build',
-        'apk',
-        '--performance-measurement-file=perf.json',
-        ...additionalArgs,
-        if (release)
-          '--release'
-        else
-          '--debug',
-        '-v',
-      ],
-      workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    );
-    final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
-    if (!_allTargetsCached(file)) {
-      print('${red}Not all build targets cached after second run.$reset');
-      print('The target performance data was: ${file.readAsStringSync()}');
-      exit(1);
-    }
-  }
 }
 
 Future<void> _flutterBuildIpa(String relativePathToApplication, {
@@ -445,12 +427,41 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
       },
     );
   }
+  await _flutterBuild(relativePathToApplication, 'IPA', 'ios',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: <String>[...additionalArgs, '--no-codesign'],
+  );
+}
+
+Future<void> _flutterBuildMacOS(String relativePathToApplication, {
+  @required bool release,
+  bool verifyCaching = false,
+  List<String> additionalArgs = const <String>[],
+}) async {
+  assert(Platform.isMacOS);
+  await runCommand(flutter, <String>['config', '--enable-macos-desktop']);
+  print('${green}Testing macOS build$reset for $cyan$relativePathToApplication$reset...');
+  await _flutterBuild(relativePathToApplication, 'macOS', 'macos',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
+  );
+}
+
+Future<void> _flutterBuild(
+  String relativePathToApplication,
+  String platformLabel,
+  String platformBuildName, {
+  @required bool release,
+  bool verifyCaching = false,
+  List<String> additionalArgs = const <String>[],
+}) async {
   await runCommand(flutter,
     <String>[
       'build',
-      'ios',
+      platformBuildName,
       ...additionalArgs,
-      '--no-codesign',
       if (release)
         '--release'
       else
@@ -459,15 +470,15 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
     ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
+
   if (verifyCaching) {
-    print('${green}Testing IPA cache$reset for $cyan$relativePathToApplication$reset...');
+    print('${green}Testing $platformLabel cache$reset for $cyan$relativePathToApplication$reset...');
     await runCommand(flutter,
       <String>[
         'build',
-        'ios',
+        platformBuildName,
         '--performance-measurement-file=perf.json',
         ...additionalArgs,
-        '--no-codesign',
         if (release)
           '--release'
         else
@@ -1247,6 +1258,17 @@ String get gitHash {
       return Platform.environment['CIRRUS_CHANGE_IN_REPO'];
     case CiProviders.luci:
       return 'HEAD'; // TODO(dnfield): Set this in the env for LUCI.
+  }
+  return '';
+}
+
+/// Returns the name of the branch being tested.
+String get branchName {
+  switch(ciProvider) {
+    case CiProviders.cirrus:
+      return Platform.environment['CIRRUS_BRANCH'];
+    case CiProviders.luci:
+      return Platform.environment['LUCI_BRANCH'];
   }
   return '';
 }
