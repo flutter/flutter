@@ -1037,10 +1037,10 @@ abstract class RouteInformationParser<T> {
 /// widget upon asked.
 ///
 /// When implementing subclass, consider defining a listenable app state to be
-/// used for building the navigating widget. The router delegate should update
-/// the app state accordingly and notify the listener know the app state has
-/// changed when it receive route related engine intents (e.g.
-/// [setNewRoutePath], [setInitialRoutePath], or [popRoute]).
+/// used for building the navigating widget. When the router delegate receives
+/// route related engine intents (e.g. [setNewRoutePath], [setInitialRoutePath],
+/// or [popRoute]), it should update the app state accordingly and notify the
+/// listener that the app state has changed.
 ///
 /// All subclass must implement [setNewRoutePath], [popRoute], and [build].
 ///
