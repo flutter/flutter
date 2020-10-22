@@ -681,7 +681,7 @@ class VerticalAlignment {
 ///    prefix, input, and suffix within an [InputDecorator].
 @Deprecated(
   'This class is deprecated. Use VerticalAlignment instead, which has the same interface. '
-  'This feature was deprecated after v1.24.0-1.0.pre'
+  'This feature was deprecated after v1.24.0-1.0.pre.'
 )
 class TextAlignVertical extends VerticalAlignment {
   /// Creates a TextAlignVertical from any y value between -1.0 and 1.0.
