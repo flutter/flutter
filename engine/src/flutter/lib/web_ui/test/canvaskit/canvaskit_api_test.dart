@@ -25,7 +25,7 @@ void testMain() {
     });
 
     test('Using CanvasKit', () {
-      expect(experimentalUseSkia, true);
+      expect(useCanvasKit, true);
     });
 
     _blendModeTests();

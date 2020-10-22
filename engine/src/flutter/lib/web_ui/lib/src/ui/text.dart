@@ -254,7 +254,7 @@ abstract class TextStyle {
     List<Shadow>? shadows,
     List<FontFeature>? fontFeatures,
   }) {
-    if (engine.experimentalUseSkia) {
+    if (engine.useCanvasKit) {
       return engine.CkTextStyle(
         color: color,
         decoration: decoration,
@@ -318,7 +318,7 @@ abstract class ParagraphStyle {
     String? ellipsis,
     Locale? locale,
   }) {
-    if (engine.experimentalUseSkia) {
+    if (engine.useCanvasKit) {
       return engine.CkParagraphStyle(
         textAlign: textAlign,
         textDirection: textDirection,
@@ -585,7 +585,7 @@ abstract class Paragraph {
 
 abstract class ParagraphBuilder {
   factory ParagraphBuilder(ParagraphStyle style) {
-    if (engine.experimentalUseSkia) {
+    if (engine.useCanvasKit) {
       return engine.CkParagraphBuilder(style);
     } else {
       return engine.EngineParagraphBuilder(style as engine.EngineParagraphStyle);
@@ -608,7 +608,7 @@ abstract class ParagraphBuilder {
 }
 
 Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) {
-  if (engine.experimentalUseSkia) {
+  if (engine.useCanvasKit) {
     return engine.skiaFontCollection.loadFontFromList(list, fontFamily: fontFamily).then(
       (_) => engine.sendFontChangeMessage()
     );

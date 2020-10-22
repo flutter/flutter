@@ -216,7 +216,7 @@ class GradientRadial extends EngineGradient {
   @override
   Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds) {
-    if (!experimentalUseSkia) {
+    if (!useCanvasKit) {
       if (tileMode != ui.TileMode.clamp) {
         throw UnimplementedError(
             'TileMode not supported in GradientRadial shader');
