@@ -21,7 +21,7 @@ Widget buildInputDecorator({
   bool isFocused = false,
   bool isHovering = false,
   TextStyle baseStyle,
-  TextAlignVertical textAlignVertical,
+  VerticalAlignment textAlignVertical,
   VisualDensity visualDensity,
   bool fixTextFieldOutlineLabel = false,
   Widget child = const Text(
@@ -1735,7 +1735,7 @@ void main() {
             decoration: const InputDecoration(
               filled: true,
             ),
-            textAlignVertical: TextAlignVertical.top, // default when no border
+            textAlignVertical: VerticalAlignment.top, // default when no border
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -1758,7 +1758,7 @@ void main() {
             decoration: const InputDecoration(
               filled: true,
             ),
-            textAlignVertical: TextAlignVertical.center,
+            textAlignVertical: VerticalAlignment.center,
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -1781,7 +1781,7 @@ void main() {
             decoration: const InputDecoration(
               filled: true,
             ),
-            textAlignVertical: TextAlignVertical.bottom,
+            textAlignVertical: VerticalAlignment.bottom,
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -1804,7 +1804,7 @@ void main() {
             decoration: const InputDecoration(
               filled: true,
             ),
-            textAlignVertical: const TextAlignVertical(y: 0.75),
+            textAlignVertical: const VerticalAlignment(y: 0.75),
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -1830,7 +1830,7 @@ void main() {
               filled: true,
               border: OutlineInputBorder(),
             ),
-            textAlignVertical: TextAlignVertical.top,
+            textAlignVertical: VerticalAlignment.top,
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -1855,7 +1855,7 @@ void main() {
               filled: true,
               border: OutlineInputBorder(),
             ),
-            textAlignVertical: TextAlignVertical.center, // default when border
+            textAlignVertical: VerticalAlignment.center, // default when border
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -1879,7 +1879,7 @@ void main() {
               filled: true,
               border: OutlineInputBorder(),
             ),
-            textAlignVertical: TextAlignVertical.bottom,
+            textAlignVertical: VerticalAlignment.bottom,
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -1909,7 +1909,7 @@ void main() {
               ),
               filled: true,
             ),
-            textAlignVertical: TextAlignVertical.top, // default when no border
+            textAlignVertical: VerticalAlignment.top, // default when no border
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -1938,7 +1938,7 @@ void main() {
               ),
               filled: true,
             ),
-            textAlignVertical: TextAlignVertical.center,
+            textAlignVertical: VerticalAlignment.center,
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -1967,7 +1967,7 @@ void main() {
               ),
               filled: true,
             ),
-            textAlignVertical: TextAlignVertical.bottom,
+            textAlignVertical: VerticalAlignment.bottom,
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -2000,7 +2000,7 @@ void main() {
               ),
               filled: true,
             ),
-            textAlignVertical: TextAlignVertical.center, // default when border
+            textAlignVertical: VerticalAlignment.center, // default when border
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -2031,7 +2031,7 @@ void main() {
               ),
               filled: true,
             ),
-            textAlignVertical: TextAlignVertical.top,
+            textAlignVertical: VerticalAlignment.top,
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -2064,7 +2064,7 @@ void main() {
               ),
               filled: true,
             ),
-            textAlignVertical: TextAlignVertical.bottom,
+            textAlignVertical: VerticalAlignment.bottom,
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -2095,7 +2095,7 @@ void main() {
               ),
               filled: true,
             ),
-            textAlignVertical: const TextAlignVertical(y: 0.1),
+            textAlignVertical: const VerticalAlignment(y: 0.1),
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -2122,7 +2122,7 @@ void main() {
               labelText: 'label',
               filled: true,
             ),
-            textAlignVertical: TextAlignVertical.top, // default
+            textAlignVertical: VerticalAlignment.top, // default
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -2147,7 +2147,7 @@ void main() {
               labelText: 'label',
               filled: true,
             ),
-            textAlignVertical: TextAlignVertical.center,
+            textAlignVertical: VerticalAlignment.center,
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -2172,7 +2172,7 @@ void main() {
               labelText: 'label',
               filled: true,
             ),
-            textAlignVertical: TextAlignVertical.bottom,
+            textAlignVertical: VerticalAlignment.bottom,
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
@@ -2290,7 +2290,7 @@ void main() {
         await tester.pumpWidget(
           buildInputDecorator(
             expands: true,
-            textAlignVertical: TextAlignVertical.top,
+            textAlignVertical: VerticalAlignment.top,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.fromLTRB(
@@ -2313,7 +2313,7 @@ void main() {
         await tester.pumpWidget(
           buildInputDecorator(
             expands: true,
-            textAlignVertical: TextAlignVertical.center,
+            textAlignVertical: VerticalAlignment.center,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.fromLTRB(
@@ -2336,7 +2336,7 @@ void main() {
         await tester.pumpWidget(
           buildInputDecorator(
             expands: true,
-            textAlignVertical: TextAlignVertical.bottom,
+            textAlignVertical: VerticalAlignment.bottom,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.fromLTRB(
@@ -2359,7 +2359,7 @@ void main() {
         await tester.pumpWidget(
           buildInputDecorator(
             expands: true,
-            textAlignVertical: TextAlignVertical.top,
+            textAlignVertical: VerticalAlignment.top,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.fromLTRB(
@@ -4140,7 +4140,7 @@ void main() {
   testWidgets('textAlignVertical can be updated', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/56933
     const String hintText = 'hint';
-    TextAlignVertical alignment = TextAlignVertical.top;
+    VerticalAlignment alignment = VerticalAlignment.top;
     StateSetter setState;
     await tester.pumpWidget(
       MaterialApp(
@@ -4161,7 +4161,7 @@ void main() {
     final double topPosition = tester.getTopLeft(find.text(hintText)).dy;
 
     setState(() {
-      alignment = TextAlignVertical.bottom;
+      alignment = VerticalAlignment.bottom;
     });
     await tester.pump();
 

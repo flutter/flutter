@@ -3476,7 +3476,7 @@ void main() {
                   width: size.width,
                   height: size.height,
                   child: CupertinoTextField(
-                    textAlignVertical: TextAlignVertical.center,
+                    textAlignVertical: VerticalAlignment.center,
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
@@ -3524,7 +3524,7 @@ void main() {
                   width: size.width,
                   height: size.height,
                   child: CupertinoTextField(
-                    textAlignVertical: TextAlignVertical.bottom,
+                    textAlignVertical: VerticalAlignment.bottom,
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
@@ -3572,7 +3572,7 @@ void main() {
                   width: size.width,
                   height: size.height,
                   child: CupertinoTextField(
-                    textAlignVertical: const TextAlignVertical(y: 0.75),
+                    textAlignVertical: const VerticalAlignment(y: 0.75),
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
@@ -3674,7 +3674,7 @@ void main() {
                   width: size.width,
                   height: size.height,
                   child: CupertinoTextField(
-                    textAlignVertical: TextAlignVertical.top,
+                    textAlignVertical: VerticalAlignment.top,
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
@@ -3728,7 +3728,7 @@ void main() {
                   width: size.width,
                   height: size.height,
                   child: CupertinoTextField(
-                    textAlignVertical: TextAlignVertical.bottom,
+                    textAlignVertical: VerticalAlignment.bottom,
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
@@ -3782,7 +3782,7 @@ void main() {
                   width: size.width,
                   height: size.height,
                   child: CupertinoTextField(
-                    textAlignVertical: const TextAlignVertical(y: 0.75),
+                    textAlignVertical: const VerticalAlignment(y: 0.75),
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
