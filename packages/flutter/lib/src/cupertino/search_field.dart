@@ -52,7 +52,7 @@ import 'text_field.dart';
 /// [onSubmitted] parameters in order to be notified once the value of the
 /// field changes or is submitted by the keyboard:
 ///
-/// /// {@tool snippet}
+/// {@tool snippet}
 ///
 /// ```dart
 ///   @override
