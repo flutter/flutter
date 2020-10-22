@@ -726,8 +726,8 @@ class _RenderCupertinoDialog extends RenderBox {
     final double maxContentHeight = contentSection!.getMaxIntrinsicHeight(_dialogWidth);
     final double maxActionsHeight = actionsSection!.getMaxIntrinsicHeight(_dialogWidth);
 
-    Size contentSize;
-    Size actionsSize;
+    final Size contentSize;
+    final Size actionsSize;
     if (maxContentHeight + dividerThickness + maxActionsHeight > constraints.maxHeight) {
       // There isn't enough room for everything. Following iOS's accessibility dialog
       // layout policy, first we allow the actions to take up to 50% of the dialog
@@ -1435,7 +1435,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    double minHeight;
+    final double minHeight;
     if (childCount == 0) {
       minHeight = 0.0;
     } else if (childCount == 1) {
@@ -1459,7 +1459,7 @@ class _RenderCupertinoDialogActions extends RenderBox
   double _computeMinIntrinsicHeightSideBySide(double width) {
     assert(childCount >= 1 && childCount <= 2);
 
-    double minHeight;
+    final double minHeight;
     if (childCount == 1) {
       minHeight = firstChild!.getMinIntrinsicHeight(width);
     } else {
@@ -1484,7 +1484,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    double maxHeight;
+    final double maxHeight;
     if (childCount == 0) {
       // No buttons. Zero height.
       maxHeight = 0.0;
@@ -1530,7 +1530,7 @@ class _RenderCupertinoDialogActions extends RenderBox
   }
 
   bool _isSingleButtonRow(double width) {
-    bool isSingleButtonRow;
+    final bool isSingleButtonRow;
     if (childCount == 1) {
       isSingleButtonRow = true;
     } else if (childCount == 2) {

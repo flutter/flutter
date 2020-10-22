@@ -371,7 +371,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       ),
     );
 
-    Size minSize;
+    final Size minSize;
     switch (resolvedTapTargetSize!) {
       case MaterialTapTargetSize.padded:
         minSize = Size(

@@ -1319,28 +1319,28 @@ void main() {
       final Finder animatedModalBarrier = find.byType(AnimatedModalBarrier);
       expect(animatedModalBarrier, findsOneWidget);
 
-      Animation<Color> modalBarrierAnimation;
+      Animation<Color?> modalBarrierAnimation;
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(modalBarrierAnimation.value, Colors.transparent);
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
+        modalBarrierAnimation.value!.alpha,
         closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
+        modalBarrierAnimation.value!.alpha,
         closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
+        modalBarrierAnimation.value!.alpha,
         closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 
@@ -1382,28 +1382,28 @@ void main() {
       final Finder animatedModalBarrier = find.byType(AnimatedModalBarrier);
       expect(animatedModalBarrier, findsOneWidget);
 
-      Animation<Color> modalBarrierAnimation;
+      Animation<Color?> modalBarrierAnimation;
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(modalBarrierAnimation.value, Colors.transparent);
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
+        modalBarrierAnimation.value!.alpha,
         closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
+        modalBarrierAnimation.value!.alpha,
         closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
+        modalBarrierAnimation.value!.alpha,
         closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 

@@ -67,7 +67,7 @@ enum CocoaPodsStatus {
   brokenInstall,
 }
 
-/// Cocoapods is a depenency management solution for iOS and macOS applications.
+/// Cocoapods is a dependency management solution for iOS and macOS applications.
 ///
 /// Cocoapods is generally installed via ruby gems and interacted with via
 /// the `pod` CLI command.
@@ -83,15 +83,13 @@ class CocoaPods {
     @required XcodeProjectInterpreter xcodeProjectInterpreter,
     @required Logger logger,
     @required Platform platform,
-    @required TimeoutConfiguration timeoutConfiguration,
   }) : _fileSystem = fileSystem,
       _processManager = processManager,
       _xcodeProjectInterpreter = xcodeProjectInterpreter,
       _logger = logger,
       _platform = platform,
       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-      _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
-      _timeoutConfiguration = timeoutConfiguration;
+      _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
 
   final FileSystem _fileSystem;
   final ProcessManager _processManager;
@@ -100,7 +98,6 @@ class CocoaPods {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Logger _logger;
   final Platform _platform;
-  final TimeoutConfiguration _timeoutConfiguration;
 
   Future<String> _versionText;
 
@@ -342,7 +339,7 @@ class CocoaPods {
   }
 
   Future<void> _runPodInstall(XcodeBasedProject xcodeProject, String engineDirectory) async {
-    final Status status = _logger.startProgress('Running pod install...', timeout: _timeoutConfiguration.slowOperation);
+    final Status status = _logger.startProgress('Running pod install...');
     final ProcessResult result = await _processManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: _fileSystem.path.dirname(xcodeProject.podfile.path),

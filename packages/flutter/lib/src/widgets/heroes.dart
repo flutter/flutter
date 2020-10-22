@@ -300,7 +300,7 @@ class Hero extends StatefulWidget {
           // the Hero is inside a nested Navigator and should only be
           // considered for animation if it is part of the top-most route in
           // that nested Navigator and if that route is also a PageRoute.
-          final ModalRoute<Object>? heroRoute = ModalRoute.of(hero);
+          final ModalRoute<Object?>? heroRoute = ModalRoute.of(hero);
           if (heroRoute != null && heroRoute is PageRoute && heroRoute.isCurrent) {
             inviteHero(hero, tag);
           }

@@ -122,7 +122,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
 
   @override
   bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
-    bool result;
+    final bool result;
     switch (key) {
       case ModifierKey.controlModifier:
         result = _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);

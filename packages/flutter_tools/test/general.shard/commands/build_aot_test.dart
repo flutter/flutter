@@ -116,14 +116,14 @@ void main() {
       .thenAnswer((Invocation invocation) async {
         return BuildResult(success: true, performance: <String, PerformanceMeasurement>{
           'kernel_snapshot': PerformanceMeasurement(
-            analyicsName: 'kernel_snapshot',
+            analyticsName: 'kernel_snapshot',
             target: 'kernel_snapshot',
             elapsedMilliseconds: 1000,
             succeeded: true,
             skipped: false,
           ),
           'anything': PerformanceMeasurement(
-            analyicsName: 'android_aot',
+            analyticsName: 'android_aot',
             target: 'anything',
             elapsedMilliseconds: 1000,
             succeeded: true,

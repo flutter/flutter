@@ -26,7 +26,7 @@ typedef ShardRunner = Future<void> Function();
 ///
 /// If the output does not match expectations, the function shall return an
 /// appropriate error message.
-typedef OutputChecker = String Function(CapturedOutput);
+typedef OutputChecker = String Function(CommandResult);
 
 final String exe = Platform.isWindows ? '.exe' : '';
 final String bat = Platform.isWindows ? '.bat' : '';
@@ -143,9 +143,8 @@ Future<void> _validateEngineHash() async {
     return;
   }
   final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
-  final CapturedOutput flutterTesterOutput = CapturedOutput();
-  await runCommand(flutterTester, <String>['--help'], output: flutterTesterOutput, outputMode: OutputMode.capture);
-  final String actualVersion = flutterTesterOutput.stderr.split('\n').firstWhere((final String line) {
+  final CommandResult result = await runCommand(flutterTester, <String>['--help'], outputMode: OutputMode.capture);
+  final String actualVersion = result.flattenedStderr.split('\n').firstWhere((final String line) {
     return line.startsWith('Flutter Engine Version:');
   });
   if (!actualVersion.contains(expectedVersion)) {
@@ -190,8 +189,8 @@ Future<void> _runSmokeTests() async {
     script: path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
     expectFailure: true,
     printOutput: false,
-    outputChecker: (CapturedOutput output) {
-      return output.stdout.contains('failingPendingTimerTest')
+    outputChecker: (CommandResult result) {
+      return result.flattenedStdout.contains('failingPendingTimerTest')
         ? null
         : 'Failed to find the stack trace for the pending Timer.';
     }
@@ -230,7 +229,7 @@ Future<void> _runSmokeTests() async {
         <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
         workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
         expectNonZeroExit: true,
-        outputMode: OutputMode.discard,
+        outputMode: OutputMode.capture,
       ),
     ],
   );
@@ -287,7 +286,7 @@ Future<void> _runToolCoverage() async {
       '--report-on=lib/'
     ],
     workingDirectory: toolRoot,
-    outputMode: OutputMode.discard,
+    outputMode: OutputMode.capture,
   );
 }
 
@@ -529,7 +528,8 @@ Future<void> _runAddToAppLifeCycleTests() async {
 
 Future<void> _runFrameworkTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
-  final List<String> nullSafetyOptions = <String>['--null-assertions', '--no-sound-null-safety'];
+  final List<String> soundNullSafetyOptions     = <String>['--enable-experiment=non-nullable', '--null-assertions', '--sound-null-safety'];
+  final List<String> mixedModeNullSafetyOptions = <String>['--enable-experiment=non-nullable', '--null-assertions', '--no-sound-null-safety'];
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
@@ -537,7 +537,7 @@ Future<void> _runFrameworkTests() async {
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
       await _runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
-        options: <String>[trackWidgetCreationOption, ...nullSafetyOptions],
+        options: <String>[trackWidgetCreationOption, ...soundNullSafetyOptions],
         tableData: bigqueryApi?.tabledata,
         tests: <String>[ path.join('test', 'widgets') + path.separator ],
       );
@@ -563,7 +563,7 @@ Future<void> _runFrameworkTests() async {
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
       await _runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
-        options: <String>[trackWidgetCreationOption, ...nullSafetyOptions],
+        options: <String>[trackWidgetCreationOption, ...soundNullSafetyOptions],
         tableData: bigqueryApi?.tabledata,
         tests: tests,
       );
@@ -614,14 +614,14 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata, options: mixedModeNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata, options: nullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: nullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: mixedModeNullSafetyOptions);
     await _runFlutterTest(
       path.join(flutterRoot, 'dev', 'tracing_tests'),
       options: <String>['--enable-vmservice'],
@@ -642,11 +642,11 @@ Future<void> _runFrameworkTests() async {
       script: path.join('test', 'bindings_test_failure.dart'),
       expectFailure: true,
       printOutput: false,
-      outputChecker: (CapturedOutput output) {
-        final Iterable<Match> matches = httpClientWarning.allMatches(output.stdout);
+      outputChecker: (CommandResult result) {
+        final Iterable<Match> matches = httpClientWarning.allMatches(result.flattenedStdout);
         if (matches == null || matches.isEmpty || matches.length > 1) {
           return 'Failed to print warning about HttpClientUsage, or printed it too many times.\n'
-                 'stdout:\n${output.stdout}';
+                 'stdout:\n${result.flattenedStdout}';
         }
         return null;
       },
@@ -868,9 +868,8 @@ Future<void> _runWebDebugTest(String target, {
   List<String> additionalArguments = const<String>[],
 }) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
-  final CapturedOutput output = CapturedOutput();
   bool success = false;
-  await runCommand(
+  final CommandResult result = await runCommand(
     flutter,
     <String>[
       'run',
@@ -889,7 +888,6 @@ Future<void> _runWebDebugTest(String target, {
       '-t',
       target,
     ],
-    output: output,
     outputMode: OutputMode.capture,
     outputListener: (String line, Process process) {
       if (line.contains('--- TEST SUCCEEDED ---')) {
@@ -908,7 +906,8 @@ Future<void> _runWebDebugTest(String target, {
   if (success) {
     print('${green}Web stack trace integration test passed.$reset');
   } else {
-    print(output.stdout);
+    print(result.flattenedStdout);
+    print(result.flattenedStderr);
     print('${red}Web stack trace integration test failed.$reset');
     exit(1);
   }
@@ -1125,29 +1124,22 @@ Future<void> _runFlutterTest(String workingDirectory, {
   args.addAll(tests);
 
   if (!shouldProcessOutput) {
-    OutputMode outputMode = OutputMode.discard;
-    CapturedOutput output;
+    final OutputMode outputMode = outputChecker == null && printOutput
+      ? OutputMode.print
+      : OutputMode.capture;
 
-    if (outputChecker != null) {
-      outputMode = OutputMode.capture;
-      output = CapturedOutput();
-    } else if (printOutput) {
-      outputMode = OutputMode.print;
-    }
-
-    await runCommand(
+    final CommandResult result = await runCommand(
       flutter,
       args,
       workingDirectory: workingDirectory,
       expectNonZeroExit: expectFailure,
       outputMode: outputMode,
-      output: output,
       skip: skip,
       environment: environment,
     );
 
     if (outputChecker != null) {
-      final String message = outputChecker(output);
+      final String message = outputChecker(result);
       if (message != null)
         exitWithError(<String>[message]);
     }

@@ -37,7 +37,7 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 const String kCspMode = 'cspMode';
 
 /// The caching strategy to use for service worker generation.
-const String kServiceWorkerStrategy = 'ServiceWorkerStratgey';
+const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
 /// Whether the dart2js build should output source maps.
 const String kSourceMapsEnabled = 'SourceMaps';
@@ -55,7 +55,7 @@ const String kOfflineFirst = 'offline-first';
 const String kNoneWorker = 'none';
 
 /// Convert a [value] into a [ServiceWorkerStrategy].
-ServiceWorkerStrategy _serviceWorkerStrategyfromString(String value) {
+ServiceWorkerStrategy _serviceWorkerStrategyFromString(String value) {
   switch (value) {
     case kNoneWorker:
       return ServiceWorkerStrategy.none;
@@ -429,7 +429,7 @@ class WebServiceWorker extends Target {
     final File serviceWorkerFile = environment.outputDir
       .childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
-    final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyfromString(
+    final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyFromString(
       environment.defines[kServiceWorkerStrategy],
     );
     final String serviceWorker = generateServiceWorker(

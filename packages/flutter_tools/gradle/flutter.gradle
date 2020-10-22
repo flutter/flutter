@@ -893,11 +893,7 @@ abstract class BaseFlutterTask extends DefaultTask {
         // cache.
         String[] ruleNames;
         if (buildMode == "debug") {
-            if (fastStart) {
-                ruleNames = ["faststart_android_application"]
-            } else {
-                ruleNames = ["debug_android_application"]
-            }
+            ruleNames = ["debug_android_application"]
         } else {
             ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
         }

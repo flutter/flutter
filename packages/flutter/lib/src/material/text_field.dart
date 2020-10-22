@@ -1092,12 +1092,12 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
 
-    TextSelectionControls textSelectionControls;
-    bool paintCursorAboveText;
-    bool cursorOpacityAnimates;
+    final TextSelectionControls textSelectionControls;
+    final bool paintCursorAboveText;
+    final bool cursorOpacityAnimates;
     Offset? cursorOffset;
     Color? cursorColor = widget.cursorColor;
-    Color selectionColor;
+    final Color selectionColor;
     Color? autocorrectionTextRectColor;
     Radius? cursorRadius = widget.cursorRadius;
 

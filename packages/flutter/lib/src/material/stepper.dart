@@ -394,8 +394,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     if (widget.controlsBuilder != null)
       return widget.controlsBuilder!(context, onStepContinue: widget.onStepContinue, onStepCancel: widget.onStepCancel);
 
-    Color cancelColor;
-
+    final Color cancelColor;
     switch (Theme.of(context)!.brightness) {
       case Brightness.light:
         cancelColor = Colors.black54;
@@ -404,8 +403,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         cancelColor = Colors.white70;
         break;
     }
-
-    assert(cancelColor != null);
 
     final ThemeData themeData = Theme.of(context)!;
     final ColorScheme colorScheme = themeData.colorScheme;

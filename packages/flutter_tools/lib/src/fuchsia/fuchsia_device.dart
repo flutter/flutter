@@ -320,7 +320,7 @@ class FuchsiaDevice extends Device {
       }
       packageRepo.createSync(recursive: true);
     } on Exception catch (e) {
-      globals.printError('Failed to create Fuchisa package repo directory '
+      globals.printError('Failed to create Fuchsia package repo directory '
                  'at ${packageRepo.path}: $e');
       return LaunchResult.failed();
     }
@@ -328,7 +328,6 @@ class FuchsiaDevice extends Device {
     final String appName = FlutterProject.current().manifest.appName;
     final Status status = globals.logger.startProgress(
       'Starting Fuchsia application $appName...',
-      timeout: null,
     );
     FuchsiaPackageServer fuchsiaPackageServer;
     bool serverRegistered = false;
@@ -440,7 +439,7 @@ class FuchsiaDevice extends Device {
     }
 
     if (debuggingOptions.buildInfo.mode.isRelease) {
-      globals.printTrace('App succesfully started in a release mode.');
+      globals.printTrace('App successfully started in a release mode.');
       return LaunchResult.succeeded();
     }
     globals.printTrace('App started in a non-release mode. Setting up vmservice connection.');
@@ -657,7 +656,7 @@ class FuchsiaDevice extends Device {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
-    return await processUtils.run(<String>[
+    return await globals.processUtils.run(<String>[
       'ssh',
       '-F',
       globals.fuchsiaArtifacts.sshConfig.absolute.path,
@@ -672,7 +671,7 @@ class FuchsiaDevice extends Device {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
-    return await processUtils.run(<String>[
+    return await globals.processUtils.run(<String>[
       'scp',
       '-F',
       globals.fuchsiaArtifacts.sshConfig.absolute.path,
@@ -756,7 +755,6 @@ class FuchsiaIsolateDiscoveryProtocol {
     }
     _status ??= globals.logger.startProgress(
       'Waiting for a connection from $_isolateName on ${_device.name}...',
-      timeout: null, // could take an arbitrary amount of time
     );
     unawaited(_findIsolate());  // Completes the _foundUri Future.
     return _foundUri.future.then((Uri uri) {

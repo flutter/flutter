@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -15,10 +13,10 @@ import 'semantics_tester.dart';
 
 class TestScrollPosition extends ScrollPositionWithSingleContext {
   TestScrollPosition({
-    ScrollPhysics physics,
-    ScrollContext state,
+    required ScrollPhysics physics,
+    required ScrollContext state,
     double initialPixels = 0.0,
-    ScrollPosition oldPosition,
+    ScrollPosition? oldPosition,
   }) : super(
     physics: physics,
     context: state,
@@ -29,7 +27,7 @@ class TestScrollPosition extends ScrollPositionWithSingleContext {
 
 class TestScrollController extends ScrollController {
   @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition oldPosition) {
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
     return TestScrollPosition(
       physics: physics,
       state: context,
@@ -53,7 +51,7 @@ void main() {
     );
 
     // 1st, check that the render object has received the default clip behavior.
-    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first; // ignore: unnecessary_nullable_for_final_variable_declarations
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, height == widow.height test: check that the painting context does not call pushClipRect .
@@ -107,7 +105,7 @@ void main() {
     await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
 
     // 1st, check that the render object has received the default clip behavior.
-    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first; // ignore: unnecessary_nullable_for_final_variable_declarations
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, check that the painting context has received the default clip behavior.
@@ -630,7 +628,15 @@ void main() {
   });
 
   testWidgets('Nested SingleChildScrollView showOnScreen', (WidgetTester tester) async {
-    final List<List<Widget>> children = List<List<Widget>>(10);
+    final List<List<Widget>> children = List<List<Widget>>.generate(10, (int x) {
+      return List<Widget>.generate(10, (int y) {
+        return SizedBox(
+          key: UniqueKey(),
+          height: 100.0,
+          width: 100.0,
+        );
+      });
+    });
     ScrollController controllerX;
     ScrollController controllerY;
 
@@ -665,17 +671,11 @@ void main() {
                 controller: controllerX = ScrollController(initialScrollOffset: 400.0),
                 scrollDirection: Axis.horizontal,
                 child: Column(
-                  children: List<Widget>.generate(10, (int y) {
+                  children: children.map((List<Widget> widgets) {
                     return Row(
-                      children: children[y] = List<Widget>.generate(10, (int x) {
-                        return SizedBox(
-                          key: UniqueKey(),
-                          height: 100.0,
-                          width: 100.0,
-                        );
-                      }),
+                      children: widgets,
                     );
-                  }),
+                  }).toList(),
                 ),
               ),
             ),
@@ -792,9 +792,9 @@ void main() {
   });
 
   group('Nested SingleChildScrollView (same orientation) showOnScreen', () {
-    List<Widget> children;
+    late List<Widget> children;
 
-    Future<void> buildNestedScroller({ WidgetTester tester, ScrollController inner, ScrollController outer }) {
+    Future<void> buildNestedScroller({ required WidgetTester tester, ScrollController? inner, ScrollController? outer }) {
       return tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

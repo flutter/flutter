@@ -534,7 +534,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         return const SizedBox.shrink();
       }
     } else {
-      bool platformHasBackButton;
+      final bool platformHasBackButton;
       switch (Theme.of(context)!.platform) {
         case TargetPlatform.android:
           platformHasBackButton = true;

@@ -1924,7 +1924,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         ),
       ),
     );
-    BoxConstraints constraints;
+    final BoxConstraints constraints;
     final Offset densityAdjustment = (widget.visualDensity ?? theme.visualDensity).baseSizeAdjustment;
     switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
@@ -2570,16 +2570,12 @@ class _RenderChip extends RenderBox {
 
     Offset centerLayout(Size boxSize, double x) {
       assert(contentSize >= boxSize.height);
-      Offset boxOffset;
       switch (textDirection!) {
         case TextDirection.rtl:
-          boxOffset = Offset(x - boxSize.width, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
-          break;
+          return Offset(x - boxSize.width, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
         case TextDirection.ltr:
-          boxOffset = Offset(x, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
-          break;
+          return Offset(x, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
       }
-      return boxOffset;
     }
 
     // These are the offsets to the upper left corners of the boxes (including
@@ -2687,7 +2683,7 @@ class _RenderChip extends RenderBox {
     if (enableAnimation == null || enableAnimation.isCompleted) {
       return Colors.white;
     }
-    ColorTween enableTween;
+    final ColorTween enableTween;
     switch (theme.brightness) {
       case Brightness.light:
         enableTween = ColorTween(

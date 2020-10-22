@@ -101,7 +101,7 @@ class DepfileService {
         .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
         .where((String path) => path.isNotEmpty)
     // The tool doesn't write duplicates to these lists. This call is an attempt to
-    // be resillient to the outputs of other tools which write or user edits to depfiles.
+    // be resilient to the outputs of other tools which write or user edits to depfiles.
         .toSet()
         .map(_fileSystem.file)
         .toList();

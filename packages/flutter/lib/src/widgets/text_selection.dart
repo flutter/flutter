@@ -587,7 +587,7 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionHandleChanged(TextSelection newSelection, _TextSelectionHandlePosition position) {
-    TextPosition textPosition;
+    final TextPosition textPosition;
     switch (position) {
       case _TextSelectionHandlePosition.start:
         textPosition = newSelection.base;
@@ -695,7 +695,7 @@ class _TextSelectionHandleOverlayState
       return;
     }
 
-    TextSelection newSelection;
+    final TextSelection newSelection;
     switch (widget.position) {
       case _TextSelectionHandlePosition.start:
         newSelection = TextSelection(
@@ -724,8 +724,8 @@ class _TextSelectionHandleOverlayState
 
   @override
   Widget build(BuildContext context) {
-    LayerLink layerLink;
-    TextSelectionHandleType type;
+    final LayerLink layerLink;
+    final TextSelectionHandleType type;
 
     switch (widget.position) {
       case _TextSelectionHandlePosition.start:

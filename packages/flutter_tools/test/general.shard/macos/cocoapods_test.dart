@@ -71,7 +71,6 @@ void main() {
       logger: logger,
       platform: FakePlatform(),
       xcodeProjectInterpreter: mockXcodeProjectInterpreter,
-      timeoutConfiguration: const TimeoutConfiguration(),
     );
     pretendPodVersionIs('1.8.0');
     fileSystem.file(fileSystem.path.join(
@@ -302,7 +301,7 @@ void main() {
         ..writeAsStringSync('Existing release config');
 
       final FlutterProject project = FlutterProject.fromPath('project');
-      await injectPlugins(project, checkProjects: true);
+      await injectPlugins(project, iosPlatform: true);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
       expect(debugContents, contains(

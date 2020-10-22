@@ -14,8 +14,17 @@ Future<void> main() async {
     try {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleDebug with target platform = android-arm');
-        await pluginProject.runGradleTask('assembleDebug',
-            options: <String>['-Ptarget-platform=android-arm']);
+
+        await inDirectory(pluginProject.exampleAndroidPath, () {
+          return flutter(
+            'build',
+            options: <String>[
+              'apk',
+              '--debug',
+              '--target-platform=android-arm'
+            ],
+          );
+        });
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
@@ -40,8 +49,16 @@ Future<void> main() async {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleDebug with target platform = android-x86');
         // This is used by `flutter run`
-        await pluginProject.runGradleTask('assembleDebug',
-            options: <String>['-Ptarget-platform=android-x86']);
+        await inDirectory(pluginProject.exampleAndroidPath, () {
+          return flutter(
+            'build',
+            options: <String>[
+              'apk',
+              '--debug',
+              '--target-platform=android-x86'
+            ],
+          );
+        });
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
@@ -64,8 +81,17 @@ Future<void> main() async {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleDebug with target platform = android-x64');
         // This is used by `flutter run`
-        await pluginProject.runGradleTask('assembleDebug',
-            options: <String>['-Ptarget-platform=android-x64']);
+
+        await inDirectory(pluginProject.exampleAndroidPath, () {
+          return flutter(
+            'build',
+            options: <String>[
+              'apk',
+              '--debug',
+              '--target-platform=android-x64'
+            ],
+          );
+        });
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
@@ -87,8 +113,17 @@ Future<void> main() async {
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleRelease with target platform = android-arm');
-        await pluginProject.runGradleTask('assembleRelease',
-            options: <String>['-Ptarget-platform=android-arm']);
+
+        await inDirectory(pluginProject.exampleAndroidPath, () {
+          return flutter(
+            'build',
+            options: <String>[
+              'apk',
+              '--release',
+              '--target-platform=android-arm'
+            ],
+          );
+        });
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
@@ -108,8 +143,17 @@ Future<void> main() async {
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleRelease with target platform = android-arm64');
-        await pluginProject.runGradleTask('assembleRelease',
-            options: <String>['-Ptarget-platform=android-arm64']);
+
+        await inDirectory(pluginProject.exampleAndroidPath, () {
+          return flutter(
+            'build',
+            options: <String>[
+              'apk',
+              '--release',
+              '--target-platform=android-arm64'
+            ],
+          );
+        });
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
@@ -129,7 +173,15 @@ Future<void> main() async {
 
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleDebug');
-        await project.runGradleTask('assembleDebug');
+        await inDirectory(project.rootPath, () {
+          return flutter(
+            'build',
+            options: <String>[
+              'apk',
+              '--debug',
+            ],
+          );
+        });
         final String errorMessage = validateSnapshotDependency(project, 'kernel_blob.bin');
         if (errorMessage != null) {
           throw TaskResult.failure(errorMessage);
@@ -138,7 +190,15 @@ Future<void> main() async {
 
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleProfile');
-        await project.runGradleTask('assembleProfile');
+        await inDirectory(project.rootPath, () {
+          return flutter(
+            'build',
+            options: <String>[
+              'apk',
+              '--profile',
+            ],
+          );
+        });
       });
 
       await runProjectTest((FlutterProject project) async {
@@ -173,8 +233,13 @@ Future<void> main() async {
       await runProjectTest((FlutterProject project) async {
         section('gradlew on build script with error');
         await project.introduceError();
-        final ProcessResult result =
-            await project.resultOfGradleTask('assembleRelease');
+        final ProcessResult result = await inDirectory(project.rootPath, () {
+          return executeFlutter('build', options: <String>[
+            'apk',
+            '--release',
+          ]);
+        });
+
         if (result.exitCode == 0)
           throw failure(
               'Gradle did not exit with error as expected', result);
@@ -193,8 +258,12 @@ Future<void> main() async {
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleDebug forwards stderr');
         await project.introducePubspecError();
-                final ProcessResult result =
-            await project.resultOfGradleTask('assembleRelease');
+        final ProcessResult result = await inDirectory(project.rootPath, () {
+          return executeFlutter('build', options: <String>[
+            'apk',
+            '--release',
+          ]);
+        });
         if (result.exitCode == 0)
           throw failure(
               'Gradle did not exit with error as expected', result);
@@ -206,7 +275,12 @@ Future<void> main() async {
       await runProjectTest((FlutterProject project) async {
         section('flutter build apk on build script with error');
         await project.introduceError();
-        final ProcessResult result = await project.resultOfFlutterCommand('build', <String>['apk']);
+        final ProcessResult result = await inDirectory(project.rootPath, () {
+          return executeFlutter('build', options: <String>[
+            'apk',
+            '--release',
+          ]);
+        });
         if (result.exitCode == 0)
           throw failure(
               'flutter build apk should fail when Gradle does', result);
@@ -223,7 +297,15 @@ Future<void> main() async {
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('gradlew assembleDebug on plugin example');
-        await pluginProject.runGradleTask('assembleDebug');
+        await inDirectory(pluginProject.exampleAndroidPath, () {
+          return flutter(
+            'build',
+            options: <String>[
+              'apk',
+              '--debug',
+            ],
+          );
+        });
         if (!File(pluginProject.debugApkPath).existsSync())
           throw TaskResult.failure(
               'Gradle did not produce an apk file at the expected place');
