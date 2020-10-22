@@ -13,7 +13,7 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
-  test_api: 0.2.19-nullsafety.2
+  test_api: 0.2.19-nullsafety.3
 
   # Used by golden file comparator
   path: 1.8.0-nullsafety.1
@@ -46,4 +46,4 @@ dependencies:
 dev_dependencies:
   file: 6.0.0-nullsafety.2
 
-# PUBSPEC CHECKSUM: 8c45
+# PUBSPEC CHECKSUM: 0846
