@@ -37,8 +37,10 @@ packages if no package exists for your specific use case. Please be sure to revi
 page and the ['Code of Conduct'](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md) 
 page for general contribution guidelines.
 
-To write a new packages, ['Developing Packages']
-(https://flutter.dev/docs/development/packages-and-plugins/developing-packages) see the page. 
+To write a new packages, see the ['Developing Packages']
+(https://flutter.dev/docs/development/packages-and-plugins/developing-packages) page and to 
+see how to best organize the package contents see the ['Dart library package']
+(https://dart.dev/guides/libraries/create-library-packages) documentation page. 
 
 To test a package, see the ['Unit Tests'](https://flutter.dev/docs/testing#unit-tests) page for guidance. 
 
