@@ -422,7 +422,7 @@ class IOSDevice extends Device {
           deviceLogReader,
           portForwarder: portForwarder,
           throttleDuration: fallbackPollingDelay,
-          throttleTimeout: fallbackThrottleTimeout ?? const Duration(seconds: 5),
+          throttleTimeout: fallbackThrottleTimeout ?? const Duration(minutes: 5),
           hostPort: debuggingOptions.hostVmServicePort,
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
