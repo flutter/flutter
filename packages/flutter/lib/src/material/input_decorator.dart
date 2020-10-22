@@ -1321,18 +1321,10 @@ class _RenderDecoration extends RenderBox {
     }
 
     double customLayout(RenderBox box, double x, double y) {
+      final double scaleY = (y + 1) / 2;
       _boxParentData(box).offset = Offset(
         x,
-        (height! - box.size.height) *
-          (
-            ((2 * y) + 2) > 2
-            ? y
-            : (
-              ((2 * y) + 2) == 0
-                ? 0
-                : (1 / ((2 * y) + 2))
-            )
-              ),
+        (height! - box.size.height) * scaleY
         );
       return box.size.width;
     }
@@ -1362,7 +1354,11 @@ class _RenderDecoration extends RenderBox {
         double end = left;
         if (prefixIcon != null) {
           start += contentPadding.left;
+          start -= customLayout(
+            prefixIcon!,
+            start - prefixIcon!.size.width,
             (decoration.prefixIconAlignment ?? VerticalAlignment.center).y
+          );
         }
         if (label != null) {
           if (decoration.alignLabelWithHint) {
@@ -1379,7 +1375,11 @@ class _RenderDecoration extends RenderBox {
           baselineLayout(hint!, start - hint!.size.width);
         if (suffixIcon != null) {
           end -= contentPadding.left;
+          end += customLayout(
+            suffixIcon!,
+            end,
             (decoration.suffixIconAlignment ?? VerticalAlignment.center).y
+          );
         }
         if (suffix != null)
           end += baselineLayout(suffix!, end);
@@ -1390,7 +1390,11 @@ class _RenderDecoration extends RenderBox {
         double end = right;
         if (prefixIcon != null) {
           start -= contentPadding.left;
+          start +=  customLayout(
+            prefixIcon!,
+            start,
             (decoration.prefixIconAlignment ?? VerticalAlignment.center).y
+          );
         }
         if (label != null) {
           if (decoration.alignLabelWithHint) {
@@ -1407,7 +1411,11 @@ class _RenderDecoration extends RenderBox {
           baselineLayout(hint!, start);
         if (suffixIcon != null) {
           end += contentPadding.right;
+          end -= customLayout(
+            suffixIcon!,
+            end - suffixIcon!.size.width,
             (decoration.suffixIconAlignment ?? VerticalAlignment.center).y
+          );
         }
         if (suffix != null)
           end -= baselineLayout(suffix!, end - suffix!.size.width);
@@ -2255,9 +2263,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ),
       );
 
+    final Alignment prefixIconAlignment = decoration!.prefixIconAlignment != null
+      ? Alignment(0.0, decoration!.prefixIconAlignment!.y)
+      : Alignment.center;
     final Widget? prefixIcon = decoration!.prefixIcon == null ? null :
       Align(
-        alignment: decoration!.prefixIconAlignment ?? Alignment.center,
+        alignment: prefixIconAlignment,
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
@@ -2277,9 +2288,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ),
       );
 
+    final Alignment suffixIconAlignment = decoration!.suffixIconAlignment != null
+      ? Alignment(0.0, decoration!.suffixIconAlignment!.y)
+      : Alignment.center;
     final Widget? suffixIcon = decoration!.suffixIcon == null ? null :
       Align(
-        alignment: decoration!.suffixIconAlignment ?? Alignment.center,
+        alignment: suffixIconAlignment,
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
