@@ -34,7 +34,7 @@ abstract class PhysicalShapeEngineLayer implements EngineLayer {}
 
 abstract class SceneBuilder {
   factory SceneBuilder() {
-    if (engine.experimentalUseSkia) {
+    if (engine.useCanvasKit) {
       return engine.LayerSceneBuilder();
     } else {
       return engine.SurfaceSceneBuilder();

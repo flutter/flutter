@@ -81,7 +81,7 @@ class CkGradientLinear extends CkShader implements ui.Gradient {
 
   @override
   SkShader createDefault() {
-    assert(experimentalUseSkia);
+    assert(useCanvasKit);
 
     return canvasKit.SkShader.MakeLinearGradient(
       toSkPoint(from),
@@ -109,7 +109,7 @@ class CkGradientRadial extends CkShader implements ui.Gradient {
 
   @override
   SkShader createDefault() {
-    assert(experimentalUseSkia);
+    assert(useCanvasKit);
 
     return canvasKit.SkShader.MakeRadialGradient(
       toSkPoint(center),
@@ -141,7 +141,7 @@ class CkGradientConical extends CkShader implements ui.Gradient {
 
   @override
   SkShader createDefault() {
-    assert(experimentalUseSkia);
+    assert(useCanvasKit);
     return canvasKit.SkShader.MakeTwoPointConicalGradient(
       toSkPoint(focal),
       focalRadius,
