@@ -526,6 +526,12 @@ class LocalizationsGenerator {
   List<String> _inputFileList;
   List<String> _outputFileList;
 
+  /// Whether or not resource attributes are required for each corresponding
+  /// resource id.
+  ///
+  /// Resource attributes provide metadata about the message.
+  bool _areResourceAttributesRequired;
+
   /// Initializes [inputDirectory], [outputDirectory], [templateArbFile],
   /// [outputFile] and [className].
   ///
@@ -547,6 +553,7 @@ class LocalizationsGenerator {
     String inputsAndOutputsListPath,
     bool useSyntheticPackage = true,
     String projectPathString,
+    bool areResourceAttributesRequired = false,
   }) {
     _useSyntheticPackage = useSyntheticPackage;
     setProjectDir(projectPathString);
@@ -559,6 +566,7 @@ class LocalizationsGenerator {
     _setUseDeferredLoading(useDeferredLoading);
     className = classNameString;
     _setInputsAndOutputsListFile(inputsAndOutputsListPath);
+    _areResourceAttributesRequired = areResourceAttributesRequired;
   }
 
   static bool _isNotReadable(FileStat fileStat) {
@@ -793,7 +801,9 @@ class LocalizationsGenerator {
   void loadResources() {
     final AppResourceBundle templateBundle = AppResourceBundle(templateArbFile);
     _templateArbLocale = templateBundle.locale;
-    _allMessages = templateBundle.resourceIds.map((String id) => Message(templateBundle.resources, id));
+    _allMessages = templateBundle.resourceIds.map((String id) => Message(
+      templateBundle.resources, id, _areResourceAttributesRequired,
+    ));
     for (final String resourceId in templateBundle.resourceIds) {
       if (!_isValidGetterAndMethodName(resourceId)) {
         throw L10nException(
