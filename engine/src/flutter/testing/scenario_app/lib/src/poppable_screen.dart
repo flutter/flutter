@@ -14,10 +14,10 @@ import 'scenario.dart';
 class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
   /// Creates the PoppableScreenScenario.
   ///
-  /// The [window] parameter must not be null.
-  PoppableScreenScenario(Window window)
-      : assert(window != null),
-        super(window);
+  /// The [dispatcher] parameter must not be null.
+  PoppableScreenScenario(PlatformDispatcher dispatcher)
+      : assert(dispatcher != null),
+        super(dispatcher);
 
   // Rect for the pop button. Only defined once onMetricsChanged is called.
   Rect _buttonRect;
@@ -74,7 +74,7 @@ class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
 
   void _pop() {
     sendJsonMethodCall(
-      window: window,
+      dispatcher: dispatcher,
       // 'flutter/platform' is the hardcoded name of the 'platform'
       // `SystemChannel` from the `SystemNavigator` API.
       // https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/system_navigator.dart.

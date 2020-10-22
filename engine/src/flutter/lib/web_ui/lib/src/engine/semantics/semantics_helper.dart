@@ -49,8 +49,8 @@ class SemanticsHelper {
     return _semanticsEnabler.shouldEnableSemantics(event);
   }
 
-  html.Element prepareAccesibilityPlaceholder() {
-    return _semanticsEnabler.prepareAccesibilityPlaceholder();
+  html.Element prepareAccessibilityPlaceholder() {
+    return _semanticsEnabler.prepareAccessibilityPlaceholder();
   }
 }
 
@@ -78,15 +78,15 @@ abstract class SemanticsEnabler {
   /// should be forwarded to the framework.
   bool tryEnableSemantics(html.Event event);
 
-  /// Creates the placeholder for accesibility.
+  /// Creates the placeholder for accessibility.
   ///
   /// Puts it inside the glasspane.
   ///
   /// On focus the element announces that accessibility can be enabled by
   /// tapping/clicking. (Announcement depends on the assistive technology)
-  html.Element prepareAccesibilityPlaceholder();
+  html.Element prepareAccessibilityPlaceholder();
 
-  /// Whether platform is still consisering enabling semantics.
+  /// Whether platform is still considering enabling semantics.
   ///
   /// At this stage a relevant set of events are always assessed to see if
   /// they activate the semantics.
@@ -189,7 +189,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
   }
 
   @override
-  html.Element prepareAccesibilityPlaceholder() {
+  html.Element prepareAccessibilityPlaceholder() {
     final html.Element placeholder = _semanticsPlaceholder = html.Element.tag('flt-semantics-placeholder');
 
     // Only listen to "click" because other kinds of events are reported via
@@ -366,7 +366,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
   }
 
   @override
-  html.Element prepareAccesibilityPlaceholder() {
+  html.Element prepareAccessibilityPlaceholder() {
     final html.Element placeholder = _semanticsPlaceholder = html.Element.tag('flt-semantics-placeholder');
 
     // Only listen to "click" because other kinds of events are reported via

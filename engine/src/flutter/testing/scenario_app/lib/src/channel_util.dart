@@ -10,13 +10,13 @@ import 'package:meta/meta.dart';
 /// Util method to replicate the behavior of a `MethodChannel` in the Flutter
 /// framework.
 void sendJsonMethodCall({
-  @required Window window,
+  @required PlatformDispatcher dispatcher,
   @required String channel,
   @required String method,
   dynamic arguments,
   PlatformMessageResponseCallback callback,
 }) {
-  window.sendPlatformMessage(
+  dispatcher.sendPlatformMessage(
     channel,
     // This recreates a combination of OptionalMethodChannel, JSONMethodCodec,
     // and _DefaultBinaryMessenger in the framework.

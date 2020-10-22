@@ -12,9 +12,9 @@ import 'scenario.dart';
 /// Sends the recieved locale data back as semantics information.
 class LocaleInitialization extends Scenario {
   /// Constructor
-  LocaleInitialization(Window window)
-      : assert(window != null),
-        super(window);
+  LocaleInitialization(PlatformDispatcher dispatcher)
+      : assert(dispatcher != null),
+        super(dispatcher);
 
   int _tapCount = 0;
 
@@ -82,10 +82,11 @@ class LocaleInitialization extends Scenario {
   /// Send changing information via semantics on each successive tap.
   @override
   void onPointerDataPacket(PointerDataPacket packet) {
-    String label;
+    String label = '';
     switch(_tapCount) {
       case 1: {
         // Set label to string data we wish to pass on first frame.
+        label = '1';
         break;
       }
       // Expand for other test cases.

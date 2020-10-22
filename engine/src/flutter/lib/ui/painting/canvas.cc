@@ -468,7 +468,7 @@ void Canvas::drawShadow(const CanvasPath* path,
   }
   SkScalar dpr = UIDartState::Current()
                      ->platform_configuration()
-                     ->window()
+                     ->get_window(0)
                      ->viewport_metrics()
                      .device_pixel_ratio;
   flutter::PhysicalShapeLayer::DrawShadow(canvas_, path->path(), color,

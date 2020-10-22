@@ -1168,7 +1168,6 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
         .send();
   }
 
-  // TODO(mattcarroll): consider introducing a system channel for this communication instead of JNI
   private void sendViewportMetricsToFlutter() {
     if (!isAttachedToFlutterEngine()) {
       Log.w(

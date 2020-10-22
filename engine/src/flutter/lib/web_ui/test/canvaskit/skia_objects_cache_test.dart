@@ -50,7 +50,7 @@ void _tests() {
       when(mockRasterizer.addPostFrameCallback(any)).thenAnswer((_) {
         addPostFrameCallbackCount++;
       });
-      window.rasterizer = mockRasterizer;
+      EnginePlatformDispatcher.instance.rasterizer = mockRasterizer;
 
       // Trigger first create
       final TestSkiaObject testObject = TestSkiaObject();
