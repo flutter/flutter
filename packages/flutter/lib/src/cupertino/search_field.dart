@@ -61,14 +61,6 @@ import 'text_field.dart';
 /// }
 ///
 /// class _MyPrefilledSearchState extends State<MyPrefilledSearch> {
-///   TextEditingController _textController;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _textController = TextEditingController(text: 'initial text');
-///   }
-///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return CupertinoSearchTextField(
