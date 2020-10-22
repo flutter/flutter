@@ -22,7 +22,7 @@ class ClipRRectLayer : public ContainerLayer {
   }
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
-  void UpdateScene(SceneUpdateContext& context) override;
+  void UpdateScene(std::shared_ptr<SceneUpdateContext> context) override;
 #endif
 
  private:

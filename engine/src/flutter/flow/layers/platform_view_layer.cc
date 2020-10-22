@@ -47,10 +47,11 @@ void PlatformViewLayer::Paint(PaintContext& context) const {
 }
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
-void PlatformViewLayer::UpdateScene(SceneUpdateContext& context) {
+void PlatformViewLayer::UpdateScene(
+    std::shared_ptr<SceneUpdateContext> context) {
   TRACE_EVENT0("flutter", "PlatformViewLayer::UpdateScene");
   FML_DCHECK(needs_system_composite());
-  context.UpdateView(view_id_, offset_, size_);
+  context->UpdateView(view_id_, offset_, size_);
 }
 #endif
 

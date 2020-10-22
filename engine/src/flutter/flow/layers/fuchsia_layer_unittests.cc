@@ -261,7 +261,7 @@ struct TestContext {
   std::unique_ptr<MockSessionWrapper> mock_session_wrapper;
 
   // SceneUpdateContext.
-  std::unique_ptr<SceneUpdateContext> scene_update_context;
+  std::shared_ptr<SceneUpdateContext> scene_update_context;
 
   // PrerollContext.
   MutatorsStack unused_stack;
@@ -286,7 +286,7 @@ std::unique_ptr<TestContext> InitTest() {
       std::make_unique<MockSessionWrapper>(std::move(session_ptr));
 
   // Init SceneUpdateContext.
-  context->scene_update_context = std::make_unique<SceneUpdateContext>(
+  context->scene_update_context = std::make_shared<SceneUpdateContext>(
       "fuchsia_layer_unittest", fuchsia::ui::views::ViewToken(),
       scenic::ViewRefPair::New(), *(context->mock_session_wrapper));
 
@@ -410,7 +410,7 @@ TEST_F(FuchsiaLayerTest, DISABLED_PhysicalShapeLayersAndChildSceneLayers) {
 
   // Create another frame to be the "real" root. Required because
   // UpdateScene() traversal expects there to already be a top node.
-  SceneUpdateContext::Frame frame(*(test_context->scene_update_context),
+  SceneUpdateContext::Frame frame(test_context->scene_update_context,
                                   SkRRect::MakeRect(SkRect::MakeWH(100, 100)),
                                   SK_ColorTRANSPARENT, SK_AlphaOPAQUE,
                                   "fuchsia test root");
@@ -555,7 +555,7 @@ TEST_F(FuchsiaLayerTest, DISABLED_PhysicalShapeLayersAndChildSceneLayers) {
 
   // Finally, UpdateScene(). The MockSession will check the emitted commands
   // against the list above.
-  root->UpdateScene(*(test_context->scene_update_context));
+  root->UpdateScene(test_context->scene_update_context);
 
   test_context->mock_session_wrapper->Present();
 
@@ -626,7 +626,7 @@ TEST_F(FuchsiaLayerTest, DISABLED_OpacityAndTransformLayer) {
 
   // Create another frame to be the "real" root. Required because
   // UpdateScene() traversal expects there to already be a top node.
-  SceneUpdateContext::Frame frame(*(test_context->scene_update_context),
+  SceneUpdateContext::Frame frame(test_context->scene_update_context,
                                   SkRRect::MakeRect(SkRect::MakeWH(100, 100)),
                                   SK_ColorTRANSPARENT, SK_AlphaOPAQUE,
                                   "fuchsia test root");
@@ -737,7 +737,7 @@ TEST_F(FuchsiaLayerTest, DISABLED_OpacityAndTransformLayer) {
 
   // Finally, UpdateScene(). The MockSession will check the emitted
   // commands against the list above.
-  root->UpdateScene(*(test_context->scene_update_context));
+  root->UpdateScene(test_context->scene_update_context);
 
   test_context->mock_session_wrapper->Present();
 

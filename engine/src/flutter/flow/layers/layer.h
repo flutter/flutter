@@ -154,7 +154,7 @@ class Layer {
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
   // Updates the system composited scene.
-  virtual void UpdateScene(SceneUpdateContext& context);
+  virtual void UpdateScene(std::shared_ptr<SceneUpdateContext> context);
   virtual void CheckForChildLayerBelow(PrerollContext* context);
 #endif
 
