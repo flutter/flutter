@@ -342,6 +342,7 @@ tonic::DartErrorHandleType RuntimeController::GetLastError() {
 }
 
 bool RuntimeController::LaunchRootIsolate(
+    const Settings& settings,
     std::optional<std::string> dart_entrypoint,
     std::optional<std::string> dart_entrypoint_library,
     std::unique_ptr<IsolateConfiguration> isolate_configuration) {
@@ -352,7 +353,7 @@ bool RuntimeController::LaunchRootIsolate(
 
   auto strong_root_isolate =
       DartIsolate::CreateRunningRootIsolate(
-          vm_->GetVMData()->GetSettings(),                //
+          settings,                                       //
           isolate_snapshot_,                              //
           task_runners_,                                  //
           std::make_unique<PlatformConfiguration>(this),  //

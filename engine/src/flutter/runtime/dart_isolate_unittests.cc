@@ -402,5 +402,33 @@ TEST_F(DartIsolateTest,
   ASSERT_EQ(create_callback_count, 1u);
 }
 
+TEST_F(DartIsolateTest,
+       IsolateCreateCallbacksTakeInstanceSettingsInsteadOfVMSettings) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto vm_settings = CreateSettingsForFixture();
+  auto vm_ref = DartVMRef::Create(vm_settings);
+  auto instance_settings = vm_settings;
+  size_t create_callback_count = 0u;
+  instance_settings.root_isolate_create_callback =
+      [&create_callback_count](const auto& isolate) {
+        ASSERT_EQ(isolate.GetPhase(), DartIsolate::Phase::Ready);
+        create_callback_count++;
+        ASSERT_NE(::Dart_CurrentIsolate(), nullptr);
+      };
+  TaskRunners task_runners(GetCurrentTestName(),    //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner()   //
+  );
+  {
+    auto isolate = RunDartCodeInIsolate(vm_ref, instance_settings, task_runners,
+                                        "main", {}, GetFixturesPath());
+    ASSERT_TRUE(isolate);
+    ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
+  }
+  ASSERT_EQ(create_callback_count, 1u);
+}
+
 }  // namespace testing
 }  // namespace flutter

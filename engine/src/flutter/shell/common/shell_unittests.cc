@@ -2185,5 +2185,28 @@ TEST_F(ShellTest, OnServiceProtocolSetAssetBundlePathWorks) {
   DestroyShell(std::move(shell));
 }
 
+TEST_F(ShellTest, EngineRootIsolateLaunchesDontTakeVMDataSettings) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  // Make sure the shell launch does not kick off the creation of the VM
+  // instance by already creating one upfront.
+  auto vm_settings = CreateSettingsForFixture();
+  auto vm_ref = DartVMRef::Create(vm_settings);
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+
+  auto settings = vm_settings;
+  fml::AutoResetWaitableEvent isolate_create_latch;
+  settings.root_isolate_create_callback = [&](const auto& isolate) {
+    isolate_create_latch.Signal();
+  };
+  auto shell = CreateShell(settings);
+  ASSERT_TRUE(ValidateShell(shell.get()));
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  ASSERT_TRUE(configuration.IsValid());
+  RunEngine(shell.get(), std::move(configuration));
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+  DestroyShell(std::move(shell));
+  isolate_create_latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter
