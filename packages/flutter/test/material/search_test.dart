@@ -99,6 +99,7 @@ void main() {
     expect(find.text('HomeBody'), findsNothing);
     expect(find.text('HomeTitle'), findsNothing);
     expect(find.text('Suggestions'), findsOneWidget);
+    expect(find.text('Bottom'), findsOneWidget);
 
     // Simulate system back button
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
@@ -801,5 +802,13 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   @override
   List<Widget> buildActions(BuildContext context) {
     return actions;
+  }
+
+  @override
+  PreferredSizeWidget buildBottom(BuildContext context) {
+    return PreferredSize(
+      preferredSize: Size.fromHeight(56.0),
+      child: Text('Bottom'),
+    );
   }
 }
