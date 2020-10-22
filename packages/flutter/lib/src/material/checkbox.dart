@@ -137,6 +137,9 @@ class Checkbox extends StatefulWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  ///
+  /// Note, when this [Checkbox] is not selected, this color will not fill
+  /// anything.
   final Color? activeColor;
 
   /// The color to use for the check icon when this checkbox is checked.
@@ -264,8 +267,9 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       _states,
     );
+    final Color activeColor = widget.activeColor ?? themeData!.toggleableActiveColor;
     final Color effectiveActiveColor = MaterialStateProperty.resolveAs<Color>(
-      widget.activeColor ?? themeData!.toggleableActiveColor,
+      activeColor,
       _states,
     );
 
@@ -284,6 +288,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             tristate: widget.tristate,
             activeColor: effectiveActiveColor,
             checkColor: widget.checkColor ?? const Color(0xFFFFFFFF),
+            useActiveColorInDisabledState: activeColor is MaterialStateColor,
             inactiveColor: enabled ? themeData!.unselectedWidgetColor : themeData!.disabledColor,
             focusColor: widget.focusColor ?? themeData.focusColor,
             hoverColor: widget.hoverColor ?? themeData.hoverColor,
@@ -314,6 +319,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     required this.additionalConstraints,
     required this.hasFocus,
     required this.hovering,
+    required this.useActiveColorInDisabledState,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(activeColor != null),
@@ -333,6 +339,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<bool?>? onChanged;
   final TickerProvider vsync;
   final BoxConstraints additionalConstraints;
+  final bool useActiveColorInDisabledState;
 
   @override
   _RenderCheckbox createRenderObject(BuildContext context) => _RenderCheckbox(
@@ -348,6 +355,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     additionalConstraints: additionalConstraints,
     hasFocus: hasFocus,
     hovering: hovering,
+    useActiveColorInDisabledState: useActiveColorInDisabledState,
   );
 
   @override
@@ -366,7 +374,8 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
       ..additionalConstraints = additionalConstraints
       ..vsync = vsync
       ..hasFocus = hasFocus
-      ..hovering = hovering;
+      ..hovering = hovering
+      ..useActiveColorInDisabledState = useActiveColorInDisabledState;
   }
 }
 
@@ -388,6 +397,7 @@ class _RenderCheckbox extends RenderToggleable {
     required bool hasFocus,
     required bool hovering,
     required TickerProvider vsync,
+    required this.useActiveColorInDisabledState,
   }) : _oldValue = value,
        super(
          value: value,
@@ -402,6 +412,8 @@ class _RenderCheckbox extends RenderToggleable {
          hasFocus: hasFocus,
          hovering: hovering,
        );
+
+  bool useActiveColorInDisabledState;
 
   bool? _oldValue;
   Color checkColor;
@@ -435,7 +447,9 @@ class _RenderCheckbox extends RenderToggleable {
   // value == true or null.
   Color _colorAt(double t) {
     // As t goes from 0.0 to 0.25, animate from the inactiveColor to activeColor.
-    return t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0)!;
+    return onChanged == null && !useActiveColorInDisabledState
+      ? inactiveColor
+      : (t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0)!);
   }
 
   // White stroke used to paint the check and dash.
