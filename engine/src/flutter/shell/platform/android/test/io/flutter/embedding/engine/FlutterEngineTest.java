@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -127,8 +129,11 @@ public class FlutterEngineTest {
   }
 
   @Test
-  public void itUsesApplicationContext() {
+  public void itUsesApplicationContext() throws NameNotFoundException {
     Context context = mock(Context.class);
+    Context packageContext = mock(Context.class);
+
+    when(context.createPackageContext(any(), anyInt())).thenReturn(packageContext);
 
     new FlutterEngine(
         context,
@@ -141,12 +146,32 @@ public class FlutterEngineTest {
   }
 
   @Test
-  public void itCanUseFlutterLoaderInjectionViaFlutterInjector() {
+  public void itUsesPackageContextForAssetManager() throws NameNotFoundException {
+    Context context = mock(Context.class);
+    Context packageContext = mock(Context.class);
+    when(context.createPackageContext(any(), anyInt())).thenReturn(packageContext);
+
+    new FlutterEngine(
+        context,
+        mock(FlutterLoader.class),
+        flutterJNI,
+        /*dartVmArgs=*/ new String[] {},
+        /*automaticallyRegisterPlugins=*/ false);
+
+    verify(packageContext, atLeast(1)).getAssets();
+    verify(context, times(0)).getAssets();
+  }
+
+  @Test
+  public void itCanUseFlutterLoaderInjectionViaFlutterInjector() throws NameNotFoundException {
     FlutterInjector.reset();
     FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
     FlutterInjector.setInstance(
         new FlutterInjector.Builder().setFlutterLoader(mockFlutterLoader).build());
     Context mockContext = mock(Context.class);
+    Context packageContext = mock(Context.class);
+
+    when(mockContext.createPackageContext(any(), anyInt())).thenReturn(packageContext);
 
     new FlutterEngine(mockContext, null, flutterJNI);
 
