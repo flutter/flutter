@@ -1252,9 +1252,12 @@ class EngineSemanticsOwner {
       _rootSemanticsElement = null;
       _gestureModeClock?.datetime = null;
     }
-
-    if (window._onSemanticsEnabledChanged != null) {
-      window.invokeOnSemanticsEnabledChanged();
+    if (_semanticsEnabled != EnginePlatformDispatcher.instance.semanticsEnabled) {
+      EnginePlatformDispatcher.instance._configuration =
+        EnginePlatformDispatcher.instance._configuration.copyWith(semanticsEnabled: _semanticsEnabled);
+      if (EnginePlatformDispatcher.instance._onSemanticsEnabledChanged != null) {
+        EnginePlatformDispatcher.instance.invokeOnSemanticsEnabledChanged();
+      }
     }
   }
 

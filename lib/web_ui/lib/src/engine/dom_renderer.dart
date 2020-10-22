@@ -404,7 +404,7 @@ flt-glass-pane * {
 
     final html.Element _accesibilityPlaceholder = EngineSemanticsOwner
         .instance.semanticsHelper
-        .prepareAccesibilityPlaceholder();
+        .prepareAccessibilityPlaceholder();
 
     // Insert the semantics placeholder after the scene host. For all widgets
     // in the scene, except for platform widgets, the scene host will pass the
@@ -466,7 +466,7 @@ flt-glass-pane * {
     }
     _localeSubscription = languageChangeEvent.forTarget(html.window)
       .listen(_languageDidChange);
-    window._updateLocales();
+    EnginePlatformDispatcher.instance._updateLocales();
   }
 
   /// Called immediately after browser window metrics change.
@@ -481,18 +481,18 @@ flt-glass-pane * {
   void _metricsDidChange(html.Event? event) {
     if(isMobile && !window.isRotation() && textEditing.isEditing) {
       window.computeOnScreenKeyboardInsets();
-      window.invokeOnMetricsChanged();
+      EnginePlatformDispatcher.instance.invokeOnMetricsChanged();
     } else {
       window._computePhysicalSize();
       // When physical size changes this value has to be recalculated.
       window.computeOnScreenKeyboardInsets();
-      window.invokeOnMetricsChanged();
+      EnginePlatformDispatcher.instance.invokeOnMetricsChanged();
     }
   }
 
   /// Called immediately after browser window language change.
   void _languageDidChange(html.Event event) {
-    window._updateLocales();
+    EnginePlatformDispatcher.instance._updateLocales();
     if (ui.window.onLocaleChanged != null) {
       ui.window.onLocaleChanged!();
     }

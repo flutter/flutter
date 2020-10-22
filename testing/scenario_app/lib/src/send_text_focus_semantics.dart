@@ -11,9 +11,9 @@ import 'channel_util.dart';
 import 'scenario.dart';
 
 /// A scenario that sends back messages when touches are received.
-class SendTextFocusScemantics extends Scenario {
+class SendTextFocusSemantics extends Scenario {
   /// Constructor for `SendTextFocusScemantics`.
-  SendTextFocusScemantics(Window window) : super(window);
+  SendTextFocusSemantics(PlatformDispatcher dispatcher) : super(dispatcher);
 
   @override
   void onBeginFrame(Duration duration) {
@@ -79,7 +79,7 @@ class SendTextFocusScemantics extends Scenario {
     // This mimics the framework which shows the FlutterTextInputView before
     // updating the TextInputSemanticsObject.
     sendJsonMethodCall(
-      window: window,
+      dispatcher: dispatcher,
       channel: 'flutter/textinput',
       method: 'TextInput.setClient',
       arguments: <dynamic>[
@@ -91,7 +91,7 @@ class SendTextFocusScemantics extends Scenario {
     );
 
     sendJsonMethodCall(
-      window: window,
+      dispatcher: dispatcher,
       channel: 'flutter/textinput',
       method: 'TextInput.show',
     );

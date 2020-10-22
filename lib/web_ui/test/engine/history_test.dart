@@ -292,7 +292,7 @@ void testMain() {
       expect(strategy.history, hasLength(1));
       expect(strategy.currentEntry.state, _tagStateWithSerialCount('initial state', 0));
       expect(strategy.currentEntry.url, '/home');
-      await routeInfomrationUpdated('/page1', 'page1 state');
+      await routeInformationUpdated('/page1', 'page1 state');
       // Should have two history entries now.
       expect(strategy.history, hasLength(2));
       expect(strategy.currentEntryIndex, 1);
@@ -329,8 +329,8 @@ void testMain() {
       );
       await window.debugInitializeHistory(strategy, useSingle: false);
 
-      await routeInfomrationUpdated('/page1', 'page1 state');
-      await routeInfomrationUpdated('/page2', 'page2 state');
+      await routeInformationUpdated('/page1', 'page1 state');
+      await routeInformationUpdated('/page2', 'page2 state');
 
       // Make sure we are on page2.
       expect(strategy.history, hasLength(3));
@@ -426,8 +426,8 @@ void testMain() {
       );
       await window.debugInitializeHistory(strategy, useSingle: false);
 
-      await routeInfomrationUpdated('/page1', 'page1 state');
-      await routeInfomrationUpdated('/page2', 'page2 state');
+      await routeInformationUpdated('/page1', 'page1 state');
+      await routeInformationUpdated('/page2', 'page2 state');
 
       // Make sure we are on page2.
       expect(strategy.history, hasLength(3));
@@ -522,7 +522,7 @@ Future<void> routeUpdated(String routeName) {
   return completer.future;
 }
 
-Future<void> routeInfomrationUpdated(String location, dynamic state) {
+Future<void> routeInformationUpdated(String location, dynamic state) {
   final Completer<void> completer = Completer<void>();
   window.sendPlatformMessage(
     'flutter/navigation',

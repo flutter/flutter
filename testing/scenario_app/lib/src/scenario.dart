@@ -8,31 +8,31 @@ import 'dart:ui';
 
 /// A scenario to run for testing.
 abstract class Scenario {
-  /// Creates a new scenario using a specific Window instance.
-  Scenario(this.window);
+  /// Creates a new scenario using a specific FlutterWindow instance.
+  Scenario(this.dispatcher);
 
   /// The window used by this scenario. May be mocked.
-  final Window window;
+  final PlatformDispatcher dispatcher;
 
   /// [true] if a screenshot is taken in the next frame.
   bool _didScheduleScreenshot = false;
 
   /// Called by the program when a frame is ready to be drawn.
   ///
-  /// See [Window.onBeginFrame] for more details.
+  /// See [PlatformDispatcher.onBeginFrame] for more details.
   void onBeginFrame(Duration duration) {}
 
   /// Called by the program when the microtasks from [onBeginFrame] have been
   /// flushed.
   ///
-  /// See [Window.onDrawFrame] for more details.
+  /// See [PlatformDispatcher.onDrawFrame] for more details.
   void onDrawFrame() {
     Future<void>.delayed(const Duration(seconds: 1), () {
       if (_didScheduleScreenshot) {
-        window.sendPlatformMessage('take_screenshot', null, null);
+        dispatcher.sendPlatformMessage('take_screenshot', null, null);
       } else {
         _didScheduleScreenshot = true;
-        window.scheduleFrame();
+        dispatcher.scheduleFrame();
       }
     });
   }
@@ -45,18 +45,18 @@ abstract class Scenario {
 
   /// Called by the program when the window metrics have changed.
   ///
-  /// See [Window.onMetricsChanged].
+  /// See [PlatformDispatcher.onMetricsChanged].
   void onMetricsChanged() {}
 
   /// Called by the program when a pointer event is received.
   ///
-  /// See [Window.onPointerDataPacket].
+  /// See [PlatformDispatcher.onPointerDataPacket].
   void onPointerDataPacket(PointerDataPacket packet) {}
 
   /// Called by the program when an engine side platform channel message is
   /// received.
   ///
-  /// See [Window.onPlatformMessage].
+  /// See [PlatformDispatcher.onPlatformMessage].
   void onPlatformMessage(
     String name,
     ByteData data,
