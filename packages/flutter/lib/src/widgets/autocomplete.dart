@@ -8,6 +8,7 @@ import 'package:flutter/scheduler.dart';
 import 'basic.dart';
 import 'container.dart';
 import 'editable_text.dart';
+import 'focus_manager.dart';
 import 'framework.dart';
 import 'overlay.dart';
 
@@ -46,6 +47,7 @@ typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
 typedef AutocompleteFieldViewBuilder = Widget Function(
   BuildContext context,
   TextEditingController textEditingController,
+  FocusNode focusNode,
   VoidCallback onFieldSubmitted,
 );
 
@@ -94,9 +96,10 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///           return option.contains(textEditingValue.text.toLowerCase());
 ///         });
 ///       },
-///       fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+///       fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
 ///         return TextFormField(
 ///           controller: textEditingController,
+///           focusNode: focusNode,
 ///           onFieldSubmitted: (String value) {
 ///             onFieldSubmitted();
 ///           },
@@ -201,9 +204,10 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///         });
 ///       },
 ///       displayStringForOption: _displayStringForOption,
-///       fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+///       fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
 ///         return TextFormField(
 ///           controller: textEditingController,
+///           focusNode: focusNode,
 ///           onFieldSubmitted: (String value) {
 ///             onFieldSubmitted();
 ///           },
@@ -329,12 +333,13 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                     _autocompleteSelection = selection;
 ///                   });
 ///                 },
-///                 fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+///                 fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
 ///                   return TextFormField(
 ///                     controller: textEditingController,
 ///                     decoration: InputDecoration(
 ///                       hintText: 'This is an AutocompleteCore!',
 ///                     ),
+///                     focusNode: focusNode,
 ///                     onFieldSubmitted: (String value) {
 ///                       onFieldSubmitted();
 ///                     },
@@ -478,6 +483,7 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
   final TextEditingController _textEditingController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   Iterable<T> _options = Iterable<T>.empty();
   T? _selection;
 
@@ -486,11 +492,7 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
 
   // True iff the state indicates that the options should be visible.
   bool get _shouldShowOptions {
-    final TextSelection selection = _textEditingController.selection;
-    final bool fieldIsFocused = selection.baseOffset >= 0
-        && selection.extentOffset >= 0;
-    final bool hasOptions = _options.isNotEmpty;
-    return fieldIsFocused && _selection == null && hasOptions;
+    return _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
   }
 
   // Called when _textEditingController changes.
@@ -503,6 +505,11 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
         && _textEditingController.text != widget.displayStringForOption(_selection!)) {
       _selection = null;
     }
+    _updateOverlay();
+  }
+
+  // Called when the field's FocusNode changes.
+  void _onChangedFocus() {
     _updateOverlay();
   }
 
@@ -555,6 +562,7 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
   void initState() {
     super.initState();
     _textEditingController.addListener(_onChangedField);
+    _focusNode.addListener(_onChangedFocus);
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       _updateOverlay();
     });
@@ -571,6 +579,7 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
   @override
   void dispose() {
     _textEditingController.removeListener(_onChangedField);
+    _focusNode.removeListener(_onChangedFocus);
     _floatingOptions?.remove();
     _floatingOptions = null;
     super.dispose();
@@ -585,6 +594,7 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
         child: widget.fieldViewBuilder(
           context,
           _textEditingController,
+          _focusNode,
           _onFieldSubmitted,
         ),
       ),
