@@ -2273,7 +2273,7 @@ final ByteData _fontChangeMessage = utf8.encoder.convert(
 ).buffer.asByteData();
 
 FutureOr<void> _sendFontChangeMessage() async {
-  window.onPlatformMessage?.call(
+  PlatformDispatcher.instance.onPlatformMessage?.call(
     'flutter/system',
     _fontChangeMessage,
     (_) {},

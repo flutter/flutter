@@ -71,7 +71,7 @@ void testMain() {
     expect(window.browserHistory.currentPath, '/');
 
     // Perform some navigation operations.
-    routeInfomrationUpdated('/foo/bar', null);
+    routeInformationUpdated('/foo/bar', null);
     // Path should not be updated because URL strategy is disabled.
     expect(window.browserHistory.currentPath, '/');
   });
