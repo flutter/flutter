@@ -8,6 +8,7 @@ import 'package:flutter/animation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'box.dart';
+import 'layer.dart';
 import 'object.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
@@ -784,18 +785,22 @@ class RenderListWheelViewport
   void paint(PaintingContext context, Offset offset) {
     if (childCount > 0) {
       if (_shouldClipAtCurrentOffset() && clipBehavior != Clip.none) {
-        context.pushClipRect(
+        _clipRectLayer = context.pushClipRect(
           needsCompositing,
           offset,
           Offset.zero & size,
           _paintVisibleChildren,
           clipBehavior: clipBehavior,
+          oldLayer: _clipRectLayer,
         );
       } else {
+        _clipRectLayer = null;
         _paintVisibleChildren(context, offset);
       }
     }
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {

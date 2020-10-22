@@ -821,13 +821,8 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
     final Iterator<RecordedInvocation> call = calls.iterator..moveNext();
     try {
       while (predicate.moveNext()) {
-        if (call.current == null) {
-          throw 'It painted less on its canvas than the paint pattern expected. '
-                'The first missing paint call was: ${predicate.current}';
-        }
         predicate.current.match(call);
       }
-      assert(predicate.current == null);
       // We allow painting more than expected.
     } on _MismatchedCall catch (data) {
       description.writeln(data.message);
@@ -836,11 +831,7 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
       return false;
     } on String catch (s) {
       description.writeln(s);
-      if (call.current != null) {
-        description.write('The stack of the offending call was:\n${call.current.stackToString(indent: "  ")}\n');
-      } else {
-        description.write('The stack of the first call was:\n${calls.first.stackToString(indent: "  ")}\n');
-      }
+      description.write('The stack of the offending call was:\n${call.current.stackToString(indent: "  ")}\n');
       return false;
     }
     return true;
@@ -1390,8 +1381,6 @@ class _SomethingPaintPredicate extends _PaintPredicate {
     RecordedInvocation currentCall;
     do {
       currentCall = call.current;
-      if (currentCall == null)
-        throw 'It did not call anything that was matched by the predicate passed to a "something" step of the paint pattern.';
       if (!currentCall.invocation.isMethod)
         throw 'It called $currentCall, which was not a method, when the paint pattern expected a method call';
       call.moveNext();

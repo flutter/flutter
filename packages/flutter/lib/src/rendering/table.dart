@@ -390,7 +390,7 @@ class RenderTable extends RenderBox {
        _textBaseline = textBaseline,
        _defaultVerticalAlignment = defaultVerticalAlignment,
        _configuration = configuration {
-    _children = <RenderBox>[]..length = _columns * _rows;
+    _children = <RenderBox?>[]..length = _columns * _rows;
     this.rowDecorations = rowDecorations; // must use setter to initialize box painters array
     children?.forEach(addRow);
   }
@@ -645,7 +645,7 @@ class RenderTable extends RenderBox {
     // update our internal values
     _columns = columns;
     _rows = cells.length ~/ columns;
-    _children = cells.toList();
+    _children = List<RenderBox?>.from(cells);
     assert(_children.length == rows * columns);
     markNeedsLayout();
   }
@@ -870,7 +870,7 @@ class RenderTable extends RenderBox {
     if (totalFlex > 0.0) {
       // this can only grow the table, but it _will_ grow the table at
       // least as big as the target width.
-      double targetWidth;
+      final double targetWidth;
       if (maxWidthConstraint.isFinite) {
         targetWidth = maxWidthConstraint;
       } else {
@@ -1011,7 +1011,7 @@ class RenderTable extends RenderBox {
     }
     final List<double> widths = _computeColumnWidths(constraints);
     final List<double> positions = List<double>.filled(columns, 0.0, growable: false);
-    double tableWidth;
+    final double tableWidth;
     switch (textDirection) {
       case TextDirection.rtl:
         positions[columns - 1] = 0.0;
@@ -1085,8 +1085,7 @@ class RenderTable extends RenderBox {
           final TableCellParentData childParentData = child.parentData! as TableCellParentData;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
-              if (baselines[x] != null)
-                childParentData.offset = Offset(positions[x], rowTop + beforeBaselineDistance - baselines[x]);
+              childParentData.offset = Offset(positions[x], rowTop + beforeBaselineDistance - baselines[x]);
               break;
             case TableCellVerticalAlignment.top:
               childParentData.offset = Offset(positions[x], rowTop);

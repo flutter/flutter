@@ -390,8 +390,8 @@ void main() {
     List<Element> titles = tester.elementList(find.text('Title'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
+          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
           return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
         });
 
@@ -415,8 +415,8 @@ void main() {
     titles = tester.elementList(find.text('Title'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
+          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
           return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
         });
 
@@ -1198,7 +1198,7 @@ class _ExpectStyles extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle style = DefaultTextStyle.of(context).style!;
+    final TextStyle style = DefaultTextStyle.of(context).style;
     expect(style.color, isSameColorAs(color));
     expect(style.fontFamily, '.SF Pro Text');
     expect(style.fontSize, 17.0);

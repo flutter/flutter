@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
@@ -11,22 +12,19 @@ import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'base/platform.dart';
-import 'base/process.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
-import 'base/version.dart';
 import 'cache.dart';
 import 'device.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
-import 'intellij/intellij.dart';
-import 'ios/plist_parser.dart';
+import 'intellij/intellij_validator.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
-import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
@@ -77,16 +75,30 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
     final List<DoctorValidator> ideValidators = <DoctorValidator>[
       ...AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages),
-      ...IntelliJValidator.installedValidators(globals.fs, globals.platform),
+      ...IntelliJValidator.installedValidators(
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        userMessages: userMessages,
+        plistParser: globals.plistParser,
+      ),
       ...VsCodeValidator.installedValidators(globals.fs, globals.platform),
     ];
     final ProxyValidator proxyValidator = ProxyValidator(platform: globals.platform);
     _validators = <DoctorValidator>[
-      FlutterValidator(),
+      FlutterValidator(
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        flutterVersion: () => globals.flutterVersion,
+        processManager: globals.processManager,
+        userMessages: userMessages,
+        artifacts: globals.artifacts,
+        flutterRoot: () => Cache.flutterRoot,
+        operatingSystemUtils: globals.os,
+      ),
       if (androidWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
       if (globals.iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode, userMessages: userMessages), cocoapodsValidator]),
+        GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode, userMessages: userMessages), globals.cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
         ChromeValidator(
           chromiumLauncher: ChromiumLauncher(
@@ -289,9 +301,6 @@ class Doctor {
     for (final ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = Status.withSpinner(
-        timeout: timeoutConfiguration.fastOperation,
-        slowWarningCallback: () => validator.slowWarning,
-        timeoutConfiguration: timeoutConfiguration,
         stopwatch: Stopwatch(),
         terminal: globals.terminal,
       );
@@ -584,7 +593,7 @@ class ValidationResult {
 /// on the cause and/or solution to the validation failure.
 @immutable
 class ValidationMessage {
-  /// Create a validation message with information for a passing validatior.
+  /// Create a validation message with information for a passing validator.
   ///
   /// By default this is not displayed unless the doctor is run in
   /// verbose mode.
@@ -651,8 +660,39 @@ class ValidationMessage {
   int get hashCode => type.hashCode ^ message.hashCode ^ contextUrl.hashCode;
 }
 
+/// A validator that checks the version of Flutter, as well as some auxiliary information
+/// such as the pub or Flutter cache overrides.
+///
+/// This is primarily useful for diagnosing issues on Github bug reports by displaying
+/// specific commit information.
 class FlutterValidator extends DoctorValidator {
-  FlutterValidator() : super('Flutter');
+  FlutterValidator({
+    @required Platform platform,
+    @required FlutterVersion Function() flutterVersion,
+    @required UserMessages userMessages,
+    @required FileSystem fileSystem,
+    @required Artifacts artifacts,
+    @required ProcessManager processManager,
+    @required String Function() flutterRoot,
+    @required OperatingSystemUtils operatingSystemUtils,
+  }) : _flutterVersion = flutterVersion,
+       _platform = platform,
+       _userMessages = userMessages,
+       _fileSystem = fileSystem,
+       _artifacts = artifacts,
+       _processManager = processManager,
+       _flutterRoot = flutterRoot,
+       _operatingSystemUtils = operatingSystemUtils,
+       super('Flutter');
+
+  final Platform _platform;
+  final FlutterVersion Function() _flutterVersion;
+  final String Function() _flutterRoot;
+  final UserMessages _userMessages;
+  final FileSystem _fileSystem;
+  final Artifacts _artifacts;
+  final ProcessManager _processManager;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   Future<ValidationResult> validate() async {
@@ -662,65 +702,64 @@ class FlutterValidator extends DoctorValidator {
     String frameworkVersion;
 
     try {
-      final FlutterVersion version = globals.flutterVersion;
+      final FlutterVersion version = _flutterVersion();
       versionChannel = version.channel;
       frameworkVersion = version.frameworkVersion;
-      messages.add(ValidationMessage(userMessages.flutterVersion(
+      messages.add(ValidationMessage(_userMessages.flutterVersion(
         frameworkVersion,
-        Cache.flutterRoot,
+        _flutterRoot(),
       )));
-      messages.add(ValidationMessage(userMessages.flutterRevision(
+      messages.add(ValidationMessage(_userMessages.flutterRevision(
         version.frameworkRevisionShort,
         version.frameworkAge,
         version.frameworkDate,
       )));
-      messages.add(ValidationMessage(userMessages.engineRevision(version.engineRevisionShort)));
-      messages.add(ValidationMessage(userMessages.dartRevision(version.dartSdkVersion)));
-      if (globals.platform.environment.containsKey('PUB_HOSTED_URL')) {
-        messages.add(ValidationMessage(userMessages.pubMirrorURL(globals.platform.environment['PUB_HOSTED_URL'])));
+      messages.add(ValidationMessage(_userMessages.engineRevision(version.engineRevisionShort)));
+      messages.add(ValidationMessage(_userMessages.dartRevision(version.dartSdkVersion)));
+      if (_platform.environment.containsKey('PUB_HOSTED_URL')) {
+        messages.add(ValidationMessage(_userMessages.pubMirrorURL(_platform.environment['PUB_HOSTED_URL'])));
       }
-      if (globals.platform.environment.containsKey('FLUTTER_STORAGE_BASE_URL')) {
-        messages.add(ValidationMessage(userMessages.flutterMirrorURL(globals.platform.environment['FLUTTER_STORAGE_BASE_URL'])));
+      if (_platform.environment.containsKey('FLUTTER_STORAGE_BASE_URL')) {
+        messages.add(ValidationMessage(_userMessages.flutterMirrorURL(_platform.environment['FLUTTER_STORAGE_BASE_URL'])));
       }
     } on VersionCheckError catch (e) {
       messages.add(ValidationMessage.error(e.message));
       valid = ValidationType.partial;
     }
 
-    final String genSnapshotPath =
-      globals.artifacts.getArtifactPath(Artifact.genSnapshot);
-
     // Check that the binaries we downloaded for this platform actually run on it.
-    if (globals.fs.file(genSnapshotPath).existsSync()
-        && !_genSnapshotRuns(genSnapshotPath)) {
-      final StringBuffer buf = StringBuffer();
-      buf.writeln(userMessages.flutterBinariesDoNotRun);
-      if (globals.platform.isLinux) {
-        buf.writeln(userMessages.flutterBinariesLinuxRepairCommands);
+    // If the binaries are not downloaded (because android is not enabled), then do
+    // not run this check.
+    final String genSnapshotPath = _artifacts.getArtifactPath(Artifact.genSnapshot);
+    if (_fileSystem.file(genSnapshotPath).existsSync() && !_genSnapshotRuns(genSnapshotPath)) {
+      final StringBuffer buffer = StringBuffer();
+      buffer.writeln(_userMessages.flutterBinariesDoNotRun);
+      if (_platform.isLinux) {
+        buffer.writeln(_userMessages.flutterBinariesLinuxRepairCommands);
       }
-      messages.add(ValidationMessage.error(buf.toString()));
+      messages.add(ValidationMessage.error(buffer.toString()));
       valid = ValidationType.partial;
     }
 
     return ValidationResult(
       valid,
       messages,
-      statusInfo: userMessages.flutterStatusInfo(
+      statusInfo: _userMessages.flutterStatusInfo(
         versionChannel,
         frameworkVersion,
-        globals.os.name,
-        globals.platform.localeName,
+        _operatingSystemUtils.name,
+        _platform.localeName,
       ),
     );
   }
-}
 
-bool _genSnapshotRuns(String genSnapshotPath) {
-  const int kExpectedExitCode = 255;
-  try {
-    return processUtils.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
-  } on Exception {
-    return false;
+  bool _genSnapshotRuns(String genSnapshotPath) {
+    const int kExpectedExitCode = 255;
+    try {
+      return _processManager.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
+    } on Exception {
+      return false;
+    }
   }
 }
 
@@ -733,272 +772,6 @@ class NoIdeValidator extends DoctorValidator {
       ValidationMessage(userMessages.noIdeInstallationInfo),
     ], statusInfo: userMessages.noIdeStatusInfo);
   }
-}
-
-/// A doctor validator for both Intellij and Android Studio.
-abstract class IntelliJValidator extends DoctorValidator {
-  IntelliJValidator(String title, this.installPath, {
-    @required FileSystem fileSystem,
-  }) : _fileSystem = fileSystem,
-       super(title);
-
-  final String installPath;
-  final FileSystem _fileSystem;
-
-  String get version;
-  String get pluginsPath;
-
-  static final Map<String, String> _idToTitle = <String, String>{
-    'IntelliJIdea': 'IntelliJ IDEA Ultimate Edition',
-    'IdeaIC': 'IntelliJ IDEA Community Edition',
-  };
-
-  static final Version kMinIdeaVersion = Version(2017, 1, 0);
-
-  static Iterable<DoctorValidator> installedValidators(FileSystem fileSystem, Platform platform) {
-    if (platform.isLinux || platform.isWindows) {
-      return IntelliJValidatorOnLinuxAndWindows.installed(fileSystem);
-    }
-    if (platform.isMacOS) {
-      return IntelliJValidatorOnMac.installed(fileSystem);
-    }
-    return <DoctorValidator>[];
-  }
-
-  @override
-  Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
-
-    if (pluginsPath == null) {
-      messages.add(const ValidationMessage.error('Invalid IntelliJ version number.'));
-    } else {
-      messages.add(ValidationMessage(userMessages.intellijLocation(installPath)));
-
-      final IntelliJPlugins plugins = IntelliJPlugins(pluginsPath, fileSystem: _fileSystem);
-      plugins.validatePackage(
-        messages,
-        <String>['flutter-intellij', 'flutter-intellij.jar'],
-        'Flutter',
-        IntelliJPlugins.kIntellijFlutterPluginUrl,
-        minVersion: IntelliJPlugins.kMinFlutterPluginVersion,
-      );
-      plugins.validatePackage(
-        messages,
-        <String>['Dart'],
-        'Dart',
-        IntelliJPlugins.kIntellijDartPluginUrl,
-      );
-
-      if (_hasIssues(messages)) {
-        messages.add(ValidationMessage(userMessages.intellijPluginInfo));
-      }
-
-      _validateIntelliJVersion(messages, kMinIdeaVersion);
-    }
-
-    return ValidationResult(
-      _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
-      messages,
-      statusInfo: userMessages.intellijStatusInfo(version),
-    );
-  }
-
-  bool _hasIssues(List<ValidationMessage> messages) {
-    return messages.any((ValidationMessage message) => message.isError);
-  }
-
-  void _validateIntelliJVersion(List<ValidationMessage> messages, Version minVersion) {
-    // Ignore unknown versions.
-    if (minVersion == Version.unknown) {
-      return;
-    }
-
-    final Version installedVersion = Version.parse(version);
-    if (installedVersion == null) {
-      return;
-    }
-
-    if (installedVersion < minVersion) {
-      messages.add(ValidationMessage.error(userMessages.intellijMinimumVersion(minVersion.toString())));
-    }
-  }
-}
-
-/// A linux and windows specific implementation of the intellij validator.
-class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
-  IntelliJValidatorOnLinuxAndWindows(String title, this.version, String installPath, this.pluginsPath, {
-    @required FileSystem fileSystem,
-  }) : super(title, installPath, fileSystem: fileSystem);
-
-  @override
-  final String version;
-
-  @override
-  final String pluginsPath;
-
-  static Iterable<DoctorValidator> installed(FileSystem fileSystem) {
-    final List<DoctorValidator> validators = <DoctorValidator>[];
-    if (globals.fsUtils.homeDirPath == null) {
-      return validators;
-    }
-
-    void addValidator(String title, String version, String installPath, String pluginsPath) {
-      final IntelliJValidatorOnLinuxAndWindows validator =
-        IntelliJValidatorOnLinuxAndWindows(title, version, installPath, pluginsPath, fileSystem: fileSystem);
-      for (int index = 0; index < validators.length; ++index) {
-        final DoctorValidator other = validators[index];
-        if (other is IntelliJValidatorOnLinuxAndWindows && validator.installPath == other.installPath) {
-          if (validator.version.compareTo(other.version) > 0) {
-            validators[index] = validator;
-          }
-          return;
-        }
-      }
-      validators.add(validator);
-    }
-
-    final Directory homeDir = globals.fs.directory(globals.fsUtils.homeDirPath);
-    for (final Directory dir in homeDir.listSync().whereType<Directory>()) {
-      final String name = globals.fs.path.basename(dir.path);
-      IntelliJValidator._idToTitle.forEach((String id, String title) {
-        if (name.startsWith('.$id')) {
-          final String version = name.substring(id.length + 1);
-          String installPath;
-          try {
-            installPath = globals.fs.file(globals.fs.path.join(dir.path, 'system', '.home')).readAsStringSync();
-          } on Exception {
-            // ignored
-          }
-          if (installPath != null && globals.fs.isDirectorySync(installPath)) {
-            final String pluginsPath = globals.fs.path.join(dir.path, 'config', 'plugins');
-            addValidator(title, version, installPath, pluginsPath);
-          }
-        }
-      });
-    }
-    return validators;
-  }
-}
-
-/// A macOS specific implementation of the intellij validator.
-class IntelliJValidatorOnMac extends IntelliJValidator {
-  IntelliJValidatorOnMac(String title, this.id, String installPath, {
-    @required FileSystem fileSystem,
-  }) : super(title, installPath, fileSystem: fileSystem);
-
-  final String id;
-
-  static final Map<String, String> _dirNameToId = <String, String>{
-    'IntelliJ IDEA.app': 'IntelliJIdea',
-    'IntelliJ IDEA Ultimate.app': 'IntelliJIdea',
-    'IntelliJ IDEA CE.app': 'IdeaIC',
-  };
-
-  static Iterable<DoctorValidator> installed(FileSystem fileSystem) {
-    final List<DoctorValidator> validators = <DoctorValidator>[];
-    final List<String> installPaths = <String>[
-      '/Applications',
-      fileSystem.path.join(globals.fsUtils.homeDirPath, 'Applications'),
-    ];
-
-    void checkForIntelliJ(Directory dir) {
-      final String name = fileSystem.path.basename(dir.path);
-      _dirNameToId.forEach((String dirName, String id) {
-        if (name == dirName) {
-          final String title = IntelliJValidator._idToTitle[id];
-          validators.add(IntelliJValidatorOnMac(title, id, dir.path, fileSystem: fileSystem));
-        }
-      });
-    }
-
-    try {
-      final Iterable<Directory> installDirs = installPaths
-        .map(fileSystem.directory)
-        .map<List<FileSystemEntity>>((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
-        .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
-        .whereType<Directory>();
-      for (final Directory dir in installDirs) {
-        checkForIntelliJ(dir);
-        if (!dir.path.endsWith('.app')) {
-          for (final FileSystemEntity subdir in dir.listSync()) {
-            if (subdir is Directory) {
-              checkForIntelliJ(subdir);
-            }
-          }
-        }
-      }
-    } on FileSystemException catch (e) {
-      validators.add(ValidatorWithResult(
-          userMessages.intellijMacUnknownResult,
-          ValidationResult(ValidationType.missing, <ValidationMessage>[
-            ValidationMessage.error(e.message),
-          ]),
-      ));
-    }
-    return validators;
-  }
-
-  @visibleForTesting
-  String get plistFile {
-    _plistFile ??= _fileSystem.path.join(installPath, 'Contents', 'Info.plist');
-    return _plistFile;
-  }
-  String _plistFile;
-
-  @override
-  String get version {
-    _version ??= globals.plistParser.getValueFromFile(
-        plistFile,
-        PlistParser.kCFBundleShortVersionStringKey,
-      ) ?? 'unknown';
-    return _version;
-  }
-  String _version;
-
-  @override
-  String get pluginsPath {
-    if (_pluginsPath != null) {
-      return _pluginsPath;
-    }
-
-    final String altLocation = globals.plistParser
-      .getValueFromFile(plistFile, 'JetBrainsToolboxApp');
-
-    if (altLocation != null) {
-      _pluginsPath = altLocation + '.plugins';
-      return _pluginsPath;
-    }
-
-    final List<String> split = version.split('.');
-    if (split.length < 2) {
-      return null;
-    }
-    final String major = split[0];
-    final String minor = split[1];
-
-    final String homeDirPath = globals.fsUtils.homeDirPath;
-    String pluginsPath = globals.fs.path.join(
-      homeDirPath,
-      'Library',
-      'Application Support',
-      'JetBrains',
-      '$id$major.$minor',
-      'plugins',
-    );
-    // Fallback to legacy location from < 2020.
-    if (!globals.fs.isDirectorySync(pluginsPath)) {
-      pluginsPath = globals.fs.path.join(
-        homeDirPath,
-        'Library',
-        'Application Support',
-        '$id$major.$minor',
-      );
-    }
-    _pluginsPath = pluginsPath;
-
-    return _pluginsPath;
-  }
-  String _pluginsPath;
 }
 
 class DeviceValidator extends DoctorValidator {

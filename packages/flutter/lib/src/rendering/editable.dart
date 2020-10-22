@@ -676,14 +676,24 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         }
       } else {
         if (rightArrow && newSelection.extentOffset < _plainText.length) {
-          final int nextExtent = nextCharacter(newSelection.extentOffset, _plainText);
+          int nextExtent;
+          if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
+            nextExtent = newSelection.end;
+          } else {
+            nextExtent = nextCharacter(newSelection.extentOffset, _plainText);
+          }
           final int distance = nextExtent - newSelection.extentOffset;
           newSelection = newSelection.copyWith(extentOffset: nextExtent);
           if (shift) {
             _cursorResetLocation += distance;
           }
         } else if (leftArrow && newSelection.extentOffset > 0) {
-          final int previousExtent = previousCharacter(newSelection.extentOffset, _plainText);
+          int previousExtent;
+          if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
+            previousExtent = newSelection.start;
+          } else {
+            previousExtent = previousCharacter(newSelection.extentOffset, _plainText);
+          }
           final int distance = newSelection.extentOffset - previousExtent;
           newSelection = newSelection.copyWith(extentOffset: previousExtent);
           if (shift) {
@@ -2287,12 +2297,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   void paint(PaintingContext context, Offset offset) {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    if (_hasVisualOverflow && clipBehavior != Clip.none)
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents, clipBehavior: clipBehavior);
-    else
+    if (_hasVisualOverflow && clipBehavior != Clip.none) {
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents,
+          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+    } else {
+      _clipRectLayer = null;
       _paintContents(context, offset);
+    }
     _paintHandleLayers(context, getEndpointsForSelection(selection!));
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;

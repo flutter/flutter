@@ -12,7 +12,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
@@ -70,6 +69,13 @@ class AndroidWorkflow implements Workflow {
     && _androidSdk.emulatorPath != null;
 }
 
+/// A validator that checks if the Android SDK and Java SDK are available and
+/// installed correctly.
+///
+/// Android development requires the Android SDK, and at least one Java SDK. While
+/// newer Java compilers can be used to compile the Java application code, the SDK
+/// tools themselves required JDK 1.8. This older JDK is normally bundled with
+/// Android Studio.
 class AndroidValidator extends DoctorValidator {
   AndroidValidator({
     @required AndroidSdk androidSdk,
@@ -244,6 +250,8 @@ class AndroidValidator extends DoctorValidator {
   }
 }
 
+/// A subvalidator that checks if the licenses within the detected Android
+/// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator() : super('Android license subvalidator',);
 
@@ -337,7 +345,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     try {
-      final Process process = await processUtils.start(
+      final Process process = await globals.processUtils.start(
         <String>[globals.androidSdk.sdkManagerPath, '--licenses'],
         environment: globals.androidSdk.sdkManagerEnv,
       );
@@ -374,7 +382,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     try {
-      final Process process = await processUtils.start(
+      final Process process = await globals.processUtils.start(
         <String>[globals.androidSdk.sdkManagerPath, '--licenses'],
         environment: globals.androidSdk.sdkManagerEnv,
       );

@@ -233,7 +233,7 @@ typedef ImageChunkListener = void Function(ImageChunkEvent event);
 ///
 /// Used in [ImageStreamListener], as well as by [ImageCache.putIfAbsent] and
 /// [precacheImage], to report errors.
-typedef ImageErrorListener = void Function(dynamic exception, StackTrace? stackTrace);
+typedef ImageErrorListener = void Function(Object exception, StackTrace? stackTrace);
 
 /// An immutable notification of image bytes that have been incrementally loaded.
 ///
@@ -655,7 +655,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   @protected
   void reportError({
     DiagnosticsNode? context,
-    dynamic exception,
+    required Object exception,
     StackTrace? stack,
     InformationCollector? informationCollector,
     bool silent = false,
@@ -747,7 +747,7 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   /// FlutterErrorDetails]).
   OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector? informationCollector })
       : assert(image != null) {
-    image.then<void>(setImage, onError: (dynamic error, StackTrace stack) {
+    image.then<void>(setImage, onError: (Object error, StackTrace stack) {
       reportError(
         context: ErrorDescription('resolving a single-frame image stream'),
         exception: error,
@@ -819,7 +819,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
        _informationCollector = informationCollector,
        _scale = scale {
     this.debugLabel = debugLabel;
-    codec.then<void>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
+    codec.then<void>(_handleCodecReady, onError: (Object error, StackTrace stack) {
       reportError(
         context: ErrorDescription('resolving an image codec'),
         exception: error,
@@ -830,7 +830,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     });
     if (chunkEvents != null) {
       chunkEvents.listen(reportImageChunkEvent,
-        onError: (dynamic error, StackTrace stack) {
+        onError: (Object error, StackTrace stack) {
           reportError(
             context: ErrorDescription('loading an image'),
             exception: error,

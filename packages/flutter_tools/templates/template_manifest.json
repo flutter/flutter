@@ -139,7 +139,6 @@
         "templates/cocoapods/Podfile-ios-objc",
         "templates/cocoapods/Podfile-ios-swift",
         "templates/cocoapods/Podfile-macos",
-        "templates/driver/main_test.dart.tmpl",
         "templates/module/android/gradle/build.gradle.copy.tmpl",
         "templates/module/android/gradle/gradle.properties.tmpl",
         "templates/module/android/host_app_common/app.tmpl/build.gradle.tmpl",

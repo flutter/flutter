@@ -27,7 +27,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   TestRenderingFlutterBinding({ this.onErrors }) {
     FlutterError.onError = (FlutterErrorDetails details) {
       FlutterError.dumpErrorToConsole(details);
-      Zone.current.parent!.handleUncaughtError(details.exception as Object, details.stack!);
+      Zone.current.parent!.handleUncaughtError(details.exception, details.stack!);
     };
   }
 

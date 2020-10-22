@@ -145,7 +145,7 @@ class MaterialBanner extends StatelessWidget {
                   ),
                 Expanded(
                   child: DefaultTextStyle(
-                    style: textStyle,
+                    style: textStyle!,
                     child: content,
                   ),
                 ),

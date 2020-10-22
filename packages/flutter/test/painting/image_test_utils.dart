@@ -10,7 +10,6 @@ import 'package:flutter/painting.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
-
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   TestImageProvider(this.testImage);
 

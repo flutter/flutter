@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -20,8 +18,8 @@ class TestCanvas implements Canvas {
 }
 
 void main() {
-  ui.Image image300x300;
-  ui.Image image300x200;
+  late ui.Image image300x300;
+  late ui.Image image300x200;
   setUpAll(() async {
     image300x300 = await createTestImage(width: 300, height: 300, cache: false);
     image300x200 = await createTestImage(width: 300, height: 200, cache: false);
@@ -53,7 +51,7 @@ void main() {
 
   test('debugInvertOversizedImages', () async {
     debugInvertOversizedImages = true;
-    final FlutterExceptionHandler oldFlutterError = FlutterError.onError;
+    final FlutterExceptionHandler? oldFlutterError = FlutterError.onError;
 
     final List<String> messages = <String>[];
     FlutterError.onError = (FlutterErrorDetails details) {
@@ -111,7 +109,7 @@ void main() {
   });
 
   testWidgets('Reports Image painting', (WidgetTester tester) async {
-    ImageSizeInfo imageSizeInfo;
+    late ImageSizeInfo imageSizeInfo;
     int count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
       count += 1;
@@ -150,7 +148,7 @@ void main() {
   });
 
   testWidgets('Reports Image painting - change per frame', (WidgetTester tester) async {
-    ImageSizeInfo imageSizeInfo;
+    late ImageSizeInfo imageSizeInfo;
     int count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
       count += 1;
@@ -193,7 +191,7 @@ void main() {
   });
 
   testWidgets('Reports Image painting - no debug label', (WidgetTester tester) async {
-    ImageSizeInfo imageSizeInfo;
+    late ImageSizeInfo imageSizeInfo;
     int count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
       count += 1;

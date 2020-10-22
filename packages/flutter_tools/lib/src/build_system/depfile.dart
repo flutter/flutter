@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 
@@ -26,9 +27,7 @@ class DepfileService {
   /// exist.
   void writeToFile(Depfile depfile, File output) {
     if (depfile.inputs.isEmpty || depfile.outputs.isEmpty) {
-      if (output.existsSync()) {
-        output.deleteSync();
-      }
+      ErrorHandlingFileSystem.deleteIfExists(output);
       return;
     }
     final StringBuffer buffer = StringBuffer();
@@ -102,7 +101,7 @@ class DepfileService {
         .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
         .where((String path) => path.isNotEmpty)
     // The tool doesn't write duplicates to these lists. This call is an attempt to
-    // be resillient to the outputs of other tools which write or user edits to depfiles.
+    // be resilient to the outputs of other tools which write or user edits to depfiles.
         .toSet()
         .map(_fileSystem.file)
         .toList();

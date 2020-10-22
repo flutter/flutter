@@ -306,8 +306,8 @@ abstract class Route<T> {
   /// The future completes with the value given to [Navigator.pop], if any, or
   /// else the value of [currentResult]. See [didComplete] for more discussion
   /// on this topic.
-  Future<T> get popped => _popCompleter.future;
-  final Completer<T> _popCompleter = Completer<T>();
+  Future<T?> get popped => _popCompleter.future;
+  final Completer<T?> _popCompleter = Completer<T?>();
 
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then
@@ -329,7 +329,7 @@ abstract class Route<T> {
   /// See [popped], [didComplete], and [currentResult] for a discussion of the
   /// `result` argument.
   @mustCallSuper
-  bool didPop(T result) {
+  bool didPop(T? result) {
     didComplete(result);
     return true;
   }
@@ -351,7 +351,7 @@ abstract class Route<T> {
   /// iOS-style back gesture. See [NavigatorState.didStartUserGesture].
   @protected
   @mustCallSuper
-  void didComplete(T result) {
+  void didComplete(T? result) {
     _popCompleter.complete(result ?? currentResult);
   }
 
@@ -1528,6 +1528,7 @@ class Navigator extends StatefulWidget {
   /// Restoration ID to save and restore the state of the navigator, including
   /// its history.
   ///
+  /// {@template flutter.widgets.navigator.restorationScopeId}
   /// If a restoration ID is provided, the navigator will persist its internal
   /// state (including the route history as well as the restorable state of the
   /// routes) and restore it during state restoration.
@@ -1538,11 +1539,20 @@ class Navigator extends StatefulWidget {
   ///
   /// The state is persisted in a [RestorationBucket] claimed from
   /// the surrounding [RestorationScope] using the provided restoration ID.
+  /// Within that bucket, the [Navigator] also creates a new [RestorationScope]
+  /// for its children (the [Route]s).
   ///
   /// See also:
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
+  ///  * [RestorationMixin], which contains a runnable code sample showcasing
+  ///    state restoration in Flutter.
+  ///  * [Navigator], which explains under the heading "state restoration"
+  ///    how and under what conditions the navigator restores its state.
+  ///  * [Navigator.restorablePush], which includes an example showcasing how
+  ///    to push a restorable route unto the navigator.
+  /// {@endtemplate}
   final String? restorationScopeId;
 
   /// The name for the default route of the application.
@@ -1561,6 +1571,16 @@ class Navigator extends StatefulWidget {
   /// The [NavigatorState] and [initialRoute] will be passed to the callback.
   /// The callback must return a list of [Route] objects with which the history
   /// will be primed.
+  ///
+  /// When parsing the initialRoute, if there's any chance that the it may
+  /// contain complex characters, it's best to use the
+  /// [characters](https://pub.dev/packages/characters) API. This will ensure
+  /// that extended grapheme clusters and surrogate pairs are treated as single
+  /// characters by the code, the same way that they appear to the user. For
+  /// example, the string "👨‍👩‍👦" appears to the user as a single
+  /// character and `string.characters.length` intuitively returns 1. On the
+  /// other hand, `string.length` returns 8, and `string.runes.length` returns
+  /// 5!
   final RouteListFactory onGenerateInitialRoutes;
 
   /// Whether this navigator should report route update message back to the
@@ -1673,7 +1693,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePushNamed], which pushes a route that can be restored
   ///    during state restoration.
   @optionalTypeArgs
-  static Future<T> pushNamed<T extends Object?>(
+  static Future<T?> pushNamed<T extends Object?>(
     BuildContext context,
     String routeName, {
     Object? arguments,
@@ -1790,7 +1810,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePushReplacementNamed], which pushes a replacement route that
   ///    can be restored during state restoration.
   @optionalTypeArgs
-  static Future<T> pushReplacementNamed<T extends Object?, TO extends Object?>(
+  static Future<T?> pushReplacementNamed<T extends Object?, TO extends Object?>(
     BuildContext context,
     String routeName, {
     TO? result,
@@ -1884,7 +1904,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePopAndPushNamed], which pushes a new route that can be
   ///    restored during state restoration.
   @optionalTypeArgs
-  static Future<T> popAndPushNamed<T extends Object?, TO extends Object?>(
+  static Future<T?> popAndPushNamed<T extends Object?, TO extends Object?>(
     BuildContext context,
     String routeName, {
     TO? result,
@@ -1988,7 +2008,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePushNamedAndRemoveUntil], which pushes a new route that can
   ///    be restored during state restoration.
   @optionalTypeArgs
-  static Future<T> pushNamedAndRemoveUntil<T extends Object?>(
+  static Future<T?> pushNamedAndRemoveUntil<T extends Object?>(
     BuildContext context,
     String newRouteName,
     RoutePredicate predicate, {
@@ -2067,7 +2087,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePush], which pushes a route that can be restored during
   ///    state restoration.
   @optionalTypeArgs
-  static Future<T> push<T extends Object?>(BuildContext context, Route<T> route) {
+  static Future<T?> push<T extends Object?>(BuildContext context, Route<T> route) {
     return Navigator.of(context)!.push(route);
   }
 
@@ -2170,7 +2190,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePushReplacement], which pushes a replacement route that can
   ///    be restored during state restoration.
   @optionalTypeArgs
-  static Future<T> pushReplacement<T extends Object?, TO extends Object?>(BuildContext context, Route<T> newRoute, { TO? result }) {
+  static Future<T?> pushReplacement<T extends Object?, TO extends Object?>(BuildContext context, Route<T> newRoute, { TO? result }) {
     return Navigator.of(context)!.pushReplacement<T, TO>(newRoute, result: result);
   }
 
@@ -2275,7 +2295,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePushAndRemoveUntil], which pushes a route that can be
   ///    restored during state restoration.
   @optionalTypeArgs
-  static Future<T> pushAndRemoveUntil<T extends Object?>(BuildContext context, Route<T> newRoute, RoutePredicate predicate) {
+  static Future<T?> pushAndRemoveUntil<T extends Object?>(BuildContext context, Route<T> newRoute, RoutePredicate predicate) {
     return Navigator.of(context)!.pushAndRemoveUntil<T>(newRoute, predicate);
   }
 
@@ -2856,7 +2876,7 @@ class _RouteEntry extends RouteTransitionRecord {
     // User-provided restoration ids of Pages are prefixed with 'p+'. Generated
     // ids for pageless routes are prefixed with 'r+' to avoid clashes.
     if (hasPage) {
-      final Page<Object> page = route.settings as Page<Object>;
+      final Page<Object?> page = route.settings as Page<Object?>;
       return page.restorationId != null ? 'p+${page.restorationId}' : null;
     }
     if (restorationInformation != null) {
@@ -3603,11 +3623,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         assert(previousOldPageRouteEntry != null);
         final List<_RouteEntry> pagelessRoutes = pageRouteToPagelessRoutes
           .putIfAbsent(
-            previousOldPageRouteEntry!,
+            previousOldPageRouteEntry,
             () => <_RouteEntry>[],
           );
         pagelessRoutes.add(potentialEntryToRemove);
-        if (previousOldPageRouteEntry.isWaitingForExitingDecision)
+        if (previousOldPageRouteEntry!.isWaitingForExitingDecision)
           potentialEntryToRemove.markNeedsExitingDecision();
         continue;
       }
@@ -3651,7 +3671,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         assert(previousOldPageRouteEntry != null);
         final List<_RouteEntry> pagelessRoutes = pageRouteToPagelessRoutes
           .putIfAbsent(
-          previousOldPageRouteEntry!,
+          previousOldPageRouteEntry,
             () => <_RouteEntry>[]
         );
         pagelessRoutes.add(oldEntry);
@@ -3980,7 +4000,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [restorablePushNamed], which pushes a route that can be restored
   ///    during state restoration.
   @optionalTypeArgs
-  Future<T> pushNamed<T extends Object?>(
+  Future<T?> pushNamed<T extends Object?>(
     String routeName, {
     Object? arguments,
   }) {
@@ -4047,7 +4067,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [restorablePushReplacementNamed], which pushes a replacement route that
   ///  can be restored during state restoration.
   @optionalTypeArgs
-  Future<T> pushReplacementNamed<T extends Object?, TO extends Object?>(
+  Future<T?> pushReplacementNamed<T extends Object?, TO extends Object?>(
     String routeName, {
     TO? result,
     Object? arguments,
@@ -4117,7 +4137,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [restorablePopAndPushNamed], which pushes a new route that can be
   ///    restored during state restoration.
   @optionalTypeArgs
-  Future<T> popAndPushNamed<T extends Object?, TO extends Object?>(
+  Future<T?> popAndPushNamed<T extends Object?, TO extends Object?>(
     String routeName, {
     TO? result,
     Object? arguments,
@@ -4180,7 +4200,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [restorablePushNamedAndRemoveUntil], which pushes a new route that can
   ///    be restored during state restoration.
   @optionalTypeArgs
-  Future<T> pushNamedAndRemoveUntil<T extends Object?>(
+  Future<T?> pushNamedAndRemoveUntil<T extends Object?>(
     String newRouteName,
     RoutePredicate predicate, {
     Object? arguments,
@@ -4246,7 +4266,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [restorablePush], which pushes a route that can be restored during
   ///    state restoration.
   @optionalTypeArgs
-  Future<T> push<T extends Object?>(Route<T> route) {
+  Future<T?> push<T extends Object?>(Route<T> route) {
     _pushEntry(_RouteEntry(route, initialState: _RouteLifecycle.push));
     return route.popped;
   }
@@ -4338,7 +4358,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       if (route != null) {
         routeJsonable = <String, dynamic>{};
 
-        String description;
+        final String description;
         if (route is TransitionRoute<dynamic>) {
           final TransitionRoute<dynamic> transitionRoute = route;
           description = transitionRoute.debugLabel;
@@ -4390,7 +4410,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [restorablePushReplacement], which pushes a replacement route that can
   ///    be restored during state restoration.
   @optionalTypeArgs
-  Future<T> pushReplacement<T extends Object?, TO extends Object?>(Route<T> newRoute, { TO? result }) {
+  Future<T?> pushReplacement<T extends Object?, TO extends Object?>(Route<T> newRoute, { TO? result }) {
     assert(newRoute != null);
     assert(newRoute._navigator == null);
     _pushReplacementEntry(_RouteEntry(newRoute, initialState: _RouteLifecycle.pushReplace), result);
@@ -4496,7 +4516,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [restorablePushAndRemoveUntil], which pushes a route that can be
   ///    restored during state restoration.
   @optionalTypeArgs
-  Future<T> pushAndRemoveUntil<T extends Object?>(Route<T> newRoute, RoutePredicate predicate) {
+  Future<T?> pushAndRemoveUntil<T extends Object?>(Route<T> newRoute, RoutePredicate predicate) {
     assert(newRoute != null);
     assert(newRoute._navigator == null);
     assert(newRoute.overlayEntries.isEmpty);
@@ -4958,7 +4978,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return _history.cast<_RouteEntry?>().firstWhere(
       (_RouteEntry? entry) => entry!.restorationId == id,
       orElse: () => null,
-    )?.route as Route<T>;
+    )?.route as Route<T>?;
   }
 
   int get _userGesturesInProgress => _userGesturesInProgressCount;
@@ -5096,9 +5116,9 @@ abstract class _RestorationInformation {
 
   factory _RestorationInformation.fromSerializableData(Object data) {
     assert(data != null);
-    final List<Object> casted = data as List<Object>;
+    final List<Object?> casted = data as List<Object?>;
     assert(casted.isNotEmpty);
-    final _RouteRestorationType type = _RouteRestorationType.values[casted[0] as int];
+    final _RouteRestorationType type = _RouteRestorationType.values[casted[0]! as int];
     switch (type) {
       case _RouteRestorationType.named:
         return _NamedRestorationInformation.fromSerializableData(casted.sublist(1));
@@ -5147,11 +5167,11 @@ class _NamedRestorationInformation extends _RestorationInformation {
     required this.restorationScopeId,
   }) : assert(name != null), super(_RouteRestorationType.named);
 
-  factory _NamedRestorationInformation.fromSerializableData(List<Object> data) {
+  factory _NamedRestorationInformation.fromSerializableData(List<Object?> data) {
     assert(data.length >= 2);
     return _NamedRestorationInformation(
-      restorationScopeId: data[0] as int,
-      name: data[1] as String,
+      restorationScopeId: data[0]! as int,
+      name: data[1]! as String,
       arguments: data.length > 2 ? data[2] : null,
     );
   }
@@ -5186,12 +5206,11 @@ class _AnonymousRestorationInformation extends _RestorationInformation {
     required this.restorationScopeId,
   }) : assert(routeBuilder != null), super(_RouteRestorationType.anonymous);
 
-  factory _AnonymousRestorationInformation.fromSerializableData(List<Object> data) {
+  factory _AnonymousRestorationInformation.fromSerializableData(List<Object?> data) {
     assert(data.length > 1);
-    final RestorableRouteBuilder routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1] as int)) as RestorableRouteBuilder;
-    assert(routeBuilder != null);
+    final RestorableRouteBuilder routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1]! as int))! as RestorableRouteBuilder;
     return _AnonymousRestorationInformation(
-      restorationScopeId: data[0] as int,
+      restorationScopeId: data[0]! as int,
       routeBuilder: routeBuilder,
       arguments: data.length > 2 ? data[2] : null,
     );
@@ -5364,10 +5383,10 @@ class _HistoryProperty extends RestorableProperty<Map<String?, List<Object>>?> {
   }
 
   @override
-  Map<String?, List<Object>>? fromPrimitives(Object data) {
-    final Map<dynamic, dynamic> casted = data as Map<dynamic, dynamic>;
-    return casted.map<String, List<Object>>((dynamic key, dynamic value) => MapEntry<String, List<Object>>(
-      key as String,
+  Map<String?, List<Object>>? fromPrimitives(Object? data) {
+    final Map<dynamic, dynamic> casted = data! as Map<dynamic, dynamic>;
+    return casted.map<String?, List<Object>>((dynamic key, dynamic value) => MapEntry<String?, List<Object>>(
+      key as String?,
       List<Object>.from(value as List<dynamic>, growable: true),
     ));
   }
@@ -5530,7 +5549,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///         mainAxisSize: MainAxisSize.min,
 ///         children: <Widget>[
 ///           Text('Last count: ${_lastCount.value}'),
-///           RaisedButton(
+///           ElevatedButton(
 ///             onPressed: () {
 ///               // Show the route defined by the `RestorableRouteFuture`.
 ///               _counterRoute.present('Awesome Counter');
@@ -5675,9 +5694,9 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   }
 
   @override
-  String fromPrimitives(Object data) {
+  String fromPrimitives(Object? data) {
     assert(data != null);
-    return data as String;
+    return data! as String;
   }
 
   bool _disposed = false;

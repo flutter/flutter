@@ -61,7 +61,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.widgetWithText(DefaultTextStyle, 'Ok'));
 
-    expect(widget.style!.color, const CupertinoDynamicColor.withBrightnessAndContrast(
+    expect(widget.style.color, const CupertinoDynamicColor.withBrightnessAndContrast(
       color: Color.fromARGB(255, 255, 59, 48),
       darkColor: Color.fromARGB(255, 255, 69, 58),
       highContrastColor: Color.fromARGB(255, 215, 0, 21),
@@ -84,7 +84,7 @@ void main() {
           of: find.widgetWithText(CupertinoActionSheetAction, text),
           matching: find.byType(DefaultTextStyle),
         ),
-      ).style!;
+      ).style;
     }
 
     await tester.pumpWidget(
@@ -139,7 +139,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.widgetWithText(DefaultTextStyle, 'Ok'));
 
-    expect(widget.style!.fontWeight, equals(FontWeight.w600));
+    expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
   testWidgets('Action sheet text styles are correct when both title and message are included', (WidgetTester tester) async {
@@ -160,8 +160,8 @@ void main() {
     final DefaultTextStyle messageStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
         'An action sheet'));
 
-    expect(titleStyle.style!.fontWeight, FontWeight.w600);
-    expect(messageStyle.style!.fontWeight, FontWeight.w400);
+    expect(titleStyle.style.fontWeight, FontWeight.w600);
+    expect(messageStyle.style.fontWeight, FontWeight.w400);
   });
 
   testWidgets('Action sheet text styles are correct when title but no message is included', (WidgetTester tester) async {
@@ -179,7 +179,7 @@ void main() {
     final DefaultTextStyle titleStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
         'Action Sheet'));
 
-    expect(titleStyle.style!.fontWeight, FontWeight.w400);
+    expect(titleStyle.style.fontWeight, FontWeight.w400);
   });
 
   testWidgets('Action sheet text styles are correct when message but no title is included', (WidgetTester tester) async {
@@ -197,7 +197,7 @@ void main() {
     final DefaultTextStyle messageStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
         'An action sheet'));
 
-    expect(messageStyle.style!.fontWeight, FontWeight.w600);
+    expect(messageStyle.style.fontWeight, FontWeight.w600);
   });
 
   testWidgets('Content section but no actions', (WidgetTester tester) async {

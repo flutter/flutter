@@ -83,12 +83,11 @@ class _PasswordFieldState extends State<PasswordField> {
 }
 
 class TextFormFieldDemoState extends State<TextFormFieldDemo> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   PersonData person = PersonData();
 
   void showInSnackBar(String value) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(value),
     ));
   }
@@ -150,11 +149,11 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           title: const Text('This form has errors'),
           content: const Text('Really leave this form?'),
           actions: <Widget> [
-            FlatButton(
+            TextButton(
               child: const Text('YES'),
               onPressed: () { Navigator.of(context).pop(true); },
             ),
-            FlatButton(
+            TextButton(
               child: const Text('NO'),
               onPressed: () { Navigator.of(context).pop(false); },
             ),
@@ -168,7 +167,6 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawerDragStartBehavior: DragStartBehavior.down,
-      key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Text fields'),
         actions: <Widget>[MaterialDemoDocumentationButton(TextFormFieldDemo.routeName)],
@@ -279,7 +277,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   ),
                   const SizedBox(height: 24.0),
                   Center(
-                    child: RaisedButton(
+                    child: ElevatedButton(
                       child: const Text('SUBMIT'),
                       onPressed: _handleSubmitted,
                     ),

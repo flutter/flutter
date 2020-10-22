@@ -116,7 +116,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style!.color!.withAlpha(255), CupertinoColors.systemRed.color);
+    expect(widget.style.color!.withAlpha(255), CupertinoColors.systemRed.color);
   });
 
   testWidgets('Dialog dark theme', (WidgetTester tester) async {
@@ -231,7 +231,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style!.fontWeight, equals(FontWeight.w600));
+    expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
   testWidgets('Dialog default and destructive action styles', (WidgetTester tester) async {
@@ -243,8 +243,8 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style!.color!.withAlpha(255), CupertinoColors.systemRed.color);
-    expect(widget.style!.fontWeight, equals(FontWeight.w600));
+    expect(widget.style.color!.withAlpha(255), CupertinoColors.systemRed.color);
+    expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
   testWidgets('Dialog disabled action style', (WidgetTester tester) async {
@@ -254,8 +254,8 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style!.color!.opacity, greaterThanOrEqualTo(127 / 255));
-    expect(widget.style!.color!.opacity, lessThanOrEqualTo(128 / 255));
+    expect(widget.style.color!.opacity, greaterThanOrEqualTo(127 / 255));
+    expect(widget.style.color!.opacity, lessThanOrEqualTo(128 / 255));
   });
 
   testWidgets('Dialog enabled action style', (WidgetTester tester) async {
@@ -266,7 +266,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style!.color!.opacity, equals(1.0));
+    expect(widget.style.color!.opacity, equals(1.0));
   });
 
   testWidgets('Message is scrollable, has correct padding with large text sizes', (WidgetTester tester) async {

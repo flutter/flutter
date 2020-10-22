@@ -539,7 +539,7 @@ class ButtonThemeData with Diagnosticable {
   /// If [MaterialButton.textColor] is a [MaterialStateProperty<Color>], it will be
   /// used as the `disabledTextColor`. It will be resolved in the [MaterialState.disabled] state.
   Color getDisabledTextColor(MaterialButton button) {
-    if (button.textColor is MaterialStateProperty<Color>)
+    if (button.textColor is MaterialStateProperty<Color?>)
       return button.textColor!;
     if (button.disabledTextColor != null)
       return button.disabledTextColor!;

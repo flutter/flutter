@@ -123,7 +123,7 @@ Future<void> precacheImage(
         stream.removeListener(listener!);
       });
     },
-    onError: (dynamic exception, StackTrace? stackTrace) {
+    onError: (Object exception, StackTrace? stackTrace) {
       if (!completer.isCompleted) {
         completer.complete();
       }

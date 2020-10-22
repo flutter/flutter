@@ -7,7 +7,7 @@
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 
-dynamic getAssertionErrorWithMessage() {
+Object getAssertionErrorWithMessage() {
   try {
     assert(false, 'Message goes here.');
   } catch (e) {
@@ -16,7 +16,7 @@ dynamic getAssertionErrorWithMessage() {
   throw 'assert failed';
 }
 
-dynamic getAssertionErrorWithoutMessage() {
+Object getAssertionErrorWithoutMessage() {
   try {
     assert(false);
   } catch (e) {
@@ -25,7 +25,7 @@ dynamic getAssertionErrorWithoutMessage() {
   throw 'assert failed';
 }
 
-dynamic getAssertionErrorWithLongMessage() {
+Object getAssertionErrorWithLongMessage() {
   try {
     assert(false, 'word ' * 100);
   } catch (e) {

@@ -120,10 +120,10 @@ class ButtonStyle with Diagnosticable {
   ///
   /// The color of the [textStyle] is typically not used directly, the
   /// [foregroundColor] is used instead.
-  final MaterialStateProperty<TextStyle>? textStyle;
+  final MaterialStateProperty<TextStyle?>? textStyle;
 
   /// The button's background fill color.
-  final MaterialStateProperty<Color>? backgroundColor;
+  final MaterialStateProperty<Color?>? backgroundColor;
 
   /// The color for the button's [Text] and [Icon] widget descendants.
   ///
@@ -131,11 +131,11 @@ class ButtonStyle with Diagnosticable {
   /// of the components that compute defaults from [ButtonStyle] values
   /// compute a default [foregroundColor] and use that instead of the
   /// [textStyle]'s color.
-  final MaterialStateProperty<Color>? foregroundColor;
+  final MaterialStateProperty<Color?>? foregroundColor;
 
   /// The highlight color that's typically used to indicate that
   /// the button is focused, hovered, or pressed.
-  final MaterialStateProperty<Color>? overlayColor;
+  final MaterialStateProperty<Color?>? overlayColor;
 
   /// The shadow color of the button's [Material].
   ///
@@ -143,35 +143,35 @@ class ButtonStyle with Diagnosticable {
   /// dark themes, so by default the button classes add a
   /// semi-transparent overlay to indicate elevation. See
   /// [ThemeData.applyElevationOverlayColor].
-  final MaterialStateProperty<Color>? shadowColor;
+  final MaterialStateProperty<Color?>? shadowColor;
 
   /// The elevation of the button's [Material].
-  final MaterialStateProperty<double>? elevation;
+  final MaterialStateProperty<double?>? elevation;
 
   /// The padding between the button's boundary and its child.
-  final MaterialStateProperty<EdgeInsetsGeometry>? padding;
+  final MaterialStateProperty<EdgeInsetsGeometry?>? padding;
 
   /// The minimum size of the button itself.
   ///
   /// The size of the rectangle the button lies within may be larger
   /// per [tapTargetSize].
-  final MaterialStateProperty<Size>? minimumSize;
+  final MaterialStateProperty<Size?>? minimumSize;
 
   /// The color and weight of the button's outline.
   ///
   /// This value is combined with [shape] to create a shape decorated
   /// with an outline.
-  final MaterialStateProperty<BorderSide>? side;
+  final MaterialStateProperty<BorderSide?>? side;
 
   /// The shape of the button's underlying [Material].
   ///
   /// This shape is combined with [side] to create a shape decorated
   /// with an outline.
-  final MaterialStateProperty<OutlinedBorder>? shape;
+  final MaterialStateProperty<OutlinedBorder?>? shape;
 
   /// The cursor for a mouse pointer when it enters or is hovering over
   /// this button's [InkWell].
-  final MaterialStateProperty<MouseCursor>? mouseCursor;
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   /// Defines how compact the button's layout will be.
   ///
@@ -211,17 +211,17 @@ class ButtonStyle with Diagnosticable {
   /// Returns a copy of this ButtonStyle with the given fields replaced with
   /// the new values.
   ButtonStyle copyWith({
-    MaterialStateProperty<TextStyle>? textStyle,
-    MaterialStateProperty<Color>? backgroundColor,
-    MaterialStateProperty<Color>? foregroundColor,
-    MaterialStateProperty<Color>? overlayColor,
-    MaterialStateProperty<Color>? shadowColor,
-    MaterialStateProperty<double>? elevation,
-    MaterialStateProperty<EdgeInsetsGeometry>? padding,
-    MaterialStateProperty<Size>? minimumSize,
-    MaterialStateProperty<BorderSide>? side,
-    MaterialStateProperty<OutlinedBorder>? shape,
-    MaterialStateProperty<MouseCursor>? mouseCursor,
+    MaterialStateProperty<TextStyle?>? textStyle,
+    MaterialStateProperty<Color?>? backgroundColor,
+    MaterialStateProperty<Color?>? foregroundColor,
+    MaterialStateProperty<Color?>? overlayColor,
+    MaterialStateProperty<Color?>? shadowColor,
+    MaterialStateProperty<double?>? elevation,
+    MaterialStateProperty<EdgeInsetsGeometry?>? padding,
+    MaterialStateProperty<Size?>? minimumSize,
+    MaterialStateProperty<BorderSide?>? side,
+    MaterialStateProperty<OutlinedBorder?>? shape,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
     VisualDensity? visualDensity,
     MaterialTapTargetSize? tapTargetSize,
     Duration? animationDuration,
@@ -321,17 +321,17 @@ class ButtonStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle>>('textStyle', textStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color>>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color>>('foregroundColor', foregroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color>>('overlayColor', overlayColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color>>('shadowColor', shadowColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<double>>('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<EdgeInsetsGeometry>>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Size>>('minimumSize', minimumSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide>>('side', side, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder>>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('textStyle', textStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('foregroundColor', foregroundColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('shadowColor', shadowColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<EdgeInsetsGeometry?>>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(EnumProperty<MaterialTapTargetSize>('tapTargetSize', tapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('animationDuration', animationDuration, defaultValue: null));
@@ -344,14 +344,14 @@ class ButtonStyle with Diagnosticable {
     if (a == null && b == null)
       return null;
     return ButtonStyle(
-      textStyle: _lerpProperties<TextStyle>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),
-      backgroundColor: _lerpProperties<Color>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
-      foregroundColor:  _lerpProperties<Color>(a?.foregroundColor, b?.foregroundColor, t, Color.lerp),
-      overlayColor: _lerpProperties<Color>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
-      shadowColor: _lerpProperties<Color>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
-      elevation: _lerpProperties<double>(a?.elevation, b?.elevation, t, lerpDouble),
-      padding:  _lerpProperties<EdgeInsetsGeometry>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
-      minimumSize: _lerpProperties<Size>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
+      textStyle: _lerpProperties<TextStyle?>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),
+      backgroundColor: _lerpProperties<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
+      foregroundColor:  _lerpProperties<Color?>(a?.foregroundColor, b?.foregroundColor, t, Color.lerp),
+      overlayColor: _lerpProperties<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
+      shadowColor: _lerpProperties<Color?>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
+      elevation: _lerpProperties<double?>(a?.elevation, b?.elevation, t, lerpDouble),
+      padding:  _lerpProperties<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
+      minimumSize: _lerpProperties<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
       side: _lerpSides(a?.side, b?.side, t),
       shape: _lerpShapes(a?.shape, b?.shape, t),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
@@ -362,7 +362,7 @@ class ButtonStyle with Diagnosticable {
     );
   }
 
-  static MaterialStateProperty<T>? _lerpProperties<T>(MaterialStateProperty<T>? a, MaterialStateProperty<T>? b, double t, T? Function(T?, T?, double) lerpFunction ) {
+  static MaterialStateProperty<T?>? _lerpProperties<T>(MaterialStateProperty<T>? a, MaterialStateProperty<T>? b, double t, T? Function(T?, T?, double) lerpFunction ) {
     // Avoid creating a _LerpProperties object for a common case.
     if (a == null && b == null)
       return null;
@@ -370,21 +370,21 @@ class ButtonStyle with Diagnosticable {
   }
 
   // Special case because BorderSide.lerp() doesn't support null arguments
-  static MaterialStateProperty<BorderSide>? _lerpSides(MaterialStateProperty<BorderSide>? a, MaterialStateProperty<BorderSide>? b, double t) {
+  static MaterialStateProperty<BorderSide?>? _lerpSides(MaterialStateProperty<BorderSide?>? a, MaterialStateProperty<BorderSide?>? b, double t) {
     if (a == null && b == null)
       return null;
     return _LerpSides(a, b, t);
   }
 
   // TODO(hansmuller): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
-  static MaterialStateProperty<OutlinedBorder>? _lerpShapes(MaterialStateProperty<OutlinedBorder>? a, MaterialStateProperty<OutlinedBorder>? b, double t) {
+  static MaterialStateProperty<OutlinedBorder?>? _lerpShapes(MaterialStateProperty<OutlinedBorder?>? a, MaterialStateProperty<OutlinedBorder?>? b, double t) {
     if (a == null && b == null)
       return null;
     return _LerpShapes(a, b, t);
   }
 }
 
-class _LerpProperties<T> implements MaterialStateProperty<T> {
+class _LerpProperties<T> implements MaterialStateProperty<T?> {
   const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
 
   final MaterialStateProperty<T>? a;
@@ -400,11 +400,11 @@ class _LerpProperties<T> implements MaterialStateProperty<T> {
   }
 }
 
-class _LerpSides implements MaterialStateProperty<BorderSide> {
+class _LerpSides implements MaterialStateProperty<BorderSide?> {
   const _LerpSides(this.a, this.b, this.t);
 
-  final MaterialStateProperty<BorderSide>? a;
-  final MaterialStateProperty<BorderSide>? b;
+  final MaterialStateProperty<BorderSide?>? a;
+  final MaterialStateProperty<BorderSide?>? b;
   final double t;
 
   @override
@@ -421,11 +421,11 @@ class _LerpSides implements MaterialStateProperty<BorderSide> {
   }
 }
 
-class _LerpShapes implements MaterialStateProperty<OutlinedBorder> {
+class _LerpShapes implements MaterialStateProperty<OutlinedBorder?> {
   const _LerpShapes(this.a, this.b, this.t);
 
-  final MaterialStateProperty<OutlinedBorder>? a;
-  final MaterialStateProperty<OutlinedBorder>? b;
+  final MaterialStateProperty<OutlinedBorder?>? a;
+  final MaterialStateProperty<OutlinedBorder?>? b;
   final double t;
 
   @override

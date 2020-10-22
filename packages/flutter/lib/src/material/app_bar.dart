@@ -135,7 +135,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///           icon: const Icon(Icons.add_alert),
 ///           tooltip: 'Show Snackbar',
 ///           onPressed: () {
-///             scaffoldKey.currentState.showSnackBar(snackBar);
+///             ScaffoldMessenger.of(context).showSnackBar(snackBar);
 ///           },
 ///         ),
 ///         IconButton(
@@ -171,11 +171,6 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///    can expand and collapse.
 ///  * <https://material.io/design/components/app-bars-top.html>
 ///  * Cookbook: [Place a floating app bar above a list](https://flutter.dev/docs/cookbook/lists/floating-app-bar)
-///  * See our
-///    [AppBar Basics sample](https://flutter.dev/docs/catalog/samples/basic-app-bar)
-///    and our advanced samples with app bars with
-///    [tabs](https://flutter.dev/docs/catalog/samples/tabbed-app-bar) or
-///    [custom bottom widgets](https://flutter.dev/docs/catalog/samples/app-bar-bottom).
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///
@@ -208,7 +203,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.primary = true,
     this.centerTitle,
     this.excludeHeaderSemantics = false,
-    this.titleSpacing = NavigationToolbar.kMiddleSpacing,
+    this.titleSpacing,
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
     this.toolbarHeight,
@@ -216,7 +211,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation == null || elevation >= 0.0),
        assert(primary != null),
-       assert(titleSpacing != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
        preferredSize = Size.fromHeight(toolbarHeight ?? kToolbarHeight + (bottom?.preferredSize.height ?? 0.0)),
@@ -429,7 +423,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [title] to take all the space available, set this value to 0.0.
   ///
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
-  final double titleSpacing;
+  final double? titleSpacing;
 
   /// How opaque the toolbar part of the app bar is.
   ///
@@ -588,7 +582,7 @@ class _AppBarState extends State<AppBar> {
       }
 
       title = DefaultTextStyle(
-        style: centerStyle,
+        style: centerStyle!,
         softWrap: false,
         overflow: TextOverflow.ellipsis,
         child: title,
@@ -639,7 +633,7 @@ class _AppBarState extends State<AppBar> {
       middle: title,
       trailing: actions,
       centerMiddle: widget._getEffectiveCenterTitle(theme!),
-      middleSpacing: widget.titleSpacing,
+      middleSpacing: widget.titleSpacing ?? appBarTheme.titleSpacing ?? NavigationToolbar.kMiddleSpacing,
     );
 
     // If the toolbar is allocated less than toolbarHeight make it
@@ -650,7 +644,7 @@ class _AppBarState extends State<AppBar> {
         child: IconTheme.merge(
           data: overallIconTheme,
           child: DefaultTextStyle(
-            style: sideStyle,
+            style: sideStyle!,
             child: toolbar,
           ),
         ),
@@ -853,7 +847,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool primary;
   final bool? centerTitle;
   final bool excludeHeaderSemantics;
-  final double titleSpacing;
+  final double? titleSpacing;
   final double? expandedHeight;
   final double collapsedHeight;
   final double topPadding;
@@ -1069,7 +1063,7 @@ class SliverAppBar extends StatefulWidget {
     this.primary = true,
     this.centerTitle,
     this.excludeHeaderSemantics = false,
-    this.titleSpacing = NavigationToolbar.kMiddleSpacing,
+    this.titleSpacing,
     this.collapsedHeight,
     this.expandedHeight,
     this.floating = false,
@@ -1084,7 +1078,6 @@ class SliverAppBar extends StatefulWidget {
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
-       assert(titleSpacing != null),
        assert(floating != null),
        assert(pinned != null),
        assert(snap != null),
@@ -1264,7 +1257,7 @@ class SliverAppBar extends StatefulWidget {
   /// [title] to take all the space available, set this value to 0.0.
   ///
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
-  final double titleSpacing;
+  final double? titleSpacing;
 
   /// Defines the height of the app bar when it is collapsed.
   ///

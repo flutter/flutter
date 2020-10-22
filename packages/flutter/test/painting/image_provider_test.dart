@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -22,15 +20,15 @@ import 'mocks_for_image_cache.dart';
 void main() {
   TestRenderingFlutterBinding();
 
-  FlutterExceptionHandler oldError;
+  FlutterExceptionHandler? oldError;
   setUp(() {
     oldError = FlutterError.onError;
   });
 
   tearDown(() {
     FlutterError.onError = oldError;
-    PaintingBinding.instance.imageCache.clear();
-    PaintingBinding.instance.imageCache.clearLiveImages();
+    PaintingBinding.instance!.imageCache!.clear();
+    PaintingBinding.instance!.imageCache!.clearLiveImages();
   });
 
   test('obtainKey errors will be caught', () async {
@@ -42,7 +40,7 @@ void main() {
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
       caughtError.complete(false);
-    }, onError: (dynamic error, StackTrace stackTrace) {
+    }, onError: (dynamic error, StackTrace? stackTrace) {
       caughtError.complete(true);
     }));
     expect(await caughtError.future, true);
@@ -74,7 +72,7 @@ void main() {
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
       result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace stackTrace) {
+      }, onError: (dynamic error, StackTrace? stackTrace) {
         caughtError.complete(true);
       }));
       expect(await caughtError.future, true);
@@ -97,7 +95,7 @@ void main() {
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
       result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace stackTrace) {
+      }, onError: (dynamic error, StackTrace? stackTrace) {
         caughtError.complete(true);
       }));
       expect(await caughtError.future, true);
@@ -114,17 +112,17 @@ void main() {
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final FileImage provider = FileImage(file);
 
-    expect(imageCache.statusForKey(provider).untracked, true);
-    expect(imageCache.pendingImageCount, 0);
+    expect(imageCache!.statusForKey(provider).untracked, true);
+    expect(imageCache!.pendingImageCount, 0);
 
     provider.resolve(ImageConfiguration.empty);
 
-    expect(imageCache.statusForKey(provider).pending, true);
-    expect(imageCache.pendingImageCount, 1);
+    expect(imageCache!.statusForKey(provider).pending, true);
+    expect(imageCache!.pendingImageCount, 1);
 
     expect(await error.future, isStateError);
-    expect(imageCache.statusForKey(provider).untracked, true);
-    expect(imageCache.pendingImageCount, 0);
+    expect(imageCache!.statusForKey(provider).untracked, true);
+    expect(imageCache!.pendingImageCount, 0);
   });
 
   test('File image with empty file throws expected error (load)', () async {
@@ -136,14 +134,14 @@ void main() {
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final FileImage provider = FileImage(file);
 
-    expect(provider.load(provider, (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) async {
+    expect(provider.load(provider, (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
       return Future<Codec>.value(FakeCodec());
     }), isA<MultiFrameImageStreamCompleter>());
 
     expect(await error.future, isStateError);
   });
 
-  Future<Codec> _decoder(Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) async {
+  Future<Codec> _decoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
     return FakeCodec();
   }
 
