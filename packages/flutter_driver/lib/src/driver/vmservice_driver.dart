@@ -125,14 +125,14 @@ class VMServiceFlutterDriver extends FlutterDriver {
         _log('Failed to set pause_isolates_on_start=false, proceeding. Error: $e');
       }
 
-      return await client.resume(isolate.id).catchError((dynamic e) {
+      return client.resume(isolate.id).catchError((dynamic e) {
         const int vmMustBePausedCode = 101;
         if (e is vms.RPCError && e.code == vmMustBePausedCode) {
           // No biggie; something else must have resumed the isolate
           _log(
               'Attempted to resume an already resumed isolate. This may happen '
-              'when we lose a race with another tool (usually a debugger) that '
-              'is connected to the same isolate.'
+              'when another tool (usually a debugger) resumed the isolate '
+              'before the flutter_driver did.'
           );
         } else {
           // Failed to resume due to another reason. Fail hard.
