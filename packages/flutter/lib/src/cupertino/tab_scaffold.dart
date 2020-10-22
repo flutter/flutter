@@ -619,8 +619,9 @@ class RestorableCupertinoTabController extends RestorableChangeNotifier<Cupertin
   }
 
   @override
-  CupertinoTabController fromPrimitives(Object data) {
-    return CupertinoTabController(initialIndex: data as int);
+  CupertinoTabController fromPrimitives(Object? data) {
+    assert(data != null);
+    return CupertinoTabController(initialIndex: data! as int);
   }
 
   @override

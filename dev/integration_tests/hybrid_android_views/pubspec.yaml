@@ -1,6 +1,8 @@
 name: hybrid_platform_views
 description: An integration test for hybrid composition on Android
 version: 1.0.0+1
+environment:
+  sdk: '>=2.9.0 <3.0.0'
 
 dependencies:
   flutter:

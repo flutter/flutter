@@ -120,7 +120,7 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// }
 /// ```
 /// {@end-tool}
-abstract class MaterialStateColor extends Color implements MaterialStateProperty<Color?> {
+abstract class MaterialStateColor extends Color implements MaterialStateProperty<Color> {
   /// Creates a [MaterialStateColor].
   const MaterialStateColor(int defaultValue) : super(defaultValue);
 
