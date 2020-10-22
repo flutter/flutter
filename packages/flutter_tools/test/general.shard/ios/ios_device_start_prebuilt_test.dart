@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
@@ -54,7 +53,7 @@ const FakeCommand kLaunchReleaseCommand = FakeCommand(
     '--justlaunch',
     // These args are the default on DebuggingOptions.
     '--args',
-    '--enable-dart-profiling --enable-service-port-fallback --disable-service-auth-codes --observatory-port=60700',
+    '--enable-dart-profiling --disable-service-auth-codes',
   ],
   environment: <String, String>{
     'PATH': '/usr/bin:null',
@@ -72,7 +71,7 @@ const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
   '--no-wifi',
   '--justlaunch',
   '--args',
-  '--enable-dart-profiling --enable-service-port-fallback --disable-service-auth-codes --observatory-port=60700 --enable-checked-mode --verify-entry-points'
+  '--enable-dart-profiling --disable-service-auth-codes --enable-checked-mode --verify-entry-points'
 ], environment: <String, String>{
   'PATH': '/usr/bin:null',
   'DYLD_LIBRARY_PATH': '/path/to/libraries',
@@ -92,7 +91,7 @@ const FakeCommand kAttachDebuggerCommand = FakeCommand(command: <String>[
   '--debug',
   '--no-wifi',
   '--args',
-  '--enable-dart-profiling --enable-service-port-fallback --disable-service-auth-codes --observatory-port=60700 --enable-checked-mode --verify-entry-points'
+  '--enable-dart-profiling --disable-service-auth-codes --enable-checked-mode --verify-entry-points'
 ], environment: <String, String>{
   'PATH': '/usr/bin:null',
   'DYLD_LIBRARY_PATH': '/path/to/libraries',
@@ -151,16 +150,11 @@ void main() {
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       platformArgs: <String, dynamic>{},
-      fallbackPollingDelay: Duration.zero,
-      fallbackThrottleTimeout: const Duration(milliseconds: 10),
     );
 
     expect(launchResult.started, true);
     expect(launchResult.hasObservatory, true);
-    verify(globals.flutterUsage.sendEvent('ios-handshake', 'log-success')).called(1);
     expect(await device.stopApp(iosApp), false);
-  }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
   });
 
   // Still uses context for analytics.
@@ -195,65 +189,12 @@ void main() {
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       platformArgs: <String, dynamic>{},
-      fallbackPollingDelay: Duration.zero,
-      fallbackThrottleTimeout: const Duration(milliseconds: 10),
     );
 
     expect(launchResult.started, true);
     expect(launchResult.hasObservatory, true);
-    verify(globals.flutterUsage.sendEvent('ios-handshake', 'log-success')).called(1);
     expect(await device.stopApp(iosApp), false);
-  }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
   });
-
-  // Still uses context for analytics.
-  testUsingContext('IOSDevice.startApp fails in debug mode when Observatory URI is malformed', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      kDeployCommand,
-      kAttachDebuggerCommand,
-    ]);
-    final IOSDevice device = setUpIOSDevice(
-      processManager: processManager,
-      fileSystem: fileSystem,
-    );
-    final IOSApp iosApp = PrebuiltIOSApp(
-      projectBundleId: 'app',
-      bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
-    );
-    final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
-
-    device.portForwarder = const NoOpDevicePortForwarder();
-    device.setLogReader(iosApp, deviceLogReader);
-
-    // Now that the reader is used, start writing messages to it.
-    Timer.run(() {
-      deviceLogReader.addLine('Foo');
-      deviceLogReader.addLine('Observatory listening on http://127.0.0.1:456abc');
-    });
-
-    final LaunchResult launchResult = await device.startApp(iosApp,
-      prebuiltApplication: true,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      platformArgs: <String, dynamic>{},
-      fallbackPollingDelay: Duration.zero,
-      // fallbackThrottleTimeout: const Duration(milliseconds: 10),
-    );
-
-    expect(launchResult.started, false);
-    expect(launchResult.hasObservatory, false);
-    verify(globals.flutterUsage.sendEvent(
-      'ios-handshake',
-      'failure-other',
-      label: anyNamed('label'),
-      value: anyNamed('value'),
-    )).called(1);
-    verify(globals.flutterUsage.sendEvent('ios-handshake', 'log-failure')).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => MockUsage(),
-    });
 
   // Still uses context for TimeoutConfiguration and usage
   testUsingContext('IOSDevice.startApp succeeds in release mode', () async {
@@ -276,8 +217,6 @@ void main() {
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       platformArgs: <String, dynamic>{},
-      fallbackPollingDelay: Duration.zero,
-      fallbackThrottleTimeout: const Duration(milliseconds: 10),
     );
 
     expect(launchResult.started, true);
@@ -311,9 +250,7 @@ void main() {
           '--args',
           <String>[
             '--enable-dart-profiling',
-            '--enable-service-port-fallback',
             '--disable-service-auth-codes',
-            '--observatory-port=60700',
             '--disable-observatory-publication',
             '--start-paused',
             '--dart-flags="--foo,--null_assertions"',
@@ -329,9 +266,9 @@ void main() {
             '--purge-persistent-cache',
           ].join(' '),
         ], environment: const <String, String>{
-          'PATH': '/usr/bin:null',
-          'DYLD_LIBRARY_PATH': '/path/to/libraries',
-        },
+        'PATH': '/usr/bin:null',
+        'DYLD_LIBRARY_PATH': '/path/to/libraries',
+      },
         stdout: '(lldb)     run\nsuccess',
       )
     ]);
@@ -375,63 +312,11 @@ void main() {
         nullAssertions: true,
       ),
       platformArgs: <String, dynamic>{},
-      fallbackPollingDelay: Duration.zero,
-      fallbackThrottleTimeout: const Duration(milliseconds: 10),
     );
 
     expect(launchResult.started, true);
     expect(await device.stopApp(iosApp), false);
     expect(processManager.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
-  });
-
-  // Still uses context for analytics.
-  testUsingContext(
-      'IOSDevice.startApp detaches lldb when VM service connection fails',
-      () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-
-    final MockIOSDeploy mockIOSDeploy = MockIOSDeploy();
-    final MockIOSDeployDebugger mockIOSDeployDebugger = MockIOSDeployDebugger();
-    when(mockIOSDeploy.prepareDebuggerForLaunch(
-            deviceId: anyNamed('deviceId'),
-            bundlePath: anyNamed('bundlePath'),
-            launchArguments: anyNamed('launchArguments'),
-            interfaceType: anyNamed('interfaceType')))
-        .thenReturn(mockIOSDeployDebugger);
-    when(mockIOSDeploy.installApp(
-            deviceId: anyNamed('deviceId'),
-            bundlePath: anyNamed('bundlePath'),
-            launchArguments: anyNamed('launchArguments'),
-            interfaceType: anyNamed('interfaceType')))
-        .thenAnswer((_) async => 0);
-
-    when(mockIOSDeployDebugger.launchAndAttach()).thenAnswer((_) async => true);
-
-    final IOSDevice device = setUpIOSDevice(
-      fileSystem: fileSystem,
-      iosDeploy: mockIOSDeploy,
-    );
-    final IOSApp iosApp = PrebuiltIOSApp(
-      projectBundleId: 'app',
-      bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
-    );
-    device.portForwarder = const NoOpDevicePortForwarder();
-    device.setLogReader(iosApp, FakeDeviceLogReader());
-
-    final LaunchResult launchResult = await device.startApp(
-      iosApp,
-      prebuiltApplication: true,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      platformArgs: <String, dynamic>{},
-      fallbackPollingDelay: Duration.zero,
-      fallbackThrottleTimeout: const Duration(milliseconds: 10),
-    );
-
-    expect(launchResult.started, false);
-    verify(mockIOSDeployDebugger.detach()).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
   });
