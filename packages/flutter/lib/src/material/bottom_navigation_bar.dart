@@ -166,10 +166,10 @@ class BottomNavigationBar extends StatefulWidget {
   ///
   /// If [showSelectedLabels] is `null`, [BottomNavigationBarThemeData.showSelectedLabels]
   /// is used. If [BottomNavigationBarThemeData.showSelectedLabels]  is null,
-  /// then [showSelectedLabels] defaults to `true`.argument defaults to `true`.
+  /// then [showSelectedLabels] defaults to `true`.
   ///
   /// If [showUnselectedLabels] is `null`, [BottomNavigationBarThemeData.showUnselectedLabels]
-  /// is used. If [BottomNavigationBarThemeData.showSelectedLabels]  is null,
+  /// is used. If [BottomNavigationBarThemeData.showSelectedLabels] is null,
   /// then [showUnselectedLabels] defaults to `true` when [type] is
   /// [BottomNavigationBarType.fixed] and `false` when [type] is
   /// [BottomNavigationBarType.shifting].
