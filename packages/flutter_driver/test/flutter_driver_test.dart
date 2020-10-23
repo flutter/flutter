@@ -56,8 +56,15 @@ void main() {
 
 
     test('throws after retries if no isolate', () async {
-      fakeVM.isolate = null;
-      expectLater(() => FlutterDriver.connect(dartVmServiceUrl: ''), throwsDriverError);
+      fakeVM.numberOfTriesBeforeResolvingIsolate = 10000;
+      FakeAsync().run((FakeAsync time) {
+        FlutterDriver.connect(dartVmServiceUrl: '');
+        time.elapse(kUnusuallyLongTimeout);
+      });
+      expect(log, <String>[
+        'VMServiceFlutterDriver: Connecting to Flutter application at ',
+        'VMServiceFlutterDriver: The root isolate is taking an unuusally long time to start.',
+      ]);
     });
 
     test('Retries connections if isolate is not available', () async {

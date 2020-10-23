@@ -93,25 +93,28 @@ class VMServiceFlutterDriver extends FlutterDriver {
     _log('Connecting to Flutter application at $dartVmServiceUrl');
     final vms.VmService client = await vmServiceConnectFunction(dartVmServiceUrl, headers);
 
-    vms.IsolateRef isolateRef;
-    const int totalTries = 10;
-    bool _checkIsolate(vms.IsolateRef ref) => ref.number == isolateNumber;
-    for (int tries = 0; tries < totalTries; tries += 1) {
-      final vms.VM vm = await client.getVM();
-      if (vm.isolates.isEmpty || (isolateNumber != null && !vm.isolates.any(_checkIsolate))) {
-        await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
-        continue;
+    Future<vms.IsolateRef> _waitForRootIsolate() async {
+      bool _checkIsolate(vms.IsolateRef ref) => ref.number == isolateNumber;
+      while (true) {
+        final vms.VM vm = await client.getVM();
+        if (vm.isolates.isEmpty || (isolateNumber != null && !vm.isolates.any(_checkIsolate))) {
+          await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
+          continue;
+        }
+        return isolateNumber == null
+          ? vm.isolates.first
+          : vm.isolates.firstWhere(_checkIsolate);
       }
-      isolateRef = isolateNumber == null
-        ? vm.isolates.first
-        : vm.isolates.firstWhere(_checkIsolate);
-      break;
     }
-    if (isolateRef == null) {
-      throw DriverError('Failed to find main isolate after ${_kPauseBetweenReconnectAttempts.inSeconds * totalTries} seconds!');
-    }
-    _log('Isolate found with number: ${isolateRef.number}');
 
+    final vms.IsolateRef isolateRef = await _warnIfSlow<vms.IsolateRef>(
+      future: _waitForRootIsolate(),
+      timeout: kUnusuallyLongTimeout,
+      message: isolateNumber == null
+        ? 'The root isolate is taking an unuusally long time to start.'
+        : 'Isolate $isolateNumber is taking an unusually long time to start.',
+    );
+    _log('Isolate found with number: ${isolateRef.number}');
     vms.Isolate isolate = await client.getIsolate(isolateRef.id);
 
     if (isolate.pauseEvent.kind == vms.EventKind.kNone) {
