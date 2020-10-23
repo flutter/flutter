@@ -109,30 +109,37 @@ abstract class FlutterDriver {
   ///
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
   ///
-  /// `dartVmServiceUrl` is the URL to Dart observatory (a.k.a. VM service). If
-  /// not specified, the URL specified by the `VM_SERVICE_URL` environment
-  /// variable is used. One or the other must be specified.
+  /// The `dartVmServiceUrl` parameter is the URL to Dart observatory
+  /// (a.k.a. VM service). If not specified, the URL specified by the
+  /// `VM_SERVICE_URL` environment variable is used. One or the other must be
+  /// specified.
   ///
-  /// `printCommunication` determines whether the command communication between
-  /// the test and the app should be printed to stdout.
+  /// The `printCommunication` parameter determines whether the command
+  /// communication between the test and the app should be printed to stdout.
   ///
-  /// `logCommunicationToFile` determines whether the command communication
-  /// between the test and the app should be logged to `flutter_driver_commands.log`.
+  /// The `logCommunicationToFile` parameter determines whether the command
+  /// communication between the test and the app should be logged to
+  /// `flutter_driver_commands.log`.
   ///
-  /// `isolateNumber` determines the specific isolate to connect to.
-  /// If this is left as `null`, will connect to the first isolate found
+  /// The `isolateNumber` parameter determines the specific isolate to connect
+  /// to. If this is left as `null`, will connect to the first isolate found
   /// running on `dartVmServiceUrl`.
   ///
-  /// `fuchsiaModuleTarget` specifies the pattern for determining which mod to
-  /// control. When running on a Fuchsia device, either this or the environment
-  /// variable `FUCHSIA_MODULE_TARGET` must be set (the environment variable is
-  /// treated as a substring pattern). This field will be ignored if
+  /// The `fuchsiaModuleTarget` parameter specifies the pattern for determining
+  /// which mod to control. When running on a Fuchsia device, either this or the
+  /// environment variable `FUCHSIA_MODULE_TARGET` must be set (the environment
+  /// variable is treated as a substring pattern). This field will be ignored if
   /// `isolateNumber` is set, as this is already enough information to connect
   /// to an isolate.
   ///
-  /// `browser` specifies which FlutterDriver implementation to use. If not
-  /// speicifed or set to false, [VMServiceFlutterDriver] implementation
-  /// will be used. Otherwise, [WebFlutterDriver] implementation will be used.
+  /// The `headers` parameter optionally specifies HTTP headers to be included
+  /// in the [WebSocket] connection. This is only used for
+  /// [VMServiceFlutterDriver] connections.
+  ///
+  /// The `browser` parameter specifies which FlutterDriver implementation to
+  /// use. If not speicifed or set to false, [VMServiceFlutterDriver]
+  /// implementation will be used. Otherwise, [WebFlutterDriver] implementation
+  /// will be used.
   ///
   /// The return value is a future. This method never times out, though it may
   /// fail (completing with an error). A timeout can be applied by the caller
@@ -144,6 +151,7 @@ abstract class FlutterDriver {
     int isolateNumber,
     Pattern fuchsiaModuleTarget,
     Duration timeout,
+    Map<String, dynamic> headers,
   }) async {
     if (Platform.environment['FLUTTER_WEB_TEST'] != null) {
       return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl, timeout: timeout);
@@ -154,6 +162,7 @@ abstract class FlutterDriver {
       logCommunicationToFile: logCommunicationToFile,
       isolateNumber: isolateNumber,
       fuchsiaModuleTarget: fuchsiaModuleTarget,
+      headers: headers,
     );
   }
 

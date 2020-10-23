@@ -44,7 +44,9 @@ void main() {
       fakeIsolate = FakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
-      vmServiceConnectFunction = (String url) async => fakeClient;
+      vmServiceConnectFunction = (String url, Map<String, dynamic> headers) async {
+        return fakeClient;
+      };
       fakeClient.responses['get_health'] = makeFakeResponse(<String, dynamic>{'status': 'ok'});
     });
 

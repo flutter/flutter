@@ -47,6 +47,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
     bool logCommunicationToFile = true,
     int isolateNumber,
     Pattern fuchsiaModuleTarget,
+    Map<String, dynamic> headers,
   }) async {
     // If running on a Fuchsia device, connect to the first isolate whose name
     // matches FUCHSIA_MODULE_TARGET.
@@ -90,7 +91,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
     // Connect to Dart VM services
     _log('Connecting to Flutter application at $dartVmServiceUrl');
-    final vms.VmService client = await vmServiceConnectFunction(dartVmServiceUrl);
+    final vms.VmService client = await vmServiceConnectFunction(dartVmServiceUrl, headers);
     final vms.VM vm = await client.getVM();
     final vms.IsolateRef isolateRef = isolateNumber == null
       ? vm.isolates.first
@@ -538,12 +539,24 @@ String _getWebSocketUrl(String url) {
 
 /// Waits for a real Dart VM service to become available, then connects using
 /// the [VMServiceClient].
-Future<vms.VmService> _waitAndConnect(String url) async {
+Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic> headers) async {
   final String webSocketUrl = _getWebSocketUrl(url);
   int attempts = 0;
   while (true) {
     try {
-      return await vmServiceConnectUri(webSocketUrl);
+      final WebSocket socket = await WebSocket.connect(webSocketUrl, headers: headers);
+      final vms.VmService service = vms.VmService(
+        socket,
+        socket.add,
+        log: null,
+        disposeHandler: () async {
+          await socket.close();
+        },
+      );
+      // This call is to ensure we are able to establish a connection instead of
+      // keeping on trucking and failing farther down the process.
+      await service.getVersion();
+      return service;
     } catch (e) {
       if (attempts > 5) {
         _log('It is taking an unusually long time to connect to the VM...');
@@ -602,5 +615,5 @@ Future<T> _warnIfSlow<T>({
   return future;
 }
 
-/// A function that connects to a Dart VM service given the [url].
-typedef VMServiceConnectFunction = Future<vms.VmService> Function(String url);
+/// A function that connects to a Dart VM service given the `url` and `headers`.
+typedef VMServiceConnectFunction = Future<vms.VmService> Function(String url, Map<String, dynamic> headers);
