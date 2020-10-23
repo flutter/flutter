@@ -54,12 +54,21 @@ class CkAnimatedImage implements ui.Image {
     }
   }
 
+  bool _disposed = false;
   @override
   void dispose() {
     box.delete();
+    _disposed = true;
   }
 
   @override
+  bool get debugDisposed {
+    if (assertionsEnabled) {
+      return _disposed;
+    }
+    throw StateError('Image.debugDisposed is only available when asserts are enabled.');
+  }
+
   ui.Image clone() => CkAnimatedImage._(_skAnimatedImage, box);
 
   @override
@@ -138,9 +147,22 @@ class CkImage implements ui.Image {
     }
   }
 
+  bool _disposed = false;
   @override
   void dispose() {
     box.delete();
+    assert(() {
+      _disposed = true;
+      return true;
+    }());
+  }
+
+  @override
+  bool get debugDisposed {
+    if (assertionsEnabled) {
+      return _disposed;
+    }
+    throw StateError('Image.debugDisposed is only available when asserts are enabled.');
   }
 
   @override

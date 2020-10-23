@@ -63,6 +63,14 @@ void testMain() async {
       expect(frameInfo.image.width, 100);
       expect(frameInfo.image.toString(), '[100×100]');
     });
+    test('dispose image image', () async {
+      final HtmlCodec codec = HtmlCodec('sample_image1.png');
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      expect(frameInfo.image, isNotNull);
+      expect(frameInfo.image.debugDisposed, false);
+      frameInfo.image.dispose();
+      expect(frameInfo.image.debugDisposed, true);
+    });
     test('provides image loading progress', () async {
       StringBuffer buffer = new StringBuffer();
       final HtmlCodec codec = HtmlCodec('sample_image1.png',
