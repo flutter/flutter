@@ -463,7 +463,7 @@ class AlertDialog extends StatelessWidget {
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        label ??= MaterialLocalizations.of(context)?.alertDialogLabel;
+        label ??= MaterialLocalizations.of(context).alertDialogLabel;
     }
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
@@ -814,13 +814,12 @@ class SimpleDialog extends StatelessWidget {
       switch (theme.platform) {
         case TargetPlatform.macOS:
         case TargetPlatform.iOS:
-          label = semanticLabel;
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-          label = semanticLabel ?? MaterialLocalizations.of(context)?.dialogLabel;
+          label = semanticLabel ?? MaterialLocalizations.of(context).dialogLabel;
       }
     }
 
@@ -997,7 +996,7 @@ Future<T?> showDialog<T>({
       return dialog;
     },
     barrierDismissible: barrierDismissible,
-    barrierLabel: MaterialLocalizations.of(context)!.modalBarrierDismissLabel,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     barrierColor: barrierColor ?? Colors.black54,
     transitionDuration: const Duration(milliseconds: 150),
     transitionBuilder: _buildMaterialDialogTransitions,

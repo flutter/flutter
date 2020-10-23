@@ -543,7 +543,7 @@ class _AppBarState extends State<AppBar> {
         leading = IconButton(
           icon: const Icon(Icons.menu),
           onPressed: _handleDrawerButton,
-          tooltip: MaterialLocalizations.of(context)!.openAppDrawerTooltip,
+          tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
       } else {
         if (!hasEndDrawer && canPop)
@@ -616,7 +616,7 @@ class _AppBarState extends State<AppBar> {
       actions = IconButton(
         icon: const Icon(Icons.menu),
         onPressed: _handleDrawerButtonEnd,
-        tooltip: MaterialLocalizations.of(context)!.openAppDrawerTooltip,
+        tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
       );
     }
 
