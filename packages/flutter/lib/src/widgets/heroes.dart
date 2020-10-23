@@ -562,10 +562,12 @@ class _HeroFlight {
       return;
     }
 
-    // The `navigator` must be null, or the first if clause would have returned.
-    final NavigatorState navigator = manifest!.fromRoute.navigator!;
     if (_scheduledPerformAnimtationUpdate)
       return;
+
+    // The `navigator` must be non-null here, or the first if clause above would
+    // have returned from this method.
+    final NavigatorState navigator = manifest!.fromRoute.navigator!;
 
     void delayedPerformAnimtationUpdate() {
       assert(!navigator.userGestureInProgress);
