@@ -634,7 +634,7 @@ class _MixedAlignment extends AlignmentGeometry {
 /// The vertical alignment of a widget within an input box.
 ///
 /// A single [y] value that can range from -1.0 to 1.0 inclusive. -1.0 aligns to the top
-/// of the input box so that the top of the widget fits within the box and its 
+/// of the input box so that the top of the widget fits within the box and its
 /// padding. 0.0 aligns to the center of the box. 1.0 aligns so that the bottom
 /// of the widget aligns with the bottom interior edge of the input box.
 class VerticalAlignment {
