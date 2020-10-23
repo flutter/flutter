@@ -258,6 +258,42 @@ void testMain() {
     });
   });
 
+  /// Verify elementCache is passed during update to reuse existing
+  /// image elements.
+  test('Should retain same image element', () async {
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+    final Picture picture1 = _drawPathImagePath();
+    EngineLayer oldLayer = builder.pushClipRect(
+      const Rect.fromLTRB(10, 10, 300, 300),
+    );
+    builder.addPicture(Offset.zero, picture1);
+    builder.pop();
+
+    html.HtmlElement content = builder.build().webOnlyRootElement;
+    html.document.body.append(content);
+    List<html.ImageElement> list = content.querySelectorAll('img');
+    for (html.ImageElement image in list) {
+      image.alt = 'marked';
+    }
+
+    // Force update to scene which will utilize reuse code path.
+    final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
+    builder2.pushClipRect(
+        const Rect.fromLTRB(5, 10, 300, 300),
+        oldLayer: oldLayer
+    );
+    final Picture picture2 = _drawPathImagePath();
+    builder2.addPicture(Offset.zero, picture2);
+    builder2.pop();
+
+    html.HtmlElement contentAfterReuse = builder2.build().webOnlyRootElement;
+    list = contentAfterReuse.querySelectorAll('img');
+    for (html.ImageElement image in list) {
+      expect(image.alt, 'marked');
+    }
+    expect(list.length, 1);
+  });
+
   PersistedPicture findPictureSurfaceChild(PersistedContainerSurface parent) {
     PersistedPicture pictureSurface;
     parent.visitChildren((PersistedSurface child) {
