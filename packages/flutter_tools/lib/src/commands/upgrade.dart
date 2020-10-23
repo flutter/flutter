@@ -38,6 +38,11 @@ class UpgradeCommand extends FlutterCommand {
         'working-directory',
         hide: true,
         help: 'Override the upgrade working directory for integration testing.'
+      )
+      ..addFlag(
+        'verify-only',
+        help: 'Verifies for any new flutter update, without fetching the update.',
+        negatable: false,
       );
   }
 
@@ -63,6 +68,7 @@ class UpgradeCommand extends FlutterCommand {
       flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
         : FlutterVersion(const SystemClock(), _commandRunner.workingDirectory),
+      verifyOnly: boolArg('verify-only'),
     );
   }
 }
@@ -78,6 +84,7 @@ class UpgradeCommandRunner {
     @required bool testFlow,
     @required GitTagVersion gitTagVersion,
     @required FlutterVersion flutterVersion,
+    @required bool verifyOnly,
   }) async {
     if (!continueFlow) {
       await runCommandFirstHalf(
@@ -85,6 +92,7 @@ class UpgradeCommandRunner {
         gitTagVersion: gitTagVersion,
         flutterVersion: flutterVersion,
         testFlow: testFlow,
+        verifyOnly: verifyOnly,
       );
     } else {
       await runCommandSecondHalf(flutterVersion);
@@ -97,11 +105,17 @@ class UpgradeCommandRunner {
     @required GitTagVersion gitTagVersion,
     @required FlutterVersion flutterVersion,
     @required bool testFlow,
+    @required bool verifyOnly,
   }) async {
     final String upstreamRevision = await fetchRemoteRevision();
     if (flutterVersion.frameworkRevision == upstreamRevision) {
       globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
       globals.printStatus('$flutterVersion');
+      return;
+    }else if(verifyOnly){
+      globals.printStatus('A new version of Flutter is available!\n');
+      globals.printStatus('Installed: ${flutterVersion.frameworkRevision}');
+      globals.printStatus('Available: $upstreamRevision', emphasis: true);
       return;
     }
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
