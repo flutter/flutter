@@ -97,22 +97,27 @@ class VMServiceFlutterDriver extends FlutterDriver {
     await vmServiceConnectFunction(dartVmServiceUrl, headers: headers);
     final VMServiceClient client = connection.client;
 
-    VMIsolateRef isolateRef;
-    const int totalTries = 10;
-    for (int tries = 0; tries < totalTries; tries += 1) {
-      final VM vm = await client.getVM();
-      if (vm.isolates.isEmpty) {
-        await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
-        continue;
+    Future<VMIsolateRef> _waitForRootIsolate() async {
+      bool _checkIsolate(VMIsolateRef ref) => ref.number == isolateNumber;
+      while (true) {
+        final VM vm = await client.getVM();
+        if (vm.isolates.isEmpty || (isolateNumber != null && !vm.isolates.any(_checkIsolate))) {
+          await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
+          continue;
+        }
+        return isolateNumber == null
+          ? vm.isolates.first
+          : vm.isolates.firstWhere(_checkIsolate);
       }
-      isolateRef = isolateNumber == null
-        ? vm.isolates.first
-        : vm.isolates.firstWhere((VMIsolateRef isolate) => isolate.number == isolateNumber);
-      break;
     }
-    if (isolateRef == null) {
-      throw DriverError('Failed to find main isolate after ${_kPauseBetweenReconnectAttempts.inSeconds * totalTries} seconds!');
-    }
+
+    final VMIsolateRef isolateRef = await _warnIfSlow<VMIsolateRef>(
+      future: _waitForRootIsolate(),
+      timeout: kUnusuallyLongTimeout,
+      message: isolateNumber == null
+        ? 'The root isolate is taking an unuusally long time to start.'
+        : 'Isolate $isolateNumber is taking an unusually long time to start.',
+    );
     _log('Isolate found with number: ${isolateRef.number}');
 
     VMIsolate isolate = await isolateRef.loadRunnable();
