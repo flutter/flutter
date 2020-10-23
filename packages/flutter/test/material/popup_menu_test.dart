@@ -465,7 +465,7 @@ void main() {
     final WidgetPredicate popupMenu = (Widget widget) {
       final String widgetType = widget.runtimeType.toString();
       // TODO(mraleph): Remove the old case below.
-      return widgetType == '_PopupMenu<int>' // normal case
+      return widgetType == '_PopupMenu<int?>' // normal case
           || widgetType == '_PopupMenu'; // for old versions of Dart that don't reify method type arguments
     };
 
@@ -794,7 +794,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // The position is different than the offset because the default position isn't at the origin.
-    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int>')), const Offset(364.0, 324.0));
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(364.0, 324.0));
   });
 
   testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {

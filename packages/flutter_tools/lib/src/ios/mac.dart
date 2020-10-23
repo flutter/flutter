@@ -25,7 +25,6 @@ import 'code_signing.dart';
 import 'devices.dart';
 import 'migrations/ios_migrator.dart';
 import 'migrations/project_base_configuration_migration.dart';
-import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
 import 'xcodeproj.dart';
@@ -107,7 +106,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
-    ProjectBuildLocationMigration(app.project, globals.logger),
   ];
 
   final IOSMigration migration = IOSMigration(migrators);
@@ -440,7 +438,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
       }
     } else {
-      outputDir = '${globals.fs.path.absolute(app.archiveBundlePath)}.xcarchive';
+      outputDir = globals.fs.path.absolute(app.archiveBundleOutputPath);
       if (!globals.fs.isDirectorySync(outputDir)) {
         globals.printError('Archive succeeded but the expected xcarchive at $outputDir not found');
       }

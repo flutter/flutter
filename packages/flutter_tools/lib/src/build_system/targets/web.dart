@@ -183,7 +183,7 @@ class Dart2JSTarget extends Target {
     Source.artifact(Artifact.dart2jsSnapshot),
     Source.artifact(Artifact.engineDartBinary),
     Source.pattern('{BUILD_DIR}/main.dart'),
-    Source.pattern('{PROJECT_DIR}/.packages'),
+    Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
   ];
 
   @override

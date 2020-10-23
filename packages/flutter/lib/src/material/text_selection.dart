@@ -183,7 +183,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final List<_ItemData> itemDatas = <_ItemData>[
       if (widget.handleCut != null)
         _ItemData(widget.handleCut!, localizations.cutButtonLabel),

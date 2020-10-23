@@ -179,7 +179,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
-    _localizations = MaterialLocalizations.of(context)!;
+    _localizations = MaterialLocalizations.of(context);
     _textDirection = Directionality.of(context)!;
     if (!_announcedInitialDate) {
       _announcedInitialDate = true;
@@ -380,7 +380,7 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
         children: <Widget>[
           Flexible(
             child: Semantics(
-              label: MaterialLocalizations.of(context)!.selectYearSemanticsLabel,
+              label: MaterialLocalizations.of(context).selectYearSemanticsLabel,
               excludeSemantics: true,
               button: true,
               child: Container(
@@ -524,7 +524,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _localizations = MaterialLocalizations.of(context)!;
+    _localizations = MaterialLocalizations.of(context);
     _textDirection = Directionality.of(context);
   }
 
@@ -941,7 +941,7 @@ class _DayPickerState extends State<_DayPicker> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context)!.colorScheme;
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final TextTheme textTheme = Theme.of(context)!.textTheme;
     final TextStyle? headerStyle = textTheme.caption?.apply(
       color: colorScheme.onSurface.withOpacity(0.60),

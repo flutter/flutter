@@ -8,7 +8,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-ui.Color color;
+late ui.Color color;
 
 ui.Picture paint(ui.Rect paintBounds) {
   // First we create a PictureRecorder to record the commands we're going to

@@ -39,6 +39,7 @@ class KeyEventSimulator {
       case 'macos':
       case 'linux':
       case 'web':
+      case 'ios':
       case 'windows':
         return true;
     }
@@ -57,6 +58,9 @@ class KeyEventSimulator {
         break;
       case 'macos':
         map = kMacOsToPhysicalKey;
+        break;
+      case 'ios':
+        map = kIosToPhysicalKey;
         break;
       case 'linux':
         map = kLinuxToPhysicalKey;
@@ -90,7 +94,10 @@ class KeyEventSimulator {
         map = kFuchsiaToLogicalKey;
         break;
       case 'macos':
-        // macOS doesn't do key codes, just scan codes.
+      // macOS doesn't do key codes, just scan codes.
+        return -1;
+      case 'ios':
+      // iOS doesn't do key codes, just scan codes.
         return -1;
       case 'web':
         // web doesn't have int type code
@@ -136,6 +143,9 @@ class KeyEventSimulator {
         break;
       case 'macos':
         map = kMacOsToPhysicalKey;
+        break;
+      case 'ios':
+        map = kIosToPhysicalKey;
         break;
       case 'linux':
         map = kLinuxToPhysicalKey;
@@ -212,6 +222,12 @@ class KeyEventSimulator {
           result['charactersIgnoringModifiers'] = key.keyLabel;
         }
         result['modifiers'] = _getMacOsModifierFlags(key, isDown);
+        break;
+      case 'ios':
+        result['keyCode'] = scanCode;
+        result['characters'] = key.keyLabel;
+        result['charactersIgnoringModifiers'] = key.keyLabel;
+        result['modifiers'] = _getIOSModifierFlags(key, isDown);
         break;
       case 'web':
         result['code'] = _getWebKeyCode(key);
@@ -500,6 +516,73 @@ class KeyEventSimulator {
     }
     if (pressed.contains(LogicalKeyboardKey.capsLock)) {
       result |= RawKeyEventDataMacOs.modifierCapsLock;
+    }
+    return result;
+  }
+
+  static int _getIOSModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
+    int result = 0;
+    final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
+    if (isDown) {
+      pressed.add(newKey);
+    } else {
+      pressed.remove(newKey);
+    }
+    if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
+      result |= RawKeyEventDataIos.modifierLeftShift | RawKeyEventDataIos.modifierShift;
+    }
+    if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
+      result |= RawKeyEventDataIos.modifierRightShift | RawKeyEventDataIos.modifierShift;
+    }
+    if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
+      result |= RawKeyEventDataIos.modifierLeftCommand | RawKeyEventDataIos.modifierCommand;
+    }
+    if (pressed.contains(LogicalKeyboardKey.metaRight)) {
+      result |= RawKeyEventDataIos.modifierRightCommand | RawKeyEventDataIos.modifierCommand;
+    }
+    if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
+      result |= RawKeyEventDataIos.modifierLeftControl | RawKeyEventDataIos.modifierControl;
+    }
+    if (pressed.contains(LogicalKeyboardKey.controlRight)) {
+      result |= RawKeyEventDataIos.modifierRightControl | RawKeyEventDataIos.modifierControl;
+    }
+    if (pressed.contains(LogicalKeyboardKey.altLeft)) {
+      result |= RawKeyEventDataIos.modifierLeftOption | RawKeyEventDataIos.modifierOption;
+    }
+    if (pressed.contains(LogicalKeyboardKey.altRight)) {
+      result |= RawKeyEventDataIos.modifierRightOption | RawKeyEventDataIos.modifierOption;
+    }
+    final Set<LogicalKeyboardKey> functionKeys = <LogicalKeyboardKey>{
+      LogicalKeyboardKey.f1,
+      LogicalKeyboardKey.f2,
+      LogicalKeyboardKey.f3,
+      LogicalKeyboardKey.f4,
+      LogicalKeyboardKey.f5,
+      LogicalKeyboardKey.f6,
+      LogicalKeyboardKey.f7,
+      LogicalKeyboardKey.f8,
+      LogicalKeyboardKey.f9,
+      LogicalKeyboardKey.f10,
+      LogicalKeyboardKey.f11,
+      LogicalKeyboardKey.f12,
+      LogicalKeyboardKey.f13,
+      LogicalKeyboardKey.f14,
+      LogicalKeyboardKey.f15,
+      LogicalKeyboardKey.f16,
+      LogicalKeyboardKey.f17,
+      LogicalKeyboardKey.f18,
+      LogicalKeyboardKey.f19,
+      LogicalKeyboardKey.f20,
+      LogicalKeyboardKey.f21,
+    };
+    if (pressed.intersection(functionKeys).isNotEmpty) {
+      result |= RawKeyEventDataIos.modifierFunction;
+    }
+    if (pressed.intersection(kMacOsNumPadMap.values.toSet()).isNotEmpty) {
+      result |= RawKeyEventDataIos.modifierNumericPad;
+    }
+    if (pressed.contains(LogicalKeyboardKey.capsLock)) {
+      result |= RawKeyEventDataIos.modifierCapsLock;
     }
     return result;
   }
