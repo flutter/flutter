@@ -313,7 +313,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// than the [toolbarHeight].
   final List<Widget>? actions;
 
-  /// This widget is stacked behind the toolbar and the tab bar. It's height will
+  /// This widget is stacked behind the toolbar and the tab bar. Its height will
   /// be the same as the app bar's overall height.
   ///
   /// A flexible space isn't actually flexible unless the [AppBar]'s container
