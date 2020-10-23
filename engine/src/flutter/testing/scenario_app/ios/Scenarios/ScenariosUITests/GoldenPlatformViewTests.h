@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #import <XCTest/XCTest.h>
-#import "PlatformViewGoldenTestManager.h"
+#import "GoldenTestManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -12,20 +12,19 @@ NS_ASSUME_NONNULL_BEGIN
 // A new PlatformView golden tests can subclass this and override the `-initiWithInvocation:`
 // method, which then retun the `-initWithManager:invocation:`
 //
-// Then in any test method, call `checkGolden` to perform the golden test.
+// Then in any test method, call `checkPlatformViewGolden` to perform the golden test.
 //
 // This base class doesn't run any test case on its own.
 @interface GoldenPlatformViewTests : XCTestCase
 
 @property(nonatomic, strong) XCUIApplication* application;
 
-// Initialize with a `PlatformViewGoldenTestManager`.
-- (instancetype)initWithManager:(PlatformViewGoldenTestManager*)manager
-                     invocation:(NSInvocation*)invocation;
+// Initialize with a `GoldenTestManager`.
+- (instancetype)initWithManager:(GoldenTestManager*)manager invocation:(NSInvocation*)invocation;
 
 // Take a sceenshot of the test app and check it has the same pixels with goldenImage inside the
-// `PlatformViewGoldenTestManager`.
-- (void)checkGolden;
+// `GoldenTestManager`.
+- (void)checkPlatformViewGolden;
 
 @end
 

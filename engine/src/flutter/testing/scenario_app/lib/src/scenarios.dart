@@ -6,6 +6,7 @@
 import 'dart:ui';
 
 import 'animated_color_square.dart';
+import 'bogus_font_text.dart';
 import 'initial_route_reply.dart';
 import 'locale_initialization.dart';
 import 'platform_view.dart';
@@ -43,6 +44,7 @@ Map<String, ScenarioFactory> _scenarios = <String, ScenarioFactory>{
   'tap_status_bar': () => TouchesScenario(PlatformDispatcher.instance),
   'text_semantics_focus': () => SendTextFocusSemantics(PlatformDispatcher.instance),
   'initial_route_reply': () => InitialRouteReply(PlatformDispatcher.instance),
+  'bogus_font_text': () => BogusFontText(PlatformDispatcher.instance),
 };
 
 Map<String, dynamic> _currentScenarioParams = <String, dynamic>{};
