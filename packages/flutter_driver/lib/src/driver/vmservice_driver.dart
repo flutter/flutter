@@ -94,7 +94,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
     final vms.VmService client = await vmServiceConnectFunction(dartVmServiceUrl, headers);
 
     Future<vms.IsolateRef> _waitForRootIsolate() async {
-      bool _checkIsolate(vms.IsolateRef ref) => ref.number == isolateNumber;
+      bool _checkIsolate(vms.IsolateRef ref) => ref.number == isolateNumber.toString();
       while (true) {
         final vms.VM vm = await client.getVM();
         if (vm.isolates.isEmpty || (isolateNumber != null && !vm.isolates.any(_checkIsolate))) {
