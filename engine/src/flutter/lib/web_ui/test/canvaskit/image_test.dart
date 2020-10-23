@@ -32,10 +32,13 @@ void testMain() {
       final SkAnimatedImage skAnimatedImage = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
       final CkAnimatedImage image = CkAnimatedImage(skAnimatedImage);
       expect(image.box.isDeleted, false);
+      expect(image.debugDisposed, false);
       image.dispose();
       expect(image.box.isDeleted, true);
+      expect(image.debugDisposed, true);
       image.dispose();
       expect(image.box.isDeleted, true);
+      expect(image.debugDisposed, true);
     });
 
     test('CkAnimatedImage can be cloned and explicitly disposed of', () async {
@@ -69,10 +72,13 @@ void testMain() {
     test('CkImage can be explicitly disposed of', () {
       final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage).getCurrentFrame();
       final CkImage image = CkImage(skImage);
+      expect(image.debugDisposed, false);
       expect(image.box.isDeleted, false);
       image.dispose();
+      expect(image.debugDisposed, true);
       expect(image.box.isDeleted, true);
       image.dispose();
+      expect(image.debugDisposed, true);
       expect(image.box.isDeleted, true);
     });
 
