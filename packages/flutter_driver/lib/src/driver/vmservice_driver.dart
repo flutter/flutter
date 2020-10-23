@@ -13,7 +13,6 @@ import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:vm_service/vm_service.dart' as vms;
-import 'package:vm_service/vm_service_io.dart' show vmServiceConnectUri;
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../../flutter_driver.dart';
