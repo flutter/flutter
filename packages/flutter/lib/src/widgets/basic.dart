@@ -677,7 +677,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// exceed width/height.
   ///
   /// This value is ignored if [clipper] is non-null.
-  final BorderRadius? borderRadius;
+  final BorderRadiusGeometry? borderRadius;
 
   /// If non-null, determines which clip to use.
   final CustomClipper<RRect>? clipper;
