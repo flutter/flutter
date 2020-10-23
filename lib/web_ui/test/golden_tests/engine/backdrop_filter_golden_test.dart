@@ -60,7 +60,8 @@ void testMain() async {
         .build()
         .webOnlyRootElement);
 
-    await matchGoldenFile('backdrop_filter_clip.png', region: region);
+    await matchGoldenFile('backdrop_filter_clip.png', region: region,
+        maxDiffRatePercent: 0.8);
   });
 
   test('Background should only blur at ancestor clip boundary after move', () async {
@@ -110,7 +111,8 @@ void testMain() async {
         .build()
         .webOnlyRootElement);
 
-    await matchGoldenFile('backdrop_filter_clip_moved.png', region: region);
+    await matchGoldenFile('backdrop_filter_clip_moved.png', region: region,
+      maxDiffRatePercent: 0.8);
   });
 }
 
