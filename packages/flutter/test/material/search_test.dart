@@ -636,6 +636,11 @@ void main() {
                             textDirection: TextDirection.ltr,
                             textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                           ),
+                          TestSemantics(
+                            id: 14,
+                            label: 'Bottom',
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
                       ),
                       TestSemantics(
