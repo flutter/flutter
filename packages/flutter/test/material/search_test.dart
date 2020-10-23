@@ -811,9 +811,9 @@ class _TestSearchDelegate extends SearchDelegate<String> {
 
   @override
   PreferredSizeWidget buildBottom(BuildContext context) {
-    return PreferredSize(
-      preferredSize: Size.fromHeight(56.0),
-      child: Text('Bottom'),
+    return const PreferredSize(
+      preferredSize: const Size.fromHeight(56.0),
+      child: const Text('Bottom'),
     );
   }
 }
