@@ -95,7 +95,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    String label;
+    final String label;
     switch (position) {
       case DecorationPosition.background:
         label = 'bg';
@@ -105,12 +105,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
         break;
     }
     properties.add(EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<Decoration>(
-      label,
-      decoration,
-      ifNull: 'no decoration',
-      showName: decoration != null,
-    ));
+    properties.add(DiagnosticsProperty<Decoration>(label, decoration));
   }
 }
 
@@ -357,14 +352,14 @@ class Container extends StatelessWidget {
   /// The transformation matrix to apply before painting the container.
   final Matrix4? transform;
 
- /// The alignment of the origin, relative to the size of the container, if [transform] is specified.
- ///
- /// When [transform] is null, the value of this property is ignored.
- ///
- /// See also:
- ///
- ///  * [Transform.alignment], which is set by this property.
-  final Alignment? transformAlignment;
+  /// The alignment of the origin, relative to the size of the container, if [transform] is specified.
+  ///
+  /// When [transform] is null, the value of this property is ignored.
+  ///
+  /// See also:
+  ///
+  ///  * [Transform.alignment], which is set by this property.
+  final AlignmentGeometry? transformAlignment;
 
   /// The clip behavior when [Container.decoration] is not null.
   ///

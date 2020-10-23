@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -28,7 +26,7 @@ void main() {
     // The color scheme values are guaranteed to be non null since the default
     // [ThemeData] creates it with [ColorScheme.fromSwatch].
     expect(_getRawMaterialButton(tester).fillColor, ThemeData().colorScheme.secondary);
-    expect(_getRichText(tester).text.style.color, ThemeData().colorScheme.onSecondary);
+    expect(_getRichText(tester).text.style!.color, ThemeData().colorScheme.onSecondary);
 
     // These defaults come directly from the [FloatingActionButton].
     expect(_getRawMaterialButton(tester).elevation, 6);
@@ -67,7 +65,7 @@ void main() {
     ));
 
     expect(_getRawMaterialButton(tester).fillColor, backgroundColor);
-    expect(_getRichText(tester).text.style.color, foregroundColor);
+    expect(_getRichText(tester).text.style!.color, foregroundColor);
     expect(_getRawMaterialButton(tester).elevation, elevation);
     expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
     expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
@@ -112,7 +110,7 @@ void main() {
     ));
 
     expect(_getRawMaterialButton(tester).fillColor, backgroundColor);
-    expect(_getRichText(tester).text.style.color, foregroundColor);
+    expect(_getRichText(tester).text.style!.color, foregroundColor);
     expect(_getRawMaterialButton(tester).elevation, elevation);
     expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
     expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);

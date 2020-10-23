@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -20,8 +18,8 @@ class TestCanvas implements Canvas {
 }
 
 void main() {
-  ui.Image image300x300;
-  ui.Image image300x200;
+  late ui.Image image300x300;
+  late ui.Image image300x200;
   setUpAll(() async {
     image300x300 = await createTestImage(width: 300, height: 300, cache: false);
     image300x200 = await createTestImage(width: 300, height: 200, cache: false);
@@ -53,7 +51,7 @@ void main() {
 
   test('debugInvertOversizedImages', () async {
     debugInvertOversizedImages = true;
-    final FlutterExceptionHandler oldFlutterError = FlutterError.onError;
+    final FlutterExceptionHandler? oldFlutterError = FlutterError.onError;
 
     final List<String> messages = <String>[];
     FlutterError.onError = (FlutterErrorDetails details) {
@@ -110,8 +108,28 @@ void main() {
     FlutterError.onError = oldFlutterError;
   });
 
+  test('centerSlice with scale ≠ 1', () async {
+    final TestCanvas canvas = TestCanvas();
+    paintImage(
+      canvas: canvas,
+      rect: const Rect.fromLTRB(10, 20, 430, 420),
+      image: image300x300,
+      scale: 2.0,
+      centerSlice: const Rect.fromLTRB(50, 40, 250, 260),
+    );
+
+    final Invocation command = canvas.invocations.firstWhere((Invocation invocation) {
+      return invocation.memberName == #drawImageNine;
+    });
+
+    expect(command, isNotNull);
+    expect(command.positionalArguments[0], equals(image300x300));
+    expect(command.positionalArguments[1], equals(const Rect.fromLTRB(100.0, 80.0, 500.0, 520.0)));
+    expect(command.positionalArguments[2], equals(const Rect.fromLTRB(20.0, 40.0, 860.0, 840.0)));
+  });
+
   testWidgets('Reports Image painting', (WidgetTester tester) async {
-    ImageSizeInfo imageSizeInfo;
+    late ImageSizeInfo imageSizeInfo;
     int count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
       count += 1;
@@ -150,7 +168,7 @@ void main() {
   });
 
   testWidgets('Reports Image painting - change per frame', (WidgetTester tester) async {
-    ImageSizeInfo imageSizeInfo;
+    late ImageSizeInfo imageSizeInfo;
     int count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
       count += 1;
@@ -193,7 +211,7 @@ void main() {
   });
 
   testWidgets('Reports Image painting - no debug label', (WidgetTester tester) async {
-    ImageSizeInfo imageSizeInfo;
+    late ImageSizeInfo imageSizeInfo;
     int count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
       count += 1;

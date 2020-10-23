@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -30,7 +28,7 @@ Future<void> main() async {
 
       completer.future.then(
         (String value) {},
-        onError: (dynamic error, StackTrace stack) {
+        onError: (Object error, StackTrace stack) {
           assert(stack is stack_trace.Chain);
           FlutterError.reportError(FlutterErrorDetails(
             exception: error,

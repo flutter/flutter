@@ -28,6 +28,7 @@ class BuildCommand extends FlutterCommand {
       buildSystem: globals.buildSystem,
       verboseHelp: verboseHelp,
     ));
+    addSubcommand(BuildIOSArchiveCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildWebCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildMacosCommand(verboseHelp: verboseHelp));

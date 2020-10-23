@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +26,7 @@ void main() {
     int updated = 0;
     int ended = 0;
 
-    Offset startGlobalPosition;
+    Offset? startGlobalPosition;
 
     void onStart(ForcePressDetails details) {
       startGlobalPosition = details.globalPosition;
@@ -411,7 +409,7 @@ void main() {
     int updated = 0;
     int ended = 0;
 
-    Offset startGlobalPosition;
+    Offset? startGlobalPosition;
 
     void onStart(ForcePressDetails details) {
       startGlobalPosition = details.globalPosition;

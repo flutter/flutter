@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> main(FutureOr<void> testMain()) async {
+Future<void> testExecutable(FutureOr<void> testMain()) async {
   reportTestException = (FlutterErrorDetails details, String testDescription) {
     expect(details.exception, isA<StateError>());
-    expect(details.exception.message, 'foo');
+    expect((details.exception as StateError).message, 'foo');
     expect(testDescription, 'custom exception reporter');
   };
 

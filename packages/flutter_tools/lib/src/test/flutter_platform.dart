@@ -8,11 +8,7 @@ import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
+import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
@@ -201,7 +197,7 @@ void main() {
 ''');
   if (testConfigFile != null) {
     buffer.write('''
-    return () => test_config.main(test.main);
+    return () => test_config.testExecutable(test.main);
 ''');
   } else {
     buffer.write('''

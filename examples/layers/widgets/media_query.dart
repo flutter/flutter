@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class AdaptedListItem extends StatelessWidget {
-  const AdaptedListItem({ Key key, this.name }) : super(key: key);
+  const AdaptedListItem({ Key? key, required this.name }) : super(key: key);
 
   final String name;
 
@@ -26,7 +26,7 @@ class AdaptedListItem extends StatelessWidget {
 }
 
 class AdaptedGridItem extends StatelessWidget {
-  const AdaptedGridItem({ Key key, this.name }) : super(key: key);
+  const AdaptedGridItem({ Key? key, required this.name }) : super(key: key);
 
   final String name;
 
@@ -65,13 +65,13 @@ const double _kMaxTileWidth = 150.0;
 const double _kGridViewBreakpoint = 450.0;
 
 class AdaptiveContainer extends StatelessWidget {
-  const AdaptiveContainer({ Key key, this.names }) : super(key: key);
+  const AdaptiveContainer({ Key? key, required this.names }) : super(key: key);
 
   final List<String> names;
 
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.of(context).size.width < _kGridViewBreakpoint) {
+    if (MediaQuery.of(context)!.size.width < _kGridViewBreakpoint) {
       return ListView(
         itemExtent: _kListItemExtent,
         children: names.map<Widget>((String name) => AdaptedListItem(name: name)).toList(),

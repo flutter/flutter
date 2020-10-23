@@ -45,7 +45,7 @@ class ImageInfo {
   ///
   /// See also:
   ///
-  ///  * [Image.clone]
+  ///  * [Image.clone], which describes how and why to clone images.
   ImageInfo clone() {
     return ImageInfo(
       image: image.clone(),
@@ -68,11 +68,15 @@ class ImageInfo {
   /// ```dart
   /// ImageInfo _imageInfo;
   /// set imageInfo (ImageInfo value) {
-  ///   // If the image reference is exactly the same, or its a clone of the
-  ///   // current reference, we can immediately dispose of it and avoid
-  ///   // recalculating anything.
-  ///   if (value == _imageInfo || value != null && _imageInfo != null && value.isCloneOf(_imageInfo)) {
-  ///     value?.dispose();
+  ///   // If the image reference is exactly the same, do nothing.
+  ///   if (value == _imageInfo) {
+  ///     return;
+  ///   }
+  ///   // If it is a clone of the current reference, we must dispose of it and
+  ///   // can do so immediately. Since the underlying image has not changed,
+  ///   // We don't have any additional work to do here.
+  ///   if (value != null && _imageInfo != null && value.isCloneOf(_imageInfo)) {
+  ///     value.dispose();
   ///     return;
   ///   }
   ///   _imageInfo?.dispose();
@@ -229,7 +233,7 @@ typedef ImageChunkListener = void Function(ImageChunkEvent event);
 ///
 /// Used in [ImageStreamListener], as well as by [ImageCache.putIfAbsent] and
 /// [precacheImage], to report errors.
-typedef ImageErrorListener = void Function(dynamic exception, StackTrace? stackTrace);
+typedef ImageErrorListener = void Function(Object exception, StackTrace? stackTrace);
 
 /// An immutable notification of image bytes that have been incrementally loaded.
 ///
@@ -467,7 +471,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   @visibleForTesting
   bool get hasListeners => _listeners.isNotEmpty;
 
-  /// We should avoid disposing a completer if it has never had a listener, even
+  /// We must avoid disposing a completer if it has never had a listener, even
   /// if all [keepAlive] handles get disposed.
   bool _hadAtLeastOneListener = false;
 
@@ -651,7 +655,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   @protected
   void reportError({
     DiagnosticsNode? context,
-    dynamic exception,
+    required Object exception,
     StackTrace? stack,
     InformationCollector? informationCollector,
     bool silent = false,
@@ -743,7 +747,7 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   /// FlutterErrorDetails]).
   OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector? informationCollector })
       : assert(image != null) {
-    image.then<void>(setImage, onError: (dynamic error, StackTrace stack) {
+    image.then<void>(setImage, onError: (Object error, StackTrace stack) {
       reportError(
         context: ErrorDescription('resolving a single-frame image stream'),
         exception: error,
@@ -815,7 +819,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
        _informationCollector = informationCollector,
        _scale = scale {
     this.debugLabel = debugLabel;
-    codec.then<void>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
+    codec.then<void>(_handleCodecReady, onError: (Object error, StackTrace stack) {
       reportError(
         context: ErrorDescription('resolving an image codec'),
         exception: error,
@@ -826,7 +830,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     });
     if (chunkEvents != null) {
       chunkEvents.listen(reportImageChunkEvent,
-        onError: (dynamic error, StackTrace stack) {
+        onError: (Object error, StackTrace stack) {
           reportError(
             context: ErrorDescription('loading an image'),
             exception: error,

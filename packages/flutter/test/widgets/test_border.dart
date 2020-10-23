@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 
 typedef Logger = void Function(String caller);
@@ -20,19 +18,19 @@ class TestBorder extends ShapeBorder {
   ShapeBorder scale(double t) => TestBorder(onLog);
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     onLog('getInnerPath $rect $textDirection');
     return Path();
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     onLog('getOuterPath $rect $textDirection');
     return Path();
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     onLog('paint $rect $textDirection');
   }
 }

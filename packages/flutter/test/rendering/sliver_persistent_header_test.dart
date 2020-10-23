@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import '../flutter_test_alternative.dart';
 
@@ -24,7 +22,7 @@ void main() {
     );
     layout(root);
 
-    expect(header.geometry.maxScrollObstructionExtent, 0);
+    expect(header.geometry!.maxScrollObstructionExtent, 0);
   });
 
   test('RenderSliverFloatingPinnedPersistentHeader maxScrollObstructionExtent is minExtent', () {
@@ -42,13 +40,13 @@ void main() {
     );
     layout(root);
 
-    expect(header.geometry.maxScrollObstructionExtent, 100.0);
+    expect(header.geometry!.maxScrollObstructionExtent, 100.0);
   });
 }
 
 class TestRenderSliverFloatingPersistentHeader extends RenderSliverFloatingPersistentHeader {
   TestRenderSliverFloatingPersistentHeader({
-    RenderBox child,
+    required RenderBox child,
   }) : super(child: child, vsync: null, showOnScreenConfiguration: null);
 
   @override
@@ -60,7 +58,7 @@ class TestRenderSliverFloatingPersistentHeader extends RenderSliverFloatingPersi
 
 class TestRenderSliverFloatingPinnedPersistentHeader extends RenderSliverFloatingPinnedPersistentHeader {
   TestRenderSliverFloatingPinnedPersistentHeader({
-    RenderBox child,
+    required RenderBox child,
   }) : super(child: child, vsync: null, showOnScreenConfiguration: null);
 
   @override

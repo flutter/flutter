@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,7 +36,7 @@ void main() {
 
       expect(events.length, 8);
       for (int i = 0; i < events.length; ++i) {
-        final bool isEven = i % 2 == 0;
+        final bool isEven = i.isEven;
         if (isEven) {
           expect(events[i].runtimeType, equals(RawKeyDownEvent));
         } else {
