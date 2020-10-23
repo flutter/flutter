@@ -31,11 +31,32 @@ bool _focusDebug(String message, [Iterable<String>? details]) {
   return true;
 }
 
+/// An enum that describes how to handle a key event handled by a
+/// [FocusOnKeyCallback].
+enum KeyEventResult {
+  /// The key event has been handled, and the event should not be propagated to
+  /// other key event handlers.
+  handled,
+  /// The key event has not been handled, and the event should continue to be
+  /// propagated to other key event handlers, even non-Flutter ones.
+  ignored,
+  /// The key event has not been handled, but the key event should not be
+  /// propagated to other key event handlers.
+  ///
+  /// It will be returned to the platform embedding to be propagated to text
+  /// fields and non-Flutter key event handlers on the platform.
+  skipRemainingHandlers,
+}
+
 /// Signature of a callback used by [Focus.onKey] and [FocusScope.onKey]
 /// to receive key events.
 ///
 /// The [node] is the node that received the event.
-typedef FocusOnKeyCallback = bool Function(FocusNode node, RawKeyEvent event);
+///
+/// Returns a [KeyEventResult] that describes how, and whether, the key event
+/// was handled.
+// TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
+typedef FocusOnKeyCallback = dynamic Function(FocusNode node, RawKeyEvent event);
 
 /// An attachment point for a [FocusNode].
 ///
@@ -321,7 +342,7 @@ enum UnfocusDisposition {
 ///     }
 ///   }
 ///
-///   bool _handleKeyPress(FocusNode node, RawKeyEvent event) {
+///   KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
 ///     if (event is RawKeyDownEvent) {
 ///       print('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
 ///       if (event.logicalKey == LogicalKeyboardKey.keyR) {
@@ -329,22 +350,22 @@ enum UnfocusDisposition {
 ///         setState(() {
 ///           _color = Colors.red;
 ///         });
-///         return true;
+///         return KeyEventResult.handled;
 ///       } else if (event.logicalKey == LogicalKeyboardKey.keyG) {
 ///         print('Changing color to green.');
 ///         setState(() {
 ///           _color = Colors.green;
 ///         });
-///         return true;
+///         return KeyEventResult.handled;
 ///       } else if (event.logicalKey == LogicalKeyboardKey.keyB) {
 ///         print('Changing color to blue.');
 ///         setState(() {
 ///           _color = Colors.blue;
 ///         });
-///         return true;
+///         return KeyEventResult.handled;
 ///       }
 ///     }
-///     return false;
+///     return KeyEventResult.ignored;
 ///   }
 ///
 ///   @override
@@ -1503,7 +1524,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   // Update function to be called whenever the state relating to highlightMode
   // changes.
   void _updateHighlightMode() {
-    FocusHighlightMode newMode;
+    final FocusHighlightMode newMode;
     switch (highlightStrategy) {
       case FocusHighlightStrategy.automatic:
         if (_lastInteractionWasTouch == null) {
@@ -1587,7 +1608,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   final FocusScopeNode rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
 
   void _handlePointerEvent(PointerEvent event) {
-    FocusHighlightMode expectedMode;
+    final FocusHighlightMode expectedMode;
     switch (event.kind) {
       case PointerDeviceKind.touch:
       case PointerDeviceKind.stylus:
@@ -1613,17 +1634,43 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     _updateHighlightMode();
 
     assert(_focusDebug('Received key event ${event.logicalKey}'));
-    // Walk the current focus from the leaf to the root, calling each one's
-    // onKey on the way up, and if one responds that they handled it, stop.
     if (_primaryFocus == null) {
       assert(_focusDebug('No primary focus for key event, ignored: $event'));
       return false;
     }
+
+    // Walk the current focus from the leaf to the root, calling each one's
+    // onKey on the way up, and if one responds that they handled it or want to
+    // stop propagation, stop.
     bool handled = false;
     for (final FocusNode node in <FocusNode>[_primaryFocus!, ..._primaryFocus!.ancestors]) {
-      if (node.onKey != null && node.onKey!(node, event)) {
-        assert(_focusDebug('Node $node handled key event $event.'));
-        handled = true;
+      if (node.onKey != null) {
+        // TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
+        final dynamic result = node.onKey!(node, event);
+        assert(result is bool || result is KeyEventResult,
+            'Value returned from onKey handler must be a non-null bool or KeyEventResult, not ${result.runtimeType}');
+        if (result is KeyEventResult) {
+          switch (result) {
+            case KeyEventResult.handled:
+              assert(_focusDebug('Node $node handled key event $event.'));
+              handled = true;
+              break;
+            case KeyEventResult.skipRemainingHandlers:
+              assert(_focusDebug('Node $node stopped key event propagation: $event.'));
+              handled = false;
+              break;
+            case KeyEventResult.ignored:
+              continue;
+          }
+        } else if (result is bool){
+          if (result) {
+            assert(_focusDebug('Node $node handled key event $event.'));
+            handled = true;
+            break;
+          } else {
+            continue;
+          }
+        }
         break;
       }
     }

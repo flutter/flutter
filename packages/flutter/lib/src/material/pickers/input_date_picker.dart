@@ -224,7 +224,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     return TextFormField(
       decoration: InputDecoration(
         border: inputTheme.border ?? const UnderlineInputBorder(),
-        filled: inputTheme.filled ?? true,
+        filled: inputTheme.filled,
         hintText: widget.fieldHintText ?? localizations.dateHelpText,
         labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
       ),

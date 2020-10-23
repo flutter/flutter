@@ -29,7 +29,7 @@ void main() {
       await driver.waitFor(plusButton);
       await driver.waitUntilNoTransientCallbacks();
 
-      // Tapping a raised button runs an animation that pumps enough frames to un-merge the threads.
+      // Tapping an elevated button runs an animation that pumps enough frames to un-merge the threads.
       await driver.tap(plusButton);
       await driver.waitUntilNoTransientCallbacks();
 
@@ -56,7 +56,7 @@ void main() {
       await driver.tap(backButton);
       await driver.waitUntilNoTransientCallbacks();
 
-      // The animation of tapping a `RaisedButton` should pump enough frames to un-merge the thread.
+      // The animation of tapping a `ElevatedButton` should pump enough frames to un-merge the thread.
       final SerializableFinder unmergeButton =
           find.byValueKey('unmerge_button');
       await driver.waitFor(unmergeButton);

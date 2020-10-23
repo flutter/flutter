@@ -870,14 +870,14 @@ abstract class SliderComponentShape {
     Offset center, {
     required Animation<double> activationAnimation,
     required Animation<double> enableAnimation,
-    bool isDiscrete,
+    required bool isDiscrete,
     required TextPainter labelPainter,
     required RenderBox parentBox,
     required SliderThemeData sliderTheme,
     required TextDirection textDirection,
     required double value,
-    double textScaleFactor,
-    Size sizeWithOverflow,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
   });
 
   /// Special instance of [SliderComponentShape] to skip the thumb drawing.
@@ -927,7 +927,7 @@ abstract class SliderTickMarkShape {
   /// {@endtemplate}
   Size getPreferredSize({
     required SliderThemeData sliderTheme,
-    bool isEnabled,
+    required bool isEnabled,
   });
 
   /// Paints the slider track.
@@ -958,7 +958,7 @@ abstract class SliderTickMarkShape {
     required SliderThemeData sliderTheme,
     required Animation<double> enableAnimation,
     required Offset thumbCenter,
-    bool isEnabled,
+    required bool isEnabled,
     required TextDirection textDirection,
   });
 
@@ -1537,8 +1537,8 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
-    Paint leftTrackPaint;
-    Paint rightTrackPaint;
+    final Paint leftTrackPaint;
+    final Paint rightTrackPaint;
     switch (textDirection) {
       case TextDirection.ltr:
         leftTrackPaint = activePaint;
@@ -1634,8 +1634,8 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
-    Paint leftTrackPaint;
-    Paint rightTrackPaint;
+    final Paint leftTrackPaint;
+    final Paint rightTrackPaint;
     switch (textDirection) {
       case TextDirection.ltr:
         leftTrackPaint = activePaint;
@@ -1777,8 +1777,8 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation!)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
-    Offset leftThumbOffset;
-    Offset rightThumbOffset;
+    final Offset leftThumbOffset;
+    final Offset rightThumbOffset;
     switch (textDirection) {
       case TextDirection.ltr:
         leftThumbOffset = startThumbCenter;
@@ -1917,8 +1917,8 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
     final Paint inactivePaint = Paint()
       ..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
-    Offset leftThumbOffset;
-    Offset rightThumbOffset;
+    final Offset leftThumbOffset;
+    final Offset rightThumbOffset;
     switch (textDirection) {
       case TextDirection.ltr:
         leftThumbOffset = startThumbCenter;
@@ -2012,7 +2012,7 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
   @override
   Size getPreferredSize({
     required SliderThemeData sliderTheme,
-    bool isEnabled = false,
+    required bool isEnabled,
   }) {
     assert(sliderTheme != null);
     assert(sliderTheme.trackHeight != null);
@@ -2032,7 +2032,7 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
     required Animation<double> enableAnimation,
     required TextDirection textDirection,
     required Offset thumbCenter,
-    bool isEnabled = false,
+    required bool isEnabled,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2144,7 +2144,7 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
     assert(isEnabled != null);
     assert(textDirection != null);
 
-    bool isBetweenThumbs;
+    final bool isBetweenThumbs;
     switch (textDirection) {
       case TextDirection.ltr:
         isBetweenThumbs = startThumbCenter.dx < center.dx && center.dx < endThumbCenter.dx;
@@ -2178,8 +2178,8 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
 class _EmptySliderTickMarkShape extends SliderTickMarkShape {
   @override
   Size getPreferredSize({
-    SliderThemeData? sliderTheme,
-    bool? isEnabled,
+    required SliderThemeData sliderTheme,
+    required bool isEnabled,
   }) {
     return Size.zero;
   }
@@ -2192,7 +2192,7 @@ class _EmptySliderTickMarkShape extends SliderTickMarkShape {
     required SliderThemeData sliderTheme,
     required Animation<double> enableAnimation,
     required Offset thumbCenter,
-    bool? isEnabled,
+    required bool isEnabled,
     required TextDirection textDirection,
   }) {
     // no-op.
@@ -2216,16 +2216,16 @@ class _EmptySliderComponentShape extends SliderComponentShape {
   void paint(
     PaintingContext context,
     Offset center, {
-    Animation<double>? activationAnimation,
-    Animation<double>? enableAnimation,
-    bool? isDiscrete,
-    TextPainter? labelPainter,
-    RenderBox? parentBox,
-    SliderThemeData? sliderTheme,
-    TextDirection? textDirection,
-    double? value,
-    double? textScaleFactor,
-    Size? sizeWithOverflow,
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
   }) {
     // no-op.
   }
@@ -2290,16 +2290,16 @@ class RoundSliderThumbShape extends SliderComponentShape {
   void paint(
     PaintingContext context,
     Offset center, {
-    Animation<double>? activationAnimation,
+    required Animation<double> activationAnimation,
     required Animation<double> enableAnimation,
-    bool? isDiscrete,
-    TextPainter? labelPainter,
-    RenderBox? parentBox,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
     required SliderThemeData sliderTheme,
-    TextDirection? textDirection,
-    double? value,
-    double? textScaleFactor,
-    Size? sizeWithOverflow,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2326,7 +2326,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
       end: pressedElevation,
     );
 
-    final double evaluatedElevation = elevationTween.evaluate(activationAnimation!);
+    final double evaluatedElevation = elevationTween.evaluate(activationAnimation);
     final Path path = Path()
       ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
     canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
@@ -2484,14 +2484,14 @@ class RoundSliderOverlayShape extends SliderComponentShape {
     Offset center, {
     required Animation<double> activationAnimation,
     required Animation<double> enableAnimation,
-    bool isDiscrete = false,
+    required bool isDiscrete,
     required TextPainter labelPainter,
     required RenderBox parentBox,
     required SliderThemeData sliderTheme,
     required TextDirection textDirection,
     required double value,
-    double? textScaleFactor,
-    Size? sizeWithOverflow,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2549,28 +2549,28 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
   void paint(
     PaintingContext context,
     Offset center, {
-    Animation<double>? activationAnimation,
-    Animation<double>? enableAnimation,
-    bool? isDiscrete,
-    TextPainter? labelPainter,
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
     required RenderBox parentBox,
-    SliderThemeData? sliderTheme,
-    TextDirection? textDirection,
-    double? value,
-    double? textScaleFactor,
-    Size? sizeWithOverflow,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
-    final double scale = activationAnimation!.value;
+    final double scale = activationAnimation.value;
     _pathPainter.paint(
       parentBox: parentBox,
       canvas: canvas,
       center: center,
       scale: scale,
-      labelPainter: labelPainter!,
-      textScaleFactor: textScaleFactor!,
-      sizeWithOverflow: sizeWithOverflow!,
-      backgroundPaintColor: sliderTheme!.valueIndicatorColor!);
+      labelPainter: labelPainter,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
+      backgroundPaintColor: sliderTheme.valueIndicatorColor!);
   }
 }
 
@@ -2815,16 +2815,16 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   void paint(
     PaintingContext context,
     Offset center, {
-    Animation<double>? activationAnimation,
-    Animation<double>? enableAnimation,
-    bool? isDiscrete,
-    TextPainter? labelPainter,
-    RenderBox? parentBox,
-    SliderThemeData? sliderTheme,
-    TextDirection? textDirection,
-    double? value,
-    double? textScaleFactor,
-    Size? sizeWithOverflow,
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2833,19 +2833,19 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     assert(labelPainter != null);
     assert(parentBox != null);
     assert(sliderTheme != null);
-    assert(!sizeWithOverflow!.isEmpty);
+    assert(!sizeWithOverflow.isEmpty);
     final ColorTween enableColor = ColorTween(
-      begin: sliderTheme!.disabledThumbColor,
+      begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
     );
     _pathPainter.paint(
       context.canvas,
       center,
-      Paint()..color = enableColor.evaluate(enableAnimation!)!,
-      activationAnimation!.value,
-      labelPainter!,
-      textScaleFactor!,
-      sizeWithOverflow!,
+      Paint()..color = enableColor.evaluate(enableAnimation)!,
+      activationAnimation.value,
+      labelPainter,
+      textScaleFactor,
+      sizeWithOverflow,
       null,
     );
   }

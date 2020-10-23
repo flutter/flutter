@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -52,7 +50,7 @@ void main() {
     final Key child2Key = UniqueKey();
     final Key child3Key = UniqueKey();
 
-    Widget buildFrame({ double spacing, TextDirection textDirection }) {
+    Widget buildFrame({ required double spacing, required TextDirection textDirection }) {
       return Directionality(
         textDirection: textDirection,
         child: Align(
@@ -176,7 +174,7 @@ void main() {
   });
 
   testWidgets('OverflowBar intrinsic width', (WidgetTester tester) async {
-    Widget buildFrame({ double width }) {
+    Widget buildFrame({ required double width }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -207,7 +205,7 @@ void main() {
   });
 
   testWidgets('OverflowBar intrinsic height', (WidgetTester tester) async {
-    Widget buildFrame({ double maxWidth }) {
+    Widget buildFrame({ required double maxWidth }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(

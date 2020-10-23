@@ -223,6 +223,52 @@ void main() {
     verify(usage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
   });
 
+  testWithoutContext('package_config_subset file is generated from packages and not timestamp', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final MockUsage usage = MockUsage();
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      processManager: MockProcessManager(0),
+      botDetector: const BotDetectorAlwaysNo(),
+      usage: usage,
+      platform: FakePlatform(
+        environment: const <String, String>{
+          'PUB_CACHE': 'custom/pub-cache/path',
+        }
+      ),
+    );
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+      {"configVersion": 2,"packages": [
+        {
+          "name": "flutter_tools",
+          "rootUri": "../",
+          "packageUri": "lib/",
+          "languageVersion": "2.7"
+        }
+      ],"generated":"some-time"}
+''');
+
+    await pub.get(
+      context: PubContext.flutterTests,
+      generateSyntheticPackage: true,
+      checkLastModified: false,
+    );
+
+    expect(
+      fileSystem.file('.dart_tool/package_config_subset').readAsStringSync(),
+      'flutter_tools\n'
+      '2.7\n'
+      'file:///\n'
+      'file:///lib/\n'
+      '2\n',
+    );
+  });
+
+
   testWithoutContext('analytics sent on failure', () async {
     MockDirectory.findCache = true;
     final MockUsage usage = MockUsage();

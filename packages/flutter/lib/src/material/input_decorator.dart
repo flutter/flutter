@@ -62,7 +62,7 @@ class _InputBorderTween extends Tween<InputBorder> {
   _InputBorderTween({InputBorder? begin, InputBorder? end}) : super(begin: begin, end: end);
 
   @override
-  InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t) as InputBorder;
+  InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t)! as InputBorder;
 }
 
 // Passes the _InputBorderGap parameters along to an InputBorder's paint method.
@@ -925,7 +925,7 @@ class _RenderDecoration extends RenderBox {
 
   static Size _boxSize(RenderBox? box) => box == null ? Size.zero : box.size;
 
-  static BoxParentData _boxParentData(RenderBox box) => box.parentData as BoxParentData;
+  static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
 
   EdgeInsets get contentPadding => decoration.contentPadding as EdgeInsets;
 
@@ -982,11 +982,15 @@ class _RenderDecoration extends RenderBox {
       + contentPadding.right));
     // Increase the available width for the label when it is scaled down.
     final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
+    double suffixIconWidth = _boxSize(suffixIcon).width;
+    if (decoration.border!.isOutline) {
+      suffixIconWidth = lerpDouble(suffixIconWidth, 0.0, decoration.floatingLabelProgress)!;
+    }
     final double labelWidth = math.max(0.0, constraints.maxWidth - (
       _boxSize(icon).width
       + contentPadding.left
       + _boxSize(prefixIcon).width
-      + _boxSize(suffixIcon).width
+      + suffixIconWidth
       + contentPadding.right));
     boxToBaseline[label] = _layoutLineBox(
       label,
@@ -1296,7 +1300,7 @@ class _RenderDecoration extends RenderBox {
         width: overallWidth - _boxSize(icon).width,
       );
       container!.layout(containerConstraints, parentUsesSize: true);
-      double x;
+      final double x;
       switch (textDirection) {
         case TextDirection.rtl:
           x = 0.0;
@@ -1336,7 +1340,7 @@ class _RenderDecoration extends RenderBox {
     baseline = _isOutlineAligned ? layout.outlineBaseline : layout.inputBaseline;
 
     if (icon != null) {
-      double x;
+      final double x;
       switch (textDirection) {
         case TextDirection.rtl:
           x = overallWidth - icon!.size.width;
@@ -1492,7 +1496,7 @@ class _RenderDecoration extends RenderBox {
         ? isOutlineBorder ? (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top
         : isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
       final double scale = lerpDouble(1.0, _kFinalLabelScale, t)!;
-      double dx;
+      final double dx;
       switch (textDirection) {
         case TextDirection.rtl:
           dx = labelOffset.dx + label!.size.width * (1.0 - scale); // origin is on the right
@@ -1505,7 +1509,10 @@ class _RenderDecoration extends RenderBox {
       _labelTransform = Matrix4.identity()
         ..translate(dx, labelOffset.dy + dy)
         ..scale(scale);
-      context.pushTransform(needsCompositing, offset, _labelTransform!, _paintLabel);
+      _transformLayer = context.pushTransform(needsCompositing, offset, _labelTransform!, _paintLabel,
+          oldLayer: _transformLayer);
+    } else {
+      _transformLayer = null;
     }
 
     doPaint(icon);
@@ -1518,6 +1525,8 @@ class _RenderDecoration extends RenderBox {
     doPaint(helperError);
     doPaint(counter);
   }
+
+  TransformLayer? _transformLayer;
 
   @override
   bool hitTestSelf(Offset position) => true;
@@ -2142,7 +2151,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       return decoration!.border!;
     }
 
-    Color borderColor;
+    final Color borderColor;
     if (decoration!.enabled || isFocused) {
       borderColor = decoration!.errorText == null
         ? _getDefaultBorderColor(themeData)
@@ -2153,7 +2162,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         : themeData.disabledColor;
     }
 
-    double borderWeight;
+    final double borderWeight;
     if (decoration!.isCollapsed || decoration?.border == InputBorder.none || !decoration!.enabled)
       borderWeight = 0.0;
     else
@@ -2344,8 +2353,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextDirection textDirection = Directionality.of(context)!;
     final EdgeInsets? decorationContentPadding = decoration!.contentPadding?.resolve(textDirection);
 
-    EdgeInsets contentPadding;
-    double floatingLabelHeight;
+    final EdgeInsets contentPadding;
+    final double floatingLabelHeight;
     if (decoration!.isCollapsed) {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
@@ -3805,7 +3814,7 @@ class InputDecorationTheme with Diagnosticable {
   /// true and bordered per the [border].
   ///
   /// This property is false by default.
-  final bool? filled;
+  final bool filled;
 
   /// The color to fill the decoration's container with, if [filled] is true.
   ///

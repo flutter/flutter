@@ -96,8 +96,7 @@ abstract class PopupMenuEntry<T> extends StatefulWidget {
 ///  * [showMenu], a method to dynamically show a popup menu at a given location.
 ///  * [PopupMenuButton], an [IconButton] that automatically shows a menu when
 ///    it is tapped.
-// ignore: prefer_void_to_null, https://github.com/dart-lang/sdk/issues/34416
-class PopupMenuDivider extends PopupMenuEntry<Null> {
+class PopupMenuDivider extends PopupMenuEntry<Never> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16 logical pixels.
@@ -757,12 +756,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
         menu = Theme(data: theme!, child: menu);
     }
 
-    return MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
-      removeBottom: true,
-      removeLeft: true,
-      removeRight: true,
+    return SafeArea(
       child: Builder(
         builder: (BuildContext context) {
           return CustomSingleChildLayout(
@@ -835,7 +829,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///    calling this method automatically.
 ///  * [SemanticsConfiguration.namesRoute], for a description of edge triggered
 ///    semantics.
-Future<T> showMenu<T>({
+Future<T?> showMenu<T>({
   required BuildContext context,
   required RelativeRect position,
   required List<PopupMenuEntry<T>> items,
@@ -1083,7 +1077,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
-    final RenderBox overlay = Overlay.of(context)!.context.findRenderObject()! as RenderBox;
+    final RenderBox overlay = Navigator.of(context)!.overlay!.context.findRenderObject()! as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(widget.offset, ancestor: overlay),
@@ -1094,7 +1088,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
-      showMenu<T>(
+      showMenu<T?>(
         context: context,
         elevation: widget.elevation ?? popupMenuTheme.elevation,
         items: items,
@@ -1104,7 +1098,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         color: widget.color ?? popupMenuTheme.color,
         captureInheritedThemes: widget.captureInheritedThemes,
       )
-      .then<void>((T newValue) {
+      .then<void>((T? newValue) {
         if (!mounted)
           return null;
         if (newValue == null) {

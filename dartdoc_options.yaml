@@ -28,6 +28,7 @@ dartdoc:
     - ignored-canonical-for
     - missing-from-search-index
     - no-canonical-found
+    - no-documentable-libraries
     - no-library-level-docs
     - not-implemented
     - orphaned-file

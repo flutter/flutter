@@ -145,7 +145,6 @@ class LocalEngineLocator {
   }
 
   String _tryEnginePath(String enginePath) {
-    print('looking for $enginePath');
     if (_fileSystem.isDirectorySync(_fileSystem.path.join(enginePath, 'out'))) {
       return enginePath;
     }

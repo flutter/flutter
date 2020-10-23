@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -65,7 +67,7 @@ enum TimelineStream {
 
 /// How long to wait before showing a message saying that
 /// things seem to be taking a long time.
-@visibleForTesting
+@internal
 const Duration kUnusuallyLongTimeout = Duration(seconds: 5);
 
 /// A convenient accessor to frequently used finders.

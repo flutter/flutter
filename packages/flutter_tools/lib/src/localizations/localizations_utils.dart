@@ -238,7 +238,7 @@ String describeLocale(String tag) {
   return output;
 }
 
-/// Return the input string as a Dart-parseable string.
+/// Return the input string as a Dart-parsable string.
 ///
 /// ```
 /// foo => 'foo'

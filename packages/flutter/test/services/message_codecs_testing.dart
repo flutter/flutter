@@ -23,9 +23,9 @@ void checkEncodeDecode<T>(MessageCodec<T> codec, T message) {
     expect(decoded, isNull);
   } else {
     expect(deepEquals(message, decoded), isTrue);
-    final ByteData encodedAgain = codec.encodeMessage(decoded)!;
+    final ByteData? encodedAgain = codec.encodeMessage(decoded);
     expect(
-      encodedAgain.buffer.asUint8List(),
+      encodedAgain!.buffer.asUint8List(),
       orderedEquals(encoded!.buffer.asUint8List()),
     );
   }

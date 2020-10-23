@@ -182,6 +182,7 @@ class TextFormField extends FormField<String> {
     Brightness? keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     bool enableInteractiveSelection = true,
+    TextSelectionControls? selectionControls,
     InputCounterWidgetBuilder? buildCounter,
     ScrollPhysics? scrollPhysics,
     Iterable<String>? autofillHints,
@@ -276,6 +277,7 @@ class TextFormField extends FormField<String> {
            scrollPhysics: scrollPhysics,
            keyboardAppearance: keyboardAppearance,
            enableInteractiveSelection: enableInteractiveSelection,
+           selectionControls: selectionControls,
            buildCounter: buildCounter,
            autofillHints: autofillHints,
          );
@@ -345,7 +347,7 @@ class _TextFormFieldState extends FormFieldState<String> {
   void reset() {
     super.reset();
     setState(() {
-      _effectiveController!.text = widget.initialValue!;
+      _effectiveController!.text = widget.initialValue;
     });
   }
 

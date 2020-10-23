@@ -80,7 +80,7 @@ class DevicesCommand extends FlutterCommand {
         globals.printStatus(status.toString());
       } else {
         globals.printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
-        await Device.printDevices(devices);
+        await Device.printDevices(devices, globals.logger);
       }
       await _printDiagnostics();
     }

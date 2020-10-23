@@ -370,8 +370,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
     final ThemeData theme = Theme.of(context)!;
     final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
-    TextStyle defaultTextStyle;
-    BoxDecoration defaultDecoration;
+    final TextStyle defaultTextStyle;
+    final BoxDecoration defaultDecoration;
     if (theme.brightness == Brightness.dark) {
       defaultTextStyle = theme.textTheme.bodyText2!.copyWith(
         color: Colors.black,

@@ -134,13 +134,13 @@ void main() {
     const BoxDecoration a = BoxDecoration(color: Color(0xFFFFFFFF));
     const BoxDecoration b = BoxDecoration(color: Color(0x00000000));
 
-    BoxDecoration c = Decoration.lerp(a, b, 0.0) as BoxDecoration;
+    BoxDecoration c = Decoration.lerp(a, b, 0.0)! as BoxDecoration;
     expect(c.color, equals(a.color));
 
-    c = Decoration.lerp(a, b, 0.25) as BoxDecoration;
+    c = Decoration.lerp(a, b, 0.25)! as BoxDecoration;
     expect(c.color, equals(Color.lerp(const Color(0xFFFFFFFF), const Color(0x00000000), 0.25)));
 
-    c = Decoration.lerp(a, b, 1.0) as BoxDecoration;
+    c = Decoration.lerp(a, b, 1.0)! as BoxDecoration;
     expect(c.color, equals(b.color));
   });
 
@@ -352,8 +352,8 @@ void main() {
       '   When DecorationImagePainter.paint() was called, there was no text\n'
       '   direction provided in the ImageConfiguration object to match.\n'
       '   The DecorationImage was:\n'
-      '     DecorationImage(SynchronousTestImageProvider(), center, match\n'
-      '     text direction, scale: 1.0)\n'
+      '     DecorationImage(SynchronousTestImageProvider(),\n'
+      '     Alignment.center, match text direction, scale: 1.0)\n'
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n'
     );
