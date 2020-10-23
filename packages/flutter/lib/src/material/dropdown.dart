@@ -1513,7 +1513,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                return InputDecorator(
                  decoration: effectiveDecoration.copyWith(errorText: field.errorText),
                  isEmpty: state.value == null,
-                 isFocused: Focus.of(context)!.hasFocus,
+                 isFocused: Focus.of(context).hasFocus,
                  child: DropdownButtonHideUnderline(
                    child: DropdownButton<T>(
                      items: items,
