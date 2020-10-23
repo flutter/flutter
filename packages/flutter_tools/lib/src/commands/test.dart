@@ -235,8 +235,8 @@ class TestCommand extends FlutterCommand {
       watcher = collector;
     }
 
-    final bool disableServiceAuthCodes =
-      boolArg('disable-service-auth-codes');
+    final bool disableServiceAuthCodes = boolArg('disable-service-auth-codes');
+    final BuildInfo buildInfo = getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     final int result = await testRunner.runTests(
       testWrapper,
@@ -261,8 +261,9 @@ class TestCommand extends FlutterCommand {
       flutterProject: flutterProject,
       web: stringArg('platform') == 'chrome',
       randomSeed: stringArg('test-randomize-ordering-seed'),
-      extraFrontEndOptions: getBuildInfo(forcedBuildMode: BuildMode.debug).extraFrontEndOptions,
+      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
+      buildInfo: buildInfo,
     );
 
     if (collector != null) {
