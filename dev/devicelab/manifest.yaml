@@ -84,6 +84,7 @@ tasks:
       completer
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery_android__compile:
     description: >

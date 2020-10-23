@@ -26,6 +26,8 @@ Future<void> main() async {
         '-t',
         'lib/main.dart',
         '-d',
+        '--no-pub',
+        '--no-android-gradle-daemon',
         deviceId,
       ];
       final Process process = await startProcess(
@@ -36,6 +38,8 @@ Future<void> main() async {
       final Stream<String> lines = process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter());
+
+      process.stderr.listen(print);
 
       await for (final String line in lines) {
         print(line);
