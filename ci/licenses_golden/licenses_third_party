@@ -1,4 +1,4 @@
-Signature: c3fb653e365c02ffb467ba33dda7bcae
+Signature: 05cfe341fa933d3a5579dc6246524c80
 
 UNUSED LICENSES:
 
@@ -8488,10 +8488,7 @@ FILE: ../../../third_party/dart/runtime/vm/dispatch_table.cc
 FILE: ../../../third_party/dart/runtime/vm/dispatch_table.h
 FILE: ../../../third_party/dart/runtime/vm/field_table.cc
 FILE: ../../../third_party/dart/runtime/vm/field_table.h
-FILE: ../../../third_party/dart/runtime/vm/heap/become_test.cc
-FILE: ../../../third_party/dart/runtime/vm/heap/weak_table_test.cc
 FILE: ../../../third_party/dart/runtime/vm/port_set.h
-FILE: ../../../third_party/dart/runtime/vm/stub_code_test.cc
 FILE: ../../../third_party/dart/runtime/vm/tagged_pointer.h
 FILE: ../../../third_party/dart/runtime/vm/timeline_macos.cc
 FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_test.cc
