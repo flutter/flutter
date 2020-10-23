@@ -28,7 +28,7 @@ typedef DismissDirectionCallback = void Function(DismissDirection direction);
 /// confirm or veto a dismiss gesture.
 ///
 /// Used by [Dismissible.confirmDismiss].
-typedef ConfirmDismissCallback = Future<bool> Function(DismissDirection direction);
+typedef ConfirmDismissCallback = Future<bool?> Function(DismissDirection direction);
 
 /// The direction in which a [Dismissible] can be dismissed.
 enum DismissDirection {
@@ -120,7 +120,7 @@ class Dismissible extends StatefulWidget {
   /// If the returned Future<bool> completes true, then this widget will be
   /// dismissed, otherwise it will be moved back to its original location.
   ///
-  /// If the returned Future<bool> completes to false or null the [onResize]
+  /// If the returned Future<bool?> completes to false or null the [onResize]
   /// and [onDismissed] callbacks will not run.
   final ConfirmDismissCallback? confirmDismiss;
 
@@ -458,7 +458,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     updateKeepAlive();
   }
 
-  Future<bool> _confirmStartResizeAnimation() async {
+  Future<bool?> _confirmStartResizeAnimation() async {
     if (widget.confirmDismiss != null) {
       final DismissDirection direction = _dismissDirection!;
       assert(direction != null);

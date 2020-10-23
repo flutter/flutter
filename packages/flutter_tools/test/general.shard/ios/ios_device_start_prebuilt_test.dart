@@ -411,6 +411,62 @@ void main() {
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
   });
+
+  // Still uses context for analytics.
+  testUsingContext(
+      'IOSDevice.startApp detaches lldb when VM service connection fails',
+      () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final MockIOSDeploy mockIOSDeploy = MockIOSDeploy();
+    final MockIOSDeployDebugger mockIOSDeployDebugger = MockIOSDeployDebugger();
+    when(mockIOSDeploy.prepareDebuggerForLaunch(
+            deviceId: anyNamed('deviceId'),
+            bundlePath: anyNamed('bundlePath'),
+            launchArguments: anyNamed('launchArguments'),
+            interfaceType: anyNamed('interfaceType')))
+        .thenReturn(mockIOSDeployDebugger);
+    when(mockIOSDeploy.installApp(
+            deviceId: anyNamed('deviceId'),
+            bundlePath: anyNamed('bundlePath'),
+            launchArguments: anyNamed('launchArguments'),
+            interfaceType: anyNamed('interfaceType')))
+        .thenAnswer((_) async => 0);
+
+    when(mockIOSDeployDebugger.launchAndAttach()).thenAnswer((_) async => true);
+
+    final IOSDevice device = setUpIOSDevice(
+      fileSystem: fileSystem,
+      iosDeploy: mockIOSDeploy,
+      vmServiceConnector: (String string, {Log log}) async {
+        throw const io.SocketException(
+          'OS Error: Connection refused, errno = 61, address = localhost, port '
+          '= 58943',
+        );
+      },
+    );
+    final IOSApp iosApp = PrebuiltIOSApp(
+      projectBundleId: 'app',
+      bundleName: 'Runner',
+      bundleDir: fileSystem.currentDirectory,
+    );
+    device.portForwarder = const NoOpDevicePortForwarder();
+    device.setLogReader(iosApp, FakeDeviceLogReader());
+
+    final LaunchResult launchResult = await device.startApp(
+      iosApp,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      platformArgs: <String, dynamic>{},
+      fallbackPollingDelay: Duration.zero,
+      fallbackThrottleTimeout: const Duration(milliseconds: 10),
+    );
+
+    expect(launchResult.started, false);
+    verify(mockIOSDeployDebugger.detach()).called(1);
+  }, overrides: <Type, Generator>{
+    Usage: () => MockUsage(),
+  });
 }
 
 IOSDevice setUpIOSDevice({
@@ -419,6 +475,7 @@ IOSDevice setUpIOSDevice({
   Logger logger,
   ProcessManager processManager,
   VmServiceConnector vmServiceConnector,
+  IOSDeploy iosDeploy,
 }) {
   final Artifacts artifacts = Artifacts.test();
   final FakePlatform macPlatform = FakePlatform(
@@ -441,13 +498,14 @@ IOSDevice setUpIOSDevice({
     platform: macPlatform,
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     logger: logger ?? BufferLogger.test(),
-    iosDeploy: IOSDeploy(
-      logger: logger ?? BufferLogger.test(),
-      platform: macPlatform,
-      processManager: processManager ?? FakeProcessManager.any(),
-      artifacts: artifacts,
-      cache: cache,
-    ),
+    iosDeploy: iosDeploy ??
+        IOSDeploy(
+          logger: logger ?? BufferLogger.test(),
+          platform: macPlatform,
+          processManager: processManager ?? FakeProcessManager.any(),
+          artifacts: artifacts,
+          cache: cache,
+        ),
     iMobileDevice: IMobileDevice(
       logger: logger ?? BufferLogger.test(),
       processManager: processManager ?? FakeProcessManager.any(),
@@ -461,7 +519,9 @@ IOSDevice setUpIOSDevice({
 }
 
 class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
-class MockDeviceLogReader extends Mock implements DeviceLogReader  {}
+class MockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockUsage extends Mock implements Usage {}
 class MockVmService extends Mock implements VmService {}
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
+class MockIOSDeployDebugger extends Mock implements IOSDeployDebugger {}
+class MockIOSDeploy extends Mock implements IOSDeploy {}

@@ -149,7 +149,7 @@ class Switch extends StatefulWidget {
   ///   },
   /// )
   /// ```
-  final ValueChanged<bool?>? onChanged;
+  final ValueChanged<bool>? onChanged;
 
   /// The color to use when this switch is on.
   ///
@@ -306,8 +306,8 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     final Color hoverColor = widget.hoverColor ?? theme.hoverColor;
     final Color focusColor = widget.focusColor ?? theme.focusColor;
 
-    Color inactiveThumbColor;
-    Color inactiveTrackColor;
+    final Color inactiveThumbColor;
+    final Color inactiveTrackColor;
     if (enabled) {
       const Color black32 = Color(0x52000000); // Black with 32% opacity
       inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade400 : Colors.grey.shade50);
@@ -440,7 +440,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final Color activeTrackColor;
   final Color inactiveTrackColor;
   final ImageConfiguration configuration;
-  final ValueChanged<bool?>? onChanged;
+  final ValueChanged<bool>? onChanged;
   final BoxConstraints additionalConstraints;
   final DragStartBehavior dragStartBehavior;
   final bool hasFocus;
@@ -463,7 +463,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       activeTrackColor: activeTrackColor,
       inactiveTrackColor: inactiveTrackColor,
       configuration: configuration,
-      onChanged: onChanged,
+      onChanged: onChanged != null ? _handleValueChanged : null,
       textDirection: Directionality.of(context)!,
       additionalConstraints: additionalConstraints,
       hasFocus: hasFocus,
@@ -487,13 +487,24 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..activeTrackColor = activeTrackColor
       ..inactiveTrackColor = inactiveTrackColor
       ..configuration = configuration
-      ..onChanged = onChanged
+      ..onChanged = onChanged != null ? _handleValueChanged : null
       ..textDirection = Directionality.of(context)!
       ..additionalConstraints = additionalConstraints
       ..dragStartBehavior = dragStartBehavior
       ..hasFocus = hasFocus
       ..hovering = hovering
       ..vsync = state;
+  }
+
+  void _handleValueChanged(bool? value) {
+    // Wrap the onChanged callback because the RenderToggleable supports tri-state
+    // values (i.e. value can be null), but the Switch doesn't. We pass false
+    // for the tristate param to RenderToggleable, so value should never
+    // be null.
+    assert(value != null);
+    if (onChanged != null) {
+      onChanged!(value!);
+    }
   }
 }
 
@@ -650,7 +661,6 @@ class _RenderSwitch extends RenderToggleable {
     }
   }
 
-
   @override
   void detach() {
     _cachedThumbPainter?.dispose();
@@ -738,7 +748,7 @@ class _RenderSwitch extends RenderToggleable {
     final bool isEnabled = onChanged != null;
     final double currentValue = position.value;
 
-    double visualPosition;
+    final double visualPosition;
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - currentValue;

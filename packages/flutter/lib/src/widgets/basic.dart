@@ -1328,9 +1328,11 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 ///
 /// When this widget is composited during the compositing phase (which comes
 /// after the paint phase, as described in [WidgetsBinding.drawFrame]), it
-/// applies a transformation that causes it to provide its child with a
-/// coordinate space that matches that of the linked [CompositedTransformTarget]
-/// widget, offset by [offset].
+/// applies a transformation that brings [targetAnchor] of the linked
+/// [CompositedTransformTarget] and [followerAnchor] of this widget together.
+/// The two anchor points will have the same global coordinates, unless [offset]
+/// is not [Offset.zero], in which case [followerAnchor] will be offset by
+/// [offset] in the linked [CompositedTransformTarget]'s coordinate space.
 ///
 /// The [LayerLink] object used as the [link] must be the same object as that
 /// provided to the matching [CompositedTransformTarget].
@@ -1362,10 +1364,14 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
     required this.link,
     this.showWhenUnlinked = true,
     this.offset = Offset.zero,
+    this.targetAnchor = Alignment.topLeft,
+    this.followerAnchor = Alignment.topLeft,
     Widget? child,
   }) : assert(link != null),
        assert(showWhenUnlinked != null),
        assert(offset != null),
+       assert(targetAnchor != null),
+       assert(followerAnchor != null),
        super(key: key, child: child);
 
   /// The link object that connects this [CompositedTransformFollower] with a
@@ -1385,8 +1391,33 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// hidden.
   final bool showWhenUnlinked;
 
-  /// The offset to apply to the origin of the linked
-  /// [CompositedTransformTarget] to obtain this widget's origin.
+  /// The anchor point on the linked [CompositedTransformTarget] that
+  /// [followerAnchor] will line up with.
+  ///
+  /// {@template flutter.widgets.followerLayer.anchor}
+  /// For example, when [targetAnchor] and [followerAnchor] are both
+  /// [Alignment.topLeft], this widget will be top left aligned with the linked
+  /// [CompositedTransformTarget]. When [targetAnchor] is
+  /// [Alignment.bottomLeft] and [followerAnchor] is [Alignment.topLeft], this
+  /// widget will be left aligned with the linked [CompositedTransformTarget],
+  /// and its top edge will line up with the [CompositedTransformTarget]'s
+  /// bottom edge.
+  /// {@endtemplate}
+  ///
+  /// Defaults to [Alignment.topLeft].
+  final Alignment targetAnchor;
+
+  /// The anchor point on this widget that will line up with [followerAnchor] on
+  /// the linked [CompositedTransformTarget].
+  ///
+  /// {@macro flutter.widgets.followerLayer.anchor}
+  ///
+  /// Defaults to [Alignment.topLeft].
+  final Alignment followerAnchor;
+
+  /// The additional offset to apply to the [targetAnchor] of the linked
+  /// [CompositedTransformTarget] to obtain this widget's [followerAnchor]
+  /// position.
   final Offset offset;
 
   @override
@@ -1395,6 +1426,8 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
       link: link,
       showWhenUnlinked: showWhenUnlinked,
       offset: offset,
+      leaderAnchor: targetAnchor,
+      followerAnchor: followerAnchor,
     );
   }
 
@@ -1403,7 +1436,9 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
     renderObject
       ..link = link
       ..showWhenUnlinked = showWhenUnlinked
-      ..offset = offset;
+      ..offset = offset
+      ..leaderAnchor = targetAnchor
+      ..followerAnchor = followerAnchor;
   }
 }
 
@@ -2136,7 +2171,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 
   @override
   String toStringShort() {
-    String type;
+    final String type;
     if (width == double.infinity && height == double.infinity) {
       type = '${objectRuntimeType(this, 'SizedBox')}.expand';
     } else if (width == 0.0 && height == 0.0) {
@@ -2150,7 +2185,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    DiagnosticLevel level;
+    final DiagnosticLevel level;
     if ((width == double.infinity && height == double.infinity) ||
         (width == 0.0 && height == 0.0)) {
       level = DiagnosticLevel.hidden;
@@ -6925,6 +6960,25 @@ class Semantics extends SingleChildRenderObjectWidget {
 /// would be presented as a separate feature than the checkbox, and
 /// the user would not be able to be sure that they were related.
 ///
+/// {@tool snippet}
+/// This snippet shows how to use [MergeSemantics] to merge the semantics of
+/// a [Checkbox] and [Text] widget.
+///
+/// ```dart
+/// MergeSemantics(
+///   child: Row(
+///     children: <Widget>[
+///       Checkbox(
+///         value: true,
+///         onChanged: (bool value) => null,
+///       ),
+///       const Text("Settings"),
+///     ],
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// Be aware that if two nodes in the subtree have conflicting
 /// semantics, the result may be nonsensical. For example, a subtree
 /// with a checked checkbox and an unchecked checkbox will be
@@ -7120,13 +7174,87 @@ class KeyedSubtree extends StatelessWidget {
   Widget build(BuildContext context) => child;
 }
 
-/// A platonic widget that calls a closure to obtain its child widget.
+/// A stateless utility widget whose [build] method uses its
+/// [builder] callback to create the widget's child.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=xXNOkIuSYuA}
 ///
+/// This widget is a simple inline alternative to defining a [StatelessWidget]
+/// subclass. For example a widget defined and used like this:
+///
+/// ```dart
+/// class Foo extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) => Text('foo');
+/// }
+///
+/// Center(child: Foo())
+/// ```
+///
+/// Could equally well be defined and used like this, without
+/// definining a new widget class:
+///
+/// ```dart
+/// Center(
+///   child: Builder(
+///     builder: (BuildContext context) => Text('foo');
+///   ),
+/// )
+/// ```
+///
+/// The difference between either of the previous examples and simply
+/// creating a child directly, without an intervening widget, is the
+/// extra [BuildContext] element that the additional widget adds. This
+/// is particularly noticeable when the tree contains an inherited
+/// widget that is referred to by a method like [Scaffold.of],
+/// which visits the child widget's BuildContext ancestors.
+///
+/// In the following example the button's `onPressed` callback is unable
+/// to find the enclosing [ScaffoldState] with [Scaffold.of]:
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: TextButton(
+///         onPressed: () {
+///           // Fails because Scaffold.of() doesn't find anything
+///           // above this widget's context.
+///           print(Scaffold.of(context).hasAppBar);
+///         },
+///         child: Text('hasAppBar'),
+///       )
+///     ),
+///   );
+/// }
+/// ```
+///
+/// A [Builder] widget introduces an additional [BuildContext] element
+/// and so the [Scaffold.of] method succeeds.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Builder(
+///       builder: (BuildContext context) {
+///         return Center(
+///           child: TextButton(
+///             onPressed: () {
+///               print(Scaffold.of(context).hasAppBar);
+///             },
+///             child: Text('hasAppBar'),
+///           ),
+///         );
+///       },
+///     ),
+///   );
+/// }
+/// ```
+///
 /// See also:
 ///
-///  * [StatefulBuilder], a platonic widget which also has state.
+///  * [StatefulBuilder], A stateful utility widget whose [build] method uses its
+///    [builder] callback to create the widget's child.
 class Builder extends StatelessWidget {
   /// Creates a widget that delegates its build to a callback.
   ///

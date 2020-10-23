@@ -310,9 +310,9 @@ class SizeAnalyzer {
       color = TerminalColor.yellow;
     }
 
-    // Compute any preceeding directories, and compare this to the stored
-    // directoried (in _leadingPaths) for the last entity that was printed. The
-    // similary determines whether or not leading directory information needs to
+    // Compute any preceding directories, and compare this to the stored
+    // directories (in _leadingPaths) for the last entity that was printed. The
+    // similarly determines whether or not leading directory information needs to
     // be printed.
     final List<String> localSegments = entityName.split('/')
         ..removeLast();

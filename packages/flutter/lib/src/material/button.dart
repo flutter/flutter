@@ -451,7 +451,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         ),
       ),
     );
-    Size minSize;
+    final Size minSize;
     switch (widget.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         minSize = Size(
@@ -550,7 +550,7 @@ class _RenderInputPadding extends RenderShiftedBox {
       final double height = math.max(child!.size.width, minSize.width);
       final double width = math.max(child!.size.height, minSize.height);
       size = constraints.constrain(Size(height, width));
-      final BoxParentData childParentData = child!.parentData as BoxParentData;
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
     } else {
       size = Size.zero;

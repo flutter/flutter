@@ -316,7 +316,7 @@ void main() {
     BorderSide dividerBorder() {
       final BoxDecoration decoration = tester.widget<Container>(
         find.descendant(of: find.byType(Divider), matching: find.byType(Container)).first,
-      ).decoration as BoxDecoration;
+      ).decoration! as BoxDecoration;
       return decoration.border!.bottom;
     }
 

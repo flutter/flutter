@@ -40,7 +40,7 @@ void main() {
     );
     expect(finder, findsOneWidget);
     final Container container = tester.widget(finder);
-    return container.decoration as BoxDecoration;
+    return container.decoration! as BoxDecoration;
   }
 
   TextStyle _getTextStyle(WidgetTester tester) {

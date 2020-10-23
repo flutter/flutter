@@ -132,7 +132,7 @@ class Theme extends StatelessWidget {
       return inheritedTheme.theme.data;
     }
 
-    final MaterialLocalizations? localizations = MaterialLocalizations.of(context);
+    final MaterialLocalizations? localizations = Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
     final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
     final ThemeData theme = inheritedTheme?.theme.data ?? _kFallbackTheme;
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
@@ -254,8 +254,7 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible, https://github.com/dart-lang/sdk/issues/10659
-    _data = visitor(_data, widget.data, (dynamic value) => ThemeDataTween(begin: value as ThemeData)) as ThemeDataTween;
-    assert(_data != null);
+    _data = visitor(_data, widget.data, (dynamic value) => ThemeDataTween(begin: value as ThemeData))! as ThemeDataTween;
   }
 
   @override

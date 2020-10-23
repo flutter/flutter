@@ -137,7 +137,6 @@ class AnalyzeOnce extends AnalyzeBase {
       progress = argResults['preamble'] as bool
           ? logger.startProgress(
             'Analyzing $message...',
-            timeout: timeoutConfiguration.slowOperation,
           )
           : null;
 

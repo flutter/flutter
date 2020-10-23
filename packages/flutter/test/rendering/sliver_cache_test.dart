@@ -912,7 +912,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   RenderSliverList createRenderSliverList() {
     assert(_renderObject == null);
     _renderObject = RenderSliverList(childManager: this);
-    return _renderObject as RenderSliverList;
+    return _renderObject! as RenderSliverList;
   }
 
   RenderSliverFixedExtentList createRenderSliverFixedExtentList() {
@@ -921,7 +921,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
       childManager: this,
       itemExtent: 100.0,
     );
-    return _renderObject as RenderSliverFixedExtentList;
+    return _renderObject! as RenderSliverFixedExtentList;
   }
 
   RenderSliverGrid createRenderSliverGrid() {
@@ -933,7 +933,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
         childAspectRatio: 4.0,
       ),
     );
-    return _renderObject as RenderSliverGrid;
+    return _renderObject! as RenderSliverGrid;
   }
 
   int? _currentlyUpdatingChildIndex;
@@ -973,7 +973,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 

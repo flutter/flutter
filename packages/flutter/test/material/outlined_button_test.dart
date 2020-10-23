@@ -635,7 +635,7 @@ void main() {
     BorderSide getBorderSide() {
       final OutlinedBorder border = tester.widget<Material>(
         find.descendant(of: outlinedButton, matching: find.byType(Material))
-      ).shape as OutlinedBorder;
+      ).shape! as OutlinedBorder;
       return border.side;
     }
 
@@ -1180,11 +1180,11 @@ PhysicalModelLayer _findPhysicalLayer(Element element) {
   expect(element, isNotNull);
   RenderObject? object = element.renderObject;
   while (object != null && object is! RenderRepaintBoundary && object is! RenderView) {
-    object = object.parent as RenderObject;
+    object = object.parent as RenderObject?;
   }
   expect(object!.debugLayer, isNotNull);
   expect(object.debugLayer!.firstChild, isA<PhysicalModelLayer>());
-  final PhysicalModelLayer layer = object.debugLayer!.firstChild as PhysicalModelLayer;
+  final PhysicalModelLayer layer = object.debugLayer!.firstChild! as PhysicalModelLayer;
   final Layer child = layer.firstChild!;
   return child is PhysicalModelLayer ? child : layer;
 }
