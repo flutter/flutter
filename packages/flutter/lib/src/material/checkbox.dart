@@ -138,8 +138,8 @@ class Checkbox extends StatefulWidget {
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// Note, when this [Checkbox] is not selected, this color will not fill
-  /// anything.
+  /// Note, when this [Checkbox] is not selected, the [activeColor] color will
+  /// not fill anything.
   final Color? activeColor;
 
   /// The color to use for the check icon when this checkbox is checked.
