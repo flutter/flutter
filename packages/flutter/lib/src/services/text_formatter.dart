@@ -15,8 +15,8 @@ import 'text_input.dart';
 /// ### [MaxLengthEnforcement.enforced] versus
 /// [MaxLengthEnforcement.allowComposingTextToFinish]
 ///
-/// Both [MaxLengthEnforcement.enforced]
-/// and [MaxLengthEnforcement.allowComposingTextToFinish] make sure the final length
+/// Both [MaxLengthEnforcement.enforced] and
+/// [MaxLengthEnforcement.allowComposingTextToFinish] make sure the final length
 /// of the text does not exceed the max length specified.
 /// The difference is that [MaxLengthEnforcement.enforced] truncates the text
 /// whenever a new character is inserted into the text field,
@@ -42,8 +42,9 @@ enum MaxLengthEnforcement {
   /// the text has unfinished composing region.
   enforced,
 
-  /// Users can still input if the current value is composing while it reached
-  /// the max length limit. After composing ends, the value will be truncated.
+  /// Users can still input text if the current value is composing even after
+  /// reaching the max length limit. After composing ends, the value will be
+  /// truncated.
   allowComposingTextToFinish,
 
   /// No enforcement applied to the editing value.
