@@ -808,20 +808,9 @@ class MediaQuery extends InheritedWidget {
   ///
   /// The deprecated `nullOk` argument is ignored, and will assert if set to true.
   /// Use [maybeOf] instead of setting `nullOk` to true.
-  static MediaQueryData of(BuildContext context, {
-    @Deprecated(
-      'This argument is ignored. For cases where nullOk would be true, use MediaQuery.maybeOf instead. '
-      'This feature was deprecated after v1.24.0-1.0.pre.'
-    )
-    bool nullOk = false,
-  }) {
+  static MediaQueryData of(BuildContext context) {
     assert(context != null);
     assert(debugCheckHasMediaQuery(context));
-    assert(
-      nullOk == false,
-      'The nullOk parameter is no longer used. Instead of setting it to true, '
-      'call the MediaQuery.maybeOf function instead.',
-    );
     return context.dependOnInheritedWidgetOfExactType<MediaQuery>()!.data;
   }
 
