@@ -390,7 +390,7 @@ class Localizations extends StatefulWidget {
       mergedDelegates.insertAll(0, delegates);
     return Localizations(
       key: key,
-      locale: locale ?? Localizations.localeOf(context)!,
+      locale: locale ?? Localizations.localeOf(context),
       delegates: mergedDelegates,
       child: child,
     );
@@ -411,17 +411,38 @@ class Localizations extends StatefulWidget {
   /// The locale of the Localizations widget for the widget tree that
   /// corresponds to [BuildContext] `context`.
   ///
-  /// If no [Localizations] widget is in scope then the [Localizations.localeOf]
-  /// method will throw an exception, unless the `nullOk` argument is set to
-  /// true, in which case it returns null.
-  static Locale? localeOf(BuildContext context, { bool nullOk = false }) {
+  /// If no [Localizations] widget is in scope then this function will assert in
+  /// debug mode, and throw an exception in release mode.
+  static Locale localeOf(BuildContext context) {
     assert(context != null);
-    assert(nullOk != null);
     final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
-    if (nullOk && scope == null)
-      return null;
-    assert(scope != null, 'a Localizations ancestor was not found');
-    return scope!.localizationsState.locale;
+    assert(() {
+      if (scope == null) {
+        throw FlutterError(
+          'Localizations operation requested with a context that does not include Localizations.\n'
+          'The context used to retrieve the Localizations widget must be that of a widget that '
+          'is a descendant of a Localizations widget.'
+        );
+      }
+      if (scope.localizationsState.locale == null) {
+        throw FlutterError(
+          'Localizations.localeOf found a Localizations widget that had a null locale.\n'
+        );
+      }
+      return true;
+    }());
+    return scope!.localizationsState.locale!;
+  }
+
+  /// The locale of the Localizations widget for the widget tree that
+  /// corresponds to [BuildContext] `context`.
+  ///
+  /// If no [Localizations] widget is in scope then this function will return
+  /// null.
+  static Locale? maybeLocaleOf(BuildContext context) {
+    assert(context != null);
+    final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    return scope?.localizationsState.locale;
   }
 
   // There doesn't appear to be a need to make this public. See the

@@ -34,6 +34,24 @@ void main() {
     await tester.pump();
     expect(find.text('loaded'), findsOneWidget);
   });
+
+  testWidgets('Localizations.localeOf throws when no localizations exist', (WidgetTester tester) async {
+    final GlobalKey contextKey = GlobalKey(debugLabel: 'Test Key');
+    await tester.pumpWidget(Container(key: contextKey));
+
+    expect(() => Localizations.localeOf(contextKey.currentContext!), throwsA(isAssertionError.having(
+          (AssertionError e) => e.message,
+      'message',
+      contains('Localizations operation requested with a context that does not include Localizations'),
+    )));
+  });
+
+  testWidgets('Localizations.maybeLocaleOf returns null when no localizations exist', (WidgetTester tester) async {
+    final GlobalKey contextKey = GlobalKey(debugLabel: 'Test Key');
+    await tester.pumpWidget(Container(key: contextKey));
+
+    expect(Localizations.maybeLocaleOf(contextKey.currentContext!), isNull);
+  });
 }
 
 class FakeLocalizationsDelegate extends LocalizationsDelegate<String> {
