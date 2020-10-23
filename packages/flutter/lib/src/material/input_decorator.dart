@@ -1325,11 +1325,11 @@ class _RenderDecoration extends RenderBox {
     }
 
     double customLayout(RenderBox box, double x, double y) {
-      final double scaleY = (y + 1) / 2;
+      final double scaleY = (y + 1.0) / 2.0;
       _boxParentData(box).offset = Offset(
         x,
-        (height! - box.size.height) * scaleY
-        );
+        (height! - box.size.height) * scaleY,
+      );
       return box.size.width;
     }
 

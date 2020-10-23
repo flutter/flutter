@@ -633,29 +633,26 @@ class _MixedAlignment extends AlignmentGeometry {
 
 /// The vertical alignment of a widget within an input box.
 ///
-/// A single [y] value that can range from -1.0 to 1.0. -1.0 aligns to the top
-/// of the input box so that the top of the widget fits within the box and its padding.
-/// 0.0 aligns to the center of the box. 1.0 aligns so that
-/// the bottom of the widget aligns with the bottom interior edge of
-/// the input box.
-///
+/// A single [y] value that can range from -1.0 to 1.0 inclusive. -1.0 aligns to the top
+/// of the input box so that the top of the widget fits within the box and its 
+/// padding. 0.0 aligns to the center of the box. 1.0 aligns so that the bottom
+/// of the widget aligns with the bottom interior edge of the input box.
 class VerticalAlignment {
-  /// Creates a VerticalAlignment from any y value between -1.0 and 1.0.
+  /// Creates a VerticalAlignment from any y value between -1.0 and 1.0 inclusive.
   const VerticalAlignment({
     required this.y,
   }) : assert(y != null),
        assert(y >= -1.0 && y <= 1.0);
 
-  /// A value ranging from -1.0 to 1.0 that defines the topmost and bottommost
-  /// locations of the top and bottom of the input box.
+  /// A value ranging from -1.0 to 1.0 inclusive that defines the topmost
+  /// and bottommost locations of the top and bottom of the input box.
   final double y;
 
-  /// Aligns the widget with the topmost location within a
-  /// TextField's input box.
+  /// Aligns the widget with the topmost location within the input box.
   static const VerticalAlignment top = VerticalAlignment(y: -1.0);
-  /// Alignsthe widget to the center of the TextField.
+  /// Aligns the widget to the center of the input box.
   static const VerticalAlignment center = VerticalAlignment(y: 0.0);
-  /// Aligns the widget with the bottommost location within a TextField.
+  /// Aligns the widget with the bottommost location within a input box.
   static const VerticalAlignment bottom = VerticalAlignment(y: 1.0);
 
   @override
