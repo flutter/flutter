@@ -324,13 +324,18 @@ class BitmapCanvas extends EngineCanvas {
   ///   DOM to render correctly.
   /// - Pictures typically have large rect/rounded rectangles as background
   ///   prefer DOM if canvas has not been allocated yet.
+  ///
+  /// Future optimization: The check below can be used to prevent excessive
+  /// canvas sandwiching (switching between dom and multiple canvas(s)).
+  /// Once RecordingCanvas is updated to detect switch count, this can be
+  /// enabled.
+  /// (_canvasPool._canvas == null &&
+  ///           paint.maskFilter == null &&
+  ///           paint.shader == null &&
+  ///           paint.style != ui.PaintingStyle.stroke)
+  ///
   bool _useDomForRendering(SurfacePaintData paint) =>
-      _preserveImageData == false && (
-      _contains3dTransform ||
-      (_canvasPool._canvas == null &&
-          paint.maskFilter == null &&
-          paint.shader == null &&
-          paint.style != ui.PaintingStyle.stroke));
+      _preserveImageData == false && _contains3dTransform;
 
   @override
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
@@ -488,10 +493,13 @@ class BitmapCanvas extends EngineCanvas {
       html.Element svgElm = _pathToSvgElement(
           surfacePath, paint, '${pathBounds.right}', '${pathBounds.bottom}');
       if (!_canvasPool.isClipped) {
-        svgElm.style
-          ..transform = matrix4ToCssTransform(transform)
-          ..transformOrigin = '0 0 0'
-          ..position = 'absolute';
+        html.CssStyleDeclaration style = svgElm.style;
+        style.position = 'absolute';
+        if (!transform.isIdentity()) {
+          style
+            ..transform = matrix4ToCssTransform(transform)
+            ..transformOrigin = '0 0 0';
+        }
       }
       _drawElement(svgElm, ui.Offset(0, 0), paint);
     } else {
