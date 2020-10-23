@@ -37,6 +37,8 @@ Future<void> main() async {
         .transform(utf8.decoder)
         .transform(const LineSplitter());
 
+      process.stderr.listen(print);
+
       await for (final String line in lines) {
         print(line);
         if (line.contains('ERROR caught by framework')) {
