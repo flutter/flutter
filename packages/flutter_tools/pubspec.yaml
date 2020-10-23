@@ -12,7 +12,7 @@ dependencies:
   archive: 2.0.13
   args: 1.6.0
   dds: 1.4.1
-  dwds: 6.0.0
+  dwds: 7.0.0
   completion: 0.2.2
   coverage: 0.14.1
   crypto: 2.1.5
@@ -114,9 +114,3 @@ dartdoc:
   nodoc: true
 
 # PUBSPEC CHECKSUM: 138b
-
-dependency_overrides:
-  dwds:
-    git:
-      url: git@github.com:dart-lang/webdev.git
-      path: dwds
