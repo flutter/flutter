@@ -19,7 +19,7 @@ Widget buildInputDecorator({
   bool isFocused = false,
   bool isHovering = false,
   TextStyle? baseStyle,
-  VerticalAlignment textAlignVertical,
+  VerticalAlignment? textAlignVertical,
   VisualDensity? visualDensity,
   bool fixTextFieldOutlineLabel = false,
   Widget child = const Text(
@@ -1450,6 +1450,60 @@ void main() {
     expect(tester.getTopLeft(find.byIcon(Icons.pages)).dx, 0.0);
     expect(tester.getTopRight(find.byIcon(Icons.pages)).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
+  });
+
+  testWidgets('InputDecorator prefixIcon/suffixIcon alignments', (WidgetTester tester) async {
+    VerticalAlignment? alignment = VerticalAlignment.center;
+    late StateSetter setState;
+     await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return Material(
+              child: TextField(
+                minLines: 5,
+                maxLines: null,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.pages),
+                  prefixIconAlignment: alignment,
+                  suffixIcon: const Icon(Icons.satellite),
+                  suffixIconAlignment: alignment,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final double prefixPosition = tester.getTopLeft(find.byIcon(Icons.pages)).dy;
+    final double suffixPosition = tester.getTopLeft(find.byIcon(Icons.satellite)).dy;
+
+    setState(() {
+      alignment = VerticalAlignment.top;
+    });
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, lessThan(prefixPosition));
+    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, lessThan(suffixPosition));
+
+    setState(() {
+      alignment = VerticalAlignment.bottom;
+    });
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, greaterThan(prefixPosition));
+    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, greaterThan(suffixPosition));
+
+    // Setting alignment back to null works and reverts to the default.
+    setState(() {
+      alignment = null;
+    });
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, prefixPosition);
+    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, suffixPosition);
   });
 
   testWidgets('InputDecorator prefixIconConstraints/suffixIconConstraints', (WidgetTester tester) async {
@@ -4157,7 +4211,7 @@ void main() {
   testWidgets('textAlignVertical can be updated', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/56933
     const String hintText = 'hint';
-    VerticalAlignment alignment = VerticalAlignment.top;
+    VerticalAlignment? alignment = VerticalAlignment.top;
     late StateSetter setState;
     await tester.pumpWidget(
       MaterialApp(
