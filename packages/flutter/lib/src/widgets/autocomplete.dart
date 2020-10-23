@@ -526,9 +526,7 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
       return;
     }
     _selection = nextSelection;
-    final String selectionString = nextSelection == null
-        ? ''
-        : widget.displayStringForOption(nextSelection);
+    final String selectionString = widget.displayStringForOption(nextSelection);
     _textEditingController.value = TextEditingValue(
       selection: TextSelection.collapsed(offset: selectionString.length),
       text: selectionString,
