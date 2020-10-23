@@ -113,4 +113,10 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 138b
+# PUBSPEC CHECKSUM: 9d86
+
+dependency_overrides:
+  dwds:
+    git:
+      url: git@github.com:dart-lang/webdev.git
+      path: dwds

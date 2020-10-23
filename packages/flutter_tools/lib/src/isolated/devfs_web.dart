@@ -9,6 +9,7 @@ import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
+import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
@@ -226,6 +227,10 @@ class WebAssetServer implements AssetReader {
         };
       };
 
+      logging.Logger.root.onRecord.listen((logging.LogRecord event) {
+        globals.printTrace('${event.loggerName}: ${event.message}');
+      });
+
       // In debug builds, spin up DWDS and the full asset server.
       final Dwds dwds = await dwdsLauncher(
           assetReader: server,
@@ -300,6 +305,11 @@ class WebAssetServer implements AssetReader {
   // handle requests for JavaScript source, dart sources maps, or asset files.
   @visibleForTesting
   Future<shelf.Response> handleRequest(shelf.Request request) async {
+    if (request.method != 'GET') {
+      // Assets are served via GET only.
+      return shelf.Response.notFound('');
+    }
+
     final String requestPath = _stripBasePath(request.url.path, basePath);
 
     if (requestPath == null) {
@@ -976,6 +986,11 @@ class ReleaseAssetServer {
       ];
 
   Future<shelf.Response> handle(shelf.Request request) async {
+    if (request.method != 'GET') {
+      // Assets are served via GET only.
+      return shelf.Response.notFound('');
+    }
+
     Uri fileUri;
     final String requestPath = _stripBasePath(request.url.path, basePath);
 

@@ -18,7 +18,7 @@ const double crossAxisEndOffset = 0.5;
 Widget buildTest({
   double? startToEndThreshold,
   TextDirection textDirection = TextDirection.ltr,
-  Future<bool> Function(BuildContext context, DismissDirection direction)? confirmDismiss,
+  Future<bool?> Function(BuildContext context, DismissDirection direction)? confirmDismiss,
 }) {
   return Directionality(
     textDirection: textDirection,
@@ -679,7 +679,7 @@ void main() {
       return buildTest(
         confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
           confirmDismissDirection = dismissDirection;
-          return Future<bool>.value(confirmDismissValue);
+          return Future<bool?>.value(confirmDismissValue);
         }
       );
     }

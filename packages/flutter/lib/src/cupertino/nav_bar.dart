@@ -1379,15 +1379,18 @@ class _BackChevron extends StatelessWidget {
 
     // Replicate the Icon logic here to get a tightly sized icon and add
     // custom non-square padding.
-    Widget iconWidget = Text.rich(
-      TextSpan(
-        text: String.fromCharCode(CupertinoIcons.back.codePoint),
-        style: TextStyle(
-          inherit: false,
-          color: textStyle.color,
-          fontSize: 34.0,
-          fontFamily: CupertinoIcons.back.fontFamily,
-          package: CupertinoIcons.back.fontPackage,
+    Widget iconWidget = Padding(
+      padding: const EdgeInsetsDirectional.only(start: 6, end: 2),
+      child: Text.rich(
+        TextSpan(
+          text: String.fromCharCode(CupertinoIcons.back.codePoint),
+          style: TextStyle(
+            inherit: false,
+            color: textStyle.color,
+            fontSize: 30.0,
+            fontFamily: CupertinoIcons.back.fontFamily,
+            package: CupertinoIcons.back.fontPackage,
+          ),
         ),
       ),
     );

@@ -99,7 +99,7 @@ void main() {
 
     testUsingContext('returns 1 when app fails to run', () async {
       testDeviceManager.addDevice(MockDevice());
-      appStarter = expectAsync4((DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) async => null);
+      appStarter = expectAsync4((DriveCommand command, Uri webUri, ApplicationPackage package, bool prebuiltApplication) async => null, count: 3);
 
       final String testApp = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -228,6 +228,7 @@ void main() {
         '10',
       ];
       await createTestCommandRunner(command).run(args);
+      verify(mockDevice.dispose());
       expect(testLogger.errorText, isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
@@ -529,6 +530,7 @@ void main() {
                 prebuiltApplication: false,
                 userIdentifier: anyNamed('userIdentifier'),
         ));
+        verify(mockDevice.dispose());
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -558,6 +560,7 @@ void main() {
                 prebuiltApplication: false,
                 userIdentifier: anyNamed('userIdentifier'),
         ));
+        verify(mockDevice.dispose());
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

@@ -1,5 +1,7 @@
 name: image_loading
 description: Integration testing library for Android semantics
+environment:
+  sdk: '>=2.9.0 <3.0.0'
 
 dependencies:
   flutter:

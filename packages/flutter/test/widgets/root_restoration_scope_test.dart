@@ -302,7 +302,7 @@ void main() {
   });
 
   testWidgets('injects null when rootBucket is null', (WidgetTester tester) async {
-    final Completer<RestorationBucket> completer = Completer<RestorationBucket>();
+    final Completer<RestorationBucket?> completer = Completer<RestorationBucket?>();
     binding.restorationManager.rootBucket = completer.future;
 
     await tester.pumpWidget(
