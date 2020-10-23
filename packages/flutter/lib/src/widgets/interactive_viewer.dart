@@ -140,6 +140,15 @@ class InteractiveViewer extends StatefulWidget {
   /// If set to false, then the child will be given infinite constraints. This
   /// is often useful when a child should be bigger than the InteractiveViewer.
   ///
+  /// For example, for a child which is bigger than the viewport but can be
+  /// panned to reveal parts that were initially offscreen, [constrained] must
+  /// be set to false to allow it to size itself properly. If [constrained] is
+  /// true and the child can only size itself to the viewport, then areas
+  /// initially outside of the viewport will not be able to receive user
+  /// interaction events. If experiencing regions of the child that are not
+  /// receptive to user gestures, make sure [constrained] is false and the child
+  /// is sized properly.
+  ///
   /// Defaults to true.
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
