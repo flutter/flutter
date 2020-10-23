@@ -25,6 +25,10 @@
          "repo":"engine"
       },
       {
+         "name":"Linux Web Framework tests",
+         "repo":"engine"
+       },
+       {
          "name":"Mac Android AOT Engine",
          "repo":"engine"
       },
