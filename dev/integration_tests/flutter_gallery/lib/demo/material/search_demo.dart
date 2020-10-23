@@ -226,8 +226,8 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
 
   @override
   PreferredSizeWidget buildBottom(BuildContext context) => const PreferredSize(
-    preferredSize: const Size.fromHeight(56.0),
-    child: const Text('Numbers'),
+    preferredSize: Size.fromHeight(56.0),
+    child: Text('Numbers'),
   );
 }
 
