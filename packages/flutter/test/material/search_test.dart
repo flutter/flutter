@@ -80,7 +80,7 @@ void main() {
     // regression test for https://github.com/flutter/flutter/issues/18145
 
     final _TestSearchDelegate delegate = _TestSearchDelegate();
-    final List<String> selectedResults = <String>[];
+    final List<String?> selectedResults = <String?>[];
 
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
@@ -105,7 +105,7 @@ void main() {
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
 
-    expect(selectedResults, <void>[null]);
+    expect(selectedResults, <String?>[null]);
 
     // We are on the homepage again
     expect(find.text('HomeBody'), findsOneWidget);
@@ -374,7 +374,7 @@ void main() {
   });
 
   testWidgets('Closing nested search returns to search', (WidgetTester tester) async {
-    final List<String> nestedSearchResults = <String>[];
+    final List<String?> nestedSearchResults = <String?>[];
     final _TestSearchDelegate nestedSearchDelegate = _TestSearchDelegate(
       suggestions: 'Nested Suggestions',
       result: 'Nested Result',
@@ -389,7 +389,7 @@ void main() {
               tooltip: 'Nested Search',
               icon: const Icon(Icons.search),
               onPressed: () async {
-                final String result = await showSearch(
+                final String? result = await showSearch(
                   context: context,
                   delegate: nestedSearchDelegate,
                 );
@@ -467,7 +467,7 @@ void main() {
               tooltip: 'Nested Search',
               icon: const Icon(Icons.search),
               onPressed: () async {
-                final String result = await showSearch(
+                final String? result = await showSearch(
                   context: context,
                   delegate: nestedSearchDelegate,
                 );
@@ -702,7 +702,7 @@ class TestHomePage extends StatelessWidget {
     this.initialQuery,
   }) : super(key: key);
 
-  final List<String>? results;
+  final List<String?>? results;
   final SearchDelegate<String> delegate;
   final bool passInInitialQuery;
   final String? initialQuery;
@@ -719,7 +719,7 @@ class TestHomePage extends StatelessWidget {
                 tooltip: 'Search',
                 icon: const Icon(Icons.search),
                 onPressed: () async {
-                  String selectedResult;
+                  String? selectedResult;
                   if (passInInitialQuery) {
                     selectedResult = await showSearch<String>(
                       context: context,

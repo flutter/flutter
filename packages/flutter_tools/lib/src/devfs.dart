@@ -296,16 +296,11 @@ class _DevFSHttpWriter implements DevFSWriter {
           _osUtils,
         );
         await request.addStream(contents);
-        // The contents has already been streamed, closing the request should
-        // not take long but we are experiencing hangs with it, see #63869.
-        //
         // Once the bug in Dart is solved we can remove the timeout
-        // (https://github.com/dart-lang/sdk/issues/43525).  The timeout was
-        // chosen to be inflated based on the max observed time when running the
-        // tests in "Google Tests".
+        // (https://github.com/dart-lang/sdk/issues/43525).
         try {
           final HttpClientResponse response = await request.close().timeout(
-            const Duration(milliseconds: 10000));
+            const Duration(seconds: 60));
           response.listen((_) {},
             onError: (dynamic error) {
               _logger.printTrace('error: $error');

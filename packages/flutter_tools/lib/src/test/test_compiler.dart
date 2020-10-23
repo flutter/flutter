@@ -109,6 +109,7 @@ class TestCompiler {
       packagesPath: globalPackagesPath,
       extraFrontEndOptions: extraFrontEndOptions,
       platform: globals.platform,
+      testCompilation: true,
     );
     return residentCompiler;
   }

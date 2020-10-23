@@ -69,6 +69,81 @@ void main() {
     expect(message.message, contains('recommended minimum version'));
   });
 
+  testWithoutContext('IntelliJPlugins can read the package version of the flutter-intellij 50.0+/IntelliJ 2020.2+ layout', () async {
+    final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
+
+    final Archive flutterIdeaJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
+<idea-plugin version="2">
+<name>Flutter</name>
+<version>50.0</version>
+</idea-plugin>
+''');
+    writeFileCreatingDirectories(
+      fileSystem.path.join(_kPluginsPath, 'flutter-intellij', 'lib', 'flutter-idea-50.0.jar'),
+      ZipEncoder().encode(flutterIdeaJarArchive),
+    );
+    final Archive flutterIntellijJarArchive = buildSingleFileArchive('META-INF/MANIFEST.MF', r'''
+Manifest-Version: 1.0
+''');
+    writeFileCreatingDirectories(
+      fileSystem.path.join(_kPluginsPath, 'flutter-intellij', 'lib', 'flutter-intellij-50.0.jar'),
+      ZipEncoder().encode(flutterIntellijJarArchive),
+    );
+
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    plugins.validatePackage(messages,
+      <String>[
+        'flutter-intellij',
+        'flutter-intellij.jar',
+      ],
+      'Flutter', 'download-Flutter',
+      minVersion: IntelliJPlugins.kMinFlutterPluginVersion,
+    );
+
+    final ValidationMessage message = messages.firstWhere(
+            (ValidationMessage m) => m.message.startsWith('Flutter '));
+    expect(message.message, contains('Flutter plugin version 50.0'));
+  });
+
+  testWithoutContext('IntelliJPlugins can read the package version of the flutter-intellij 50.0+/IntelliJ 2020.2+ layout(priority is given to packages with the same prefix as packageName)', () async {
+    final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
+
+    final Archive flutterIdeaJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
+<idea-plugin version="2">
+<name>Flutter</name>
+<version>50.0</version>
+</idea-plugin>
+''');
+    writeFileCreatingDirectories(
+      fileSystem.path.join(_kPluginsPath, 'flutter-intellij', 'lib', 'flutter-idea-50.0.jar'),
+      ZipEncoder().encode(flutterIdeaJarArchive),
+    );
+    final Archive flutterIntellijJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
+<idea-plugin version="2">
+<name>Flutter</name>
+<version>51.0</version>
+</idea-plugin>
+''');
+    writeFileCreatingDirectories(
+      fileSystem.path.join(_kPluginsPath, 'flutter-intellij', 'lib', 'flutter-intellij-50.0.jar'),
+      ZipEncoder().encode(flutterIntellijJarArchive),
+    );
+
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    plugins.validatePackage(messages,
+      <String>[
+        'flutter-intellij',
+        'flutter-intellij.jar',
+      ],
+      'Flutter', 'download-Flutter',
+      minVersion: IntelliJPlugins.kMinFlutterPluginVersion,
+    );
+
+    final ValidationMessage message = messages.firstWhere(
+            (ValidationMessage m) => m.message.startsWith('Flutter '));
+    expect(message.message, contains('Flutter plugin version 51.0'));
+  });
+
   testWithoutContext('IntelliJPlugins not found displays a link to their download site', () async {
     final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
 
@@ -94,11 +169,8 @@ void main() {
     final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
 
     final Archive dartJarArchive =
-    buildSingleFileArchive('META-INF/plugin.xml', r'''
-<idea-plugin version="2">
-<name>Dart</name>
-<version>162.2485</version>
-</idea-plugin>
+    buildSingleFileArchive('META-INF/MANIFEST.MF', r'''
+Manifest-Version: 1.0
 ''');
     writeFileCreatingDirectories(
       fileSystem.path.join(_kPluginsPath, 'Dart', 'lib', 'Other.jar'),
