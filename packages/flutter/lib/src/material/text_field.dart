@@ -430,7 +430,11 @@ class TextField extends StatefulWidget {
          )),
        super(key: key);
 
-const TextField.adaptive({
+  /// Creates a [CupertinoTextField] if the target platform is iOS, creates a
+  /// material design text field otherwise.
+  ///
+  /// The target platform is based on the current [Theme]: [ThemeData.platform].
+  const TextField.adaptive({
     Key? key,
     this.controller,
     this.focusNode,
@@ -1187,7 +1191,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       controller: widget.controller,
       focusNode: widget.focusNode,
       placeholder: widget.decoration?.hintText,
-      placeholderStyle: widget.decoration?.hintStyle,
+      placeholderStyle: widget.decoration?.hintStyle ?? const TextStyle(fontWeight: FontWeight.w400, color: CupertinoColors.placeholderText),
       prefix: widget.decoration?.prefix,
       suffix: widget.decoration?.suffix,
       keyboardType: widget.keyboardType,
