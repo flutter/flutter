@@ -223,6 +223,12 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
         ),
     ];
   }
+
+  @override
+  PreferredSizeWidget buildBottom(BuildContext context) => PreferredSize(
+    preferredSize: Size.fromHeight(56.0),
+    child: Text('Numbers'),
+  );
 }
 
 class _ResultCard extends StatelessWidget {

@@ -111,7 +111,7 @@ abstract class SearchDelegate<T> {
   ///   Widget buildLeading(BuildContext context) => Text("leading");
   ///
   ///   @override
-  ///   PreferredSizeWidget buildBottom(BuildContext) => PreferredSize(
+  ///   PreferredSizeWidget buildBottom(BuildContext context) => PreferredSize(
   ///        preferredSize: Size.fromHeight(56.0),
   ///        child: Text("bottom"));
   ///
