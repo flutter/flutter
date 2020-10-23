@@ -37,10 +37,11 @@ enum TestStep {
   testPassed,
 }
 
-Future<int> runTest({bool coverage = false}) async {
+Future<int> runTest({bool coverage = false, bool noPub = false}) async {
   final Stopwatch clock = Stopwatch()..start();
   final List<String> arguments = flutterCommandArgs('test', <String>[
     if (coverage) '--coverage',
+    if (noPub) '--no-pub',
     path.join('flutter_test', 'trivial_widget_test.dart'),
   ]);
   final Process analysis = await startProcess(
@@ -107,21 +108,21 @@ void main() {
     final String originalSource = await nodeSourceFile.readAsString();
     try {
       await runTest(); // first number is meaningless; could have had to build the tool, run pub get, have a cache, etc
-      final int withoutChange = await runTest(); // run test again with no change
+      final int withoutChange = await runTest(noPub: true); // run test again with no change
       await nodeSourceFile.writeAsString( // only change implementation
         originalSource
           .replaceAll('_owner', '_xyzzy')
       );
-      final int implementationChange = await runTest(); // run test again with implementation changed
+      final int implementationChange = await runTest(noPub: true); // run test again with implementation changed
       await nodeSourceFile.writeAsString( // change interface as well
         originalSource
           .replaceAll('_owner', '_xyzzy')
           .replaceAll('owner', '_owner')
           .replaceAll('_xyzzy', 'owner')
       );
-      final int interfaceChange = await runTest(); // run test again with interface changed
+      final int interfaceChange = await runTest(noPub: true); // run test again with interface changed
       // run test with coverage enabled.
-      final int withCoverage = await runTest(coverage: true);
+      final int withCoverage = await runTest(coverage: true, noPub: true);
       final Map<String, dynamic> data = <String, dynamic>{
         'without_change_elapsed_time_ms': withoutChange,
         'implementation_change_elapsed_time_ms': implementationChange,
