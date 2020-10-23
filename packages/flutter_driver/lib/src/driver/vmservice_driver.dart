@@ -96,11 +96,22 @@ class VMServiceFlutterDriver extends FlutterDriver {
     final VMServiceClientConnection connection =
     await vmServiceConnectFunction(dartVmServiceUrl, headers: headers);
     final VMServiceClient client = connection.client;
-    final VM vm = await client.getVM();
-    final VMIsolateRef isolateRef = isolateNumber ==
-        null ? vm.isolates.first :
-    vm.isolates.firstWhere(
-            (VMIsolateRef isolate) => isolate.number == isolateNumber);
+
+    VMIsolateRef isolateRef;
+    for (int tries = 0; tries < 10; tries += 1) {
+      final VM vm = await client.getVM();
+      if (vm.isolates.isEmpty) {
+        await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
+        continue;
+      }
+      isolateRef = isolateNumber == null
+        ? vm.isolates.first
+        : vm.isolates.firstWhere((VMIsolateRef isolate) => isolate.number == isolateNumber);
+      break;
+    }
+    if (isolateRef == null) {
+      throw DriverException('Failed to find main isolate after ${_kPauseBetweenReconnectAttempts.inSeconds * 10} seconds!');
+    }
     _log('Isolate found with number: ${isolateRef.number}');
 
     VMIsolate isolate = await isolateRef.loadRunnable();
