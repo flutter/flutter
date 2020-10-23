@@ -155,9 +155,8 @@ void main() {
     } on AssertionError catch(e) {
       expect(
         e.message,
-        'You must provide both routeInformationProvider and '
-        'routeInformationParser if this router parses route information. '
-        'Otheriwse, they should both be null.'
+        'Both routeInformationProvider and routeInformationParser must be provided if this router '
+        'parses route information. Otherwise, they should both be null.'
       );
     }
   });
@@ -175,9 +174,8 @@ void main() {
     } on AssertionError catch(e) {
       expect(
         e.message,
-        'You must provide both routeInformationProvider and '
-        'routeInformationParser if this router parses route information. '
-        'Otheriwse, they should both be null.'
+        'Both routeInformationProvider and routeInformationParser must be provided if this router '
+        'parses route information. Otherwise, they should both be null.'
       );
     }
   });
