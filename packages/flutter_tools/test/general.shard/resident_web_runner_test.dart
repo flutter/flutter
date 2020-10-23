@@ -1700,7 +1700,13 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice) {
   ) as ResidentWebRunner;
 }
 
-BuildInfo _createBuildDebugInfo() => BuildInfo(BuildMode.debug, null, treeShakeIcons: false, dartDefines: <String>[]);
+// ignore: prefer_const_constructors
+BuildInfo _createBuildDebugInfo() => BuildInfo(
+  BuildMode.debug,
+  null,
+  treeShakeIcons: false,
+  dartDefines: <String>[]
+);
 
 class MockChromeLauncher extends Mock implements ChromiumLauncher {}
 class MockFlutterUsage extends Mock implements Usage {}
