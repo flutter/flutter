@@ -815,12 +815,12 @@ class WebDevFS implements DevFS {
     @required String pathToReload,
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
+    @required String dillOutputPath,
     DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
-    String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
   }) async {
@@ -878,8 +878,7 @@ class WebDevFS implements DevFS {
         path: '/' + mainUri.pathSegments.last,
       ),
       invalidatedFiles,
-      outputPath: dillOutputPath ??
-        getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
+      outputPath: dillOutputPath,
       packageConfig: packageConfig,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {

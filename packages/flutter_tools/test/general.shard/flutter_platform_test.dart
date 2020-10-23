@@ -175,6 +175,7 @@ void main() {
         enableObservatory: false,
         startPaused: true,
         extraFrontEndOptions: <String>[],
+        buildInfo: BuildInfo.debug,
       ), throwsAssertionError);
 
       expect(() => installHook(
@@ -184,6 +185,7 @@ void main() {
         startPaused: false,
         observatoryPort: 123,
         extraFrontEndOptions: <String>[],
+        buildInfo: BuildInfo.debug,
       ), throwsAssertionError);
 
       FlutterPlatform capturedPlatform;
@@ -205,6 +207,7 @@ void main() {
         serverType: InternetAddressType.IPv6,
         icudtlPath: 'ghi',
         extraFrontEndOptions: <String>[],
+        buildInfo: BuildInfo.debug,
         platformPluginRegistration: (FlutterPlatform platform) {
           capturedPlatform = platform;
         });

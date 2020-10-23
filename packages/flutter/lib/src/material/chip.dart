@@ -1789,7 +1789,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       container: true,
       button: true,
       child: _wrapWithTooltip(
-        widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
+        widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context).deleteButtonTooltip,
         widget.onDeleted,
         GestureDetector(
           key: deleteIconKey,

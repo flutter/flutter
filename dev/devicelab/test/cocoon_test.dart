@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:http/http.dart';
@@ -13,19 +16,70 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'common.dart';
 
 void main() {
-  group('Cocoon', () {
-    const String serviceAccountTokenPath = 'test_account_file';
-    const String serviceAccountToken = 'test_token';
+  ProcessResult _processResult;
+  ProcessResult runSyncStub(String executable, List<String> args,
+          {Map<String, String> environment,
+          bool includeParentEnvironment,
+          bool runInShell,
+          Encoding stderrEncoding,
+          Encoding stdoutEncoding,
+          String workingDirectory}) =>
+      _processResult;
 
+  // Expected test values.
+  const String commitBranch = 'flutter-1.23-candidate.18';
+  const String commitSha = 'a4952838bf288a81d8ea11edfd4b4cd649fa94cc';
+  const String serviceAccountTokenPath = 'test_account_file';
+  const String serviceAccountToken = 'test_token';
+
+  group('Cocoon', () {
     Client mockClient;
     Cocoon cocoon;
     FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem();
+      mockClient = MockClient((Request request) async => Response('{}', 200));
 
       final File serviceAccountFile = fs.file(serviceAccountTokenPath)..createSync();
       serviceAccountFile.writeAsStringSync(serviceAccountToken);
+    });
+
+    test('returns expected commit branch', () {
+      _processResult = ProcessResult(1, 0, commitBranch, '');
+      cocoon = Cocoon(
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        filesystem: fs,
+        httpClient: mockClient,
+        processRunSync: runSyncStub,
+      );
+
+      expect(cocoon.commitBranch, commitBranch);
+    });
+
+    test('returns expected commit sha', () {
+      _processResult = ProcessResult(1, 0, commitSha, '');
+      cocoon = Cocoon(
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        filesystem: fs,
+        httpClient: mockClient,
+        processRunSync: runSyncStub,
+      );
+
+      expect(cocoon.commitSha, commitSha);
+    });
+
+    test('throws exception on git cli errors', () {
+      _processResult = ProcessResult(1, 1, '', '');
+      cocoon = Cocoon(
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        filesystem: fs,
+        httpClient: mockClient,
+        processRunSync: runSyncStub,
+      );
+
+      expect(() => cocoon.commitBranch, throwsA(isA<CocoonException>()));
+      expect(() => cocoon.commitSha, throwsA(isA<CocoonException>()));
     });
 
     test('sends expected request from successful task', () async {
@@ -57,26 +111,23 @@ void main() {
   });
 
   group('AuthenticatedCocoonClient', () {
-    const String serviceAccountPath = 'test_account_file';
-    const String serviceAccountToken = 'test_token';
-
     FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem();
-      final File serviceAccountFile = fs.file(serviceAccountPath)..createSync();
+      final File serviceAccountFile = fs.file(serviceAccountTokenPath)..createSync();
       serviceAccountFile.writeAsStringSync(serviceAccountToken);
     });
 
     test('reads token from service account file', () {
-      final AuthenticatedCocoonClient client = AuthenticatedCocoonClient(serviceAccountPath, filesystem: fs);
+      final AuthenticatedCocoonClient client = AuthenticatedCocoonClient(serviceAccountTokenPath, filesystem: fs);
       expect(client.serviceAccountToken, serviceAccountToken);
     });
 
     test('reads token from service account file with whitespace', () {
-      final File serviceAccountFile = fs.file(serviceAccountPath)..createSync();
+      final File serviceAccountFile = fs.file(serviceAccountTokenPath)..createSync();
       serviceAccountFile.writeAsStringSync(serviceAccountToken + ' \n');
-      final AuthenticatedCocoonClient client = AuthenticatedCocoonClient(serviceAccountPath, filesystem: fs);
+      final AuthenticatedCocoonClient client = AuthenticatedCocoonClient(serviceAccountTokenPath, filesystem: fs);
       expect(client.serviceAccountToken, serviceAccountToken);
     });
 

@@ -265,7 +265,7 @@ void main() {
 
           expect(xcode.xcrunCommand(), <String>[
             '/usr/bin/arch',
-            '-arm64',
+            '-arm64e',
             'xcrun',
           ]);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);

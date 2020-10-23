@@ -77,6 +77,7 @@ void main() {
       ..writeAsStringSync('void main() {}');
     environment.defines[kTargetFile] = mainFile.path;
     environment.defines[kHasWebPlugins] = 'true';
+    environment.defines[kInitializePlatform] = 'true';
     await const WebEntrypointTarget().build(environment);
 
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
@@ -84,6 +85,9 @@ void main() {
     // Plugins
     expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
     expect(generated, contains('registerPlugins(webPluginRegistry);'));
+
+    // Platform
+    expect(generated, contains('if (true) {'));
 
     // Main
     expect(generated, contains('entrypoint.main();'));
@@ -179,6 +183,7 @@ void main() {
     environment.defines[kTargetFile] = mainFile.path;
 
     environment.defines[kHasWebPlugins] = 'true';
+    environment.defines[kInitializePlatform] = 'true';
     await const WebEntrypointTarget().build(environment);
 
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
@@ -186,6 +191,9 @@ void main() {
     // Plugins
     expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
     expect(generated, contains('registerPlugins(webPluginRegistry);'));
+
+    // Platform
+    expect(generated, contains('if (true) {'));
 
     // Main
     expect(generated, contains('entrypoint.main();'));
@@ -202,6 +210,7 @@ void main() {
       ..writeAsStringSync('void main() {}');
     environment.defines[kTargetFile] = mainFile.path;
     environment.defines[kHasWebPlugins] = 'false';
+    environment.defines[kInitializePlatform] = 'true';
     await const WebEntrypointTarget().build(environment);
 
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
@@ -209,6 +218,32 @@ void main() {
     // Plugins
     expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
     expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
+
+    // Platform
+    expect(generated, contains('if (true) {'));
+
+    // Main
+    expect(generated, contains('entrypoint.main();'));
+  }));
+
+  test('WebEntrypointTarget generates an entrypoint with plugins and without init platform', () => testbed.run(() async {
+    final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}');
+    environment.defines[kTargetFile] = mainFile.path;
+    environment.defines[kHasWebPlugins] = 'true';
+    environment.defines[kInitializePlatform] = 'false';
+    await const WebEntrypointTarget().build(environment);
+
+    final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
+
+    // Plugins
+    expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
+    expect(generated, contains('registerPlugins(webPluginRegistry);'));
+
+    // Platform
+    expect(generated, contains('if (false) {'));
+
     // Main
     expect(generated, contains('entrypoint.main();'));
   }));
@@ -247,6 +282,7 @@ void main() {
       ..writeAsStringSync('void main() {}');
     environment.defines[kTargetFile] = mainFile.path;
     environment.defines[kHasWebPlugins] = 'false';
+    environment.defines[kInitializePlatform] = 'false';
     await const WebEntrypointTarget().build(environment);
 
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
@@ -254,6 +290,9 @@ void main() {
     // Plugins
     expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
     expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
+
+    // Platform
+    expect(generated, contains('if (false) {'));
 
     // Main
     expect(generated, contains('entrypoint.main();'));

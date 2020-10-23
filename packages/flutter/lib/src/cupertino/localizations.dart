@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'date_picker.dart';
+import 'debug.dart';
 
 /// Determines the order of the columns inside [CupertinoDatePicker] in
 /// time and date time mode.
@@ -242,8 +242,11 @@ abstract class CupertinoLocalizations {
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
+  /// If no [CupertinoLocalizations] are available in the given `context`, this
+  /// method throws an exception.
+  ///
   /// This method is just a convenient shorthand for:
-  /// `Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)`.
+  /// `Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)!`.
   ///
   /// References to the localized resources defined by this class are typically
   /// written in terms of this method. For example:
@@ -251,8 +254,9 @@ abstract class CupertinoLocalizations {
   /// ```dart
   /// CupertinoLocalizations.of(context).anteMeridiemAbbreviation;
   /// ```
-  static CupertinoLocalizations? of(BuildContext context) {
-    return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations);
+  static CupertinoLocalizations of(BuildContext context) {
+    debugCheckHasCupertinoLocalizations(context);
+    return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)!;
   }
 }
 

@@ -152,7 +152,7 @@ class _CupertinoTextSelectionToolbarWrapperState extends State<_CupertinoTextSel
     }
 
     final List<Widget> items = <Widget>[];
-    final CupertinoLocalizations? localizations = CupertinoLocalizations.of(context);
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     final EdgeInsets arrowPadding = widget.isArrowPointingDown
       ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
       : EdgeInsets.only(top: _kToolbarArrowSize.height);
@@ -183,17 +183,17 @@ class _CupertinoTextSelectionToolbarWrapperState extends State<_CupertinoTextSel
     }
 
     if (widget.handleCut != null) {
-      addToolbarButton(localizations!.cutButtonLabel, widget.handleCut!);
+      addToolbarButton(localizations.cutButtonLabel, widget.handleCut!);
     }
     if (widget.handleCopy != null) {
-      addToolbarButton(localizations!.copyButtonLabel, widget.handleCopy!);
+      addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
     }
     if (widget.handlePaste != null
         && _clipboardStatus.value == ClipboardStatus.pasteable) {
-      addToolbarButton(localizations!.pasteButtonLabel, widget.handlePaste!);
+      addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
     }
     if (widget.handleSelectAll != null) {
-      addToolbarButton(localizations!.selectAllButtonLabel, widget.handleSelectAll!);
+      addToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll!);
     }
 
     return CupertinoTextSelectionToolbar._(

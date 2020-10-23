@@ -384,6 +384,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
+      flutterProject: flutterProject,
       fileSystemRoots: stringsArg('filesystem-root'),
       fileSystemScheme: stringArg('filesystem-scheme'),
       target: stringArg('target'),
