@@ -8,11 +8,8 @@ import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../build_system/build_system.dart';
 import '../bundle.dart';
 import '../cache.dart';
-import '../dart/generate_synthetic_packages.dart';
-import '../dart/pub.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -169,32 +166,6 @@ class TestCommand extends FlutterCommand {
         'directory (or one of its subdirectories).');
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    if (shouldRunPub) {
-      if (flutterProject.manifest.generateSyntheticPackage) {
-        final Environment environment = Environment(
-          artifacts: globals.artifacts,
-          logger: globals.logger,
-          cacheDir: globals.cache.getRoot(),
-          engineVersion: globals.flutterVersion.engineRevision,
-          fileSystem: globals.fs,
-          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-          outputDir: globals.fs.directory(getBuildDirectory()),
-          processManager: globals.processManager,
-          projectDir: flutterProject.directory,
-        );
-
-        await generateLocalizationsSyntheticPackage(
-          environment: environment,
-          buildSystem: globals.buildSystem,
-        );
-      }
-
-      await pub.get(
-        context: PubContext.getVerifyContext(name),
-        skipPubspecYamlCheck: true,
-        generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
-      );
-    }
     final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');

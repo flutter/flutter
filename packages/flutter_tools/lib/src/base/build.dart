@@ -109,7 +109,6 @@ class AOTSnapshotter {
     @required TargetPlatform platform,
     @required BuildMode buildMode,
     @required String mainPath,
-    @required String packagesPath,
     @required String outputPath,
     DarwinArch darwinArch,
     List<String> extraGenSnapshotOptions = const <String>[],
