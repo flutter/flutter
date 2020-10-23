@@ -451,6 +451,7 @@ class AppDomain extends Domain {
     bool ipv6 = false,
     String isolateFilter,
     bool machine = true,
+    @required String webRenderer,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -483,6 +484,7 @@ class AppDomain extends Domain {
         stayResident: true,
         urlTunneller: options.webEnableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
+        webRenderer: webRenderer,
       );
     } else if (enableHotReload) {
       runner = HotRunner(

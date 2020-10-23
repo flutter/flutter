@@ -54,6 +54,7 @@ void main() {
           ipv6: true,
           stayResident: true,
           urlTunneller: null,
+          webRenderer: 'html',
         ) as ResidentWebRunner;
       }, overrides: <Type, Generator>{
         Pub: () => MockPub(),

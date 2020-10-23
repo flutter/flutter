@@ -466,6 +466,7 @@ class RunCommand extends RunCommandBase {
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
           machine: true,
+          webRenderer: stringArg('web-renderer'),
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());

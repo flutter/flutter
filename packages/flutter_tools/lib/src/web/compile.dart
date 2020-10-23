@@ -142,4 +142,5 @@ Iterable<String> _dartDefinesForWebRenderer(String webRenderer) {
       // Safeguard, shouldn't happen.
       throwToolExit('Unsupported value for option "web-renderer');
   }
+  return <String>[];
 }
