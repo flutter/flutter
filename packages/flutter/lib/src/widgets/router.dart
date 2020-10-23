@@ -800,10 +800,11 @@ class _CallbackHookProvider<T> {
 /// the callback should return a future that completes to true if it can handle
 /// the pop request, and a future that completes to false otherwise.
 abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> {
-  LinkedHashSet<ChildBackButtonDispatcher>? _children;
+  late final LinkedHashSet<ChildBackButtonDispatcher> _children =
+    <ChildBackButtonDispatcher>{} as LinkedHashSet<ChildBackButtonDispatcher>;
 
   @override
-  bool get hasCallbacks => super.hasCallbacks || (_children != null && _children!.isNotEmpty);
+  bool get hasCallbacks => super.hasCallbacks || (_children.isNotEmpty);
 
   /// Handles a pop route request.
   ///
@@ -823,8 +824,8 @@ abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> 
   /// return a future of true or false.
   @override
   Future<bool> invokeCallback(Future<bool> defaultValue) {
-    if (_children != null && _children!.isNotEmpty) {
-      final List<ChildBackButtonDispatcher> children = _children!.toList();
+    if (_children.isNotEmpty) {
+      final List<ChildBackButtonDispatcher> children = _children.toList();
       int childIndex = children.length - 1;
 
       Future<bool> notifyNextChild(bool result) {
@@ -878,10 +879,13 @@ abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> 
   ///
   /// The [BackButtonDispatcher] must have a listener registered before it can
   /// be told to take priority.
-  void takePriority() {
-    if (_children != null)
-      _children!.clear();
-  }
+  ///
+  /// The this method only takes the priority from its parent by default.
+  /// Calling this method alone does not claim the priority to handle Android
+  /// back button event if the parent themself does not have the priority.
+  /// Sets the `applyToParent` parameter to true to ask parent to recursively
+  /// claim priority from their parent.
+  void takePriority({bool applyToParent= false}) => _children.clear();
 
   /// Mark the given child as taking priority over this object and the other
   /// children.
@@ -896,16 +900,15 @@ abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> 
   /// Calling this again without first calling [forget] moves the child back to
   /// the head of the list.
   ///
-  // (Actually it moves it to the end of the list and we treat the end of the
-  // list to be the priority end, but that's an implementation detail.)
-  //
   /// The [BackButtonDispatcher] must have a listener registered before it can
   /// be told to defer to a child.
-  void deferTo(ChildBackButtonDispatcher child) {
+  ///
+  /// Sets the `applyToParent` parameter to true to make this back button
+  /// dispatcher to also take priority from its parent.
+  void deferTo(ChildBackButtonDispatcher child, {bool applyToParent = false}) {
     assert(hasCallbacks);
-    _children ??= <ChildBackButtonDispatcher>{} as LinkedHashSet<ChildBackButtonDispatcher>;
-    _children!.remove(child); // child may or may not be in the set already
-    _children!.add(child);
+    _children.remove(child); // child may or may not be in the set already
+    _children.add(child);
   }
 
   /// Causes the given child to be removed from the list of children to which
@@ -920,11 +923,7 @@ abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> 
   /// this object itself is a [ChildBackButtonDispatcher], [takePriority] would
   /// additionally attempt to claim priority from its parent, whereas removing
   /// the last child does not.)
-  void forget(ChildBackButtonDispatcher child) {
-    if(_children != null) {
-      _children!.remove(child);
-    }
-  }
+  void forget(ChildBackButtonDispatcher child) => _children.remove(child);
 }
 
 /// The default implementation of back button dispatcher for the root router.
@@ -988,19 +987,17 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
   }
 
   @override
-  void takePriority() {
-    if (parent is ChildBackButtonDispatcher) {
-      final ChildBackButtonDispatcher cascadingParent = parent as ChildBackButtonDispatcher;
-      cascadingParent.parent.deferTo(cascadingParent);
-    }
-    parent.deferTo(this);
-    super.takePriority();
+  void takePriority({bool applyToParent = false}) {
+    parent.deferTo(this, applyToParent: applyToParent);
+    super.takePriority(applyToParent: applyToParent);
   }
 
   @override
-  void deferTo(ChildBackButtonDispatcher child) {
+  void deferTo(ChildBackButtonDispatcher child, {bool applyToParent = false}) {
     assert(hasCallbacks);
-    super.deferTo(child);
+    if (applyToParent)
+      parent.deferTo(child, applyToParent: applyToParent);
+    super.deferTo(child, applyToParent: applyToParent);
   }
 
   @override

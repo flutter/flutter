@@ -426,6 +426,56 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+testWidgets('ChildBackButtonDispatcher can be take priority recursively', (WidgetTester tester) async {
+
+    final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
+    final BackButtonDispatcher innerDispatcher1 = ChildBackButtonDispatcher(outerDispatcher);
+    final BackButtonDispatcher innerDispatcher2 = ChildBackButtonDispatcher(innerDispatcher1);
+    final BackButtonDispatcher innerDispatcher3 = ChildBackButtonDispatcher(innerDispatcher2);
+    bool isPopped = false;
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        backButtonDispatcher: outerDispatcher,
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext context, RouteInformation? information) {
+            // Creates the sub-router.
+            return Router<RouteInformation>(
+              backButtonDispatcher: innerDispatcher1,
+              routerDelegate: SimpleRouterDelegate(
+                builder: (BuildContext context, RouteInformation? innerInformation) {
+                  return Router<RouteInformation>(
+                    backButtonDispatcher: innerDispatcher2,
+                    routerDelegate: SimpleRouterDelegate(
+                      builder: (BuildContext context, RouteInformation? innerInformation) {
+                        return Router<RouteInformation>(
+                          backButtonDispatcher: innerDispatcher3,
+                          routerDelegate: SimpleRouterDelegate(
+                            onPopRoute: () {
+                              isPopped = true;
+                              return SynchronousFuture<bool>(true);
+                            },
+                            builder: (BuildContext context, RouteInformation? innerInformation) {
+                              return Container();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      )
+    ));
+    innerDispatcher3.takePriority(applyToParent: true);
+    bool result = false;
+    result = await outerDispatcher.invokeCallback(SynchronousFuture<bool>(false));
+    expect(result, isTrue);
+    expect(isPopped, isTrue);
+  });
+
   testWidgets('router does report URL change correctly', (WidgetTester tester) async {
     RouteInformation? reportedRouteInformation;
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider(
