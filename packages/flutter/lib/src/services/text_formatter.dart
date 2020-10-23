@@ -459,9 +459,9 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
       case MaxLengthEnforcement.none:
         return newValue;
       case MaxLengthEnforcement.enforced:
-        // If already at the maximum and tried to enter even more, keep the old
-        // value.
-        if (oldValue.text.characters.length == maxLength) {
+        // If already at the maximum and tried to enter even more, and has no
+        // selection, keep the old value.
+        if (oldValue.text.characters.length == maxLength && !oldValue.selection.isValid) {
           return oldValue;
         }
 
@@ -469,8 +469,10 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
         return truncate(newValue, maxLength);
       case MaxLengthEnforcement.allowComposingTextToFinish:
         // If already at the maximum and tried to enter even more, and the old
-        // value is not composing, keep the old value.
-        if (oldValue.text.characters.length == maxLength && !oldValue.composing.isValid) {
+        // value is not composing or selected, keep the old value.
+        if (oldValue.text.characters.length == maxLength &&
+          !oldValue.composing.isValid &&
+          !oldValue.selection.isValid) {
           return oldValue;
         }
 
