@@ -204,16 +204,34 @@ class ScaffoldMessenger extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// If there is no [ScaffoldMessenger] in scope, then this will return null.
+  /// If there is no [ScaffoldMessenger] in scope, then this will assert in
+  /// debug mode, and throw an exception in release mode.
+  ///
   /// See also:
   ///
+  ///  * [maybeOf], which is a similar function but will return null instead of
+  ///    throwing if there is no [ScaffoldMessenger] ancestor.
   ///  * [debugCheckHasScaffoldMessenger], which asserts that the given context
   ///    has a [ScaffoldMessenger] ancestor.
-  static ScaffoldMessengerState? of(BuildContext context, { bool nullOk = false }) {
-    assert(nullOk != null);
+  static ScaffoldMessengerState of(BuildContext context) {
     assert(context != null);
+    assert(debugCheckHasScaffoldMessenger(context));
 
-    assert(nullOk || debugCheckHasScaffoldMessenger(context));
+    final _ScaffoldMessengerScope scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>()!;
+    return scope._scaffoldMessengerState;
+  }
+
+  /// The state from the closest instance of this class that encloses the given
+  /// context, if any.
+  ///
+  /// Will return null if a [ScaffoldMessenger] is not found in the given context.
+  ///
+  /// See also:
+  ///
+  ///  * [of], which is a similar function, except that it will throw an
+  ///    exception if a [ScaffoldMessenger] is not found in the given context.
+  static ScaffoldMessengerState? maybeOf(BuildContext context) {
+    assert(context != null);
 
     final _ScaffoldMessengerScope? scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>();
     return scope?._scaffoldMessengerState;
@@ -1755,7 +1773,11 @@ class Scaffold extends StatefulWidget {
   /// By default, the drag gesture is enabled.
   final bool endDrawerEnableOpenDragGesture;
 
-  /// The state from the closest instance of this class that encloses the given context.
+  /// Finds the [ScaffoldState] from the closest instance of this class that
+  /// encloses the given context.
+  ///
+  /// If no instance of this class encloses the given context, will cause an
+  /// assert in debug mode, and throw an exception in release mode.
   ///
   /// {@tool dartpad --template=freeform}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
@@ -1892,12 +1914,11 @@ class Scaffold extends StatefulWidget {
   /// [ScaffoldState] rather than using the [Scaffold.of] function.
   ///
   /// If there is no [Scaffold] in scope, then this will throw an exception.
-  /// To return null if there is no [Scaffold], then pass `nullOk: true`.
-  static ScaffoldState? of(BuildContext context, { bool nullOk = false }) {
-    assert(nullOk != null);
+  /// To return null if there is no [Scaffold], use [maybeOf] instead.
+  static ScaffoldState of(BuildContext context) {
     assert(context != null);
     final ScaffoldState? result = context.findAncestorStateOfType<ScaffoldState>();
-    if (nullOk || result != null)
+    if (result != null)
       return result;
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary(
@@ -1925,6 +1946,22 @@ class Scaffold extends StatefulWidget {
       ),
       context.describeElement('The context used was')
     ]);
+  }
+
+  /// Finds the [ScaffoldState] from the closest instance of this class that
+  /// encloses the given context.
+  ///
+  /// If no instance of this class encloses the given context, will return null.
+  /// To throw an exception instead, use [of] instead of this function.
+  ///
+  /// See also:
+  ///
+  ///  * [of], a similar function to this one that throws if no instance
+  ///    encloses the given context. Also includes some sample code in its
+  ///    documentation.
+  static ScaffoldState? maybeOf(BuildContext context) {
+    assert(context != null);
+    return context.findAncestorStateOfType<ScaffoldState>();
   }
 
   /// Returns a [ValueListenable] for the [ScaffoldGeometry] for the closest
@@ -2714,7 +2751,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   void didChangeDependencies() {
     // nullOk is valid here since  both the Scaffold and ScaffoldMessenger are
     // currently available for managing SnackBars.
-    final ScaffoldMessengerState? _currentScaffoldMessenger = ScaffoldMessenger.of(context, nullOk: true);
+    final ScaffoldMessengerState? _currentScaffoldMessenger = ScaffoldMessenger.maybeOf(context);
     // If our ScaffoldMessenger has changed, unregister with the old one first.
     if (_scaffoldMessenger != null &&
       (_currentScaffoldMessenger == null || _scaffoldMessenger != _currentScaffoldMessenger)) {
@@ -3304,7 +3341,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   bool extentChanged(DraggableScrollableNotification notification) {
     final double extentRemaining = 1.0 - notification.extent;
-    final ScaffoldState scaffold = Scaffold.of(context)!;
+    final ScaffoldState scaffold = Scaffold.of(context);
     if (extentRemaining < _kBottomSheetDominatesPercentage) {
       scaffold._floatingActionButtonVisibilityValue = extentRemaining * _kBottomSheetDominatesPercentage * 10;
       scaffold.showBodyScrim(true,  math.max(
