@@ -98,7 +98,8 @@ class VMServiceFlutterDriver extends FlutterDriver {
     final VMServiceClient client = connection.client;
 
     VMIsolateRef isolateRef;
-    for (int tries = 0; tries < 10; tries += 1) {
+    const int totalTries = 10;
+    for (int tries = 0; tries < totalTries; tries += 1) {
       final VM vm = await client.getVM();
       if (vm.isolates.isEmpty) {
         await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
@@ -110,7 +111,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       break;
     }
     if (isolateRef == null) {
-      throw DriverError('Failed to find main isolate after ${_kPauseBetweenReconnectAttempts.inSeconds * 10} seconds!');
+      throw DriverError('Failed to find main isolate after ${_kPauseBetweenReconnectAttempts.inSeconds * totalTries} seconds!');
     }
     _log('Isolate found with number: ${isolateRef.number}');
 
