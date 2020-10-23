@@ -279,7 +279,7 @@ void main() {
               textColor: textColor,
               child: Builder(
                 builder: (BuildContext context) {
-                  theme = Theme.of(context)!;
+                  theme = Theme.of(context);
                   return ListTile(
                     enabled: enabled,
                     selected: selected,

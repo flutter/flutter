@@ -196,7 +196,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   }
 
   void _vibrate() {
-    switch (Theme.of(context)!.platform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -369,8 +369,8 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context)!.colorScheme;
-    final TextTheme textTheme = Theme.of(context)!.textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     final Color controlColor = colorScheme.onSurface.withOpacity(0.60);
 
     return Container(
@@ -742,7 +742,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   Widget build(BuildContext context) {
     final String previousTooltipText = '${_localizations.previousMonthTooltip} ${_localizations.formatMonthYear(_previousMonthDate)}';
     final String nextTooltipText = '${_localizations.nextMonthTooltip} ${_localizations.formatMonthYear(_nextMonthDate)}';
-    final Color controlColor = Theme.of(context)!.colorScheme.onSurface.withOpacity(0.60);
+    final Color controlColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.60);
 
     return Semantics(
       child: Column(
@@ -940,9 +940,9 @@ class _DayPickerState extends State<_DayPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context)!.colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final TextTheme textTheme = Theme.of(context)!.textTheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle? headerStyle = textTheme.caption?.apply(
       color: colorScheme.onSurface.withOpacity(0.60),
     );
@@ -1143,8 +1143,8 @@ class _YearPickerState extends State<_YearPicker> {
   }
 
   Widget _buildYearItem(BuildContext context, int index) {
-    final ColorScheme colorScheme = Theme.of(context)!.colorScheme;
-    final TextTheme textTheme = Theme.of(context)!.textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
     // Backfill the _YearPicker with disabled years if necessary.
     final int offset = _itemCount < minYears ? (minYears - _itemCount) ~/ 2 : 0;

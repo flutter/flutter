@@ -798,11 +798,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       // Material Design spec. A separate highlight is no longer used.
       // See https://material.io/design/interaction/states.html#pressed
       case _HighlightType.pressed:
-        return widget.highlightColor ?? Theme.of(context)!.highlightColor;
+        return widget.highlightColor ?? Theme.of(context).highlightColor;
       case _HighlightType.focus:
-        return widget.overlayColor?.resolve(focused) ?? widget.focusColor ?? Theme.of(context)!.focusColor;
+        return widget.overlayColor?.resolve(focused) ?? widget.focusColor ?? Theme.of(context).focusColor;
       case _HighlightType.hover:
-        return widget.overlayColor?.resolve(hovered) ?? widget.hoverColor ?? Theme.of(context)!.hoverColor;
+        return widget.overlayColor?.resolve(hovered) ?? widget.hoverColor ?? Theme.of(context).hoverColor;
     }
   }
 
@@ -873,7 +873,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
     final Offset position = referenceBox.globalToLocal(globalPosition);
     const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
-    final Color color =  widget.overlayColor?.resolve(pressed) ?? widget.splashColor ?? Theme.of(context)!.splashColor;
+    final Color color =  widget.overlayColor?.resolve(pressed) ?? widget.splashColor ?? Theme.of(context).splashColor;
     final RectCallback? rectCallback = widget.containedInkWell ? widget.getRectCallback!(referenceBox) : null;
     final BorderRadius? borderRadius = widget.borderRadius;
     final ShapeBorder? customBorder = widget.customBorder;
@@ -889,7 +889,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       } // else we're probably in deactivate()
     }
 
-    splash = (widget.splashFactory ?? Theme.of(context)!.splashFactory).create(
+    splash = (widget.splashFactory ?? Theme.of(context).splashFactory).create(
       controller: inkController,
       referenceBox: referenceBox,
       position: position,
@@ -1073,7 +1073,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
 
     const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
-    _currentSplash?.color = widget.overlayColor?.resolve(pressed) ?? widget.splashColor ?? Theme.of(context)!.splashColor;
+    _currentSplash?.color = widget.overlayColor?.resolve(pressed) ?? widget.splashColor ?? Theme.of(context).splashColor;
 
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,

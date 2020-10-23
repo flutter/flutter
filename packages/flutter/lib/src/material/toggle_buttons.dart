@@ -575,7 +575,7 @@ class ToggleButtons extends StatelessWidget {
       'There are ${focusNodes!.length} focus nodes, while '
       'there are ${children.length} children.'
     );
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
@@ -772,7 +772,7 @@ class _ToggleButton extends StatelessWidget {
     Color? currentFocusColor;
     Color? currentHoverColor;
     Color? currentSplashColor;
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
 
     if (onPressed != null && selected) {

@@ -64,7 +64,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   @override
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context)!.platform) {
+      switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
@@ -90,7 +90,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   void onSingleTapUp(TapUpDetails details) {
     editableText.hideToolbar();
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context)!.platform) {
+      switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           switch (details.kind) {
@@ -124,7 +124,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   @override
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context)!.platform) {
+      switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
@@ -982,7 +982,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
       .applyDefaults(themeData.inputDecorationTheme)
       .copyWith(
@@ -1162,7 +1162,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       });
     }
 
-    switch (Theme.of(context)!.platform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         if (cause == SelectionChangedCause.longPress) {
@@ -1255,7 +1255,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       'inherit false style must supply fontSize and textBaseline',
     );
 
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
     final TextStyle style = theme.textTheme.subtitle1!.merge(widget.style);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.primaryColorBrightness;
@@ -1431,7 +1431,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         return _buildMaterialTextField(context);
 
       case _TextFieldType.adaptive: {
-        final ThemeData theme = Theme.of(context)!;
+        final ThemeData theme = Theme.of(context);
         assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.iOS:

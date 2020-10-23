@@ -1918,7 +1918,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       (MediaQuery.of(context).textScaleFactor - 1.0).clamp(0.0, 1.0),
     )!;
 
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final TextDirection? textDirection = Directionality.maybeOf(context);
     final OutlinedBorder resolvedShape = _getShape(chipTheme);
@@ -2985,7 +2985,7 @@ class _LocationAwareInkRippleFactory extends InteractiveInkFeatureFactory {
         ? deleteIconKey.currentContext!
         : chipContext;
 
-    final InteractiveInkFeatureFactory splashFactory = Theme.of(splashContext)!.splashFactory;
+    final InteractiveInkFeatureFactory splashFactory = Theme.of(splashContext).splashFactory;
 
     if (tapIsOnDeleteIcon) {
       final RenderBox currentBox = referenceBox;

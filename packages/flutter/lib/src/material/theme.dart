@@ -124,14 +124,8 @@ class Theme extends StatelessWidget {
   ///   );
   /// }
   /// ```
-  static ThemeData? of(BuildContext context, { bool shadowThemeOnly = false }) {
+  static ThemeData of(BuildContext context) {
     final _InheritedTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
-    if (shadowThemeOnly) {
-      if (inheritedTheme == null || inheritedTheme.theme.isMaterialAppTheme)
-        return null;
-      return inheritedTheme.theme.data;
-    }
-
     final MaterialLocalizations? localizations = Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
     final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
     final ThemeData theme = inheritedTheme?.theme.data ?? _kFallbackTheme;

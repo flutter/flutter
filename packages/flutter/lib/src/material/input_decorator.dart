@@ -1956,7 +1956,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   InputDecoration? _effectiveDecoration;
   InputDecoration? get decoration {
     _effectiveDecoration ??= widget.decoration.applyDefaults(
-      Theme.of(context)!.inputDecorationTheme,
+      Theme.of(context).inputDecorationTheme,
     );
     return _effectiveDecoration;
   }
@@ -2143,7 +2143,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final TextStyle inlineStyle = _getInlineStyle(themeData);
     final TextBaseline textBaseline = inlineStyle.textBaseline!;
 

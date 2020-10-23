@@ -1811,7 +1811,7 @@ void main() {
         late FlutterError error;
         try {
           key.currentState!.showBottomSheet<void>((BuildContext context) {
-            final ThemeData themeData = Theme.of(context)!;
+            final ThemeData themeData = Theme.of(context);
             return Container(
               decoration: BoxDecoration(
                 border: Border(top: BorderSide(color: themeData.disabledColor))

@@ -192,7 +192,7 @@ class Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final CardTheme cardTheme = CardTheme.of(context);
 
     return Semantics(

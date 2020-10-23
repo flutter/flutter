@@ -1025,7 +1025,7 @@ class ListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ListTileTheme tileTheme = ListTileTheme.of(context);
 
     IconThemeData? iconThemeData;
