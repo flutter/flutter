@@ -279,7 +279,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// typically used in `flutter test`), this advances the fake [clock] for the
   /// period and also increases timeout (see [addTime]).
   ///
-  /// In the live test environemnt ([LiveTestWidgetsFlutterBinding], typically
+  /// In the live test environment ([LiveTestWidgetsFlutterBinding], typically
   /// used for `flutter run` and for [e2e](https://pub.dev/packages/e2e)), it is
   /// equivalent as [Future.delayed].
   Future<void> delayed(Duration duration);
@@ -1387,6 +1387,11 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
 /// doesn't trigger a paint, since then you could not see anything
 /// anyway.)
 class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
+
+  LiveTestWidgetsFlutterBinding() {
+    binding.mockFlutterAssets();
+  }
+
   @override
   bool get inTest => _inTest;
   bool _inTest = false;
