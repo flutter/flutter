@@ -107,7 +107,7 @@ void main() {
     ));
     final String originalSource = await nodeSourceFile.readAsString();
     try {
-      await runTest(); // first number is meaningless; could have had to build the tool, run pub get, have a cache, etc
+      await runTest(noPub: true); // first number is meaningless; could have had to build the tool, run pub get, have a cache, etc
       final int withoutChange = await runTest(noPub: true); // run test again with no change
       await nodeSourceFile.writeAsString( // only change implementation
         originalSource
