@@ -67,10 +67,11 @@ class VMServiceFlutterDriver extends FlutterDriver {
             'environment variable.'
         );
       }
-      final fuchsia.FuchsiaRemoteConnection fuchsiaConnection =
-      await FuchsiaCompat.connect();
-      final List<fuchsia.IsolateRef> refs =
-      await fuchsiaConnection.getMainIsolatesByPattern(fuchsiaModuleTarget);
+      final fuchsia.FuchsiaRemoteConnection fuchsiaConnection = await FuchsiaCompat.connect();
+      final List<fuchsia.IsolateRef> refs = await fuchsiaConnection.getMainIsolatesByPattern(fuchsiaModuleTarget);
+      if (refs.isEmpty) {
+        throw DriverError('Failed to get any isolate refs!');
+      }
       final fuchsia.IsolateRef ref = refs.first;
       isolateNumber = ref.number;
       dartVmServiceUrl = ref.dartVm.uri.toString();
@@ -91,10 +92,24 @@ class VMServiceFlutterDriver extends FlutterDriver {
     // Connect to Dart VM services
     _log('Connecting to Flutter application at $dartVmServiceUrl');
     final vms.VmService client = await vmServiceConnectFunction(dartVmServiceUrl, headers);
-    final vms.VM vm = await client.getVM();
-    final vms.IsolateRef isolateRef = isolateNumber == null
-      ? vm.isolates.first
-      : vm.isolates.firstWhere((vms.IsolateRef isolate) => isolate.number == isolateNumber);
+
+    vms.IsolateRef isolateRef;
+    const int totalTries = 10;
+    bool _checkIsolate(vms.IsolateRef ref) => ref.number == isolateNumber;
+    for (int tries = 0; tries < totalTries; tries += 1) {
+      final vms.VM vm = await client.getVM();
+      if (vm.isolates.isEmpty || (isolateNumber != null && !vm.isolates.any(_checkIsolate))) {
+        await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
+        continue;
+      }
+      isolateRef = isolateNumber == null
+        ? vm.isolates.first
+        : vm.isolates.firstWhere(_checkIsolate);
+      break;
+    }
+    if (isolateRef == null) {
+      throw DriverError('Failed to find main isolate after ${_kPauseBetweenReconnectAttempts.inSeconds * totalTries} seconds!');
+    }
     _log('Isolate found with number: ${isolateRef.number}');
 
     vms.Isolate isolate = await client.getIsolate(isolateRef.id);

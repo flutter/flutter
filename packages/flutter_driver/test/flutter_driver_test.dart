@@ -54,6 +54,49 @@ void main() {
       restoreVmServiceConnectFunction();
     });
 
+
+    test('throws after retries if no isolate', () async {
+      fakeVM.isolate = null;
+      expectLater(() => FlutterDriver.connect(dartVmServiceUrl: ''), throwsDriverError);
+    });
+
+    test('Retries connections if isolate is not available', () async {
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
+      fakeVM.numberOfTriesBeforeResolvingIsolate = 5;
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
+      expect(driver, isNotNull);
+      expect(
+        fakeClient.connectionLog,
+        <String>[
+          'getIsolate',
+          'setFlag pause_isolates_on_start false',
+          'resume',
+          'streamListen Isolate',
+          'getIsolate',
+          'onIsolateEvent',
+          'streamCancel Isolate',
+        ],
+      );
+    });
+
+    test('Connects to isolate number', () async {
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '', isolateNumber: int.parse(fakeIsolate.number));
+      expect(driver, isNotNull);
+      expect(
+        fakeClient.connectionLog,
+        <String>[
+          'getIsolate',
+          'setFlag pause_isolates_on_start false',
+          'resume',
+          'streamListen Isolate',
+          'getIsolate',
+          'onIsolateEvent',
+          'streamCancel Isolate',
+        ],
+      );
+    });
+
     test('connects to isolate paused at start', () async {
       fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
 
@@ -977,8 +1020,16 @@ class FakeVM extends Fake implements vms.VM {
 
   vms.Isolate isolate;
 
+  int numberOfTriesBeforeResolvingIsolate = 0;
+
   @override
-  List<vms.IsolateRef> get isolates => <vms.Isolate>[isolate];
+  List<vms.IsolateRef> get isolates {
+    numberOfTriesBeforeResolvingIsolate -= 1;
+    return <vms.Isolate>[
+      if (numberOfTriesBeforeResolvingIsolate <= 0)
+        isolate,
+    ];
+  }
 }
 
 class FakeIsolate extends Fake implements vms.Isolate {
