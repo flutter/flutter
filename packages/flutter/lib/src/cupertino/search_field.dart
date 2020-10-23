@@ -334,13 +334,11 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   @override
   String? get restorationId => widget.restorationId;
 
-  VoidCallback _getDefaultOnSuffixTap() {
-    return () {
-      final bool textChanged = _effectiveController.text.isNotEmpty;
-      _effectiveController.clear();
-      if (widget.onChanged != null && textChanged)
-        widget.onChanged!(_effectiveController.text);
-    };
+  void _defaultOnSuffixTap() {
+    final bool textChanged = _effectiveController.text.isNotEmpty;
+    _effectiveController.clear();
+    if (widget.onChanged != null && textChanged)
+      widget.onChanged!(_effectiveController.text);
   }
 
   @override
@@ -350,7 +348,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
         'Search';
 
     final TextStyle placeholderStyle = widget.placeholderStyle ??
-        const TextStyle(color: CupertinoColors.secondaryLabel);
+        const TextStyle(color: CupertinoColors.systemGrey);
 
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
@@ -378,8 +376,8 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     final Widget suffix = Padding(
       child: CupertinoButton(
         child: IconTheme(child: widget.suffixIcon, data: iconThemeData),
-        onPressed: widget.onSuffixTap ?? _getDefaultOnSuffixTap(),
-        minSize: 0.0,
+        onPressed: widget.onSuffixTap ?? _defaultOnSuffixTap,
+        minSize: 0,
         padding: EdgeInsets.zero,
       ),
       padding: widget.suffixInsets,
