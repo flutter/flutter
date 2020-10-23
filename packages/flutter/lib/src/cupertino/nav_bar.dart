@@ -399,7 +399,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// True if the navigation bar's background color has no transparency.
   @override
   bool shouldFullyObstruct(BuildContext context) {
-    final Color backgroundColor = CupertinoDynamicColor.resolve(this.backgroundColor, context)
+    final Color backgroundColor = CupertinoDynamicColor.maybeResolve(this.backgroundColor, context)
                                ?? CupertinoTheme.of(context).barBackgroundColor;
     return backgroundColor.alpha == 0xFF;
   }
@@ -430,7 +430,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor =
-      CupertinoDynamicColor.resolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor;
+      CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
@@ -459,7 +459,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       ),
     );
 
-    final Color? actionsForegroundColor = CupertinoDynamicColor.resolve(
+    final Color? actionsForegroundColor = CupertinoDynamicColor.maybeResolve(
       widget.actionsForegroundColor,
       context,
     );
@@ -691,7 +691,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   @override
   Widget build(BuildContext context) {
     // Lint ignore to maintain backward compatibility.
-    final Color actionsForegroundColor = CupertinoDynamicColor.resolve(widget.actionsForegroundColor, context)
+    final Color actionsForegroundColor = CupertinoDynamicColor.maybeResolve(widget.actionsForegroundColor, context)
                                       ?? CupertinoTheme.of(context).primaryColor;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
@@ -720,7 +720,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
             keys: keys,
             components: components,
             userMiddle: widget.middle,
-            backgroundColor: CupertinoDynamicColor.resolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor,
+            backgroundColor: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor,
             brightness: widget.brightness,
             border: widget.border,
             padding: widget.padding,
@@ -789,7 +789,7 @@ class _LargeTitleNavigationBarSliverDelegate
 
     final Widget navBar = _wrapWithBackground(
       border: border,
-      backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context)!,
+      backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context),
       brightness: brightness,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
@@ -1325,7 +1325,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
 
     TextStyle actionTextStyle = CupertinoTheme.of(context).textTheme.navActionTextStyle;
     if (color != null) {
-      actionTextStyle = actionTextStyle.copyWith(color: CupertinoDynamicColor.resolve(color, context));
+      actionTextStyle = actionTextStyle.copyWith(color: CupertinoDynamicColor.maybeResolve(color, context));
     }
 
     return CupertinoButton(

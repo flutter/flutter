@@ -888,24 +888,24 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
 
     final TextStyle? resolvedStyle = widget.style?.copyWith(
-      color: CupertinoDynamicColor.resolve(widget.style?.color, context),
-      backgroundColor: CupertinoDynamicColor.resolve(widget.style?.backgroundColor, context),
+      color: CupertinoDynamicColor.maybeResolve(widget.style?.color, context),
+      backgroundColor: CupertinoDynamicColor.maybeResolve(widget.style?.backgroundColor, context),
     );
 
     final TextStyle textStyle = themeData.textTheme.textStyle.merge(resolvedStyle);
 
     final TextStyle? resolvedPlaceholderStyle = widget.placeholderStyle?.copyWith(
-      color: CupertinoDynamicColor.resolve(widget.placeholderStyle?.color, context),
-      backgroundColor: CupertinoDynamicColor.resolve(widget.placeholderStyle?.backgroundColor, context),
+      color: CupertinoDynamicColor.maybeResolve(widget.placeholderStyle?.color, context),
+      backgroundColor: CupertinoDynamicColor.maybeResolve(widget.placeholderStyle?.backgroundColor, context),
     );
 
     final TextStyle placeholderStyle = textStyle.merge(resolvedPlaceholderStyle);
 
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? CupertinoTheme.brightnessOf(context);
-    final Color cursorColor = CupertinoDynamicColor.resolve(widget.cursorColor, context) ?? themeData.primaryColor;
-    final Color? disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context);
+    final Color cursorColor = CupertinoDynamicColor.maybeResolve(widget.cursorColor, context) ?? themeData.primaryColor;
+    final Color disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context);
 
-    final Color? decorationColor = CupertinoDynamicColor.resolve(widget.decoration?.color, context);
+    final Color? decorationColor = CupertinoDynamicColor.maybeResolve(widget.decoration?.color, context);
 
     final BoxBorder? border = widget.decoration?.border;
     Border? resolvedBorder = border as Border?;
@@ -978,7 +978,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             cursorOffset: cursorOffset,
             paintCursorAboveText: true,
             autocorrectionTextRectColor: selectionColor,
-            backgroundCursorColor: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)!,
+            backgroundCursorColor: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context),
             selectionHeightStyle: widget.selectionHeightStyle,
             selectionWidthStyle: widget.selectionWidthStyle,
             scrollPadding: widget.scrollPadding,

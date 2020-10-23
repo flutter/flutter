@@ -378,7 +378,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   WidgetsApp _buildWidgetApp(BuildContext context) {
     final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
-    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context)!;
+    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context);
 
     if (_usesRouter) {
       return WidgetsApp.router(
