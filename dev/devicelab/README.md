@@ -15,7 +15,8 @@ for information on using the dashboards.
 The DeviceLab devices continuously ask Flutter's continuous integration system
 [Cocoon](https://github.com/flutter/cocoon) for tasks to run. When Cocoon has a
 task that is suitable for the device (e.g. Android test), it reserves that
-task for the device.
+task for the device. See [manifest.yaml](manifest.yaml) for more information on
+the information used for scheduling tasks.
 
 1. If the task succeeds, the test runner reports the success to Cocoon. The dashboards
 will show that task in green.
