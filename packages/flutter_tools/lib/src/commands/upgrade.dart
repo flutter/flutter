@@ -115,7 +115,8 @@ class UpgradeCommandRunner {
     }else if(verifyOnly){
       globals.printStatus('A new version of Flutter is available!\n');
       globals.printStatus('Installed: ${flutterVersion.frameworkRevision}');
-      globals.printStatus('Available: $upstreamRevision', emphasis: true);
+      globals.printStatus('Available: $upstreamRevision\n', emphasis: true);
+      globals.printStatus('To upgrade now, run "flutter upgrade".');
       return;
     }
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
