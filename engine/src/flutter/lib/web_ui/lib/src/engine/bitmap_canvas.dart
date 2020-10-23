@@ -135,7 +135,7 @@ class BitmapCanvas extends EngineCanvas {
   }
 
   /// Setup cache for reusing DOM elements across frames.
-  void setElementCache(CrossFrameCache<html.HtmlElement> cache) {
+  void setElementCache(CrossFrameCache<html.HtmlElement>? cache) {
     _elementCache = cache;
   }
 

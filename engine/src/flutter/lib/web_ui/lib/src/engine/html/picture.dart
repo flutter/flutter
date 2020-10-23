@@ -52,6 +52,7 @@ List<_PaintRequest> _paintQueue = <_PaintRequest>[];
 
 void _recycleCanvas(EngineCanvas? canvas) {
   if (canvas is BitmapCanvas) {
+    canvas.setElementCache(null);
     if (canvas.isReusable()) {
       _recycledCanvases.add(canvas);
       if (_recycledCanvases.length > _kCanvasCacheSize) {
@@ -91,7 +92,7 @@ class PersistedPicture extends PersistedLeafSurface {
   final int hints;
 
   /// Cache for reusing elements such as images across picture updates.
-  CrossFrameCache<html.HtmlElement> _elementCache =
+  CrossFrameCache<html.HtmlElement>? _elementCache =
       CrossFrameCache<html.HtmlElement>();
 
   @override
@@ -386,6 +387,7 @@ class PersistedPicture extends PersistedLeafSurface {
       if (_debugShowCanvasReuseStats) {
         DebugCanvasReuseOverlay.instance.keptCount++;
       }
+      // Re-use old bitmap canvas.
       oldCanvas.bounds = _optimalLocalCullRect!;
       _canvas = oldCanvas;
       oldCanvas.setElementCache(_elementCache);
@@ -395,6 +397,10 @@ class PersistedPicture extends PersistedLeafSurface {
       // We can't use the old canvas because the size has changed, so we put
       // it in a cache for later reuse.
       _recycleCanvas(oldCanvas);
+      if (_canvas is BitmapCanvas) {
+        (_canvas as BitmapCanvas).setElementCache(null);
+      }
+      _canvas = null;
       // We cannot paint immediately because not all canvases that we may be
       // able to reuse have been released yet. So instead we enqueue this
       // picture to be painted after the update cycle is done syncing the layer
@@ -403,8 +409,9 @@ class PersistedPicture extends PersistedLeafSurface {
         canvasSize: _optimalLocalCullRect!.size,
         paintCallback: () {
           _canvas = _findOrCreateCanvas(_optimalLocalCullRect!);
-          assert(_canvas is BitmapCanvas &&
-              (_canvas as BitmapCanvas?)!._elementCache == _elementCache);
+          if (_canvas is BitmapCanvas) {
+            (_canvas as BitmapCanvas).setElementCache(_elementCache);
+          }
           if (_debugExplainSurfaceStats) {
             final BitmapCanvas bitmapCanvas = _canvas as BitmapCanvas;
             _surfaceStatsFor(this).paintPixelCount +=
@@ -518,6 +525,9 @@ class PersistedPicture extends PersistedLeafSurface {
     super.update(oldSurface);
     // Transfer element cache over.
     _elementCache = oldSurface._elementCache;
+    if (oldSurface != this) {
+      oldSurface._elementCache = null;
+    }
 
     if (dx != oldSurface.dx || dy != oldSurface.dy) {
       _applyTranslate();
