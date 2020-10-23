@@ -171,10 +171,11 @@ void main() {
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
+      webRenderer: 'html',
     ) as ResidentWebRunner;
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
@@ -202,10 +203,11 @@ void main() {
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
+      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo(), startPaused: true),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
+      webRenderer: 'html',
     );
 
     expect(profileResidentWebRunner.uri, mockWebDevFS.baseUri);
@@ -223,10 +225,11 @@ void main() {
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
+      webRenderer: 'html',
     ) as ResidentWebRunner;
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
@@ -237,6 +240,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
+      webRenderer: 'html',
     );
 
     expect(profileResidentWebRunner.supportsServiceProtocol, false);
@@ -255,10 +259,11 @@ void main() {
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
+      webRenderer: 'html',
     ) as ResidentWebRunner;
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     fileSystem.file('pubspec.yaml').createSync();
@@ -316,7 +321,7 @@ void main() {
     ));
     await connectionInfoCompleter.future;
 
-    expect(await fileSystem.file(fileSystem.path.join('build', 'cache.dill')).readAsString(), 'ABC');
+    expect(await fileSystem.file(fileSystem.path.join('build', 'cf81dbb7dee963bedb1148fc66e70128.cache.dill')).readAsString(), 'ABC');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -367,10 +372,11 @@ void main() {
     final ResidentWebRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
       ipv6: true,
       stayResident: false,
       urlTunneller: null,
+      webRenderer: 'html',
     ) as ResidentWebRunner;
 
     expect(await residentWebRunner.run(), 0);
@@ -389,10 +395,11 @@ void main() {
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
       ipv6: true,
       stayResident: false,
       urlTunneller: null,
+      webRenderer: 'html',
     ) as ResidentWebRunner;
 
     expect(await residentWebRunner.run(), 0);
@@ -513,10 +520,11 @@ void main() {
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
+      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo(), startPaused: true),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
+      webRenderer: 'html',
     ) as ResidentWebRunner;
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     _setupMocks();
@@ -1506,10 +1514,11 @@ void main() {
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
+      webRenderer: 'html',
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -1553,10 +1562,11 @@ void main() {
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
+      webRenderer: 'html',
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -1682,12 +1692,15 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice) {
   return DwdsWebRunnerFactory().createWebRunner(
     flutterDevice,
     flutterProject: FlutterProject.current(),
-    debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
     ipv6: true,
     stayResident: true,
     urlTunneller: null,
+    webRenderer: 'html',
   ) as ResidentWebRunner;
 }
+
+BuildInfo _createBuildDebugInfo() => BuildInfo(BuildMode.debug, null, treeShakeIcons: false, dartDefines: <String>[]);
 
 class MockChromeLauncher extends Mock implements ChromiumLauncher {}
 class MockFlutterUsage extends Mock implements Usage {}

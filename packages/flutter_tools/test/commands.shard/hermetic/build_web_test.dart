@@ -56,6 +56,7 @@ void main() {
       false,
       null,
       true,
+      'html',
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
