@@ -110,7 +110,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       break;
     }
     if (isolateRef == null) {
-      throw DriverException('Failed to find main isolate after ${_kPauseBetweenReconnectAttempts.inSeconds * 10} seconds!');
+      throw DriverError('Failed to find main isolate after ${_kPauseBetweenReconnectAttempts.inSeconds * 10} seconds!');
     }
     _log('Isolate found with number: ${isolateRef.number}');
 
