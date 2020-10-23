@@ -1632,6 +1632,19 @@ class Image {
     }
   }
 
+  /// Whether this reference to the underlying image is [dispose]d.
+  ///
+  /// This only returns a valid value if asserts are enabled, and must not be
+  /// used otherwise.
+  bool get debugDisposed {
+    bool? disposed;
+    assert(() {
+      disposed = _disposed;
+      return true;
+    }());
+    return disposed ?? (throw StateError('Image.debugDisposed is only available when asserts are enabled.'));
+  }
+
   /// Converts the [Image] object into a byte array.
   ///
   /// The [format] argument specifies the format in which the bytes will be

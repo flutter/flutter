@@ -329,6 +329,7 @@ abstract class Image {
   int get height;
   Future<ByteData?> toByteData({ImageByteFormat format = ImageByteFormat.rawRgba});
   void dispose();
+  bool get debugDisposed;
 
   Image clone() => this;
 

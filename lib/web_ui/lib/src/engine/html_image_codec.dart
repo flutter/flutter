@@ -116,11 +116,24 @@ class HtmlImage implements ui.Image {
   bool _requiresClone = false;
   HtmlImage(this.imgElement, this.width, this.height);
 
+  bool _disposed = false;
   @override
   void dispose() {
     // Do nothing. The codec that owns this image should take care of
     // releasing the object url.
+    if (assertionsEnabled) {
+      _disposed = true;
+    }
   }
+
+  @override
+  bool get debugDisposed {
+    if (assertionsEnabled) {
+      return _disposed;
+    }
+    return throw StateError('Image.debugDisposed is only available when asserts are enabled.');
+  }
+
 
   @override
   ui.Image clone() => this;

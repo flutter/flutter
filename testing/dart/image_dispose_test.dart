@@ -126,6 +126,25 @@ void main() {
     expect(frame2.image.clone()..dispose(), isNotNull);
     frame2.image.dispose();
   });
+
+  test('debugDisposed works', () async {
+    final Uint8List bytes = await readFile('2x2.png');
+    final Codec codec = await instantiateImageCodec(bytes);
+    final FrameInfo frame = await codec.getNextFrame();
+
+    if (assertsEnabled) {
+      expect(frame.image.debugDisposed, false);
+    } else {
+      expect(() => frame.image.debugDisposed, throwsStateError);
+    }
+
+    frame.image.dispose();
+    if (assertsEnabled) {
+      expect(frame.image.debugDisposed, true);
+    } else {
+      expect(() => frame.image.debugDisposed, throwsStateError);
+    }
+  });
 }
 
 Future<Uint8List> readFile(String fileName) async {
