@@ -105,6 +105,7 @@ Future<void> runNavigatorTest(
 ) async {
   expect(host, isNotNull);
   test();
+  await tester.pump();
   expect(results, equals(expectations));
   results.clear();
   await tester.pump();
