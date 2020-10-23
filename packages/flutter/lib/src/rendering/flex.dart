@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'debug_overflow_indicator.dart';
-import 'layer.dart';
 import 'object.dart';
 
 /// How the child is inscribed into the available space.
@@ -981,12 +980,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       return;
 
     if (clipBehavior == Clip.none) {
-      _clipRectLayer = null;
       defaultPaint(context, offset);
     } else {
       // We have overflow and the clipBehavior isn't none. Clip it.
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint,
-          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint, clipBehavior: clipBehavior);
     }
 
     assert(() {
@@ -1031,8 +1028,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       return true;
     }());
   }
-
-  ClipRectLayer? _clipRectLayer;
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) => _hasOverflow ? Offset.zero & size : null;

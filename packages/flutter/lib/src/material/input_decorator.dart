@@ -1478,10 +1478,7 @@ class _RenderDecoration extends RenderBox {
       _labelTransform = Matrix4.identity()
         ..translate(dx, labelOffset.dy + dy)
         ..scale(scale);
-      _transformLayer = context.pushTransform(needsCompositing, offset, _labelTransform!, _paintLabel,
-          oldLayer: _transformLayer);
-    } else {
-      _transformLayer = null;
+      context.pushTransform(needsCompositing, offset, _labelTransform!, _paintLabel);
     }
 
     doPaint(icon);
@@ -1494,8 +1491,6 @@ class _RenderDecoration extends RenderBox {
     doPaint(helperError);
     doPaint(counter);
   }
-
-  TransformLayer? _transformLayer;
 
   @override
   bool hitTestSelf(Offset position) => true;

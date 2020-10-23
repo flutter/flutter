@@ -756,15 +756,11 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_hasVisualOverflow && clipBehavior != Clip.none) {
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack,
-          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack, clipBehavior: clipBehavior);
     } else {
-      _clipRectLayer = null;
       paintStack(context, offset);
     }
   }
-
-  ClipRectLayer? _clipRectLayer;
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {

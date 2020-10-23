@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'box.dart';
-import 'layer.dart';
 import 'object.dart';
 import 'shifted_box.dart';
 
@@ -295,13 +294,9 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null && _hasVisualOverflow && clipBehavior != Clip.none) {
       final Rect rect = Offset.zero & size;
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, rect, super.paint,
-          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+      context.pushClipRect(needsCompositing, offset, rect, super.paint, clipBehavior: clipBehavior);
     } else {
-      _clipRectLayer = null;
       super.paint(context, offset);
     }
   }
-
-  ClipRectLayer? _clipRectLayer;
 }
