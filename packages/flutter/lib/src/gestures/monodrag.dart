@@ -386,8 +386,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _giveUpPointer(int pointer, {bool reject = true}) {
     stopTrackingPointer(pointer);
-    if (reject)
-      resolvePointer(pointer, GestureDisposition.rejected);
+    if (reject) {
+      if (_velocityTrackers.containsKey(pointer)) {
+        _velocityTrackers.remove(pointer);
+        resolvePointer(pointer, GestureDisposition.rejected);
+      }
+    }
   }
 
   void _checkDown() {
