@@ -34,7 +34,7 @@ double _lerpDouble(double a, double b, double t) {
 ///
 /// Same as [lerpDouble] but specialized for non-null `int` type.
 double _lerpInt(int a, int b, double t) {
-  return a * (1.0 - t) + b * t;
+  return a + (b - a) * t;
 }
 
 /// Same as [num.clamp] but specialized for non-null [int].
