@@ -11,14 +11,15 @@
     ],
     "services": [
       "fuchsia.accessibility.semantics.SemanticsManager",
-      "fuchsia.process.Launcher",
       "fuchsia.deprecatedtimezone.Timezone",
-      "fuchsia.netstack.Netstack",
-      "fuchsia.sysmem.Allocator",
-      "fuchsia.vulkan.loader.Loader",
+      "fuchsia.intl.PropertyProvider",
       "fuchsia.logger.LogSink",
+      "fuchsia.netstack.Netstack",
+      "fuchsia.process.Launcher",
+      "fuchsia.settings.Intl",
+      "fuchsia.sysmem.Allocator",
       "fuchsia.tracing.provider.Registry",
-      "fuchsia.intl.PropertyProvider"
+      "fuchsia.vulkan.loader.Loader"
     ]
   }
 }

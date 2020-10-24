@@ -164,14 +164,29 @@ List<int> getFixtureImage() native 'GetFixtureImage';
 
 void notifyLocalTime(String string) native 'NotifyLocalTime';
 
+bool waitFixture() native 'WaitFixture';
+
+// Return local date-time as a string, to an hour resolution.  So, "2020-07-23
+// 14:03:22" will become "2020-07-23 14".
+String localTimeAsString() {
+   final now = DateTime.now().toLocal();
+   // This is: "$y-$m-$d $h:$min:$sec.$ms$us";
+   final timeStr = now.toString();
+   // Forward only "$y-$m-$d $h" for timestamp comparison.  Not using DateTime
+   // formatting since package:intl is not available.
+  return timeStr.split(":")[0];
+}
+
 @pragma('vm:entry-point')
 void localtimesMatch() {
-  final now = DateTime.now().toLocal();
-  // This is: "$y-$m-$d $h:$min:$sec.$ms$us";
-  final timeStr = now.toString();
-  // Forward only "$y-$m-$d $h" for timestamp comparison.  Not using DateTime
-  // formatting since package:intl is not available.
-  notifyLocalTime(timeStr.split(":")[0]);
+  notifyLocalTime(localTimeAsString());
+}
+
+@pragma('vm:entry-point')
+void timezonesChange() {
+  do {
+    notifyLocalTime(localTimeAsString());
+  } while (waitFixture());
 }
 
 void notifyCanAccessResource(bool success) native 'NotifyCanAccessResource';
