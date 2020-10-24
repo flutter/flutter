@@ -27,7 +27,7 @@
     self.window.tintColor = UIColor.systemPinkColor;
   }
   NSDictionary<NSString*, NSString*>* launchArgsMap = @{
-    // The golden test args should match `GoldenTestManager`.
+    // The Platform view golden test args should match `PlatformViewGoldenTestManager`.
     @"--locale-initialization" : @"locale_initialization",
     @"--platform-view" : @"platform_view",
     @"--platform-view-no-overlay-intersection" : @"platform_view_no_overlay_intersection",
@@ -52,7 +52,6 @@
     @"--tap-status-bar" : @"tap_status_bar",
     @"--text-semantics-focus" : @"text_semantics_focus",
     @"--animated-color-square" : @"animated_color_square",
-    @"--bogus-font-text" : @"bogus_font_text"
   };
   __block NSString* flutterViewControllerTestName = nil;
   [launchArgsMap

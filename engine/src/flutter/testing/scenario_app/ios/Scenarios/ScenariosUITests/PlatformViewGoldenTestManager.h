@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #import <Foundation/Foundation.h>
-#import <XCTest/XCTest.h>
+
 #import "GoldenImage.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -14,7 +14,7 @@ extern NSDictionary* launchArgsMap;
 //
 // It creates the correct `identifer` based on the `launchArg`.
 // It also generates the correct GoldenImage based on the `identifier`.
-@interface GoldenTestManager : NSObject
+@interface PlatformViewGoldenTestManager : NSObject
 
 @property(readonly, strong, nonatomic) GoldenImage* goldenImage;
 @property(readonly, copy, nonatomic) NSString* identifier;
@@ -24,10 +24,6 @@ extern NSDictionary* launchArgsMap;
 //
 // Crahes if the launchArg is not mapped in `Appdelegate.launchArgsMap`.
 - (instancetype)initWithLaunchArg:(NSString*)launchArg;
-
-// Take a sceenshot of the test app and check it has the same pixels with
-// goldenImage inside the `GoldenTestManager`.
-- (void)checkGoldenForTest:(XCTestCase*)test;
 
 @end
 

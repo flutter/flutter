@@ -5,7 +5,8 @@
 #import "GoldenPlatformViewTests.h"
 
 #include <sys/sysctl.h>
-#import "GoldenTestManager.h"
+
+#import "PlatformViewGoldenTestManager.h"
 
 static const NSInteger kSecondsToWaitForPlatformView = 30;
 
@@ -13,13 +14,14 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 
 @property(nonatomic, copy) NSString* goldenName;
 
-@property(nonatomic, strong) GoldenTestManager* manager;
+@property(nonatomic, strong) PlatformViewGoldenTestManager* manager;
 
 @end
 
 @implementation GoldenPlatformViewTests
 
-- (instancetype)initWithManager:(GoldenTestManager*)manager invocation:(NSInvocation*)invocation {
+- (instancetype)initWithManager:(PlatformViewGoldenTestManager*)manager
+                     invocation:(NSInvocation*)invocation {
   self = [super initWithInvocation:invocation];
   _manager = manager;
   return self;
@@ -35,7 +37,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 }
 
 // Note: don't prefix with "test" or GoldenPlatformViewTests will run instead of the subclasses.
-- (void)checkPlatformViewGolden {
+- (void)checkGolden {
   XCUIElement* element = self.application.textViews.firstMatch;
   BOOL exists = [element waitForExistenceWithTimeout:kSecondsToWaitForPlatformView];
   if (!exists) {
@@ -45,6 +47,29 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
             @(kSecondsToWaitForPlatformView));
   }
 
-  [self.manager checkGoldenForTest:self];
+  GoldenImage* golden = self.manager.goldenImage;
+
+  XCUIScreenshot* screenshot = [[XCUIScreen mainScreen] screenshot];
+  if (!golden.image) {
+    XCTAttachment* attachment = [XCTAttachment attachmentWithScreenshot:screenshot];
+    attachment.name = @"new_golden";
+    attachment.lifetime = XCTAttachmentLifetimeKeepAlways;
+    [self addAttachment:attachment];
+    XCTFail(@"This test will fail - no golden named %@ found. Follow the steps in the "
+            @"README to add a new golden.",
+            golden.goldenName);
+  }
+
+  if (![golden compareGoldenToImage:screenshot.image]) {
+    XCTAttachment* screenshotAttachment;
+    screenshotAttachment = [XCTAttachment attachmentWithImage:screenshot.image];
+    screenshotAttachment.name = golden.goldenName;
+    screenshotAttachment.lifetime = XCTAttachmentLifetimeKeepAlways;
+    [self addAttachment:screenshotAttachment];
+
+    XCTFail(@"Goldens to not match. Follow the steps in the "
+            @"README to update golden named %@ if needed.",
+            golden.goldenName);
+  }
 }
 @end
