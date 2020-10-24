@@ -6471,43 +6471,6 @@ void main() {
       state.updateEditingValue(const TextEditingValue(text: string, composing: TextRange(start: 10, end: 11)));
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
-
-    testWidgets('Update with a completely different value while selection is valid.', (WidgetTester tester) async {
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
-      final Widget widget = MaterialApp(
-        home: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          inputFormatters: <TextInputFormatter>[formatter],
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
-        ),
-      );
-
-      await tester.pumpWidget(widget);
-      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-
-      // Initially we're at max length.
-      state.updateEditingValue(const TextEditingValue(text: '12345'));
-      expect(state.currentTextEditingValue.text, '12345');
-
-      // Update with a completely different value and over the max length, but no selection.
-      state.updateEditingValue(const TextEditingValue(text: 'abcdef'));
-      expect(state.currentTextEditingValue.text, '12345');
-
-      // Add selection to origin value first.
-      state.updateEditingValue(
-        const TextEditingValue(text: '12345', selection: TextSelection(baseOffset: 3, extentOffset: 5)),
-      );
-      expect(state.currentTextEditingValue.text, '12345');
-      expect(state.currentTextEditingValue.selection, const TextSelection(baseOffset: 3, extentOffset: 5));
-
-      // Replace with a whole different value, again.
-      state.updateEditingValue(const TextEditingValue(text: 'abcdef'));
-      expect(state.currentTextEditingValue.text, 'abcde');
-    });
   });
 
   group('callback errors', () {
