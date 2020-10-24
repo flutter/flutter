@@ -17,6 +17,7 @@ void main() {
     Stdio stdio;
     Platform platform;
     FileSystem fileSystem;
+    Git git;
     const String usageString = 'Usage: flutter conductor.';
 
     setUp(() {
@@ -27,38 +28,47 @@ void main() {
       );
       platform = const LocalPlatform();
       fileSystem = const LocalFileSystem();
+      git = const Git();
     });
 
     test('integration test', () {
-      final Repository frameworkFakeUpstream = Repository(
+      final Checkouts checkouts = Checkouts(
+        platform: platform,
+        fileSystem: fileSystem,
+        git: git,
+        cleanFirst: true,
+      );
+
+      final Repository frameworkFakeUpstream = checkouts.addRepo(
         name: 'framework-fake-upstream',
         upstream: kUpstreamRemote,
-        git: Git(kUpstreamRemote),
+        git: git,
+        stdio: stdio,
+        platform: platform,
+        fileSystem: fileSystem,
+        localUpstream: true,
+      );
+
+      final Repository framework = checkouts.addRepo(
+        name: 'framework',
+        upstream: 'file://${frameworkFakeUpstream.checkoutDirectory.path}/',
+        git: git,
         stdio: stdio,
         platform: platform,
         fileSystem: fileSystem,
       );
 
-      final Repository framework = Repository(
-        name: 'framework',
-        upstream: frameworkFakeUpstream.directory.path,
-        git: Git(frameworkFakeUpstream.directory.path),
-        stdio: stdio,
-        platform: platform,
-        fileSystem: fileSystem,
-      );
+      final String latestCommit = framework.authorEmptyCommit();
 
       final FakeArgResults fakeArgResults = FakeArgResults(
         level: 'm',
-        commit: 'abc123',
+        commit: latestCommit,
         origin: 'origin',
-        justPrint: true,
       );
 
       run(
         usage: usageString,
         argResults: fakeArgResults,
-        git: git,
         stdio: stdio,
         fileSystem: fileSystem,
         platform: platform,

@@ -7,7 +7,7 @@ const String kX = 'x';
 const String kY = 'y';
 const String kZ = 'z';
 const String kCommit = 'commit';
-const String kOrigin = 'origin';
+const String kRemoteName = 'origin';
 const String kJustPrint = 'just-print';
 const String kYes = 'yes';
 const String kHelp = 'help';
@@ -15,3 +15,10 @@ const String kForce = 'force';
 const String kSkipTagging = 'skip-tagging';
 
 const String kUpstreamRemote = 'https://github.com/flutter/flutter.git';
+
+const List<String> kReleaseChannels = <String>[
+  'stable',
+  'beta',
+  'dev',
+  'master',
+];

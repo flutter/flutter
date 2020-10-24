@@ -7,7 +7,6 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
-import './git.dart';
 import './globals.dart';
 import './repository.dart';
 import './stdio.dart';
@@ -19,7 +18,6 @@ import './version.dart';
 bool run({
   @required String usage,
   @required ArgResults argResults,
-  @required Git git,
   @required Stdio stdio,
   @required Platform platform,
   @required FileSystem fileSystem,
@@ -27,7 +25,7 @@ bool run({
 }) {
   final String level = argResults[kIncrement] as String;
   final String commit = argResults[kCommit] as String;
-  final String origin = argResults[kOrigin] as String;
+  final String remoteName = argResults[kRemoteName] as String;
   final bool justPrint = argResults[kJustPrint] as bool;
   final bool autoApprove = argResults[kYes] as bool;
   final bool help = argResults[kHelp] as bool;
@@ -41,69 +39,58 @@ bool run({
     return false;
   }
 
-  final String remote = git.getOutput(
-    'remote get-url $origin',
-    'check whether this is a flutter checkout',
-  );
-  if (remote != kUpstreamRemote) {
+  final String remoteUrl = repository.remoteUrl(remoteName);
+
+  if (!repository.gitCheckoutClean()) {
     throw Exception(
-        'The remote named $origin is set to $remote, when $kUpstreamRemote was '
-        'expected.\nFor more details see: '
-        'https://github.com/flutter/flutter/wiki/Release-process');
+      'Your git repository is not clean. Try running "git clean -fd". Warning, '
+      'this will delete files! Run with -n to find out which ones.');
   }
 
-  if (git.getOutput('status --porcelain', 'check status of your local checkout') != '') {
-    throw Exception(
-        'Your git repository is not clean. Try running "git clean -fd". Warning, '
-        'this will delete files! Run with -n to find out which ones.');
-  }
+  repository.fetch(remoteName);
 
-  git.run('fetch $origin', 'fetch $origin');
+  // Verify [commit] is valid
+  repository.reverseParse(commit);
 
-  final Version lastVersion = Version.fromString(git.getFullTag(origin));
+  stdio.printStatus('remoteName is $remoteName');
+  final Version lastVersion = Version.fromString(repository.getFullTag(remoteName));
 
   final Version version = skipTagging ? lastVersion : Version.increment(lastVersion, level);
+  final String tagName = version.toString();
 
-  if (git.getOutput(
-        'rev-parse $lastVersion',
-        'check if commit is already on dev',
-      ).contains(commit.trim())) {
+  if (repository.reverseParse(lastVersion.toString()).contains(commit.trim())) {
     throw Exception(
         'Commit $commit is already on the dev branch as $lastVersion.');
   }
 
   if (justPrint) {
-    stdio.printStatus(version.toString());
+    stdio.printStatus(tagName);
     return false;
   }
 
-  if (skipTagging) {
-    git.run(
-        'describe --exact-match --tags $commit',
-        'verify $commit is already tagged. You can only use the flag '
-            '`$kSkipTagging` if the commit has already been tagged.');
+  if (skipTagging && !repository.isCommitTagged(commit)) {
+    throw Exception('The $kSkipTagging flag is only supported for tagged commits.');
   }
 
-  if (!force) {
-    git.run(
-        'merge-base --is-ancestor $lastVersion $commit',
-        'verify $lastVersion is a direct ancestor of $commit. The flag `$kForce`'
-        'is required to force push a new release past a cherry-pick',
+  if (!force && !repository.isAncestor(commit, lastVersion.toString())) {
+    throw Exception(
+        'The previous dev tag $lastVersion is not a direct ancestor of $commit.\n'
+        'The flag "$kForce" is required to force push a new release past a cherry-pick.'
     );
   }
 
-  git.run('reset $commit --hard', 'reset to the release commit');
+  final String hash = repository.reverseParse(commit);
 
-  final String hash =
-      git.getOutput('rev-parse HEAD', 'Get git hash for $commit');
+  // [commit] can be a prefix for [hash].
+  assert(hash.startsWith(commit));
 
   // PROMPT
 
   if (autoApprove) {
-    stdio.printStatus('Publishing Flutter $version (${hash.substring(0, 10)}) to the "dev" channel.');
+    stdio.printStatus('Publishing Flutter $version ($hash) to the "dev" channel.');
   } else {
     stdio.printStatus('Your tree is ready to publish Flutter $version '
-        '(${hash.substring(0, 10)}) to the "dev" channel.');
+        '($hash) to the "dev" channel.');
     stdio.write('Are you? [yes/no] ');
     if (stdio.readLineSync() != 'yes') {
       stdio.printError('The dev roll has been aborted.');
@@ -112,15 +99,13 @@ bool run({
   }
 
   if (!skipTagging) {
-    git.run('tag $version', 'tag the commit with the version label');
-    git.run('push $origin $version', 'publish the version');
+    repository.tag(commit, version.toString(), remoteName);
   }
-  git.run(
-    'push ${force ? "--force " : ""}$origin HEAD:dev',
-    'land the new version on the "dev" branch',
-  );
+
+  repository.updateChannel(commit, remoteName, 'dev');
+
   stdio.printStatus(
-    'Flutter version $version has been rolled to the "dev" channel!',
+    'Flutter version $version has been rolled to the "dev" channel at $remoteUrl.',
   );
   return true;
 }

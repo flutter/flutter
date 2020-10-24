@@ -4,60 +4,59 @@
 
 import 'dart:io';
 
+import 'package:meta/meta.dart';
+
 /// A wrapper around git process calls that can be mocked for unit testing.
 class Git {
-  Git(this.workingDirectory);
-
-  final String workingDirectory;
+  const Git();
 
   String getOutput(
-    String command,
-    String explanation
-  ) {
-    final ProcessResult result = _run(command);
+    List<String> args,
+    String explanation, {
+    @required String workingDirectory,
+  }) {
+    final ProcessResult result = _run(args, workingDirectory);
     if ((result.stderr as String).isEmpty && result.exitCode == 0)
       return (result.stdout as String).trim();
-    _reportFailureAndExit(result, explanation);
+    _reportFailureAndExit(args, workingDirectory, result, explanation);
     return null; // for the analyzer's sake
   }
 
-  void run(
-    String command,
-    String explanation
-  ) {
-    final ProcessResult result = _run(command);
-    if (result.exitCode != 0) {
-      _reportFailureAndExit(result, explanation);
+  int run(
+    List<String> args,
+    String explanation, {
+    bool allowNonZeroExitCode = false,
+    @required String workingDirectory,
+  }) {
+    final ProcessResult result = _run(args, workingDirectory);
+    if (result.exitCode != 0 && !allowNonZeroExitCode) {
+      _reportFailureAndExit(args, workingDirectory, result, explanation);
     }
+    return result.exitCode;
   }
 
-  // TODO: this should not be a [Git] method.
-  /// Obtain the version tag of the previous dev release.
-  String getFullTag(String remote) {
-    const String glob = '*.*.*-*.*.pre';
-    // describe the latest dev release
-    final String ref = 'refs/remotes/$remote/dev';
-    return getOutput(
-      'describe --match $glob --exact-match --tags $ref',
-      'obtain last released version number',
-    );
-  }
-
-  ProcessResult _run(String command) {
+  ProcessResult _run(List<String> args, String workingDirectory) {
     return Process.runSync(
       'git',
-      command.split(' '),
+      args,
       workingDirectory: workingDirectory,
     );
   }
 
-  void _reportFailureAndExit(ProcessResult result, String explanation) {
+  void _reportFailureAndExit(
+    List<String> args,
+    String workingDirectory,
+    ProcessResult result,
+    String explanation,
+  ) {
     final StringBuffer message = StringBuffer();
     if (result.exitCode != 0) {
       message.writeln(
-          'Failed to $explanation. Git exited with error code ${result.exitCode}.');
+        'Command "git ${args.join(' ')}" failed in directory "$workingDirectory" to '
+        '$explanation. Git exited with error code ${result.exitCode}.',
+      );
     } else {
-      message.writeln('Failed to $explanation.');
+      message.writeln('Command "git ${args.join(' ')}" failed to $explanation.');
     }
     if ((result.stdout as String).isNotEmpty)
       message.writeln('stdout from git:\n${result.stdout}\n');
