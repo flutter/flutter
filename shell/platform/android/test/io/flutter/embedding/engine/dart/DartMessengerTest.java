@@ -52,4 +52,3 @@ public class DartMessengerTest {
     currentThread.setUncaughtExceptionHandler(savedHandler);
   }
 }
-
