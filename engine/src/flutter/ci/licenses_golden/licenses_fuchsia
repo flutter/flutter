@@ -1,4 +1,4 @@
-Signature: f6ea3ff26134daffbad15b2964d7b2e3
+Signature: 1420c2a36104aecbd3347e80a864b12a
 
 UNUSED LICENSES:
 
@@ -558,7 +558,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl-async/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/meta.json
@@ -1509,7 +1508,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/async/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/directory.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/fd.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl-async/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/internal_callable_traits.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/txn_header.h
@@ -2224,7 +2222,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl-async/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/meta.json
@@ -2645,8 +2642,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/test_loop_dispatcher.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/time.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/trap.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/spawn.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl-async/bind.c
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl-async/include/lib/fidl-async/bind.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl/epitaph.c
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl/handle_closing.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl/include/lib/fidl/epitaph.h
