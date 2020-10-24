@@ -77,6 +77,12 @@ void main() {
       Color.lerp(const Color(0x00000000), const Color(0xFFFFFFFF), 1.1),
       const Color(0xFFFFFFFF),
     );
+
+    // Prevent regression: https://github.com/flutter/flutter/issues/67423
+    expect(
+      Color.lerp(const Color(0xFFFFFFFF), const Color(0xFFFFFFFF), 0.04),
+      const Color(0xFFFFFFFF),
+    );
   });
 
   test('Color.alphaBlend', () {
