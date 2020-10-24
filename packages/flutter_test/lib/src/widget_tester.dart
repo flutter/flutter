@@ -610,6 +610,31 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }
   }
 
+  /// Repeatedly calls [pump] with the given `duration` until there are no longer any frames scheduled.
+  /// This will call [pump] at least once, even if no frames are scheduled
+  /// when the function is called, to flush any pending microtasks
+  /// which may themselves schedule a frame.
+  ///
+  /// This essentially waits for all animations to have completed.
+  ///
+  /// If it takes longer that the given `timeout` to settle, then the test will fail
+  /// (this method will throw an exception).
+  /// In particular, this means that if there is an infinite animation in progress
+  /// (for example, if there is an indeterminate progress indicator spinning),
+  /// this method will throw.
+  ///
+  /// The default timeout is ten minutes,
+  /// which is longer than most reasonable finite animations would last.
+  ///
+  /// If the function returns, it returns the number of pumps that it performed.
+  ///
+  /// In general, it is better practice to figure out exactly why each frame is needed,
+  /// and then to [pump] exactly as many frames as necessary.
+  /// This will help catch regressions where, for instance,
+  /// an animation is being started one frame later than it should.
+  ///
+  /// Alternatively, one can check that the return value from this
+  /// function matches the expected number of pumps.  
   @override
   Future<int> pumpAndSettle([
     Duration duration = const Duration(milliseconds: 100),
