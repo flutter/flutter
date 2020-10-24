@@ -11,12 +11,13 @@
 @implementation PlatformViewUITests
 
 - (instancetype)initWithInvocation:(NSInvocation*)invocation {
-  GoldenTestManager* manager = [[GoldenTestManager alloc] initWithLaunchArg:@"--platform-view"];
+  PlatformViewGoldenTestManager* manager =
+      [[PlatformViewGoldenTestManager alloc] initWithLaunchArg:@"--platform-view"];
   return [super initWithManager:manager invocation:invocation];
 }
 
 - (void)testPlatformView {
-  [self checkPlatformViewGolden];
+  [self checkGolden];
 }
 
 @end
@@ -28,13 +29,13 @@
 @implementation MultiplePlatformViewsTest
 
 - (instancetype)initWithInvocation:(NSInvocation*)invocation {
-  GoldenTestManager* manager =
-      [[GoldenTestManager alloc] initWithLaunchArg:@"--platform-view-multiple"];
+  PlatformViewGoldenTestManager* manager =
+      [[PlatformViewGoldenTestManager alloc] initWithLaunchArg:@"--platform-view-multiple"];
   return [super initWithManager:manager invocation:invocation];
 }
 
 - (void)testPlatformView {
-  [self checkPlatformViewGolden];
+  [self checkGolden];
 }
 
 @end
@@ -46,7 +47,7 @@
 @implementation MultiplePlatformViewsBackgroundForegroundTest
 
 - (instancetype)initWithInvocation:(NSInvocation*)invocation {
-  GoldenTestManager* manager = [[GoldenTestManager alloc]
+  PlatformViewGoldenTestManager* manager = [[PlatformViewGoldenTestManager alloc]
       initWithLaunchArg:@"--platform-view-multiple-background-foreground"];
   return [super initWithManager:manager invocation:invocation];
 }
@@ -54,7 +55,7 @@
 - (void)testPlatformView {
   [[XCUIDevice sharedDevice] pressButton:XCUIDeviceButtonHome];
   [self.application activate];
-  [self checkPlatformViewGolden];
+  [self checkGolden];
 }
 
 @end
@@ -67,13 +68,13 @@
 @implementation PlatformViewMutationClipRectTests
 
 - (instancetype)initWithInvocation:(NSInvocation*)invocation {
-  GoldenTestManager* manager =
-      [[GoldenTestManager alloc] initWithLaunchArg:@"--platform-view-cliprect"];
+  PlatformViewGoldenTestManager* manager =
+      [[PlatformViewGoldenTestManager alloc] initWithLaunchArg:@"--platform-view-cliprect"];
   return [super initWithManager:manager invocation:invocation];
 }
 
 - (void)testPlatformView {
-  [self checkPlatformViewGolden];
+  [self checkGolden];
 }
 
 @end
@@ -85,13 +86,13 @@
 @implementation PlatformViewMutationClipRRectTests
 
 - (instancetype)initWithInvocation:(NSInvocation*)invocation {
-  GoldenTestManager* manager =
-      [[GoldenTestManager alloc] initWithLaunchArg:@"--platform-view-cliprrect"];
+  PlatformViewGoldenTestManager* manager =
+      [[PlatformViewGoldenTestManager alloc] initWithLaunchArg:@"--platform-view-cliprrect"];
   return [super initWithManager:manager invocation:invocation];
 }
 
 - (void)testPlatformView {
-  [self checkPlatformViewGolden];
+  [self checkGolden];
 }
 
 @end
@@ -103,13 +104,13 @@
 @implementation PlatformViewMutationClipPathTests
 
 - (instancetype)initWithInvocation:(NSInvocation*)invocation {
-  GoldenTestManager* manager =
-      [[GoldenTestManager alloc] initWithLaunchArg:@"--platform-view-clippath"];
+  PlatformViewGoldenTestManager* manager =
+      [[PlatformViewGoldenTestManager alloc] initWithLaunchArg:@"--platform-view-clippath"];
   return [super initWithManager:manager invocation:invocation];
 }
 
 - (void)testPlatformView {
-  [self checkPlatformViewGolden];
+  [self checkGolden];
 }
 
 @end
@@ -121,13 +122,13 @@
 @implementation PlatformViewMutationTransformTests
 
 - (instancetype)initWithInvocation:(NSInvocation*)invocation {
-  GoldenTestManager* manager =
-      [[GoldenTestManager alloc] initWithLaunchArg:@"--platform-view-transform"];
+  PlatformViewGoldenTestManager* manager =
+      [[PlatformViewGoldenTestManager alloc] initWithLaunchArg:@"--platform-view-transform"];
   return [super initWithManager:manager invocation:invocation];
 }
 
 - (void)testPlatformView {
-  [self checkPlatformViewGolden];
+  [self checkGolden];
 }
 
 @end
@@ -139,13 +140,13 @@
 @implementation PlatformViewMutationOpacityTests
 
 - (instancetype)initWithInvocation:(NSInvocation*)invocation {
-  GoldenTestManager* manager =
-      [[GoldenTestManager alloc] initWithLaunchArg:@"--platform-view-opacity"];
+  PlatformViewGoldenTestManager* manager =
+      [[PlatformViewGoldenTestManager alloc] initWithLaunchArg:@"--platform-view-opacity"];
   return [super initWithManager:manager invocation:invocation];
 }
 
 - (void)testPlatformView {
-  [self checkPlatformViewGolden];
+  [self checkGolden];
 }
 
 @end
@@ -155,8 +156,8 @@
 
 @implementation PlatformViewRotation
 - (instancetype)initWithInvocation:(NSInvocation*)invocation {
-  GoldenTestManager* manager =
-      [[GoldenTestManager alloc] initWithLaunchArg:@"--platform-view-rotate"];
+  PlatformViewGoldenTestManager* manager =
+      [[PlatformViewGoldenTestManager alloc] initWithLaunchArg:@"--platform-view-rotate"];
   return [super initWithManager:manager invocation:invocation];
 }
 
@@ -167,6 +168,6 @@
 
 - (void)testPlatformView {
   XCUIDevice.sharedDevice.orientation = UIDeviceOrientationLandscapeLeft;
-  [self checkPlatformViewGolden];
+  [self checkGolden];
 }
 @end
