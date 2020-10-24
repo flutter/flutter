@@ -29,7 +29,7 @@ import 'text_input.dart';
 /// However, some input methods (Gboard for example) initiate text composition
 /// even for Latin characters. If the text field should only take
 /// Latin characters or numbers (e.g., verification code),
-/// [MaxLengthEnforcement.allowComposingTextToFinish] is generally a better fit.
+/// [MaxLengthEnforcement.enforced] is generally a better fit.
 /// {@endtemplate}
 ///
 /// See also:

@@ -582,6 +582,7 @@ class TextField extends StatefulWidget {
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforcement] is set to
   /// [MaxLengthEnforcement.none].
+  ///
   /// The text field enforces the length with a [LengthLimitingTextInputFormatter],
   /// which is evaluated after the supplied [inputFormatters], if any.
   ///
