@@ -78,14 +78,6 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  uncaught_image_error_linux:
-    description: >
-      Ensures that an error thrown into the zone can be caught by the ImageStream
-      completer
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
-
   flutter_gallery_android__compile:
     description: >
       Collects various performance metrics of compiling the Flutter
@@ -424,13 +416,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  android_enable_twc:
-    description: >
-      Verifies that track-widget-creation can be enabled and disabled.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-    flaky: true
-
   android_defines_test:
     description: >
       Builds an APK with a --dart-define and verifies it can be used as a constant
@@ -643,13 +628,6 @@ tasks:
       Runs end-to-end tests with platform views in the scene.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-
-  ios_enable_twc:
-    description: >
-      Verifies that track-widget-creation can be enabled and disabled.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   macos_chrome_dev_mode:
     description: >
@@ -910,13 +888,6 @@ tasks:
       Runs Web benchmarks on Chrome on a Linux machine using the CanvasKit rendering backend.
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
-
-  web_enable_twc:
-     description: >
-       Verifies that track-widget-creation can be enabled and disabled.
-     stage: devicelab
-     required_agent_capabilities: ["linux-vm"]
-     flaky: true
 
   # android_splash_screen_integration_test:
   #   description: >

@@ -14,7 +14,6 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
 TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
@@ -1460,6 +1459,19 @@ class _UnzipListEntry {
   final int uncompressedSize;
   final int compressedSize;
   final String path;
+}
+
+/// Wait for up to 400 seconds for the file to appear.
+Future<File> waitForFile(String path) async {
+  for (int i = 0; i < 20; i += 1) {
+    final File file = File(path);
+    print('looking for ${file.path}');
+    if (file.existsSync()) {
+      return file;
+    }
+    await Future<void>.delayed(const Duration(seconds: 20));
+  }
+  throw StateError('Did not find vmservice out file after 400 seconds');
 }
 
 String _findIosAppInBuildDirectory(String searchDirectory) {
