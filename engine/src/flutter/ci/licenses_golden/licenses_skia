@@ -1,4 +1,4 @@
-Signature: ef49c7bdb00ab5a3bdcaa1ddf80c6bb7
+Signature: 85584d718a5abe1b6643f5aa4fdf9306
 
 UNUSED LICENSES:
 
@@ -2747,7 +2747,6 @@ FILE: ../../../third_party/skia/gm/xfermodes2.cpp
 FILE: ../../../third_party/skia/gm/xfermodes3.cpp
 FILE: ../../../third_party/skia/include/core/SkDataTable.h
 FILE: ../../../third_party/skia/include/core/SkDocument.h
-FILE: ../../../third_party/skia/include/core/SkFontLCDConfig.h
 FILE: ../../../third_party/skia/include/core/SkFontMgr.h
 FILE: ../../../third_party/skia/include/core/SkFontStyle.h
 FILE: ../../../third_party/skia/include/core/SkImageGenerator.h
@@ -6730,7 +6729,6 @@ FILE: ../../../third_party/skia/src/core/SkCubicClipper.cpp
 FILE: ../../../third_party/skia/src/core/SkCubicClipper.h
 FILE: ../../../third_party/skia/src/core/SkEdgeClipper.cpp
 FILE: ../../../third_party/skia/src/core/SkEdgeClipper.h
-FILE: ../../../third_party/skia/src/core/SkFontLCDConfig.cpp
 FILE: ../../../third_party/skia/src/core/SkQuadClipper.cpp
 FILE: ../../../third_party/skia/src/core/SkQuadClipper.h
 FILE: ../../../third_party/skia/src/images/SkImageEncoder.cpp
