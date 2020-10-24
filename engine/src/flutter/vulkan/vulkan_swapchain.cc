@@ -153,10 +153,9 @@ VulkanSwapchain::VulkanSwapchain(const VulkanProcTable& p_vk,
                                          nullptr);
                 }};
 
-  if (!CreateSwapchainImages(skia_context,
-                             format_infos[format_index].color_type_,
-                             format_infos[format_index].color_space_,
-                             usage_flags)) {
+  if (!CreateSwapchainImages(
+          skia_context, format_infos[format_index].color_type_,
+          format_infos[format_index].color_space_, usage_flags)) {
     FML_DLOG(INFO) << "Could not create swapchain images.";
     return;
   }
