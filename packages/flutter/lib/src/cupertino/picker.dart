@@ -236,7 +236,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   void _handleSelectedItemChanged(int index) {
     // Only the haptic engine hardware on iOS devices would produce the
     // intended effects.
-    bool hasSuitableHapticHardware;
+    final bool hasSuitableHapticHardware;
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         hasSuitableHapticHardware = true;

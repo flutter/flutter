@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -13,7 +11,7 @@ void main() {
 
   testWidgets('Change link during layout', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    Widget build({ LayerLink linkToUse }) {
+    Widget build({ LayerLink? linkToUse }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         // The LayoutBuilder forces the CompositedTransformTarget widget to
@@ -49,7 +47,7 @@ void main() {
     }
 
     await tester.pumpWidget(build());
-    final RenderBox box = key.currentContext.findRenderObject() as RenderBox;
+    final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
     expect(box.localToGlobal(Offset.zero), const Offset(118.0, 451.0));
 
     await tester.pumpWidget(build(linkToUse: LayerLink()));
@@ -59,7 +57,7 @@ void main() {
   group('Composited transforms - only offsets', () {
     final GlobalKey key = GlobalKey();
 
-    Widget build({ @required Alignment targetAlignment, @required Alignment followerAlignment }) {
+    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -89,19 +87,19 @@ void main() {
 
     testWidgets('topLeft', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
-      final RenderBox box = key.currentContext.findRenderObject() as RenderBox;
+      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(123.0, 456.0));
     });
 
     testWidgets('center', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
-      final RenderBox box = key.currentContext.findRenderObject() as RenderBox;
+      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(118.0, 451.0));
     });
 
     testWidgets('bottomRight - topRight', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
-      final RenderBox box = key.currentContext.findRenderObject() as RenderBox;
+      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(113.0, 466.0));
     });
   });
@@ -110,7 +108,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    Widget build({ @required Alignment targetAlignment, @required Alignment followerAlignment }) {
+    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -145,8 +143,8 @@ void main() {
     }
     testWidgets('topLeft', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
-      final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
-      final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
+      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(Offset.zero);
       final Offset position2 = box2.localToGlobal(Offset.zero);
       expect(position1, offsetMoreOrLessEquals(position2));
@@ -154,8 +152,8 @@ void main() {
 
     testWidgets('center', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
-      final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
-      final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
+      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(const Offset(40, 5));
       final Offset position2 = box2.localToGlobal(const Offset(20, 10));
       expect(position1, offsetMoreOrLessEquals(position2));
@@ -163,8 +161,8 @@ void main() {
 
     testWidgets('bottomRight - topRight', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
-      final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
-      final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
+      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(const Offset(80, 10));
       final Offset position2 = box2.localToGlobal(const Offset(40, 0));
       expect(position1, offsetMoreOrLessEquals(position2));
@@ -175,7 +173,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    Widget build({ @required Alignment targetAlignment, @required Alignment followerAlignment }) {
+    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -222,8 +220,8 @@ void main() {
     }
     testWidgets('topLeft', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
-      final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
-      final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
+      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(Offset.zero);
       final Offset position2 = box2.localToGlobal(Offset.zero);
       expect(position1, offsetMoreOrLessEquals(position2));
@@ -231,8 +229,8 @@ void main() {
 
     testWidgets('center', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
-      final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
-      final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
+      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(Alignment.center.alongSize(const Size(80, 10)));
       final Offset position2 = box2.localToGlobal(Alignment.center.alongSize(const Size(40, 20)));
       expect(position1, offsetMoreOrLessEquals(position2));
@@ -240,8 +238,8 @@ void main() {
 
     testWidgets('bottomRight - topRight', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
-      final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
-      final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
+      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(Alignment.bottomRight.alongSize(const Size(80, 10)));
       final Offset position2 = box2.localToGlobal(Alignment.topRight.alongSize(const Size(40, 20)));
       expect(position1, offsetMoreOrLessEquals(position2));
@@ -255,7 +253,7 @@ void main() {
 
     bool tapped = false;
 
-    Widget build({ @required Alignment targetAlignment, @required Alignment followerAlignment }) {
+    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -294,7 +292,7 @@ void main() {
       for (final Alignment followerAlignment in alignments) {
         testWidgets('$targetAlignment - $followerAlignment', (WidgetTester tester) async{
           await tester.pumpWidget(build(targetAlignment: targetAlignment, followerAlignment: followerAlignment));
-          final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
+          final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
           expect(box2.size, const Size(2.0, 2.0));
           expect(tapped, isFalse);
           await tester.tap(find.byKey(key3));

@@ -260,6 +260,29 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         }
       }
     }
+    // 4.1 has a different location for AndroidStudio installs on Windows.
+    if (globals.platform.isWindows) {
+      final File homeDot = globals.fs.file(globals.fs.path.join(
+        globals.platform.environment['LOCALAPPDATA'],
+        'Google',
+        'AndroidStudio4.1',
+        '.home',
+      ));
+      if (homeDot.existsSync()) {
+        final String installPath = homeDot.readAsStringSync();
+        if (globals.fs.isDirectorySync(installPath)) {
+          final AndroidStudio studio = AndroidStudio(
+            installPath,
+            version: Version(4, 1, 0),
+            studioAppName: 'Android Studio 4.1',
+          );
+          if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
+            studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
+            studios.add(studio);
+          }
+        }
+      }
+    }
 
     final String configuredStudioDir = globals.config.getValue('android-studio-dir') as String;
     if (configuredStudioDir != null && !_hasStudioAt(configuredStudioDir)) {
@@ -310,7 +333,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     } else {
       RunResult result;
       try {
-        result = processUtils.runSync(<String>[javaExecutable, '-version']);
+        result = globals.processUtils.runSync(<String>[javaExecutable, '-version']);
       } on ProcessException catch (e) {
         _validationMessages.add('Failed to run Java: $e');
       }

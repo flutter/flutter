@@ -29,6 +29,36 @@ class MockClipboard {
   }
 }
 
+class MockTextSelectionControls extends TextSelectionControls {
+  @override
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type,
+      double textLineHeight) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Widget buildToolbar(
+      BuildContext context,
+      Rect globalEditableRegion,
+      double textLineHeight,
+      Offset position,
+      List<TextSelectionPoint> endpoints,
+      TextSelectionDelegate delegate,
+      ClipboardStatusNotifier clipboardStatus) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    throw UnimplementedError();
+  }
+}
+
 class PathBoundsMatcher extends Matcher {
   const PathBoundsMatcher({
     this.rectMatcher,
@@ -2707,6 +2737,43 @@ void main() {
       expect(tapCount, 1);
   });
 
+  testWidgets('Focus test when the text field is disabled', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            focusNode: focusNode,
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, false); // initial status
+
+    // Should accept requestFocus.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, true);
+
+    // Disable the text field, now it should not accept requestFocus.
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            enabled: false,
+            focusNode: focusNode,
+          ),
+        ),
+      ),
+    );
+
+    // Should not accept requestFocus.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, false);
+  });
+
   testWidgets(
     'text field respects theme',
     (WidgetTester tester) async {
@@ -3222,8 +3289,8 @@ void main() {
       EditableText.debugDeterministicCursor = true;
       tester.binding.window.physicalSizeTestValue = const Size(400, 400);
       tester.binding.window.devicePixelRatioTestValue = 1;
-      TextEditingController controller;
-      EditableTextState state;
+      final TextEditingController controller;
+      final EditableTextState state;
 
       // Normal multiword collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the caret.
@@ -3293,8 +3360,8 @@ void main() {
       EditableText.debugDeterministicCursor = true;
       tester.binding.window.physicalSizeTestValue = const Size(400, 400);
       tester.binding.window.devicePixelRatioTestValue = 1;
-      TextEditingController controller;
-      EditableTextState state;
+      final TextEditingController controller;
+      final EditableTextState state;
 
       // Normal multiline collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the horizontal center of the text field.
@@ -4085,5 +4152,21 @@ void main() {
       find.byType(CupertinoApp),
       matchesGoldenFile('text_field_golden.TextSelectionStyle.2.png'),
     );
+  });
+
+  testWidgets('textSelectionControls is passed to EditableText', (WidgetTester tester) async {
+    final MockTextSelectionControls selectionControl = MockTextSelectionControls();
+    await tester.pumpWidget(
+       CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+              selectionControls: selectionControl
+            ),
+          ),
+        ),
+      );
+
+    final EditableText widget = tester.widget(find.byType(EditableText));
+    expect(widget.selectionControls, equals(selectionControl));
   });
 }

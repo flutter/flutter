@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -17,7 +15,7 @@ class Item {
 List<Item> items = <Item>[Item(), Item()];
 
 class StatefulLeaf extends StatefulWidget {
-  const StatefulLeaf({ GlobalKey key }) : super(key: key);
+  const StatefulLeaf({ GlobalKey? key }) : super(key: key);
 
   @override
   StatefulLeafState createState() => StatefulLeafState();
@@ -31,7 +29,7 @@ class StatefulLeafState extends State<StatefulLeaf> {
 }
 
 class KeyedWrapper extends StatelessWidget {
-  const KeyedWrapper(this.key1, this.key2, { Key key }) : super(key: key);
+  const KeyedWrapper(this.key1, this.key2, { Key? key }) : super(key: key);
 
   final Key key1;
   final GlobalKey key2;

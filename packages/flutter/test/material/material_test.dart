@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -13,7 +11,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
-  const NotifyMaterial({ Key key }) : super(key: key);
+  const NotifyMaterial({ Key? key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     LayoutChangedNotification().dispatch(context);
@@ -378,22 +376,6 @@ void main() {
       );
 
       expect(find.byKey(materialKey), hasNoImmediateClip);
-    });
-
-    testWidgets('Null clipBehavior asserts', (WidgetTester tester) async {
-      final GlobalKey materialKey = GlobalKey();
-      Future<void> doPump() async {
-        await tester.pumpWidget(
-            Material(
-              key: materialKey,
-              type: MaterialType.transparency,
-              child: const SizedBox(width: 100.0, height: 100.0),
-              clipBehavior: null,
-            ),
-        );
-      }
-
-      expect(() async => doPump(), throwsAssertionError);
     });
 
     testWidgets('clips to bounding rect by default given Clip.antiAlias', (WidgetTester tester) async {

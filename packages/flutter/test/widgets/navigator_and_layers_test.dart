@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 import 'test_widgets.dart';
 
 class TestCustomPainter extends CustomPainter {
-  TestCustomPainter({ this.log, this.name });
+  TestCustomPainter({ required this.log, required this.name });
 
   final List<String> log;
   final String name;

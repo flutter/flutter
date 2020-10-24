@@ -101,7 +101,7 @@ void main() {
 
     test('test filtering formatter, deny mode (deprecated names)', () {
       final TextEditingValue actualValue =
-          BlacklistingTextInputFormatter(RegExp(r'[a-z]'))
+          FilteringTextInputFormatter.deny(RegExp(r'[a-z]'))
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -134,7 +134,7 @@ void main() {
 
     test('test single line formatter (deprecated names)', () {
       final TextEditingValue actualValue =
-          BlacklistingTextInputFormatter.singleLineFormatter
+          FilteringTextInputFormatter.singleLineFormatter
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -166,7 +166,7 @@ void main() {
 
     test('test filtering formatter, allow mode (deprecated names)', () {
       final TextEditingValue actualValue =
-          WhitelistingTextInputFormatter(RegExp(r'[a-c]'))
+          FilteringTextInputFormatter.allow(RegExp(r'[a-c]'))
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -198,7 +198,7 @@ void main() {
 
     test('test digits only formatter (deprecated names)', () {
       final TextEditingValue actualValue =
-          WhitelistingTextInputFormatter.digitsOnly
+          FilteringTextInputFormatter.digitsOnly
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -528,7 +528,7 @@ void main() {
     const TextEditingValue oldValue = TextEditingValue(text: '12345');
     const TextEditingValue newValue = TextEditingValue(text: '12345@');
 
-    final WhitelistingTextInputFormatter formatter = WhitelistingTextInputFormatter.digitsOnly;
+    final TextInputFormatter formatter = FilteringTextInputFormatter.digitsOnly;
     final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
 
     // assert that we are passing digits only at the first time
@@ -583,8 +583,8 @@ void main() {
     TextEditingValue oldValue = collapsedValue('123', 0);
     TextEditingValue newValue = collapsedValue('123456', 6);
 
-    final WhitelistingTextInputFormatter formatter =
-        WhitelistingTextInputFormatter.digitsOnly;
+    final TextInputFormatter formatter =
+        FilteringTextInputFormatter.digitsOnly;
     TextEditingValue formatted = formatter.formatEditUpdate(oldValue,
         newValue);
 

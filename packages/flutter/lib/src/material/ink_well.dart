@@ -926,7 +926,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   void _updateFocusHighlights() {
-    bool showFocus;
+    final bool showFocus;
     switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
         showFocus = false;
@@ -959,7 +959,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void _startSplash({TapDownDetails? details, BuildContext? context}) {
     assert(details != null || context != null);
 
-    Offset globalPosition;
+    final Offset globalPosition;
     if (context != null) {
       final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
       assert(referenceBox.hasSize, 'InkResponse must be done with layout before starting a splash.');

@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:mockito/mockito.dart';
@@ -31,6 +32,13 @@ const Map<String, dynamic> macStudioInfoPlist = <String, dynamic>{
 final Platform linuxPlatform = FakePlatform(
   operatingSystem: 'linux',
   environment: <String, String>{'HOME': homeLinux},
+);
+
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+  environment: <String, String>{
+    'LOCALAPPDATA': 'C:\\Users\\Dash\\AppData\\Local',
+  }
 );
 
 class MockPlistUtils extends Mock implements PlistParser {}
@@ -176,5 +184,29 @@ void main() {
       Platform: () => platform,
       PlistParser: () => plistUtils,
     });
+  });
+
+  FileSystem windowsFileSystem;
+
+  setUp(() {
+    windowsFileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+  });
+
+  testUsingContext('Can discover Android Studio 4.1 location on Windows', () {
+    windowsFileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio4.1\\.home')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('C:\\Program Files\\AndroidStudio');
+    windowsFileSystem
+      .directory('C:\\Program Files\\AndroidStudio')
+      .createSync(recursive: true);
+
+    final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+    expect(studio.version, Version(4, 1, 0));
+    expect(studio.studioAppName, 'Android Studio 4.1');
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => windowsFileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }

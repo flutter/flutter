@@ -1095,6 +1095,7 @@ class WidgetsApp extends StatefulWidget {
   /// The default value of [WidgetsApp.actions].
   static Map<Type, Action<Intent>> defaultActions = <Type, Action<Intent>>{
     DoNothingIntent: DoNothingAction(),
+    DoNothingAndStopPropagationIntent: DoNothingAction(consumesKey: false),
     RequestFocusIntent: RequestFocusAction(),
     NextFocusIntent: NextFocusAction(),
     PreviousFocusIntent: PreviousFocusAction(),
@@ -1586,7 +1587,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       return true;
     }());
 
-    Widget title;
+    final Widget title;
     if (widget.onGenerateTitle != null) {
       title = Builder(
         // This Builder exists to provide a context below the Localizations widget.

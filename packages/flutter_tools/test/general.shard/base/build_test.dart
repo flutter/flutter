@@ -16,6 +16,14 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
+const FakeCommand kARMCheckCommand = FakeCommand(
+  command: <String>[
+    'sysctl',
+    'hw.optional.arm64',
+  ],
+  exitCode: 1,
+);
+
 const FakeCommand kSdkPathCommand = FakeCommand(
   command: <String>[
     'xcrun',
@@ -26,7 +34,7 @@ const FakeCommand kSdkPathCommand = FakeCommand(
 );
 
 const List<String> kDefaultClang = <String>[
-  '-miphoneos-version-min=9.0',
+  '-miphoneos-version-min=8.0',
   '-dynamiclib',
   '-Xlinker',
   '-rpath',
@@ -46,7 +54,7 @@ const List<String> kDefaultClang = <String>[
 ];
 
 const List<String> kBitcodeClang = <String>[
-  '-miphoneos-version-min=9.0',
+  '-miphoneos-version-min=8.0',
   '-dynamiclib',
   '-Xlinker',
   '-rpath',
@@ -217,7 +225,6 @@ void main() {
         darwinArch: DarwinArch.arm64,
         buildMode: BuildMode.debug,
         mainPath: 'main.dill',
-        packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: null,
@@ -232,7 +239,6 @@ void main() {
         platform: TargetPlatform.android_arm,
         buildMode: BuildMode.debug,
         mainPath: 'main.dill',
-        packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: null,
@@ -247,7 +253,6 @@ void main() {
         platform: TargetPlatform.android_arm64,
         buildMode: BuildMode.debug,
         mainPath: 'main.dill',
-        packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: null,
@@ -272,6 +277,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -302,7 +308,6 @@ void main() {
         platform: TargetPlatform.ios,
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
-        packagesPath: '.packages',
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: true,
@@ -334,6 +339,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -363,7 +369,6 @@ void main() {
         platform: TargetPlatform.ios,
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
-        packagesPath: '.packages',
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: false,
@@ -393,6 +398,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -422,7 +428,6 @@ void main() {
         platform: TargetPlatform.ios,
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
-        packagesPath: '.packages',
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: false,
@@ -451,6 +456,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -480,7 +486,6 @@ void main() {
         platform: TargetPlatform.ios,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
-        packagesPath: '.packages',
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: false,
@@ -506,6 +511,7 @@ void main() {
           'main.dill',
         ]
       ));
+      processManager.addCommand(kARMCheckCommand);
       processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -535,7 +541,6 @@ void main() {
         platform: TargetPlatform.ios,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
-        packagesPath: '.packages',
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
         bitcode: false,
@@ -568,7 +573,6 @@ void main() {
         platform: TargetPlatform.android_arm,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
-        packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: null,
@@ -603,7 +607,6 @@ void main() {
         platform: TargetPlatform.android_arm,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
-        packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: 'foo',
@@ -636,7 +639,6 @@ void main() {
         platform: TargetPlatform.android_arm,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
-        packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: null,
@@ -668,7 +670,6 @@ void main() {
         platform: TargetPlatform.android_arm,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
-        packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: '',
@@ -698,7 +699,6 @@ void main() {
         platform: TargetPlatform.android_arm64,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
-        packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: null,

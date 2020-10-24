@@ -1042,6 +1042,10 @@ class ListView extends BoxScrollView {
   /// child that could possibly be displayed in the list view instead of just
   /// those children that are actually visible.
   ///
+  /// Like other widgets in the framework, this widget expects that
+  /// the [children] list will not be mutated after it has been passed in here.
+  /// See the documentation at [SliverChildListDelegate.children] for more details.
+  ///
   /// It is usually more efficient to create children on demand using
   /// [ListView.builder] because it will create the widget children lazily as necessary.
   ///
@@ -1247,7 +1251,7 @@ class ListView extends BoxScrollView {
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
-           Widget widget;
+           final Widget widget;
            if (index.isEven) {
              widget = itemBuilder(context, itemIndex);
            } else {
