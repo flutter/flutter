@@ -15,13 +15,9 @@ const double _willPopThreshold = 0.8;
 // Arbitrary value
 const Duration _kBounceAnimationDuration = Duration(milliseconds: 300);
 
-//
-typedef WidgetWithChildBuilder = Widget Function(
-    BuildContext context, Animation<double> animation, Widget child);
-
 /// A custom bottom sheet.
 ///
-/// The [ModalBottomSheet] widget itself is rarely used directly. Instead, prefer to
+/// The [Sheet] widget itself is rarely used directly. Instead, prefer to
 /// create a modal bottom sheet with [showMaterialModalBottomSheet].
 ///
 /// See also:
@@ -30,36 +26,26 @@ typedef WidgetWithChildBuilder = Widget Function(
 ///    sheet with Material appareance.
 ///  * [showCupertinoModalBottomSheet] which can be used to display a modal bottom
 ///    sheet with Cupertino appareance.
-class ModalBottomSheet extends StatefulWidget {
+class Sheet extends StatefulWidget {
   /// Creates a bottom sheet.
-  const ModalBottomSheet({
+  const Sheet({
     Key? key,
-    this.closeProgressThreshold,
-    required this.animationController,
-    required this.animationCurve,
-    this.enableDrag = true,
-    required this.sheetBuilder,
-    this.bounce = true,
-    this.shouldClose,
-    required this.scrollController,
-    required this.expanded,
-    required this.onClosing,
     required this.child,
-  })   : assert(enableDrag != null),
-        assert(onClosing != null),
+    required this.controller,
+    this.closeProgressThreshold,
+    this.animationCurve,
+    this.enableDrag = true,
+    this.bounce = true,
+    this.expanded = true,
+  })  : assert(enableDrag != null),
         assert(child != null),
         super(key: key);
+
+  final SheetController controller;
 
   /// The closeProgressThreshold parameter
   /// specifies when the bottom sheet will be dismissed when user drags it.
   final double? closeProgressThreshold;
-
-  /// The animation controller that controls the bottom sheet's entrance and
-  /// exit animations.
-  ///
-  /// The BottomSheet widget will manipulate the position of this animation, it
-  /// is not just a passive observer.
-  final AnimationController animationController;
 
   /// The curve used by the animation showing and dismissing the bottom sheet.
   ///
@@ -75,21 +61,7 @@ class ModalBottomSheet extends StatefulWidget {
   // or if false it will fit to the content of the widget
   final bool expanded;
 
-  final WidgetWithChildBuilder sheetBuilder;
-
-  /// Called when the bottom sheet begins to close.
-  ///
-  /// A bottom sheet might be prevented from closing (e.g., by user
-  /// interaction) even after this callback is called. For this reason, this
-  /// callback might be call multiple times for a given bottom sheet.
-  final Function() onClosing;
-
-  // If shouldClose is null is ignored.
-  // If returns true => The dialog closes
-  // If returns false => The dialog cancels close
-  // Notice that if shouldClose is not null, the dialog will go back to the
-  // previous position until the function is solved
-  final Future<bool> Function()? shouldClose;
+  //final WidgetWithChildBuilder sheetBuilder;
 
   /// A builder for the contents of the sheet.
   ///
@@ -101,13 +73,13 @@ class ModalBottomSheet extends StatefulWidget {
   /// Default is true.
   final bool enableDrag;
 
-  final ScrollController scrollController;
+  //final ScrollController scrollController;
 
   @override
-  _ModalBottomSheetState createState() => _ModalBottomSheetState();
+  _SheetState createState() => _SheetState();
 
   /// Creates an [AnimationController] suitable for a
-  /// [ModalBottomSheet.animationController].
+  /// [Sheet.animationController].
   ///
   /// This API available as a convenience for a Material compliant bottom sheet
   /// animation. If alternative animation durations are required, a different
@@ -124,22 +96,25 @@ class ModalBottomSheet extends StatefulWidget {
   }
 }
 
-class _ModalBottomSheetState extends State<ModalBottomSheet>
-    with TickerProviderStateMixin {
+class _SheetState extends State<Sheet> with TickerProviderStateMixin {
   final GlobalKey _childKey = GlobalKey(debugLabel: 'BottomSheet child');
 
-  ScrollController get _scrollController => widget.scrollController;
+  SheetController get _controller => widget.controller;
+
+  ScrollController get _scrollController => widget.controller.scrollController;
+  AnimationController get _animationController =>
+      widget.controller.animationController;
 
   late AnimationController _bounceDragController;
 
   double? get _childHeight {
-    final RenderBox renderBox =
+    final RenderBox? renderBox =
         _childKey.currentContext?.findRenderObject() as RenderBox;
-    return renderBox.size.height;
+    return renderBox?.size.height;
   }
 
   bool get _dismissUnderway =>
-      widget.animationController.status == AnimationStatus.reverse;
+      _animationController.status == AnimationStatus.reverse;
 
   // Detect if user is dragging.
   // Used on NotificationListener to detect if ScrollNotifications are
@@ -147,35 +122,35 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
   bool isDragging = false;
 
   bool get hasReachedWillPopThreshold =>
-      widget.animationController.value < _willPopThreshold;
+      _animationController.value < _willPopThreshold;
 
   bool get hasReachedCloseThreshold =>
-      widget.animationController.value <
+      _animationController.value <
       (widget.closeProgressThreshold ?? _closeProgressThreshold);
 
   void _close() {
     isDragging = false;
-    widget.onClosing();
+    _controller.onClose?.call();
   }
 
   Future<void> _cancelClose() async {
     _bounceDragController.reverse();
-    await widget.animationController.forward();
+    await _animationController.forward();
     // When using WillPop, animation doesn't end at 1.
     // Check more in detail the problem
-    if (!widget.animationController.isCompleted) {
-      widget.animationController.value = 1;
+    if (!_animationController.isCompleted) {
+      _animationController.value = 1;
     }
   }
 
   bool _isCheckingShouldClose = false;
 
   FutureOr<bool> shouldClose() async {
-    if (widget.shouldClose == null || _isCheckingShouldClose) {
+    if (_controller.shouldClose == null || _isCheckingShouldClose) {
       return false;
     }
     _isCheckingShouldClose = true;
-    final bool result = await widget.shouldClose!();
+    final bool result = await _controller.shouldClose();
     _isCheckingShouldClose = false;
     return result;
   }
@@ -192,8 +167,7 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
     isDragging = true;
 
     final double progress = primaryDelta / (_childHeight ?? primaryDelta);
-
-    if (widget.shouldClose != null && hasReachedWillPopThreshold) {
+    if (_controller.shouldPreventClose() && hasReachedWillPopThreshold) {
       _cancelClose();
       final bool canClose = await shouldClose();
       if (canClose) {
@@ -205,20 +179,20 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
     }
 
     final bool shouldBounce = _bounceDragController.value > 0;
-    final bool isBouncing = (widget.animationController.value - progress) > 1;
+    final bool isBouncing = (_animationController.value - progress) > 1;
     if (widget.bounce && (shouldBounce || isBouncing)) {
       _bounceDragController.value -= progress * 10;
       return;
     }
 
-    widget.animationController.value -= progress;
+    _animationController.value -= progress;
   }
 
   Future<void> _handleDragEnd(double? velocity) async {
     assert(widget.enableDrag, 'Dragging is disabled');
 
     animationCurve = BottomSheetSuspendedCurve(
-      widget.animationController.value,
+      _animationController.value,
       curve: _defaultCurve,
     );
 
@@ -229,7 +203,7 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
     _bounceDragController.reverse();
 
     bool canClose = true;
-    if (widget.shouldClose != null && hasReachedWillPopThreshold) {
+    if (_controller.shouldPreventClose() && hasReachedWillPopThreshold) {
       _cancelClose();
       canClose = await shouldClose();
     }
@@ -238,8 +212,8 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
       if (velocity != null && velocity > _minFlingVelocity) {
         _close();
       } else if (hasReachedCloseThreshold) {
-        if (widget.animationController.value > 0.0) {
-          widget.animationController.fling(velocity: -1.0);
+        if (_animationController.value > 0.0) {
+          _animationController.fling(velocity: -1.0);
         }
         _close();
       } else {
@@ -299,7 +273,8 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
       }
       // Otherwise the calculate the velocity with a VelocityTracker
       if (_velocityTracker == null || _startTime == null) {
-        _velocityTracker = VelocityTracker.withKind(_defaultPointerDeviceKind(context));
+        _velocityTracker =
+            VelocityTracker.withKind(_defaultPointerDeviceKind(context));
         _startTime = DateTime.now();
       }
       if (dragDetails != null) {
@@ -338,22 +313,22 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
     );
 
     Widget child = widget.child;
-    if (widget.sheetBuilder != null) {
+    /* if (widget.sheetBuilder != null) {
       child = widget.sheetBuilder(
         context,
-        widget.animationController,
+        _animationController,
         child,
       );
-    }
+    } */
 
     child = AnimatedBuilder(
-      animation: widget.animationController,
+      animation: _animationController,
       child: RepaintBoundary(child: child),
       builder: (BuildContext context, Widget? child) {
         assert(child != null);
         final double animationValue = accessibleNavigation
             ? 1.0
-            : animationCurve.transform(widget.animationController.value);
+            : animationCurve.transform(_animationController.value);
 
         final Widget? draggableChild = !widget.enableDrag
             ? child
@@ -554,17 +529,21 @@ class BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// This issue should be solved first https://github.com/flutter/flutter/issues/64236
 ///
 /// See [PrimaryScrollController]
-class ModalScrollController extends InheritedWidget {
+class SheetController extends InheritedWidget {
   /// Creates a widget that associates a [ScrollController] with a subtree.
-  ModalScrollController({
+  SheetController({
     Key? key,
-    required this.controller,
+    required this.scrollController,
+    required this.animationController,
+    required this.shouldPreventClose,
+    this.onClose,
+    required this.shouldClose,
     required Widget child,
-  })   : assert(controller != null),
+  })   : assert(scrollController != null),
         super(
           key: key,
           child: PrimaryScrollController(
-            controller: controller,
+            controller: scrollController,
             child: child,
           ),
         );
@@ -575,29 +554,62 @@ class ModalScrollController extends InheritedWidget {
   ///
   ///  * [ScrollView.controller], which discusses the purpose of specifying a
   ///    scroll controller.
-  final ScrollController controller;
+  final ScrollController scrollController;
+
+  /// The [AnimationController] associated with the sheet.
+  ///
+  final AnimationController animationController;
+
+  /// If shouldClose is null is ignored.
+  /// If returns true => The dialog closes
+  /// If returns false => The dialog cancels close
+  /// Notice that if shouldClose is not null, the dialog will go back to the
+  /// previous position until the function is solved
+  final Future<bool> Function() shouldClose;
+
+  /// If returns true => The dialog closes
+  /// If returns false => The dialog cancels close
+  /// Notice that if shouldClose is not null, the dialog will go back to the
+  /// previous position until the function is solved
+  final bool Function() shouldPreventClose;
+
+  /// Called when the bottom sheet begins to close.
+  ///
+  /// A bottom sheet might be prevented from closing (e.g., by user
+  /// interaction) even after this callback is called. For this reason, this
+  /// callback might be call multiple times for a given bottom sheet.
+  final VoidCallback? onClose;
 
   /// Returns the [ScrollController] most closely associated with the given
   /// context.
   ///
   /// Returns null if there is no [ScrollController] associated with the given
   /// context.
-  static ScrollController? of(BuildContext context) {
-    final ModalScrollController? result =
-        context.dependOnInheritedWidgetOfExactType<ModalScrollController>();
-    return result?.controller;
+  static SheetController? of(BuildContext context) {
+    final SheetController? result =
+        context.dependOnInheritedWidgetOfExactType<SheetController>();
+    return result;
   }
 
   @override
-  bool updateShouldNotify(ModalScrollController oldWidget) =>
-      controller != oldWidget.controller;
+  bool updateShouldNotify(SheetController oldWidget) =>
+      scrollController != oldWidget.scrollController ||
+      animationController != oldWidget.animationController ||
+      shouldClose != oldWidget.shouldClose ||
+      onClose != oldWidget.onClose;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ScrollController>(
-        'controller', controller,
-        ifNull: 'no controller', showName: false));
+        'scrollController', scrollController,
+        ifNull: 'no scroll controller', showName: false));
+    properties.add(DiagnosticsProperty<AnimationController>(
+        'animationController', animationController,
+        ifNull: 'no animation controller', showName: false));
+    properties.add(DiagnosticsProperty<Future<bool> Function()?>(
+        'shouldClose', shouldClose,
+        ifNull: 'no need to check if it closes', showName: false));
   }
 }
 
