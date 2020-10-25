@@ -130,8 +130,8 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
     
-    final ThemeData textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
-    final Color hintColor = textFieldTheme.inputDecorationTheme.hintStyle.color;
+    final ThemeData? textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
+    final Color? hintColor = textFieldTheme?.inputDecorationTheme.hintStyle?.color;
     expect(hintColor, _TestSearchDelegate.hintTextColor);
   });
 
@@ -548,8 +548,8 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final ThemeData textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
-    final TextStyle hintStyle = textFieldTheme.inputDecorationTheme.hintStyle;
+    final ThemeData? textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
+    final TextStyle? hintStyle = textFieldTheme?.inputDecorationTheme.hintStyle;
     
     expect(hintStyle, delegate.searchFieldStyle);
   });
@@ -702,8 +702,8 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final ThemeData textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
-    expect(textFieldTheme.inputDecorationTheme, searchFieldDecorationTheme);
+    final ThemeData? textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
+    expect(textFieldTheme?.inputDecorationTheme, searchFieldDecorationTheme);
   });
 }
 
