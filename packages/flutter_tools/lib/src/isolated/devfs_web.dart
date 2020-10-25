@@ -333,6 +333,11 @@ class WebAssetServer implements AssetReader {
   // handle requests for JavaScript source, dart sources maps, or asset files.
   @visibleForTesting
   Future<shelf.Response> handleRequest(shelf.Request request) async {
+    if (request.method != 'GET') {
+      // Assets are served via GET only.
+      return shelf.Response.notFound('');
+    }
+
     final String requestPath = _stripBasePath(request.url.path, basePath);
 
     if (requestPath == null) {
@@ -431,7 +436,7 @@ class WebAssetServer implements AssetReader {
 
     final int length = file.lengthSync();
     // Attempt to determine the file's mime type. if this is not provided some
-    // browsers will refuse to render images/show video et cetera. If the tool
+    // browsers will refuse to render images/show video etc. If the tool
     // cannot determine a mime type, fall back to application/octet-stream.
     String mimeType;
     if (length >= 12) {
@@ -544,7 +549,7 @@ class WebAssetServer implements AssetReader {
     return modules;
   }
 
-  /// Whether to use the cavaskit SDK for rendering.
+  /// Whether to use the canvaskit SDK for rendering.
   bool canvasKitRendering = false;
 
   shelf.Response _serveIndex() {
@@ -810,15 +815,14 @@ class WebDevFS implements DevFS {
     @required String pathToReload,
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
+    @required String dillOutputPath,
     DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
-    String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
-    bool skipAssets = false,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
@@ -865,17 +869,16 @@ class WebDevFS implements DevFS {
     }
 
     // The tool generates an entrypoint file in a temp directory to handle
-    // the web specific bootrstrap logic. To make it easier for DWDS to handle
+    // the web specific bootstrap logic. To make it easier for DWDS to handle
     // mapping the file name, this is done via an additional file root and
-    // specicial hard-coded scheme.
+    // special hard-coded scheme.
     final CompilerOutput compilerOutput = await generator.recompile(
       Uri(
         scheme: 'org-dartlang-app',
         path: '/' + mainUri.pathSegments.last,
       ),
       invalidatedFiles,
-      outputPath: dillOutputPath ??
-        getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
+      outputPath: dillOutputPath,
       packageConfig: packageConfig,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
@@ -927,6 +930,11 @@ class WebDevFS implements DevFS {
     'web',
     'dart_stack_trace_mapper.js',
   ));
+
+  @override
+  void resetLastCompiled() {
+    // Not used for web compilation.
+  }
 }
 
 class ReleaseAssetServer {
@@ -965,6 +973,11 @@ class ReleaseAssetServer {
   ];
 
   Future<shelf.Response> handle(shelf.Request request) async {
+    if (request.method != 'GET') {
+      // Assets are served via GET only.
+      return shelf.Response.notFound('');
+    }
+
     Uri fileUri;
     final String requestPath = _stripBasePath(request.url.path, basePath);
 

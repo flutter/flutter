@@ -209,14 +209,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   List<Widget> _buildTabItems(BuildContext context) {
     final List<Widget> result = <Widget>[];
-    final CupertinoLocalizations? localizations = CupertinoLocalizations.of(context);
-    assert(
-      localizations != null,
-      'CupertinoTabBar requires a Localizations parent in order to provide an '
-        'appropriate Semantics hint for tab indexing. A CupertinoApp will '
-        'provide the DefaultCupertinoLocalizations, or you can instantiate your '
-        'own Localizations.'
-    );
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
 
     for (int index = 0; index < items.length; index += 1) {
       final bool active = index == currentIndex;
@@ -226,7 +219,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
           Expanded(
             child: Semantics(
               selected: active,
-              hint: localizations!.tabSemanticsLabel(
+              hint: localizations.tabSemanticsLabel(
                 tabIndex: index + 1,
                 tabCount: items.length,
               ),

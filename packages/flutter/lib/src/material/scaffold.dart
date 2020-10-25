@@ -969,7 +969,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         );
       }
 
-      double snackBarYOffsetBase;
+      final double snackBarYOffsetBase;
       if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating) {
         snackBarYOffsetBase = floatingActionButtonRect.top;
       } else {
@@ -1412,8 +1412,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///  * [ScaffoldState], which is the state associated with this widget.
 ///  * <https://material.io/design/layout/responsive-layout-grid.html>
 ///  * Cookbook: [Add a Drawer to a screen](https://flutter.dev/docs/cookbook/design/drawer)
-///  * See our
-///    [Scaffold Sample Apps](https://flutter.dev/docs/catalog/samples/Scaffold).
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
   const Scaffold({
@@ -2148,7 +2146,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// See also:
   ///
   ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
-  // TODO(Piinks): Deprecate & defer to ScaffoldMessenger after customers are migrated.
+  @Deprecated(
+    'Use ScaffoldMessenger.showSnackBar. '
+    'This feature was deprecated after v1.23.0-14.0.pre.'
+  )
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
@@ -2207,7 +2208,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// See also:
   ///
   ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
-  // TODO(Piinks): Deprecate & defer to ScaffoldMessenger after customers are migrated
+  @Deprecated(
+    'Use ScaffoldMessenger.removeCurrentSnackBar. '
+    'This feature was deprecated after v1.23.0-14.0.pre.'
+  )
   void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
     assert(reason != null);
 
@@ -2249,7 +2253,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// See also:
   ///
   ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
-  // TODO(Piinks): Deprecate & defer to ScaffoldMessenger after customers are migrated.
+  @Deprecated(
+    'Use ScaffoldMessenger.hideCurrentSnackBar. '
+    'This feature was deprecated after v1.23.0-14.0.pre.'
+  )
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
     assert(reason != null);
 
@@ -2572,7 +2579,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         clipBehavior: clipBehavior,
       );
     });
-    return _currentBottomSheet as PersistentBottomSheetController<T>;
+    return _currentBottomSheet! as PersistentBottomSheetController<T>;
   }
 
   // Floating Action Button API
@@ -3328,38 +3335,28 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.animationController != null) {
-      return AnimatedBuilder(
-        animation: widget.animationController,
-        builder: (BuildContext context, Widget? child) {
-          return Align(
-            alignment: AlignmentDirectional.topStart,
-            heightFactor: animationCurve.transform(widget.animationController.value),
-            child: child,
-          );
-        },
-        child: _wrapBottomSheet(
-          BottomSheet(
-            animationController: widget.animationController,
-            enableDrag: widget.enableDrag,
-            onDragStart: _handleDragStart,
-            onDragEnd: _handleDragEnd,
-            onClosing: widget.onClosing!,
-            builder: widget.builder,
-            backgroundColor: widget.backgroundColor,
-            elevation: widget.elevation,
-            shape: widget.shape,
-            clipBehavior: widget.clipBehavior,
-          ),
+    return AnimatedBuilder(
+      animation: widget.animationController,
+      builder: (BuildContext context, Widget? child) {
+        return Align(
+          alignment: AlignmentDirectional.topStart,
+          heightFactor: animationCurve.transform(widget.animationController.value),
+          child: child,
+        );
+      },
+      child: _wrapBottomSheet(
+        BottomSheet(
+          animationController: widget.animationController,
+          enableDrag: widget.enableDrag,
+          onDragStart: _handleDragStart,
+          onDragEnd: _handleDragEnd,
+          onClosing: widget.onClosing!,
+          builder: widget.builder,
+          backgroundColor: widget.backgroundColor,
+          elevation: widget.elevation,
+          shape: widget.shape,
+          clipBehavior: widget.clipBehavior,
         ),
-      );
-    }
-
-    return _wrapBottomSheet(
-      BottomSheet(
-        onClosing: widget.onClosing!,
-        builder: widget.builder,
-        backgroundColor: widget.backgroundColor,
       ),
     );
   }

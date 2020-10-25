@@ -738,9 +738,9 @@ class CatmullRomSpline extends Curve2D {
   Offset transformInternal(double t) {
     _initializeIfNeeded();
     final double length = _cubicSegments.length.toDouble();
-    double position;
-    double localT;
-    int index;
+    final double position;
+    final double localT;
+    final int index;
     if (t < 1.0) {
       position = t * length;
       localT = position % 1.0;

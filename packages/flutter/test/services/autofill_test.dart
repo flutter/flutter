@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert' show utf8;
 
 import 'package:flutter/services.dart';
@@ -13,13 +11,12 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('TextInput message channels', () {
-    FakeTextChannel fakeTextChannel;
-    FakeAutofillScope scope;
+    late FakeTextChannel fakeTextChannel;
+    final FakeAutofillScope scope = FakeAutofillScope();
 
     setUp(() {
       fakeTextChannel = FakeTextChannel((MethodCall call) async {});
       TextInput.setChannel(fakeTextChannel);
-      scope ??= FakeAutofillScope();
       scope.clients.clear();
     });
 
@@ -28,35 +25,8 @@ void main() {
       TextInput.setChannel(SystemChannels.textInput);
     });
 
-    test('mandatory fields are mandatory', () async {
-      AutofillConfiguration config;
-      try {
-        config = AutofillConfiguration(
-          uniqueIdentifier: null,
-          autofillHints: const <String>['test'],
-          currentEditingValue: const TextEditingValue(),
-        );
-      } catch (e) {
-        expect(e.toString(), contains('uniqueIdentifier != null'));
-      }
-
-      expect(config, isNull);
-
-      try {
-        config = AutofillConfiguration(
-          uniqueIdentifier: 'id',
-          autofillHints: null,
-          currentEditingValue: const TextEditingValue(),
-        );
-      } catch (e) {
-        expect(e.toString(), contains('autofillHints != null'));
-      }
-
-      expect(config, isNull);
-    });
-
     test('throws if the hint list is empty', () async {
-      Map<String, dynamic> json;
+      Map<String, dynamic>? json;
       try {
         const AutofillConfiguration config = AutofillConfiguration(
           uniqueIdentifier: 'id',
@@ -113,7 +83,7 @@ void main() {
         ]);
 
         const TextEditingValue text2 = TextEditingValue(text: 'Text 2');
-        fakeTextChannel.incoming(MethodCall(
+        fakeTextChannel.incoming?.call(MethodCall(
           'TextInputClient.updateEditingStateWithTag',
           <dynamic>[0, <String, dynamic>{ client2.autofillId : text2.toJSON() }],
         ));
@@ -130,7 +100,7 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   String get autofillId => hashCode.toString();
 
   @override
-  TextInputConfiguration textInputConfiguration;
+  late TextInputConfiguration textInputConfiguration;
 
   @override
   void updateEditingValue(TextEditingValue newEditingValue) {
@@ -139,7 +109,7 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
-  AutofillScope currentAutofillScope;
+  AutofillScope? currentAutofillScope;
 
   String latestMethodCall = '';
 
@@ -179,7 +149,7 @@ class FakeAutofillScope with AutofillScopeMixin implements AutofillScope {
   Iterable<AutofillClient> get autofillClients => clients.values;
 
   @override
-  AutofillClient getAutofillClient(String autofillId) => clients[autofillId];
+  AutofillClient getAutofillClient(String autofillId) => clients[autofillId]!;
 
   void register(AutofillClient client) {
     clients.putIfAbsent(client.autofillId, () => client);
@@ -190,7 +160,7 @@ class FakeTextChannel implements MethodChannel {
   FakeTextChannel(this.outgoing) : assert(outgoing != null);
 
   Future<dynamic> Function(MethodCall) outgoing;
-  Future<void> Function(MethodCall) incoming;
+  Future<void> Function(MethodCall)? incoming;
 
   List<MethodCall> outgoingCalls = <MethodCall>[];
 
@@ -217,18 +187,18 @@ class FakeTextChannel implements MethodChannel {
   String get name => 'flutter/textinput';
 
   @override
-  void setMethodCallHandler(Future<void> Function(MethodCall call) handler) {
+  void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) {
     incoming = handler;
   }
 
   @override
-  bool checkMethodCallHandler(Future<void> Function(MethodCall call) handler) => throw UnimplementedError();
+  bool checkMethodCallHandler(Future<void> Function(MethodCall call)? handler) => throw UnimplementedError();
 
   @override
-  void setMockMethodCallHandler(Future<void> Function(MethodCall call) handler)  => throw UnimplementedError();
+  void setMockMethodCallHandler(Future<void>? Function(MethodCall call)? handler)  => throw UnimplementedError();
 
   @override
-  bool checkMockMethodCallHandler(Future<void> Function(MethodCall call) handler) => throw UnimplementedError();
+  bool checkMockMethodCallHandler(Future<void> Function(MethodCall call)? handler) => throw UnimplementedError();
 
   void validateOutgoingMethodCalls(List<MethodCall> calls) {
     expect(outgoingCalls.length, calls.length);

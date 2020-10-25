@@ -96,8 +96,7 @@ abstract class PopupMenuEntry<T> extends StatefulWidget {
 ///  * [showMenu], a method to dynamically show a popup menu at a given location.
 ///  * [PopupMenuButton], an [IconButton] that automatically shows a menu when
 ///    it is tapped.
-// ignore: prefer_void_to_null, https://github.com/dart-lang/sdk/issues/34416
-class PopupMenuDivider extends PopupMenuEntry<Null> {
+class PopupMenuDivider extends PopupMenuEntry<Never> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16 logical pixels.
@@ -757,12 +756,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
         menu = Theme(data: theme!, child: menu);
     }
 
-    return MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
-      removeBottom: true,
-      removeLeft: true,
-      removeRight: true,
+    return SafeArea(
       child: Builder(
         builder: (BuildContext context) {
           return CustomSingleChildLayout(
@@ -835,7 +829,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///    calling this method automatically.
 ///  * [SemanticsConfiguration.namesRoute], for a description of edge triggered
 ///    semantics.
-Future<T> showMenu<T>({
+Future<T?> showMenu<T>({
   required BuildContext context,
   required RelativeRect position,
   required List<PopupMenuEntry<T>> items,
@@ -854,17 +848,15 @@ Future<T> showMenu<T>({
   assert(captureInheritedThemes != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  String? label;
   switch (Theme.of(context)!.platform) {
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
-      label = semanticLabel;
       break;
     case TargetPlatform.android:
     case TargetPlatform.fuchsia:
     case TargetPlatform.linux:
     case TargetPlatform.windows:
-      label = semanticLabel ?? MaterialLocalizations.of(context)?.popupMenuLabel;
+      semanticLabel ??= MaterialLocalizations.of(context).popupMenuLabel;
   }
 
   return Navigator.of(context, rootNavigator: useRootNavigator)!.push(_PopupMenuRoute<T>(
@@ -872,10 +864,10 @@ Future<T> showMenu<T>({
     items: items,
     initialValue: initialValue,
     elevation: elevation,
-    semanticLabel: label,
+    semanticLabel: semanticLabel,
     theme: Theme.of(context, shadowThemeOnly: true),
     popupMenuTheme: PopupMenuTheme.of(context),
-    barrierLabel: MaterialLocalizations.of(context)!.modalBarrierDismissLabel,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     shape: shape,
     color: color,
     showMenuContext: context,
@@ -1083,7 +1075,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
-    final RenderBox overlay = Overlay.of(context)!.context.findRenderObject()! as RenderBox;
+    final RenderBox overlay = Navigator.of(context)!.overlay!.context.findRenderObject()! as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(widget.offset, ancestor: overlay),
@@ -1094,7 +1086,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
-      showMenu<T>(
+      showMenu<T?>(
         context: context,
         elevation: widget.elevation ?? popupMenuTheme.elevation,
         items: items,
@@ -1104,7 +1096,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         color: widget.color ?? popupMenuTheme.color,
         captureInheritedThemes: widget.captureInheritedThemes,
       )
-      .then<void>((T newValue) {
+      .then<void>((T? newValue) {
         if (!mounted)
           return null;
         if (newValue == null) {
@@ -1148,7 +1140,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
     if (widget.child != null)
       return Tooltip(
-        message: widget.tooltip ?? MaterialLocalizations.of(context)!.showMenuTooltip,
+        message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
@@ -1159,7 +1151,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     return IconButton(
       icon: widget.icon ?? _getIcon(Theme.of(context)!.platform),
       padding: widget.padding,
-      tooltip: widget.tooltip ?? MaterialLocalizations.of(context)!.showMenuTooltip,
+      tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
     );
   }

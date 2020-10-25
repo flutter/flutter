@@ -1660,9 +1660,7 @@ abstract class DiagnosticsNode {
         result = toStringDeep(
             parentConfiguration: parentConfiguration, minLevel: minLevel);
       } else {
-        String? description = toDescription(parentConfiguration: parentConfiguration);
-        assert(description != null);
-        description = description!;
+        final String description = toDescription(parentConfiguration: parentConfiguration)!;
 
         if (name == null || name!.isEmpty || !showName) {
           result = description;

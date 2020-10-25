@@ -43,10 +43,13 @@ import 'theme.dart';
 /// the [AppBar.leading] position e.g. from the hamburger menu to the back arrow
 /// used to exit the search page.
 ///
+/// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.editableText.complexCharacters}
+///
 /// See also:
 ///
 ///  * [SearchDelegate] to define the content of the search page.
-Future<T> showSearch<T>({
+Future<T?> showSearch<T>({
   required BuildContext context,
   required SearchDelegate<T> delegate,
   String? query = '',
@@ -85,6 +88,9 @@ Future<T> showSearch<T>({
 /// A given [SearchDelegate] can only be associated with one active [showSearch]
 /// call. Call [SearchDelegate.close] before re-using the same delegate instance
 /// for another [showSearch] call.
+///
+/// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.editableText.complexCharacters}
 abstract class SearchDelegate<T> {
   /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
   /// [textInputAction].
@@ -393,7 +399,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  void didComplete(T result) {
+  void didComplete(T? result) {
     super.didComplete(result);
     assert(delegate._route == this);
     delegate._route = null;
@@ -484,8 +490,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    final String searchFieldLabel = widget.delegate.searchFieldLabel
-      ?? MaterialLocalizations.of(context)!.searchFieldLabel;
+    final String searchFieldLabel = widget.delegate.searchFieldLabel ?? MaterialLocalizations.of(context).searchFieldLabel;
     Widget? body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
@@ -503,7 +508,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       case null:
         break;
     }
-    String routeName;
+    final String routeName;
     switch (theme.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:

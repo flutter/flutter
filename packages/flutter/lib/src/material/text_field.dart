@@ -26,7 +26,7 @@ import 'theme.dart';
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
 /// Signature for the [TextField.buildCounter] callback.
-typedef InputCounterWidgetBuilder = Widget Function(
+typedef InputCounterWidgetBuilder = Widget? Function(
   /// The build context for the TextField.
   BuildContext context, {
   /// The length of the string currently in the input.
@@ -227,7 +227,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///             builder: (BuildContext context) {
 ///               return AlertDialog(
 ///                 title: const Text('Thanks!'),
-///                 content: Text ('You typed "$value".'),
+///                 content: Text ('You typed "$value", which has length ${value.characters.length}.'),
 ///                 actions: <Widget>[
 ///                   TextButton(
 ///                     onPressed: () { Navigator.pop(context); },
@@ -256,6 +256,14 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///
 /// Keep in mind you can also always read the current string from a TextField's
 /// [TextEditingController] using [TextEditingController.text].
+///
+  /// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.editableText.complexCharacters}
+///
+/// In the live Dartpad example above, try typing the emoji 👨‍👩‍👦
+/// into the field and submitting. Because the example code measures the length
+/// with `value.characters.length`, the emoji is correctly counted as a single
+/// character.
 ///
 /// See also:
 ///
@@ -364,6 +372,7 @@ class TextField extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection = true,
+    this.selectionControls,
     this.onTap,
     this.mouseCursor,
     this.buildCounter,
@@ -666,6 +675,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
+  /// {@macro flutter.widgets.editableText.selectionControls}
+  final TextSelectionControls? selectionControls;
+
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
@@ -810,6 +822,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<Brightness>('keyboardAppearance', keyboardAppearance, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('scrollPadding', scrollPadding, defaultValue: const EdgeInsets.all(20.0)));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
+    properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
   }
@@ -852,7 +865,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   bool get _hasError => widget.decoration?.errorText != null || _hasIntrinsicError;
 
   InputDecoration _getEffectiveDecoration() {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context)!;
     final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
       .applyDefaults(themeData.inputDecorationTheme)
@@ -872,7 +885,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         && effectiveDecoration.counterText == null
         && widget.buildCounter != null) {
       final bool isFocused = _effectiveFocusNode.hasFocus;
-      final Widget builtCounter = widget.buildCounter!(
+      final Widget? builtCounter = widget.buildCounter!(
         context,
         currentLength: currentLength,
         maxLength: widget.maxLength,
@@ -1084,12 +1097,12 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
 
-    TextSelectionControls textSelectionControls;
-    bool paintCursorAboveText;
-    bool cursorOpacityAnimates;
+    TextSelectionControls? textSelectionControls = widget.selectionControls;
+    final bool paintCursorAboveText;
+    final bool cursorOpacityAnimates;
     Offset? cursorOffset;
     Color? cursorColor = widget.cursorColor;
-    Color selectionColor;
+    final Color selectionColor;
     Color? autocorrectionTextRectColor;
     Radius? cursorRadius = widget.cursorRadius;
 
@@ -1098,7 +1111,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case TargetPlatform.macOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
         forcePressEnabled = true;
-        textSelectionControls = cupertinoTextSelectionControls;
+        textSelectionControls ??= cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
         cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
@@ -1113,7 +1126,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         forcePressEnabled = false;
-        textSelectionControls = materialTextSelectionControls;
+        textSelectionControls ??= materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;

@@ -101,8 +101,8 @@ class Tab extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
 
-    double height;
-    Widget label;
+    final double height;
+    final Widget label;
     if (icon == null) {
       height = _kTabHeight;
       label = _buildLabelText();
@@ -240,7 +240,7 @@ class _TabLabelBarRenderer extends RenderFlex {
     RenderBox? child = firstChild;
     final List<double> xOffsets = <double>[];
     while (child != null) {
-      final FlexParentData childParentData = child.parentData as FlexParentData;
+      final FlexParentData childParentData = child.parentData! as FlexParentData;
       xOffsets.add(childParentData.offset.dx);
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
@@ -459,13 +459,13 @@ class _ChangeAnimation extends Animation<double> with AnimationWithParentMixin<d
 
   @override
   void removeStatusListener(AnimationStatusListener listener) {
-    if (parent != null)
+    if (controller.animation != null)
       super.removeStatusListener(listener);
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    if (parent != null)
+    if (controller.animation != null)
       super.removeListener(listener);
   }
 
@@ -956,7 +956,7 @@ class _TabBarState extends State<TabBar> {
 
     final double index = _controller!.index.toDouble();
     final double value = _controller!.animation!.value;
-    double offset;
+    final double offset;
     if (value == index - 1.0)
       offset = leadingPosition ?? middlePosition;
     else if (value == index + 1.0)
@@ -1030,7 +1030,7 @@ class _TabBarState extends State<TabBar> {
       }
       return true;
     }());
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller!.length == 0) {
       return Container(
         height: _kTabHeight + widget.indicatorWeight,
@@ -1462,7 +1462,7 @@ class TabPageSelector extends StatelessWidget {
     ColorTween selectedColorTween,
     ColorTween previousColorTween,
   ) {
-    Color background;
+    final Color background;
     if (tabController.indexIsChanging) {
       // The selection's animation is animating from previousValue to value.
       final double t = 1.0 - _indexChangeProgress(tabController);

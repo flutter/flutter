@@ -161,10 +161,10 @@ void main() {
 
     final TestImageStreamCompleter resultingCompleter1 = imageCache!.putIfAbsent(testImage, () {
       return completer1;
-    }) as TestImageStreamCompleter;
+    })! as TestImageStreamCompleter;
     final TestImageStreamCompleter resultingCompleter2 = imageCache!.putIfAbsent(testImage, () {
       return completer2;
-    }) as TestImageStreamCompleter;
+    })! as TestImageStreamCompleter;
 
     expect(resultingCompleter1, completer1);
     expect(resultingCompleter2, completer1);
@@ -178,7 +178,7 @@ void main() {
 
     final TestImageStreamCompleter resultingCompleter1 = imageCache!.putIfAbsent(testImage, () {
       return completer1;
-    }) as TestImageStreamCompleter;
+    })! as TestImageStreamCompleter;
 
     expect(imageCache!.statusForKey(testImage).pending, true);
     expect(imageCache!.statusForKey(testImage).live, true);
@@ -191,7 +191,7 @@ void main() {
 
     final TestImageStreamCompleter resultingCompleter2 = imageCache!.putIfAbsent(testImage, () {
       return completer2;
-    }) as TestImageStreamCompleter;
+    })! as TestImageStreamCompleter;
 
     expect(resultingCompleter1, completer1);
     expect(resultingCompleter2, completer2);
@@ -205,13 +205,13 @@ void main() {
 
     final TestImageStreamCompleter resultingCompleter1 = imageCache!.putIfAbsent(testImage, () {
       return completer1;
-    }) as TestImageStreamCompleter;
+    })! as TestImageStreamCompleter;
 
     imageCache!.evict(testImage);
 
     final TestImageStreamCompleter resultingCompleter2 = imageCache!.putIfAbsent(testImage, () {
       return completer2;
-    }) as TestImageStreamCompleter;
+    })! as TestImageStreamCompleter;
 
     expect(resultingCompleter1, completer1);
     expect(resultingCompleter2, completer2);
@@ -242,7 +242,7 @@ void main() {
 
     final TestImageStreamCompleter resultingCompleter1 = imageCache!.putIfAbsent(testImage, () {
       return completer1;
-    }) as TestImageStreamCompleter;
+    })! as TestImageStreamCompleter;
 
     expect(resultingCompleter1, completer1);
     expect(imageCache!.containsKey(testImage), true);
@@ -255,7 +255,7 @@ void main() {
 
     final TestImageStreamCompleter resultingCompleter1 = imageCache!.putIfAbsent(testImage, () {
       return completer1;
-    }) as TestImageStreamCompleter;
+    })! as TestImageStreamCompleter;
 
     // Mark as complete
     completer1.testSetImage(testImage);
@@ -276,7 +276,7 @@ void main() {
 
     final TestImageStreamCompleter resultingCompleter1 = imageCache!.putIfAbsent(testImage, () {
       return completer1;
-    }) as TestImageStreamCompleter;
+    })! as TestImageStreamCompleter;
 
     expect(imageCache!.statusForKey(testImage).pending, false);
     expect(imageCache!.statusForKey(testImage).keepAlive, true);
@@ -284,7 +284,7 @@ void main() {
     expect(imageCache!.statusForKey(testImage2).untracked, true);
     final TestImageStreamCompleter resultingCompleter2 = imageCache!.putIfAbsent(testImage2, () {
       return completer2;
-    }) as TestImageStreamCompleter;
+    })! as TestImageStreamCompleter;
 
 
     expect(imageCache!.statusForKey(testImage).pending, false);

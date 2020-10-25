@@ -24,7 +24,6 @@ import '../common/health.dart';
 import '../common/message.dart';
 import 'common.dart';
 import 'driver.dart';
-import 'fuchsia_compat.dart';
 import 'timeline.dart';
 
 /// An implementation of the Flutter Driver over the vmservice protocol.
@@ -97,11 +96,28 @@ class VMServiceFlutterDriver extends FlutterDriver {
     final VMServiceClientConnection connection =
     await vmServiceConnectFunction(dartVmServiceUrl, headers: headers);
     final VMServiceClient client = connection.client;
-    final VM vm = await client.getVM();
-    final VMIsolateRef isolateRef = isolateNumber ==
-        null ? vm.isolates.first :
-    vm.isolates.firstWhere(
-            (VMIsolateRef isolate) => isolate.number == isolateNumber);
+
+    Future<VMIsolateRef> _waitForRootIsolate() async {
+      bool _checkIsolate(VMIsolateRef ref) => ref.number == isolateNumber;
+      while (true) {
+        final VM vm = await client.getVM();
+        if (vm.isolates.isEmpty || (isolateNumber != null && !vm.isolates.any(_checkIsolate))) {
+          await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
+          continue;
+        }
+        return isolateNumber == null
+          ? vm.isolates.first
+          : vm.isolates.firstWhere(_checkIsolate);
+      }
+    }
+
+    final VMIsolateRef isolateRef = await _warnIfSlow<VMIsolateRef>(
+      future: _waitForRootIsolate(),
+      timeout: kUnusuallyLongTimeout,
+      message: isolateNumber == null
+        ? 'The root isolate is taking an unuusally long time to start.'
+        : 'Isolate $isolateNumber is taking an unusually long time to start.',
+    );
     _log('Isolate found with number: ${isolateRef.number}');
 
     VMIsolate isolate = await isolateRef.loadRunnable();

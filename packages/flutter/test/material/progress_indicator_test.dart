@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
@@ -298,8 +296,8 @@ void main() {
   });
 
   testWidgets('Determinate CircularProgressIndicator stops the animator', (WidgetTester tester) async {
-    double progressValue;
-    StateSetter setState;
+    double? progressValue;
+    late StateSetter setState;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

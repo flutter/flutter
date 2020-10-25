@@ -635,7 +635,9 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     BoxConstraints? constraints,
     this.margin,
     this.transform,
+    this.transformAlignment,
     this.child,
+    this.clipBehavior = Clip.none,
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
@@ -709,6 +711,28 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// The transformation matrix to apply before painting the container.
   final Matrix4? transform;
 
+  /// The alignment of the origin, relative to the size of the container, if [transform] is specified.
+  ///
+  /// When [transform] is null, the value of this property is ignored.
+  ///
+  /// See also:
+  ///
+  ///  * [Transform.alignment], which is set by this property.
+  final AlignmentGeometry? transformAlignment;
+
+  /// The clip behavior when [AnimatedContainer.decoration] is not null.
+  ///
+  /// Defaults to [Clip.none]. Must be [Clip.none] if [decoration] is null.
+  ///
+  /// Unlike other properties of [AnimatedContainer], changes to this property
+  /// apply immediately and have no animation.
+  ///
+  /// If a clip is to be applied, the [Decoration.getClipPath] method
+  /// for the provided decoration must return a clip path. (This is not
+  /// supported by all decorations; the default implementation of that
+  /// method throws an [UnsupportedError].)
+  final Clip clipBehavior;
+
   @override
   _AnimatedContainerState createState() => _AnimatedContainerState();
 
@@ -722,6 +746,8 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null, showName: false));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(ObjectFlagProperty<Matrix4>.has('transform', transform));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('transformAlignment', transformAlignment, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 
@@ -733,6 +759,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   BoxConstraintsTween? _constraints;
   EdgeInsetsGeometryTween? _margin;
   Matrix4Tween? _transform;
+  AlignmentGeometryTween? _transformAlignment;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
@@ -743,19 +770,23 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
     _constraints = visitor(_constraints, widget.constraints, (dynamic value) => BoxConstraintsTween(begin: value as BoxConstraints)) as BoxConstraintsTween?;
     _margin = visitor(_margin, widget.margin, (dynamic value) => EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry)) as EdgeInsetsGeometryTween?;
     _transform = visitor(_transform, widget.transform, (dynamic value) => Matrix4Tween(begin: value as Matrix4)) as Matrix4Tween?;
+    _transformAlignment = visitor(_transformAlignment, widget.transformAlignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween?;
   }
 
   @override
   Widget build(BuildContext context) {
+    final Animation<double> animation = this.animation!;
     return Container(
       child: widget.child,
-      alignment: _alignment?.evaluate(animation!),
-      padding: _padding?.evaluate(animation!),
-      decoration: _decoration?.evaluate(animation!),
-      foregroundDecoration: _foregroundDecoration?.evaluate(animation!),
-      constraints: _constraints?.evaluate(animation!),
-      margin: _margin?.evaluate(animation!),
-      transform: _transform?.evaluate(animation!),
+      alignment: _alignment?.evaluate(animation),
+      padding: _padding?.evaluate(animation),
+      decoration: _decoration?.evaluate(animation),
+      foregroundDecoration: _foregroundDecoration?.evaluate(animation),
+      constraints: _constraints?.evaluate(animation),
+      margin: _margin?.evaluate(animation),
+      transform: _transform?.evaluate(animation),
+      transformAlignment: _transformAlignment?.evaluate(animation),
+      clipBehavior: widget.clipBehavior,
     );
   }
 
@@ -769,6 +800,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
     description.add(DiagnosticsProperty<BoxConstraintsTween>('constraints', _constraints, showName: false, defaultValue: null));
     description.add(DiagnosticsProperty<EdgeInsetsGeometryTween>('margin', _margin, defaultValue: null));
     description.add(ObjectFlagProperty<Matrix4Tween>.has('transform', _transform));
+    description.add(DiagnosticsProperty<AlignmentGeometryTween>('transformAlignment', _transformAlignment, defaultValue: null));
   }
 }
 

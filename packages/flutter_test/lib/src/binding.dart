@@ -101,11 +101,11 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   int get pendingMessageCount => _pendingMessages.length;
 
   @override
-  Future<ByteData?> send(String channel, ByteData? message) {
-    final Future<ByteData?> resultFuture = delegate.send(channel, message);
-    // Removes the future itself from the [_pendingMessages] list when it
-    // completes.
+  Future<ByteData?>? send(String channel, ByteData? message) {
+    final Future<ByteData?>? resultFuture = delegate.send(channel, message);
     if (resultFuture != null) {
+      // Removes the future itself from the [_pendingMessages] list when it
+      // completes.
       _pendingMessages.add(resultFuture);
       resultFuture.whenComplete(() => _pendingMessages.remove(resultFuture));
     }
@@ -1011,17 +1011,19 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     addTime(additionalTime);
 
-    return realAsyncZone.run<Future<T>>(() {
+    return realAsyncZone.run<Future<T?>>(() async {
       _pendingAsyncTasks = Completer<void>();
-      return callback().catchError((Object exception, StackTrace stack) {
+      T? result;
+      try {
+        result = await callback();
+      } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
           library: 'Flutter test framework',
           context: ErrorDescription('while running async test code'),
         ));
-        return null;
-      }).whenComplete(() {
+      } finally {
         // We complete the _pendingAsyncTasks future successfully regardless of
         // whether an exception occurred because in the case of an exception,
         // we already reported the exception to FlutterError. Moreover,
@@ -1029,7 +1031,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         // exception due to zone error boundaries.
         _pendingAsyncTasks!.complete();
         _pendingAsyncTasks = null;
-      });
+      }
+      return result;
     });
   }
 
@@ -1780,8 +1783,7 @@ class _LiveTestRenderView extends RenderView {
     _label ??= TextPainter(textAlign: TextAlign.left, textDirection: TextDirection.ltr);
     _label!.text = TextSpan(text: value, style: _labelStyle);
     _label!.layout();
-    if (onNeedPaint != null)
-      onNeedPaint();
+    onNeedPaint();
   }
 
   @override

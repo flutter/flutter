@@ -505,7 +505,7 @@ void main() {
     setUp(() { color = null; });
 
     testWidgets('dynamic color works in cupertino override theme', (WidgetTester tester) async {
-      final CupertinoDynamicColor Function() typedColor = () => color as CupertinoDynamicColor;
+      final CupertinoDynamicColor Function() typedColor = () => color! as CupertinoDynamicColor;
 
       await tester.pumpWidget(
         MaterialApp(
