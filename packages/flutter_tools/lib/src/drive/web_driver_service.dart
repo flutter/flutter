@@ -56,7 +56,16 @@ class WebDriverService extends DriverService {
       flutterDevice,
       target: mainPath,
       ipv6: ipv6,
-      debuggingOptions: debuggingOptions,
+      debuggingOptions: buildInfo.isRelease ?
+        DebuggingOptions.disabled(
+          buildInfo,
+          port: debuggingOptions.port,
+        )
+        : DebuggingOptions.enabled(
+          buildInfo,
+          port: debuggingOptions.port,
+          disablePortPublication: debuggingOptions.disablePortPublication,
+        ),
       stayResident: false,
       urlTunneller: null,
       flutterProject: FlutterProject.current(),
