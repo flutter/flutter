@@ -237,6 +237,7 @@ class _LeaveBehindListItem extends StatelessWidget {
             case DismissDirection.vertical:
             case DismissDirection.up:
             case DismissDirection.down:
+            case DismissDirection.none:
               assert(false);
           }
           return false;
