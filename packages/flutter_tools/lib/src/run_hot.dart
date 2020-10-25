@@ -205,7 +205,7 @@ class HotRunner extends ResidentRunner {
           ),
         );
       }
-    } on Exception catch (error) {
+    } on DevFSException catch (error) {
       globals.printError('Error initializing DevFS: $error');
       return 3;
     }
@@ -761,11 +761,10 @@ class HotRunner extends ResidentRunner {
     ];
   }
 
-  Future<void> _resetAssetDirectory(FlutterDevice device) async {
+  Future<void> _resetAssetDirectory(List<FlutterView> views, FlutterDevice device) async {
     final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(
       globals.fs.path.toUri(getAssetBuildDirectory()));
     assert(deviceAssetsDirectoryUri != null);
-    final List<FlutterView> views = await device.vmService.getFlutterViews();
     await Future.wait<void>(views.map<Future<void>>(
       (FlutterView view) => device.vmService.setAssetDirectory(
         assetsDirectory: deviceAssetsDirectoryUri,
@@ -783,12 +782,20 @@ class HotRunner extends ResidentRunner {
     String reason,
     void Function(String message) onSlow,
   }) async {
+    final Map<FlutterDevice, List<FlutterView>> viewCache = <FlutterDevice, List<FlutterView>>{};
     for (final FlutterDevice device in flutterDevices) {
       final List<FlutterView> views = await device.vmService.getFlutterViews();
+      viewCache[device] = views;
       for (final FlutterView view in views) {
         if (view.uiIsolate == null) {
           return OperationResult(2, 'Application isolate not found', fatal: true);
         }
+      }
+      if (_shouldResetAssetDirectory) {
+        // Asset directory has to be set only once when the engine switches from
+        // running from bundle to uploaded files.
+        await _resetAssetDirectory(views, device);
+        _shouldResetAssetDirectory = false;
       }
     }
 
@@ -801,43 +808,77 @@ class HotRunner extends ResidentRunner {
     if (!updatedDevFS.success) {
       return OperationResult(1, 'DevFS synchronization failed');
     }
-    String reloadMessage;
+    String reloadMessage = 'Refreshed';
     final Stopwatch vmReloadTimer = Stopwatch()..start();
-    Map<String, dynamic> firstReloadDetails;
-    try {
-      const String entryPath = 'main.dart.incremental.dill';
-      final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
-      for (final FlutterDevice device in flutterDevices) {
-        if (_shouldResetAssetDirectory) {
-          // Asset directory has to be set only once when the engine switches from
-          // running from bundle to uploaded files.
-          await _resetAssetDirectory(device);
-          _shouldResetAssetDirectory = false;
+    Map<String, Object> firstReloadDetails = <String, Object>{
+      'finalLibraryCount': -1,
+      'receivedLibraryCount': -1,
+      'receivedClassesCount': -1,
+      'receivedProceduresCount': -1,
+    };
+    if (updatedDevFS.invalidatedSourcesCount > 0) {
+      try {
+        const String entryPath = 'main.dart.incremental.dill';
+        final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
+        for (final FlutterDevice device in flutterDevices) {
+          final List<Future<vm_service.ReloadReport>> reportFutures = await _reloadDeviceSources(
+            device,
+            entryPath,
+            pause: pause,
+          );
+          allReportsFutures.add(Future.wait(reportFutures).then(
+            (List<vm_service.ReloadReport> reports) async {
+              // TODO(aam): Investigate why we are validating only first reload report,
+              // which seems to be current behavior
+              final vm_service.ReloadReport firstReport = reports.first;
+              // Don't print errors because they will be printed further down when
+              // `validateReloadReport` is called again.
+              await device.updateReloadStatus(
+                validateReloadReport(firstReport, printErrors: false),
+              );
+              return DeviceReloadReport(device, reports);
+            },
+          ));
         }
-        final List<Future<vm_service.ReloadReport>> reportFutures = await _reloadDeviceSources(
-          device,
-          entryPath, pause: pause,
-        );
-        allReportsFutures.add(Future.wait(reportFutures).then(
-          (List<vm_service.ReloadReport> reports) async {
-            // TODO(aam): Investigate why we are validating only first reload report,
-            // which seems to be current behavior
-            final vm_service.ReloadReport firstReport = reports.first;
-            // Don't print errors because they will be printed further down when
-            // `validateReloadReport` is called again.
-            await device.updateReloadStatus(
-              validateReloadReport(firstReport, printErrors: false),
-            );
-            return DeviceReloadReport(device, reports);
-          },
-        ));
-      }
-      final List<DeviceReloadReport> reports = await Future.wait(allReportsFutures);
-      for (final DeviceReloadReport report in reports) {
-        final vm_service.ReloadReport reloadReport = report.reports[0];
-        if (!validateReloadReport(reloadReport)) {
-          // Reload failed.
-          HotEvent('reload-reject',
+        final List<DeviceReloadReport> reports = await Future.wait(allReportsFutures);
+        for (final DeviceReloadReport report in reports) {
+          final vm_service.ReloadReport reloadReport = report.reports[0];
+          if (!validateReloadReport(reloadReport)) {
+            // Reload failed.
+            HotEvent('reload-reject',
+              targetPlatform: targetPlatform,
+              sdkName: sdkName,
+              emulator: emulator,
+              fullRestart: false,
+              reason: reason,
+              nullSafety: usageNullSafety,
+              fastReassemble: null,
+            ).send();
+            // Reset devFS lastCompileTime to ensure the file will still be marked
+            // as dirty on subsequent reloads.
+            _resetDevFSCompileTime();
+            final ReloadReportContents contents = ReloadReportContents.fromReloadReport(reloadReport);
+            return OperationResult(1, 'Reload rejected: ${contents.notices.join("\n")}');
+          }
+          // Collect stats only from the first device. If/when run -d all is
+          // refactored, we'll probably need to send one hot reload/restart event
+          // per device to analytics.
+          firstReloadDetails ??= castStringKeyedMap(reloadReport.json['details']);
+          final int loadedLibraryCount = reloadReport.json['details']['loadedLibraryCount'] as int;
+          final int finalLibraryCount = reloadReport.json['details']['finalLibraryCount'] as int;
+          globals.printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
+          reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
+        }
+      } on vm_service.RPCError catch (error) {
+        String errorMessage = '';
+        int errorCode = 1;
+        if (error.code == kIsolateReloadBarred) {
+          errorCode = error.code;
+          errorMessage = 'Unable to hot reload application due to an unrecoverable error in '
+                        'the source code. Please address the error and then use "R" to '
+                        'restart the app.\n'
+                        '${error.message} (error code: ${error.code})';
+          HotEvent('reload-barred',
             targetPlatform: targetPlatform,
             sdkName: sdkName,
             emulator: emulator,
@@ -846,60 +887,27 @@ class HotRunner extends ResidentRunner {
             nullSafety: usageNullSafety,
             fastReassemble: null,
           ).send();
-          // Reset devFS lastCompileTime to ensure the file will still be marked
-          // as dirty on subsequent reloads.
-          _resetDevFSCompileTime();
-          final ReloadReportContents contents = ReloadReportContents.fromReloadReport(reloadReport);
-          return OperationResult(1, 'Reload rejected: ${contents.notices.join("\n")}');
         }
-        // Collect stats only from the first device. If/when run -d all is
-        // refactored, we'll probably need to send one hot reload/restart event
-        // per device to analytics.
-        firstReloadDetails ??= castStringKeyedMap(reloadReport.json['details']);
-        final int loadedLibraryCount = reloadReport.json['details']['loadedLibraryCount'] as int;
-        final int finalLibraryCount = reloadReport.json['details']['finalLibraryCount'] as int;
-        globals.printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
-        reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
-      }
-    } on Map<String, dynamic> catch (error, stackTrace) {
-      globals.printTrace('Hot reload failed: $error\n$stackTrace');
-      final int errorCode = error['code'] as int;
-      String errorMessage = error['message'] as String;
-      if (errorCode == kIsolateReloadBarred) {
-        errorMessage = 'Unable to hot reload application due to an unrecoverable error in '
-                       'the source code. Please address the error and then use "R" to '
-                       'restart the app.\n'
-                       '$errorMessage (error code: $errorCode)';
-        HotEvent('reload-barred',
-          targetPlatform: targetPlatform,
-          sdkName: sdkName,
-          emulator: emulator,
-          fullRestart: false,
-          reason: reason,
-          nullSafety: usageNullSafety,
-          fastReassemble: null,
-        ).send();
         return OperationResult(errorCode, errorMessage);
+      } on Exception catch (error, stackTrace) {
+        globals.printTrace('Hot reload failed: $error\n$stackTrace');
+        return OperationResult(1, '$error');
       }
-      return OperationResult(errorCode, '$errorMessage (error code: $errorCode)');
-    } on Exception catch (error, stackTrace) {
-      globals.printTrace('Hot reload failed: $error\n$stackTrace');
-      return OperationResult(1, '$error');
     }
+
     // Record time it took for the VM to reload the sources.
     _addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
     final Stopwatch reassembleTimer = Stopwatch()..start();
     await _evictDirtyAssets();
 
-    // Check if any isolates are paused and reassemble those
-    // that aren't.
+    // Check if any isolates are paused and reassemble those that aren't.
     final Map<FlutterView, vm_service.VmService> reassembleViews = <FlutterView, vm_service.VmService>{};
     final List<Future<void>> reassembleFutures = <Future<void>>[];
     String serviceEventKind;
     int pausedIsolatesFound = 0;
     bool failedReassemble = false;
     for (final FlutterDevice device in flutterDevices) {
-      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      final List<FlutterView> views = viewCache[device];
       for (final FlutterView view in views) {
         // Check if the isolate is paused, and if so, don't reassemble. Ignore the
         // PostPauseEvent event - the client requesting the pause will resume the app.
