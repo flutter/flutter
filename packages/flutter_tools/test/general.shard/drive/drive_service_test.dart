@@ -42,6 +42,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   pauseOnExit: false,
   runnable: true,
   startTime: 0,
+  isSystemIsolate: false,
 );
 
 final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
@@ -69,6 +70,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
   pauseOnExit: false,
   runnable: true,
   startTime: 0,
+  isSystemIsolate: false,
 );
 
 final vm_service.VM fakeVM = vm_service.VM(
@@ -82,6 +84,8 @@ final vm_service.VM fakeVM = vm_service.VM(
   architectureBits: 64,
   operatingSystem: '',
   version: '',
+  systemIsolateGroups: <vm_service.IsolateGroupRef>[],
+  systemIsolates: <vm_service.IsolateRef>[],
 );
 
 final FlutterView fakeFlutterView = FlutterView(
