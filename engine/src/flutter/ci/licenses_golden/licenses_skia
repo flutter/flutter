@@ -1,4 +1,4 @@
-Signature: 969c528c3e308f62542eb1a30226de5b
+Signature: b1c18192841f34809a7a3e6b72dbfcc9
 
 UNUSED LICENSES:
 
@@ -4137,6 +4137,7 @@ FILE: ../../../third_party/skia/samplecode/SampleAudio.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFitCubicToCircle.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSimpleStroker.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTiming.cpp
+FILE: ../../../third_party/skia/samplecode/SampleVariableWidthStroker.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.cpp
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.h
