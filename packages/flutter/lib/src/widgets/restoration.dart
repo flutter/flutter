@@ -425,7 +425,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   /// [RestorableProperty]. Whenever new restoration data has been provided to
   /// the [RestorationMixin] the property is registered to, either this method
   /// or [createDefaultValue] is called before [initWithValue] is invoked.
-  T fromPrimitives(Object data);
+  T fromPrimitives(Object? data);
 
   /// Called by the [RestorationMixin] with the `value` returned by either
   /// [createDefaultValue] or [fromPrimitives] to set the value that this
@@ -499,10 +499,13 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   }
 
   /// The [State] object that this property is registered with.
+  ///
+  /// Must only be called when [isRegistered] is true.
   @protected
-  State? get state {
+  State get state {
+    assert(isRegistered);
     assert(_debugAssertNotDisposed());
-    return _owner;
+    return _owner!;
   }
 
   /// Whether this property is currently registered with a [RestorationMixin].
@@ -609,13 +612,10 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 /// class RestorationExampleApp extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     // The [RootRestorationScope] can be removed once it is part of [MaterialApp].
-///     return RootRestorationScope(
-///       restorationId: 'root',
-///       child: MaterialApp(
-///         title: 'Restorable Counter',
-///         home: RestorableCounter(restorationId: 'counter'),
-///       ),
+///     return MaterialApp(
+///       restorationScopeId: 'app',
+///       title: 'Restorable Counter',
+///       home: RestorableCounter(restorationId: 'counter'),
 ///     );
 ///   }
 /// }
@@ -884,7 +884,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// restore the internal state of a [State] object, it may be removed from the
   /// restoration data by calling this method.
   @protected
-  void unregisterFromRestoration(RestorableProperty<Object> property) {
+  void unregisterFromRestoration(RestorableProperty<Object?> property) {
     assert(property != null);
     assert(property._owner == this);
     _bucket?.remove<Object?>(property._restorationId!);

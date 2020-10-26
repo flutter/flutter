@@ -539,7 +539,7 @@ abstract class BindingBase {
         return Future<void>.delayed(Duration.zero);
       });
 
-      dynamic caughtException;
+      Object? caughtException;
       StackTrace? caughtStack;
       late Map<String, dynamic> result;
       try {

@@ -75,12 +75,13 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                     bottom: 16.0,
                     left: 16.0,
                     right: 16.0,
-                    child: RaisedButton(
-                      shape: const BeveledRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: kShrinePink100,
+                        shape: const BeveledRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                        ),
                       ),
-                      color: kShrinePink100,
-                      splashColor: kShrineBrown600,
                       child: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12.0),
                         child: Text('CLEAR CART'),

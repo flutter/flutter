@@ -81,9 +81,7 @@ void main() {
     });
 
     testUsingContext('printStatus should log to stdout when logToStdout is enabled', () async {
-      final StringBuffer buffer = StringBuffer();
-
-      await runZoned<Future<void>>(() async {
+      final StringBuffer buffer = await capturedConsolePrint(() {
         final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
         final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
         daemon = Daemon(
@@ -93,11 +91,8 @@ void main() {
           logToStdout: true,
         );
         globals.printStatus('daemon.logMessage test');
-        // Service the event loop.
-        await Future<void>.value();
-      }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-        buffer.writeln(line);
-      }));
+        return Future<void>.value();
+      });
 
       expect(buffer.toString().trim(), 'daemon.logMessage test');
     }, overrides: <Type, Generator>{

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -46,44 +44,44 @@ class CardTheme with Diagnosticable {
   /// Default value for [Card.clipBehavior].
   ///
   /// If null, [Card] uses [Clip.none].
-  final Clip clipBehavior;
+  final Clip? clipBehavior;
 
   /// Default value for [Card.color].
   ///
   /// If null, [Card] uses [ThemeData.cardColor].
-  final Color color;
+  final Color? color;
 
   /// Default value for [Card.shadowColor].
   ///
   /// If null, [Card] defaults to fully opaque black.
-  final Color shadowColor;
+  final Color? shadowColor;
 
   /// Default value for [Card.elevation].
   ///
   /// If null, [Card] uses a default of 1.0.
-  final double elevation;
+  final double? elevation;
 
   /// Default value for [Card.margin].
   ///
   /// If null, [Card] uses a default margin of 4.0 logical pixels on all sides:
   /// `EdgeInsets.all(4.0)`.
-  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry? margin;
 
   /// Default value for [Card.shape].
   ///
   /// If null, [Card] then uses a [RoundedRectangleBorder] with a circular
   /// corner radius of 4.0.
-  final ShapeBorder shape;
+  final ShapeBorder? shape;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   CardTheme copyWith({
-    Clip clipBehavior,
-    Color color,
-    Color shadowColor,
-    double elevation,
-    EdgeInsetsGeometry margin,
-    ShapeBorder shape,
+    Clip? clipBehavior,
+    Color? color,
+    Color? shadowColor,
+    double? elevation,
+    EdgeInsetsGeometry? margin,
+    ShapeBorder? shape,
   }) {
     return CardTheme(
       clipBehavior: clipBehavior ?? this.clipBehavior,
@@ -97,7 +95,7 @@ class CardTheme with Diagnosticable {
 
   /// The [ThemeData.cardTheme] property of the ambient [Theme].
   static CardTheme of(BuildContext context) {
-    return Theme.of(context).cardTheme;
+    return Theme.of(context)!.cardTheme;
   }
 
   /// Linearly interpolate between two Card themes.
@@ -105,7 +103,7 @@ class CardTheme with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static CardTheme lerp(CardTheme a, CardTheme b, double t) {
+  static CardTheme lerp(CardTheme? a, CardTheme? b, double t) {
     assert(t != null);
     return CardTheme(
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,

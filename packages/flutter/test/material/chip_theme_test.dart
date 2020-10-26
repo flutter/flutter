@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show window;
 
 import 'package:flutter/gestures.dart';
@@ -171,7 +169,7 @@ void main() {
   testWidgets('ChipThemeData generates correct opacities for defaults', (WidgetTester tester) async {
     const Color customColor1 = Color(0xcafefeed);
     const Color customColor2 = Color(0xdeadbeef);
-    final TextStyle customStyle = ThemeData.fallback().textTheme.bodyText1.copyWith(color: customColor2);
+    final TextStyle customStyle = ThemeData.fallback().textTheme.bodyText1!.copyWith(color: customColor2);
 
     final ChipThemeData lightTheme = ChipThemeData.fromDefaults(
       secondaryColor: customColor1,
@@ -232,7 +230,7 @@ void main() {
     final ChipThemeData chipThemeBlack = ChipThemeData.fromDefaults(
       secondaryColor: Colors.black,
       brightness: Brightness.dark,
-      labelStyle: ThemeData.fallback().textTheme.bodyText1.copyWith(color: Colors.black),
+      labelStyle: ThemeData.fallback().textTheme.bodyText1!.copyWith(color: Colors.black),
     ).copyWith(
       elevation: 1.0,
       labelPadding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -244,7 +242,7 @@ void main() {
     final ChipThemeData chipThemeWhite = ChipThemeData.fromDefaults(
       secondaryColor: Colors.white,
       brightness: Brightness.light,
-      labelStyle: ThemeData.fallback().textTheme.bodyText1.copyWith(color: Colors.white),
+      labelStyle: ThemeData.fallback().textTheme.bodyText1!.copyWith(color: Colors.white),
     ).copyWith(
       padding: const EdgeInsets.all(2.0),
       labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
@@ -255,7 +253,7 @@ void main() {
       checkmarkColor: Colors.white,
     );
 
-    final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5);
+    final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5)!;
     const Color middleGrey = Color(0xff7f7f7f);
     expect(lerp.backgroundColor, equals(middleGrey.withAlpha(0x1f)));
     expect(lerp.deleteIconColor, equals(middleGrey.withAlpha(0xde)));
@@ -276,7 +274,7 @@ void main() {
 
     expect(ChipThemeData.lerp(null, null, 0.25), isNull);
 
-    final ChipThemeData lerpANull25 = ChipThemeData.lerp(null, chipThemeWhite, 0.25);
+    final ChipThemeData lerpANull25 = ChipThemeData.lerp(null, chipThemeWhite, 0.25)!;
     expect(lerpANull25.backgroundColor, equals(Colors.black.withAlpha(0x08)));
     expect(lerpANull25.deleteIconColor, equals(Colors.black.withAlpha(0x38)));
     expect(lerpANull25.disabledColor, equals(Colors.black.withAlpha(0x03)));
@@ -294,7 +292,7 @@ void main() {
     expect(lerpANull25.pressElevation, 2.5);
     expect(lerpANull25.checkmarkColor, equals(Colors.white.withAlpha(0x40)));
 
-    final ChipThemeData lerpANull75 = ChipThemeData.lerp(null, chipThemeWhite, 0.75);
+    final ChipThemeData lerpANull75 = ChipThemeData.lerp(null, chipThemeWhite, 0.75)!;
     expect(lerpANull75.backgroundColor, equals(Colors.black.withAlpha(0x17)));
     expect(lerpANull75.deleteIconColor, equals(Colors.black.withAlpha(0xa7)));
     expect(lerpANull75.disabledColor, equals(Colors.black.withAlpha(0x09)));
@@ -312,7 +310,7 @@ void main() {
     expect(lerpANull75.pressElevation, 7.5);
     expect(lerpANull75.checkmarkColor, equals(Colors.white.withAlpha(0xbf)));
 
-    final ChipThemeData lerpBNull25 = ChipThemeData.lerp(chipThemeBlack, null, 0.25);
+    final ChipThemeData lerpBNull25 = ChipThemeData.lerp(chipThemeBlack, null, 0.25)!;
     expect(lerpBNull25.backgroundColor, equals(Colors.white.withAlpha(0x17)));
     expect(lerpBNull25.deleteIconColor, equals(Colors.white.withAlpha(0xa7)));
     expect(lerpBNull25.disabledColor, equals(Colors.white.withAlpha(0x09)));
@@ -330,7 +328,7 @@ void main() {
     expect(lerpBNull25.pressElevation, 3.0);
     expect(lerpBNull25.checkmarkColor, equals(Colors.black.withAlpha(0xbf)));
 
-    final ChipThemeData lerpBNull75 = ChipThemeData.lerp(chipThemeBlack, null, 0.75);
+    final ChipThemeData lerpBNull75 = ChipThemeData.lerp(chipThemeBlack, null, 0.75)!;
     expect(lerpBNull75.backgroundColor, equals(Colors.white.withAlpha(0x08)));
     expect(lerpBNull75.deleteIconColor, equals(Colors.white.withAlpha(0x38)));
     expect(lerpBNull75.disabledColor, equals(Colors.white.withAlpha(0x03)));
@@ -402,7 +400,7 @@ void main() {
       );
     }
     Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('Chip')).text.style.color;
+      return tester.renderObject<RenderParagraph>(find.text('Chip')).text.style!.color!;
     }
 
     // Default, not disabled.

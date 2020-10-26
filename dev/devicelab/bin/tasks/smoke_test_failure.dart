@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 
 /// Smoke test of a task that fails by returning an unsuccessful response.
 Future<void> main() async {

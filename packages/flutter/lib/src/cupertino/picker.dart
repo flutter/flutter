@@ -10,11 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
-/// Color of the 'magnifier' lens border.
-const Color _kHighlighterBorder = CupertinoDynamicColor.withBrightness(
-  color: Color(0x33000000),
-  darkColor: Color(0x33FFFFFF),
-);
 // Eyeballed values comparing with a native picker to produce the right
 // curvatures and densities.
 const double _kDefaultDiameterRatio = 1.07;
@@ -79,6 +74,7 @@ class CupertinoPicker extends StatefulWidget {
     required this.itemExtent,
     required this.onSelectedItemChanged,
     required List<Widget> children,
+    this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
     bool looping = false,
   }) : assert(children != null),
        assert(diameterRatio != null),
@@ -123,6 +119,7 @@ class CupertinoPicker extends StatefulWidget {
     required this.onSelectedItemChanged,
     required NullableIndexedWidgetBuilder itemBuilder,
     int? childCount,
+    this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
   }) : assert(itemBuilder != null),
        assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
@@ -186,10 +183,22 @@ class CupertinoPicker extends StatefulWidget {
   /// This can be called during scrolls and during ballistic flings. To get the
   /// value only when the scrolling settles, use a [NotificationListener],
   /// listen for [ScrollEndNotification] and read its [FixedExtentMetrics].
-  final ValueChanged<int> onSelectedItemChanged;
+  final ValueChanged<int>? onSelectedItemChanged;
 
   /// A delegate that lazily instantiates children.
   final ListWheelChildDelegate childDelegate;
+
+  /// A widget overlaid on the picker to highlight the currently selected entry.
+  ///
+  /// The [selectionOverlay] widget drawn above the [CupertinoPicker]'s picker
+  /// wheel.
+  /// It is vertically centered in the picker and is constrained to have the
+  /// same height as the center row.
+  ///
+  /// If unspecified, it defaults to a [CupertinoPickerDefaultSelectionOverlay]
+  /// which is a gray rounded rectangle overlay in iOS 14 style.
+  /// This property can be set to null to remove the overlay.
+  final Widget selectionOverlay;
 
   @override
   State<StatefulWidget> createState() => _CupertinoPickerState();
@@ -227,7 +236,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   void _handleSelectedItemChanged(int index) {
     // Only the haptic engine hardware on iOS devices would produce the
     // intended effects.
-    bool hasSuitableHapticHardware;
+    final bool hasSuitableHapticHardware;
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         hasSuitableHapticHardware = true;
@@ -247,26 +256,21 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     }
 
     if (widget.onSelectedItemChanged != null) {
-      widget.onSelectedItemChanged(index);
+      widget.onSelectedItemChanged!(index);
     }
   }
 
-  /// Draws the magnifier borders.
-  Widget _buildMagnifierScreen() {
-    final Color resolvedBorderColor = CupertinoDynamicColor.resolve(_kHighlighterBorder, context)!;
+  /// Draws the selectionOverlay.
+  Widget _buildSelectionOverlay(Widget selectionOverlay) {
+    final double height = widget.itemExtent * widget.magnification;
 
     return IgnorePointer(
       child: Center(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(width: 0.0, color: resolvedBorderColor),
-              bottom: BorderSide(width: 0.0, color: resolvedBorderColor),
-            ),
-          ),
+        child: ConstrainedBox(
           constraints: BoxConstraints.expand(
-            height: widget.itemExtent * widget.magnification,
+            height: height,
           ),
+          child: selectionOverlay,
         ),
       ),
     );
@@ -299,7 +303,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               ),
             ),
           ),
-          _buildMagnifierScreen(),
+          _buildSelectionOverlay(widget.selectionOverlay),
         ],
       ),
     );
@@ -307,6 +311,86 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     return DecoratedBox(
       decoration: BoxDecoration(color: resolvedBackgroundColor),
       child: result,
+    );
+  }
+}
+
+/// A default selection overlay for [CupertinoPicker]s.
+///
+/// It draws a gray rounded rectangle to match the picker visuals introduced in
+/// iOS 14.
+///
+/// This widget is typically only used in [CupertinoPicker.selectionOverlay].
+/// In an iOS 14 multi-column picker, the selection overlay is a single rounded
+/// rectangle that spans the entire multi-column picker.
+/// To achieve the same effect using [CupertinoPickerDefaultSelectionOverlay],
+/// the additional margin and corner radii on the left or the right side can be
+/// disabled by turning off [capLeftEdge] and [capRightEdge], so this selection
+/// overlay visually connects with selection overlays of adjoining
+/// [CupertinoPicker]s (i.e., other "column"s).
+///
+/// See also:
+///
+///  * [CupertinoPicker], which uses this widget as its default [CupertinoPicker.selectionOverlay].
+class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
+
+  /// Creates an iOS 14 style selection overlay that highlights the magnified
+  /// area (or the currently selected item, depending on how you described it
+  /// elsewhere) of a [CupertinoPicker].
+  ///
+  /// The [background] argument default value is [CupertinoColors.tertiarySystemFill].
+  /// It must be non-null.
+  ///
+  /// The [capLeftEdge] and [capRightEdge] arguments decide whether to add a
+  /// default margin and use rounded corners on the left and right side of the
+  /// rectangular overlay.
+  /// Default to true and must not be null.
+  const CupertinoPickerDefaultSelectionOverlay({
+    Key? key,
+    this.background = CupertinoColors.tertiarySystemFill,
+    this.capLeftEdge = true,
+    this.capRightEdge = true,
+  }) : assert(background != null),
+       assert(capLeftEdge != null),
+       assert(capRightEdge != null),
+       super(key: key);
+
+  /// Whether to use the default use rounded corners and margin on the left side.
+  final bool capLeftEdge;
+
+  /// Whether to use the default use rounded corners and margin on the right side.
+  final bool capRightEdge;
+
+  /// The color to fill in the background of the [CupertinoPickerDefaultSelectionOverlay].
+  /// It Support for use [CupertinoDynamicColor].
+  ///
+  /// Typically this should not be set to a fully opaque color, as the currently
+  /// selected item of the underlying [CupertinoPicker] should remain visible.
+  /// Defaults to [CupertinoColors.tertiarySystemFill].
+  final Color background;
+
+  /// Default margin of the 'SelectionOverlay'.
+  static const double _defaultSelectionOverlayHorizontalMargin = 9;
+
+  /// Default radius of the 'SelectionOverlay'.
+  static const double _defaultSelectionOverlayRadius = 8;
+
+  @override
+  Widget build(BuildContext context) {
+    const Radius radius = Radius.circular(_defaultSelectionOverlayRadius);
+
+    return Container(
+      margin: EdgeInsets.only(
+        left: capLeftEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
+        right: capRightEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.horizontal(
+          left: capLeftEdge ? radius : Radius.zero,
+          right: capRightEdge ? radius : Radius.zero,
+        ),
+        color: CupertinoDynamicColor.resolve(background, context),
+      ),
     );
   }
 }

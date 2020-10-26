@@ -201,8 +201,6 @@ enum ConnectionState {
 ///    with a [Stream].
 ///  * [FutureBuilder], which builds itself based on a snapshot from interacting
 ///    with a [Future].
-// TODO(a14n): the type parameter should be <T extends Object> to enforce that retrieved data must not be null.
-// But it breaks a lot of code in google3. See https://github.com/flutter/flutter/pull/64672#pullrequestreview-485199027
 @immutable
 class AsyncSnapshot<T> {
   /// Creates an [AsyncSnapshot] with the specified [connectionState],
@@ -467,7 +465,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///  * [StreamBuilderBase], which supports widget building based on a computation
 ///    that spans all interactions made with the stream.
 // TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1139 is fixed
-class StreamBuilder<T extends Object> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
+class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build
   /// strategy is given by [builder].
@@ -502,7 +500,7 @@ class StreamBuilder<T extends Object> extends StreamBuilderBase<T, AsyncSnapshot
   @override
   AsyncSnapshot<T> initial() => initialData == null
       ? AsyncSnapshot<T>.nothing()
-      : AsyncSnapshot<T>.withData(ConnectionState.none, initialData!);
+      : AsyncSnapshot<T>.withData(ConnectionState.none, initialData as T);
 
   @override
   AsyncSnapshot<T> afterConnected(AsyncSnapshot<T> current) => current.inState(ConnectionState.waiting);
@@ -664,7 +662,7 @@ class StreamBuilder<T extends Object> extends StreamBuilderBase<T, AsyncSnapshot
 /// ```
 /// {@end-tool}
 // TODO(ianh): remove unreachable code above once https://github.com/dart-lang/sdk/issues/35520 is fixed
-class FutureBuilder<T extends Object> extends StatefulWidget {
+class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
   /// interaction with a [Future].
   ///
@@ -723,7 +721,7 @@ class FutureBuilder<T extends Object> extends StatefulWidget {
 }
 
 /// State for [FutureBuilder].
-class _FutureBuilderState<T extends Object> extends State<FutureBuilder<T>> {
+class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   /// An object that identifies the currently active callbacks. Used to avoid
   /// calling setState from stale callbacks, e.g. after disposal of this state,
   /// or after widget reconfiguration to a new Future.
@@ -735,7 +733,7 @@ class _FutureBuilderState<T extends Object> extends State<FutureBuilder<T>> {
     super.initState();
     _snapshot = widget.initialData == null
         ? AsyncSnapshot<T>.nothing()
-        : AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData!);
+        : AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData as T);
     _subscribe();
   }
 

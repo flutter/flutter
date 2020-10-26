@@ -79,7 +79,8 @@ $ ../../bin/dart pub run test
 ```
 
 The tests in `test/integration.shard` are slower to run than the tests in
-`test/general.shard`. To run only the tests in `test/general.shard`, in this
+`test/general.shard`. They also require the `FLUTTER_ROOT` environment variable
+to be set and pointing to the root of the Flutter SDK. To run only the tests in `test/general.shard`, in this
 directory run:
 ```shell
 $ ../../bin/dart pub run test test/general.shard

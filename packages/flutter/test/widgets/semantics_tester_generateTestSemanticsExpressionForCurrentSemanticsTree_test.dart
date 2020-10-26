@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('!chrome')
 import 'dart:io';
 
@@ -62,10 +60,10 @@ void _tests() {
       .join('\n')
       .trim() + ',';
 
-    File findThisTestFile(Directory directory) {
+    File? findThisTestFile(Directory directory) {
       for (final FileSystemEntity entity in directory.listSync()) {
         if (entity is Directory) {
-          final File childSearch = findThisTestFile(entity);
+          final File? childSearch = findThisTestFile(entity);
           if (childSearch != null) {
             return childSearch;
           }
@@ -76,7 +74,7 @@ void _tests() {
       return null;
     }
 
-    final File thisTestFile = findThisTestFile(Directory.current);
+    final File thisTestFile = findThisTestFile(Directory.current)!;
     expect(thisTestFile, isNotNull);
     String expectedCode = thisTestFile.readAsStringSync();
     expectedCode = expectedCode.substring(

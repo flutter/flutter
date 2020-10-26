@@ -21,7 +21,7 @@ import 'framework.dart';
 class BottomNavigationBarItem {
   /// Creates an item that is used with [BottomNavigationBar.items].
   ///
-  /// The argument [icon] should not be null and the argument [title] should not be null when used in a Material Design's [BottomNavigationBar].
+  /// The argument [icon] should not be null and the argument [label] should not be null when used in a Material Design's [BottomNavigationBar].
   const BottomNavigationBarItem({
     required this.icon,
     @Deprecated(

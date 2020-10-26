@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -104,8 +102,8 @@ void main() {
     expect(TableBorder.lerp(tableA, tableC, 0.5), tableB);
     expect(TableBorder.lerp(tableA, tableB, 2.0), tableC);
     expect(TableBorder.lerp(tableB, tableC, -1.0), tableA);
-    expect(TableBorder.lerp(tableA, tableC, 0.9195).isUniform, isFalse);
-    expect(TableBorder.lerp(tableA, tableC, 0.9195).dimensions,
+    expect(TableBorder.lerp(tableA, tableC, 0.9195)!.isUniform, isFalse);
+    expect(TableBorder.lerp(tableA, tableC, 0.9195)!.dimensions,
            EdgeInsets.lerp(tableA.dimensions, tableC.dimensions, 0.9195));
   });
 

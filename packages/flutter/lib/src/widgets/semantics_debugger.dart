@@ -281,11 +281,11 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       annotations.add('adjustable');
 
     assert(data.label != null);
-    String message;
+    final String message;
     if (data.label.isEmpty) {
       message = annotations.join('; ');
     } else {
-      String label;
+      final String label;
       if (data.textDirection == null) {
         label = '${Unicode.FSI}${data.label}${Unicode.PDI}';
         annotations.insert(0, 'MISSING TEXT DIRECTION');

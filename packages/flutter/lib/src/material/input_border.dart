@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
@@ -54,7 +52,7 @@ abstract class InputBorder extends ShapeBorder {
   final BorderSide borderSide;
 
   /// Creates a copy of this input border with the specified `borderSide`.
-  InputBorder copyWith({ BorderSide borderSide });
+  InputBorder copyWith({ BorderSide? borderSide });
 
   /// True if this border will enclose the [InputDecorator]'s container.
   ///
@@ -76,10 +74,10 @@ abstract class InputBorder extends ShapeBorder {
   void paint(
     Canvas canvas,
     Rect rect, {
-    double gapStart,
+    double? gapStart,
     double gapExtent = 0.0,
     double gapPercentage = 0.0,
-    TextDirection textDirection,
+    TextDirection? textDirection,
   });
 }
 
@@ -88,7 +86,7 @@ class _NoInputBorder extends InputBorder {
   const _NoInputBorder() : super(borderSide: BorderSide.none);
 
   @override
-  _NoInputBorder copyWith({ BorderSide borderSide }) => const _NoInputBorder();
+  _NoInputBorder copyWith({ BorderSide? borderSide }) => const _NoInputBorder();
 
   @override
   bool get isOutline => false;
@@ -100,12 +98,12 @@ class _NoInputBorder extends InputBorder {
   _NoInputBorder scale(double t) => const _NoInputBorder();
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return Path()..addRect(rect);
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()..addRect(rect);
   }
 
@@ -113,10 +111,10 @@ class _NoInputBorder extends InputBorder {
   void paint(
     Canvas canvas,
     Rect rect, {
-    double gapStart,
+    double? gapStart,
     double gapExtent = 0.0,
     double gapPercentage = 0.0,
-    TextDirection textDirection,
+    TextDirection? textDirection,
   }) {
     // Do not paint.
   }
@@ -168,7 +166,7 @@ class UnderlineInputBorder extends InputBorder {
   bool get isOutline => false;
 
   @override
-  UnderlineInputBorder copyWith({ BorderSide borderSide, BorderRadius borderRadius }) {
+  UnderlineInputBorder copyWith({ BorderSide? borderSide, BorderRadius? borderRadius }) {
     return UnderlineInputBorder(
       borderSide: borderSide ?? this.borderSide,
       borderRadius: borderRadius ?? this.borderRadius,
@@ -186,33 +184,33 @@ class UnderlineInputBorder extends InputBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addRect(Rect.fromLTWH(rect.left, rect.top, rect.width, math.max(0.0, rect.height - borderSide.width)));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     if (a is UnderlineInputBorder) {
       return UnderlineInputBorder(
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
-        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
+        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t)!,
       );
     }
     return super.lerpFrom(a, t);
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     if (b is UnderlineInputBorder) {
       return UnderlineInputBorder(
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
-        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
+        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t)!,
       );
     }
     return super.lerpTo(b, t);
@@ -226,10 +224,10 @@ class UnderlineInputBorder extends InputBorder {
   void paint(
     Canvas canvas,
     Rect rect, {
-    double gapStart,
+    double? gapStart,
     double gapExtent = 0.0,
     double gapPercentage = 0.0,
-    TextDirection textDirection,
+    TextDirection? textDirection,
   }) {
     if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero)
       canvas.clipPath(getOuterPath(rect, textDirection: textDirection));
@@ -323,9 +321,9 @@ class OutlineInputBorder extends InputBorder {
 
   @override
   OutlineInputBorder copyWith({
-    BorderSide borderSide,
-    BorderRadius borderRadius,
-    double gapPadding,
+    BorderSide? borderSide,
+    BorderRadius? borderRadius,
+    double? gapPadding,
   }) {
     return OutlineInputBorder(
       borderSide: borderSide ?? this.borderSide,
@@ -349,11 +347,11 @@ class OutlineInputBorder extends InputBorder {
   }
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     if (a is OutlineInputBorder) {
       final OutlineInputBorder outline = a;
       return OutlineInputBorder(
-        borderRadius: BorderRadius.lerp(outline.borderRadius, borderRadius, t),
+        borderRadius: BorderRadius.lerp(outline.borderRadius, borderRadius, t)!,
         borderSide: BorderSide.lerp(outline.borderSide, borderSide, t),
         gapPadding: outline.gapPadding,
       );
@@ -362,11 +360,11 @@ class OutlineInputBorder extends InputBorder {
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     if (b is OutlineInputBorder) {
       final OutlineInputBorder outline = b;
       return OutlineInputBorder(
-        borderRadius: BorderRadius.lerp(borderRadius, outline.borderRadius, t),
+        borderRadius: BorderRadius.lerp(borderRadius, outline.borderRadius, t)!,
         borderSide: BorderSide.lerp(borderSide, outline.borderSide, t),
         gapPadding: outline.gapPadding,
       );
@@ -375,13 +373,13 @@ class OutlineInputBorder extends InputBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addRRect(borderRadius.resolve(textDirection).toRRect(rect).deflate(borderSide.width));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
@@ -463,10 +461,10 @@ class OutlineInputBorder extends InputBorder {
   void paint(
     Canvas canvas,
     Rect rect, {
-    double gapStart,
+    double? gapStart,
     double gapExtent = 0.0,
     double gapPercentage = 0.0,
-    TextDirection textDirection,
+    TextDirection? textDirection,
   }) {
     assert(gapExtent != null);
     assert(gapPercentage >= 0.0 && gapPercentage <= 1.0);
@@ -478,8 +476,8 @@ class OutlineInputBorder extends InputBorder {
     if (gapStart == null || gapExtent <= 0.0 || gapPercentage == 0.0) {
       canvas.drawRRect(center, paint);
     } else {
-      final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage);
-      switch (textDirection) {
+      final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage)!;
+      switch (textDirection!) {
         case TextDirection.rtl:
           final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart + gapPadding - extent), extent);
           canvas.drawPath(path, paint);

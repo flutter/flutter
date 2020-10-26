@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/gestures.dart' show kPressTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,17 +12,17 @@ bool cancelCalled = false;
 
 class TestInkSplash extends InkSplash {
   TestInkSplash({
-    MaterialInkController controller,
-    RenderBox referenceBox,
-    Offset position,
-    Color color,
+    required MaterialInkController controller,
+    required RenderBox referenceBox,
+    Offset? position,
+    required Color color,
     bool containedInkWell = false,
-    RectCallback rectCallback,
-    BorderRadius borderRadius,
-    ShapeBorder customBorder,
-    double radius,
-    VoidCallback onRemoved,
-    TextDirection textDirection,
+    RectCallback? rectCallback,
+    BorderRadius? borderRadius,
+    ShapeBorder? customBorder,
+    double? radius,
+    VoidCallback? onRemoved,
+    required TextDirection textDirection,
   }) : super(
     controller: controller,
     referenceBox: referenceBox,
@@ -57,17 +55,17 @@ class TestInkSplashFactory extends InteractiveInkFeatureFactory {
 
   @override
   InteractiveInkFeature create({
-    MaterialInkController controller,
-    RenderBox referenceBox,
-    Offset position,
-    Color color,
+    required MaterialInkController controller,
+    required RenderBox referenceBox,
+    Offset? position,
+    required Color color,
     bool containedInkWell = false,
-    RectCallback rectCallback,
-    BorderRadius borderRadius,
-    ShapeBorder customBorder,
-    double radius,
-    VoidCallback onRemoved,
-    TextDirection textDirection,
+    RectCallback? rectCallback,
+    BorderRadius? borderRadius,
+    ShapeBorder? customBorder,
+    double? radius,
+    VoidCallback? onRemoved,
+    required TextDirection textDirection,
   }) {
     return TestInkSplash(
       controller: controller,

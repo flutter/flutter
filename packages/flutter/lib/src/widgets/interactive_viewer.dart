@@ -107,6 +107,10 @@ class InteractiveViewer extends StatefulWidget {
   /// single gesture begun along one axis cannot also cause panning along the
   /// other axis without stopping and beginning a new gesture. This is a common
   /// pattern in tables where data is displayed in columns and rows.
+  ///
+  /// See also:
+  ///  * [constrained], which has an example of creating a table that uses
+  ///    alignPanAxis.
   final bool alignPanAxis;
 
   /// A margin for the visible boundaries of the child.
@@ -136,6 +140,15 @@ class InteractiveViewer extends StatefulWidget {
   /// If set to false, then the child will be given infinite constraints. This
   /// is often useful when a child should be bigger than the InteractiveViewer.
   ///
+  /// For example, for a child which is bigger than the viewport but can be
+  /// panned to reveal parts that were initially offscreen, [constrained] must
+  /// be set to false to allow it to size itself properly. If [constrained] is
+  /// true and the child can only size itself to the viewport, then areas
+  /// initially outside of the viewport will not be able to receive user
+  /// interaction events. If experiencing regions of the child that are not
+  /// receptive to user gestures, make sure [constrained] is false and the child
+  /// is sized properly.
+  ///
   /// Defaults to true.
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
@@ -146,34 +159,36 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// ```dart
   ///   Widget build(BuildContext context) {
-  ///     const int _rowCount = 20;
-  ///     const int _columnCount = 3;
+  ///     const int _rowCount = 48;
+  ///     const int _columnCount = 6;
   ///
-  ///     return Scaffold(
-  ///       appBar: AppBar(
-  ///         title: const Text('Pannable Table'),
-  ///       ),
-  ///       body: InteractiveViewer(
-  ///         constrained: false,
-  ///         scaleEnabled: false,
-  ///         child: Table(
-  ///           columnWidths: <int, TableColumnWidth>{
-  ///             for (int column = 0; column < _columnCount; column += 1)
-  ///               column: const FixedColumnWidth(300.0),
-  ///           },
-  ///           children: <TableRow>[
-  ///             for (int row = 0; row < _rowCount; row += 1)
-  ///               TableRow(
-  ///                 children: <Widget>[
-  ///                   for (int column = 0; column < _columnCount; column += 1)
-  ///                     Container(
-  ///                       height: 100,
-  ///                       color: row % 2 + column % 2 == 1 ? Colors.red : Colors.green,
+  ///     return InteractiveViewer(
+  ///       alignPanAxis: true,
+  ///       constrained: false,
+  ///       scaleEnabled: false,
+  ///       child: Table(
+  ///         columnWidths: <int, TableColumnWidth>{
+  ///           for (int column = 0; column < _columnCount; column += 1)
+  ///             column: const FixedColumnWidth(200.0),
+  ///         },
+  ///         children: <TableRow>[
+  ///           for (int row = 0; row < _rowCount; row += 1)
+  ///             TableRow(
+  ///               children: <Widget>[
+  ///                 for (int column = 0; column < _columnCount; column += 1)
+  ///                   Container(
+  ///                     height: 26,
+  ///                     color: row % 2 + column % 2 == 1
+  ///                         ? Colors.white
+  ///                         : Colors.grey.withOpacity(0.1),
+  ///                     child: Align(
+  ///                       alignment: Alignment.centerLeft,
+  ///                       child: Text('$row x $column'),
   ///                     ),
-  ///                 ],
-  ///               ),
-  ///           ],
-  ///         ),
+  ///                   ),
+  ///               ],
+  ///             ),
+  ///         ],
   ///       ),
   ///     );
   ///   }
@@ -543,7 +558,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     assert(!widget.boundaryMargin.top.isNaN);
     assert(!widget.boundaryMargin.bottom.isNaN);
 
-    final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
     final Size childSize = childRenderBox.size;
     final Rect boundaryRect = widget.boundaryMargin.inflateRect(Offset.zero & childSize);
     // Boundaries that are partially infinite are not allowed because Matrix4's
@@ -559,7 +574,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // The Rect representing the child's parent.
   Rect get _viewport {
     assert(_parentKey.currentContext != null);
-    final RenderBox parentRenderBox = _parentKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox parentRenderBox = _parentKey.currentContext!.findRenderObject()! as RenderBox;
     return Offset.zero & parentRenderBox.size;
   }
 
@@ -704,7 +719,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         return widget.scaleEnabled;
 
       case _GestureType.pan:
-      default:
+      case null:
         return widget.panEnabled;
     }
   }
@@ -910,7 +925,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         widget.onInteractionEnd?.call(ScaleEndDetails());
         return;
       }
-      final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject() as RenderBox;
+      final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
       final Size childSize = childRenderBox.size;
       final double scaleChange = 1.0 - event.scrollDelta.dy / childSize.height;
       if (scaleChange == 0.0) {
@@ -1232,7 +1247,6 @@ Offset _alignAxis(Offset offset, Axis axis) {
     case Axis.horizontal:
       return Offset(offset.dx, 0.0);
     case Axis.vertical:
-    default:
       return Offset(0.0, offset.dy);
   }
 }

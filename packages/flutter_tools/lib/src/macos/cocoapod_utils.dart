@@ -18,7 +18,7 @@ Future<void> processPodsIfNeeded(
 ) async {
   final FlutterProject project = xcodeProject.parent;
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
-  await refreshPluginsList(project);
+  await refreshPluginsList(project, macOSPlatform: project.macos.existsSync());
   if (!(hasPlugins(project) || (project.isModule && xcodeProject.podfile.existsSync()))) {
     return;
   }

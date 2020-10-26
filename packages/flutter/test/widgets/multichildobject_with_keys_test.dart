@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -68,7 +66,7 @@ void main() {
 List<String> _getChildOrder(RenderFlex flex) {
   final List<String> childOrder = <String>[];
   flex.visitChildren((RenderObject child) {
-    childOrder.add(((child as RenderParagraph).text as TextSpan).text);
+    childOrder.add(((child as RenderParagraph).text as TextSpan).text!);
   });
   return childOrder;
 }

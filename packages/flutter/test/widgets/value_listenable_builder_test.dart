@@ -2,24 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  SpyStringValueNotifier valueListenable;
-  Widget textBuilderUnderTest;
+  late SpyStringValueNotifier valueListenable;
+  late Widget textBuilderUnderTest;
 
   Widget builderForValueListenable(
-    ValueListenable<String> valueListenable,
+    ValueListenable<String?> valueListenable,
   ) {
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: ValueListenableBuilder<String>(
+      child: ValueListenableBuilder<String?>(
         valueListenable: valueListenable,
-        builder: (BuildContext context, String value, Widget child) {
+        builder: (BuildContext context, String? value, Widget? child) {
           if (value == null)
             return const Placeholder();
           return Text(value);
@@ -67,7 +65,7 @@ void main() {
     await tester.pump();
     expect(find.text('Gilfoyle'), findsOneWidget);
 
-    final ValueListenable<String> differentListenable =
+    final ValueListenable<String?> differentListenable =
         SpyStringValueNotifier('Hendricks');
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
@@ -83,7 +81,7 @@ void main() {
     await tester.pump();
     expect(find.text('Gilfoyle'), findsOneWidget);
 
-    final ValueListenable<String> differentListenable =
+    final ValueListenable<String?> differentListenable =
        SpyStringValueNotifier('Hendricks');
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
@@ -113,8 +111,8 @@ void main() {
   });
 }
 
-class SpyStringValueNotifier extends ValueNotifier<String> {
-  SpyStringValueNotifier(String initialValue) : super(initialValue);
+class SpyStringValueNotifier extends ValueNotifier<String?> {
+  SpyStringValueNotifier(String? initialValue) : super(initialValue);
 
   /// Override for test visibility only.
   @override

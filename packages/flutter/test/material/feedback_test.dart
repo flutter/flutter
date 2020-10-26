@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,18 +12,18 @@ import 'feedback_tester.dart';
 void main () {
   const Duration kWaitDuration = Duration(seconds: 1);
 
-  FeedbackTester feedback;
+  late FeedbackTester feedback;
 
   setUp(() {
     feedback = FeedbackTester();
   });
 
   tearDown(() {
-    feedback?.dispose();
+    feedback.dispose();
   });
 
   group('Feedback on Android', () {
-    List<Map<String, Object>> semanticEvents;
+    late List<Map<String, Object>> semanticEvents;
 
     setUp(() {
       semanticEvents = <Map<String, Object>>[];
@@ -60,10 +58,10 @@ void main () {
       expect(feedback.clickSoundCount, 1);
       expect(semanticEvents.single, <String, dynamic>{
         'type': 'tap',
-        'nodeId': object.debugSemantics.id,
+        'nodeId': object.debugSemantics!.id,
         'data': <String, dynamic>{},
       });
-      expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
+      expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
       semanticsTester.dispose();
     });
@@ -78,7 +76,7 @@ void main () {
 
       await tester.pumpWidget(TestWidget(
         tapHandler: (BuildContext context) {
-          return Feedback.wrapForTap(callback, context);
+          return Feedback.wrapForTap(callback, context)!;
         },
       ));
       await tester.pumpAndSettle(kWaitDuration);
@@ -95,10 +93,10 @@ void main () {
       expect(callbackCount, 1);
       expect(semanticEvents.single, <String, dynamic>{
         'type': 'tap',
-        'nodeId': object.debugSemantics.id,
+        'nodeId': object.debugSemantics!.id,
         'data': <String, dynamic>{},
       });
-      expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
+      expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
       semanticsTester.dispose();
     });
@@ -123,10 +121,10 @@ void main () {
       expect(feedback.clickSoundCount, 0);
       expect(semanticEvents.single, <String, dynamic>{
         'type': 'longPress',
-        'nodeId': object.debugSemantics.id,
+        'nodeId': object.debugSemantics!.id,
         'data': <String, dynamic>{},
       });
-      expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.longPress), true);
+      expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.longPress), true);
 
       semanticsTester.dispose();
     });
@@ -140,7 +138,7 @@ void main () {
 
       await tester.pumpWidget(TestWidget(
         longPressHandler: (BuildContext context) {
-          return Feedback.wrapForLongPress(callback, context);
+          return Feedback.wrapForLongPress(callback, context)!;
         },
       ));
       await tester.pumpAndSettle(kWaitDuration);
@@ -157,10 +155,10 @@ void main () {
       expect(callbackCount, 1);
       expect(semanticEvents.single, <String, dynamic>{
         'type': 'longPress',
-        'nodeId': object.debugSemantics.id,
+        'nodeId': object.debugSemantics!.id,
         'data': <String, dynamic>{},
       });
-      expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.longPress), true);
+      expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.longPress), true);
 
       semanticsTester.dispose();
     });
@@ -204,7 +202,7 @@ void main () {
 
 class TestWidget extends StatelessWidget {
   const TestWidget({
-    Key key,
+    Key? key,
     this.tapHandler = nullHandler,
     this.longPressHandler = nullHandler,
   }) : super(key: key);
@@ -212,7 +210,7 @@ class TestWidget extends StatelessWidget {
   final HandlerCreator tapHandler;
   final HandlerCreator longPressHandler;
 
-  static VoidCallback nullHandler(BuildContext context) => null;
+  static VoidCallback? nullHandler(BuildContext context) => null;
 
   @override
   Widget build(BuildContext context) {
@@ -224,4 +222,4 @@ class TestWidget extends StatelessWidget {
   }
 }
 
-typedef HandlerCreator = VoidCallback Function(BuildContext context);
+typedef HandlerCreator = VoidCallback? Function(BuildContext context);

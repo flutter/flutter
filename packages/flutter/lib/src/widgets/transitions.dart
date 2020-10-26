@@ -632,7 +632,7 @@ class SizeTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    AlignmentDirectional alignment;
+    final AlignmentDirectional alignment;
     if (axis == Axis.vertical)
       alignment = AlignmentDirectional(-1.0, axisAlignment);
     else

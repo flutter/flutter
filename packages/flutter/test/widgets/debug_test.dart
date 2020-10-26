@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,7 +17,7 @@ void main() {
       direction: Axis.vertical,
       children: children
     );
-    FlutterError error;
+    late FlutterError error;
     try {
       debugChildrenHaveDuplicateKeys(widget, children);
     } on FlutterError catch (e) {
@@ -47,7 +45,7 @@ void main() {
       Container(key: key),
       Container(key: key),
     ];
-    FlutterError error;
+    late FlutterError error;
     try {
       debugItemsHaveDuplicateKeys(items);
     } on FlutterError catch (e) {
@@ -68,7 +66,7 @@ void main() {
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          FlutterError error;
+          late FlutterError error;
           try {
             debugCheckHasTable(context);
           } on FlutterError catch (e) {
@@ -100,7 +98,7 @@ void main() {
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          FlutterError error;
+          late FlutterError error;
           try {
             debugCheckHasMediaQuery(context);
           } on FlutterError catch (e) {
@@ -141,14 +139,14 @@ void main() {
 
   test('debugWidgetBuilderValue control test', () {
     final Widget widget = Container();
-    FlutterError error;
+    FlutterError? error;
     try {
       debugWidgetBuilderValue(widget, null);
     } on FlutterError catch (e) {
       error = e;
     } finally {
       expect(error, isNotNull);
-      expect(error.diagnostics.length, 4);
+      expect(error!.diagnostics.length, 4);
       expect(error.diagnostics[1], isA<DiagnosticsProperty<Widget>>());
       expect(error.diagnostics[1].style, DiagnosticsTreeStyle.errorProperty);
       expect(
@@ -191,7 +189,7 @@ void main() {
       error = e;
     } finally {
       expect(error, isNotNull);
-      expect(error.diagnostics.length, 3);
+      expect(error!.diagnostics.length, 3);
       expect(error.diagnostics[1], isA<DiagnosticsProperty<Widget>>());
       expect(error.diagnostics[1].style, DiagnosticsTreeStyle.errorProperty);
       expect(
@@ -219,7 +217,7 @@ void main() {
 
   test('debugAssertAllWidgetVarsUnset', () {
     debugHighlightDeprecatedWidgets = true;
-    FlutterError error;
+    late FlutterError error;
     try {
       debugAssertAllWidgetVarsUnset('The value of a widget debug variable was changed by the test.');
     } on FlutterError catch (e) {

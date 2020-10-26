@@ -52,6 +52,7 @@ abstract class FlutterTestRunner {
     String randomSeed,
     @required List<String> extraFrontEndOptions,
     bool nullAssertions = false,
+    BuildInfo buildInfo, // TODO(jonahwilliams): make the default
   });
 }
 
@@ -88,6 +89,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String randomSeed,
     @required List<String> extraFrontEndOptions,
     bool nullAssertions = false,
+    BuildInfo buildInfo // TODO(jonahwilliams): make the default argument
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
@@ -182,6 +184,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       icudtlPath: icudtlPath,
       extraFrontEndOptions: extraFrontEndOptions,
       nullAssertions: nullAssertions,
+      buildInfo: buildInfo,
     );
 
     // Make the global packages path absolute.

@@ -466,7 +466,7 @@ class _RenderOverflowBar extends RenderBox
       RenderBox? nextChild() => overflowDirection == VerticalDirection.down ? childAfter(child!) : childBefore(child!);
       double y = 0;
       while (child != null) {
-        final _OverflowBarParentData childParentData = child.parentData as _OverflowBarParentData;
+        final _OverflowBarParentData childParentData = child.parentData! as _OverflowBarParentData;
         double x = 0;
         switch (overflowAlignment) {
           case OverflowBarAlignment.start:
@@ -491,7 +491,7 @@ class _RenderOverflowBar extends RenderBox
       RenderBox? nextChild() => rtl ? childBefore(child!) : childAfter(child!);
       double x  = 0;
       while (child != null) {
-        final _OverflowBarParentData childParentData = child.parentData as _OverflowBarParentData;
+        final _OverflowBarParentData childParentData = child.parentData! as _OverflowBarParentData;
         childParentData.offset = Offset(x, (maxChildHeight - child.size.height) / 2);
         x += child.size.width + spacing;
         child = nextChild();

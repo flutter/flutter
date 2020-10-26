@@ -106,7 +106,7 @@ void main() {
         return BuildResult(success: true, performance: <String, PerformanceMeasurement>{
           'hello': PerformanceMeasurement(
             target: 'hello',
-            analyicsName: 'bar',
+            analyticsName: 'bar',
             elapsedMilliseconds: 123,
             skipped: false,
             succeeded: true,
@@ -208,7 +208,7 @@ void main() {
   testWithoutContext('writePerformanceData outputs performance data in JSON form', () {
     final List<PerformanceMeasurement> performanceMeasurement = <PerformanceMeasurement>[
       PerformanceMeasurement(
-        analyicsName: 'foo',
+        analyticsName: 'foo',
         target: 'hidden',
         skipped: false,
         succeeded: true,

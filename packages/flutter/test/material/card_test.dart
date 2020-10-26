@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
@@ -178,7 +176,7 @@ void main() {
 
   testWidgets('Card clipBehavior property defers to theme when null', (WidgetTester tester) async {
     await tester.pumpWidget(Builder(builder: (BuildContext context) {
-      final ThemeData themeData = Theme.of(context);
+      final ThemeData themeData = Theme.of(context)!;
       return Theme(
         data: themeData.copyWith(
           cardTheme: themeData.cardTheme.copyWith(

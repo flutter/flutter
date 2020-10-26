@@ -21,10 +21,7 @@ import '../../src/context.dart';
 import 'utils.dart';
 
 const String _kFlutterRoot = '/flutter/flutter';
-const String _kEngineRoot = '/flutter/engine';
-const String _kArbitraryEngineRoot = '/arbitrary/engine';
 const String _kProjectRoot = '/project';
-const String _kDotPackages = '.packages';
 
 void main() {
   group('FlutterCommandRunner', () {
@@ -39,7 +36,7 @@ void main() {
     });
 
     setUp(() {
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
       fs.directory(_kProjectRoot).createSync(recursive: true);
       fs.currentDirectory = _kProjectRoot;
@@ -111,49 +108,6 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
       }, initializeFlutterRoot: false);
-
-      testUsingContext('works if --local-engine is specified and --local-engine-src-path is determined by sky_engine', () async {
-        fs.directory('$_kArbitraryEngineRoot/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/').createSync(recursive: true);
-        fs.directory('$_kArbitraryEngineRoot/src/out/host_debug').createSync(recursive: true);
-        fs.file(_kDotPackages).writeAsStringSync('sky_engine:file://$_kArbitraryEngineRoot/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/');
-
-        await runner.run(<String>['dummy', '--local-engine=ios_debug']);
-
-        // Verify that this also works if the sky_engine path is a symlink to the engine root.
-        fs.link('/symlink').createSync(_kArbitraryEngineRoot);
-        fs.file(_kDotPackages).writeAsStringSync('sky_engine:file:///symlink/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/');
-
-        await runner.run(<String>['dummy', '--local-engine=ios_debug']);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => platform,
-      }, initializeFlutterRoot: false);
-
-      testUsingContext('works if --local-engine is specified and --local-engine-src-path is specified', () async {
-        // Intentionally do not create a package_config to verify that it is not required.
-        fs.directory('$_kArbitraryEngineRoot/src/out/ios_debug').createSync(recursive: true);
-        fs.directory('$_kArbitraryEngineRoot/src/out/host_debug').createSync(recursive: true);
-
-        await runner.run(<String>['dummy', '--local-engine-src-path=$_kArbitraryEngineRoot/src', '--local-engine=ios_debug']);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => platform,
-      }, initializeFlutterRoot: false);
-
-      testUsingContext('works if --local-engine is specified and --local-engine-src-path is determined by flutter root', () async {
-        fs.file(_kDotPackages).writeAsStringSync('\n');
-        fs.directory('$_kEngineRoot/src/out/ios_debug').createSync(recursive: true);
-        fs.directory('$_kEngineRoot/src/out/host_debug').createSync(recursive: true);
-
-        await runner.run(<String>['dummy', '--local-engine=ios_debug']);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => platform,
-      }, initializeFlutterRoot: false);
-    });
 
     testUsingContext('Doesnt crash on invalid .packages file', () async {
       fs.file('pubspec.yaml').createSync();
@@ -285,6 +239,7 @@ void main() {
         Stdio: () => FakeStdio(hasFakeTerminal: false),
       }, initializeFlutterRoot: false);
     });
+  });
   });
 }
 class MockProcessManager extends Mock implements ProcessManager {}

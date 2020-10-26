@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Default PageTransitionsTheme platform', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Text('home')));
-    final PageTransitionsTheme theme = Theme.of(tester.element(find.text('home'))).pageTransitionsTheme;
+    final PageTransitionsTheme theme = Theme.of(tester.element(find.text('home')))!.pageTransitionsTheme;
     expect(theme.builders, isNotNull);
     for (final TargetPlatform platform in TargetPlatform.values) {
       if (platform == TargetPlatform.fuchsia) {
@@ -28,7 +26,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -40,7 +38,7 @@ void main() {
       ),
     );
 
-    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
+    expect(Theme.of(tester.element(find.text('push')))!.platform, debugDefaultTargetPlatformOverride);
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
 
     await tester.tap(find.text('push'));
@@ -54,7 +52,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -73,7 +71,7 @@ void main() {
       );
     }
 
-    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
+    expect(Theme.of(tester.element(find.text('push')))!.platform, debugDefaultTargetPlatformOverride);
     expect(findFadeUpwardsPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
@@ -87,7 +85,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -113,7 +111,7 @@ void main() {
       );
     }
 
-    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
+    expect(Theme.of(tester.element(find.text('push')))!.platform, debugDefaultTargetPlatformOverride);
     expect(findOpenUpwardsPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
@@ -127,7 +125,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -153,7 +151,7 @@ void main() {
       );
     }
 
-    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
+    expect(Theme.of(tester.element(find.text('push')))!.platform, debugDefaultTargetPlatformOverride);
     expect(findZoomPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
@@ -171,7 +169,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => StatefulBuilder(

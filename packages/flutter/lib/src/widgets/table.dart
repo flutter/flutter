@@ -303,17 +303,17 @@ class _TableElement extends RenderObjectElement {
   }
 
   @override
-  void insertRenderObjectChild(RenderObject child, IndexedSlot<Element>? slot) {
+  void insertRenderObjectChild(RenderObject child, dynamic slot) {
     renderObject.setupParentData(child);
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element>? oldSlot, IndexedSlot<Element>? newSlot) {
+  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, IndexedSlot<Element>? slot) {
-    final TableCellParentData childParentData = child.parentData as TableCellParentData;
+  void removeRenderObjectChild(RenderObject child, dynamic slot) {
+    final TableCellParentData childParentData = child.parentData! as TableCellParentData;
     renderObject.setChild(childParentData.x!, childParentData.y!, null);
   }
 
@@ -363,7 +363,7 @@ class _TableElement extends RenderObjectElement {
       _children.isNotEmpty ? _children[0].children.length : 0,
       _children.expand<RenderBox>((_TableElementRow row) {
         return row.children.map<RenderBox>((Element child) {
-          final RenderBox box = child.renderObject as RenderBox;
+          final RenderBox box = child.renderObject! as RenderBox;
           return box;
         });
       }).toList(),
@@ -405,7 +405,7 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    final TableCellParentData parentData = renderObject.parentData as TableCellParentData;
+    final TableCellParentData parentData = renderObject.parentData! as TableCellParentData;
     if (parentData.verticalAlignment != verticalAlignment) {
       parentData.verticalAlignment = verticalAlignment;
       final AbstractNode? targetParent = renderObject.parent;

@@ -22,7 +22,7 @@ void main() {
     Directory gradleWrapperDirectory;
 
     setUp(() {
-      memoryFileSystem = MemoryFileSystem();
+      memoryFileSystem = MemoryFileSystem.test();
       tempDir = memoryFileSystem.systemTempDirectory.createTempSync('flutter_artifacts_test.');
       gradleWrapperDirectory = memoryFileSystem.directory(
           memoryFileSystem.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper'));
@@ -124,7 +124,7 @@ void main() {
     MemoryFileSystem memoryFileSystem;
 
     setUp(() {
-      memoryFileSystem = MemoryFileSystem();
+      memoryFileSystem = MemoryFileSystem.test();
     });
 
     testUsingContext("throws ToolExit if gradle.properties doesn't exist", () {
@@ -229,7 +229,7 @@ void main() {
     MockGradleUtils gradleUtils;
 
     setUp(() {
-      memoryFileSystem = MemoryFileSystem();
+      memoryFileSystem = MemoryFileSystem.test();
       operatingSystemUtils = MockOperatingSystemUtils();
       gradleUtils = MockGradleUtils();
     });

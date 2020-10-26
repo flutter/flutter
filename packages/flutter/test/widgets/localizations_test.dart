@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -22,11 +20,11 @@ void main() {
       ],
       child: const Text('loaded')
     ));
-    final dynamic state = tester.state(find.byType(Localizations));
-    expect(state.locale, isNull);
+    final dynamic state = tester.state(find.byType(Localizations)); // ignore: unnecessary_nullable_for_final_variable_declarations
+    expect(state!.locale, isNull);
     expect(find.text('loaded'), findsNothing);
 
-    Locale locale;
+    late Locale locale;
     binding.onAllowFrame = () {
       locale = state.locale as Locale;
     };
@@ -53,12 +51,11 @@ class FakeLocalizationsDelegate extends LocalizationsDelegate<String> {
 
 class TestAutomatedTestWidgetsFlutterBinding extends AutomatedTestWidgetsFlutterBinding {
 
-  VoidCallback onAllowFrame;
+  VoidCallback? onAllowFrame;
 
   @override
   void allowFirstFrame() {
-    if (onAllowFrame != null)
-      onAllowFrame();
+    onAllowFrame?.call();
     super.allowFirstFrame();
   }
 }

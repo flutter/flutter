@@ -13,12 +13,15 @@ import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
 
-/// The default path used when the `useSyntheticPackage` setting is set to true
+/// The path for the synthetic package.
+final String defaultSyntheticPackagePath = globals.fs.path.join('.dart_tool', 'flutter_gen');
+
+/// The default path used when the `_useSyntheticPackage` setting is set to true
 /// in [LocalizationsGenerator].
 ///
 /// See [LocalizationsGenerator.initialize] for where and how it is used by the
 /// localizations tool.
-final String defaultSyntheticPackagePath = globals.fs.path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
+final String syntheticL10nPackagePath = globals.fs.path.join(defaultSyntheticPackagePath, 'gen_l10n');
 
 List<String> generateMethodParameters(Message message) {
   assert(message.placeholders.isNotEmpty);
@@ -405,6 +408,7 @@ class LocalizationsGenerator {
   Iterable<Message> _allMessages;
   AppResourceBundleCollection _allBundles;
   LocaleInfo _templateArbLocale;
+  bool _useSyntheticPackage = true;
 
   /// The directory that contains the project's arb files, as well as the
   /// header file, if specified.
@@ -538,12 +542,10 @@ class LocalizationsGenerator {
     bool useSyntheticPackage = true,
     String projectPathString,
   }) {
+    _useSyntheticPackage = useSyntheticPackage;
     setProjectDir(projectPathString);
     setInputDirectory(inputPathString);
-    setOutputDirectory(
-      outputPathString: outputPathString ?? inputPathString,
-      useSyntheticPackage: useSyntheticPackage,
-    );
+    setOutputDirectory(outputPathString ?? inputPathString);
     setTemplateArbFile(templateArbFileName);
     setBaseOutputFile(outputFileString);
     setPreferredSupportedLocales(preferredSupportedLocale);
@@ -614,15 +616,14 @@ class LocalizationsGenerator {
 
   /// Sets the reference [Directory] for [outputDirectory].
   @visibleForTesting
-  void setOutputDirectory({
+  void setOutputDirectory(
     String outputPathString,
-    bool useSyntheticPackage = true,
-  }) {
-    if (useSyntheticPackage) {
+  ) {
+    if (_useSyntheticPackage) {
       outputDirectory = _fs.directory(
         projectDirectory != null
-          ? _getAbsoluteProjectPath(defaultSyntheticPackagePath)
-          : defaultSyntheticPackagePath
+          ? _getAbsoluteProjectPath(syntheticL10nPackagePath)
+          : syntheticL10nPackagePath
       );
     } else {
       if (outputPathString == null) {
@@ -1004,11 +1005,20 @@ class LocalizationsGenerator {
     // First, generate the string contents of all necessary files.
     _generateCode();
 
+    // A pubspec.yaml file is required when using a synthetic package. If it does not
+    // exist, create a blank one.
+    if (_useSyntheticPackage) {
+      final Directory syntheticPackageDirectory = _fs.directory(defaultSyntheticPackagePath);
+      syntheticPackageDirectory.createSync(recursive: true);
+      final File flutterGenPubspec = syntheticPackageDirectory.childFile('pubspec.yaml');
+      if (!flutterGenPubspec.existsSync()) {
+        flutterGenPubspec.writeAsStringSync(emptyPubspecTemplate);
+      }
+    }
+
     // Since all validity checks have passed up to this point,
     // write the contents into the directory.
-    if (!outputDirectory.existsSync()) {
-      outputDirectory.createSync(recursive: true);
-    }
+    outputDirectory.createSync(recursive: true);
 
     // Ensure that the created directory has read/write permissions.
     final FileStat fileStat = outputDirectory.statSync();

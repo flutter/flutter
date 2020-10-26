@@ -630,7 +630,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     }
     RenderBox? child = super.firstChild;
     for (int toSkip = skipCount; toSkip > 0; toSkip--) {
-      final StackParentData childParentData = child!.parentData as StackParentData;
+      final StackParentData childParentData = child!.parentData! as StackParentData;
       child = childParentData.nextSibling;
       assert(child != null);
     }
@@ -668,7 +668,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     RenderBox? child = _firstOnstageChild;
     while (child != null) {
       assert(!child.debugNeedsLayout);
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       double? candidate = child.getDistanceToActualBaseline(baseline);
       if (candidate != null) {
         candidate += childParentData.offset.dy;
@@ -708,7 +708,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
     RenderBox? child = _firstOnstageChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
 
       if (!childParentData.isPositioned) {
         child.layout(nonPositionedConstraints, parentUsesSize: true);
@@ -727,7 +727,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     RenderBox? child = _lastOnstageChild;
     for (int i = 0; i < _onstageChildCount; i++) {
       assert(child != null);
-      final StackParentData childParentData = child!.parentData as StackParentData;
+      final StackParentData childParentData = child!.parentData! as StackParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
@@ -747,7 +747,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   void paintStack(PaintingContext context, Offset offset) {
     RenderBox? child = _firstOnstageChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       context.paintChild(child, childParentData.offset + offset);
       child = childParentData.nextSibling;
     }
@@ -756,18 +756,22 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_hasVisualOverflow && clipBehavior != Clip.none) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack, clipBehavior: clipBehavior);
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack,
+          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
     } else {
+      _clipRectLayer = null;
       paintStack(context, offset);
     }
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     RenderBox? child = _firstOnstageChild;
     while (child != null) {
       visitor(child);
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       child = childParentData.nextSibling;
     }
   }
@@ -812,7 +816,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
         );
       }
 
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       child = childParentData.nextSibling;
       count += 1;
     }

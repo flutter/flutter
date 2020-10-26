@@ -69,7 +69,7 @@ class PrecacheCommand extends FlutterCommand {
   final String name = 'precache';
 
   @override
-  final String description = "Populates the Flutter tool's cache of binary artifacts.";
+  final String description = "Populate the Flutter tool's cache of binary artifacts.";
 
   @override
   bool get shouldUpdateCache => false;

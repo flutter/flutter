@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
@@ -110,14 +108,14 @@ void main() {
     final AlignmentGeometry mixed3 = const Alignment(25.0, 42.5).add(const AlignmentDirectional(55.0, 80.0));
 
     for (final TextDirection direction in TextDirection.values) {
-      expect(AlignmentGeometry.lerp(mixed1, mixed2, 0.0).resolve(direction), mixed1.resolve(direction));
-      expect(AlignmentGeometry.lerp(mixed1, mixed2, 1.0).resolve(direction), mixed2.resolve(direction));
-      expect(AlignmentGeometry.lerp(mixed1, mixed2, 0.25).resolve(direction), mixed3.resolve(direction));
+      expect(AlignmentGeometry.lerp(mixed1, mixed2, 0.0)!.resolve(direction), mixed1.resolve(direction));
+      expect(AlignmentGeometry.lerp(mixed1, mixed2, 1.0)!.resolve(direction), mixed2.resolve(direction));
+      expect(AlignmentGeometry.lerp(mixed1, mixed2, 0.25)!.resolve(direction), mixed3.resolve(direction));
     }
   });
 
   test('lerp commutes with resolve', () {
-    final List<AlignmentGeometry> offsets = <AlignmentGeometry>[
+    final List<AlignmentGeometry?> offsets = <AlignmentGeometry?>[
       Alignment.topLeft,
       Alignment.topCenter,
       Alignment.topRight,
@@ -154,19 +152,19 @@ void main() {
 
     for (final TextDirection direction in TextDirection.values) {
       final Alignment defaultValue = AlignmentDirectional.center.resolve(direction);
-      for (final AlignmentGeometry a in offsets) {
+      for (final AlignmentGeometry? a in offsets) {
         final Alignment resolvedA = a?.resolve(direction) ?? defaultValue;
-        for (final AlignmentGeometry b in offsets) {
+        for (final AlignmentGeometry? b in offsets) {
           final Alignment resolvedB = b?.resolve(direction) ?? defaultValue;
-          approxExpect(Alignment.lerp(resolvedA, resolvedB, 0.0), resolvedA);
-          approxExpect(Alignment.lerp(resolvedA, resolvedB, 1.0), resolvedB);
+          approxExpect(Alignment.lerp(resolvedA, resolvedB, 0.0)!, resolvedA);
+          approxExpect(Alignment.lerp(resolvedA, resolvedB, 1.0)!, resolvedB);
           approxExpect((AlignmentGeometry.lerp(a, b, 0.0) ?? defaultValue).resolve(direction), resolvedA);
           approxExpect((AlignmentGeometry.lerp(a, b, 1.0) ?? defaultValue).resolve(direction), resolvedB);
           for (final double t in times) {
             assert(t > 0.0);
             assert(t < 1.0);
             final Alignment value = (AlignmentGeometry.lerp(a, b, t) ?? defaultValue).resolve(direction);
-            approxExpect(value, Alignment.lerp(resolvedA, resolvedB, t));
+            approxExpect(value, Alignment.lerp(resolvedA, resolvedB, t)!);
             final double minDX = math.min(resolvedA.x, resolvedB.x);
             final double maxDX = math.max(resolvedA.x, resolvedB.x);
             final double minDY = math.min(resolvedA.y, resolvedB.y);
@@ -214,10 +212,10 @@ void main() {
 
   test('AlignmentGeometry toString', () {
     expect(const Alignment(1.0001, 2.0001).toString(), 'Alignment(1.0, 2.0)');
-    expect(const Alignment(0.0, 0.0).toString(), 'center');
-    expect(const Alignment(-1.0, 1.0).add(const AlignmentDirectional(1.0, 0.0)).toString(), 'bottomLeft + AlignmentDirectional.centerEnd');
+    expect(const Alignment(0.0, 0.0).toString(), 'Alignment.center');
+    expect(const Alignment(-1.0, 1.0).add(const AlignmentDirectional(1.0, 0.0)).toString(), 'Alignment.bottomLeft + AlignmentDirectional.centerEnd');
     expect(const Alignment(0.0001, 0.0001).toString(), 'Alignment(0.0, 0.0)');
-    expect(const Alignment(0.0, 0.0).toString(), 'center');
+    expect(const Alignment(0.0, 0.0).toString(), 'Alignment.center');
     expect(const AlignmentDirectional(0.0, 0.0).toString(), 'AlignmentDirectional.center');
     expect(const Alignment(1.0, 1.0).add(const AlignmentDirectional(1.0, 1.0)).toString(), 'Alignment(1.0, 2.0) + AlignmentDirectional.centerEnd');
   });

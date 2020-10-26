@@ -57,7 +57,7 @@ void main() {
   });
 
   testWithoutContext('Template.render replaces .img.tmpl files with files from the image source', () {
-    final MemoryFileSystem fileSystem = MemoryFileSystem();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Directory templateDir = fileSystem.directory('templates');
     final Directory imageSourceDir = fileSystem.directory('template_images');
     final Directory destination = fileSystem.directory('target');
@@ -84,7 +84,7 @@ void main() {
   });
 
   testWithoutContext('Template.fromName runs pub get if .packages is missing', () async {
-    final MemoryFileSystem fileSystem = MemoryFileSystem();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final MockPub pub = MockPub();
     when(pub.get(
       context: PubContext.pubGet,
@@ -107,7 +107,7 @@ void main() {
   });
 
   testWithoutContext('Template.fromName runs pub get if .packages is missing flutter_template_images', () async {
-    final MemoryFileSystem fileSystem = MemoryFileSystem();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final MockPub pub = MockPub();
     when(pub.get(
       context: PubContext.pubGet,
@@ -137,7 +137,7 @@ void main() {
   });
 
   testWithoutContext('Template.fromName runs pub get if flutter_template_images directory is missing', () async {
-    final MemoryFileSystem fileSystem = MemoryFileSystem();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final MockPub pub = MockPub();
     Cache.flutterRoot = '/flutter';
     final File packagesFile = fileSystem.directory(Cache.flutterRoot)

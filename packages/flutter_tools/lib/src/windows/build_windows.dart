@@ -7,7 +7,6 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -36,7 +35,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       'to learn about adding Windows support to a project.');
   }
 
-  // Ensure that necessary emphemeral files are generated and up to date.
+  // Ensure that necessary ephemeral files are generated and up to date.
   _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
   createPluginSymlinks(windowsProject.parent);
 
@@ -56,7 +55,6 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
-    timeout: null,
   );
   try {
     await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
@@ -95,7 +93,7 @@ Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory
   await buildDir.create(recursive: true);
   int result;
   try {
-    result = await processUtils.stream(
+    result = await globals.processUtils.stream(
       <String>[
         cmakePath,
         '-S',
@@ -125,7 +123,7 @@ Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeNam
 
   int result;
   try {
-    result = await processUtils.stream(
+    result = await globals.processUtils.stream(
       <String>[
         cmakePath,
         '--build',

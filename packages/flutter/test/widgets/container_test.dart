@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
@@ -96,7 +94,7 @@ void main() {
         '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
         '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: bottomRight\n'
+        '           │ alignment: Alignment.bottomRight\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
         '           │\n'
@@ -169,7 +167,7 @@ void main() {
         '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
         '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: bottomRight\n'
+        '           │ alignment: Alignment.bottomRight\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
         '           │\n'
@@ -267,7 +265,7 @@ void main() {
         '           │ layer: null\n'
         '           │ semantics node: null\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: bottomRight\n'
+        '           │ alignment: Alignment.bottomRight\n'
         '           │ textDirection: null\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
@@ -394,7 +392,7 @@ void main() {
         '           │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
         '           │ isSemanticBoundary: false\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: bottomRight\n'
+        '           │ alignment: Alignment.bottomRight\n'
         '           │ textDirection: null\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
@@ -440,7 +438,7 @@ void main() {
 
     final RenderBox decoratedBox = tester.renderObject(find.byType(DecoratedBox).last);
     final PaintingContext context = _MockPaintingContext();
-    FlutterError error;
+    late FlutterError error;
     try {
       decoratedBox.paint(context, const Offset(0, 0));
     } on FlutterError catch (e) {
@@ -468,6 +466,53 @@ void main() {
         child: ListView(children: <Widget>[Container()]),
       ),
     );
+  });
+
+  testWidgets('Container transformAlignment', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                color: const Color(0xFF0000FF),
+              ),
+            ),
+            Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                key: key,
+                transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
+                transformAlignment: const Alignment(1.0, 0.0),
+                child: Container(
+                  color: const Color(0xFF00FFFF),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Finder finder = find.byKey(key);
+
+    expect(tester.getSize(finder), equals(const Size(100, 100)));
+
+    expect(tester.getTopLeft(finder), equals(const Offset(100, 100)));
+    expect(tester.getTopRight(finder), equals(const Offset(200, 100)));
+
+    expect(tester.getBottomLeft(finder), equals(const Offset(100, 200)));
+    expect(tester.getBottomRight(finder), equals(const Offset(200, 200)));
   });
 
   testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {

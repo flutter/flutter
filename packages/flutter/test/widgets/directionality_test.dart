@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -12,7 +10,7 @@ void main() {
     final List<TextDirection> log = <TextDirection>[];
     final Widget inner = Builder(
       builder: (BuildContext context) {
-        log.add(Directionality.of(context));
+        log.add(Directionality.of(context)!);
         return const Placeholder();
       }
     );
@@ -63,11 +61,5 @@ void main() {
       },
     ));
     expect(good, isTrue);
-  });
-
-  testWidgets("Directionality can't be null", (WidgetTester tester) async {
-    expect(() {
-      Directionality(textDirection: nonconst(null), child: const Placeholder());
-    }, throwsAssertionError);
   });
 }

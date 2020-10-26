@@ -2,21 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('Border constructor', () {
-    expect(() => Border(left: nonconst(null)), throwsAssertionError);
-    expect(() => Border(top: nonconst(null)), throwsAssertionError);
-    expect(() => Border(right: nonconst(null)), throwsAssertionError);
-    expect(() => Border(bottom: nonconst(null)), throwsAssertionError);
-  });
-
   test('Border.uniform constructor', () {
-    expect(() => Border.fromBorderSide(null), throwsAssertionError);
     const BorderSide side = BorderSide();
     const Border border = Border.fromBorderSide(side);
     expect(border.left, same(side));
@@ -26,8 +16,6 @@ void main() {
   });
 
   test('Border.symmetric constructor', () {
-    expect(() => Border.symmetric(vertical: nonconst(null)), throwsAssertionError);
-    expect(() => Border.symmetric(horizontal: nonconst(null)), throwsAssertionError);
     const BorderSide side1 = BorderSide(color: Color(0xFFFFFFFF));
     const BorderSide side2 = BorderSide(color: Color(0xFF000000));
     const Border border = Border.symmetric(vertical: side1, horizontal: side2);

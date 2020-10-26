@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -77,9 +76,6 @@ flutter:
 }
 
 IOSDevice setUpIOSDevice(FileSystem fileSystem) {
-  final MockArtifacts artifacts = MockArtifacts();
-  when(artifacts.getArtifactPath(Artifact.iosDeploy, platform: anyNamed('platform')))
-    .thenReturn('ios-deploy');
   return IOSDevice(
     'test',
     fileSystem: fileSystem,
@@ -96,5 +92,4 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
   );
 }
 
-class MockArtifacts extends Mock implements Artifacts {}
 class MockVmService extends Mock implements VmService {}

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
@@ -104,46 +102,64 @@ void main() {
 
     resampler.sample(const Duration(microseconds: 2500), result.add);
 
-    // Down pointer event should have been returned.
-    expect(result.length, 2);
+    // Hover and down pointer events should have been returned.
+    expect(result.length, 3);
     expect(result[1].timeStamp, const Duration(microseconds: 2500));
-    expect(result[1] is PointerDownEvent, true);
+    expect(result[1] is PointerHoverEvent, true);
     expect(result[1].position.dx, 15.0);
     expect(result[1].position.dy, 35.0);
+    expect(result[1].delta.dx, 10.0);
+    expect(result[1].delta.dy, -10.0);
+    expect(result[2].timeStamp, const Duration(microseconds: 2500));
+    expect(result[2] is PointerDownEvent, true);
+    expect(result[2].position.dx, 15.0);
+    expect(result[2].position.dy, 35.0);
 
     resampler.sample(const Duration(microseconds: 3500), result.add);
 
     // Move pointer event should have been returned.
-    expect(result.length, 3);
-    expect(result[2].timeStamp, const Duration(microseconds: 3500));
-    expect(result[2] is PointerMoveEvent, true);
-    expect(result[2].position.dx, 25.0);
-    expect(result[2].position.dy, 25.0);
-    expect(result[2].delta.dx, 10.0);
-    expect(result[2].delta.dy, -10.0);
+    expect(result.length, 4);
+    expect(result[3].timeStamp, const Duration(microseconds: 3500));
+    expect(result[3] is PointerMoveEvent, true);
+    expect(result[3].position.dx, 25.0);
+    expect(result[3].position.dy, 25.0);
+    expect(result[3].delta.dx, 10.0);
+    expect(result[3].delta.dy, -10.0);
 
     resampler.sample(const Duration(microseconds: 4500), result.add);
 
-    // Up pointer event should have been returned.
-    expect(result.length, 4);
-    expect(result[3].timeStamp, const Duration(microseconds: 4500));
-    expect(result[3] is PointerUpEvent, true);
-    expect(result[3].position.dx, 35.0);
-    expect(result[3].position.dy, 15.0);
+    // Move and up pointer events should have been returned.
+    expect(result.length, 6);
+    expect(result[4].timeStamp, const Duration(microseconds: 4500));
+    expect(result[4] is PointerMoveEvent, true);
+    expect(result[4].position.dx, 35.0);
+    expect(result[4].position.dy, 15.0);
+    expect(result[4].delta.dx, 10.0);
+    expect(result[4].delta.dy, -10.0);
+    expect(result[5].timeStamp, const Duration(microseconds: 4500));
+    expect(result[5] is PointerUpEvent, true);
+    expect(result[5].position.dx, 35.0);
+    expect(result[5].position.dy, 15.0);
 
     resampler.sample(const Duration(microseconds: 5500), result.add);
 
-    // Remove pointer event should have been returned.
-    expect(result.length, 5);
-    expect(result[4].timeStamp, const Duration(microseconds: 5500));
-    expect(result[4] is PointerRemovedEvent, true);
-    expect(result[4].position.dx, 45.0);
-    expect(result[4].position.dy, 5.0);
+    // Hover and remove pointer events should have been returned.
+    expect(result.length, 8);
+    expect(result[6].timeStamp, const Duration(microseconds: 5500));
+    expect(result[6] is PointerHoverEvent, true);
+    expect(result[6].position.dx, 45.0);
+    expect(result[6].position.dy, 5.0);
+    expect(result[6].delta.dx, 10.0);
+    expect(result[6].delta.dy, -10.0);
+    expect(result[7].timeStamp, const Duration(microseconds: 5500));
+    expect(result[7] is PointerRemovedEvent, true);
+    expect(result[7].position.dx, 45.0);
+    expect(result[7].position.dy, 5.0);
 
     resampler.sample(const Duration(microseconds: 6500), result.add);
 
     // No pointer event should have been returned.
-    expect(result.length, 5);
+    expect(result.length, 8);
   });
 
   test('stream', () {
@@ -201,19 +217,25 @@ void main() {
 
     resampler.sample(const Duration(microseconds: 2500), result.add);
 
-    // Down pointer event should have been returned.
-    expect(result.length, 2);
+    // Hover and down pointer events should have been returned.
+    expect(result.length, 3);
     expect(result[1].timeStamp, const Duration(microseconds: 2500));
-    expect(result[1] is PointerDownEvent, true);
+    expect(result[1] is PointerHoverEvent, true);
     expect(result[1].position.dx, 15.0);
     expect(result[1].position.dy, 35.0);
+    expect(result[1].delta.dx, 10.0);
+    expect(result[1].delta.dy, -10.0);
+    expect(result[2].timeStamp, const Duration(microseconds: 2500));
+    expect(result[2] is PointerDownEvent, true);
+    expect(result[2].position.dx, 15.0);
+    expect(result[2].position.dy, 35.0);
 
     resampler.addEvent(event3);
 
     resampler.sample(const Duration(microseconds: 2500), result.add);
 
     // No more pointer events should have been returned.
-    expect(result.length, 2);
+    expect(result.length, 3);
 
     //
     // Advance sample time to 3.5 ms.
@@ -222,20 +244,20 @@ void main() {
     resampler.sample(const Duration(microseconds: 3500), result.add);
 
     // Move pointer event should have been returned.
-    expect(result.length, 3);
-    expect(result[2].timeStamp, const Duration(microseconds: 3500));
-    expect(result[2] is PointerMoveEvent, true);
-    expect(result[2].position.dx, 25.0);
-    expect(result[2].position.dy, 25.0);
-    expect(result[2].delta.dx, 10.0);
-    expect(result[2].delta.dy, -10.0);
+    expect(result.length, 4);
+    expect(result[3].timeStamp, const Duration(microseconds: 3500));
+    expect(result[3] is PointerMoveEvent, true);
+    expect(result[3].position.dx, 25.0);
+    expect(result[3].position.dy, 25.0);
+    expect(result[3].delta.dx, 10.0);
+    expect(result[3].delta.dy, -10.0);
 
     resampler.addEvent(event4);
 
     resampler.sample(const Duration(microseconds: 3500), result.add);
 
     // No more pointer events should have been returned.
-    expect(result.length, 3);
+    expect(result.length, 4);
 
     //
     // Advance sample time to 4.5 ms.
@@ -243,19 +265,25 @@ void main() {
 
     resampler.sample(const Duration(microseconds: 4500), result.add);
 
-    // Up pointer event should have been returned.
-    expect(result.length, 4);
-    expect(result[3].timeStamp, const Duration(microseconds: 4500));
-    expect(result[3] is PointerUpEvent, true);
-    expect(result[3].position.dx, 35.0);
-    expect(result[3].position.dy, 15.0);
+    // Move and up pointer events should have been returned.
+    expect(result.length, 6);
+    expect(result[4].timeStamp, const Duration(microseconds: 4500));
+    expect(result[4] is PointerMoveEvent, true);
+    expect(result[4].position.dx, 35.0);
+    expect(result[4].position.dy, 15.0);
+    expect(result[4].delta.dx, 10.0);
+    expect(result[4].delta.dy, -10.0);
+    expect(result[5].timeStamp, const Duration(microseconds: 4500));
+    expect(result[5] is PointerUpEvent, true);
+    expect(result[5].position.dx, 35.0);
+    expect(result[5].position.dy, 15.0);
 
     resampler.addEvent(event5);
 
     resampler.sample(const Duration(microseconds: 4500), result.add);
 
     // No more pointer events should have been returned.
-    expect(result.length, 4);
+    expect(result.length, 6);
 
     //
     // Advance sample time to 5.5 ms.
@@ -263,12 +291,18 @@ void main() {
 
     resampler.sample(const Duration(microseconds: 5500), result.add);
 
-    // Remove pointer event should have been returned.
-    expect(result.length, 5);
-    expect(result[4].timeStamp, const Duration(microseconds: 5500));
-    expect(result[4] is PointerRemovedEvent, true);
-    expect(result[4].position.dx, 45.0);
-    expect(result[4].position.dy, 5.0);
+    // Hover and remove pointer event should have been returned.
+    expect(result.length, 8);
+    expect(result[6].timeStamp, const Duration(microseconds: 5500));
+    expect(result[6] is PointerHoverEvent, true);
+    expect(result[6].position.dx, 45.0);
+    expect(result[6].position.dy, 5.0);
+    expect(result[6].delta.dx, 10.0);
+    expect(result[6].delta.dy, -10.0);
+    expect(result[7].timeStamp, const Duration(microseconds: 5500));
+    expect(result[7] is PointerRemovedEvent, true);
+    expect(result[7].position.dx, 45.0);
+    expect(result[7].position.dy, 5.0);
 
     //
     // Advance sample time to 6.5 ms.
@@ -277,7 +311,7 @@ void main() {
     resampler.sample(const Duration(microseconds: 6500), result.add);
 
     // No pointer events should have been returned.
-    expect(result.length, 5);
+    expect(result.length, 8);
   });
 
   test('quick tap', () {
@@ -376,16 +410,22 @@ void main() {
 
     resampler.sample(const Duration(microseconds: 2500), result.add);
 
-    // Last two pointer events should have been returned.
-    expect(result.length, 6);
+    // Move, up and removed pointer events should have been returned.
+    expect(result.length, 7);
     expect(result[4].timeStamp, const Duration(microseconds: 2500));
-    expect(result[4] is PointerUpEvent, true);
+    expect(result[4] is PointerMoveEvent, true);
     expect(result[4].position.dx, 15.0);
     expect(result[4].position.dy, 0.0);
+    expect(result[4].delta.dx, 5.0);
+    expect(result[4].delta.dy, 0.0);
     expect(result[5].timeStamp, const Duration(microseconds: 2500));
-    expect(result[5] is PointerRemovedEvent, true);
+    expect(result[5] is PointerUpEvent, true);
     expect(result[5].position.dx, 15.0);
     expect(result[5].position.dy, 0.0);
+    expect(result[6].timeStamp, const Duration(microseconds: 2500));
+    expect(result[6] is PointerRemovedEvent, true);
+    expect(result[6].position.dx, 15.0);
+    expect(result[6].position.dy, 0.0);
   });
 
   test('advance fast', () {
@@ -422,21 +462,27 @@ void main() {
 
     resampler.sample(const Duration(microseconds: 5500), result.add);
 
-    // Up and removed pointer events should have been returned.
-    expect(result.length, 4);
+    // Move, up and removed pointer events should have been returned.
+    expect(result.length, 5);
     expect(result[2].timeStamp, const Duration(microseconds: 5500));
-    expect(result[2] is PointerUpEvent, true);
+    expect(result[2] is PointerMoveEvent, true);
     expect(result[2].position.dx, 30.0);
     expect(result[2].position.dy, 0.0);
+    expect(result[2].delta.dx, 17.5);
+    expect(result[2].delta.dy, 0.0);
     expect(result[3].timeStamp, const Duration(microseconds: 5500));
-    expect(result[3] is PointerRemovedEvent, true);
+    expect(result[3] is PointerUpEvent, true);
     expect(result[3].position.dx, 30.0);
     expect(result[3].position.dy, 0.0);
+    expect(result[4].timeStamp, const Duration(microseconds: 5500));
+    expect(result[4] is PointerRemovedEvent, true);
+    expect(result[4].position.dx, 30.0);
+    expect(result[4].position.dy, 0.0);
 
     resampler.sample(const Duration(microseconds: 6500), result.add);
 
     // No pointer events should have been returned.
-    expect(result.length, 4);
+    expect(result.length, 5);
   });
 
   test('skip', () {
@@ -476,28 +522,34 @@ void main() {
     resampler.sample(const Duration(microseconds: 4500), result.add);
 
     // All remaining pointer events should have been returned.
-    expect(result.length, 6);
+    expect(result.length, 7);
     expect(result[2].timeStamp, const Duration(microseconds: 4500));
-    expect(result[2] is PointerUpEvent, true);
+    expect(result[2] is PointerMoveEvent, true);
     expect(result[2].position.dx, 25.0);
     expect(result[2].position.dy, 0.0);
+    expect(result[2].delta.dx, 20.0);
+    expect(result[2].delta.dy, 0.0);
     expect(result[3].timeStamp, const Duration(microseconds: 4500));
-    expect(result[3] is PointerDownEvent, true);
+    expect(result[3] is PointerUpEvent, true);
     expect(result[3].position.dx, 25.0);
     expect(result[3].position.dy, 0.0);
     expect(result[4].timeStamp, const Duration(microseconds: 4500));
-    expect(result[4] is PointerUpEvent, true);
+    expect(result[4] is PointerDownEvent, true);
     expect(result[4].position.dx, 25.0);
     expect(result[4].position.dy, 0.0);
     expect(result[5].timeStamp, const Duration(microseconds: 4500));
-    expect(result[5] is PointerRemovedEvent, true);
+    expect(result[5] is PointerUpEvent, true);
     expect(result[5].position.dx, 25.0);
     expect(result[5].position.dy, 0.0);
+    expect(result[6].timeStamp, const Duration(microseconds: 4500));
+    expect(result[6] is PointerRemovedEvent, true);
+    expect(result[6].position.dx, 25.0);
+    expect(result[6].position.dy, 0.0);
 
     resampler.sample(const Duration(microseconds: 5500), result.add);
 
     // No pointer events should have been returned.
-    expect(result.length, 6);
+    expect(result.length, 7);
   });
 
   test('skip all', () {
@@ -595,6 +647,67 @@ void main() {
     expect(result[4].timeStamp, const Duration(microseconds: 5000));
     expect(result[4] is PointerRemovedEvent, true);
     expect(result[4].position.dx, 20.0);
+    expect(result[4].position.dy, 0.0);
+
+    resampler.sample(const Duration(microseconds: 10000), result.add);
+
+    // No pointer events should have been returned.
+    expect(result.length, 5);
+  });
+
+  test('synthetic move', () {
+    final PointerEventResampler resampler = PointerEventResampler();
+    final PointerEvent event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event1 = _createSimulatedPointerDownEvent(2000, 0.0, 0.0);
+    final PointerEvent event2 = _createSimulatedPointerMoveEvent(3000, 10.0, 0.0, 10.0, 0.0);
+    final PointerEvent event3 = _createSimulatedPointerUpEvent(4000, 10.0, 0.0);
+    final PointerEvent event4 = _createSimulatedPointerRemovedEvent(5000, 10.0, 0.0);
+
+    resampler
+      ..addEvent(event0)
+      ..addEvent(event1)
+      ..addEvent(event2)
+      ..addEvent(event3)
+      ..addEvent(event4);
+
+    final List<PointerEvent> result = <PointerEvent>[];
+
+    resampler.sample(const Duration(microseconds: 500), result.add);
+
+    // No pointer events should have been returned.
+    expect(result.isEmpty, true);
+
+    resampler.sample(const Duration(microseconds: 2000), result.add);
+
+    // Added and down pointer events should have been returned.
+    expect(result.length, 2);
+    expect(result[0].timeStamp, const Duration(microseconds: 2000));
+    expect(result[0] is PointerAddedEvent, true);
+    expect(result[0].position.dx, 0.0);
+    expect(result[0].position.dy, 0.0);
+    expect(result[1].timeStamp, const Duration(microseconds: 2000));
+    expect(result[1] is PointerDownEvent, true);
+    expect(result[1].position.dx, 0.0);
+    expect(result[1].position.dy, 0.0);
+
+    resampler.sample(const Duration(microseconds: 5000), result.add);
+
+    // All remaining pointer events and a synthetic move event should
+    // have been returned.
+    expect(result.length, 5);
+    expect(result[2].timeStamp, const Duration(microseconds: 5000));
+    expect(result[2] is PointerMoveEvent, true);
+    expect(result[2].position.dx, 10.0);
+    expect(result[2].position.dy, 0.0);
+    expect(result[2].delta.dx, 10.0);
+    expect(result[2].delta.dy, 0.0);
+    expect(result[3].timeStamp, const Duration(microseconds: 5000));
+    expect(result[3] is PointerUpEvent, true);
+    expect(result[3].position.dx, 10.0);
+    expect(result[3].position.dy, 0.0);
+    expect(result[4].timeStamp, const Duration(microseconds: 5000));
+    expect(result[4] is PointerRemovedEvent, true);
+    expect(result[4].position.dx, 10.0);
     expect(result[4].position.dy, 0.0);
 
     resampler.sample(const Duration(microseconds: 10000), result.add);

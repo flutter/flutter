@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui show window;
 
 import 'package:flutter/material.dart';
@@ -29,8 +27,8 @@ class TestLayout {
       ),
     );
   }
-  RenderBox root;
-  RenderBox child;
+  late RenderBox root;
+  late RenderBox child;
   bool painted = false;
 }
 

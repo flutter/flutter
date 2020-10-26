@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/memory.dart';
+import 'package:yaml/yaml.dart';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -19,7 +20,8 @@ import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignor
 export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf, test; // Defines a 'package:test' shim.
 
 final String defaultL10nPathString = globals.fs.path.join('lib', 'l10n');
-final String syntheticPackagePath = globals.fs.path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
+final String syntheticPackagePath = globals.fs.path.join('.dart_tool', 'flutter_gen');
+final String syntheticL10nPackagePath = globals.fs.path.join(syntheticPackagePath, 'gen_l10n');
 const String defaultTemplateArbFileName = 'app_en.arb';
 const String defaultOutputFileString = 'output-localization-file.dart';
 const String defaultClassNameString = 'AppLocalizations';
@@ -109,10 +111,8 @@ void main() {
         _standardFlutterDirectoryL10nSetup(fs);
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         try {
-          generator.setOutputDirectory(
-            outputPathString: null,
-            useSyntheticPackage: false,
-          );
+          generator.initialize(useSyntheticPackage: false);
+          generator.setOutputDirectory(null);
         } on L10nException catch (e) {
           expect(e.message, contains('cannot be null'));
           return;
@@ -302,7 +302,7 @@ void main() {
         generator = LocalizationsGenerator(fs);
         try {
           generator.setInputDirectory(defaultL10nPathString);
-          generator.setOutputDirectory();
+          generator.setOutputDirectory(null);
           generator.setTemplateArbFile(defaultTemplateArbFileName);
           generator.setBaseOutputFile(defaultOutputFileString);
         } on L10nException catch (e) {
@@ -433,7 +433,7 @@ void main() {
       fail('Generating output should not fail: \n${e.message}');
     }
 
-    final Directory outputDirectory = fs.directory(syntheticPackagePath);
+    final Directory outputDirectory = fs.directory(syntheticL10nPackagePath);
     expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
     expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
     expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
@@ -624,7 +624,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
-          inputsAndOutputsListPath: syntheticPackagePath,
+          inputsAndOutputsListPath: syntheticL10nPackagePath,
         )
         ..loadResources()
         ..writeOutputFiles();
@@ -633,7 +633,7 @@ void main() {
     }
 
     final File inputsAndOutputsList = fs.file(
-      fs.path.join(syntheticPackagePath, 'gen_l10n_inputs_and_outputs.json'),
+      fs.path.join(syntheticL10nPackagePath, 'gen_l10n_inputs_and_outputs.json'),
     );
     expect(inputsAndOutputsList.existsSync(), isTrue);
 
@@ -645,9 +645,9 @@ void main() {
 
     expect(jsonResult.containsKey('outputs'), isTrue);
     final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
-    expect(outputList, contains(fs.path.absolute(syntheticPackagePath, 'output-localization-file.dart')));
-    expect(outputList, contains(fs.path.absolute(syntheticPackagePath, 'output-localization-file_en.dart')));
-    expect(outputList, contains(fs.path.absolute(syntheticPackagePath, 'output-localization-file_es.dart')));
+    expect(outputList, contains(fs.path.absolute(syntheticL10nPackagePath, 'output-localization-file.dart')));
+    expect(outputList, contains(fs.path.absolute(syntheticL10nPackagePath, 'output-localization-file_en.dart')));
+    expect(outputList, contains(fs.path.absolute(syntheticL10nPackagePath, 'output-localization-file_es.dart')));
   });
 
   test('setting both a headerString and a headerFile should fail', () {
@@ -1095,11 +1095,11 @@ void main() {
         fail('Generating output files should not fail: $e');
       }
 
-      expect(fs.isFileSync(fs.path.join(syntheticPackagePath, 'output-localization-file_en.dart')), true);
-      expect(fs.isFileSync(fs.path.join(syntheticPackagePath, 'output-localization-file_en_US.dart')), false);
+      expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart')), true);
+      expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en_US.dart')), false);
 
       final String englishLocalizationsFile = fs.file(
-        fs.path.join(syntheticPackagePath, 'output-localization-file_en.dart')
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart')
       ).readAsStringSync();
       expect(englishLocalizationsFile, contains('class AppLocalizationsEnCa extends AppLocalizationsEn'));
       expect(englishLocalizationsFile, contains('class AppLocalizationsEn extends AppLocalizations'));
@@ -1129,7 +1129,7 @@ void main() {
       }
 
       final String localizationsFile = fs.file(
-        fs.path.join(syntheticPackagePath, defaultOutputFileString),
+        fs.path.join(syntheticL10nPackagePath, defaultOutputFileString),
       ).readAsStringSync();
       expect(localizationsFile, contains(
 '''
@@ -1159,7 +1159,7 @@ import 'output-localization-file_zh.dart';
       }
 
       final String localizationsFile = fs.file(
-        fs.path.join(syntheticPackagePath, defaultOutputFileString),
+        fs.path.join(syntheticL10nPackagePath, defaultOutputFileString),
       ).readAsStringSync();
       expect(localizationsFile, contains(
 '''
@@ -1585,5 +1585,63 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         fail('should fail since key starts with a number.');
       });
     });
+  });
+
+  test('should generate a valid pubspec.yaml file when using synthetic package if it does not already exist', () {
+    _standardFlutterDirectoryL10nSetup(fs);
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources()
+        ..writeOutputFiles();
+    } on L10nException catch (e) {
+      fail('Generating output should not fail: \n${e.message}');
+    }
+
+    final Directory outputDirectory = fs.directory(syntheticPackagePath);
+    final File pubspecFile = outputDirectory.childFile('pubspec.yaml');
+    expect(pubspecFile.existsSync(), isTrue);
+
+    final YamlNode yamlNode = loadYamlNode(pubspecFile.readAsStringSync());
+    expect(yamlNode, isA<YamlMap>());
+
+    final YamlMap yamlMap = yamlNode as YamlMap;
+    final String pubspecName = yamlMap['name'] as String;
+    final String pubspecDescription = yamlMap['description'] as String;
+    expect(pubspecName, 'synthetic_package');
+    expect(pubspecDescription, "The Flutter application's synthetic package.");
+  });
+
+  test('should not overwrite existing pubspec.yaml file when using synthetic package', () {
+    _standardFlutterDirectoryL10nSetup(fs);
+    final File pubspecFile = fs.file(fs.path.join(syntheticPackagePath, 'pubspec.yaml'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('abcd');
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources()
+        ..writeOutputFiles();
+    } on L10nException catch (e) {
+      fail('Generating output should not fail: \n${e.message}');
+    }
+
+    // The original pubspec file should not be overwritten.
+    expect(pubspecFile.readAsStringSync(), 'abcd');
   });
 }

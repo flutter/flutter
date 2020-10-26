@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import '../flutter_test_alternative.dart';
 
@@ -33,7 +31,7 @@ class RenderFixedSize extends RenderBox {
 }
 
 class RenderParentSize extends RenderProxyBox {
-  RenderParentSize({ RenderBox child }) : super(child);
+  RenderParentSize({ required RenderBox child }) : super(child);
 
   @override
   bool get sizedByParent => true;
@@ -45,19 +43,19 @@ class RenderParentSize extends RenderProxyBox {
 
   @override
   void performLayout() {
-    child.layout(constraints);
+    child!.layout(constraints);
   }
 }
 
 class RenderIntrinsicSize extends RenderProxyBox {
-  RenderIntrinsicSize({ RenderBox child }) : super(child);
+  RenderIntrinsicSize({ required RenderBox child }) : super(child);
 
   @override
   void performLayout() {
-    child.layout(constraints);
+    child!.layout(constraints);
     size = Size(
-      child.getMinIntrinsicWidth(double.infinity),
-      child.getMinIntrinsicHeight(double.infinity),
+      child!.getMinIntrinsicWidth(double.infinity),
+      child!.getMinIntrinsicHeight(double.infinity),
     );
   }
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -234,15 +232,4 @@ void main() {
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 2)).runtimeType, WidgetSpan);
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 3)).runtimeType, TextSpan);
   });
-
-  test('TextSpan with a null child should throw FlutterError', () {
-    const TextSpan text = TextSpan(
-      text: 'foo bar',
-      children: <InlineSpan>[
-        null,
-      ],
-    );
-    expect(() => text.computeToPlainText(StringBuffer()), anyOf(throwsFlutterError, throwsAssertionError));
-  });
-
 }

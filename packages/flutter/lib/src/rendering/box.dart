@@ -2021,7 +2021,7 @@ abstract class RenderBox extends RenderObject {
     assert(constraints != null);
     assert(() {
       if (!hasSize) {
-        DiagnosticsNode contract;
+        final DiagnosticsNode contract;
         if (sizedByParent)
           contract = ErrorDescription('Because this RenderBox has sizedByParent set to true, it must set its size in performResize().');
         else
@@ -2046,14 +2046,14 @@ abstract class RenderBox extends RenderObject {
         if (!constraints.hasBoundedWidth) {
           RenderBox node = this;
           while (!node.constraints.hasBoundedWidth && node.parent is RenderBox)
-            node = node.parent as RenderBox;
+            node = node.parent! as RenderBox;
 
           information.add(node.describeForError('The nearest ancestor providing an unbounded width constraint is'));
         }
         if (!constraints.hasBoundedHeight) {
           RenderBox node = this;
           while (!node.constraints.hasBoundedHeight && node.parent is RenderBox)
-            node = node.parent as RenderBox;
+            node = node.parent! as RenderBox;
 
           information.add(node.describeForError('The nearest ancestor providing an unbounded height constraint is'));
         }
@@ -2314,7 +2314,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     }());
-    final BoxParentData childParentData = child.parentData as BoxParentData;
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
     final Offset offset = childParentData.offset;
     transform.translate(offset.dx, offset.dy);
   }
@@ -2560,7 +2560,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     double? result;
     ChildType? child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType childParentData = child.parentData! as ParentDataType;
       double? candidate = child.getDistanceToActualBaseline(baseline);
       if (candidate != null) {
         candidate += childParentData.offset.dy;
@@ -2587,7 +2587,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     // The x, y parameters have the top left of the node's box as the origin.
     ChildType? child = lastChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType childParentData = child.parentData! as ParentDataType;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
@@ -2612,7 +2612,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   void defaultPaint(PaintingContext context, Offset offset) {
     ChildType? child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType childParentData = child.parentData! as ParentDataType;
       context.paintChild(child, childParentData.offset + offset);
       child = childParentData.nextSibling;
     }
@@ -2627,7 +2627,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     final List<ChildType> result = <ChildType>[];
     RenderBox? child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType childParentData = child.parentData! as ParentDataType;
       result.add(child as ChildType);
       child = childParentData.nextSibling;
     }

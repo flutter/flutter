@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +44,7 @@ void main() {
         gradient: RadialGradient(
           center: Alignment.topLeft,
           radius: 1.8,
-          colors: <Color>[Colors.yellow[500], Colors.blue[500]],
+          colors: <Color>[Colors.yellow[500]!, Colors.blue[500]!],
         ),
         boxShadow: kElevationToShadow[3],
       ),
@@ -57,7 +55,7 @@ void main() {
   });
 
   test('performLayout error message', () {
-    FlutterError result;
+    late FlutterError result;
     try {
       MissingPerformLayoutRenderBox().performLayout();
     }  on FlutterError catch (e) {
@@ -95,7 +93,7 @@ void main() {
     // BoxParentData.
     paddingBox.parentData = ParentData();
 
-    FlutterError result;
+    late FlutterError result;
     try {
       root.applyPaintTransform(paddingBox, Matrix4.identity());
     } on FlutterError catch (e) {
@@ -151,7 +149,7 @@ void main() {
 
     final MissingPerformLayoutRenderBox testBox = MissingPerformLayoutRenderBox();
     {
-      FlutterError result;
+      late FlutterError result;
       try {
         testBox.triggerExceptionSettingSizeOutsideOfLayout();
       } on FlutterError catch (e) {
@@ -173,7 +171,7 @@ void main() {
       expect(result.diagnostics.where((DiagnosticsNode node) => node.level == DiagnosticLevel.hint), isEmpty);
     }
     {
-      FlutterError result;
+      late FlutterError result;
       try {
         testBox.debugAdoptSize(root.size);
       } on FlutterError catch (e) {
@@ -310,7 +308,7 @@ void main() {
       padding: const EdgeInsets.all(10.0),
     );
     layout(paddedBox);
-    final BoxParentData parentData = coloredBox.parentData as BoxParentData;
+    final BoxParentData parentData = coloredBox.parentData! as BoxParentData;
     expect(parentData.offset.dx, isNot(equals(0.0)));
     paddedBox.child = null;
 
@@ -392,7 +390,7 @@ void main() {
     layout(unconstrained, constraints: viewport);
 
     {
-      FlutterError result;
+      late FlutterError result;
       try {
         unconstrained.getMinIntrinsicWidth(-1);
       } on FlutterError catch (e) {
@@ -420,7 +418,7 @@ void main() {
     }
 
     {
-      FlutterError result;
+      late FlutterError result;
       try {
         unconstrained.getMinIntrinsicHeight(-1);
       } on FlutterError catch (e) {
@@ -448,7 +446,7 @@ void main() {
     }
 
     {
-      FlutterError result;
+      late FlutterError result;
       try {
         unconstrained.getMaxIntrinsicWidth(-1);
       } on FlutterError catch (e) {
@@ -476,7 +474,7 @@ void main() {
     }
 
     {
-      FlutterError result;
+      late FlutterError result;
       try {
         unconstrained.getMaxIntrinsicHeight(-1);
       } on FlutterError catch (e) {
@@ -519,7 +517,7 @@ void main() {
           '   parentData: MISSING\n'
           '   constraints: MISSING\n'
           '   size: MISSING\n'
-          '   alignment: center\n'
+          '   alignment: Alignment.center\n'
           '   textDirection: ltr\n'),
     );
   });
@@ -537,7 +535,7 @@ void main() {
       ),
       alignment: Alignment.center,
     );
-    final FlexParentData flexParentData = flexible.parentData as FlexParentData;
+    final FlexParentData flexParentData = flexible.parentData! as FlexParentData;
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
@@ -561,7 +559,7 @@ void main() {
       ),
       alignment: Alignment.center,
     );
-    final FlexParentData flexParentData = flexible.parentData as FlexParentData;
+    final FlexParentData flexParentData = flexible.parentData! as FlexParentData;
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
@@ -934,7 +932,7 @@ void main() {
         final RenderBox renderObject = RenderConstrainedBox(
           additionalConstraints: const BoxConstraints().tighten(height: 100.0),
         );
-        FlutterError result;
+        late FlutterError result;
         try {
           final BoxHitTestResult result = BoxHitTestResult();
           renderObject.hitTest(result, position: Offset.zero);
@@ -971,7 +969,7 @@ void main() {
       }
 
       {
-        FlutterError result;
+        late FlutterError result;
         final FakeMissingSizeRenderBox renderObject = FakeMissingSizeRenderBox();
         layout(renderObject);
         renderObject.fakeMissingSize = true;
@@ -1019,16 +1017,9 @@ void main() {
     });
   });
 
-  test('BoxConstraints parameters should be non-null', () {
-    expect(() => BoxConstraints(minWidth: null), throwsAssertionError);
-    expect(() => BoxConstraints(maxWidth: null), throwsAssertionError);
-    expect(() => BoxConstraints(minHeight: null), throwsAssertionError);
-    expect(() => BoxConstraints(maxHeight: null), throwsAssertionError);
-  });
-
   test('Error message when size has not been set in RenderBox performLayout should be well versed', () {
-    FlutterErrorDetails errorDetails;
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    late FlutterErrorDetails errorDetails;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       errorDetails = details;
     };

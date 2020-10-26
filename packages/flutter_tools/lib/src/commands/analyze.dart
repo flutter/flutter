@@ -73,6 +73,14 @@ class AnalyzeCommand extends FlutterCommand {
         help: 'When analyzing the flutter repository, display the number of '
               'files that will be analyzed.\n'
               'Ignored if --watch is specified.');
+    argParser.addFlag('fatal-infos',
+        negatable: true,
+        help: 'Treat info level issues as fatal.',
+        defaultsTo: true);
+    argParser.addFlag('fatal-warnings',
+        negatable: true,
+        help: 'Treat warning level issues as fatal.',
+        defaultsTo: true);
   }
 
   /// The working directory for testing analysis using dartanalyzer.

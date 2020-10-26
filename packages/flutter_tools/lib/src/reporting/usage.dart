@@ -198,6 +198,7 @@ class _DefaultUsage implements Usage {
     final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;
 
     analyticsIOFactory ??= _defaultAnalyticsIOFactory;
+    _clock = globals.systemClock;
 
     if (// To support testing, only allow other signals to supress analytics
         // when analytics are not being shunted to a file.
@@ -221,14 +222,16 @@ class _DefaultUsage implements Usage {
       _analytics = LogToFileAnalytics(logFilePath);
     } else {
       try {
-        _analytics = analyticsIOFactory(
-          _kFlutterUA,
-          settingsName,
-          version,
-          documentDirectory: configDirOverride != null
-            ? globals.fs.directory(configDirOverride)
-            : null,
-        );
+        ErrorHandlingFileSystem.noExitOnFailure(() {
+          _analytics = analyticsIOFactory(
+            _kFlutterUA,
+            settingsName,
+            version,
+            documentDirectory: configDirOverride != null
+              ? globals.fs.directory(configDirOverride)
+              : null,
+          );
+        });
       } on Exception catch (e) {
         globals.printTrace('Failed to initialize analytics reporting: $e');
         suppressAnalytics = true;
@@ -270,13 +273,15 @@ class _DefaultUsage implements Usage {
   }
 
   _DefaultUsage.test() :
-      _suppressAnalytics = true,
-      _analytics = AnalyticsMock();
+      _suppressAnalytics = false,
+      _analytics = AnalyticsMock(true),
+      _clock = SystemClock.fixed(DateTime(2020, 10, 8));
 
   Analytics _analytics;
 
   bool _printedWelcome = false;
   bool _suppressAnalytics = false;
+  SystemClock _clock;
 
   @override
   bool get isFirstRun => _analytics.firstRun;
@@ -308,7 +313,7 @@ class _DefaultUsage implements Usage {
 
     final Map<String, String> paramsWithLocalTime = <String, String>{
       ...?parameters,
-      cdKey(CustomDimensions.localTime): formatDateTime(globals.systemClock.now()),
+      cdKey(CustomDimensions.localTime): formatDateTime(_clock.now()),
     };
     _analytics.sendScreenView(command, parameters: paramsWithLocalTime);
   }
@@ -327,7 +332,7 @@ class _DefaultUsage implements Usage {
 
     final Map<String, String> paramsWithLocalTime = <String, String>{
       ...?parameters,
-      cdKey(CustomDimensions.localTime): formatDateTime(globals.systemClock.now()),
+      cdKey(CustomDimensions.localTime): formatDateTime(_clock.now()),
     };
 
     _analytics.sendEvent(

@@ -9,16 +9,25 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main () {
+  Artifacts artifacts;
+  String iosDeployPath;
+
+  setUp(() {
+    artifacts = Artifacts.test();
+    iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+  });
+
   testWithoutContext('IOSDeploy.iosDeployEnv returns path with /usr/bin first', () {
     final IOSDeploy iosDeploy = setUpIOSDeploy(FakeProcessManager.any());
     final Map<String, String> environment = iosDeploy.iosDeployEnv;
@@ -35,7 +44,7 @@ void main () {
             '-t',
             '0',
             '/dev/null',
-            'ios-deploy',
+            iosDeployPath,
             '--id',
             '123',
             '--bundle',
@@ -47,12 +56,12 @@ void main () {
             ].join(' '),
           ], environment: const <String, String>{
             'PATH': '/usr/bin:/usr/local/bin:/usr/bin',
-            'DYLD_LIBRARY_PATH': '/path/to/libs',
+            'DYLD_LIBRARY_PATH': '/path/to/libraries',
           },
           stdout: '(lldb)     run\nsuccess\nDid finish launching.',
         ),
       ]);
-      final IOSDeploy iosDeploy = setUpIOSDeploy(processManager);
+      final IOSDeploy iosDeploy = setUpIOSDeploy(processManager, artifacts: artifacts);
       final IOSDeployDebugger iosDeployDebugger = iosDeploy.prepareDebuggerForLaunch(
         deviceId: '123',
         bundlePath: '/',
@@ -95,7 +104,10 @@ void main () {
           'success', // ignore first "success" from lldb, but log subsequent ones from real logging.
           'Log on attach1',
           'Log on attach2',
-          '', '']);
+          '',
+          '',
+          'Log after process exit',
+        ]);
       });
 
       testWithoutContext('app exit', () async {
@@ -115,7 +127,34 @@ void main () {
 
         expect(await iosDeployDebugger.launchAndAttach(), isTrue);
         await logLines.toList();
-        expect(receivedLogLines, <String>['Log on attach']);
+        expect(receivedLogLines, <String>[
+          'Log on attach',
+          'Log after process exit',
+        ]);
+      });
+
+      testWithoutContext('app crash', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ios-deploy'],
+            stdout:
+                '(lldb)     run\r\nsuccess\r\nLog on attach\r\n(lldb) Process 6156 stopped\r\n* thread #1, stop reason = Assertion failed:',
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        final List<String> receivedLogLines = <String>[];
+        final Stream<String> logLines = iosDeployDebugger.logLines
+          ..listen(receivedLogLines.add);
+
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+        await logLines.toList();
+        expect(receivedLogLines, <String>[
+          'Log on attach',
+          '* thread #1, stop reason = Assertion failed:',
+        ]);
       });
 
       testWithoutContext('attach failed', () async {
@@ -187,7 +226,7 @@ void main () {
         expect(logger.errorText, contains('Your device is locked.'));
       });
 
-      testWithoutContext('device locked', () async {
+      testWithoutContext('unknown app launch error', () async {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
@@ -229,8 +268,8 @@ void main () {
       const String deviceId = '123';
       const String bundleId = 'com.example.app';
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>[
-          'ios-deploy',
+        FakeCommand(command: <String>[
+          iosDeployPath,
           '--id',
           deviceId,
           '--uninstall_only',
@@ -238,7 +277,7 @@ void main () {
           bundleId,
         ])
       ]);
-      final IOSDeploy iosDeploy = setUpIOSDeploy(processManager);
+      final IOSDeploy iosDeploy = setUpIOSDeploy(processManager, artifacts: artifacts);
       final int exitCode = await iosDeploy.uninstallApp(
         deviceId: deviceId,
         bundleId: bundleId,
@@ -252,8 +291,8 @@ void main () {
       const String deviceId = '123';
       const String bundleId = 'com.example.app';
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>[
-          'ios-deploy',
+        FakeCommand(command: <String>[
+          iosDeployPath,
           '--id',
           deviceId,
           '--uninstall_only',
@@ -261,7 +300,7 @@ void main () {
           bundleId,
         ], exitCode: 1)
       ]);
-      final IOSDeploy iosDeploy = setUpIOSDeploy(processManager);
+      final IOSDeploy iosDeploy = setUpIOSDeploy(processManager, artifacts: artifacts);
       final int exitCode = await iosDeploy.uninstallApp(
         deviceId: deviceId,
         bundleId: bundleId,
@@ -273,30 +312,27 @@ void main () {
   });
 }
 
-IOSDeploy setUpIOSDeploy(ProcessManager processManager) {
-  const MapEntry<String, String> kDyLdLibEntry = MapEntry<String, String>(
-    'DYLD_LIBRARY_PATH', '/path/to/libs',
-  );
+IOSDeploy setUpIOSDeploy(ProcessManager processManager, {
+    Artifacts artifacts,
+  }) {
   final FakePlatform macPlatform = FakePlatform(
     operatingSystem: 'macos',
     environment: <String, String>{
       'PATH': '/usr/local/bin:/usr/bin'
     }
   );
-  final MockArtifacts artifacts = MockArtifacts();
-  final MockCache cache = MockCache();
+  final Cache cache = Cache.test(
+    platform: macPlatform,
+    artifacts: <ArtifactSet>[
+      FakeDyldEnvironmentArtifact(),
+    ],
+  );
 
-  when(cache.dyLdLibEntry).thenReturn(kDyLdLibEntry);
-  when(artifacts.getArtifactPath(Artifact.iosDeploy, platform: anyNamed('platform')))
-    .thenReturn('ios-deploy');
   return IOSDeploy(
     logger: BufferLogger.test(),
     platform: macPlatform,
     processManager: processManager,
-    artifacts: artifacts,
+    artifacts: artifacts ?? Artifacts.test(),
     cache: cache,
   );
 }
-
-class MockArtifacts extends Mock implements Artifacts {}
-class MockCache extends Mock implements Cache {}

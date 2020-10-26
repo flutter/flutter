@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -74,7 +72,7 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
     expect(renderEditable.cursorColor, defaultCursorColor);
-    expect(Color(renderEditable.selectionColor.value), defaultSelectionColor);
+    expect(Color(renderEditable.selectionColor!.value), defaultSelectionColor);
 
     // Test the selection handle color.
     await tester.pumpWidget(
@@ -117,7 +115,7 @@ void main() {
     await tester.pumpAndSettle();
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
-    expect(renderEditable.cursorColor, textSelectionTheme.cursorColor.withAlpha(0));
+    expect(renderEditable.cursorColor, textSelectionTheme.cursorColor!.withAlpha(0));
     expect(renderEditable.selectionColor, textSelectionTheme.selectionColor);
 
     // Test the selection handle color.
@@ -170,7 +168,7 @@ void main() {
     await tester.pumpAndSettle();
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
-    expect(renderEditable.cursorColor, widgetTextSelectionTheme.cursorColor.withAlpha(0));
+    expect(renderEditable.cursorColor, widgetTextSelectionTheme.cursorColor!.withAlpha(0));
     expect(renderEditable.selectionColor, widgetTextSelectionTheme.selectionColor);
 
     // Test the selection handle color.

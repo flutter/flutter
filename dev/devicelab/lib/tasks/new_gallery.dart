@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 
-import '../framework/framework.dart';
+import '../framework/task_result.dart';
 import '../framework/utils.dart';
 import '../versions/gallery.dart' show galleryVersion;
 

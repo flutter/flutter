@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -162,7 +160,7 @@ class MutatingRoute extends MaterialPageRoute<void> {
 }
 
 class _SimpleStatefulWidget extends StatefulWidget {
-  const _SimpleStatefulWidget({ Key key }) : super(key: key);
+  const _SimpleStatefulWidget({ Key? key }) : super(key: key);
   @override
   _SimpleState createState() => _SimpleState();
 }
@@ -175,7 +173,7 @@ class _SimpleState extends State<_SimpleStatefulWidget> {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({ Key key, this.value = '123' }) : super(key: key);
+  const MyStatefulWidget({ Key? key, this.value = '123' }) : super(key: key);
   final String value;
   @override
   MyStatefulWidgetState createState() => MyStatefulWidgetState();
@@ -339,7 +337,7 @@ Future<void> main() async {
         ),
       ),
     );
-    key.currentState.push(MaterialPageRoute<void>(
+    key.currentState!.push(MaterialPageRoute<void>(
       builder: (BuildContext c) {
         return Hero(
           tag: 'hero',
@@ -803,7 +801,7 @@ Future<void> main() async {
     const Key homeHeroKey = Key('home hero');
     const Key routeHeroKey = Key('route hero');
     bool routeIncludesHero = true;
-    StateSetter heroCardSetState;
+    late StateSetter heroCardSetState;
 
     // Show a 200x200 Hero tagged 'H', with key routeHeroKey
     final MaterialPageRoute<void> route = MaterialPageRoute<void>(
@@ -1196,7 +1194,7 @@ Future<void> main() async {
     bool _isVisible(Element node) {
       bool isVisible = true;
       node.visitAncestorElements((Element ancestor) {
-        final RenderObject r = ancestor.renderObject;
+        final RenderObject r = ancestor.renderObject!;
         if (r is RenderOpacity && r.opacity == 0) {
           isVisible = false;
           return false;
@@ -1300,7 +1298,7 @@ Future<void> main() async {
   });
 
   testWidgets('Hero createRectTween', (WidgetTester tester) async {
-    RectTween createRectTween(Rect begin, Rect end) {
+    RectTween createRectTween(Rect? begin, Rect? end) {
       return MaterialRectCenterArcTween(begin: begin, end: end);
     }
 
@@ -1415,7 +1413,7 @@ Future<void> main() async {
   testWidgets('Hero createRectTween for Navigator that is not full screen', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25272
 
-    RectTween createRectTween(Rect begin, Rect end) {
+    RectTween createRectTween(Rect? begin, Rect? end) {
       return RectTween(begin: begin, end: end);
     }
 
@@ -1485,17 +1483,17 @@ Future<void> main() async {
 
     await tester.pump(duration * 0.25);
     Rect actualHeroRect = tester.getRect(find.byKey(secondKey));
-    Rect predictedHeroRect = pushRectTween.lerp(curve.transform(0.25));
+    Rect predictedHeroRect = pushRectTween.lerp(curve.transform(0.25))!;
     expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
 
     await tester.pump(duration * 0.25);
     actualHeroRect = tester.getRect(find.byKey(secondKey));
-    predictedHeroRect = pushRectTween.lerp(curve.transform(0.5));
+    predictedHeroRect = pushRectTween.lerp(curve.transform(0.5))!;
     expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
 
     await tester.pump(duration * 0.25);
     actualHeroRect = tester.getRect(find.byKey(secondKey));
-    predictedHeroRect = pushRectTween.lerp(curve.transform(0.75));
+    predictedHeroRect = pushRectTween.lerp(curve.transform(0.75))!;
     expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
 
     await tester.pumpAndSettle();
@@ -1516,17 +1514,17 @@ Future<void> main() async {
 
     await tester.pump(duration * 0.25);
     actualHeroRect = tester.getRect(find.byKey(firstKey));
-    predictedHeroRect = popRectTween.lerp(curve.transform(0.25));
+    predictedHeroRect = popRectTween.lerp(curve.transform(0.25))!;
     expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
 
     await tester.pump(duration * 0.25);
     actualHeroRect = tester.getRect(find.byKey(firstKey));
-    predictedHeroRect = popRectTween.lerp(curve.transform(0.5));
+    predictedHeroRect = popRectTween.lerp(curve.transform(0.5))!;
     expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
 
     await tester.pump(duration * 0.25);
     actualHeroRect = tester.getRect(find.byKey(firstKey));
-    predictedHeroRect = popRectTween.lerp(curve.transform(0.75));
+    predictedHeroRect = popRectTween.lerp(curve.transform(0.75))!;
     expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
 
     await tester.pumpAndSettle();
@@ -1876,7 +1874,7 @@ Future<void> main() async {
       ),
     );
 
-    nestedNavigator.currentState.push(MaterialPageRoute<void>(
+    nestedNavigator.currentState!.push(MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return Hero(
           tag: heroTag,
@@ -1893,7 +1891,7 @@ Future<void> main() async {
     expect(find.byKey(nestedRouteHeroBottom), findsNothing);
     expect(find.byKey(nestedRouteHeroBottom, skipOffstage: false), findsOneWidget);
 
-    rootNavigator.currentState.push(MaterialPageRoute<void>(
+    rootNavigator.currentState!.push(MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return const Text('Foo');
       },
@@ -1910,7 +1908,7 @@ Future<void> main() async {
     // Doesn't crash.
     expect(tester.takeException(), isNull);
 
-    rootNavigator.currentState.pop();
+    rootNavigator.currentState!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('Foo'), findsNothing);
@@ -1951,7 +1949,7 @@ Future<void> main() async {
     expect(find.byKey(largeContainer), isInCard);
     expect(find.byKey(smallContainer, skipOffstage: false), findsNothing);
 
-    rootNavigator.currentState.push(
+    rootNavigator.currentState!.push(
       MaterialPageRoute<void>(
         builder: (BuildContext context) {
           return Center(
@@ -2120,7 +2118,7 @@ Future<void> main() async {
     expect(find.byKey(largeContainer), isInCard);
     expect(find.byKey(smallContainer, skipOffstage: false), findsNothing);
 
-    navigator.currentState.pushReplacement(
+    navigator.currentState!.pushReplacement(
       MaterialPageRoute<void>(
           builder: (BuildContext context) {
             return Center(
@@ -2214,7 +2212,7 @@ Future<void> main() async {
       }
     );
 
-    navigatorKey.currentState.push(route2);
+    navigatorKey.currentState!.push(route2);
     await tester.pumpAndSettle();
 
     expect(shuttlesBuilt, 1);
@@ -2281,10 +2279,10 @@ Future<void> main() async {
         }
       );
 
-      final _SimpleState state1 = key1.currentState;
+      final _SimpleState state1 = key1.currentState!;
       state1.state = 1;
 
-      navigatorKey.currentState.push(route2);
+      navigatorKey.currentState!.push(route2);
       await tester.pump();
 
       expect(state1.mounted, isTrue);
@@ -2294,7 +2292,7 @@ Future<void> main() async {
       // The element should be mounted and unique.
       expect(state1.mounted, isTrue);
 
-      navigatorKey.currentState.pop();
+      navigatorKey.currentState!.pop();
       await tester.pumpAndSettle();
 
       // State is preserved.
@@ -2366,7 +2364,7 @@ Future<void> main() async {
       // Before push image1 should be laid out correctly.
       expect(renderImage.size, const Size(100, 100));
 
-      navigatorKey.currentState.push(route2);
+      navigatorKey.currentState!.push(route2);
       await tester.pump();
 
       final TestGesture gesture = await tester.startGesture(const Offset(0.01, 300));
@@ -2425,7 +2423,7 @@ Future<void> main() async {
     'In a pop transition, when fromHero is null, the to hero should eventually become visible',
     (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
-      StateSetter setState;
+      late StateSetter setState;
       bool shouldDisplayHero = true;
       await tester.pumpWidget(
         CupertinoApp(
@@ -2452,7 +2450,7 @@ Future<void> main() async {
         },
       );
 
-      navigatorKey.currentState.push(route2);
+      navigatorKey.currentState!.push(route2);
       await tester.pumpAndSettle();
 
       expect(find.text('text'), findsOneWidget);
@@ -2463,7 +2461,7 @@ Future<void> main() async {
 
       expect(find.text('text'), findsNothing);
 
-      navigatorKey.currentState.pop();
+      navigatorKey.currentState!.pop();
       await tester.pumpAndSettle();
 
       expect(find.byType(Placeholder), findsOneWidget);
@@ -2475,7 +2473,7 @@ Future<void> main() async {
     final Key container2 = UniqueKey();
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
 
-    final Animatable<Size> tween = SizeTween(
+    final Animatable<Size?> tween = SizeTween(
       begin: const Size(200, 200),
       end: const Size(100, 100),
     ).chain(CurveTween(curve: Curves.fastOutSlowIn));
@@ -2488,7 +2486,7 @@ Future<void> main() async {
           body: Center(
             child: Hero(
               tag: 'test',
-              createRectTween: (Rect begin, Rect end) {
+              createRectTween: (Rect? begin, Rect? end) {
                 return RectTween(begin: begin, end: end);
               },
               child: Container(
@@ -2504,12 +2502,12 @@ Future<void> main() async {
     final Size originalSize = tester.getSize(find.byKey(container1));
     expect(originalSize, const Size(100, 100));
 
-    navigator.currentState.push(MaterialPageRoute<void>(builder: (BuildContext context) {
+    navigator.currentState!.push(MaterialPageRoute<void>(builder: (BuildContext context) {
       return Scaffold(
         body: Center(
           child: Hero(
             tag: 'test',
-            createRectTween: (Rect begin, Rect end) {
+            createRectTween: (Rect? begin, Rect? end) {
               return RectTween(begin: begin, end: end);
             },
             child: Container(
@@ -2525,7 +2523,7 @@ Future<void> main() async {
     final Size newSize = tester.getSize(find.byKey(container2));
     expect(newSize, const Size(200, 200));
 
-    navigator.currentState.pop();
+    navigator.currentState!.pop();
     await tester.pump();
 
     // Jump 25% into the transition (total length = 300ms)

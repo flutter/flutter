@@ -42,7 +42,6 @@ class LeaveBehindDemo extends StatefulWidget {
 }
 
 class LeaveBehindDemoState extends State<LeaveBehindDemo> {
-  static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   bool _confirmDismiss = true;
   List<LeaveBehindItem> leaveBehindItems;
@@ -97,7 +96,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     setState(() {
       leaveBehindItems.remove(item);
     });
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('You archived item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
@@ -110,7 +109,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     setState(() {
       leaveBehindItems.remove(item);
     });
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('You deleted item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
@@ -146,7 +145,6 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     }
 
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Swipe to dismiss'),
         actions: <Widget>[

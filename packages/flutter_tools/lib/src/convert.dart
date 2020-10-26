@@ -7,8 +7,18 @@
 import 'dart:convert' hide utf8;
 import 'dart:convert' as cnv show utf8, Utf8Decoder;
 
+import 'package:meta/meta.dart';
+
 import 'base/common.dart';
 export 'dart:convert' hide utf8, Utf8Codec, Utf8Decoder;
+
+/// The original utf8 encoding for testing overrides only.
+///
+/// Attempting to use the flutter tool utf8 decoder will surface an analyzer
+/// warning that overrides cannot change the default value of a named
+/// parameter.
+@visibleForTesting
+const Encoding utf8ForTesting = cnv.utf8;
 
 /// A [Codec] which reports malformed bytes when decoding.
 ///

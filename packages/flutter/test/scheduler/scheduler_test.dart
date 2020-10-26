@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:ui' show window;
 
@@ -30,13 +28,13 @@ class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBi
 class TestStrategy {
   int allowedPriority = 10000;
 
-  bool shouldRunTaskWithPriority({ int priority, SchedulerBinding scheduler }) {
+  bool shouldRunTaskWithPriority({ required int priority, required SchedulerBinding scheduler }) {
     return priority >= allowedPriority;
   }
 }
 
 void main() {
-  TestSchedulerBinding scheduler;
+  late TestSchedulerBinding scheduler;
 
   setUpAll(() {
     scheduler = TestSchedulerBinding();
@@ -122,7 +120,7 @@ void main() {
         createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
           // Don't actually run the tasks, just record that it was scheduled.
           timerQueueTasks.add(f);
-          return null;
+          return DummyTimer();
         },
       ),
     );
@@ -134,7 +132,7 @@ void main() {
   });
 
   test('Flutter.Frame event fired', () async {
-    window.onReportTimings(<FrameTiming>[FrameTiming(
+    window.onReportTimings!(<FrameTiming>[FrameTiming(
       vsyncStart: 5000,
       buildStart: 10000,
       buildFinish: 15000,
@@ -155,20 +153,20 @@ void main() {
   });
 
   test('TimingsCallback exceptions are caught', () {
-    FlutterErrorDetails errorCaught;
+    FlutterErrorDetails? errorCaught;
     FlutterError.onError = (FlutterErrorDetails details) {
       errorCaught = details;
     };
-    SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
+    SchedulerBinding.instance!.addTimingsCallback((List<FrameTiming> timings) {
       throw Exception('Test');
     });
-    window.onReportTimings(<FrameTiming>[]);
-    expect(errorCaught.exceptionAsString(), equals('Exception: Test'));
+    window.onReportTimings!(<FrameTiming>[]);
+    expect(errorCaught!.exceptionAsString(), equals('Exception: Test'));
   });
 
   test('currentSystemFrameTimeStamp is the raw timestamp', () {
-    Duration lastTimeStamp;
-    Duration lastSystemTimeStamp;
+    late Duration lastTimeStamp;
+    late Duration lastSystemTimeStamp;
 
     void frameCallback(Duration timeStamp) {
       expect(timeStamp, scheduler.currentFrameTimeStamp);
@@ -197,4 +195,15 @@ void main() {
     expect(lastTimeStamp, const Duration(seconds: 3)); // 2s + (8 - 6)s / 2
     expect(lastSystemTimeStamp, const Duration(seconds: 8));
   });
+}
+
+class DummyTimer implements Timer {
+  @override
+  void cancel() {}
+
+  @override
+  bool get isActive => false;
+
+  @override
+  int get tick => 0;
 }

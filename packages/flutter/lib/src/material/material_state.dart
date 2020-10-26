@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show Color;
 
 import 'package:flutter/foundation.dart';
@@ -263,9 +261,9 @@ abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialS
 
 class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
   const _EnabledAndDisabledMouseCursor({
-    this.enabledCursor,
-    this.disabledCursor,
-    this.name,
+    required this.enabledCursor,
+    required this.disabledCursor,
+    required this.name,
   });
 
   final MouseCursor enabledCursor;

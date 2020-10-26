@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -117,12 +115,12 @@ class Typography with Diagnosticable {
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2014], [dense2014], and [tall2014].
   factory Typography.material2014({
-    TargetPlatform platform = TargetPlatform.android,
-    TextTheme black,
-    TextTheme white,
-    TextTheme englishLike,
-    TextTheme dense,
-    TextTheme tall,
+    TargetPlatform? platform = TargetPlatform.android,
+    TextTheme? black,
+    TextTheme? white,
+    TextTheme? englishLike,
+    TextTheme? dense,
+    TextTheme? tall,
   }) {
     assert(platform != null || (black != null && white != null));
     return Typography._withPlatform(
@@ -145,12 +143,12 @@ class Typography with Diagnosticable {
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2018], [dense2018], and [tall2018].
   factory Typography.material2018({
-    TargetPlatform platform = TargetPlatform.android,
-    TextTheme black,
-    TextTheme white,
-    TextTheme englishLike,
-    TextTheme dense,
-    TextTheme tall,
+    TargetPlatform? platform = TargetPlatform.android,
+    TextTheme? black,
+    TextTheme? white,
+    TextTheme? englishLike,
+    TextTheme? dense,
+    TextTheme? tall,
   }) {
     assert(platform != null || (black != null && white != null));
     return Typography._withPlatform(
@@ -163,9 +161,9 @@ class Typography with Diagnosticable {
   }
 
   factory Typography._withPlatform(
-    TargetPlatform platform,
-    TextTheme black,
-    TextTheme white,
+    TargetPlatform? platform,
+    TextTheme? black,
+    TextTheme? white,
     TextTheme englishLike,
     TextTheme dense,
     TextTheme tall,
@@ -193,8 +191,10 @@ class Typography with Diagnosticable {
         black ??= blackHelsinki;
         white ??= whiteHelsinki;
         break;
+      case null:
+        break;
     }
-    return Typography._(black, white, englishLike, dense, tall);
+    return Typography._(black!, white!, englishLike, dense, tall);
   }
 
   const Typography._(this.black, this.white, this.englishLike, this.dense, this.tall)
@@ -269,17 +269,16 @@ class Typography with Diagnosticable {
       case ScriptCategory.tall:
         return tall;
     }
-    return null;
   }
 
   /// Creates a copy of this [Typography] with the given fields
   /// replaced by the non-null parameter values.
   Typography copyWith({
-    TextTheme black,
-    TextTheme white,
-    TextTheme englishLike,
-    TextTheme dense,
-    TextTheme tall,
+    TextTheme? black,
+    TextTheme? white,
+    TextTheme? englishLike,
+    TextTheme? dense,
+    TextTheme? tall,
   }) {
     return Typography._(
       black ?? this.black,

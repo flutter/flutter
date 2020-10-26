@@ -196,7 +196,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     if (firstChild == null) {
       if (!addInitialChild(index: firstIndex, layoutOffset: indexToLayoutOffset(itemExtent, firstIndex))) {
         // There are either no children, or we are past the end of all our children.
-        double max;
+        final double max;
         if (firstIndex <= 0) {
           max = 0.0;
         } else {
@@ -222,7 +222,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         geometry = SliverGeometry(scrollOffsetCorrection: index * itemExtent);
         return;
       }
-      final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, index);
       assert(childParentData.index == index);
       trailingChildWithLayout ??= child;
@@ -230,7 +230,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     if (trailingChildWithLayout == null) {
       firstChild!.layout(childConstraints);
-      final SliverMultiBoxAdaptorParentData childParentData = firstChild!.parentData as SliverMultiBoxAdaptorParentData;
+      final SliverMultiBoxAdaptorParentData childParentData = firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, firstIndex);
       trailingChildWithLayout = firstChild;
     }
@@ -250,7 +250,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       }
       trailingChildWithLayout = child;
       assert(child != null);
-      final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index);
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, childParentData.index!);
     }

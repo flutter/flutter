@@ -52,13 +52,13 @@ class UpdaterState extends State<Updater> {
       title: const Text('Update Flutter Gallery?'),
       content: Text('A newer version is available.', style: dialogTextStyle),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           child: const Text('NO THANKS'),
           onPressed: () {
             Navigator.pop(context, false);
           },
         ),
-        FlatButton(
+        TextButton(
           child: const Text('UPDATE'),
           onPressed: () {
             Navigator.pop(context, true);

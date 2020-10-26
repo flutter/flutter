@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -47,9 +45,9 @@ class ChipTheme extends InheritedTheme {
   ///
   /// The [data] and [child] arguments must not be null.
   const ChipTheme({
-    Key key,
-    @required this.data,
-    @required Widget child,
+    Key? key,
+    required this.data,
+    required Widget child,
   }) : assert(child != null),
        assert(data != null),
        super(key: key, child: child);
@@ -87,13 +85,13 @@ class ChipTheme extends InheritedTheme {
   ///  * [ChipThemeData], which describes the actual configuration of a chip
   ///    theme.
   static ChipThemeData of(BuildContext context) {
-    final ChipTheme inheritedTheme = context.dependOnInheritedWidgetOfExactType<ChipTheme>();
-    return inheritedTheme?.data ?? Theme.of(context).chipTheme;
+    final ChipTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<ChipTheme>();
+    return inheritedTheme?.data ?? Theme.of(context)!.chipTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ChipTheme ancestorTheme = context.findAncestorWidgetOfExactType<ChipTheme>();
+    final ChipTheme? ancestorTheme = context.findAncestorWidgetOfExactType<ChipTheme>();
     return identical(this, ancestorTheme) ? child : ChipTheme(data: data, child: child);
   }
 
@@ -179,21 +177,21 @@ class ChipThemeData with Diagnosticable {
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes.
   const ChipThemeData({
-    @required this.backgroundColor,
+    required this.backgroundColor,
     this.deleteIconColor,
-    @required this.disabledColor,
-    @required this.selectedColor,
-    @required this.secondarySelectedColor,
+    required this.disabledColor,
+    required this.selectedColor,
+    required this.secondarySelectedColor,
     this.shadowColor,
     this.selectedShadowColor,
     this.showCheckmark,
     this.checkmarkColor,
     this.labelPadding,
-    @required this.padding,
-    @required this.shape,
-    @required this.labelStyle,
-    @required this.secondaryLabelStyle,
-    @required this.brightness,
+    required this.padding,
+    required this.shape,
+    required this.labelStyle,
+    required this.secondaryLabelStyle,
+    required this.brightness,
     this.elevation,
     this.pressElevation,
   }) : assert(backgroundColor != null),
@@ -224,10 +222,10 @@ class ChipThemeData with Diagnosticable {
   ///
   /// This is used to generate the default chip theme for a [ThemeData].
   factory ChipThemeData.fromDefaults({
-    Brightness brightness,
-    Color primaryColor,
-    @required Color secondaryColor,
-    @required TextStyle labelStyle,
+    Brightness? brightness,
+    Color? primaryColor,
+    required Color secondaryColor,
+    required TextStyle labelStyle,
   }) {
     assert(primaryColor != null || brightness != null,
       'One of primaryColor or brightness must be specified');
@@ -271,7 +269,7 @@ class ChipThemeData with Diagnosticable {
       shape: shape,
       labelStyle: labelStyle,
       secondaryLabelStyle: secondaryLabelStyle,
-      brightness: brightness,
+      brightness: brightness!,
     );
   }
 
@@ -285,7 +283,7 @@ class ChipThemeData with Diagnosticable {
   /// (slightly transparent white) for dark themes.
   ///
   /// May be set to null, in which case the ambient [IconThemeData.color] is used.
-  final Color deleteIconColor;
+  final Color? deleteIconColor;
 
   /// Color to be used for the chip's background indicating that it is disabled.
   ///
@@ -317,7 +315,7 @@ class ChipThemeData with Diagnosticable {
   /// See also:
   ///
   ///  * [selectedShadowColor]
-  final Color shadowColor;
+  final Color? shadowColor;
 
   /// Color of the chip's shadow when the elevation is greater than 0 and the
   /// chip is selected.
@@ -327,7 +325,7 @@ class ChipThemeData with Diagnosticable {
   /// See also:
   ///
   ///  * [shadowColor]
-  final Color selectedShadowColor;
+  final Color? selectedShadowColor;
 
   /// Whether or not to show a check mark when [SelectableChipAttributes.selected] is true.
   ///
@@ -335,18 +333,18 @@ class ChipThemeData with Diagnosticable {
   /// selected without showing the check mark.
   ///
   /// Defaults to true.
-  final bool showCheckmark;
+  final bool? showCheckmark;
 
   /// Color of the chip's check mark when a check mark is visible.
   ///
   /// This will override the color set by the platform's brightness setting.
-  final Color checkmarkColor;
+  final Color? checkmarkColor;
 
   /// The padding around the [Chip.label] widget.
   ///
   /// By default, this is 4 logical pixels at the beginning and the end of the
   /// label, and zero on top and bottom.
-  final EdgeInsetsGeometry labelPadding;
+  final EdgeInsetsGeometry? labelPadding;
 
   /// The padding between the contents of the chip and the outside [shape].
   ///
@@ -379,32 +377,32 @@ class ChipThemeData with Diagnosticable {
   /// The elevation to be applied to the chip.
   ///
   /// If null, the chip defaults to 0.
-  final double elevation;
+  final double? elevation;
 
   /// The elevation to be applied to the chip during the press motion.
   ///
   /// If null, the chip defaults to 8.
-  final double pressElevation;
+  final double? pressElevation;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ChipThemeData copyWith({
-    Color backgroundColor,
-    Color deleteIconColor,
-    Color disabledColor,
-    Color selectedColor,
-    Color secondarySelectedColor,
-    Color shadowColor,
-    Color selectedShadowColor,
-    Color checkmarkColor,
-    EdgeInsetsGeometry labelPadding,
-    EdgeInsetsGeometry padding,
-    ShapeBorder shape,
-    TextStyle labelStyle,
-    TextStyle secondaryLabelStyle,
-    Brightness brightness,
-    double elevation,
-    double pressElevation,
+    Color? backgroundColor,
+    Color? deleteIconColor,
+    Color? disabledColor,
+    Color? selectedColor,
+    Color? secondarySelectedColor,
+    Color? shadowColor,
+    Color? selectedShadowColor,
+    Color? checkmarkColor,
+    EdgeInsetsGeometry? labelPadding,
+    EdgeInsetsGeometry? padding,
+    ShapeBorder? shape,
+    TextStyle? labelStyle,
+    TextStyle? secondaryLabelStyle,
+    Brightness? brightness,
+    double? elevation,
+    double? pressElevation,
   }) {
     return ChipThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -431,24 +429,24 @@ class ChipThemeData with Diagnosticable {
   /// The arguments must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static ChipThemeData lerp(ChipThemeData a, ChipThemeData b, double t) {
+  static ChipThemeData? lerp(ChipThemeData? a, ChipThemeData? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     return ChipThemeData(
-      backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
+      backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t)!,
       deleteIconColor: Color.lerp(a?.deleteIconColor, b?.deleteIconColor, t),
-      disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
-      selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t),
-      secondarySelectedColor: Color.lerp(a?.secondarySelectedColor, b?.secondarySelectedColor, t),
+      disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t)!,
+      selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t)!,
+      secondarySelectedColor: Color.lerp(a?.secondarySelectedColor, b?.secondarySelectedColor, t)!,
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       selectedShadowColor: Color.lerp(a?.selectedShadowColor, b?.selectedShadowColor, t),
       checkmarkColor: Color.lerp(a?.checkmarkColor, b?.checkmarkColor, t),
       labelPadding: EdgeInsetsGeometry.lerp(a?.labelPadding, b?.labelPadding, t),
-      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
-      shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
-      labelStyle: TextStyle.lerp(a?.labelStyle, b?.labelStyle, t),
-      secondaryLabelStyle: TextStyle.lerp(a?.secondaryLabelStyle, b?.secondaryLabelStyle, t),
+      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t)!,
+      shape: ShapeBorder.lerp(a?.shape, b?.shape, t)!,
+      labelStyle: TextStyle.lerp(a?.labelStyle, b?.labelStyle, t)!,
+      secondaryLabelStyle: TextStyle.lerp(a?.secondaryLabelStyle, b?.secondaryLabelStyle, t)!,
       brightness: t < 0.5 ? a?.brightness ?? Brightness.light : b?.brightness ?? Brightness.light,
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       pressElevation: lerpDouble(a?.pressElevation, b?.pressElevation, t),
@@ -511,7 +509,7 @@ class ChipThemeData with Diagnosticable {
     final ChipThemeData defaultData = ChipThemeData.fromDefaults(
       secondaryColor: defaultTheme.primaryColor,
       brightness: defaultTheme.brightness,
-      labelStyle: defaultTheme.textTheme.bodyText1,
+      labelStyle: defaultTheme.textTheme.bodyText1!,
     );
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
     properties.add(ColorProperty('deleteIconColor', deleteIconColor, defaultValue: defaultData.deleteIconColor));

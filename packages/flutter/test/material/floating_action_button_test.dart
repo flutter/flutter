@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('!chrome') // whole file needs triage.
 import 'dart:ui';
 
@@ -109,17 +107,15 @@ void main() {
     expect(find.text('Add'), findsNothing);
 
     // Test hover for tooltip.
-    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(() => gesture?.removePointer());
+    addTearDown(() => gesture.removePointer());
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsOneWidget);
 
     await gesture.moveTo(Offset.zero);
-    await gesture.removePointer();
-    gesture = null;
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsNothing);
@@ -146,9 +142,9 @@ void main() {
     expect(find.text('Add'), findsNothing);
 
     // Test hover for tooltip.
-    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(() => gesture?.removePointer());
+    addTearDown(() => gesture.removePointer());
     await tester.pumpAndSettle();
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
     await tester.pumpAndSettle();
@@ -156,8 +152,6 @@ void main() {
     expect(find.text('Add'), findsOneWidget);
 
     await gesture.moveTo(Offset.zero);
-    await gesture.removePointer();
-    gesture = null;
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsNothing);
@@ -472,7 +466,7 @@ void main() {
   });
 
   testWidgets('Floating Action Button heroTag', (WidgetTester tester) async {
-    BuildContext theContext;
+    late BuildContext theContext;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -495,7 +489,7 @@ void main() {
   });
 
   testWidgets('Floating Action Button heroTag - with duplicate', (WidgetTester tester) async {
-    BuildContext theContext;
+    late BuildContext theContext;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -519,7 +513,7 @@ void main() {
   });
 
   testWidgets('Floating Action Button heroTag - with duplicate', (WidgetTester tester) async {
-    BuildContext theContext;
+    late BuildContext theContext;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -773,7 +767,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -791,7 +785,7 @@ void main() {
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -808,7 +802,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -825,7 +819,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async {
@@ -882,7 +876,7 @@ void main() {
     final RichText iconRichText = tester.widget<RichText>(
       find.descendant(of: find.byIcon(Icons.access_alarm), matching: find.byType(RichText)),
     );
-    expect(iconRichText.text.style.color, foregroundColor);
+    expect(iconRichText.text.style!.color, foregroundColor);
   });
 
   testWidgets('FloatingActionButton uses custom splash color', (WidgetTester tester) async {

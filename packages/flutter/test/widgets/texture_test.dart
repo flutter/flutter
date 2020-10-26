@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -29,7 +27,7 @@ void main() {
     final ContainerLayer containerLayer = ContainerLayer();
     final PaintingContext paintingContext = PaintingContext(containerLayer, Rect.zero);
     textureBox.paint(paintingContext, Offset.zero);
-    final Layer layer = containerLayer.lastChild;
+    final Layer layer = containerLayer.lastChild!;
     expect(layer, isNotNull);
     final TextureLayer textureLayer = layer as TextureLayer;
     expect(textureLayer, isNotNull);
@@ -58,7 +56,7 @@ void main() {
     final ContainerLayer containerLayer = ContainerLayer();
     final PaintingContext paintingContext = PaintingContext(containerLayer, Rect.zero);
     textureBox.paint(paintingContext, Offset.zero);
-    final Layer layer = containerLayer.lastChild;
+    final Layer layer = containerLayer.lastChild!;
     expect(layer, isNotNull);
     final TextureLayer textureLayer = layer as TextureLayer;
     expect(textureLayer, isNotNull);
@@ -86,7 +84,7 @@ void main() {
     final ContainerLayer containerLayer = ContainerLayer();
     final PaintingContext paintingContext = PaintingContext(containerLayer, Rect.zero);
     textureBox.paint(paintingContext, Offset.zero);
-    final Layer layer = containerLayer.lastChild;
+    final Layer layer = containerLayer.lastChild!;
     expect(layer, isNotNull);
     final TextureLayer textureLayer = layer as TextureLayer;
     expect(textureLayer, isNotNull);

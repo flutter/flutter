@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
@@ -61,14 +59,14 @@ class TextButton extends ButtonStyleButton {
   ///
   /// The [autofocus] and [clipBehavior] arguments must not be null.
   const TextButton({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ButtonStyle? style,
+    FocusNode? focusNode,
     bool autofocus = false,
     Clip clipBehavior = Clip.none,
-    @required Widget child,
+    required Widget child,
   }) : super(
     key: key,
     onPressed: onPressed,
@@ -89,14 +87,14 @@ class TextButton extends ButtonStyleButton {
   /// The [icon] and [label] arguments must not be null.
   factory TextButton.icon({
     Key key,
-    @required VoidCallback onPressed,
+    required VoidCallback onPressed,
     VoidCallback onLongPress,
     ButtonStyle style,
     FocusNode focusNode,
     bool autofocus,
     Clip clipBehavior,
-    @required Widget icon,
-    @required Widget label,
+    required Widget icon,
+    required Widget label,
   }) = _TextButtonWithIcon;
 
   /// A static convenience method that constructs a text button
@@ -131,32 +129,32 @@ class TextButton extends ButtonStyleButton {
   /// )
   /// ```
   static ButtonStyle styleFrom({
-    Color primary,
-    Color onSurface,
-    Color backgroundColor,
-    Color shadowColor,
-    double elevation,
-    TextStyle textStyle,
-    EdgeInsetsGeometry padding,
-    Size minimumSize,
-    BorderSide side,
-    OutlinedBorder shape,
-    MouseCursor enabledMouseCursor,
-    MouseCursor disabledMouseCursor,
-    VisualDensity visualDensity,
-    MaterialTapTargetSize tapTargetSize,
-    Duration animationDuration,
-    bool enableFeedback,
+    Color? primary,
+    Color? onSurface,
+    Color? backgroundColor,
+    Color? shadowColor,
+    double? elevation,
+    TextStyle? textStyle,
+    EdgeInsetsGeometry? padding,
+    Size? minimumSize,
+    BorderSide? side,
+    OutlinedBorder? shape,
+    MouseCursor? enabledMouseCursor,
+    MouseCursor? disabledMouseCursor,
+    VisualDensity? visualDensity,
+    MaterialTapTargetSize? tapTargetSize,
+    Duration? animationDuration,
+    bool? enableFeedback,
   }) {
-    final MaterialStateProperty<Color> foregroundColor = (onSurface == null && primary == null)
+    final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && primary == null)
       ? null
       : _TextButtonDefaultForeground(primary, onSurface);
-    final MaterialStateProperty<Color> overlayColor = (primary == null)
+    final MaterialStateProperty<Color?>? overlayColor = (primary == null)
       ? null
       : _TextButtonDefaultOverlay(primary);
-    final MaterialStateProperty<MouseCursor> mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
+    final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
       ? null
-      : _TextButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
+      : _TextButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
 
     return ButtonStyle(
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
@@ -237,7 +235,7 @@ class TextButton extends ButtonStyleButton {
   ///   * `2 < textScaleFactor` - horizontal(4)
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context)!;
     final ColorScheme colorScheme = theme.colorScheme;
 
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
@@ -270,20 +268,20 @@ class TextButton extends ButtonStyleButton {
   /// Returns the [TextButtonThemeData.style] of the closest
   /// [TextButtonTheme] ancestor.
   @override
-  ButtonStyle themeStyleOf(BuildContext context) {
-    return TextButtonTheme.of(context)?.style;
+  ButtonStyle? themeStyleOf(BuildContext context) {
+    return TextButtonTheme.of(context).style;
   }
 }
 
 @immutable
-class _TextButtonDefaultForeground extends MaterialStateProperty<Color> {
+class _TextButtonDefaultForeground extends MaterialStateProperty<Color?> {
   _TextButtonDefaultForeground(this.primary, this.onSurface);
 
-  final Color primary;
-  final Color onSurface;
+  final Color? primary;
+  final Color? onSurface;
 
   @override
-  Color resolve(Set<MaterialState> states) {
+  Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled))
       return onSurface?.withOpacity(0.38);
     return primary;
@@ -296,23 +294,23 @@ class _TextButtonDefaultForeground extends MaterialStateProperty<Color> {
 }
 
 @immutable
-class _TextButtonDefaultOverlay extends MaterialStateProperty<Color> {
+class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   _TextButtonDefaultOverlay(this.primary);
 
   final Color primary;
 
   @override
-  Color resolve(Set<MaterialState> states) {
+  Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.hovered))
-      return primary?.withOpacity(0.04);
+      return primary.withOpacity(0.04);
     if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
-      return primary?.withOpacity(0.12);
+      return primary.withOpacity(0.12);
     return null;
   }
 
   @override
   String toString() {
-    return '{hovered: ${primary?.withOpacity(0.04)}, focused,pressed: ${primary?.withOpacity(0.12)}, otherwise: null}';
+    return '{hovered: ${primary.withOpacity(0.04)}, focused,pressed: ${primary.withOpacity(0.12)}, otherwise: null}';
   }
 }
 
@@ -333,15 +331,15 @@ class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> w
 
 class _TextButtonWithIcon extends TextButton {
   _TextButtonWithIcon({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus,
-    Clip clipBehavior,
-    @required Widget icon,
-    @required Widget label,
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ButtonStyle? style,
+    FocusNode? focusNode,
+    bool? autofocus,
+    Clip? clipBehavior,
+    required Widget icon,
+    required Widget label,
   }) : assert(icon != null),
        assert(label != null),
        super(
@@ -370,7 +368,11 @@ class _TextButtonWithIcon extends TextButton {
 }
 
 class _TextButtonWithIconChild extends StatelessWidget {
-  const _TextButtonWithIconChild({ Key key, this.label, this.icon }) : super(key: key);
+  const _TextButtonWithIconChild({
+    Key? key,
+    required this.label,
+    required this.icon,
+  }) : super(key: key);
 
   final Widget label;
   final Widget icon;
@@ -378,7 +380,7 @@ class _TextButtonWithIconChild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double scale = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1;
-    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1));
+    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[icon, SizedBox(width: gap), label],

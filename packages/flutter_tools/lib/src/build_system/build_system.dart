@@ -10,6 +10,7 @@ import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -160,9 +161,7 @@ abstract class Target {
   /// Invoke to remove the stamp file if the [buildAction] threw an exception.
   void clearStamp(Environment environment) {
     final File stamp = _findStampFile(environment);
-    if (stamp.existsSync()) {
-      stamp.deleteSync();
-    }
+    ErrorHandlingFileSystem.deleteIfExists(stamp);
   }
 
   void _writeStamp(
@@ -697,9 +696,7 @@ class FlutterBuildSystem extends BuildSystem {
     for (final String lastOutput in lastOutputs) {
       if (!currentOutputs.containsKey(lastOutput)) {
         final File lastOutputFile = fileSystem.file(lastOutput);
-        if (lastOutputFile.existsSync()) {
-          lastOutputFile.deleteSync();
-        }
+        ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
       }
     }
   }
@@ -820,9 +817,7 @@ class _BuildInstance {
           continue;
         }
         final File previousFile = fileSystem.file(previousOutput);
-        if (previousFile.existsSync()) {
-          previousFile.deleteSync();
-        }
+        ErrorHandlingFileSystem.deleteIfExists(previousFile);
       }
     } on Exception catch (exception, stackTrace) {
       // TODO(jonahwilliams): throw specific exception for expected errors to mark
@@ -840,7 +835,7 @@ class _BuildInstance {
         elapsedMilliseconds: stopwatch.elapsedMilliseconds,
         skipped: skipped,
         succeeded: succeeded,
-        analyicsName: node.target.analyticsName,
+        analyticsName: node.target.analyticsName,
       );
     }
     return succeeded;
@@ -869,14 +864,14 @@ class PerformanceMeasurement {
     @required this.elapsedMilliseconds,
     @required this.skipped,
     @required this.succeeded,
-    @required this.analyicsName,
+    @required this.analyticsName,
   });
 
   final int elapsedMilliseconds;
   final String target;
   final bool skipped;
   final bool succeeded;
-  final String analyicsName;
+  final String analyticsName;
 }
 
 /// Check if there are any dependency cycles in the target.
@@ -1067,7 +1062,7 @@ class Node {
       }
     }
 
-    // If we depend on a file that doesnt exist on disk, mark the build as
+    // If we depend on a file that doesn't exist on disk, mark the build as
     // dirty. if the rule is not correctly specified, this will result in it
     // always being rerun.
     if (missingInputs.isNotEmpty) {

@@ -72,6 +72,13 @@ void main() {
     environment.defines[kIosArchs] = 'arm64';
     processManager.addCommands(<FakeCommand>[
       // Create iphone stub.
+      const FakeCommand(
+        command: <String>[
+          'sysctl',
+          'hw.optional.arm64',
+        ],
+        exitCode: 1,
+      ),
       const FakeCommand(command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path']),
       FakeCommand(command: <String>[
         'xcrun',
@@ -115,7 +122,7 @@ void main() {
       ]),
     ]);
 
-    await const DebugUniveralFramework().build(environment);
+    await const DebugUniversalFramework().build(environment);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

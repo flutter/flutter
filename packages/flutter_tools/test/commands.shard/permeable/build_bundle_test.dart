@@ -112,7 +112,7 @@ void main() {
       '--target-platform=windows-x64',
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
   });
@@ -130,7 +130,7 @@ void main() {
       '--target-platform=linux-x64',
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
@@ -148,7 +148,7 @@ void main() {
       '--target-platform=darwin-x64',
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
@@ -166,7 +166,7 @@ void main() {
       '--target-platform=windows-x64',
     ]);
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -184,7 +184,7 @@ void main() {
       '--target-platform=linux-x64',
     ]);
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
@@ -202,7 +202,7 @@ void main() {
       '--target-platform=darwin-x64',
     ]);
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
@@ -234,7 +234,7 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     BuildSystem: () => MockBuildSystem(),
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 }

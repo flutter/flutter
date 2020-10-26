@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class InnerWidget extends StatefulWidget {
-  const InnerWidget({ Key key }) : super(key: key);
+  const InnerWidget({ Key? key }) : super(key: key);
 
   @override
   InnerWidgetState createState() => InnerWidgetState();
@@ -30,7 +28,7 @@ class InnerWidgetState extends State<InnerWidget> {
 }
 
 class OuterContainer extends StatefulWidget {
-  const OuterContainer({ Key key, this.child }) : super(key: key);
+  const OuterContainer({ Key? key, required this.child }) : super(key: key);
 
   final InnerWidget child;
 
@@ -61,7 +59,7 @@ void main() {
     final InnerWidgetState innerElementState = innerElement.state as InnerWidgetState;
     expect(innerElementState.widget, equals(inner1));
     expect(innerElementState._didInitState, isTrue);
-    expect(innerElement.renderObject.attached, isTrue);
+    expect(innerElement.renderObject!.attached, isTrue);
 
     inner2 = const InnerWidget(key: innerKey);
     outer2 = OuterContainer(key: outerKey, child: inner2);
@@ -73,7 +71,7 @@ void main() {
 
     expect(innerElementState.widget, equals(inner2));
     expect(innerElementState._didInitState, isTrue);
-    expect(innerElement.renderObject.attached, isTrue);
+    expect(innerElement.renderObject!.attached, isTrue);
 
     final StatefulElement outerElement = tester.element(find.byKey(outerKey));
     expect(outerElement.state.widget, equals(outer2));
@@ -83,6 +81,6 @@ void main() {
     expect(tester.element(find.byKey(innerKey)), equals(innerElement));
     expect(innerElement.state, equals(innerElementState));
     expect(innerElementState.widget, equals(inner2));
-    expect(innerElement.renderObject.attached, isTrue);
+    expect(innerElement.renderObject!.attached, isTrue);
   });
 }

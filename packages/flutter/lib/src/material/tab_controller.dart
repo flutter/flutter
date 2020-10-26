@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -148,7 +146,7 @@ class TabController extends ChangeNotifier {
   ///
   /// The `initialIndex` must be valid given [length] and must not be null. If
   /// [length] is zero, then `initialIndex` must be 0 (the default).
-  TabController({ int initialIndex = 0, @required this.length, @required TickerProvider vsync })
+  TabController({ int initialIndex = 0, required this.length, required TickerProvider vsync })
     : assert(length != null && length >= 0),
       assert(initialIndex != null && initialIndex >= 0 && (length == 0 || initialIndex < length)),
       _index = initialIndex,
@@ -161,10 +159,10 @@ class TabController extends ChangeNotifier {
   // Private constructor used by `_copyWith`. This allows a new TabController to
   // be created without having to create a new animationController.
   TabController._({
-    int index,
-    int previousIndex,
-    AnimationController animationController,
-    @required this.length,
+    required int index,
+    required int previousIndex,
+    required AnimationController? animationController,
+    required this.length,
   }) : _index = index,
        _previousIndex = previousIndex,
        _animationController = animationController;
@@ -177,7 +175,11 @@ class TabController extends ChangeNotifier {
   ///
   /// When [DefaultTabController.length] is updated, this method is called to
   /// create a new [TabController] without creating a new [AnimationController].
-  TabController _copyWith({ int index, int length, int previousIndex }) {
+  TabController _copyWith({
+    required int? index,
+    required int? length,
+    required int? previousIndex,
+  }) {
     return TabController._(
       index: index ?? _index,
       length: length ?? this.length,
@@ -196,8 +198,8 @@ class TabController extends ChangeNotifier {
   /// drag scrolling.
   ///
   /// If this [TabController] was disposed, then return null.
-  Animation<double> get animation => _animationController?.view;
-  AnimationController _animationController;
+  Animation<double>? get animation => _animationController?.view;
+  AnimationController? _animationController;
 
   /// The total number of tabs.
   ///
@@ -205,7 +207,7 @@ class TabController extends ChangeNotifier {
   /// [TabBarView.children]'s length.
   final int length;
 
-  void _changeIndex(int value, { Duration duration, Curve curve }) {
+  void _changeIndex(int value, { Duration? duration, Curve? curve }) {
     assert(value != null);
     assert(value >= 0 && (value < length || length == 0));
     assert(duration != null || curve == null);
@@ -217,8 +219,8 @@ class TabController extends ChangeNotifier {
     if (duration != null) {
       _indexIsChangingCount += 1;
       notifyListeners(); // Because the value of indexIsChanging may have changed.
-      _animationController
-        .animateTo(_index.toDouble(), duration: duration, curve: curve)
+      _animationController!
+        .animateTo(_index.toDouble(), duration: duration, curve: curve!)
         .whenCompleteOrCancel(() {
           if (_animationController != null) { // don't notify if we've been disposed
             _indexIsChangingCount -= 1;
@@ -227,7 +229,7 @@ class TabController extends ChangeNotifier {
         });
     } else {
       _indexIsChangingCount += 1;
-      _animationController.value = _index.toDouble();
+      _animationController!.value = _index.toDouble();
       _indexIsChangingCount -= 1;
       notifyListeners();
     }
@@ -280,14 +282,14 @@ class TabController extends ChangeNotifier {
   /// drags left or right. A value between -1.0 and 0.0 implies that the
   /// TabBarView has been dragged to the left. Similarly a value between
   /// 0.0 and 1.0 implies that the TabBarView has been dragged to the right.
-  double get offset => _animationController.value - _index.toDouble();
+  double get offset => _animationController!.value - _index.toDouble();
   set offset(double value) {
     assert(value != null);
     assert(value >= -1.0 && value <= 1.0);
     assert(!indexIsChanging);
     if (value == offset)
       return;
-    _animationController.value = value + _index.toDouble();
+    _animationController!.value = value + _index.toDouble();
   }
 
   @override
@@ -300,10 +302,10 @@ class TabController extends ChangeNotifier {
 
 class _TabControllerScope extends InheritedWidget {
   const _TabControllerScope({
-    Key key,
-    this.controller,
-    this.enabled,
-    Widget child,
+    Key? key,
+    required this.controller,
+    required this.enabled,
+    required Widget child,
   }) : super(key: key, child: child);
 
   final TabController controller;
@@ -369,10 +371,10 @@ class DefaultTabController extends StatefulWidget {
   ///
   /// The [initialIndex] argument must not be null.
   const DefaultTabController({
-    Key key,
-    @required this.length,
+    Key? key,
+    required this.length,
     this.initialIndex = 0,
-    @required this.child,
+    required this.child,
   }) : assert(initialIndex != null),
        assert(length >= 0),
        assert(length == 0 || (initialIndex >= 0 && initialIndex < length)),
@@ -405,8 +407,8 @@ class DefaultTabController extends StatefulWidget {
   /// TabController controller = DefaultTabController.of(context);
   /// ```
   /// {@end-tool}
-  static TabController of(BuildContext context) {
-    final _TabControllerScope scope = context.dependOnInheritedWidgetOfExactType<_TabControllerScope>();
+  static TabController? of(BuildContext context) {
+    final _TabControllerScope? scope = context.dependOnInheritedWidgetOfExactType<_TabControllerScope>();
     return scope?.controller;
   }
 
@@ -415,7 +417,7 @@ class DefaultTabController extends StatefulWidget {
 }
 
 class _DefaultTabControllerState extends State<DefaultTabController> with SingleTickerProviderStateMixin {
-  TabController _controller;
+  late TabController _controller;
 
   @override
   void initState() {
@@ -448,7 +450,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
     if (oldWidget.length != widget.length) {
       // If the length is shortened while the last tab is selected, we should
       // automatically update the index of the controller to be the new last tab.
-      int newIndex;
+      int? newIndex;
       int previousIndex = _controller.previousIndex;
       if (_controller.index >= widget.length) {
         newIndex = math.max(0, widget.length - 1);

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -24,7 +22,7 @@ void main() {
   Widget _getContextMenu({
     Alignment alignment = Alignment.center,
     Size screenSize = const Size(800.0, 600.0),
-    Widget child,
+    Widget? child,
   }) {
     return CupertinoApp(
       home: CupertinoPageScaffold(

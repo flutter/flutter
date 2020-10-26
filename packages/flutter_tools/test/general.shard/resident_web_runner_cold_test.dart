@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_runner/devfs_web.dart';
-import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
+import 'package:flutter_tools/src/isolated/devfs_web.dart';
+import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -70,9 +70,9 @@ void main() {
 
   test('Can successfully run and connect without vmservice', () => testbed.run(() async {
     _setupMocks();
-    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
+    final FakeStatusLogger fakeStatusLogger = globals.logger as FakeStatusLogger;
     final MockStatus mockStatus = MockStatus();
-    delegateLogger.status = mockStatus;
+    fakeStatusLogger.status = mockStatus;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -83,7 +83,7 @@ void main() {
     verify(mockStatus.stop()).called(1);
   }, overrides: <Type, Generator>{
     BuildSystem: () => mockBuildSystem,
-    Logger: () => DelegateLogger(BufferLogger(
+    Logger: () => FakeStatusLogger(BufferLogger(
       terminal: AnsiTerminal(
         stdio: null,
         platform: const LocalPlatform(),

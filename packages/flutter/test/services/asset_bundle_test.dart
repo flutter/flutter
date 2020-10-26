@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -41,7 +39,7 @@ void main() {
 
     expect(bundle.loadCallCount['one'], 1);
 
-    Object loadException;
+    late Object loadException;
     try {
       await bundle.loadString('foo');
     } catch (e) {
@@ -61,7 +59,7 @@ void main() {
   test('NetworkAssetBundle control test', () async {
     final Uri uri = Uri.http('example.org', '/path');
     final NetworkAssetBundle bundle = NetworkAssetBundle(uri);
-    FlutterError error;
+    late FlutterError error;
     try {
       await bundle.load('key');
     } on FlutterError catch (e) {

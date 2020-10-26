@@ -198,8 +198,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   void _paintThumbCrossAxis(Canvas canvas, Size size, double thumbOffset, double thumbExtent, AxisDirection direction) {
-    double x, y;
-    Size thumbSize;
+    final double x, y;
+    final Size thumbSize;
 
     switch (direction) {
       case AxisDirection.down:
