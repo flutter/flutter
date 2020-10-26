@@ -22,7 +22,6 @@ class UsageEvent {
   final Usage flutterUsage;
 
   void send() {
-    print(flutterUsage);
     flutterUsage.sendEvent(category, parameter, label: label, value: value);
   }
 }
