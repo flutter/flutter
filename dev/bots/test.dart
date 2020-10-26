@@ -781,6 +781,7 @@ Future<void> _runWebIntegrationTests() async {
   await _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart');
   await _runWebStackTraceTest('release', 'lib/framework_stack_trace.dart');
   await _runWebDebugTest('lib/stack_trace.dart');
+  await _runWebDebugTest('lib/framework_stack_trace.dart');
   await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
   await _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true);
