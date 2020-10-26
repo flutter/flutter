@@ -79,7 +79,6 @@ class ApplicationPackageFactory {
         return AndroidApk.fromApk(
           applicationBinary,
           processManager: _processManager,
-          processUtils: _processUtils,
           logger: _logger,
           androidSdk: _androidSdk,
           userMessages: _userMessages,
@@ -153,7 +152,6 @@ class AndroidApk extends ApplicationPackage {
     @required AndroidSdk androidSdk,
     @required ProcessManager processManager,
     @required UserMessages userMessages,
-    @required ProcessUtils processUtils,
     @required Logger logger,
   }) {
     final String aaptPath = androidSdk?.latestVersion?.aaptPath;
@@ -228,7 +226,6 @@ class AndroidApk extends ApplicationPackage {
           apkFile,
           androidSdk: androidSdk,
           processManager: processManager,
-          processUtils: processUtils,
           logger: logger,
           userMessages: userMessages,
         );
