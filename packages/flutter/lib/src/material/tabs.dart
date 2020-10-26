@@ -331,8 +331,12 @@ class _IndicatorPainter extends CustomPainter {
   final TabBarIndicatorSize? indicatorSize;
   final List<GlobalKey> tabKeys;
 
-  late List<double> _currentTabOffsets;
-  late TextDirection _currentTextDirection;
+  // _currentTabOffsets and _currentTextDirection are set each time TabBar
+  // layout is completed. These values can be null when TabBar contains no
+  // tabs, since there are nothing to lay out.
+  List<double>? _currentTabOffsets;
+  TextDirection? _currentTextDirection;
+
   Rect? _currentRect;
   BoxPainter? _painter;
   bool _needsPaint = false;
@@ -344,38 +348,38 @@ class _IndicatorPainter extends CustomPainter {
     _painter?.dispose();
   }
 
-  void saveTabOffsets(List<double> tabOffsets, TextDirection textDirection) {
+  void saveTabOffsets(List<double>? tabOffsets, TextDirection? textDirection) {
     _currentTabOffsets = tabOffsets;
     _currentTextDirection = textDirection;
   }
 
   // _currentTabOffsets[index] is the offset of the start edge of the tab at index, and
   // _currentTabOffsets[_currentTabOffsets.length] is the end edge of the last tab.
-  int get maxTabIndex => _currentTabOffsets.length - 2;
+  int get maxTabIndex => _currentTabOffsets!.length - 2;
 
   double centerOf(int tabIndex) {
     assert(_currentTabOffsets != null);
-    assert(_currentTabOffsets.isNotEmpty);
+    assert(_currentTabOffsets!.isNotEmpty);
     assert(tabIndex >= 0);
     assert(tabIndex <= maxTabIndex);
-    return (_currentTabOffsets[tabIndex] + _currentTabOffsets[tabIndex + 1]) / 2.0;
+    return (_currentTabOffsets![tabIndex] + _currentTabOffsets![tabIndex + 1]) / 2.0;
   }
 
   Rect indicatorRect(Size tabBarSize, int tabIndex) {
     assert(_currentTabOffsets != null);
     assert(_currentTextDirection != null);
-    assert(_currentTabOffsets.isNotEmpty);
+    assert(_currentTabOffsets!.isNotEmpty);
     assert(tabIndex >= 0);
     assert(tabIndex <= maxTabIndex);
     double tabLeft, tabRight;
-    switch (_currentTextDirection) {
+    switch (_currentTextDirection!) {
       case TextDirection.rtl:
-        tabLeft = _currentTabOffsets[tabIndex + 1];
-        tabRight = _currentTabOffsets[tabIndex];
+        tabLeft = _currentTabOffsets![tabIndex + 1];
+        tabRight = _currentTabOffsets![tabIndex];
         break;
       case TextDirection.ltr:
-        tabLeft = _currentTabOffsets[tabIndex];
-        tabRight = _currentTabOffsets[tabIndex + 1];
+        tabLeft = _currentTabOffsets![tabIndex];
+        tabRight = _currentTabOffsets![tabIndex + 1];
         break;
     }
 
@@ -426,13 +430,14 @@ class _IndicatorPainter extends CustomPainter {
     _painter!.paint(canvas, _currentRect!.topLeft, configuration);
   }
 
-  static bool _tabOffsetsEqual(List<double> a, List<double> b) {
-    // TODO(shihaohong): The following null check should be replaced when a fix
-    // for https://github.com/flutter/flutter/issues/40014 is available.
-    if (a == null || b == null || a.length != b.length)
+  static bool _tabOffsetsEqual(List<double>? a, List<double>? b) {
+    // Tab offsets are null if TabBar contains no tabs.
+    if (a == null && b == null)
+      return true;
+    if (a?.length != b?.length)
       return false;
-    for (int i = 0; i < a.length; i += 1) {
-      if (a[i] != b[i])
+    for (int i = 0; i < a!.length; i += 1) {
+      if (a[i] != b![i])
         return false;
     }
     return true;
