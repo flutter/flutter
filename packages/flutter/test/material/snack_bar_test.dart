@@ -17,7 +17,7 @@ void main() {
           builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                Scaffold.of(context)!.showSnackBar(const SnackBar(
+                ScaffoldMessenger.of(context)!.showSnackBar(const SnackBar(
                   content: Text(helloSnackBar),
                   duration: Duration(seconds: 2),
                 ));
@@ -108,7 +108,7 @@ void main() {
             return GestureDetector(
               onTap: () {
                 snackBarCount += 1;
-                Scaffold.of(context)!.showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
                   duration: const Duration(seconds: 2),
                 ));
@@ -260,7 +260,7 @@ void main() {
             return GestureDetector(
               onTap: () {
                 snackBarCount += 1;
-                lastController = Scaffold.of(context)!.showSnackBar(SnackBar(
+                lastController = ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
                   duration: Duration(seconds: time),
                 ));
@@ -430,7 +430,7 @@ void main() {
             return GestureDetector(
               onTap: () {
                 snackBarCount += 1;
-                Scaffold.of(context)!.showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
                   duration: const Duration(seconds: 2),
                 ));
@@ -518,7 +518,7 @@ void main() {
           builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                Scaffold.of(context)!.showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                   content: const Text('I am a snack bar.'),
                   duration: const Duration(seconds: 2),
                   action: SnackBarAction(
@@ -598,7 +598,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context)!.showSnackBar(
+                  ScaffoldMessenger.of(context)!.showSnackBar(
                     SnackBar(
                       content: const Text('I am a snack bar.'),
                       duration: const Duration(seconds: 2),
@@ -640,7 +640,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context)!.showSnackBar(
+                  ScaffoldMessenger.of(context)!.showSnackBar(
                     SnackBar(
                       content: const Text('I am a snack bar.'),
                       duration: const Duration(seconds: 2),
@@ -678,7 +678,7 @@ void main() {
               builder: (BuildContext context) {
                 return GestureDetector(
                   onTap: () {
-                    Scaffold.of(context)!.showSnackBar(
+                    ScaffoldMessenger.of(context)!.showSnackBar(
                       SnackBar(
                         content: const Text('I am a snack bar.'),
                         margin: const EdgeInsets.all(padding),
@@ -724,7 +724,7 @@ void main() {
               builder: (BuildContext context) {
                 return GestureDetector(
                   onTap: () {
-                    Scaffold.of(context)!.showSnackBar(
+                    ScaffoldMessenger.of(context)!.showSnackBar(
                       const SnackBar(
                         content: Text('I am a snack bar.'),
                         behavior: SnackBarBehavior.floating,
@@ -1274,23 +1274,25 @@ void main() {
   });
 
   testWidgets('accessible navigation behavior with action', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
     await tester.pumpWidget(MaterialApp(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       home: MediaQuery(
         data: const MediaQueryData(accessibleNavigation: true),
         child: Scaffold(
-          key: scaffoldKey,
           body: Builder(
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context)!.showSnackBar(SnackBar(
+                  ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                     content: const Text('snack'),
                     duration: const Duration(seconds: 1),
                     action: SnackBarAction(
                       label: 'ACTION',
-                      onPressed: () { },
+                      onPressed: () {
+                        scaffoldMessengerKey.currentState?.removeCurrentSnackBar();
+                      },
                     ),
                   ));
                 },
@@ -1369,7 +1371,7 @@ void main() {
           body: Builder(builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                Scaffold.of(context)!.showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                   content: const Text('snack'),
                   duration: const Duration(seconds: 1),
                   action: SnackBarAction(
@@ -1499,7 +1501,7 @@ void main() {
               builder: (BuildContext context) {
                 return GestureDetector(
                   onTap: () {
-                    Scaffold.of(context)!.showSnackBar(SnackBar(
+                    ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                       content: const Text('test'),
                       action: SnackBarAction(label: 'foo', onPressed: () { }),
                     ));
@@ -1953,7 +1955,7 @@ void main() {
                 builder: (BuildContext context) {
                     return GestureDetector(
                       onTap: () {
-                        Scaffold.of(context)!.showSnackBar(SnackBar(
+                        ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                           content: const Text('Some content'),
                           behavior: SnackBarBehavior.fixed,
                           action: SnackBarAction(
@@ -1990,7 +1992,7 @@ void main() {
                 builder: (BuildContext context) {
                     return GestureDetector(
                       onTap: () {
-                        Scaffold.of(context)!.showSnackBar(SnackBar(
+                        ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                           content: const Text('Some content'),
                           behavior: SnackBarBehavior.floating,
                           action: SnackBarAction(
