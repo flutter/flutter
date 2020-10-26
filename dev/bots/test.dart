@@ -776,9 +776,12 @@ Future<void> _runWebUnitTests() async {
 }
 
 Future<void> _runWebIntegrationTests() async {
-  await _runWebStackTraceTest('profile');
-  await _runWebStackTraceTest('release');
+  await _runWebStackTraceTest('profile', 'lib/stack_trace.dart');
+  await _runWebStackTraceTest('release', 'lib/stack_trace.dart');
+  await _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart');
+  await _runWebStackTraceTest('release', 'lib/framework_stack_trace.dart');
   await _runWebDebugTest('lib/stack_trace.dart');
+  await _runWebDebugTest('lib/framework_stack_trace.dart');
   await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
   await _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true);
@@ -807,7 +810,7 @@ Future<void> _runWebIntegrationTests() async {
   ]);
 }
 
-Future<void> _runWebStackTraceTest(String buildMode) async {
+Future<void> _runWebStackTraceTest(String buildMode, String entrypoint) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
   final String appBuildDirectory = path.join(testAppDirectory, 'build', 'web');
 
@@ -824,7 +827,7 @@ Future<void> _runWebStackTraceTest(String buildMode) async {
       'web',
       '--$buildMode',
       '-t',
-      'lib/stack_trace.dart',
+      entrypoint,
     ],
     workingDirectory: testAppDirectory,
     environment: <String, String>{
