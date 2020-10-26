@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'logic.dart';
 
 class Calculator extends StatefulWidget {
-  const Calculator({Key key}) : super(key: key);
+  const Calculator({Key? key}) : super(key: key);
 
   @override
   _CalculatorState createState() => _CalculatorState();
@@ -43,7 +43,7 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void handleNumberTap(int n) {
-    final CalcExpression expression = _expression.appendDigit(n);
+    final CalcExpression? expression = _expression.appendDigit(n);
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -52,7 +52,7 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void handlePointTap() {
-    final CalcExpression expression = _expression.appendPoint();
+    final CalcExpression? expression = _expression.appendPoint();
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -61,7 +61,7 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void handlePlusTap() {
-    final CalcExpression expression = _expression.appendOperation(Operation.Addition);
+    final CalcExpression? expression = _expression.appendOperation(Operation.Addition);
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -70,7 +70,7 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void handleMinusTap() {
-    final CalcExpression expression = _expression.appendMinus();
+    final CalcExpression? expression = _expression.appendMinus();
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -79,7 +79,7 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void handleMultTap() {
-    final CalcExpression expression = _expression.appendOperation(Operation.Multiplication);
+    final CalcExpression? expression = _expression.appendOperation(Operation.Multiplication);
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -88,7 +88,7 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void handleDivTap() {
-    final CalcExpression expression = _expression.appendOperation(Operation.Division);
+    final CalcExpression? expression = _expression.appendOperation(Operation.Division);
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -97,7 +97,7 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void handleEqualsTap() {
-    final CalcExpression resultExpression = _expression.computeResult();
+    final CalcExpression? resultExpression = _expression.computeResult();
     if (resultExpression != null) {
       setState(() {
         setResult(resultExpression);
@@ -115,7 +115,7 @@ class _CalculatorState extends State<Calculator> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).canvasColor,
+        backgroundColor: Theme.of(context)!.canvasColor,
         elevation: 0.0,
       ),
       body: Column(
@@ -140,13 +140,13 @@ class _CalculatorState extends State<Calculator> {
 class CalcDisplay extends StatelessWidget {
   const CalcDisplay({ this.content });
 
-  final String content;
+  final String? content;
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        content,
+        content!,
         style: const TextStyle(fontSize: 24.0),
       ),
     );
@@ -156,14 +156,14 @@ class CalcDisplay extends StatelessWidget {
 class KeyPad extends StatelessWidget {
   const KeyPad({ this.calcState });
 
-  final _CalculatorState calcState;
+  final _CalculatorState? calcState;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = ThemeData(
       primarySwatch: Colors.purple,
       brightness: Brightness.dark,
-      platform: Theme.of(context).platform,
+      platform: Theme.of(context)!.platform,
     );
     return Theme(
       data: themeData,
@@ -193,9 +193,9 @@ class KeyPad extends StatelessWidget {
                     NumberKey(3, calcState),
                   ]),
                   KeyRow(<Widget>[
-                    CalcKey('.', calcState.handlePointTap),
+                    CalcKey('.', calcState!.handlePointTap),
                     NumberKey(0, calcState),
-                    CalcKey('=', calcState.handleEqualsTap),
+                    CalcKey('=', calcState!.handleEqualsTap),
                   ]),
                 ],
               ),
@@ -205,11 +205,11 @@ class KeyPad extends StatelessWidget {
                 color: themeData.backgroundColor,
                 child: Column(
                   children: <Widget>[
-                    CalcKey('\u232B', calcState.handleDelTap),
-                    CalcKey('\u00F7', calcState.handleDivTap),
-                    CalcKey('\u00D7', calcState.handleMultTap),
-                    CalcKey('-', calcState.handleMinusTap),
-                    CalcKey('+', calcState.handlePlusTap),
+                    CalcKey('\u232B', calcState!.handleDelTap),
+                    CalcKey('\u00F7', calcState!.handleDivTap),
+                    CalcKey('\u00D7', calcState!.handleMultTap),
+                    CalcKey('-', calcState!.handleMinusTap),
+                    CalcKey('+', calcState!.handlePlusTap),
                   ],
                 ),
               ),
@@ -245,7 +245,7 @@ class CalcKey extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Orientation orientation = MediaQuery.of(context).orientation;
+    final Orientation orientation = MediaQuery.of(context)!.orientation;
     return Expanded(
       child: InkResponse(
         onTap: onTap,
@@ -263,8 +263,8 @@ class CalcKey extends StatelessWidget {
 }
 
 class NumberKey extends CalcKey {
-  NumberKey(int value, _CalculatorState calcState)
+  NumberKey(int value, _CalculatorState? calcState)
     : super('$value', () {
-        calcState.handleNumberTap(value);
+        calcState!.handleNumberTap(value);
       });
 }

@@ -23,17 +23,17 @@ class LeaveBehindItem implements Comparable<LeaveBehindItem> {
   LeaveBehindItem.from(LeaveBehindItem item)
     : index = item.index, name = item.name, subject = item.subject, body = item.body;
 
-  final int index;
-  final String name;
-  final String subject;
-  final String body;
+  final int? index;
+  final String? name;
+  final String? subject;
+  final String? body;
 
   @override
-  int compareTo(LeaveBehindItem other) => index.compareTo(other.index);
+  int compareTo(LeaveBehindItem other) => index!.compareTo(other.index!);
 }
 
 class LeaveBehindDemo extends StatefulWidget {
-  const LeaveBehindDemo({ Key key }) : super(key: key);
+  const LeaveBehindDemo({ Key? key }) : super(key: key);
 
   static const String routeName = '/material/leave-behind';
 
@@ -44,7 +44,7 @@ class LeaveBehindDemo extends StatefulWidget {
 class LeaveBehindDemoState extends State<LeaveBehindDemo> {
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   bool _confirmDismiss = true;
-  List<LeaveBehindItem> leaveBehindItems;
+  late List<LeaveBehindItem> leaveBehindItems;
 
   void initListItems() {
     leaveBehindItems = List<LeaveBehindItem>.generate(16, (int index) {
@@ -96,7 +96,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     setState(() {
       leaveBehindItems.remove(item);
     });
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
       content: Text('You archived item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
@@ -109,7 +109,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     setState(() {
       leaveBehindItems.remove(item);
     });
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
       content: Text('You deleted item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
@@ -188,12 +188,12 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
 
 class _LeaveBehindListItem extends StatelessWidget {
   const _LeaveBehindListItem({
-    Key key,
-    @required this.item,
-    @required this.onArchive,
-    @required this.onDelete,
-    @required this.dismissDirection,
-    @required this.confirmDismiss,
+    Key? key,
+    required this.item,
+    required this.onArchive,
+    required this.onDelete,
+    required this.dismissDirection,
+    required this.confirmDismiss,
   }) : super(key: key);
 
   final LeaveBehindItem item;
@@ -212,7 +212,7 @@ class _LeaveBehindListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final ThemeData? theme = Theme.of(context);
     return Semantics(
       customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
         const CustomSemanticsAction(label: 'Archive'): _handleArchive,
@@ -242,7 +242,7 @@ class _LeaveBehindListItem extends StatelessWidget {
           return false;
         },
         background: Container(
-          color: theme.primaryColor,
+          color: theme!.primaryColor,
           child: const Center(
             child: ListTile(
               leading: Icon(Icons.delete, color: Colors.white, size: 36.0),
@@ -263,7 +263,7 @@ class _LeaveBehindListItem extends StatelessWidget {
             border: Border(bottom: BorderSide(color: theme.dividerColor)),
           ),
           child: ListTile(
-            title: Text(item.name),
+            title: Text(item.name!),
             subtitle: Text('${item.subject}\n${item.body}'),
             isThreeLine: true,
           ),
@@ -272,7 +272,7 @@ class _LeaveBehindListItem extends StatelessWidget {
     );
   }
 
-  Future<bool> _showConfirmationDialog(BuildContext context, String action) {
+  Future<bool?> _showConfirmationDialog(BuildContext context, String action) {
     return showDialog<bool>(
       context: context,
       barrierDismissible: true,

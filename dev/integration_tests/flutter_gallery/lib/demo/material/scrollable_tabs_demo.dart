@@ -14,8 +14,8 @@ enum TabsDemoStyle {
 
 class _Page {
   const _Page({ this.icon, this.text });
-  final IconData icon;
-  final String text;
+  final IconData? icon;
+  final String? text;
 }
 
 const List<_Page> _allPages = <_Page>[
@@ -43,7 +43,7 @@ class ScrollableTabsDemo extends StatefulWidget {
 }
 
 class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTickerProviderStateMixin {
-  TabController _controller;
+  TabController? _controller;
   TabsDemoStyle _demoStyle = TabsDemoStyle.iconsAndText;
   bool _customIndicator = false;
 
@@ -55,7 +55,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller!.dispose();
     super.dispose();
   }
 
@@ -65,7 +65,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
     });
   }
 
-  Decoration getIndicator() {
+  Decoration? getIndicator() {
     if (!_customIndicator)
       return const UnderlineTabIndicator();
 
@@ -117,12 +117,11 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
           ),
         );
     }
-    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color iconColor = Theme.of(context).accentColor;
+    final Color iconColor = Theme.of(context)!.accentColor;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Scrollable tabs'),
@@ -160,8 +159,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
           controller: _controller,
           isScrollable: true,
           indicator: getIndicator(),
-          tabs: _allPages.map<Tab>((_Page page) {
-            assert(_demoStyle != null);
+          tabs: _allPages.map<Tab?>((_Page page) {
             switch (_demoStyle) {
               case TabsDemoStyle.iconsAndText:
                 return Tab(text: page.text, icon: Icon(page.icon));
@@ -170,8 +168,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
               case TabsDemoStyle.textOnly:
                 return Tab(text: page.text);
             }
-            return null;
-          }).toList(),
+          }).toList() as List<Widget>,
         ),
       ),
       body: TabBarView(

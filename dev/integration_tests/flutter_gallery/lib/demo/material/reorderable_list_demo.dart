@@ -20,7 +20,7 @@ enum _ReorderableListType {
 }
 
 class ReorderableListDemo extends StatefulWidget {
-  const ReorderableListDemo({ Key key }) : super(key: key);
+  const ReorderableListDemo({ Key? key }) : super(key: key);
 
   static const String routeName = '/material/reorderable-list';
 
@@ -33,38 +33,38 @@ class _ListItem {
 
   final String value;
 
-  bool checkState;
+  bool? checkState;
 }
 
 class _ListDemoState extends State<ReorderableListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  PersistentBottomSheetController<void> _bottomSheet;
-  _ReorderableListType _itemType = _ReorderableListType.threeLine;
-  bool _reverse = false;
+  PersistentBottomSheetController<void>? _bottomSheet;
+  _ReorderableListType? _itemType = _ReorderableListType.threeLine;
+  bool? _reverse = false;
   bool _reverseSort = false;
   final List<_ListItem> _items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
   ].map<_ListItem>((String item) => _ListItem(item, false)).toList();
 
-  void changeItemType(_ReorderableListType type) {
+  void changeItemType(_ReorderableListType? type) {
     setState(() {
       _itemType = type;
     });
     // Rebuild the bottom sheet to reflect the selected list view.
-    _bottomSheet?.setState(() {
+    _bottomSheet?.setState!(() {
       // Trigger a rebuild.
     });
     // Close the bottom sheet to give the user a clear view of the list.
     _bottomSheet?.close();
   }
 
-  void changeReverse(bool newValue) {
+  void changeReverse(bool? newValue) {
     setState(() {
       _reverse = newValue;
     });
     // Rebuild the bottom sheet to reflect the selected list view.
-    _bottomSheet?.setState(() {
+    _bottomSheet?.setState!(() {
       // Trigger a rebuild.
     });
     // Close the bottom sheet to give the user a clear view of the list.
@@ -73,7 +73,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
 
   void _showConfigurationSheet() {
     setState(() {
-      _bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((BuildContext bottomSheetContext) {
+      _bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((BuildContext bottomSheetContext) {
         return DecoratedBox(
           decoration: const BoxDecoration(
             border: Border(top: BorderSide(color: Colors.black26)),
@@ -115,7 +115,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
       });
 
       // Garbage collect the bottom sheet when it closes.
-      _bottomSheet.closed.whenComplete(() {
+      _bottomSheet!.closed.whenComplete(() {
         if (mounted) {
           setState(() {
             _bottomSheet = null;
@@ -125,18 +125,18 @@ class _ListDemoState extends State<ReorderableListDemo> {
     });
   }
 
-  Widget buildListTile(_ListItem item) {
+  Widget? buildListTile(_ListItem item) {
     const Widget secondary = Text(
       'Even more additional list item information appears on line three.',
     );
-    Widget listTile;
+    Widget? listTile;
     switch (_itemType) {
       case _ReorderableListType.threeLine:
         listTile = CheckboxListTile(
           key: Key(item.value),
           isThreeLine: true,
           value: item.checkState ?? false,
-          onChanged: (bool newValue) {
+          onChanged: (bool? newValue) {
             setState(() {
               item.checkState = newValue;
             });
@@ -156,6 +156,8 @@ class _ListDemoState extends State<ReorderableListDemo> {
             backgroundColor: Colors.green,
           ),
         );
+        break;
+      default:
         break;
     }
 
@@ -193,7 +195,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
           ),
           IconButton(
             icon: Icon(
-              Theme.of(context).platform == TargetPlatform.iOS
+              Theme.of(context)!.platform == TargetPlatform.iOS
                   ? Icons.more_horiz
                   : Icons.more_vert,
             ),
@@ -207,13 +209,13 @@ class _ListDemoState extends State<ReorderableListDemo> {
           header: _itemType != _ReorderableListType.threeLine
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text('Header of the list', style: Theme.of(context).textTheme.headline5))
+                  child: Text('Header of the list', style: Theme.of(context)!.textTheme.headline5))
               : null,
           onReorder: _onReorder,
-          reverse: _reverse,
+          reverse: _reverse!,
           scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          children: _items.map<Widget>(buildListTile).toList(),
+          children: _items.map<Widget?>(buildListTile).toList() as List<Widget>,
         ),
       ),
     );

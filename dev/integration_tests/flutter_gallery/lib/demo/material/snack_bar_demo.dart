@@ -19,7 +19,7 @@ const String _text3 =
   'By default snackbars automatically disappear after a few seconds ';
 
 class SnackBarDemo extends StatefulWidget {
-  const SnackBarDemo({ Key key }) : super(key: key);
+  const SnackBarDemo({ Key? key }) : super(key: key);
 
   static const String routeName = '/material/snack-bar';
 
@@ -44,12 +44,12 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
               child: const Text('SHOW A SNACKBAR'),
               onPressed: () {
                 final int thisSnackBarIndex = _snackBarIndex++;
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                   content: Text('This is snackbar #$thisSnackBarIndex.'),
                   action: SnackBarAction(
                     label: 'ACTION',
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
                         content: Text("You pressed snackbar $thisSnackBarIndex's action."),
                       ));
                     },

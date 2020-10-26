@@ -24,18 +24,18 @@ List<String> _allDemos = kAllGalleryDemos.map(
 Set<String> _unTestedDemos = Set<String>.from(_allDemos);
 
 class _MessageHandler {
-  static LiveWidgetController controller;
+  static LiveWidgetController? controller;
   Future<String> call(String message) async {
     switch(message) {
       case 'demoNames':
         return const JsonEncoder.withIndent('  ').convert(_allDemos);
       case 'profileDemos':
-        controller ??= LiveWidgetController(WidgetsBinding.instance);
+        controller ??= LiveWidgetController(WidgetsBinding.instance!);
         await runDemos(kProfiledDemos, controller);
         _unTestedDemos.removeAll(kProfiledDemos);
         return const JsonEncoder.withIndent('  ').convert(kProfiledDemos);
       case 'restDemos':
-        controller ??= LiveWidgetController(WidgetsBinding.instance);
+        controller ??= LiveWidgetController(WidgetsBinding.instance!);
         final List<String> restDemos =  _unTestedDemos.toList();
         await runDemos(restDemos, controller);
         return const JsonEncoder.withIndent('  ').convert(restDemos);
@@ -46,7 +46,7 @@ class _MessageHandler {
 }
 
 void main() {
-  enableFlutterDriverExtension(handler: _MessageHandler());
+  enableFlutterDriverExtension(handler: _MessageHandler() as Future<String> Function(String?)?);
   // As in lib/main.dart: overriding https://github.com/flutter/flutter/issues/13736
   // for better visual effect at the cost of performance.
   runApp(const GalleryApp(testMode: true));

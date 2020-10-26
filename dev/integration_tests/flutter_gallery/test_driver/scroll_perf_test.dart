@@ -7,22 +7,22 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('scrolling performance test', () {
-    FlutterDriver driver;
+    FlutterDriver? driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
 
-      await driver.waitUntilFirstFrameRasterized();
+      await driver!.waitUntilFirstFrameRasterized();
     });
 
     tearDownAll(() async {
       if (driver != null)
-        driver.close();
+        driver!.close();
     });
 
     test('measure', () async {
-      final Timeline timeline = await driver.traceAction(() async {
-        await driver.tap(find.text('Material'));
+      final Timeline timeline = await driver!.traceAction(() async {
+        await driver!.tap(find.text('Material'));
 
         final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
 
@@ -30,13 +30,13 @@ void main() {
         // https://github.com/flutter/flutter/issues/3316
         // Scroll down
         for (int i = 0; i < 5; i++) {
-          await driver.scroll(demoList, 0.0, -300.0, const Duration(milliseconds: 300));
+          await driver!.scroll(demoList, 0.0, -300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
 
         // Scroll up
         for (int i = 0; i < 5; i++) {
-          await driver.scroll(demoList, 0.0, 300.0, const Duration(milliseconds: 300));
+          await driver!.scroll(demoList, 0.0, 300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
       });

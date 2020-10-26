@@ -11,10 +11,10 @@ import 'package:flutter_gallery/demo/shrine/model/product.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({ this.imageAspectRatio = 33 / 49, this.product })
-      : assert(imageAspectRatio == null || imageAspectRatio > 0);
+      : assert(imageAspectRatio > 0);
 
   final double imageAspectRatio;
-  final Product product;
+  final Product? product;
 
   static const double kTextBoxHeight = 65.0;
 
@@ -25,19 +25,19 @@ class ProductCard extends StatelessWidget {
       locale: Localizations.localeOf(context).toString(),
     );
 
-    final ThemeData theme = Theme.of(context);
+    final ThemeData? theme = Theme.of(context);
 
     final Image imageWidget = Image.asset(
-      product.assetName,
-      package: product.assetPackage,
+      product!.assetName,
+      package: product!.assetPackage,
       fit: BoxFit.cover,
     );
 
     return ScopedModelDescendant<AppStateModel>(
-      builder: (BuildContext context, Widget child, AppStateModel model) {
+      builder: (BuildContext context, Widget? child, AppStateModel model) {
         return GestureDetector(
           onTap: () {
-            model.addProductToCart(product.id);
+            model.addProductToCart(product!.id);
           },
           child: child,
         );
@@ -53,22 +53,22 @@ class ProductCard extends StatelessWidget {
                 child: imageWidget,
               ),
               SizedBox(
-                height: kTextBoxHeight * MediaQuery.of(context).textScaleFactor,
+                height: kTextBoxHeight * MediaQuery.of(context)!.textScaleFactor,
                 width: 121.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      product == null ? '' : product.name,
-                      style: theme.textTheme.button,
+                      product == null ? '' : product!.name,
+                      style: theme!.textTheme.button,
                       softWrap: false,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
                     const SizedBox(height: 4.0),
                     Text(
-                      product == null ? '' : formatter.format(product.price),
+                      product == null ? '' : formatter.format(product!.price),
                       style: theme.textTheme.caption,
                     ),
                   ],
