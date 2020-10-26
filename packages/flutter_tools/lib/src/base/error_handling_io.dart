@@ -306,9 +306,11 @@ class ErrorHandlingFile
     // If the copy failed but both of the above checks passed, copy the bytes
     // directly.
     _runSync(() {
-      final RandomAccessFile source = delegate.openSync(mode: FileMode.read);
-      final RandomAccessFile sink = resultFile.openSync(mode: FileMode.writeOnly);
+      RandomAccessFile source;
+      RandomAccessFile sink;
       try {
+        source = delegate.openSync(mode: FileMode.read);
+        sink = resultFile.openSync(mode: FileMode.writeOnly);
         // 64k is the same sized buffer used by dart:io for `File.openRead`.
         final Uint8List buffer = Uint8List(64 * 1024);
         final int totalBytes = source.lengthSync();
@@ -318,6 +320,9 @@ class ErrorHandlingFile
           sink.writeFromSync(buffer, 0, chunkLength);
           bytes += chunkLength;
         }
+      } catch (err) { // ignore: avoid_catches_without_on_clauses
+        ErrorHandlingFileSystem.deleteIfExists(resultFile, recursive: true);
+        rethrow;
       } finally {
         source?.closeSync();
         sink?.closeSync();

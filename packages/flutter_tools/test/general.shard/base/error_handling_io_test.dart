@@ -874,6 +874,40 @@ void main() {
     }, overrides: <Type, Generator>{
       Usage: () => MockUsage(),
     });
+
+    // Uses context for analytics.
+    testUsingContext('copySync deletes the result file if the fallback fails', () {
+      final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
+      final MockFile source = MockFile();
+      final MockFile dest = MockFile();
+      final File memorySource = memoryFileSystem.file('source')
+        ..createSync();
+      final File memoryDest = memoryFileSystem.file('dest')
+        ..createSync();
+      int calledCount = 0;
+
+      when(dest.existsSync()).thenReturn(true);
+      when(source.copySync(any))
+        .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
+      when(source.openSync(mode: anyNamed('mode')))
+        .thenAnswer((Invocation invocation) {
+          if (calledCount == 1) {
+            throw const FileSystemException('', '', OSError('', eaccess));
+          }
+          calledCount +=  1;
+          return memorySource.openSync(mode: invocation.namedArguments[#mode] as FileMode);
+        });
+      when(dest.openSync(mode: anyNamed('mode')))
+        .thenAnswer((Invocation invocation) => memoryDest.openSync(mode: invocation.namedArguments[#mode] as FileMode));
+      when(mockFileSystem.file('source')).thenReturn(source);
+      when(mockFileSystem.file('dest')).thenReturn(dest);
+
+      expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit());
+
+      verify(dest.deleteSync(recursive: true)).called(1);
+    }, overrides: <Type, Generator>{
+      Usage: () => MockUsage(),
+    });
   });
 }
 
