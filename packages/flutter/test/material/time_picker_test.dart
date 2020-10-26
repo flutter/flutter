@@ -65,7 +65,7 @@ Future<Offset?> startPicker(
 }
 
 Future<void> finishPicker(WidgetTester tester) async {
-  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(ElevatedButton)))!;
+  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(ElevatedButton)));
   await tester.tap(find.text(materialLocalizations.okButtonLabel));
   await tester.pumpAndSettle(const Duration(seconds: 1));
 }

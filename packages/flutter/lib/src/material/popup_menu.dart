@@ -848,17 +848,15 @@ Future<T?> showMenu<T>({
   assert(captureInheritedThemes != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  String? label;
   switch (Theme.of(context)!.platform) {
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
-      label = semanticLabel;
       break;
     case TargetPlatform.android:
     case TargetPlatform.fuchsia:
     case TargetPlatform.linux:
     case TargetPlatform.windows:
-      label = semanticLabel ?? MaterialLocalizations.of(context)?.popupMenuLabel;
+      semanticLabel ??= MaterialLocalizations.of(context).popupMenuLabel;
   }
 
   return Navigator.of(context, rootNavigator: useRootNavigator)!.push(_PopupMenuRoute<T>(
@@ -866,10 +864,10 @@ Future<T?> showMenu<T>({
     items: items,
     initialValue: initialValue,
     elevation: elevation,
-    semanticLabel: label,
+    semanticLabel: semanticLabel,
     theme: Theme.of(context, shadowThemeOnly: true),
     popupMenuTheme: PopupMenuTheme.of(context),
-    barrierLabel: MaterialLocalizations.of(context)!.modalBarrierDismissLabel,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     shape: shape,
     color: color,
     showMenuContext: context,
@@ -1142,7 +1140,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
     if (widget.child != null)
       return Tooltip(
-        message: widget.tooltip ?? MaterialLocalizations.of(context)!.showMenuTooltip,
+        message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
@@ -1153,7 +1151,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     return IconButton(
       icon: widget.icon ?? _getIcon(Theme.of(context)!.platform),
       padding: widget.padding,
-      tooltip: widget.tooltip ?? MaterialLocalizations.of(context)!.showMenuTooltip,
+      tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
     );
   }

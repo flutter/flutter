@@ -823,7 +823,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   }
 
   List<Widget> _createTiles() {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     assert(localizations != null);
 
     final ThemeData themeData = Theme.of(context)!;

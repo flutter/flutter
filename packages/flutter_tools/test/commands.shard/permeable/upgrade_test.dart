@@ -163,7 +163,7 @@ void main() {
       await expectLater(
             () async => await realCommandRunner.fetchRemoteRevision(),
         throwsToolExit(
-          message: 'Unable to upgrade Flutter: no origin repository configured\.',
+          message: 'Unable to upgrade Flutter: no origin repository configured.',
         ),
       );
       expect(processManager.hasRemainingExpectations, isFalse);
