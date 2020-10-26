@@ -564,7 +564,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
       route.scrollController = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
     }
 
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection? textDirection = Directionality.maybeOf(context);
     final Widget menu = _DropdownMenu<T>(
       route: route,
       padding: padding.resolve(textDirection),
@@ -1178,7 +1178,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   void _handleTap() {
     final RenderBox itemBox = context.findRenderObject()! as RenderBox;
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection? textDirection = Directionality.maybeOf(context);
     final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown
       ? _kAlignedMenuMargin
       : _kUnalignedMenuMargin;

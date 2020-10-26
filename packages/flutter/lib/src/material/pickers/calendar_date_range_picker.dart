@@ -707,7 +707,7 @@ class _MonthItemState extends State<_MonthItem> {
     final ColorScheme colorScheme = theme.colorScheme;
     final TextTheme textTheme = theme.textTheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection textDirection = Directionality.of(context)!;
     final Color highlightColor = _highlightColor(context);
     final int day = dayToBuild.day;
 

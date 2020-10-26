@@ -55,7 +55,7 @@ void main() {
     bool good = false;
     await tester.pumpWidget(Builder(
       builder: (BuildContext context) {
-        expect(Directionality.of(context), isNull);
+        expect(Directionality.maybeOf(context), isNull);
         good = true;
         return const Placeholder();
       },
