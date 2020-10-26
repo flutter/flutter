@@ -232,4 +232,31 @@ void main() {
       );
     }
   });
+
+  testWidgets('debugCheckHasCupertinoLocalizations throws', (WidgetTester tester) async {
+    final GlobalKey noLocalizationsAvailable = GlobalKey();
+    final GlobalKey localizationsAvailable = GlobalKey();
+
+    await tester.pumpWidget(
+      Container(
+        key: noLocalizationsAvailable,
+        child: WidgetsApp(
+          builder: (BuildContext context, Widget? child) {
+            return Container(
+              key: localizationsAvailable,
+            );
+          },
+          color: const Color(0xFF4CAF50),
+        ),
+      ),
+    );
+
+    expect(() => debugCheckHasWidgetsLocalizations(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
+          (AssertionError e) => e.message,
+      'message',
+      contains('No WidgetsLocalizations found'),
+    )));
+
+    expect(debugCheckHasWidgetsLocalizations(localizationsAvailable.currentContext!), isTrue);
+  });
 }

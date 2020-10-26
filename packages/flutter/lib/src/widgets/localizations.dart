@@ -165,7 +165,7 @@ abstract class WidgetsLocalizations {
   /// textDirection: WidgetsLocalizations.of(context).textDirection,
   /// ```
   static WidgetsLocalizations of(BuildContext context) {
-    debugCheckHasWidgetsLocalizations(context);
+    assert(debugCheckHasWidgetsLocalizations(context));
     return Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations)!;
   }
 }
