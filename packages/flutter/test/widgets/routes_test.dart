@@ -102,7 +102,7 @@ Future<void> runNavigatorTest(
   NavigatorState host,
   VoidCallback test,
   List<String> expectations, [
-  List<String>? expectationsAfterAnotherPump = const <String>[],
+  List<String> expectationsAfterAnotherPump = const <String>[],
 ]) async {
   expect(host, isNotNull);
   test();
