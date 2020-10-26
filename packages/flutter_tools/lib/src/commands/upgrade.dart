@@ -112,7 +112,7 @@ class UpgradeCommandRunner {
       globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
       globals.printStatus('$flutterVersion');
       return;
-    }else if(verifyOnly){
+    } else if(verifyOnly) {
       globals.printStatus('A new version of Flutter is available!\n');
       globals.printStatus('Installed: ${flutterVersion.frameworkRevision}');
       globals.printStatus('Available: $upstreamRevision\n', emphasis: true);
