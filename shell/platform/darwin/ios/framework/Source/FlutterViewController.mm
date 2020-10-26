@@ -1332,7 +1332,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 #pragma mark - Platform views
 
-- (flutter::FlutterPlatformViewsController*)platformViewsController {
+- (std::shared_ptr<flutter::FlutterPlatformViewsController>&)platformViewsController {
   return [_engine.get() platformViewsController];
 }
 
