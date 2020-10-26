@@ -1097,7 +1097,7 @@ void main() {
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart')
       ).readAsStringSync();
       expect(baseLocalizationsFileContents, contains('/// Title for the application.'));
-      expect(baseLocalizationsFileContents, contains('/// In en, this message translates to "Title"'));
+      expect(baseLocalizationsFileContents, contains('/// In en, this message translates to "Title".'));
     });
 
     test('message with placeholders - should generate code comment with description and template message translation', () {
@@ -1147,7 +1147,7 @@ void main() {
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart')
       ).readAsStringSync();
       expect(baseLocalizationsFileContents, contains('/// The price of an online shopping cart item.'));
-      expect(baseLocalizationsFileContents, contains(r'''/// In en, this message translates to "The price of this item is: ${price}"'''));
+      expect(baseLocalizationsFileContents, contains(r'''/// In en, this message translates to "The price of this item is: ${price}".'''));
     });
 
     test('should generate a file per language', () {

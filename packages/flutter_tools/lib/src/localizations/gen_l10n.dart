@@ -207,7 +207,7 @@ String generateMethod(Message message, AppResourceBundle bundle) {
 
 String generateBaseClassMethod(Message message, LocaleInfo templateArbLocale) {
   final String comment = message.description ?? 'No description provided for @${message.resourceId}.';
-  final String templateLocaleTranslationComment = 'In $templateArbLocale, this message translates to "${message.value}"';
+  final String templateLocaleTranslationComment = 'In $templateArbLocale, this message translates to "${message.value}".';
   if (message.placeholders.isNotEmpty) {
     return baseClassMethodTemplate
       .replaceAll('@(comment)', comment)
