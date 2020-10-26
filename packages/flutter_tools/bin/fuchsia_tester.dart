@@ -23,8 +23,6 @@ import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 
-// This was largely inspired by lib/src/commands/test.dart.
-
 const String _kOptionPackages = 'packages';
 const String _kOptionShell = 'shell';
 const String _kOptionTestDirectory = 'test-directory';
