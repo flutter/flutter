@@ -1,98 +1,38 @@
-# Flutter devicelab
+# Flutter DeviceLab
 
-"Devicelab" (a.k.a. [Cocoon](https://github.com/flutter/cocoon)) is a physical
-lab that tests Flutter on real Android and iOS devices.
+DeviceLab is a physical lab that tests Flutter on real devices.
 
-This package contains the code for the test framework and the tests. More generally
+This package contains the code for the test framework and tests. More generally
 the tests are referred to as "tasks" in the API, but since we primarily use it
 for testing, this document refers to them as "tests".
 
 Current statuses for the devicelab are available at
-https://flutter-dashboard.appspot.com.
+https://flutter-dashboard.appspot.com. See [dashboard user guide](https://github.com/flutter/cocoon/blob/master/app_flutter/USER_GUIDE.md)
+for information on using the dashboards.
 
-# Dashboards
+## How the DeviceLab runs tasks
 
-## Build dashboard
+The DeviceLab devices continuously ask Flutter's continuous integration system
+[Cocoon](https://github.com/flutter/cocoon) for tasks to run. When Cocoon has a
+task that is suitable for the device (e.g. Android test), it reserves that
+task for the device. See [manifest.yaml](manifest.yaml) for more information on
+the information used for scheduling tasks.
 
-The build page is accessible at https://flutter-dashboard.appspot.com/#/build.
-This page reports the build statuses of commits to the flutter/flutter repo.
-
-### Tasks
-
-Task statuses are color-coded in the following manner:
-
-**New task** (blue): the task is waiting for an agent to pick it up and
-start the build.
-
-**Task is running** (blue with clock): an agent is currently building the task.
-
-**Task succeeded** (green): an agent reported the successful completion of the
-task.
-
-**Task is flaky** (yellow): the task was attempted multiple time, but only the
-latest attempt succeeded (we currently only try twice).
-
-**Task failed** (red): the task failed all of the attempts.
-
-**Task is rerunning** (orange): the task is being rerun.
-
-**Task was skipped** (transparent): the task is not scheduled for a build. This
-usually happens when a task is removed from the `manifest.yaml` file.
-
-In addition to color-coding, a task may display a question mark. This means
-that the task was marked as flaky manually. The status of such a task is ignored
-when considering whether the build is broken or not. For example, if a flaky
-task fails, GitHub will not prevent PR submissions. However, if the latest
-status of a non-flaky task is red, all pending PRs will contain a warning about
-the broken build and recommend caution when submitting.
-
-Clicking a cell will pop up an overlay with information about that task. It
-includes information such as the task name, number of attempts, run time,
-queue time, whether it is manually marked flaky, and the agent it was run on.
-It has actions to download the log, rerun the task, and view the agent on
-the agent dashboard.
-
-## Why is a task stuck on "new task" status?
-
-The dashboard aggregates build results from multiple build environments,
-including Cirrus, Chrome Infra, and devicelab. While devicelab
-tests every commit that goes into the `master` branch, other environments
-may skip some commits. For example, Cirrus will only test the
-_last_ commit of a PR that's merged into the `master` branch. Chrome Infra may
-skip commits when they come in too fast.
-
-## Agent dashboard
-
-Agent statuses are available at https://flutter-dashboard.appspot.com/#/agents.
-
-A green agent is considered healthy and ready to receive new tasks to build. A
-red agent is broken and does not receive new tasks.
-
-## Performance dashboard
-
-Flutter benchmarks are available at
-https://flutter-dashboard.appspot.com/benchmarks.html.
-
-# How the devicelab runs tasks
-
-The devicelab agents have a small script installed on them that continuously
-asks the CI server for tasks to run. When the server finds a suitable task for
-an agent it reserves that task for the agent. If the task succeeds, the agent
-reports the success to the server and the dashboard shows that task in green.
-If the task fails, the agent reports the failure to the server, the server
-increments the counter counting the number of attempts it took to run the task
-and puts the task back in the pool of available tasks. If a task does not
-succeed after a certain number of attempts (as of this writing the limit is 2),
+1. If the task succeeds, the test runner reports the success to Cocoon. The dashboards
+will show that task in green.
+2.  If the task fails, the test runner reports the failure to the server. Cocoon
+increments the run attempt counter and puts the task back in the pool of available
+tasks. If a task does not succeed after a certain number of attempts (as of this writing the limit is 2),
 the task is marked as failed and is displayed using a red color on the dashboard.
 
-# Running tests locally
+## Running tests locally
 
 Do make sure your tests pass locally before deploying to the CI environment.
 Below is a handful of commands that run tests in a similar way to how the
 CI environment runs them. These commands are also useful when you need to
 reproduce a CI test failure locally.
 
-## Prerequisites
+### Prerequisites
 
 You must set the `ANDROID_SDK_ROOT` environment variable to run
 tests on Android. If you have a local build of the Flutter engine, then you have
@@ -100,13 +40,13 @@ a copy of the Android SDK at `.../engine/src/third_party/android_tools/sdk`.
 
 You can find where your Android SDK is using `flutter doctor`.
 
-## Warnings
+### Warnings
 
 Running the devicelab will do things to your environment.
 
 Notably, it will start and stop Gradle, for instance.
 
-## Running all tests
+### Running all tests
 
 To run all tests defined in `manifest.yaml`, use option `-a` (`--all`):
 
@@ -117,7 +57,7 @@ To run all tests defined in `manifest.yaml`, use option `-a` (`--all`):
 This defaults to only running tests supported by your host device's platform
 (`--match-host-platform`) and exiting after the first failure (`--exit`).
 
-## Running specific tests
+### Running specific tests
 
 To run a test, use option `-t` (`--task`):
 
@@ -148,7 +88,7 @@ Currently, there are only three stages defined, `devicelab`,
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -s {NAME_OF_STAGE}
 ```
 
-## Running tests against a local engine build
+### Running tests against a local engine build
 
 To run device lab tests against a local engine build, pass the appropriate
 flags to `bin/run.dart`:
@@ -161,7 +101,7 @@ flags to `bin/run.dart`:
 
 An example of a local engine architecture is `android_debug_unopt_x86`.
 
-## Running an A/B test for engine changes
+### Running an A/B test for engine changes
 
 You can run an A/B test that compares the performance of the default engine
 against a local engine build. The test runs the same benchmark a specified
@@ -224,7 +164,7 @@ with tabs for easy spreadsheet entry. (defaults to on)
 
 Multiple trailing filenames can be specified and each such results file will be processed in turn.
 
-# Reproducing broken builds locally
+## Reproducing broken builds locally
 
 To reproduce the breakage locally `git checkout` the corresponding Flutter
 revision. Note the name of the test that failed. In the example above the
@@ -235,7 +175,7 @@ the `run.dart` command. For example:
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -t flutter_gallery__transition_perf
 ```
 
-# Writing tests
+## Writing tests
 
 A test is a simple Dart program that lives under `bin/tasks` and uses
 `package:flutter_devicelab/framework/framework.dart` to define and run a _task_.
@@ -271,7 +211,7 @@ A task runs in its own standalone Dart VM and reports results via Dart VM
 service protocol. This ensures that tasks do not interfere with each other and
 lets the CI system time out and clean up tasks that get stuck.
 
-# Adding tests to the CI environment
+## Adding tests to the CI environment
 
 The `manifest.yaml` file describes a subset of tests we run in the CI. To add
 your test edit `manifest.yaml` and add the following in the "tasks" dictionary:

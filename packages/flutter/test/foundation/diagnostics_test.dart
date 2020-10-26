@@ -47,15 +47,15 @@ enum ExampleEnum {
 
 /// Encode and decode to JSON to make sure all objects in the JSON for the
 /// [DiagnosticsNode] are valid JSON.
-Map<String, Object> simulateJsonSerialization(DiagnosticsNode node) {
-  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate()))) as Map<String, Object>;
+Map<String, Object?> simulateJsonSerialization(DiagnosticsNode node) {
+  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate()))) as Map<String, Object?>;
 }
 
 void validateNodeJsonSerialization(DiagnosticsNode node) {
   validateNodeJsonSerializationHelper(simulateJsonSerialization(node), node);
 }
 
-void validateNodeJsonSerializationHelper(Map<String, Object> json, DiagnosticsNode node) {
+void validateNodeJsonSerializationHelper(Map<String, Object?> json, DiagnosticsNode node) {
   expect(json['name'], equals(node.name));
   expect(json['showSeparator'] ?? true, equals(node.showSeparator));
   expect(json['description'], equals(node.toDescription()));
@@ -67,18 +67,18 @@ void validateNodeJsonSerializationHelper(Map<String, Object> json, DiagnosticsNo
   expect(json['hasChildren'] ?? false, equals(node.getChildren().isNotEmpty));
 }
 
-void validatePropertyJsonSerialization(DiagnosticsProperty<Object> property) {
+void validatePropertyJsonSerialization(DiagnosticsProperty<Object?> property) {
   validatePropertyJsonSerializationHelper(simulateJsonSerialization(property), property);
 }
 
 void validateStringPropertyJsonSerialization(StringProperty property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   expect(json['quoted'], equals(property.quoted));
   validatePropertyJsonSerializationHelper(json, property);
 }
 
 void validateFlagPropertyJsonSerialization(FlagProperty property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   expect(json['ifTrue'], equals(property.ifTrue));
 
   if (property.ifTrue != null) {
@@ -96,7 +96,7 @@ void validateFlagPropertyJsonSerialization(FlagProperty property) {
 }
 
 void validateDoublePropertyJsonSerialization(DoubleProperty property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.unit != null) {
     expect(json['unit'], equals(property.unit));
   } else {
@@ -109,7 +109,7 @@ void validateDoublePropertyJsonSerialization(DoubleProperty property) {
 }
 
 void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.ifPresent != null) {
     expect(json['ifPresent'], equals(property.ifPresent));
   } else {
@@ -120,7 +120,7 @@ void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> prop
 }
 
 void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object?> property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.value.isNotEmpty) {
     expect(json['values'], equals(
       property.value.entries
@@ -135,9 +135,9 @@ void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object?> proper
 }
 
 void validateIterablePropertyJsonSerialization(IterableProperty<Object> property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.value != null) {
-    final List<Object> valuesJson = json['values']! as List<Object>;
+    final List<Object?> valuesJson = json['values']! as List<Object?>;
     final List<String> expectedValues = property.value!.map<String>((Object value) => value.toString()).toList();
     expect(listEquals(valuesJson, expectedValues), isTrue);
   } else {
@@ -147,7 +147,7 @@ void validateIterablePropertyJsonSerialization(IterableProperty<Object> property
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validatePropertyJsonSerializationHelper(final Map<String, Object> json, DiagnosticsProperty<Object> property) {
+void validatePropertyJsonSerializationHelper(final Map<String, Object?> json, DiagnosticsProperty<Object?> property) {
   if (property.defaultValue != kNoDefaultValue) {
     expect(json['defaultValue'], equals(property.defaultValue.toString()));
   } else {
@@ -1919,7 +1919,7 @@ void main() {
     expect(messageProperty.name, equals('diagnostics'));
     expect(messageProperty.value, isNull);
     expect(messageProperty.showName, isTrue);
-    validatePropertyJsonSerialization(messageProperty as DiagnosticsProperty<Object>);
+    validatePropertyJsonSerialization(messageProperty as DiagnosticsProperty<Object?>);
   });
 
   test('error message style wrap test', () {
@@ -2246,7 +2246,7 @@ void main() {
 
   test('DiagnosticsProperty for basic types has value in json', () {
     DiagnosticsProperty<int> intProperty = DiagnosticsProperty<int>('int1', 10);
-    Map<String, Object> json = simulateJsonSerialization(intProperty);
+    Map<String, Object?> json = simulateJsonSerialization(intProperty);
     expect(json['name'], 'int1');
     expect(json['value'], 10);
 

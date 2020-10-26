@@ -1343,7 +1343,9 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     // The logic for max is equivalent but on the other side.
     final double max = delta > 0.0
       ? double.infinity
-      : math.max(maxScrollExtent, pixels);
+      // If pixels < 0.0, then we are currently in overscroll. The max should be
+      // 0.0, representing the end of the overscrolled portion.
+      : pixels < 0.0 ? 0.0 : math.max(maxScrollExtent, pixels);
     final double oldPixels = pixels;
     final double newPixels = (pixels - delta).clamp(min, max);
     final double clampedDelta = newPixels - pixels;

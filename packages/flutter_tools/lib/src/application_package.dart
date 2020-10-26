@@ -164,7 +164,7 @@ class AndroidApk extends ApplicationPackage {
 
     String apptStdout;
     try {
-      apptStdout = processUtils.runSync(
+      apptStdout = globals.processUtils.runSync(
         <String>[
           aaptPath,
           'dump',
@@ -446,6 +446,13 @@ class BuildableIOSApp extends IOSApp {
   // Specifying `build/ios/archive/Runner` will result in `build/ios/archive/Runner.xcarchive`.
   String get archiveBundlePath
     => globals.fs.path.join(getIosBuildDirectory(), 'archive', globals.fs.path.withoutExtension(_hostAppBundleName));
+
+  // The output xcarchive bundle path `build/ios/archive/Runner.xcarchive`.
+  String get archiveBundleOutputPath =>
+      globals.fs.path.setExtension(archiveBundlePath, '.xcarchive');
+
+  String get ipaOutputPath =>
+      globals.fs.path.join(getIosBuildDirectory(), 'ipa');
 
   String _buildAppPath(String type) {
     return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);

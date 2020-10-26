@@ -703,8 +703,6 @@ class PubDependencies extends ArtifactSet {
       context: PubContext.pubGet,
       directory: _fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
       generateSyntheticPackage: false,
-      skipPubspecYamlCheck: true,
-      checkLastModified: false,
     );
   }
 }
@@ -1085,7 +1083,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     try {
       final String gradleExecutable = gradle.absolute.path;
       final String flutterSdk = globals.fsUtils.escapePath(Cache.flutterRoot);
-      final RunResult processResult = await processUtils.run(
+      final RunResult processResult = await globals.processUtils.run(
         <String>[
           gradleExecutable,
           '-b', globals.fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),

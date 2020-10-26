@@ -36,7 +36,7 @@ void main() {
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
-        ' │ alignment: center\n'
+        ' │ alignment: Alignment.center\n'
         ' │ minWidth: 0.0\n'
         ' │ maxWidth: Infinity\n'
         ' │ minHeight: 0.0\n'
@@ -122,7 +122,7 @@ void main() {
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
-        ' │ alignment: center\n'
+        ' │ alignment: Alignment.center\n'
         ' │ minWidth: 10.0\n'
         ' │ maxWidth: 500.0\n'
         ' │ minHeight: 0.0\n'
@@ -158,7 +158,7 @@ void main() {
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
-        ' │ alignment: center\n'
+        ' │ alignment: Alignment.center\n'
         ' │ minWidth: 10.0\n'
         ' │ maxWidth: use parent maxWidth constraint\n'
         ' │ minHeight: use parent minHeight constraint\n'
@@ -173,5 +173,4 @@ void main() {
       ),
     );
   });
-
 }

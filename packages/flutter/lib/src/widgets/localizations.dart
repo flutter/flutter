@@ -450,7 +450,7 @@ class Localizations extends StatefulWidget {
     assert(context != null);
     assert(type != null);
     final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
-    return scope?.localizationsState.resourcesFor<T>(type);
+    return scope?.localizationsState.resourcesFor<T?>(type);
   }
 
   @override

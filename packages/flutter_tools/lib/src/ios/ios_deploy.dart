@@ -25,9 +25,6 @@ const String noProvisioningProfileErrorTwo = 'Error 0xe8000067';
 const String deviceLockedError = 'e80000e2';
 const String unknownAppLaunchError = 'Error 0xe8000022';
 
-// Another debugger instance is already attached?
-const String processLaunchFailedError = 'error: process launch failed';
-
 class IOSDeploy {
   IOSDeploy({
     @required Artifacts artifacts,
@@ -275,6 +272,9 @@ class IOSDeployDebugger {
   // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
   static final RegExp _lldbProcessExit = RegExp(r'Process \d* exited with status =');
 
+  // (lldb) Process 6152 stopped
+  static final RegExp _lldbProcessStopped = RegExp(r'Process \d* stopped');
+
   /// Launch the app on the device, and attach the debugger.
   ///
   /// Returns whether or not the debugger successfully attached.
@@ -314,14 +314,12 @@ class IOSDeployDebugger {
         }
         if (line.contains('PROCESS_STOPPED') ||
             line.contains('PROCESS_EXITED') ||
-            _lldbProcessExit.hasMatch(line)) {
-          // The app exited or crashed, so stop echoing the output.
-          // Don't pass any further ios-deploy debugging messages to the log reader after it exits.
-          _debuggerState = _IOSDeployDebuggerState.detached;
+            _lldbProcessExit.hasMatch(line) ||
+            _lldbProcessStopped.hasMatch(line)) {
+          // The app exited or crashed, so exit. Continue passing debugging
+          // messages to the log reader until it exits to capture crash dumps.
           _logger.printTrace(line);
-          if (!debuggerCompleter.isCompleted) {
-            debuggerCompleter.complete(false);
-          }
+          exit();
           return;
         }
         if (_debuggerState != _IOSDeployDebuggerState.attached) {
@@ -415,13 +413,6 @@ Error launching app. Try launching from within Xcode via:
     open ios/Runner.xcworkspace
 
 Your Xcode version may be too old for your iOS version.
-═══════════════════════════════════════════════════════════════════════════════════''',
-        emphasis: true);
-  } else if (stdout.contains(processLaunchFailedError)) {
-    logger.printError('''
-═══════════════════════════════════════════════════════════════════════════════════
-Could not attach the debugger.
-Try uninstalling the app from your device and retrying.
 ═══════════════════════════════════════════════════════════════════════════════════''',
         emphasis: true);
   }

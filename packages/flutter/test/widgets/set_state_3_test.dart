@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-ChangerState changer;
+late ChangerState changer;
 
 class Changer extends StatefulWidget {
-  const Changer(this.child, { Key key }) : super(key: key);
+  const Changer(this.child, { Key? key }) : super(key: key);
 
   final Widget child;
 
@@ -34,7 +32,7 @@ class ChangerState extends State<Changer> {
 }
 
 class Wrapper extends StatelessWidget {
-  const Wrapper(this.child, { Key key }) : super(key: key);
+  const Wrapper(this.child, { Key? key }) : super(key: key);
 
   final Widget child;
 
@@ -43,7 +41,7 @@ class Wrapper extends StatelessWidget {
 }
 
 class Leaf extends StatefulWidget {
-  const Leaf({ Key key }) : super(key: key);
+  const Leaf({ Key? key }) : super(key: key);
   @override
   LeafState createState() => LeafState();
 }
