@@ -427,6 +427,8 @@ class _SnackBarState extends State<SnackBar> {
     final EdgeInsetsGeometry padding = widget.padding
       ?? EdgeInsetsDirectional.only(start: horizontalPadding, end: widget.action != null ? 0 : horizontalPadding);
 
+    final double actionHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 2;
+
     final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _snackBarHeightCurve);
     final CurvedAnimation fadeInAnimation = CurvedAnimation(parent: widget.animation!, curve: _snackBarFadeInCurve);
     final CurvedAnimation fadeOutAnimation = CurvedAnimation(
@@ -450,14 +452,17 @@ class _SnackBarState extends State<SnackBar> {
             ),
           ),
           if (widget.action != null)
-            TextButtonTheme(
-              data: TextButtonThemeData(
-                style: TextButton.styleFrom(
-                  primary: buttonColor,
-                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: actionHorizontalMargin),
+              child: TextButtonTheme(
+                data: TextButtonThemeData(
+                  style: TextButton.styleFrom(
+                    primary: buttonColor,
+                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  ),
                 ),
+                child: widget.action!,
               ),
-              child: widget.action!,
             ),
         ],
       ),

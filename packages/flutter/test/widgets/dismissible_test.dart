@@ -18,7 +18,7 @@ const double crossAxisEndOffset = 0.5;
 Widget buildTest({
   double? startToEndThreshold,
   TextDirection textDirection = TextDirection.ltr,
-  Future<bool> Function(BuildContext context, DismissDirection direction)? confirmDismiss,
+  Future<bool?> Function(BuildContext context, DismissDirection direction)? confirmDismiss,
 }) {
   return Directionality(
     textDirection: textDirection,
@@ -99,8 +99,6 @@ Future<void> dismissElement(WidgetTester tester, Finder finder, { required AxisD
       downLocation = tester.getTopLeft(finder) + const Offset(0.1, 0.0);
       upLocation = tester.getBottomLeft(finder);
       break;
-    default:
-      fail('unsupported gestureDirection');
   }
 
   final TestGesture gesture = await tester.startGesture(downLocation);
@@ -123,8 +121,6 @@ Future<void> flingElement(WidgetTester tester, Finder finder, { required AxisDir
     case AxisDirection.down:
       delta = const Offset(0.0, 300.0);
       break;
-    default:
-      fail('unsupported gestureDirection');
   }
   await tester.fling(finder, delta, 1000.0, initialOffset: delta * initialOffsetFactor);
 }
@@ -683,7 +679,7 @@ void main() {
       return buildTest(
         confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
           confirmDismissDirection = dismissDirection;
-          return Future<bool>.value(confirmDismissValue);
+          return Future<bool?>.value(confirmDismissValue);
         }
       );
     }

@@ -192,10 +192,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final List<String> buildCommands = <String>[
-    '/usr/bin/env',
-    'xcrun',
+    ...globals.xcode.xcrunCommand(),
     'xcodebuild',
-    '-configuration', configuration,
+    '-configuration',
+    configuration,
   ];
 
   if (globals.logger.isVerbose) {
@@ -438,7 +438,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
       }
     } else {
-      outputDir = '${globals.fs.path.absolute(app.archiveBundlePath)}.xcarchive';
+      outputDir = globals.fs.path.absolute(app.archiveBundleOutputPath);
       if (!globals.fs.isDirectorySync(outputDir)) {
         globals.printError('Archive succeeded but the expected xcarchive at $outputDir not found');
       }

@@ -399,21 +399,44 @@ void main() {
 
   test('Service extensions - invertOversizedImages', () async {
     Map<String, dynamic> result;
+    Future<Map<String, dynamic>> pendingResult;
+    bool completed;
 
     expect(binding.frameScheduled, isFalse);
     expect(debugInvertOversizedImages, false);
     result = await binding.testExtension('invertOversizedImages', <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugInvertOversizedImages, false);
-    result = await binding.testExtension('invertOversizedImages', <String, String>{'enabled': 'true'});
+    expect(binding.frameScheduled, isFalse);
+
+    pendingResult = binding.testExtension('invertOversizedImages', <String, String>{'enabled': 'true'});
+    completed = false;
+    pendingResult.whenComplete(() { completed = true; });
+    await binding.flushMicrotasks();
+    expect(binding.frameScheduled, isTrue);
+    expect(completed, isFalse);
+    await binding.doFrame();
+    await binding.flushMicrotasks();
+    expect(completed, isTrue);
+    expect(binding.frameScheduled, isFalse);
+    result = await pendingResult;
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugInvertOversizedImages, true);
+
     result = await binding.testExtension('invertOversizedImages', <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugInvertOversizedImages, true);
-    result = await binding.testExtension('invertOversizedImages', <String, String>{'enabled': 'false'});
+    expect(binding.frameScheduled, isFalse);
+
+    pendingResult = binding.testExtension('invertOversizedImages', <String, String>{'enabled': 'false'});
+    await binding.flushMicrotasks();
+    expect(binding.frameScheduled, isTrue);
+    await binding.doFrame();
+    expect(binding.frameScheduled, isFalse);
+    result = await pendingResult;
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugInvertOversizedImages, false);
+
     result = await binding.testExtension('invertOversizedImages', <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugInvertOversizedImages, false);

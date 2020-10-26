@@ -390,7 +390,7 @@ class RenderTable extends RenderBox {
        _textBaseline = textBaseline,
        _defaultVerticalAlignment = defaultVerticalAlignment,
        _configuration = configuration {
-    _children = <RenderBox>[]..length = _columns * _rows;
+    _children = <RenderBox?>[]..length = _columns * _rows;
     this.rowDecorations = rowDecorations; // must use setter to initialize box painters array
     children?.forEach(addRow);
   }
@@ -645,7 +645,7 @@ class RenderTable extends RenderBox {
     // update our internal values
     _columns = columns;
     _rows = cells.length ~/ columns;
-    _children = cells.toList();
+    _children = List<RenderBox?>.from(cells);
     assert(_children.length == rows * columns);
     markNeedsLayout();
   }
