@@ -47,7 +47,7 @@ import 'framework.dart';
 ///     // excluding themes are are found above the navigator. Those themes do
 ///     // not have to be captured, because they will already be visible from
 ///     // the new route pushed onto said navigator.
-///     // Themes are captures outside of the route's builder because when the
+///     // Themes are captured outside of the route's builder because when the
 ///     // builder executes, the context may not be valid anymore.
 ///     final CapturedThemes themes = InheritedTheme.capture(from: context, to: navigator.context);
 ///     return GestureDetector(
@@ -184,7 +184,7 @@ abstract class InheritedTheme extends InheritedWidget {
   }
 }
 
-/// Stores a list of captured [InheritedTheme] that can be wrapped around a
+/// Stores a list of captured [InheritedTheme]s that can be wrapped around a
 /// child [Widget].
 ///
 /// Used as return type by [InheritedTheme.captureFrom].
