@@ -9,6 +9,8 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/globals.dart' as globals show flutterUsage;
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
 
@@ -21,6 +23,7 @@ class MockPathContext extends Mock implements path.Context {}
 class MockDirectory extends Mock implements Directory {}
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockUsage extends Mock implements Usage {}
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
@@ -844,28 +847,32 @@ void main() {
       verify(source.copySync('dest')).called(1);
     });
 
-    testWithoutContext('copySync can directly copy bytes if both files can be opened but copySync fails', () {
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    // Uses context for analytics.
+    testUsingContext('copySync can directly copy bytes if both files can be opened but copySync fails', () {
+      final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
       final MockFile source = MockFile();
       final MockFile dest = MockFile();
       final List<int> expectedBytes = List<int>.generate(64 * 1024 + 3, (int i) => i.isEven ? 0 : 1);
-      final File memorySource = fileSystem.file('source')
+      final File memorySource = memoryFileSystem.file('source')
         ..writeAsBytesSync(expectedBytes);
-      final File memoryDest = fileSystem.file('dest')
+      final File memoryDest = memoryFileSystem.file('dest')
         ..createSync();
-      final RandomAccessFile memorySourceRA = memorySource.openSync();
-      final RandomAccessFile memoryDestRA = memoryDest.openSync();
 
       when(source.copySync(any))
         .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
-      when(source.openSync(mode: anyNamed('mode'))).thenReturn(memorySourceRA);
-      when(dest.openSync(mode: anyNamed('mode'))).thenReturn(memoryDestRA);
+      when(source.openSync(mode: anyNamed('mode')))
+        .thenAnswer((Invocation invocation) => memorySource.openSync(mode: invocation.namedArguments[#mode] as FileMode));
+      when(dest.openSync(mode: anyNamed('mode')))
+        .thenAnswer((Invocation invocation) => memoryDest.openSync(mode: invocation.namedArguments[#mode] as FileMode));
       when(mockFileSystem.file('source')).thenReturn(source);
       when(mockFileSystem.file('dest')).thenReturn(dest);
 
       fileSystem.file('source').copySync('dest');
 
       expect(memoryDest.readAsBytesSync(), expectedBytes);
+      verify(globals.flutterUsage.sendEvent('error-handling', 'copy-fallback')).called(1);
+    }, overrides: <Type, Generator>{
+      Usage: () => MockUsage(),
     });
   });
 }

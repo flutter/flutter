@@ -11,6 +11,7 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:process/process.dart';
 
+import '../reporting/reporting.dart';
 import 'common.dart' show throwToolExit;
 import 'platform.dart';
 
@@ -302,7 +303,6 @@ class ErrorHandlingFile
     } on FileSystemException {
       // Proceed below
     }
-
     // If the copy failed but both of the above checks passed, copy the bytes
     // directly.
     _runSync(() {
@@ -323,6 +323,9 @@ class ErrorHandlingFile
         sink?.closeSync();
       }
     }, platform: _platform, failureMessage: 'Flutter failed to copy $path to $newPath due to unknown error');
+    // The original copy failed, but the manual copy worked. Report an analytics event to
+    // track this to determine if this code path is actually hit.
+    ErrorHandlingEvent('copy-fallback').send();
     return wrapFile(resultFile);
   }
 
