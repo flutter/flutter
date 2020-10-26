@@ -149,13 +149,11 @@ Future<void> run(List<String> args) async {
       watcher: collector,
       ipv6: false,
       enableObservatory: collector != null,
-      buildMode: BuildMode.debug,
+      buildInfo: BuildInfo.debug,
       precompiledDillFiles: tests,
       concurrency: math.max(1, globals.platform.numberOfProcessors - 2),
       icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
       coverageDirectory: coverageDirectory,
-      extraFrontEndOptions: <String>[],
-      buildInfo: BuildInfo.debug,
     );
 
     if (collector != null) {
