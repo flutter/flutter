@@ -67,6 +67,7 @@ FlutterPlatform installHook({
   // Deprecated, use extraFrontEndOptions.
   List<String> dartExperiments,
   bool nullAssertions = false,
+  BuildInfo buildInfo, // TODO(jonahwilliams): make the default
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!startPaused && observatoryPort == null));
@@ -102,6 +103,7 @@ FlutterPlatform installHook({
     icudtlPath: icudtlPath,
     extraFrontEndOptions: extraFrontEndOptions,
     nullAssertions: nullAssertions,
+    buildInfo: buildInfo,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -246,6 +248,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.flutterProject,
     this.icudtlPath,
     this.nullAssertions = false,
+    this.buildInfo,
     @required this.extraFrontEndOptions,
   }) : assert(shellPath != null);
 
@@ -270,6 +273,7 @@ class FlutterPlatform extends PlatformPlugin {
   final String icudtlPath;
   final List<String> extraFrontEndOptions;
   final bool nullAssertions;
+  final BuildInfo buildInfo;
 
   Directory fontsDirectory;
 
@@ -444,7 +448,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject, extraFrontEndOptions);
+        compiler ??= TestCompiler(buildInfo ?? BuildInfo(buildMode, '', trackWidgetCreation: trackWidgetCreation, treeShakeIcons: false), flutterProject, extraFrontEndOptions);
         mainDart = await compiler.compile(globals.fs.file(mainDart).uri);
 
         if (mainDart == null) {

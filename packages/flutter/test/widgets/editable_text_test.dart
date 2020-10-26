@@ -5391,6 +5391,79 @@ void main() {
     expect(focusNode.hasFocus, false);
   });
 
+  testWidgets('TextEditingController.clear() behavior test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66316
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+    final TextEditingController controller = TextEditingController();
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
+    Widget builder() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          return MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(devicePixelRatio: 1.0),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Material(
+                    child: EditableText(
+                      controller: controller,
+                      focusNode: focusNode,
+                      style: textStyle,
+                      cursorColor: Colors.red,
+                      backgroundCursorColor: Colors.red,
+                      keyboardType: TextInputType.multiline,
+                      onChanged: (String value) { },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+
+    // The keyboard is shown after tap the EditableText.
+    expect(focusNode.hasFocus, true);
+
+    log.clear();
+
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+
+    state.updateEditingValue(const TextEditingValue(
+      text: 'a',
+    ));
+    await tester.pump();
+
+    // Nothing called when only the remote changes.
+    expect(log.length, 0);
+
+    controller.clear();
+
+    expect(log.length, 1);
+    expect(
+      log[0],
+      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
+        'text': '',
+        'selectionBase': 0,
+        'selectionExtent': 0,
+        'selectionAffinity': 'TextAffinity.downstream',
+        'selectionIsDirectional': false,
+        'composingBase': -1,
+        'composingExtent': -1,
+      }),
+    );
+  });
+
   testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(

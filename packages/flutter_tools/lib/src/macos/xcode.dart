@@ -174,7 +174,7 @@ class Xcode {
   /// tools and properties.
   ///
   /// Returns `xcrun` on x86 macOS.
-  /// Returns `/usr/bin/arch -arm64 xcrun` on ARM macOS to force Xcode commands
+  /// Returns `/usr/bin/arch -arm64e xcrun` on ARM macOS to force Xcode commands
   /// to run outside the x86 Rosetta translation, which may cause crashes.
   List<String> xcrunCommand() {
     final List<String> xcrunCommand = <String>[];
@@ -182,7 +182,7 @@ class Xcode {
       // Force Xcode commands to run outside Rosetta.
       xcrunCommand.addAll(<String>[
         '/usr/bin/arch',
-        '-arm64',
+        '-arm64e',
       ]);
     }
     xcrunCommand.add('xcrun');

@@ -1030,7 +1030,7 @@ class _TabBarState extends State<TabBar> {
       }
       return true;
     }());
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller!.length == 0) {
       return Container(
         height: _kTabHeight + widget.indicatorWeight,
