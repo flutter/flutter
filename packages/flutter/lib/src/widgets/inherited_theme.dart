@@ -136,10 +136,10 @@ abstract class InheritedTheme extends InheritedWidget {
   /// widget tree are captured.
   ///
   /// After calling this method, the themes present between `from` and `to` are
-  /// frozen in the returned [CaptureThemes] object. If the themes (or their
+  /// frozen in the returned [CapturedThemes] object. If the themes (or their
   /// theme data) change in the original subtree, those changes will not be
-  /// applied to the themes captured in the [CaptureThemes] object - unless this
-  /// method is called again to re-capture the updated themes.
+  /// applied to the themes captured in the [CapturedThemes] object - unless
+  /// this method is called again to re-capture the updated themes.
   ///
   /// To wrap a [Widget] in the captured themes, call [CapturedThemes.wrap].
   static CapturedThemes capture({ required BuildContext from, required BuildContext? to }) {
@@ -187,7 +187,7 @@ abstract class InheritedTheme extends InheritedWidget {
 /// Stores a list of captured [InheritedTheme]s that can be wrapped around a
 /// child [Widget].
 ///
-/// Used as return type by [InheritedTheme.captureFrom].
+/// Used as return type by [InheritedTheme.capture].
 class CapturedThemes {
   CapturedThemes._(this._themes);
 
