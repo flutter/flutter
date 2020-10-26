@@ -10,7 +10,7 @@ void main() {
     final List<TextDirection> log = <TextDirection>[];
     final Widget inner = Builder(
       builder: (BuildContext context) {
-        log.add(Directionality.of(context)!);
+        log.add(Directionality.of(context));
         return const Placeholder();
       }
     );
