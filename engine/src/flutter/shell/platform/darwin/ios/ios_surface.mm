@@ -18,7 +18,7 @@ namespace flutter {
 std::unique_ptr<IOSSurface> IOSSurface::Create(
     std::shared_ptr<IOSContext> context,
     fml::scoped_nsobject<CALayer> layer,
-    FlutterPlatformViewsController* platform_views_controller) {
+    const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller) {
   FML_DCHECK(layer);
   FML_DCHECK(context);
 
@@ -51,8 +51,9 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(
   );
 }
 
-IOSSurface::IOSSurface(std::shared_ptr<IOSContext> ios_context,
-                       FlutterPlatformViewsController* platform_views_controller)
+IOSSurface::IOSSurface(
+    std::shared_ptr<IOSContext> ios_context,
+    const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller)
     : ios_context_(std::move(ios_context)) {
   FML_DCHECK(ios_context_);
   external_view_embedder_ =

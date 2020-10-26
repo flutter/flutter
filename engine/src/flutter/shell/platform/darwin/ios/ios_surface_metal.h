@@ -19,7 +19,7 @@ class SK_API_AVAILABLE_CA_METAL_LAYER IOSSurfaceMetal final : public IOSSurface,
  public:
   IOSSurfaceMetal(fml::scoped_nsobject<CAMetalLayer> layer,
                   std::shared_ptr<IOSContext> context,
-                  FlutterPlatformViewsController* platform_views_controller);
+                  const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller);
 
   // |IOSSurface|
   ~IOSSurfaceMetal() override;

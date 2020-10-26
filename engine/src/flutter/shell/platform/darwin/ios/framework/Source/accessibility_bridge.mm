@@ -36,10 +36,11 @@ class DefaultIosDelegate : public AccessibilityBridge::IosDelegate {
 };
 }  // namespace
 
-AccessibilityBridge::AccessibilityBridge(FlutterViewController* view_controller,
-                                         PlatformViewIOS* platform_view,
-                                         FlutterPlatformViewsController* platform_views_controller,
-                                         std::unique_ptr<IosDelegate> ios_delegate)
+AccessibilityBridge::AccessibilityBridge(
+    FlutterViewController* view_controller,
+    PlatformViewIOS* platform_view,
+    std::shared_ptr<FlutterPlatformViewsController> platform_views_controller,
+    std::unique_ptr<IosDelegate> ios_delegate)
     : view_controller_(view_controller),
       platform_view_(platform_view),
       platform_views_controller_(platform_views_controller),
@@ -126,7 +127,7 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
     }
 
     if (object.node.IsPlatformViewNode()) {
-      FlutterPlatformViewsController* controller = GetPlatformViewsController();
+      auto controller = GetPlatformViewsController();
       if (controller) {
         object.platformViewSemanticsContainer = [[[FlutterPlatformViewSemanticsContainer alloc]
             initWithSemanticsObject:object] autorelease];

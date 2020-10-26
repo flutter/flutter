@@ -12,15 +12,16 @@ namespace flutter {
 
 class IOSExternalViewEmbedder : public ExternalViewEmbedder {
  public:
-  IOSExternalViewEmbedder(
-      FlutterPlatformViewsController* platform_views_controller,
-      std::shared_ptr<IOSContext> context);
+  IOSExternalViewEmbedder(const std::shared_ptr<FlutterPlatformViewsController>&
+                              platform_views_controller,
+                          std::shared_ptr<IOSContext> context);
 
   // |ExternalViewEmbedder|
   virtual ~IOSExternalViewEmbedder() override;
 
  private:
-  FlutterPlatformViewsController* platform_views_controller_;
+  const std::shared_ptr<FlutterPlatformViewsController>&
+      platform_views_controller_;
   std::shared_ptr<IOSContext> ios_context_;
 
   // |ExternalViewEmbedder|

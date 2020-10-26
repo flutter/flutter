@@ -26,7 +26,7 @@ extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
 
 @property(nonatomic, readonly) BOOL isPresentingViewController;
 - (fml::WeakPtr<FlutterViewController>)getWeakPtr;
-- (flutter::FlutterPlatformViewsController*)platformViewsController;
+- (std::shared_ptr<flutter::FlutterPlatformViewsController>&)platformViewsController;
 
 @end
 

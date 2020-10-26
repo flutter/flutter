@@ -39,7 +39,9 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   }
   void AccessibilityObjectDidBecomeFocused(int32_t id) override {}
   void AccessibilityObjectDidLoseFocus(int32_t id) override {}
-  FlutterPlatformViewsController* GetPlatformViewsController() const override { return nil; }
+  std::shared_ptr<FlutterPlatformViewsController> GetPlatformViewsController() const override {
+    return nil;
+  }
   std::vector<SemanticsActionObservation> observations;
 
  private:
