@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/error_handling_io.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -50,8 +49,6 @@ void main() {
       await createTestCommandRunner(command).run(arguments);
       expect(toolExit, isFalse, reason: 'Expected ToolExit exception');
     } on ToolExit catch (e) {
-      print(logger.errorText);
-      print(logger.statusText);
       if (!toolExit) {
         testLogger.clear();
         rethrow;
