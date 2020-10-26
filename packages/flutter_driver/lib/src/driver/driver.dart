@@ -130,16 +130,11 @@ abstract class FlutterDriver {
   /// environment variable `FUCHSIA_MODULE_TARGET` must be set (the environment
   /// variable is treated as a substring pattern). This field will be ignored if
   /// `isolateNumber` is set, as this is already enough information to connect
-  /// to an isolate.
+  /// to an isolate. This parameter is ignored on non-fuchsia devices.
   ///
   /// The `headers` parameter optionally specifies HTTP headers to be included
   /// in the [WebSocket] connection. This is only used for
   /// [VMServiceFlutterDriver] connections.
-  ///
-  /// The `browser` parameter specifies which FlutterDriver implementation to
-  /// use. If not speicifed or set to false, [VMServiceFlutterDriver]
-  /// implementation will be used. Otherwise, [WebFlutterDriver] implementation
-  /// will be used.
   ///
   /// The return value is a future. This method never times out, though it may
   /// fail (completing with an error). A timeout can be applied by the caller
