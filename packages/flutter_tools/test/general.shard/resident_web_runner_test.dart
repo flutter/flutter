@@ -1705,7 +1705,7 @@ BuildInfo _createBuildDebugInfo() => BuildInfo(
   BuildMode.debug,
   null,
   treeShakeIcons: false,
-  dartDefines: <String>[]
+  dartDefines: <String>[],
 );
 
 class MockChromeLauncher extends Mock implements ChromiumLauncher {}
