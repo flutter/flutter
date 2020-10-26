@@ -396,25 +396,6 @@ class InteractiveViewer extends StatefulWidget {
   ///  * [TextEditingController] for an example of another similar pattern.
   final TransformationController? transformationController;
 
-  /// Returns the closest point to the given point on the given line segment.
-  @visibleForTesting
-  static Vector3 getNearestPointOnLine(Vector3 point, Vector3 l1, Vector3 l2) {
-    final double lengthSquared = math.pow(l2.x - l1.x, 2.0).toDouble()
-        + math.pow(l2.y - l1.y, 2.0).toDouble();
-
-    // In this case, l1 == l2.
-    if (lengthSquared == 0) {
-      return l1;
-    }
-
-    // Calculate how far down the line segment the closest point is and return
-    // the point.
-    final Vector3 l1P = point - l1;
-    final Vector3 l1L2 = l2 - l1;
-    final double fraction = (l1P.dot(l1L2) / lengthSquared).clamp(0.0, 1.0).toDouble();
-    return l1 + l1L2 * fraction;
-  }
-
   /// Returns true iff the point is inside the rectangle given by the Quad,
   /// inclusively.
   /// Algorithm from https://math.stackexchange.com/a/190373.
@@ -434,6 +415,7 @@ class InteractiveViewer extends StatefulWidget {
 
   /// Get the point inside (inclusively) the given Quad that is nearest to the
   /// given Vector3.
+  /*
   @visibleForTesting
   static Vector3 getNearestPointInside(Vector3 point, Quad quad) {
     // If the point is inside the axis aligned bounding box, then it's ok where
@@ -462,6 +444,7 @@ class InteractiveViewer extends StatefulWidget {
     }
     return closestOverall;
   }
+  */
 
   /// Returns the axis aligned bounding box of the given quad.
   @visibleForTesting
@@ -698,10 +681,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // Invalid. Find the nearest points on boundaryRect and the viewportSide
     // that doesn't intersect to each other, and move the points on top of each
     // other.
-    // TODO(justinmc): Implement recovery.
-    final _ClosestPoints closestPoints = invalidSide.findClosestPoints(_boundaryRect);
-    final Offset difference = closestPoints.onRect - closestPoints.onLineSegment;
-    print('justin closest point onrect ${closestPoints.onRect}, online ${closestPoints.onLineSegment}, so move by $difference');
+    final OffsetTuple closestPoints = invalidSide.findClosestPointsRect(_boundaryRect);
+    final Offset difference = closestPoints.b - closestPoints.a;
+    print('justin closest point onrect ${closestPoints.a}, online ${closestPoints.b}, so move by $difference');
 
     final Matrix4 correctedMatrix = matrix.clone()
         ..translate(difference.dx, difference.dy);
@@ -730,6 +712,17 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         || !correctedViewportSide12.intersectsRect(_boundaryRect)
         || !correctedViewportSide23.intersectsRect(_boundaryRect)
         || !correctedViewportSide30.intersectsRect(_boundaryRect)) {
+      /*
+      final LineSegment? correctedInvalidSide = <LineSegment?>[
+        correctedViewportSide01,
+        correctedViewportSide12,
+        correctedViewportSide23,
+        correctedViewportSide30,
+      ].firstWhere((LineSegment? side) {
+        return !side!.intersectsRect(_boundaryRect);
+      }, orElse: () => null);
+      print('justin still invalid after correction! $correctedInvalidSide doesnt intersect $_boundaryRect... or does it? ${correctedInvalidSide!.intersectsRect(_boundaryRect)}');
+      */
       return Matrix4.identity();
     }
 
@@ -1285,6 +1278,7 @@ String _stringifyQuad(Quad quad) {
 // Return the amount that viewport lies outside of boundary. If the viewport
 // is completely contained within the boundary (inclusively), then returns
 // Offset.zero.
+/*
 Offset _exceedsBy(Quad boundary, Quad viewport) {
   final List<Vector3> viewportPoints = <Vector3>[
     viewport.point0, viewport.point1, viewport.point2, viewport.point3,
@@ -1306,6 +1300,7 @@ Offset _exceedsBy(Quad boundary, Quad viewport) {
 
   return _round(largestExcess);
 }
+*/
 
 // Round the output values. This works around a precision problem where
 // values that should have been zero were given as within 10^-10 of zero.
@@ -1394,13 +1389,25 @@ class LineSegment {
     return vertical.contains(intersection) && nonVertical.contains(intersection);
   }
 
+  /// True iff the line containing this line segment also contains the given
+  /// offset.
+  bool _lineContains(Offset offset) {
+    // Special case vertical line because of infinite slope.
+    if (p0.dx == p1.dx) {
+      return offset.dx == p0.dx;
+    }
+    // Use the line formula with a tolerance.
+    return (offset.dy - (slope * offset.dx + lineYIntercept)).abs() <= 0.0000000000001;
+  }
+
   /// True iff the offset lies on the line segment, inclusively.
   bool contains(Offset offset) {
     final double xMin = math.min(p0.dx, p1.dx);
     final double xMax = math.max(p0.dx, p1.dx);
     final double yMin = math.min(p0.dy, p1.dy);
     final double yMax = math.max(p0.dy, p1.dy);
-    return offset.dx >= xMin && offset.dx <= xMax
+    return _lineContains(offset)
+        && offset.dx >= xMin && offset.dx <= xMax
         && offset.dy >= yMin && offset.dy <= yMax;
   }
 
@@ -1483,12 +1490,14 @@ class LineSegment {
   }
 
   static double _distanceBetweenPoints(Offset a, Offset b) {
-    return math.sqrt(math.pow(b.dx - a.dx, 2) - math.pow(b.dy - a.dy, 2));
+    return math.sqrt(math.pow(b.dx - a.dx, 2) + math.pow(b.dy - a.dy, 2));
   }
 
-  // Assuming that the given point is on the extended line of this line segment,
-  // returns the closest point on the line segment to it.
-  Offset findClosestPointOnLineSegmentToPointOnLine(Offset pointOnLine) {
+  /// Assuming that the given point is on the extended line of this line segment,
+  /// returns the closest point on the line segment to it.
+  @visibleForTesting
+  Offset findClosestOffsetOnLineSegmentToOffsetOnLine(Offset pointOnLine) {
+    assert(_lineContains(pointOnLine));
     if (contains(pointOnLine)) {
       return pointOnLine;
     }
@@ -1498,47 +1507,72 @@ class LineSegment {
   }
 
   /// Returns the closest point on each line segment to the other line segment.
-  _ClosestPoints findClosestPointsLineSegment(LineSegment lineSegment) {
+  @visibleForTesting
+  OffsetTuple findClosestPointsLineSegment(LineSegment lineSegment) {
     final Offset? lineIntersection = linesIntersectAt(lineSegment);
 
-    // If they don't intersect, return any two closest points.
+    // If the lines don't intersect (the line segments are parallel), then there
+    // are many closest points. This will return p0 and the closest point to p0.
     if (lineIntersection == null) {
-      // TODO(justinmc)
+      final Offset closestToP0 = lineSegment.findClosestToOffset(p0);
+      return OffsetTuple(
+        a: p0,
+        b: closestToP0,
+      );
     }
 
     // Otherwise, the closest points on the line segments are the closest points
     // to the line intersection.
-    return _ClosestPoints(
-      a: findClosestPointOnLineSegmentToPointOnLine(lineIntersection!),
-      b: lineSegment.findClosestPointOnLineSegmentToPointOnLine(lineIntersection),
+    return OffsetTuple(
+      a: findClosestOffsetOnLineSegmentToOffsetOnLine(lineIntersection),
+      b: lineSegment.findClosestOffsetOnLineSegmentToOffsetOnLine(lineIntersection),
     );
   }
 
   /// Returns the points on the LineSegment and Rect closest to each other.
   /// Assumes that they do not intersect.
-  _ClosestPoints findClosestPointsRect(Rect rect) {
+  OffsetTuple findClosestPointsRect(Rect rect) {
     assert(!intersectsRect(rect));
 
     final LineSegment top = LineSegment(rect.topLeft, rect.topRight);
-    final _ClosestPoints toTop = findClosestPointsLineSegment(top);
+    final OffsetTuple toTop = findClosestPointsLineSegment(top);
     final LineSegment right = LineSegment(rect.topRight, rect.bottomRight);
-    final _ClosestPoints toRight = findClosestPointsLineSegment(top);
+    final OffsetTuple toRight = findClosestPointsLineSegment(top);
     final LineSegment bottom = LineSegment(rect.bottomRight, rect.bottomLeft);
-    final _ClosestPoints toBottom = findClosestPointsLineSegment(top);
+    final OffsetTuple toBottom = findClosestPointsLineSegment(top);
     final LineSegment left = LineSegment(rect.bottomLeft, rect.topLeft);
-    final _ClosestPoints toLeft = findClosestPointsLineSegment(top);
+    final OffsetTuple toLeft = findClosestPointsLineSegment(top);
 
 
     // TODO(justinmc): Find distance between two closestpoints for each side,
     // and return the closest.
+    return (<OffsetTuple>[toTop, toRight, toBottom, toLeft]
+        ..sort((OffsetTuple first, OffsetTuple second) {
+          final double firstDistance = _distanceBetweenPoints(first.a, first.b);
+          final double secondDistance = _distanceBetweenPoints(second.a, second.b);
+          return firstDistance.compareTo(secondDistance);
+        })).first;
+  }
 
+  // Returns the closest offset on the line segment to the given offset.
+  @visibleForTesting
+  Offset findClosestToOffset(Offset offset) {
+    // If the line segment is just a point, then that's the only option for the
+    // closest point.
+    if (p0 == p1) {
+      return p0;
+    }
 
+    final double lengthSquared = math.pow(p1.dx - p0.dx, 2.0).toDouble()
+        + math.pow(p1.dy - p0.dy, 2.0).toDouble();
 
-    // TODO(justinmc): Implement.
-    return const _ClosestPoints(
-      onLineSegment: Offset.zero,
-      onRect: Offset.zero,
-    );
+    // Calculate how far down the line segment the closest point is and return
+    // the point.
+    final Offset p0O = offset - p0;
+    final Offset p0P1 = p1 - p0;
+    final double dotProduct = p0O.dx * p0P1.dx + p0O.dy * p0P1.dy;
+    final double fraction = (dotProduct / lengthSquared).clamp(0.0, 1.0).toDouble();
+    return p0 + p0P1 * fraction;
   }
 
   @override
@@ -1549,8 +1583,8 @@ class LineSegment {
 
 /*
 // A pair of Offsets, used by findClosestPoints to return both points.
-class _ClosestPoints {
-  const _ClosestPoints({
+class OffsetTuple {
+  const OffsetTuple({
     required this.onLineSegment,
     required this.onRect,
   });
@@ -1560,13 +1594,17 @@ class _ClosestPoints {
 }
 */
 
-// A pair of Offsets, used by findClosestPoints to return both points.
-class _ClosestPoints {
-  const _ClosestPoints({
+/// A pair of Offsets, used to return two Offsets from various methods.
+@visibleForTesting
+class OffsetTuple {
+  /// Create a set of closest points.
+  const OffsetTuple ({
     required this.a,
     required this.b,
   });
 
+  /// The first Offset;
   final Offset a;
+  /// The second Offset;
   final Offset b;
 }

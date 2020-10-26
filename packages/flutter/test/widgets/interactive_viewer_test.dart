@@ -1224,6 +1224,7 @@ void main() {
     });
   });
 
+  /*
   group('getNearestPointInside', () {
     test('point already inside quad', () {
       final Vector3 point = Vector3(5.0, 5.0, 0.0);
@@ -1268,6 +1269,7 @@ void main() {
       expect(nearestPoint.y, moreOrLessEquals(10.8, epsilon: 0.1));
     });
   });
+  */
 
   group('LineSegment', () {
     group('contains', () {
@@ -1400,7 +1402,6 @@ void main() {
           Offset(0.0, 0.0),
           Offset(100.0, 100.0),
         );
-        print('justin start');
         expect(a.intersects(b), isTrue);
         expect(b.intersects(a), isTrue);
       });
@@ -1414,7 +1415,6 @@ void main() {
           Offset(0.0, 0.0),
           Offset(100.0, 100.0),
         );
-        print('justin start');
         expect(a.intersects(b), isFalse);
         expect(b.intersects(a), isFalse);
       });
@@ -1443,6 +1443,257 @@ void main() {
         );
         expect(a.intersects(b), isFalse);
         expect(b.intersects(a), isFalse);
+      });
+    });
+
+    group('findClosestToOffset', () {
+      test('vertical line', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(0.0, 100.0),
+        );
+
+        expect(
+          lineSegment.findClosestToOffset(const Offset(0.0, -10.0)),
+          const Offset(0.0, 0.0),
+        );
+        expect(
+          lineSegment.findClosestToOffset(const Offset(0.0, 110.0)),
+          const Offset(0.0, 100.0),
+        );
+        expect(
+          lineSegment.findClosestToOffset(const Offset(0.0, 50.0)),
+          const Offset(0.0, 50.0),
+        );
+        expect(
+          lineSegment.findClosestToOffset(const Offset(50.0, 50.0)),
+          const Offset(0.0, 50.0),
+        );
+      });
+
+      test('horizontal line', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 0.0),
+        );
+
+        expect(
+          lineSegment.findClosestToOffset(const Offset(-10.0, 0.0)),
+          const Offset(0.0, 0.0),
+        );
+        expect(
+          lineSegment.findClosestToOffset(const Offset(110.0, 0.0)),
+          const Offset(100.0, 0.0),
+        );
+        expect(
+          lineSegment.findClosestToOffset(const Offset(50.0, 0.0)),
+          const Offset(50.0, 0.0),
+        );
+        expect(
+          lineSegment.findClosestToOffset(const Offset(50.0, 50.0)),
+          const Offset(50.0, 0.0),
+        );
+      });
+
+      test('sloped line', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+
+        expect(
+          lineSegment.findClosestToOffset(const Offset(0.0, -10.0)),
+          const Offset(0.0, 0.0),
+        );
+        expect(
+          lineSegment.findClosestToOffset(const Offset(-10.0, -10.0)),
+          const Offset(0.0, 0.0),
+        );
+        expect(
+          lineSegment.findClosestToOffset(const Offset(0.0, 100.0)),
+          const Offset(50.0, 50.0),
+        );
+        expect(
+          lineSegment.findClosestToOffset(const Offset(110.0, 110.0)),
+          const Offset(100.0, 100.0),
+        );
+        expect(
+          lineSegment.findClosestToOffset(const Offset(50.0, 50.0)),
+          const Offset(50.0, 50.0),
+        );
+        expect(
+          lineSegment.findClosestToOffset(const Offset(0.0, 50.0)),
+          const Offset(25.0, 25.0),
+        );
+      });
+
+      test('real example', () {
+        const Offset offset = Offset(-436.9, 433.6);
+        const LineSegment lineSegment = LineSegment(
+          Offset(-1114.0, -60.3),
+          Offset(288.8, 432.7),
+        );
+
+        final Offset closest = lineSegment.findClosestToOffset(offset);
+        expect(closest.dx, moreOrLessEquals(-356.8, epsilon: 0.1));
+        expect(closest.dy, moreOrLessEquals(205.8, epsilon: 0.1));
+      });
+    });
+
+    group('findClosestOffsetOnLineSegmentToPointOnLine', () {
+      test('at an angle', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+
+        expect(
+          lineSegment.findClosestOffsetOnLineSegmentToOffsetOnLine(const Offset(0.0, 0.0)),
+          const Offset(0.0, 0.0),
+        );
+        expect(
+          lineSegment.findClosestOffsetOnLineSegmentToOffsetOnLine(const Offset(10.0, 10.0)),
+          const Offset(10.0, 10.0),
+        );
+        expect(
+          lineSegment.findClosestOffsetOnLineSegmentToOffsetOnLine(const Offset(110.0, 110.0)),
+          const Offset(100.0, 100.0),
+        );
+      });
+
+      test('horizontal', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 0.0),
+        );
+
+        expect(
+          lineSegment.findClosestOffsetOnLineSegmentToOffsetOnLine(const Offset(0.0, 0.0)),
+          const Offset(0.0, 0.0),
+        );
+        expect(
+          lineSegment.findClosestOffsetOnLineSegmentToOffsetOnLine(const Offset(-10.0, 0.0)),
+          const Offset(0.0, 0.0),
+        );
+        expect(
+          lineSegment.findClosestOffsetOnLineSegmentToOffsetOnLine(const Offset(110.0, 0.0)),
+          const Offset(100.0, 0.0),
+        );
+      });
+
+      test('vertical', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(0.0, 100.0),
+        );
+
+        expect(
+          lineSegment.findClosestOffsetOnLineSegmentToOffsetOnLine(const Offset(0.0, 0.0)),
+          const Offset(0.0, 0.0),
+        );
+        expect(
+          lineSegment.findClosestOffsetOnLineSegmentToOffsetOnLine(const Offset(0.0, -10.0)),
+          const Offset(0.0, 0.0),
+        );
+        expect(
+          lineSegment.findClosestOffsetOnLineSegmentToOffsetOnLine(const Offset(0.0, 110.0)),
+          const Offset(0.0, 100.0),
+        );
+      });
+    });
+
+    group('findClosestPointsLineSegment', () {
+      test('vertical and horizontal', () {
+        const LineSegment a = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(0.0, 100.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(10.0, 0.0),
+          Offset(110.0, 0.0),
+        );
+
+        final OffsetTuple pair = a.findClosestPointsLineSegment(b);
+        expect(pair.a, const Offset(0.0, 0.0));
+        expect(pair.b, const Offset(10.0, 0.0));
+      });
+
+      test('intersecting', () {
+        const LineSegment a = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(100.0, 0.0),
+          Offset(0.0, 100.0),
+        );
+
+        final OffsetTuple pair = a.findClosestPointsLineSegment(b);
+        expect(pair.a, const Offset(50.0, 50.0));
+        expect(pair.b, const Offset(50.0, 50.0));
+      });
+
+      test('parallel', () {
+        const LineSegment a = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(10.0, 0.0),
+          Offset(110.0, 100.0),
+        );
+
+        final OffsetTuple pair = a.findClosestPointsLineSegment(b);
+        expect(pair.a, const Offset(0.0, 0.0));
+        expect(pair.b, const Offset(10.0, 0.0));
+      });
+
+      test('at angles', () {
+        const LineSegment a = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 100.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(120.0, 0.0),
+          Offset(100.0, 200.0),
+        );
+
+        final OffsetTuple pair = a.findClosestPointsLineSegment(b);
+        expect(pair.a, const Offset(100.0, 100.0));
+        expect(pair.b.dx, moreOrLessEquals(109.1, epsilon: 0.1));
+        expect(pair.b.dy, moreOrLessEquals(109.1, epsilon: 0.1));
+      });
+    });
+
+    group('intersectsRect', () {
+      test('contained in rect', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(25.0, 25.0),
+          Offset(75.0, 75.0),
+        );
+        const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+
+        expect(lineSegment.intersectsRect(rect), isTrue);
+      });
+
+      test('just touches rect', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(50.0, 100.0),
+          Offset(150.0, 100.0),
+        );
+        const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+
+        expect(lineSegment.intersectsRect(rect), isTrue);
+      });
+
+      test('just touches rect, real example', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(-18.7, 300.0),
+          Offset(281.3, 300.0),
+        );
+        const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 300.0);
+
+        expect(lineSegment.intersectsRect(rect), isTrue);
       });
     });
   });
