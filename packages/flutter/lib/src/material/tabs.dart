@@ -4,6 +4,7 @@
 
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -430,26 +431,13 @@ class _IndicatorPainter extends CustomPainter {
     _painter!.paint(canvas, _currentRect!.topLeft, configuration);
   }
 
-  static bool _tabOffsetsEqual(List<double>? a, List<double>? b) {
-    // Tab offsets are null if TabBar contains no tabs.
-    if (a == null && b == null)
-      return true;
-    if (a?.length != b?.length)
-      return false;
-    for (int i = 0; i < a!.length; i += 1) {
-      if (a[i] != b![i])
-        return false;
-    }
-    return true;
-  }
-
   @override
   bool shouldRepaint(_IndicatorPainter old) {
     return _needsPaint
         || controller != old.controller
         || indicator != old.indicator
         || tabKeys.length != old.tabKeys.length
-        || (!_tabOffsetsEqual(_currentTabOffsets, old._currentTabOffsets))
+        || (!listEquals(_currentTabOffsets, old._currentTabOffsets))
         || _currentTextDirection != old._currentTextDirection;
   }
 }
