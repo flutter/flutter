@@ -92,8 +92,10 @@ Future<T?> showSearch<T>({
 /// ## Handling emojis and other complex characters
 /// {@macro flutter.widgets.editableText.complexCharacters}
 abstract class SearchDelegate<T> {
-  /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
-  /// [textInputAction]. You can only use either [searchFieldStyle] or [searchFieldDecorationTheme] at a time.
+  /// Constructor to be called by subclasses which may specify
+  /// [searchFieldLabel], either [searchFieldStyle] or [searchFieldDecorationTheme],
+  /// [keyboardType] and/or [textInputAction]. Only one of [searchFieldLabel]
+  /// and [searchFieldDecorationTheme] may be non-null.
   ///
   /// {@tool snippet}
   /// ```dart
@@ -280,7 +282,7 @@ abstract class SearchDelegate<T> {
   /// The style of the [searchFieldLabel].
   ///
   /// If this value is set to null, the value of the ambient [Theme]'s
-  /// [InputDecorationTheme.hintStyle] will be used instead
+  /// [InputDecorationTheme.hintStyle] will be used instead.
   ///
   /// If this value is not null, [searchFieldDecorationTheme]
   /// will be ignored so this can be used.
@@ -514,18 +516,18 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       case null:
         break;
     }
-    String? routeName;
+
+    late final String routeName;
     switch (theme.platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        routeName = '';
+        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         routeName = searchFieldLabel;
-        break;
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        routeName = '';
-        break;
     }
 
     return Semantics(
@@ -537,6 +539,10 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         data: theme,
         child: Scaffold(
           appBar: AppBar(
+            backgroundColor: theme.primaryColor,
+            iconTheme: theme.primaryIconTheme,
+            textTheme: theme.primaryTextTheme,
+            brightness: theme.primaryColorBrightness,
             leading: widget.delegate.buildLeading(context),
             title: TextField(
               controller: widget.delegate._queryTextController,
