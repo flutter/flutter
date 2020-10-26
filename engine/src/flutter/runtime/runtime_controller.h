@@ -5,7 +5,6 @@
 #ifndef FLUTTER_RUNTIME_RUNTIME_CONTROLLER_H_
 #define FLUTTER_RUNTIME_RUNTIME_CONTROLLER_H_
 
-#include <future>
 #include <memory>
 #include <vector>
 
@@ -506,10 +505,6 @@ class RuntimeController : public PlatformConfigurationClient {
   std::string advisory_script_entrypoint_;
   std::function<void(int64_t)> idle_notification_callback_;
   PlatformData platform_data_;
-  std::future<void> create_and_config_root_isolate_;
-  // Note that `root_isolate_` is created asynchronously from the constructor of
-  // `RuntimeController`, be careful to use it directly while it might have not
-  // been created yet. Call `GetRootIsolate()` instead which guarantees that.
   std::weak_ptr<DartIsolate> root_isolate_;
   std::optional<uint32_t> root_isolate_return_code_;
   const fml::closure isolate_create_callback_;
@@ -551,16 +546,6 @@ class RuntimeController : public PlatformConfigurationClient {
   // |PlatformConfigurationClient|
   std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocale(
       const std::vector<std::string>& supported_locale_data) override;
-
-  //----------------------------------------------------------------------------
-  /// @brief      Get a weak pointer to the root Dart isolate. This isolate may
-  ///             only be locked on the UI task runner. Callers use this
-  ///             accessor to transition to the root isolate to the running
-  ///             phase.
-  ///
-  /// @return     The root isolate reference.
-  ///
-  std::weak_ptr<DartIsolate> GetRootIsolate();
 
   FML_DISALLOW_COPY_AND_ASSIGN(RuntimeController);
 };

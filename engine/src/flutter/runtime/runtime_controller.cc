@@ -69,7 +69,7 @@ RuntimeController::~RuntimeController() {
 }
 
 bool RuntimeController::IsRootIsolateRunning() {
-  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   if (root_isolate) {
     return root_isolate->GetPhase() == DartIsolate::Phase::Running;
   }
@@ -196,7 +196,7 @@ bool RuntimeController::ReportTimings(std::vector<int64_t> timings) {
 }
 
 bool RuntimeController::NotifyIdle(int64_t deadline, size_t freed_hint) {
-  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   if (!root_isolate) {
     return false;
   }
@@ -256,7 +256,7 @@ bool RuntimeController::DispatchSemanticsAction(int32_t id,
 
 PlatformConfiguration*
 RuntimeController::GetPlatformConfigurationIfAvailable() {
-  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   return root_isolate ? root_isolate->platform_configuration() : nullptr;
 }
 
@@ -318,17 +318,17 @@ RuntimeController::ComputePlatformResolvedLocale(
 }
 
 Dart_Port RuntimeController::GetMainPort() {
-  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   return root_isolate ? root_isolate->main_port() : ILLEGAL_PORT;
 }
 
 std::string RuntimeController::GetIsolateName() {
-  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   return root_isolate ? root_isolate->debug_name() : "";
 }
 
 bool RuntimeController::HasLivePorts() {
-  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   if (!root_isolate) {
     return false;
   }
@@ -337,7 +337,7 @@ bool RuntimeController::HasLivePorts() {
 }
 
 tonic::DartErrorHandleType RuntimeController::GetLastError() {
-  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   return root_isolate ? root_isolate->GetLastError() : tonic::kNoError;
 }
 
@@ -409,15 +409,6 @@ std::optional<std::string> RuntimeController::GetRootIsolateServiceID() const {
     return isolate->GetServiceId();
   }
   return std::nullopt;
-}
-
-std::weak_ptr<DartIsolate> RuntimeController::GetRootIsolate() {
-  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
-  if (root_isolate) {
-    return root_isolate_;
-  }
-
-  return root_isolate_;
 }
 
 std::optional<uint32_t> RuntimeController::GetRootIsolateReturnCode() {
