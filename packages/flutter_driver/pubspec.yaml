@@ -49,6 +49,6 @@ dependencies:
 
 dev_dependencies:
   mockito: 4.1.1
-  quiver: 2.1.3
+  quiver: 2.1.4+1
 
-# PUBSPEC CHECKSUM: 9a64
+# PUBSPEC CHECKSUM: 69c1
