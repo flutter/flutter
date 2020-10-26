@@ -26,7 +26,6 @@ Future<void> buildWeb(
   FlutterProject flutterProject,
   String target,
   BuildInfo buildInfo,
-  bool initializePlatform,
   bool csp,
   String serviceWorkerStrategy,
   bool sourceMaps,
@@ -54,7 +53,6 @@ Future<void> buildWeb(
       defines: <String, String>{
         kBuildMode: getNameForBuildMode(buildInfo.mode),
         kTargetFile: target,
-        kInitializePlatform: initializePlatform.toString(),
         kHasWebPlugins: hasWebPlugins.toString(),
         kDartDefines: encodeDartDefines(buildInfo.dartDefines),
         kCspMode: csp.toString(),

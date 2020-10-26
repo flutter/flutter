@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
@@ -2418,7 +2417,6 @@ void main() {
         treeShakeIcons: false,
         nullSafetyMode: NullSafetyMode.unsound,
       ),
-      flutterProject: FlutterProject.current(),
       target: null,
       platform: FakePlatform(operatingSystem: 'linux'),
     )).generator as DefaultResidentCompiler;
@@ -2453,7 +2451,6 @@ void main() {
         treeShakeIcons: false,
         extraFrontEndOptions: <String>['--enable-experiment=non-nullable'],
       ),
-      flutterProject: FlutterProject.current(),
       target: null,
       platform: FakePlatform(operatingSystem: 'linux'),
     )).generator as DefaultResidentCompiler;
@@ -2488,7 +2485,6 @@ void main() {
         treeShakeIcons: false,
         extraFrontEndOptions: <String>[],
       ),
-      flutterProject: FlutterProject.current(),
       target: null, platform: null,
     )).generator as DefaultResidentCompiler;
 
