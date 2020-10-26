@@ -248,3 +248,8 @@ class CodeSizeEvent extends UsageEvent {
     flutterUsage: flutterUsage ?? globals.flutterUsage,
   );
 }
+
+/// An event for tracking the usage of specific error handling fallbacks.
+class ErrorHandlingEvent extends UsageEvent {
+  ErrorHandlingEvent(String parameter) : super('error-handling', parameter, flutterUsage: globals.flutterUsage);
+}

@@ -743,9 +743,6 @@ void main() {
     verify(pub.get(
       context: PubContext.pubGet,
       directory: 'packages/flutter_tools',
-      generateSyntheticPackage: false,
-      skipPubspecYamlCheck: true,
-      checkLastModified: false,
     )).called(1);
   });
 }

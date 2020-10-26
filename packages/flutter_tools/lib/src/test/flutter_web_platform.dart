@@ -67,7 +67,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
     _testGoldenComparator = TestGoldenComparator(
       shellPath,
-      () => TestCompiler(BuildMode.debug, false, flutterProject, <String>[]),
+      () => TestCompiler(BuildInfo.debug, flutterProject, <String>[]),
     );
   }
 

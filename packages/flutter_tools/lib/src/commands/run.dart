@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:args/command_runner.dart';
-
 import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -25,8 +23,8 @@ import '../tracing.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
 
+/// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
     usesDartDefineOption();
@@ -77,6 +75,45 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         'this must be the path to an APK. For iOS applications, the path to an IPA. Other device types '
         'do not yet support prebuilt application binaries',
         valueHelp: 'path/to/app.apk',
+      )
+      ..addFlag('start-paused',
+        defaultsTo: startPausedDefault,
+        help: 'Start in a paused mode and wait for a debugger to connect.',
+      )
+      ..addOption('dart-flags',
+        hide: !verboseHelp,
+        help: 'Pass a list of comma separated flags to the Dart instance at '
+              'application startup. Flags passed through this option must be '
+              'present on the allowlist defined within the Flutter engine. If '
+              'a disallowed flag is encountered, the process will be '
+              'terminated immediately.\n\n'
+              'This flag is not available on the stable channel and is only '
+              'applied in debug and profile modes. This option should only '
+              'be used for experiments and should not be used by typical users.'
+      )
+      ..addFlag('endless-trace-buffer',
+        negatable: false,
+        help: 'Enable tracing to the endless tracer. This is useful when '
+              'recording huge amounts of traces. If we need to use endless buffer to '
+              'record startup traces, we can combine the ("--trace-startup"). '
+              'For example, flutter run --trace-startup --endless-trace-buffer. ',
+      )
+      ..addFlag('trace-systrace',
+        negatable: false,
+        help: 'Enable tracing to the system tracer. This is only useful on '
+              'platforms where such a tracer is available (Android and Fuchsia).',
+      )
+      ..addFlag('trace-skia',
+        negatable: false,
+        help: 'Enable tracing of Skia code. This is useful when debugging '
+              'the raster thread (formerly known as the GPU thread). '
+              'By default, Flutter will not log skia code.',
+      )
+      ..addOption('trace-allowlist',
+        hide: true,
+        help: 'Filters out all trace events except those that are specified in '
+            'this comma separated list of allowed prefixes.',
+        valueHelp: 'foo,bar',
       );
     usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
@@ -96,7 +133,71 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get dumpSkpOnShaderCompilation => boolArg('dump-skp-on-shader-compilation');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
+  bool get runningWithPrebuiltApplication => argResults['use-application-binary'] != null;
+  bool get trackWidgetCreation => boolArg('track-widget-creation');
+
+  /// Whether to start the application paused by default.
+  bool get startPausedDefault;
+
   String get route => stringArg('route');
+
+  String get traceAllowlist => stringArg('trace-allowlist');
+
+  /// Create a debugging options instance for the current `run` or `drive` invocation.
+  DebuggingOptions createDebuggingOptions() {
+    final BuildInfo buildInfo = getBuildInfo();
+    final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
+      ? int.parse(stringArg('web-browser-debug-port'))
+      : null;
+    if (buildInfo.mode.isRelease) {
+      return DebuggingOptions.disabled(
+        buildInfo,
+        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
+        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
+        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
+        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
+        webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
+        webBrowserDebugPort: browserDebugPort,
+      );
+    } else {
+      return DebuggingOptions.enabled(
+        buildInfo,
+        startPaused: boolArg('start-paused'),
+        disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+        disableDds: boolArg('disable-dds'),
+        dartFlags: stringArg('dart-flags') ?? '',
+        useTestFonts: argParser.options.containsKey('use-test-fonts') && boolArg('use-test-fonts'),
+        enableSoftwareRendering: argParser.options.containsKey('enable-software-rendering') && boolArg('enable-software-rendering'),
+        skiaDeterministicRendering: argParser.options.containsKey('skia-deterministic-rendering') && boolArg('skia-deterministic-rendering'),
+        traceSkia: boolArg('trace-skia'),
+        traceAllowlist: traceAllowlist,
+        traceSystrace: boolArg('trace-systrace'),
+        endlessTraceBuffer: boolArg('endless-trace-buffer'),
+        dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
+        cacheSkSL: cacheSkSL,
+        purgePersistentCache: purgePersistentCache,
+        deviceVmServicePort: deviceVmservicePort,
+        hostVmServicePort: hostVmservicePort,
+        disablePortPublication: disablePortPublication,
+        ddsPort: ddsPort,
+        verboseSystemLogs: boolArg('verbose-system-logs'),
+        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
+        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
+        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
+        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
+        webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
+        webBrowserDebugPort: browserDebugPort,
+        webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
+        vmserviceOutFile: stringArg('vmservice-out-file'),
+        fastStart: argParser.options.containsKey('fast-start')
+          && boolArg('fast-start')
+          && !runningWithPrebuiltApplication,
+        nullAssertions: boolArg('null-assertions'),
+      );
+    }
+  }
 }
 
 class RunCommand extends RunCommandBase {
@@ -111,10 +212,6 @@ class RunCommand extends RunCommandBase {
     // without needing to know the port.
     addPublishPort(enabledByDefault: true, verboseHelp: verboseHelp);
     argParser
-      ..addFlag('start-paused',
-        negatable: false,
-        help: 'Start in a paused mode and wait for a debugger to connect.',
-      )
       ..addFlag('enable-software-rendering',
         negatable: false,
         help: 'Enable rendering using the Skia software backend. '
@@ -126,35 +223,6 @@ class RunCommand extends RunCommandBase {
         negatable: false,
         help: 'When combined with --enable-software-rendering, provides 100% '
               'deterministic Skia rendering.',
-      )
-      ..addFlag('trace-skia',
-        negatable: false,
-        help: 'Enable tracing of Skia code. This is useful when debugging '
-              'the raster thread (formerly known as the GPU thread). '
-              'By default, Flutter will not log skia code.',
-      )
-      ..addOption('trace-whitelist',
-        hide: true,
-        help: '(deprecated) Use --trace-allowlist instead',
-        valueHelp: 'foo,bar',
-      )
-      ..addOption('trace-allowlist',
-        hide: true,
-        help: 'Filters out all trace events except those that are specified in '
-            'this comma separated list of allowed prefixes.',
-        valueHelp: 'foo,bar',
-      )
-      ..addFlag('endless-trace-buffer',
-        negatable: false,
-        help: 'Enable tracing to the endless tracer. This is useful when '
-              'recording huge amounts of traces. If we need to use endless buffer to '
-              'record startup traces, we can combine the ("--trace-startup"). '
-              'For example, flutter run --trace-startup --endless-trace-buffer. ',
-      )
-      ..addFlag('trace-systrace',
-        negatable: false,
-        help: 'Enable tracing to the system tracer. This is only useful on '
-              'platforms where such a tracer is available (Android and Fuchsia).',
       )
       ..addFlag('await-first-frame-when-tracing',
         defaultsTo: true,
@@ -176,16 +244,6 @@ class RunCommand extends RunCommandBase {
         defaultsTo: true,
         help: 'If necessary, build the app before running.',
       )
-      ..addOption('dart-flags',
-        hide: !verboseHelp,
-        help: 'Pass a list of comma separated flags to the Dart instance at '
-              'application startup. Flags passed through this option must be '
-              'present on the allowlist defined within the Flutter engine. If '
-              'a disallowed flag is encountered, the process will be '
-              'terminated immediately.\n\n'
-              'This flag is not available on the stable channel and is only '
-              'applied in debug and profile modes. This option should only '
-              'be used for experiments and should not be used by typical users.')
       ..addOption('project-root',
         hide: !verboseHelp,
         help: 'Specify the project root directory.',
@@ -247,6 +305,9 @@ class RunCommand extends RunCommandBase {
   List<Device> devices;
 
   String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+
+  @override
+  bool get startPausedDefault => false;
 
   @override
   Future<String> get usagePath async {
@@ -342,9 +403,6 @@ class RunCommand extends RunCommandBase {
     return getBuildInfo().isDebug && shouldUseHotMode;
   }
 
-  bool get runningWithPrebuiltApplication =>
-      argResults['use-application-binary'] != null;
-
   bool get stayResident => boolArg('resident');
   bool get awaitFirstFrameWhenTracing => boolArg('await-first-frame-when-tracing');
 
@@ -368,73 +426,6 @@ class RunCommand extends RunCommandBase {
       && devices.every((Device device) => device is! AndroidDevice)) {
       throwToolExit(
         '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
-      );
-    }
-  }
-
-  String get _traceAllowlist {
-    final String deprecatedValue = stringArg('trace-whitelist');
-    if (deprecatedValue != null) {
-      globals.printError('--trace-whitelist has been deprecated, use --trace-allowlist instead');
-    }
-    return stringArg('trace-allowlist') ?? deprecatedValue;
-  }
-
-  DebuggingOptions _createDebuggingOptions() {
-    final BuildInfo buildInfo = getBuildInfo();
-    final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
-      ? int.parse(stringArg('web-browser-debug-port'))
-      : null;
-    if (buildInfo.mode.isRelease) {
-      return DebuggingOptions.disabled(
-        buildInfo,
-        initializePlatform: boolArg('web-initialize-platform'),
-        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
-        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
-        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
-        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
-        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
-        webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
-        webBrowserDebugPort: browserDebugPort,
-      );
-    } else {
-      return DebuggingOptions.enabled(
-        buildInfo,
-        startPaused: boolArg('start-paused'),
-        disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
-        disableDds: boolArg('disable-dds'),
-        dartFlags: stringArg('dart-flags') ?? '',
-        useTestFonts: boolArg('use-test-fonts'),
-        enableSoftwareRendering: boolArg('enable-software-rendering'),
-        skiaDeterministicRendering: boolArg('skia-deterministic-rendering'),
-        traceSkia: boolArg('trace-skia'),
-        traceAllowlist: _traceAllowlist,
-        traceSystrace: boolArg('trace-systrace'),
-        endlessTraceBuffer: boolArg('endless-trace-buffer'),
-        dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
-        cacheSkSL: cacheSkSL,
-        purgePersistentCache: purgePersistentCache,
-        deviceVmServicePort: deviceVmservicePort,
-        hostVmServicePort: hostVmservicePort,
-        disablePortPublication: disablePortPublication,
-        ddsPort: ddsPort,
-        verboseSystemLogs: boolArg('verbose-system-logs'),
-        initializePlatform: boolArg('web-initialize-platform'),
-        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
-        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
-        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
-        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
-        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
-        webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
-        webBrowserDebugPort: browserDebugPort,
-        webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
-        vmserviceOutFile: stringArg('vmservice-out-file'),
-        // Allow forcing fast-start to off to prevent doing more work on devices that
-        // don't support it.
-        fastStart: boolArg('fast-start')
-          && !runningWithPrebuiltApplication
-          && devices.every((Device device) => device.supportsFastStart),
-        nullAssertions: boolArg('null-assertions'),
       );
     }
   }
@@ -464,11 +455,11 @@ class RunCommand extends RunCommandBase {
         final String applicationBinaryPath = stringArg('use-application-binary');
         app = await daemon.appDomain.startApp(
           devices.first, globals.fs.currentDirectory.path, targetFile, route,
-          _createDebuggingOptions(), hotMode,
+          createDebuggingOptions(), hotMode,
           applicationBinary: applicationBinaryPath == null
               ? null
               : globals.fs.file(applicationBinaryPath),
-          trackWidgetCreation: boolArg('track-widget-creation'),
+          trackWidgetCreation: trackWidgetCreation,
           projectRootPath: stringArg('project-root'),
           packagesFilePath: globalResults['packages'] as String,
           dillOutputPath: stringArg('output-dill'),
@@ -490,11 +481,6 @@ class RunCommand extends RunCommandBase {
       );
     }
     globals.terminal.usesTerminalUi = true;
-
-    if (argResults['dart-flags'] != null && !globals.flutterVersion.isMaster) {
-      throw UsageException('--dart-flags is not available on the stable '
-                           'channel.', null);
-    }
 
     final BuildMode buildMode = getBuildMode();
     for (final Device device in devices) {
@@ -534,7 +520,6 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices)
         await FlutterDevice.create(
           device,
-          flutterProject: flutterProject,
           fileSystemRoots: stringsArg('filesystem-root'),
           fileSystemScheme: stringArg('filesystem-scheme'),
           experimentalFlags: expFlags,
@@ -556,7 +541,7 @@ class RunCommand extends RunCommandBase {
       runner = HotRunner(
         flutterDevices,
         target: targetFile,
-        debuggingOptions: _createDebuggingOptions(),
+        debuggingOptions: createDebuggingOptions(),
         benchmarkMode: boolArg('benchmark'),
         applicationBinary: applicationBinaryPath == null
             ? null
@@ -572,7 +557,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         flutterProject: flutterProject,
         ipv6: ipv6,
-        debuggingOptions: _createDebuggingOptions(),
+        debuggingOptions: createDebuggingOptions(),
         stayResident: stayResident,
         urlTunneller: null,
       );
@@ -580,7 +565,7 @@ class RunCommand extends RunCommandBase {
       runner = ColdRunner(
         flutterDevices,
         target: targetFile,
-        debuggingOptions: _createDebuggingOptions(),
+        debuggingOptions: createDebuggingOptions(),
         traceStartup: traceStartup,
         awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
         applicationBinary: applicationBinaryPath == null

@@ -20,7 +20,7 @@ List<Color> _kColors = <Color>[
 
 /// A simple model object for a dot that reacts to pointer pressure.
 class Dot {
-  Dot({ Color color }) : _paint = Paint()..color = color;
+  Dot({ required Color color }) : _paint = Paint()..color = color;
 
   final Paint _paint;
   Offset position = Offset.zero;
@@ -65,7 +65,7 @@ class RenderDots extends RenderBox {
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is PointerDownEvent) {
-      final Color color = _kColors[event.pointer.remainder(_kColors.length) as int];
+      final Color color = _kColors[event.pointer.remainder(_kColors.length)];
       _dots[event.pointer] = Dot(color: color)..update(event);
       // We call markNeedsPaint to indicate that our painting commands have
       // changed and that paint needs to be called before displaying a new frame
@@ -76,7 +76,7 @@ class RenderDots extends RenderBox {
       _dots.remove(event.pointer);
       markNeedsPaint();
     } else if (event is PointerMoveEvent) {
-      _dots[event.pointer].update(event);
+      _dots[event.pointer]!.update(event);
       markNeedsPaint();
     }
   }
@@ -126,7 +126,7 @@ void main() {
   //
   // We use the StackParentData of the paragraph to position the text in the top
   // left corner of the screen.
-  final StackParentData paragraphParentData = paragraph.parentData as StackParentData;
+  final StackParentData paragraphParentData = paragraph.parentData! as StackParentData;
   paragraphParentData
     ..top = 40.0
     ..left = 20.0;

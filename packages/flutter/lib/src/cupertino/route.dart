@@ -1146,7 +1146,7 @@ Future<T?> showCupertinoDialog<T>({
   return showGeneralDialog(
     context: context,
     barrierDismissible: barrierDismissible,
-    barrierLabel: CupertinoLocalizations.of(context)!.modalBarrierDismissLabel,
+    barrierLabel: CupertinoLocalizations.of(context).modalBarrierDismissLabel,
     barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context)!,
     // This transition duration was eyeballed comparing with iOS
     transitionDuration: const Duration(milliseconds: 250),
