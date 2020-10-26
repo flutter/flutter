@@ -322,27 +322,6 @@ void debugWidgetBuilderValue(Widget widget, Widget? built) {
   }());
 }
 
-/// Returns true if none of the widget library debug variables have been changed.
-///
-/// This function is used by the test framework to ensure that debug variables
-/// haven't been inadvertently changed.
-///
-/// See [the widgets library](widgets/widgets-library.html) for a complete list.
-bool debugAssertAllWidgetVarsUnset(String reason) {
-  assert(() {
-    if (debugPrintRebuildDirtyWidgets ||
-        debugPrintBuildScope ||
-        debugPrintScheduleBuildForStacks ||
-        debugPrintGlobalKeyedWidgetLifecycle ||
-        debugProfileBuildsEnabled ||
-        debugHighlightDeprecatedWidgets) {
-      throw FlutterError(reason);
-    }
-    return true;
-  }());
-  return true;
-}
-
 /// Asserts that the given context has a [Localizations] ancestor that contains
 /// a [WidgetsLocalizations] delegate.
 ///
@@ -375,6 +354,27 @@ bool debugCheckHasWidgetsLocalizations(BuildContext context) {
         ),
         ...context.describeMissingAncestor(expectedAncestorType: WidgetsLocalizations)
       ]);
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Returns true if none of the widget library debug variables have been changed.
+///
+/// This function is used by the test framework to ensure that debug variables
+/// haven't been inadvertently changed.
+///
+/// See [the widgets library](widgets/widgets-library.html) for a complete list.
+bool debugAssertAllWidgetVarsUnset(String reason) {
+  assert(() {
+    if (debugPrintRebuildDirtyWidgets ||
+        debugPrintBuildScope ||
+        debugPrintScheduleBuildForStacks ||
+        debugPrintGlobalKeyedWidgetLifecycle ||
+        debugProfileBuildsEnabled ||
+        debugHighlightDeprecatedWidgets) {
+      throw FlutterError(reason);
     }
     return true;
   }());

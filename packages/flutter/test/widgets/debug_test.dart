@@ -215,25 +215,7 @@ void main() {
     }
   });
 
-  test('debugAssertAllWidgetVarsUnset', () {
-    debugHighlightDeprecatedWidgets = true;
-    late FlutterError error;
-    try {
-      debugAssertAllWidgetVarsUnset('The value of a widget debug variable was changed by the test.');
-    } on FlutterError catch (e) {
-      error = e;
-    } finally {
-      expect(error, isNotNull);
-      expect(error.diagnostics.length, 1);
-      expect(
-        error.toStringDeep(),
-        'FlutterError\n'
-        '   The value of a widget debug variable was changed by the test.\n',
-      );
-    }
-  });
-
-  testWidgets('debugCheckHasCupertinoLocalizations throws', (WidgetTester tester) async {
+  testWidgets('debugCheckHasWidgetsLocalizations throws', (WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
@@ -252,11 +234,29 @@ void main() {
     );
 
     expect(() => debugCheckHasWidgetsLocalizations(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
-          (AssertionError e) => e.message,
+      (AssertionError e) => e.message,
       'message',
       contains('No WidgetsLocalizations found'),
     )));
 
     expect(debugCheckHasWidgetsLocalizations(localizationsAvailable.currentContext!), isTrue);
+  });
+
+  test('debugAssertAllWidgetVarsUnset', () {
+    debugHighlightDeprecatedWidgets = true;
+    late FlutterError error;
+    try {
+      debugAssertAllWidgetVarsUnset('The value of a widget debug variable was changed by the test.');
+    } on FlutterError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error.diagnostics.length, 1);
+      expect(
+        error.toStringDeep(),
+        'FlutterError\n'
+        '   The value of a widget debug variable was changed by the test.\n',
+      );
+    }
   });
 }
