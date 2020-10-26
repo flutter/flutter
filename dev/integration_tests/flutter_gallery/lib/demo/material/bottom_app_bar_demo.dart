@@ -512,6 +512,6 @@ class _DiamondBorder extends ShapeBorder {
   // This border doesn't support scaling.
   @override
   ShapeBorder scale(double t) {
-    return null!;
+    return this;
   }
 }

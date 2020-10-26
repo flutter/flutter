@@ -103,7 +103,10 @@ class _ListDemoState extends State<ListDemo> {
                     setState(() {
                       _showAvatars = value;
                     });
-                    _bottomSheet?.setState!(() { });
+                    final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
+                    if (bottomSheetSetState != null) {
+                      bottomSheetSetState(() { });
+                    }
                   },
                 ),
               ),
@@ -118,7 +121,10 @@ class _ListDemoState extends State<ListDemo> {
                     setState(() {
                       _showIcons = value;
                     });
-                    _bottomSheet?.setState(() { });
+                    final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
+                    if (bottomSheetSetState != null) {
+                      bottomSheetSetState(() { });
+                    }
                   },
                 ),
               ),
@@ -133,7 +139,10 @@ class _ListDemoState extends State<ListDemo> {
                     setState(() {
                       _showDividers = value;
                     });
-                    _bottomSheet?.setState(() { });
+                    final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
+                    if (bottomSheetSetState != null) {
+                      bottomSheetSetState(() { });
+                    }
                   },
                 ),
               ),
@@ -148,7 +157,10 @@ class _ListDemoState extends State<ListDemo> {
                     setState(() {
                       _dense = value;
                     });
-                    _bottomSheet?.setState(() { });
+                    final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
+                    if (bottomSheetSetState != null) {
+                      bottomSheetSetState(() { });
+                    }
                   },
                 ),
               ),
@@ -162,7 +174,7 @@ class _ListDemoState extends State<ListDemo> {
       _bottomSheet = bottomSheet;
     });
 
-    _bottomSheet.closed.whenComplete(() {
+    _bottomSheet?.closed.whenComplete(() {
       if (mounted) {
         setState(() {
           _bottomSheet = null;
@@ -184,17 +196,17 @@ class _ListDemoState extends State<ListDemo> {
       child: ListTile(
         isThreeLine: _itemType == _MaterialListType.threeLine,
         dense: _dense,
-        leading: _showAvatars ? ExcludeSemantics(child: CircleAvatar(child: Text(item))) : null,
+        leading: _showAvatars != null ? ExcludeSemantics(child: CircleAvatar(child: Text(item))) : null,
         title: Text('This item represents $item.'),
         subtitle: secondary,
-        trailing: _showIcons ? Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
+        trailing: _showIcons != null ? Icon(Icons.info, color: Theme.of(context)?.disabledColor) : null,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final String layoutText = _dense ? ' \u2013 Dense' : '';
+    final String layoutText = _dense != null ? ' \u2013 Dense' : '';
     String? itemTypeText;
     switch (_itemType) {
       case _MaterialListType.oneLine:
@@ -207,10 +219,12 @@ class _ListDemoState extends State<ListDemo> {
       case _MaterialListType.threeLine:
         itemTypeText = 'Three-line';
         break;
+      default:
+        break;
     }
 
     Iterable<Widget> listTiles = items.map<Widget>((String item) => buildListTile(context, item));
-    if (_showDividers)
+    if (_showDividers != null)
       listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
 
     return Scaffold(
@@ -231,7 +245,7 @@ class _ListDemoState extends State<ListDemo> {
           ),
           IconButton(
             icon: Icon(
-              Theme.of(context).platform == TargetPlatform.iOS
+              Theme.of(context)?.platform == TargetPlatform.iOS
                   ? Icons.more_horiz
                   : Icons.more_vert,
             ),
@@ -242,7 +256,7 @@ class _ListDemoState extends State<ListDemo> {
       ),
       body: Scrollbar(
         child: ListView(
-          padding: EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
+          padding: EdgeInsets.symmetric(vertical: _dense != null ? 4.0 : 8.0),
           children: listTiles.toList(),
         ),
       ),
