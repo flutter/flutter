@@ -6,17 +6,11 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
 import '../project.dart';
-
-/// Tests whether a [FileSystemEntity] is an macOS bundle directory.
-bool _isBundleDirectory(FileSystemEntity entity) =>
-    entity is Directory && entity.path.endsWith('.app');
 
 abstract class MacOSApp extends ApplicationPackage {
   MacOSApp({@required String projectBundleId}) : super(id: projectBundleId);
@@ -34,8 +28,7 @@ abstract class MacOSApp extends ApplicationPackage {
   /// which is expected to start the application and send the observatory
   /// port over stdout.
   factory MacOSApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
-    final _ExecutableAndIdAndBundle executableAndIdAndBundle =
-        _executableFromBundle(applicationBinary);
+    final _ExecutableAndIdAndBundle executableAndIdAndBundle = _executableFromBundle(applicationBinary);
     if (executableAndIdAndBundle == null) {
       return null;
     }
@@ -55,35 +48,9 @@ abstract class MacOSApp extends ApplicationPackage {
       globals.printError('File "${applicationBundle.path}" does not exist.');
       return null;
     }
-    Directory bundleDir;
-    if (entityType == FileSystemEntityType.directory) {
-      final Directory directory = globals.fs.directory(applicationBundle);
-      if (!_isBundleDirectory(directory)) {
-        globals.printError('Folder "${applicationBundle.path}" is not an app bundle.');
-        return null;
-      }
-      bundleDir = globals.fs.directory(applicationBundle);
-    } else {
-      // Try to unpack as a zip.
-      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_app.');
-      shutdownHooks.addShutdownHook(() async {
-        await tempDir.delete(recursive: true);
-      }, ShutdownStage.STILL_RECORDING);
-      try {
-        globals.os.unzip(globals.fs.file(applicationBundle), tempDir);
-      } on ProcessException {
-        globals.printError('Invalid prebuilt macOS app. Unable to extract bundle from archive.');
-        return null;
-      }
-      try {
-        bundleDir = tempDir
-            .listSync()
-            .whereType<Directory>()
-            .singleWhere(_isBundleDirectory);
-      } on StateError {
-        globals.printError('Archive "${applicationBundle.path}" does not contain a single app bundle.');
-        return null;
-      }
+    final Directory bundleDir = globals.bundleProcessor.getAppBundle(applicationBundle);
+    if (bundleDir == null) {
+      return null;
     }
     final String plistPath = globals.fs.path.join(bundleDir.path, 'Contents', 'Info.plist');
     if (!globals.fs.file(plistPath).existsSync()) {
