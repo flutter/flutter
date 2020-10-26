@@ -241,7 +241,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   late Animation<double> _fadeoutOpacityAnimation;
   late AnimationController _thicknessAnimationController;
   Timer? _fadeoutTimer;
-  double? _dragScrollbarPositionY;
+  double? _dragScrollbarAxisPosition;
   Drag? _drag;
 
   double get _thickness {
@@ -342,18 +342,25 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     // position, and create/update the drag event with that position.
     final double scrollOffsetLocal = _painter!.getTrackToScroll(primaryDelta);
     final double scrollOffsetGlobal = scrollOffsetLocal + _currentController!.position.pixels;
+    final Axis direction = _currentController!.position.axis;
 
     if (_drag == null) {
       _drag = _currentController!.position.drag(
         DragStartDetails(
-          globalPosition: Offset(0.0, scrollOffsetGlobal),
+          globalPosition: direction == Axis.vertical
+            ? Offset(0.0, scrollOffsetGlobal)
+            : Offset(scrollOffsetGlobal, 0.0),
         ),
         () {},
       );
     } else {
       _drag!.update(DragUpdateDetails(
-        globalPosition: Offset(0.0, scrollOffsetGlobal),
-        delta: Offset(0.0, -scrollOffsetLocal),
+        globalPosition: direction == Axis.vertical
+          ? Offset(0.0, scrollOffsetGlobal)
+          : Offset(scrollOffsetGlobal, 0.0),
+        delta: direction == Axis.vertical
+          ? Offset(0.0, -scrollOffsetLocal)
+          : Offset(-scrollOffsetLocal, 0.0),
         primaryDelta: -scrollOffsetLocal,
       ));
     }
@@ -369,33 +376,43 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     }
   }
 
-  bool _checkVertical() {
+  Axis? _getDirection() {
     try {
-      return _currentController!.position.axis == Axis.vertical;
+      return _currentController!.position.axis;
     } catch (_) {
       // Ignore the gesture if we cannot determine the direction.
-      return false;
+      return null;
     }
   }
 
-  double _pressStartY = 0.0;
+  double _pressStartAxisPosition = 0.0;
 
   // Long press event callbacks handle the gesture where the user long presses
   // on the scrollbar thumb and then drags the scrollbar without releasing.
   void _handleLongPressStart(LongPressStartDetails details) {
     _currentController = _controller;
-    if (!_checkVertical()) {
+    final Axis? direction = _getDirection();
+    if (direction == null) {
       return;
     }
-    _pressStartY = details.localPosition.dy;
     _fadeoutTimer?.cancel();
     _fadeoutAnimationController.forward();
-    _dragScrollbar(details.localPosition.dy);
-    _dragScrollbarPositionY = details.localPosition.dy;
+    switch (direction) {
+      case Axis.vertical:
+        _pressStartAxisPosition = details.localPosition.dy;
+        _dragScrollbar(details.localPosition.dy);
+        _dragScrollbarAxisPosition = details.localPosition.dy;
+        break;
+      case Axis.horizontal:
+        _pressStartAxisPosition = details.localPosition.dx;
+        _dragScrollbar(details.localPosition.dx);
+        _dragScrollbarAxisPosition = details.localPosition.dx;
+        break;
+    }
   }
 
   void _handleLongPress() {
-    if (!_checkVertical()) {
+    if (_getDirection() == null) {
       return;
     }
     _fadeoutTimer?.cancel();
@@ -405,37 +422,57 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (!_checkVertical()) {
+    final Axis? direction = _getDirection();
+    if (direction == null) {
       return;
     }
-    _dragScrollbar(details.localPosition.dy - _dragScrollbarPositionY!);
-    _dragScrollbarPositionY = details.localPosition.dy;
+    switch(direction) {
+      case Axis.vertical:
+        _dragScrollbar(details.localPosition.dy - _dragScrollbarAxisPosition!);
+        _dragScrollbarAxisPosition = details.localPosition.dy;
+        break;
+      case Axis.horizontal:
+        _dragScrollbar(details.localPosition.dx - _dragScrollbarAxisPosition!);
+        _dragScrollbarAxisPosition = details.localPosition.dx;
+        break;
+    }
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
-    if (!_checkVertical()) {
+    final Axis? direction = _getDirection();
+    if (direction == null) {
       return;
     }
-    _handleDragScrollEnd(details.velocity.pixelsPerSecond.dy);
-    if (details.velocity.pixelsPerSecond.dy.abs() < 10 &&
-        (details.localPosition.dy - _pressStartY).abs() > 0) {
-      HapticFeedback.mediumImpact();
+    switch(direction) {
+      case Axis.vertical:
+        _handleDragScrollEnd(details.velocity.pixelsPerSecond.dy, direction);
+        if (details.velocity.pixelsPerSecond.dy.abs() < 10 &&
+          (details.localPosition.dy - _pressStartAxisPosition).abs() > 0) {
+          HapticFeedback.mediumImpact();
+        }
+        break;
+      case Axis.horizontal:
+        _handleDragScrollEnd(details.velocity.pixelsPerSecond.dx, direction);
+        if (details.velocity.pixelsPerSecond.dx.abs() < 10 &&
+          (details.localPosition.dx - _pressStartAxisPosition).abs() > 0) {
+          HapticFeedback.mediumImpact();
+        }
+        break;
     }
     _currentController = null;
   }
 
-  void _handleDragScrollEnd(double trackVelocityY) {
+  void _handleDragScrollEnd(double trackVelocity, Axis direction) {
     _startFadeoutTimer();
     _thicknessAnimationController.reverse();
-    _dragScrollbarPositionY = null;
-    final double scrollVelocityY = _painter!.getTrackToScroll(trackVelocityY);
+    _dragScrollbarAxisPosition = null;
+    final double scrollVelocity = _painter!.getTrackToScroll(trackVelocity);
     _drag?.end(DragEndDetails(
-      primaryVelocity: -scrollVelocityY,
+      primaryVelocity: -scrollVelocity,
       velocity: Velocity(
-        pixelsPerSecond: Offset(
-          0.0,
-          -scrollVelocityY,
-        ),
+        pixelsPerSecond: direction == Axis.vertical
+          ? Offset(0.0, -scrollVelocity)
+          : Offset(-scrollVelocity, 0.0),
       ),
     ));
     _drag = null;
@@ -458,7 +495,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       _painter!.update(notification.metrics, notification.metrics.axisDirection);
     } else if (notification is ScrollEndNotification) {
       // On iOS, the scrollbar can only go away once the user lifted the finger.
-      if (_dragScrollbarPositionY == null) {
+      if (_dragScrollbarAxisPosition == null) {
         _startFadeoutTimer();
       }
     }
