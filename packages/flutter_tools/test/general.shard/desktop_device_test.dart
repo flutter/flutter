@@ -55,7 +55,7 @@ void main() {
 
     testWithoutContext('Install and uninstall are no-ops that report success', () async {
       final FakeDesktopDevice device = setUpDesktopDevice();
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final FakeAppplicationPackage package = FakeAppplicationPackage();
 
       expect(await device.uninstallApp(package), true);
       expect(await device.isAppInstalled(package), true);
@@ -71,7 +71,7 @@ void main() {
   group('Starting and stopping application', () {
     testWithoutContext('Stop without start is a successful no-op', () async {
       final FakeDesktopDevice device = setUpDesktopDevice();
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final FakeAppplicationPackage package = FakeAppplicationPackage();
 
       expect(await device.stopApp(package), true);
     });
@@ -89,7 +89,7 @@ void main() {
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager, fileSystem: fileSystem);
       final String executableName = device.executablePathForDevice(null, BuildMode.debug);
       fileSystem.file(executableName).writeAsStringSync('\n');
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final FakeAppplicationPackage package = FakeAppplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -103,7 +103,7 @@ void main() {
     testWithoutContext('Null executable path fails gracefully', () async {
       final BufferLogger logger = BufferLogger.test();
       final DesktopDevice device = setUpDesktopDevice(nullExecutablePathForDevice: true, logger: logger);
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final FakeAppplicationPackage package = FakeAppplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -124,7 +124,7 @@ void main() {
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final FakeAppplicationPackage package = FakeAppplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -168,7 +168,7 @@ void main() {
       ),
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-    final FakeApplicationPackage package = FakeApplicationPackage();
+    final FakeAppplicationPackage package = FakeAppplicationPackage();
     final LaunchResult result = await device.startApp(
       package,
       prebuiltApplication: true,
@@ -191,6 +191,7 @@ void main() {
         purgePersistentCache: true,
         useTestFonts: true,
         verboseSystemLogs: true,
+        initializePlatform: true,
         nullAssertions: true,
       ),
     );
@@ -216,7 +217,7 @@ void main() {
       ),
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-    final FakeApplicationPackage package = FakeApplicationPackage();
+    final FakeAppplicationPackage package = FakeAppplicationPackage();
     final LaunchResult result = await device.startApp(
       package,
       prebuiltApplication: true,
@@ -227,6 +228,7 @@ void main() {
         BuildInfo.debug,
         traceAllowlist: 'foo,bar',
         cacheSkSL: true,
+        initializePlatform: true,
       ),
     );
 
@@ -323,7 +325,7 @@ class FakeDesktopDevice extends DesktopDevice {
   }
 }
 
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+class FakeAppplicationPackage extends Fake implements ApplicationPackage {}
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override
   String get name => 'Example';

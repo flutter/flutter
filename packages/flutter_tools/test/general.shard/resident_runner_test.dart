@@ -24,6 +24,7 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
@@ -2285,6 +2286,38 @@ void main() {
     expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill.track.dill')).readAsString(), 'ABC');
   }));
 
+  testUsingContext('HotRunner copies compiled app.dill to cache during startup with --sound-null-safety', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+    ]);
+    setWsAddress(testUri, fakeVmServiceHost.vmService);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        trackWidgetCreation: true,
+        nullSafetyMode: NullSafetyMode.sound,
+      )),
+    );
+    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    await residentRunner.run();
+
+    expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill.sound.track.dill')).readAsString(), 'ABC');
+  }));
+
 
   testUsingContext('HotRunner unforwards device ports', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
@@ -2385,6 +2418,7 @@ void main() {
         treeShakeIcons: false,
         nullSafetyMode: NullSafetyMode.unsound,
       ),
+      flutterProject: FlutterProject.current(),
       target: null,
       platform: FakePlatform(operatingSystem: 'linux'),
     )).generator as DefaultResidentCompiler;
@@ -2419,6 +2453,7 @@ void main() {
         treeShakeIcons: false,
         extraFrontEndOptions: <String>['--enable-experiment=non-nullable'],
       ),
+      flutterProject: FlutterProject.current(),
       target: null,
       platform: FakePlatform(operatingSystem: 'linux'),
     )).generator as DefaultResidentCompiler;
@@ -2453,6 +2488,7 @@ void main() {
         treeShakeIcons: false,
         extraFrontEndOptions: <String>[],
       ),
+      flutterProject: FlutterProject.current(),
       target: null, platform: null,
     )).generator as DefaultResidentCompiler;
 

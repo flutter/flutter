@@ -466,6 +466,7 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
+      flutterProject: flutterProject,
       target: target,
       buildInfo: options.buildInfo,
       platform: globals.platform,

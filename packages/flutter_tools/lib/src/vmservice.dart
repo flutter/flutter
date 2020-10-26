@@ -8,7 +8,6 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/context.dart';
 import 'base/io.dart' as io;
-import 'base/logger.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
@@ -807,11 +806,9 @@ bool isPauseEvent(String kind) {
 // or delete it.
 Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
   File outputFile,
-  Logger logger,
 }) async {
-  logger ??= globals.logger;
   if (data.isEmpty) {
-    logger.printStatus(
+    globals.logger.printStatus(
       'No data was received. To ensure SkSL data can be generated use a '
       'physical device then:\n'
       '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
@@ -847,7 +844,7 @@ Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
     'data': data,
   };
   outputFile.writeAsStringSync(json.encode(manifest));
-  logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
+  globals.logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
   return outputFile.path;
 }
 
