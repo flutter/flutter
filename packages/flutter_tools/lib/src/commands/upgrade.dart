@@ -117,6 +117,10 @@ class UpgradeCommandRunner {
       globals.printStatus('Installed: ${flutterVersion.frameworkRevision}');
       globals.printStatus('Available: $upstreamRevision\n', emphasis: true);
       globals.printStatus('To upgrade now, run "flutter upgrade".');
+      if(flutterVersion.channel == 'stable'){
+        globals.printStatus('\nSee the announcement and release notes:');
+        globals.printStatus('https://flutter.dev/docs/development/tools/sdk/release-notes');
+      }
       return;
     }
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
