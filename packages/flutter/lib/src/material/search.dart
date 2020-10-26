@@ -42,6 +42,9 @@ import 'theme.dart';
 /// page fades in or out. This is commonly used to animate an [AnimatedIcon] in
 /// the [AppBar.leading] position e.g. from the hamburger menu to the back arrow
 /// used to exit the search page.
+/// 
+/// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.editableText.complexCharacters}
 ///
 /// See also:
 ///
@@ -85,11 +88,14 @@ Future<T?> showSearch<T>({
 /// A given [SearchDelegate] can only be associated with one active [showSearch]
 /// call. Call [SearchDelegate.close] before re-using the same delegate instance
 /// for another [showSearch] call.
+/// 
+/// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.editableText.complexCharacters}
 abstract class SearchDelegate<T> {
   /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
-  /// [textInputAction].
+  /// [textInputAction]. You can only use either [searchFieldStyle] or [searchFieldDecorationTheme] at a time.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// ```dart
   /// class CustomSearchHintDelegate extends SearchDelegate {
   ///   CustomSearchHintDelegate({
@@ -272,7 +278,10 @@ abstract class SearchDelegate<T> {
   /// The style of the [searchFieldLabel].
   ///
   /// If this value is set to null, the value of the ambient [Theme]'s
-  /// [InputDecorationTheme.hintStyle] will be used instead.
+  /// [InputDecorationTheme.hintStyle] will be used instead
+  /// 
+  /// If this value is not null, [searchFieldDecorationTheme]
+  /// will be ignored so this can be used.
   final TextStyle? searchFieldStyle;
 
   /// The [InputDecorationTheme] for the search field, use
@@ -503,7 +512,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       case null:
         break;
     }
-    String routeName;
+    String? routeName;
     switch (theme.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -511,8 +520,10 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       case TargetPlatform.windows:
         routeName = searchFieldLabel;
         break;
-      default:
-        routeName = '';
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        routeName = '';  
+        break;
     }
 
     return Semantics(

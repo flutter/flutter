@@ -122,17 +122,17 @@ void main() {
   });
 
   testWidgets('Hint text color overridden', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    const String searchHintText = 'Enter search terms';
+    final _TestSearchDelegate delegate = _TestSearchDelegate(searchHint: searchHintText);
 
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
     ));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
-    
-    final ThemeData? textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
-    final Color? hintColor = textFieldTheme?.inputDecorationTheme.hintStyle?.color;
-    expect(hintColor, _TestSearchDelegate.hintTextColor);
+
+    final Text hintText = tester.widget(find.text(searchHintText));
+    expect(hintText.style!.color, _TestSearchDelegate.hintTextColor);
   });
 
   testWidgets('Requests suggestions', (WidgetTester tester) async {
@@ -540,18 +540,18 @@ void main() {
   });
 
   testWidgets('Custom searchFieldStyle value', (WidgetTester tester) async {
+    const String searchHintText = 'Enter search terms';
     const TextStyle searchFieldStyle = TextStyle(color: Colors.red, fontSize: 3);
 
-    final _TestSearchDelegate delegate = _TestSearchDelegate(searchFieldStyle: searchFieldStyle);
+    final _TestSearchDelegate delegate = _TestSearchDelegate(searchHint: searchHintText, searchFieldStyle: searchFieldStyle);
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final ThemeData? textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
-    final TextStyle? hintStyle = textFieldTheme?.inputDecorationTheme.hintStyle;
-    
-    expect(hintStyle, delegate.searchFieldStyle);
+    final Text hintText = tester.widget(find.text(searchHintText));
+    expect(hintText.style?.color, delegate.searchFieldStyle?.color);
+    expect(hintText.style?.fontSize, delegate.searchFieldStyle?.fontSize);
   });
 
   testWidgets('keyboard show search button by default', (WidgetTester tester) async {
@@ -621,7 +621,8 @@ void main() {
                               SemanticsFlag.isTextField,
                               SemanticsFlag.isFocused,
                               SemanticsFlag.isHeader,
-                              if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS && debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                              if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
+                                  debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
                             ],
                             actions: <SemanticsAction>[
                               SemanticsAction.tap,
