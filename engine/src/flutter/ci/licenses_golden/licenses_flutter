@@ -936,6 +936,8 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegateTest.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelayTest.mm

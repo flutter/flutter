@@ -4,14 +4,20 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
 
-#include "flutter/fml/logging.h"
+#import "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 
 static NSString* kUIBackgroundMode = @"UIBackgroundModes";
 static NSString* kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* kBackgroundFetchCapatibility = @"fetch";
+
+@interface FlutterAppDelegate ()
+@property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
+@end
 
 @implementation FlutterAppDelegate {
   FlutterPluginAppLifeCycleDelegate* _lifeCycleDelegate;
@@ -26,6 +32,7 @@ static NSString* kBackgroundFetchCapatibility = @"fetch";
 
 - (void)dealloc {
   [_lifeCycleDelegate release];
+  [_rootFlutterViewControllerGetter release];
   [super dealloc];
 }
 
@@ -41,10 +48,13 @@ static NSString* kBackgroundFetchCapatibility = @"fetch";
 
 // Returns the key window's rootViewController, if it's a FlutterViewController.
 // Otherwise, returns nil.
-+ (FlutterViewController*)rootFlutterViewController {
-  UIViewController* viewController = [UIApplication sharedApplication].keyWindow.rootViewController;
-  if ([viewController isKindOfClass:[FlutterViewController class]]) {
-    return (FlutterViewController*)viewController;
+- (FlutterViewController*)rootFlutterViewController {
+  if (_rootFlutterViewControllerGetter != nil) {
+    return _rootFlutterViewControllerGetter();
+  }
+  UIViewController* rootViewController = _window.rootViewController;
+  if ([rootViewController isKindOfClass:[FlutterViewController class]]) {
+    return (FlutterViewController*)rootViewController;
   }
   return nil;
 }
@@ -124,7 +134,28 @@ static NSString* kBackgroundFetchCapatibility = @"fetch";
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
-  return [_lifeCycleDelegate application:application openURL:url options:options];
+  if ([_lifeCycleDelegate application:application openURL:url options:options]) {
+    return YES;
+  } else {
+    FlutterViewController* flutterViewController = [self rootFlutterViewController];
+    if (flutterViewController) {
+      [flutterViewController.engine
+          waitForFirstFrame:3.0
+                   callback:^(BOOL didTimeout) {
+                     if (didTimeout) {
+                       FML_LOG(ERROR)
+                           << "Timeout waiting for the first frame when launching an URL.";
+                     } else {
+                       [flutterViewController.engine.navigationChannel invokeMethod:@"pushRoute"
+                                                                          arguments:url.path];
+                     }
+                   }];
+      return YES;
+    } else {
+      FML_LOG(ERROR) << "Attempting to open an URL without a Flutter RootViewController.";
+      return NO;
+    }
+  }
 }
 
 - (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url {
@@ -175,27 +206,25 @@ static NSString* kBackgroundFetchCapatibility = @"fetch";
 #pragma mark - FlutterPluginRegistry methods. All delegating to the rootViewController
 
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
-  UIViewController* rootViewController = _window.rootViewController;
-  if ([rootViewController isKindOfClass:[FlutterViewController class]]) {
-    return
-        [[(FlutterViewController*)rootViewController pluginRegistry] registrarForPlugin:pluginKey];
+  FlutterViewController* flutterRootViewController = [self rootFlutterViewController];
+  if (flutterRootViewController) {
+    return [[flutterRootViewController pluginRegistry] registrarForPlugin:pluginKey];
   }
   return nil;
 }
 
 - (BOOL)hasPlugin:(NSString*)pluginKey {
-  UIViewController* rootViewController = _window.rootViewController;
-  if ([rootViewController isKindOfClass:[FlutterViewController class]]) {
-    return [[(FlutterViewController*)rootViewController pluginRegistry] hasPlugin:pluginKey];
+  FlutterViewController* flutterRootViewController = [self rootFlutterViewController];
+  if (flutterRootViewController) {
+    return [[flutterRootViewController pluginRegistry] hasPlugin:pluginKey];
   }
   return false;
 }
 
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
-  UIViewController* rootViewController = _window.rootViewController;
-  if ([rootViewController isKindOfClass:[FlutterViewController class]]) {
-    return [[(FlutterViewController*)rootViewController pluginRegistry]
-        valuePublishedByPlugin:pluginKey];
+  FlutterViewController* flutterRootViewController = [self rootFlutterViewController];
+  if (flutterRootViewController) {
+    return [[flutterRootViewController pluginRegistry] valuePublishedByPlugin:pluginKey];
   }
   return nil;
 }
