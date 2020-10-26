@@ -102,17 +102,15 @@ Future<void> runNavigatorTest(
   NavigatorState host,
   VoidCallback test,
   List<String> expectations, [
-  List<String>? expectationsAfterAnotherPump,
+  List<String>? expectationsAfterAnotherPump = const <String>[],
 ]) async {
   expect(host, isNotNull);
   test();
   expect(results, equals(expectations));
   results.clear();
   await tester.pump();
-  if (expectationsAfterAnotherPump != null) {
-    expect(results, equals(expectationsAfterAnotherPump));
-    results.clear();
-  }
+  expect(results, equals(expectationsAfterAnotherPump));
+  results.clear();
 }
 
 void main() {
@@ -194,8 +192,6 @@ void main() {
         'two: didReplace second',
         'two: didChangeNext third',
         'initial: didChangeNext two',
-      ],
-      <String>[
         'second: dispose',
       ],
     );
@@ -278,7 +274,6 @@ void main() {
       tester,
       host,
       () { host.removeRouteBelow(second); },
-      <String>[],
       <String>[
         'first: dispose',
       ],
@@ -324,8 +319,6 @@ void main() {
       () { host.removeRouteBelow(four); },
       <String>[
         'second: didChangeNext four',
-      ],
-      <String>[
         'three: dispose',
       ],
     );
@@ -403,8 +396,6 @@ void main() {
         'b: didReplace B',
         'b: didChangeNext C',
         'A: didChangeNext b',
-      ],
-      <String>[
         'B: dispose',
       ],
     );
