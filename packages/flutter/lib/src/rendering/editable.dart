@@ -1920,7 +1920,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
           int startIndex = position.offset - 1;
-          while (startIndex > 0 && _isWhitespace(text!.text!.codeUnitAt(startIndex))) {
+          while (startIndex > 0
+              && (_isWhitespace(text!.text!.codeUnitAt(startIndex))
+              || text!.text! == '\u200e' || text!.text! == '\u200f')) {
             startIndex--;
           }
           if (startIndex > 0) {
