@@ -8,11 +8,7 @@ import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
+import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
@@ -71,6 +67,7 @@ FlutterPlatform installHook({
   // Deprecated, use extraFrontEndOptions.
   List<String> dartExperiments,
   bool nullAssertions = false,
+  BuildInfo buildInfo, // TODO(jonahwilliams): make the default
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!startPaused && observatoryPort == null));
@@ -106,6 +103,7 @@ FlutterPlatform installHook({
     icudtlPath: icudtlPath,
     extraFrontEndOptions: extraFrontEndOptions,
     nullAssertions: nullAssertions,
+    buildInfo: buildInfo,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -201,7 +199,7 @@ void main() {
 ''');
   if (testConfigFile != null) {
     buffer.write('''
-    return () => test_config.main(test.main);
+    return () => test_config.testExecutable(test.main);
 ''');
   } else {
     buffer.write('''
@@ -250,6 +248,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.flutterProject,
     this.icudtlPath,
     this.nullAssertions = false,
+    this.buildInfo,
     @required this.extraFrontEndOptions,
   }) : assert(shellPath != null);
 
@@ -274,6 +273,7 @@ class FlutterPlatform extends PlatformPlugin {
   final String icudtlPath;
   final List<String> extraFrontEndOptions;
   final bool nullAssertions;
+  final BuildInfo buildInfo;
 
   Directory fontsDirectory;
 
@@ -448,7 +448,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject, extraFrontEndOptions);
+        compiler ??= TestCompiler(buildInfo ?? BuildInfo(buildMode, '', trackWidgetCreation: trackWidgetCreation, treeShakeIcons: false), flutterProject, extraFrontEndOptions);
         mainDart = await compiler.compile(globals.fs.file(mainDart).uri);
 
         if (mainDart == null) {

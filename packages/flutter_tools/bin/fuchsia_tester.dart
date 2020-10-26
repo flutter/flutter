@@ -155,6 +155,7 @@ Future<void> run(List<String> args) async {
       icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
       coverageDirectory: coverageDirectory,
       extraFrontEndOptions: <String>[],
+      buildInfo: BuildInfo.debug,
     );
 
     if (collector != null) {

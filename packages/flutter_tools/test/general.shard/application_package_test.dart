@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' show ProcessResult;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -30,44 +29,35 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
 
-class MockitoProcessManager extends Mock implements ProcessManager {}
 class MockitoAndroidSdk extends Mock implements AndroidSdk {}
 class MockitoAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
 
 void main() {
   group('Apk with partial Android SDK works', () {
     AndroidSdk sdk;
-    ProcessManager mockProcessManager;
+    FakeProcessManager fakeProcessManager;
     MemoryFileSystem fs;
     Cache cache;
-    File gradle;
     final Map<Type, Generator> overrides = <Type, Generator>{
       AndroidSdk: () => sdk,
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => fakeProcessManager,
       FileSystem: () => fs,
       Cache: () => cache,
     };
 
     setUp(() async {
       sdk = MockitoAndroidSdk();
-      mockProcessManager = MockitoProcessManager();
+      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       fs = MemoryFileSystem.test();
       cache = Cache.test(
-        processManager: FakeProcessManager.any()
+        processManager: FakeProcessManager.any(),
       );
       Cache.flutterRoot = '../..';
       when(sdk.licensesAvailable).thenReturn(true);
-      when(mockProcessManager.canRun(any)).thenReturn(true);
-      when(mockProcessManager.run(
-        any,
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenAnswer((_) async => ProcessResult(1, 0, 'stdout', 'stderr'));
-      when(mockProcessManager.runSync(any)).thenReturn(ProcessResult(1, 0, 'stdout', 'stderr'));
       final FlutterProject project = FlutterProject.current();
-      gradle = globals.fs.file(project.android.hostAppGradleRoot.childFile(
+      globals.fs.file(project.android.hostAppGradleRoot.childFile(
         globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
-      ).path)..createSync(recursive: true);
+      ).path).createSync(recursive: true);
     });
 
     testUsingContext('Licenses not available, platform and buildtools available, apk exists', () async {
@@ -78,18 +68,19 @@ void main() {
       when(sdk.latestVersion).thenReturn(sdkVersion);
       when(sdk.platformToolsAvailable).thenReturn(true);
       when(sdk.licensesAvailable).thenReturn(false);
-      when(mockProcessManager.runSync(
-          argThat(equals(<String>[
+
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
             aaptPath,
             'dump',
             'xmltree',
-            apkFile.path,
+             apkFile.path,
             'AndroidManifest.xml',
-          ])),
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        ),
-      ).thenReturn(ProcessResult(0, 0, _aaptDataWithDefaultEnabledAndMainLauncherActivity, ''));
+          ],
+          stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity
+        )
+      );
 
       final ApplicationPackage applicationPackage = await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
@@ -97,6 +88,7 @@ void main() {
         applicationBinary: apkFile,
       );
       expect(applicationPackage.name, 'app.apk');
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: overrides);
 
     testUsingContext('Licenses available, build tools not, apk exists', () async {
@@ -117,18 +109,14 @@ void main() {
       gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
       gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
 
+      fakeProcessManager.addCommand(FakeCommand(command: <String>[gradle.path, 'dependencies']));
+
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
         buildInfo: null,
         applicationBinary: globals.fs.file('app.apk'),
       );
-      verify(
-        mockProcessManager.run(
-          argThat(equals(<String>[gradle.path, 'dependencies'])),
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        ),
-      ).called(1);
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: overrides);
 
     testUsingContext('Licenses available, build tools available, does not call gradle dependencies', () async {
@@ -139,22 +127,15 @@ void main() {
         TargetPlatform.android_arm,
         buildInfo: null,
       );
-      verifyNever(
-        mockProcessManager.run(
-          argThat(equals(<String>[gradle.path, 'dependencies'])),
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        ),
-      );
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: overrides);
 
     testUsingContext('returns null when failed to extract manifest', () async {
       final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
       when(sdk.latestVersion).thenReturn(sdkVersion);
-      when(mockProcessManager.runSync(argThat(contains('logcat'))))
-          .thenReturn(ProcessResult(0, 1, '', ''));
 
       expect(AndroidApk.fromApk(null), isNull);
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: overrides);
   });
 

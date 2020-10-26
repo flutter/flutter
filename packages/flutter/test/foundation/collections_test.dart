@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 import 'dart:math';
 
 import 'package:flutter/src/foundation/collections.dart';
@@ -64,10 +63,8 @@ void main() {
   test('MergeSortRandom', () {
     final Random random = Random();
     for (int i = 0; i < 250; i += 1) {
-      final List<int> list = List<int>(i);
-      for (int j = 0; j < i; j++) {
-        list[j] = random.nextInt(i); // Expect some equal elements.
-      }
+      // Expect some equal elements.
+      final List<int> list = List<int>.generate(i, (int j) => random.nextInt(i));
       mergeSort(list);
       for (int j = 1; j < i; j++) {
         expect(list[j - 1], lessThanOrEqualTo(list[j]));
@@ -80,14 +77,12 @@ void main() {
     // larger case where the internal moving insertion sort is used
     // larger cases with multiple splittings, numbers just around a power of 2.
     for (final int size in <int>[8, 50, 511, 512, 513]) {
-      final List<OrderedComparable> list = List<OrderedComparable>(size);
       // Class OC compares using id.
       // With size elements with id's in the range 0..size/4, a number of
       // collisions are guaranteed. These should be sorted so that the 'order'
       // part of the objects are still in order.
-      for (int i = 0; i < size; i++) {
-        list[i] = OrderedComparable(random.nextInt(size >> 2), i);
-      }
+      final List<OrderedComparable> list = List<OrderedComparable>.generate(
+          size, (int i) => OrderedComparable(random.nextInt(size >> 2), i));
       mergeSort(list);
       OrderedComparable prev = list[0];
       for (int i = 1; i < size; i++) {
@@ -126,10 +121,8 @@ void main() {
   test('MergeSortSpecialCases', () {
     for (final int size in <int>[511, 512, 513]) {
       // All equal.
-      final List<OrderedComparable> list = List<OrderedComparable>(size);
-      for (int i = 0; i < size; i++) {
-        list[i] = OrderedComparable(0, i);
-      }
+      final List<OrderedComparable> list = List<OrderedComparable>.generate(
+          size, (int i) => OrderedComparable(0, i));
       mergeSort(list);
       for (int i = 0; i < size; i++) {
         expect(list[i].order, equals(i));

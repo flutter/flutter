@@ -330,7 +330,7 @@ class _FlutterLogoPainter extends BoxPainter {
     final Size canvasSize = _config.margin.deflateSize(configuration.size!);
     if (canvasSize.isEmpty)
       return;
-    Size logoSize;
+    final Size logoSize;
     if (_config._position > 0.0) {
       // horizontal style
       logoSize = const Size(820.0, 232.0);
@@ -352,7 +352,7 @@ class _FlutterLogoPainter extends BoxPainter {
       centerSquareHeight,
     );
 
-    Rect logoTargetSquare;
+    final Rect logoTargetSquare;
     if (_config._position > 0.0) {
       // horizontal style
       logoTargetSquare = Rect.fromLTWH(rect.left, rect.top, rect.height, rect.height);

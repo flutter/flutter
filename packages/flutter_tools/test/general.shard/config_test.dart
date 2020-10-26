@@ -65,7 +65,7 @@ void main() {
 
   testWithoutContext('Config parse error', () {
     final BufferLogger bufferLogger = BufferLogger.test();
-    final File file = memoryFileSystem.file('example')
+    final File file = memoryFileSystem.file('.flutter_example')
       ..writeAsStringSync('{"hello":"bar');
     config = Config(
       'example',
@@ -105,6 +105,30 @@ void main() {
     expect(bufferLogger.errorText, contains('Could not read preferences in testfile'));
     // Also contains original error message:
     expect(bufferLogger.errorText, contains('The flutter tool cannot access the file or directory'));
+  });
+
+  testWithoutContext('Config in home dir is used if it exists', () {
+    memoryFileSystem.file('.flutter_example').writeAsStringSync('{"hello":"bar"}');
+    config = Config(
+      'example',
+      fileSystem: memoryFileSystem,
+      logger: BufferLogger.test(),
+      platform: fakePlatform,
+    );
+    expect(config.getValue('hello'), 'bar');
+    expect(memoryFileSystem.file('.config/flutter/example').existsSync(), false);
+  });
+
+  testWithoutContext('Config is created in config dir if it does not already exist in home dir', () {
+    config = Config(
+      'example',
+      fileSystem: memoryFileSystem,
+      logger: BufferLogger.test(),
+      platform: fakePlatform,
+    );
+
+    config.setValue('foo', 'bar');
+    expect(memoryFileSystem.file('.config/flutter/example').existsSync(), true);
   });
 }
 

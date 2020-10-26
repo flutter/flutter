@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -18,7 +16,7 @@ Future<void> main() async {
   final ui.Image image = await createTestImage();
 
   testWidgets('didHaveMemoryPressure clears imageCache', (WidgetTester tester) async {
-    imageCache.putIfAbsent(1, () => OneFrameImageStreamCompleter(
+    imageCache!.putIfAbsent(1, () => OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(ImageInfo(
         image: image,
         scale: 1.0,
@@ -26,11 +24,11 @@ Future<void> main() async {
     )));
 
     await tester.idle();
-    expect(imageCache.currentSize, 1);
+    expect(imageCache!.currentSize, 1);
     final ByteData message = const JSONMessageCodec().encodeMessage(
-      <String, dynamic>{'type': 'memoryPressure'});
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
-    expect(imageCache.currentSize, 0);
+      <String, dynamic>{'type': 'memoryPressure'})!;
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    expect(imageCache!.currentSize, 0);
   });
 
   test('evict clears live references', () async {
@@ -71,19 +69,19 @@ class TestBindingBase implements BindingBase {
   }
 
   @override
-  void registerBoolServiceExtension({String name, AsyncValueGetter<bool> getter, AsyncValueSetter<bool> setter}) {}
+  void registerBoolServiceExtension({required String name, required AsyncValueGetter<bool> getter, required AsyncValueSetter<bool> setter}) {}
 
   @override
-  void registerNumericServiceExtension({String name, AsyncValueGetter<double> getter, AsyncValueSetter<double> setter}) {}
+  void registerNumericServiceExtension({required String name, required AsyncValueGetter<double> getter, required AsyncValueSetter<double> setter}) {}
 
   @override
-  void registerServiceExtension({String name, ServiceExtensionCallback callback}) {}
+  void registerServiceExtension({required String name, required ServiceExtensionCallback callback}) {}
 
   @override
-  void registerSignalServiceExtension({String name, AsyncCallback callback}) {}
+  void registerSignalServiceExtension({required String name, required AsyncCallback callback}) {}
 
   @override
-  void registerStringServiceExtension({String name, AsyncValueGetter<String> getter, AsyncValueSetter<String> setter}) {}
+  void registerStringServiceExtension({required String name, required AsyncValueGetter<String> getter, required AsyncValueSetter<String> setter}) {}
 
   @override
   void unlocked() {}

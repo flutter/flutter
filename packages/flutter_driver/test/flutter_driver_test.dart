@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -21,7 +23,7 @@ import 'common.dart';
 /// Magical timeout value that's different from the default.
 const Duration _kTestTimeout = Duration(milliseconds: 1234);
 const String _kSerializedTestTimeout = '1234';
-const String _kWebScriptPrefix = "window.\$flutterDriver('";
+const String _kWebScriptPrefix = r"window.$flutterDriver('";
 const String _kWebScriptSuffix = "')";
 
 void main() {

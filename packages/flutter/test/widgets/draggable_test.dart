@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
@@ -31,7 +29,7 @@ void main() {
             },
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target'));
             },
             onMove: (_) => moveCount++,
@@ -102,22 +100,22 @@ void main() {
             feedback: Text('Dragging'),
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target 1'));
             },
-            onLeave: (Object data) {
+            onLeave: (Object? data) {
               if (data is int) {
-                leftBehind['Target 1'] = leftBehind['Target 1'] + data;
+                leftBehind['Target 1'] = leftBehind['Target 1']! + data;
               }
             },
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target 2'));
             },
-            onLeave: (Object data) {
+            onLeave: (Object? data) {
               if (data is int) {
-                leftBehind['Target 2'] = leftBehind['Target 2'] + data;
+                leftBehind['Target 2'] = leftBehind['Target 2']! + data;
               }
             },
           ),
@@ -177,24 +175,24 @@ void main() {
             feedback: Text('Dragging'),
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target 1'));
             },
             onMove: (DragTargetDetails<dynamic> details) {
               if (details.data is int) {
                 targetMoveCount['Target 1'] =
-                    targetMoveCount['Target 1'] + (details.data as int);
+                    targetMoveCount['Target 1']! + (details.data as int);
               }
             },
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target 2'));
             },
             onMove: (DragTargetDetails<dynamic> details) {
               if (details.data is int) {
                 targetMoveCount['Target 2'] =
-                    targetMoveCount['Target 2'] + (details.data as int);
+                    targetMoveCount['Target 2']! + (details.data as int);
               }
             },
           ),
@@ -263,12 +261,12 @@ void main() {
                 ),
               ),
               DragTarget<int>(
-                builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
                   return IgnorePointer(
                     child: Container(child: const Text('Target')),
                   );
                 },
-                onAccept: (int data) {
+                onAccept: (int? data) {
                   events.add('drop');
                 },
                 onAcceptWithDetails: (DragTargetDetails<int> _) {
@@ -353,10 +351,10 @@ void main() {
             feedback: const Text('Dragging'),
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const Text('Target');
             },
-            onAccept: (int data) {
+            onAccept: (int? data) {
               events.add('drop');
             },
             onAcceptWithDetails: (DragTargetDetails<int> _) {
@@ -404,10 +402,10 @@ void main() {
             feedback: Text('Dragging'),
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const Text('Target');
             },
-            onAccept: (int data) {
+            onAccept: (int? data) {
               events.add('drop');
             },
             onAcceptWithDetails: (DragTargetDetails<int> _) {
@@ -453,10 +451,10 @@ void main() {
             feedback: Text('Dragging'),
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const Text('Target');
             },
-            onAccept: (int data) {
+            onAccept: (int? data) {
               events.add('drop');
             },
             onAcceptWithDetails: (DragTargetDetails<int> _) {
@@ -500,10 +498,10 @@ void main() {
         dragStartBehavior: DragStartBehavior.down,
         children: <Widget>[
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const Text('Target');
             },
-            onAccept: (int data) {
+            onAccept: (int? data) {
               events.add('drop $data');
             },
             onAcceptWithDetails: (DragTargetDetails<int> _) {
@@ -611,10 +609,10 @@ void main() {
         scrollDirection: Axis.horizontal,
         children: <Widget>[
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const Text('Target');
             },
-            onAccept: (int data) {
+            onAccept: (int? data) {
               events.add('drop $data');
             },
             onAcceptWithDetails: (DragTargetDetails<int> _) {
@@ -721,10 +719,10 @@ void main() {
           scrollDirection: Axis.horizontal,
           children: <Widget>[
             DragTarget<int>(
-              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+              builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
                 return const Text('Target');
               },
-              onAccept: (int data) {
+              onAccept: (int? data) {
                 events.add('drop $data');
               },
               onAcceptWithDetails: (DragTargetDetails<int> _) {
@@ -860,7 +858,7 @@ void main() {
             },
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target'));
             },
             onAccept: accepted.add,
@@ -915,8 +913,8 @@ void main() {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDraggableCanceledCalled = false;
-    Velocity onDraggableCanceledVelocity;
-    Offset onDraggableCanceledOffset;
+    late Velocity onDraggableCanceledVelocity;
+    late Offset onDraggableCanceledOffset;
 
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -932,13 +930,13 @@ void main() {
             },
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(
                 height: 100.0,
                 child: const Text('Target'),
               );
             },
-            onWillAccept: (int data) => false,
+            onWillAccept: (int? data) => false,
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
@@ -992,8 +990,8 @@ void main() {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDraggableCanceledCalled = false;
-    Velocity onDraggableCanceledVelocity;
-    Offset onDraggableCanceledOffset;
+    late Velocity onDraggableCanceledVelocity;
+    late Offset onDraggableCanceledOffset;
 
     await tester.pumpWidget(MaterialApp(
       home: Column(children: <Widget>[
@@ -1008,13 +1006,13 @@ void main() {
           },
         ),
         DragTarget<int>(
-          builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+          builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
             return Container(
               height: 100.0,
               child: const Text('Target'),
             );
           },
-          onWillAccept: (int data) => false,
+          onWillAccept: (int? data) => false,
           onAccept: accepted.add,
           onAcceptWithDetails: acceptedDetails.add,
         ),
@@ -1047,7 +1045,7 @@ void main() {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragEndCalled = false;
-    DraggableDetails onDragEndDraggableDetails;
+    late DraggableDetails onDragEndDraggableDetails;
     await tester.pumpWidget(MaterialApp(
       home: Column(
         children: <Widget>[
@@ -1061,13 +1059,13 @@ void main() {
             },
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(
                 height: 100.0,
                 child: const Text('Target'),
               );
             },
-            onWillAccept: (int data) => false,
+            onWillAccept: (int? data) => false,
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
@@ -1131,7 +1129,7 @@ void main() {
             feedback: Text('Dragging'),
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(
                 height: 100.0,
                 child: rejects.isNotEmpty
@@ -1139,7 +1137,7 @@ void main() {
                     : const Text('Target'),
               );
             },
-            onWillAccept: (int data) => false,
+            onWillAccept: (int? data) => false,
           ),
         ],
       ),
@@ -1189,7 +1187,7 @@ void main() {
           },
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(
                 height: 100.0,
                 child: rejects.isNotEmpty
@@ -1197,7 +1195,7 @@ void main() {
                     : const Text('Target'),
               );
             },
-            onWillAccept: (int data) => false,
+            onWillAccept: (int? data) => false,
           ),
         ],
       ),
@@ -1274,13 +1272,13 @@ void main() {
             },
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(
                 height: 100.0,
                 child: const Text('Target'),
               );
             },
-            onWillAccept: (int data) => false,
+            onWillAccept: (int? data) => false,
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
@@ -1332,7 +1330,7 @@ void main() {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragEndCalled = false;
-    DraggableDetails onDragEndDraggableDetails;
+    late DraggableDetails onDragEndDraggableDetails;
     await tester.pumpWidget(MaterialApp(
       home: Column(
         children: <Widget>[
@@ -1346,7 +1344,7 @@ void main() {
             },
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target'));
             },
             onAccept: accepted.add,
@@ -1420,10 +1418,10 @@ void main() {
               },
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const Text('Target');
             },
-            onAccept: (int data) {
+            onAccept: (int? data) {
               events.add('drop');
             },
             onAcceptWithDetails: (DragTargetDetails<int> _) {
@@ -1487,7 +1485,7 @@ void main() {
             },
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target'));
             },
             onAccept: accepted.add,
@@ -1560,7 +1558,7 @@ void main() {
           Stack(
             children: <Widget>[
               DragTarget<int>(
-                builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
                   return IgnorePointer(
                     child: Container(
                       height: 100.0,
@@ -1572,7 +1570,7 @@ void main() {
                 onAcceptWithDetails: acceptedIntsDetails.add,
               ),
               DragTarget<double>(
-                builder: (BuildContext context, List<double> data, List<dynamic> rejects) {
+                builder: (BuildContext context, List<double?> data, List<dynamic> rejects) {
                   return IgnorePointer(
                     child: Container(
                       height: 100.0,
@@ -1689,7 +1687,7 @@ void main() {
           Stack(
             children: <Widget>[
               DragTarget<DragTargetData>(
-                builder: (BuildContext context, List<DragTargetData> data, List<dynamic> rejects) {
+                builder: (BuildContext context, List<DragTargetData?> data, List<dynamic> rejects) {
                   return IgnorePointer(
                     child: Container(
                       height: 100.0,
@@ -1700,7 +1698,7 @@ void main() {
                 onAcceptWithDetails: acceptedDragTargetDataDetails.add,
               ),
               DragTarget<ExtendedDragTargetData>(
-                builder: (BuildContext context, List<ExtendedDragTargetData> data, List<dynamic> rejects) {
+                builder: (BuildContext context, List<ExtendedDragTargetData?> data, List<dynamic> rejects) {
                   return IgnorePointer(
                     child: Container(
                       height: 100.0,
@@ -1755,7 +1753,7 @@ void main() {
               feedback: const Text('Dragging'),
             ),
             DragTarget<int>(
-              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+              builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
                 return Container(height: 100.0, child: const Text('Target'));
               },
               onAccept: accepted.add,
@@ -1879,7 +1877,7 @@ void main() {
                 onTap: () {
                   didTap = true;
                 },
-                child: Draggable<dynamic>(
+                child: Draggable<Object>(
                   child: Container(
                     color: const Color(0xFFFFFF00),
                   ),
@@ -1915,7 +1913,7 @@ void main() {
             OverlayEntry(
               builder: (BuildContext context) => GestureDetector(
                 onTap: () { /* registers a tap recognizer */ },
-                child: Draggable<dynamic>(
+                child: Draggable<Object>(
                   child: Container(
                     color: const Color(0xFFFFFF00),
                   ),
@@ -1952,10 +1950,10 @@ void main() {
             feedback: Text('Dragging'),
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const Text('Target');
             },
-            onAccept: (int data) {
+            onAccept: (int? data) {
               events.add('drop');
             },
             onAcceptWithDetails: (DragTargetDetails<int> _) {
@@ -2014,7 +2012,7 @@ void main() {
             feedback: Text('Dragging'),
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target'));
             },
             onAccept: accepted.add,
@@ -2044,7 +2042,7 @@ void main() {
       home: Column(
         children: <Widget>[
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target'));
             },
             onAccept: accepted.add,
@@ -2109,7 +2107,7 @@ void main() {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragEndCalled = false;
-    DraggableDetails onDragEndDraggableDetails;
+    late DraggableDetails onDragEndDraggableDetails;
 
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -2124,7 +2122,7 @@ void main() {
             },
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target'));
             },
             onAccept: accepted.add,
@@ -2209,7 +2207,7 @@ void main() {
             },
           ),
           DragTarget<int>(
-            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target'));
             },
             onAccept: accepted.add,
@@ -2318,6 +2316,70 @@ void main() {
     await _testChildAnchorFeedbackPosition(tester: tester, left: 100.0, top: 100.0);
   });
 
+  testWidgets('Drag feedback is put on root overlay with [rootOverlay] flag', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+      final GlobalKey<NavigatorState> childNavigatorKey = GlobalKey<NavigatorState>();
+      // Create a [MaterialApp], with a nested [Navigator], which has the
+      // [Draggable].
+      await tester.pumpWidget(MaterialApp(
+        navigatorKey: rootNavigatorKey,
+        home: Column(
+          children: <Widget>[
+            Container(
+              height: 200.0,
+              child: Navigator(
+                key: childNavigatorKey,
+                onGenerateRoute: (RouteSettings settings) {
+                  if (settings.name == '/') {
+                    return MaterialPageRoute<void>(
+                      settings: settings,
+                      builder: (BuildContext context) => const Draggable<int>(
+                        data: 1,
+                        child: Text('Source'),
+                        feedback: Text('Dragging'),
+                        rootOverlay: true,
+                      ),
+                    );
+                  }
+                  throw UnsupportedError('Unsupported route: $settings');
+                },
+              ),
+            ),
+            DragTarget<int>(
+              builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+                return Container(
+                    height: 300.0, child: const Center(child: Text('Target 1')),
+                );
+              },
+            ),
+          ],
+        ),
+      ));
+
+      final Offset firstLocation = tester.getCenter(find.text('Source'));
+      final TestGesture gesture =
+          await tester.startGesture(firstLocation, pointer: 7);
+      await tester.pump();
+
+      final Offset secondLocation = tester.getCenter(find.text('Target 1'));
+      await gesture.moveTo(secondLocation);
+      await tester.pump();
+
+      // Expect that the feedback widget is a descendant of the root overlay,
+      // but not a descendant of the child overlay.
+      expect(
+          find.descendant(
+            of: find.byType(Overlay).first,
+            matching: find.text('Dragging'),
+          ),
+          findsOneWidget);
+      expect(
+          find.descendant(
+            of: find.byType(Overlay).last,
+            matching: find.text('Dragging'),
+          ),
+          findsNothing);
+    });
 
   testWidgets('Drag and drop can contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -2327,7 +2389,7 @@ void main() {
           addSemanticIndexes: false,
           children: <Widget>[
             DragTarget<int>(
-              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+              builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
                 return const Text('Target');
               },
             ),
@@ -2480,7 +2542,7 @@ void main() {
   });
 }
 
-Future<void> _testLongPressDraggableHapticFeedback({ WidgetTester tester, bool hapticFeedbackOnStart, int expectedHapticFeedbackCount }) async {
+Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester tester, required bool hapticFeedbackOnStart, required int expectedHapticFeedbackCount }) async {
   bool onDragStartedCalled = false;
 
   int hapticFeedbackCalls = 0;
@@ -2522,7 +2584,7 @@ Future<void> _testLongPressDraggableHapticFeedback({ WidgetTester tester, bool h
   expect(hapticFeedbackCalls, expectedHapticFeedbackCount);
 }
 
-Future<void> _testChildAnchorFeedbackPosition({ WidgetTester tester, double top = 0.0, double left = 0.0 }) async {
+Future<void> _testChildAnchorFeedbackPosition({ required WidgetTester tester, double top = 0.0, double left = 0.0 }) async {
   final List<int> accepted = <int>[];
   final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
   int dragStartedCount = 0;
@@ -2548,7 +2610,7 @@ Future<void> _testChildAnchorFeedbackPosition({ WidgetTester tester, double top 
                   },
                 ),
                 DragTarget<int>(
-                  builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                  builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
                     return Container(height: 100.0, child: const Text('Target'));
                   },
                   onAccept: accepted.add,

@@ -32,6 +32,7 @@ const List<int> kTransparentImage = <int>[
 void main() {
   Testbed testbed;
   WebAssetServer webAssetServer;
+  ReleaseAssetServer releaseAssetServer;
   Platform linux;
   PackageConfig packages;
   Platform windows;
@@ -55,7 +56,14 @@ void main() {
         null,
         null,
         null,
-
+      );
+      releaseAssetServer = ReleaseAssetServer(
+        globals.fs.file('main.dart').uri,
+        fileSystem: null,
+        flutterRoot: null,
+        platform: null,
+        webBuildDirectory: null,
+        basePath: null,
       );
     });
   });
@@ -215,6 +223,85 @@ void main() {
     expect(response.statusCode, HttpStatus.notFound);
   }));
 
+  test('parses base path from index.html', () => testbed.run(() async {
+    const String htmlContent = '<html><head><base href="/foo/bar/"></head><body id="test"></body></html>';
+    final Directory webDir = globals.fs.currentDirectory
+      .childDirectory('web')
+      ..createSync();
+    webDir.childFile('index.html').writeAsStringSync(htmlContent);
+
+    final WebAssetServer webAssetServer = WebAssetServer(
+      mockHttpServer,
+      packages,
+      InternetAddress.loopbackIPv4,
+      null,
+      null,
+      null,
+    );
+
+    expect(webAssetServer.basePath, 'foo/bar');
+  }));
+
+  test('handles lack of base path in index.html', () => testbed.run(() async {
+    const String htmlContent = '<html><head></head><body id="test"></body></html>';
+    final Directory webDir = globals.fs.currentDirectory
+      .childDirectory('web')
+      ..createSync();
+    webDir.childFile('index.html').writeAsStringSync(htmlContent);
+
+    final WebAssetServer webAssetServer = WebAssetServer(
+      mockHttpServer,
+      packages,
+      InternetAddress.loopbackIPv4,
+      null,
+      null,
+      null,
+    );
+
+    // Defaults to "/" when there's no base element.
+    expect(webAssetServer.basePath, '');
+  }));
+
+  test('throws if base path is relative', () => testbed.run(() async {
+    const String htmlContent = '<html><head><base href="foo/bar/"></head><body id="test"></body></html>';
+    final Directory webDir = globals.fs.currentDirectory
+      .childDirectory('web')
+      ..createSync();
+    webDir.childFile('index.html').writeAsStringSync(htmlContent);
+
+    expect(
+      () => WebAssetServer(
+        mockHttpServer,
+        packages,
+        InternetAddress.loopbackIPv4,
+        null,
+        null,
+        null,
+      ),
+      throwsToolExit(),
+    );
+  }));
+
+  test('throws if base path does not end with slash', () => testbed.run(() async {
+    const String htmlContent = '<html><head><base href="/foo/bar"></head><body id="test"></body></html>';
+    final Directory webDir = globals.fs.currentDirectory
+      .childDirectory('web')
+      ..createSync();
+    webDir.childFile('index.html').writeAsStringSync(htmlContent);
+
+    expect(
+      () => WebAssetServer(
+        mockHttpServer,
+        packages,
+        InternetAddress.loopbackIPv4,
+        null,
+        null,
+        null,
+      ),
+      throwsToolExit(),
+    );
+  }));
+
   test('serves JavaScript files from in memory cache not from manifest', () => testbed.run(() async {
     webAssetServer.writeFile('foo.js', 'main() {}');
 
@@ -258,6 +345,47 @@ void main() {
 
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), htmlContent);
+  }));
+
+  test('does not serve outside the base path', () => testbed.run(() async {
+    webAssetServer.basePath = 'base/path';
+
+    const String htmlContent = '<html><head></head><body id="test"></body></html>';
+    final Directory webDir = globals.fs.currentDirectory
+      .childDirectory('web')
+      ..createSync();
+    webDir.childFile('index.html').writeAsStringSync(htmlContent);
+
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/')));
+
+    expect(response.statusCode, HttpStatus.notFound);
+  }));
+
+  test('does not serve index.html when path is inside assets or packages', () => testbed.run(() async {
+    const String htmlContent = '<html><head></head><body id="test"></body></html>';
+    final Directory webDir = globals.fs.currentDirectory
+      .childDirectory('web')
+      ..createSync();
+    webDir.childFile('index.html').writeAsStringSync(htmlContent);
+
+    Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/assets/foo/bar.png')));
+    expect(response.statusCode, HttpStatus.notFound);
+
+    response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/packages/foo/bar.dart.js')));
+    expect(response.statusCode, HttpStatus.notFound);
+
+    webAssetServer.basePath = 'base/path';
+
+    response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/base/path/assets/foo/bar.png')));
+    expect(response.statusCode, HttpStatus.notFound);
+
+    response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/base/path/packages/foo/bar.dart.js')));
+    expect(response.statusCode, HttpStatus.notFound);
   }));
 
   test('serves default index.html', () => testbed.run(() async {
@@ -541,6 +669,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       pathToReload: '',
+      dillOutputPath: 'out.dill',
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -656,6 +785,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       pathToReload: '',
+      dillOutputPath: '',
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -805,6 +935,20 @@ void main() {
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
     await webAssetServer.dispose();
   });
+
+  test('WebAssetServer responds to POST requests with 404 not found', () => testbed.run(() async {
+    final Response response = await webAssetServer.handleRequest(
+      Request('POST', Uri.parse('http://foobar/something')),
+    );
+    expect(response.statusCode, 404);
+  }));
+
+  test('ReleaseAssetServer responds to POST requests with 404 not found', () => testbed.run(() async {
+    final Response response = await releaseAssetServer.handle(
+      Request('POST', Uri.parse('http://foobar/something')),
+    );
+    expect(response.statusCode, 404);
+  }));
 }
 
 class MockHttpServer extends Mock implements HttpServer {}

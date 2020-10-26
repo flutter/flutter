@@ -12,6 +12,7 @@ import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
+import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
@@ -20,9 +21,6 @@ import '../depfile.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'localizations.dart';
-
-/// Whether web builds should call the platform initialization logic.
-const String kInitializePlatform = 'InitializePlatform';
 
 /// Whether the application has web plugins.
 const String kHasWebPlugins = 'HasWebPlugins';
@@ -36,7 +34,10 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 const String kCspMode = 'cspMode';
 
 /// The caching strategy to use for service worker generation.
-const String kServiceWorkerStrategy = 'ServiceWorkerStratgey';
+const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
+
+/// Whether the dart2js build should output source maps.
+const String kSourceMapsEnabled = 'SourceMaps';
 
 /// The caching strategy for the generated service worker.
 enum ServiceWorkerStrategy {
@@ -51,7 +52,7 @@ const String kOfflineFirst = 'offline-first';
 const String kNoneWorker = 'none';
 
 /// Convert a [value] into a [ServiceWorkerStrategy].
-ServiceWorkerStrategy _serviceWorkerStrategyfromString(String value) {
+ServiceWorkerStrategy _serviceWorkerStrategyFromString(String value) {
   switch (value) {
     case kNoneWorker:
       return ServiceWorkerStrategy.none;
@@ -85,7 +86,6 @@ class WebEntrypointTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final String targetFile = environment.defines[kTargetFile];
-    final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
     // TODO(jonahwilliams): support configuration of this file.
@@ -94,6 +94,11 @@ class WebEntrypointTarget extends Target {
       environment.fileSystem.file(packageFile),
       logger: environment.logger,
     );
+    final FlutterProject flutterProject = FlutterProject.current();
+    final String languageVersion = determineLanguageVersion(
+      environment.fileSystem.file(targetFile),
+      packageConfig[flutterProject.manifest.appName],
+    ) ?? '';
 
     // Use the PackageConfig to find the correct package-scheme import path
     // for the user application. If the application has a mix of package-scheme
@@ -117,6 +122,8 @@ class WebEntrypointTarget extends Target {
       final String generatedImport = packageConfig.toPackageUri(generatedUri)?.toString()
         ?? generatedUri.toString();
       contents = '''
+$languageVersion
+
 import 'dart:ui' as ui;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -126,22 +133,20 @@ import '$mainImport' as entrypoint;
 
 Future<void> main() async {
   registerPlugins(webPluginRegistry);
-  if ($shouldInitializePlatform) {
-    await ui.webOnlyInitializePlatform();
-  }
+  await ui.webOnlyInitializePlatform();
   entrypoint.main();
 }
 ''';
     } else {
       contents = '''
+$languageVersion
+
 import 'dart:ui' as ui;
 
 import '$mainImport' as entrypoint;
 
 Future<void> main() async {
-  if ($shouldInitializePlatform) {
-    await ui.webOnlyInitializePlatform();
-  }
+  await ui.webOnlyInitializePlatform();
   entrypoint.main();
 }
 ''';
@@ -170,7 +175,7 @@ class Dart2JSTarget extends Target {
     Source.artifact(Artifact.dart2jsSnapshot),
     Source.artifact(Artifact.engineDartBinary),
     Source.pattern('{BUILD_DIR}/main.dart'),
-    Source.pattern('{PROJECT_DIR}/.packages'),
+    Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
   ];
 
   @override
@@ -184,6 +189,7 @@ class Dart2JSTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
 
     final List<String> sharedCommandOptions = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
@@ -197,6 +203,8 @@ class Dart2JSTarget extends Target {
         '-Ddart.vm.product=true',
       for (final String dartDefine in decodeDartDefines(environment.defines, kDartDefines))
         '-D$dartDefine',
+      if (!sourceMapsEnabled)
+        '--no-source-maps',
     ];
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
@@ -217,7 +225,7 @@ class Dart2JSTarget extends Target {
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
     final bool csp = environment.defines[kCspMode] == 'true';
 
-    final ProcessResult javaScriptResult = await globals.processManager.run(<String>[
+    final ProcessResult javaScriptResult = await environment.processManager.run(<String>[
       ...sharedCommandOptions,
       if (dart2jsOptimization != null) '-$dart2jsOptimization' else '-O4',
       if (buildMode == BuildMode.profile) '--no-minify',
@@ -413,7 +421,7 @@ class WebServiceWorker extends Target {
     final File serviceWorkerFile = environment.outputDir
       .childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
-    final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyfromString(
+    final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyFromString(
       environment.defines[kServiceWorkerStrategy],
     );
     final String serviceWorker = generateServiceWorker(

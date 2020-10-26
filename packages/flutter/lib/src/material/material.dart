@@ -637,8 +637,7 @@ abstract class InkFeature {
     final List<RenderObject> descendants = <RenderObject>[referenceBox];
     RenderObject node = referenceBox;
     while (node != _controller) {
-      node = node.parent as RenderObject;
-      assert(node != null);
+      node = node.parent! as RenderObject;
       descendants.add(node);
     }
     // determine the transform that gets our coordinate system to be like theirs
@@ -763,17 +762,17 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       _elevation,
       widget.elevation,
       (dynamic value) => Tween<double>(begin: value as double),
-    ) as Tween<double>;
+    ) as Tween<double>?;
     _shadowColor = visitor(
       _shadowColor,
       widget.shadowColor,
       (dynamic value) => ColorTween(begin: value as Color),
-    ) as ColorTween;
+    ) as ColorTween?;
     _border = visitor(
       _border,
       widget.shape,
       (dynamic value) => ShapeBorderTween(begin: value as ShapeBorder),
-    ) as ShapeBorderTween;
+    ) as ShapeBorderTween?;
   }
 
   @override

@@ -8,7 +8,6 @@ import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
@@ -21,7 +20,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
@@ -34,31 +32,6 @@ final Generator kNoColorTerminalPlatform = () {
     const LocalPlatform()
   )..stdoutSupportsAnsi = false;
 };
-
-class MockApplicationPackageStore extends ApplicationPackageStore {
-  MockApplicationPackageStore() : super(
-    android: AndroidApk(
-      id: 'io.flutter.android.mock',
-      file: globals.fs.file('/mock/path/to/android/SkyShell.apk'),
-      versionCode: 1,
-      launchActivity: 'io.flutter.android.mock.MockActivity',
-    ),
-    iOS: BuildableIOSApp(MockIosProject(), MockIosProject.bundleId, MockIosProject.appBundleName),
-  );
-}
-
-class MockApplicationPackageFactory extends Mock implements ApplicationPackageFactory {
-  final MockApplicationPackageStore _store = MockApplicationPackageStore();
-
-  @override
-  Future<ApplicationPackage> getPackageForPlatform(
-    TargetPlatform platform, {
-    BuildInfo buildInfo,
-    File applicationBinary,
-  }) async {
-    return _store.getPackageForPlatform(platform, buildInfo);
-  }
-}
 
 /// An SDK installation with several SDK levels (19, 22, 23).
 class MockAndroidSdk extends Mock implements AndroidSdk {
@@ -616,10 +589,6 @@ class MockIOSSimulator extends Mock implements IOSSimulator {
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
-}
-
-void applyMocksToCommand(FlutterCommand command) {
-  command.applicationPackages = MockApplicationPackageStore();
 }
 
 /// Common functionality for tracking mock interaction.

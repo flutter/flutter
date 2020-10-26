@@ -46,11 +46,11 @@ const Color _kDisabledBackground = CupertinoDynamicColor.withBrightness(
   darkColor: Color(0xFF050505),
 );
 
-// Value inspected from Xcode 11 & iOS 13.0 Simulator.
+// Value inspected from Xcode 12 & iOS 14.0 Simulator.
 // Note it may not be consistent with https://developer.apple.com/design/resources/.
 const CupertinoDynamicColor _kClearButtonColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFF636366),
-  darkColor: Color(0xFFAEAEB2),
+  color: Color(0x33000000),
+  darkColor: Color(0x33FFFFFF),
 );
 
 // An eyeballed value that moves the cursor slightly left of where it is
@@ -100,7 +100,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
     // this handler. If the clear button widget recognizes the up event,
     // then do not handle it.
     if (_state._clearGlobalKey.currentContext != null) {
-      final RenderBox renderBox = _state._clearGlobalKey.currentContext!.findRenderObject() as RenderBox;
+      final RenderBox renderBox = _state._clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
       final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
       if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
         return;
@@ -130,6 +130,8 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// text in the field. If the user indicates that they are done typing in the
 /// field (e.g., by pressing a button on the soft keyboard), the text field
 /// calls the [onSubmitted] callback.
+///
+/// {@macro flutter.widgets.editableText.complexCharacters}
 ///
 /// To control the text that is displayed in the text field, use the
 /// [controller]. For example, to set the initial value of the text field, use
@@ -268,6 +270,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection = true,
+    this.selectionControls,
     this.onTap,
     this.scrollController,
     this.scrollPhysics,
@@ -557,6 +560,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
+  /// {@macro flutter.widgets.editableText.selectionControls}
+  final TextSelectionControls? selectionControls;
+
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
@@ -613,6 +619,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(createCupertinoColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
+    properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
@@ -651,6 +658,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     if (widget.controller == null) {
       _createLocalController();
     }
+    _effectiveFocusNode.canRequestFocus = widget.enabled ?? true;
   }
 
   @override
@@ -663,11 +671,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       _controller!.dispose();
       _controller = null;
     }
-    final bool isEnabled = widget.enabled ?? true;
-    final bool wasEnabled = oldWidget.enabled ?? true;
-    if (wasEnabled && !isEnabled) {
-      _effectiveFocusNode.unfocus();
-    }
+    _effectiveFocusNode.canRequestFocus = widget.enabled ?? true;
   }
 
   @override
@@ -703,10 +707,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     super.dispose();
   }
 
-  EditableTextState? get _editableText => editableTextKey.currentState;
+  EditableTextState get _editableText => editableTextKey.currentState!;
 
   void _requestKeyboard() {
-    _editableText?.requestKeyboard();
+    _editableText.requestKeyboard();
   }
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
@@ -730,7 +734,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     if (cause == SelectionChangedCause.longPress) {
-      _editableText?.bringIntoView(selection.base);
+      _editableText.bringIntoView(selection.base);
     }
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
@@ -875,6 +879,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
+    final TextSelectionControls textSelectionControls = widget.selectionControls ?? cupertinoTextSelectionControls;
     final bool enabled = widget.enabled ?? true;
     final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context)!.devicePixelRatio, 0);
     if (widget.maxLength != null && widget.maxLengthEnforced) {
@@ -903,7 +908,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final Color? decorationColor = CupertinoDynamicColor.resolve(widget.decoration?.color, context);
 
     final BoxBorder? border = widget.decoration?.border;
-    Border resolvedBorder = border as Border;
+    Border? resolvedBorder = border as Border?;
     if (border is Border) {
       BorderSide resolveBorderSide(BorderSide side) {
         return side == BorderSide.none
@@ -958,7 +963,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             expands: widget.expands,
             selectionColor: selectionColor,
             selectionControls: widget.selectionEnabled
-              ? cupertinoTextSelectionControls : null,
+              ? textSelectionControls : null,
             onChanged: widget.onChanged,
             onSelectionChanged: _handleSelectionChanged,
             onEditingComplete: widget.onEditingComplete,

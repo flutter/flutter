@@ -166,7 +166,7 @@ class AnimationSheetBuilder {
       key: key,
       cellSize: frameSize,
       children: frames.map((ui.Image image) => RawImage(
-        image: image,
+        image: image.clone(),
         width: frameSize.width,
         height: frameSize.height,
       )).toList(),

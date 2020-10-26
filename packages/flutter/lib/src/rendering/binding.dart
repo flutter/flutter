@@ -60,6 +60,17 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     assert(() {
       // these service extensions only work in debug mode
       registerBoolServiceExtension(
+        name: 'invertOversizedImages',
+        getter: () async => debugInvertOversizedImages,
+        setter: (bool value) async {
+          if (debugInvertOversizedImages != value) {
+            debugInvertOversizedImages = value;
+            return _forceRepaint();
+          }
+          return Future<void>.value();
+        },
+      );
+      registerBoolServiceExtension(
         name: 'debugPaint',
         getter: () async => debugPaintSizeEnabled,
         setter: (bool value) {
@@ -259,7 +270,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override // from GestureBinding
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     if (hitTestResult != null ||
-        event is PointerHoverEvent ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
       assert(event.position != null);

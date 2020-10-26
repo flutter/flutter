@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/context.dart';
 import 'base/io.dart' as io;
+import 'base/logger.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
@@ -79,12 +80,6 @@ typedef CompileExpression = Future<String> Function(
   bool isStatic,
 );
 
-typedef ReloadMethod = Future<void> Function({
-  String classId,
-  String libraryId,
-});
-
-
 /// A method that pulls an SkSL shader from the device and writes it to a file.
 ///
 /// The name of the file returned as a result.
@@ -147,7 +142,6 @@ typedef VMServiceConnector = Future<vm_service.VmService> Function(Uri httpUri, 
   ReloadSources reloadSources,
   Restart restart,
   CompileExpression compileExpression,
-  ReloadMethod reloadMethod,
   GetSkSLMethod getSkSLMethod,
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression,
@@ -174,7 +168,6 @@ vm_service.VmService setUpVmService(
   Restart restart,
   CompileExpression compileExpression,
   Device device,
-  ReloadMethod reloadMethod,
   GetSkSLMethod skSLMethod,
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   vm_service.VmService vmService
@@ -194,32 +187,6 @@ vm_service.VmService setUpVmService(
       };
     });
     vmService.registerService('reloadSources', 'Flutter Tools');
-  }
-
-  if (reloadMethod != null) {
-    // Register a special method for hot UI. while this is implemented
-    // currently in the same way as hot reload, it leaves the tool free
-    // to change to a more efficient implementation in the future.
-    //
-    // `library` should be the file URI of the updated code.
-    // `class` should be the name of the Widget subclass to be marked dirty. For example,
-    // if the build method of a StatelessWidget is updated, this is the name of class.
-    // If the build method of a StatefulWidget is updated, then this is the name
-    // of the Widget class that created the State object.
-    vmService.registerServiceCallback('reloadMethod', (Map<String, dynamic> params) async {
-      final String libraryId = _validateRpcStringParam('reloadMethod', params, 'library');
-      final String classId = _validateRpcStringParam('reloadMethod', params, 'class');
-
-      globals.printTrace('reloadMethod not yet supported, falling back to hot reload');
-
-      await reloadMethod(libraryId: libraryId, classId: classId);
-      return <String, dynamic>{
-        'result': <String, Object>{
-          'type': 'Success',
-        }
-      };
-    });
-    vmService.registerService('reloadMethod', 'Flutter Tools');
   }
 
   if (restart != null) {
@@ -318,7 +285,6 @@ Future<vm_service.VmService> connectToVmService(
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
@@ -331,7 +297,6 @@ Future<vm_service.VmService> connectToVmService(
     compileExpression: compileExpression,
     compression: compression,
     device: device,
-    reloadMethod: reloadMethod,
     getSkSLMethod: getSkSLMethod,
     printStructuredErrorLogMethod: printStructuredErrorLogMethod,
   );
@@ -342,7 +307,6 @@ Future<vm_service.VmService> _connect(
   ReloadSources reloadSources,
   Restart restart,
   CompileExpression compileExpression,
-  ReloadMethod reloadMethod,
   GetSkSLMethod getSkSLMethod,
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
@@ -364,7 +328,6 @@ Future<vm_service.VmService> _connect(
     restart,
     compileExpression,
     device,
-    reloadMethod,
     getSkSLMethod,
     printStructuredErrorLogMethod,
     delegateService,
@@ -459,10 +422,10 @@ extension FlutterVmService on vm_service.VmService {
       });
   }
 
-  /// Retreive the cached SkSL shaders from an attached Flutter view.
+  /// Retrieve the cached SkSL shaders from an attached Flutter view.
   ///
   /// This method will only return data if `--cache-sksl` was provided as a
-  /// flutter run agument, and only then on physical devices.
+  /// flutter run argument, and only then on physical devices.
   Future<Map<String, Object>> getSkSLs({
     @required String viewId,
   }) async {
@@ -475,7 +438,7 @@ extension FlutterVmService on vm_service.VmService {
     return response.json['SkSLs'] as Map<String, Object>;
   }
 
-  /// Flush all tasks on the UI thead for an attached Flutter view.
+  /// Flush all tasks on the UI thread for an attached Flutter view.
   ///
   /// This method is currently used only for benchmarking.
   Future<void> flushUIThreadTasks({
@@ -844,10 +807,12 @@ bool isPauseEvent(String kind) {
 // or delete it.
 Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
   File outputFile,
+  Logger logger,
 }) async {
+  logger ??= globals.logger;
   if (data.isEmpty) {
-    globals.logger.printStatus(
-      'No data was receieved. To ensure SkSL data can be generated use a '
+    logger.printStatus(
+      'No data was received. To ensure SkSL data can be generated use a '
       'physical device then:\n'
       '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
       '  2. Interact with the application to force shaders to be compiled.\n'
@@ -882,7 +847,7 @@ Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
     'data': data,
   };
   outputFile.writeAsStringSync(json.encode(manifest));
-  globals.logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
+  logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
   return outputFile.path;
 }
 

@@ -73,7 +73,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
       logger: logger,
     );
 
-  static const String _kFileName = '.flutter_tool_state';
+  static const String _kFileName = 'tool_state';
   static const String _kRedisplayWelcomeMessage = 'redisplay-welcome-message';
   static const Map<Channel, String> _lastActiveVersionKeys = <Channel,String>{
     Channel.master: 'last-active-master-version',

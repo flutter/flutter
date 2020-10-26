@@ -64,10 +64,10 @@ class InputDateRangePicker extends StatefulWidget {
   final DateTime lastDate;
 
   /// Called when the user changes the start date of the selected range.
-  final ValueChanged<DateTime>? onStartDateChanged;
+  final ValueChanged<DateTime?>? onStartDateChanged;
 
   /// Called when the user changes the end date of the selected range.
-  final ValueChanged<DateTime>? onEndDateChanged;
+  final ValueChanged<DateTime?>? onEndDateChanged;
 
   /// The text that is displayed at the top of the header.
   ///
@@ -141,7 +141,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_startDate != null) {
       _startInputText = localizations.formatCompactDate(_startDate!);
       final bool selectText = widget.autofocus && !_autoSelected;
@@ -166,7 +166,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
     final String? endError = _validateDate(_endDate);
     if (startError == null && endError == null) {
       if (_startDate!.isAfter(_endDate!)) {
-        startError = widget.errorInvalidRangeText ?? MaterialLocalizations.of(context)!.invalidDateRangeLabel;
+        startError = widget.errorInvalidRangeText ?? MaterialLocalizations.of(context).invalidDateRangeLabel;
       }
     }
     setState(() {
@@ -177,15 +177,15 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
   }
 
   DateTime? _parseDate(String? text) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return localizations.parseCompactDate(text);
   }
 
   String? _validateDate(DateTime? date) {
     if (date == null) {
-      return widget.errorFormatText ?? MaterialLocalizations.of(context)!.invalidDateFormatLabel;
+      return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
     } else if (date.isBefore(widget.firstDate) || date.isAfter(widget.lastDate)) {
-      return widget.errorInvalidText ?? MaterialLocalizations.of(context)!.dateOutOfRangeLabel;
+      return widget.errorInvalidText ?? MaterialLocalizations.of(context).dateOutOfRangeLabel;
     }
     return null;
   }
@@ -205,7 +205,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
     setState(() {
       _startInputText = text;
       _startDate = _parseDate(text);
-      widget.onStartDateChanged?.call(_startDate!);
+      widget.onStartDateChanged?.call(_startDate);
     });
     if (widget.autovalidate) {
       validate();
@@ -216,7 +216,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
     setState(() {
       _endInputText = text;
       _endDate = _parseDate(text);
-      widget.onEndDateChanged?.call(_endDate!);
+      widget.onEndDateChanged?.call(_endDate);
     });
     if (widget.autovalidate) {
       validate();
@@ -225,7 +225,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
 
   @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final InputDecorationTheme inputTheme = Theme.of(context)!.inputDecorationTheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,7 +235,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
             controller: _startController,
             decoration: InputDecoration(
               border: inputTheme.border ?? const UnderlineInputBorder(),
-              filled: inputTheme.filled ?? true,
+              filled: inputTheme.filled,
               hintText: widget.fieldStartHintText ?? localizations.dateHelpText,
               labelText: widget.fieldStartLabelText ?? localizations.dateRangeStartLabel,
               errorText: _startErrorText,
@@ -251,7 +251,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
             controller: _endController,
             decoration: InputDecoration(
               border: inputTheme.border ?? const UnderlineInputBorder(),
-              filled: inputTheme.filled ?? true,
+              filled: inputTheme.filled,
               hintText: widget.fieldEndHintText ?? localizations.dateHelpText,
               labelText: widget.fieldEndLabelText ?? localizations.dateRangeEndLabel,
               errorText: _endErrorText,

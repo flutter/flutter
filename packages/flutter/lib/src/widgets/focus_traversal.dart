@@ -595,7 +595,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           invalidateScopeData(nearestScope);
           return false;
         }
-        ScrollPositionAlignmentPolicy alignmentPolicy;
+        final ScrollPositionAlignmentPolicy alignmentPolicy;
         switch (direction) {
           case TraversalDirection.up:
           case TraversalDirection.left:
