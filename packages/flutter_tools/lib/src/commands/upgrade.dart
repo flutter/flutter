@@ -112,13 +112,13 @@ class UpgradeCommandRunner {
       globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
       globals.printStatus('$flutterVersion');
       return;
-    } else if(verifyOnly) {
+    } else if (verifyOnly) {
       globals.printStatus('A new version of Flutter is available on channel ${flutterVersion.channel}\n');
       // TODO(fujino): use a [FlutterVersion] once that class supports arbitrary revisions.
       globals.printStatus('The latest revision: $upstreamRevision\n', emphasis: true);
       globals.printStatus('Your current version: ${flutterVersion.frameworkRevision}');
       globals.printStatus('To upgrade now, run "flutter upgrade".');
-      if(flutterVersion.channel == 'stable'){
+      if (flutterVersion.channel == 'stable') {
         globals.printStatus('\nSee the announcement and release notes:');
         globals.printStatus('https://flutter.dev/docs/development/tools/sdk/release-notes');
       }
