@@ -45,6 +45,10 @@ import 'ticker_provider.dart';
 /// if widgets in an overlay entry with [maintainState] set to true repeatedly
 /// call [State.setState], the user's battery will be drained unnecessarily.
 ///
+/// [OverlayEntry] is a [ChangeNotifier] that notifies when the widget built by
+/// [builder] is mounted or unmounted, whose exact state can be queried by
+/// [mounted].
+///
 /// See also:
 ///
 ///  * [Overlay]
