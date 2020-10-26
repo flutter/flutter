@@ -189,7 +189,7 @@ const String baseClassGetterTemplate = '''
 const String baseClassMethodTemplate = '''
   /// @(comment)
   ///
-  @(templateLocaleTranslationComment)
+@(templateLocaleTranslationComment)
   String @(name)(@(parameters));
 ''';
 

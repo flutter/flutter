@@ -1097,7 +1097,8 @@ void main() {
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart')
       ).readAsStringSync();
       expect(baseLocalizationsFileContents, contains('/// Title for the application.'));
-      expect(baseLocalizationsFileContents, contains('''/// In en, this message translates to:
+      expect(baseLocalizationsFileContents, contains('''
+  /// In en, this message translates to:
   /// **"Title"**'''));
     });
 
@@ -1105,7 +1106,8 @@ void main() {
       final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true);
       l10nDirectory.childFile(defaultTemplateArbFileName)
-        .writeAsStringSync(r'''{
+        .writeAsStringSync(r'''
+{
   "price": "The price of this item is: ${price}",
   "@price": {
     "description": "The price of an online shopping cart item.",
@@ -1118,7 +1120,8 @@ void main() {
   }
 }''');
       l10nDirectory.childFile(esArbFileName)
-        .writeAsStringSync(r'''{
+        .writeAsStringSync(r'''
+{
   "price": "el precio de este artículo es: ${price}"
 }''');
 
@@ -1148,7 +1151,8 @@ void main() {
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart')
       ).readAsStringSync();
       expect(baseLocalizationsFileContents, contains('/// The price of an online shopping cart item.'));
-      expect(baseLocalizationsFileContents, contains(r'''/// In en, this message translates to:
+      expect(baseLocalizationsFileContents, contains(r'''
+  /// In en, this message translates to:
   /// **"The price of this item is: ${price}"**'''));
     });
 
