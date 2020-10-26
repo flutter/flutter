@@ -667,7 +667,8 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      expect(semantics, hasSemantics(buildExpected(routeName: 'Search'), ignoreId: true, ignoreRect: true, ignoreTransform: true));
+      expect(semantics, hasSemantics(buildExpected(routeName: 'Search'), 
+        ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
       semantics.dispose();
     });
@@ -682,12 +683,11 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      expect(semantics, hasSemantics(buildExpected(routeName: ''), ignoreId: true, ignoreRect: true, ignoreTransform: true));
+      expect(semantics, hasSemantics(buildExpected(routeName: ''), 
+        ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
       semantics.dispose();
-    },
-        variant: const TargetPlatformVariant(
-            <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
 
   testWidgets('Custom searchFieldDecorationTheme value',
