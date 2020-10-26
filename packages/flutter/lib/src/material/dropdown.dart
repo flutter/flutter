@@ -402,7 +402,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     required this.buttonRect,
     required this.selectedIndex,
     this.elevation = 8,
-    this.theme,
+    required this.capturedThemes,
     required this.style,
     this.barrierLabel,
     this.itemHeight,
@@ -415,7 +415,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final Rect buttonRect;
   final int selectedIndex;
   final int elevation;
-  final ThemeData? theme;
+  final CapturedThemes capturedThemes;
   final TextStyle style;
   final double? itemHeight;
   final Color? dropdownColor;
@@ -447,7 +447,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           buttonRect: buttonRect,
           selectedIndex: selectedIndex,
           elevation: elevation,
-          theme: theme,
+          capturedThemes: capturedThemes,
           style: style,
           dropdownColor: dropdownColor,
         );
@@ -533,7 +533,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     required this.buttonRect,
     required this.selectedIndex,
     this.elevation = 8,
-    this.theme,
+    required this.capturedThemes,
     this.style,
     required this.dropdownColor,
   }) : super(key: key);
@@ -545,7 +545,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   final Rect buttonRect;
   final int selectedIndex;
   final int elevation;
-  final ThemeData? theme;
+  final CapturedThemes capturedThemes;
   final TextStyle? style;
   final Color? dropdownColor;
 
@@ -565,16 +565,13 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     }
 
     final TextDirection? textDirection = Directionality.of(context);
-    Widget menu = _DropdownMenu<T>(
+    final Widget menu = _DropdownMenu<T>(
       route: route,
       padding: padding.resolve(textDirection),
       buttonRect: buttonRect,
       constraints: constraints,
       dropdownColor: dropdownColor,
     );
-
-    if (theme != null)
-      menu = Theme(data: theme!, child: menu);
 
     return MediaQuery.removePadding(
       context: context,
@@ -590,7 +587,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
               route: route,
               textDirection: textDirection,
             ),
-            child: menu,
+            child: capturedThemes.wrap(menu),
           );
         },
       ),
@@ -1207,6 +1204,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       )
     ];
 
+    final NavigatorState navigator = Navigator.of(context)!;
     assert(_dropdownRoute == null);
     _dropdownRoute = _DropdownRoute<T>(
       items: menuItems,
@@ -1214,14 +1212,14 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       padding: _kMenuItemPadding.resolve(textDirection),
       selectedIndex: _selectedIndex ?? 0,
       elevation: widget.elevation,
-      theme: Theme.of(context, shadowThemeOnly: true),
+      capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
       style: _textStyle!,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       itemHeight: widget.itemHeight,
       dropdownColor: widget.dropdownColor,
     );
 
-    Navigator.push(context, _dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
+    navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
       if (!mounted || newValue == null)
         return;
