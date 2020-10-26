@@ -181,7 +181,7 @@ List<String> _xcodeBuildSettingsLines({
 
   // iOS does not link on Flutter in any build phase. Add the linker flag.
   if (!useMacOSConfig) {
-    xcodeBuildSettings.add('OTHER_LDFLAGS=\$(inherited) -framework Flutter');
+    xcodeBuildSettings.add(r'OTHER_LDFLAGS=$(inherited) -framework Flutter');
   }
 
   if (!project.isModule) {
