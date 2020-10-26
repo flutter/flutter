@@ -112,9 +112,9 @@ void main() {
         verifyOnly: true,
       );
       expect(await result, FlutterCommandResult.success());
-      expect(testLogger.statusText, contains('A new version of Flutter is available!'));
-      expect(testLogger.statusText, contains(revision));
+      expect(testLogger.statusText, contains('A new version of Flutter is available'));
       expect(testLogger.statusText, contains(fakeCommandRunner.remoteRevision));
+      expect(testLogger.statusText, contains(revision));
       expect(processManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
