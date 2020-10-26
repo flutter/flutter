@@ -432,7 +432,11 @@ class TextField extends StatefulWidget {
 
   /// Creates a [CupertinoTextField] if the target platform is iOS, creates a
   /// material design text field otherwise.
-  ///
+  /// 
+  /// To retain the standard look of [CupertinoTextField], this constructor only 
+  /// uses the [decoration] property's [hintText], [hintStyle], [suffix], and 
+  /// [prefix] for the iOS platform.
+  /// 
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const TextField.adaptive({
     Key? key,
@@ -486,7 +490,8 @@ class TextField extends StatefulWidget {
     this.scrollPhysics,
     this.autofillHints,
     this.restorationId,
-  }) : assert(textAlign != null),
+  }) : _textFieldType = _TextFieldType.adaptive,
+       assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -531,7 +536,6 @@ class TextField extends StatefulWidget {
            selectAll: true,
            paste: true,
          )),
-       _textFieldType = _TextFieldType.adaptive,
        super(key: key);
   
   final _TextFieldType _textFieldType;
@@ -1185,7 +1189,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
   }
 
-  Widget buildCupertinoTextField(BuildContext context) {
+  Widget _buildCupertinoTextField(BuildContext context) {
     return CupertinoTextField(
       key: widget.key,
       controller: widget.controller,
@@ -1238,7 +1242,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     );
   }
 
-  Widget buildMaterialTextField(BuildContext context) {
+  Widget _buildMaterialTextField(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
@@ -1421,7 +1425,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   Widget build(BuildContext context) {
     switch (widget._textFieldType) {
       case _TextFieldType.material:
-        return buildMaterialTextField(context);
+        return _buildMaterialTextField(context);
 
       case _TextFieldType.adaptive: {
         final ThemeData theme = Theme.of(context)!;
@@ -1429,12 +1433,12 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         switch (theme.platform) {
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
-            return buildCupertinoTextField(context);
+            return _buildCupertinoTextField(context);
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            return buildMaterialTextField(context);
+            return _buildMaterialTextField(context);
         }
       }
     }
