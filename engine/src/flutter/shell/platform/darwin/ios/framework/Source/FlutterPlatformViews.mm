@@ -884,16 +884,16 @@ void FlutterPlatformViewsController::CommitCATransactionIfNeeded() {
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
-  [_platformViewsController.get()->getFlutterViewController() touchesBegan:touches withEvent:event];
+  [_platformViewsController->getFlutterViewController() touchesBegan:touches withEvent:event];
   _currentTouchPointersCount += touches.count;
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
-  [_platformViewsController.get()->getFlutterViewController() touchesMoved:touches withEvent:event];
+  [_platformViewsController->getFlutterViewController() touchesMoved:touches withEvent:event];
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-  [_platformViewsController.get()->getFlutterViewController() touchesEnded:touches withEvent:event];
+  [_platformViewsController->getFlutterViewController() touchesEnded:touches withEvent:event];
   _currentTouchPointersCount -= touches.count;
   // Touches in one touch sequence are sent to the touchesEnded method separately if different
   // fingers stop touching the screen at different time. So one touchesEnded method triggering does
@@ -905,8 +905,7 @@ void FlutterPlatformViewsController::CommitCATransactionIfNeeded() {
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
-  [_platformViewsController.get()->getFlutterViewController() touchesCancelled:touches
-                                                                     withEvent:event];
+  [_platformViewsController->getFlutterViewController() touchesCancelled:touches withEvent:event];
   _currentTouchPointersCount = 0;
   self.state = UIGestureRecognizerStateFailed;
 }

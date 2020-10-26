@@ -234,7 +234,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     std::string label = "some label";
 
     auto flutterPlatformViewsController =
-        std::make_unique<flutter::FlutterPlatformViewsController>();
+        std::make_shared<flutter::FlutterPlatformViewsController>();
     flutterPlatformViewsController->SetFlutterView(mockFlutterView);
 
     MockFlutterPlatformFactory* factory = [[MockFlutterPlatformFactory new] autorelease];
@@ -252,7 +252,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     auto bridge = std::make_unique<flutter::AccessibilityBridge>(
         /*view_controller=*/mockFlutterViewController,
         /*platform_view=*/platform_view.get(),
-        /*platform_views_controller=*/flutterPlatformViewsController.get());
+        /*platform_views_controller=*/flutterPlatformViewsController);
 
     flutter::SemanticsNodeUpdates nodes;
     flutter::SemanticsNode semantics_node;
