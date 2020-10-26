@@ -320,7 +320,7 @@ class HtmlViewEmbedder {
       return;
     }
     _svgPathDefs = html.Element.html(
-      '<svg width="0" height="0"><defs id="sk_path_defs"></defs></svg>',
+      '$kSvgResourceHeader><defs id="sk_path_defs"></defs></svg>',
       treeSanitizer: _NullTreeSanitizer(),
     );
     skiaSceneHost!.append(_svgPathDefs!);
