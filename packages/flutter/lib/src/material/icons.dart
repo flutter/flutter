@@ -2,7 +2,82 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/widgets.dart';
+
+// ignore_for_file: non_constant_identifier_names
+class _PlatformAdaptiveIcons {
+  static final bool isApplePlatform = _isApplePlatform();
+
+  static bool _isApplePlatform() {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return false;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return true;
+    }
+  }
+
+  // Generated code: do not hand-edit.
+  // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts
+  // BEGIN GENERATED PLATFORM ADAPTIVE ICONS
+
+  /// Platform-adaptive icon for <i class="material-icons md-36">arrow_back</i> &#x2014; material icon named "arrow back" and <i class="material-icons md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios".;
+  IconData get arrow_back => !isApplePlatform ? Icons.arrow_back : Icons.arrow_back_ios;
+
+  /// Platform-adaptive icon for <i class="material-icons-outlined md-36">arrow_back</i> &#x2014; material icon named "arrow back outlined" and <i class="material-icons-outlined md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios outlined".;
+  IconData get arrow_back_outlined => !isApplePlatform ? Icons.arrow_back_outlined : Icons.arrow_back_ios_outlined;
+
+  /// Platform-adaptive icon for <i class="material-icons-round md-36">arrow_back</i> &#x2014; material icon named "arrow back rounded" and <i class="material-icons-round md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios rounded".;
+  IconData get arrow_back_rounded => !isApplePlatform ? Icons.arrow_back_rounded : Icons.arrow_back_ios_rounded;
+
+  /// Platform-adaptive icon for <i class="material-icons-sharp md-36">arrow_back</i> &#x2014; material icon named "arrow back sharp" and <i class="material-icons-sharp md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios sharp".;
+  IconData get arrow_back_sharp => !isApplePlatform ? Icons.arrow_back_sharp : Icons.arrow_back_ios_sharp;
+
+  /// Platform-adaptive icon for <i class="material-icons md-36">arrow_forward</i> &#x2014; material icon named "arrow forward" and <i class="material-icons md-36">arrow_forward_ios</i> &#x2014; material icon named "arrow forward ios".;
+  IconData get arrow_forward => !isApplePlatform ? Icons.arrow_forward : Icons.arrow_forward_ios;
+
+  /// Platform-adaptive icon for <i class="material-icons-outlined md-36">arrow_forward</i> &#x2014; material icon named "arrow forward outlined" and <i class="material-icons-outlined md-36">arrow_forward_ios</i> &#x2014; material icon named "arrow forward ios outlined".;
+  IconData get arrow_forward_outlined => !isApplePlatform ? Icons.arrow_forward_outlined : Icons.arrow_forward_ios_outlined;
+
+  /// Platform-adaptive icon for <i class="material-icons-round md-36">arrow_forward</i> &#x2014; material icon named "arrow forward rounded" and <i class="material-icons-round md-36">arrow_forward_ios</i> &#x2014; material icon named "arrow forward ios rounded".;
+  IconData get arrow_forward_rounded => !isApplePlatform ? Icons.arrow_forward_rounded : Icons.arrow_forward_ios_rounded;
+
+  /// Platform-adaptive icon for <i class="material-icons-sharp md-36">arrow_forward</i> &#x2014; material icon named "arrow forward sharp" and <i class="material-icons-sharp md-36">arrow_forward_ios</i> &#x2014; material icon named "arrow forward ios sharp".;
+  IconData get arrow_forward_sharp => !isApplePlatform ? Icons.arrow_forward_sharp : Icons.arrow_forward_ios_sharp;
+
+  /// Platform-adaptive icon for <i class="material-icons md-36">flip_camera_android</i> &#x2014; material icon named "flip camera android" and <i class="material-icons md-36">flip_camera_ios</i> &#x2014; material icon named "flip camera ios".;
+  IconData get flip_camera => !isApplePlatform ? Icons.flip_camera_android : Icons.flip_camera_ios;
+
+  /// Platform-adaptive icon for <i class="material-icons-outlined md-36">flip_camera_android</i> &#x2014; material icon named "flip camera android outlined" and <i class="material-icons-outlined md-36">flip_camera_ios</i> &#x2014; material icon named "flip camera ios outlined".;
+  IconData get flip_camera_outlined => !isApplePlatform ? Icons.flip_camera_android_outlined : Icons.flip_camera_ios_outlined;
+
+  /// Platform-adaptive icon for <i class="material-icons-round md-36">flip_camera_android</i> &#x2014; material icon named "flip camera android rounded" and <i class="material-icons-round md-36">flip_camera_ios</i> &#x2014; material icon named "flip camera ios rounded".;
+  IconData get flip_camera_rounded => !isApplePlatform ? Icons.flip_camera_android_rounded : Icons.flip_camera_ios_rounded;
+
+  /// Platform-adaptive icon for <i class="material-icons-sharp md-36">flip_camera_android</i> &#x2014; material icon named "flip camera android sharp" and <i class="material-icons-sharp md-36">flip_camera_ios</i> &#x2014; material icon named "flip camera ios sharp".;
+  IconData get flip_camera_sharp => !isApplePlatform ? Icons.flip_camera_android_sharp : Icons.flip_camera_ios_sharp;
+
+  /// Platform-adaptive icon for <i class="material-icons md-36">more_vert</i> &#x2014; material icon named "more vert" and <i class="material-icons md-36">more_horiz</i> &#x2014; material icon named "more horiz".;
+  IconData get more => !isApplePlatform ? Icons.more_vert : Icons.more_horiz;
+
+  /// Platform-adaptive icon for <i class="material-icons-outlined md-36">more_vert</i> &#x2014; material icon named "more vert outlined" and <i class="material-icons-outlined md-36">more_horiz</i> &#x2014; material icon named "more horiz outlined".;
+  IconData get more_outlined => !isApplePlatform ? Icons.more_vert_outlined : Icons.more_horiz_outlined;
+
+  /// Platform-adaptive icon for <i class="material-icons-round md-36">more_vert</i> &#x2014; material icon named "more vert rounded" and <i class="material-icons-round md-36">more_horiz</i> &#x2014; material icon named "more horiz rounded".;
+  IconData get more_rounded => !isApplePlatform ? Icons.more_vert_rounded : Icons.more_horiz_rounded;
+
+  /// Platform-adaptive icon for <i class="material-icons-sharp md-36">more_vert</i> &#x2014; material icon named "more vert sharp" and <i class="material-icons-sharp md-36">more_horiz</i> &#x2014; material icon named "more horiz sharp".;
+  IconData get more_sharp => !isApplePlatform ? Icons.more_vert_sharp : Icons.more_horiz_sharp;
+
+  /// Platform-adaptive icon for <i class="material-icons md-36">share</i> &#x2014; material icon named "share" and <i class="material-icons md-36">ios_share</i> &#x2014; material icon named "ios share".;
+  IconData get share => !isApplePlatform ? Icons.share : Icons.ios_share;
+  // END GENERATED PLATFORM ADAPTIVE ICONS
+}
 
 /// Identifiers for the supported material design icons.
 ///
@@ -64,9 +139,35 @@ class Icons {
   // ignore: unused_element
   Icons._();
 
+  /// A set of platform-adaptive material design icons.
+  ///
+  /// Provides a convenient way to show a certain set of platform-appropriate
+  /// icons on Apple platforms.
+  ///
+  /// Use with the [Icon] class to show specific icons.
+  ///
+  /// {@tool snippet}
+  /// This example shows how to create a [Row] of [Icon]s in different colors and
+  /// sizes. The first [Icon] uses a [Icon.semanticLabel] to announce in accessibility
+  /// modes like TalkBack and VoiceOver.
+  ///
+  /// ```dart
+  /// Icon(
+  ///   Icons.adaptive.share,
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [Icon]
+  ///  * [IconButton]
+  ///  * <https://design.google.com/icons/>
+  static _PlatformAdaptiveIcons get adaptive => _PlatformAdaptiveIcons();
+
   // Generated code: do not hand-edit.
   // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts
-  // BEGIN GENERATED
+  // BEGIN GENERATED ICONS
 
   /// <i class="material-icons md-36">10k</i> &#x2014; material icon named "10k".
   static const IconData ten_k = IconData(0xe52a, fontFamily: 'MaterialIcons');
@@ -17029,5 +17130,5 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">zoom_out</i> &#x2014; material icon named "zoom out sharp".
   static const IconData zoom_out_sharp = IconData(0xf02d, fontFamily: 'MaterialIcons');
-  // END GENERATED
+  // END GENERATED ICONS
 }

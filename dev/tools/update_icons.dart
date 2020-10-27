@@ -20,8 +20,20 @@ const String _defaultNewCodepointsPath = 'codepoints';
 const String _defaultOldCodepointsPath = 'bin/cache/artifacts/material_fonts/codepoints';
 const String _defaultIconsPath = 'packages/flutter/lib/src/material/icons.dart';
 
-const String _beginGeneratedMark = '// BEGIN GENERATED';
-const String _endGeneratedMark = '// END GENERATED';
+const String _beginGeneratedMark = '// BEGIN GENERATED ICONS';
+const String _endGeneratedMark = '// END GENERATED ICONS';
+const String _beginPlatformAdaptiveGeneratedMark = '// BEGIN GENERATED PLATFORM ADAPTIVE ICONS';
+const String _endPlatformAdaptiveGeneratedMark = '// END GENERATED PLATFORM ADAPTIVE ICONS';
+
+const Map<String, List<String>> _platformAdaptiveIdentifiers = <String, List<String>>{
+  // Mapping of Flutter IDs to an Android/agnostic ID and an iOS ID.
+  // Flutter IDs can be anything, but should be chosen to be agnostic.
+  'arrow_back': ['arrow_back', 'arrow_back_ios'],
+  'arrow_forward': ['arrow_forward', 'arrow_forward_ios'],
+  'flip_camera': ['flip_camera_android', 'flip_camera_ios'],
+  'more': ['more_vert', 'more_horiz'],
+  'share': ['share', 'ios_share'],
+};
 
 const Map<String, String> _identifierRewrites = <String, String>{
   '360': 'threesixty',
@@ -235,20 +247,50 @@ Map<String, String> stringToTokenPairMap(String codepointData) {
 
 // Do not make this method private as it is used by g3 roll.
 String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
+  final Iterable<_Icon> newIcons = tokenPairMap.entries.map((MapEntry<String, String> entry) => _Icon(entry));
   final StringBuffer buf = StringBuffer();
   bool generating = false;
+  
   for (final String line in LineSplitter.split(iconData)) {
     if (!generating) {
       buf.writeln(line);
     }
-    if (line.contains(_beginGeneratedMark)) {
+
+    // Generate for _PlatformAdaptiveIcons
+    if (line.contains(_beginPlatformAdaptiveGeneratedMark)) {
       generating = true;
 
-      final String iconDeclarationsString = <String>[
-        for (MapEntry<String, String> entry in tokenPairMap.entries)
-          _Icon(entry).fullDeclaration
-      ].join();
+      final List<String> platformAdaptiveDeclarations = <String>[];
+      _platformAdaptiveIdentifiers.forEach((String flutterId, List<String> ids) {
+        // Automatically finds and generates styled icon declarations.
+        for (final IconStyle iconStyle in IconStyle.values) {
+          final String style = iconStyle.idSuffix();
+          try {
+            final _Icon agnosticIcon = newIcons.firstWhere((_Icon icon) => icon.id == '${ids[0]}$style');
+            final _Icon iOSIcon = newIcons.firstWhere((_Icon icon) => icon.id == '${ids[1]}$style');
 
+            platformAdaptiveDeclarations.add(_Icon.platformAdaptiveDeclaration('$flutterId$style', agnosticIcon, iOSIcon));
+          } catch (e) {
+            if (iconStyle == IconStyle.regular) {
+              stderr.writeln('Error while generating platformAdaptiveDeclarations: One or both of $ids not found.');
+              exit(1);
+            } else {
+              // Ignore errors for styled icons since some don't exist.
+            }
+          }
+        }
+      });
+
+      buf.write(platformAdaptiveDeclarations.join());
+    } else if (line.contains(_endPlatformAdaptiveGeneratedMark)) {
+      generating = false;
+      buf.writeln(line);
+    }
+
+    // Generate for Icons
+    if (line.contains(_beginGeneratedMark)) {
+      generating = true;
+      final String iconDeclarationsString = newIcons.map((_Icon icon) => icon.fullDeclaration).join('');
       buf.write(iconDeclarationsString);
     } else if (line.contains(_endGeneratedMark)) {
       generating = false;
@@ -279,13 +321,24 @@ enum IconStyle {
   sharp,
 }
 
-extension IconStyleSuffix on IconStyle {
+extension IconStyleExtension on IconStyle {
   // The suffix for the 'material-icons' HTML class.
-  String suffix() {
+  String htmlSuffix() {
     switch (this) {
       case IconStyle.outlined: return '-outlined';
       case IconStyle.rounded: return '-round';
       case IconStyle.sharp: return '-sharp';
+      default: return '';
+    }
+  }
+
+  // The suffix for icon ids.
+  String idSuffix() {
+    switch (this) {
+      case IconStyle.outlined:
+      case IconStyle.rounded:
+      case IconStyle.sharp:
+        return '_' + toString().split('.').last;
       default: return '';
     }
   }
@@ -340,12 +393,25 @@ class _Icon {
   String get name => id.replaceAll('_', ' ');
 
   String get dartDoc =>
-      '/// <i class="material-icons${style.suffix()} md-36">$shortId</i> &#x2014; material icon named "$name".';
+      '<i class="material-icons${style.htmlSuffix()} md-36">$shortId</i> &#x2014; material icon named "$name"';
 
   String get declaration =>
       "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: 'MaterialIcons'$mirroredInRTL);";
 
-  String get fullDeclaration => '''\n  $dartDoc\n  $declaration\n''';
+  String get fullDeclaration => '''
+
+  /// $dartDoc.
+  $declaration
+''';
+
+  static String platformAdaptiveDeclaration(String flutterId, _Icon agnosticIcon, _Icon iOSIcon) => '''
+
+  /// Platform-adaptive icon for ${agnosticIcon.dartDoc} and ${iOSIcon.dartDoc}.;
+  IconData get $flutterId => !isApplePlatform ? Icons.${agnosticIcon.flutterId} : Icons.${iOSIcon.flutterId};
+''';
+
+  @override
+  String toString() => id;
 }
 
 // Replace the old codepoints file with the new.
