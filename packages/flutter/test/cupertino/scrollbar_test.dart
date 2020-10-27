@@ -632,7 +632,7 @@ void main() {
     // Scroll a bit.
     const double scrollAmount = 10.0;
     final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
-    // Scroll down by swiping up.
+    // Scroll right by swiping left.
     await scrollGesture.moveBy(const Offset(-scrollAmount, 0.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -662,7 +662,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
     expect(hapticFeedbackCalls, 1);
 
-    // Drag the thumb down to scroll down.
+    // Drag the thumb down to scroll back to the left.
     await dragScrollbarGesture.moveBy(const Offset(scrollAmount, 0.0));
     await tester.pump(const Duration(milliseconds: 100));
     await dragScrollbarGesture.up();
