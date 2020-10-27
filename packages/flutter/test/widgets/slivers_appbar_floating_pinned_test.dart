@@ -72,7 +72,7 @@ void main() {
                     (BuildContext _, int index) {
                       return Container(
                         height: 100.0,
-                        color: index % 2 == 0 ? Colors.red : Colors.yellow,
+                        color: index.isEven ? Colors.red : Colors.yellow,
                         child: Text('Tile $index'),
                       );
                     },

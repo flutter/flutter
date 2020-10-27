@@ -1906,6 +1906,61 @@ void main() {
       expect(tester.getCenter(find.text('Item 49')).dy, equals(585.0));
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/63978
+  testWidgets('Inner _NestedScrollPosition.applyClampedDragUpdate correctly calculates range when in overscroll', (WidgetTester tester) async {
+    final GlobalKey<NestedScrollViewState> nestedScrollView = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: NestedScrollView(
+          key: nestedScrollView,
+          headerSliverBuilder: (BuildContext context, bool boxIsScrolled) {
+            return <Widget>[
+              const SliverAppBar(
+                expandedHeight: 200,
+                title: Text('Test'),
+              )
+            ];
+          },
+          body: ListView.builder(
+            itemExtent: 100.0,
+            itemBuilder: (BuildContext context, int index) => Container(
+              padding: const EdgeInsets.all(10.0),
+              child: Material(
+                color: index.isEven ? Colors.cyan : Colors.deepOrange,
+                child: Center(
+                  child: Text(index.toString()),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(nestedScrollView.currentState!.outerController.position.pixels, 0.0);
+    expect(nestedScrollView.currentState!.innerController.position.pixels, 0.0);
+    expect(nestedScrollView.currentState!.outerController.position.maxScrollExtent, 200.0);
+    final Offset point = tester.getCenter(find.text('1'));
+    // Drag slightly into overscroll in the inner position.
+    final TestGesture gesture = await tester.startGesture(point);
+    await gesture.moveBy(const Offset(0.0, 5.0));
+    await tester.pump();
+    expect(nestedScrollView.currentState!.outerController.position.pixels, 0.0);
+    expect(nestedScrollView.currentState!.innerController.position.pixels, -5.0);
+    // Move by a much larger delta than the amount of over scroll, in a very
+    // short period of time.
+    await gesture.moveBy(const Offset(0.0, -500.0));
+    await tester.pump();
+    // The overscrolled inner position should have closed, then passed the
+    // correct remaining delta to the outer position, and finally any remainder
+    // back to the inner position.
+    expect(
+      nestedScrollView.currentState!.outerController.position.pixels,
+      nestedScrollView.currentState!.outerController.position.maxScrollExtent,
+    );
+    expect(nestedScrollView.currentState!.innerController.position.pixels, 295.0);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 }
 
 class TestHeader extends SliverPersistentHeaderDelegate {

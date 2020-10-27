@@ -565,13 +565,13 @@ Information about project "Runner":
       expect(config.existsSync(), isTrue);
 
       final String contents = config.readAsStringSync();
-      expect(contents.contains('OTHER_LDFLAGS=\$(inherited) -framework Flutter'), isTrue);
+      expect(contents.contains(r'OTHER_LDFLAGS=$(inherited) -framework Flutter'), isTrue);
 
       final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
       expect(buildPhaseScript.existsSync(), isTrue);
 
       final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
-      expect(buildPhaseScriptContents.contains('OTHER_LDFLAGS=\$(inherited) -framework Flutter'), isTrue);
+      expect(buildPhaseScriptContents.contains(r'OTHER_LDFLAGS=$(inherited) -framework Flutter'), isTrue);
     });
 
     testUsingOsxContext('do not set OTHER_LDFLAGS for macOS', () async {

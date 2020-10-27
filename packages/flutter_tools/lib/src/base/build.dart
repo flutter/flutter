@@ -109,7 +109,6 @@ class AOTSnapshotter {
     @required TargetPlatform platform,
     @required BuildMode buildMode,
     @required String mainPath,
-    @required String packagesPath,
     @required String outputPath,
     DarwinArch darwinArch,
     List<String> extraGenSnapshotOptions = const <String>[],
@@ -241,12 +240,9 @@ class AOTSnapshotter {
       '-arch', targetArch,
       if (isIOS)
         // When the minimum version is updated, remember to update
-        // template IPHONEOS_DEPLOYMENT_TARGET and MinimumOSVersion.
+        // template MinimumOSVersion.
         // https://github.com/flutter/flutter/pull/62902
-        // Also update the podhelper.rb "deployment version too low"
-        // warning suppression version.
-        // https://github.com/flutter/flutter/pull/66590
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=8.0',
     ];
 
     const String embedBitcodeArg = '-fembed-bitcode';

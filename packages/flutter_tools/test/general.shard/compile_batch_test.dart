@@ -240,7 +240,7 @@ void main() {
     expect(latestCommand, containsAllInOrder(<String>['-DFOO=bar', '-DBAZ=qux']));
   });
 
-  testWithoutContext('maps a file to a multiroot scheme if providfed', () async {
+  testWithoutContext('maps a file to a multiroot scheme if provided', () async {
     // Use unsuccessful result because it's easier to setup in test. We only care about arguments passed to the compiler.
     when(mockFrontendServer.exitCode).thenAnswer((_) async => 255);
     when(mockFrontendServer.stdout).thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(

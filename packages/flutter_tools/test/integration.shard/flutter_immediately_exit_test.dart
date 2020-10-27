@@ -34,7 +34,7 @@ void main() {
         _flutter.lastErrorInfo.contains(
           // Looks for stack trace entry of the form:
           //   test/integration.shard/test_driver.dart 379:18  FlutterTestDriver._waitFor.<fn>
-          RegExp('^(.+)\/([^\/]+)\.dart \d*:\d*\s*.*\$')
+          RegExp(r'^(.+)\/([^\/]+)\.dart \d*:\d*\s*.*\$')
         ),
         isFalse
       );

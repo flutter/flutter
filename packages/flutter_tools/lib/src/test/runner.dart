@@ -39,8 +39,6 @@ abstract class FlutterTestRunner {
     bool machine = false,
     String precompiledDillPath,
     Map<String, String> precompiledDillFiles,
-    @required BuildMode buildMode,
-    bool trackWidgetCreation = false,
     bool updateGoldens = false,
     TestWatcher watcher,
     @required int concurrency,
@@ -50,8 +48,8 @@ abstract class FlutterTestRunner {
     Directory coverageDirectory,
     bool web = false,
     String randomSeed,
-    @required List<String> extraFrontEndOptions,
     bool nullAssertions = false,
+    @required BuildInfo buildInfo,
   });
 }
 
@@ -75,8 +73,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     bool machine = false,
     String precompiledDillPath,
     Map<String, String> precompiledDillFiles,
-    @required BuildMode buildMode,
-    bool trackWidgetCreation = false,
     bool updateGoldens = false,
     TestWatcher watcher,
     @required int concurrency,
@@ -86,8 +82,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     Directory coverageDirectory,
     bool web = false,
     String randomSeed,
-    @required List<String> extraFrontEndOptions,
     bool nullAssertions = false,
+    @required BuildInfo buildInfo,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
@@ -173,15 +169,13 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       serverType: serverType,
       precompiledDillPath: precompiledDillPath,
       precompiledDillFiles: precompiledDillFiles,
-      buildMode: buildMode,
-      trackWidgetCreation: trackWidgetCreation,
       updateGoldens: updateGoldens,
       buildTestAssets: buildTestAssets,
       projectRootDirectory: globals.fs.currentDirectory.uri,
       flutterProject: flutterProject,
       icudtlPath: icudtlPath,
-      extraFrontEndOptions: extraFrontEndOptions,
       nullAssertions: nullAssertions,
+      buildInfo: buildInfo,
     );
 
     // Make the global packages path absolute.
