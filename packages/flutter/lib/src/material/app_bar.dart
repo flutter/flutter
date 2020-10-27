@@ -313,7 +313,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// than the [toolbarHeight].
   final List<Widget>? actions;
 
-  /// This widget is stacked behind the toolbar and the tab bar. It's height will
+  /// This widget is stacked behind the toolbar and the tab bar. Its height will
   /// be the same as the app bar's overall height.
   ///
   /// A flexible space isn't actually flexible unless the [AppBar]'s container
@@ -543,7 +543,7 @@ class _AppBarState extends State<AppBar> {
         leading = IconButton(
           icon: const Icon(Icons.menu),
           onPressed: _handleDrawerButton,
-          tooltip: MaterialLocalizations.of(context)!.openAppDrawerTooltip,
+          tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
       } else {
         if (!hasEndDrawer && canPop)
@@ -616,7 +616,7 @@ class _AppBarState extends State<AppBar> {
       actions = IconButton(
         icon: const Icon(Icons.menu),
         onPressed: _handleDrawerButtonEnd,
-        tooltip: MaterialLocalizations.of(context)!.openAppDrawerTooltip,
+        tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
       );
     }
 

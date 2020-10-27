@@ -226,7 +226,7 @@ class CupertinoAlertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context)!;
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     final bool isInAccessibilityMode = _isInAccessibilityMode(context);
     final double textScaleFactor = MediaQuery.of(context)!.textScaleFactor;
     return CupertinoUserInterfaceLevel(

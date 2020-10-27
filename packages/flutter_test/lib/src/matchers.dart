@@ -449,6 +449,7 @@ Matcher matchesSemantics({
   bool isChecked = false,
   bool isSelected = false,
   bool isButton = false,
+  bool isSlider = false,
   bool isLink = false,
   bool isFocused = false,
   bool isFocusable = false,
@@ -500,6 +501,7 @@ Matcher matchesSemantics({
     if (isChecked) SemanticsFlag.isChecked,
     if (isSelected) SemanticsFlag.isSelected,
     if (isButton) SemanticsFlag.isButton,
+    if (isSlider) SemanticsFlag.isSlider,
     if (isLink) SemanticsFlag.isLink,
     if (isTextField) SemanticsFlag.isTextField,
     if (isReadOnly) SemanticsFlag.isReadOnly,
@@ -519,6 +521,7 @@ Matcher matchesSemantics({
     if (hasToggledState) SemanticsFlag.hasToggledState,
     if (isToggled) SemanticsFlag.isToggled,
     if (hasImplicitScrolling) SemanticsFlag.hasImplicitScrolling,
+    if (isSlider) SemanticsFlag.isSlider
   ];
 
   final List<SemanticsAction> actions = <SemanticsAction>[

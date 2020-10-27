@@ -259,4 +259,25 @@ void main() {
     final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
     expect(coloredBox.color, equals(tileColor));
   });
+
+  testWidgets('CheckboxListTile respects selectedTileColor', (WidgetTester tester) async {
+    const Color selectedTileColor = Colors.black;
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: CheckboxListTile(
+            value: false,
+            onChanged: null,
+            title: Text('Title'),
+            selected: true,
+            selectedTileColor: selectedTileColor,
+          ),
+        ),
+      ),
+    );
+
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, equals(selectedTileColor));
+  });
 }

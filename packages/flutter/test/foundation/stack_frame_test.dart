@@ -160,9 +160,9 @@ const String asyncStackString = '''
 #37     _startIsolate.<anonymous closure> (dart:isolate-patch/isolate_patch.dart:307:19)
 #38     _RawReceivePortImpl._handleMessage (dart:isolate-patch/isolate_patch.dart:174:12)''';
 
-const String mangledStackString = '''
+const String mangledStackString = r'''
 dart:async/future_impl.dart 23:44                              _Completer.completeError
-test\\bindings_async_gap_test.dart 42:17                        main.<fn>.<fn>
+test\bindings_async_gap_test.dart 42:17                        main.<fn>.<fn>
 package:flutter_test/src/binding.dart 744:19                   TestWidgetsFlutterBinding._runTestBody
 ===== asynchronous gap ===========================
 dart:async/zone.dart 1121:19                                   _CustomZone.registerUnaryCallback

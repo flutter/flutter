@@ -27,9 +27,11 @@ import 'navigator.dart';
 /// these information and navigates accordingly.
 ///
 /// The latter case should only happen in a web application where the [Router]
-/// reports route change back to web engine.
+/// reports route changes back to web engine.
 class RouteInformation {
-  /// Creates a route information.
+  /// Creates a route information object.
+  ///
+  /// The arguments may be null.
   const RouteInformation({this.location, this.state});
 
   /// The location of the application.
@@ -42,15 +44,16 @@ class RouteInformation {
 
   /// The state of the application in the [location].
   ///
-  /// The app can have different states even in the same location. For example
-  /// the text inside a [TextField] or the scroll position in a [ScrollView],
-  /// these widget states can be stored in the [state].
+  /// The app can have different states even in the same location. For example,
+  /// the text inside a [TextField] or the scroll position in a [ScrollView].
+  /// These widget states can be stored in the [state].
   ///
-  /// It's only used in the web application currently. In a web application,
-  /// this property is stored into browser history entry when the [Router]
-  /// report this route information back to the web engine through the
-  /// [PlatformRouteInformationProvider], so we can get the url along with state
-  /// back when the user click the forward or backward buttons.
+  /// Currently, this information is only used by Flutter on the web:
+  /// the data is stored in the browser history entry when the
+  /// [Router] reports this route information back to the web engine
+  /// through the [PlatformRouteInformationProvider]. The information
+  /// is then passed back, along with the [location], when the user
+  /// clicks the back or forward buttons.
   ///
   /// The state must be serializable.
   final Object? state;
@@ -64,31 +67,29 @@ class RouteInformation {
 /// button), parses route information into data of type `T`, and then converts
 /// that data into [Page] objects that it passes to a [Navigator].
 ///
-/// Additionally, every single part of that previous sentence can be overridden
-/// and configured as desired.
+/// Each part of this process can be overridden and configured as desired.
 ///
 /// The [routeInformationProvider] can be overridden to change how the name of
-/// the route is obtained. the [RouteInformationProvider.value] when the
-/// [Router] is first created is used as the initial route, and subsequent
-/// notifications from the [RouteInformationProvider] to its listeners are
-/// treated as notifications that the route information has changed.
+/// the route is obtained. The [RouteInformationProvider.value] is used as the
+/// initial route when the [Router] is first created. Subsequent notifications
+/// from the [RouteInformationProvider] to its listeners are treated as
+/// notifications that the route information has changed.
 ///
 /// The [backButtonDispatcher] can be overridden to change how back button
 /// notifications are received. This must be a [BackButtonDispatcher], which is
-/// an object where callbacks can be registered, and which can be chained
-/// so that back button presses are delegated to subsidiary routers. The
-/// callbacks are invoked to indicate that the user is trying to close the
-/// current route (by pressing the system back button); the [Router] ensures
-/// that when this callback is invoked, the message is passed to the
-/// [routerDelegate] and its result is provided back to the
-/// [backButtonDispatcher]. Some platforms don't have back buttons and on those
-/// platforms it is completely normal that this notification is never sent. The
-/// common [backButtonDispatcher] for root router is an instance of
-/// [RootBackButtonDispatcher], which uses a [WidgetsBindingObserver] to listen
-/// to the `popRoute` notifications from [SystemChannels.navigation]. A
-/// common alternative is [ChildBackButtonDispatcher], which must be provided
-/// the [BackButtonDispatcher] of its ancestor [Router] (available via
-/// [Router.of]).
+/// an object where callbacks can be registered, and which can be chained so
+/// that back button presses are delegated to subsidiary routers. The callbacks
+/// are invoked to indicate that the user is trying to close the current route
+/// (by pressing the system back button); the [Router] ensures that when this
+/// callback is invoked, the message is passed to the [routerDelegate] and its
+/// result is provided back to the [backButtonDispatcher]. Some platforms don't
+/// have back buttons (e.g. iOS and desktop platforms); on those platforms this
+/// notification is never sent. Typically, the [backButtonDispatcher] for the
+/// root router is an instance of [RootBackButtonDispatcher], which uses a
+/// [WidgetsBindingObserver] to listen to the `popRoute` notifications from
+/// [SystemChannels.navigation]. Nested [Router]s typically use a
+/// [ChildBackButtonDispatcher], which must be provided the
+/// [BackButtonDispatcher] of its ancestor [Router] (available via [Router.of]).
 ///
 /// The [routeInformationParser] can be overridden to change how names obtained
 /// from the [routeInformationProvider] are interpreted. It must implement the
@@ -160,7 +161,9 @@ class RouteInformation {
 /// its needs.
 ///
 /// An application might have no [Router] widgets if it has only one "screen",
-/// or if the facilities provided by [Navigator] are sufficient.
+/// or if the facilities provided by [Navigator] are sufficient. This is common
+/// for desktop applications, where subsidiary "screens" are represented using
+/// different windows rather than changing the active interface.
 ///
 /// A particularly elaborate application might have multiple [Router] widgets,
 /// in a tree configuration, with the first handling the entire route parsing
@@ -172,68 +175,63 @@ class RouteInformation {
 ///
 /// ## URL updates for web applications
 ///
-/// In the web platform, it is important to keeps the URL up to date with the
-/// app state. This ensures the browser constructs its history entry
-/// correctly so that its forward and backward buttons continue to work.
+/// In the web platform, keeping the URL in the browser's location bar up to
+/// date with the application state ensures that the browser constructs its
+/// history entry correctly, allowing its back and forward buttons to function
+/// as the user expects.
 ///
-/// If the [routeInformationProvider] is a [PlatformRouteInformationProvider]
-/// and a app state change leads to [Router] rebuilds, the [Router] will detect
-/// such a event and retrieve the new route information from the
-/// [RouterDelegate.currentConfiguration] and the
-/// [RouteInformationParser.restoreRouteInformation]. If the location in the
-/// new route information is different from the current location, the router
-/// sends the new route information to the engine through the
-/// [PlatformRouteInformationProvider.routerReportsNewRouteInformation].
+/// If an app state change leads to the [Router] rebuilding, the [Router] will
+/// retrieve the new route information from the [routerDelegate]'s
+/// [RouterDelegate.currentConfiguration] method and the
+/// [routeInformationParser]'s [RouteInformationParser.restoreRouteInformation]
+/// method. If the location in the new route information is different from the
+/// current location, the router sends the new route information to the
+/// [routeInformationProvider]'s
+/// [RouteInformationProvider.routerReportsNewRouteInformation] method. That
+/// method as implemented in [PlatformRouteInformationProvider] uses
+/// [SystemNavigator.routeInformationUpdated] to notify the engine, and through
+/// that the browser, of the new URL.
 ///
-/// By Providing implementations of these two methods in the subclasses and using
-/// the [PlatformRouteInformationProvider], you can enable the [Router] widget to
-/// update the URL in the browser automatically.
+/// One can force the [Router] to report new route information to the
+/// [routeInformationProvider] (and thus the browser) even if the
+/// [RouteInformation.location] has not changed by calling the [Router.navigate]
+/// method with a callback that performs the state change. This allows one to
+/// support the browser's back and forward buttons without changing the URL. For
+/// example, the scroll position of a scroll view may be saved in the
+/// [RouteInformation.state]. Using [Router.navigate] to update the scroll
+/// position causes the browser to create a new history entry with the
+/// [RouteInformation.state] that stores this new scroll position. When the user
+/// clicks the back button, the app will go back to the previous scroll position
+/// without changing the URL in the location bar.
 ///
-/// You can force the [Router] to report the new route information back to the
-/// engine even if the [RouteInformation.location] has not changed. By calling
-/// the [Router.navigate], the [Router] will be forced to report the route
-/// information back to the engine after running the callback. This is useful
-/// when you want to support the browser backward and forward buttons without
-/// changing the URL. For example, the scroll position of a scroll view may be
-/// saved in the [RouteInformation.state]. If you use the [Router.navigate] to
-/// update the scroll position, the browser will create a new history entry with
-/// the [RouteInformation.state] that stores the new scroll position. when the
-/// users click the backward button, the browser will go back to previous scroll
-/// position without changing the url bar.
+/// One can also force the [Router] to ignore application state changes by
+/// making those changes during a callback passed to [Router.neglect]. The
+/// [Router] will not report any route information even if it detects location
+/// change as a result of running the callback.
 ///
-/// You can also force the [Router] to ignore a one time route information
-/// update by providing a one time app state update in a callback and pass it
-/// into the [Router.neglect]. The [Router] will not report any route
-/// information even if it detects location change as a result of running the
-/// callback. This is particularly useful when you don't want the browser to
-/// create a browser history entry for this app state update.
+/// To opt out of URL updates entirely, pass null for [routeInformationProvider]
+/// and [routeInformationParser]. This is not recommended in general, but may be
+/// appropriate in the following cases:
 ///
-/// You can also choose to opt out of URL updates entirely. Simply ignore the
-/// [RouterDelegate.currentConfiguration] and the
-/// [RouteInformationParser.restoreRouteInformation] without providing the
-/// implementations will prevent the [Router] from reporting the URL back to the
-/// web engine. This is not recommended in general, but You may decide to opt
-/// out in these cases:
+/// * The application does not target the web platform.
 ///
-/// * If you are not writing a web application.
+/// * There are multiple router widgets in the application. Only one [Router]
+///   widget should update the URL (typically the top-most one created by the
+///   [WidgetsApp.router], [MaterialApp.router], or [CupertinoApp.router]).
 ///
-/// * If you have multiple router widgets in your app, then only one router
-///   widget should update the URL (Usually the top-most one created by the
-///   [WidgetsApp.router]/[MaterialApp.router]/[CupertinoApp.router]).
+/// * The application does not need to implemenent in-app navigation using the
+///   browser's back and forward buttons.
 ///
-/// * If your app does not care about the in-app navigation using the browser's
-///   forward and backward buttons.
-///
-/// Otherwise, we strongly recommend implementing the
-/// [RouterDelegate.currentConfiguration] and the
-/// [RouteInformationParser.restoreRouteInformation] to provide optimal
-/// user experience in the web application.
+/// In other cases, it is strongly recommended to implement the
+/// [RouterDelegate.currentConfiguration] and
+/// [RouteInformationParser.restoreRouteInformation] APIs to provide an optimal
+/// user experience when running on the web platform.
 class Router<T> extends StatefulWidget {
   /// Creates a router.
   ///
   /// The [routeInformationProvider] and [routeInformationParser] can be null if this
   /// router does not depend on route information. A common example is a sub router
-  /// that builds its content completely relies on the app state.
+  /// that builds its content completely based on the app state.
   ///
   /// If the [routeInformationProvider] is not null, the [routeInformationParser] must
   /// also not be null.
@@ -247,8 +245,8 @@ class Router<T> extends StatefulWidget {
     this.backButtonDispatcher,
   })  : assert(
           (routeInformationProvider == null) == (routeInformationParser == null),
-          'You must provide both routeInformationProvider and routeInformationParser '
-          'if this router parses route information. Otheriwse, they should both '
+          'Both routeInformationProvider and routeInformationParser must be provided '
+          'if this router parses route information. Otherwise, they should both '
           'be null.'
         ),
         assert(routerDelegate != null),
@@ -282,8 +280,8 @@ class Router<T> extends StatefulWidget {
   /// builds a navigating widget for the [Router].
   ///
   /// It is also the primary respondent for the [backButtonDispatcher]. The
-  /// [Router] relies on the [RouterDelegate.popRoute] to handles the back
-  /// button intends.
+  /// [Router] relies on [RouterDelegate.popRoute] to handle the back
+  /// button.
   ///
   /// If the [RouterDelegate.currentConfiguration] returns a non-null object,
   /// this [Router] will opt for URL updates.
@@ -297,11 +295,9 @@ class Router<T> extends StatefulWidget {
 
   /// Retrieves the immediate [Router] ancestor from the given context.
   ///
-  /// Use this method when you need to access the delegates in the [Router].
-  /// For example, you need to access the [backButtonDispatcher] of the parent
-  /// router to create a [ChildBackButtonDispatcher] for a nested router.
-  /// Another use case may be updating the value in [routeInformationProvider]
-  /// to navigate to a new route.
+  /// This method provides access to the delegates in the [Router]. For example,
+  /// this can be used to access the [backButtonDispatcher] of the parent router
+  /// when creating a [ChildBackButtonDispatcher] for a nested [Router].
   static Router<dynamic>? of(BuildContext context, {bool nullOk = false}) {
     final _RouterScope? scope = context.dependOnInheritedWidgetOfExactType<_RouterScope>();
     assert(() {
@@ -1011,13 +1007,11 @@ abstract class RouteInformationParser<T> {
 
   /// Restore the route information from the given configuration.
   ///
-  /// This is not required if you do not opt for the route information reporting
-  /// , which is used for updating browser history for the web application. If
-  /// you decides to opt in, you must also overrides this method to return a
-  /// route information.
+  /// This may return null, in which case the browser history will not be updated.
+  /// See [Router]'s documentation for details.
   ///
-  /// In practice, the [parseRouteInformation] method must produce an equivalent
-  /// configuration when passed this method's return value
+  /// The [parseRouteInformation] method must produce an equivalent
+  /// configuration when passed this method's return value.
   RouteInformation? restoreRouteInformation(T configuration) => null;
 }
 
@@ -1025,21 +1019,21 @@ abstract class RouteInformationParser<T> {
 /// navigating widget.
 ///
 /// This delegate is the core piece of the [Router] widget. It responds to
-/// push route and pop route intent from the engine and notifies the [Router]
-/// to rebuild. It also act as a builder for the [Router] widget and builds a
+/// push route and pop route intents from the engine and notifies the [Router]
+/// to rebuild. It also acts as a builder for the [Router] widget and builds a
 /// navigating widget, typically a [Navigator], when the [Router] widget
 /// builds.
 ///
-/// When engine pushes a new route, the route information is parsed by the
+/// When the engine pushes a new route, the route information is parsed by the
 /// [RouteInformationParser] to produce a configuration of type T. The router
 /// delegate receives the configuration through [setInitialRoutePath] or
 /// [setNewRoutePath] to configure itself and builds the latest navigating
-/// widget upon asked.
+/// widget when asked ([build]).
 ///
-/// When implementing subclass, consider defining a listenable app state to be
-/// used for building the navigating widget. The router delegate should update
-/// the app state accordingly and notify the listener know the app state has
-/// changed when it receive route related engine intents (e.g.
+/// When implementing subclasses, consider defining a [Listenable] app state object to be
+/// used for building the navigating widget. The router delegate would update
+/// the app state accordingly and notify its own listeners when the app state has
+/// changed and when it receive route related engine intents (e.g.
 /// [setNewRoutePath], [setInitialRoutePath], or [popRoute]).
 ///
 /// All subclass must implement [setNewRoutePath], [popRoute], and [build].

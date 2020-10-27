@@ -333,6 +333,11 @@ class WebAssetServer implements AssetReader {
   // handle requests for JavaScript source, dart sources maps, or asset files.
   @visibleForTesting
   Future<shelf.Response> handleRequest(shelf.Request request) async {
+    if (request.method != 'GET') {
+      // Assets are served via GET only.
+      return shelf.Response.notFound('');
+    }
+
     final String requestPath = _stripBasePath(request.url.path, basePath);
 
     if (requestPath == null) {
@@ -810,12 +815,12 @@ class WebDevFS implements DevFS {
     @required String pathToReload,
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
+    @required String dillOutputPath,
     DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
-    String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
   }) async {
@@ -873,8 +878,7 @@ class WebDevFS implements DevFS {
         path: '/' + mainUri.pathSegments.last,
       ),
       invalidatedFiles,
-      outputPath: dillOutputPath ??
-        getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
+      outputPath: dillOutputPath,
       packageConfig: packageConfig,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
@@ -969,6 +973,11 @@ class ReleaseAssetServer {
   ];
 
   Future<shelf.Response> handle(shelf.Request request) async {
+    if (request.method != 'GET') {
+      // Assets are served via GET only.
+      return shelf.Response.notFound('');
+    }
+
     Uri fileUri;
     final String requestPath = _stripBasePath(request.url.path, basePath);
 
