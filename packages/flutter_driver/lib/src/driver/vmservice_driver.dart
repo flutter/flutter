@@ -559,9 +559,10 @@ String _getWebSocketUrl(String url) {
 Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic> headers) async {
   final String webSocketUrl = _getWebSocketUrl(url);
   int attempts = 0;
+  WebSocket socket;
   while (true) {
     try {
-      final WebSocket socket = await WebSocket.connect(webSocketUrl, headers: headers);
+      socket = await WebSocket.connect(webSocketUrl, headers: headers);
       final vms.VmService service = vms.VmService(
         socket,
         socket.add,
@@ -575,6 +576,7 @@ Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic> headers) 
       await service.getVersion();
       return service;
     } catch (e) {
+      await socket?.close();
       if (attempts > 5) {
         _log('It is taking an unusually long time to connect to the VM...');
       }
