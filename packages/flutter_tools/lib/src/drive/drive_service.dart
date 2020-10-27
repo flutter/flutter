@@ -104,8 +104,6 @@ class FlutterDriverService extends DriverService {
        _dartSdkPath = dartSdkPath,
        _vmServiceConnector = vmServiceConnector;
 
-  static const int _kLaunchAttempts = 3;
-
   final ApplicationPackageFactory _applicationPackageFactory;
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -144,27 +142,15 @@ class FlutterDriverService extends DriverService {
       buildInfo: buildInfo,
       applicationBinary: applicationBinary,
     );
-    int attempt = 0;
-    LaunchResult result;
-    bool prebuiltApplication = applicationBinary != null;
-    while (attempt < _kLaunchAttempts) {
-      result = await device.startApp(
-        _applicationPackage,
-        mainPath: mainPath,
-        route: route,
-        debuggingOptions: debuggingOptions,
-        platformArgs: platformArgs,
-        userIdentifier: userIdentifier,
-        prebuiltApplication: prebuiltApplication,
-      );
-      if (result != null && result.started) {
-        break;
-      }
-      // On attempts past 1, assume the application is built correctly and re-use it.
-      attempt += 1;
-      prebuiltApplication = true;
-      _logger.printError('Application failed to start on attempt: $attempt');
-    }
+    final LaunchResult result = await device.startApp(
+      _applicationPackage,
+      mainPath: mainPath,
+      route: route,
+      debuggingOptions: debuggingOptions,
+      platformArgs: platformArgs,
+      userIdentifier: userIdentifier,
+      prebuiltApplication: applicationBinary != null,
+    );
     if (result == null || !result.started) {
       throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
     }

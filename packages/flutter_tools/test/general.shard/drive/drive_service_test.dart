@@ -115,31 +115,6 @@ void main() {
     );
   });
 
-  testWithoutContext('Retries application launch if it fails the first time', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
-      getVM,
-    ]);
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
-        exitCode: 23,
-        environment: <String, String>{
-          'FOO': 'BAR',
-          'VM_SERVICE_URL': 'http://127.0.0.1:1234/' // dds forwarded URI
-        },
-      ),
-    ]);
-    final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
-    final Device device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
-    ))..failOnce = true;
-
-    await expectLater(
-      () async => await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true),
-      returnsNormally,
-    );
-  });
-
   testWithoutContext('Connects to device VM Service and runs test application', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
       getVM,
@@ -303,7 +278,6 @@ class FakeDevice extends Fake implements Device {
   bool didStopApp = false;
   bool didUninstallApp = false;
   bool didDispose = false;
-  bool failOnce = false;
 
   @override
   String get name => 'test';
@@ -331,10 +305,6 @@ class FakeDevice extends Fake implements Device {
     bool ipv6 = false,
     String userIdentifier,
   }) async {
-    if (failOnce) {
-      failOnce = false;
-      return LaunchResult.failed();
-    }
     return result;
   }
 
