@@ -186,6 +186,7 @@ class SampleChecker {
   /// Computes the headers needed for each sample file.
   List<Line> get headers {
     return _headers ??= <String>[
+      '// @dart = 2.9',
       '// generated code',
       "import 'dart:async';",
       "import 'dart:convert';",
