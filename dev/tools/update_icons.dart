@@ -86,11 +86,7 @@ const Map<String, String> _identifierRewrites = <String, String>{
   'class': 'class_',
 };
 
-<<<<<<< HEAD
-const Set<String> _mirroredInRTL = <String>{
-=======
 const Set<String> _iconsMirroredWhenRTL = <String>{
->>>>>>> upstream/master
   // This list is obtained from:
   // http://google.github.io/material-design-icons/#icons-in-rtl
   'arrow_back',
@@ -384,11 +380,7 @@ class _Icon {
   String hexCodepoint;
 
   // TODO(guidezpl): will be fixed in a future PR to be shortId instead of id
-<<<<<<< HEAD
-  String get mirroredInRTL => _mirroredInRTL.contains(id) ? ', matchTextDirection: true' : '';
-=======
   String get mirroredInRTL => _iconsMirroredWhenRTL.contains(id) ? ', matchTextDirection: true' : '';
->>>>>>> upstream/master
 
   String get name => id.replaceAll('_', ' ');
 
