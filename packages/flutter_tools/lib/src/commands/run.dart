@@ -466,7 +466,6 @@ class RunCommand extends RunCommandBase {
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
           machine: true,
-          webRenderer: stringArg('web-renderer'),
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());
@@ -562,7 +561,6 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: createDebuggingOptions(),
         stayResident: stayResident,
         urlTunneller: null,
-        webRenderer: stringArg('web-renderer'),
       );
     } else {
       runner = ColdRunner(

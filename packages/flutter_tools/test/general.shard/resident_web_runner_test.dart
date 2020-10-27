@@ -175,7 +175,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
-      webRenderer: 'html',
     ) as ResidentWebRunner;
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
@@ -207,7 +206,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
-      webRenderer: 'html',
     );
 
     expect(profileResidentWebRunner.uri, mockWebDevFS.baseUri);
@@ -229,7 +227,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
-      webRenderer: 'html',
     ) as ResidentWebRunner;
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
@@ -240,7 +237,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
-      webRenderer: 'html',
     );
 
     expect(profileResidentWebRunner.supportsServiceProtocol, false);
@@ -263,7 +259,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
-      webRenderer: 'html',
     ) as ResidentWebRunner;
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     fileSystem.file('pubspec.yaml').createSync();
@@ -376,7 +371,6 @@ void main() {
       ipv6: true,
       stayResident: false,
       urlTunneller: null,
-      webRenderer: 'html',
     ) as ResidentWebRunner;
 
     expect(await residentWebRunner.run(), 0);
@@ -399,7 +393,6 @@ void main() {
       ipv6: true,
       stayResident: false,
       urlTunneller: null,
-      webRenderer: 'html',
     ) as ResidentWebRunner;
 
     expect(await residentWebRunner.run(), 0);
@@ -524,7 +517,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
-      webRenderer: 'html',
     ) as ResidentWebRunner;
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     _setupMocks();
@@ -754,25 +746,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
 
     expect(residentWebRunner.debuggingEnabled, true);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Pub: () => MockPub(),
-    Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
-  });
-
-  testUsingContext('web resident runner can toggle CanvasKit', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null, null);
-    when(mockWebDevFS.webAssetServer).thenReturn(webAssetServer);
-
-    expect(webAssetServer.canvasKitRendering, false);
-
-    final bool toggleResult = await residentWebRunner.toggleCanvaskit();
-
-    expect(webAssetServer.canvasKitRendering, true);
-    expect(toggleResult, true);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1518,7 +1491,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
-      webRenderer: 'html',
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -1566,7 +1538,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
-      webRenderer: 'html',
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -1696,17 +1667,8 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice) {
     ipv6: true,
     stayResident: true,
     urlTunneller: null,
-    webRenderer: 'html',
   ) as ResidentWebRunner;
 }
-
-// ignore: prefer_const_constructors
-BuildInfo _createBuildDebugInfo() => BuildInfo(
-  BuildMode.debug,
-  null,
-  treeShakeIcons: false,
-  dartDefines: <String>[],
-);
 
 class MockChromeLauncher extends Mock implements ChromiumLauncher {}
 class MockFlutterUsage extends Mock implements Usage {}

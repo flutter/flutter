@@ -429,10 +429,10 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption('web-renderer',
       defaultsTo: 'html',
       allowed: <String>['auto', 'canvaskit', 'html'],
-      help: 'Experimental. Which rendering backend to use for Flutter Web.'
+      help: 'Which rendering backend to use for Flutter for Web.'
           'auto      - Use the HTML renderer on mobile devices,'
-          '            and CanvasKit on desktop devices. '
-          'canvaskit - Always use the CanvasK it renderer.'
+          '            and CanvasKit on desktop devices.'
+          'canvaskit - Always use the CanvasKit renderer.'
           'html      - Default. Always use the HTML renderer.',
     );
   }
@@ -822,6 +822,14 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
+    List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
+        ? stringsArg(FlutterOptions.kDartDefinesOption)
+        : const <String>[];
+
+    if (argParser.options.containsKey('web-renderer')) {
+      dartDefines = _updateDartDefines(dartDefines, stringArg('web-renderer'));
+    }
+
     return BuildInfo(buildMode,
       argParser.options.containsKey('flavor')
         ? stringArg('flavor')
@@ -846,9 +854,7 @@ abstract class FlutterCommand extends Command<void> {
       treeShakeIcons: treeShakeIcons,
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
-      dartDefines: argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
-          ? stringsArg(FlutterOptions.kDartDefinesOption)
-          : const <String>[],
+      dartDefines: dartDefines,
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
@@ -1286,3 +1292,39 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
 bool _isBlank(String s) => s == null || s.trim().isEmpty;
+
+
+/// Updates dartdefines based on [webRenderer].
+List<String> _updateDartDefines(List<String> original, String webRenderer) {
+  final List<String> dartDefines = List<String>.from(original);
+  final Iterable<String> webRendererDartDefines = _dartDefinesForWebRenderer(webRenderer);
+  if (webRendererDartDefines.isNotEmpty) {
+    // If --web-renderer is used, removes existing dartDefine that starts with
+    // "FLUTTER_WEB_USE_SKIA="
+    dartDefines.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
+    dartDefines.addAll(webRendererDartDefines);
+  }
+  return dartDefines;
+}
+
+Iterable<String> _dartDefinesForWebRenderer(String webRenderer) {
+  if (!_webRendererDartDefines.containsKey(webRenderer)) {
+    throwToolExit('Unsupported value for option "web-renderer');
+  }
+  return _webRendererDartDefines[webRenderer];
+}
+
+const Map<String, Iterable<String>> _webRendererDartDefines
+= <String, Iterable<String>> {
+  'auto': <String>[
+    'FLUTTER_WEB_AUTO_DETECT=true',
+  ],
+  'canvaskit': <String>[
+    'FLUTTER_WEB_AUTO_DETECT=false',
+    'FLUTTER_WEB_USE_SKIA=true'
+  ],
+  'html': <String>[
+    'FLUTTER_WEB_AUTO_DETECT=false',
+    'FLUTTER_WEB_USE_SKIA=false'
+  ],
+};

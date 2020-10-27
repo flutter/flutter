@@ -200,8 +200,6 @@ class DriveCommand extends RunCommandBase {
           'trace-startup': traceStartup,
         if (web)
           '--no-launch-chrome': true,
-        if (web)
-          '--web-renderer': stringArg('web-renderer'),
       }
     );
 

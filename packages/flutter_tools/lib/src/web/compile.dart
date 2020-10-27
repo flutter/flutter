@@ -29,7 +29,6 @@ Future<void> buildWeb(
   bool csp,
   String serviceWorkerStrategy,
   bool sourceMaps,
-  String webRenderer,
 ) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
@@ -45,7 +44,6 @@ Future<void> buildWeb(
   final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();
   try {
-    final List<String> dartDefines = updateDartDefines(buildInfo.dartDefines, webRenderer);
     final BuildResult result = await globals.buildSystem.build(const WebServiceWorker(), Environment(
       projectDir: globals.fs.currentDirectory,
       outputDir: outputDirectory,
@@ -56,7 +54,7 @@ Future<void> buildWeb(
         kBuildMode: getNameForBuildMode(buildInfo.mode),
         kTargetFile: target,
         kHasWebPlugins: hasWebPlugins.toString(),
-        kDartDefines: encodeDartDefines(dartDefines),
+        kDartDefines: encodeDartDefines(buildInfo.dartDefines),
         kCspMode: csp.toString(),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
         kSourceMapsEnabled: sourceMaps.toString(),
@@ -117,30 +115,3 @@ class WebCompilationProxy {
   }
 }
 
-/// Updates dartdefines based on [webRenderer].
-List<String> updateDartDefines(List<String> original, String webRenderer) {
-  final List<String> dartDefines = List<String>.from(original);
-  final Iterable<String> webRendererDartDefines = _dartDefinesForWebRenderer(webRenderer);
-  if (webRendererDartDefines.isNotEmpty) {
-    // If --web-renderer is used, removes existing dartDefine that starts with
-    // "FLUTTER_WEB_USE_SKIA="
-    dartDefines.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
-    dartDefines.addAll(webRendererDartDefines);
-  }
-  return dartDefines;
-}
-
-Iterable<String> _dartDefinesForWebRenderer(String webRenderer) {
-  switch (webRenderer) {
-    case 'auto':
-      return <String>['FLUTTER_WEB_AUTO_DETECT=true'];
-    case 'canvaskit':
-      return <String>['FLUTTER_WEB_AUTO_DETECT=false', 'FLUTTER_WEB_USE_SKIA=true'];
-    case 'html':
-      return <String>['FLUTTER_WEB_AUTO_DETECT=false', 'FLUTTER_WEB_USE_SKIA=false'];
-    default:
-      // Safeguard, shouldn't happen.
-      throwToolExit('Unsupported value for option "web-renderer');
-  }
-  return <String>[];
-}

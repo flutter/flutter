@@ -26,6 +26,5 @@ abstract class WebRunnerFactory {
     @required DebuggingOptions debuggingOptions,
     @required UrlTunneller urlTunneller,
     bool machine = false,
-    @required String webRenderer,
   });
 }

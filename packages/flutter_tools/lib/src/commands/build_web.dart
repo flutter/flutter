@@ -90,7 +90,6 @@ class BuildWebCommand extends BuildSubCommand {
       boolArg('csp'),
       stringArg('pwa-strategy'),
       boolArg('source-maps'),
-      stringArg('web-renderer')
     );
     return FlutterCommandResult.success();
   }
