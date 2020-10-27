@@ -640,14 +640,17 @@ class WebAssetServer implements AssetReader {
       WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdk,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
       },
       WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdk,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdk,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSoundSdk,
       },
       WebRendererMode.html: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledSoundSdk,
         NullSafetyMode.unsound: Artifact.webPrecompiledSdk,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledSoundSdk,
       },
     };
 
@@ -656,14 +659,17 @@ class WebAssetServer implements AssetReader {
       WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
       },
       WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdkSourcemaps,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
       },
       WebRendererMode.html: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledSoundSdkSourcemaps,
         NullSafetyMode.unsound: Artifact.webPrecompiledSdkSourcemaps,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledSoundSdkSourcemaps,
       },
     };
 
@@ -816,11 +822,9 @@ class WebDevFS implements DevFS {
     );
     if (buildInfo.dartDefines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
       webAssetServer.webRenderer = WebRendererMode.autoDetect;
-    } else {
-      if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
-        webAssetServer.webRenderer = WebRendererMode.html;
+    } else if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
+        webAssetServer.webRenderer = WebRendererMode.canvaskit;
       }
-    }
     if (hostname == 'any') {
       _baseUri = Uri.http('localhost:$port', '');
     } else {

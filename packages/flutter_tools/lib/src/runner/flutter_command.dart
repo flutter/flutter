@@ -130,8 +130,8 @@ abstract class FlutterCommand extends Command<void> {
   static const String ipv6Flag = 'ipv6';
 
   /// The map used to convert web-renderer option to a List of dart-defines.
-  static const Map<String, Iterable<String>> _webRendererDartDefines
-  = <String, Iterable<String>> {
+  static const Map<String, Iterable<String>> _webRendererDartDefines =
+  <String, Iterable<String>> {
     'auto': <String>[
       'FLUTTER_WEB_AUTO_DETECT=true',
     ],
@@ -838,12 +838,12 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
-    List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
+    final List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
         ? stringsArg(FlutterOptions.kDartDefinesOption)
-        : const <String>[];
+        : <String>[];
 
     if (argParser.options.containsKey('web-renderer') && argResults.wasParsed('web-renderer')) {
-      dartDefines = _updateDartDefines(dartDefines, stringArg('web-renderer'));
+      _updateDartDefines(dartDefines, stringArg('web-renderer'));
     }
 
     return BuildInfo(buildMode,
@@ -944,16 +944,13 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Updates dart-defines based on [webRenderer].
-  List<String> _updateDartDefines(List<String> original, String webRenderer) {
-    if (original.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
+  void _updateDartDefines(List<String> dartDefines, String webRenderer) {
+    if (dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
       throwToolExit('Only one of "--web-renderer" and '
           '"--dart-defines=FLUTTER_WEB_USE_SKIA" may be specified.');
 
     }
-    // create a new List since the original may be a constant.
-    final List<String> dartDefines = List<String>.from(original);
     dartDefines.addAll(_webRendererDartDefines[webRenderer]);
-    return dartDefines;
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
