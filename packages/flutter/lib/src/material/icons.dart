@@ -147,9 +147,9 @@ class Icons {
   /// Use with the [Icon] class to show specific icons.
   ///
   /// {@tool snippet}
-  /// This example shows how to create a [Row] of [Icon]s in different colors and
-  /// sizes. The first [Icon] uses a [Icon.semanticLabel] to announce in accessibility
-  /// modes like TalkBack and VoiceOver.
+  /// This example shows how to create a share icon that uses the material icon
+  /// named "share" on non-Apple platforms, and the icon named "ios share" on
+  /// Apple platforms.
   ///
   /// ```dart
   /// Icon(
