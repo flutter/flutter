@@ -1,4 +1,4 @@
-Signature: cbe3aa202f68ef60cd72664d2442a6b6
+Signature: 358c3055f33a91bff22d25103af58b74
 
 UNUSED LICENSES:
 
@@ -3568,7 +3568,6 @@ ORIGIN: ../../../third_party/skia/bench/ClipMaskBench.cpp + ../../../third_party
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/ClipMaskBench.cpp
 FILE: ../../../third_party/skia/bench/ClipStrategyBench.cpp
-FILE: ../../../third_party/skia/bench/CubicKLMBench.cpp
 FILE: ../../../third_party/skia/bench/PathTextBench.cpp
 FILE: ../../../third_party/skia/bench/ShadowBench.cpp
 FILE: ../../../third_party/skia/bin/gerrit-number
