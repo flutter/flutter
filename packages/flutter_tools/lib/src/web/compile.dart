@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -37,10 +38,7 @@ Future<void> buildWeb(
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());
   try {
-    if (outputDirectory.existsSync()) {
-      outputDirectory.deleteSync(recursive: true);
-      outputDirectory.createSync(recursive: true);
-    }
+    ErrorHandlingFileSystem.deleteIfExists(outputDirectory, recursive: true);
   } on FileSystemException catch (err) {
     globals.logger.printError(
       'Error when clearing directory: $err.\nStale files may'
