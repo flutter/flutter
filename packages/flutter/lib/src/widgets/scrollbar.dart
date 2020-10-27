@@ -6,8 +6,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
+import 'basic.dart';
+import 'framework.dart';
 import 'scroll_metrics.dart';
 
 const double _kMinThumbExtent = 18.0;
@@ -385,4 +388,32 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   SemanticsBuilderCallback? get semanticsBuilder => null;
+}
+
+/// Doc
+mixin ScrollbarThumbGestureRecognizerMixin on DragGestureRecognizer {
+  /// Doc
+  GlobalKey get customPaintKey;
+
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    if (!_hitTestInteractive(customPaintKey, event.position)) {
+      return false;
+    }
+    return super.isPointerAllowed(event);
+  }
+
+  // foregroundPainter also hit tests its children by default, but the
+  // scrollbar should only respond to a gesture directly on its thumb, so
+  // manually check for a hit on the thumb here.
+  bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset) {
+    if (customPaintKey.currentContext == null) {
+      return false;
+    }
+    final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
+    final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
+    final RenderBox renderBox = customPaintKey.currentContext!.findRenderObject()! as RenderBox;
+    final Offset localOffset = renderBox.globalToLocal(offset);
+    return painter.hitTestInteractive(localOffset);
+  }
 }
