@@ -117,7 +117,8 @@ class FlutterDevice {
         initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
-          extraFrontEndOptions: extraFrontEndOptions
+          extraFrontEndOptions: extraFrontEndOptions,
+          nullSafetyMode: buildInfo.nullSafetyMode,
         ),
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
@@ -159,6 +160,7 @@ class FlutterDevice {
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
+          nullSafetyMode: buildInfo.nullSafetyMode,
         ),
         packagesPath: buildInfo.packagesPath,
         artifacts: globals.artifacts,
@@ -1174,6 +1176,7 @@ abstract class ResidentRunner {
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
+        nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
       );
       globals.fs
           .file(copyPath)

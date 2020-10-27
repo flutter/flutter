@@ -26,13 +26,6 @@ class DoctorCommand extends FlutterCommand {
   final String name = 'doctor';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    // This is required because the gradle host-only tests do not correctly specify
-    // their dependencies.
-    DevelopmentArtifact.androidGenSnapshot,
-  };
-
-  @override
   final String description = 'Show information about the installed tooling.';
 
   @override

@@ -201,7 +201,7 @@ class AboutListTile extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     return ListTile(
       leading: icon,
-      title: child ?? Text(MaterialLocalizations.of(context)!.aboutListTileTitle(
+      title: child ?? Text(MaterialLocalizations.of(context).aboutListTileTitle(
         applicationName ?? _defaultApplicationName(context),
       )),
       dense: dense,
@@ -405,7 +405,7 @@ class AboutDialog extends StatelessWidget {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text(MaterialLocalizations.of(context)!.viewLicensesButtonLabel),
+          child: Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
           onPressed: () {
             showLicensePage(
               context: context,
@@ -417,7 +417,7 @@ class AboutDialog extends StatelessWidget {
           },
         ),
         TextButton(
-          child: Text(MaterialLocalizations.of(context)!.closeButtonLabel),
+          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -493,7 +493,7 @@ class _LicensePageState extends State<LicensePage> {
   Widget build(BuildContext context) {
     return _MasterDetailFlow(
       detailPageFABlessGutterWidth: _getGutterSize(context),
-      title: Text(MaterialLocalizations.of(context)!.licensesPageTitle),
+      title: Text(MaterialLocalizations.of(context).licensesPageTitle),
       detailPageBuilder: _packageLicensePage,
       masterViewBuilder: _packagesView,
     );
@@ -720,7 +720,7 @@ class _PackageListTile extends StatelessWidget {
       color: isSelected ? Theme.of(context)!.highlightColor : Theme.of(context)!.cardColor,
       child: ListTile(
         title: Text(packageName),
-        subtitle: Text(MaterialLocalizations.of(context)!.licensesPackageDetailText(numberLicenses)),
+        subtitle: Text(MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses)),
         selected: isSelected,
         onTap: onTap,
       ),
@@ -890,7 +890,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData? theme = Theme.of(context);
     final String title = widget.packageName;
     final String subtitle = localizations.licensesPackageDetailText(widget.licenseEntries.length);

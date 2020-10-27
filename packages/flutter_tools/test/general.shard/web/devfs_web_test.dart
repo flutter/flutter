@@ -669,6 +669,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       pathToReload: '',
+      dillOutputPath: 'out.dill',
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -784,6 +785,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       pathToReload: '',
+      dillOutputPath: '',
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);

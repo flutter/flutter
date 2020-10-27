@@ -944,22 +944,32 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   static void dumpErrorToConsole(FlutterErrorDetails details, { bool forceReport = false }) {
     assert(details != null);
     assert(details.exception != null);
-    bool reportError = details.silent != true; // could be null
+    bool isInDebugMode = false;
     assert(() {
       // In checked mode, we ignore the "silent" flag.
-      reportError = true;
+      isInDebugMode = true;
       return true;
     }());
+    final bool reportError = isInDebugMode || details.silent != true; // could be null
     if (!reportError && !forceReport)
       return;
     if (_errorCount == 0 || forceReport) {
-      debugPrint(
-        TextTreeRenderer(
-          wrapWidth: wrapWidth,
-          wrapWidthProperties: wrapWidth,
-          maxDescendentsTruncatableNode: 5,
-        ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight(),
-      );
+      // Diagnostics is only available in debug mode. In profile and release modes fallback to plain print.
+      if (isInDebugMode) {
+        debugPrint(
+          TextTreeRenderer(
+            wrapWidth: wrapWidth,
+            wrapWidthProperties: wrapWidth,
+            maxDescendentsTruncatableNode: 5,
+          ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight(),
+        );
+      } else {
+        debugPrintStack(
+          stackTrace: details.stack,
+          label: details.exception.toString(),
+          maxFrames: 100,
+        );
+      }
     } else {
       debugPrint('Another exception was thrown: ${details.summary}');
     }
