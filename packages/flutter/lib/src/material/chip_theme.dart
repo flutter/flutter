@@ -91,8 +91,7 @@ class ChipTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ChipTheme? ancestorTheme = context.findAncestorWidgetOfExactType<ChipTheme>();
-    return identical(this, ancestorTheme) ? child : ChipTheme(data: data, child: child);
+    return ChipTheme(data: data, child: child);
   }
 
   @override
