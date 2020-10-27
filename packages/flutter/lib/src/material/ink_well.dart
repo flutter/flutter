@@ -975,15 +975,16 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     updateHighlight(_HighlightType.pressed, value: true);
   }
 
-  void _handleTap(BuildContext context) {
+  void _handleTapUp(TapUpDetails tapUpDetails) {
     _currentSplash?.confirm();
     _currentSplash = null;
     updateHighlight(_HighlightType.pressed, value: false);
-    if (widget.onTap != null) {
-      if (widget.enableFeedback)
-        Feedback.forTap(context);
-      widget.onTap!();
-    }
+  }
+
+  void _handleTap(BuildContext context) {
+    if (widget.enableFeedback)
+      Feedback.forTap(context);
+    widget.onTap!();
   }
 
   void _handleTapCancel() {
@@ -1098,13 +1099,13 @@ class _InkResponseState extends State<_InkResponseStateWidget>
             onExit: _handleMouseExit,
             child: GestureDetector(
               onTapDown: enabled ? _handleTapDown : null,
-              onTap: enabled ? () => _handleTap(context) : null,
+              onTapUp: enabled ? _handleTapUp : null,
+              onTap: enabled && widget.onTap != null ? () => _handleTap(context) : null,
               onTapCancel: enabled ? _handleTapCancel : null,
               onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
               onLongPress: widget.onLongPress != null ? () => _handleLongPress(context) : null,
               behavior: HitTestBehavior.opaque,
               excludeFromSemantics: widget.excludeFromSemantics,
-              excludeTapFromSemantics: widget.onTap == null,
               child: widget.child,
             ),
           ),
