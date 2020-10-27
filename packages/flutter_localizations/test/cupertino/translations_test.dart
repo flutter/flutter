@@ -166,6 +166,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/36704.
   testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
+    print('DMA: $rootDirectoryPath');
     final File file = File(
       path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'cupertino_kn.arb'),
     );
