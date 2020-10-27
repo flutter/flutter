@@ -434,10 +434,10 @@ class TextField extends StatefulWidget {
   /// material design text field otherwise.
   ///
   /// To retain the standard look of [CupertinoTextField], this constructor only
-  /// uses the [decoration] property's [decoration.hintText], 
-  /// [decoration.hintStyle], [decoration.suffix], and [decoration.prefix] for 
-  /// the iOS platform, and all else is ignored in support of the default iOS 
-  /// look. For instance, the [decoration.border] cannot override the default 
+  /// uses the [decoration] property's [decoration.hintText],
+  /// [decoration.hintStyle], [decoration.suffix], and [decoration.prefix] for
+  /// the iOS platform, and all else is ignored in support of the default iOS
+  /// look. For instance, the [decoration.border] cannot override the default
   /// iOS-style border.
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
