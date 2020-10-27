@@ -220,7 +220,6 @@ class Checkouts {
     @required Git git,
     Directory parentDirectory,
     String directoryName = 'checkouts',
-    bool cleanFirst = false,
   }) {
     if (parentDirectory != null) {
       directory = parentDirectory.childDirectory(directoryName);
@@ -250,14 +249,8 @@ class Checkouts {
       );
       directory = fileSystem.directory(checkoutsDirname);
     }
-    // This should always exist.
-    assert(directory.existsSync());
-    if (cleanFirst) {
-      git.run(
-        <String>['clean', '-xffd', '--', directory.path],
-        'clean checkouts directory',
-        workingDirectory: directory.path,
-      );
+    if (!directory.existsSync()) {
+      directory.createSync(recursive: true);
     }
   }
 

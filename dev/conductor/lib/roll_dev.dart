@@ -210,7 +210,12 @@ bool rollDev({
     repository.tag(commit, version.toString(), remoteName);
   }
 
-  repository.updateChannel(commit, remoteName, 'dev');
+  repository.updateChannel(
+    commit,
+    remoteName,
+    'dev',
+    force: force,
+  );
 
   stdio.printStatus(
     'Flutter version $version has been rolled to the "dev" channel at $remoteUrl.',
