@@ -261,8 +261,8 @@ abstract class DeletableChipAttributes {
   /// Whether to use a tooltip on the delete button showing this chip's
   /// [deleteButtonTooltipMessage].
   ///
-  /// If null, defaults to `true`.
-  bool? get useDeleteButtonTooltip;
+  /// Defaults to `true`.
+  bool get useDeleteButtonTooltip;
 
   /// The message to be used for the chip's delete button tooltip.
   ///
@@ -591,6 +591,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
        assert(autofocus != null),
        assert(clipBehavior != null),
        assert(elevation == null || elevation >= 0.0),
+       assert(useDeleteButtonTooltip != null),
        super(key: key);
 
   @override
@@ -622,7 +623,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   @override
   final Color? deleteIconColor;
   @override
-  final bool? useDeleteButtonTooltip;
+  final bool useDeleteButtonTooltip;
   @override
   final String? deleteButtonTooltipMessage;
   @override
@@ -762,6 +763,7 @@ class InputChip extends StatelessWidget
        assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
+       assert(useDeleteButtonTooltip != null),
        super(key: key);
 
   @override
@@ -785,7 +787,7 @@ class InputChip extends StatelessWidget
   @override
   final Color? deleteIconColor;
   @override
-  final bool? useDeleteButtonTooltip;
+  final bool useDeleteButtonTooltip;
   @override
   final String? deleteButtonTooltipMessage;
   @override
@@ -1493,6 +1495,7 @@ class RawChip extends StatefulWidget
        assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
+       assert(useDeleteButtonTooltip != null),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
        super(key: key);
 
@@ -1511,7 +1514,7 @@ class RawChip extends StatefulWidget
   @override
   final Color? deleteIconColor;
   @override
-  final bool? useDeleteButtonTooltip;
+  final bool useDeleteButtonTooltip;
   @override
   final String? deleteButtonTooltipMessage;
   @override
@@ -1591,7 +1594,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   final GlobalKey deleteIconKey = GlobalKey();
 
   bool get hasDeleteButton => widget.onDeleted != null;
-  bool get hasDeleteButtonTooltip => widget.useDeleteButtonTooltip ?? true;
   bool get hasAvatar => widget.avatar != null;
 
   bool get canTap {
@@ -1786,7 +1788,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   }
 
   Widget? _wrapWithTooltip(String? tooltip, VoidCallback? callback, Widget? child) {
-    if(!hasDeleteButtonTooltip){
+    if(!widget.useDeleteButtonTooltip){
       return child;
     }
     if (child == null || callback == null || tooltip == null) {
