@@ -10,9 +10,11 @@ import 'dart:io';
 
 import 'package:file/file.dart' as f;
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart' as fuchsia;
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
-import 'package:vm_service/vm_service.dart' as vms;
+import 'package:vm_service_client/vm_service_client.dart';
+import 'package:web_socket_channel/io.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../../flutter_driver.dart';
@@ -27,15 +29,16 @@ import 'timeline.dart';
 /// An implementation of the Flutter Driver over the vmservice protocol.
 class VMServiceFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
-  /// [serviceClient] and [appIsolate].
+  /// [serviceClient], [_peer] and [appIsolate].
   VMServiceFlutterDriver.connectedTo(
-    this._serviceClient,
-    this._appIsolate, {
-      bool printCommunication = false,
-      bool logCommunicationToFile = true,
-    }) : _printCommunication = printCommunication,
-      _logCommunicationToFile = logCommunicationToFile,
-      _driverId = _nextDriverId++;
+      this._serviceClient,
+      this._peer,
+      this._appIsolate, {
+        bool printCommunication = false,
+        bool logCommunicationToFile = true,
+      }) : _printCommunication = printCommunication,
+        _logCommunicationToFile = logCommunicationToFile,
+        _driverId = _nextDriverId++;
 
   /// Connects to a Flutter application.
   ///
@@ -63,15 +66,14 @@ class VMServiceFlutterDriver extends FlutterDriver {
       if (fuchsiaModuleTarget == null) {
         throw DriverError(
             'No Fuchsia module target has been specified.\n'
-            'Please make sure to specify the FUCHSIA_MODULE_TARGET '
-            'environment variable.'
+                'Please make sure to specify the FUCHSIA_MODULE_TARGET '
+                'environment variable.'
         );
       }
-      final fuchsia.FuchsiaRemoteConnection fuchsiaConnection = await FuchsiaCompat.connect();
-      final List<fuchsia.IsolateRef> refs = await fuchsiaConnection.getMainIsolatesByPattern(fuchsiaModuleTarget);
-      if (refs.isEmpty) {
-        throw DriverError('Failed to get any isolate refs!');
-      }
+      final fuchsia.FuchsiaRemoteConnection fuchsiaConnection =
+      await FuchsiaCompat.connect();
+      final List<fuchsia.IsolateRef> refs =
+      await fuchsiaConnection.getMainIsolatesByPattern(fuchsiaModuleTarget);
       final fuchsia.IsolateRef ref = refs.first;
       isolateNumber = ref.number;
       dartVmServiceUrl = ref.dartVm.uri.toString();
@@ -84,19 +86,21 @@ class VMServiceFlutterDriver extends FlutterDriver {
     if (dartVmServiceUrl == null) {
       throw DriverError(
           'Could not determine URL to connect to application.\n'
-          'Either the VM_SERVICE_URL environment variable should be set, or an explicit '
-          'URL should be provided to the FlutterDriver.connect() method.'
+              'Either the VM_SERVICE_URL environment variable should be set, or an explicit '
+              'URL should be provided to the FlutterDriver.connect() method.'
       );
     }
 
     // Connect to Dart VM services
     _log('Connecting to Flutter application at $dartVmServiceUrl');
-    final vms.VmService client = await vmServiceConnectFunction(dartVmServiceUrl, headers);
+    final VMServiceClientConnection connection =
+    await vmServiceConnectFunction(dartVmServiceUrl, headers: headers);
+    final VMServiceClient client = connection.client;
 
-    Future<vms.IsolateRef> _waitForRootIsolate() async {
-      bool _checkIsolate(vms.IsolateRef ref) => ref.number == isolateNumber.toString();
+    Future<VMIsolateRef> _waitForRootIsolate() async {
+      bool _checkIsolate(VMIsolateRef ref) => ref.number == isolateNumber;
       while (true) {
-        final vms.VM vm = await client.getVM();
+        final VM vm = await client.getVM();
         if (vm.isolates.isEmpty || (isolateNumber != null && !vm.isolates.any(_checkIsolate))) {
           await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
           continue;
@@ -107,7 +111,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       }
     }
 
-    final vms.IsolateRef isolateRef = await _warnIfSlow<vms.IsolateRef>(
+    final VMIsolateRef isolateRef = await _warnIfSlow<VMIsolateRef>(
       future: _waitForRootIsolate(),
       timeout: kUnusuallyLongTimeout,
       message: isolateNumber == null
@@ -115,42 +119,60 @@ class VMServiceFlutterDriver extends FlutterDriver {
         : 'Isolate $isolateNumber is taking an unusually long time to start.',
     );
     _log('Isolate found with number: ${isolateRef.number}');
-    vms.Isolate isolate = await client.getIsolate(isolateRef.id);
 
-    if (isolate.pauseEvent.kind == vms.EventKind.kNone) {
-      isolate = await client.getIsolate(isolateRef.id);
+    VMIsolate isolate = await isolateRef.loadRunnable();
+
+    // TODO(yjbanov): vm_service_client does not support "None" pause event yet.
+    // It is currently reported as null, but we cannot rely on it because
+    // eventually the event will be reported as a non-null object. For now,
+    // list all the events we know about. Later we'll check for "None" event
+    // explicitly.
+    //
+    // See: https://github.com/dart-lang/vm_service_client/issues/4
+    if (isolate.pauseEvent is! VMPauseStartEvent &&
+        isolate.pauseEvent is! VMPauseExitEvent &&
+        isolate.pauseEvent is! VMPauseBreakpointEvent &&
+        isolate.pauseEvent is! VMPauseExceptionEvent &&
+        isolate.pauseEvent is! VMPauseInterruptedEvent &&
+        isolate.pauseEvent is! VMResumeEvent) {
+      isolate = await isolateRef.loadRunnable();
     }
 
     final VMServiceFlutterDriver driver = VMServiceFlutterDriver.connectedTo(
-      client,
-      isolate,
+      client, connection.peer, isolate,
       printCommunication: printCommunication,
       logCommunicationToFile: logCommunicationToFile,
     );
 
+    driver._dartVmReconnectUrl = dartVmServiceUrl;
+
     // Attempts to resume the isolate, but does not crash if it fails because
     // the isolate is already resumed. There could be a race with other tools,
     // such as a debugger, any of which could have resumed the isolate.
-    Future<vms.Success> resumeLeniently() async {
+    Future<dynamic> resumeLeniently() async {
       _log('Attempting to resume isolate');
       // Let subsequent isolates start automatically.
       try {
-        final vms.Response result = await client.setFlag('pause_isolates_on_start', 'false');
-        if (result == null || result.type != 'Success') {
+        final Map<String, dynamic> result =
+            await connection.peer.sendRequest('setFlag', <String, String>{
+          'name': 'pause_isolates_on_start',
+          'value': 'false',
+        }) as Map<String, dynamic>;
+        if (result == null || result['type'] != 'Success') {
           _log('setFlag failure: $result');
         }
       } catch (e) {
         _log('Failed to set pause_isolates_on_start=false, proceeding. Error: $e');
       }
 
-      return client.resume(isolate.id).catchError((dynamic e) {
+      return isolate.resume().catchError((dynamic e) {
         const int vmMustBePausedCode = 101;
-        if (e is vms.RPCError && e.code == vmMustBePausedCode) {
+        if (e is rpc.RpcException && e.code == vmMustBePausedCode) {
           // No biggie; something else must have resumed the isolate
           _log(
               'Attempted to resume an already resumed isolate. This may happen '
-              'when another tool (usually a debugger) resumed the isolate '
-              'before the flutter_driver did.'
+                  'when we lose a race with another tool (usually a debugger) that '
+                  'is connected to the same isolate.'
           );
         } else {
           // Failed to resume due to another reason. Fail hard.
@@ -164,12 +186,10 @@ class VMServiceFlutterDriver extends FlutterDriver {
     /// Looks at the list of loaded extensions for the current [isolateRef], as
     /// well as the stream of added extensions.
     Future<void> waitForServiceExtension() async {
-      await client.streamListen(vms.EventStreams.kIsolate);
-
-      final Future<void> extensionAlreadyAdded = client
-        .getIsolate(isolateRef.id)
-        .then((vms.Isolate isolate) async {
-          if (isolate.extensionRPCs.contains(_flutterExtensionMethodName)) {
+      final Future<void> extensionAlreadyAdded = isolateRef
+        .loadRunnable()
+        .then((VMIsolate isolate) async {
+          if (isolate.extensionRpcs.contains(_flutterExtensionMethodName)) {
             return;
           }
           // Never complete. Rely on the stream listener to find the service
@@ -178,48 +198,59 @@ class VMServiceFlutterDriver extends FlutterDriver {
         });
 
       final Completer<void> extensionAdded = Completer<void>();
-      StreamSubscription<vms.Event> isolateAddedSubscription;
-
-      isolateAddedSubscription = client.onIsolateEvent.listen(
-        (vms.Event data) {
-          if (data.kind == vms.EventKind.kServiceExtensionAdded && data.extensionRPC == _flutterExtensionMethodName) {
+      StreamSubscription<String> isolateAddedSubscription;
+      isolateAddedSubscription = isolate.onExtensionAdded.listen(
+        (String extensionName) {
+          if (extensionName == _flutterExtensionMethodName) {
             extensionAdded.complete();
             isolateAddedSubscription.cancel();
           }
         },
         onError: extensionAdded.completeError,
-        cancelOnError: true,
-      );
+        cancelOnError: true);
 
       await Future.any(<Future<void>>[
         extensionAlreadyAdded,
         extensionAdded.future,
       ]);
-      await isolateAddedSubscription.cancel();
-      await client.streamCancel(vms.EventStreams.kIsolate);
+    }
+
+    /// Tells the Dart VM Service to notify us about "Isolate" events.
+    ///
+    /// This is a workaround for an issue in package:vm_service_client, which
+    /// subscribes to the "Isolate" stream lazily upon subscription, which
+    /// results in lost events.
+    ///
+    /// Details: https://github.com/dart-lang/vm_service_client/issues/17
+    Future<void> enableIsolateStreams() async {
+      await connection.peer.sendRequest('streamListen', <String, String>{
+        'streamId': 'Isolate',
+      });
     }
 
     // Attempt to resume isolate if it was paused
-    if (isolate.pauseEvent.kind == vms.EventKind.kPauseStart) {
+    if (isolate.pauseEvent is VMPauseStartEvent) {
       _log('Isolate is paused at start.');
 
       await resumeLeniently();
-    } else if (isolate.pauseEvent.kind == vms.EventKind.kPauseExit ||
-        isolate.pauseEvent.kind == vms.EventKind.kPauseBreakpoint ||
-        isolate.pauseEvent.kind == vms.EventKind.kPauseException ||
-        isolate.pauseEvent.kind == vms.EventKind.kPauseInterrupted) {
+    } else if (isolate.pauseEvent is VMPauseExitEvent ||
+        isolate.pauseEvent is VMPauseBreakpointEvent ||
+        isolate.pauseEvent is VMPauseExceptionEvent ||
+        isolate.pauseEvent is VMPauseInterruptedEvent) {
       // If the isolate is paused for any other reason, assume the extension is
       // already there.
       _log('Isolate is paused mid-flight.');
       await resumeLeniently();
-    } else if (isolate.pauseEvent.kind == vms.EventKind.kResume) {
+    } else if (isolate.pauseEvent is VMResumeEvent) {
       _log('Isolate is not paused. Assuming application is ready.');
     } else {
       _log(
           'Unknown pause event type ${isolate.pauseEvent.runtimeType}. '
-          'Assuming application is ready.'
+              'Assuming application is ready.'
       );
     }
+
+    await enableIsolateStreams();
 
     // We will never receive the extension event if the user does not register
     // it. If that happens, show a message but continue waiting.
@@ -234,8 +265,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
     final Health health = await driver.checkHealth();
     if (health.status != HealthStatus.ok) {
-      client.dispose();
-      await client.onDone;
+      await client.close();
       throw DriverError('Flutter application health check failed.');
     }
 
@@ -246,6 +276,9 @@ class VMServiceFlutterDriver extends FlutterDriver {
   static int _nextDriverId = 0;
 
   static const String _flutterExtensionMethodName = 'ext.flutter.driver';
+  static const String _setVMTimelineFlagsMethodName = 'setVMTimelineFlags';
+  static const String _getVMTimelineMethodName = 'getVMTimeline';
+  static const String _clearVMTimelineMethodName = 'clearVMTimeline';
   static const String _collectAllGarbageMethodName = '_collectAllGarbage';
 
   // The additional blank line in the beginning is for _log.
@@ -266,19 +299,42 @@ class VMServiceFlutterDriver extends FlutterDriver {
   /// The unique ID of this driver instance.
   final int _driverId;
 
-  @override
-  vms.Isolate get appIsolate => _appIsolate;
-
   /// Client connected to the Dart VM running the Flutter application.
   ///
   /// You can use [VMServiceClient] to check VM version, flags and get
   /// notified when a new isolate has been instantiated. That could be
   /// useful if your application spawns multiple isolates that you
   /// would like to instrument.
-  final vms.VmService _serviceClient;
+  final VMServiceClient _serviceClient;
+
+  /// JSON-RPC client useful for sending raw JSON requests.
+  rpc.Peer _peer;
+
+  String _dartVmReconnectUrl;
+
+  Future<void> _restorePeerConnectionIfNeeded() async {
+    if (!_peer.isClosed || _dartVmReconnectUrl == null) {
+      return;
+    }
+
+    _log(
+        'Peer connection is closed! Trying to restore the connection...'
+    );
+
+    final String webSocketUrl = _getWebSocketUrl(_dartVmReconnectUrl);
+    final WebSocket ws = await WebSocket.connect(webSocketUrl);
+    ws.done.whenComplete(() => _checkCloseCode(ws));
+    _peer = rpc.Peer(
+      IOWebSocketChannel(ws).cast(),
+      onUnhandledError: _unhandledJsonRpcError,
+    )..listen();
+  }
 
   @override
-  vms.VmService get serviceClient => _serviceClient;
+  VMIsolate get appIsolate => _appIsolate;
+
+  @override
+  VMServiceClient get serviceClient => _serviceClient;
 
   @override
   async_io.WebDriver get webDriver => throw UnsupportedError('VMServiceFlutterDriver does not support webDriver');
@@ -286,9 +342,9 @@ class VMServiceFlutterDriver extends FlutterDriver {
   /// The main isolate hosting the Flutter application.
   ///
   /// If you used the [registerExtension] API to instrument your application,
-  /// you can use this [vms.Isolate] to call these extension methods via
+  /// you can use this [VMIsolate] to call these extension methods via
   /// [invokeExtension].
-  final vms.Isolate _appIsolate;
+  final VMIsolate _appIsolate;
 
   /// Whether to print communication between host and app to `stdout`.
   final bool _printCommunication;
@@ -307,11 +363,10 @@ class VMServiceFlutterDriver extends FlutterDriver {
     try {
       final Map<String, String> serialized = command.serialize();
       _logCommunication('>>> $serialized');
-      final Future<Map<String, dynamic>> future = _serviceClient.callServiceExtension(
+      final Future<Map<String, dynamic>> future = _appIsolate.invokeExtension(
         _flutterExtensionMethodName,
-        isolateId: _appIsolate.id,
-        args: serialized,
-      ).then<Map<String, dynamic>>((vms.Response value) => value.json);
+        serialized,
+      ).then<Map<String, dynamic>>((Object value) => value as Map<String, dynamic>);
       response = await _warnIfSlow<Map<String, dynamic>>(
         future: future,
         timeout: command.timeout ?? kUnusuallyLongTimeout,
@@ -344,20 +399,21 @@ class VMServiceFlutterDriver extends FlutterDriver {
   Future<List<int>> screenshot() async {
     await Future<void>.delayed(const Duration(seconds: 2));
 
-    final vms.Response result = await _serviceClient.callMethod('_flutter.screenshot');
-    return base64.decode(result.json['screenshot'] as String);
+    final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot') as Map<String, dynamic>;
+    return base64.decode(result['screenshot'] as String);
   }
 
   @override
   Future<List<Map<String, dynamic>>> getVmFlags() async {
-    final vms.FlagList result = await _serviceClient.getFlagList();
+    await _restorePeerConnectionIfNeeded();
+    final Map<String, dynamic> result = await _peer.sendRequest('getFlagList') as Map<String, dynamic>;
     return result != null
-        ? result.flags.map((vms.Flag flag) => flag.toJson()).toList()
+        ? (result['flags'] as List<dynamic>).cast<Map<String,dynamic>>()
         : const <Map<String, dynamic>>[];
   }
 
-  Future<vms.Timestamp> _getVMTimelineMicros() async {
-    return await _serviceClient.getVMTimelineMicros();
+  Future<Map<String, Object>> _getVMTimelineMicros() async {
+    return await _peer.sendRequest('getVMTimelineMicros') as Map<String, dynamic>;
   }
 
   @override
@@ -368,10 +424,10 @@ class VMServiceFlutterDriver extends FlutterDriver {
     assert(streams != null && streams.isNotEmpty);
     assert(timeout != null);
     try {
-      await _warnIfSlow<vms.Success>(
-        future: _serviceClient.setVMTimelineFlags(
-          _timelineStreamsToString(streams),
-        ),
+      await _warnIfSlow<void>(
+        future: _peer.sendRequest(_setVMTimelineFlagsMethodName, <String, String>{
+          'recordedStreams': _timelineStreamsToString(streams),
+        }),
         timeout: timeout,
         message: 'VM is taking an unusually long time to respond to being told to start tracing...',
       );
@@ -395,27 +451,26 @@ class VMServiceFlutterDriver extends FlutterDriver {
            (startTime != null && endTime != null));
 
     try {
-      await _warnIfSlow<vms.Success>(
-        future: _serviceClient.setVMTimelineFlags(const <String>[]),
+      await _warnIfSlow<void>(
+        future: _peer.sendRequest(_setVMTimelineFlagsMethodName, <String, String>{'recordedStreams': '[]'}),
         timeout: timeout,
         message: 'VM is taking an unusually long time to respond to being told to stop tracing...',
       );
       if (startTime == null) {
-        final vms.Timeline timeline = await _serviceClient.getVMTimeline();
-        return Timeline.fromJson(timeline.json);
+        return Timeline.fromJson(await _peer.sendRequest(_getVMTimelineMethodName) as Map<String, dynamic>);
       }
       const int kSecondInMicros = 1000000;
       int currentStart = startTime;
       int currentEnd = startTime + kSecondInMicros; // 1 second of timeline
       final List<Map<String, Object>> chunks = <Map<String, Object>>[];
       do {
-        final vms.Timeline chunk = await _serviceClient.getVMTimeline(
-          timeOriginMicros: currentStart,
+        final Map<String, Object> chunk = await _peer.sendRequest(_getVMTimelineMethodName, <String, Object>{
+          'timeOriginMicros': currentStart,
           // The range is inclusive, avoid double counting on the chance something
           // aligns on the boundary.
-          timeExtentMicros: kSecondInMicros - 1,
-        );
-        chunks.add(chunk.json);
+          'timeExtentMicros': kSecondInMicros - 1,
+        }) as Map<String, dynamic>;
+        chunks.add(chunk);
         currentStart = currentEnd;
         currentEnd += kSecondInMicros;
       } while (currentStart < endTime);
@@ -463,18 +518,18 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
     await clearTimeline();
 
-    final vms.Timestamp startTimestamp = await _getVMTimelineMicros();
+    final Map<String, Object> startTimestamp = await _getVMTimelineMicros();
     await startTracing(streams: streams);
     await action();
-    final vms.Timestamp endTimestamp = await _getVMTimelineMicros();
+    final Map<String, Object> endTimestamp = await _getVMTimelineMicros();
 
     if (!(await _isPrecompiledMode())) {
       _log(_kDebugWarning);
     }
 
     return stopTracingAndDownloadTimeline(
-      startTime: startTimestamp.timestamp,
-      endTime: endTimestamp.timestamp,
+      startTime: startTimestamp['timestamp'] as int,
+      endTime: endTimestamp['timestamp'] as int,
     );
   }
 
@@ -484,8 +539,8 @@ class VMServiceFlutterDriver extends FlutterDriver {
   }) async {
     assert(timeout != null);
     try {
-      await _warnIfSlow<vms.Success>(
-        future: _serviceClient.clearVMTimeline(),
+      await _warnIfSlow<void>(
+        future: _peer.sendRequest(_clearVMTimelineMethodName, <String, String>{}),
         timeout: timeout,
         message: 'VM is taking an unusually long time to respond to being told to clear its timeline buffer...',
       );
@@ -513,7 +568,10 @@ class VMServiceFlutterDriver extends FlutterDriver {
   @override
   Future<void> forceGC() async {
     try {
-      await _serviceClient.callMethod(_collectAllGarbageMethodName, isolateId: _appIsolate.id);
+      await _peer
+          .sendRequest(_collectAllGarbageMethodName, <String, String>{
+        'isolateId': 'isolates/${_appIsolate.numberAsString}',
+      });
     } catch (error, stackTrace) {
       throw DriverError(
         'Failed to force a GC due to remote error',
@@ -525,8 +583,9 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
   @override
   Future<void> close() async {
-    _serviceClient.dispose();
-    await _serviceClient.onDone;
+    // Don't leak vm_service_client-specific objects, if any
+    await _serviceClient.close();
+    await _peer.close();
   }
 }
 
@@ -542,6 +601,40 @@ void restoreVmServiceConnectFunction() {
   vmServiceConnectFunction = _waitAndConnect;
 }
 
+/// The JSON RPC 2 spec says that a notification from a client must not respond
+/// to the client. It's possible the client sent a notification as a "ping", but
+/// the service isn't set up yet to respond.
+///
+/// For example, if the client sends a notification message to the server for
+/// 'streamNotify', but the server has not finished loading, it will throw an
+/// exception. Since the message is a notification, the server follows the
+/// specification and does not send a response back, but is left with an
+/// unhandled exception. That exception is safe for us to ignore - the client
+/// is signaling that it will try again later if it doesn't get what it wants
+/// here by sending a notification.
+// This may be ignoring too many exceptions. It would be best to rewrite
+// the client code to not use notifications so that it gets error replies back
+// and can decide what to do from there.
+// TODO(dnfield): https://github.com/flutter/flutter/issues/31813
+bool _ignoreRpcError(dynamic error) {
+  if (error is rpc.RpcException) {
+    final rpc.RpcException exception = error;
+    return exception.data == null || exception.data['id'] == null;
+  } else if (error is String && error.startsWith('JSON-RPC error -32601')) {
+    return true;
+  }
+  return false;
+}
+
+void _unhandledJsonRpcError(dynamic error, dynamic stack) {
+  if (_ignoreRpcError(error)) {
+    return;
+  }
+  _log('Unhandled RPC error:\n$error\n$stack');
+  // TODO(dnfield): https://github.com/flutter/flutter/issues/31813
+  // assert(false);
+}
+
 String _getWebSocketUrl(String url) {
   Uri uri = Uri.parse(url);
   final List<String> pathSegments = <String>[
@@ -554,30 +647,40 @@ String _getWebSocketUrl(String url) {
   return uri.toString();
 }
 
+void _checkCloseCode(WebSocket ws) {
+  if (ws.closeCode != 1000 && ws.closeCode != null) {
+    _log('$ws is closed with an unexpected code ${ws.closeCode}');
+  }
+}
+
 /// Waits for a real Dart VM service to become available, then connects using
 /// the [VMServiceClient].
-Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic> headers) async {
+Future<VMServiceClientConnection> _waitAndConnect(
+    String url, {Map<String, dynamic> headers}) async {
   final String webSocketUrl = _getWebSocketUrl(url);
   int attempts = 0;
   while (true) {
+    WebSocket ws1;
+    WebSocket ws2;
     try {
-      final WebSocket socket = await WebSocket.connect(webSocketUrl, headers: headers);
-      final vms.VmService service = vms.VmService(
-        socket,
-        socket.add,
-        log: null,
-        disposeHandler: () async {
-          await socket.close();
-        },
+      ws1 = await WebSocket.connect(webSocketUrl, headers: headers);
+      ws2 = await WebSocket.connect(webSocketUrl, headers: headers);
+
+      ws1.done.whenComplete(() => _checkCloseCode(ws1));
+      ws2.done.whenComplete(() => _checkCloseCode(ws2));
+
+      return VMServiceClientConnection(
+        VMServiceClient(IOWebSocketChannel(ws1).cast()),
+        rpc.Peer(
+          IOWebSocketChannel(ws2).cast(),
+          onUnhandledError: _unhandledJsonRpcError,
+        )..listen(),
       );
-      // This call is to ensure we are able to establish a connection instead of
-      // keeping on trucking and failing farther down the process.
-      await service.getVersion();
-      return service;
     } catch (e) {
-      if (attempts > 5) {
+      await ws1?.close();
+      await ws2?.close();
+      if (attempts > 5)
         _log('It is taking an unusually long time to connect to the VM...');
-      }
       attempts += 1;
       await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
     }
@@ -591,8 +694,8 @@ const Duration _kPauseBetweenReconnectAttempts = Duration(seconds: 1);
 
 // See `timeline_streams` in
 // https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc
-List<String> _timelineStreamsToString(List<TimelineStream> streams) {
-  return streams.map<String>((TimelineStream stream) {
+String _timelineStreamsToString(List<TimelineStream> streams) {
+  final String contents = streams.map<String>((TimelineStream stream) {
     switch (stream) {
       case TimelineStream.all: return 'all';
       case TimelineStream.api: return 'API';
@@ -607,7 +710,8 @@ List<String> _timelineStreamsToString(List<TimelineStream> streams) {
       default:
         throw 'Unknown timeline stream $stream';
     }
-  }).toList();
+  }).join(', ');
+  return '[$contents]';
 }
 
 void _log(String message) {
@@ -632,5 +736,24 @@ Future<T> _warnIfSlow<T>({
   return future;
 }
 
-/// A function that connects to a Dart VM service given the `url` and `headers`.
-typedef VMServiceConnectFunction = Future<vms.VmService> Function(String url, Map<String, dynamic> headers);
+/// Encapsulates connection information to an instance of a Flutter application.
+@visibleForTesting
+class VMServiceClientConnection {
+  /// Creates an instance of this class given a [client] and a [peer].
+  VMServiceClientConnection(this.client, this.peer);
+
+  /// Use this for structured access to the VM service's public APIs.
+  final VMServiceClient client;
+
+  /// Use this to make arbitrary raw JSON-RPC calls.
+  ///
+  /// This object allows reaching into private VM service APIs. Use with
+  /// caution.
+  final rpc.Peer peer;
+}
+
+/// A function that connects to a Dart VM service
+/// with [headers] given the [url].
+typedef VMServiceConnectFunction =
+  Future<VMServiceClientConnection> Function(
+    String url, {Map<String, dynamic> headers});
