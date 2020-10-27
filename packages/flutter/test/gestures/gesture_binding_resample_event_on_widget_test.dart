@@ -48,14 +48,19 @@ void main() {
             timeStamp: epoch + const Duration(milliseconds: 4),
         ),
         ui.PointerData(
-            change: ui.PointerChange.up,
+            change: ui.PointerChange.move,
             physicalX: 40.0,
             timeStamp: epoch + const Duration(milliseconds: 5),
         ),
         ui.PointerData(
-            change: ui.PointerChange.remove,
+            change: ui.PointerChange.up,
             physicalX: 40.0,
             timeStamp: epoch + const Duration(milliseconds: 6),
+        ),
+        ui.PointerData(
+            change: ui.PointerChange.remove,
+            physicalX: 40.0,
+            timeStamp: epoch + const Duration(milliseconds: 7),
         ),
       ],
     );
@@ -76,6 +81,7 @@ void main() {
     GestureBinding.instance!.resamplingEnabled = true;
     const Duration kSamplingOffset = Duration(microseconds: -5500);
     GestureBinding.instance!.samplingOffset = kSamplingOffset;
+    GestureBinding.instance!.samplingInterval = const Duration(milliseconds: 2);
     ui.window.onPointerDataPacket!(packet);
     expect(events.length, 0);
 
