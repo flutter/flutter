@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -13,6 +14,9 @@ import 'theme.dart';
 const double _kMinCircularProgressIndicatorSize = 36.0;
 const int _kIndeterminateLinearDuration = 1800;
 const int _kIndeterminateCircularDuration = 1333 * 2222;
+
+enum _ActivityIndicatorType { material, adaptive }
+
 
 /// A base class for material design progress indicators.
 ///
@@ -433,7 +437,8 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.strokeWidth = 4.0,
     String? semanticsLabel,
     String? semanticsValue,
-  }) : super(
+  }) : _indicatorType = _ActivityIndicatorType.material,
+       super(
          key: key,
          value: value,
          backgroundColor: backgroundColor,
@@ -441,6 +446,34 @@ class CircularProgressIndicator extends ProgressIndicator {
          semanticsLabel: semanticsLabel,
          semanticsValue: semanticsValue,
        );
+
+  /// Creates an adaptive progress indicator that is a 
+  /// [CupertinoActivityIndicator] in iOS and [CircularProgressIndicator] in
+  /// material theme/non-iOS.
+  /// 
+  /// The [key], [value], [backgroundColor], [valueColor], [strokeWidth], 
+  /// [semanticsLabel], and [semanticsValue] will be ignored in iOS.
+  ///
+  /// {@macro flutter.material.progressIndicator.parameters}
+  const CircularProgressIndicator.adaptive({
+    Key? key,
+    double? value,
+    Color? backgroundColor,
+    Animation<Color?>? valueColor,
+    this.strokeWidth = 4.0,
+    String? semanticsLabel,
+    String? semanticsValue,
+  }) : _indicatorType = _ActivityIndicatorType.adaptive,
+       super(
+         key: key,
+         value: value,
+         backgroundColor: backgroundColor,
+         valueColor: valueColor,
+         semanticsLabel: semanticsLabel,
+         semanticsValue: semanticsValue,
+       );
+
+  final _ActivityIndicatorType _indicatorType;
 
   /// The width of the line used to draw the circle.
   final double strokeWidth;
@@ -494,7 +527,11 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     super.dispose();
   }
 
-  Widget _buildIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+  Widget _buildCupertinoIndicator(BuildContext context) {
+    return const CupertinoActivityIndicator();
+  }
+
+  Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
     return widget._buildSemanticsWrapper(
       context: context,
       child: Container(
@@ -522,7 +559,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     return AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget? child) {
-        return _buildIndicator(
+        return _buildMaterialIndicator(
           context,
           _strokeHeadTween.evaluate(_controller),
           _strokeTailTween.evaluate(_controller),
@@ -535,9 +572,27 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
 
   @override
   Widget build(BuildContext context) {
-    if (widget.value != null)
-      return _buildIndicator(context, 0.0, 0.0, 0, 0.0);
-    return _buildAnimation();
+    switch (widget._indicatorType) {
+      case _ActivityIndicatorType.material:
+        if (widget.value != null)
+          return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+        return _buildAnimation();
+      case _ActivityIndicatorType.adaptive:
+        final ThemeData theme = Theme.of(context)!;
+        assert(theme.platform != null);
+        switch (theme.platform) {
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            return _buildCupertinoIndicator(context);
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            if (widget.value != null)
+              return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+            return _buildAnimation();
+        }
+    }
   }
 }
 
