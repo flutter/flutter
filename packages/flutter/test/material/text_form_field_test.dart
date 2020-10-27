@@ -406,35 +406,6 @@ void main() {
     expect(find.text('initialValue'), findsOneWidget);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/68997.
-  testWidgets('reset calls setState only once', (WidgetTester tester) async {
-    int builds = 0;
-    await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: TextFormField(
-                initialValue: 'initialValue',
-                autovalidateMode: AutovalidateMode.always,
-                validator: (String? value) {
-                  builds++;
-                },
-              ),
-            ),
-          ),
-        )
-    );
-
-    expect(builds, 1);
-    await tester.enterText(find.byType(TextFormField), 'changedValue');
-
-    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
-    state.reset();
-    await tester.pump();
-    await tester.pump();
-    expect(builds, 2);
-  });
-
   // Regression test for https://github.com/flutter/flutter/issues/54472.
   testWidgets('didChange changes text fields value', (WidgetTester tester) async {
     await tester.pumpWidget(
