@@ -17,7 +17,6 @@ const int _kIndeterminateCircularDuration = 1333 * 2222;
 
 enum _ActivityIndicatorType { material, adaptive }
 
-
 /// A base class for material design progress indicators.
 ///
 /// This widget cannot be instantiated directly. For a linear progress
