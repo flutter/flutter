@@ -243,15 +243,15 @@ class Cache {
     @required FileSystem fileSystem,
     @required UserMessages userMessages,
   }) {
-    String process(String path) {
+    String normalize(String path) {
       return fileSystem.path.normalize(fileSystem.path.absolute(path));
     }
     if (platform.environment.containsKey(kFlutterRootEnvironmentVariableName)) {
-      return process(platform.environment[kFlutterRootEnvironmentVariableName]);
+      return normalize(platform.environment[kFlutterRootEnvironmentVariableName]);
     }
     try {
       if (platform.script.scheme == 'data') {
-        return process('../..'); // The tool is running as a test.
+        return normalize('../..'); // The tool is running as a test.
       }
       final String Function(String) dirname = fileSystem.path.dirname;
 
@@ -259,7 +259,7 @@ class Cache {
         final String packageConfigPath = Uri.parse(platform.packageConfig).toFilePath(
           windows: platform.isWindows,
         );
-        return process(dirname(dirname(dirname(packageConfigPath))));
+        return normalize(dirname(dirname(dirname(packageConfigPath))));
       }
 
       if (platform.script.scheme == 'file') {
@@ -267,17 +267,17 @@ class Cache {
           windows: platform.isWindows,
         );
         if (fileSystem.path.basename(script) == kSnapshotFileName) {
-          return process(dirname(dirname(fileSystem.path.dirname(script))));
+          return normalize(dirname(dirname(fileSystem.path.dirname(script))));
         }
         if (fileSystem.path.basename(script) == kFlutterToolsScriptFileName) {
-          return process(dirname(dirname(dirname(dirname(script)))));
+          return normalize(dirname(dirname(dirname(dirname(script)))));
         }
       }
     } on Exception catch (error) {
       // There is currently no logger attached since this is computed at startup.
       print(userMessages.runnerNoRoot('$error'));
     }
-    return process('.');
+    return normalize('.');
   }
 
   // Whether to cache artifacts for all platforms. Defaults to only caching
