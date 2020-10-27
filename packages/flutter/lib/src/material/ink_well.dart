@@ -1003,7 +1003,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       widget.onDoubleTap!();
   }
 
-  void _handleLongPress(BuildContext context) {
+  void _handleLongPress() {
     _currentSplash?.confirm();
     _currentSplash = null;
     if (widget.onLongPress != null) {
@@ -1103,7 +1103,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
               onTap: enabled && widget.onTap != null ? _handleTap : null,
               onTapCancel: enabled ? _handleTapCancel : null,
               onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
-              onLongPress: widget.onLongPress != null ? () => _handleLongPress(context) : null,
+              onLongPress: widget.onLongPress != null ? _handleLongPress : null,
               behavior: HitTestBehavior.opaque,
               excludeFromSemantics: widget.excludeFromSemantics,
               child: widget.child,
