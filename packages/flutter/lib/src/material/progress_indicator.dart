@@ -447,11 +447,11 @@ class CircularProgressIndicator extends ProgressIndicator {
          semanticsValue: semanticsValue,
        );
 
-  /// Creates an adaptive progress indicator that is a 
+  /// Creates an adaptive progress indicator that is a
   /// [CupertinoActivityIndicator] in iOS and [CircularProgressIndicator] in
   /// material theme/non-iOS.
-  /// 
-  /// The [key], [value], [backgroundColor], [valueColor], [strokeWidth],
+  ///
+  /// The [value], [backgroundColor], [valueColor], [strokeWidth],
   /// [semanticsLabel], and [semanticsValue] will be ignored in iOS.
   ///
   /// {@macro flutter.material.progressIndicator.parameters}
@@ -528,7 +528,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   Widget _buildCupertinoIndicator(BuildContext context) {
-    return const CupertinoActivityIndicator();
+    return CupertinoActivityIndicator(key: widget.key);
   }
 
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
