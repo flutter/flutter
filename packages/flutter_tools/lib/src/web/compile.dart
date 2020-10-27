@@ -26,7 +26,6 @@ Future<void> buildWeb(
   FlutterProject flutterProject,
   String target,
   BuildInfo buildInfo,
-  bool initializePlatform,
   bool csp,
   String serviceWorkerStrategy,
   bool sourceMaps,
@@ -41,8 +40,8 @@ Future<void> buildWeb(
     outputDirectory.deleteSync(recursive: true);
     outputDirectory.createSync(recursive: true);
   }
-  await injectPlugins(flutterProject, checkProjects: true);
-  final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);
+  await injectPlugins(flutterProject, webPlatform: true);
+  final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();
   try {
     final BuildResult result = await globals.buildSystem.build(const WebServiceWorker(), Environment(
@@ -54,7 +53,6 @@ Future<void> buildWeb(
       defines: <String, String>{
         kBuildMode: getNameForBuildMode(buildInfo.mode),
         kTargetFile: target,
-        kInitializePlatform: initializePlatform.toString(),
         kHasWebPlugins: hasWebPlugins.toString(),
         kDartDefines: encodeDartDefines(buildInfo.dartDefines),
         kCspMode: csp.toString(),

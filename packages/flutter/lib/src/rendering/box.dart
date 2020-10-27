@@ -2021,7 +2021,7 @@ abstract class RenderBox extends RenderObject {
     assert(constraints != null);
     assert(() {
       if (!hasSize) {
-        DiagnosticsNode contract;
+        final DiagnosticsNode contract;
         if (sizedByParent)
           contract = ErrorDescription('Because this RenderBox has sizedByParent set to true, it must set its size in performResize().');
         else

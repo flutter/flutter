@@ -463,7 +463,7 @@ class AlertDialog extends StatelessWidget {
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        label ??= MaterialLocalizations.of(context)?.alertDialogLabel;
+        label ??= MaterialLocalizations.of(context).alertDialogLabel;
     }
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
@@ -814,13 +814,12 @@ class SimpleDialog extends StatelessWidget {
       switch (theme.platform) {
         case TargetPlatform.macOS:
         case TargetPlatform.iOS:
-          label = semanticLabel;
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-          label = semanticLabel ?? MaterialLocalizations.of(context)?.dialogLabel;
+          label = semanticLabel ?? MaterialLocalizations.of(context).dialogLabel;
       }
     }
 
@@ -841,7 +840,7 @@ class SimpleDialog extends StatelessWidget {
         ),
         child: DefaultTextStyle(
           style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6!,
-          child: Semantics(namesRoute: true, child: title),
+          child: Semantics(namesRoute: label == null, child: title),
         ),
       );
     }
@@ -879,6 +878,8 @@ class SimpleDialog extends StatelessWidget {
 
     if (label != null)
       dialogChild = Semantics(
+        scopesRoute: true,
+        explicitChildNodes: true,
         namesRoute: true,
         label: label,
         child: dialogChild,
@@ -955,7 +956,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * <https://material.io/design/components/dialogs.html>
-Future<T> showDialog<T>({
+Future<T?> showDialog<T>({
   required BuildContext context,
   WidgetBuilder? builder,
   bool barrierDismissible = true,
@@ -977,25 +978,19 @@ Future<T> showDialog<T>({
   assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  final ThemeData? theme = Theme.of(context, shadowThemeOnly: true);
+  final CapturedThemes themes = InheritedTheme.capture(from: context, to: Navigator.of(context, rootNavigator: useRootNavigator)!.context);
   return showGeneralDialog(
     context: context,
     pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
       final Widget pageChild = child ?? Builder(builder: builder!);
-      Widget dialog = Builder(
-        builder: (BuildContext context) {
-          return theme != null
-            ? Theme(data: theme, child: pageChild)
-            : pageChild;
-        }
-      );
+      Widget dialog = themes.wrap(pageChild);
       if (useSafeArea) {
         dialog = SafeArea(child: dialog);
       }
       return dialog;
     },
     barrierDismissible: barrierDismissible,
-    barrierLabel: MaterialLocalizations.of(context)!.modalBarrierDismissLabel,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     barrierColor: barrierColor ?? Colors.black54,
     transitionDuration: const Duration(milliseconds: 150),
     transitionBuilder: _buildMaterialDialogTransitions,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -50,7 +48,7 @@ void main() {
       ),
     );
 
-    AnimationController controller;
+    late AnimationController controller;
 
     setUp(() {
       controller = AnimationController(vsync: const TestVSync());
@@ -71,9 +69,9 @@ void main() {
       BoxDecoration actualDecoration = actualBox.decoration as BoxDecoration;
 
       expect(actualDecoration.color, const Color(0xFFFFFFFF));
-      expect(actualDecoration.boxShadow[0].blurRadius, 10.0);
-      expect(actualDecoration.boxShadow[0].spreadRadius, 4.0);
-      expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
+      expect(actualDecoration.boxShadow![0].blurRadius, 10.0);
+      expect(actualDecoration.boxShadow![0].spreadRadius, 4.0);
+      expect(actualDecoration.boxShadow![0].color, const Color(0x66000000));
 
       controller.value = 0.5;
 
@@ -83,16 +81,16 @@ void main() {
 
       expect(actualDecoration.color, const Color(0xFF7F7F7F));
       expect(actualDecoration.border, isA<Border>());
-      final Border border = actualDecoration.border as Border;
+      final Border border = actualDecoration.border! as Border;
       expect(border.left.width, 2.5);
       expect(border.left.style, BorderStyle.solid);
       expect(border.left.color, const Color(0xFF101010));
       expect(actualDecoration.borderRadius, BorderRadius.circular(5.0));
       expect(actualDecoration.shape, BoxShape.rectangle);
-      expect(actualDecoration.boxShadow[0].blurRadius, 5.0);
-      expect(actualDecoration.boxShadow[0].spreadRadius, 2.0);
+      expect(actualDecoration.boxShadow![0].blurRadius, 5.0);
+      expect(actualDecoration.boxShadow![0].spreadRadius, 2.0);
       // Scaling a shadow doesn't change the color.
-      expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
+      expect(actualDecoration.boxShadow![0].color, const Color(0x66000000));
 
       controller.value = 1.0;
 
@@ -126,9 +124,9 @@ void main() {
       BoxDecoration actualDecoration = actualBox.decoration as BoxDecoration;
 
       expect(actualDecoration.color, const Color(0xFFFFFFFF));
-      expect(actualDecoration.boxShadow[0].blurRadius, 10.0);
-      expect(actualDecoration.boxShadow[0].spreadRadius, 4.0);
-      expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
+      expect(actualDecoration.boxShadow![0].blurRadius, 10.0);
+      expect(actualDecoration.boxShadow![0].spreadRadius, 4.0);
+      expect(actualDecoration.boxShadow![0].color, const Color(0x66000000));
 
       controller.value = 0.5;
 
@@ -140,16 +138,16 @@ void main() {
       // tween's end values given the easeOut curve.
       expect(actualDecoration.color, const Color(0xFF505050));
       expect(actualDecoration.border, isA<Border>());
-      final Border border = actualDecoration.border as Border;
+      final Border border = actualDecoration.border! as Border;
       expect(border.left.width, moreOrLessEquals(1.9, epsilon: 0.1));
       expect(border.left.style, BorderStyle.solid);
       expect(border.left.color, const Color(0xFF151515));
-      expect(actualDecoration.borderRadius.resolve(TextDirection.ltr).topLeft.x, moreOrLessEquals(6.8, epsilon: 0.1));
+      expect(actualDecoration.borderRadius!.resolve(TextDirection.ltr).topLeft.x, moreOrLessEquals(6.8, epsilon: 0.1));
       expect(actualDecoration.shape, BoxShape.rectangle);
-      expect(actualDecoration.boxShadow[0].blurRadius, moreOrLessEquals(3.1, epsilon: 0.1));
-      expect(actualDecoration.boxShadow[0].spreadRadius, moreOrLessEquals(1.2, epsilon: 0.1));
+      expect(actualDecoration.boxShadow![0].blurRadius, moreOrLessEquals(3.1, epsilon: 0.1));
+      expect(actualDecoration.boxShadow![0].spreadRadius, moreOrLessEquals(1.2, epsilon: 0.1));
       // Scaling a shadow doesn't change the color.
-      expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
+      expect(actualDecoration.boxShadow![0].color, const Color(0x66000000));
     });
   });
 

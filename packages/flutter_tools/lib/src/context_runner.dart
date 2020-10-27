@@ -88,7 +88,13 @@ Future<T> runInContext<T>(
         androidSdk: globals.androidSdk,
         featureFlags: featureFlags,
       ),
-      ApplicationPackageFactory: () => ApplicationPackageFactory(),
+      ApplicationPackageFactory: () => ApplicationPackageFactory(
+        userMessages: globals.userMessages,
+        processManager: globals.processManager,
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        androidSdk: globals.androidSdk,
+      ),
       Artifacts: () => CachedArtifacts(
         fileSystem: globals.fs,
         cache: globals.cache,
@@ -111,7 +117,6 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
-        timeoutConfiguration: timeoutConfiguration,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(
         globals.cocoaPods,
@@ -197,13 +202,11 @@ Future<T> runInContext<T>(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: globals.outputPreferences,
-            timeoutConfiguration: timeoutConfiguration,
           )
         : StdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: globals.outputPreferences,
-            timeoutConfiguration: timeoutConfiguration,
           ),
       MacOSWorkflow: () => MacOSWorkflow(
         featureFlags: featureFlags,
@@ -237,13 +240,10 @@ Future<T> runInContext<T>(
         botDetector: globals.botDetector,
         platform: globals.platform,
         usage: globals.flutterUsage,
-        // Avoid a circular dependency by making this access lazy.
-        toolStampFile: () => globals.cache.getStampFileFor('flutter_tools'),
       ),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
-      TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(
         runningOnBot: runningOnBot,
       ),

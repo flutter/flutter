@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
@@ -71,7 +70,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
       id: 'test-breakpoint',
       location: vm_service.SourceLocation(
         tokenPos: 0,
-        script: vm_service.ScriptRef(id: 'test-script', uri: 'lib/foo.dart'),
+        script: vm_service.ScriptRef(id: 'test-script', uri: 'foo.dart'),
       ),
       resolved: true,
     ),
@@ -411,7 +410,7 @@ void main() {
         method: kRunInViewMethod,
         args: <String, Object>{
           'viewId': fakeFlutterView.id,
-          'mainScript': 'lib/main.dart.dill',
+          'mainScript': 'main.dart.dill',
           'assetDirectory': 'build/flutter_assets',
         }
       ),
@@ -606,7 +605,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'lib/main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill'
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -699,7 +698,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'lib/main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill'
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -795,7 +794,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'lib/main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill'
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -875,7 +874,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'lib/main.dart.incremental.dill',
+          'rootLibUri': 'main.dart.incremental.dill',
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -992,7 +991,7 @@ void main() {
         method: kRunInViewMethod,
         args: <String, Object>{
           'viewId': fakeFlutterView.id,
-          'mainScript': 'lib/main.dart.dill',
+          'mainScript': 'main.dart.dill',
           'assetDirectory': 'build/flutter_assets',
         },
       ),
@@ -1074,7 +1073,7 @@ void main() {
         method: kRunInViewMethod,
         args: <String, Object>{
           'viewId': fakeFlutterView.id,
-          'mainScript': 'lib/main.dart.dill',
+          'mainScript': 'main.dart.dill',
           'assetDirectory': 'build/flutter_assets',
         },
       ),
@@ -1136,7 +1135,7 @@ void main() {
         method: kRunInViewMethod,
         args: <String, Object>{
           'viewId': fakeFlutterView.id,
-          'mainScript': 'lib/main.dart.dill',
+          'mainScript': 'main.dart.dill',
           'assetDirectory': 'build/flutter_assets',
         },
       ),
@@ -1170,7 +1169,7 @@ void main() {
         method: kRunInViewMethod,
         args: <String, Object>{
           'viewId': fakeFlutterView.id,
-          'mainScript': 'lib/main.dart.swap.dill',
+          'mainScript': 'main.dart.swap.dill',
           'assetDirectory': 'build/flutter_assets',
         },
       ),
@@ -1204,7 +1203,7 @@ void main() {
         method: kRunInViewMethod,
         args: <String, Object>{
           'viewId': fakeFlutterView.id,
-          'mainScript': 'lib/main.dart.dill',
+          'mainScript': 'main.dart.dill',
           'assetDirectory': 'build/flutter_assets',
         },
       ),
@@ -1319,7 +1318,8 @@ void main() {
   testUsingContext('ResidentRunner can run source generation', () => testbed.run(() async {
     final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
-    arbFile.writeAsStringSync('''{
+    arbFile.writeAsStringSync('''
+{
   "helloWorld": "Hello, World!",
   "@helloWorld": {
     "description": "Sample description"
@@ -1339,7 +1339,8 @@ void main() {
     // to app_en.arb.
     final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
       ..createSync(recursive: true);
-    arbFile.writeAsStringSync('''{
+    arbFile.writeAsStringSync('''
+{
   "helloWorld": "Hello, World!",
   "@helloWorld": {
     "description": "Sample description"
@@ -1457,7 +1458,7 @@ void main() {
     ]);
     await residentRunner.writeSkSL();
 
-    expect(testLogger.statusText, contains('No data was receieved'));
+    expect(testLogger.statusText, contains('No data was received'));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
@@ -2284,6 +2285,38 @@ void main() {
     expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill.track.dill')).readAsString(), 'ABC');
   }));
 
+  testUsingContext('HotRunner copies compiled app.dill to cache during startup with --sound-null-safety', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+    ]);
+    setWsAddress(testUri, fakeVmServiceHost.vmService);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        trackWidgetCreation: true,
+        nullSafetyMode: NullSafetyMode.sound,
+      )),
+    );
+    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    await residentRunner.run();
+
+    expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill.sound.track.dill')).readAsString(), 'ABC');
+  }));
+
 
   testUsingContext('HotRunner unforwards device ports', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
@@ -2384,7 +2417,6 @@ void main() {
         treeShakeIcons: false,
         nullSafetyMode: NullSafetyMode.unsound,
       ),
-      flutterProject: FlutterProject.current(),
       target: null,
       platform: FakePlatform(operatingSystem: 'linux'),
     )).generator as DefaultResidentCompiler;
@@ -2419,7 +2451,6 @@ void main() {
         treeShakeIcons: false,
         extraFrontEndOptions: <String>['--enable-experiment=non-nullable'],
       ),
-      flutterProject: FlutterProject.current(),
       target: null,
       platform: FakePlatform(operatingSystem: 'linux'),
     )).generator as DefaultResidentCompiler;
@@ -2454,7 +2485,6 @@ void main() {
         treeShakeIcons: false,
         extraFrontEndOptions: <String>[],
       ),
-      flutterProject: FlutterProject.current(),
       target: null, platform: null,
     )).generator as DefaultResidentCompiler;
 

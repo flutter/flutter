@@ -20,7 +20,6 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 // Defined globally for mocks to use.
@@ -145,7 +144,6 @@ void main() {
 
   testUsingContext('Fuchsia build parts fit together right', () async {
     final BuildCommand command = BuildCommand();
-    applyMocksToCommand(command);
     const String appName = 'app_name';
     fileSystem
         .file(fileSystem.path.join('fuchsia', 'meta', '$appName.cmx'))

@@ -162,13 +162,13 @@ class ChromiumLauncher {
 
   /// Launch a Chromium browser to a particular `host` page.
   ///
-  /// `headless` defaults to false, and controls whether we open a headless or
-  /// a `headfull` browser.
+  /// [headless] defaults to false, and controls whether we open a headless or
+  /// a "headfull" browser.
   ///
-  /// `debugPort` is Chrome's debugging protocol port. If null, a random free
+  /// [debugPort] is Chrome's debugging protocol port. If null, a random free
   /// port is picked automatically.
   ///
-  /// `skipCheck` does not attempt to make a devtools connection before returning.
+  /// [skipCheck] does not attempt to make a devtools connection before returning.
   Future<Chromium> launch(String url, {
     bool headless = false,
     int debugPort,

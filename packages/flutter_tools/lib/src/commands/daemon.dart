@@ -466,7 +466,6 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      flutterProject: flutterProject,
       target: target,
       buildInfo: options.buildInfo,
       platform: globals.platform,
@@ -1025,8 +1024,6 @@ class NotifyingLogger extends DelegatingLogger {
     assert(timeout != null);
     printStatus(message);
     return SilentStatus(
-      timeout: timeout,
-      timeoutConfiguration: timeoutConfiguration,
       stopwatch: Stopwatch(),
     );
   }
@@ -1161,8 +1158,6 @@ class AppRunLogger extends DelegatingLogger {
     );
 
     _status = SilentStatus(
-      timeout: timeout,
-      timeoutConfiguration: timeoutConfiguration,
       onFinish: () {
         _status = null;
         _sendProgressEvent(

@@ -126,7 +126,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
 
 class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> {
   void _handleFocusChange(bool focused) {
-    bool inTraditionalMode;
+    final bool inTraditionalMode;
     switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
         inTraditionalMode = false;
@@ -166,7 +166,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
 
   @override
   Widget build(BuildContext context) {
-    CurvedAnimation opacity;
+    final CurvedAnimation opacity;
     final double unit = 0.5 / (widget.route.items.length + 1.5);
     if (widget.itemIndex == widget.route.selectedIndex) {
       opacity = CurvedAnimation(parent: widget.route.animation!, curve: const Threshold(0.0));
@@ -253,7 +253,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
     // When the menu is dismissed we just fade the entire thing out
     // in the first 0.25s.
     assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final _DropdownRoute<T> route = widget.route;
     final List<Widget> children = <Widget>[
       for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex)
@@ -349,7 +349,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
       return true;
     }());
     assert(textDirection != null);
-    double left;
+    final double left;
     switch (textDirection!) {
       case TextDirection.rtl:
         left = buttonRect.right.clamp(0.0, size.width) - childSize.width;
@@ -402,7 +402,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     required this.buttonRect,
     required this.selectedIndex,
     this.elevation = 8,
-    this.theme,
+    required this.capturedThemes,
     required this.style,
     this.barrierLabel,
     this.itemHeight,
@@ -415,7 +415,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final Rect buttonRect;
   final int selectedIndex;
   final int elevation;
-  final ThemeData? theme;
+  final CapturedThemes capturedThemes;
   final TextStyle style;
   final double? itemHeight;
   final Color? dropdownColor;
@@ -447,7 +447,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           buttonRect: buttonRect,
           selectedIndex: selectedIndex,
           elevation: elevation,
-          theme: theme,
+          capturedThemes: capturedThemes,
           style: style,
           dropdownColor: dropdownColor,
         );
@@ -533,7 +533,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     required this.buttonRect,
     required this.selectedIndex,
     this.elevation = 8,
-    this.theme,
+    required this.capturedThemes,
     this.style,
     required this.dropdownColor,
   }) : super(key: key);
@@ -545,7 +545,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   final Rect buttonRect;
   final int selectedIndex;
   final int elevation;
-  final ThemeData? theme;
+  final CapturedThemes capturedThemes;
   final TextStyle? style;
   final Color? dropdownColor;
 
@@ -565,16 +565,13 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     }
 
     final TextDirection? textDirection = Directionality.of(context);
-    Widget menu = _DropdownMenu<T>(
+    final Widget menu = _DropdownMenu<T>(
       route: route,
       padding: padding.resolve(textDirection),
       buttonRect: buttonRect,
       constraints: constraints,
       dropdownColor: dropdownColor,
     );
-
-    if (theme != null)
-      menu = Theme(data: theme!, child: menu);
 
     return MediaQuery.removePadding(
       context: context,
@@ -590,7 +587,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
               route: route,
               textDirection: textDirection,
             ),
-            child: menu,
+            child: capturedThemes.wrap(menu),
           );
         },
       ),
@@ -1207,6 +1204,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       )
     ];
 
+    final NavigatorState navigator = Navigator.of(context)!;
     assert(_dropdownRoute == null);
     _dropdownRoute = _DropdownRoute<T>(
       items: menuItems,
@@ -1214,14 +1212,14 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       padding: _kMenuItemPadding.resolve(textDirection),
       selectedIndex: _selectedIndex ?? 0,
       elevation: widget.elevation,
-      theme: Theme.of(context, shadowThemeOnly: true),
+      capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
       style: _textStyle!,
-      barrierLabel: MaterialLocalizations.of(context)!.modalBarrierDismissLabel,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       itemHeight: widget.itemHeight,
       dropdownColor: widget.dropdownColor,
     );
 
-    Navigator.push(context, _dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
+    navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
       if (!mounted || newValue == null)
         return;
@@ -1303,16 +1301,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
-    List<Widget> items;
-    if (_enabled) {
-      items = widget.selectedItemBuilder == null
-        ? List<Widget>.from(widget.items!)
-        : widget.selectedItemBuilder!(context);
-    } else {
-      items = widget.selectedItemBuilder == null
-        ? <Widget>[]
-        : widget.selectedItemBuilder!(context);
-    }
+    // We should explicitly type the items list to be a list of <Widget>,
+    // otherwise, no explicit type adding items maybe trigger a crash/failure
+    // when hint and selectedItemBuilder are provided.
+    final List<Widget> items = widget.selectedItemBuilder == null
+      ? (_enabled ? List<Widget>.from(widget.items!) : <Widget>[])
+      : List<Widget>.from(widget.selectedItemBuilder!(context));
 
     int? hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
@@ -1337,7 +1331,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // If value is null (then _selectedIndex is null) or if disabled then we
     // display the hint or nothing at all.
     final int? index = _enabled ? (_selectedIndex ?? hintIndex) : hintIndex;
-    Widget innerItemsWidget;
+    final Widget innerItemsWidget;
     if (items.isEmpty) {
       innerItemsWidget = Container();
     } else {
