@@ -109,7 +109,6 @@ class Directionality extends InheritedWidget {
   /// ```
   // TODO(goderbauer): Make this non-null when customers have upgraded to Directionality.maybeOf.
   static TextDirection? of(BuildContext context) {
-    assert(debugCheckHasDirectionality(context));
     final Directionality? widget = context.dependOnInheritedWidgetOfExactType<Directionality>();
     return widget?.textDirection;
   }
