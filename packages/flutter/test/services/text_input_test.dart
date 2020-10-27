@@ -5,9 +5,16 @@
 
 import 'dart:convert' show utf8;
 import 'dart:convert' show jsonDecode;
+import 'dart:ui' show
+  FontWeight,
+  Size,
+  Rect,
+  TextAlign,
+  TextDirection;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import '../flutter_test_alternative.dart';
 
 void main() {
@@ -436,6 +443,92 @@ void main() {
       isTrue,
     );
   });
+
+  group('TextInputSource', () {
+    late FakeTextInputClient client;
+
+    setUp(() {
+      client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    });
+
+    tearDown(() {
+      TextInput.detach(client);
+      TextInput.setSource(TextInput.defaultSource);
+      TextInput.setChannel(SystemChannels.textInput);
+      TextInputConnection.debugResetId();
+    });
+
+    test('creates a correct connection instance', () {
+      TextInput.setSource(FakeTextInputSource());
+      final TextInputConnection connection = TextInput.attach(client, client.configuration);
+      expect(connection is FakeTextInputConnection, isTrue);
+    });
+
+    test('can be reset back to default', () {
+      TextInput.setSource(TextInput.defaultSource);
+      final TextInputConnection connection = TextInput.attach(client, client.configuration);
+      expect(connection is! FakeTextInputConnection, isTrue);
+     });
+
+    test('calls the excepted methods', () async {
+      final FakeTextInputSource source = FakeTextInputSource();
+      TextInput.setSource(source);
+      final FakeTextInputConnection connection = TextInput.attach(client, client.configuration) as FakeTextInputConnection;
+      expect(source.methodCalls, <String>['init', 'attach']);
+      expect(connection.methodCalls, <String>['setClient']);
+
+      TextInput.detach(client);
+      expect(source.methodCalls, <String>['init', 'attach', 'detach']);
+      expect(connection.methodCalls, <String>['setClient', 'clearClient']);
+
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+      await binding.runAsync(() async {});
+      await expectLater(connection.methodCalls, <String>['setClient', 'clearClient', 'hide']);
+    });
+
+    test('detaches the old client when a new client is attached',() {
+      final FakeTextInputSource source = FakeTextInputSource();
+      TextInput.setSource(source);
+
+      final FakeTextInputConnection connection1 = TextInput.attach(client, client.configuration) as FakeTextInputConnection;
+      expect(source.methodCalls, <String>['init', 'attach']);
+      expect(connection1.methodCalls, <String>['setClient']);
+
+      final FakeTextInputClient client2 = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+
+      final FakeTextInputConnection connection2 = TextInput.attach(client2, client2.configuration) as FakeTextInputConnection;
+      expect(source.methodCalls, <String>['init', 'attach', 'detach', 'attach']);
+      expect(connection1.methodCalls, <String>['setClient', 'clearClient']);
+      expect(connection2.methodCalls, <String>['setClient']);
+    });
+
+    test('cleans up previous source', () {
+      final FakeTextInputSource source1 = FakeTextInputSource();
+      TextInput.setSource(source1);
+      expect(source1.methodCalls, <String>['init']);
+
+      final FakeTextInputSource source2 = FakeTextInputSource();
+      TextInput.setSource(source2);
+      expect(source2.methodCalls, <String>['init']);
+      expect(source1.methodCalls, <String>['init', 'cleanup']);
+    });
+
+    test('informs the attached client when the source is changed', () {
+      TextInput.setSource(FakeTextInputSource());
+      TextInput.attach(client, client.configuration);
+      TextInput.setSource(FakeTextInputSource());
+      expect(client.latestMethodCall, 'didUpdateInputSource');
+    });
+
+    test('ignores text input method channel', () {
+      final FakeTextChannel fakeTextChannel = FakeTextChannel((MethodCall call) async {});
+      TextInput.setChannel(fakeTextChannel);
+      TextInput.setSource(FakeTextInputSource());
+      TextInput.attach(client, client.configuration);
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState', null));
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[]);
+    });
+  });
 }
 
 class FakeTextInputClient implements TextInputClient {
@@ -472,6 +565,11 @@ class FakeTextInputClient implements TextInputClient {
   @override
   void connectionClosed() {
     latestMethodCall = 'connectionClosed';
+  }
+
+  @override
+  void didUpdateInputSource(TextInputSource source) {
+    latestMethodCall = 'didUpdateInputSource';
   }
 
   @override
@@ -545,5 +643,109 @@ class FakeTextChannel implements MethodChannel {
     if (hasError) {
       fail('Calls did not match.');
     }
+  }
+}
+
+class FakeTextInputConnection extends TextInputConnection {
+  FakeTextInputConnection(TextInputClient client) : super(client);
+
+  final List<String> methodCalls = <String>[];
+
+  @override
+  void show() {
+    methodCalls.add('show');
+  }
+
+  @override
+  void hide() {
+    methodCalls.add('hide');
+  }
+
+  @override
+  void requestAutofill() {
+    methodCalls.add('requestAutofill');
+  }
+
+  @override
+  void setClient(TextInputConfiguration configuration) {
+    methodCalls.add('setClient');
+  }
+
+  @override
+  void clearClient() {
+    methodCalls.add('clearClient');
+  }
+
+  @override
+  void updateConfig(TextInputConfiguration configuration) {
+    methodCalls.add('updateConfig');
+  }
+
+  @override
+  void setEditingState(TextEditingValue value) {
+    methodCalls.add('setEditingState');
+  }
+
+  @override
+  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+    methodCalls.add('setEditableSizeAndTransform');
+  }
+
+  @override
+  void setComposingRect(Rect rect) {
+    methodCalls.add('setComposingRect');
+  }
+
+  @override
+  void setStyle({
+    required String? fontFamily,
+    required double? fontSize,
+    required FontWeight? fontWeight,
+    required TextDirection textDirection,
+    required TextAlign textAlign,
+  }) {
+    methodCalls.add('setStyle');
+  }
+
+  @override
+  void close() {
+    methodCalls.add('close');
+  }
+
+  @override
+  void connectionClosedReceived() {
+    methodCalls.add('connectionClosedReceived');
+  }
+}
+
+class FakeTextInputSource extends TextInputSource {
+  final List<String> methodCalls = <String>[];
+  late FakeTextInputConnection latestConnection;
+
+  @override
+  void init() {
+    methodCalls.add('init');
+  }
+
+  @override
+  void cleanup() {
+    methodCalls.add('cleanup');
+  }
+
+  @override
+  TextInputConnection attach(TextInputClient client) {
+    methodCalls.add('attach');
+    latestConnection = FakeTextInputConnection(client);
+    return latestConnection;
+  }
+
+  @override
+  void detach(TextInputClient client) {
+    methodCalls.add('detach');
+  }
+
+  @override
+  void finishAutofillContext({bool shouldSave = true}) {
+    methodCalls.add('finishAutofillContext');
   }
 }

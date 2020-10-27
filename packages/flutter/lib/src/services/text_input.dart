@@ -856,6 +856,17 @@ abstract class TextInputClient {
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
   void connectionClosed();
+
+  /// Framework notified of a text input [source] that has been updated.
+  ///
+  /// [TextInputClient] should re-attach itself if it wants to show the text
+  /// input control from the new text input source.
+  ///
+  /// See also:
+  ///
+  ///  * [TextInput.attach], a method used to re-attach the client.
+  ///  * [TextInput.setSource], a method used to change the text input source.
+  void didUpdateInputSource(TextInputSource source);
 }
 
 /// An interface for interacting with a text input control.
@@ -864,12 +875,26 @@ abstract class TextInputClient {
 /// over the [SystemChannels.textInput] method channel. See [SystemChannels.textInput]
 /// for more details about the method channel messages.
 ///
+/// ### Connect to a different input source
+///
+/// The default [TextInputConnection] can be replaced by setting a custom
+/// [TextInputSource] with [TextInput.setSource]. The text input source is used
+/// to create [TextInputConnection] instances whenever a [TextInputClient] is
+/// attached.
+///
+/// A custom implementation of the [TextInputConnection] interface can override
+/// the default method channel connection, and delegate text input calls from the
+/// framework (i.e. the attached [TextInputClient]), for example, to an in-app
+/// virtual keyboard on platforms that don't have one provided by the system.
+///
 /// See also:
 ///
 ///  * [TextInput.attach], a method used to establish a [TextInputConnection]
 ///    between the system's text input and a [TextInputClient].
 ///  * [EditableText], a [TextInputClient] that connects to and interacts with
 ///    the system's text input using a [TextInputConnection].
+///  * [TextInput.setSource], used to register a text input source for creating
+///    creating [TextInputConnection] instances.
 abstract class TextInputConnection {
   /// Creates a connection for a [TextInputClient].
   TextInputConnection(this._client)
@@ -1300,9 +1325,31 @@ class TextInput {
   @visibleForTesting
   static void setChannel(MethodChannel newChannel) {
     assert(() {
-      _TextInputSource.setChannel(newChannel);
+      _DefaultTextInputSource.setChannel(newChannel);
       return true;
     }());
+  }
+
+  /// Sets the [TextInputSource] used to attach and detach text input clients.
+  /// The text input source is responsible for creating [TextInputConnection]
+  /// instances that are used to communicate with the currently attached
+  /// [TextInputClient].
+  ///
+  /// The default text input source can be restored by passing
+  /// [TextInput.defaultSource].
+  ///
+  /// If there is a [TextInputClient] attached at the time of calling
+  /// [TextInput.setSource], the current text input client is notified via
+  /// [TextInputClient.didUpdateInputSource].
+  ///
+  /// See also:
+  ///
+  ///  * [TextInput.defaultSource], the default text input source instance.
+  static void setSource(TextInputSource source) {
+    _instance._currentSource.cleanup();
+    _instance._currentSource = source..init();
+    final TextInputClient? client = _instance._currentConnection?._client;
+    client?.didUpdateInputSource(source);
   }
 
   static final TextInput _instance = TextInput._();
@@ -1384,7 +1431,20 @@ class TextInput {
     return true;
   }
 
-  final _TextInputSource _currentSource = _TextInputSource();
+  /// The default instance of [TextInputSource].
+  ///
+  /// The default text input source creates [TextInputConnection] instances that
+  /// communicate with the platform text input plugin over the
+  /// [SystemChannels.textInput] method channel. See [SystemChannels.textInput]
+  /// for more details about the method channel messages.
+  ///
+  /// See also:
+  ///
+  ///  * [TextInput.setSource], a method to set the current text input source.
+  static final TextInputSource defaultSource = _DefaultTextInputSource();
+
+  TextInputSource _currentSource = defaultSource;
+
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
 
@@ -1501,28 +1561,84 @@ class TextInput {
   }
 }
 
-class _TextInputSource {
+/// An interface for attaching and detaching [TextInputClient].
+///
+/// [TextInputSource] creates is responsible for creating [TextInputConnection]
+/// instances that are used to communicate with the currently attached
+/// [TextInputClient].
+///
+/// The default text input source, available via [TextInput.defaultSource],
+/// creates [TextInputConnection] instances that communicate with the platform
+/// text input plugin over the [SystemChannels.textInput] method channel. See
+/// [SystemChannels.textInput] for more details about the text input method
+/// channel messages.
+///
+/// ### Custom text input sources
+///
+/// A custom text input source can delegate text input calls from the framework
+/// (i.e. the attached [TextInputClient]), for example, to an in-app virtual
+/// keyboard on platforms that don't have one provided by the system.
+///
+/// See also:
+///
+///  * [TextInput.setSource], a method for setting the desired text input source.
+abstract class TextInputSource {
+  /// TODO(jpnurmi)
+  void init();
+
+  /// TODO(jpnurmi)
+  void cleanup();
+
+  /// Attaches the current [TextInputClient] and creates a [TextInputConnection]
+  /// used to interact with the text input control.
+  ///
+  /// This method is called by the framework when a [client] should be attached.
+  ///
+  /// See also:
+  ///
+  ///  * [TextInput.attach]
+  TextInputConnection attach(TextInputClient client);
+
+  /// Detaches the current [TextInputClient] from the text input control.
+  ///
+  /// This method is called by the framework when a [client] should be detached.
+  ///
+  /// See also:
+  ///
+  ///  * [TextInput.attach]
+  void detach(TextInputClient client);
+
+  /// TODO(jpnurmi)
+  void finishAutofillContext({bool shouldSave = true});
+}
+
+class _DefaultTextInputSource implements TextInputSource {
   static MethodChannel? _channel;
 
   static void setChannel(MethodChannel newChannel) {
     _channel = newChannel..setMethodCallHandler(_handleTextInputInvocation);
   }
 
+  @override
   void init() {
     _channel ??= SystemChannels.textInput;
     _channel!.setMethodCallHandler(_handleTextInputInvocation);
   }
 
+  @override
   void cleanup() {
     _channel!.setMethodCallHandler((MethodCall methodCall) async {});
   }
 
+  @override
   TextInputConnection attach(TextInputClient client) {
     return _TextInputChannelConnection(client, _channel!);
   }
 
+  @override
   void detach(TextInputClient client) {}
 
+  @override
   void finishAutofillContext({bool shouldSave = true}) {
     _channel!.invokeMethod<void>(
       'TextInput.finishAutofillContext',

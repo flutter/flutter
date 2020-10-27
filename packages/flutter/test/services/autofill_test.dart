@@ -137,6 +137,11 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
+  void didUpdateInputSource(TextInputSource source) {
+    latestMethodCall = 'didUpdateInputSource';
+  }
+
+  @override
   void showAutocorrectionPromptRect(int start, int end) {
     latestMethodCall = 'showAutocorrectionPromptRect';
   }

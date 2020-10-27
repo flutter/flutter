@@ -2054,6 +2054,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
+  void didUpdateInputSource(TextInputSource source) {
+    if (_hasFocus && _hasInputConnection) {
+      _textInputConnection!.hide();
+      _closeInputConnectionIfNeeded();
+      _openInputConnection();
+    }
+  }
+
+  @override
   void connectionClosed() {
     if (_hasInputConnection) {
       _textInputConnection = null;
