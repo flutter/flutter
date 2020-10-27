@@ -1099,7 +1099,52 @@ void main() {
       expect(baseLocalizationsFileContents, contains('/// Title for the application.'));
       expect(baseLocalizationsFileContents, contains('''
   /// In en, this message translates to:
-  /// **"Title"**'''));
+  /// **'Title'**'''));
+    });
+
+    test('template message translation handles newline characters', () {
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(r'''
+{
+  "title": "Title \n of the application",
+  "@title": {
+    "description": "Title for the application."
+  }
+}''');
+      l10nDirectory.childFile(esArbFileName)
+        .writeAsStringSync(singleEsMessageArbFileString);
+
+
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles();
+      } on Exception catch (e) {
+        fail('Generating output files should not fail: $e');
+      }
+
+      final File baseLocalizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart')
+      );
+      expect(baseLocalizationsFile.existsSync(), isTrue);
+
+      final String baseLocalizationsFileContents = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart')
+      ).readAsStringSync();
+      expect(baseLocalizationsFileContents, contains('/// Title for the application.'));
+      expect(baseLocalizationsFileContents, contains(r'''
+  /// In en, this message translates to:
+  /// **'Title \n of the application'**'''));
     });
 
     test('message with placeholders - should generate code comment with description and template message translation', () {
@@ -1153,7 +1198,7 @@ void main() {
       expect(baseLocalizationsFileContents, contains('/// The price of an online shopping cart item.'));
       expect(baseLocalizationsFileContents, contains(r'''
   /// In en, this message translates to:
-  /// **"The price of this item is: ${price}"**'''));
+  /// **'The price of this item is: \${price}'**'''));
     });
 
     test('should generate a file per language', () {
