@@ -1,10 +1,16 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+
+import 'colors.dart';
+import 'interface_level.dart';
 
 /// Value extracted from the official sketch iOS UI kit
 /// It is the top offset that will be displayed from the bottom route

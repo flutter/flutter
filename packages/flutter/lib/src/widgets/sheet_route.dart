@@ -1,8 +1,19 @@
-import 'dart:ui';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
+import 'dart:ui';
+import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
+
+import 'basic.dart';
+import 'debug.dart';
+import 'framework.dart';
+import 'navigator.dart';
+import 'pages.dart';
+import 'routes.dart';
 import 'sheet.dart';
+import 'ticker_provider.dart';
 
 // TODO: Arbitrary values, keep them or make SheetRoute abstract
 const Duration _kSheetTransitionDuration = Duration(milliseconds: 400);

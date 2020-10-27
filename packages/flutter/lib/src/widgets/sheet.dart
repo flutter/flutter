@@ -1,8 +1,26 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+
+import 'basic.dart';
+import 'framework.dart';
+import 'gesture_detector.dart';
+import 'layout_builder.dart';
+import 'media_query.dart';
+import 'primary_scroll_controller.dart';
+import 'scroll_context.dart';
+import 'scroll_controller.dart';
+import 'scroll_physics.dart';
+import 'scroll_position.dart';
+import 'scroll_position_with_single_context.dart';
+import 'scroll_simulation.dart';
+import 'ticker_provider.dart';
+import 'transitions.dart';
 
 // TODO(jamesblasco): Arbitrary values
 const double _kWillPopThreshold = 0.8;
