@@ -803,11 +803,14 @@ class MediaQuery extends InheritedWidget {
   /// MediaQueryData media = MediaQuery.of(context);
   /// ```
   ///
-  /// If there is no [MediaQuery] in scope, this will throw an exception in
-  /// release builds, and throw a [FlutterError] in debug builds.
+  /// If there is no [MediaQuery] in scope, this will throw a [TypeError]
+  /// exception in release builds, and throw a descriptive [FlutterError] in
+  /// debug builds.
   ///
-  /// The deprecated `nullOk` argument is ignored, and will assert if set to true.
-  /// Use [maybeOf] instead of setting `nullOk` to true.
+  /// See also:
+  ///
+  ///  * [maybeOf], which doesn't throw or assert if it doesn't find a
+  ///    [MediaQuery] ancestor, it returns null instead.
   static MediaQueryData of(BuildContext context) {
     assert(context != null);
     assert(debugCheckHasMediaQuery(context));
@@ -836,6 +839,11 @@ class MediaQuery extends InheritedWidget {
   ///   // Do something else instead.
   /// }
   /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [of], which will throw if it doesn't find a [MediaQuery] ancestor,
+  ///    instead of returning null.
   static MediaQueryData? maybeOf(BuildContext context) {
     assert(context != null);
     return context.dependOnInheritedWidgetOfExactType<MediaQuery>()?.data;

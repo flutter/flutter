@@ -82,22 +82,11 @@ class CupertinoTheme extends StatelessWidget {
   ///
   /// See also:
   ///
+  /// * [maybeBrightnessOf], which returns null if no valid [CupertinoTheme] or
+  ///   [MediaQuery] exists, instead of throwing.
   /// * [CupertinoThemeData.brightness], the property takes precedence over
   ///   [MediaQueryData.platformBrightness] for descendant Cupertino widgets.
-  /// * [maybeBrightnessOf], which returns null if no
-  ///   valid [CupertinoTheme] or [MediaQuery] exists, instead of throwing.
-  static Brightness brightnessOf(BuildContext context, {
-    @Deprecated(
-      'This argument is ignored. For cases where nullOk would be true, use CupertinoTheme.maybeBrightnessOf instead. '
-      'This feature was deprecated after v1.24.0-1.0.pre.'
-    )
-    bool nullOk = false,
-  }) {
-    assert(
-      nullOk == false,
-      'The nullOk parameter is no longer used. Instead of setting it to true, '
-      'call the CupertinoTheme.maybeBrightnessOf function instead.',
-    );
+  static Brightness brightnessOf(BuildContext context) {
     final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
     return inheritedTheme?.theme.data.brightness ?? MediaQuery.of(context).platformBrightness;
   }
