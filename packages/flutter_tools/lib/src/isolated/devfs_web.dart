@@ -575,56 +575,11 @@ class WebAssetServer implements AssetReader {
   // Attempt to resolve `path` to a dart file.
   File _resolveDartFile(String path) {
     // Return the actual file objects so that local engine changes are automatically picked up.
-    if (autoDetect) {
-      switch (path) {
-        case 'dart_sdk.js':
-          return globals.fs.file(
-              _buildInfo.nullSafetyMode == NullSafetyMode.unsound
-              ? globals.artifacts.getArtifactPath(
-              Artifact.webPrecompiledCanvaskitAndHtmlSdk)
-              : globals.artifacts.getArtifactPath(
-              Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk));
-          break;
-        case 'dart_sdk.js.map':
-            return globals.fs.file(
-            _buildInfo.nullSafetyMode == NullSafetyMode.unsound
-            ? globals.artifacts.getArtifactPath(
-            Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps)
-            : globals.artifacts.getArtifactPath(
-            Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps));
-      }
-    } else {
-      switch (path) {
-        case 'dart_sdk.js':
-          if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-            return globals.fs.file(canvasKitRendering
-                ? globals.artifacts.getArtifactPath(
-                Artifact.webPrecompiledCanvaskitSdk)
-                : globals.artifacts.getArtifactPath(
-                Artifact.webPrecompiledSdk));
-          } else {
-            return globals.fs.file(canvasKitRendering
-                ? globals.artifacts.getArtifactPath(
-                Artifact.webPrecompiledCanvaskitSoundSdk)
-                : globals.artifacts.getArtifactPath(
-                Artifact.webPrecompiledSoundSdk));
-          }
-          break;
-        case 'dart_sdk.js.map':
-          if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-            return globals.fs.file(canvasKitRendering
-                ? globals.artifacts.getArtifactPath(
-                Artifact.webPrecompiledCanvaskitSdkSourcemaps)
-                : globals.artifacts.getArtifactPath(
-                Artifact.webPrecompiledSdkSourcemaps));
-          } else {
-            return globals.fs.file(canvasKitRendering
-                ? globals.artifacts.getArtifactPath(
-                Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps)
-                : globals.artifacts.getArtifactPath(
-                Artifact.webPrecompiledSoundSdkSourcemaps));
-          }
-      }
+    switch (path) {
+      case 'dart_sdk.js':
+        return _resolveDartSdkJsFile;
+      case 'dart_sdk.js.map':
+        return _resolveDartSdkJSMapFile;
     }
     // This is the special generated entrypoint.
     if (path == 'web_entrypoint.dart') {
@@ -671,6 +626,52 @@ class WebAssetServer implements AssetReader {
     final File webSdkFile = globals.fs.file(flutterWebSdk.uri.resolve(path));
 
     return webSdkFile;
+  }
+
+  File get _resolveDartSdkJsFile {
+    if (autoDetect) {
+      return globals.fs.file(
+          _buildInfo.nullSafetyMode == NullSafetyMode.unsound
+          ? globals.artifacts.getArtifactPath(
+          Artifact.webPrecompiledCanvaskitAndHtmlSdk)
+          : globals.artifacts.getArtifactPath(
+          Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk));
+    }
+    if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
+      return globals.fs.file(canvasKitRendering
+          ? globals.artifacts.getArtifactPath(
+          Artifact.webPrecompiledCanvaskitSdk)
+          : globals.artifacts.getArtifactPath(
+          Artifact.webPrecompiledSdk));
+     }
+    return globals.fs.file(canvasKitRendering
+        ? globals.artifacts.getArtifactPath(
+        Artifact.webPrecompiledCanvaskitSoundSdk)
+        : globals.artifacts.getArtifactPath(
+        Artifact.webPrecompiledSoundSdk));
+  }
+
+  File get _resolveDartSdkJSMapFile {
+    if (autoDetect) {
+      return globals.fs.file(
+          _buildInfo.nullSafetyMode == NullSafetyMode.unsound
+          ? globals.artifacts.getArtifactPath(
+          Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps)
+          : globals.artifacts.getArtifactPath(
+          Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps));
+    }
+    if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
+      return globals.fs.file(canvasKitRendering
+          ? globals.artifacts.getArtifactPath(
+          Artifact.webPrecompiledCanvaskitSdkSourcemaps)
+          : globals.artifacts.getArtifactPath(
+          Artifact.webPrecompiledSdkSourcemaps));
+    }
+    return globals.fs.file(canvasKitRendering
+        ? globals.artifacts.getArtifactPath(
+        Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps)
+        : globals.artifacts.getArtifactPath(
+        Artifact.webPrecompiledSoundSdkSourcemaps));
   }
 
   @override

@@ -171,7 +171,7 @@ void main() {
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
@@ -201,8 +201,8 @@ void main() {
     ));
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo(), startPaused: true),
+      flutterProject: FlutterProject  .current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
@@ -223,7 +223,7 @@ void main() {
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
@@ -255,7 +255,7 @@ void main() {
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
@@ -367,7 +367,7 @@ void main() {
     final ResidentWebRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
       urlTunneller: null,
@@ -389,7 +389,7 @@ void main() {
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
       urlTunneller: null,
@@ -513,7 +513,7 @@ void main() {
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo(), startPaused: true),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
@@ -1487,7 +1487,7 @@ void main() {
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
@@ -1534,7 +1534,7 @@ void main() {
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
@@ -1663,7 +1663,7 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice) {
   return DwdsWebRunnerFactory().createWebRunner(
     flutterDevice,
     flutterProject: FlutterProject.current(),
-    debuggingOptions: DebuggingOptions.enabled(_createBuildDebugInfo()),
+    debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
     ipv6: true,
     stayResident: true,
     urlTunneller: null,

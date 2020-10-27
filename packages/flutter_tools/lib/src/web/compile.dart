@@ -114,4 +114,3 @@ class WebCompilationProxy {
     throw UnimplementedError();
   }
 }
-

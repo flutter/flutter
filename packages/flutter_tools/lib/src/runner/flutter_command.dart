@@ -4,6 +4,7 @@
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:devtools_server/devtools_server.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -128,6 +129,22 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
+
+  /// The map used to convert web-renderer option to a List of dart-defines.
+  static const Map<String, Iterable<String>> _webRendererDartDefines
+  = <String, Iterable<String>> {
+    'auto': <String>[
+      'FLUTTER_WEB_AUTO_DETECT=true',
+    ],
+    'canvaskit': <String>[
+      'FLUTTER_WEB_AUTO_DETECT=false',
+      'FLUTTER_WEB_USE_SKIA=true'
+    ],
+    'html': <String>[
+      'FLUTTER_WEB_AUTO_DETECT=false',
+      'FLUTTER_WEB_USE_SKIA=false'
+    ],
+  };
 
   @override
   ArgParser get argParser => _argParser;
@@ -826,7 +843,7 @@ abstract class FlutterCommand extends Command<void> {
         ? stringsArg(FlutterOptions.kDartDefinesOption)
         : const <String>[];
 
-    if (argParser.options.containsKey('web-renderer')) {
+    if (argParser.options.containsKey('web-renderer') && argResults.wasParsed('web-renderer')) ) {
       dartDefines = _updateDartDefines(dartDefines, stringArg('web-renderer'));
     }
 
@@ -925,6 +942,19 @@ abstract class FlutterCommand extends Command<void> {
           'for previous releases of Flutter.');
       globals.printStatus('');
     }
+  }
+
+  /// Updates dart-defines based on [webRenderer].
+  List<String> _updateDartDefines(List<String> original, String webRenderer) {
+    if (original.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
+      throwToolExit('Only one of "--web-renderer" and '
+          '"--dart-defines=FLUTTER_WEB_USE_SKIA" may be specified.');
+
+    }
+    // create a new List since the original may be a constant.
+    final List<String> dartDefines = List<String>.from(original);
+    dartDefines.addAll(_webRendererDartDefines[webRenderer]);
+    return dartDefines;
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
@@ -1292,39 +1322,3 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
 bool _isBlank(String s) => s == null || s.trim().isEmpty;
-
-
-/// Updates dartdefines based on [webRenderer].
-List<String> _updateDartDefines(List<String> original, String webRenderer) {
-  final List<String> dartDefines = List<String>.from(original);
-  final Iterable<String> webRendererDartDefines = _dartDefinesForWebRenderer(webRenderer);
-  if (webRendererDartDefines.isNotEmpty) {
-    // If --web-renderer is used, removes existing dartDefine that starts with
-    // "FLUTTER_WEB_USE_SKIA="
-    dartDefines.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
-    dartDefines.addAll(webRendererDartDefines);
-  }
-  return dartDefines;
-}
-
-Iterable<String> _dartDefinesForWebRenderer(String webRenderer) {
-  if (!_webRendererDartDefines.containsKey(webRenderer)) {
-    throwToolExit('Unsupported value for option "web-renderer');
-  }
-  return _webRendererDartDefines[webRenderer];
-}
-
-const Map<String, Iterable<String>> _webRendererDartDefines
-= <String, Iterable<String>> {
-  'auto': <String>[
-    'FLUTTER_WEB_AUTO_DETECT=true',
-  ],
-  'canvaskit': <String>[
-    'FLUTTER_WEB_AUTO_DETECT=false',
-    'FLUTTER_WEB_USE_SKIA=true'
-  ],
-  'html': <String>[
-    'FLUTTER_WEB_AUTO_DETECT=false',
-    'FLUTTER_WEB_USE_SKIA=false'
-  ],
-};
