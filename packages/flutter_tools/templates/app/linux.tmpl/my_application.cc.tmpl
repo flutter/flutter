@@ -6,12 +6,14 @@
 
 struct _MyApplication {
   GtkApplication parent_instance;
-  char** dart_entrypoint_args;
+  char** dart_entrypoint_arguments;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
+// Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
+  MyApplication* self = MY_APPLICATION(application);
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
   GtkHeaderBar *header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
@@ -23,8 +25,7 @@ static void my_application_activate(GApplication* application) {
   gtk_widget_show(GTK_WIDGET(window));
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
-  MyApplication* my_app = MY_APPLICATION(application);
-  fl_dart_project_set_dart_entrypoint_arguments(project, my_app->dart_entrypoint_args);
+  fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
 
   FlView* view = fl_view_new(project);
   gtk_widget_show(GTK_WIDGET(view));
@@ -35,29 +36,38 @@ static void my_application_activate(GApplication* application) {
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }
 
+// Implements GApplication::local_command_line.
 static gboolean my_application_local_command_line(GApplication* application, gchar ***arguments, int *exit_status) {
-  MyApplication* my_app = MY_APPLICATION(application);
-  my_app->dart_entrypoint_args = *arguments;
+  MyApplication* self = MY_APPLICATION(application);
+  char** entrypoint_arguments = *arguments;
   // Strip out the first argument as it is the binary name
-  my_app->dart_entrypoint_args++;
+  entrypoint_arguments++;
+  self->dart_entrypoint_arguments = g_strdupv(entrypoint_arguments);
 
   g_autoptr(GError) error = nullptr;
-
-  if (!g_application_register(application, NULL, &error)) {
+  if (!g_application_register(application, nullptr, &error)) {
      g_printerr("Failed to register: %s\n", error->message);
      *exit_status = 1;
-     return true;
+     return TRUE;
   }
 
   g_application_activate(application);
   *exit_status = 0;
 
-  return true;
+  return TRUE;
+}
+
+// Implements GObject::dispose.
+static void my_application_dispose(GObject *object) {
+  MyApplication* self = MY_APPLICATION(object);
+  g_clear_pointer(&self->dart_entrypoint_arguments, g_strfreev);
+  G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }
 
 static void my_application_class_init(MyApplicationClass* klass) {
   G_APPLICATION_CLASS(klass)->activate = my_application_activate;
   G_APPLICATION_CLASS(klass)->local_command_line = my_application_local_command_line;
+  G_OBJECT_CLASS(klass)->dispose = my_application_dispose;
 }
 
 static void my_application_init(MyApplication* self) {}
