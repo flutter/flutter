@@ -170,10 +170,8 @@ class Tooltip extends StatefulWidget {
 }
 
 class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
-  static const double _defaultTooltipHeight = 32.0;
   static const double _defaultVerticalOffset = 24.0;
   static const bool _defaultPreferBelow = true;
-  static const EdgeInsetsGeometry _defaultPadding = EdgeInsets.symmetric(horizontal: 16.0);
   static const EdgeInsetsGeometry _defaultMargin = EdgeInsets.all(0.0);
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
@@ -213,6 +211,43 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // Listen to global pointer events so that we can hide a tooltip immediately
     // if some other control is clicked on.
     GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
+  }
+
+  // https://material.io/components/tooltips#specs
+  double _getDefaultTooltipHeight() {
+    final ThemeData theme = Theme.of(context)!;
+    switch (theme.platform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return 24.0;
+      default:
+        return 32.0;
+    }
+  }
+
+  EdgeInsets _getDefaultPadding() {
+    final ThemeData theme = Theme.of(context)!;
+    switch (theme.platform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return const EdgeInsets.symmetric(horizontal: 8.0);
+      default:
+        return const EdgeInsets.symmetric(horizontal: 16.0);
+    }
+  }
+
+  double _getDefaultFontSize() {
+    final ThemeData theme = Theme.of(context)!;
+    switch (theme.platform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return 10.0;
+      default:
+        return 14.0;
+    }
   }
 
   // Forces a rebuild if a mouse has been added or removed.
@@ -375,6 +410,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (theme.brightness == Brightness.dark) {
       defaultTextStyle = theme.textTheme.bodyText2!.copyWith(
         color: Colors.black,
+        fontSize: _getDefaultFontSize(),
       );
       defaultDecoration = BoxDecoration(
         color: Colors.white.withOpacity(0.9),
@@ -383,6 +419,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     } else {
       defaultTextStyle = theme.textTheme.bodyText2!.copyWith(
         color: Colors.white,
+        fontSize: _getDefaultFontSize(),
       );
       defaultDecoration = BoxDecoration(
         color: Colors.grey[700]!.withOpacity(0.9),
@@ -390,8 +427,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       );
     }
 
-    height = widget.height ?? tooltipTheme.height ?? _defaultTooltipHeight;
-    padding = widget.padding ?? tooltipTheme.padding ?? _defaultPadding;
+    height = widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight();
+    padding = widget.padding ?? tooltipTheme.padding ?? _getDefaultPadding();
     margin = widget.margin ?? tooltipTheme.margin ?? _defaultMargin;
     verticalOffset = widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset;
     preferBelow = widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow;
