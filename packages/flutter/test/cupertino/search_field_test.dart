@@ -153,7 +153,7 @@ void main() {
 
     Text placeholder = tester.widget(find.text('Search'));
     expect(placeholder.style!.color!.value,
-        CupertinoColors.secondaryLabel.darkColor.value);
+        CupertinoColors.systemGrey.darkColor.value);
 
     await tester.pumpAndSettle();
 
@@ -168,7 +168,7 @@ void main() {
 
     placeholder = tester.widget(find.text('Search'));
     expect(placeholder.style!.color!.value,
-        CupertinoColors.secondaryLabel.color.value);
+        CupertinoColors.systemGrey.color.value);
   });
 
   testWidgets(
