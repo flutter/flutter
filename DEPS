@@ -41,6 +41,7 @@ vars = {
   'dart_args_tag': '1.6.0',
   'dart_boringssl_gen_rev': '429ccb1877f7987a6f3988228bc2440e61293499',
   'dart_boringssl_rev': '4dfd5af70191b068aebe567b8e29ce108cee85ce',
+  'dart_clock_rev': 'a494269254ba978e7ef8f192c5f7fec3fc05b9d3',
   'dart_collection_rev': '60e6ee2228586980826b07ec1df633bd879f42ea',
   'dart_dart_style_tag': '1.3.8',
   'dart_http_retry_tag': '0.1.1',
@@ -175,6 +176,9 @@ deps = {
 
   'src/third_party/dart/third_party/pkg/cli_util':
    Var('dart_git') + '/cli_util.git@335ed165887d0ec97c2a09173ebf22dcf56a6c4e',
+
+  'src/third_party/dart/third_party/pkg/clock':
+   Var('dart_git') + '/clock.git' + '@' + Var('dart_clock_rev'),
 
   'src/third_party/dart/third_party/pkg/collection':
    Var('dart_git') + '/collection.git' + '@' + Var('dart_collection_rev'),
