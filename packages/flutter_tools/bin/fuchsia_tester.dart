@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:math' as math;
 
@@ -23,8 +22,6 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
-
-// This was largely inspired by lib/src/commands/test.dart.
 
 const String _kOptionPackages = 'packages';
 const String _kOptionShell = 'shell';
@@ -150,12 +147,11 @@ Future<void> run(List<String> args) async {
       watcher: collector,
       ipv6: false,
       enableObservatory: collector != null,
-      buildMode: BuildMode.debug,
+      buildInfo: BuildInfo.debug,
       precompiledDillFiles: tests,
       concurrency: math.max(1, globals.platform.numberOfProcessors - 2),
       icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
       coverageDirectory: coverageDirectory,
-      extraFrontEndOptions: <String>[],
     );
 
     if (collector != null) {

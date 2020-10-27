@@ -20,7 +20,7 @@ int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
       return buttons | kPrimaryButton;
-    default:
+    case PointerDeviceKind.unknown:
       // We have no information about the device but we know we never want
       // buttons to be 0 when the pointer is down.
       return buttons == 0 ? kPrimaryButton : buttons;
@@ -48,6 +48,7 @@ class PointerEventConverter {
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) sync* {
     for (final ui.PointerData datum in data) {
       final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
+      assert(position != null);
       final Offset delta = Offset(datum.physicalDeltaX, datum.physicalDeltaY) / devicePixelRatio;
       final double radiusMinor = _toLogicalPixels(datum.radiusMinor, devicePixelRatio);
       final double radiusMajor = _toLogicalPixels(datum.radiusMajor, devicePixelRatio);

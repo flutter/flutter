@@ -7,10 +7,13 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/analyze_size.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 
-const String aotSizeOutput = '''[
+const String aotSizeOutput = '''
+[
     {
         "l": "dart:_internal",
         "c": "SubListIterable",
@@ -63,6 +66,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
+      flutterUsage: MockUsage(),
     );
 
     final Archive archive = Archive()
@@ -139,6 +143,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
+      flutterUsage: MockUsage(),
     );
 
     final Archive archive = Archive()
@@ -180,6 +185,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
+      flutterUsage: MockUsage(),
     );
 
     final Directory outputDirectory = fileSystem.directory('example/out/foo.app')
@@ -217,3 +223,5 @@ void main() {
     expect(result['precompiler-trace'], <String, Object>{});
   });
 }
+
+class MockUsage extends Mock implements Usage {}

@@ -2,23 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
+
+import 'package:flutter_test/flutter_test.dart';
 
 Future<void> pumpTest(
   WidgetTester tester,
-  TargetPlatform platform, {
+  TargetPlatform? platform, {
   bool scrollable = true,
   bool reverse = false,
-  ScrollController controller,
-  Widget Function(Widget) wrapper,
+  ScrollController? controller,
 }) async {
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
@@ -82,7 +81,7 @@ double getScrollOffset(WidgetTester tester, {bool last = true}) {
 double getScrollVelocity(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
   final ScrollPosition position = viewport.offset as ScrollPosition;
-  return position.activity.velocity;
+  return position.activity!.velocity;
 }
 
 void resetScrollOffset(WidgetTester tester) {
@@ -290,11 +289,10 @@ void main() {
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
-    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
     expect(getScrollOffset(tester), 20.0);
     // Pointer signals should not cause overscroll.
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)), result);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)));
     expect(getScrollOffset(tester), 0.0);
   });
 
@@ -308,11 +306,10 @@ void main() {
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
-    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
     expect(getScrollOffset(tester, last: true), 20.0);
     // Pointer signals should not cause overscroll.
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)), result);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)));
     expect(getScrollOffset(tester, last: true), 0.0);
   });
 
@@ -322,8 +319,7 @@ void main() {
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
-    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
     expect(getScrollOffset(tester), 0.0);
   });
 
@@ -334,8 +330,7 @@ void main() {
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
-    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)), result);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)));
 
     expect(getScrollOffset(tester), 20.0);
   });
@@ -744,7 +739,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity.delegate.goBallistic(4000);
+    Scrollable.of(find.byType(SizedBox).evaluate().first)!.position.activity!.delegate.goBallistic(4000);
 
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
@@ -773,7 +768,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)!.position;
     final SuperPessimisticScrollPhysics physics = position.physics as SuperPessimisticScrollPhysics;
 
     expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
@@ -786,7 +781,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    position.activity.delegate.goBallistic(4000);
+    position.activity!.delegate.goBallistic(4000);
 
     await tester.pumpAndSettle();
 
@@ -817,7 +812,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)!.position;
 
     expect(find.byKey(const ValueKey<String>('Cheap box 0')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
@@ -828,7 +823,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    position.activity.delegate.goBallistic(4000);
+    position.activity!.delegate.goBallistic(4000);
 
     await tester.pumpAndSettle();
 
@@ -838,11 +833,181 @@ void main() {
     expect(expensiveWidgets, 0);
     expect(cheapWidgets, 58);
   });
+
+  testWidgets('ensureVisible does not move PageViews', (WidgetTester tester) async {
+    final PageController controller = PageController();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          children: List<ListView>.generate(
+            3,
+            (int pageIndex) {
+              return ListView(
+                key: Key('list_$pageIndex'),
+                children: List<Widget>.generate(
+                  100,
+                  (int listIndex) {
+                    return Row(
+                      children: <Widget>[
+                        Container(
+                          key: Key('${pageIndex}_${listIndex}_0'),
+                          color: Colors.red,
+                          width: 200,
+                          height: 10,
+                        ),
+                        Container(
+                          key: Key('${pageIndex}_${listIndex}_1'),
+                          color: Colors.blue,
+                          width: 200,
+                          height: 10,
+                        ),
+                        Container(
+                          key: Key('${pageIndex}_${listIndex}_2'),
+                          color: Colors.green,
+                          width: 200,
+                          height: 10,
+                        ),
+                      ]
+                    );
+                  }
+                ),
+              );
+            }
+          )
+        ),
+      ),
+    );
+
+    final Finder targetMidRightPage0 = find.byKey(const Key('0_25_2'));
+    final Finder targetMidRightPage1 = find.byKey(const Key('1_25_2'));
+    final Finder targetMidLeftPage1 = find.byKey(const Key('1_25_0'));
+
+    expect(find.byKey(const Key('list_0')), findsOneWidget);
+    expect(find.byKey(const Key('list_1')), findsNothing);
+    expect(targetMidRightPage0, findsOneWidget);
+    expect(targetMidRightPage1, findsNothing);
+    expect(targetMidLeftPage1, findsNothing);
+
+    await tester.ensureVisible(targetMidRightPage0);
+    await tester.pumpAndSettle();
+    expect(targetMidRightPage0, findsOneWidget);
+    expect(targetMidRightPage1, findsNothing);
+    expect(targetMidLeftPage1, findsNothing);
+
+    controller.jumpToPage(1);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('list_0')), findsNothing);
+    expect(find.byKey(const Key('list_1')), findsOneWidget);
+    await tester.ensureVisible(targetMidRightPage1);
+    await tester.pumpAndSettle();
+
+    expect(targetMidRightPage0, findsNothing);
+    expect(targetMidRightPage1, findsOneWidget);
+    expect(targetMidLeftPage1, findsOneWidget);
+
+    await tester.ensureVisible(targetMidLeftPage1);
+    await tester.pumpAndSettle();
+
+    expect(targetMidRightPage0, findsNothing);
+    expect(targetMidRightPage1, findsOneWidget);
+    expect(targetMidLeftPage1, findsOneWidget);
+  });
+
+  testWidgets('ensureVisible does not move TabViews', (WidgetTester tester) async {
+    final TickerProvider vsync = TestTickerProvider();
+    final TabController controller = TabController(
+      length: 3,
+      vsync: vsync,
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TabBarView(
+          controller: controller,
+          children: List<ListView>.generate(
+            3,
+            (int pageIndex) {
+              return ListView(
+                key: Key('list_$pageIndex'),
+                children: List<Widget>.generate(
+                  100,
+                  (int listIndex) {
+                    return Row(
+                      children: <Widget>[
+                        Container(
+                          key: Key('${pageIndex}_${listIndex}_0'),
+                          color: Colors.red,
+                          width: 200,
+                          height: 10,
+                        ),
+                        Container(
+                          key: Key('${pageIndex}_${listIndex}_1'),
+                          color: Colors.blue,
+                          width: 200,
+                          height: 10,
+                        ),
+                        Container(
+                          key: Key('${pageIndex}_${listIndex}_2'),
+                          color: Colors.green,
+                          width: 200,
+                          height: 10,
+                        ),
+                      ]
+                    );
+                  }
+                ),
+              );
+            }
+          )
+        ),
+      ),
+    );
+
+    final Finder targetMidRightPage0 = find.byKey(const Key('0_25_2'));
+    final Finder targetMidRightPage1 = find.byKey(const Key('1_25_2'));
+    final Finder targetMidLeftPage1 = find.byKey(const Key('1_25_0'));
+
+    expect(find.byKey(const Key('list_0')), findsOneWidget);
+    expect(find.byKey(const Key('list_1')), findsNothing);
+    expect(targetMidRightPage0, findsOneWidget);
+    expect(targetMidRightPage1, findsNothing);
+    expect(targetMidLeftPage1, findsNothing);
+
+    await tester.ensureVisible(targetMidRightPage0);
+    await tester.pumpAndSettle();
+    expect(targetMidRightPage0, findsOneWidget);
+    expect(targetMidRightPage1, findsNothing);
+    expect(targetMidLeftPage1, findsNothing);
+
+    controller.index = 1;
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('list_0')), findsNothing);
+    expect(find.byKey(const Key('list_1')), findsOneWidget);
+    await tester.ensureVisible(targetMidRightPage1);
+    await tester.pumpAndSettle();
+
+    expect(targetMidRightPage0, findsNothing);
+    expect(targetMidRightPage1, findsOneWidget);
+    expect(targetMidLeftPage1, findsOneWidget);
+
+    await tester.ensureVisible(targetMidLeftPage1);
+    await tester.pumpAndSettle();
+
+    expect(targetMidRightPage0, findsNothing);
+    expect(targetMidRightPage1, findsOneWidget);
+    expect(targetMidLeftPage1, findsOneWidget);
+  });
 }
 
 // ignore: must_be_immutable
 class SuperPessimisticScrollPhysics extends ScrollPhysics {
-  SuperPessimisticScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+  SuperPessimisticScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   int count = 0;
 
@@ -853,13 +1018,13 @@ class SuperPessimisticScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  ScrollPhysics applyTo(ScrollPhysics ancestor) {
+  ScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return SuperPessimisticScrollPhysics(parent: buildParent(ancestor));
   }
 }
 
 class ExtraSuperPessimisticScrollPhysics extends ScrollPhysics {
-  const ExtraSuperPessimisticScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+  const ExtraSuperPessimisticScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   @override
   bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
@@ -867,7 +1032,14 @@ class ExtraSuperPessimisticScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  ScrollPhysics applyTo(ScrollPhysics ancestor) {
+  ScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return ExtraSuperPessimisticScrollPhysics(parent: buildParent(ancestor));
+  }
+}
+
+class TestTickerProvider extends TickerProvider {
+  @override
+  Ticker createTicker(TickerCallback onTick) {
+    return Ticker(onTick);
   }
 }

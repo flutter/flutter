@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -17,7 +15,7 @@ void main() {
 }
 
 class RelayoutBoundariesCrash extends StatefulWidget {
-  const RelayoutBoundariesCrash({Key key}) : super(key: key);
+  const RelayoutBoundariesCrash({Key? key}) : super(key: key);
 
   @override
   RelayoutBoundariesCrashState createState() => RelayoutBoundariesCrashState();

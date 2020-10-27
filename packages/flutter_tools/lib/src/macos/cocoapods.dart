@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -31,7 +30,7 @@ const String unknownCocoaPodsConsequence = '''
 const String brokenCocoaPodsConsequence = '''
   You appear to have CocoaPods installed but it is not working.
   This can happen if the version of Ruby that CocoaPods was installed with is different from the one being used to invoke it.
-  This can usually be fixed by re-installing CocoaPods. For more info, see https://github.com/flutter/flutter/issues/14293.''';
+  This can usually be fixed by re-installing CocoaPods.''';
 
 const String outOfDateFrameworksPodfileConsequence = '''
   This can cause a mismatched version of Flutter to be embedded in your app, which may result in App Store submission rejection or crashes.
@@ -42,11 +41,7 @@ const String outOfDatePluginsPodfileConsequence = '''
   See https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms for details.
   If you have local Podfile edits you would like to keep, see https://github.com/flutter/flutter/issues/45197 for instructions.''';
 
-const String cocoaPodsInstallInstructions = '''
-  sudo gem install cocoapods''';
-
-const String cocoaPodsUpgradeInstructions = '''
-  sudo gem install cocoapods''';
+const String cocoaPodsInstallInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#installation for instructions.';
 
 const String podfileMigrationInstructions = '''
   rm ios/Podfile''';
@@ -68,6 +63,15 @@ enum CocoaPodsStatus {
   brokenInstall,
 }
 
+/// Cocoapods is a dependency management solution for iOS and macOS applications.
+///
+/// Cocoapods is generally installed via ruby gems and interacted with via
+/// the `pod` CLI command.
+///
+/// See also:
+///   * https://cocoapods.org/ - the cocoapods website.
+///   * https://flutter.dev/docs/get-started/install/macos#deploy-to-ios-devices - instructions for
+///     installing iOS/macOS dependencies.
 class CocoaPods {
   CocoaPods({
     @required FileSystem fileSystem,
@@ -75,15 +79,13 @@ class CocoaPods {
     @required XcodeProjectInterpreter xcodeProjectInterpreter,
     @required Logger logger,
     @required Platform platform,
-    @required TimeoutConfiguration timeoutConfiguration,
   }) : _fileSystem = fileSystem,
       _processManager = processManager,
       _xcodeProjectInterpreter = xcodeProjectInterpreter,
       _logger = logger,
       _platform = platform,
       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-      _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
-      _timeoutConfiguration = timeoutConfiguration;
+      _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
 
   final FileSystem _fileSystem;
   final ProcessManager _processManager;
@@ -92,7 +94,6 @@ class CocoaPods {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Logger _logger;
   final Platform _platform;
-  final TimeoutConfiguration _timeoutConfiguration;
 
   Future<String> _versionText;
 
@@ -190,8 +191,7 @@ class CocoaPods {
         _logger.printError(
           'Warning: CocoaPods not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
-          'To install:\n'
-          '$cocoaPodsInstallInstructions\n',
+          'To install $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         return false;
@@ -199,8 +199,7 @@ class CocoaPods {
         _logger.printError(
           'Warning: CocoaPods is installed but broken. Skipping pod install.\n'
           '$brokenCocoaPodsConsequence\n'
-          'To re-install:\n'
-          '$cocoaPodsUpgradeInstructions\n',
+          'To re-install $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         return false;
@@ -208,8 +207,7 @@ class CocoaPods {
         _logger.printError(
           'Warning: Unknown CocoaPods version installed.\n'
           '$unknownCocoaPodsConsequence\n'
-          'To upgrade:\n'
-          '$cocoaPodsUpgradeInstructions\n',
+          'To upgrade $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         break;
@@ -217,8 +215,7 @@ class CocoaPods {
         _logger.printError(
           'Warning: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
-          'To upgrade:\n'
-          '$cocoaPodsUpgradeInstructions\n',
+          'To upgrade $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         return false;
@@ -226,8 +223,7 @@ class CocoaPods {
         _logger.printError(
           'Warning: CocoaPods recommended version $cocoaPodsRecommendedVersion or greater not installed.\n'
           'Pods handling may fail on some projects involving plugins.\n'
-          'To upgrade:\n'
-          '$cocoaPodsUpgradeInstructions\n',
+          'To upgrade $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         break;
@@ -309,9 +305,7 @@ class CocoaPods {
   /// Ensures that pod install is deemed needed on next check.
   void invalidatePodInstallOutput(XcodeBasedProject xcodeProject) {
     final File manifestLock = xcodeProject.podManifestLock;
-    if (manifestLock.existsSync()) {
-      manifestLock.deleteSync();
-    }
+    ErrorHandlingFileSystem.deleteIfExists(manifestLock);
   }
 
   // Check if you need to run pod install.
@@ -336,7 +330,7 @@ class CocoaPods {
   }
 
   Future<void> _runPodInstall(XcodeBasedProject xcodeProject, String engineDirectory) async {
-    final Status status = _logger.startProgress('Running pod install...', timeout: _timeoutConfiguration.slowOperation);
+    final Status status = _logger.startProgress('Running pod install...');
     final ProcessResult result = await _processManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: _fileSystem.path.dirname(xcodeProject.podfile.path),

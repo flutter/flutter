@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/memory.dart';
@@ -58,6 +57,7 @@ void main() {
     when(mockSdk.avdManagerPath).thenReturn('avdmanager');
     when(mockSdk.getAvdManagerPath()).thenReturn('avdmanager');
     when(mockSdk.emulatorPath).thenReturn('emulator');
+    when(mockSdk.adbPath).thenReturn('adb');
   });
 
   group('EmulatorManager', () {
@@ -76,6 +76,28 @@ void main() {
         androidSdk: mockSdk,
         androidWorkflow: AndroidWorkflow(
           androidSdk: mockSdk,
+          featureFlags: TestFeatureFlags(),
+        ),
+      );
+
+      await expectLater(() async => await emulatorManager.getAllAvailableEmulators(),
+        returnsNormally);
+    });
+
+    testUsingContext('getEmulators with no Android SDK', () async {
+      // Test that EmulatorManager.getEmulators() doesn't throw when there's no Android SDK.
+      final EmulatorManager emulatorManager = EmulatorManager(
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['emulator', '-list-avds'],
+            stdout: 'existing-avd-1',
+          ),
+        ]),
+        androidSdk: null,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: null,
           featureFlags: TestFeatureFlags(),
         ),
       );

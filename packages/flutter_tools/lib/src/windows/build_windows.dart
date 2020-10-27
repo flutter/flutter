@@ -7,7 +7,6 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -31,26 +30,12 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
 }) async {
   if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
-      'No Windows desktop project configured. '
-      'See https://github.com/flutter/flutter/wiki/Desktop-shells#create '
+      'No Windows desktop project configured. See '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-app '
       'to learn about adding Windows support to a project.');
   }
 
-  // Check for incompatibility between the Flutter tool version and the project
-  // template version, since the tempalte isn't stable yet.
-  final int templateCompareResult = _compareTemplateVersions(windowsProject);
-  if (templateCompareResult < 0) {
-    throwToolExit('The Windows runner was created with an earlier version of '
-      'the template, which is not yet stable.\n\n'
-      'Delete the windows/ directory and re-run \'flutter create .\', '
-      're-applying any previous changes.');
-  } else if (templateCompareResult > 0) {
-    throwToolExit('The Windows runner was created with a newer version of the '
-      'template, which is not yet stable.\n\n'
-      'Upgrade Flutter and try again.');
-  }
-
-  // Ensure that necessary emphemeral files are generated and up to date.
+  // Ensure that necessary ephemeral files are generated and up to date.
   _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
   createPluginSymlinks(windowsProject.parent);
 
@@ -70,7 +55,6 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
-    timeout: null,
   );
   try {
     await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
@@ -109,7 +93,7 @@ Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory
   await buildDir.create(recursive: true);
   int result;
   try {
-    result = await processUtils.stream(
+    result = await globals.processUtils.stream(
       <String>[
         cmakePath,
         '-S',
@@ -139,7 +123,7 @@ Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeNam
 
   int result;
   try {
-    result = await processUtils.stream(
+    result = await globals.processUtils.stream(
       <String>[
         cmakePath,
         '--build',
@@ -188,26 +172,4 @@ void _writeGeneratedFlutterConfig(
     environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot, windowsProject, environment);
-}
-
-// Checks the template version of [project] against the current template
-// version. Returns < 0 if the project is older than the current template, > 0
-// if it's newer, and 0 if they match.
-int _compareTemplateVersions(WindowsProject project) {
-  const String projectVersionBasename = '.template_version';
-  final int expectedVersion = int.parse(globals.fs.file(globals.fs.path.join(
-    globals.fs.path.absolute(Cache.flutterRoot),
-    'packages',
-    'flutter_tools',
-    'templates',
-    'app',
-    'windows.tmpl',
-    'flutter',
-    projectVersionBasename,
-  )).readAsStringSync());
-  final File projectVersionFile = project.managedDirectory.childFile(projectVersionBasename);
-  final int version = projectVersionFile.existsSync()
-      ? int.tryParse(projectVersionFile.readAsStringSync())
-      : 0;
-  return version.compareTo(expectedVersion);
 }

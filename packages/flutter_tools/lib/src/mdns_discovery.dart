@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 
@@ -53,6 +51,7 @@ class MDnsObservatoryDiscovery {
   /// it will return that instance's information regardless of what application
   /// the Observatory instance is for.
   // TODO(jonahwilliams): use `deviceVmservicePort` to filter mdns results.
+  @visibleForTesting
   Future<MDnsObservatoryDiscoveryResult> query({String applicationId, int deviceVmservicePort}) async {
     globals.printTrace('Checking for advertised Dart observatories...');
     try {
@@ -239,7 +238,9 @@ Future<Uri> buildObservatoryUri(
   if (!path.endsWith('/')) {
     path += '/';
   }
-  final int actualHostPort = hostVmservicePort ?? await device
-    .portForwarder.forward(devicePort);
+  hostVmservicePort ??= 0;
+  final int actualHostPort = hostVmservicePort == 0 ?
+    await device.portForwarder.forward(devicePort) :
+    hostVmservicePort;
   return Uri(scheme: 'http', host: host, port: actualHostPort, path: path);
 }

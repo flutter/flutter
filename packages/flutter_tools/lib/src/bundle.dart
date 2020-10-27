@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
@@ -29,10 +27,14 @@ const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
 String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 
-String getDefaultApplicationKernelPath({ @required bool trackWidgetCreation }) {
+String getDefaultApplicationKernelPath({
+  @required bool trackWidgetCreation,
+  @required NullSafetyMode nullSafetyMode,
+}) {
   return getKernelPathForTransformerOptions(
     globals.fs.path.join(getBuildDirectory(), 'app.dill'),
     trackWidgetCreation: trackWidgetCreation,
+    nullSafetyMode: nullSafetyMode,
   );
 }
 
@@ -40,6 +42,7 @@ String getDefaultCachedKernelPath({
   @required bool trackWidgetCreation,
   @required List<String> dartDefines,
   @required List<String> extraFrontEndOptions,
+  @required NullSafetyMode nullSafetyMode,
 }) {
   final StringBuffer buffer = StringBuffer();
   buffer.writeAll(dartDefines);
@@ -53,13 +56,21 @@ String getDefaultCachedKernelPath({
   return getKernelPathForTransformerOptions(
     globals.fs.path.join(getBuildDirectory(), '${buildPrefix}cache.dill'),
     trackWidgetCreation: trackWidgetCreation,
+    nullSafetyMode: nullSafetyMode,
   );
 }
 
 String getKernelPathForTransformerOptions(
   String path, {
   @required bool trackWidgetCreation,
+  @required NullSafetyMode nullSafetyMode,
 }) {
+  // Temporary work around until --initialize-from-dill accounts for sound mode.
+  // The tool does not know the compilation mode if [NullSafetyMode.autodetect] is
+  // selected.
+  if (nullSafetyMode == NullSafetyMode.sound) {
+    path += '.sound';
+  }
   if (trackWidgetCreation) {
     path += '.track.dill';
   }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -84,7 +82,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         help: 'Produce xcframeworks that include all valid architectures (Xcode 11 or later).',
       )
       ..addFlag('cocoapods',
-        help: 'Produce a Flutter.podspec instead of an engine Flutter.framework (recomended if host app uses CocoaPods).',
+        help: 'Produce a Flutter.podspec instead of an engine Flutter.framework (recommended if host app uses CocoaPods).',
       )
       ..addOption('output',
         abbr: 'o',
@@ -209,7 +207,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       }
 
       final Status status = globals.logger.startProgress(
-        ' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}', timeout: timeoutConfiguration.slowOperation);
+        ' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
       try {
         // Delete the intermediaries since they would have been copied into our
         // output frameworks.
@@ -232,7 +230,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   /// vendored framework caching.
   @visibleForTesting
   void produceFlutterPodspec(BuildMode mode, Directory modeDirectory, { bool force = false }) {
-    final Status status = globals.logger.startProgress(' ├─Creating Flutter.podspec...', timeout: timeoutConfiguration.fastOperation);
+    final Status status = globals.logger.startProgress(' ├─Creating Flutter.podspec...');
     try {
       final GitTagVersion gitTagVersion = _flutterVersion.gitTagVersion;
       if (!force && (gitTagVersion.x == null || gitTagVersion.y == null || gitTagVersion.z == null || gitTagVersion.commits != 0)) {
@@ -292,7 +290,6 @@ end
   ) async {
     final Status status = globals.logger.startProgress(
       ' ├─Populating Flutter.framework...',
-      timeout: timeoutConfiguration.slowOperation,
     );
     final String engineCacheFlutterFrameworkDirectory = globals.artifacts.getArtifactPath(
       Artifact.flutterFramework,
@@ -318,7 +315,7 @@ end
 
         // Remove simulator architecture in profile and release mode.
         final List<String> lipoCommand = <String>[
-          'xcrun',
+          ...globals.xcode.xcrunCommand(),
           'lipo',
           fatFlutterFrameworkBinary.path,
           '-remove',
@@ -326,7 +323,7 @@ end
           '-output',
           fatFlutterFrameworkBinary.path
         ];
-        final RunResult lipoResult = await processUtils.run(
+        final RunResult lipoResult = await globals.processUtils.run(
           lipoCommand,
           allowReentrantFlutter: false,
         );
@@ -349,7 +346,6 @@ end
 
     final Status status = globals.logger.startProgress(
       ' ├─Building App.framework...',
-      timeout: timeoutConfiguration.slowOperation,
     );
     try {
       Target target;
@@ -413,7 +409,8 @@ end
     Directory outputDirectory,
   ) async {
     final Status status = globals.logger.startProgress(
-      ' ├─Building plugins...', timeout: timeoutConfiguration.slowOperation);
+      ' ├─Building plugins...'
+    );
     try {
       // Regardless of the last "flutter build" build mode,
       // copy the corresponding engine.
@@ -425,7 +422,7 @@ end
           'bitcode' : 'marker'; // In release, force bitcode embedding without archiving.
 
       List<String> pluginsBuildCommand = <String>[
-        'xcrun',
+        ...globals.xcode.xcrunCommand(),
         'xcodebuild',
         '-alltargets',
         '-sdk',
@@ -439,7 +436,7 @@ end
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
       ];
 
-      RunResult buildPluginsResult = await processUtils.run(
+      RunResult buildPluginsResult = await globals.processUtils.run(
         pluginsBuildCommand,
         workingDirectory: _project.ios.hostAppRoot.childDirectory('Pods').path,
         allowReentrantFlutter: false,
@@ -451,7 +448,7 @@ end
 
       if (mode == BuildMode.debug) {
         pluginsBuildCommand = <String>[
-          'xcrun',
+          ...globals.xcode.xcrunCommand(),
           'xcodebuild',
           '-alltargets',
           '-sdk',
@@ -465,7 +462,7 @@ end
           'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
         ];
 
-        buildPluginsResult = await processUtils.run(
+        buildPluginsResult = await globals.processUtils.run(
           pluginsBuildCommand,
           workingDirectory: _project.ios.hostAppRoot
             .childDirectory('Pods')
@@ -503,7 +500,7 @@ end
               modeDirectory.childDirectory(podFrameworkName),
             );
             final List<String> lipoCommand = <String>[
-              'xcrun',
+              ...globals.xcode.xcrunCommand(),
               'lipo',
               '-create',
               globals.fs.path.join(podProduct.path, binaryName),
@@ -517,7 +514,7 @@ end
               modeDirectory.childDirectory(podFrameworkName).childFile(binaryName).path
             ];
 
-            final RunResult pluginsLipoResult = await processUtils.run(
+            final RunResult pluginsLipoResult = await globals.processUtils.run(
               lipoCommand,
               workingDirectory: outputDirectory.path,
               allowReentrantFlutter: false,
@@ -532,7 +529,7 @@ end
 
           if (boolArg('xcframework')) {
             final List<String> xcframeworkCommand = <String>[
-              'xcrun',
+              ...globals.xcode.xcrunCommand(),
               'xcodebuild',
               '-create-xcframework',
               '-framework',
@@ -548,7 +545,7 @@ end
               modeDirectory.childFile('$binaryName.xcframework').path
             ];
 
-            final RunResult xcframeworkResult = await processUtils.run(
+            final RunResult xcframeworkResult = await globals.processUtils.run(
               xcframeworkCommand,
               workingDirectory: outputDirectory.path,
               allowReentrantFlutter: false,
@@ -574,7 +571,6 @@ end
 
       final Status status = globals.logger.startProgress(
         ' ├─Creating $frameworkBinaryName.xcframework...',
-        timeout: timeoutConfiguration.slowOperation,
       );
       try {
         if (buildInfo.mode == BuildMode.debug) {
@@ -616,7 +612,7 @@ end
 
       // Create iOS framework.
       List<String> lipoCommand = <String>[
-        'xcrun',
+        ...globals.xcode.xcrunCommand(),
         'lipo',
         fatFlutterFrameworkBinary.path,
         '-remove',
@@ -625,7 +621,7 @@ end
         armFlutterFrameworkBinary.path
       ];
 
-      RunResult lipoResult = await processUtils.run(
+      RunResult lipoResult = await globals.processUtils.run(
         lipoCommand,
         allowReentrantFlutter: false,
       );
@@ -642,7 +638,7 @@ end
       globals.fsUtils.copyDirectorySync(fatFramework, simulatorFlutterFrameworkDirectory);
 
       lipoCommand = <String>[
-        'xcrun',
+        ...globals.xcode.xcrunCommand(),
         'lipo',
         fatFlutterFrameworkBinary.path,
         '-thin',
@@ -651,7 +647,7 @@ end
         simulatorFlutterFrameworkBinary.path
       ];
 
-      lipoResult = await processUtils.run(
+      lipoResult = await globals.processUtils.run(
         lipoCommand,
         allowReentrantFlutter: false,
       );
@@ -663,7 +659,7 @@ end
 
       // Create XCFramework from iOS and simulator frameworks.
       final List<String> xcframeworkCommand = <String>[
-        'xcrun',
+        ...globals.xcode.xcrunCommand(),
         'xcodebuild',
         '-create-xcframework',
         '-framework', armFlutterFrameworkDirectory.path,
@@ -673,7 +669,7 @@ end
             .path
       ];
 
-      final RunResult xcframeworkResult = await processUtils.run(
+      final RunResult xcframeworkResult = await globals.processUtils.run(
         xcframeworkCommand,
         allowReentrantFlutter: false,
       );
@@ -696,7 +692,7 @@ end
     // Simulator is only supported in Debug mode.
     // "Fat" framework here must only contain arm.
     final List<String> xcframeworkCommand = <String>[
-      'xcrun',
+      ...globals.xcode.xcrunCommand(),
       'xcodebuild',
       '-create-xcframework',
       '-framework', fatFramework.path,
@@ -705,7 +701,7 @@ end
           .path
     ];
 
-    final RunResult xcframeworkResult = await processUtils.run(
+    final RunResult xcframeworkResult = await globals.processUtils.run(
       xcframeworkCommand,
       allowReentrantFlutter: false,
     );

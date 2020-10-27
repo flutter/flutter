@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -127,7 +125,7 @@ void main() {
 
     final RichText text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.text.style.fontSize, 20.0);
+    expect(text.text.style!.fontSize, 20.0);
   });
 
   testWidgets('inline widgets works with ellipsis', (WidgetTester tester) async {
@@ -160,6 +158,42 @@ void main() {
         overflow: TextOverflow.ellipsis,
       ),
     );
+    expect(tester.takeException(), null);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+
+  testWidgets('inline widgets hitTest works with ellipsis', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/68559
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      Text.rich(
+        TextSpan(
+          children: <InlineSpan>[
+            const TextSpan(
+              text: 'a very very very very very very very very very very long line',
+            ),
+            WidgetSpan(
+              child: SizedBox(
+                width: 20,
+                height: 40,
+                child: Card(
+                  child: RichText(
+                    text: const TextSpan(text: 'widget should be truncated'),
+                    textDirection: TextDirection.rtl,
+                  ),
+                ),
+              ),
+            ),
+          ],
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+
+    await tester.tap(find.byType(Text));
+
     expect(tester.takeException(), null);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
 
@@ -943,7 +977,7 @@ void main() {
         if (method != #drawParagraph)
           return false;
         final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
-        if (paragraph.width > paragraph.longestLine)
+        if (paragraph.longestLine > paragraph.width)
           throw 'paragraph width (${paragraph.width}) greater than its longest line (${paragraph.longestLine}).';
         if (paragraph.width >= 400)
           throw 'paragraph.width (${paragraph.width}) >= 400';
@@ -958,9 +992,60 @@ void main() {
     paragraph.layout(const ui.ParagraphConstraints(width: 1000));
     expect(paragraph.getBoxesForRange(2, 2), isEmpty);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/65818
+  testWidgets('WidgetSpans with no semantic information are elided from semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    // Without the fix for this bug the pump widget will throw a RangeError.
+    await tester.pumpWidget(
+      RichText(
+        textDirection: TextDirection.ltr,
+        text: TextSpan(children: <InlineSpan>[
+          const WidgetSpan(child: SizedBox.shrink()),
+          TextSpan(
+            text: 'HELLO',
+            style: const TextStyle(color: Colors.black),
+            recognizer: TapGestureRecognizer()..onTap = () {},
+          )
+        ]),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          id: 1,
+          rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+          transform: Matrix4(
+            3.0,0.0,0.0,0.0,
+            0.0,3.0,0.0,0.0,
+            0.0,0.0,1.0,0.0,
+            0.0,0.0,0.0,1.0,
+          ),
+          children: <TestSemantics>[
+            TestSemantics(
+              rect: const Rect.fromLTRB(-4.0, -4.0, 74.0, 18.0),
+              id: 2,
+              label: 'HELLO',
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isLink,
+              ],
+            ),
+          ],
+        ),
+      ],
+    )));
+  }, semanticsEnabled: true, skip: isBrowser); // Browser semantics have different sizes.
 }
 
-Future<void> _pumpTextWidget({ WidgetTester tester, String text, TextOverflow overflow }) {
+Future<void> _pumpTextWidget({
+  required WidgetTester tester,
+  required String text,
+  required TextOverflow overflow,
+}) {
   return tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,

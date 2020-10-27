@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/globals.dart' as globals;
-
 import '../test_utils.dart';
 import 'project.dart';
 
@@ -53,7 +51,7 @@ class BackgroundProject extends Project {
 
   void updateTestIsolatePhrase(String message) {
     final String newMainContents = main.replaceFirst('Isolate thread', message);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
   }
 }
 
@@ -103,6 +101,6 @@ class RepeatingBackgroundProject extends Project {
 
   void updateTestIsolatePhrase(String message) {
     final String newMainContents = main.replaceFirst('Isolate thread', message);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
   }
 }

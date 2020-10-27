@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
@@ -20,19 +18,9 @@ import 'build.dart';
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({ @required bool verboseHelp }) {
-    addTreeShakeIconsFlag();
-    addSplitDebugInfoOption();
-    usesTargetOption();
-    addBuildModeFlags();
-    addDartObfuscationOption();
-    usesExtraFrontendOptions();
+    addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesBuildNumberOption();
     usesBuildNameOption();
-    addEnableExperimentation(hide: !verboseHelp);
-    addBuildPerformanceFile(hide: !verboseHelp);
-    addBundleSkSLPathOption(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
-    usesAnalyzeSizeFlag();
   }
 
   @override
@@ -68,6 +56,7 @@ class BuildMacosCommand extends BuildSubCommand {
         fileSystem: globals.fs,
         logger: globals.logger,
         appFilenamePattern: 'App',
+        flutterUsage: globals.flutterUsage,
       ),
     );
     return FlutterCommandResult.success();

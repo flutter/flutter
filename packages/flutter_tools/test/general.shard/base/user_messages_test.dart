@@ -23,7 +23,7 @@ void main() {
 
   testWithoutContext('Android installation instructions', () {
     final UserMessages userMessages = UserMessages();
-    _checkInstallationURL((Platform platform) => userMessages.androidMissingSdkInstructions('ANDROID_SDK_ROOT', platform));
+    _checkInstallationURL((Platform platform) => userMessages.androidMissingSdkInstructions(platform));
     _checkInstallationURL((Platform platform) => userMessages.androidSdkInstallHelp(platform));
     _checkInstallationURL((Platform platform) => userMessages.androidMissingSdkManager('/', platform));
     _checkInstallationURL((Platform platform) => userMessages.androidCannotRunSdkManager('/', '', platform));

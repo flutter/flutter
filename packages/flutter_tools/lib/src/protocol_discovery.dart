@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import 'base/io.dart';
+import 'base/logger.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 
@@ -18,11 +19,13 @@ class ProtocolDiscovery {
     this.serviceName, {
     this.portForwarder,
     this.throttleDuration,
+    this.throttleTimeout,
     this.hostPort,
     this.devicePort,
     this.ipv6,
-  }) : assert(logReader != null)
-  {
+    Logger logger,
+  }) : _logger = logger,
+       assert(logReader != null) {
     _deviceLogSubscription = logReader.logLines.listen(
       _handleLine,
       onDone: _stopScrapingLogs,
@@ -33,20 +36,24 @@ class ProtocolDiscovery {
   factory ProtocolDiscovery.observatory(
     DeviceLogReader logReader, {
     DevicePortForwarder portForwarder,
-    Duration throttleDuration = const Duration(milliseconds: 200),
+    Duration throttleDuration,
+    Duration throttleTimeout,
     @required int hostPort,
     @required int devicePort,
     @required bool ipv6,
+    Logger logger, // TODO(jonahwilliams): make required.
   }) {
     const String kObservatoryService = 'Observatory';
     return ProtocolDiscovery._(
       logReader,
       kObservatoryService,
       portForwarder: portForwarder,
-      throttleDuration: throttleDuration,
+      throttleDuration: throttleDuration ?? const Duration(milliseconds: 200),
+      throttleTimeout: throttleTimeout,
       hostPort: hostPort,
       devicePort: devicePort,
       ipv6: ipv6,
+      logger: logger ?? globals.logger,
     );
   }
 
@@ -56,9 +63,15 @@ class ProtocolDiscovery {
   final int hostPort;
   final int devicePort;
   final bool ipv6;
+  final Logger _logger;
 
   /// The time to wait before forwarding a new observatory URIs from [logReader].
   final Duration throttleDuration;
+
+  /// The time between URIs are discovered before timing out when scraping the [logReader].
+  ///
+  /// If null, log scanning will continue indefinitely.
+  final Duration throttleTimeout;
 
   StreamSubscription<String> _deviceLogSubscription;
   _BufferedStreamController<Uri> _uriStreamController;
@@ -81,15 +94,21 @@ class ProtocolDiscovery {
   ///
   /// When a new observatory URL: is available in [logReader],
   /// the URLs are forwarded at most once every [throttleDuration].
+  /// Returns when no event has been observed for [throttleTimeout].
   ///
   /// Port forwarding is only attempted when this is invoked,
   /// for each observatory URL in the stream.
   Stream<Uri> get uris {
-    return _uriStreamController.stream
+    Stream<Uri> uriStream = _uriStreamController.stream
       .transform(_throttle<Uri>(
         waitDuration: throttleDuration,
-      ))
-      .asyncMap<Uri>(_forwardPort);
+      ));
+    if (throttleTimeout != null) {
+      // Don't throw a TimeoutException. The URL wasn't found in time, just close the stream.
+      uriStream = uriStream.timeout(throttleTimeout,
+          onTimeout: (EventSink<Uri> sink) => sink.close());
+    }
+    return uriStream.asyncMap<Uri>(_forwardPort);
   }
 
   Future<void> cancel() => _stopScrapingLogs();
@@ -124,20 +143,20 @@ class ProtocolDiscovery {
       return;
     }
     if (devicePort != null && uri.port != devicePort) {
-      globals.printTrace('skipping potential observatory $uri due to device port mismatch');
+      _logger.printTrace('skipping potential observatory $uri due to device port mismatch');
       return;
     }
     _uriStreamController.add(uri);
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
-    globals.printTrace('$serviceName URL on device: $deviceUri');
+    _logger.printTrace('$serviceName URL on device: $deviceUri');
     Uri hostUri = deviceUri;
 
     if (portForwarder != null) {
       final int actualDevicePort = deviceUri.port;
       final int actualHostPort = await portForwarder.forward(actualDevicePort, hostPort: hostPort);
-      globals.printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
+      _logger.printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
@@ -211,7 +230,7 @@ class _BufferedStreamController<T> {
 ///
 /// For example, consider a `waitDuration` of `10ms`, and list of event names
 /// and arrival times: `a (0ms), b (5ms), c (11ms), d (21ms)`.
-/// The events `c` and `d` will be produced as a result.
+/// The events `a`, `c`, and `d` will be produced as a result.
 StreamTransformer<S, S> _throttle<S>({
   @required Duration waitDuration,
 }) {
@@ -220,26 +239,36 @@ StreamTransformer<S, S> _throttle<S>({
   S latestLine;
   int lastExecution;
   Future<void> throttleFuture;
+  bool done = false;
 
   return StreamTransformer<S, S>
     .fromHandlers(
       handleData: (S value, EventSink<S> sink) {
         latestLine = value;
 
+        final bool isFirstMessage = lastExecution == null;
         final int currentTime = DateTime.now().millisecondsSinceEpoch;
         lastExecution ??= currentTime;
         final int remainingTime = currentTime - lastExecution;
-        final int nextExecutionTime = remainingTime > waitDuration.inMilliseconds
+
+        // Always send the first event immediately.
+        final int nextExecutionTime = isFirstMessage || remainingTime > waitDuration.inMilliseconds
           ? 0
           : waitDuration.inMilliseconds - remainingTime;
-
         throttleFuture ??= Future<void>
           .delayed(Duration(milliseconds: nextExecutionTime))
           .whenComplete(() {
+            if (done) {
+              return;
+            }
             sink.add(latestLine);
             throttleFuture = null;
             lastExecution = DateTime.now().millisecondsSinceEpoch;
           });
+      },
+      handleDone: (EventSink<S> sink) {
+        done = true;
+        sink.close();
       }
     );
 }

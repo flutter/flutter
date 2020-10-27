@@ -208,6 +208,20 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// [Tween]s that use dedicated `lerp` methods instead of merely relying on the
 /// operators (in particular, this allows them to handle null values in a more
 /// useful manner).
+///
+/// ## Nullability
+///
+/// The [begin] and [end] fields are nullable; a [Tween] does not have to
+/// have non-null values specified when it is created.
+///
+/// If `T` is nullable, then [lerp] and [transform] may return null.
+/// This is typically seen in the case where [begin] is null and `t`
+/// is 0.0, or [end] is null and `t` is 1.0, or both are null (at any
+/// `t` value).
+///
+/// If `T` is not nullable, then [begin] and [end] must both be set to
+/// non-null values before using [lerp] or [transform], otherwise they
+/// will throw.
 class Tween<T extends dynamic> extends Animatable<T> {
   /// Creates a tween.
   ///
@@ -236,6 +250,9 @@ class Tween<T extends dynamic> extends Animatable<T> {
   /// The default implementation of this method uses the [+], [-], and [*]
   /// operators on `T`. The [begin] and [end] properties must therefore be
   /// non-null by the time this method is called.
+  ///
+  /// In general, however, it is possible for this to return null, especially
+  /// when `t`=0.0 and [begin] is null, or `t`=1.0 and [end] is null.
   @protected
   T lerp(double t) {
     assert(begin != null);
@@ -291,6 +308,9 @@ class ReverseTween<T> extends Tween<T> {
 /// This class specializes the interpolation of [Tween<Color>] to use
 /// [Color.lerp].
 ///
+/// The values can be null, representing no color (which is distinct to
+/// transparent black, as represented by [Colors.transparent]).
+///
 /// See [Tween] for a discussion on how to use interpolation objects.
 class ColorTween extends Tween<Color?> {
   /// Creates a [Color] tween.
@@ -314,6 +334,8 @@ class ColorTween extends Tween<Color?> {
 /// This class specializes the interpolation of [Tween<Size>] to use
 /// [Size.lerp].
 ///
+/// The values can be null, representing [Size.zero].
+///
 /// See [Tween] for a discussion on how to use interpolation objects.
 class SizeTween extends Tween<Size?> {
   /// Creates a [Size] tween.
@@ -331,6 +353,9 @@ class SizeTween extends Tween<Size?> {
 ///
 /// This class specializes the interpolation of [Tween<Rect>] to use
 /// [Rect.lerp].
+///
+/// The values can be null, representing a zero-sized rectangle at the
+/// origin ([Rect.zero]).
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
 class RectTween extends Tween<Rect?> {
@@ -354,6 +379,9 @@ class RectTween extends Tween<Rect?> {
 ///
 /// This is the closest approximation to a linear tween that is possible with an
 /// integer. Compare to [StepTween] and [Tween<double>].
+///
+/// The [begin] and [end] values must be set to non-null values before
+/// calling [lerp] or [transform].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
 class IntTween extends Tween<int> {
@@ -379,6 +407,9 @@ class IntTween extends Tween<int> {
 ///
 /// This results in a value that is never greater than the equivalent
 /// value from a linear double interpolation. Compare to [IntTween].
+///
+/// The [begin] and [end] values must be set to non-null values before
+/// calling [lerp] or [transform].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
 class StepTween extends Tween<int> {

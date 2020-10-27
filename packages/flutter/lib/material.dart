@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 /// Flutter widgets implementing Material Design.
 ///
 /// To use, import `package:flutter/material.dart`.
@@ -52,6 +50,7 @@ export 'src/material/constants.dart';
 export 'src/material/curves.dart';
 export 'src/material/data_table.dart';
 export 'src/material/data_table_source.dart';
+export 'src/material/data_table_theme.dart';
 export 'src/material/debug.dart';
 export 'src/material/dialog.dart';
 export 'src/material/dialog_theme.dart';

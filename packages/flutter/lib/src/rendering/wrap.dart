@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'box.dart';
+import 'layer.dart';
 import 'object.dart';
 
 /// How [Wrap] should align objects.
@@ -111,14 +110,14 @@ class RenderWrap extends RenderBox
   /// By default, the wrap layout is horizontal and both the children and the
   /// runs are aligned to the start.
   RenderWrap({
-    List<RenderBox> children,
+    List<RenderBox>? children,
     Axis direction = Axis.horizontal,
     WrapAlignment alignment = WrapAlignment.start,
     double spacing = 0.0,
     WrapAlignment runAlignment = WrapAlignment.start,
     double runSpacing = 0.0,
     WrapCrossAlignment crossAxisAlignment = WrapCrossAlignment.start,
-    TextDirection textDirection,
+    TextDirection? textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     Clip clipBehavior = Clip.none,
   }) : assert(direction != null),
@@ -292,9 +291,9 @@ class RenderWrap extends RenderBox
   /// [crossAxisAlignment] is either [WrapCrossAlignment.start] or
   /// [WrapCrossAlignment.end], or there's more than one child, then the
   /// [textDirection] must not be null.
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? value) {
     if (_textDirection != value) {
       _textDirection = value;
       markNeedsLayout();
@@ -407,7 +406,7 @@ class RenderWrap extends RenderBox
     double runWidth = 0.0;
     double runHeight = 0.0;
     int childCount = 0;
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     while (child != null) {
       // TODO(chunhtai): use the new intrinsic API to calculate child sizes
       // once https://github.com/flutter/flutter/issues/48679 is fixed.
@@ -437,7 +436,7 @@ class RenderWrap extends RenderBox
     double runHeight = 0.0;
     double runWidth = 0.0;
     int childCount = 0;
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     while (child != null) {
       // TODO(chunhtai): use the new intrinsic API to calculate child sizes
       // once https://github.com/flutter/flutter/issues/48679 is fixed.
@@ -466,7 +465,7 @@ class RenderWrap extends RenderBox
     switch (direction) {
       case Axis.horizontal:
         double width = 0.0;
-        RenderBox child = firstChild;
+        RenderBox? child = firstChild;
         while (child != null) {
           width = math.max(width, child.getMinIntrinsicWidth(double.infinity));
           child = childAfter(child);
@@ -475,7 +474,6 @@ class RenderWrap extends RenderBox
       case Axis.vertical:
         return _computeIntrinsicWidthForHeight(height);
     }
-    return null;
   }
 
   @override
@@ -483,7 +481,7 @@ class RenderWrap extends RenderBox
     switch (direction) {
       case Axis.horizontal:
         double width = 0.0;
-        RenderBox child = firstChild;
+        RenderBox? child = firstChild;
         while (child != null) {
           width += child.getMaxIntrinsicWidth(double.infinity);
           child = childAfter(child);
@@ -492,7 +490,6 @@ class RenderWrap extends RenderBox
       case Axis.vertical:
         return _computeIntrinsicWidthForHeight(height);
     }
-    return null;
   }
 
   @override
@@ -502,14 +499,13 @@ class RenderWrap extends RenderBox
         return _computeIntrinsicHeightForWidth(width);
       case Axis.vertical:
         double height = 0.0;
-        RenderBox child = firstChild;
+        RenderBox? child = firstChild;
         while (child != null) {
           height = math.max(height, child.getMinIntrinsicHeight(double.infinity));
           child = childAfter(child);
         }
         return height;
     }
-    return null;
   }
 
   @override
@@ -519,18 +515,17 @@ class RenderWrap extends RenderBox
         return _computeIntrinsicHeightForWidth(width);
       case Axis.vertical:
         double height = 0.0;
-        RenderBox child = firstChild;
+        RenderBox? child = firstChild;
         while (child != null) {
           height += child.getMaxIntrinsicHeight(double.infinity);
           child = childAfter(child);
         }
         return height;
     }
-    return null;
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
     return defaultComputeDistanceToHighestActualBaseline(baseline);
   }
 
@@ -541,7 +536,6 @@ class RenderWrap extends RenderBox
       case Axis.vertical:
         return child.size.height;
     }
-    return 0.0;
   }
 
   double _getCrossAxisExtent(RenderBox child) {
@@ -551,7 +545,6 @@ class RenderWrap extends RenderBox
       case Axis.vertical:
         return child.size.width;
     }
-    return 0.0;
   }
 
   Offset _getOffset(double mainAxisOffset, double crossAxisOffset) {
@@ -561,7 +554,6 @@ class RenderWrap extends RenderBox
       case Axis.vertical:
         return Offset(crossAxisOffset, mainAxisOffset);
     }
-    return Offset.zero;
   }
 
   double _getChildCrossAxisOffset(bool flipCrossAxis, double runCrossAxisExtent, double childCrossAxisExtent) {
@@ -574,7 +566,6 @@ class RenderWrap extends RenderBox
       case WrapCrossAlignment.center:
         return freeSpace / 2.0;
     }
-    return 0.0;
   }
 
   bool _hasVisualOverflow = false;
@@ -584,12 +575,12 @@ class RenderWrap extends RenderBox
     final BoxConstraints constraints = this.constraints;
     assert(_debugHasNecessaryDirections);
     _hasVisualOverflow = false;
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     if (child == null) {
       size = constraints.smallest;
       return;
     }
-    BoxConstraints childConstraints;
+    final BoxConstraints childConstraints;
     double mainAxisLimit = 0.0;
     bool flipMainAxis = false;
     bool flipCrossAxis = false;
@@ -640,7 +631,7 @@ class RenderWrap extends RenderBox
         runMainAxisExtent += spacing;
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       childCount += 1;
-      final WrapParentData childParentData = child.parentData as WrapParentData;
+      final WrapParentData childParentData = child.parentData! as WrapParentData;
       childParentData._runIndex = runMetrics.length;
       child = childParentData.nextSibling;
     }
@@ -741,7 +732,7 @@ class RenderWrap extends RenderBox
         crossAxisOffset -= runCrossAxisExtent;
 
       while (child != null) {
-        final WrapParentData childParentData = child.parentData as WrapParentData;
+        final WrapParentData childParentData = child.parentData! as WrapParentData;
         if (childParentData._runIndex != i)
           break;
         final double childMainAxisExtent = _getMainAxisExtent(child);
@@ -765,7 +756,7 @@ class RenderWrap extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -773,11 +764,16 @@ class RenderWrap extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     // TODO(ianh): move the debug flex overflow paint logic somewhere common so
     // it can be reused here
-    if (_hasVisualOverflow && clipBehavior != Clip.none)
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint, clipBehavior: clipBehavior);
-    else
+    if (_hasVisualOverflow && clipBehavior != Clip.none) {
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint,
+          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+    } else {
+      _clipRectLayer = null;
       defaultPaint(context, offset);
+    }
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

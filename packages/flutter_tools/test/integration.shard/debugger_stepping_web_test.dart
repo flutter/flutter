@@ -5,7 +5,6 @@
 import 'dart:io';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../src/common.dart';
 import 'test_data/stepping_project.dart';
@@ -20,7 +19,7 @@ void main() {
     tempDirectory = createResolvedTempDirectorySync('debugger_stepping_test.');
   });
 
-  test('Web debugger can step over statements', () async {
+  testWithoutContext('Web debugger can step over statements', () async {
     final WebSteppingProject _project = WebSteppingProject();
     await _project.setUpIn(tempDirectory);
 
