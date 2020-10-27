@@ -985,11 +985,15 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
         if (hasPagelessRoute) {
           final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute]!;
           for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
-            assert(pagelessRoute.isWaitingForExitingDecision);
-            if (isLastExitingPageRoute && pagelessRoute == pagelessRoutes.last) {
-              pagelessRoute.markForPop(pagelessRoute.route.currentResult);
-            } else {
-              pagelessRoute.markForComplete(pagelessRoute.route.currentResult);
+            // It is possible that a pageless route that belongs to an exiting
+            // page-based route does not require exiting decision. This can
+            // happen if the page list is updated right after a Navigator.pop.
+            if (pagelessRoute.isWaitingForExitingDecision) {
+              if (isLastExitingPageRoute && pagelessRoute == pagelessRoutes.last) {
+                pagelessRoute.markForPop(pagelessRoute.route.currentResult);
+              } else {
+                pagelessRoute.markForComplete(pagelessRoute.route.currentResult);
+              }
             }
           }
         }
@@ -3655,7 +3659,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             () => <_RouteEntry>[],
           );
         pagelessRoutes.add(potentialEntryToRemove);
-        if (previousOldPageRouteEntry!.isWaitingForExitingDecision)
+        if (previousOldPageRouteEntry!.isWaitingForExitingDecision && potentialEntryToRemove.isPresent)
           potentialEntryToRemove.markNeedsExitingDecision();
         continue;
       }

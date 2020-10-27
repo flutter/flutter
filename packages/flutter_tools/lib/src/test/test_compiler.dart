@@ -39,7 +39,6 @@ class TestCompiler {
   TestCompiler(
     this.buildInfo,
     this.flutterProject,
-    this.extraFrontEndOptions,
   ) : testFilePath = globals.fs.path.join(
         flutterProject.directory.path,
         getBuildDirectory(),
@@ -68,7 +67,6 @@ class TestCompiler {
   final FlutterProject flutterProject;
   final BuildInfo buildInfo;
   final String testFilePath;
-  final List<String> extraFrontEndOptions;
 
 
   ResidentCompiler compiler;
@@ -111,7 +109,7 @@ class TestCompiler {
       unsafePackageSerialization: false,
       dartDefines: buildInfo.dartDefines,
       packagesPath: globalPackagesPath,
-      extraFrontEndOptions: extraFrontEndOptions,
+      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       platform: globals.platform,
       testCompilation: true,
     );

@@ -690,14 +690,11 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     required this.items,
     this.initialValue,
     this.elevation,
-    this.theme,
-    required this.popupMenuTheme,
     required this.barrierLabel,
     this.semanticLabel,
     this.shape,
     this.color,
-    required this.showMenuContext,
-    required this.captureInheritedThemes,
+    required this.capturedThemes,
   }) : itemSizes = List<Size?>.filled(items.length, null);
 
   final RelativeRect position;
@@ -705,13 +702,10 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final List<Size?> itemSizes;
   final T? initialValue;
   final double? elevation;
-  final ThemeData? theme;
   final String? semanticLabel;
   final ShapeBorder? shape;
   final Color? color;
-  final PopupMenuThemeData popupMenuTheme;
-  final BuildContext showMenuContext;
-  final bool captureInheritedThemes;
+  final CapturedThemes capturedThemes;
 
   @override
   Animation<double> createAnimation() {
@@ -745,16 +739,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       }
     }
 
-    Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
-    if (captureInheritedThemes) {
-      menu = InheritedTheme.captureAll(showMenuContext, menu);
-    } else {
-      // For the sake of backwards compatibility. An (unlikely) app that relied
-      // on having menus only inherit from the material Theme could set
-      // captureInheritedThemes to false and get the original behavior.
-      if (theme != null)
-        menu = Theme(data: theme!, child: menu);
-    }
+    final Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
 
     return SafeArea(
       child: Builder(
@@ -766,7 +751,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
               selectedItemIndex,
               Directionality.of(context)!,
             ),
-            child: menu,
+            child: capturedThemes.wrap(menu),
           );
         },
       ),
@@ -838,14 +823,12 @@ Future<T?> showMenu<T>({
   String? semanticLabel,
   ShapeBorder? shape,
   Color? color,
-  bool captureInheritedThemes = true,
   bool useRootNavigator = false,
 }) {
   assert(context != null);
   assert(position != null);
   assert(useRootNavigator != null);
   assert(items != null && items.isNotEmpty);
-  assert(captureInheritedThemes != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
   switch (Theme.of(context)!.platform) {
@@ -859,19 +842,17 @@ Future<T?> showMenu<T>({
       semanticLabel ??= MaterialLocalizations.of(context).popupMenuLabel;
   }
 
-  return Navigator.of(context, rootNavigator: useRootNavigator)!.push(_PopupMenuRoute<T>(
+  final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator)!;
+  return navigator.push(_PopupMenuRoute<T>(
     position: position,
     items: items,
     initialValue: initialValue,
     elevation: elevation,
     semanticLabel: semanticLabel,
-    theme: Theme.of(context, shadowThemeOnly: true),
-    popupMenuTheme: PopupMenuTheme.of(context),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     shape: shape,
     color: color,
-    showMenuContext: context,
-    captureInheritedThemes: captureInheritedThemes,
+    capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
   ));
 }
 
@@ -964,11 +945,9 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.enabled = true,
     this.shape,
     this.color,
-    this.captureInheritedThemes = true,
   }) : assert(itemBuilder != null),
        assert(offset != null),
        assert(enabled != null),
-       assert(captureInheritedThemes != null),
        assert(!(child != null && icon != null),
            'You can only pass [child] or [icon], not both.'),
        super(key: key);
@@ -1050,11 +1029,6 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Theme.of(context).cardColor is used.
   final Color? color;
 
-  /// If true (the default) then the menu will be wrapped with copies
-  /// of the [InheritedTheme]s, like [Theme] and [PopupMenuTheme], which
-  /// are defined above the [BuildContext] where the menu is shown.
-  final bool captureInheritedThemes;
-
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1094,7 +1068,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         position: position,
         shape: widget.shape ?? popupMenuTheme.shape,
         color: widget.color ?? popupMenuTheme.color,
-        captureInheritedThemes: widget.captureInheritedThemes,
       )
       .then<void>((T? newValue) {
         if (!mounted)

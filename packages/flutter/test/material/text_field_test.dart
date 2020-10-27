@@ -7044,6 +7044,129 @@ void main() {
       expect(find.byType(CupertinoButton), findsNWidgets(3));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  testWidgets('double tapping a space selects the previous word on iOS', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: ' blah blah  \n  blah',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, -1);
+    expect(controller.value.selection.extentOffset, -1);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 19));
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 19);
+    expect(controller.value.selection.extentOffset, 19);
+
+    // Double tapping does the same thing.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pumpAndSettle();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.extentOffset, 5);
+    expect(controller.value.selection.baseOffset, 1);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 19));
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 19);
+    expect(controller.value.selection.extentOffset, 19);
+
+    // Double tapping does the same thing for the first space.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(controller.value.selection.extentOffset, 1);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 19));
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 19);
+    expect(controller.value.selection.extentOffset, 19);
+
+    // Double tapping the last space selects all previous contiguous spaces on
+    // both lines and the previous word.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 14));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 14));
+    await tester.pumpAndSettle();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 6);
+    expect(controller.value.selection.extentOffset, 14);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  testWidgets('selecting a space selects the space on non-iOS platforms', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: ' blah blah',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, -1);
+    expect(controller.value.selection.extentOffset, -1);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 10));
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 10);
+    expect(controller.value.selection.extentOffset, 10);
+
+    // Double tapping the second space selects it.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pumpAndSettle();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 5);
+    expect(controller.value.selection.extentOffset, 6);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 10));
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 10);
+    expect(controller.value.selection.extentOffset, 10);
+
+    // Double tapping the second space selects it.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(controller.value.selection.extentOffset, 1);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS,  TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia, TargetPlatform.android }));
+
   testWidgets('force press does not select a word', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
