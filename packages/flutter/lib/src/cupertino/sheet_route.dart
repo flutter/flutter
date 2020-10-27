@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
@@ -5,17 +7,32 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// Value extracted from the official sketch iOS UI kit
-/// It is the top offset that will be displayed from previous route
+/// It is the top offset that will be displayed from the bottom route
 const double _kPreviousRouteVisibeOffset = 10.0;
 
 /// Value extracted from the official sketch iOS UI kit
-const Radius kCupertinoModalSheetTopRadius = Radius.circular(10.0);
+const Radius _kCupertinoSheetTopRadius = Radius.circular(10.0);
 
 /// Estimated Round corners for iPhone X, XR, 11, 11 Pro
 /// https://kylebashour.com/posts/finding-the-real-iphone-x-corner-radius
-const double _kDeviceFrameCorners = 38.5;
+/// It used to animate the bottom route with a top radius that matches
+/// the frame radius. If the device doesn't have round corners it will use
+/// Radius.zero
+const Radius _kRoundedDeviceRadius = Radius.circular(38.5);
 
-const Color _kModalBarrierColor = Color.fromRGBO(0, 0, 0, 0.12);
+/// Minimal distance from the top of the screen to the top of the previous route
+/// It will be used ff the top safearea is less than this value.
+/// In iPhones the top SafeArea is more or equal to this distance.
+const double _kSheetMinimalOffset = 10;
+
+/// Value extracted from the official sketch iOS UI kit for iPhone X, XR, 11, 11 Pro
+/// The status bar height is bigger for devices with rounded corners, this is
+/// used to detect if an iPhone has round corners or not
+const double _kRoundedDeviceStatusBarHeight = 20;
+
+const Color _kBarrierColor = Color.fromRGBO(0, 0, 0, 0.20);
+
+const Curve _kCupertinoSheetCurve = Curves.easeOut;
 
 /// Wraps the child into a cupertino modal sheet appareance. This is used to
 /// create a [SheetRoute].
@@ -41,30 +58,27 @@ class _CupertinoSheetDecorationBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This should be changed before merging the PR
-    final BoxShadow shadow = BoxShadow(
-        blurRadius: 10,
-        color: CupertinoColors.black.withOpacity(0.12),
-        spreadRadius: 5);
-    final Color backgroundColor = this.backgroundColor ??
-        CupertinoTheme.of(context).scaffoldBackgroundColor;
-    return SafeArea(
-      bottom: false,
-      right: false,
-      left: false,
-      child: Padding(
-        padding: const EdgeInsets.only(top: _kPreviousRouteVisibeOffset),
-        child: Container(
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            boxShadow: <BoxShadow>[shadow],
-            borderRadius: BorderRadius.vertical(top: topRadius),
-          ),
-          child: MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
-            child: child,
+    final double paddingTop = math.max(10, MediaQuery.of(context)?.padding.top ?? 0);
+    return CupertinoUserInterfaceLevel(
+      data: CupertinoUserInterfaceLevelData.elevated,
+      child: Builder(
+        builder: (BuildContext context) => Padding(
+          padding: EdgeInsets.only(top: _kPreviousRouteVisibeOffset + paddingTop),
+          child: Container(
+            clipBehavior: Clip.hardEdge,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.vertical(top: topRadius),
+              color: backgroundColor ??
+                  CupertinoColors.systemBackground.resolveFrom(
+                    context,
+                    nullOk: true,
+                  ),
+            ),
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: child,
+            ),
           ),
         ),
       ),
@@ -72,30 +86,14 @@ class _CupertinoSheetDecorationBuilder extends StatelessWidget {
   }
 }
 
-
-
 class CupertinoSheetRoute<T> extends SheetRoute<T> {
- 
   CupertinoSheetRoute({
     required WidgetBuilder builder,
-    double? closeProgressThreshold,
-    String? barrierLabel,
-    Curve? animationCurve,
-    Color? modalBarrierColor,
-    bool bounce = true,
-    bool isDismissible = true,
-    bool enableDrag = true,
-    bool expanded = true,
-    Duration? duration,
+    List<double>? stops,
+    double initialStop = 1,
     RouteSettings? settings,
-    this.transitionBackgroundColor,
-    this.topRadius = kCupertinoModalSheetTopRadius,
-    this.previousRouteAnimationCurve,
-  })  : assert(expanded != null),
-        assert(isDismissible != null),
-        assert(enableDrag != null),
-        super(
-          closeProgressThreshold: closeProgressThreshold,
+    Color? backgroundColor,
+  }) : super(
           builder: (BuildContext context) {
             return _CupertinoSheetDecorationBuilder(
               child: Builder(
@@ -103,30 +101,30 @@ class CupertinoSheetRoute<T> extends SheetRoute<T> {
                   return builder(context);
                 },
               ),
-              backgroundColor: transitionBackgroundColor,
-              topRadius: topRadius,
+              backgroundColor: backgroundColor,
+              topRadius: _kCupertinoSheetTopRadius,
             );
           },
-          bounce: bounce,
-          barrierLabel: barrierLabel,
-          modalBarrierColor: modalBarrierColor ?? _kModalBarrierColor,
-          isDismissible: isDismissible,
-          enableDrag: enableDrag,
-          expanded: expanded,
           settings: settings,
-          animationCurve: animationCurve,
-          duration: duration,
+          animationCurve: _kCupertinoSheetCurve,
+          stops: stops,
+          initialStop: initialStop,
         );
 
-  /// The top corners of this modal sheet are rounded by this Radius
-  final Radius topRadius;
+  @override
+  bool get bounceAtTop => true;
 
-  /// Background color behind all routes. Black by default
-  final Color? transitionBackgroundColor;
+  @override
+  bool get draggable => true;
 
-  /// Curve for second animation of previous route transition
-  final Curve? previousRouteAnimationCurve;
+  @override
+  bool get expanded => true;
 
+  @override
+  Color? get barrierColor => _kBarrierColor;
+
+  @override
+  bool get barrierDismissible => false;
 
   @override
   Widget buildTransitions(
@@ -135,17 +133,16 @@ class CupertinoSheetRoute<T> extends SheetRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final double paddingTop = MediaQuery.of(context)?.padding.top ?? 0;
+    final double topPadding = MediaQuery.of(context)!.padding.top;
+    final double topOffset = math.max(_kSheetMinimalOffset, topPadding);
     return AnimatedBuilder(
       animation: secondaryAnimation,
       child: child,
       builder: (BuildContext context, Widget? child) {
         final double progress = secondaryAnimation.value;
         final double scale = 1 - progress / 10;
-        final double distanceWithScale =
-            (paddingTop + _kPreviousRouteVisibeOffset) * 0.9;
-        final Offset offset =
-            Offset(0, progress * (paddingTop - distanceWithScale));
+        final double distanceWithScale = (topOffset + _kPreviousRouteVisibeOffset) * 0.9;
+        final Offset offset = Offset(0, progress * (topOffset - distanceWithScale));
         return Transform.translate(
           offset: offset,
           child: Transform.scale(
@@ -159,47 +156,47 @@ class CupertinoSheetRoute<T> extends SheetRoute<T> {
   }
 
   @override
-  Widget getPreviousRouteTransition(BuildContext context,
-      Animation<double> secondaryAnimation, Widget child) {
-    return _CupertinoModalTransition(
+  Widget getBottomRouteTransition(
+      BuildContext context, Animation<double> secondAnimation, Widget child) {
+    final Animation<double> delayAnimation = initialStop == 1
+        ? secondAnimation
+        : CurvedAnimation(
+            parent: sheetAnimation!,
+            curve: const Interval(0.5, 1, curve: Curves.linear),
+          );
+
+    return _CupertinoSheetBottomRouteTransition(
       body: child,
-      secondaryAnimation: secondaryAnimation,
-      animationCurve: previousRouteAnimationCurve,
-      topRadius: topRadius,
-      backgroundColor: transitionBackgroundColor,
+      secondaryAnimation: delayAnimation,
     );
   }
 }
 
-class _CupertinoModalTransition extends StatelessWidget {
-  const _CupertinoModalTransition({
+/// Animation for previous route when a [CupertinoSheetRoute] enters/exits
+class _CupertinoSheetBottomRouteTransition extends StatelessWidget {
+  
+  const _CupertinoSheetBottomRouteTransition({
     Key? key,
     required this.secondaryAnimation,
     required this.body,
-    required this.topRadius,
-    this.backgroundColor,
-    this.animationCurve,
   }) : super(key: key);
 
   final Widget body;
 
   final Animation<double> secondaryAnimation;
-  final Radius topRadius;
-  final Curve? animationCurve;
-  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
-    final double paddingTop = MediaQuery.of(context)?.padding.top ?? 0;
+    final double topPadding = MediaQuery.of(context)!.padding.top;
+    final double topOffset = math.max(_kSheetMinimalOffset, topPadding);
 
-    final bool phoneWithRoundedCorners =
-        defaultTargetPlatform == TargetPlatform.iOS && paddingTop > 20;
-    final double startRoundCorner =
-        phoneWithRoundedCorners ? _kDeviceFrameCorners : 0;
+    final bool isRoundedDevice =
+        defaultTargetPlatform == TargetPlatform.iOS && topPadding > _kRoundedDeviceStatusBarHeight;
+    final Radius deviceCorner = isRoundedDevice ? _kRoundedDeviceRadius : Radius.zero;
 
     final CurvedAnimation curvedAnimation = CurvedAnimation(
       parent: secondaryAnimation,
-      curve: animationCurve ?? Curves.easeOut,
+      curve: _kCupertinoSheetCurve,
     );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -209,21 +206,22 @@ class _CupertinoModalTransition extends StatelessWidget {
         child: body,
         builder: (BuildContext context, Widget? child) {
           final double progress = curvedAnimation.value;
-          final double yOffset = progress * paddingTop;
           final double scale = 1 - progress / 10;
-          final double radius = progress == 0
-              ? 0.0
-              : (1 - progress) * startRoundCorner + progress * topRadius.x;
+          final Radius radius = progress == 0
+              ? Radius.zero
+              : Radius.lerp(deviceCorner, _kCupertinoSheetTopRadius, progress)!;
           return Stack(
             children: <Widget>[
-              Container(color: backgroundColor ?? CupertinoColors.black),
+              Container(color: CupertinoColors.black),
+              // TODO(jamesblasco): Add ColorFilter based on CupertinoUserInterfaceLevelData
+              // https://github.com/jamesblasco/modal_bottom_sheet/pull/44/files
               Transform.translate(
-                offset: Offset(0, yOffset),
+                offset: Offset(0, progress * topOffset),
                 child: Transform.scale(
                   scale: scale,
                   alignment: Alignment.topCenter,
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(radius),
+                    borderRadius: BorderRadius.vertical(top: radius),
                     child: child,
                   ),
                 ),
@@ -234,4 +232,16 @@ class _CupertinoModalTransition extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Copied from widgets/sheet_route.dart as is a private method/
+/// Re-maps a number from one range to another.
+///
+/// A value of fromLow would get mapped to toLow, a value of
+/// fromHigh to toHigh, values in-between to values in-between, etc
+double _mapDoubleInRange(
+    double value, double fromLow, double fromHigh, double toLow, double toHigh) {
+  final double offset = toLow;
+  final double ratio = (toHigh - toLow) / (fromHigh - fromLow);
+  return ratio * (value - fromLow) + offset;
 }

@@ -4,263 +4,314 @@ import 'package:flutter/widgets.dart';
 
 import 'sheet.dart';
 
-/// Route that defines the transition animation of the previous route when this
-/// one is closing
-mixin RouteWithPreviousTransitionMixin<T> on Route<T> {
-  Widget getPreviousRouteTransition(
-    BuildContext context,
-    Animation<double> secondAnimation,
-    Widget child,
-  );
-}
+// TODO: Arbitrary values, keep them or make SheetRoute abstract
+const Duration _kSheetTransitionDuration = Duration(milliseconds: 400);
+const Color _kBarrierColor = Color(0x59000000);
 
-/// Route that allows the next route to define the animation transition of this route
-/// when the route appears back after the next one is popped
-mixin AllowsRouteWithPreviousTransitionMixin<T> on PageRoute<T> {
-  RouteWithPreviousTransitionMixin? _nextModalRoute;
 
-  @override
-  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    return super.canTransitionTo(nextRoute) ||
-        (nextRoute is RouteWithPreviousTransitionMixin);
-  }
-
-  @override
-  void didChangeNext(Route? nextRoute) {
-    if (nextRoute is RouteWithPreviousTransitionMixin) {
-      _nextModalRoute = nextRoute;
-    }
-
-    super.didChangeNext(nextRoute);
-  }
-
-  @override
-  bool didPop(T result) {
-    _nextModalRoute = null;
-    return super.didPop(result);
-  }
-
-  @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    if (_nextModalRoute != null) {
-      if (secondaryAnimation.isDismissed) {
-        _nextModalRoute = null;
-      } else {
-        // Avoid default transition theme to animate when a new modal view is pushed
-        final Animation<double> fakeSecondaryAnimation =
-            Tween<double>(begin: 0, end: 0).animate(secondaryAnimation);
-
-        final Widget defaultTransition = super.buildTransitions(
-            context, animation, fakeSecondaryAnimation, child);
-        return _nextModalRoute!.getPreviousRouteTransition(
-            context, secondaryAnimation, defaultTransition);
-      }
-    }
-    return super.buildTransitions(
-      context,
-      animation,
-      secondaryAnimation,
-      child,
-    );
-  }
-}
-
-const Duration _bottomSheetDuration = Duration(milliseconds: 400);
-
-class _Sheet<T> extends StatefulWidget {
-  const _Sheet({
-    Key? key,
-    required this.route,
-    required this.secondAnimationController,
-    this.bounce = false,
-    this.expanded = false,
-    this.enableDrag = true,
-    required this.animationCurve,
-    this.closeProgressThreshold,
-    this.modalLabel,
-  })  : assert(expanded != null),
-        assert(enableDrag != null),
-        super(key: key);
-
-  final double? closeProgressThreshold;
-  final SheetRoute<T> route;
-  final bool expanded;
-  final bool bounce;
-  final bool enableDrag;
-  final AnimationController? secondAnimationController;
-  final Curve? animationCurve;
-  final String? modalLabel;
-
-  @override
-  _SheetState<T> createState() => _SheetState<T>();
-}
-
-class _SheetState<T> extends State<_Sheet<T>> {
-  ScrollController? _scrollController;
-
-  @override
-  void initState() {
-    widget.route.animation?.addListener(updateController);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    widget.route.animation?.removeListener(updateController);
-    _scrollController?.dispose();
-    super.dispose();
-  }
-
-  void updateController() {
-    final Animation<double>? animation = widget.route.animation;
-    if (animation != null) {
-      widget.secondAnimationController?.value = animation.value;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasMediaQuery(context));
-    final ScrollController scrollController =
-        PrimaryScrollController.of(context) ??
-            (_scrollController ??= ScrollController());
-    print(widget.route._hasScopedWillPopCallback);
-    return SheetController(
-      scrollController: scrollController,
-      shouldPreventClose: () => widget.route._hasScopedWillPopCallback,
-      shouldClose: () async {
-        final RoutePopDisposition willPop = await widget.route.willPop();
-        return willPop != RoutePopDisposition.doNotPop;
-      },
-      animationController: widget.route._animationController!,
-      onClose: () {
-        if (widget.route.isCurrent) {
-          Navigator.of(context)?.pop();
-        }
-      },
-      child: Builder(
-        builder: (BuildContext context) => Semantics(
-          scopesRoute: true,
-          namesRoute: true,
-          label: widget.modalLabel,
-          explicitChildNodes: true,
-          child: Sheet(
-            controller: SheetController.of(context)!,
-            expanded: widget.route.expanded,
-
-            child: widget.route.builder(context),
-            enableDrag: widget.enableDrag,
-            bounce: widget.bounce,
-            animationCurve: widget.animationCurve,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class SheetRoute<T> extends PopupRoute<T>
-    with RouteWithPreviousTransitionMixin<T> {
+/// 
+class SheetRoute<T> extends PopupRoute<T> with DefinesBottomRouteTransitionMixin<T> {
+  
   SheetRoute({
-    this.closeProgressThreshold,
     required this.builder,
-    this.scrollController,
-    this.barrierLabel,
-    this.modalLabel,
-    this.secondAnimationController,
-    this.modalBarrierColor,
-    this.isDismissible = true,
-    this.enableDrag = true,
-    required this.expanded,
-    this.bounce = false,
+    this.initialStop = 1,
+    this.stops,
+    this.draggable = true,
+    this.expanded = true,
+    this.bounceAtTop = false,
     this.animationCurve,
     this.duration,
+    this.sheetLabel,
+    this.barrierLabel,
+    this.barrierColor = _kBarrierColor,
+    this.barrierDismissible = true,
     RouteSettings? settings,
-  })  : assert(expanded != null),
-        assert(isDismissible != null),
-        assert(enableDrag != null),
-        super(settings: settings);
+  }) : super(settings: settings);
 
-  final double? closeProgressThreshold;
   final WidgetBuilder builder;
+
+  final double initialStop;
+
+  final List<double>? stops;
+
   final bool expanded;
-  final bool bounce;
-  final Color? modalBarrierColor;
-  final bool isDismissible;
-  final bool enableDrag;
-  final ScrollController? scrollController;
+
+  final bool bounceAtTop;
+
+  final bool draggable;
 
   final Duration? duration;
 
-  final AnimationController? secondAnimationController;
   final Curve? animationCurve;
 
   @override
-  Duration get transitionDuration => duration ?? _bottomSheetDuration;
+  Duration get transitionDuration => duration ?? _kSheetTransitionDuration;
+
+  final String? sheetLabel;
 
   @override
-  bool get barrierDismissible => isDismissible;
+  final bool barrierDismissible;
+
+  @override
+  final Color? barrierColor;
 
   @override
   final String? barrierLabel;
 
-  final String? modalLabel;
+  AnimationController? _routeAnimationController;
+  AnimationController? _sheetAnimationController;
 
-  @override
-  Color get barrierColor =>
-      modalBarrierColor ?? const Color(0x00000000).withOpacity(0.35);
-
-  AnimationController? _animationController;
+  Animation<double>? get sheetAnimation => _sheetAnimationController;
 
   @override
   AnimationController createAnimationController() {
-    assert(_animationController == null);
+    assert(_routeAnimationController == null);
     assert(navigator?.overlay != null);
-    _animationController = Sheet.createAnimationController(
+    _routeAnimationController = SnapSheet.createAnimationController(
       navigator!.overlay!,
       duration: duration,
     );
-    return _animationController!;
+    _sheetAnimationController = SnapSheet.createAnimationController(
+      navigator!.overlay!,
+      duration: duration,
+    );
+    return _routeAnimationController!;
+  }
+
+  @override
+  void dispose() {
+    _sheetAnimationController?.dispose();
+    super.dispose();
   }
 
   bool get _hasScopedWillPopCallback => hasScopedWillPopCallback;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
-    // By definition, the bottom sheet is aligned to the bottom of the page
-    // and isn't exposed to the top padding of the MediaQuery.
-    return MediaQuery.removePadding(
-      context: context,
-      // removeTop: true,
-      child: _Sheet<T>(
-        route: this,
-        secondAnimationController: secondAnimationController,
-        closeProgressThreshold: closeProgressThreshold,
-        expanded: expanded,
-        bounce: bounce,
-        enableDrag: enableDrag,
-        animationCurve: animationCurve,
+  Widget buildPage(
+      BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return _DefaultSheetRouteController<T>(
+      route: this,
+      child: Builder(
+        builder: (BuildContext context) {
+          return Semantics(
+            scopesRoute: true,
+            namesRoute: true,
+            label: sheetLabel,
+            explicitChildNodes: true,
+            child: SnapSheet(
+              controller: DefaultSheetController.of(context)!,
+              expanded: expanded,
+              child: builder(context),
+              draggable: draggable,
+              bounceAtTop: bounceAtTop,
+            ),
+          );
+        },
       ),
     );
   }
 
   @override
-  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) =>
-      nextRoute is SheetRoute;
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => nextRoute is SheetRoute;
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) =>
       previousRoute is SheetRoute || previousRoute is PageRoute;
 
   @override
-  Widget getPreviousRouteTransition(
+  Widget getBottomRouteTransition(
       BuildContext context, Animation<double> secondAnimation, Widget child) {
     return child;
   }
+}
+
+/// A page that creates a material style [PageRoute].
+///
+/// {@macro flutter.material.materialRouteTransitionMixin}
+///
+/// By default, when the created route is replaced by another, the previous
+/// route remains in memory. To free all the resources when this is not
+/// necessary, set [maintainState] to false.
+///
+/// The `fullscreenDialog` property specifies whether the created route is a
+/// fullscreen modal dialog. On iOS, those routes animate from the bottom to the
+/// top rather than horizontally.
+///
+/// The type `T` specifies the return type of the route which can be supplied as
+/// the route is popped from the stack via [Navigator.transitionDelegate] by
+/// providing the optional `result` argument to the
+/// [RouteTransitionRecord.markForPop] in the [TransitionDelegate.resolve].
+///
+/// See also:
+///
+///  * [MaterialPageRoute], which is the [PageRoute] version of this class
+class SheetPage<T> extends Page<T> {
+  /// Creates a material page.
+  const SheetPage({
+    required this.child,
+    this.maintainState = true,
+    LocalKey? key,
+    String? name,
+    Object? arguments,
+  })  : assert(child != null),
+        assert(maintainState != null),
+        super(key: key, name: name, arguments: arguments);
+
+  /// The content to be shown in the [Route] created by this page.
+  final Widget child;
+
+  /// {@macro flutter.widgets.modalRoute.maintainState}
+  final bool maintainState;
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return _PageBasedSheetRoute<T>(page: this);
+  }
+}
+
+// A page-based version of SheetRoute.
+//
+// This route uses the builder from the page to build its content. This ensures
+// the content is up to date after page updates.
+class _PageBasedSheetRoute<T> extends SheetRoute<T> {
+  _PageBasedSheetRoute({
+    required SheetPage<T> page,
+    Color? barrierColor,
+    bool bounceAtTop = false,
+    bool expanded = false,
+    Curve? animationCurve,
+    bool barrierDismissible = true,
+    bool enableDrag = true,
+    Duration? duration,
+    List<double>? stops,
+    double initialStop = 1,
+  })  : assert(page != null),
+        super(
+          settings: page,
+          builder: (BuildContext context) => page.child,
+          bounceAtTop: bounceAtTop,
+          expanded: expanded,
+          stops: stops,
+          initialStop: initialStop,
+          barrierDismissible: barrierDismissible,
+          barrierColor: barrierColor,
+          draggable: enableDrag,
+          animationCurve: animationCurve,
+          duration: duration,
+        );
+
+  SheetPage<T> get _page => settings as SheetPage<T>;
+
+  @override
+  bool get maintainState => _page.maintainState;
+
+  @override
+  String get debugLabel => '${super.debugLabel}(${_page.name})';
+}
+
+
+/// Creates a DefaultSheetController syncronized with the AnimationController from
+/// SheetRoute
+class _DefaultSheetRouteController<T> extends StatefulWidget {
+  const _DefaultSheetRouteController({
+    Key? key,
+    required this.route,
+    required this.child,
+  }) : super(key: key);
+
+  final SheetRoute<T> route;
+
+  final Widget child;
+
+  @override
+  _DefaultSheetRouteControllerState<T> createState() => _DefaultSheetRouteControllerState<T>();
+}
+
+class _DefaultSheetRouteControllerState<T> extends State<_DefaultSheetRouteController<T>>
+    with SingleTickerProviderStateMixin {
+  late SheetController _controller;
+
+  @override
+  void initState() {
+    _controller = WillPopSheetController(
+      controller: widget.route._sheetAnimationController!,
+      animationCurve: widget.route.animationCurve,
+      stops: widget.route.stops ?? <double>[0, 1],
+      hasScopedWillPopCallback: () => widget.route._hasScopedWillPopCallback,
+      willPop: () async {
+        final RoutePopDisposition willPop = await widget.route.willPop();
+        return willPop != RoutePopDisposition.doNotPop;
+      },
+      onPop: () {
+        if (widget.route.isCurrent) {
+          Navigator.of(context)?.pop();
+        }
+      },
+    );
+    widget.route._routeAnimationController?.addListener(onRouteAnimationUpdate);
+    widget.route._sheetAnimationController?.addListener(onSheetAnimationUpdate);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.route._routeAnimationController?.removeListener(onRouteAnimationUpdate);
+    widget.route._sheetAnimationController?.removeListener(onSheetAnimationUpdate);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  AnimationController get routeAnimationController => widget.route._routeAnimationController!;
+  AnimationController get sheetAnimationController => widget.route._sheetAnimationController!;
+
+  bool get dismissUnderway => routeAnimationController.status == AnimationStatus.reverse;
+  double? lastPositionBeforeDismiss;
+
+  void onRouteAnimationUpdate() {
+    double newValue;
+    // If dismiss is underway we animate the sheet from the last known position
+    // Otherwise we will animate to the initialStop
+    if (dismissUnderway) {
+      lastPositionBeforeDismiss ??= sheetAnimationController.value;
+      newValue =
+          _mapDoubleInRange(routeAnimationController.value, 0, 1, 0, lastPositionBeforeDismiss!);
+    } else {
+      newValue =
+          _mapDoubleInRange(routeAnimationController.value, 0, 1, 0, widget.route.initialStop);
+    }
+    if (sheetAnimationController.value != newValue) {
+      sheetAnimationController.value = newValue;
+    }
+  }
+
+  void onSheetAnimationUpdate() {
+    if (dismissUnderway) {
+      return;
+    }
+    final double clampedValue = sheetAnimationController.value.clamp(0, widget.route.initialStop);
+    final double newValue = _mapDoubleInRange(clampedValue, 0, widget.route.initialStop, 0, 1);
+    if (routeAnimationController.value != newValue) {
+      routeAnimationController.value = newValue;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    assert(debugCheckHasMediaQuery(context));
+    return DefaultSheetController(
+      controller: _controller,
+      child: widget.child,
+    );
+  }
+}
+
+/// Re-maps a number from one range to another.
+///
+/// A value of fromLow would get mapped to toLow, a value of
+/// fromHigh to toHigh, values in-between to values in-between, etc
+double _mapDoubleInRange(
+    double value, double fromLow, double fromHigh, double toLow, double toHigh) {
+  final double offset = toLow;
+  final double ratio = (toHigh - toLow) / (fromHigh - fromLow);
+  return ratio * (value - fromLow) + offset;
 }

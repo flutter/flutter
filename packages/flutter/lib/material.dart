@@ -112,7 +112,6 @@ export 'src/material/scrollbar.dart';
 export 'src/material/search.dart';
 export 'src/material/selectable_text.dart';
 export 'src/material/shadows.dart';
-export 'src/material/sheet_route.dart';
 export 'src/material/slider.dart';
 export 'src/material/slider_theme.dart';
 export 'src/material/snack_bar.dart';
