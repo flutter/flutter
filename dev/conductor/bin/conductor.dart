@@ -9,24 +9,60 @@
 
 import 'dart:io' as io;
 
-import 'package:args/args.dart';
-import 'package:file/local.dart';
-import 'package:platform/platform.dart';
-
-import 'package:flutter_conductor/arguments.dart';
-import 'package:flutter_conductor/git.dart';
-import 'package:flutter_conductor/main.dart';
+import 'package:args/command_runner.dart';
+import 'package:flutter_conductor/roll_dev.dart';
 import 'package:flutter_conductor/stdio.dart';
 
 void main(List<String> args) {
-  final ArgParser argParser = ArgParser(allowTrailingOptions: false);
-  // TODO(fujino): only use VerboseStdio if --v flag provided
+  final CommandRunner<void> runner = CommandRunner<void>(
+    'conductor',
+    'A tool for coordinating Flutter releases.',
+    usageLineLength: 80,
+  );
+  addCommands(runner);
   final Stdio stdio = VerboseStdio(
     stdout: io.stdout,
     stderr: io.stderr,
     stdin: io.stdin,
   );
 
+  if (!assertsEnabled()) {
+    stdio.printError('The conductor tool must be run with --enable-asserts.');
+    io.exit(1);
+  }
+
+  //ArgResults argResults;
+  //try {
+  //  argResults = parseArguments(runner.argParser, args);
+  //} on ArgParserException catch (error) {
+  //  stdio.printError(error.message);
+  //  stdio.printError(runner.argParser.usage);
+  //  io.exit(1);
+  //}
+
+  try {
+    runner.run(args);
+    //run(
+    //  usage: argParser.usage,
+    //  argResults: argResults,
+    //  git: const Git(),
+    //  stdio: stdio,
+    //  platform: const LocalPlatform(),
+    //  fileSystem: const LocalFileSystem(),
+    //);
+  } on Exception catch (e) {
+    stdio.printError(e.toString());
+    io.exit(1);
+  }
+}
+
+void addCommands(CommandRunner<void> runner) {
+  <Command<void>>[
+    RollDev(),
+  ].forEach(runner.addCommand);
+}
+
+bool assertsEnabled() {
   // Verify asserts enabled
   bool assertsEnabled = false;
 
@@ -34,32 +70,5 @@ void main(List<String> args) {
     assertsEnabled = true;
     return true;
   }());
-
-  if (!assertsEnabled) {
-    stdio.printError('The conductor tool must be run with --enable-asserts.');
-    io.exit(1);
-  }
-
-  ArgResults argResults;
-  try {
-    argResults = parseArguments(argParser, args);
-  } on ArgParserException catch (error) {
-    stdio.printError(error.message);
-    stdio.printError(argParser.usage);
-    io.exit(1);
-  }
-
-  try {
-    run(
-      usage: argParser.usage,
-      argResults: argResults,
-      git: const Git(),
-      stdio: stdio,
-      platform: const LocalPlatform(),
-      fileSystem: const LocalFileSystem(),
-    );
-  } on Exception catch (e) {
-    stdio.printError(e.toString());
-    io.exit(1);
-  }
+  return assertsEnabled;
 }

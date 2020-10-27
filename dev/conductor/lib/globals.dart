@@ -7,10 +7,9 @@ const String kX = 'x';
 const String kY = 'y';
 const String kZ = 'z';
 const String kCommit = 'commit';
-const String kRemoteName = 'origin';
+const String kRemoteName = 'remote';
 const String kJustPrint = 'just-print';
 const String kYes = 'yes';
-const String kHelp = 'help';
 const String kForce = 'force';
 const String kSkipTagging = 'skip-tagging';
 

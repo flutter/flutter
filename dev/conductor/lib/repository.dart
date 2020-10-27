@@ -22,8 +22,10 @@ class Repository {
     @required this.fileSystem,
     @required this.parentDirectory,
     this.localUpstream = false,
-  }) : checkoutDirectory = parentDirectory.childDirectory(name) {
-    ensureCloned();
+    this.useExistingCheckout = true, // TODO: make this false
+  }) {
+    // These branches must exist locally for the repo that depends on it to
+    // fetch and push to.
     if (localUpstream) {
       for (final String channel in globals.kReleaseChannels) {
         git.run(
@@ -42,30 +44,42 @@ class Repository {
   final Platform platform;
   final FileSystem fileSystem;
   final Directory parentDirectory;
-  final Directory checkoutDirectory;
+  final bool useExistingCheckout;
 
-  /// If the repository's upstream is a local directory.
+  /// If the repository will be used as an upstream for a test repo.
   final bool localUpstream;
 
-  void ensureCloned() {
-    stdio.printTrace('About to check if $name exists...');
-    if (!checkoutDirectory.existsSync()) {
-      stdio.printTrace('About to clone repo $name');
-      git.run(
-        <String>['clone', '--', upstream, checkoutDirectory.path],
-        'Cloning $name repo',
-        workingDirectory: parentDirectory.path,
-      );
-    } else {
-      stdio.printTrace('Repo $name already exists');
+  Directory _checkoutDirectory;
+  Directory get checkoutDirectory {
+    if (_checkoutDirectory == null) {
+      _checkoutDirectory = parentDirectory.childDirectory(name);
+      if (checkoutDirectory.existsSync() && !useExistingCheckout) {
+        stdio.printTrace('Deleting $name from ${checkoutDirectory.path}...');
+        checkoutDirectory.deleteSync(recursive: true);
+      }
+      if (!checkoutDirectory.existsSync()) {
+        stdio.printTrace('Cloning $name to ${checkoutDirectory.path}...');
+        git.run(
+          <String>['clone', '--', upstream, checkoutDirectory.path],
+          'Cloning $name repo',
+          workingDirectory: parentDirectory.path,
+        );
+      } else {
+        stdio.printTrace(
+            'Using existing $name repo at ${checkoutDirectory.path}...');
+      }
     }
+    return _checkoutDirectory;
   }
 
-  String remoteUrl(String remoteName) => git.getOutput(
-    <String>['remote', 'get-url', remoteName],
-    'verify the URL of the $remoteName remote',
-    workingDirectory: checkoutDirectory.path,
-  );
+  String remoteUrl(String remoteName) {
+    assert(remoteName != null);
+    return git.getOutput(
+      <String>['remote', 'get-url', remoteName],
+      'verify the URL of the $remoteName remote',
+      workingDirectory: checkoutDirectory.path,
+    );
+  }
 
   /// Verifies the repository's git checkout is clean.
   bool gitCheckoutClean() {
@@ -177,6 +191,26 @@ class Repository {
     );
     return reverseParse('HEAD');
   }
+
+  @visibleForTesting
+  Repository cloneRepository(String cloneName) {
+    cloneName ??= 'clone-of-$name';
+    return Repository(
+      fileSystem: fileSystem,
+      git: git,
+      name: cloneName,
+      parentDirectory: parentDirectory,
+      platform: platform,
+      stdio: stdio,
+      upstream: 'file://${checkoutDirectory.path}/',
+    );
+  }
+}
+
+/// An enum of all the repositories that the Conductor supports.
+enum RepositoryType {
+  framework,
+  engine,
 }
 
 class Checkouts {
@@ -195,10 +229,11 @@ class Checkouts {
       // If a test
       if (platform.script.scheme == 'data') {
         final RegExp pattern = RegExp(
-            r'(file:\/\/[^"]*[/\\]conductor[/\\][^"]+\.dart)',
-            multiLine: true,
+          r'(file:\/\/[^"]*[/\\]conductor[/\\][^"]+\.dart)',
+          multiLine: true,
         );
-        final Match match = pattern.firstMatch(Uri.decodeFull(platform.script.path));
+        final Match match =
+            pattern.firstMatch(Uri.decodeFull(platform.script.path));
         if (match == null) {
           throw Exception('Cannot determine path of script!');
         }
@@ -207,11 +242,11 @@ class Checkouts {
         filePath = platform.script.toFilePath();
       }
       final String checkoutsDirname = fileSystem.path.normalize(
-          fileSystem.path.join(
-              fileSystem.path.dirname(filePath),
-              '..',
-              'checkouts',
-          ),
+        fileSystem.path.join(
+          fileSystem.path.dirname(filePath),
+          '..',
+          'checkouts',
+        ),
       );
       directory = fileSystem.directory(checkoutsDirname);
     }
@@ -220,24 +255,36 @@ class Checkouts {
     if (cleanFirst) {
       git.run(
         <String>['clean', '-xffd', '--', directory.path],
-        'clean checkouts directory'
+        'clean checkouts directory',
+        workingDirectory: directory.path,
       );
     }
   }
 
   Directory directory;
-  List<Repository> repositories = <Repository>[];
+  FileSystem fileSystem;
 
   Repository addRepo({
-    @required String name,
-    @required String upstream,
+    @required RepositoryType repoType,
     @required Git git,
     @required Stdio stdio,
     @required Platform platform,
-    @required FileSystem fileSystem,
+    FileSystem fileSystem,
+    String upstream,
+    String name,
     bool localUpstream = false,
   }) {
-    final Repository repo = Repository(
+    switch (repoType) {
+      case RepositoryType.framework:
+        name ??= 'framework';
+        upstream ??= 'https://github.com/flutter/flutter.git';
+        break;
+      case RepositoryType.engine:
+        name ??= 'engine';
+        upstream ??= 'https://github.com/flutter/engine.git';
+        break;
+    }
+    return Repository(
       name: name,
       upstream: upstream,
       git: git,
@@ -247,7 +294,5 @@ class Checkouts {
       parentDirectory: directory,
       localUpstream: localUpstream,
     );
-    repositories.add(repo);
-    return repo;
   }
 }

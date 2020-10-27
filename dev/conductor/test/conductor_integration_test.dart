@@ -6,7 +6,7 @@ import 'package:platform/platform.dart';
 
 import 'package:flutter_conductor/git.dart';
 import 'package:flutter_conductor/globals.dart';
-import 'package:flutter_conductor/main.dart' show run;
+import 'package:flutter_conductor/roll_dev.dart' show rollDev;
 import 'package:flutter_conductor/repository.dart';
 import 'package:flutter_conductor/stdio.dart';
 
@@ -31,42 +31,45 @@ void main() {
       git = const Git();
     });
 
-    test('integration test', () {
+    test('increment m', () {
       final Checkouts checkouts = Checkouts(
-        platform: platform,
         fileSystem: fileSystem,
         git: git,
-        cleanFirst: true,
+        platform: platform,
       );
 
       final Repository frameworkFakeUpstream = checkouts.addRepo(
+        repoType: RepositoryType.framework,
         name: 'framework-fake-upstream',
-        upstream: kUpstreamRemote,
         git: git,
         stdio: stdio,
         platform: platform,
-        fileSystem: fileSystem,
         localUpstream: true,
+        fileSystem: fileSystem,
       );
 
-      final Repository framework = checkouts.addRepo(
-        name: 'framework',
-        upstream: 'file://${frameworkFakeUpstream.checkoutDirectory.path}/',
-        git: git,
-        stdio: stdio,
-        platform: platform,
-        fileSystem: fileSystem,
-      );
+      final Repository framework =
+          frameworkFakeUpstream.cloneRepository('test-framework');
+      //final Repository framework = Repository(
+      //  name: 'framework',
+      //  upstream: 'file://${frameworkFakeUpstream.checkoutDirectory.path}/',
+      //  git: git,
+      //  stdio: stdio,
+      //  parentDirectory: parentDirectory,
+      //  platform: platform,
+      //  fileSystem: fileSystem,
+      //  localUpstream: true,
+      //);
 
       final String latestCommit = framework.authorEmptyCommit();
 
       final FakeArgResults fakeArgResults = FakeArgResults(
         level: 'm',
         commit: latestCommit,
-        origin: 'origin',
+        remote: 'origin',
       );
 
-      run(
+      final bool success = rollDev(
         usage: usageString,
         argResults: fakeArgResults,
         stdio: stdio,
@@ -74,6 +77,7 @@ void main() {
         platform: platform,
         repository: framework,
       );
+      expect(success, true);
     });
   });
 }

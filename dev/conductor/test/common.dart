@@ -91,7 +91,7 @@ class FakeArgResults implements ArgResults {
   FakeArgResults({
     String level,
     String commit,
-    String origin,
+    String remote,
     bool justPrint = false,
     bool autoApprove = true, // so we don't have to mock stdin
     bool help = false,
@@ -100,7 +100,7 @@ class FakeArgResults implements ArgResults {
   }) : _parsedArgs = <String, dynamic>{
     'increment': level,
     'commit': commit,
-    'origin': origin,
+    'remote': remote,
     'just-print': justPrint,
     'yes': autoApprove,
     'help': help,

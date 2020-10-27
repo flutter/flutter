@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:flutter_conductor/main.dart';
+import 'package:flutter_conductor/roll_dev.dart';
 import 'package:flutter_conductor/globals.dart';
 import 'package:flutter_conductor/git.dart';
+import 'package:flutter_conductor/repository.dart';
 
 import './common.dart';
 
@@ -15,29 +18,42 @@ void main() {
     const String usage = 'usage info...';
     const String level = 'm';
     const String commit = 'abcde012345';
-    const String origin = 'upstream';
+    const String remote = 'origin';
     const String lastVersion = '1.2.0-0.0.pre';
     const String nextVersion = '1.2.0-1.0.pre';
     FakeArgResults fakeArgResults;
     MockGit mockGit;
+    MemoryFileSystem fileSystem;
     TestStdio stdio;
+    Repository repo;
+    Checkouts checkouts;
+    FakePlatform platform;
 
     setUp(() {
       mockGit = MockGit();
       stdio = TestStdio();
+      memoryFileSystem = MemoryFileSystem.test();
+      checkouts = Checkouts(
+        fileSystem: fileSystem,
+        git: mockGit,
+        platform: platform,
+      );
+      repo = checkouts.addRepo(
+        repoType: RepositoryType.framework,
+      );
     });
 
     test('returns false if help requested', () {
       fakeArgResults = FakeArgResults(
         level: level,
         commit: commit,
-        origin: origin,
+        remote: remote,
         help: true,
       );
       expect(
-        run(
+        rollDev(
           argResults: fakeArgResults,
-          git: mockGit,
+          repository: repo,
           stdio: stdio,
           usage: usage,
         ),
@@ -49,10 +65,10 @@ void main() {
       fakeArgResults = FakeArgResults(
         level: null,
         commit: commit,
-        origin: origin,
+        remote: remote,
       );
       expect(
-        run(
+        roll_dev(
           usage: usage,
           argResults: fakeArgResults,
           git: mockGit,
