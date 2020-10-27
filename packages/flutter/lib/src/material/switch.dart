@@ -296,13 +296,24 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     setState(() {});
   }
 
+  Set<MaterialState> get _states => <MaterialState>{
+    if (!enabled) MaterialState.disabled,
+    if (_hovering) MaterialState.hovered,
+    if (_focused) MaterialState.focused,
+    if (widget.value) MaterialState.selected,
+  };
+
   Widget buildMaterialSwitch(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context)!;
     final bool isDark = theme.brightness == Brightness.dark;
 
     final Color activeThumbColor = widget.activeColor ?? theme.toggleableActiveColor;
-    final Color activeTrackColor = widget.activeTrackColor ?? activeThumbColor.withAlpha(0x80);
+    final Color effectiveActiveThumbColor = MaterialStateProperty.resolveAs<Color>(
+      activeThumbColor,
+      _states,
+    );
+    final Color activeTrackColor = widget.activeTrackColor ?? effectiveActiveThumbColor.withAlpha(0x80);
     final Color hoverColor = widget.hoverColor ?? theme.hoverColor;
     final Color focusColor = widget.focusColor ?? theme.focusColor;
 
@@ -318,12 +329,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     }
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
-      <MaterialState>{
-        if (!enabled) MaterialState.disabled,
-        if (_hovering) MaterialState.hovered,
-        if (_focused) MaterialState.focused,
-        if (widget.value) MaterialState.selected,
-      },
+      _states,
     );
 
     return FocusableActionDetector(
@@ -339,7 +345,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
           return _SwitchRenderObjectWidget(
             dragStartBehavior: widget.dragStartBehavior,
             value: widget.value,
-            activeColor: activeThumbColor,
+            activeColor: effectiveActiveThumbColor,
             inactiveColor: inactiveThumbColor,
             hoverColor: hoverColor,
             focusColor: focusColor,
@@ -758,13 +764,12 @@ class _RenderSwitch extends RenderToggleable {
         break;
     }
 
-    final Color trackColor = isEnabled
-      ? Color.lerp(inactiveTrackColor, activeTrackColor, currentValue)!
-      : inactiveTrackColor;
-
-    final Color thumbColor = isEnabled
-      ? Color.lerp(inactiveColor, activeColor, currentValue)!
-      : inactiveColor;
+    final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, currentValue)!;
+    final Color thumbColor = Color.lerp(
+      inactiveColor,
+      Color.alphaBlend(activeColor.withOpacity(.38), Colors.white),
+      currentValue,
+    )!;
 
     final ImageProvider? thumbImage = isEnabled
       ? (currentValue < 0.5 ? inactiveThumbImage : activeThumbImage)

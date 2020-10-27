@@ -288,7 +288,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             tristate: widget.tristate,
             activeColor: effectiveActiveColor,
             checkColor: widget.checkColor ?? const Color(0xFFFFFFFF),
-            useActiveColorInDisabledState: activeColor is MaterialStateColor,
+            useActiveColorInDisabledState: activeColor is MaterialStateProperty<Color>,
             inactiveColor: enabled ? themeData!.unselectedWidgetColor : themeData!.disabledColor,
             focusColor: widget.focusColor ?? themeData.focusColor,
             hoverColor: widget.hoverColor ?? themeData.hoverColor,
