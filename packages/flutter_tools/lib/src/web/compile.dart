@@ -36,10 +36,18 @@ Future<void> buildWeb(
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());
-  if (outputDirectory.existsSync()) {
-    outputDirectory.deleteSync(recursive: true);
-    outputDirectory.createSync(recursive: true);
+  try {
+    if (outputDirectory.existsSync()) {
+      outputDirectory.deleteSync(recursive: true);
+      outputDirectory.createSync(recursive: true);
+    }
+  } on FileSystemException catch (err) {
+    globals.logger.printError(
+      'Error when clearing directory: $err.\nStale files may'
+      'be present in build directory.'
+    );
   }
+
   await injectPlugins(flutterProject, webPlatform: true);
   final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();
