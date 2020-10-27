@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
@@ -83,6 +84,7 @@ class Scrollbar extends StatefulWidget {
 
 class _ScrollbarState extends State<Scrollbar> with SingleTickerProviderStateMixin {
   ScrollbarPainter? _materialPainter;
+  final GlobalKey _customPaintKey = GlobalKey();
   late TextDirection _textDirection;
   late Color _themeColor;
   late bool _useCupertinoScrollbar;
@@ -201,6 +203,72 @@ class _ScrollbarState extends State<Scrollbar> with SingleTickerProviderStateMix
     return false;
   }
 
+  void _handleDragDown(DragDownDetails details) {
+    print('dragDown');
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    print('dragStart');
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    print('dragUpdate');
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    print('dragEnd');
+  }
+
+  void _handleDragCancel() {
+    print('dragCancel');
+  }
+
+  // Get the GestureRecognizerFactories used to detect gestures on the scrollbar
+  // thumb.
+  Map<Type, GestureRecognizerFactory> get _gestures {
+    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
+    if (widget.controller == null)
+      return gestures;
+    final Axis direction = widget.controller!.position.axis;
+
+    switch (direction) {
+      case Axis.vertical:
+        gestures[_VerticalThumbDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_VerticalThumbDragGestureRecognizer>(
+              () => _VerticalThumbDragGestureRecognizer(
+                debugOwner: this,
+                customPaintKey: _customPaintKey,
+              ),
+              (_VerticalThumbDragGestureRecognizer instance) {
+              instance
+                ..onDown = _handleDragDown
+                ..onStart = _handleDragStart
+                ..onUpdate = _handleDragUpdate
+                ..onEnd = _handleDragEnd
+                ..onCancel = _handleDragCancel;
+            },
+          );
+        break;
+      case Axis.horizontal:
+        gestures[_HorizontalThumbDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_HorizontalThumbDragGestureRecognizer>(
+              () => _HorizontalThumbDragGestureRecognizer(
+                debugOwner: this,
+                customPaintKey: _customPaintKey,
+              ),
+              (_HorizontalThumbDragGestureRecognizer instance) {
+              instance
+                ..onDown = _handleDragDown
+                ..onStart = _handleDragStart
+                ..onUpdate = _handleDragUpdate
+                ..onEnd = _handleDragEnd
+                ..onCancel = _handleDragCancel;
+            },
+          );
+        break;
+    }
+
+    return gestures;
+  }
+
   @override
   void dispose() {
     _fadeoutAnimationController.dispose();
@@ -225,13 +293,79 @@ class _ScrollbarState extends State<Scrollbar> with SingleTickerProviderStateMix
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: RepaintBoundary(
-        child: CustomPaint(
-          foregroundPainter: _materialPainter,
-          child: RepaintBoundary(
-            child: widget.child,
+        child: RawGestureDetector(
+          gestures: _gestures,
+          child: CustomPaint(
+            key: _customPaintKey,
+            foregroundPainter: _materialPainter,
+            child: RepaintBoundary(
+              child: widget.child,
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+// A vertical drag gesture detector that only responds to events on the
+// scrollbar's thumb and ignores everything else.
+class _VerticalThumbDragGestureRecognizer extends VerticalDragGestureRecognizer {
+  _VerticalThumbDragGestureRecognizer({
+    PointerDeviceKind? kind,
+    required Object debugOwner,
+    required GlobalKey customPaintKey,
+  }) :  _customPaintKey = customPaintKey,
+      super(
+      kind: kind,
+      debugOwner: debugOwner,
+    );
+
+  final GlobalKey _customPaintKey;
+
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    if (!_hitTestInteractive(_customPaintKey, event.position)) {
+      return false;
+    }
+    return super.isPointerAllowed(event);
+  }
+}
+
+// A horizontal drag gesture detector that only responds to events on the
+// scrollbar's thumb and ignores everything else.
+class _HorizontalThumbDragGestureRecognizer extends HorizontalDragGestureRecognizer {
+  _HorizontalThumbDragGestureRecognizer({
+    PointerDeviceKind? kind,
+    required Object debugOwner,
+    required GlobalKey customPaintKey,
+  }) :  _customPaintKey = customPaintKey,
+      super(
+      kind: kind,
+      debugOwner: debugOwner,
+    );
+
+  final GlobalKey _customPaintKey;
+
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    if (!_hitTestInteractive(_customPaintKey, event.position)) {
+      return false;
+    }
+    return super.isPointerAllowed(event);
+  }
+}
+
+// foregroundPainter also hit tests its children by default, but the
+// scrollbar should only respond to a gesture directly on its thumb, so
+// manually check for a hit on the thumb here.
+bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset) {
+  if (customPaintKey.currentContext == null) {
+    return false;
+  }
+  final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
+  final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
+  final RenderBox renderBox = customPaintKey.currentContext!.findRenderObject()! as RenderBox;
+  final Offset localOffset = renderBox.globalToLocal(offset);
+  return painter.hitTestInteractive(localOffset);
 }

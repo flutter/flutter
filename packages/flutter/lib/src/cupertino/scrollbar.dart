@@ -390,6 +390,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   // Long press event callbacks handle the gesture where the user long presses
   // on the scrollbar thumb and then drags the scrollbar without releasing.
   void _handleLongPressStart(LongPressStartDetails details) {
+    print('longPressStart');
     _currentController = _controller;
     final Axis? direction = _getDirection();
     if (direction == null) {
@@ -412,6 +413,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _handleLongPress() {
+    print('longPress');
     if (_getDirection() == null) {
       return;
     }
@@ -422,6 +424,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    print('longPressMoveUpdate');
     final Axis? direction = _getDirection();
     if (direction == null) {
       return;
@@ -439,6 +442,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
+    print('longPressEnd');
     final Axis? direction = _getDirection();
     if (direction == null) {
       return;
