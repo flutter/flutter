@@ -8453,7 +8453,7 @@ void main() {
         home: Scaffold(
           body: Material(
             child: TextField.adaptive(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Hint',
               ),
             ),
@@ -8466,6 +8466,66 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform> { 
       TargetPlatform.iOS,  
       TargetPlatform.macOS,
+    })
+  );
+
+  testWidgets('Adaptive TextField in iOS cannot override iOS-specific decoration border', 
+  (WidgetTester tester) async {
+    final BorderRadius borderRadius = BorderRadius.circular(0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: TextField.adaptive(
+              decoration: InputDecoration(
+                hintText: 'Hint',
+                border: OutlineInputBorder(
+                  borderRadius: borderRadius,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.decoration!.borderRadius != borderRadius, isTrue);
+  }, variant: const TargetPlatformVariant(<TargetPlatform> { 
+      TargetPlatform.iOS,  
+      TargetPlatform.macOS,
+    })
+  );
+
+  testWidgets('Adaptive TextField in non-iOS can override decoration border', 
+  (WidgetTester tester) async {
+    final OutlineInputBorder border = OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(0),
+                );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: TextField.adaptive(
+              decoration: InputDecoration(
+                hintText: 'Hint',
+                border: border,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.decoration!.border, border);
+  }, variant: const TargetPlatformVariant(<TargetPlatform> { 
+      TargetPlatform.android,  
+      TargetPlatform.fuchsia, 
+      TargetPlatform.windows, 
+      TargetPlatform.linux,
     })
   );
 
