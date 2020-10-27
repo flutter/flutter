@@ -432,13 +432,13 @@ class TextField extends StatefulWidget {
 
   /// Creates a [CupertinoTextField] if the target platform is iOS, creates a
   /// material design text field otherwise.
-  /// 
-  /// To retain the standard look of [CupertinoTextField], this constructor only 
-  /// uses the [decoration] property's [hintText], [hintStyle], [suffix], and 
+  ///
+  /// To retain the standard look of [CupertinoTextField], this constructor only
+  /// uses the [decoration] property's [hintText], [hintStyle], [suffix], and
   /// [prefix] for the iOS platform, and all else is ignored in support of the
-  /// default iOS look. For instance, the [decoration.border] cannot override 
+  /// default iOS look. For instance, the [decoration.border] cannot override
   /// the default iOS-style border.
-  /// 
+  ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const TextField.adaptive({
     Key? key,
@@ -539,7 +539,7 @@ class TextField extends StatefulWidget {
            paste: true,
          )),
        super(key: key);
-  
+
   final _TextFieldType _textFieldType;
 
   /// Controls the text being edited.

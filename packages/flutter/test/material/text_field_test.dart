@@ -8406,7 +8406,7 @@ void main() {
     expect(cursorRight, inputWidth - kCaretGap);
   });
 
-  testWidgets('Adaptive TextField displays CupertinoTextField in iOS', 
+  testWidgets('Adaptive TextField displays CupertinoTextField in iOS',
   (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -8419,13 +8419,13 @@ void main() {
     );
 
     expect(find.byType(CupertinoTextField), findsOneWidget);
-  }, variant: const TargetPlatformVariant(<TargetPlatform> { 
-      TargetPlatform.iOS,  
+  }, variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
       TargetPlatform.macOS,
     })
   );
 
-  testWidgets('Adaptive TextField does not display CupertinoTextField in non-iOS', 
+  testWidgets('Adaptive TextField does not display CupertinoTextField in non-iOS',
   (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -8438,15 +8438,15 @@ void main() {
     );
 
     expect(find.byType(CupertinoTextField), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform> { 
-      TargetPlatform.android,  
-      TargetPlatform.fuchsia, 
-      TargetPlatform.windows, 
+  }, variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.windows,
       TargetPlatform.linux,
     }),
   );
 
-  testWidgets('Adaptive TextField in iOS with specified hintText', 
+  testWidgets('Adaptive TextField in iOS with specified hintText',
   (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -8461,15 +8461,15 @@ void main() {
         ),
       ),
     );
-    
+
     expect(find.text('Hint'), findsOneWidget);
-  }, variant: const TargetPlatformVariant(<TargetPlatform> { 
-      TargetPlatform.iOS,  
+  }, variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
       TargetPlatform.macOS,
     })
   );
 
-  testWidgets('Adaptive TextField in iOS cannot override iOS-specific decoration border', 
+  testWidgets('Adaptive TextField in iOS cannot override iOS-specific decoration border',
   (WidgetTester tester) async {
     final BorderRadius borderRadius = BorderRadius.circular(0);
 
@@ -8492,13 +8492,13 @@ void main() {
     
     final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
     expect(textField.decoration!.borderRadius != borderRadius, isTrue);
-  }, variant: const TargetPlatformVariant(<TargetPlatform> { 
-      TargetPlatform.iOS,  
+  }, variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
       TargetPlatform.macOS,
     })
   );
 
-  testWidgets('Adaptive TextField in non-iOS can override decoration border', 
+  testWidgets('Adaptive TextField in non-iOS can override decoration border',
   (WidgetTester tester) async {
     final OutlineInputBorder border = OutlineInputBorder(
                   borderRadius: BorderRadius.circular(0),
@@ -8521,15 +8521,15 @@ void main() {
     
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.decoration!.border, border);
-  }, variant: const TargetPlatformVariant(<TargetPlatform> { 
-      TargetPlatform.android,  
-      TargetPlatform.fuchsia, 
-      TargetPlatform.windows, 
+  }, variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.windows,
       TargetPlatform.linux,
     })
   );
 
-  testWidgets('Adaptive TextField in iOS with specified hintStyle', 
+  testWidgets('Adaptive TextField in iOS with specified hintStyle',
   (WidgetTester tester) async {
     final TextStyle hintStyle = TextStyle(
       inherit: false,
@@ -8554,13 +8554,13 @@ void main() {
     
     final Text hintText = tester.widget(find.text('Hint'));
     expect(hintText.style, hintStyle);
-  }, variant: const TargetPlatformVariant(<TargetPlatform> { 
-      TargetPlatform.iOS,  
+  }, variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
       TargetPlatform.macOS,
     })
   );
 
-  testWidgets('Adaptive TextField in iOS with custom text style', 
+  testWidgets('Adaptive TextField in iOS with custom text style',
   (WidgetTester tester) async {
     final TextStyle style = TextStyle(
       color: Colors.pink[500],
@@ -8579,9 +8579,13 @@ void main() {
     final EditableText text = tester.widget(find.text('Text'));
     expect(text.style.color, style.color);
     expect(text.style.fontSize, style.fontSize);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    })
+  );
 
-  testWidgets('Adaptive TextField in iOS with suffix', 
+  testWidgets('Adaptive TextField in iOS with suffix',
   (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
@@ -8597,5 +8601,9 @@ void main() {
 
     expect(find.byIcon(Icons.phone), findsOneWidget);
     expect(find.byIcon(Icons.message), findsOneWidget);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    })
+  );
 }
