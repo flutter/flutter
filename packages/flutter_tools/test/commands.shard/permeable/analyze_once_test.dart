@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -120,6 +121,11 @@ void main() {
       cache: globals.cache,
       fileSystem: fileSystem,
       platform: platform,
+    );
+    Cache.flutterRoot = Cache.defaultFlutterRoot(
+      fileSystem: fileSystem,
+      platform: platform,
+      userMessages: UserMessages(),
     );
   });
 
