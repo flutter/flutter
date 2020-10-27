@@ -381,7 +381,7 @@ $factoryDeclaration
 /// Typically "String", but some (e.g. "timeOfDayFormat") return enums.
 ///
 /// Used by [generateGetter] below.
-String generateType(String key, Map<String, dynamic> attributes) {
+String generateType(Map<String, dynamic> attributes) {
   bool optional = false;
   String type = 'String';
   if (attributes != null) {
@@ -479,7 +479,7 @@ String generateValue(String value, Map<String, dynamic> attributes, LocaleInfo l
 /// the source of getters for the GlobalMaterialLocalizations subclass.
 /// The locale is the locale for which the getter is being generated.
 String generateGetter(String key, String value, Map<String, dynamic> attributes, LocaleInfo locale) {
-  final String type = generateType(key, attributes);
+  final String type = generateType(attributes);
   key = generateKey(key, attributes);
   value = generateValue(value, attributes, locale);
       return '''
