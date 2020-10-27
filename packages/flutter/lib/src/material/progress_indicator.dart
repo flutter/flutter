@@ -451,7 +451,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// [CupertinoActivityIndicator] in iOS and [CircularProgressIndicator] in
   /// material theme/non-iOS.
   /// 
-  /// The [key], [value], [backgroundColor], [valueColor], [strokeWidth], 
+  /// The [key], [value], [backgroundColor], [valueColor], [strokeWidth],
   /// [semanticsLabel], and [semanticsValue] will be ignored in iOS.
   ///
   /// {@macro flutter.material.progressIndicator.parameters}
@@ -712,7 +712,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   }
 
   @override
-  Widget _buildIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+  Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
     final double arrowheadScale = widget.value == null ? 0.0 : (widget.value! * 2.0).clamp(0.0, 1.0);
     return widget._buildSemanticsWrapper(
       context: context,
