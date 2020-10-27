@@ -182,7 +182,7 @@ class @(class) extends @(baseLanguageClassName) {
 const String baseClassGetterTemplate = '''
   /// @(comment)
   ///
-  @(templateLocaleTranslationComment)
+@(templateLocaleTranslationComment)
   String get @(name);
 ''';
 
