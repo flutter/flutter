@@ -37,21 +37,20 @@ import '../project.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 
-typedef DwdsLauncher = Future<Dwds> Function({
-  @required AssetReader assetReader,
-  @required Stream<BuildResult> buildResults,
-  @required ConnectionProvider chromeConnection,
-  @required LoadStrategy loadStrategy,
-  @required bool enableDebugging,
-  ExpressionCompiler expressionCompiler,
-  bool enableDebugExtension,
-  String hostname,
-  bool useSseForDebugProxy,
-  bool useSseForDebugBackend,
-  bool serveDevTools,
-  UrlEncoder urlEncoder,
-  bool spawnDds,
-});
+typedef DwdsLauncher = Future<Dwds> Function(
+    {@required AssetReader assetReader,
+    @required Stream<BuildResult> buildResults,
+    @required ConnectionProvider chromeConnection,
+    @required LoadStrategy loadStrategy,
+    @required bool enableDebugging,
+    ExpressionCompiler expressionCompiler,
+    bool enableDebugExtension,
+    String hostname,
+    bool useSseForDebugProxy,
+    bool useSseForDebugBackend,
+    bool serveDevTools,
+    UrlEncoder urlEncoder,
+    bool spawnDds});
 
 // A minimal index for projects that do not yet support web.
 const String _kDefaultIndex = '''
