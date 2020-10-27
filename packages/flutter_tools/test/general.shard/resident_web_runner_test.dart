@@ -316,7 +316,7 @@ void main() {
     ));
     await connectionInfoCompleter.future;
 
-    expect(await fileSystem.file(fileSystem.path.join('build', 'cf81dbb7dee963bedb1148fc66e70128.cache.dill')).readAsString(), 'ABC');
+    expect(await fileSystem.file(fileSystem.path.join('build', 'cache.dill')).readAsString(), 'ABC');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

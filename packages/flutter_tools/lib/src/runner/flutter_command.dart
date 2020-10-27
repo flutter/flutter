@@ -4,7 +4,6 @@
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:devtools_server/devtools_server.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
