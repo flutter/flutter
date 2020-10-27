@@ -22,20 +22,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
   flutter::DartProject project(L"data");
 
-  // Convert the UTF-16 command line arguments to UTF-8 for the Engine to use.
-  int argc, length;
-  wchar_t** argv = CommandLineToArgvW(command_line, &argc);
-  std::vector<std::string> command_line_arguments;
-
-  // Skip the first argument as it's the binary name.
-  for (int i = 1; i < argc; i++) {
-    length = WideCharToMultiByte(CP_UTF8, WC_NO_BEST_FIT_CHARS, argv[i], -1, nullptr, 0, nullptr, nullptr);
-    std::string arg(length, 0);
-    WideCharToMultiByte(CP_UTF8, WC_NO_BEST_FIT_CHARS, argv[i], -1, &arg[0], length, nullptr, nullptr);
-    command_line_arguments.push_back(std::move(arg));
-  }
-
-  LocalFree(argv);
+  std::vector<std::string> command_line_arguments =
+      GetCommandLineArguments();
 
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
 
