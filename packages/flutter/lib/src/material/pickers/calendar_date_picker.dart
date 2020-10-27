@@ -494,7 +494,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   late DateTime _previousMonthDate;
   PageController? _pageController;
   late MaterialLocalizations _localizations;
-  TextDirection? _textDirection;
+  late TextDirection _textDirection;
   Map<LogicalKeySet, Intent>? _shortcutMap;
   Map<Type, Action<Intent>>? _actionMap;
   FocusNode? _dayGridFocus;
@@ -525,7 +525,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _localizations = MaterialLocalizations.of(context);
-    _textDirection = Directionality.of(context);
+    _textDirection = Directionality.of(context)!;
   }
 
   @override
@@ -595,7 +595,7 @@ class _MonthPickerState extends State<_MonthPicker> {
     if (!_isDisplayingLastMonth) {
       SemanticsService.announce(
         _localizations.formatMonthYear(_nextMonthDate),
-        _textDirection!,
+        _textDirection,
       );
       _pageController!.nextPage(
         duration: _monthScrollDuration,
@@ -609,7 +609,7 @@ class _MonthPickerState extends State<_MonthPicker> {
     if (!_isDisplayingFirstMonth) {
       SemanticsService.announce(
         _localizations.formatMonthYear(_previousMonthDate),
-        _textDirection!,
+        _textDirection,
       );
       _pageController!.previousPage(
         duration: _monthScrollDuration,
