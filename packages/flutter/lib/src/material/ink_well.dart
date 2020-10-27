@@ -755,7 +755,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   void _handleAction(ActivateIntent intent) {
     _startSplash(context: context);
-    _handleTap(context);
+    _handleTap();
   }
 
   @override
@@ -981,7 +981,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     updateHighlight(_HighlightType.pressed, value: false);
   }
 
-  void _handleTap(BuildContext context) {
+  void _handleTap() {
     if (widget.enableFeedback)
       Feedback.forTap(context);
     widget.onTap!();
@@ -1100,7 +1100,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
             child: GestureDetector(
               onTapDown: enabled ? _handleTapDown : null,
               onTapUp: enabled ? _handleTapUp : null,
-              onTap: enabled && widget.onTap != null ? () => _handleTap(context) : null,
+              onTap: enabled && widget.onTap != null ? _handleTap : null,
               onTapCancel: enabled ? _handleTapCancel : null,
               onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
               onLongPress: widget.onLongPress != null ? () => _handleLongPress(context) : null,
