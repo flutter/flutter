@@ -724,8 +724,11 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
-      expect(appBar.backgroundColor, Colors.white);
+      final Material appBarBackground = tester.widget<Material>(find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(Material),
+      ));
+      expect(appBarBackground.color, Colors.white);
 
       final TextField textField = tester.widget<TextField>(find.byType(TextField));
       expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
@@ -749,8 +752,11 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
-      expect(appBar.backgroundColor, themeData.primaryColor);
+      final Material appBarBackground = tester.widget<Material>(find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(Material),
+      ));
+      expect(appBarBackground.color, themeData.primaryColor);
 
       final TextField textField = tester.widget<TextField>(find.byType(TextField));
       expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
