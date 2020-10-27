@@ -1324,8 +1324,9 @@ class _RenderDecoration extends RenderBox {
       return box.size.width;
     }
 
-    double customLayout(RenderBox box, double x, double y) {
-      final double scaleY = (y + 1.0) / 2.0;
+    // Lays out based on y as a VerticalAlignment y value.
+    double alignedLayout(RenderBox box, double x, double alignmentY) {
+      final double scaleY = (alignmentY + 1.0) / 2.0;
       _boxParentData(box).offset = Offset(
         x,
         (height! - box.size.height) * scaleY,
@@ -1358,7 +1359,7 @@ class _RenderDecoration extends RenderBox {
         double end = left;
         if (prefixIcon != null) {
           start += contentPadding.left;
-          start -= customLayout(
+          start -= alignedLayout(
             prefixIcon!,
             start - prefixIcon!.size.width,
             (decoration.prefixIconAlignment ?? VerticalAlignment.center).y
@@ -1379,7 +1380,7 @@ class _RenderDecoration extends RenderBox {
           baselineLayout(hint!, start - hint!.size.width);
         if (suffixIcon != null) {
           end -= contentPadding.left;
-          end += customLayout(
+          end += alignedLayout(
             suffixIcon!,
             end,
             (decoration.suffixIconAlignment ?? VerticalAlignment.center).y
@@ -1394,7 +1395,7 @@ class _RenderDecoration extends RenderBox {
         double end = right;
         if (prefixIcon != null) {
           start -= contentPadding.left;
-          start +=  customLayout(
+          start +=  alignedLayout(
             prefixIcon!,
             start,
             (decoration.prefixIconAlignment ?? VerticalAlignment.center).y
@@ -1415,7 +1416,7 @@ class _RenderDecoration extends RenderBox {
           baselineLayout(hint!, start);
         if (suffixIcon != null) {
           end += contentPadding.right;
-          end -= customLayout(
+          end -= alignedLayout(
             suffixIcon!,
             end - suffixIcon!.size.width,
             (decoration.suffixIconAlignment ?? VerticalAlignment.center).y
@@ -2851,6 +2852,10 @@ class InputDecoration {
   /// )
   /// ```
   ///
+  /// The prefix icon can be aligned along the vertical axis by using the
+  /// [prefixIconAlignment]. Use of [Align] widget with prefix icon will fail to
+  /// align the icon and may cause unexpected behaviour.
+  ///
   /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
   /// [icon] and above the widgets that contain [helperText],
@@ -2867,6 +2872,16 @@ class InputDecoration {
   /// The alignment for [prefixIcon].
   ///
   /// Used to align the [prefixIcon] relative to the position of the text box.
+  ///
+  /// ```dart
+  /// TextField(
+  ///   decoration: InputDecoration(
+  ///     hintText:'Top Icon Alignment',
+  ///     prefixIcon: Icon(Icons.search),
+  ///     prefixIconAlignment: VerticalAlignment.top,
+  ///   ),
+  /// )
+  /// ```
   ///
   /// The default value is [VerticalAlignment.center].
   final VerticalAlignment? prefixIconAlignment;
@@ -2984,6 +2999,10 @@ class InputDecoration {
   /// )
   /// ```
   ///
+  /// The suffix icon can be aligned along the vertical axis by using the
+  /// [suffixIconAlignment]. Use of [Align] widget with suffix icon will fail to
+  /// align the icon and may cause unexpected behaviour.
+  ///
   /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
   /// [icon] and above the widgets that contain [helperText],
@@ -3000,6 +3019,16 @@ class InputDecoration {
   /// The alignment for [suffixIcon].
   ///
   /// Used to align the [suffixIcon] relative to the position of the text box.
+  ///
+  /// ```dart
+  /// TextField(
+  ///   decoration: InputDecoration(
+  ///     hintText:'Top Icon Alignment',
+  ///     suffixIcon: Icon(Icons.search),
+  ///     suffixIconAlignment: VerticalAlignment.top,
+  ///   ),
+  /// )
+  /// ```
   ///
   /// The default value is [VerticalAlignment.center].
   final VerticalAlignment? suffixIconAlignment;
