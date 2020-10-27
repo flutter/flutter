@@ -39,6 +39,7 @@ Future<void> buildWeb(
   final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());
   try {
     ErrorHandlingFileSystem.deleteIfExists(outputDirectory, recursive: true);
+    outputDirectory.createSync(recursive: true);
   } on FileSystemException catch (err) {
     globals.logger.printError(
       'Error when clearing directory: $err.\nStale files may'
