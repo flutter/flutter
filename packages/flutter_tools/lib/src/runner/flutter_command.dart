@@ -948,7 +948,6 @@ abstract class FlutterCommand extends Command<void> {
     if (dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
       throwToolExit('Only one of "--web-renderer" and '
           '"--dart-defines=FLUTTER_WEB_USE_SKIA" may be specified.');
-
     }
     dartDefines.addAll(_webRendererDartDefines[webRenderer]);
   }
