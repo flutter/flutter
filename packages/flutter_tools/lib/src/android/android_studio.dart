@@ -66,15 +66,40 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         pathsSelectorValue = jvmProperties['idea.paths.selector'] as String;
       }
     }
-    final String presetPluginsPath = pathsSelectorValue == null
-      ? null
-      : globals.fs.path.join(
+    String presetPluginsPath;
+    if(version == null) {
+      presetPluginsPath = pathsSelectorValue == null ? null : globals.fs.path.join(
         globals.fsUtils.homeDirPath,
         'Library',
-        'Application Support',
-        pathsSelectorValue,
+        'Application Support/Google',
+        '$pathsSelectorValue/plugins',
       );
-    return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
+    } else {
+      final String versionCodeStr = version.toString().replaceAll('.', '').toString().length > 2 
+      ? version.toString().replaceAll('.', '').toString(): version.toString().replaceAll('.', '').toString() + '0';
+      final int versionCode = int.parse(versionCodeStr);
+      if (versionCode > 400) {
+          presetPluginsPath = pathsSelectorValue == null
+          ? null
+          : globals.fs.path.join(
+            globals.fsUtils.homeDirPath,
+            'Library',
+            'Application Support/Google',
+            '$pathsSelectorValue/plugins',
+          );
+        } else {
+          presetPluginsPath = pathsSelectorValue == null
+          ? null
+          : globals.fs.path.join(
+            globals.fsUtils.homeDirPath,
+            'Library',
+            'Application Support',
+            pathsSelectorValue,
+          );
+        }
+    }
+    return AndroidStudio(studioPath, version: version, 
+    presetPluginsPath: presetPluginsPath);
   }
 
   factory AndroidStudio.fromHomeDot(Directory homeDotDir) {
