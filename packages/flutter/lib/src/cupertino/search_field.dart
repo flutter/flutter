@@ -344,8 +344,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   @override
   Widget build(BuildContext context) {
     final String placeholder = widget.placeholder ??
-        CupertinoLocalizations.of(context)?.searchTextFieldPlaceholerLabel ??
-        'Search';
+        CupertinoLocalizations.of(context).searchTextFieldPlaceholerLabel;
 
     final TextStyle placeholderStyle = widget.placeholderStyle ??
         const TextStyle(color: CupertinoColors.systemGrey);

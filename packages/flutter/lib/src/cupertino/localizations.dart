@@ -259,7 +259,7 @@ abstract class CupertinoLocalizations {
   /// CupertinoLocalizations.of(context).anteMeridiemAbbreviation;
   /// ```
   static CupertinoLocalizations of(BuildContext context) {
-    debugCheckHasCupertinoLocalizations(context);
+    assert(debugCheckHasCupertinoLocalizations(context));
     return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)!;
   }
 }
