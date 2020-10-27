@@ -189,7 +189,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         // removing the route and disposing it.
         if (!isActive) {
           navigator!.finalizeRoute(this);
-          assert(overlayEntries.isEmpty);
         }
         break;
     }

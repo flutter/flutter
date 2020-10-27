@@ -1445,7 +1445,7 @@ class FocusTraversalOrder extends InheritedWidget {
 /// By default, traverses in reading order using [ReadingOrderTraversalPolicy].
 ///
 /// To prevent the members of the group from being focused, set the
-/// [descendantsAreFocusable] attribute to true.
+/// [descendantsAreFocusable] attribute to false.
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 /// This sample shows three rows of buttons, each grouped by a
