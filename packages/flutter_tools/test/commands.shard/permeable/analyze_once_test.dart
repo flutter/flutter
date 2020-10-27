@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -14,7 +15,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -108,7 +108,6 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = FlutterCommandRunner.defaultFlutterRoot;
     processManager = const LocalProcessManager();
     platform = const LocalPlatform();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
@@ -122,6 +121,11 @@ void main() {
       cache: globals.cache,
       fileSystem: fileSystem,
       platform: platform,
+    );
+    Cache.flutterRoot = Cache.defaultFlutterRoot(
+      fileSystem: fileSystem,
+      platform: platform,
+      userMessages: UserMessages(),
     );
   });
 
