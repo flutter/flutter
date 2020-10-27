@@ -8489,7 +8489,7 @@ void main() {
         ),
       ),
     );
-    
+
     final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
     expect(textField.decoration!.borderRadius != borderRadius, isTrue);
   }, variant: const TargetPlatformVariant(<TargetPlatform> {
@@ -8518,7 +8518,7 @@ void main() {
         ),
       ),
     );
-    
+
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.decoration!.border, border);
   }, variant: const TargetPlatformVariant(<TargetPlatform> {
@@ -8551,7 +8551,7 @@ void main() {
         ),
       ),
     );
-    
+
     final Text hintText = tester.widget(find.text('Hint'));
     expect(hintText.style, hintStyle);
   }, variant: const TargetPlatformVariant(<TargetPlatform> {
