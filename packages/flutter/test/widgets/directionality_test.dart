@@ -62,4 +62,22 @@ void main() {
     ));
     expect(good, isTrue);
   });
+
+  testWidgets('Directionality.maybeOf', (WidgetTester tester) async {
+    final GlobalKey hasDirectionality = GlobalKey();
+    final GlobalKey noDirectionality = GlobalKey();
+    await tester.pumpWidget(
+      Container(
+        key: noDirectionality,
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Container(
+            key: hasDirectionality,
+          ),
+        )
+      )
+    );
+    expect(Directionality.maybeOf(noDirectionality.currentContext!), isNull);
+    expect(Directionality.maybeOf(hasDirectionality.currentContext!), TextDirection.rtl);
+  });
 }
