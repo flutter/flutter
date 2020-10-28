@@ -6,6 +6,7 @@
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:platform/platform.dart';
 
 import './git.dart';
@@ -16,14 +17,16 @@ class Repository {
   Repository({
     @required this.name,
     @required this.upstream,
-    @required this.git,
+    @required this.processManager,
     @required this.stdio,
     @required this.platform,
     @required this.fileSystem,
     @required this.parentDirectory,
     this.localUpstream = false,
-    this.useExistingCheckout = true, // TODO: make this false
-  }) {
+    this.useExistingCheckout = false,
+  })  : git = Git(processManager),
+        assert(localUpstream != null),
+        assert(useExistingCheckout != null) {
     // These branches must exist locally for the repo that depends on it to
     // fetch and push to.
     if (localUpstream) {
@@ -40,6 +43,7 @@ class Repository {
   final String name;
   final String upstream;
   final Git git;
+  final ProcessManager processManager;
   final Stdio stdio;
   final Platform platform;
   final FileSystem fileSystem;
@@ -49,6 +53,10 @@ class Repository {
   /// If the repository will be used as an upstream for a test repo.
   final bool localUpstream;
 
+  /// Lazily-loaded directory for the repository checkout.
+  ///
+  /// This property is not populated until the repository is ensured to be
+  /// cloned.
   Directory _checkoutDirectory;
   Directory get checkoutDirectory {
     if (_checkoutDirectory == null) {
@@ -72,6 +80,7 @@ class Repository {
     return _checkoutDirectory;
   }
 
+  /// The URL of the remote named [remoteName].
   String remoteUrl(String remoteName) {
     assert(remoteName != null);
     return git.getOutput(
@@ -81,7 +90,7 @@ class Repository {
     );
   }
 
-  /// Verifies the repository's git checkout is clean.
+  /// Verify the repository's git checkout is clean.
   bool gitCheckoutClean() {
     final String output = git.getOutput(
       <String>['status', '--porcelain'],
@@ -93,8 +102,9 @@ class Repository {
 
   void fetch(String remoteName) {
     git.run(
-      <String>['fetch', remoteName],
-      'fetch $remoteName',
+      // Fetch all branches and associated commits and tags
+      <String>['fetch', remoteName, '--tags'],
+      'fetch $remoteName --tags',
       workingDirectory: checkoutDirectory.path,
     );
   }
@@ -132,6 +142,7 @@ class Repository {
     return exitcode == 0;
   }
 
+  /// Determines if a given commit has a tag.
   bool isCommitTagged(String commit) {
     final int exitcode = git.run(
       <String>['describe', '--exact-match', '--tags', commit],
@@ -142,6 +153,7 @@ class Repository {
     return exitcode == 0;
   }
 
+  /// Resets repository HEAD to [commit].
   void reset(String commit) {
     git.run(
       <String>['reset', commit, '--hard'],
@@ -183,6 +195,8 @@ class Repository {
     );
   }
 
+  /// Create an empty commit and return the revision.
+  @visibleForTesting
   String authorEmptyCommit([String message = 'An empty commit']) {
     git.run(
       <String>['commit', '--allow-empty', '-m', '\'$message\''],
@@ -192,17 +206,25 @@ class Repository {
     return reverseParse('HEAD');
   }
 
+  /// Create a new clone of the current repository.
+  ///
+  /// The returned repository will inherit all properties from this one, except
+  /// for the upstream, which will be the path to this repository on disk.
+  ///
+  /// This method is for testing purposes.
   @visibleForTesting
   Repository cloneRepository(String cloneName) {
+    assert(localUpstream);
     cloneName ??= 'clone-of-$name';
     return Repository(
       fileSystem: fileSystem,
-      git: git,
       name: cloneName,
       parentDirectory: parentDirectory,
       platform: platform,
+      processManager: processManager,
       stdio: stdio,
       upstream: 'file://${checkoutDirectory.path}/',
+      useExistingCheckout: useExistingCheckout,
     );
   }
 }
@@ -216,8 +238,8 @@ enum RepositoryType {
 class Checkouts {
   Checkouts({
     @required Platform platform,
-    @required FileSystem fileSystem,
-    @required Git git,
+    @required this.fileSystem,
+    @required this.processManager,
     Directory parentDirectory,
     String directoryName = 'checkouts',
   }) {
@@ -255,17 +277,18 @@ class Checkouts {
   }
 
   Directory directory;
-  FileSystem fileSystem;
+  final FileSystem fileSystem;
+  final ProcessManager processManager;
 
   Repository addRepo({
     @required RepositoryType repoType,
-    @required Git git,
     @required Stdio stdio,
     @required Platform platform,
     FileSystem fileSystem,
     String upstream,
     String name,
     bool localUpstream = false,
+    bool useExistingCheckout = true, // TODO: change this to false
   }) {
     switch (repoType) {
       case RepositoryType.framework:
@@ -280,12 +303,13 @@ class Checkouts {
     return Repository(
       name: name,
       upstream: upstream,
-      git: git,
       stdio: stdio,
       platform: platform,
       fileSystem: fileSystem,
       parentDirectory: directory,
+      processManager: processManager,
       localUpstream: localUpstream,
+      useExistingCheckout: useExistingCheckout,
     );
   }
 }

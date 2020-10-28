@@ -3,9 +3,10 @@ import 'dart:io' as io;
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import 'package:flutter_conductor/git.dart';
-import 'package:flutter_conductor/globals.dart';
+//import 'package:flutter_conductor/globals.dart';
 import 'package:flutter_conductor/roll_dev.dart' show rollDev;
 import 'package:flutter_conductor/repository.dart';
 import 'package:flutter_conductor/stdio.dart';
@@ -13,54 +14,43 @@ import 'package:flutter_conductor/stdio.dart';
 import './common.dart';
 
 void main() {
-  group('test', () {
-    Stdio stdio;
+  group('roll-dev', () {
+    TestStdio stdio;
     Platform platform;
+    ProcessManager processManager;
     FileSystem fileSystem;
-    Git git;
     const String usageString = 'Usage: flutter conductor.';
 
-    setUp(() {
-      stdio = VerboseStdio(
-        stdout: io.stdout,
-        stderr: io.stderr,
-        stdin: io.stdin,
-      );
+    Checkouts checkouts;
+    Repository frameworkUpstream;
+    Repository framework;
+
+    setUpAll(() {
       platform = const LocalPlatform();
       fileSystem = const LocalFileSystem();
-      git = const Git();
-    });
-
-    test('increment m', () {
-      final Checkouts checkouts = Checkouts(
+      processManager = const LocalProcessManager();
+      stdio = TestStdio(verbose: true);
+      checkouts = Checkouts(
         fileSystem: fileSystem,
-        git: git,
         platform: platform,
+        processManager: processManager,
       );
 
-      final Repository frameworkFakeUpstream = checkouts.addRepo(
+      frameworkUpstream = checkouts.addRepo(
         repoType: RepositoryType.framework,
-        name: 'framework-fake-upstream',
-        git: git,
+        name: 'framework-upstream',
         stdio: stdio,
         platform: platform,
         localUpstream: true,
         fileSystem: fileSystem,
+        useExistingCheckout: true, // TODO: Make false
       );
 
-      final Repository framework =
-          frameworkFakeUpstream.cloneRepository('test-framework');
-      //final Repository framework = Repository(
-      //  name: 'framework',
-      //  upstream: 'file://${frameworkFakeUpstream.checkoutDirectory.path}/',
-      //  git: git,
-      //  stdio: stdio,
-      //  parentDirectory: parentDirectory,
-      //  platform: platform,
-      //  fileSystem: fileSystem,
-      //  localUpstream: true,
-      //);
+      // This repository has [frameworkUpstream] set as its push/pull remote.
+      framework = frameworkUpstream.cloneRepository('test-framework');
+    });
 
+    test('increment m', () {
       final String latestCommit = framework.authorEmptyCommit();
 
       final FakeArgResults fakeArgResults = FakeArgResults(
@@ -78,6 +68,10 @@ void main() {
         repository: framework,
       );
       expect(success, true);
+      expect(
+        stdio.stdout,
+        contains(RegExp(r'Publishing Flutter \d+\.\d+\.\d+-\d+\.\d+\.pre \(')),
+      );
     });
   });
 }

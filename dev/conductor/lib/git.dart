@@ -5,10 +5,13 @@
 import 'dart:io';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 /// A wrapper around git process calls that can be mocked for unit testing.
 class Git {
-  const Git();
+  Git(this.processManager) : assert(processManager != null);
+
+  final ProcessManager processManager;
 
   String getOutput(
     List<String> args,
@@ -36,9 +39,8 @@ class Git {
   }
 
   ProcessResult _run(List<String> args, String workingDirectory) {
-    return Process.runSync(
-      'git',
-      args,
+    return processManager.runSync(
+      <String>['git', ...args],
       workingDirectory: workingDirectory,
     );
   }

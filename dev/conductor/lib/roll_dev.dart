@@ -10,8 +10,8 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
-import './git.dart';
 import './globals.dart';
 import './repository.dart';
 import './stdio.dart';
@@ -20,7 +20,7 @@ import './version.dart';
 class RollDev extends Command<void> {
   factory RollDev() {
     const FileSystem fileSystem = LocalFileSystem();
-    const Git git = Git();
+    const ProcessManager processManager = LocalProcessManager();
     const Platform platform = LocalPlatform();
     final Stdio stdio = VerboseStdio(
       stdout: io.stdout,
@@ -29,16 +29,14 @@ class RollDev extends Command<void> {
     );
     final Checkouts checkouts = Checkouts(
       fileSystem: fileSystem,
-      git: git,
       platform: platform,
+      processManager: processManager,
     );
     return RollDev._(
       fileSystem: fileSystem,
-      git: git,
       platform: platform,
       repository: checkouts.addRepo(
         fileSystem: fileSystem,
-        git: git,
         platform: platform,
         repoType: RepositoryType.framework,
         stdio: stdio,
@@ -49,7 +47,6 @@ class RollDev extends Command<void> {
 
   RollDev._({
     this.fileSystem,
-    this.git,
     this.platform,
     this.repository,
     this.stdio,
@@ -93,7 +90,6 @@ class RollDev extends Command<void> {
   }
 
   final FileSystem fileSystem;
-  final Git git;
   final Platform platform;
   final Stdio stdio;
   final Repository repository;
