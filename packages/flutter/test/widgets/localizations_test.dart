@@ -42,7 +42,7 @@ void main() {
     expect(() => Localizations.localeOf(contextKey.currentContext!), throwsA(isAssertionError.having(
           (AssertionError e) => e.message,
       'message',
-      contains('Localizations operation requested with a context that does not include Localizations'),
+      contains('does not include a Localizations ancestor'),
     )));
   });
 
