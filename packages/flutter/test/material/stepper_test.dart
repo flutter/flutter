@@ -295,7 +295,8 @@ void main() {
       ),
     );
 
-    final ScrollableState scrollableState = tester.firstState(find.byType(Scrollable));
+    final ScrollableState scrollableState =
+        tester.firstState(find.byType(Scrollable));
     expect(scrollableState.position.pixels, 0.0);
 
     await tester.tap(find.text('Step 3'));
@@ -380,30 +381,30 @@ void main() {
       canceledPressed = true;
     }
 
-    final ControlsWidgetBuilder builder =
-      (BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel }) {
-        return Container(
-          margin: const EdgeInsets.only(top: 16.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints.tightFor(height: 48.0),
-            child: Row(
-              children: <Widget>[
-                TextButton(
-                  onPressed: onStepContinue,
-                  child: const Text('Let us continue!'),
+    final ControlsWidgetBuilder builder = (BuildContext context,
+        {VoidCallback? onStepContinue, VoidCallback? onStepCancel}) {
+      return Container(
+        margin: const EdgeInsets.only(top: 16.0),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints.tightFor(height: 48.0),
+          child: Row(
+            children: <Widget>[
+              TextButton(
+                onPressed: onStepContinue,
+                child: const Text('Let us continue!'),
+              ),
+              Container(
+                margin: const EdgeInsetsDirectional.only(start: 8.0),
+                child: TextButton(
+                  onPressed: onStepCancel,
+                  child: const Text('Cancel This!'),
                 ),
-                Container(
-                  margin: const EdgeInsetsDirectional.only(start: 8.0),
-                  child: TextButton(
-                    onPressed: onStepCancel,
-                    child: const Text('Cancel This!'),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      };
+        ),
+      );
+    };
 
     await tester.pumpWidget(
       MaterialApp(
@@ -489,7 +490,7 @@ void main() {
               steps: <Step>[
                 Step(
                   title: const Text('Step 2'),
-                  content:  Stepper(
+                  content: Stepper(
                     type: StepperType.vertical,
                     steps: const <Step>[
                       Step(
@@ -522,23 +523,26 @@ void main() {
     final List<String> lines = fullErrorMessage.split('\n');
     // The lines in the middle of the error message contain the stack trace
     // which will change depending on where the test is run.
-    final String errorMessage = lines.takeWhile(
-      (String line) => line != '',
-    ).join('\n');
+    final String errorMessage = lines
+        .takeWhile(
+          (String line) => line != '',
+        )
+        .join('\n');
     expect(errorMessage.length, lessThan(fullErrorMessage.length));
-    expect(errorMessage, startsWith(
-      '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
-      'The following assertion was thrown building Stepper('
-    ));
+    expect(
+        errorMessage,
+        startsWith(
+            '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
+            'The following assertion was thrown building Stepper('));
     // The description string of the stepper looks slightly different depending
     // on the platform and is omitted here.
-    expect(errorMessage, endsWith(
-      '):\n'
-      'Steppers must not be nested.\n'
-      'The material specification advises that one should avoid\n'
-      'embedding steppers within steppers.\n'
-      'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
-    ));
+    expect(
+        errorMessage,
+        endsWith('):\n'
+            'Steppers must not be nested.\n'
+            'The material specification advises that one should avoid\n'
+            'embedding steppers within steppers.\n'
+            'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'));
   });
 
   ///https://github.com/flutter/flutter/issues/16920
@@ -604,7 +608,8 @@ void main() {
     expect(find.text('Text After Stepper'), findsNothing);
   });
 
-  testWidgets("Vertical Stepper can't be focused when disabled.", (WidgetTester tester) async {
+  testWidgets("Vertical Stepper can't be focused when disabled.",
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -624,13 +629,15 @@ void main() {
     );
     await tester.pump();
 
-    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), nullOk: true, scopeOk: true)!;
+    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')),
+        nullOk: true, scopeOk: true)!;
     disabledNode.requestFocus();
     await tester.pump();
     expect(disabledNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets("Horizontal Stepper can't be focused when disabled.", (WidgetTester tester) async {
+  testWidgets("Horizontal Stepper can't be focused when disabled.",
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -650,13 +657,15 @@ void main() {
     );
     await tester.pump();
 
-    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), nullOk: true, scopeOk: true)!;
+    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')),
+        nullOk: true, scopeOk: true)!;
     disabledNode.requestFocus();
     await tester.pump();
     expect(disabledNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('Stepper header title should not overflow', (WidgetTester tester) async {
+  testWidgets('Stepper header title should not overflow',
+      (WidgetTester tester) async {
     const String longText =
         'A long long long long long long long long long long long long text';
 
@@ -667,10 +676,7 @@ void main() {
             children: <Widget>[
               Stepper(
                 steps: const <Step>[
-                  Step(
-                    title: Text(longText),
-                    content: Text('Text content')
-                  ),
+                  Step(title: Text(longText), content: Text('Text content')),
                 ],
               ),
             ],
@@ -682,7 +688,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Stepper header subtitle should not overflow', (WidgetTester tester) async {
+  testWidgets('Stepper header subtitle should not overflow',
+      (WidgetTester tester) async {
     const String longText =
         'A long long long long long long long long long long long long text';
 
@@ -694,10 +701,9 @@ void main() {
               Stepper(
                 steps: const <Step>[
                   Step(
-                    title: Text('Regular title'),
-                    subtitle: Text(longText),
-                    content: Text('Text content')
-                  ),
+                      title: Text('Regular title'),
+                      subtitle: Text(longText),
+                      content: Text('Text content')),
                 ],
               ),
             ],
@@ -716,8 +722,8 @@ void main() {
         home: Material(
           child: Stepper(
             type: StepperType.horizontal,
-            onStepCancel: () { },
-            onStepContinue: () { },
+            onStepCancel: () {},
+            onStepContinue: () {},
             steps: const <Step>[
               Step(
                 title: Text('step1'),
@@ -730,16 +736,17 @@ void main() {
     }
 
     Material buttonMaterial(String label) {
-      return tester.widget<Material>(
-        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material))
-      );
+      return tester.widget<Material>(find.descendant(
+          of: find.widgetWithText(TextButton, label),
+          matching: find.byType(Material)));
     }
 
     // The checks that follow verify that the layout and appearance of
     // the default enabled Stepper buttons have not changed even
     // though the FlatButtons have been replaced by TextButtons.
 
-    const OutlinedBorder buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2)));
+    const OutlinedBorder buttonShape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(2)));
     const Rect continueButtonRect = Rect.fromLTRB(24.0, 212.0, 168.0, 260.0);
     const Rect cancelButtonRect = Rect.fromLTRB(176.0, 212.0, 292.0, 260.0);
 
@@ -748,25 +755,29 @@ void main() {
     expect(buttonMaterial('CONTINUE').color!.value, 0xff2196f3);
     expect(buttonMaterial('CONTINUE').textStyle!.color!.value, 0xffffffff);
     expect(buttonMaterial('CONTINUE').shape, buttonShape);
-    expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')), continueButtonRect);
+    expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')),
+        continueButtonRect);
 
     expect(buttonMaterial('CANCEL').color!.value, 0);
     expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0x8a000000);
     expect(buttonMaterial('CANCEL').shape, buttonShape);
-    expect(tester.getRect(find.widgetWithText(TextButton, 'CANCEL')), cancelButtonRect);
+    expect(tester.getRect(find.widgetWithText(TextButton, 'CANCEL')),
+        cancelButtonRect);
 
     await tester.pumpWidget(buildFrame(ThemeData.dark()));
     await tester.pumpAndSettle(); // Complete the theme animation.
 
     expect(buttonMaterial('CONTINUE').color!.value, 0);
-    expect(buttonMaterial('CONTINUE').textStyle!.color!.value,  0xffffffff);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value, 0xffffffff);
     expect(buttonMaterial('CONTINUE').shape, buttonShape);
-    expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')), continueButtonRect);
+    expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')),
+        continueButtonRect);
 
     expect(buttonMaterial('CANCEL').color!.value, 0);
     expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0xb3ffffff);
     expect(buttonMaterial('CANCEL').shape, buttonShape);
-    expect(tester.getRect(find.widgetWithText(TextButton, 'CANCEL')), cancelButtonRect);
+    expect(tester.getRect(find.widgetWithText(TextButton, 'CANCEL')),
+        cancelButtonRect);
   });
 
   testWidgets('Stepper disabled button styles', (WidgetTester tester) async {
@@ -788,9 +799,9 @@ void main() {
     }
 
     Material buttonMaterial(String label) {
-      return tester.widget<Material>(
-        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material))
-      );
+      return tester.widget<Material>(find.descendant(
+          of: find.widgetWithText(TextButton, label),
+          matching: find.byType(Material)));
     }
 
     // The checks that follow verify that the appearance of the
@@ -815,32 +826,111 @@ void main() {
     expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0x61ffffff);
   });
 
-  testWidgets('Vertical and Horizontal Stepper physics test', (WidgetTester tester) async {
+  testWidgets('Vertical Stepper physics test', (WidgetTester tester) async {
     const ScrollPhysics physics = NeverScrollableScrollPhysics();
 
-    for(final StepperType type in StepperType.values) {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Stepper(
-              physics: physics,
-              type: type,
-              steps: const <Step>[
-                Step(
-                  title: Text('Step 1'),
-                  content: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            physics: physics,
+            steps: const <Step>[
+              Step(
+                title: Text('Step 1'),
+                content: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    );
 
-      final ListView listView = tester.widget<ListView>(find.descendant(of: find.byType(Stepper), matching: find.byType(ListView)));
-      expect(listView.physics, physics);
+    final ListView listView = tester.widget<ListView>(find.descendant(
+        of: find.byType(Stepper), matching: find.byType(ListView)));
+    expect(listView.physics, physics);
+  });
+
+  testWidgets('Horizontal Stepper physics test', (WidgetTester tester) async {
+    const ScrollPhysics physics = NeverScrollableScrollPhysics();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            physics: physics,
+            type: StepperType.horizontal,
+            steps: const <Step>[
+              Step(
+                title: Text('Step 1'),
+                content: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Iterable<ListView> listView = tester.widgetList(find.descendant(
+        of: find.byType(Stepper), matching: find.byType(ListView)));
+    expect(listView.elementAt(listView.length - 1).physics, physics);
+  });
+
+  testWidgets('Horizontal stepper header showed as currentStep',
+      (WidgetTester tester) async {
+    int currentStep = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+          return Material(
+            child: Stepper(
+              type: StepperType.horizontal,
+              currentStep: currentStep,
+              onStepContinue: () {
+                if (currentStep < 10)
+                  setState(() {
+                    currentStep += 1;
+                  });
+              },
+              onStepCancel: () {
+                if (currentStep > 0)
+                  setState(() {
+                    currentStep -= 1;
+                  });
+              },
+              steps: const <Step>[
+                Step(title: Text('Step 1'), content: Text('Text 1')),
+                Step(title: Text('Step 2'), content: Text('Text 2')),
+                Step(title: Text('Step 3'), content: Text('Text 3')),
+                Step(title: Text('Step 4'), content: Text('Text 4')),
+                Step(title: Text('Step 5'), content: Text('Text 5')),
+                Step(title: Text('Step 6'), content: Text('Text 6')),
+                Step(title: Text('Step 7'), content: Text('Text 7')),
+                Step(title: Text('Step 8'), content: Text('Text 8')),
+                Step(title: Text('Step 9'), content: Text('Text 9')),
+                Step(title: Text('Step 10'), content: Text('Text 10')),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+
+    for (int index = 0; index < 8; index += 1) {
+      await tester.tap(find.text('CONTINUE'));
+      await tester.pumpAndSettle();
+      expect(find.text('Step ${index + 2}'), findsOneWidget);
+    }
+    for (int index = 8; index > 1; index -= 1) {
+      await tester.tap(find.text('CANCEL'));
+      await tester.pumpAndSettle();
+      expect(find.text('Step ${index - 1}'), findsOneWidget);
     }
   });
 }

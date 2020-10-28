@@ -177,12 +177,12 @@ class Stepper extends StatefulWidget {
   /// The amount of space by which to inset the title of [steps].
   /// Default margin is 24.0 logical pixels on
   /// horizontal side: EdgeInsets.symmetric(horizontal: 24.0)
-  final EdgeInsetsGeometry? headerMargin;
+  final EdgeInsetsGeometry headerMargin;
 
   /// The amount of space by which to inset the title of [steps].
   /// Default margin is 24.0 logical pixels on
   /// all sides: EdgeInsets.all(24.0),
-  final EdgeInsetsGeometry? contentPadding;
+  final EdgeInsetsGeometry contentPadding;
 
   /// The index into [steps] of the current step whose content is displayed.
   final int currentStep;
@@ -204,7 +204,7 @@ class Stepper extends StatefulWidget {
   /// Whether the default control buttons of [onStepContinue]
   /// and [onStepCancel] should build.
   /// Defaults to true.
-  final bool? includeControls;
+  final bool includeControls;
 
   /// The callback for creating custom controls.
   ///
@@ -265,7 +265,7 @@ class Stepper extends StatefulWidget {
 class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   late List<GlobalKey> _keys;
   final Map<int, StepState> _oldStates = <int, StepState>{};
-  ScrollController _controller;
+  ScrollController? _scrollController;
 
   @override
   void initState() {
@@ -278,7 +278,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     for (int i = 0; i < widget.steps.length; i += 1)
       _oldStates[i] = widget.steps[i].state;
 
-    _controller = new ScrollController();
+    if (widget.type == StepperType.horizontal)
+      _scrollController = ScrollController();
   }
 
   @override
@@ -289,20 +290,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     for (int i = 0; i < oldWidget.steps.length; i += 1)
       _oldStates[i] = oldWidget.steps[i].state;
 
-    if (widget.type == StepperType.vertical) {
-      _controller.animateTo(
-        widget.currentStep * 72.0,
-        curve: Curves.fastOutSlowIn,
-        duration: kThemeAnimationDuration,
-      );
-    } else {
+    if (widget.type == StepperType.horizontal) {
       Scrollable.ensureVisible(
-        _keys[widget.currentStep].currentContext,
+        _keys[widget.currentStep].currentContext!,
         curve: Curves.fastOutSlowIn,
         alignment: 0.5,
         duration: kThemeAnimationDuration,
       );
-      _controller.jumpTo(0);
+      _scrollController!.jumpTo(0);
     }
   }
 
@@ -460,7 +455,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final ThemeData themeData = Theme.of(context)!;
     final ColorScheme colorScheme = themeData.colorScheme;
     final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+        MaterialLocalizations.of(context)!;
 
     const OutlinedBorder buttonShape = RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(2)));
@@ -604,7 +599,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVerticalBody(int index) {
-    EdgeInsets contentPadding = widget.contentPadding;
+    EdgeInsets contentPadding = widget.contentPadding as EdgeInsets;
     return Stack(
       children: <Widget>[
         PositionedDirectional(
@@ -626,7 +621,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         AnimatedCrossFade(
           firstChild: Container(height: 0.0),
           secondChild: Container(
-            margin: const EdgeInsetsDirectional.only(
+            margin: EdgeInsetsDirectional.only(
               start: contentPadding.left + 36.0,
               end: contentPadding.right,
               bottom: contentPadding.bottom,
@@ -653,14 +648,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   Widget _buildVertical() {
     return ListView(
       shrinkWrap: true,
-      controller: _controller,
       physics: widget.physics,
       children: <Widget>[
         for (int i = 0; i < widget.steps.length; i += 1)
           Column(
+            key: _keys[i],
             children: <Widget>[
               InkWell(
-                key: _keys[i],
                 onTap: widget.steps[i].state != StepState.disabled
                     ? () {
                         // In the vertical case we need to scroll to the newly tapped
@@ -693,12 +687,12 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           onTap: widget.steps[i].state != StepState.disabled
               ? () {
                   Scrollable.ensureVisible(
-                    _keys[i].currentContext,
+                    _keys[i].currentContext!,
                     curve: Curves.fastOutSlowIn,
                     alignment: 0.5,
                     duration: kThemeAnimationDuration,
                   );
-                  if (widget.onStepTapped != null) widget.onStepTapped(i);
+                  if (widget.onStepTapped != null) widget.onStepTapped!(i);
                 }
               : null,
           canRequestFocus: widget.steps[i].state != StepState.disabled,
@@ -749,7 +743,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         Expanded(
           child: ListView(
             physics: widget.physics,
-            controller: _controller,
+            controller: _scrollController,
             padding: widget.contentPadding,
             children: <Widget>[
               AnimatedSize(
