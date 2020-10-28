@@ -25,7 +25,7 @@ Set<String> _unTestedDemos = Set<String>.from(_allDemos);
 
 class _MessageHandler {
   static LiveWidgetController? controller;
-  Future<String> call(String message) async {
+  Future<String> call(String? message) async {
     switch(message) {
       case 'demoNames':
         return const JsonEncoder.withIndent('  ').convert(_allDemos);
@@ -46,7 +46,7 @@ class _MessageHandler {
 }
 
 void main() {
-  enableFlutterDriverExtension(handler: _MessageHandler() as Future<String> Function(String?)?);
+  enableFlutterDriverExtension(handler: _MessageHandler().call);
   // As in lib/main.dart: overriding https://github.com/flutter/flutter/issues/13736
   // for better visual effect at the cost of performance.
   runApp(const GalleryApp(testMode: true));
