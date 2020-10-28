@@ -38,6 +38,9 @@ import 'text_input.dart';
 ///  [TextField.maxLength] to limit the length of user input. [TextField] also
 ///  provides a character counter to provide visual feedback.
 enum MaxLengthEnforcement {
+  /// No enforcement applied to the editing value.
+  none,
+
   /// Keep the length of the text input from exceeding the max length even when
   /// the text has an unfinished composing region.
   enforced,
@@ -46,9 +49,6 @@ enum MaxLengthEnforcement {
   /// reaching the max length limit. After composing ends, the value will be
   /// truncated.
   truncateAfterCompositionEnds,
-
-  /// No enforcement applied to the editing value.
-  none,
 }
 
 /// A [TextInputFormatter] can be optionally injected into an [EditableText]
