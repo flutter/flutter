@@ -359,46 +359,67 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// zero.
   final ShapeBorder? shape;
 
-  /// The color to use for the app bar's [Material].
+  /// The fill color to use for the app bar's [Material].
   ///
-  /// This property is often set along with [brightness], [iconTheme],
-  /// [textTheme].
-  ///
-  /// If this property is null, then [AppBarTheme.color] of
-  /// [ThemeData.appBarTheme] is used. If that is also null,
-  /// the overall theme's [ColorScheme.primary] is used for light color schemes,
-  /// [ColorScheme.surface] for dark color schemes.
+  /// If null, then the [AppBarTheme.color] is used. If that value is also
+  /// null, then [AppBar] uses the overall theme's [ColorScheme.primary] if the
+  /// overall theme's brightness is [Brightness.light], and [ColorScheme.surface]
+  /// if the overall theme's [brightness] is [Brightness.dark].
   ///
   /// See also:
   ///
-  ///  * [ThemeData.colorScheme], the overall theme's color scheme.
-  ///  * [ColorScheme.brightness], classifies the color scheme as light or dark.
+  ///  * [foregroundColor], which specifies the color for icons and text within
+  ///    the app bar.
+  ///  * [brightness], which overrides the overall theme's brightness for
+  ///    this app bar.
+  ///  * [Theme.of], which returns the current overall Material theme as
+  ///    a [ThemeData].
+  ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
+  ///    default colors are based on.
+  ///  * [ThemeData.colorScheme.brightness], which indicates if the overall theme
+  ///    is light or dark.
   final Color? backgroundColor;
 
-  /// The default color to use for the app bar's text and icons.
+  /// The default color for [Text] and [Icon]s within the app bar.
   ///
-  /// If this property is null, then [AppBarTheme.foregroundColor] of
-  /// [ThemeData.appBarTheme] is used. If that is also null,
-  /// the overall theme's [ColorScheme.onPrimary] is used for light color schemes,
-  /// [ColorScheme.onSurface] for dark color schemes.
+  /// If null, then [AppBarTheme.foregroundColor] is used. If that
+  /// value is also null, then [AppBar] uses the overall theme's
+  /// [ColorScheme.onPrimary] if the overall theme's brightness is
+  /// [Brightness.light], and [ColorScheme.onSurface] if the overall
+  /// theme's [brightness] is [Brightness.dark].
+  ///
+  /// This color is used to configure [DefaultTextStyle] and [IconTheme]
+  /// widgets.
   ///
   /// See also:
   ///
-  ///  * [ThemeData.colorScheme], the overall theme's color scheme.
+  ///  * [backgroundColor], which specifies the app bar's background color.
+  ///  * [brightness], which overrides the overall theme's brightness for
+  ///    this app bar.
+  ///  * [Theme.of], which returns the current overall Material theme as
+  ///    a [ThemeData].
+  ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
+  ///    default colors are based on.
+  ///  * [ThemeData.colorScheme.brightness], which indicates if the overall theme
+  ///    is light or dark.
   final Color? foregroundColor;
 
-  /// The brightness of the app bar's [Material].
+  /// AppBar uses this value to determine the default [color] and [backgroundColor]
+  /// as well as the app bar's [SystemUiOverlayStyle].
   ///
-  /// This property is often set along with [backgroundColor],
-  /// [iconTheme], [textTheme].
-  ///
-  /// If this property is null, then [AppBarTheme.brightness] of
-  /// [ThemeData.appBarTheme] is used. If that is also null, then
-  /// the brightness of the [backgroundColor] is used.
+  /// For [Brightness.dark], [SystemUiOverlayStyle.light] is used and for
+  /// [Brightness.light], [SystemUiOverlayStyle.dark] is used.
   ///
   /// See also:
   ///
-  ///  * [ThemeData.estimateBrightnessForColor], which classifies colors as light or dark.
+  ///  * [AppBar.brightness], which overrides the this value and the overall
+  ///    theme's [ColorScheme.brightness].
+  ///  * [Theme.of], which returns the current overall Material theme as
+  ///    a [ThemeData].
+  ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
+  ///    default colors are based on.
+  ///  * [ThemeData.colorScheme.brightness], which indicates if the overall theme
+  ///    is light or dark.
   final Brightness? brightness;
 
   /// The color, opacity, and size to use for app bar icons. Typically this
@@ -543,7 +564,7 @@ class _AppBarState extends State<AppBar> {
       ?? appBarTheme.color
       ?? (colorScheme.brightness == Brightness.dark ? colorScheme.surface : colorScheme.primary);
     final Color foregroundColor = widget.foregroundColor
-      //?? appBarTheme.foregroundColor
+      ?? appBarTheme.foregroundColor
       ?? (colorScheme.brightness == Brightness.dark ? colorScheme.onSurface : colorScheme.onPrimary);
 
     IconThemeData overallIconTheme = widget.iconTheme
