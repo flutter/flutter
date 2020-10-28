@@ -57,7 +57,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await failToEvaluateExpression(_flutter);
     await cleanProject();
-  });
+  }, skip: platform.isMacOS);
 
  testWithoutContext('flutter run expression evaluation - no native javascript objects in static scope', () async {
     await initProject();
@@ -65,7 +65,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await checkStaticScope(_flutter);
     await cleanProject();
-  });
+  }, skip: platform.isMacOS);
 
   testWithoutContext('flutter run expression evaluation - can handle compilation errors', () async {
     await initProject();
@@ -73,7 +73,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await evaluateErrorExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: platform.isMacOS);
 
   testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in top level function', () async {
     await initProject();
@@ -81,7 +81,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: platform.isMacOS);
 
   testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in build method', () async {
     await initProject();
@@ -89,7 +89,7 @@ void batch1() {
     await breakInBuildMethod(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: platform.isMacOS);
 
   testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in top level function', () async {
     await initProject();
@@ -97,7 +97,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: platform.isMacOS);
 
   testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in build method', () async {
     await initProject();
@@ -105,7 +105,7 @@ void batch1() {
     await breakInBuildMethod(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: platform.isMacOS);
 }
 
 void batch2() {

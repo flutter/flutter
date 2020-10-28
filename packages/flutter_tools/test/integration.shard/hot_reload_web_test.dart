@@ -30,7 +30,7 @@ void main() {
   testWithoutContext('hot restart works without error', () async {
     await flutter.run(chrome: true);
     await flutter.hotRestart();
-  });
+  }, skip: platform.isMacOS);
 
   testWithoutContext('newly added code executes during hot restart', () async {
     final Completer<void> completer = Completer<void>();
@@ -48,5 +48,5 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  });
+  }, skip: platform.isMacOS);
 }
