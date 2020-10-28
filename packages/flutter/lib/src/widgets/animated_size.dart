@@ -116,7 +116,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
       reverseDuration: reverseDuration,
       curve: curve,
       vsync: vsync,
-      textDirection: Directionality.of(context),
+      textDirection: Directionality.maybeOf(context),
       clipBehavior: clipBehavior,
     );
   }
@@ -129,7 +129,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
       ..reverseDuration = reverseDuration
       ..curve = curve
       ..vsync = vsync
-      ..textDirection = Directionality.of(context)
+      ..textDirection = Directionality.maybeOf(context)
       ..clipBehavior = clipBehavior;
   }
 

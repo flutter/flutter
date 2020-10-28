@@ -506,7 +506,7 @@ abstract class MaterialLocalizations {
   /// tooltip: MaterialLocalizations.of(context).backButtonTooltip,
   /// ```
   static MaterialLocalizations of(BuildContext context) {
-    debugCheckHasMaterialLocalizations(context);
+    assert(debugCheckHasMaterialLocalizations(context));
     return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)!;
   }
 }

@@ -274,12 +274,12 @@ class CupertinoActionSheet extends StatelessWidget {
       if (cancelButton != null) _buildCancelButton(),
     ];
 
-    final Orientation orientation = MediaQuery.of(context)!.orientation;
+    final Orientation orientation = MediaQuery.of(context).orientation;
     final double actionSheetWidth;
     if (orientation == Orientation.portrait) {
-      actionSheetWidth = MediaQuery.of(context)!.size.width - (_kEdgeHorizontalPadding * 2);
+      actionSheetWidth = MediaQuery.of(context).size.width - (_kEdgeHorizontalPadding * 2);
     } else {
-      actionSheetWidth = MediaQuery.of(context)!.size.height - (_kEdgeHorizontalPadding * 2);
+      actionSheetWidth = MediaQuery.of(context).size.height - (_kEdgeHorizontalPadding * 2);
     }
 
     return SafeArea(
@@ -449,7 +449,7 @@ class _CupertinoAlertRenderWidget extends RenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     return _RenderCupertinoAlert(
-      dividerThickness: _kDividerThickness / MediaQuery.of(context)!.devicePixelRatio,
+      dividerThickness: _kDividerThickness / MediaQuery.of(context).devicePixelRatio,
       dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!,
     );
   }
@@ -944,7 +944,7 @@ class _CupertinoAlertActionSection extends StatefulWidget {
 class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSection> {
   @override
   Widget build(BuildContext context) {
-    final double devicePixelRatio = MediaQuery.of(context)!.devicePixelRatio;
+    final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     final List<Widget> interactiveButtons = <Widget>[];
     for (int i = 0; i < widget.children.length; i += 1) {

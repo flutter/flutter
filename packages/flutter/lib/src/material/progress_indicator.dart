@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -13,6 +14,8 @@ import 'theme.dart';
 const double _kMinCircularProgressIndicatorSize = 36.0;
 const int _kIndeterminateLinearDuration = 1800;
 const int _kIndeterminateCircularDuration = 1333 * 2222;
+
+enum _ActivityIndicatorType { material, adaptive }
 
 /// A base class for material design progress indicators.
 ///
@@ -53,11 +56,17 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// If null, this progress indicator is indeterminate, which means the
   /// indicator displays a predetermined animation that does not indicate how
   /// much actual progress is being made.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   final double? value;
 
   /// The progress indicator's background color.
   ///
   /// The current theme's [ThemeData.backgroundColor] by default.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   final Color? backgroundColor;
 
   /// The progress indicator's color as an animated value.
@@ -66,6 +75,9 @@ abstract class ProgressIndicator extends StatefulWidget {
   ///
   /// If null, the progress indicator is rendered with the current theme's
   /// [ThemeData.accentColor].
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   final Animation<Color?>? valueColor;
 
   /// {@template flutter.material.progressIndicator.semanticsLabel}
@@ -74,6 +86,9 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// This value indicates the purpose of the progress bar, and will be
   /// read out by screen readers to indicate the purpose of this progress
   /// indicator.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   /// {@endtemplate}
   final String? semanticsLabel;
 
@@ -88,6 +103,9 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// For determinate progress indicators, this will be defaulted to
   /// [ProgressIndicator.value] expressed as a percentage, i.e. `0.1` will
   /// become '10%'.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   /// {@endtemplate}
   final String? semanticsValue;
 
@@ -433,7 +451,8 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.strokeWidth = 4.0,
     String? semanticsLabel,
     String? semanticsValue,
-  }) : super(
+  }) : _indicatorType = _ActivityIndicatorType.material,
+       super(
          key: key,
          value: value,
          backgroundColor: backgroundColor,
@@ -442,7 +461,38 @@ class CircularProgressIndicator extends ProgressIndicator {
          semanticsValue: semanticsValue,
        );
 
+  /// Creates an adaptive progress indicator that is a
+  /// [CupertinoActivityIndicator] in iOS and [CircularProgressIndicator] in
+  /// material theme/non-iOS.
+  ///
+  /// The [value], [backgroundColor], [valueColor], [strokeWidth],
+  /// [semanticsLabel], and [semanticsValue] will be ignored in iOS.
+  ///
+  /// {@macro flutter.material.progressIndicator.parameters}
+  const CircularProgressIndicator.adaptive({
+    Key? key,
+    double? value,
+    Color? backgroundColor,
+    Animation<Color?>? valueColor,
+    this.strokeWidth = 4.0,
+    String? semanticsLabel,
+    String? semanticsValue,
+  }) : _indicatorType = _ActivityIndicatorType.adaptive,
+       super(
+         key: key,
+         value: value,
+         backgroundColor: backgroundColor,
+         valueColor: valueColor,
+         semanticsLabel: semanticsLabel,
+         semanticsValue: semanticsValue,
+       );
+
+  final _ActivityIndicatorType _indicatorType;
+
   /// The width of the line used to draw the circle.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   final double strokeWidth;
 
   @override
@@ -494,7 +544,11 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     super.dispose();
   }
 
-  Widget _buildIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+  Widget _buildCupertinoIndicator(BuildContext context) {
+    return CupertinoActivityIndicator(key: widget.key);
+  }
+
+  Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
     return widget._buildSemanticsWrapper(
       context: context,
       child: Container(
@@ -522,7 +576,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     return AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget? child) {
-        return _buildIndicator(
+        return _buildMaterialIndicator(
           context,
           _strokeHeadTween.evaluate(_controller),
           _strokeTailTween.evaluate(_controller),
@@ -535,9 +589,27 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
 
   @override
   Widget build(BuildContext context) {
-    if (widget.value != null)
-      return _buildIndicator(context, 0.0, 0.0, 0, 0.0);
-    return _buildAnimation();
+    switch (widget._indicatorType) {
+      case _ActivityIndicatorType.material:
+        if (widget.value != null)
+          return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+        return _buildAnimation();
+      case _ActivityIndicatorType.adaptive:
+        final ThemeData theme = Theme.of(context)!;
+        assert(theme.platform != null);
+        switch (theme.platform) {
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            return _buildCupertinoIndicator(context);
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            if (widget.value != null)
+              return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+            return _buildAnimation();
+        }
+    }
   }
 }
 
@@ -657,7 +729,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   }
 
   @override
-  Widget _buildIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+  Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
     final double arrowheadScale = widget.value == null ? 0.0 : (widget.value! * 2.0).clamp(0.0, 1.0);
     return widget._buildSemanticsWrapper(
       context: context,

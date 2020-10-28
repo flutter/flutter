@@ -103,7 +103,7 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
       thickness: widget.thickness ?? _kScrollbarThickness,
       radius: widget.radius,
       fadeoutOpacityAnimation: fadeoutOpacityAnimation,
-      padding: MediaQuery.of(context)!.padding,
+      padding: MediaQuery.of(context).padding,
     );
   }
 

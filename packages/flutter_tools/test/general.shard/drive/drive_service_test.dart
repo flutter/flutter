@@ -42,6 +42,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   pauseOnExit: false,
   runnable: true,
   startTime: 0,
+  isSystemIsolate: false,
 );
 
 final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
@@ -69,6 +70,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
   pauseOnExit: false,
   runnable: true,
   startTime: 0,
+  isSystemIsolate: false,
 );
 
 final vm_service.VM fakeVM = vm_service.VM(
@@ -82,6 +84,8 @@ final vm_service.VM fakeVM = vm_service.VM(
   architectureBits: 64,
   operatingSystem: '',
   version: '',
+  systemIsolateGroups: <vm_service.IsolateGroupRef>[],
+  systemIsolates: <vm_service.IsolateRef>[],
 );
 
 final FlutterView fakeFlutterView = FlutterView(
@@ -146,7 +150,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        command: <String>['dart', 'pub', 'run', 'test', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
@@ -175,7 +179,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', 'foo.test', '-rexpanded'],
+        command: <String>['dart', 'pub', 'run', 'test', 'foo.test', '-rexpanded'],
         exitCode: 11,
         environment: <String, String>{
           'VM_SERVICE_URL': 'http://127.0.0.1:1234/'

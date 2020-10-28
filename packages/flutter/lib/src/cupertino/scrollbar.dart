@@ -147,7 +147,7 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
       painter!
         ..textDirection = Directionality.of(context)!
         ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)!
-        ..padding = MediaQuery.of(context)!.padding;
+        ..padding = MediaQuery.of(context).padding;
     }
     triggerScrollbar();
   }
@@ -169,7 +169,7 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
       mainAxisMargin: _kScrollbarMainAxisMargin,
       crossAxisMargin: _kScrollbarCrossAxisMargin,
       radius: _radius,
-      padding: MediaQuery.of(context)!.padding,
+      padding: MediaQuery.of(context).padding,
       minLength: _kScrollbarMinLength,
       minOverscrollLength: _kScrollbarMinOverscrollLength,
     );
@@ -179,6 +179,7 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
 
   // Long press event callbacks handle the gesture where the user long presses
   // on the scrollbar thumb and then drags the scrollbar without releasing.
+
   @override
   void handleGestureStart(Offset localPosition) {
     super.handleGestureStart(localPosition);

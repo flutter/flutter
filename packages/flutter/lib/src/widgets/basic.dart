@@ -107,7 +107,24 @@ class Directionality extends InheritedWidget {
   /// ```dart
   /// TextDirection textDirection = Directionality.of(context);
   /// ```
+  // TODO(goderbauer): Make this non-null when customers have upgraded to Directionality.maybeOf.
   static TextDirection? of(BuildContext context) {
+    final Directionality? widget = context.dependOnInheritedWidgetOfExactType<Directionality>();
+    return widget?.textDirection;
+  }
+
+  /// The text direction from the closest instance of this class that encloses
+  /// the given context.
+  ///
+  /// If there is no [Directionality] ancestor widget in the tree at the given
+  /// context, then this will return null.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TextDirection? textDirection = Directionality.maybeOf(context);
+  /// ```
+  static TextDirection? maybeOf(BuildContext context) {
     final Directionality? widget = context.dependOnInheritedWidgetOfExactType<Directionality>();
     return widget?.textDirection;
   }
@@ -831,7 +848,7 @@ class ClipPath extends SingleChildRenderObjectWidget {
         return ClipPath(
           clipper: ShapeBorderClipper(
             shape: shape,
-            textDirection: Directionality.of(context),
+            textDirection: Directionality.maybeOf(context),
           ),
           clipBehavior: clipBehavior,
           child: child,
@@ -1258,7 +1275,7 @@ class Transform extends SingleChildRenderObjectWidget {
       transform: transform,
       origin: origin,
       alignment: alignment,
-      textDirection: Directionality.of(context),
+      textDirection: Directionality.maybeOf(context),
       transformHitTests: transformHitTests,
     );
   }
@@ -1269,7 +1286,7 @@ class Transform extends SingleChildRenderObjectWidget {
       ..transform = transform
       ..origin = origin
       ..alignment = alignment
-      ..textDirection = Directionality.of(context)
+      ..textDirection = Directionality.maybeOf(context)
       ..transformHitTests = transformHitTests;
   }
 }
@@ -1495,7 +1512,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
     return RenderFittedBox(
       fit: fit,
       alignment: alignment,
-      textDirection: Directionality.of(context),
+      textDirection: Directionality.maybeOf(context),
       clipBehavior: clipBehavior,
     );
   }
@@ -1505,7 +1522,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
     renderObject
       ..fit = fit
       ..alignment = alignment
-      ..textDirection = Directionality.of(context)
+      ..textDirection = Directionality.maybeOf(context)
       ..clipBehavior = clipBehavior;
   }
 
@@ -1689,7 +1706,7 @@ class Padding extends SingleChildRenderObjectWidget {
   RenderPadding createRenderObject(BuildContext context) {
     return RenderPadding(
       padding: padding,
-      textDirection: Directionality.of(context),
+      textDirection: Directionality.maybeOf(context),
     );
   }
 
@@ -1697,7 +1714,7 @@ class Padding extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderPadding renderObject) {
     renderObject
       ..padding = padding
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.maybeOf(context);
   }
 
   @override
@@ -1884,7 +1901,7 @@ class Align extends SingleChildRenderObjectWidget {
       alignment: alignment,
       widthFactor: widthFactor,
       heightFactor: heightFactor,
-      textDirection: Directionality.of(context),
+      textDirection: Directionality.maybeOf(context),
     );
   }
 
@@ -1894,7 +1911,7 @@ class Align extends SingleChildRenderObjectWidget {
       ..alignment = alignment
       ..widthFactor = widthFactor
       ..heightFactor = heightFactor
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.maybeOf(context);
   }
 
   @override
@@ -2334,7 +2351,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, covariant RenderUnconstrainedBox renderObject) {
     renderObject
-      ..textDirection = textDirection ?? Directionality.of(context)
+      ..textDirection = textDirection ?? Directionality.maybeOf(context)
       ..alignment = alignment
       ..constrainedAxis = constrainedAxis
       ..clipBehavior = clipBehavior;
@@ -2342,7 +2359,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
 
   @override
   RenderUnconstrainedBox createRenderObject(BuildContext context) => RenderUnconstrainedBox(
-    textDirection: textDirection ?? Directionality.of(context),
+    textDirection: textDirection ?? Directionality.maybeOf(context),
     alignment: alignment,
     constrainedAxis: constrainedAxis,
     clipBehavior: clipBehavior,
@@ -2431,7 +2448,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
       alignment: alignment,
       widthFactor: widthFactor,
       heightFactor: heightFactor,
-      textDirection: Directionality.of(context),
+      textDirection: Directionality.maybeOf(context),
     );
   }
 
@@ -2441,7 +2458,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
       ..alignment = alignment
       ..widthFactor = widthFactor
       ..heightFactor = heightFactor
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.maybeOf(context);
   }
 
   @override
@@ -2594,7 +2611,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
       maxWidth: maxWidth,
       minHeight: minHeight,
       maxHeight: maxHeight,
-      textDirection: Directionality.of(context),
+      textDirection: Directionality.maybeOf(context),
     );
   }
 
@@ -2606,7 +2623,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
       ..maxWidth = maxWidth
       ..minHeight = minHeight
       ..maxHeight = maxHeight
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.maybeOf(context);
   }
 
   @override
@@ -3400,7 +3417,7 @@ class Stack extends MultiChildRenderObjectWidget {
     assert(_debugCheckHasDirectionality(context));
     return RenderStack(
       alignment: alignment,
-      textDirection: textDirection ?? Directionality.of(context),
+      textDirection: textDirection ?? Directionality.maybeOf(context),
       fit: fit,
       clipBehavior: overflow == Overflow.visible ? Clip.none : clipBehavior,
     );
@@ -3411,7 +3428,7 @@ class Stack extends MultiChildRenderObjectWidget {
     assert(_debugCheckHasDirectionality(context));
     renderObject
       ..alignment = alignment
-      ..textDirection = textDirection ?? Directionality.of(context)
+      ..textDirection = textDirection ?? Directionality.maybeOf(context)
       ..fit = fit
       ..clipBehavior = overflow == Overflow.visible ? Clip.none : clipBehavior;
   }
@@ -3461,7 +3478,7 @@ class IndexedStack extends Stack {
     return RenderIndexedStack(
       index: index,
       alignment: alignment,
-      textDirection: textDirection ?? Directionality.of(context),
+      textDirection: textDirection ?? Directionality.maybeOf(context),
     );
   }
 
@@ -3471,7 +3488,7 @@ class IndexedStack extends Stack {
     renderObject
       ..index = index
       ..alignment = alignment
-      ..textDirection = textDirection ?? Directionality.of(context);
+      ..textDirection = textDirection ?? Directionality.maybeOf(context);
   }
 }
 
@@ -4084,7 +4101,7 @@ class Flex extends MultiChildRenderObjectWidget {
   /// the logic for providing a text direction only when it is necessary.
   @protected
   TextDirection? getEffectiveTextDirection(BuildContext context) {
-    return textDirection ?? (_needTextDirection ? Directionality.of(context) : null);
+    return textDirection ?? (_needTextDirection ? Directionality.maybeOf(context) : null);
   }
 
   @override
@@ -4954,7 +4971,7 @@ class Wrap extends MultiChildRenderObjectWidget {
       runAlignment: runAlignment,
       runSpacing: runSpacing,
       crossAxisAlignment: crossAxisAlignment,
-      textDirection: textDirection ?? Directionality.of(context),
+      textDirection: textDirection ?? Directionality.maybeOf(context),
       verticalDirection: verticalDirection,
       clipBehavior: clipBehavior,
     );
@@ -4969,7 +4986,7 @@ class Wrap extends MultiChildRenderObjectWidget {
       ..runAlignment = runAlignment
       ..runSpacing = runSpacing
       ..crossAxisAlignment = crossAxisAlignment
-      ..textDirection = textDirection ?? Directionality.of(context)
+      ..textDirection = textDirection ?? Directionality.maybeOf(context)
       ..verticalDirection = verticalDirection
       ..clipBehavior = clipBehavior;
   }
@@ -6879,7 +6896,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     if (!containsText)
       return null;
 
-    return Directionality.of(context);
+    return Directionality.maybeOf(context);
   }
 
   @override

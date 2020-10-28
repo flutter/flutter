@@ -169,7 +169,7 @@ void main() {
           child: CircleAvatar(
             child: Builder(
               builder: (BuildContext context) {
-                final MediaQueryData data = MediaQuery.of(context)!;
+                final MediaQueryData data = MediaQuery.of(context);
 
                 // These should not change.
                 expect(data.size, equals(const Size(111.0, 111.0)));

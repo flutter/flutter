@@ -824,7 +824,19 @@ abstract class TextInputClient {
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
 
-  /// Requests that this client perform the private command.
+  /// Request from the input method that this client perform the given private
+  /// command.
+  ///
+  /// This can be used to provide domain-specific features that are only known
+  /// between certain input methods and their clients.
+  ///
+  /// See also:
+  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputConnection#performPrivateCommand(java.lang.String,%20android.os.Bundle)],
+  ///     which is the Android documentation for performPrivateCommand, used to
+  ///     send a command from the input method.
+  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#sendAppPrivateCommand],
+  ///     which is the Android documentation for sendAppPrivateCommand, used to
+  ///     send a command to the input method.
   void performPrivateCommand(String action, Map<String, dynamic> data);
 
   /// Updates the floating cursor position and state.

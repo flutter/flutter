@@ -226,7 +226,7 @@ class DriveCommand extends RunCommandBase {
       await driverService.stop(userIdentifier: userIdentifier, writeSkslOnExit: skslFile);
     }
     if (testResult != 0) {
-      return FlutterCommandResult.fail();
+      throwToolExit(null);
     }
     return FlutterCommandResult.success();
   }
