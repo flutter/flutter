@@ -187,7 +187,8 @@ class ChipThemeData with Diagnosticable {
     this.checkmarkColor,
     this.labelPadding,
     required this.padding,
-    required this.shape,
+    this.side,
+    this.shape,
     required this.labelStyle,
     required this.secondaryLabelStyle,
     required this.brightness,
@@ -198,7 +199,6 @@ class ChipThemeData with Diagnosticable {
        assert(selectedColor != null),
        assert(secondarySelectedColor != null),
        assert(padding != null),
-       assert(shape != null),
        assert(labelStyle != null),
        assert(secondaryLabelStyle != null),
        assert(brightness != null);
@@ -244,7 +244,6 @@ class ChipThemeData with Diagnosticable {
     const int disabledAlpha = 0x0c; // 38% * 12% = 5%
     const int selectAlpha = 0x3d; // 12% + 12% = 24%
     const int textLabelAlpha = 0xde; // 87%
-    const ShapeBorder shape = StadiumBorder();
     const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
 
     primaryColor = primaryColor ?? (brightness == Brightness.light ? Colors.black : Colors.white);
@@ -265,7 +264,6 @@ class ChipThemeData with Diagnosticable {
       selectedColor: selectedColor,
       secondarySelectedColor: secondarySelectedColor,
       padding: padding,
-      shape: shape,
       labelStyle: labelStyle,
       secondaryLabelStyle: secondaryLabelStyle,
       brightness: brightness!,
@@ -350,10 +348,37 @@ class ChipThemeData with Diagnosticable {
   /// Defaults to 4 logical pixels on all sides.
   final EdgeInsetsGeometry padding;
 
+  /// The color and weight of the chip's outline.
+  ///
+  /// If null, the chip defaults to the border side of [shape].
+  ///
+  /// This value is combined with [shape] to create a shape decorated with an
+  /// outline. If it is a [MaterialStateBorderSide],
+  /// [MaterialStateProperty.resolve] is used for the following
+  /// [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.pressed].
+  final BorderSide? side;
+
   /// The border to draw around the chip.
   ///
-  /// Defaults to a [StadiumBorder]. Must not be null.
-  final ShapeBorder shape;
+  /// If null, the chip defaults to a [StadiumBorder].
+  ///
+  /// This shape is combined with [side] to create a shape decorated with an
+  /// outline. If it is a [MaterialStateOutlinedBorder],
+  /// [MaterialStateProperty.resolve] is used for the following
+  /// [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.pressed].
+  final OutlinedBorder? shape;
 
   /// The style to be applied to the chip's label.
   ///
@@ -396,7 +421,8 @@ class ChipThemeData with Diagnosticable {
     Color? checkmarkColor,
     EdgeInsetsGeometry? labelPadding,
     EdgeInsetsGeometry? padding,
-    ShapeBorder? shape,
+    BorderSide? side,
+    OutlinedBorder? shape,
     TextStyle? labelStyle,
     TextStyle? secondaryLabelStyle,
     Brightness? brightness,
@@ -414,6 +440,7 @@ class ChipThemeData with Diagnosticable {
       checkmarkColor: checkmarkColor ?? this.checkmarkColor,
       labelPadding: labelPadding ?? this.labelPadding,
       padding: padding ?? this.padding,
+      side: side ?? this.side,
       shape: shape ?? this.shape,
       labelStyle: labelStyle ?? this.labelStyle,
       secondaryLabelStyle: secondaryLabelStyle ?? this.secondaryLabelStyle,
@@ -443,13 +470,32 @@ class ChipThemeData with Diagnosticable {
       checkmarkColor: Color.lerp(a?.checkmarkColor, b?.checkmarkColor, t),
       labelPadding: EdgeInsetsGeometry.lerp(a?.labelPadding, b?.labelPadding, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t)!,
-      shape: ShapeBorder.lerp(a?.shape, b?.shape, t)!,
+      side: _lerpSides(a?.side, b?.side, t),
+      shape: _lerpShapes(a?.shape, b?.shape, t),
       labelStyle: TextStyle.lerp(a?.labelStyle, b?.labelStyle, t)!,
       secondaryLabelStyle: TextStyle.lerp(a?.secondaryLabelStyle, b?.secondaryLabelStyle, t)!,
       brightness: t < 0.5 ? a?.brightness ?? Brightness.light : b?.brightness ?? Brightness.light,
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       pressElevation: lerpDouble(a?.pressElevation, b?.pressElevation, t),
     );
+  }
+
+  // Special case because BorderSide.lerp() doesn't support null arguments.
+  static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
+    if (b == null)
+      return BorderSide.lerp(BorderSide(width: 0, color: a.color.withAlpha(0)), a, t);
+    return BorderSide.lerp(a, b, t);
+  }
+
+  // TODO(perclasson): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
+  static OutlinedBorder? _lerpShapes(OutlinedBorder? a, OutlinedBorder? b, double t) {
+    if (a == null && b == null)
+      return null;
+    return ShapeBorder.lerp(a, b, t) as OutlinedBorder?;
   }
 
   @override
@@ -465,6 +511,7 @@ class ChipThemeData with Diagnosticable {
       checkmarkColor,
       labelPadding,
       padding,
+      side,
       shape,
       labelStyle,
       secondaryLabelStyle,
@@ -493,6 +540,7 @@ class ChipThemeData with Diagnosticable {
         && other.checkmarkColor == checkmarkColor
         && other.labelPadding == labelPadding
         && other.padding == padding
+        && other.side == side
         && other.shape == shape
         && other.labelStyle == labelStyle
         && other.secondaryLabelStyle == secondaryLabelStyle
@@ -520,6 +568,7 @@ class ChipThemeData with Diagnosticable {
     properties.add(ColorProperty('checkMarkColor', checkmarkColor, defaultValue: defaultData.checkmarkColor));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('labelPadding', labelPadding, defaultValue: defaultData.labelPadding));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultData.padding));
+    properties.add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: defaultData.side));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));
     properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultData.labelStyle));
     properties.add(DiagnosticsProperty<TextStyle>('secondaryLabelStyle', secondaryLabelStyle, defaultValue: defaultData.secondaryLabelStyle));

@@ -683,7 +683,7 @@ void main() {
               extendBody: extendBody,
               body: Builder(
                 builder: (BuildContext context) {
-                  mediaQueryBottom = MediaQuery.of(context)!.padding.bottom;
+                  mediaQueryBottom = MediaQuery.of(context).padding.bottom;
                   return Container(key: bodyKey);
                 },
               ),
@@ -756,7 +756,7 @@ void main() {
                   ),
                   body: Builder(
                     builder: (BuildContext context) {
-                      mediaQueryTop = MediaQuery.of(context)!.padding.top;
+                      mediaQueryTop = MediaQuery.of(context).padding.top;
                       return Container(key: bodyKey);
                     }
                   ),
@@ -1675,7 +1675,7 @@ void main() {
       MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
-            screenWidth = MediaQuery.of(context)!.size.width;
+            screenWidth = MediaQuery.of(context).size.width;
             return Scaffold(
               endDrawer: const Drawer(
                 child: Text('Drawer'),

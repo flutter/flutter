@@ -85,6 +85,16 @@ void main() {
       expect(message.isError, isFalse);
     }, overrides: noColorTerminalOverride);
 
+    testUsingContext('No IDE Validator includes expected installation messages', () async {
+      final ValidationResult result = await NoIdeValidator().validate();
+      expect(result.type, ValidationType.missing);
+
+      expect(
+        result.messages.map((ValidationMessage vm) => vm.message),
+        UserMessages().noIdeInstallationInfo,
+      );
+    }, overrides: noColorTerminalOverride);
+
     testUsingContext('vs code validator when 64bit installed', () async {
       expect(VsCodeValidatorTestTargets.installedWithExtension64bit.title, 'VS Code, 64-bit edition');
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension64bit.validate();

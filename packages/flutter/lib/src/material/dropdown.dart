@@ -456,7 +456,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   }
 
   void _dismiss() {
-    navigator?.removeRoute(this);
+    if (isActive) {
+      navigator?.removeRoute(this);
+    }
   }
 
   double getItemOffset(int index) {
@@ -564,7 +566,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
       route.scrollController = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
     }
 
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection? textDirection = Directionality.maybeOf(context);
     final Widget menu = _DropdownMenu<T>(
       route: route,
       padding: padding.resolve(textDirection),
@@ -1178,7 +1180,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   void _handleTap() {
     final RenderBox itemBox = context.findRenderObject()! as RenderBox;
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection? textDirection = Directionality.maybeOf(context);
     final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown
       ? _kAlignedMenuMargin
       : _kUnalignedMenuMargin;
@@ -1269,7 +1271,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   bool get _enabled => widget.items != null && widget.items!.isNotEmpty && widget.onChanged != null;
 
   Orientation _getOrientation(BuildContext context) {
-    Orientation? result = MediaQuery.of(context, nullOk: true)?.orientation;
+    Orientation? result = MediaQuery.maybeOf(context)?.orientation;
     if (result == null) {
       // If there's no MediaQuery, then use the window aspect to determine
       // orientation.

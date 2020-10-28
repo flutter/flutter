@@ -388,8 +388,8 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData existingMediaQuery = MediaQuery.of(context)!;
-    MediaQueryData newMediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData existingMediaQuery = MediaQuery.of(context);
+    MediaQueryData newMediaQuery = MediaQuery.of(context);
 
     Widget content = _TabSwitchingView(
       currentTabIndex: _controller.index,
