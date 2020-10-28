@@ -360,7 +360,7 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const double splashRadius = 30;
     const Key radioKey = Key('radio');
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp() {
       return MaterialApp(
         home: Material(
           child: Center(
