@@ -1316,6 +1316,7 @@ void main() {
       child: Material(
         child: Center(
           child: InkWell(
+            key: UniqueKey(),
             onLongPress: () { },
             onTap: () { },
             child: const Text('Foo'),
