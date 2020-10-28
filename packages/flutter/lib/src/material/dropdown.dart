@@ -154,7 +154,6 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       dropdownMenuItem.onTap!();
     }
 
-    print('popping');
     Navigator.pop(
       context,
       _DropdownRouteResult<T>(dropdownMenuItem.value),
@@ -1116,7 +1115,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   @override
   void dispose() {
     WidgetsBinding.instance!.removeObserver(this);
-    print('_removeDropdownRoute from dispose');
     _removeDropdownRoute();
     WidgetsBinding.instance!.focusManager.removeHighlightModeListener(_handleFocusHighlightModeChange);
     focusNode!.removeListener(_handleFocusChanged);
@@ -1125,7 +1123,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 
   void _removeDropdownRoute() {
-    print('removing');
     _dropdownRoute?._dismiss();
     _dropdownRoute = null;
     _lastOrientation = null;
@@ -1225,7 +1222,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     );
 
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
-      print('_removeDropdownRoute from route future');
       _removeDropdownRoute();
       if (!mounted || newValue == null)
         return;

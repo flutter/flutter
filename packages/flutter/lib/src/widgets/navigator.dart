@@ -3056,12 +3056,10 @@ class _RouteEntry extends RouteTransitionRecord {
     final Iterable<OverlayEntry> mountedEntries = route.overlayEntries.where((OverlayEntry e) => e.mounted);
 
     if (mountedEntries.isEmpty) {
-      print('direct dispose');
       route.dispose();
     } else {
       int mounted = mountedEntries.length;
       assert(mounted > 0);
-      print('delaying dispose');
       for (final OverlayEntry entry in mountedEntries) {
         late VoidCallback listener;
         listener = () {
@@ -3070,7 +3068,6 @@ class _RouteEntry extends RouteTransitionRecord {
           mounted--;
           entry.removeListener(listener);
           if (mounted == 0) {
-            print('dispose');
             assert(route.overlayEntries.every((OverlayEntry e) => !e.mounted));
             route.dispose();
           }
@@ -4921,7 +4918,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.removeRoute}
   void removeRoute(Route<dynamic> route) {
-    print('removeROute');
     assert(route != null);
     assert(!_debugLocked);
     assert(() {
