@@ -1,4 +1,6 @@
 name: platform_views
+# This package is not intended for consumption on pub.dev.
+publish_to: none
 description: An integration test for embedded platform views
 version: 1.0.0+1
 environment:
