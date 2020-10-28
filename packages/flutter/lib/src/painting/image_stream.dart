@@ -919,11 +919,13 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
       return;
     }
-    // ImageStreamCompleter disposed while waiting for next frame to be decoded.
-    if (!hasListeners) {
-      return;
-    }
     if (_codec!.frameCount == 1) {
+      // ImageStreamCompleter listeners removed while waiting for next frame to
+      // be decoded.
+      // There's no reason to emit the frame without active listeners.
+      if (!hasListeners) {
+        return;
+      }
       // This is not an animated image, just return it and don't schedule more
       // frames.
       _emitFrame(ImageInfo(

@@ -763,7 +763,7 @@ void main() {
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle();
-    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Only passive listeners');
+    expect(SchedulerBinding.instance!.transientCallbackCount, 1);
     await tester.pump();
 
     expect(onImageCount, 1);
