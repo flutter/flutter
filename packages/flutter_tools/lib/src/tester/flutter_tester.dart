@@ -260,6 +260,7 @@ class FlutterTesterDevice extends Device {
   Future<void> dispose() async {
     _logReader?.dispose();
     await _portForwarder?.dispose();
+    _process.kill();
   }
 }
 
