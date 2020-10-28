@@ -1,14 +1,13 @@
 {
   "none": {
     "names": {
-      "domkey": "None",
+      "domkey": null,
       "android": [
         "UNKNOWN"
       ],
       "english": "None",
-      "chromium": "none",
+      "chromium": "None",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -24,7 +23,6 @@
         0
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -33,12 +31,8 @@
       "domkey": "Hyper",
       "android": null,
       "english": "Hyper",
-      "chromium": "hyper",
+      "chromium": "Hyper",
       "glfw": null,
-      "gtk": [
-        "Hyper_L",
-        "Hyper_R"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -52,10 +46,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        65517,
-        65518
-      ],
       "windows": null
     }
   },
@@ -64,12 +54,8 @@
       "domkey": "Super",
       "android": null,
       "english": "Super Key",
-      "chromium": "super",
+      "chromium": "Super",
       "glfw": null,
-      "gtk": [
-        "Super_L",
-        "Super_R"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -83,10 +69,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        65515,
-        65516
-      ],
       "windows": null
     }
   },
@@ -95,9 +77,8 @@
       "domkey": "FnLock",
       "android": null,
       "english": "Fn Lock",
-      "chromium": "fnLock",
+      "chromium": "FnLock",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -111,7 +92,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -122,11 +102,8 @@
         "SUSPEND"
       ],
       "english": "Suspend",
-      "chromium": "suspend",
+      "chromium": "Suspend",
       "glfw": null,
-      "gtk": [
-        "Suspend"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -142,9 +119,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025191
-      ],
       "windows": null
     }
   },
@@ -153,11 +127,8 @@
       "domkey": "Resume",
       "android": null,
       "english": "Resume",
-      "chromium": "resume",
+      "chromium": "Resume",
       "glfw": null,
-      "gtk": [
-        "Resume"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -171,7 +142,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -180,9 +150,8 @@
       "domkey": "Turbo",
       "android": null,
       "english": "Turbo",
-      "chromium": "turbo",
+      "chromium": "Turbo",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -196,7 +165,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -205,9 +173,8 @@
       "domkey": "PrivacyScreenToggle",
       "android": null,
       "english": "Privacy Screen Toggle",
-      "chromium": "privacyScreenToggle",
+      "chromium": "PrivacyScreenToggle",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -221,7 +188,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -232,11 +198,8 @@
         "SLEEP"
       ],
       "english": "Sleep",
-      "chromium": "sleep",
+      "chromium": "Sleep",
       "glfw": null,
-      "gtk": [
-        "Sleep"
-      ],
       "windows": [
         "SLEEP"
       ]
@@ -256,9 +219,6 @@
         223
       ],
       "glfw": null,
-      "gtk": [
-        269025071
-      ],
       "windows": [
         95
       ]
@@ -271,11 +231,8 @@
         "WAKEUP"
       ],
       "english": "Wake Up",
-      "chromium": "wakeUp",
+      "chromium": "WakeUp",
       "glfw": null,
-      "gtk": [
-        "WakeUp"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -293,9 +250,6 @@
         224
       ],
       "glfw": null,
-      "gtk": [
-        269025067
-      ],
       "windows": null
     }
   },
@@ -304,9 +258,8 @@
       "domkey": "DisplayToggleIntExt",
       "android": null,
       "english": "Display Toggle Int Ext",
-      "chromium": "displayToggleIntExt",
+      "chromium": "DisplayToggleIntExt",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -320,7 +273,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -329,9 +281,8 @@
       "domkey": null,
       "android": null,
       "english": "Usb Reserved",
-      "chromium": "usbReserved",
+      "chromium": "UsbReserved",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -345,7 +296,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -354,9 +304,8 @@
       "domkey": null,
       "android": null,
       "english": "Usb Error Roll Over",
-      "chromium": "usbErrorRollOver",
+      "chromium": "UsbErrorRollOver",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -370,7 +319,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -379,9 +327,8 @@
       "domkey": null,
       "android": null,
       "english": "Usb Post Fail",
-      "chromium": "usbPostFail",
+      "chromium": "UsbPostFail",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -395,7 +342,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -404,9 +350,8 @@
       "domkey": null,
       "android": null,
       "english": "Usb Error Undefined",
-      "chromium": "usbErrorUndefined",
+      "chromium": "UsbErrorUndefined",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -420,7 +365,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -431,11 +375,8 @@
         "A"
       ],
       "english": "Key A",
-      "chromium": "usA",
+      "chromium": "UsA",
       "glfw": [
-        "A"
-      ],
-      "gtk": [
         "A"
       ],
       "windows": [
@@ -459,9 +400,6 @@
       "glfw": [
         65
       ],
-      "gtk": [
-        65
-      ],
       "windows": [
         65
       ]
@@ -474,11 +412,8 @@
         "B"
       ],
       "english": "Key B",
-      "chromium": "usB",
+      "chromium": "UsB",
       "glfw": [
-        "B"
-      ],
-      "gtk": [
         "B"
       ],
       "windows": [
@@ -502,9 +437,6 @@
       "glfw": [
         66
       ],
-      "gtk": [
-        66
-      ],
       "windows": [
         66
       ]
@@ -517,11 +449,8 @@
         "C"
       ],
       "english": "Key C",
-      "chromium": "usC",
+      "chromium": "UsC",
       "glfw": [
-        "C"
-      ],
-      "gtk": [
         "C"
       ],
       "windows": [
@@ -545,9 +474,6 @@
       "glfw": [
         67
       ],
-      "gtk": [
-        67
-      ],
       "windows": [
         67
       ]
@@ -560,11 +486,8 @@
         "D"
       ],
       "english": "Key D",
-      "chromium": "usD",
+      "chromium": "UsD",
       "glfw": [
-        "D"
-      ],
-      "gtk": [
         "D"
       ],
       "windows": [
@@ -588,9 +511,6 @@
       "glfw": [
         68
       ],
-      "gtk": [
-        68
-      ],
       "windows": [
         68
       ]
@@ -603,11 +523,8 @@
         "E"
       ],
       "english": "Key E",
-      "chromium": "usE",
+      "chromium": "UsE",
       "glfw": [
-        "E"
-      ],
-      "gtk": [
         "E"
       ],
       "windows": [
@@ -631,9 +548,6 @@
       "glfw": [
         69
       ],
-      "gtk": [
-        69
-      ],
       "windows": [
         69
       ]
@@ -646,11 +560,8 @@
         "F"
       ],
       "english": "Key F",
-      "chromium": "usF",
+      "chromium": "UsF",
       "glfw": [
-        "F"
-      ],
-      "gtk": [
         "F"
       ],
       "windows": [
@@ -674,9 +585,6 @@
       "glfw": [
         70
       ],
-      "gtk": [
-        70
-      ],
       "windows": [
         70
       ]
@@ -689,11 +597,8 @@
         "G"
       ],
       "english": "Key G",
-      "chromium": "usG",
+      "chromium": "UsG",
       "glfw": [
-        "G"
-      ],
-      "gtk": [
         "G"
       ],
       "windows": [
@@ -717,9 +622,6 @@
       "glfw": [
         71
       ],
-      "gtk": [
-        71
-      ],
       "windows": [
         71
       ]
@@ -732,11 +634,8 @@
         "H"
       ],
       "english": "Key H",
-      "chromium": "usH",
+      "chromium": "UsH",
       "glfw": [
-        "H"
-      ],
-      "gtk": [
         "H"
       ],
       "windows": [
@@ -760,9 +659,6 @@
       "glfw": [
         72
       ],
-      "gtk": [
-        72
-      ],
       "windows": [
         72
       ]
@@ -775,11 +671,8 @@
         "I"
       ],
       "english": "Key I",
-      "chromium": "usI",
+      "chromium": "UsI",
       "glfw": [
-        "I"
-      ],
-      "gtk": [
         "I"
       ],
       "windows": [
@@ -803,9 +696,6 @@
       "glfw": [
         73
       ],
-      "gtk": [
-        73
-      ],
       "windows": [
         73
       ]
@@ -818,11 +708,8 @@
         "J"
       ],
       "english": "Key J",
-      "chromium": "usJ",
+      "chromium": "UsJ",
       "glfw": [
-        "J"
-      ],
-      "gtk": [
         "J"
       ],
       "windows": [
@@ -846,9 +733,6 @@
       "glfw": [
         74
       ],
-      "gtk": [
-        74
-      ],
       "windows": [
         74
       ]
@@ -861,11 +745,8 @@
         "K"
       ],
       "english": "Key K",
-      "chromium": "usK",
+      "chromium": "UsK",
       "glfw": [
-        "K"
-      ],
-      "gtk": [
         "K"
       ],
       "windows": [
@@ -889,9 +770,6 @@
       "glfw": [
         75
       ],
-      "gtk": [
-        75
-      ],
       "windows": [
         75
       ]
@@ -904,11 +782,8 @@
         "L"
       ],
       "english": "Key L",
-      "chromium": "usL",
+      "chromium": "UsL",
       "glfw": [
-        "L"
-      ],
-      "gtk": [
         "L"
       ],
       "windows": [
@@ -932,9 +807,6 @@
       "glfw": [
         76
       ],
-      "gtk": [
-        76
-      ],
       "windows": [
         76
       ]
@@ -947,11 +819,8 @@
         "M"
       ],
       "english": "Key M",
-      "chromium": "usM",
+      "chromium": "UsM",
       "glfw": [
-        "M"
-      ],
-      "gtk": [
         "M"
       ],
       "windows": [
@@ -975,9 +844,6 @@
       "glfw": [
         77
       ],
-      "gtk": [
-        77
-      ],
       "windows": [
         77
       ]
@@ -990,11 +856,8 @@
         "N"
       ],
       "english": "Key N",
-      "chromium": "usN",
+      "chromium": "UsN",
       "glfw": [
-        "N"
-      ],
-      "gtk": [
         "N"
       ],
       "windows": [
@@ -1018,9 +881,6 @@
       "glfw": [
         78
       ],
-      "gtk": [
-        78
-      ],
       "windows": [
         78
       ]
@@ -1033,11 +893,8 @@
         "O"
       ],
       "english": "Key O",
-      "chromium": "usO",
+      "chromium": "UsO",
       "glfw": [
-        "O"
-      ],
-      "gtk": [
         "O"
       ],
       "windows": [
@@ -1061,9 +918,6 @@
       "glfw": [
         79
       ],
-      "gtk": [
-        79
-      ],
       "windows": [
         79
       ]
@@ -1076,11 +930,8 @@
         "P"
       ],
       "english": "Key P",
-      "chromium": "usP",
+      "chromium": "UsP",
       "glfw": [
-        "P"
-      ],
-      "gtk": [
         "P"
       ],
       "windows": [
@@ -1104,9 +955,6 @@
       "glfw": [
         80
       ],
-      "gtk": [
-        80
-      ],
       "windows": [
         80
       ]
@@ -1119,11 +967,8 @@
         "Q"
       ],
       "english": "Key Q",
-      "chromium": "usQ",
+      "chromium": "UsQ",
       "glfw": [
-        "Q"
-      ],
-      "gtk": [
         "Q"
       ],
       "windows": [
@@ -1147,9 +992,6 @@
       "glfw": [
         81
       ],
-      "gtk": [
-        81
-      ],
       "windows": [
         81
       ]
@@ -1162,11 +1004,8 @@
         "R"
       ],
       "english": "Key R",
-      "chromium": "usR",
+      "chromium": "UsR",
       "glfw": [
-        "R"
-      ],
-      "gtk": [
         "R"
       ],
       "windows": [
@@ -1190,9 +1029,6 @@
       "glfw": [
         82
       ],
-      "gtk": [
-        82
-      ],
       "windows": [
         82
       ]
@@ -1205,11 +1041,8 @@
         "S"
       ],
       "english": "Key S",
-      "chromium": "usS",
+      "chromium": "UsS",
       "glfw": [
-        "S"
-      ],
-      "gtk": [
         "S"
       ],
       "windows": [
@@ -1233,9 +1066,6 @@
       "glfw": [
         83
       ],
-      "gtk": [
-        83
-      ],
       "windows": [
         83
       ]
@@ -1248,11 +1078,8 @@
         "T"
       ],
       "english": "Key T",
-      "chromium": "usT",
+      "chromium": "UsT",
       "glfw": [
-        "T"
-      ],
-      "gtk": [
         "T"
       ],
       "windows": [
@@ -1276,9 +1103,6 @@
       "glfw": [
         84
       ],
-      "gtk": [
-        84
-      ],
       "windows": [
         84
       ]
@@ -1291,11 +1115,8 @@
         "U"
       ],
       "english": "Key U",
-      "chromium": "usU",
+      "chromium": "UsU",
       "glfw": [
-        "U"
-      ],
-      "gtk": [
         "U"
       ],
       "windows": [
@@ -1319,9 +1140,6 @@
       "glfw": [
         85
       ],
-      "gtk": [
-        85
-      ],
       "windows": [
         85
       ]
@@ -1334,11 +1152,8 @@
         "V"
       ],
       "english": "Key V",
-      "chromium": "usV",
+      "chromium": "UsV",
       "glfw": [
-        "V"
-      ],
-      "gtk": [
         "V"
       ],
       "windows": [
@@ -1362,9 +1177,6 @@
       "glfw": [
         86
       ],
-      "gtk": [
-        86
-      ],
       "windows": [
         86
       ]
@@ -1377,11 +1189,8 @@
         "W"
       ],
       "english": "Key W",
-      "chromium": "usW",
+      "chromium": "UsW",
       "glfw": [
-        "W"
-      ],
-      "gtk": [
         "W"
       ],
       "windows": [
@@ -1405,9 +1214,6 @@
       "glfw": [
         87
       ],
-      "gtk": [
-        87
-      ],
       "windows": [
         87
       ]
@@ -1420,11 +1226,8 @@
         "X"
       ],
       "english": "Key X",
-      "chromium": "usX",
+      "chromium": "UsX",
       "glfw": [
-        "X"
-      ],
-      "gtk": [
         "X"
       ],
       "windows": [
@@ -1448,9 +1251,6 @@
       "glfw": [
         88
       ],
-      "gtk": [
-        88
-      ],
       "windows": [
         88
       ]
@@ -1463,11 +1263,8 @@
         "Y"
       ],
       "english": "Key Y",
-      "chromium": "usY",
+      "chromium": "UsY",
       "glfw": [
-        "Y"
-      ],
-      "gtk": [
         "Y"
       ],
       "windows": [
@@ -1491,9 +1288,6 @@
       "glfw": [
         89
       ],
-      "gtk": [
-        89
-      ],
       "windows": [
         89
       ]
@@ -1506,11 +1300,8 @@
         "Z"
       ],
       "english": "Key Z",
-      "chromium": "usZ",
+      "chromium": "UsZ",
       "glfw": [
-        "Z"
-      ],
-      "gtk": [
         "Z"
       ],
       "windows": [
@@ -1534,9 +1325,6 @@
       "glfw": [
         90
       ],
-      "gtk": [
-        90
-      ],
       "windows": [
         90
       ]
@@ -1549,11 +1337,8 @@
         "1"
       ],
       "english": "Digit 1",
-      "chromium": "digit1",
+      "chromium": "Digit1",
       "glfw": [
-        "1"
-      ],
-      "gtk": [
         "1"
       ],
       "windows": null
@@ -1575,9 +1360,6 @@
       "glfw": [
         49
       ],
-      "gtk": [
-        49
-      ],
       "windows": null
     }
   },
@@ -1588,11 +1370,8 @@
         "2"
       ],
       "english": "Digit 2",
-      "chromium": "digit2",
+      "chromium": "Digit2",
       "glfw": [
-        "2"
-      ],
-      "gtk": [
         "2"
       ],
       "windows": null
@@ -1614,9 +1393,6 @@
       "glfw": [
         50
       ],
-      "gtk": [
-        50
-      ],
       "windows": null
     }
   },
@@ -1627,11 +1403,8 @@
         "3"
       ],
       "english": "Digit 3",
-      "chromium": "digit3",
+      "chromium": "Digit3",
       "glfw": [
-        "3"
-      ],
-      "gtk": [
         "3"
       ],
       "windows": null
@@ -1653,9 +1426,6 @@
       "glfw": [
         51
       ],
-      "gtk": [
-        51
-      ],
       "windows": null
     }
   },
@@ -1666,11 +1436,8 @@
         "4"
       ],
       "english": "Digit 4",
-      "chromium": "digit4",
+      "chromium": "Digit4",
       "glfw": [
-        "4"
-      ],
-      "gtk": [
         "4"
       ],
       "windows": null
@@ -1692,9 +1459,6 @@
       "glfw": [
         52
       ],
-      "gtk": [
-        52
-      ],
       "windows": null
     }
   },
@@ -1705,11 +1469,8 @@
         "5"
       ],
       "english": "Digit 5",
-      "chromium": "digit5",
+      "chromium": "Digit5",
       "glfw": [
-        "5"
-      ],
-      "gtk": [
         "5"
       ],
       "windows": null
@@ -1731,9 +1492,6 @@
       "glfw": [
         53
       ],
-      "gtk": [
-        53
-      ],
       "windows": null
     }
   },
@@ -1744,11 +1502,8 @@
         "6"
       ],
       "english": "Digit 6",
-      "chromium": "digit6",
+      "chromium": "Digit6",
       "glfw": [
-        "6"
-      ],
-      "gtk": [
         "6"
       ],
       "windows": null
@@ -1770,9 +1525,6 @@
       "glfw": [
         54
       ],
-      "gtk": [
-        54
-      ],
       "windows": null
     }
   },
@@ -1783,11 +1535,8 @@
         "7"
       ],
       "english": "Digit 7",
-      "chromium": "digit7",
+      "chromium": "Digit7",
       "glfw": [
-        "7"
-      ],
-      "gtk": [
         "7"
       ],
       "windows": null
@@ -1809,9 +1558,6 @@
       "glfw": [
         55
       ],
-      "gtk": [
-        55
-      ],
       "windows": null
     }
   },
@@ -1822,11 +1568,8 @@
         "8"
       ],
       "english": "Digit 8",
-      "chromium": "digit8",
+      "chromium": "Digit8",
       "glfw": [
-        "8"
-      ],
-      "gtk": [
         "8"
       ],
       "windows": null
@@ -1848,9 +1591,6 @@
       "glfw": [
         56
       ],
-      "gtk": [
-        56
-      ],
       "windows": null
     }
   },
@@ -1861,11 +1601,8 @@
         "9"
       ],
       "english": "Digit 9",
-      "chromium": "digit9",
+      "chromium": "Digit9",
       "glfw": [
-        "9"
-      ],
-      "gtk": [
         "9"
       ],
       "windows": null
@@ -1887,9 +1624,6 @@
       "glfw": [
         57
       ],
-      "gtk": [
-        57
-      ],
       "windows": null
     }
   },
@@ -1900,11 +1634,8 @@
         "0"
       ],
       "english": "Digit 0",
-      "chromium": "digit0",
+      "chromium": "Digit0",
       "glfw": [
-        "0"
-      ],
-      "gtk": [
         "0"
       ],
       "windows": null
@@ -1926,9 +1657,6 @@
       "glfw": [
         48
       ],
-      "gtk": [
-        48
-      ],
       "windows": null
     }
   },
@@ -1939,14 +1667,9 @@
         "ENTER"
       ],
       "english": "Enter",
-      "chromium": "enter",
+      "chromium": "Enter",
       "glfw": [
         "ENTER"
-      ],
-      "gtk": [
-        "Return",
-        "Enter",
-        "ISO_Enter"
       ],
       "windows": [
         "RETURN"
@@ -1969,10 +1692,6 @@
       "glfw": [
         257
       ],
-      "gtk": [
-        65293,
-        65076
-      ],
       "windows": [
         13
       ]
@@ -1985,12 +1704,9 @@
         "ESCAPE"
       ],
       "english": "Escape",
-      "chromium": "escape",
+      "chromium": "Escape",
       "glfw": [
         "ESCAPE"
-      ],
-      "gtk": [
-        "Escape"
       ],
       "windows": [
         "ESCAPE"
@@ -2013,9 +1729,6 @@
       "glfw": [
         256
       ],
-      "gtk": [
-        65307
-      ],
       "windows": [
         27
       ]
@@ -2028,12 +1741,9 @@
         "DEL"
       ],
       "english": "Backspace",
-      "chromium": "backspace",
+      "chromium": "Backspace",
       "glfw": [
         "BACKSPACE"
-      ],
-      "gtk": [
-        "BackSpace"
       ],
       "windows": [
         "BACK"
@@ -2056,9 +1766,6 @@
       "glfw": [
         259
       ],
-      "gtk": [
-        65288
-      ],
       "windows": [
         8
       ]
@@ -2071,14 +1778,9 @@
         "TAB"
       ],
       "english": "Tab",
-      "chromium": "tab",
+      "chromium": "Tab",
       "glfw": [
         "TAB"
-      ],
-      "gtk": [
-        "Tab",
-        "KP_Tab",
-        "ISO_Left_Tab"
       ],
       "windows": [
         "TAB"
@@ -2101,11 +1803,6 @@
       "glfw": [
         258
       ],
-      "gtk": [
-        65289,
-        65417,
-        65056
-      ],
       "windows": [
         9
       ]
@@ -2118,13 +1815,9 @@
         "SPACE"
       ],
       "english": "Space",
-      "chromium": "space",
+      "chromium": "Space",
       "glfw": [
         "SPACE"
-      ],
-      "gtk": [
-        "space",
-        "KP_Space"
       ],
       "windows": [
         "SPACE"
@@ -2147,10 +1840,6 @@
       "glfw": [
         32
       ],
-      "gtk": [
-        32,
-        65408
-      ],
       "windows": [
         32
       ]
@@ -2163,12 +1852,9 @@
         "MINUS"
       ],
       "english": "Minus",
-      "chromium": "minus",
+      "chromium": "Minus",
       "glfw": [
         "MINUS"
-      ],
-      "gtk": [
-        "minus"
       ],
       "windows": [
         "OEM_MINUS"
@@ -2191,9 +1877,6 @@
       "glfw": [
         45
       ],
-      "gtk": [
-        45
-      ],
       "windows": [
         189
       ]
@@ -2206,12 +1889,9 @@
         "EQUALS"
       ],
       "english": "Equal",
-      "chromium": "equal",
+      "chromium": "Equal",
       "glfw": [
         "EQUAL"
-      ],
-      "gtk": [
-        "equal"
       ],
       "windows": [
         "OEM_PLUS"
@@ -2234,9 +1914,6 @@
       "glfw": [
         61
       ],
-      "gtk": [
-        61
-      ],
       "windows": [
         187
       ]
@@ -2249,12 +1926,9 @@
         "LEFT_BRACKET"
       ],
       "english": "Bracket Left",
-      "chromium": "bracketLeft",
+      "chromium": "BracketLeft",
       "glfw": [
         "LEFT_BRACKET"
-      ],
-      "gtk": [
-        "bracketleft"
       ],
       "windows": [
         "OEM_4"
@@ -2277,9 +1951,6 @@
       "glfw": [
         91
       ],
-      "gtk": [
-        91
-      ],
       "windows": [
         219
       ]
@@ -2292,12 +1963,9 @@
         "RIGHT_BRACKET"
       ],
       "english": "Bracket Right",
-      "chromium": "bracketRight",
+      "chromium": "BracketRight",
       "glfw": [
         "RIGHT_BRACKET"
-      ],
-      "gtk": [
-        "bracketright"
       ],
       "windows": [
         "OEM_6"
@@ -2320,9 +1988,6 @@
       "glfw": [
         93
       ],
-      "gtk": [
-        93
-      ],
       "windows": [
         221
       ]
@@ -2335,12 +2000,9 @@
         "BACKSLASH"
       ],
       "english": "Backslash",
-      "chromium": "backslash",
+      "chromium": "Backslash",
       "glfw": [
         "BACKSLASH"
-      ],
-      "gtk": [
-        "backslash"
       ],
       "windows": [
         "OEM_5"
@@ -2364,9 +2026,6 @@
       "glfw": [
         92
       ],
-      "gtk": [
-        92
-      ],
       "windows": [
         220
       ]
@@ -2379,12 +2038,9 @@
         "SEMICOLON"
       ],
       "english": "Semicolon",
-      "chromium": "semicolon",
+      "chromium": "Semicolon",
       "glfw": [
         "SEMICOLON"
-      ],
-      "gtk": [
-        "semicolon"
       ],
       "windows": [
         "OEM_1"
@@ -2407,9 +2063,6 @@
       "glfw": [
         59
       ],
-      "gtk": [
-        59
-      ],
       "windows": [
         186
       ]
@@ -2422,12 +2075,9 @@
         "APOSTROPHE"
       ],
       "english": "Quote",
-      "chromium": "quote",
+      "chromium": "Quote",
       "glfw": [
         "APOSTROPHE"
-      ],
-      "gtk": [
-        "apostrophe"
       ],
       "windows": [
         "OEM_7"
@@ -2450,9 +2100,6 @@
       "glfw": [
         39
       ],
-      "gtk": [
-        39
-      ],
       "windows": [
         222
       ]
@@ -2465,12 +2112,9 @@
         "GRAVE"
       ],
       "english": "Backquote",
-      "chromium": "backquote",
+      "chromium": "Backquote",
       "glfw": [
         "GRAVE_ACCENT"
-      ],
-      "gtk": [
-        "quoteleft"
       ],
       "windows": [
         "OEM_3"
@@ -2493,9 +2137,6 @@
       "glfw": [
         96
       ],
-      "gtk": [
-        96
-      ],
       "windows": [
         192
       ]
@@ -2508,12 +2149,9 @@
         "COMMA"
       ],
       "english": "Comma",
-      "chromium": "comma",
+      "chromium": "Comma",
       "glfw": [
         "COMMA"
-      ],
-      "gtk": [
-        "comma"
       ],
       "windows": [
         "OEM_COMMA"
@@ -2536,9 +2174,6 @@
       "glfw": [
         44
       ],
-      "gtk": [
-        44
-      ],
       "windows": [
         188
       ]
@@ -2551,12 +2186,9 @@
         "PERIOD"
       ],
       "english": "Period",
-      "chromium": "period",
+      "chromium": "Period",
       "glfw": [
         "PERIOD"
-      ],
-      "gtk": [
-        "period"
       ],
       "windows": [
         "OEM_PERIOD"
@@ -2579,9 +2211,6 @@
       "glfw": [
         46
       ],
-      "gtk": [
-        46
-      ],
       "windows": [
         190
       ]
@@ -2594,12 +2223,9 @@
         "SLASH"
       ],
       "english": "Slash",
-      "chromium": "slash",
+      "chromium": "Slash",
       "glfw": [
         "SLASH"
-      ],
-      "gtk": [
-        "slash"
       ],
       "windows": [
         "OEM_2"
@@ -2622,9 +2248,6 @@
       "glfw": [
         47
       ],
-      "gtk": [
-        47
-      ],
       "windows": [
         191
       ]
@@ -2637,12 +2260,9 @@
         "CAPS_LOCK"
       ],
       "english": "Caps Lock",
-      "chromium": "capsLock",
+      "chromium": "CapsLock",
       "glfw": [
         "CAPS_LOCK"
-      ],
-      "gtk": [
-        "Caps_Lock"
       ],
       "windows": [
         "CAPITAL"
@@ -2665,9 +2285,6 @@
       "glfw": [
         280
       ],
-      "gtk": [
-        65509
-      ],
       "windows": [
         20
       ]
@@ -2680,13 +2297,9 @@
         "F1"
       ],
       "english": "F1",
-      "chromium": "f1",
+      "chromium": "F1",
       "glfw": [
         "F1"
-      ],
-      "gtk": [
-        "F1",
-        "KP_F1"
       ],
       "windows": [
         "F1"
@@ -2709,10 +2322,6 @@
       "glfw": [
         290
       ],
-      "gtk": [
-        65470,
-        65425
-      ],
       "windows": [
         112
       ]
@@ -2725,13 +2334,9 @@
         "F2"
       ],
       "english": "F2",
-      "chromium": "f2",
+      "chromium": "F2",
       "glfw": [
         "F2"
-      ],
-      "gtk": [
-        "F2",
-        "KP_F2"
       ],
       "windows": [
         "F2"
@@ -2754,10 +2359,6 @@
       "glfw": [
         291
       ],
-      "gtk": [
-        65471,
-        65426
-      ],
       "windows": [
         113
       ]
@@ -2770,13 +2371,9 @@
         "F3"
       ],
       "english": "F3",
-      "chromium": "f3",
+      "chromium": "F3",
       "glfw": [
         "F3"
-      ],
-      "gtk": [
-        "F3",
-        "KP_F3"
       ],
       "windows": [
         "F3"
@@ -2799,10 +2396,6 @@
       "glfw": [
         292
       ],
-      "gtk": [
-        65472,
-        65427
-      ],
       "windows": [
         114
       ]
@@ -2815,13 +2408,9 @@
         "F4"
       ],
       "english": "F4",
-      "chromium": "f4",
+      "chromium": "F4",
       "glfw": [
         "F4"
-      ],
-      "gtk": [
-        "F4",
-        "KP_F4"
       ],
       "windows": [
         "F4"
@@ -2844,10 +2433,6 @@
       "glfw": [
         293
       ],
-      "gtk": [
-        65473,
-        65428
-      ],
       "windows": [
         115
       ]
@@ -2860,11 +2445,8 @@
         "F5"
       ],
       "english": "F5",
-      "chromium": "f5",
+      "chromium": "F5",
       "glfw": [
-        "F5"
-      ],
-      "gtk": [
         "F5"
       ],
       "windows": [
@@ -2888,9 +2470,6 @@
       "glfw": [
         294
       ],
-      "gtk": [
-        65474
-      ],
       "windows": [
         116
       ]
@@ -2903,11 +2482,8 @@
         "F6"
       ],
       "english": "F6",
-      "chromium": "f6",
+      "chromium": "F6",
       "glfw": [
-        "F6"
-      ],
-      "gtk": [
         "F6"
       ],
       "windows": [
@@ -2931,9 +2507,6 @@
       "glfw": [
         295
       ],
-      "gtk": [
-        65475
-      ],
       "windows": [
         117
       ]
@@ -2946,11 +2519,8 @@
         "F7"
       ],
       "english": "F7",
-      "chromium": "f7",
+      "chromium": "F7",
       "glfw": [
-        "F7"
-      ],
-      "gtk": [
         "F7"
       ],
       "windows": [
@@ -2974,9 +2544,6 @@
       "glfw": [
         296
       ],
-      "gtk": [
-        65476
-      ],
       "windows": [
         118
       ]
@@ -2989,11 +2556,8 @@
         "F8"
       ],
       "english": "F8",
-      "chromium": "f8",
+      "chromium": "F8",
       "glfw": [
-        "F8"
-      ],
-      "gtk": [
         "F8"
       ],
       "windows": [
@@ -3017,9 +2581,6 @@
       "glfw": [
         297
       ],
-      "gtk": [
-        65477
-      ],
       "windows": [
         119
       ]
@@ -3032,11 +2593,8 @@
         "F9"
       ],
       "english": "F9",
-      "chromium": "f9",
+      "chromium": "F9",
       "glfw": [
-        "F9"
-      ],
-      "gtk": [
         "F9"
       ],
       "windows": [
@@ -3060,9 +2618,6 @@
       "glfw": [
         298
       ],
-      "gtk": [
-        65478
-      ],
       "windows": [
         120
       ]
@@ -3075,11 +2630,8 @@
         "F10"
       ],
       "english": "F10",
-      "chromium": "f10",
+      "chromium": "F10",
       "glfw": [
-        "F10"
-      ],
-      "gtk": [
         "F10"
       ],
       "windows": [
@@ -3103,9 +2655,6 @@
       "glfw": [
         299
       ],
-      "gtk": [
-        65479
-      ],
       "windows": [
         121
       ]
@@ -3118,11 +2667,8 @@
         "F11"
       ],
       "english": "F11",
-      "chromium": "f11",
+      "chromium": "F11",
       "glfw": [
-        "F11"
-      ],
-      "gtk": [
         "F11"
       ],
       "windows": [
@@ -3146,9 +2692,6 @@
       "glfw": [
         300
       ],
-      "gtk": [
-        65480
-      ],
       "windows": [
         122
       ]
@@ -3161,11 +2704,8 @@
         "F12"
       ],
       "english": "F12",
-      "chromium": "f12",
+      "chromium": "F12",
       "glfw": [
-        "F12"
-      ],
-      "gtk": [
         "F12"
       ],
       "windows": [
@@ -3189,9 +2729,6 @@
       "glfw": [
         301
       ],
-      "gtk": [
-        65481
-      ],
       "windows": [
         123
       ]
@@ -3204,12 +2741,9 @@
         "SYSRQ"
       ],
       "english": "Print Screen",
-      "chromium": "printScreen",
+      "chromium": "PrintScreen",
       "glfw": [
         "PRINT_SCREEN"
-      ],
-      "gtk": [
-        "3270_PrintScreen"
       ],
       "windows": null
     },
@@ -3230,9 +2764,6 @@
       "glfw": [
         283
       ],
-      "gtk": [
-        64797
-      ],
       "windows": null
     }
   },
@@ -3243,11 +2774,8 @@
         "SCROLL_LOCK"
       ],
       "english": "Scroll Lock",
-      "chromium": "scrollLock",
+      "chromium": "ScrollLock",
       "glfw": null,
-      "gtk": [
-        "Scroll_Lock"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -3265,9 +2793,6 @@
         116
       ],
       "glfw": null,
-      "gtk": [
-        65300
-      ],
       "windows": null
     }
   },
@@ -3278,12 +2803,9 @@
         "BREAK"
       ],
       "english": "Pause",
-      "chromium": "pause",
+      "chromium": "Pause",
       "glfw": [
         "PAUSE"
-      ],
-      "gtk": [
-        "Pause"
       ],
       "windows": [
         "PAUSE"
@@ -3307,9 +2829,6 @@
       "glfw": [
         284
       ],
-      "gtk": [
-        65299
-      ],
       "windows": [
         19
       ]
@@ -3322,13 +2841,9 @@
         "INSERT"
       ],
       "english": "Insert",
-      "chromium": "insert",
+      "chromium": "Insert",
       "glfw": [
         "INSERT"
-      ],
-      "gtk": [
-        "Insert",
-        "KP_Insert"
       ],
       "windows": [
         "INSERT"
@@ -3351,10 +2866,6 @@
       "glfw": [
         260
       ],
-      "gtk": [
-        65379,
-        65438
-      ],
       "windows": [
         45
       ]
@@ -3367,13 +2878,9 @@
         "MOVE_HOME"
       ],
       "english": "Home",
-      "chromium": "home",
+      "chromium": "Home",
       "glfw": [
         "HOME"
-      ],
-      "gtk": [
-        "Home",
-        "KP_Home"
       ],
       "windows": [
         "HOME"
@@ -3396,10 +2903,6 @@
       "glfw": [
         268
       ],
-      "gtk": [
-        65360,
-        65429
-      ],
       "windows": [
         36
       ]
@@ -3412,13 +2915,9 @@
         "PAGE_UP"
       ],
       "english": "Page Up",
-      "chromium": "pageUp",
+      "chromium": "PageUp",
       "glfw": [
         "PAGE_UP"
-      ],
-      "gtk": [
-        "Page_Up",
-        "KP_Page_Up"
       ],
       "windows": null
     },
@@ -3440,10 +2939,6 @@
       "glfw": [
         266
       ],
-      "gtk": [
-        65365,
-        65434
-      ],
       "windows": null
     }
   },
@@ -3454,13 +2949,9 @@
         "FORWARD_DEL"
       ],
       "english": "Delete",
-      "chromium": "del",
+      "chromium": "Del",
       "glfw": [
         "DELETE"
-      ],
-      "gtk": [
-        "Delete",
-        "KP_Delete"
       ],
       "windows": [
         "DELETE"
@@ -3483,10 +2974,6 @@
       "glfw": [
         261
       ],
-      "gtk": [
-        65535,
-        65439
-      ],
       "windows": [
         46
       ]
@@ -3499,13 +2986,9 @@
         "MOVE_END"
       ],
       "english": "End",
-      "chromium": "end",
+      "chromium": "End",
       "glfw": [
         "END"
-      ],
-      "gtk": [
-        "End",
-        "KP_End"
       ],
       "windows": [
         "END"
@@ -3528,10 +3011,6 @@
       "glfw": [
         269
       ],
-      "gtk": [
-        65367,
-        65436
-      ],
       "windows": [
         35
       ]
@@ -3544,13 +3023,9 @@
         "PAGE_DOWN"
       ],
       "english": "Page Down",
-      "chromium": "pageDown",
+      "chromium": "PageDown",
       "glfw": [
         "PAGE_DOWN"
-      ],
-      "gtk": [
-        "Page_Down",
-        "KP_Page_Down"
       ],
       "windows": null
     },
@@ -3572,10 +3047,6 @@
       "glfw": [
         267
       ],
-      "gtk": [
-        65366,
-        65435
-      ],
       "windows": null
     }
   },
@@ -3586,13 +3057,9 @@
         "DPAD_RIGHT"
       ],
       "english": "Arrow Right",
-      "chromium": "arrowRight",
+      "chromium": "ArrowRight",
       "glfw": [
         "RIGHT"
-      ],
-      "gtk": [
-        "Right",
-        "KP_Right"
       ],
       "windows": [
         "RIGHT"
@@ -3615,10 +3082,6 @@
       "glfw": [
         262
       ],
-      "gtk": [
-        65363,
-        65432
-      ],
       "windows": [
         39
       ]
@@ -3631,13 +3094,9 @@
         "DPAD_LEFT"
       ],
       "english": "Arrow Left",
-      "chromium": "arrowLeft",
+      "chromium": "ArrowLeft",
       "glfw": [
         "LEFT"
-      ],
-      "gtk": [
-        "Left",
-        "KP_Left"
       ],
       "windows": [
         "LEFT"
@@ -3660,10 +3119,6 @@
       "glfw": [
         263
       ],
-      "gtk": [
-        65361,
-        65430
-      ],
       "windows": [
         37
       ]
@@ -3676,13 +3131,9 @@
         "DPAD_DOWN"
       ],
       "english": "Arrow Down",
-      "chromium": "arrowDown",
+      "chromium": "ArrowDown",
       "glfw": [
         "DOWN"
-      ],
-      "gtk": [
-        "Down",
-        "KP_Down"
       ],
       "windows": [
         "DOWN"
@@ -3705,10 +3156,6 @@
       "glfw": [
         264
       ],
-      "gtk": [
-        65364,
-        65433
-      ],
       "windows": [
         40
       ]
@@ -3721,13 +3168,9 @@
         "DPAD_UP"
       ],
       "english": "Arrow Up",
-      "chromium": "arrowUp",
+      "chromium": "ArrowUp",
       "glfw": [
         "UP"
-      ],
-      "gtk": [
-        "Up",
-        "KP_Up"
       ],
       "windows": [
         "UP"
@@ -3750,10 +3193,6 @@
       "glfw": [
         265
       ],
-      "gtk": [
-        65362,
-        65431
-      ],
       "windows": [
         38
       ]
@@ -3766,12 +3205,9 @@
         "NUM_LOCK"
       ],
       "english": "Num Lock",
-      "chromium": "numLock",
+      "chromium": "NumLock",
       "glfw": [
         "NUM_LOCK"
-      ],
-      "gtk": [
-        "Num_Lock"
       ],
       "windows": null
     },
@@ -3792,9 +3228,6 @@
       "glfw": [
         282
       ],
-      "gtk": [
-        65407
-      ],
       "windows": null
     }
   },
@@ -3805,12 +3238,9 @@
         "NUMPAD_DIVIDE"
       ],
       "english": "Numpad Divide",
-      "chromium": "numpadDivide",
+      "chromium": "NumpadDivide",
       "glfw": [
         "KP_DIVIDE"
-      ],
-      "gtk": [
-        "KP_Divide"
       ],
       "windows": [
         "DIVIDE"
@@ -3833,9 +3263,6 @@
       "glfw": [
         331
       ],
-      "gtk": [
-        65455
-      ],
       "windows": [
         111
       ]
@@ -3848,12 +3275,9 @@
         "NUMPAD_MULTIPLY"
       ],
       "english": "Numpad Multiply",
-      "chromium": "numpadMultiply",
+      "chromium": "NumpadMultiply",
       "glfw": [
         "KP_MULTIPLY"
-      ],
-      "gtk": [
-        "KP_Multiply"
       ],
       "windows": [
         "MULTIPLY"
@@ -3876,9 +3300,6 @@
       "glfw": [
         332
       ],
-      "gtk": [
-        65450
-      ],
       "windows": [
         106
       ]
@@ -3891,12 +3312,9 @@
         "NUMPAD_SUBTRACT"
       ],
       "english": "Numpad Subtract",
-      "chromium": "numpadSubtract",
+      "chromium": "NumpadSubtract",
       "glfw": [
         "NUMPAD_SUBTRACT"
-      ],
-      "gtk": [
-        "KP_Subtract"
       ],
       "windows": [
         "SUBTRACT"
@@ -3917,9 +3335,6 @@
         156
       ],
       "glfw": null,
-      "gtk": [
-        65453
-      ],
       "windows": [
         109
       ]
@@ -3932,12 +3347,9 @@
         "NUMPAD_ADD"
       ],
       "english": "Numpad Add",
-      "chromium": "numpadAdd",
+      "chromium": "NumpadAdd",
       "glfw": [
         "KP_ADD"
-      ],
-      "gtk": [
-        "KP_Add"
       ],
       "windows": [
         "ADD"
@@ -3960,9 +3372,6 @@
       "glfw": [
         334
       ],
-      "gtk": [
-        65451
-      ],
       "windows": [
         107
       ]
@@ -3975,12 +3384,9 @@
         "NUMPAD_ENTER"
       ],
       "english": "Numpad Enter",
-      "chromium": "numpadEnter",
+      "chromium": "NumpadEnter",
       "glfw": [
         "KP_ENTER"
-      ],
-      "gtk": [
-        "KP_Enter"
       ],
       "windows": null
     },
@@ -4001,9 +3407,6 @@
       "glfw": [
         335
       ],
-      "gtk": [
-        65421
-      ],
       "windows": null
     }
   },
@@ -4014,11 +3417,8 @@
         "NUMPAD_1"
       ],
       "english": "Numpad 1",
-      "chromium": "numpad1",
+      "chromium": "Numpad1",
       "glfw": [
-        "KP_1"
-      ],
-      "gtk": [
         "KP_1"
       ],
       "windows": [
@@ -4042,9 +3442,6 @@
       "glfw": [
         321
       ],
-      "gtk": [
-        65457
-      ],
       "windows": [
         97
       ]
@@ -4057,11 +3454,8 @@
         "NUMPAD_2"
       ],
       "english": "Numpad 2",
-      "chromium": "numpad2",
+      "chromium": "Numpad2",
       "glfw": [
-        "KP_2"
-      ],
-      "gtk": [
         "KP_2"
       ],
       "windows": [
@@ -4085,9 +3479,6 @@
       "glfw": [
         322
       ],
-      "gtk": [
-        65458
-      ],
       "windows": [
         98
       ]
@@ -4100,11 +3491,8 @@
         "NUMPAD_3"
       ],
       "english": "Numpad 3",
-      "chromium": "numpad3",
+      "chromium": "Numpad3",
       "glfw": [
-        "KP_3"
-      ],
-      "gtk": [
         "KP_3"
       ],
       "windows": [
@@ -4128,9 +3516,6 @@
       "glfw": [
         323
       ],
-      "gtk": [
-        65459
-      ],
       "windows": [
         99
       ]
@@ -4143,11 +3528,8 @@
         "NUMPAD_4"
       ],
       "english": "Numpad 4",
-      "chromium": "numpad4",
+      "chromium": "Numpad4",
       "glfw": [
-        "KP_4"
-      ],
-      "gtk": [
         "KP_4"
       ],
       "windows": [
@@ -4171,9 +3553,6 @@
       "glfw": [
         324
       ],
-      "gtk": [
-        65460
-      ],
       "windows": [
         100
       ]
@@ -4186,11 +3565,8 @@
         "NUMPAD_5"
       ],
       "english": "Numpad 5",
-      "chromium": "numpad5",
+      "chromium": "Numpad5",
       "glfw": [
-        "KP_5"
-      ],
-      "gtk": [
         "KP_5"
       ],
       "windows": [
@@ -4214,9 +3590,6 @@
       "glfw": [
         325
       ],
-      "gtk": [
-        65461
-      ],
       "windows": [
         101
       ]
@@ -4229,11 +3602,8 @@
         "NUMPAD_6"
       ],
       "english": "Numpad 6",
-      "chromium": "numpad6",
+      "chromium": "Numpad6",
       "glfw": [
-        "KP_6"
-      ],
-      "gtk": [
         "KP_6"
       ],
       "windows": [
@@ -4257,9 +3627,6 @@
       "glfw": [
         326
       ],
-      "gtk": [
-        65462
-      ],
       "windows": [
         102
       ]
@@ -4272,11 +3639,8 @@
         "NUMPAD_7"
       ],
       "english": "Numpad 7",
-      "chromium": "numpad7",
+      "chromium": "Numpad7",
       "glfw": [
-        "KP_7"
-      ],
-      "gtk": [
         "KP_7"
       ],
       "windows": [
@@ -4300,9 +3664,6 @@
       "glfw": [
         327
       ],
-      "gtk": [
-        65463
-      ],
       "windows": [
         103
       ]
@@ -4315,11 +3676,8 @@
         "NUMPAD_8"
       ],
       "english": "Numpad 8",
-      "chromium": "numpad8",
+      "chromium": "Numpad8",
       "glfw": [
-        "KP_8"
-      ],
-      "gtk": [
         "KP_8"
       ],
       "windows": [
@@ -4343,9 +3701,6 @@
       "glfw": [
         328
       ],
-      "gtk": [
-        65464
-      ],
       "windows": [
         104
       ]
@@ -4358,11 +3713,8 @@
         "NUMPAD_9"
       ],
       "english": "Numpad 9",
-      "chromium": "numpad9",
+      "chromium": "Numpad9",
       "glfw": [
-        "KP_9"
-      ],
-      "gtk": [
         "KP_9"
       ],
       "windows": [
@@ -4386,9 +3738,6 @@
       "glfw": [
         329
       ],
-      "gtk": [
-        65465
-      ],
       "windows": [
         105
       ]
@@ -4401,11 +3750,8 @@
         "NUMPAD_0"
       ],
       "english": "Numpad 0",
-      "chromium": "numpad0",
+      "chromium": "Numpad0",
       "glfw": [
-        "KP_0"
-      ],
-      "gtk": [
         "KP_0"
       ],
       "windows": [
@@ -4429,9 +3775,6 @@
       "glfw": [
         320
       ],
-      "gtk": [
-        65456
-      ],
       "windows": [
         96
       ]
@@ -4444,12 +3787,9 @@
         "NUMPAD_DOT"
       ],
       "english": "Numpad Decimal",
-      "chromium": "numpadDecimal",
+      "chromium": "NumpadDecimal",
       "glfw": [
         "KP_DECIMAL"
-      ],
-      "gtk": [
-        "KP_Decimal"
       ],
       "windows": [
         "DECIMAL"
@@ -4472,9 +3812,6 @@
       "glfw": [
         330
       ],
-      "gtk": [
-        65454
-      ],
       "windows": [
         110
       ]
@@ -4485,9 +3822,8 @@
       "domkey": "IntlBackslash",
       "android": null,
       "english": "Intl Backslash",
-      "chromium": "intlBackslash",
+      "chromium": "IntlBackslash",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -4501,7 +3837,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -4512,12 +3847,9 @@
         "MENU"
       ],
       "english": "Context Menu",
-      "chromium": "contextMenu",
+      "chromium": "ContextMenu",
       "glfw": [
         "MENU"
-      ],
-      "gtk": [
-        "Menu"
       ],
       "windows": null
     },
@@ -4539,9 +3871,6 @@
       "glfw": [
         348
       ],
-      "gtk": [
-        65383
-      ],
       "windows": null
     }
   },
@@ -4552,11 +3881,8 @@
         "POWER"
       ],
       "english": "Power",
-      "chromium": "power",
+      "chromium": "Power",
       "glfw": null,
-      "gtk": [
-        "PowerOff"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -4575,9 +3901,6 @@
         26
       ],
       "glfw": null,
-      "gtk": [
-        269025066
-      ],
       "windows": null
     }
   },
@@ -4588,12 +3911,9 @@
         "NUMPAD_EQUALS"
       ],
       "english": "Numpad Equal",
-      "chromium": "numpadEqual",
+      "chromium": "NumpadEqual",
       "glfw": [
         "KP_EQUAL"
-      ],
-      "gtk": [
-        "KP_Equal"
       ],
       "windows": [
         "OEM_NEC_EQUAL"
@@ -4616,9 +3936,6 @@
       "glfw": [
         336
       ],
-      "gtk": [
-        65469
-      ],
       "windows": [
         146
       ]
@@ -4631,11 +3948,8 @@
         "F13"
       ],
       "english": "F13",
-      "chromium": "f13",
+      "chromium": "F13",
       "glfw": [
-        "F13"
-      ],
-      "gtk": [
         "F13"
       ],
       "windows": [
@@ -4657,9 +3971,6 @@
       "glfw": [
         302
       ],
-      "gtk": [
-        65482
-      ],
       "windows": [
         124
       ]
@@ -4672,11 +3983,8 @@
         "F14"
       ],
       "english": "F14",
-      "chromium": "f14",
+      "chromium": "F14",
       "glfw": [
-        "F14"
-      ],
-      "gtk": [
         "F14"
       ],
       "windows": [
@@ -4698,9 +4006,6 @@
       "glfw": [
         303
       ],
-      "gtk": [
-        65483
-      ],
       "windows": [
         125
       ]
@@ -4713,11 +4018,8 @@
         "F15"
       ],
       "english": "F15",
-      "chromium": "f15",
+      "chromium": "F15",
       "glfw": [
-        "F15"
-      ],
-      "gtk": [
         "F15"
       ],
       "windows": [
@@ -4739,9 +4041,6 @@
       "glfw": [
         304
       ],
-      "gtk": [
-        65484
-      ],
       "windows": [
         126
       ]
@@ -4754,11 +4053,8 @@
         "F16"
       ],
       "english": "F16",
-      "chromium": "f16",
+      "chromium": "F16",
       "glfw": [
-        "F16"
-      ],
-      "gtk": [
         "F16"
       ],
       "windows": [
@@ -4780,9 +4076,6 @@
       "glfw": [
         305
       ],
-      "gtk": [
-        65485
-      ],
       "windows": [
         127
       ]
@@ -4795,11 +4088,8 @@
         "F17"
       ],
       "english": "F17",
-      "chromium": "f17",
+      "chromium": "F17",
       "glfw": [
-        "F17"
-      ],
-      "gtk": [
         "F17"
       ],
       "windows": [
@@ -4821,9 +4111,6 @@
       "glfw": [
         306
       ],
-      "gtk": [
-        65486
-      ],
       "windows": [
         128
       ]
@@ -4836,11 +4123,8 @@
         "F18"
       ],
       "english": "F18",
-      "chromium": "f18",
+      "chromium": "F18",
       "glfw": [
-        "F18"
-      ],
-      "gtk": [
         "F18"
       ],
       "windows": [
@@ -4862,9 +4146,6 @@
       "glfw": [
         307
       ],
-      "gtk": [
-        65487
-      ],
       "windows": [
         129
       ]
@@ -4877,11 +4158,8 @@
         "F19"
       ],
       "english": "F19",
-      "chromium": "f19",
+      "chromium": "F19",
       "glfw": [
-        "F19"
-      ],
-      "gtk": [
         "F19"
       ],
       "windows": [
@@ -4903,9 +4181,6 @@
       "glfw": [
         308
       ],
-      "gtk": [
-        65488
-      ],
       "windows": [
         130
       ]
@@ -4918,11 +4193,8 @@
         "F20"
       ],
       "english": "F20",
-      "chromium": "f20",
+      "chromium": "F20",
       "glfw": [
-        "F20"
-      ],
-      "gtk": [
         "F20"
       ],
       "windows": [
@@ -4944,9 +4216,6 @@
       "glfw": [
         309
       ],
-      "gtk": [
-        65489
-      ],
       "windows": [
         131
       ]
@@ -4959,11 +4228,8 @@
         "F21"
       ],
       "english": "F21",
-      "chromium": "f21",
+      "chromium": "F21",
       "glfw": [
-        "F21"
-      ],
-      "gtk": [
         "F21"
       ],
       "windows": [
@@ -4985,9 +4251,6 @@
       "glfw": [
         310
       ],
-      "gtk": [
-        65490
-      ],
       "windows": [
         132
       ]
@@ -5000,11 +4263,8 @@
         "F22"
       ],
       "english": "F22",
-      "chromium": "f22",
+      "chromium": "F22",
       "glfw": [
-        "F22"
-      ],
-      "gtk": [
         "F22"
       ],
       "windows": [
@@ -5026,9 +4286,6 @@
       "glfw": [
         311
       ],
-      "gtk": [
-        65491
-      ],
       "windows": [
         133
       ]
@@ -5041,11 +4298,8 @@
         "F23"
       ],
       "english": "F23",
-      "chromium": "f23",
+      "chromium": "F23",
       "glfw": [
-        "F23"
-      ],
-      "gtk": [
         "F23"
       ],
       "windows": [
@@ -5067,9 +4321,6 @@
       "glfw": [
         312
       ],
-      "gtk": [
-        65492
-      ],
       "windows": [
         134
       ]
@@ -5082,11 +4333,8 @@
         "F24"
       ],
       "english": "F24",
-      "chromium": "f24",
+      "chromium": "F24",
       "glfw": null,
-      "gtk": [
-        "F24"
-      ],
       "windows": [
         "F24"
       ]
@@ -5104,9 +4352,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        65493
-      ],
       "windows": [
         135
       ]
@@ -5119,11 +4364,8 @@
         "OPEN"
       ],
       "english": "Open",
-      "chromium": "open",
+      "chromium": "Open",
       "glfw": null,
-      "gtk": [
-        "Open"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -5139,9 +4381,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025131
-      ],
       "windows": null
     }
   },
@@ -5152,11 +4391,8 @@
         "HELP"
       ],
       "english": "Help",
-      "chromium": "help",
+      "chromium": "Help",
       "glfw": null,
-      "gtk": [
-        "Help"
-      ],
       "windows": [
         "HELP"
       ]
@@ -5176,9 +4412,6 @@
         259
       ],
       "glfw": null,
-      "gtk": [
-        65386
-      ],
       "windows": [
         47
       ]
@@ -5191,11 +4424,8 @@
         "DPAD_CENTER"
       ],
       "english": "Select",
-      "chromium": "select",
+      "chromium": "Select",
       "glfw": null,
-      "gtk": [
-        "Select"
-      ],
       "windows": [
         "SELECT"
       ]
@@ -5215,9 +4445,6 @@
         23
       ],
       "glfw": null,
-      "gtk": [
-        65376
-      ],
       "windows": [
         41
       ]
@@ -5230,9 +4457,8 @@
         "AGAIN"
       ],
       "english": "Again",
-      "chromium": "again",
+      "chromium": "Again",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5248,7 +4474,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5259,11 +4484,8 @@
         "UNDO"
       ],
       "english": "Undo",
-      "chromium": "undo",
+      "chromium": "Undo",
       "glfw": null,
-      "gtk": [
-        "Undo"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -5279,9 +4501,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        65381
-      ],
       "windows": null
     }
   },
@@ -5292,9 +4511,8 @@
         "CUT"
       ],
       "english": "Cut",
-      "chromium": "cut",
+      "chromium": "Cut",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5312,7 +4530,6 @@
         277
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5323,12 +4540,8 @@
         "COPY"
       ],
       "english": "Copy",
-      "chromium": "copy",
+      "chromium": "Copy",
       "glfw": null,
-      "gtk": [
-        "Copy",
-        "3270_Copy"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -5346,10 +4559,6 @@
         278
       ],
       "glfw": null,
-      "gtk": [
-        269025111,
-        64789
-      ],
       "windows": null
     }
   },
@@ -5360,11 +4569,8 @@
         "PASTE"
       ],
       "english": "Paste",
-      "chromium": "paste",
+      "chromium": "Paste",
       "glfw": null,
-      "gtk": [
-        "Paste"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -5382,9 +4588,6 @@
         279
       ],
       "glfw": null,
-      "gtk": [
-        269025133
-      ],
       "windows": null
     }
   },
@@ -5395,11 +4598,8 @@
         "FIND"
       ],
       "english": "Find",
-      "chromium": "find",
+      "chromium": "Find",
       "glfw": null,
-      "gtk": [
-        "Find"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -5415,9 +4615,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        65384
-      ],
       "windows": null
     }
   },
@@ -5428,11 +4625,8 @@
         "VOLUME_MUTE"
       ],
       "english": "Audio Volume Mute",
-      "chromium": "volumeMute",
+      "chromium": "VolumeMute",
       "glfw": null,
-      "gtk": [
-        "AudioMute"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -5450,9 +4644,6 @@
         164
       ],
       "glfw": null,
-      "gtk": [
-        269025042
-      ],
       "windows": null
     }
   },
@@ -5463,11 +4654,8 @@
         "VOLUME_UP"
       ],
       "english": "Audio Volume Up",
-      "chromium": "volumeUp",
+      "chromium": "VolumeUp",
       "glfw": null,
-      "gtk": [
-        "AudioRaiseVolume"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -5485,9 +4673,6 @@
         24
       ],
       "glfw": null,
-      "gtk": [
-        269025043
-      ],
       "windows": null
     }
   },
@@ -5498,11 +4683,8 @@
         "VOLUME_DOWN"
       ],
       "english": "Audio Volume Down",
-      "chromium": "volumeDown",
+      "chromium": "VolumeDown",
       "glfw": null,
-      "gtk": [
-        "AudioLowerVolume"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -5520,9 +4702,6 @@
         25
       ],
       "glfw": null,
-      "gtk": [
-        269025041
-      ],
       "windows": null
     }
   },
@@ -5533,9 +4712,8 @@
         "NUMPAD_COMMA"
       ],
       "english": "Numpad Comma",
-      "chromium": "numpadComma",
+      "chromium": "NumpadComma",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5554,7 +4732,6 @@
         159
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5563,9 +4740,8 @@
       "domkey": "IntlRo",
       "android": null,
       "english": "Intl Ro",
-      "chromium": "intlRo",
+      "chromium": "IntlRo",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5579,7 +4755,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5588,11 +4763,8 @@
       "domkey": "KanaMode",
       "android": null,
       "english": "Kana Mode",
-      "chromium": "kanaMode",
+      "chromium": "KanaMode",
       "glfw": null,
-      "gtk": [
-        "kana_switch"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -5606,9 +4778,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        65406
-      ],
       "windows": null
     }
   },
@@ -5617,11 +4786,8 @@
       "domkey": "IntlYen",
       "android": null,
       "english": "Intl Yen",
-      "chromium": "intlYen",
+      "chromium": "IntlYen",
       "glfw": null,
-      "gtk": [
-        "yen"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -5635,9 +4801,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        165
-      ],
       "windows": null
     }
   },
@@ -5648,9 +4811,8 @@
         "HENKAN"
       ],
       "english": "Convert",
-      "chromium": "convert",
+      "chromium": "Convert",
       "glfw": null,
-      "gtk": null,
       "windows": [
         "CONVERT"
       ]
@@ -5670,7 +4832,6 @@
         214
       ],
       "glfw": null,
-      "gtk": null,
       "windows": [
         28
       ]
@@ -5683,9 +4844,8 @@
         "MUHENKAN"
       ],
       "english": "Non Convert",
-      "chromium": "nonConvert",
+      "chromium": "NonConvert",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5703,7 +4863,6 @@
         213
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5712,9 +4871,8 @@
       "domkey": "Lang1",
       "android": null,
       "english": "Lang 1",
-      "chromium": "lang1",
+      "chromium": "Lang1",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5728,7 +4886,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5737,9 +4894,8 @@
       "domkey": "Lang2",
       "android": null,
       "english": "Lang 2",
-      "chromium": "lang2",
+      "chromium": "Lang2",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5753,7 +4909,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5764,9 +4919,8 @@
         "KATAKANA"
       ],
       "english": "Lang 3",
-      "chromium": "lang3",
+      "chromium": "Lang3",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5782,7 +4936,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5793,9 +4946,8 @@
         "HIRAGANA"
       ],
       "english": "Lang 4",
-      "chromium": "lang4",
+      "chromium": "Lang4",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5811,7 +4963,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5820,9 +4971,8 @@
       "domkey": "Lang5",
       "android": null,
       "english": "Lang 5",
-      "chromium": "lang5",
+      "chromium": "Lang5",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5836,7 +4986,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5845,9 +4994,8 @@
       "domkey": "Abort",
       "android": null,
       "english": "Abort",
-      "chromium": "abort",
+      "chromium": "Abort",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5861,7 +5009,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5872,9 +5019,8 @@
         "PROPS"
       ],
       "english": "Props",
-      "chromium": "props",
+      "chromium": "Props",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5890,7 +5036,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5901,9 +5046,8 @@
         "NUMPAD_LEFT_PAREN"
       ],
       "english": "Numpad Paren Left",
-      "chromium": "numpadParenLeft",
+      "chromium": "NumpadParenLeft",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5921,7 +5065,6 @@
         162
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5932,9 +5075,8 @@
         "NUMPAD_RIGHT_PAREN"
       ],
       "english": "Numpad Paren Right",
-      "chromium": "numpadParenRight",
+      "chromium": "NumpadParenRight",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5952,7 +5094,6 @@
         163
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5961,9 +5102,8 @@
       "domkey": "NumpadBackspace",
       "android": null,
       "english": "Numpad Backspace",
-      "chromium": "numpadBackspace",
+      "chromium": "NumpadBackspace",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -5977,7 +5117,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -5986,9 +5125,8 @@
       "domkey": "NumpadMemoryStore",
       "android": null,
       "english": "Numpad Memory Store",
-      "chromium": "numpadMemoryStore",
+      "chromium": "NumpadMemoryStore",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6002,7 +5140,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6011,9 +5148,8 @@
       "domkey": "NumpadMemoryRecall",
       "android": null,
       "english": "Numpad Memory Recall",
-      "chromium": "numpadMemoryRecall",
+      "chromium": "NumpadMemoryRecall",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6027,7 +5163,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6036,9 +5171,8 @@
       "domkey": "NumpadMemoryClear",
       "android": null,
       "english": "Numpad Memory Clear",
-      "chromium": "numpadMemoryClear",
+      "chromium": "NumpadMemoryClear",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6052,7 +5186,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6061,9 +5194,8 @@
       "domkey": "NumpadMemoryAdd",
       "android": null,
       "english": "Numpad Memory Add",
-      "chromium": "numpadMemoryAdd",
+      "chromium": "NumpadMemoryAdd",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6077,7 +5209,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6086,9 +5217,8 @@
       "domkey": "NumpadMemorySubtract",
       "android": null,
       "english": "Numpad Memory Subtract",
-      "chromium": "numpadMemorySubtract",
+      "chromium": "NumpadMemorySubtract",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6102,7 +5232,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6111,9 +5240,8 @@
       "domkey": null,
       "android": null,
       "english": "Numpad Sign Change",
-      "chromium": "numpadSignChange",
+      "chromium": "NumpadSignChange",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6127,7 +5255,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6136,9 +5263,8 @@
       "domkey": "NumpadClear",
       "android": null,
       "english": "Numpad Clear",
-      "chromium": "numpadClear",
+      "chromium": "NumpadClear",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6152,7 +5278,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6161,9 +5286,8 @@
       "domkey": "NumpadClearEntry",
       "android": null,
       "english": "Numpad Clear Entry",
-      "chromium": "numpadClearEntry",
+      "chromium": "NumpadClearEntry",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6177,7 +5301,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6188,12 +5311,9 @@
         "CTRL_LEFT"
       ],
       "english": "Control Left",
-      "chromium": "controlLeft",
+      "chromium": "ControlLeft",
       "glfw": [
         "LEFT_CONTROL"
-      ],
-      "gtk": [
-        "Control_L"
       ],
       "windows": [
         "LCONTROL"
@@ -6216,9 +5336,6 @@
       "glfw": [
         341
       ],
-      "gtk": [
-        65507
-      ],
       "windows": [
         162
       ]
@@ -6231,12 +5348,9 @@
         "SHIFT_LEFT"
       ],
       "english": "Shift Left",
-      "chromium": "shiftLeft",
+      "chromium": "ShiftLeft",
       "glfw": [
         "LEFT_SHIFT"
-      ],
-      "gtk": [
-        "Shift_L"
       ],
       "windows": [
         "LSHIFT"
@@ -6259,9 +5373,6 @@
       "glfw": [
         340
       ],
-      "gtk": [
-        65505
-      ],
       "windows": [
         160
       ]
@@ -6274,12 +5385,9 @@
         "ALT_LEFT"
       ],
       "english": "Alt Left",
-      "chromium": "altLeft",
+      "chromium": "AltLeft",
       "glfw": [
         "LEFT_ALT"
-      ],
-      "gtk": [
-        "Alt_L"
       ],
       "windows": [
         "LMENU"
@@ -6302,9 +5410,6 @@
       "glfw": [
         342
       ],
-      "gtk": [
-        65513
-      ],
       "windows": [
         164
       ]
@@ -6317,12 +5422,9 @@
         "META_LEFT"
       ],
       "english": "Meta Left",
-      "chromium": "metaLeft",
+      "chromium": "MetaLeft",
       "glfw": [
         "LEFT_SUPER"
-      ],
-      "gtk": [
-        "Meta_L"
       ],
       "windows": [
         "LWIN"
@@ -6345,9 +5447,6 @@
       "glfw": [
         343
       ],
-      "gtk": [
-        65511
-      ],
       "windows": [
         91
       ]
@@ -6360,12 +5459,9 @@
         "CTRL_RIGHT"
       ],
       "english": "Control Right",
-      "chromium": "controlRight",
+      "chromium": "ControlRight",
       "glfw": [
         "RIGHT_CONTROL"
-      ],
-      "gtk": [
-        "Control_R"
       ],
       "windows": [
         "RCONTROL"
@@ -6388,9 +5484,6 @@
       "glfw": [
         345
       ],
-      "gtk": [
-        65508
-      ],
       "windows": [
         163
       ]
@@ -6403,12 +5496,9 @@
         "SHIFT_RIGHT"
       ],
       "english": "Shift Right",
-      "chromium": "shiftRight",
+      "chromium": "ShiftRight",
       "glfw": [
         "RIGHT_SHIFT"
-      ],
-      "gtk": [
-        "Shift_R"
       ],
       "windows": [
         "RSHIFT"
@@ -6431,9 +5521,6 @@
       "glfw": [
         344
       ],
-      "gtk": [
-        65506
-      ],
       "windows": [
         161
       ]
@@ -6446,12 +5533,9 @@
         "ALT_RIGHT"
       ],
       "english": "Alt Right",
-      "chromium": "altRight",
+      "chromium": "AltRight",
       "glfw": [
         "RIGHT_ALT"
-      ],
-      "gtk": [
-        "Alt_R"
       ],
       "windows": [
         "RMENU"
@@ -6474,9 +5558,6 @@
       "glfw": [
         346
       ],
-      "gtk": [
-        65514
-      ],
       "windows": [
         165
       ]
@@ -6489,12 +5570,9 @@
         "META_RIGHT"
       ],
       "english": "Meta Right",
-      "chromium": "metaRight",
+      "chromium": "MetaRight",
       "glfw": [
         "RIGHT_SUPER"
-      ],
-      "gtk": [
-        "Meta_R"
       ],
       "windows": [
         "RWIN"
@@ -6517,9 +5595,6 @@
       "glfw": [
         347
       ],
-      "gtk": [
-        65512
-      ],
       "windows": [
         92
       ]
@@ -6532,9 +5607,8 @@
         "INFO"
       ],
       "english": "Info",
-      "chromium": "info",
+      "chromium": "Info",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6552,7 +5626,6 @@
         165
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6563,9 +5636,8 @@
         "CAPTIONS"
       ],
       "english": "Closed Caption Toggle",
-      "chromium": "closedCaptionToggle",
+      "chromium": "ClosedCaptionToggle",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6583,7 +5655,6 @@
         175
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6594,11 +5665,8 @@
         "BRIGHTNESS_UP"
       ],
       "english": "Brightness Up",
-      "chromium": "brightnessUp",
+      "chromium": "BrightnessUp",
       "glfw": null,
-      "gtk": [
-        "MonBrightnessUp"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -6616,9 +5684,6 @@
         221
       ],
       "glfw": null,
-      "gtk": [
-        269025026
-      ],
       "windows": null
     }
   },
@@ -6629,11 +5694,8 @@
         "BRIGHTNESS_DOWN"
       ],
       "english": "Brightness Down",
-      "chromium": "brightnessDown",
+      "chromium": "BrightnessDown",
       "glfw": null,
-      "gtk": [
-        "MonBrightnessDown"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -6651,9 +5713,6 @@
         220
       ],
       "glfw": null,
-      "gtk": [
-        269025027
-      ],
       "windows": null
     }
   },
@@ -6662,9 +5721,8 @@
       "domkey": null,
       "android": null,
       "english": "Brightness Toggle",
-      "chromium": "brightnessToggle",
+      "chromium": "BrightnessToggle",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6678,7 +5736,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6687,9 +5744,8 @@
       "domkey": null,
       "android": null,
       "english": "Brightness Minimum",
-      "chromium": "brightnessMinimum",
+      "chromium": "BrightnessMinimum",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6703,7 +5759,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6712,9 +5767,8 @@
       "domkey": null,
       "android": null,
       "english": "Brightness Maximum",
-      "chromium": "brightnessMaximum",
+      "chromium": "BrightnessMaximum",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6728,7 +5782,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6737,9 +5790,8 @@
       "domkey": null,
       "android": null,
       "english": "Brightness Auto",
-      "chromium": "brightnessAuto",
+      "chromium": "BrightnessAuto",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6753,7 +5805,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6762,11 +5813,8 @@
       "domkey": null,
       "android": null,
       "english": "Kbd Illum Up",
-      "chromium": "kbdIllumUp",
+      "chromium": "KbdIllumUp",
       "glfw": null,
-      "gtk": [
-        "KbdBrightnessUp"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -6780,9 +5828,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025029
-      ],
       "windows": null
     }
   },
@@ -6791,11 +5836,8 @@
       "domkey": null,
       "android": null,
       "english": "Kbd Illum Down",
-      "chromium": "kbdIllumDown",
+      "chromium": "KbdIllumDown",
       "glfw": null,
-      "gtk": [
-        "KbdBrightnessDown"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -6809,9 +5851,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025030
-      ],
       "windows": null
     }
   },
@@ -6822,9 +5861,8 @@
         "LAST_CHANNEL"
       ],
       "english": "Media Last",
-      "chromium": "mediaLast",
+      "chromium": "MediaLast",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6842,7 +5880,6 @@
         229
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6851,11 +5888,8 @@
       "domkey": null,
       "android": null,
       "english": "Launch Phone",
-      "chromium": "launchPhone",
+      "chromium": "LaunchPhone",
       "glfw": null,
-      "gtk": [
-        "Phone"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -6869,9 +5903,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025134
-      ],
       "windows": null
     }
   },
@@ -6880,9 +5911,8 @@
       "domkey": null,
       "android": null,
       "english": "Program Guide",
-      "chromium": "programGuide",
+      "chromium": "ProgramGuide",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6896,7 +5926,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6907,9 +5936,8 @@
         "EXIT"
       ],
       "english": "Exit",
-      "chromium": "exit",
+      "chromium": "Exit",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6925,7 +5953,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6936,9 +5963,8 @@
         "CHANNEL_UP"
       ],
       "english": "Channel Up",
-      "chromium": "channelUp",
+      "chromium": "ChannelUp",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6956,7 +5982,6 @@
         166
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6967,9 +5992,8 @@
         "CHANNEL_DOWN"
       ],
       "english": "Channel Down",
-      "chromium": "channelDown",
+      "chromium": "ChannelDown",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -6987,7 +6011,6 @@
         167
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -6998,12 +6021,8 @@
         "MEDIA_PLAY"
       ],
       "english": "Media Play",
-      "chromium": "mediaPlay",
+      "chromium": "MediaPlay",
       "glfw": null,
-      "gtk": [
-        "AudioPlay",
-        "3270_Play"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7022,10 +6041,6 @@
         126
       ],
       "glfw": null,
-      "gtk": [
-        269025044,
-        64790
-      ],
       "windows": null
     }
   },
@@ -7036,11 +6051,8 @@
         "MEDIA_PAUSE"
       ],
       "english": "Media Pause",
-      "chromium": "mediaPause",
+      "chromium": "MediaPause",
       "glfw": null,
-      "gtk": [
-        "AudioPause"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7058,9 +6070,6 @@
         127
       ],
       "glfw": null,
-      "gtk": [
-        269025073
-      ],
       "windows": null
     }
   },
@@ -7071,11 +6080,8 @@
         "MEDIA_RECORD"
       ],
       "english": "Media Record",
-      "chromium": "mediaRecord",
+      "chromium": "MediaRecord",
       "glfw": null,
-      "gtk": [
-        "AudioRecord"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7093,9 +6099,6 @@
         130
       ],
       "glfw": null,
-      "gtk": [
-        269025052
-      ],
       "windows": null
     }
   },
@@ -7106,11 +6109,8 @@
         "MEDIA_FAST_FORWARD"
       ],
       "english": "Media Fast Forward",
-      "chromium": "mediaFastForward",
+      "chromium": "MediaFastForward",
       "glfw": null,
-      "gtk": [
-        "AudioForward"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7128,9 +6128,6 @@
         90
       ],
       "glfw": null,
-      "gtk": [
-        269025175
-      ],
       "windows": null
     }
   },
@@ -7141,11 +6138,8 @@
         "MEDIA_REWIND"
       ],
       "english": "Media Rewind",
-      "chromium": "mediaRewind",
+      "chromium": "MediaRewind",
       "glfw": null,
-      "gtk": [
-        "AudioRewind"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7163,9 +6157,6 @@
         89
       ],
       "glfw": null,
-      "gtk": [
-        269025086
-      ],
       "windows": null
     }
   },
@@ -7176,11 +6167,8 @@
         "MEDIA_NEXT"
       ],
       "english": "Media Track Next",
-      "chromium": "mediaTrackNext",
+      "chromium": "MediaTrackNext",
       "glfw": null,
-      "gtk": [
-        "AudioNext"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7198,9 +6186,6 @@
         87
       ],
       "glfw": null,
-      "gtk": [
-        269025047
-      ],
       "windows": null
     }
   },
@@ -7211,11 +6196,8 @@
         "MEDIA_PREVIOUS"
       ],
       "english": "Media Track Previous",
-      "chromium": "mediaTrackPrevious",
+      "chromium": "MediaTrackPrevious",
       "glfw": null,
-      "gtk": [
-        "AudioPrev"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7233,9 +6215,6 @@
         88
       ],
       "glfw": null,
-      "gtk": [
-        269025046
-      ],
       "windows": null
     }
   },
@@ -7246,11 +6225,8 @@
         "MEDIA_STOP"
       ],
       "english": "Media Stop",
-      "chromium": "mediaStop",
+      "chromium": "MediaStop",
       "glfw": null,
-      "gtk": [
-        "AudioStop"
-      ],
       "windows": [
         "MEDIA_STOP"
       ]
@@ -7271,9 +6247,6 @@
         86
       ],
       "glfw": null,
-      "gtk": [
-        269025045
-      ],
       "windows": [
         178
       ]
@@ -7286,11 +6259,8 @@
         "MEDIA_EJECT"
       ],
       "english": "Eject",
-      "chromium": "eject",
+      "chromium": "Eject",
       "glfw": null,
-      "gtk": [
-        "Eject"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7309,9 +6279,6 @@
         129
       ],
       "glfw": null,
-      "gtk": [
-        269025068
-      ],
       "windows": null
     }
   },
@@ -7322,9 +6289,8 @@
         "MEDIA_PLAY_PAUSE"
       ],
       "english": "Media Play Pause",
-      "chromium": "mediaPlayPause",
+      "chromium": "MediaPlayPause",
       "glfw": null,
-      "gtk": null,
       "windows": [
         "MEDIA_PLAY_PAUSE"
       ]
@@ -7344,7 +6310,6 @@
         85
       ],
       "glfw": null,
-      "gtk": null,
       "windows": [
         179
       ]
@@ -7355,9 +6320,8 @@
       "domkey": null,
       "android": null,
       "english": "Speech Input Toggle",
-      "chromium": "speechInputToggle",
+      "chromium": "SpeechInputToggle",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -7371,7 +6335,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -7382,9 +6345,8 @@
         "BASSBOOST"
       ],
       "english": "Bass Boost",
-      "chromium": "bassBoost",
+      "chromium": "BassBoost",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -7400,7 +6362,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -7409,9 +6370,8 @@
       "domkey": "MediaSelect",
       "android": null,
       "english": "Media Select",
-      "chromium": "mediaSelect",
+      "chromium": "MediaSelect",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -7425,7 +6385,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -7434,9 +6393,8 @@
       "domkey": null,
       "android": null,
       "english": "Launch Word Processor",
-      "chromium": "launchWordProcessor",
+      "chromium": "LaunchWordProcessor",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -7450,7 +6408,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -7459,9 +6416,8 @@
       "domkey": null,
       "android": null,
       "english": "Launch Spreadsheet",
-      "chromium": "launchSpreadsheet",
+      "chromium": "LaunchSpreadsheet",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -7475,7 +6431,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -7486,11 +6441,8 @@
         "ENVELOPE"
       ],
       "english": "Launch Mail",
-      "chromium": "launchMail",
+      "chromium": "LaunchMail",
       "glfw": null,
-      "gtk": [
-        "Mail"
-      ],
       "windows": [
         "LAUNCH_MAIL"
       ]
@@ -7511,9 +6463,6 @@
         65
       ],
       "glfw": null,
-      "gtk": [
-        269025049
-      ],
       "windows": [
         180
       ]
@@ -7526,9 +6475,8 @@
         "CONTACTS"
       ],
       "english": "Launch Contacts",
-      "chromium": "launchContacts",
+      "chromium": "LaunchContacts",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -7546,7 +6494,6 @@
         207
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -7557,11 +6504,8 @@
         "CALENDAR"
       ],
       "english": "Launch Calendar",
-      "chromium": "launchCalendar",
+      "chromium": "LaunchCalendar",
       "glfw": null,
-      "gtk": [
-        "Calendar"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7579,9 +6523,6 @@
         208
       ],
       "glfw": null,
-      "gtk": [
-        269025056
-      ],
       "windows": null
     }
   },
@@ -7590,9 +6531,8 @@
       "domkey": "LaunchApp2",
       "android": null,
       "english": "Launch App2",
-      "chromium": "launchApp2",
+      "chromium": "LaunchApp2",
       "glfw": null,
-      "gtk": null,
       "windows": [
         "LAUNCH_APP2"
       ]
@@ -7608,7 +6548,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": [
         183
       ]
@@ -7619,9 +6558,8 @@
       "domkey": "LaunchApp1",
       "android": null,
       "english": "Launch App1",
-      "chromium": "launchApp1",
+      "chromium": "LaunchApp1",
       "glfw": null,
-      "gtk": null,
       "windows": [
         "LAUNCH_APP1"
       ]
@@ -7637,7 +6575,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": [
         182
       ]
@@ -7648,11 +6585,8 @@
       "domkey": null,
       "android": null,
       "english": "Launch Internet Browser",
-      "chromium": "launchInternetBrowser",
+      "chromium": "LaunchInternetBrowser",
       "glfw": null,
-      "gtk": [
-        "WWW"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7666,9 +6600,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025070
-      ],
       "windows": null
     }
   },
@@ -7677,11 +6608,8 @@
       "domkey": null,
       "android": null,
       "english": "Log Off",
-      "chromium": "logOff",
+      "chromium": "LogOff",
       "glfw": null,
-      "gtk": [
-        "LogOff"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7695,9 +6623,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025121
-      ],
       "windows": null
     }
   },
@@ -7706,9 +6631,8 @@
       "domkey": null,
       "android": null,
       "english": "Lock Screen",
-      "chromium": "lockScreen",
+      "chromium": "LockScreen",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -7722,7 +6646,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -7731,9 +6654,8 @@
       "domkey": "LaunchControlPanel",
       "android": null,
       "english": "Launch Control Panel",
-      "chromium": "launchControlPanel",
+      "chromium": "LaunchControlPanel",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -7747,7 +6669,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -7756,9 +6677,8 @@
       "domkey": "SelectTask",
       "android": null,
       "english": "Select Task",
-      "chromium": "selectTask",
+      "chromium": "SelectTask",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -7772,7 +6692,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -7781,11 +6700,8 @@
       "domkey": null,
       "android": null,
       "english": "Launch Documents",
-      "chromium": "launchDocuments",
+      "chromium": "LaunchDocuments",
       "glfw": null,
-      "gtk": [
-        "Document"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7799,7 +6715,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -7808,11 +6723,8 @@
       "domkey": null,
       "android": null,
       "english": "Spell Check",
-      "chromium": "spellCheck",
+      "chromium": "SpellCheck",
       "glfw": null,
-      "gtk": [
-        "Spell"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7826,9 +6738,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025148
-      ],
       "windows": null
     }
   },
@@ -7837,9 +6746,8 @@
       "domkey": null,
       "android": null,
       "english": "Launch Keyboard Layout",
-      "chromium": "launchKeyboardLayout",
+      "chromium": "LaunchKeyboardLayout",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -7853,7 +6761,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -7862,11 +6769,8 @@
       "domkey": "LaunchScreenSaver",
       "android": null,
       "english": "Launch Screen Saver",
-      "chromium": "launchScreenSaver",
+      "chromium": "LaunchScreenSaver",
       "glfw": null,
-      "gtk": [
-        "ScreenSaver"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7880,9 +6784,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025069
-      ],
       "windows": null
     }
   },
@@ -7893,9 +6794,8 @@
         "ASSIST"
       ],
       "english": "Launch Assistant",
-      "chromium": "launchAssistant",
+      "chromium": "LaunchAssistant",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -7913,7 +6813,6 @@
         219
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -7922,11 +6821,8 @@
       "domkey": null,
       "android": null,
       "english": "Launch Audio Browser",
-      "chromium": "launchAudioBrowser",
+      "chromium": "LaunchAudioBrowser",
       "glfw": null,
-      "gtk": [
-        "Music"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7940,9 +6836,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025170
-      ],
       "windows": null
     }
   },
@@ -7953,11 +6846,8 @@
         "NEW"
       ],
       "english": "New Key",
-      "chromium": "new",
+      "chromium": "New",
       "glfw": null,
-      "gtk": [
-        "New"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -7973,9 +6863,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025128
-      ],
       "windows": null
     }
   },
@@ -7987,11 +6874,8 @@
         "CLOSE"
       ],
       "english": "Close",
-      "chromium": "close",
+      "chromium": "Close",
       "glfw": null,
-      "gtk": [
-        "Close"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -8010,9 +6894,6 @@
         128
       ],
       "glfw": null,
-      "gtk": [
-        269025110
-      ],
       "windows": null
     }
   },
@@ -8021,11 +6902,8 @@
       "domkey": null,
       "android": null,
       "english": "Save",
-      "chromium": "save",
+      "chromium": "Save",
       "glfw": null,
-      "gtk": [
-        "Save"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -8039,9 +6917,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025143
-      ],
       "windows": null
     }
   },
@@ -8052,11 +6927,8 @@
         "PRINT"
       ],
       "english": "Print",
-      "chromium": "print",
+      "chromium": "Print",
       "glfw": null,
-      "gtk": [
-        "Print"
-      ],
       "windows": [
         "PRINT"
       ]
@@ -8074,9 +6946,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        65377
-      ],
       "windows": [
         42
       ]
@@ -8089,11 +6958,8 @@
         "SEARCH"
       ],
       "english": "Browser Search",
-      "chromium": "browserSearch",
+      "chromium": "BrowserSearch",
       "glfw": null,
-      "gtk": [
-        "Search"
-      ],
       "windows": [
         "BROWSER_SEARCH"
       ]
@@ -8113,9 +6979,6 @@
         84
       ],
       "glfw": null,
-      "gtk": [
-        269025051
-      ],
       "windows": [
         170
       ]
@@ -8126,11 +6989,8 @@
       "domkey": "BrowserHome",
       "android": null,
       "english": "Browser Home",
-      "chromium": "browserHome",
+      "chromium": "BrowserHome",
       "glfw": null,
-      "gtk": [
-        "HomePage"
-      ],
       "windows": [
         "BROWSER_HOME"
       ]
@@ -8146,9 +7006,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025048
-      ],
       "windows": [
         172
       ]
@@ -8159,11 +7016,8 @@
       "domkey": "BrowserBack",
       "android": null,
       "english": "Browser Back",
-      "chromium": "browserBack",
+      "chromium": "BrowserBack",
       "glfw": null,
-      "gtk": [
-        "Back"
-      ],
       "windows": [
         "BROWSER_BACK"
       ]
@@ -8179,9 +7033,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025062
-      ],
       "windows": [
         166
       ]
@@ -8194,11 +7045,8 @@
         "FORWARD"
       ],
       "english": "Browser Forward",
-      "chromium": "browserForward",
+      "chromium": "BrowserForward",
       "glfw": null,
-      "gtk": [
-        "Forward"
-      ],
       "windows": [
         "BROWSER_FORWARD"
       ]
@@ -8218,9 +7066,6 @@
         125
       ],
       "glfw": null,
-      "gtk": [
-        269025063
-      ],
       "windows": [
         167
       ]
@@ -8231,11 +7076,8 @@
       "domkey": "BrowserStop",
       "android": null,
       "english": "Browser Stop",
-      "chromium": "browserStop",
+      "chromium": "BrowserStop",
       "glfw": null,
-      "gtk": [
-        "Stop"
-      ],
       "windows": [
         "BROWSER_STOP"
       ]
@@ -8251,9 +7093,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025064
-      ],
       "windows": [
         169
       ]
@@ -8264,11 +7103,8 @@
       "domkey": "BrowserRefresh",
       "android": null,
       "english": "Browser Refresh",
-      "chromium": "browserRefresh",
+      "chromium": "BrowserRefresh",
       "glfw": null,
-      "gtk": [
-        "Refresh"
-      ],
       "windows": [
         "BROWSER_REFRESH"
       ]
@@ -8284,9 +7120,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025065
-      ],
       "windows": [
         168
       ]
@@ -8299,11 +7132,8 @@
         "BOOKMARK"
       ],
       "english": "Browser Favorites",
-      "chromium": "browserFavorites",
+      "chromium": "BrowserFavorites",
       "glfw": null,
-      "gtk": [
-        "Favorites"
-      ],
       "windows": [
         "BROWSER_FAVORITES"
       ]
@@ -8323,9 +7153,6 @@
         174
       ],
       "glfw": null,
-      "gtk": [
-        269025072
-      ],
       "windows": [
         171
       ]
@@ -8338,11 +7165,8 @@
         "ZOOM_IN"
       ],
       "english": "Zoom In",
-      "chromium": "zoomIn",
+      "chromium": "ZoomIn",
       "glfw": null,
-      "gtk": [
-        "ZoomIn"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -8358,9 +7182,6 @@
         168
       ],
       "glfw": null,
-      "gtk": [
-        269025163
-      ],
       "windows": null
     }
   },
@@ -8371,11 +7192,8 @@
         "ZOOM_OUT"
       ],
       "english": "Zoom Out",
-      "chromium": "zoomOut",
+      "chromium": "ZoomOut",
       "glfw": null,
-      "gtk": [
-        "ZoomOut"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -8391,9 +7209,6 @@
         169
       ],
       "glfw": null,
-      "gtk": [
-        269025164
-      ],
       "windows": null
     }
   },
@@ -8404,9 +7219,8 @@
         "TV_ZOOM_MODE"
       ],
       "english": "Zoom Toggle",
-      "chromium": "zoomToggle",
+      "chromium": "ZoomToggle",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8422,7 +7236,6 @@
         255
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8433,11 +7246,8 @@
         "REDO"
       ],
       "english": "Redo",
-      "chromium": "redo",
+      "chromium": "Redo",
       "glfw": null,
-      "gtk": [
-        "Redo"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -8453,9 +7263,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        65382
-      ],
       "windows": null
     }
   },
@@ -8464,11 +7271,8 @@
       "domkey": "MailReply",
       "android": null,
       "english": "Mail Reply",
-      "chromium": "mailReply",
+      "chromium": "MailReply",
       "glfw": null,
-      "gtk": [
-        "Reply"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -8482,9 +7286,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025138
-      ],
       "windows": null
     }
   },
@@ -8493,11 +7294,8 @@
       "domkey": "MailForward",
       "android": null,
       "english": "Mail Forward",
-      "chromium": "mailForward",
+      "chromium": "MailForward",
       "glfw": null,
-      "gtk": [
-        "MailForward"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -8511,9 +7309,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025168
-      ],
       "windows": null
     }
   },
@@ -8522,11 +7317,8 @@
       "domkey": "MailSend",
       "android": null,
       "english": "Mail Send",
-      "chromium": "mailSend",
+      "chromium": "MailSend",
       "glfw": null,
-      "gtk": [
-        "Send"
-      ],
       "windows": null
     },
     "scanCodes": {
@@ -8540,9 +7332,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": [
-        269025147
-      ],
       "windows": null
     }
   },
@@ -8551,9 +7340,8 @@
       "domkey": "KeyboardLayoutSelect",
       "android": null,
       "english": "Keyboard Layout Select",
-      "chromium": "keyboardLayoutSelect",
+      "chromium": "KeyboardLayoutSelect",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8567,7 +7355,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8576,9 +7363,8 @@
       "domkey": "ShowAllWindows",
       "android": null,
       "english": "Show All Windows",
-      "chromium": "showAllWindows",
+      "chromium": "ShowAllWindows",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8592,7 +7378,6 @@
     "keyCodes": {
       "android": null,
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8603,9 +7388,8 @@
         "BUTTON_1"
       ],
       "english": "Game Button 1",
-      "chromium": "button1",
+      "chromium": "Button1",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8624,7 +7408,6 @@
         188
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8635,9 +7418,8 @@
         "BUTTON_2"
       ],
       "english": "Game Button 2",
-      "chromium": "button2",
+      "chromium": "Button2",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8656,7 +7438,6 @@
         189
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8667,9 +7448,8 @@
         "BUTTON_3"
       ],
       "english": "Game Button 3",
-      "chromium": "button3",
+      "chromium": "Button3",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8688,7 +7468,6 @@
         190
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8699,9 +7478,8 @@
         "BUTTON_4"
       ],
       "english": "Game Button 4",
-      "chromium": "button4",
+      "chromium": "Button4",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8720,7 +7498,6 @@
         191
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8731,9 +7508,8 @@
         "BUTTON_5"
       ],
       "english": "Game Button 5",
-      "chromium": "button5",
+      "chromium": "Button5",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8752,7 +7528,6 @@
         192
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8763,9 +7538,8 @@
         "BUTTON_6"
       ],
       "english": "Game Button 6",
-      "chromium": "button6",
+      "chromium": "Button6",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8784,7 +7558,6 @@
         193
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8795,9 +7568,8 @@
         "BUTTON_7"
       ],
       "english": "Game Button 7",
-      "chromium": "button7",
+      "chromium": "Button7",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8816,7 +7588,6 @@
         194
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8827,9 +7598,8 @@
         "BUTTON_8"
       ],
       "english": "Game Button 8",
-      "chromium": "button8",
+      "chromium": "Button8",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8848,7 +7618,6 @@
         195
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8859,9 +7628,8 @@
         "BUTTON_9"
       ],
       "english": "Game Button 9",
-      "chromium": "button9",
+      "chromium": "Button9",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8880,7 +7648,6 @@
         196
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8891,9 +7658,8 @@
         "BUTTON_10"
       ],
       "english": "Game Button 10",
-      "chromium": "button10",
+      "chromium": "Button10",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8912,7 +7678,6 @@
         197
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8923,9 +7688,8 @@
         "BUTTON_11"
       ],
       "english": "Game Button 11",
-      "chromium": "button11",
+      "chromium": "Button11",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8944,7 +7708,6 @@
         198
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8955,9 +7718,8 @@
         "BUTTON_12"
       ],
       "english": "Game Button 12",
-      "chromium": "button12",
+      "chromium": "Button12",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -8976,7 +7738,6 @@
         199
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -8987,9 +7748,8 @@
         "BUTTON_13"
       ],
       "english": "Game Button 13",
-      "chromium": "button13",
+      "chromium": "Button13",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9008,7 +7768,6 @@
         200
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9019,9 +7778,8 @@
         "BUTTON_14"
       ],
       "english": "Game Button 14",
-      "chromium": "button14",
+      "chromium": "Button14",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9040,7 +7798,6 @@
         201
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9051,9 +7808,8 @@
         "BUTTON_15"
       ],
       "english": "Game Button 15",
-      "chromium": "button15",
+      "chromium": "Button15",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9072,7 +7828,6 @@
         202
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9083,9 +7838,8 @@
         "BUTTON_16"
       ],
       "english": "Game Button 16",
-      "chromium": "button16",
+      "chromium": "Button16",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9104,7 +7858,6 @@
         203
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9115,9 +7868,8 @@
         "BUTTON_A"
       ],
       "english": "Game Button A",
-      "chromium": "buttonA",
+      "chromium": "ButtonA",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9135,7 +7887,6 @@
         96
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9146,9 +7897,8 @@
         "BUTTON_B"
       ],
       "english": "Game Button B",
-      "chromium": "buttonB",
+      "chromium": "ButtonB",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9166,7 +7916,6 @@
         97
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9177,9 +7926,8 @@
         "BUTTON_C"
       ],
       "english": "Game Button C",
-      "chromium": "buttonC",
+      "chromium": "ButtonC",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9197,7 +7945,6 @@
         98
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9208,9 +7955,8 @@
         "BUTTON_L1"
       ],
       "english": "Game Button Left 1",
-      "chromium": "buttonL1",
+      "chromium": "ButtonL1",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9228,7 +7974,6 @@
         102
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9239,9 +7984,8 @@
         "BUTTON_L2"
       ],
       "english": "Game Button Left 2",
-      "chromium": "buttonL2",
+      "chromium": "ButtonL2",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9259,7 +8003,6 @@
         104
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9270,9 +8013,8 @@
         "BUTTON_MODE"
       ],
       "english": "Game Button Mode",
-      "chromium": "buttonMode",
+      "chromium": "ButtonMode",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9290,7 +8032,6 @@
         110
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9301,9 +8042,8 @@
         "BUTTON_R1"
       ],
       "english": "Game Button Right 1",
-      "chromium": "buttonR1",
+      "chromium": "ButtonR1",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9321,7 +8061,6 @@
         103
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9332,9 +8071,8 @@
         "BUTTON_R2"
       ],
       "english": "Game Button Right 2",
-      "chromium": "buttonR2",
+      "chromium": "ButtonR2",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9352,7 +8090,6 @@
         105
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9363,9 +8100,8 @@
         "BUTTON_SELECT"
       ],
       "english": "Game Button Select",
-      "chromium": "buttonSelect",
+      "chromium": "ButtonSelect",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9383,7 +8119,6 @@
         109
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9394,9 +8129,8 @@
         "BUTTON_START"
       ],
       "english": "Game Button Start",
-      "chromium": "buttonStart",
+      "chromium": "ButtonStart",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9414,7 +8148,6 @@
         108
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9425,9 +8158,8 @@
         "BUTTON_THUMBL"
       ],
       "english": "Game Button Thumb Left",
-      "chromium": "buttonThumbl",
+      "chromium": "ButtonThumbl",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9445,7 +8177,6 @@
         106
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9456,9 +8187,8 @@
         "BUTTON_THUMBR"
       ],
       "english": "Game Button Thumb Right",
-      "chromium": "buttonThumbr",
+      "chromium": "ButtonThumbr",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9476,7 +8206,6 @@
         107
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9487,9 +8216,8 @@
         "BUTTON_X"
       ],
       "english": "Game Button X",
-      "chromium": "buttonX",
+      "chromium": "ButtonX",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9507,7 +8235,6 @@
         99
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9518,9 +8245,8 @@
         "BUTTON_Y"
       ],
       "english": "Game Button Y",
-      "chromium": "buttonY",
+      "chromium": "ButtonY",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9538,7 +8264,6 @@
         100
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9549,9 +8274,8 @@
         "BUTTON_Z"
       ],
       "english": "Game Button Z",
-      "chromium": "buttonZ",
+      "chromium": "ButtonZ",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9569,7 +8293,6 @@
         101
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   },
@@ -9580,9 +8303,8 @@
         "FUNCTION"
       ],
       "english": "Fn",
-      "chromium": "fn",
+      "chromium": "Fn",
       "glfw": null,
-      "gtk": null,
       "windows": null
     },
     "scanCodes": {
@@ -9600,7 +8322,6 @@
         119
       ],
       "glfw": null,
-      "gtk": null,
       "windows": null
     }
   }

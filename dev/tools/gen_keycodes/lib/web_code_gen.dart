@@ -20,9 +20,9 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   String get _webLogicalKeyCodeMap {
     final StringBuffer result = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.data) {
-      if (entry.constantName != null) {
-        result.writeln("  '${entry.constantName}': ${toHex(entry.value, digits: 10)},");
-      }
+      zipStrict(entry.webValues, entry.webNames, (int value, String name) {
+        result.writeln("  '${name}': ${toHex(value, digits: 10)},");
+      });
     }
     return result.toString().trimRight();
   }
@@ -31,8 +31,8 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   String get _webPhysicalKeyCodeMap {
     final StringBuffer result = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data) {
-      if (entry.constantName != null) {
-        result.writeln("  '${entry.constantName}': ${toHex(entry.usbHidCode)},");
+      if (entry.name != null) {
+        result.writeln("  '${entry.name}': ${toHex(entry.usbHidCode)},");
       }
     }
     return result.toString().trimRight();
@@ -42,8 +42,8 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   String get _webNumpadCodeMap {
     final StringBuffer result = StringBuffer();
     for (final PhysicalKeyEntry entry in numpadKeyData) {
-      if (entry.constantName != null) {
-        result.writeln("  '${entry.constantName}': ${toHex(entry.flutterId, digits: 10)},");
+      if (entry.name != null) {
+        result.writeln("  '${entry.name}': ${toHex(entry.flutterId, digits: 10)},");
       }
     }
     return result.toString().trimRight();

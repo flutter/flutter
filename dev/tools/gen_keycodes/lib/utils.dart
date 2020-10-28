@@ -135,3 +135,24 @@ String wrapString(String input, {String prefix}) {
   }
   return result.toString();
 }
+
+/// Run `fn` with each corresponding element from list1 and list2.
+///
+/// If `list1` has a different length from `list2`, the execution is aborted
+/// after printing an error.
+///
+/// An null list is considered a list with length 0.
+void zipStrict<T1, T2>(Iterable<T1> list1, Iterable<T2> list2, void Function(T1, T2) fn) {
+  if (list1 == null && list2 == null)
+    return;
+  if ((list1?.length ?? 0) != (list2?.length ?? 0)) {
+    print('Mismatched lists ${list1} to ${list2}');
+    return;
+  }
+  Iterator<T1> it1 = list1.iterator;
+  Iterator<T2> it2 = list2.iterator;
+  while (it1.moveNext()) {
+    it2.moveNext();
+    fn(it1.current, it2.current);
+  }
+}

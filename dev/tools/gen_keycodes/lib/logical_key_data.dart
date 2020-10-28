@@ -137,8 +137,6 @@ class LogicalKeyData {
 /// written with the [toJson] method.
 class LogicalKeyEntry {
   /// Creates a single key entry from available data.
-  ///
-  /// The [usbHidCode] and [chromiumName] parameters must not be null.
   LogicalKeyEntry({
     @required this.value,
     @required this.constantName,

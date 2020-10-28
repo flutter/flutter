@@ -32,15 +32,9 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   String get gtkKeyvalCodeMap {
     final StringBuffer gtkKeyvalCodeMap = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.data) {
-      if (entry.gtkValues != null && entry.gtkNames != null) {
-        if (entry.gtkValues.length != entry.gtkNames.length) {
-          print('Mismatched keycodes ${entry.gtkValues} to names ${entry.gtkNames}');
-          continue;
-        }
-        for (int i = 0; i < entry.gtkValues.length; i += 1) {
-          gtkKeyvalCodeMap.writeln('  insert_record(table, ${toHex(entry.gtkValues[i])}, ${entry.value});    // ${entry.gtkNames[i]}');
-        }
-      }
+      zipStrict(entry.gtkValues, entry.gtkNames, (int value, String name) {
+        gtkKeyvalCodeMap.writeln('  insert_record(table, ${toHex(value)}, ${toHex(entry.value)});    // ${name}');
+      });
     }
     return gtkKeyvalCodeMap.toString().trimRight();
   }
