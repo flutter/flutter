@@ -291,11 +291,13 @@ class MockSimControl extends Mock implements SimControl {
 }
 
 class FakeOperatingSystemUtils implements OperatingSystemUtils {
+  FakeOperatingSystemUtils({this.hostPlatform = HostPlatform.linux_x64});
+
   @override
   ProcessResult makeExecutable(File file) => null;
 
   @override
-  HostPlatform hostPlatform = HostPlatform.linux_x64;
+  HostPlatform hostPlatform;
 
   @override
   void chmod(FileSystemEntity entity, String mode) { }

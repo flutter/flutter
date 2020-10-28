@@ -166,6 +166,30 @@ void main() {
     expect(device.isSupportedForProject(flutterProject), true);
   });
 
+  testWithoutContext('target platform display name on x86_64', () async {
+    final MacOSDevice device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils:
+      FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    );
+
+    expect(await device.targetPlatformDisplayName, 'darwin-x64');
+  });
+
+  testWithoutContext('target platform display name on ARM', () async {
+    final MacOSDevice device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils:
+          FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
+    );
+
+    expect(await device.targetPlatformDisplayName, 'darwin-arm64');
+  });
+
   testUsingContext('isSupportedForProject is false with no host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final MacOSDevice device = MacOSDevice(
