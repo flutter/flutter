@@ -732,11 +732,14 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   InteractiveInkFeature? _currentSplash;
   bool _hovering = false;
   final Map<_HighlightType, InkHighlight?> _highlights = <_HighlightType, InkHighlight?>{};
-  late Map<Type, Action<Intent>> _actionMap;
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleAction),
+  };
 
   bool get highlightsExist => _highlights.values.where((InkHighlight? highlight) => highlight != null).isNotEmpty;
 
   final ObserverList<_ParentInkResponseState> _activeChildren = ObserverList<_ParentInkResponseState>();
+
   @override
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
     assert(childState != null);
@@ -761,9 +764,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   @override
   void initState() {
     super.initState();
-    _actionMap = <Type, Action<Intent>>{
-      ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleAction),
-    };
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
@@ -1084,6 +1084,24 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         if (_hasFocus) MaterialState.focused,
       },
     );
+    Widget child =  GestureDetector(
+      onTapDown: enabled ? _handleTapDown : null,
+      onTapUp: enabled ? _handleTapUp : null,
+      onTap: enabled && widget.onTap != null ? _handleTap : null,
+      onTapCancel: enabled ? _handleTapCancel : null,
+      onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
+      onLongPress: widget.onLongPress != null ? _handleLongPress : null,
+      behavior: HitTestBehavior.opaque,
+      excludeFromSemantics: true,
+      child: widget.child,
+    );
+    if (!widget.excludeFromSemantics) {
+      child = Semantics(
+        child: child,
+        onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
+      );
+    }
     return _ParentInkResponseProvider(
       state: this,
       child: Actions(
@@ -1097,17 +1115,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
             cursor: effectiveMouseCursor,
             onEnter: _handleMouseEnter,
             onExit: _handleMouseExit,
-            child: GestureDetector(
-              onTapDown: enabled ? _handleTapDown : null,
-              onTapUp: enabled ? _handleTapUp : null,
-              onTap: enabled && widget.onTap != null ? _handleTap : null,
-              onTapCancel: enabled ? _handleTapCancel : null,
-              onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
-              onLongPress: widget.onLongPress != null ? _handleLongPress : null,
-              behavior: HitTestBehavior.opaque,
-              excludeFromSemantics: widget.excludeFromSemantics,
-              child: widget.child,
-            ),
+            child: child,
           ),
         ),
       ),
