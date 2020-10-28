@@ -1834,7 +1834,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
 
     final ThemeData theme = Theme.of(context)!;
     final ChipThemeData chipTheme = ChipTheme.of(context);
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection? textDirection = Directionality.maybeOf(context);
     final ShapeBorder shape = widget.shape ?? chipTheme.shape;
     final double elevation = widget.elevation ?? chipTheme.elevation ?? _defaultElevation;
     final double pressElevation = widget.pressElevation ?? chipTheme.pressElevation ?? _defaultPressElevation;

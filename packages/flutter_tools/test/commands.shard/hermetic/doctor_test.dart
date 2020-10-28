@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_studio_validator.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -673,6 +674,13 @@ void main() {
     FlutterVersion: () => mockFlutterVersion,
     Doctor: () => NoOpDoctor(),
   }, initializeFlutterRoot: false);
+
+  testUsingContext('If android workflow is disabled, AndroidStudio validator is not included', () {
+    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<AndroidStudioValidator>())));
+    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<NoAndroidStudioValidator>())));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
+  });
 }
 
 class NoOpDoctor implements Doctor {

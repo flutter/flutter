@@ -469,7 +469,7 @@ class AlertDialog extends StatelessWidget {
     // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.
     final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context)!.textScaleFactor);
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection? textDirection = Directionality.maybeOf(context);
 
     Widget? titleWidget;
     Widget? contentWidget;
@@ -826,7 +826,7 @@ class SimpleDialog extends StatelessWidget {
     // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
     final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context)!.textScaleFactor);
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection? textDirection = Directionality.maybeOf(context);
 
     Widget? titleWidget;
     if (title != null) {
@@ -978,18 +978,12 @@ Future<T?> showDialog<T>({
   assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  final ThemeData? theme = Theme.of(context, shadowThemeOnly: true);
+  final CapturedThemes themes = InheritedTheme.capture(from: context, to: Navigator.of(context, rootNavigator: useRootNavigator)!.context);
   return showGeneralDialog(
     context: context,
     pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
       final Widget pageChild = child ?? Builder(builder: builder!);
-      Widget dialog = Builder(
-        builder: (BuildContext context) {
-          return theme != null
-            ? Theme(data: theme, child: pageChild)
-            : pageChild;
-        }
-      );
+      Widget dialog = themes.wrap(pageChild);
       if (useSafeArea) {
         dialog = SafeArea(child: dialog);
       }

@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'localizations.dart';
 import 'media_query.dart';
 import 'table.dart';
 
@@ -319,6 +320,44 @@ void debugWidgetBuilderValue(Widget widget, Widget? built) {
     }
     return true;
   }());
+}
+
+/// Asserts that the given context has a [Localizations] ancestor that contains
+/// a [WidgetsLocalizations] delegate.
+///
+/// To call this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasWidgetsLocalizations(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasWidgetsLocalizations(BuildContext context) {
+  assert(() {
+    if (Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations) == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No WidgetsLocalizations found.'),
+        ErrorDescription(
+          '${context.widget.runtimeType} widgets require WidgetsLocalizations '
+          'to be provided by a Localizations widget ancestor.'
+        ),
+        ErrorDescription(
+          'The widgets library uses Localizations to generate messages, '
+          'labels, and abbreviations.'
+        ),
+        ErrorHint(
+          'To introduce a WidgetsLocalizations, either use a '
+          'WidgetsApp at the root of your application to include them '
+          'automatically, or add a Localization widget with a '
+          'WidgetsLocalizations delegate.'
+        ),
+        ...context.describeMissingAncestor(expectedAncestorType: WidgetsLocalizations)
+      ]);
+    }
+    return true;
+  }());
+  return true;
 }
 
 /// Returns true if none of the widget library debug variables have been changed.

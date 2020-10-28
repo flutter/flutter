@@ -417,7 +417,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   _ModalBottomSheetRoute({
     this.builder,
-    this.theme,
+    required this.capturedThemes,
     this.barrierLabel,
     this.backgroundColor,
     this.elevation,
@@ -434,7 +434,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
        super(settings: settings);
 
   final WidgetBuilder? builder;
-  final ThemeData? theme;
+  final CapturedThemes capturedThemes;
   final bool isScrollControlled;
   final Color? backgroundColor;
   final double? elevation;
@@ -470,25 +470,27 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final BottomSheetThemeData sheetTheme = theme?.bottomSheetTheme ?? Theme.of(context)!.bottomSheetTheme;
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
-    Widget bottomSheet = MediaQuery.removePadding(
+    final Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: _ModalBottomSheet<T>(
-        route: this,
-        backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
-        elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
-        shape: shape,
-        clipBehavior: clipBehavior,
-        isScrollControlled: isScrollControlled,
-        enableDrag: enableDrag,
+      child: Builder(
+        builder: (BuildContext context) {
+          final BottomSheetThemeData sheetTheme = Theme.of(context)!.bottomSheetTheme;
+          return _ModalBottomSheet<T>(
+            route: this,
+            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
+            elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
+            shape: shape,
+            clipBehavior: clipBehavior,
+            isScrollControlled: isScrollControlled,
+            enableDrag: enableDrag,
+          );
+        },
       ),
     );
-    if (theme != null)
-      bottomSheet = Theme(data: theme!, child: bottomSheet);
-    return bottomSheet;
+    return capturedThemes.wrap(bottomSheet);
   }
 }
 
@@ -667,9 +669,10 @@ Future<T?> showModalBottomSheet<T>({
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
-  return Navigator.of(context, rootNavigator: useRootNavigator)!.push(_ModalBottomSheetRoute<T>(
+  final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator)!;
+  return navigator.push(_ModalBottomSheetRoute<T>(
     builder: builder,
-    theme: Theme.of(context, shadowThemeOnly: true),
+    capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     isScrollControlled: isScrollControlled,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     backgroundColor: backgroundColor,

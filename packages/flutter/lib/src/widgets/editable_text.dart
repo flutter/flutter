@@ -230,14 +230,14 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// Set the [value] to empty.
   ///
   /// After calling this function, [text] will be the empty string and the
-  /// selection will be collapsed at zero offset.
+  /// selection will be invalid.
   ///
   /// Calling this will notify all the listeners of this [TextEditingController]
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   void clear() {
-    value = const TextEditingValue(selection: TextSelection.collapsed(offset: 0));
+    value = TextEditingValue.empty;
   }
 
   /// Set the composing region to an empty range.
@@ -1081,7 +1081,21 @@ class EditableText extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
 
   /// {@template flutter.widgets.editableText.onAppPrivateCommand}
-  /// Called when the result of an app private command is received.
+  /// This is used to receive a private command from the input method.
+  ///
+  /// Called when the result of [TextInputClient.performPrivateCommand] is
+  /// received.
+  ///
+  /// This can be used to provide domain-specific features that are only known
+  /// between certain input methods and their clients.
+  ///
+  /// See also:
+  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputConnection#performPrivateCommand(java.lang.String,%20android.os.Bundle)],
+  ///     which is the Android documentation for performPrivateCommand, used to
+  ///     send a command from the input method.
+  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#sendAppPrivateCommand],
+  ///     which is the Android documentation for sendAppPrivateCommand, used to
+  ///     send a command to the input method.
   /// {@endtemplate}
   final AppPrivateCommandCallback? onAppPrivateCommand;
 

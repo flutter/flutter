@@ -253,17 +253,14 @@ class TestCommand extends FlutterCommand {
       disableDds: disableDds,
       ipv6: boolArg('ipv6'),
       machine: machine,
-      buildMode: BuildMode.debug,
-      trackWidgetCreation: boolArg('track-widget-creation'),
+      buildInfo: buildInfo,
       updateGoldens: boolArg('update-goldens'),
       concurrency: jobs,
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
       web: stringArg('platform') == 'chrome',
       randomSeed: stringArg('test-randomize-ordering-seed'),
-      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
-      buildInfo: buildInfo,
     );
 
     if (collector != null) {
