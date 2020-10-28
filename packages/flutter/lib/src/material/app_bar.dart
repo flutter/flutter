@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar_theme.dart';
 import 'back_button.dart';
+import 'color_scheme.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'flexible_space_bar.dart';
@@ -196,6 +197,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.shadowColor,
     this.shape,
     this.backgroundColor,
+    this.foregroundColor,
     this.brightness,
     this.iconTheme,
     this.actionsIconTheme,
@@ -357,20 +359,46 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// zero.
   final ShapeBorder? shape;
 
-  /// The color to use for the app bar's material. Typically this should be set
-  /// along with [brightness], [iconTheme], [textTheme].
+  /// The color to use for the app bar's [Material].
+  ///
+  /// This property is often set along with [brightness], [iconTheme],
+  /// [textTheme].
   ///
   /// If this property is null, then [AppBarTheme.color] of
-  /// [ThemeData.appBarTheme] is used. If that is also null, then
-  /// [ThemeData.primaryColor] is used.
+  /// [ThemeData.appBarTheme] is used. If that is also null,
+  /// the overall theme's [ColorScheme.primary] is used for light color schemes,
+  /// [ColorScheme.surface] for dark color schemes.
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.colorScheme], the overall theme's color scheme.
+  ///  * [ColorScheme.brightness], classifies the color scheme as light or dark.
   final Color? backgroundColor;
 
-  /// The brightness of the app bar's material. Typically this is set along
-  /// with [backgroundColor], [iconTheme], [textTheme].
+  /// The default color to use for the app bar's text and icons.
+  ///
+  /// If this property is null, then [AppBarTheme.foregroundColor] of
+  /// [ThemeData.appBarTheme] is used. If that is also null,
+  /// the overall theme's [ColorScheme.onPrimary] is used for light color schemes,
+  /// [ColorScheme.onSurface] for dark color schemes.
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.colorScheme], the overall theme's color scheme.
+  final Color? foregroundColor;
+
+  /// The brightness of the app bar's [Material].
+  ///
+  /// This property is often set along with [backgroundColor],
+  /// [iconTheme], [textTheme].
   ///
   /// If this property is null, then [AppBarTheme.brightness] of
   /// [ThemeData.appBarTheme] is used. If that is also null, then
-  /// [ThemeData.primaryColorBrightness] is used.
+  /// the brightness of the [backgroundColor] is used.
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.estimateBrightnessForColor], which classifies colors as light or dark.
   final Brightness? brightness;
 
   /// The color, opacity, and size to use for app bar icons. Typically this
@@ -498,7 +526,8 @@ class _AppBarState extends State<AppBar> {
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
-    final ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context)!;
+    final ColorScheme colorScheme = theme.colorScheme;
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
@@ -510,18 +539,25 @@ class _AppBarState extends State<AppBar> {
 
     final double toolbarHeight = widget.toolbarHeight ?? kToolbarHeight;
 
+    final Color backgroundColor = widget.backgroundColor
+      ?? appBarTheme.color
+      ?? (colorScheme.brightness == Brightness.dark ? colorScheme.surface : colorScheme.primary);
+    final Color foregroundColor = widget.foregroundColor
+      //?? appBarTheme.foregroundColor
+      ?? (colorScheme.brightness == Brightness.dark ? colorScheme.onSurface : colorScheme.onPrimary);
+
     IconThemeData overallIconTheme = widget.iconTheme
       ?? appBarTheme.iconTheme
-      ?? theme.primaryIconTheme;
+      ?? theme.iconTheme.copyWith(color: foregroundColor);
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
       ?? overallIconTheme;
     TextStyle? centerStyle = widget.textTheme?.headline6
       ?? appBarTheme.textTheme?.headline6
-      ?? theme.primaryTextTheme.headline6;
+      ?? theme.textTheme.headline6?.copyWith(color: foregroundColor);
     TextStyle? sideStyle = widget.textTheme?.bodyText2
       ?? appBarTheme.textTheme?.bodyText2
-      ?? theme.primaryTextTheme.bodyText2;
+      ?? theme.textTheme.bodyText2?.copyWith(color: foregroundColor);
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
@@ -530,10 +566,10 @@ class _AppBarState extends State<AppBar> {
       if (sideStyle?.color != null)
         sideStyle = sideStyle!.copyWith(color: sideStyle.color!.withOpacity(opacity));
       overallIconTheme = overallIconTheme.copyWith(
-        opacity: opacity * (overallIconTheme.opacity ?? 1.0)
+        opacity: opacity * (overallIconTheme.opacity ?? 1.0),
       );
       actionsIconTheme = actionsIconTheme.copyWith(
-        opacity: opacity * (actionsIconTheme.opacity ?? 1.0)
+        opacity: opacity * (actionsIconTheme.opacity ?? 1.0),
       );
     }
 
@@ -707,21 +743,19 @@ class _AppBarState extends State<AppBar> {
         ],
       );
     }
+
     final Brightness brightness = widget.brightness
       ?? appBarTheme.brightness
-      ?? theme.primaryColorBrightness;
+      ?? colorScheme.brightness;
     final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
       ? SystemUiOverlayStyle.light
       : SystemUiOverlayStyle.dark;
-
     return Semantics(
       container: true,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
         child: Material(
-          color: widget.backgroundColor
-            ?? appBarTheme.color
-            ?? theme.primaryColor,
+          color: backgroundColor,
           elevation: widget.elevation
             ?? appBarTheme.elevation
             ?? _defaultElevation,
