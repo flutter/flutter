@@ -922,8 +922,8 @@ class TextSelectionGestureDetectorBuilder {
     // For backwards-compatibility, we treat a null kind the same as touch.
     final PointerDeviceKind? kind = details.kind;
     _shouldShowSelectionToolbar = kind == null
-                              || kind == PointerDeviceKind.touch
-                              || kind == PointerDeviceKind.stylus;
+      || kind == PointerDeviceKind.touch
+      || kind == PointerDeviceKind.stylus;
   }
 
   /// Handler for [TextSelectionGestureDetector.onForcePressStart].
@@ -1077,6 +1077,11 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onDragSelectionStart(DragStartDetails details) {
+    final PointerDeviceKind? kind = details.kind;
+    _shouldShowSelectionToolbar = kind == null
+      || kind == PointerDeviceKind.touch
+      || kind == PointerDeviceKind.stylus;
+
     renderEditable.selectPositionAt(
       from: details.globalPosition,
       cause: SelectionChangedCause.drag,
