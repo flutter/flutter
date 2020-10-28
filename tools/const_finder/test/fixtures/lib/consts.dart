@@ -45,6 +45,9 @@ class IgnoreMe {
   const IgnoreMe([this.target]);
 
   final Target target;
+
+  @override
+  String toString() => target.toString();
 }
 
 class StaticConstInitializer {

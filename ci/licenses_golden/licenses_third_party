@@ -1,4 +1,4 @@
-Signature: 08da629cc55657469fbc030dd104af1f
+Signature: df32ba1b81ccb800b01c3d2bf007a2a8
 
 UNUSED LICENSES:
 
@@ -8430,6 +8430,7 @@ FILE: ../../../third_party/dart/runtime/bin/dartdev_isolate.cc
 FILE: ../../../third_party/dart/runtime/bin/dartdev_isolate.h
 FILE: ../../../third_party/dart/runtime/bin/exe_utils.cc
 FILE: ../../../third_party/dart/runtime/bin/exe_utils.h
+FILE: ../../../third_party/dart/runtime/bin/ffi_test/ffi_test_functions_generated.cc
 FILE: ../../../third_party/dart/runtime/bin/file_win.h
 FILE: ../../../third_party/dart/runtime/bin/platform_macos.h
 FILE: ../../../third_party/dart/runtime/bin/platform_macos_test.cc
