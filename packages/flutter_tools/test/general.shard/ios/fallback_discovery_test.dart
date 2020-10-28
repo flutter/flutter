@@ -97,7 +97,6 @@ void main() {
           id: 'a',
           name: 'isolate',
           number: '1',
-          isSystemIsolate: false,
         ),
       ];
     });
