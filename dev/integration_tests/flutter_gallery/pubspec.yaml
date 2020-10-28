@@ -8,29 +8,13 @@ dependencies:
   flutter:
     sdk: flutter
   collection: 1.15.0-nullsafety.4
-  device_info:
-    git:
-      url: https://github.com/flutter/plugins.git
-      ref: nnbd
-      path: packages/device_info/device_info
+  device_info: 2.0.0-nullsafety
   intl: 0.17.0-nullsafety
-  connectivity:
-    git:
-      url: https://github.com/flutter/plugins.git
-      ref: nnbd
-      path: packages/connectivity/connectivity
+  connectivity: 3.0.0-nullsafety
   string_scanner: 1.1.0-nullsafety.2
-  url_launcher:
-    git:
-      url: https://github.com/flutter/plugins.git
-      ref: nnbd
-      path: packages/url_launcher/url_launcher
+  url_launcher: 6.0.0-nullsafety
   cupertino_icons: 1.0.0
-  video_player:
-    git:
-      url: https://github.com/flutter/plugins.git
-      ref: nnbd
-      path: packages/video_player/video_player
+  video_player: 2.0.0-nullsafety
   scoped_model:
     git:
       url: https://github.com/kevmoo/scoped_model.git
