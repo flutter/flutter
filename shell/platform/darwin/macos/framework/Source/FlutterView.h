@@ -18,7 +18,10 @@
  * View capable of acting as a rendering target and input source for the Flutter
  * engine.
  */
-@interface FlutterView : NSOpenGLView
+@interface FlutterView : NSView
+
+@property(readwrite, nonatomic, nonnull) NSOpenGLContext* openGLContext;
+@property(readwrite, nonatomic) BOOL synchronousResizing;
 
 - (nullable instancetype)initWithFrame:(NSRect)frame
                           shareContext:(nonnull NSOpenGLContext*)shareContext
@@ -34,5 +37,8 @@
 - (nonnull instancetype)initWithFrame:(NSRect)frameRect NS_UNAVAILABLE;
 - (nullable instancetype)initWithCoder:(nonnull NSCoder*)coder NS_UNAVAILABLE;
 - (nonnull instancetype)init NS_UNAVAILABLE;
+
+- (void)present;
+- (int)getFrameBufferIdForSize:(CGSize)size;
 
 @end
