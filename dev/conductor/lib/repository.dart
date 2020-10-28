@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-//import 'dart:io' as io;
+import 'dart:convert' show jsonDecode;
+import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -12,6 +13,7 @@ import 'package:platform/platform.dart';
 import './git.dart';
 import './globals.dart' as globals;
 import './stdio.dart';
+import './version.dart';
 
 class Repository {
   Repository({
@@ -193,6 +195,23 @@ class Repository {
       'update the release branch with the commit',
       workingDirectory: checkoutDirectory.path,
     );
+  }
+
+  Version flutterVersion() {
+    // Build tool
+    processManager.runSync(<String>[
+      fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
+      'help',
+    ]);
+    // Check version
+    final io.ProcessResult result = processManager.runSync(<String>[
+      fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
+      '--version',
+      '--machine',
+    ]);
+    final Map<String, dynamic> versionJson =
+        jsonDecode((result.stdout as String).trim()) as Map<String, dynamic>;
+    return Version.fromString(versionJson['frameworkVersion'] as String);
   }
 
   /// Create an empty commit and return the revision.

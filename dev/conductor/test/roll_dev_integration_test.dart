@@ -1,15 +1,16 @@
-import 'dart:io' as io;
+//import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-import 'package:flutter_conductor/git.dart';
+//import 'package:flutter_conductor/git.dart';
 //import 'package:flutter_conductor/globals.dart';
 import 'package:flutter_conductor/roll_dev.dart' show rollDev;
 import 'package:flutter_conductor/repository.dart';
-import 'package:flutter_conductor/stdio.dart';
+//import 'package:flutter_conductor/stdio.dart';
+import 'package:flutter_conductor/version.dart';
 
 import './common.dart';
 
@@ -51,6 +52,8 @@ void main() {
     });
 
     test('increment m', () {
+      final Version initialVersion = framework.flutterVersion();
+
       final String latestCommit = framework.authorEmptyCommit();
 
       final FakeArgResults fakeArgResults = FakeArgResults(
@@ -72,6 +75,9 @@ void main() {
         stdio.stdout,
         contains(RegExp(r'Publishing Flutter \d+\.\d+\.\d+-\d+\.\d+\.pre \(')),
       );
+
+      final Version finalVersion = framework.flutterVersion();
+      expect(initialVersion.m + 1, finalVersion.m);
     });
   });
 }
