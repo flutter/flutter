@@ -77,14 +77,6 @@ class Theme extends StatelessWidget {
   /// Defaults to [new ThemeData.fallback] if there is no [Theme] in the given
   /// build context.
   ///
-  /// If [shadowThemeOnly] is true and the closest [Theme] ancestor was
-  /// installed by the [MaterialApp] — in other words if the closest [Theme]
-  /// ancestor does not shadow the application's theme — then this returns null.
-  /// This argument should be used in situations where its useful to wrap a
-  /// route's widgets with a [Theme], but only when the application's overall
-  /// theme is being shadowed by a [Theme] widget that is deeper in the tree.
-  /// See [isMaterialAppTheme].
-  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
