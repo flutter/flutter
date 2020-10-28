@@ -219,10 +219,6 @@ Future<void> main(List<String> rawArguments) async {
     final String supplementalHidCodes = File(parsedArguments['supplemental-hid-codes'] as String).readAsStringSync();
     final String hidCodes = '$baseHidCodes\n$supplementalHidCodes';
 
-    final String logicalKeys = parsedArguments['chromium-keys'] == null ?
-      await getChromiumLogicalKeys() :
-      File(parsedArguments['chromium-keys'] as String).readAsStringSync();
-
     final String androidKeyCodes = parsedArguments['android-keycodes'] == null ?
       await getAndroidKeyCodes() :
       File(parsedArguments['android-keycodes'] as String).readAsStringSync();
@@ -235,21 +231,25 @@ Future<void> main(List<String> rawArguments) async {
       await getGlfwKeyCodes() :
       File(parsedArguments['glfw-keycodes'] as String).readAsStringSync();
 
+    final String windowsKeyCodes = parsedArguments['windows-keycodes'] == null ?
+      await getWindowsKeyCodes() :
+      File(parsedArguments['windows-keycodes'] as String).readAsStringSync();
+
     final String gtkKeyCodes = parsedArguments['gtk-keycodes'] == null ?
       await getGtkKeyCodes() :
       File(parsedArguments['gtk-keycodes'] as String).readAsStringSync();
 
-    final String windowsKeyCodes = parsedArguments['windows-keycodes'] == null ?
-      await getWindowsKeyCodes() :
-      File(parsedArguments['windows-keycodes'] as String).readAsStringSync();
+    final String webLogicalKeys = parsedArguments['chromium-keys'] == null ?
+      await getChromiumLogicalKeys() :
+      File(parsedArguments['chromium-keys'] as String).readAsStringSync();
 
     final String windowsToDomKey = File(parsedArguments['windows-domkey'] as String).readAsStringSync();
     final String glfwToDomKey = File(parsedArguments['glfw-domkey'] as String).readAsStringSync();
     final String gtkToDomKey = File(parsedArguments['gtk-domkey'] as String).readAsStringSync();
     final String androidToDomKey = File(parsedArguments['android-domkey'] as String).readAsStringSync();
 
-    physicalData = PhysicalKeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey, gtkKeyCodes, gtkToDomKey, windowsKeyCodes, windowsToDomKey);
-    logicalData = LogicalKeyData(logicalKeys);
+    physicalData = PhysicalKeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey, windowsKeyCodes, windowsToDomKey);
+    logicalData = LogicalKeyData(webLogicalKeys, gtkKeyCodes, gtkToDomKey);
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     File(parsedArguments['physical-data'] as String).writeAsStringSync(encoder.convert(physicalData.toJson()));
@@ -294,7 +294,7 @@ Future<void> main(List<String> rawArguments) async {
         codeGenerator = WindowsCodeGenerator(physicalData);
         break;
       case 'linux':
-        codeGenerator = GtkCodeGenerator(physicalData);
+        codeGenerator = GtkCodeGenerator(physicalData, logicalData);
         break;
       case 'web':
         codeGenerator = WebCodeGenerator(physicalData, logicalData);

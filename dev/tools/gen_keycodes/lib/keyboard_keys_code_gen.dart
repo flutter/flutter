@@ -68,9 +68,15 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
       ..add(_ExplicitKeySpecification(' '.codeUnits[0], 'space'));
 
     return keys.map((_ExplicitKeySpecification key) {
-      final LogicalKeyEntry result = LogicalKeyEntry(name: key.name, value: key.code);
-      if (key.constantName != null)
-        result.constantName = key.constantName;
+      final LogicalKeyEntry result = LogicalKeyEntry(
+        value: key.code,
+        commentName: LogicalKeyEntry.computeCommentName(key.name),
+        constantName: key.constantName ?? LogicalKeyEntry.computeConstantName(key.name),
+        gtkNames: [key.name],
+        gtkValues: [key.code],
+        webNames: [key.name],
+        webValues: [key.code],
+      );
       return result;
     }).toList();
   }
@@ -91,7 +97,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
     for (final LogicalKeyEntry entry in _alnumLogicalKeys()..addAll(logicalData.data)) {
       printKey(
-        entry.flutterId,
+        entry.value,
         entry.constantName,
         entry.commentName,
       );
@@ -136,7 +142,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   String get _predefinedKeyCodeMap {
     final StringBuffer keyCodeMap = StringBuffer();
     for (final LogicalKeyEntry entry in _alnumLogicalKeys()..addAll(logicalData.data)) {
-      keyCodeMap.writeln('    ${toHex(entry.flutterId, digits: 10)}: ${entry.constantName},');
+      keyCodeMap.writeln('    ${toHex(entry.value, digits: 10)}: ${entry.constantName},');
     }
     // for (final String entry in PhysicalKeyEntry.synonyms.keys) {
     //   // Use the first item in the synonyms as a template for the ID to use.

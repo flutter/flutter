@@ -50,7 +50,7 @@ abstract class PhysicalKeyEvent with Diagnosticable {
   const PhysicalKeyEvent({
     required this.physicalKey,
     required this.timeStamp,
-    required this.lockFlags,
+    required this.activeLocks,
   });
 
   /// Returns an object representing the physical location of this key.
@@ -91,7 +91,7 @@ abstract class PhysicalKeyEvent with Diagnosticable {
   /// See also:
   ///
   ///  * [KeyboardLocks] for possible bits.
-  final int lockFlags;
+  final int activeLocks;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -111,9 +111,9 @@ class PhysicalKeyDownEvent extends PhysicalKeyEvent {
   const PhysicalKeyDownEvent({
     required Duration timeStamp,
     required PhysicalKeyboardKey physicalKey,
-    required int lockFlags,
+    required int activeLocks,
     this.repeated = false,
-  }) : super(physicalKey: physicalKey, timeStamp: timeStamp, lockFlags: lockFlags);
+  }) : super(physicalKey: physicalKey, timeStamp: timeStamp, activeLocks: activeLocks);
 
   final bool repeated;
 
@@ -134,8 +134,8 @@ class PhysicalKeyUpEvent extends PhysicalKeyEvent {
   const PhysicalKeyUpEvent({
     required Duration timeStamp,
     required PhysicalKeyboardKey physicalKey,
-    required int lockFlags,
-  }) : super(physicalKey: physicalKey, timeStamp: timeStamp, lockFlags: lockFlags);
+    required int activeLocks,
+  }) : super(physicalKey: physicalKey, timeStamp: timeStamp, activeLocks: activeLocks);
 }
 
 /// The user has released a key on the keyboard after Flutter lost input focus.
@@ -156,8 +156,8 @@ class PhysicalKeyCancelEvent extends PhysicalKeyEvent {
   const PhysicalKeyCancelEvent({
     required Duration timeStamp,
     required PhysicalKeyboardKey physicalKey,
-    required int lockFlags,
-  }) : super(physicalKey: physicalKey, timeStamp: timeStamp, lockFlags: lockFlags);
+    required int activeLocks,
+  }) : super(physicalKey: physicalKey, timeStamp: timeStamp, activeLocks: activeLocks);
 }
 
 /// The user has pressed a key on the keyboard before the current application
@@ -179,8 +179,8 @@ class PhysicalKeySyncEvent extends PhysicalKeyEvent {
   const PhysicalKeySyncEvent({
     required Duration timeStamp,
     required PhysicalKeyboardKey physicalKey,
-    required int lockFlags,
-  }) : super(physicalKey: physicalKey, timeStamp: timeStamp, lockFlags: lockFlags);
+    required int activeLocks,
+  }) : super(physicalKey: physicalKey, timeStamp: timeStamp, activeLocks: activeLocks);
 }
 
 @immutable
@@ -224,7 +224,7 @@ abstract class LogicalKeyEvent with Diagnosticable {
   /// See also:
   ///
   ///  * [KeyboardLocks] for possible bits.
-  int get lockFlags => physicalEvent.lockFlags;
+  int get activeLocks => physicalEvent.activeLocks;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -438,38 +438,38 @@ class HardwareKeyboard {
     final PhysicalKeyboardKey physicalKey = PhysicalKeyboardKey.findKeyByCode(keyData.key)
         ?? PhysicalKeyboardKey(keyData.key);
     final Duration timeStamp = keyData.timeStamp;
-    final int lockFlags = keyData.lockFlags;
+    final int activeLocks = keyData.activeLocks;
     switch (keyData.change) {
       case ui.KeyChange.down:
         return PhysicalKeyDownEvent(
           physicalKey: physicalKey,
           timeStamp: timeStamp,
-          lockFlags: lockFlags,
+          activeLocks: activeLocks,
         );
       case ui.KeyChange.repeatedDown:
         return PhysicalKeyDownEvent(
           physicalKey: physicalKey,
           timeStamp: timeStamp,
-          lockFlags: lockFlags,
+          activeLocks: activeLocks,
           repeated: true,
         );
       case ui.KeyChange.up:
         return PhysicalKeyUpEvent(
           physicalKey: physicalKey,
           timeStamp: timeStamp,
-          lockFlags: lockFlags,
+          activeLocks: activeLocks,
         );
       case ui.KeyChange.synchronize:
         return PhysicalKeySyncEvent(
           physicalKey: physicalKey,
           timeStamp: timeStamp,
-          lockFlags: lockFlags,
+          activeLocks: activeLocks,
         );
       case ui.KeyChange.cancel:
         return PhysicalKeyCancelEvent(
           physicalKey: physicalKey,
           timeStamp: timeStamp,
-          lockFlags: lockFlags,
+          activeLocks: activeLocks,
         );
     }
   }
