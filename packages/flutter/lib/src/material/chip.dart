@@ -258,16 +258,15 @@ abstract class DeletableChipAttributes {
   /// [IconThemeData.color].
   Color? get deleteIconColor;
 
-  /// Whether to use a tooltip on the delete button showing this chip's
+  /// Whether to use a tooltip on the chip's delete button showing the
   /// [deleteButtonTooltipMessage].
   ///
-  /// Defaults to `true`.
+  /// Must not be null. Defaults to true.
   bool get useDeleteButtonTooltip;
 
   /// The message to be used for the chip's delete button tooltip.
   ///
-  /// Will be shown only if this chip's [useDeleteButtonTooltip] is `true`
-  /// (the default).
+  /// This will be shown only if [useDeleteButtonTooltip] is true.
   String? get deleteButtonTooltipMessage;
 }
 
