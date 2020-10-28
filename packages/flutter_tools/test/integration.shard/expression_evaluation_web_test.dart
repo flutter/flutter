@@ -149,7 +149,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await failToEvaluateExpression(_flutter);
     await cleanProject();
-  });
+  }, skip: platform.isMacOS);
 
   testWithoutContext('flutter test expression evaluation - can evaluate trivial expressions in a test', () async {
     await initProject();
@@ -157,7 +157,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: platform.isMacOS);
 
   testWithoutContext('flutter test expression evaluation - can evaluate complex expressions in a test', () async {
     await initProject();
@@ -165,7 +165,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: platform.isMacOS);
 }
 
 Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {
