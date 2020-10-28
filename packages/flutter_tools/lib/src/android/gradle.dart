@@ -279,6 +279,9 @@ Future<void> buildGradleApp({
   } else {
     command.add('-q');
   }
+  if (!buildInfo.androidGradleDaemon) {
+    command.add('--no-daemon');
+  }
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final Directory localEngineRepo = _getLocalEngineRepo(
@@ -591,6 +594,9 @@ Future<void> buildGradleAar({
     command.add('-Pverbose=true');
   } else {
     command.add('-q');
+  }
+  if (!buildInfo.androidGradleDaemon) {
+    command.add('--no-daemon');
   }
 
   if (target != null && target.isNotEmpty) {

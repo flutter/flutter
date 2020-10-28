@@ -114,6 +114,7 @@ class FlutterOptions {
   static const String kDeviceTimeout = 'device-timeout';
   static const String kAnalyzeSize = 'analyze-size';
   static const String kNullAssertions = 'null-assertions';
+  static const String kAndroidGradleDaemon = 'android-gradle-daemon';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -611,6 +612,18 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addAndroidSpecificBuildOptions({ bool hide = false }) {
+    argParser.addFlag(
+      FlutterOptions.kAndroidGradleDaemon,
+      help: 'Whether to enable the Gradle daemon when performing an Android build. '
+        'Starting the daemon is the default behavior of the gradle wrapper script created '
+        ' in a Flutter project. Setting this flag to false corresponds to passing '
+        "'--no-daemon' to the gradle wrapper script. This flag will cause the daemon "
+        'process to terminate after the build is completed',
+      defaultsTo: true,
+    );
+  }
+
   /// Adds build options common to all of the desktop build commands.
   void addCommonDesktopBuildOptions({ bool verboseHelp = false }) {
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -764,6 +777,9 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kSplitDebugInfoOption)
       : null;
 
+    final bool androidGradleDaemon = !argParser.options.containsKey(FlutterOptions.kAndroidGradleDaemon)
+      || boolArg(FlutterOptions.kAndroidGradleDaemon);
+
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
         '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
@@ -827,6 +843,7 @@ abstract class FlutterCommand extends Command<void> {
       packagesPath: globalResults['packages'] as String ?? '.packages',
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
+      androidGradleDaemon: androidGradleDaemon,
     );
   }
 
@@ -965,9 +982,9 @@ abstract class FlutterCommand extends Command<void> {
       // First always update universal artifacts, as some of these (e.g.
       // ios-deploy on macOS) are required to determine `requiredArtifacts`.
       await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
-
       await globals.cache.updateAll(await requiredArtifacts);
     }
+    Cache.releaseLock();
 
     await validateCommand();
 
@@ -994,11 +1011,7 @@ abstract class FlutterCommand extends Command<void> {
         context: PubContext.getVerifyContext(name),
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,
       );
-      // All done updating dependencies. Release the cache lock.
-      Cache.releaseLock();
-      await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
-    } else {
-      Cache.releaseLock();
+      await project.regeneratePlatformSpecificTooling();
     }
 
     setupApplicationPackages();

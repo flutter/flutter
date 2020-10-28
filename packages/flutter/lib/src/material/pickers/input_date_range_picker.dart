@@ -141,7 +141,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_startDate != null) {
       _startInputText = localizations.formatCompactDate(_startDate!);
       final bool selectText = widget.autofocus && !_autoSelected;
@@ -166,7 +166,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
     final String? endError = _validateDate(_endDate);
     if (startError == null && endError == null) {
       if (_startDate!.isAfter(_endDate!)) {
-        startError = widget.errorInvalidRangeText ?? MaterialLocalizations.of(context)!.invalidDateRangeLabel;
+        startError = widget.errorInvalidRangeText ?? MaterialLocalizations.of(context).invalidDateRangeLabel;
       }
     }
     setState(() {
@@ -177,15 +177,15 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
   }
 
   DateTime? _parseDate(String? text) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return localizations.parseCompactDate(text);
   }
 
   String? _validateDate(DateTime? date) {
     if (date == null) {
-      return widget.errorFormatText ?? MaterialLocalizations.of(context)!.invalidDateFormatLabel;
+      return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
     } else if (date.isBefore(widget.firstDate) || date.isAfter(widget.lastDate)) {
-      return widget.errorInvalidText ?? MaterialLocalizations.of(context)!.dateOutOfRangeLabel;
+      return widget.errorInvalidText ?? MaterialLocalizations.of(context).dateOutOfRangeLabel;
     }
     return null;
   }
@@ -225,7 +225,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
 
   @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final InputDecorationTheme inputTheme = Theme.of(context)!.inputDecorationTheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

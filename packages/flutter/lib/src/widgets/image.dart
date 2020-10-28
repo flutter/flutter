@@ -52,7 +52,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? s
     bundle: DefaultAssetBundle.of(context),
     devicePixelRatio: MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
     locale: Localizations.localeOf(context, nullOk: true),
-    textDirection: Directionality.of(context),
+    textDirection: Directionality.maybeOf(context),
     size: size,
     platform: defaultTargetPlatform,
   );

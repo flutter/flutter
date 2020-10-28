@@ -258,6 +258,119 @@ void main() {
     expect(_material(tester).elevation, equals(elevation));
     expect(_material(tester).color, equals(backgroundColor));
   });
+
+  testWidgets('BottomNavigationBarTheme can be used to hide all labels', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66738.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+          ),
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+
+    final Finder findOpacity = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.byType(Opacity),
+    );
+
+    expect(findOpacity, findsNWidgets(2));
+    expect(tester.widget<Opacity>(findOpacity.at(0)).opacity, 0.0);
+    expect(tester.widget<Opacity>(findOpacity.at(1)).opacity, 0.0);
+  });
+
+  testWidgets('BottomNavigationBarTheme can be used to hide selected labels', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66738.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            showSelectedLabels: false,
+            showUnselectedLabels: true,
+          ),
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+
+    final Finder findFadeTransition = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.byType(FadeTransition),
+    );
+
+    expect(findFadeTransition, findsNWidgets(2));
+    expect(tester.widget<FadeTransition>(findFadeTransition.at(0)).opacity.value, 0.0);
+    expect(tester.widget<FadeTransition>(findFadeTransition.at(1)).opacity.value, 1.0);
+  });
+
+  testWidgets('BottomNavigationBarTheme can be used to hide unselected labels', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            showSelectedLabels: true,
+            showUnselectedLabels: false,
+          ),
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+
+    final Finder findFadeTransition = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.byType(FadeTransition),
+    );
+
+    expect(findFadeTransition, findsNWidgets(2));
+    expect(tester.widget<FadeTransition>(findFadeTransition.at(0)).opacity.value, 1.0);
+    expect(tester.widget<FadeTransition>(findFadeTransition.at(1)).opacity.value, 0.0);
+  });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {

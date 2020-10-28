@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Colar",
   "selectAllButtonLabel": "Selecionar Tudo",
   "tabSemanticsLabel": "Guia $tabIndex de $tabCount",
-  "modalBarrierDismissLabel": "Dispensar"
+  "modalBarrierDismissLabel": "Dispensar",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

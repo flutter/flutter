@@ -875,6 +875,7 @@ class EditableText extends StatefulWidget {
   /// value is set to the ambient [ThemeData.textSelectionColor].
   final Color? selectionColor;
 
+  /// {@template flutter.widgets.editableText.selectionControls}
   /// Optional delegate for building the text selection handles and toolbar.
   ///
   /// The [EditableText] widget used on its own will not trigger the display
@@ -889,6 +890,7 @@ class EditableText extends StatefulWidget {
   ///  * [TextField], a Material Design themed wrapper of [EditableText], which
   ///    shows the selection toolbar upon appropriate user events based on the
   ///    user's platform set in [ThemeData.platform].
+  /// {@endtemplate}
   final TextSelectionControls? selectionControls;
 
   /// {@template flutter.widgets.editableText.keyboardType}
@@ -1079,7 +1081,21 @@ class EditableText extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
 
   /// {@template flutter.widgets.editableText.onAppPrivateCommand}
-  /// Called when the result of an app private command is received.
+  /// This is used to receive a private command from the input method.
+  ///
+  /// Called when the result of [TextInputClient.performPrivateCommand] is
+  /// received.
+  ///
+  /// This can be used to provide domain-specific features that are only known
+  /// between certain input methods and their clients.
+  ///
+  /// See also:
+  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputConnection#performPrivateCommand(java.lang.String,%20android.os.Bundle)],
+  ///     which is the Android documentation for performPrivateCommand, used to
+  ///     send a command from the input method.
+  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#sendAppPrivateCommand],
+  ///     which is the Android documentation for sendAppPrivateCommand, used to
+  ///     send a command to the input method.
   /// {@endtemplate}
   final AppPrivateCommandCallback? onAppPrivateCommand;
 

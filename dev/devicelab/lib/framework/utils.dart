@@ -282,7 +282,6 @@ Future<Process> startProcess(
       + (environment != null ? ' with environment $environment' : ''));
   final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
-  newEnvironment['FLUTTER_IOS_SCREENSHOT_ON_CONNECTION_FAILURE'] = 'true';
   final Process process = await _processManager.start(
     <String>[executable, ...arguments],
     environment: newEnvironment,
@@ -461,6 +460,16 @@ Future<String> evalFlutter(String command, {
   final List<String> args = flutterCommandArgs(command, options);
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
       canFail: canFail, environment: environment, stderr: stderr);
+}
+
+Future<ProcessResult> executeFlutter(String command, {
+  List<String> options = const <String>[],
+}) async {
+  final List<String> args = flutterCommandArgs(command, options);
+  return _processManager.run(
+    <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
+    workingDirectory: cwd,
+  );
 }
 
 String get dartBin =>
@@ -725,4 +734,35 @@ Future<int> gitClone({String path, String repo}) async {
     path,
         () => exec('git', <String>['clone', repo]),
   );
+}
+
+/// Call [fn] retrying so long as [retryIf] return `true` for the exception
+/// thrown and [maxAttempts] has not been reached.
+///
+/// If no [retryIf] function is given this will retry any for any [Exception]
+/// thrown. To retry on an [Error], the error must be caught and _rethrown_
+/// as an [Exception].
+///
+/// Waits a constant duration of [delayDuration] between every retry attempt.
+Future<T> retry<T>(
+  FutureOr<T> Function() fn, {
+  FutureOr<bool> Function(Exception) retryIf,
+  int maxAttempts = 5,
+  Duration delayDuration = const Duration(seconds: 3),
+}) async {
+  int attempt = 0;
+  while (true) {
+    attempt++; // first invocation is the first attempt
+    try {
+      return await fn();
+    } on Exception catch (e) {
+      if (attempt >= maxAttempts ||
+          (retryIf != null && !(await retryIf(e)))) {
+        rethrow;
+      }
+    }
+
+    // Sleep for a delay
+    await Future<void>.delayed(delayDuration);
+  }
 }

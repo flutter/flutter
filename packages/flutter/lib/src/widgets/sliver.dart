@@ -862,6 +862,9 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   }) : super(key: key, delegate: delegate);
 
   @override
+  SliverMultiBoxAdaptorElement createElement() => SliverMultiBoxAdaptorElement(this, replaceMovedChildren: true);
+
+  @override
   RenderSliverList createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverList(childManager: element);
@@ -1079,7 +1082,21 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 /// the children of subclasses of [RenderSliverMultiBoxAdaptor].
 class SliverMultiBoxAdaptorElement extends RenderObjectElement implements RenderSliverBoxChildManager {
   /// Creates an element that lazily builds children for the given widget.
-  SliverMultiBoxAdaptorElement(SliverMultiBoxAdaptorWidget widget) : super(widget);
+  ///
+  /// If `replaceMovedChildren` is set to true, a new child is proactively
+  /// inflate for the index that was previously occupied by a child that moved
+  /// to a new index. The layout offset of the moved child is copied over to the
+  /// new child. RenderObjects, that depend on the layout offset of existing
+  /// children during [RenderObject.performLayout] should set this to true
+  /// (example: [RenderSliverList]). For RenderObjects that figure out the
+  /// layout offset of their children without looking at the layout offset of
+  /// existing children this should be set to false (example:
+  /// [RenderSliverFixedExtentList]) to avoid inflating unnecessary children.
+  SliverMultiBoxAdaptorElement(SliverMultiBoxAdaptorWidget widget, {bool replaceMovedChildren = false})
+     : _replaceMovedChildren = replaceMovedChildren,
+       super(widget);
+
+  final bool _replaceMovedChildren;
 
   @override
   SliverMultiBoxAdaptorWidget get widget => super.widget as SliverMultiBoxAdaptorWidget;
@@ -1146,8 +1163,10 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
             childParentData.layoutOffset = null;
 
           newChildren[newIndex] = _childElements[index];
-          // We need to make sure the original index gets processed.
-          newChildren.putIfAbsent(index, () => null);
+          if (_replaceMovedChildren) {
+            // We need to make sure the original index gets processed.
+            newChildren.putIfAbsent(index, () => null);
+          }
           // We do not want the remapped child to get deactivated during processElement.
           _childElements.remove(index);
         } else {

@@ -707,6 +707,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
     return Semantics(
       container: true,
+      slider: true,
       child: FocusableActionDetector(
         actions: _actionMap,
         shortcuts: _shortcutMap,
