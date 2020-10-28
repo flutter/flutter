@@ -64,6 +64,14 @@ abstract class DriverService {
     Map<String, Object> platformArgs = const <String, Object>{},
   });
 
+  /// If --use-existing-app is provided, configured the correct VM Service URI.
+  Future<void> reuseApplication(
+    Uri vmServiceUri,
+    Device device,
+    DebuggingOptions debuggingOptions,
+    bool ipv6,
+  );
+
   /// Start the test file with the provided [arguments] and [environment], returning
   /// the test process exit code.
   Future<int> startTest(
@@ -168,10 +176,26 @@ class FlutterDriverService extends DriverService {
     if (result == null || !result.started) {
       throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
     }
-    _vmServiceUri = result.observatoryUri.toString();
+    return reuseApplication(
+      result.observatoryUri,
+      device,
+      debuggingOptions,
+      ipv6,
+    );
+  }
+
+  @override
+  Future<void> reuseApplication(
+    Uri vmServiceUri,
+    Device device,
+    DebuggingOptions debuggingOptions,
+    bool ipv6,
+  ) async {
+    _vmServiceUri = vmServiceUri.toString();
+    _device = device;
     try {
       await device.dds.startDartDevelopmentService(
-        result.observatoryUri,
+        vmServiceUri,
         debuggingOptions.ddsPort,
         ipv6,
         debuggingOptions.disableServiceAuthCodes,
@@ -228,20 +252,24 @@ class FlutterDriverService extends DriverService {
       );
       await sharedSkSlWriter(_device, result, outputFile: writeSkslOnExit, logger: _logger);
     }
-    try {
+    // If the application package is available, stop and uninstall.
+    if (_applicationPackage != null) {
       if (!await _device.stopApp(_applicationPackage, userIdentifier: userIdentifier)) {
         _logger.printError('Failed to stop app');
       }
-    } on Exception catch (err) {
-      _logger.printError('Failed to stop app due to unhandled error: $err');
-    }
-
-    try {
       if (!await _device.uninstallApp(_applicationPackage, userIdentifier: userIdentifier)) {
-       _logger.printError('Failed to uninstall app');
+        _logger.printError('Failed to uninstall app');
       }
-    } on Exception catch (err) {
-      _logger.printError('Failed to uninstall app due to unhandled error: $err');
+    } else if (_device.supportsFlutterExit) {
+      // Otherwise use the VM Service URI to stop the app as a best effort approach.
+      final vm_service.VM vm = await _vmService.getVM();
+      final vm_service.IsolateRef isolateRef = vm.isolates
+        .firstWhere((vm_service.IsolateRef element) {
+          return !element.isSystemIsolate;
+        }, orElse: () => null);
+      unawaited(_vmService.flutterExit(isolateId: isolateRef.id));
+    } else {
+      _logger.printTrace('No application package for $_device, leaving app running');
     }
     await _device.dispose();
   }

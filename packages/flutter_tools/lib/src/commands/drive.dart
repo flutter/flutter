@@ -186,22 +186,35 @@ class DriveCommand extends RunCommandBase {
       ? null
       : _fileSystem.file(stringArg('use-application-binary'));
 
-    await driverService.start(
-      buildInfo,
-      device,
-      debuggingOptions,
-      ipv6,
-      applicationBinary: applicationBinary,
-      route: route,
-      userIdentifier: userIdentifier,
-      mainPath: targetFile,
-      platformArgs: <String, Object>{
-        if (traceStartup)
-          'trace-startup': traceStartup,
-        if (web)
-          '--no-launch-chrome': true,
+    if (stringArg('use-existing-app') == null) {
+      await driverService.start(
+        buildInfo,
+        device,
+        debuggingOptions,
+        ipv6,
+        applicationBinary: applicationBinary,
+        route: route,
+        userIdentifier: userIdentifier,
+        mainPath: targetFile,
+        platformArgs: <String, Object>{
+          if (traceStartup)
+            'trace-startup': traceStartup,
+          if (web)
+            '--no-launch-chrome': true,
+        }
+      );
+    } else {
+      final Uri uri = Uri.tryParse(stringArg('use-existing-app'));
+      if (uri == null) {
+        throwToolExit('Invalid VM Service URI: ${stringArg('use-existing-app')}');
       }
-    );
+      await driverService.reuseApplication(
+        uri,
+        device,
+        debuggingOptions,
+        ipv6,
+      );
+    }
 
     final int testResult = await driverService.startTest(
       testFile,

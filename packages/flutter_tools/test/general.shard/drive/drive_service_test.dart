@@ -255,6 +255,47 @@ void main() {
       'data': <String, Object>{'A': 'B'}
     });
   });
+
+  testWithoutContext('Can connect to existing application and stop it during cleanup', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      getVM,
+      getVM,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.exit',
+        args: <String, Object>{
+          'isolateId': '1',
+        }
+      )
+    ]);
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
+    final FakeDevice device = FakeDevice(LaunchResult.failed());
+
+    await driverService.reuseApplication(
+      Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      device,
+      DebuggingOptions.enabled(BuildInfo.debug),
+      false,
+    );
+    await driverService.stop();
+  });
+
+  testWithoutContext('Does not call flutterExit on device types that do not support it', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      getVM,
+    ]);
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
+    final FakeDevice device = FakeDevice(LaunchResult.failed(), supportsFlutterExit: false);
+
+    await driverService.reuseApplication(
+      Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      device,
+      DebuggingOptions.enabled(BuildInfo.debug),
+      false,
+    );
+    await driverService.stop();
+  });
 }
 
 FlutterDriverService setUpDriverService({
@@ -301,7 +342,7 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
 class FakeApplicationPackage extends Fake implements ApplicationPackage {}
 
 class FakeDevice extends Fake implements Device {
-  FakeDevice(this.result);
+  FakeDevice(this.result, {this.supportsFlutterExit = true});
 
   LaunchResult result;
   bool didStopApp = false;
@@ -311,6 +352,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   String get name => 'test';
+
+  @override
+  final bool supportsFlutterExit;
 
   @override
   final DartDevelopmentService dds = FakeDartDevelopmentService();
