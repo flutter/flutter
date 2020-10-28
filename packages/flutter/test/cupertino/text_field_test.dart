@@ -4241,8 +4241,8 @@ void main() {
       expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
     });
 
-    testWidgets('using allowComposingTextToFinish.', (WidgetTester tester) async {
-      const MaxLengthEnforcement enforcement = MaxLengthEnforcement.allowComposingTextToFinish;
+    testWidgets('using truncateAfterCompositionEnds.', (WidgetTester tester) async {
+      const MaxLengthEnforcement enforcement = MaxLengthEnforcement.truncateAfterCompositionEnds;
       final TextEditingController controller = TextEditingController();
 
       await setupWidget(tester, controller, enforcement);

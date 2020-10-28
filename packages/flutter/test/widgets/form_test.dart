@@ -865,7 +865,7 @@ void main() {
                 key: formKey,
                 child: TextFormField(
                   maxLength: 5,
-                  maxLengthEnforcement: MaxLengthEnforcement.allowComposingTextToFinish,
+                  maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
                   onSaved: (String? value) { fieldValue = value; },
                   validator: (String? value) => (value != null && value.length > 5) ? 'Exceeded' : null,
                 ),

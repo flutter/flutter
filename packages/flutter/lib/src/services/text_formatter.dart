@@ -13,16 +13,16 @@ import 'text_input.dart';
 
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
 /// ### [MaxLengthEnforcement.enforced] versus
-/// [MaxLengthEnforcement.allowComposingTextToFinish]
+/// [MaxLengthEnforcement.truncateAfterCompositionEnds]
 ///
 /// Both [MaxLengthEnforcement.enforced] and
-/// [MaxLengthEnforcement.allowComposingTextToFinish] make sure the final length
-/// of the text does not exceed the max length specified.
+/// [MaxLengthEnforcement.truncateAfterCompositionEnds] make sure the
+/// final length of the text does not exceed the max length specified.
 /// The difference is that [MaxLengthEnforcement.enforced] truncates the text
 /// whenever a new character is inserted into the text field,
-/// while [MaxLengthEnforcement.allowComposingTextToFinish] does not truncate when
-/// the user has unfinished composing text, allowing the "placeholder" text to
-/// temporarily exceed the max length limit, which provides a better
+/// while [MaxLengthEnforcement.truncateAfterCompositionEnds] does not truncate
+/// when the user has unfinished composing text, allowing the "placeholder" text
+/// to temporarily exceed the max length limit, which provides a better
 /// user experience for entering ideographic characters (e.g., CJK characters)
 /// via composing on phonetic keyboards.
 ///
@@ -39,13 +39,13 @@ import 'text_input.dart';
 ///  provides a character counter to provide visual feedback.
 enum MaxLengthEnforcement {
   /// Keep the length of the text input from exceeding the max length even when
-  /// the text has unfinished composing region.
+  /// the text has an unfinished composing region.
   enforced,
 
   /// Users can still input text if the current value is composing even after
   /// reaching the max length limit. After composing ends, the value will be
   /// truncated.
-  allowComposingTextToFinish,
+  truncateAfterCompositionEnds,
 
   /// No enforcement applied to the editing value.
   none,
@@ -468,7 +468,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
 
         // Enforced to return a truncated value.
         return truncate(newValue, maxLength);
-      case MaxLengthEnforcement.allowComposingTextToFinish:
+      case MaxLengthEnforcement.truncateAfterCompositionEnds:
         // If already at the maximum and tried to enter even more, and the old
         // value is not composing, keep the old value.
         if (oldValue.text.characters.length == maxLength &&
