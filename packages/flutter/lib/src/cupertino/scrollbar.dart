@@ -78,7 +78,7 @@ class CupertinoScrollbar extends RawScrollbarThumb {
     );
 
   /// Default value for [thickness] if it's not specified in [CupertinoScrollbar].
-  static const double defaultThickness = 3.0;
+  static const double defaultThickness = 3;
 
   /// Default value for [thicknessWhileDragging] if it's not specified in
   /// [CupertinoScrollbar].
@@ -211,6 +211,7 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
     if (direction == null) {
       return;
     }
+    _thicknessAnimationController.reverse();
     handleGestureEnd(details.velocity.pixelsPerSecond);
     switch(direction) {
       case Axis.vertical:
@@ -226,7 +227,6 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
         }
         break;
     }
-    _thicknessAnimationController.reverse();
   }
 
   // Get the GestureRecognizerFactories used to detect gestures on the scrollbar
