@@ -330,7 +330,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  /// The splash radius used for the reaction when drawn.
+  /// The splash radius for the radial reaction.
   double get splashRadius => _splashRadius;
   double _splashRadius;
   set splashRadius(double value) {
