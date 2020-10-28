@@ -919,6 +919,10 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
       return;
     }
+    // ImageStreamCompleter disposed while waiting for next frame to be decoded.
+    if (!hasListeners) {
+      return;
+    }
     if (_codec!.frameCount == 1) {
       // This is not an animated image, just return it and don't schedule more
       // frames.
