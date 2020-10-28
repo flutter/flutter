@@ -14,7 +14,7 @@ import 'interface_level.dart';
 
 /// Value extracted from the official sketch iOS UI kit
 /// It is the top offset that will be displayed from the bottom route
-const double _kPreviousRouteVisibeOffset = 10.0;
+const double _kPreviousRouteVisibleOffset = 10.0;
 
 /// Value extracted from the official sketch iOS UI kit
 const Radius _kCupertinoSheetTopRadius = Radius.circular(10.0);
@@ -64,12 +64,13 @@ class _CupertinoSheetDecorationBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(jamesblasco): Implement landscape mode
     final double paddingTop = math.max(10, MediaQuery.of(context)?.padding.top ?? 0);
     return CupertinoUserInterfaceLevel(
       data: CupertinoUserInterfaceLevelData.elevated,
       child: Builder(
         builder: (BuildContext context) => Padding(
-          padding: EdgeInsets.only(top: _kPreviousRouteVisibeOffset + paddingTop),
+          padding: EdgeInsets.only(top: _kPreviousRouteVisibleOffset + paddingTop),
           child: Container(
             clipBehavior: Clip.hardEdge,
             decoration: BoxDecoration(
@@ -147,7 +148,7 @@ class CupertinoSheetRoute<T> extends SheetRoute<T> {
       builder: (BuildContext context, Widget? child) {
         final double progress = secondaryAnimation.value;
         final double scale = 1 - progress / 10;
-        final double distanceWithScale = (topOffset + _kPreviousRouteVisibeOffset) * 0.9;
+        final double distanceWithScale = (topOffset + _kPreviousRouteVisibleOffset) * 0.9;
         final Offset offset = Offset(0, progress * (topOffset - distanceWithScale));
         return Transform.translate(
           offset: offset,
