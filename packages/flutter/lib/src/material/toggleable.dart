@@ -334,7 +334,6 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   double get splashRadius => _splashRadius;
   double _splashRadius;
   set splashRadius(double value) {
-    assert(value != null);
     if (value == _splashRadius)
       return;
     _splashRadius = value;
