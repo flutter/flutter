@@ -413,8 +413,9 @@ class Localizations extends StatefulWidget {
   ///
   /// If no [Localizations] widget is in scope then this function will assert in
   /// debug mode, and throw an exception in release mode.
-  static Locale localeOf(BuildContext context) {
+  static Locale localeOf(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
+    assert(!nullOk, 'nullOk == true is no longer supported, use maybeLocaleOf instead.');
     final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(() {
       if (scope == null) {
