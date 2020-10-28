@@ -269,7 +269,7 @@ class Radio<T> extends StatefulWidget {
 
   /// The splash radius of the circular [Material] ink response.
   ///
-  /// If null, default splash radius of [kRadialReactionRadius] is used.
+  /// If null, then [kRadialReactionRadius] is used.
   final double? splashRadius;
 
   /// {@macro flutter.widgets.Focus.focusNode}
