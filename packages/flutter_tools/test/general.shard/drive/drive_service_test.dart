@@ -280,6 +280,31 @@ void main() {
     await driverService.stop();
   });
 
+  testWithoutContext('Can connect to existing application using ws URI', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      getVM,
+      getVM,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.exit',
+        args: <String, Object>{
+          'isolateId': '1',
+        }
+      )
+    ]);
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
+    final FakeDevice device = FakeDevice(LaunchResult.failed());
+
+    await driverService.reuseApplication(
+      Uri.parse('ws://127.0.0.1:63426/1UasC_ihpXY=/ws/'),
+      device,
+      DebuggingOptions.enabled(BuildInfo.debug),
+      false,
+    );
+    await driverService.stop();
+  });
+
+
   testWithoutContext('Does not call flutterExit on device types that do not support it', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
       getVM,
@@ -321,6 +346,9 @@ FlutterDriverService setUpDriverService({
       Object compression,
       Device device,
     }) async {
+      if (httpUri.scheme != 'http') {
+        fail('Expected an HTTP scheme, found $httpUri');
+      }
       return vmService;
     }
   );
