@@ -887,13 +887,12 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   /// See also:
   ///
   ///  * [maybeResolve], which is similar to this function, but will allow a
-  ///    null `resolvable` color, and will return null if any of the
-  ///    dependencies required for resolution are missing.
+  ///    null `resolvable` color.
   static Color resolve(Color resolvable, BuildContext context) {
     assert(context != null);
     return (resolvable is CupertinoDynamicColor)
-        ? resolvable.resolveFrom(context)
-        : resolvable;
+      ? resolvable.resolveFrom(context)
+      : resolvable;
   }
 
   /// Resolves the given [Color] by calling [resolveFrom].
@@ -901,19 +900,21 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   /// If the given color is already a concrete [Color], it will be returned as is.
   /// If the given color is null, returns null.
   /// If the given color is a [CupertinoDynamicColor], but the given [BuildContext]
-  /// lacks the dependencies required to the color resolution, this will return null.
+  /// lacks the dependencies required to the color resolution, the default trait
+  /// value will be used ([Brightness.light] platform brightness, normal contrast,
+  /// [CupertinoUserInterfaceLevelData.base] elevation level).
   ///
   /// See also:
   ///
-  ///  * [resolve], which is similar to this function, but will return default
-  ///    trait values if any of the required dependencies are missing.
+  ///  * [resolve], which is similar to this function, but returns a
+  ///    non-nullable value, and does not allow a null `resolvable` color.
   static Color? maybeResolve(Color? resolvable, BuildContext context) {
     if (resolvable == null)
       return null;
     assert(context != null);
     return (resolvable is CupertinoDynamicColor)
-        ? resolvable.maybeResolveFrom(context)
-        : resolvable;
+      ? resolvable.resolveFrom(context)
+      : resolvable;
   }
 
   bool get _isPlatformBrightnessDependent {
@@ -966,11 +967,6 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   /// default value of that trait will be used ([Brightness.light] platform
   /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base] elevation
   /// level).
-  ///
-  /// See also:
-  ///
-  ///  * [maybeResolveFrom] which is a similar function that will return null if
-  ///    any of the required dependencies are missing.
   CupertinoDynamicColor resolveFrom(BuildContext context) {
     Brightness brightness = Brightness.light;
     if (_isPlatformBrightnessDependent) {
@@ -984,112 +980,6 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
     final CupertinoUserInterfaceLevelData level = _isInterfaceElevationDependent
       ? CupertinoUserInterfaceLevel.maybeOf(context) ?? CupertinoUserInterfaceLevelData.base
       : CupertinoUserInterfaceLevelData.base;
-
-    final Color resolved;
-    switch (brightness) {
-      case Brightness.light:
-        switch (level) {
-          case CupertinoUserInterfaceLevelData.base:
-            resolved = isHighContrastEnabled ? highContrastColor : color;
-            break;
-          case CupertinoUserInterfaceLevelData.elevated:
-            resolved = isHighContrastEnabled ? highContrastElevatedColor : elevatedColor;
-            break;
-        }
-        break;
-      case Brightness.dark:
-        switch (level) {
-          case CupertinoUserInterfaceLevelData.base:
-            resolved = isHighContrastEnabled ? darkHighContrastColor : darkColor;
-            break;
-          case CupertinoUserInterfaceLevelData.elevated:
-            resolved = isHighContrastEnabled ? darkHighContrastElevatedColor : darkElevatedColor;
-            break;
-        }
-    }
-
-    Element? _debugContext;
-    assert(() {
-      _debugContext = context as Element;
-      return true;
-    }());
-    return CupertinoDynamicColor._(
-      resolved,
-      color,
-      darkColor,
-      highContrastColor,
-      darkHighContrastColor,
-      elevatedColor,
-      darkElevatedColor,
-      highContrastElevatedColor,
-      darkHighContrastElevatedColor,
-      _debugContext,
-      _debugLabel,
-    );
-  }
-
-  /// Resolves this [CupertinoDynamicColor] using the provided [BuildContext],
-  /// if possible.
-  ///
-  /// Calling this method will create a new [CupertinoDynamicColor] that is almost
-  /// identical to this [CupertinoDynamicColor], except the effective color is
-  /// changed to adapt to the given [BuildContext].
-  ///
-  /// For example, if the given [BuildContext] indicates the widgets in the
-  /// subtree should be displayed in dark mode (the surrounding
-  /// [CupertinoTheme]'s [CupertinoThemeData.brightness] or [MediaQuery]'s
-  /// [MediaQueryData.platformBrightness] is [Brightness.dark]), with a high
-  /// accessibility contrast (the surrounding [MediaQuery]'s
-  /// [MediaQueryData.highContrast] is `true`), and an elevated interface
-  /// elevation (the surrounding [CupertinoUserInterfaceLevel]'s `data` is
-  /// [CupertinoUserInterfaceLevelData.elevated]), the resolved
-  /// [CupertinoDynamicColor] will be the same as this [CupertinoDynamicColor],
-  /// except its effective color will be the `darkHighContrastElevatedColor`
-  /// variant from the original [CupertinoDynamicColor].
-  ///
-  /// Calling this function may create dependencies on the closest instance of some
-  /// [InheritedWidget]s that enclose the given [BuildContext]. E.g., if [darkColor]
-  /// is different from [color], this method will call [CupertinoTheme.of], and
-  /// then [MediaQuery.of] if brightness wasn't specified in the theme data retrieved
-  /// from the previous [CupertinoTheme.of] call, in an effort to determine the
-  /// brightness value.
-  ///
-  /// If any of the required dependencies are missing from the given context,
-  /// this function will return null.
-  ///
-  /// See also:
-  ///
-  ///  * [resolveFrom] which is a similar function that will return default
-  ///    values if any of the required dependencies are missing.
-  CupertinoDynamicColor? maybeResolveFrom(BuildContext context) {
-    Brightness brightness = Brightness.light;
-    if (_isPlatformBrightnessDependent) {
-      final Brightness? themeBrightness = CupertinoTheme.maybeBrightnessOf(context);
-      if (themeBrightness == null) {
-        return null;
-      }
-      brightness =  themeBrightness;
-    }
-
-    bool isHighContrastEnabled = false;
-    if (_isHighContrastDependent) {
-      final MediaQueryData? data = MediaQuery.maybeOf(context);
-      if (data == null) {
-        return null;
-      }
-      isHighContrastEnabled = data.highContrast;
-    }
-
-    CupertinoUserInterfaceLevelData level;
-    if (_isInterfaceElevationDependent) {
-      final CupertinoUserInterfaceLevelData? themeLevel = CupertinoUserInterfaceLevel.maybeOf(context);
-      if (themeLevel == null) {
-        return null;
-      }
-      level = themeLevel;
-    } else {
-      level = CupertinoUserInterfaceLevelData.base;
-    }
 
     final Color resolved;
     switch (brightness) {
