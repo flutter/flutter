@@ -285,7 +285,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       _painter!
         ..textDirection = Directionality.of(context)!
         ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)!
-        ..padding = MediaQuery.of(context)!.padding;
+        ..padding = MediaQuery.of(context).padding;
     }
     _triggerScrollbar();
   }
@@ -315,7 +315,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       mainAxisMargin: _kScrollbarMainAxisMargin,
       crossAxisMargin: _kScrollbarCrossAxisMargin,
       radius: _radius,
-      padding: MediaQuery.of(context)!.padding,
+      padding: MediaQuery.of(context).padding,
       minLength: _kScrollbarMinLength,
       minOverscrollLength: _kScrollbarMinOverscrollLength,
     );

@@ -766,7 +766,7 @@ void main() {
                 home: Builder(
                   builder: (BuildContext context) {
                     return MediaQuery(
-                      data: MediaQuery.of(context)!.copyWith(
+                      data: MediaQuery.of(context).copyWith(
                         textScaleFactor: textScaleFactor,
                       ),
                       child: Directionality(
@@ -902,7 +902,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return MediaQuery(
-              data: MediaQuery.of(context)!.copyWith(
+              data: MediaQuery.of(context).copyWith(
                 textScaleFactor: 2,
               ),
               child: Scaffold(

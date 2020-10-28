@@ -111,23 +111,29 @@ void main() {
             expect(
               error.diagnostics.last.toStringDeep(),
               equalsIgnoringHashCodes(
-                'Typically, the MediaQuery widget is introduced by the MaterialApp\n'
-                'or WidgetsApp widget at the top of your application widget tree.\n'
+                'No MediaQuery ancestor could be found starting from the context\n'
+                'that was passed to MediaQuery.of(). This can happen because you\n'
+                'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
+                '(those widgets introduce a MediaQuery), or it can happen if the\n'
+                'context you use comes from a widget above those widgets.\n'
               ),
             );
             expect(
               error.toStringDeep(),
               equalsIgnoringHashCodes(
                 'FlutterError\n'
-                '   No MediaQuery widget found.\n'
+                '   No MediaQuery widget ancestor found.\n'
                 '   Builder widgets require a MediaQuery widget ancestor.\n'
                 '   The specific widget that could not find a MediaQuery ancestor\n'
                 '   was:\n'
                 '     Builder\n'
                 '   The ownership chain for the affected widget is: "Builder ←\n'
                 '     [root]"\n'
-                '   Typically, the MediaQuery widget is introduced by the MaterialApp\n'
-                '   or WidgetsApp widget at the top of your application widget tree.\n'
+                '   No MediaQuery ancestor could be found starting from the context\n'
+                '   that was passed to MediaQuery.of(). This can happen because you\n'
+                '   have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
+                '   (those widgets introduce a MediaQuery), or it can happen if the\n'
+                '   context you use comes from a widget above those widgets.\n'
               ),
             );
           }

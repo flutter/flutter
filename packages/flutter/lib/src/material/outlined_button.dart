@@ -226,7 +226,7 @@ class OutlinedButton extends ButtonStyleButton {
       const EdgeInsets.symmetric(horizontal: 16),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
+      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
 
     return styleFrom(
@@ -341,7 +341,7 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1;
+    final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,

@@ -71,7 +71,7 @@ class AdaptiveContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.of(context)!.size.width < _kGridViewBreakpoint) {
+    if (MediaQuery.of(context).size.width < _kGridViewBreakpoint) {
       return ListView(
         itemExtent: _kListItemExtent,
         children: names.map<Widget>((String name) => AdaptedListItem(name: name)).toList(),
