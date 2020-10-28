@@ -94,10 +94,39 @@ abstract class ChipAttributes {
   ///  * [MaterialState.pressed].
   TextStyle? get labelStyle;
 
-  /// The [ShapeBorder] to draw around the chip.
+  /// The color and weight of the chip's outline.
   ///
-  /// Defaults to the shape in the ambient [ChipThemeData].
-  ShapeBorder? get shape;
+  /// Defaults to the border side in the ambient [ChipThemeData]. If the theme
+  /// border side resolves to null, the default is the border side of [shape].
+  ///
+  /// This value is combined with [shape] to create a shape decorated with an
+  /// outline. If it is a [MaterialStateBorderSide],
+  /// [MaterialStateProperty.resolve] is used for the following
+  /// [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.pressed].
+  BorderSide? get side;
+
+  /// The [OutlinedBorder] to draw around the chip.
+  ///
+  /// Defaults to the shape in the ambient [ChipThemeData]. If the theme
+  /// shape resolves to null, the default is [StadiumBorder].
+  ///
+  /// This shape is combined with [side] to create a shape decorated with an
+  /// outline. If it is a [MaterialStateOutlinedBorder],
+  /// [MaterialStateProperty.resolve] is used for the following
+  /// [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.pressed].
+  OutlinedBorder? get shape;
 
   /// {@macro flutter.widgets.Clip}
   ///
@@ -567,6 +596,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.onDeleted,
     this.deleteIconColor,
     this.deleteButtonTooltipMessage,
+    this.side,
     this.shape,
     this.clipBehavior = Clip.none,
     this.focusNode,
@@ -592,7 +622,9 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   @override
   final EdgeInsetsGeometry? labelPadding;
   @override
-  final ShapeBorder? shape;
+  final BorderSide? side;
+  @override
+  final OutlinedBorder? shape;
   @override
   final Clip clipBehavior;
   @override
@@ -633,6 +665,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       deleteIconColor: deleteIconColor,
       deleteButtonTooltipMessage: deleteButtonTooltipMessage,
       tapEnabled: false,
+      side: side,
       shape: shape,
       clipBehavior: clipBehavior,
       focusNode: focusNode,
@@ -728,6 +761,7 @@ class InputChip extends StatelessWidget
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
+    this.side,
     this.shape,
     this.clipBehavior = Clip.none,
     this.focusNode,
@@ -784,7 +818,9 @@ class InputChip extends StatelessWidget
   @override
   final String? tooltip;
   @override
-  final ShapeBorder? shape;
+  final BorderSide? side;
+  @override
+  final OutlinedBorder? shape;
   @override
   final Clip clipBehavior;
   @override
@@ -832,6 +868,7 @@ class InputChip extends StatelessWidget
       disabledColor: disabledColor,
       selectedColor: selectedColor,
       tooltip: tooltip,
+      side: side,
       shape: shape,
       clipBehavior: clipBehavior,
       focusNode: focusNode,
@@ -927,6 +964,7 @@ class ChoiceChip extends StatelessWidget
     this.selectedColor,
     this.disabledColor,
     this.tooltip,
+    this.side,
     this.shape,
     this.clipBehavior = Clip.none,
     this.focusNode,
@@ -968,7 +1006,9 @@ class ChoiceChip extends StatelessWidget
   @override
   final String? tooltip;
   @override
-  final ShapeBorder? shape;
+  final BorderSide? side;
+  @override
+  final OutlinedBorder? shape;
   @override
   final Clip clipBehavior;
   @override
@@ -1010,6 +1050,7 @@ class ChoiceChip extends StatelessWidget
       showCheckmark: false,
       onDeleted: null,
       tooltip: tooltip,
+      side: side,
       shape: shape,
       clipBehavior: clipBehavior,
       focusNode: focusNode,
@@ -1138,6 +1179,7 @@ class FilterChip extends StatelessWidget
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
+    this.side,
     this.shape,
     this.clipBehavior = Clip.none,
     this.focusNode,
@@ -1181,7 +1223,9 @@ class FilterChip extends StatelessWidget
   @override
   final String? tooltip;
   @override
-  final ShapeBorder? shape;
+  final BorderSide? side;
+  @override
+  final OutlinedBorder? shape;
   @override
   final Clip clipBehavior;
   @override
@@ -1224,6 +1268,7 @@ class FilterChip extends StatelessWidget
       pressElevation: pressElevation,
       selected: selected,
       tooltip: tooltip,
+      side: side,
       shape: shape,
       clipBehavior: clipBehavior,
       focusNode: focusNode,
@@ -1307,6 +1352,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     required this.onPressed,
     this.pressElevation,
     this.tooltip,
+    this.side,
     this.shape,
     this.clipBehavior = Clip.none,
     this.focusNode,
@@ -1344,7 +1390,9 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   @override
   final String? tooltip;
   @override
-  final ShapeBorder? shape;
+  final BorderSide? side;
+  @override
+  final OutlinedBorder? shape;
   @override
   final Clip clipBehavior;
   @override
@@ -1375,6 +1423,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       tooltip: tooltip,
       labelStyle: labelStyle,
       backgroundColor: backgroundColor,
+      side: side,
       shape: shape,
       clipBehavior: clipBehavior,
       focusNode: focusNode,
@@ -1458,6 +1507,7 @@ class RawChip extends StatefulWidget
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
+    this.side,
     this.shape,
     this.clipBehavior = Clip.none,
     this.focusNode,
@@ -1513,7 +1563,9 @@ class RawChip extends StatefulWidget
   @override
   final String? tooltip;
   @override
-  final ShapeBorder? shape;
+  final BorderSide? side;
+  @override
+  final OutlinedBorder? shape;
   @override
   final Clip clipBehavior;
   @override
@@ -1709,6 +1761,15 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     });
   }
 
+  OutlinedBorder _getShape(ChipThemeData theme) {
+    final BorderSide? resolvedSide = MaterialStateProperty.resolveAs<BorderSide?>(widget.side, _states)
+      ?? MaterialStateProperty.resolveAs<BorderSide?>(theme.side, _states);
+    final OutlinedBorder resolvedShape = MaterialStateProperty.resolveAs<OutlinedBorder?>(widget.shape, _states)
+      ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(theme.shape, _states)
+      ?? const StadiumBorder();
+    return resolvedShape.copyWith(side: resolvedSide);
+  }
+
   /// Picks between three different colors, depending upon the state of two
   /// different animations.
   Color? getBackgroundColor(ChipThemeData theme) {
@@ -1835,7 +1896,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final ThemeData theme = Theme.of(context)!;
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final TextDirection? textDirection = Directionality.maybeOf(context);
-    final ShapeBorder shape = widget.shape ?? chipTheme.shape;
+    final OutlinedBorder resolvedShape = _getShape(chipTheme);
     final double elevation = widget.elevation ?? chipTheme.elevation ?? _defaultElevation;
     final double pressElevation = widget.pressElevation ?? chipTheme.pressElevation ?? _defaultPressElevation;
     final Color shadowColor = widget.shadowColor ?? chipTheme.shadowColor ?? _defaultShadowColor;
@@ -1844,7 +1905,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final bool showCheckmark = widget.showCheckmark ?? chipTheme.showCheckmark ?? true;
 
     final TextStyle effectiveLabelStyle = widget.labelStyle ?? chipTheme.labelStyle;
-    final Color? resolvedLabelColor =  MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, _states);
+    final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, _states);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
     final EdgeInsetsGeometry labelPadding = widget.labelPadding ?? chipTheme.labelPadding ?? _defaultLabelPadding;
 
@@ -1852,7 +1913,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       elevation: isTapping ? pressElevation : elevation,
       shadowColor: widget.selected ? selectedShadowColor : shadowColor,
       animationDuration: pressedAnimationDuration,
-      shape: shape,
+      shape: resolvedShape,
       clipBehavior: widget.clipBehavior,
       child: InkWell(
         onFocusChange: _handleFocus,
@@ -1868,13 +1929,13 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
             context,
             deleteIconKey,
         ),
-        customBorder: shape,
+        customBorder: resolvedShape,
         child: AnimatedBuilder(
           animation: Listenable.merge(<Listenable>[selectController, enableController]),
           builder: (BuildContext context, Widget? child) {
             return Container(
               decoration: ShapeDecoration(
-                shape: shape,
+                shape: resolvedShape,
                 color: getBackgroundColor(chipTheme),
               ),
               child: child,

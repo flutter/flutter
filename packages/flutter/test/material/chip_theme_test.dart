@@ -184,7 +184,8 @@ void main() {
     expect(lightTheme.secondarySelectedColor, equals(customColor1.withAlpha(0x3d)));
     expect(lightTheme.labelPadding, isNull);
     expect(lightTheme.padding, equals(const EdgeInsets.all(4.0)));
-    expect(lightTheme.shape, isA<StadiumBorder>());
+    expect(lightTheme.side, isNull);
+    expect(lightTheme.shape, isNull);
     expect(lightTheme.labelStyle.color, equals(Colors.black.withAlpha(0xde)));
     expect(lightTheme.secondaryLabelStyle.color, equals(customColor1.withAlpha(0xde)));
     expect(lightTheme.brightness, equals(Brightness.light));
@@ -202,7 +203,8 @@ void main() {
     expect(darkTheme.secondarySelectedColor, equals(customColor1.withAlpha(0x3d)));
     expect(darkTheme.labelPadding, isNull);
     expect(darkTheme.padding, equals(const EdgeInsets.all(4.0)));
-    expect(darkTheme.shape, isA<StadiumBorder>());
+    expect(darkTheme.side, isNull);
+    expect(darkTheme.shape, isNull);
     expect(darkTheme.labelStyle.color, equals(Colors.white.withAlpha(0xde)));
     expect(darkTheme.secondaryLabelStyle.color, equals(customColor1.withAlpha(0xde)));
     expect(darkTheme.brightness, equals(Brightness.dark));
@@ -220,7 +222,8 @@ void main() {
     expect(customTheme.secondarySelectedColor, equals(customColor2.withAlpha(0x3d)));
     expect(customTheme.labelPadding, isNull);
     expect(customTheme.padding, equals(const EdgeInsets.all(4.0)));
-    expect(customTheme.shape, isA<StadiumBorder>());
+    expect(customTheme.side, isNull);
+    expect(customTheme.shape, isNull);
     expect(customTheme.labelStyle.color, equals(customColor1.withAlpha(0xde)));
     expect(customTheme.secondaryLabelStyle.color, equals(customColor2.withAlpha(0xde)));
     expect(customTheme.brightness, equals(Brightness.light));
@@ -234,6 +237,8 @@ void main() {
     ).copyWith(
       elevation: 1.0,
       labelPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+      shape: const StadiumBorder(),
+      side: const BorderSide(color: Colors.black),
       pressElevation: 4.0,
       shadowColor: Colors.black,
       selectedShadowColor: Colors.black,
@@ -246,6 +251,8 @@ void main() {
     ).copyWith(
       padding: const EdgeInsets.all(2.0),
       labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+      shape: const BeveledRectangleBorder(),
+      side: const BorderSide(color: Colors.white),
       elevation: 5.0,
       pressElevation: 10.0,
       shadowColor: Colors.white,
@@ -264,7 +271,8 @@ void main() {
     expect(lerp.selectedShadowColor, equals(middleGrey));
     expect(lerp.labelPadding, equals(const EdgeInsets.all(4.0)));
     expect(lerp.padding, equals(const EdgeInsets.all(3.0)));
-    expect(lerp.shape, isA<StadiumBorder>());
+    expect(lerp.side!.color, equals(middleGrey));
+    expect(lerp.shape, isA<BeveledRectangleBorder>());
     expect(lerp.labelStyle.color, equals(middleGrey.withAlpha(0xde)));
     expect(lerp.secondaryLabelStyle.color, equals(middleGrey.withAlpha(0xde)));
     expect(lerp.brightness, equals(Brightness.light));
@@ -284,7 +292,8 @@ void main() {
     expect(lerpANull25.selectedShadowColor, equals(Colors.white.withAlpha(0x40)));
     expect(lerpANull25.labelPadding, equals(const EdgeInsets.only(left: 0.0, top: 2.0, right: 0.0, bottom: 2.0)));
     expect(lerpANull25.padding, equals(const EdgeInsets.all(0.5)));
-    expect(lerpANull25.shape, isA<StadiumBorder>());
+    expect(lerpANull25.side!.color, equals(Colors.white.withAlpha(0x3f)));
+    expect(lerpANull25.shape, isA<BeveledRectangleBorder>());
     expect(lerpANull25.labelStyle.color, equals(Colors.black.withAlpha(0x38)));
     expect(lerpANull25.secondaryLabelStyle.color, equals(Colors.white.withAlpha(0x38)));
     expect(lerpANull25.brightness, equals(Brightness.light));
@@ -302,7 +311,8 @@ void main() {
     expect(lerpANull75.selectedShadowColor, equals(Colors.white.withAlpha(0xbf)));
     expect(lerpANull75.labelPadding, equals(const EdgeInsets.only(left: 0.0, top: 6.0, right: 0.0, bottom: 6.0)));
     expect(lerpANull75.padding, equals(const EdgeInsets.all(1.5)));
-    expect(lerpANull75.shape, isA<StadiumBorder>());
+    expect(lerpANull75.side!.color, equals(Colors.white.withAlpha(0xbf)));
+    expect(lerpANull75.shape, isA<BeveledRectangleBorder>());
     expect(lerpANull75.labelStyle.color, equals(Colors.black.withAlpha(0xa7)));
     expect(lerpANull75.secondaryLabelStyle.color, equals(Colors.white.withAlpha(0xa7)));
     expect(lerpANull75.brightness, equals(Brightness.light));
@@ -320,6 +330,7 @@ void main() {
     expect(lerpBNull25.selectedShadowColor, equals(Colors.black.withAlpha(0xbf)));
     expect(lerpBNull25.labelPadding, equals(const EdgeInsets.only(left: 6.0, top: 0.0, right: 6.0, bottom: 0.0)));
     expect(lerpBNull25.padding, equals(const EdgeInsets.all(3.0)));
+    expect(lerpBNull25.side!.color, equals(Colors.black.withAlpha(0x3f)));
     expect(lerpBNull25.shape, isA<StadiumBorder>());
     expect(lerpBNull25.labelStyle.color, equals(Colors.white.withAlpha(0xa7)));
     expect(lerpBNull25.secondaryLabelStyle.color, equals(Colors.black.withAlpha(0xa7)));
@@ -338,6 +349,7 @@ void main() {
     expect(lerpBNull75.selectedShadowColor, equals(Colors.black.withAlpha(0x40)));
     expect(lerpBNull75.labelPadding, equals(const EdgeInsets.only(left: 2.0, top: 0.0, right: 2.0, bottom: 0.0)));
     expect(lerpBNull75.padding, equals(const EdgeInsets.all(1.0)));
+    expect(lerpBNull75.side!.color, equals(Colors.black.withAlpha(0xbf)));
     expect(lerpBNull75.shape, isA<StadiumBorder>());
     expect(lerpBNull75.labelStyle.color, equals(Colors.white.withAlpha(0x38)));
     expect(lerpBNull75.secondaryLabelStyle.color, equals(Colors.black.withAlpha(0x38)));
@@ -440,4 +452,95 @@ void main() {
     // Teardown.
     await gesture.removePointer();
   });
+
+  testWidgets('Chip uses stateful border side from chip theme', (WidgetTester tester) async {
+    const Color selectedColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+
+    BorderSide getBorderSide(Set<MaterialState> states) {
+      Color color = defaultColor;
+
+      if (states.contains(MaterialState.selected))
+        color = selectedColor;
+
+      return BorderSide(color: color, width: 1);
+    }
+
+    Widget chipWidget({ bool selected = false }) {
+      return MaterialApp(
+        theme: ThemeData(
+          chipTheme: ThemeData.light().chipTheme.copyWith(
+            side: _MaterialStateBorderSide(getBorderSide),
+          ),
+        ),
+        home: Scaffold(
+          body: ChoiceChip(
+            label: const Text('Chip'),
+            selected: selected,
+            onSelected: (_) {},
+          ),
+        ),
+      );
+    }
+
+    // Default.
+    await tester.pumpWidget(chipWidget());
+    expect(find.byType(RawChip), paints..rrect(color: defaultColor));
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(find.byType(RawChip), paints..rrect(color: selectedColor));
+  });
+
+  testWidgets('Chip uses stateful shape from chip theme', (WidgetTester tester) async {
+    OutlinedBorder? getShape(Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected))
+        return const RoundedRectangleBorder();
+
+      return null;
+    }
+
+    Widget chipWidget({ bool selected = false }) {
+      return MaterialApp(
+        theme: ThemeData(
+          chipTheme: ThemeData.light().chipTheme.copyWith(
+            shape: _MaterialStateOutlinedBorder(getShape),
+          ),
+        ),
+        home: Scaffold(
+          body: ChoiceChip(
+            label: const Text('Chip'),
+            selected: selected,
+            onSelected: (_) {},
+          ),
+        ),
+      );
+    }
+
+    // Default.
+    await tester.pumpWidget(chipWidget());
+    expect(getMaterial(tester).shape, isA<StadiumBorder>());
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(getMaterial(tester).shape, isA<RoundedRectangleBorder>());
+  });
+}
+
+class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
+  const _MaterialStateOutlinedBorder(this.resolver);
+
+  final MaterialPropertyResolver<OutlinedBorder?> resolver;
+
+  @override
+  OutlinedBorder? resolve(Set<MaterialState> states) => resolver(states);
+}
+
+class _MaterialStateBorderSide extends MaterialStateBorderSide {
+  const _MaterialStateBorderSide(this.resolver);
+
+  final MaterialPropertyResolver<BorderSide?> resolver;
+
+  @override
+  BorderSide? resolve(Set<MaterialState> states) => resolver(states);
 }
