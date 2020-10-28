@@ -2382,6 +2382,216 @@ void main() {
     await gesture.removePointer();
   });
 
+  testWidgets('Chip uses stateful border side color in different states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
+    const Color selectedColor = Color(0x00000005);
+    const Color disabledColor = Color(0x00000006);
+
+    BorderSide getBorderSide(Set<MaterialState> states) {
+      Color sideColor = defaultColor;
+
+      if (states.contains(MaterialState.disabled))
+        sideColor = disabledColor;
+
+      else if (states.contains(MaterialState.pressed))
+        sideColor = pressedColor;
+
+      else if (states.contains(MaterialState.hovered))
+        sideColor = hoverColor;
+
+      else if (states.contains(MaterialState.focused))
+        sideColor = focusedColor;
+
+      else if (states.contains(MaterialState.selected))
+        sideColor = selectedColor;
+
+      return BorderSide(color: sideColor, width: 1);
+    }
+
+    Widget chipWidget({ bool enabled = true, bool selected = false }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Focus(
+            focusNode: focusNode,
+            child: ChoiceChip(
+              label: const Text('Chip'),
+              selected: selected,
+              onSelected: enabled ? (_) {} : null,
+              side: _MaterialStateBorderSide(getBorderSide),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Default, not disabled.
+    await tester.pumpWidget(chipWidget());
+    expect(find.byType(RawChip), paints..rrect(color: defaultColor));
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(find.byType(RawChip), paints..rrect(color: selectedColor));
+
+    // Focused.
+    final FocusNode chipFocusNode = focusNode.children.first;
+    chipFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(find.byType(RawChip), paints..rrect(color: focusedColor));
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(ChoiceChip));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(find.byType(RawChip), paints..rrect(color: hoverColor));
+
+    // Pressed.
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(find.byType(RawChip), paints..rrect(color: pressedColor));
+
+    // Disabled.
+    await tester.pumpWidget(chipWidget(enabled: false));
+    await tester.pumpAndSettle();
+    expect(find.byType(RawChip), paints..rrect(color: disabledColor));
+
+    // Teardown.
+    await gesture.removePointer();
+  });
+
+  testWidgets('Chip uses stateful shape in different states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    OutlinedBorder? getShape(Set<MaterialState> states) {
+
+      if (states.contains(MaterialState.disabled))
+        return const BeveledRectangleBorder();
+
+      else if (states.contains(MaterialState.pressed))
+        return const CircleBorder();
+
+      else if (states.contains(MaterialState.hovered))
+        return const ContinuousRectangleBorder();
+
+      else if (states.contains(MaterialState.focused))
+        return const RoundedRectangleBorder();
+
+      else if (states.contains(MaterialState.selected))
+        return const BeveledRectangleBorder();
+
+      return null;
+    }
+
+    Widget chipWidget({ bool enabled = true, bool selected = false }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Focus(
+            focusNode: focusNode,
+            child: ChoiceChip(
+              selected: selected,
+              label: const Text('Chip'),
+              shape: _MaterialStateOutlinedBorder(getShape),
+              onSelected: enabled ? (_) {} : null,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Default, not disabled. Defers to default shape.
+    await tester.pumpWidget(chipWidget());
+    expect(getMaterial(tester).shape, isA<StadiumBorder>());
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(getMaterial(tester).shape, isA<BeveledRectangleBorder>());
+
+    // Focused.
+    final FocusNode chipFocusNode = focusNode.children.first;
+    chipFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(getMaterial(tester).shape, isA<RoundedRectangleBorder>());
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(ChoiceChip));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getMaterial(tester).shape, isA<ContinuousRectangleBorder>());
+
+    // Pressed.
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(getMaterial(tester).shape, isA<CircleBorder>());
+
+    // Disabled.
+    await tester.pumpWidget(chipWidget(enabled: false));
+    await tester.pumpAndSettle();
+    expect(getMaterial(tester).shape, isA<BeveledRectangleBorder>());
+
+    // Teardown.
+    await gesture.removePointer();
+  });
+
+  testWidgets('Chip defers to theme, if shape and side resolves to null', (WidgetTester tester) async {
+    const OutlinedBorder themeShape = StadiumBorder();
+    const OutlinedBorder selectedShape = RoundedRectangleBorder();
+    const BorderSide themeBorderSide = BorderSide(color: Color(0x00000001), width: 1);
+    const BorderSide selectedBorderSide = BorderSide(color: Color(0x00000002), width: 1);
+
+    OutlinedBorder? getShape(Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected))
+        return selectedShape;
+      return null;
+    }
+
+    BorderSide? getBorderSide(Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected))
+        return selectedBorderSide;
+      return null;
+    }
+
+    Widget chipWidget({ bool enabled = true, bool selected = false }) {
+      return MaterialApp(
+        theme: ThemeData(
+          chipTheme: ThemeData.light().chipTheme.copyWith(
+            shape: themeShape,
+            side: themeBorderSide,
+          ),
+        ),
+        home: Scaffold(
+          body: ChoiceChip(
+            selected: selected,
+            label: const Text('Chip'),
+            shape: _MaterialStateOutlinedBorder(getShape),
+            side: _MaterialStateBorderSide(getBorderSide),
+            onSelected: enabled ? (_) {} : null,
+          ),
+        ),
+      );
+    }
+
+    // Default, not disabled. Defer to theme.
+    await tester.pumpWidget(chipWidget());
+    expect(getMaterial(tester).shape, isA<StadiumBorder>());
+    expect(find.byType(RawChip), paints..rrect(color: themeBorderSide.color));
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(getMaterial(tester).shape, isA<RoundedRectangleBorder>());
+    expect(find.byType(RawChip), paints..drrect(color: selectedBorderSide.color));
+  });
+
   testWidgets('loses focus when disabled', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'InputChip');
     await tester.pumpWidget(
@@ -2706,4 +2916,22 @@ void main() {
 
     await tapGesture.up();
   });
+}
+
+class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
+  const _MaterialStateOutlinedBorder(this.resolver);
+
+  final MaterialPropertyResolver<OutlinedBorder?> resolver;
+
+  @override
+  OutlinedBorder? resolve(Set<MaterialState> states) => resolver(states);
+}
+
+class _MaterialStateBorderSide extends MaterialStateBorderSide {
+  const _MaterialStateBorderSide(this.resolver);
+
+  final MaterialPropertyResolver<BorderSide?> resolver;
+
+  @override
+  BorderSide? resolve(Set<MaterialState> states) => resolver(states);
 }
