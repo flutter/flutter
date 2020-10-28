@@ -80,4 +80,26 @@ void main() {
     expect(Directionality.maybeOf(noDirectionality.currentContext!), isNull);
     expect(Directionality.maybeOf(hasDirectionality.currentContext!), TextDirection.rtl);
   });
+
+  testWidgets('Directionality.of', (WidgetTester tester) async {
+    final GlobalKey hasDirectionality = GlobalKey();
+    final GlobalKey noDirectionality = GlobalKey();
+    await tester.pumpWidget(
+      Container(
+        key: noDirectionality,
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Container(
+            key: hasDirectionality,
+          ),
+        ),
+      ),
+    );
+    expect(() => Directionality.of(noDirectionality.currentContext!), throwsA(isAssertionError.having(
+      (AssertionError e) => e.message,
+      'message',
+      contains('No Directionality widget found.'),
+    )));
+    expect(Directionality.of(hasDirectionality.currentContext!), TextDirection.rtl);
+  });
 }
