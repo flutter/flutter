@@ -176,7 +176,7 @@ class PointerEventResampler {
       // Potentially stop dispatching events if more recent than `sampleTime`.
       if (event.timeStamp > sampleTime) {
         // Definitely stop if more recent than `nextSampleTime`.
-        if (event.timeStamp > nextSampleTime) {
+        if (event.timeStamp >= nextSampleTime) {
           break;
         }
 

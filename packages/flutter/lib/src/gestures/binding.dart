@@ -144,12 +144,12 @@ class _Resampler {
 // 4.666 ms margin is added for this.
 const Duration _defaultSamplingOffset = Duration(milliseconds: -38);
 
-// The default sampling interval.
+// The sampling interval.
 //
 // Sampling interval is used to determine the approximate time for subsequent
 // sampling. This is used to decide if early processing of up and removed events
 // is appropriate. 16667 us for 60hz sampling interval.
-const Duration _defaultSamplingInterval = Duration(microseconds: 16667);
+const Duration _samplingInterval = Duration(microseconds: 16667);
 
 /// A binding for the gesture subsystem.
 ///
@@ -270,7 +270,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
     if (resamplingEnabled) {
       _resampler.addOrDispatch(event);
-      _resampler.sample(samplingOffset, samplingInterval);
+      _resampler.sample(samplingOffset, _samplingInterval);
       return;
     }
 
@@ -401,7 +401,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handleSampleTimeChanged() {
     if (!locked) {
       if (resamplingEnabled) {
-        _resampler.sample(samplingOffset, samplingInterval);
+        _resampler.sample(samplingOffset, _samplingInterval);
       }
       else {
         _resampler.stop();
@@ -434,11 +434,6 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// Non-negative [samplingOffset] is allowed but will effectively
   /// disable resampling.
   Duration samplingOffset = _defaultSamplingOffset;
-
-  /// Offset relative to current sample time that should be used to
-  /// estimate next sample time. The [samplingInterval] is expected to
-  /// be non-negative.
-  Duration samplingInterval = _defaultSamplingInterval;
 }
 
 /// Variant of [FlutterErrorDetails] with extra fields for the gesture
