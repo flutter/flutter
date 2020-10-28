@@ -267,7 +267,7 @@ class Radio<T> extends StatefulWidget {
   /// The color for the radio's [Material] when a pointer is hovering over it.
   final Color? hoverColor;
 
-  /// The splash radius.
+  /// The splash radius of the circular [Material] ink response.
   ///
   /// If null, default splash radius of [kRadialReactionRadius] is used.
   final double? splashRadius;
