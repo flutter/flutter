@@ -359,7 +359,6 @@ void main() {
   testWidgets('Radio with splash radius set', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const double splashRadius = 30;
-    const Key radioKey = Key('radio');
     Widget buildApp() {
       return MaterialApp(
         home: Material(
@@ -370,7 +369,6 @@ void main() {
                 height: 100,
                 color: Colors.white,
                 child: Radio<int>(
-                  key: radioKey,
                   value: 0,
                   onChanged: (int? newValue) {},
                   focusColor: Colors.orange[500],
@@ -387,7 +385,9 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expect(
-      Material.of(tester.element(find.byKey(radioKey))),
+      Material.of(tester.element(
+        find.byWidgetPredicate((Widget widget) => widget is Radio<int>),
+      )),
       paints..circle(color: Colors.orange[500], radius: splashRadius)
     );
   });
