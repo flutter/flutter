@@ -1,4 +1,6 @@
 name: hybrid_platform_views
+# This package is not intended for consumption on pub.dev.
+publish_to: none
 description: An integration test for hybrid composition on Android
 version: 1.0.0+1
 environment:
