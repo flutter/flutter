@@ -632,7 +632,6 @@ void main() {
     // Scroll a bit.
     const double scrollAmount = 10.0;
     final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
-
     // Scroll right by swiping left.
     await scrollGesture.moveBy(const Offset(-scrollAmount, 0.0));
     await tester.pump();

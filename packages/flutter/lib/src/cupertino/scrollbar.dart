@@ -195,6 +195,7 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
   }
 
   void _handleLongPress() {
+    print('_handleLongPress');
     if (getDirection() == null) {
       return;
     }
@@ -205,6 +206,7 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
+    print('_handleLongPressEnd');
     final Axis? direction = getDirection();
     if (direction == null) {
       return;

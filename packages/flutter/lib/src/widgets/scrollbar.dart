@@ -567,8 +567,8 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
   AnimationController get fadeoutAnimationController => _fadeoutAnimationController;
   late AnimationController _fadeoutAnimationController;
   set fadeoutAnimationController(AnimationController value) {
-    if (_fadeoutAnimationController == value) 
-      return;
+    // if (_fadeoutAnimationController == value)
+    //   return;
     _fadeoutAnimationController = value;
   }
   
@@ -577,8 +577,8 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
   Animation<double> get fadeoutOpacityAnimation => _fadeoutOpacityAnimation;
   late Animation<double> _fadeoutOpacityAnimation;
   set fadeoutOpacityAnimation(Animation<double> value) {
-    if (_fadeoutOpacityAnimation == value)
-      return;
+    // if (_fadeoutOpacityAnimation == value)
+    //   return;
     _fadeoutOpacityAnimation = value;
   }
 
@@ -591,9 +591,6 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
       return;
     _fadeoutTimer = value;
   }
-
-  @protected
-  TickerProvider get vsync => this;
   
   @override
   void initState() {
