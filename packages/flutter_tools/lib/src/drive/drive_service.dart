@@ -5,6 +5,7 @@
 import 'package:dds/dds.dart' as dds;
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
@@ -77,7 +78,8 @@ abstract class DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment, {
+    Map<String, String> environment,
+    PackageConfig packageConfig, {
     bool headless,
     String chromeBinary,
     String browserName,
@@ -218,7 +220,8 @@ class FlutterDriverService extends DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment, {
+    Map<String, String> environment,
+    PackageConfig packageConfig, {
     bool headless,
     String chromeBinary,
     String browserName,
@@ -226,14 +229,14 @@ class FlutterDriverService extends DriverService {
     int driverPort,
     List<String> browserDimension,
   }) async {
+    // Check if package:test is available. If not, fall back to invoking
+    // the test script directly.
     return _processUtils.stream(<String>[
       _dartSdkPath,
-      'pub',
-      'run',
-      'test',
-      ...arguments,
-      testFile,
-      '-rexpanded',
+      if (packageConfig['test'] != null)
+        ...<String>['pub', 'run', 'test', ...arguments, testFile, '-rexpanded']
+      else
+        ...<String>[...arguments, testFile, '-rexpanded'],
     ], environment: <String, String>{
       'VM_SERVICE_URL': _vmServiceUri,
       ...environment,

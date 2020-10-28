@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 
 import '../android/android_device.dart';
 import '../application_package.dart';
@@ -178,7 +180,12 @@ class DriveCommand extends RunCommandBase {
       logger: _logger,
       processUtils: globals.processUtils,
       dartSdkPath: globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
-   );
+    );
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      globals.fs.file('.packages'),
+      logger: _logger,
+      throwOnError: false,
+    ) ?? PackageConfig.empty;
     final DriverService driverService = _flutterDriverFactory.createDriverService(web);
     final BuildInfo buildInfo = getBuildInfo();
     final DebuggingOptions debuggingOptions = createDebuggingOptions();
@@ -220,6 +227,7 @@ class DriveCommand extends RunCommandBase {
       testFile,
       stringsArg('test-arguments'),
       <String, String>{},
+      packageConfig,
       chromeBinary: stringArg('chrome-binary'),
       headless: boolArg('headless'),
       browserDimension: stringArg('browser-dimension').split(','),

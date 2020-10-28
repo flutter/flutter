@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
+import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -168,10 +169,42 @@ void main() {
       'foo.test',
       <String>['--enable-experiment=non-nullable'],
       <String, String>{'FOO': 'BAR'},
+      PackageConfig(<Package>[Package('test', Uri.base)]),
     );
 
     expect(testResult, 23);
   });
+
+  testWithoutContext('Uses dart to execute the test if there is no package:test dependency', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      getVM,
+    ]);
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        exitCode: 23,
+        environment: <String, String>{
+          'FOO': 'BAR',
+          'VM_SERVICE_URL': 'http://127.0.0.1:1234/' // dds forwarded URI
+        },
+      ),
+    ]);
+    final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
+    final Device device = FakeDevice(LaunchResult.succeeded(
+      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+    ));
+
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
+    final int testResult = await driverService.startTest(
+      'foo.test',
+      <String>['--enable-experiment=non-nullable'],
+      <String, String>{'FOO': 'BAR'},
+      PackageConfig.empty,
+    );
+
+    expect(testResult, 23);
+  });
+
 
   testWithoutContext('Connects to device VM Service and runs test application without dds', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
@@ -196,6 +229,7 @@ void main() {
       'foo.test',
       <String>[],
       <String, String>{},
+      PackageConfig(<Package>[Package('test', Uri.base)]),
     );
 
     expect(testResult, 11);
