@@ -30,8 +30,8 @@ const double kTextTabBarHeight = kMinInteractiveDimension;
 /// The amount of time theme change animations should last.
 const Duration kThemeChangeDuration = Duration(milliseconds: 200);
 
-/// The radius of a circular material ink response in logical pixels.
-const double kRadialReactionRadius = 20.0;
+/// The default radius of a circular material ink response in logical pixels.
+const double kRadialReactionRadius = 24.0;
 
 /// The amount of time a circular material ink response should take to expand to its full size.
 const Duration kRadialReactionDuration = Duration(milliseconds: 100);
