@@ -459,12 +459,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
     final ThemeData themeData = Theme.of(context)!;
     final ColorScheme colorScheme = themeData.colorScheme;
-<<<<<<< HEAD
     final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context)!;
-=======
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
->>>>>>> upstream/master
+        MaterialLocalizations.of(context);
 
     const OutlinedBorder buttonShape = RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(2)));
