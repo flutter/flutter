@@ -154,9 +154,9 @@ static bool OnPresent(FlutterEngine* engine) {
   return [engine engineCallbackOnPresent];
 }
 
-static uint32_t OnFBO(FlutterEngine* engine) {
-  // There is currently no case where a different FBO is used, so no need to forward.
-  return 0;
+static uint32_t OnFBO(FlutterEngine* engine, const FlutterFrameInfo* info) {
+  CGSize size = CGSizeMake(info->size.width, info->size.height);
+  return [engine.viewController.flutterView getFrameBufferIdForSize:size];
 }
 
 static bool OnMakeResourceCurrent(FlutterEngine* engine) {
@@ -248,7 +248,8 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
       .open_gl.make_current = (BoolCallback)OnMakeCurrent,
       .open_gl.clear_current = (BoolCallback)OnClearCurrent,
       .open_gl.present = (BoolCallback)OnPresent,
-      .open_gl.fbo_callback = (UIntCallback)OnFBO,
+      .open_gl.fbo_with_frame_info_callback = (UIntFrameInfoCallback)OnFBO,
+      .open_gl.fbo_reset_after_present = true,
       .open_gl.make_resource_current = (BoolCallback)OnMakeResourceCurrent,
       .open_gl.gl_external_texture_frame_callback = (TextureFrameCallback)OnAcquireExternalTexture,
   };
@@ -297,7 +298,6 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   const FlutterCustomTaskRunners custom_task_runners = {
       .struct_size = sizeof(FlutterCustomTaskRunners),
       .platform_task_runner = &cocoa_task_runner_description,
-      .render_task_runner = &cocoa_task_runner_description,
   };
   flutterArguments.custom_task_runners = &custom_task_runners;
 
@@ -322,6 +322,7 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   [self sendUserLocales];
   [self updateWindowMetrics];
   [self updateDisplayConfig];
+  self.viewController.flutterView.synchronousResizing = YES;
   return YES;
 }
 
@@ -362,7 +363,9 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
     [self shutDownEngine];
     _resourceContext = nil;
   }
-  [self updateWindowMetrics];
+  if (_engine) {
+    self.viewController.flutterView.synchronousResizing = YES;
+  }
 }
 
 - (id<FlutterBinaryMessenger>)binaryMessenger {
@@ -380,7 +383,7 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 - (NSOpenGLContext*)resourceContext {
   if (!_resourceContext) {
     NSOpenGLPixelFormatAttribute attributes[] = {
-        NSOpenGLPFAColorSize, 24, NSOpenGLPFAAlphaSize, 8, NSOpenGLPFADoubleBuffer, 0,
+        NSOpenGLPFAColorSize, 24, NSOpenGLPFAAlphaSize, 8, 0,
     };
     NSOpenGLPixelFormat* pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
     _resourceContext = [[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil];
@@ -479,7 +482,7 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   if (!_mainOpenGLContext) {
     return false;
   }
-  [_mainOpenGLContext flushBuffer];
+  [self.viewController.flutterView present];
   return true;
 }
 
