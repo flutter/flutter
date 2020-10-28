@@ -456,7 +456,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   }
 
   void _dismiss() {
-    navigator?.removeRoute(this);
+    if (isActive) {
+      navigator?.removeRoute(this);
+    }
   }
 
   double getItemOffset(int index) {
