@@ -153,6 +153,11 @@ class WebDriverService extends DriverService {
       'ANDROID_CHROME_ON_EMULATOR': (_browserNameToEnum(browserName) == Browser.androidChrome && androidEmulator).toString(),
     };
   }
+
+  @override
+  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions, bool ipv6) async {
+    throwToolExit('--use-existing-app is not supported with flutter web driver');
+  }
 }
 
 /// A list of supported browsers.
