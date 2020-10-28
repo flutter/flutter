@@ -56,11 +56,17 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// If null, this progress indicator is indeterminate, which means the
   /// indicator displays a predetermined animation that does not indicate how
   /// much actual progress is being made.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   final double? value;
 
   /// The progress indicator's background color.
   ///
   /// The current theme's [ThemeData.backgroundColor] by default.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   final Color? backgroundColor;
 
   /// The progress indicator's color as an animated value.
@@ -69,6 +75,9 @@ abstract class ProgressIndicator extends StatefulWidget {
   ///
   /// If null, the progress indicator is rendered with the current theme's
   /// [ThemeData.accentColor].
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   final Animation<Color?>? valueColor;
 
   /// {@template flutter.material.progressIndicator.semanticsLabel}
@@ -77,6 +86,9 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// This value indicates the purpose of the progress bar, and will be
   /// read out by screen readers to indicate the purpose of this progress
   /// indicator.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   /// {@endtemplate}
   final String? semanticsLabel;
 
@@ -91,6 +103,9 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// For determinate progress indicators, this will be defaulted to
   /// [ProgressIndicator.value] expressed as a percentage, i.e. `0.1` will
   /// become '10%'.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   /// {@endtemplate}
   final String? semanticsValue;
 
@@ -475,6 +490,9 @@ class CircularProgressIndicator extends ProgressIndicator {
   final _ActivityIndicatorType _indicatorType;
 
   /// The width of the line used to draw the circle.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   final double strokeWidth;
 
   @override

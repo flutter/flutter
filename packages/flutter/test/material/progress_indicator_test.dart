@@ -557,39 +557,41 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
 
 
-  testWidgets('Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',
-  (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: Material(
-            child: CircularProgressIndicator.adaptive(),
+  testWidgets(
+    'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Material(
+              child: CircularProgressIndicator.adaptive(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
-  }, variant: const TargetPlatformVariant(<TargetPlatform> {
+      expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+    }, variant: const TargetPlatformVariant(<TargetPlatform> {
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     })
   );
 
-  testWidgets('Adaptive CircularProgressIndicator does not display CupertinoActivityIndicator in non-iOS',
-  (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: Material(
-            child: CircularProgressIndicator.adaptive(),
+  testWidgets(
+    'Adaptive CircularProgressIndicator does not display CupertinoActivityIndicator in non-iOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Material(
+              child: CircularProgressIndicator.adaptive(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(find.byType(CupertinoActivityIndicator), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform> {
+      expect(find.byType(CupertinoActivityIndicator), findsNothing);
+    }, variant: const TargetPlatformVariant(<TargetPlatform> {
       TargetPlatform.android,
       TargetPlatform.fuchsia,
       TargetPlatform.windows,
