@@ -54,6 +54,10 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterExternalTextureGL.mm",
     "framework/Source/FlutterMouseCursorPlugin.h",
     "framework/Source/FlutterMouseCursorPlugin.mm",
+    "framework/Source/FlutterResizeSynchronizer.h",
+    "framework/Source/FlutterResizeSynchronizer.mm",
+    "framework/Source/FlutterSurfaceManager.h",
+    "framework/Source/FlutterSurfaceManager.mm",
     "framework/Source/FlutterTextInputModel.h",
     "framework/Source/FlutterTextInputModel.mm",
     "framework/Source/FlutterTextInputPlugin.h",
@@ -62,11 +66,15 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterView.mm",
     "framework/Source/FlutterViewController.mm",
     "framework/Source/FlutterViewController_Internal.h",
+    "framework/Source/MacOSSwitchableGLContext.h",
+    "framework/Source/MacOSSwitchableGLContext.mm",
   ]
 
   sources += _flutter_framework_headers
 
   deps = [
+    "//flutter/flow:flow",
+    "//flutter/fml:fml",
     "//flutter/shell/platform/common/cpp:common_cpp_switches",
     "//flutter/shell/platform/darwin/common:framework_shared",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
@@ -81,6 +89,8 @@ source_set("flutter_framework_source") {
   libs = [
     "Cocoa.framework",
     "CoreVideo.framework",
+    "IOSurface.framework",
+    "QuartzCore.framework",
   ]
 }
 
