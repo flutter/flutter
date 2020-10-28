@@ -690,7 +690,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If [automaticIndicatorColorAdjustment] is true,
   /// then the [indicatorColor] will be automatically adjusted to [Colors.white]
-  /// when the [indicatorColor] is same as [Material.color].
+  /// when the [indicatorColor] is same as [Material.color] of the [Material] parent widget.
   final bool automaticIndicatorColorAdjustment;
 
   /// Defines how the selected tab indicator's size is computed.
@@ -822,6 +822,8 @@ class _TabBarState extends State<TabBar> {
     //
     // The material's color might be null (if it's a transparency). In that case
     // there's no good way for us to find out what the color is so we don't.
+    // TODO(xu-baolin): Remove this code without breaking something.
+    // https://github.com/flutter/flutter/pull/68171#pullrequestreview-517753917
     if (widget.automaticIndicatorColorAdjustment && color.value == Material.of(context)?.color?.value)
       color = Colors.white;
 
