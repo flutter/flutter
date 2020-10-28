@@ -228,9 +228,6 @@ class FlutterDriverService extends DriverService {
   }) async {
     return _processUtils.stream(<String>[
       _dartSdkPath,
-      'pub',
-      'run',
-      'test',
       ...arguments,
       testFile,
       '-rexpanded',
