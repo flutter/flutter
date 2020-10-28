@@ -557,7 +557,6 @@ void main() {
     expect(renderEditable.selectWordsInRangeCalled, isTrue);
   });
 
-
   testWidgets('Mouse drag does not show handles nor toolbar', (WidgetTester tester) async {
     // Regressing test for https://github.com/flutter/flutter/issues/69001
     await tester.pumpWidget(
