@@ -556,7 +556,6 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
 
-
   testWidgets(
     'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',
     (WidgetTester tester) async {
