@@ -6476,6 +6476,81 @@ void main() {
       expect(error.toString(), contains(errorText));
     });
   });
+
+  testWidgets('Call onFocus and onBlur correctly', (WidgetTester tester) async {
+    final FocusNode focusNodeFoo = FocusNode();
+    final FocusNode focusNodeBar = FocusNode();
+
+    int onFocusFooCalledTime = 0;
+    int onFocusBarCalledTime = 0;
+
+    int onBlurFooCalledTime = 0;
+    int onBlurBarCalledTime = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: <Widget>[
+            EditableText(
+              controller: TextEditingController(),
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNodeFoo,
+              style: textStyle,
+              cursorColor: cursorColor,
+              autofocus: true,
+              onFocus: () {
+                onFocusFooCalledTime += 1;
+                },
+              onBlur: () {
+                onBlurFooCalledTime += 1;
+              },
+            ),
+            EditableText(
+              controller: TextEditingController(),
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNodeBar,
+              style: textStyle,
+              cursorColor: cursorColor,
+              onFocus: () {
+                onFocusBarCalledTime += 1;
+              },
+              onBlur: () {
+                onBlurBarCalledTime += 1;
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+
+    expect(focusNodeFoo.hasFocus, true);
+    expect(focusNodeBar.hasFocus, false);
+    expect(onFocusFooCalledTime, 1);
+    expect(onFocusBarCalledTime, 0);
+    expect(onBlurFooCalledTime, 0);
+    expect(onBlurBarCalledTime, 0);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    expect(focusNodeFoo.hasFocus, false);
+    expect(focusNodeBar.hasFocus, true);
+    expect(onFocusFooCalledTime, 1);
+    expect(onFocusBarCalledTime, 1);
+    expect(onBlurFooCalledTime, 1);
+    expect(onBlurBarCalledTime, 0);
+
+    focusNodeFoo.requestFocus();
+    await tester.pump();
+
+    expect(focusNodeFoo.hasFocus, true);
+    expect(focusNodeBar.hasFocus, false);
+    expect(onFocusFooCalledTime, 2);
+    expect(onFocusBarCalledTime, 1);
+    expect(onBlurFooCalledTime, 1);
+    expect(onBlurBarCalledTime, 1);
+  });
 }
 
 class MockTextFormatter extends TextInputFormatter {
