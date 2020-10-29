@@ -511,6 +511,13 @@ class CupertinoTextField extends StatefulWidget {
   ///    [TextInputAction.previous] for [textInputAction].
   final ValueChanged<String>? onSubmitted;
 
+  /// {@macro flutter.widgets.editableText.onFocus}
+  final VoidCallback? onFocus;
+
+  /// {@macro flutter.widgets.editableText.onBlur}
+  final VoidCallback? onBlur;
+
+
   /// {@macro flutter.widgets.editableText.inputFormatters}
   final List<TextInputFormatter>? inputFormatters;
 
@@ -968,6 +975,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             onSelectionChanged: _handleSelectionChanged,
             onEditingComplete: widget.onEditingComplete,
             onSubmitted: widget.onSubmitted,
+            onFocus: widget.onFocus,
+            onBlur: widget.onBlur,
             inputFormatters: formatters,
             rendererIgnoresPointer: true,
             cursorWidth: widget.cursorWidth,

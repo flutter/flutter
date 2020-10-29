@@ -362,6 +362,8 @@ class TextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onAppPrivateCommand,
+    this.onFocus,
+    this.onBlur,
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
@@ -473,6 +475,8 @@ class TextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onAppPrivateCommand,
+    this.onFocus,
+    this.onBlur,
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
@@ -736,6 +740,12 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.onAppPrivateCommand}
   final AppPrivateCommandCallback? onAppPrivateCommand;
+
+  /// {@macro flutter.widgets.editableText.onFocus}
+  final VoidCallback? onFocus;
+
+  /// {@macro flutter.widgets.editableText.onBlur}
+  final VoidCallback? onBlur;
 
   /// {@macro flutter.widgets.editableText.inputFormatters}
   final List<TextInputFormatter>? inputFormatters;
@@ -1338,6 +1348,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           onSubmitted: widget.onSubmitted,
           onAppPrivateCommand: widget.onAppPrivateCommand,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
+          onFocus: widget.onFocus,
+          onBlur: widget.onBlur,
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
           mouseCursor: MouseCursor.defer, // TextField will handle the cursor
