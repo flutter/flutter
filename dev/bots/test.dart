@@ -129,6 +129,13 @@ Future<void> main(List<String> args) async {
   print('$clock ${bold}Test successful.$reset');
 }
 
+/// Returns whether or not Linux desktop tests should be run.
+///
+/// The branch restrictions here should stay in sync with features.dart.
+bool _shouldRunLinux() {
+  return Platform.isLinux && (branchName != 'beta' && branchName != 'stable');
+}
+
 /// Returns whether or not macOS desktop tests should be run.
 ///
 /// The branch restrictions here should stay in sync with features.dart.
@@ -400,6 +407,14 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
     }
   }
+  if (_shouldRunLinux()) {
+    if (Directory(path.join(examplePath, 'linux')).existsSync()) {
+      await _flutterBuildLinux(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+      await _flutterBuildLinux(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+    } else {
+      print('Example project ${path.basename(examplePath)} has no linux directory, skipping Linux');
+    }
+  }
   if (_shouldRunMacOS()) {
     if (Directory(path.join(examplePath, 'macos')).existsSync()) {
       await _flutterBuildMacOS(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -454,6 +469,21 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
     release: release,
     verifyCaching: verifyCaching,
     additionalArgs: <String>[...additionalArgs, '--no-codesign'],
+  );
+}
+
+Future<void> _flutterBuildLinux(String relativePathToApplication, {
+  @required bool release,
+  bool verifyCaching = false,
+  List<String> additionalArgs = const <String>[],
+}) async {
+  assert(Platform.isLinux);
+  await runCommand(flutter, <String>['config', '--enable-linux-desktop']);
+  print('${green}Testing Linux build$reset for $cyan$relativePathToApplication$reset...');
+  await _flutterBuild(relativePathToApplication, 'Linux', 'linux',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
   );
 }
 
