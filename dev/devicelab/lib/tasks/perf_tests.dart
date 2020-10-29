@@ -664,8 +664,9 @@ class PerfTest {
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
           if (measureCpuGpu && !isAndroid) ...<String>[
-            'average_cpu_usage',
-            'average_gpu_usage',
+            // See https://github.com/flutter/flutter/issues/68888
+            if (data['average_cpu_usage'] != null) 'average_cpu_usage',
+            if (data['average_gpu_usage'] != null) 'average_gpu_usage',
           ],
           if (measureMemory && !isAndroid) ...<String>[
             'average_memory_usage',
