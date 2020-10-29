@@ -42,7 +42,9 @@ class PathRef {
   static const int kInitialPointsCapacity = 8;
   static const int kInitialVerbsCapacity = 8;
 
+  /// Bounds of points that define path.
   ui.Rect? fBounds;
+  /// Computed tight bounds of path (may exclude curve control points).
   ui.Rect? cachedBounds;
   int _fPointsCapacity = 0;
   int _fPointsLength = 0;
@@ -730,6 +732,7 @@ class PathRef {
     fIsRRect = false;
     fIsRect = false;
     cachedBounds = null;
+    fBoundsIsDirty = true;
   }
 
   void setIsOval(bool isOval, bool isCCW, int start) {
