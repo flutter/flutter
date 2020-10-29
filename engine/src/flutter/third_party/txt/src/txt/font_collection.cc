@@ -103,18 +103,34 @@ void FontCollection::SetupDefaultFontManager() {
 
 void FontCollection::SetDefaultFontManager(sk_sp<SkFontMgr> font_manager) {
   default_font_manager_ = font_manager;
+
+#if FLUTTER_ENABLE_SKSHAPER
+  skt_collection_.reset();
+#endif
 }
 
 void FontCollection::SetAssetFontManager(sk_sp<SkFontMgr> font_manager) {
   asset_font_manager_ = font_manager;
+
+#if FLUTTER_ENABLE_SKSHAPER
+  skt_collection_.reset();
+#endif
 }
 
 void FontCollection::SetDynamicFontManager(sk_sp<SkFontMgr> font_manager) {
   dynamic_font_manager_ = font_manager;
+
+#if FLUTTER_ENABLE_SKSHAPER
+  skt_collection_.reset();
+#endif
 }
 
 void FontCollection::SetTestFontManager(sk_sp<SkFontMgr> font_manager) {
   test_font_manager_ = font_manager;
+
+#if FLUTTER_ENABLE_SKSHAPER
+  skt_collection_.reset();
+#endif
 }
 
 // Return the available font managers in the order they should be queried.
@@ -365,6 +381,7 @@ void FontCollection::ClearFontFamilyCache() {
   }
 #endif
 }
+
 #if FLUTTER_ENABLE_SKSHAPER
 
 sk_sp<skia::textlayout::FontCollection>
