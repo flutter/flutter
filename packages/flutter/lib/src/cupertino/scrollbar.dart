@@ -154,9 +154,9 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
 
   @override
   void didUpdateWidget(CupertinoScrollbar oldWidget) {
-    super.didUpdateWidget(oldWidget);
     assert(painter != null);
     painter!.updateThickness(_thickness, _radius);
+    super.didUpdateWidget(oldWidget);
   }
 
   /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
@@ -233,7 +233,7 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
   // thumb.
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    if (widget.controller == null)
+    if (controller == null)
       return gestures;
 
     gestures[_ThumbPressGestureRecognizer] =
@@ -262,6 +262,7 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
 
   @override
   Widget build(BuildContext context) {
+    print('gestures: $_gestures');
     return NotificationListener<ScrollNotification>(
       onNotification: handleScrollNotification,
       child: RepaintBoundary(
@@ -298,6 +299,8 @@ class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer with Scrol
 
   @override
   bool isPointerAllowed(PointerDownEvent event) {
+    bool result = hitTestInteractive(_customPaintKey, event.position);
+    print('hitTestResult: $result');
     if (!hitTestInteractive(_customPaintKey, event.position)) {
       return false;
     }

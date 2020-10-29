@@ -555,7 +555,9 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
   Drag? _drag;
 
   ScrollController? _currentController;
-  ScrollController? get _controller =>
+  /// Doc
+  @protected
+  ScrollController? get controller =>
     widget.controller ?? PrimaryScrollController.of(context);
 
   ///
@@ -614,6 +616,9 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
     WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
       if (widget.isAlwaysShown) {
         _fadeoutTimer?.cancel();
+        // Wait one frame and cause an empty scroll event.  This allows the
+        // thumb to show immediately when isAlwaysShown is true.  A scroll
+        // event is required in order to paint the thumb.
         widget.controller!.position.didUpdateScrollPositionBy(0);
       }
     });
@@ -665,7 +670,7 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
     }
   }
 
-  void _startFadeoutTimer() {
+  void _maybeStartFadeoutTimer() {
     if (!widget.isAlwaysShown) {
       _fadeoutTimer?.cancel();
       _fadeoutTimer = Timer(widget.timeToFade, () {
@@ -689,7 +694,7 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
   /// Doc
   @protected
   void handleGestureStart(Offset localPosition) {
-    _currentController = _controller;
+    _currentController = controller;
     final Axis? direction = getDirection();
     if (direction == null) {
       return;
@@ -734,7 +739,7 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
     if (direction == null)
       return;
 
-    _startFadeoutTimer();
+    _maybeStartFadeoutTimer();
     _dragScrollbarAxisPosition = null;
     final double scrollVelocity = painter!.getTrackToScroll(
       direction == Axis.vertical
@@ -768,13 +773,11 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
         _fadeoutAnimationController.forward();
       }
 
-      _fadeoutTimer?.cancel();
       painter!.update(notification.metrics, notification.metrics.axisDirection);
+      _maybeStartFadeoutTimer();
     } else if (notification is ScrollEndNotification) {
-      // On iOS, the scrollbar can only go away once the user lifted the finger.
-      if (_dragScrollbarAxisPosition == null) {
-        _startFadeoutTimer();
-      }
+      if (_dragScrollbarAxisPosition == null)
+        _maybeStartFadeoutTimer();
     }
     return false;
   }
@@ -789,7 +792,7 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
 }
 
 
-/// Doc
+/// A mixin for gesture hit testing subclasses of [RawScrollbarThumb].
 mixin ScrollbarThumbHitTestMixin {
   /// The foregroundPainter also hit tests its children by default, but the
   /// scrollbar should only respond to a gesture directly on its thumb, so

@@ -120,7 +120,7 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   // thumb.
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    if (widget.controller == null)
+    if (controller == null)
       return gestures;
 
     gestures[_VerticalThumbDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_VerticalThumbDragGestureRecognizer>(
