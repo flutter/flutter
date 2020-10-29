@@ -64,6 +64,7 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    print('Scrollbar.didChangeDependencies');
     final ThemeData theme = Theme.of(context)!;
     switch (theme.platform) {
       case TargetPlatform.iOS:
@@ -79,6 +80,7 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
+        print('Not on ios, set painter, trigger scrollbar');
         painter = _buildMaterialScrollbarPainter();
         _useCupertinoScrollbar = false;
         triggerScrollbar();
@@ -89,7 +91,9 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   @override
   void didUpdateWidget(Scrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
+    print('Scrollbar.didUpdateWidget');
     if (!_useCupertinoScrollbar) {
+      print('Not using cupertino, so update thickness and radius of painter wiht  ${widget.thickness} ${widget.radius}');
       painter!
         ..thickness = widget.thickness ?? _kScrollbarThickness
         ..radius = widget.radius;
@@ -97,6 +101,15 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   }
 
   ScrollbarPainter _buildMaterialScrollbarPainter() {
+    print('Scrollbar._buildMaterialPainter:'
+      'ScrollbarPainter('
+      'color: ${Theme.of(context)!.highlightColor.withOpacity(1.0)},'
+      'textDirection: ${Directionality.of(context)!},'
+      'thickness: ${widget.thickness ?? _kScrollbarThickness},'
+      'radius: ${widget.radius},'
+      'fadeoutOpacityAnimation: $fadeoutOpacityAnimation,'
+      'padding: ${MediaQuery.of(context).padding},'
+      ');');
     return ScrollbarPainter(
       color: Theme.of(context)!.highlightColor.withOpacity(1.0),
       textDirection: Directionality.of(context)!,
@@ -109,6 +122,7 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
 
   @override
   bool handleScrollNotification(ScrollNotification notification) {
+    print('Scrollbar.handleScrollNotification');
     // iOS sub-delegates to the CupertinoScrollbar instead and doesn't handle
     // scroll notifications here.
     if (_useCupertinoScrollbar)
@@ -151,6 +165,7 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
 
   @override
   Widget build(BuildContext context) {
+    print('Scrollbar.build');
     if (_useCupertinoScrollbar) {
       return CupertinoScrollbar(
         child: widget.child,

@@ -596,6 +596,7 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
   
   @override
   void initState() {
+    print('Raw.initState, set up fadeout stuff');
     super.initState();
     _fadeoutAnimationController = AnimationController(
       vsync: this,
@@ -613,8 +614,10 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
   /// A scroll event is required in order to paint the thumb.
   @protected
   void triggerScrollbar() {
+    print('Raw.triggerScrollbar');
     WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
       if (widget.isAlwaysShown) {
+        print('isAlwaysShown is true, cancel fade out timer, update scroll position');
         _fadeoutTimer?.cancel();
         // Wait one frame and cause an empty scroll event.  This allows the
         // thumb to show immediately when isAlwaysShown is true.  A scroll
@@ -626,12 +629,15 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
 
   @override
   void didUpdateWidget(T oldWidget) {
+    print('Raw.didUpdateWidget');
     super.didUpdateWidget(oldWidget);
     if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
       if (widget.isAlwaysShown == true) {
+        print('isAlwaysShown has changed, is true. Triggering scrollbar, set fade out to animate to 1');
         triggerScrollbar();
         _fadeoutAnimationController.animateTo(1.0);
       } else {
+        print('isAlwaysShown changed, is false, reversing animation controller');
         _fadeoutAnimationController.reverse();
       }
     }
@@ -671,7 +677,9 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
   }
 
   void _maybeStartFadeoutTimer() {
+    print('Raw._maybeStartFadeoutTimer');
     if (!widget.isAlwaysShown) {
+      print('isAlways shown is false, cancel timer, reset to new fade out, reverse controller');
       _fadeoutTimer?.cancel();
       _fadeoutTimer = Timer(widget.timeToFade, () {
         _fadeoutAnimationController.reverse();
@@ -761,29 +769,38 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
   /// Doc
   @protected
   bool handleScrollNotification(ScrollNotification notification) {
+    print('Raw.handleScrollNotification');
     final ScrollMetrics metrics = notification.metrics;
     if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
+      print('returning false, maxScrollExtent <= minScrollExtent');
       return false;
     }
 
     if (notification is ScrollUpdateNotification ||
       notification is OverscrollNotification) {
+      print('notification is scrollUpdate or overscroll');
       // Any movements always makes the scrollbar start showing up.
       if (_fadeoutAnimationController.status != AnimationStatus.forward) {
+        print('sending fgadeout controller forward');
         _fadeoutAnimationController.forward();
       }
 
+      print('update painter, maybe start fadeout timer');
       painter!.update(notification.metrics, notification.metrics.axisDirection);
       _maybeStartFadeoutTimer();
     } else if (notification is ScrollEndNotification) {
-      if (_dragScrollbarAxisPosition == null)
+      print('scrollend notification');
+      if (_dragScrollbarAxisPosition == null) {
+        print('_dragScrollbarAxisPosition is null, so maybe start fadeout timer');
         _maybeStartFadeoutTimer();
+      }
     }
     return false;
   }
 
   @override
   void dispose() {
+    print('dispose');
     _fadeoutAnimationController.dispose();
     _fadeoutTimer?.cancel();
     painter?.dispose();
