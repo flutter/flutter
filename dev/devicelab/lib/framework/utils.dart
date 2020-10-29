@@ -434,7 +434,7 @@ Future<String> eval(
 
 List<String> flutterCommandArgs(String command, List<String> options) {
   // Commands support the --device-timeout flag.
-  final List<String> supportedDeviceTimeoutCommands = <String>[
+  final Set<String> supportedDeviceTimeoutCommands = <String>{
     'attach',
     'devices',
     'drive',
@@ -442,7 +442,7 @@ List<String> flutterCommandArgs(String command, List<String> options) {
     'logs',
     'run',
     'screenshot',
-  ];
+  };
   return <String>[
     command,
     if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
