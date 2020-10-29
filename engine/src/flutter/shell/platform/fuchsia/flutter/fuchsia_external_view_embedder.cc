@@ -29,7 +29,8 @@ FuchsiaExternalViewEmbedder::FuchsiaExternalViewEmbedder(
     fuchsia::ui::views::ViewToken view_token,
     scenic::ViewRefPair view_ref_pair,
     SessionConnection& session,
-    VulkanSurfaceProducer& surface_producer)
+    VulkanSurfaceProducer& surface_producer,
+    bool intercept_all_input)
     : session_(session),
       surface_producer_(surface_producer),
       root_view_(session_.get(),
@@ -38,12 +39,19 @@ FuchsiaExternalViewEmbedder::FuchsiaExternalViewEmbedder(
                  std::move(view_ref_pair.view_ref),
                  debug_label),
       metrics_node_(session_.get()),
-      root_node_(session_.get()) {
+      root_node_(session_.get()),
+      intercept_all_input_(intercept_all_input) {
   root_view_.AddChild(metrics_node_);
   metrics_node_.SetEventMask(fuchsia::ui::gfx::kMetricsEventMask);
   metrics_node_.SetLabel("Flutter::MetricsWatcher");
   metrics_node_.AddChild(root_node_);
   root_node_.SetLabel("Flutter::LayerTree");
+
+  // Set up the input interceptor at the top of the scene, if applicable.
+  if (intercept_all_input_) {
+    input_interceptor_.emplace(session_.get());
+    metrics_node_.AddChild(input_interceptor_->node());
+  }
 
   session_.Present();
 }
@@ -114,6 +122,15 @@ void FuchsiaExternalViewEmbedder::BeginFrame(
   frame_layers_.emplace(
       std::make_pair(kRootLayerId, EmbedderLayer(frame_size, std::nullopt)));
   frame_composition_order_.push_back(kRootLayerId);
+
+  // Set up the input interceptor at the top of the scene, if applicable.
+  if (input_interceptor_.has_value()) {
+    // TODO: Don't hardcode elevation.
+    const float kMaximumElevation = -100.f;
+    input_interceptor_->UpdateDimensions(session_.get(), frame_size.width(),
+                                         frame_size.height(),
+                                         kMaximumElevation);
+  }
 }
 
 void FuchsiaExternalViewEmbedder::EndFrame(
@@ -126,7 +143,6 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
     GrDirectContext* context,
     std::unique_ptr<flutter::SurfaceFrame> frame) {
   TRACE_EVENT0("flutter", "FuchsiaExternalViewEmbedder::SubmitFrame");
-
   std::vector<std::unique_ptr<SurfaceProducerSurface>> frame_surfaces;
   std::unordered_map<EmbedderLayerId, size_t> frame_surface_indices;
 
@@ -164,6 +180,7 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
     const float inv_dpr = 1.0f / frame_dpr_;
     root_node_.SetScale(inv_dpr, inv_dpr, 1.0f);
 
+    bool first_layer = true;
     for (const auto& layer_id : frame_composition_order_) {
       const auto& layer = frame_layers_.find(layer_id);
       FML_DCHECK(layer != frame_layers_.end());
@@ -324,6 +341,18 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
                                        SK_AlphaOPAQUE, SK_AlphaOPAQUE - 1);
         scenic_layer.material.SetTexture(*surface_image);
 
+        // Only the first (i.e. the bottom-most) layer should receive input.
+        // TODO: Workaround for invisible overlays stealing input. Remove when
+        // the underlying bug is fixed.
+        if (first_layer) {
+          scenic_layer.shape_node.SetHitTestBehavior(
+              fuchsia::ui::gfx::HitTestBehavior::kDefault);
+        } else {
+          scenic_layer.shape_node.SetHitTestBehavior(
+              fuchsia::ui::gfx::HitTestBehavior::kSuppress);
+        }
+        first_layer = false;
+
         // Attach the ScenicLayer to the main scene graph.
         root_node_.AddChild(scenic_layer.shape_node);
 
@@ -437,6 +466,8 @@ void FuchsiaExternalViewEmbedder::Reset() {
   for (auto& layer : scenic_layers_) {
     layer.material.SetTexture(0);
   }
+
+  input_interceptor_.reset();
 }
 
 }  // namespace flutter_runner

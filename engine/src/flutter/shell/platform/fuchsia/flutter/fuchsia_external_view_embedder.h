@@ -39,7 +39,8 @@ class FuchsiaExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
                               fuchsia::ui::views::ViewToken view_token,
                               scenic::ViewRefPair view_ref_pair,
                               SessionConnection& session,
-                              VulkanSurfaceProducer& surface_producer);
+                              VulkanSurfaceProducer& surface_producer,
+                              bool intercept_all_input = false);
   ~FuchsiaExternalViewEmbedder();
 
   // |ExternalViewEmbedder|
@@ -131,6 +132,40 @@ class FuchsiaExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
     scenic::Material material;
   };
 
+  // Helper class for setting up an invisible rectangle to catch all input.
+  // Rejected input will then be re-injected into a suitable platform view
+  // controlled by this Engine instance.
+  class InputInterceptor {
+   public:
+    InputInterceptor(scenic::Session* session)
+        : opacity_node_(session), shape_node_(session) {
+      opacity_node_.SetLabel("Flutter::InputInterceptor");
+      opacity_node_.SetOpacity(0.5f);
+
+      // Set the shape node to capture all input. Any unwanted input will be
+      // reinjected.
+      shape_node_.SetHitTestBehavior(
+          fuchsia::ui::gfx::HitTestBehavior::kDefault);
+      shape_node_.SetSemanticVisibility(false);
+
+      opacity_node_.AddChild(shape_node_);
+    }
+
+    void UpdateDimensions(scenic::Session* session,
+                          float width,
+                          float height,
+                          float elevation) {
+      opacity_node_.SetTranslation(width * 0.5f, height * 0.5f, elevation);
+      shape_node_.SetShape(scenic::Rectangle(session, width, height));
+    }
+
+    const scenic::Node& node() { return opacity_node_; }
+
+   private:
+    scenic::OpacityNodeHACK opacity_node_;
+    scenic::ShapeNode shape_node_;
+  };
+
   using EmbedderLayerId = std::optional<uint32_t>;
   constexpr static EmbedderLayerId kRootLayerId = EmbedderLayerId{};
 
@@ -145,10 +180,14 @@ class FuchsiaExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
   std::unordered_map<int64_t, ScenicView> scenic_views_;
   std::vector<ScenicLayer> scenic_layers_;
 
+  std::optional<InputInterceptor> input_interceptor_;
+
   std::unordered_map<EmbedderLayerId, EmbedderLayer> frame_layers_;
   std::vector<EmbedderLayerId> frame_composition_order_;
   SkISize frame_size_ = SkISize::Make(0, 0);
   float frame_dpr_ = 1.f;
+
+  bool intercept_all_input_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FuchsiaExternalViewEmbedder);
 };
