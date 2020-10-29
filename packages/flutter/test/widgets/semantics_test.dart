@@ -1096,6 +1096,393 @@ void main() {
     );
     semantics.dispose();
   });
+
+  testWidgets('Can change handlers', (WidgetTester tester) async {
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onTap: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasTapAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onDismiss: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasDismissAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onLongPress: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasLongPressAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onScrollLeft: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasScrollLeftAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onScrollRight: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasScrollRightAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onScrollUp: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasScrollUpAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onScrollDown: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasScrollDownAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onIncrease: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasIncreaseAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onDecrease: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasDecreaseAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onCopy: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasCopyAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onCut: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasCutAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onPaste: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasPasteAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onSetSelection: (TextSelection _) {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasSetSelectionAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onDidGainAccessibilityFocus: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasDidGainAccessibilityFocusAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onDidLoseAccessibilityFocus: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasDidLoseAccessibilityFocusAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+  });
 }
 
 class CustomSortKey extends OrdinalSortKey {
