@@ -57,7 +57,7 @@ class AppBarTheme with Diagnosticable {
   ///    a [ThemeData].
   ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
   ///    default colors are based on.
-  ///  * [ThemeData.colorScheme.brightness], which indicates if the overall theme
+  ///  * [ColorScheme.brightness], which indicates if the overall [Theme]
   ///    is light or dark.
   final Brightness? brightness;
 
@@ -77,7 +77,7 @@ class AppBarTheme with Diagnosticable {
   ///    a [ThemeData].
   ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
   ///    default colors are based on.
-  ///  * [ThemeData.colorScheme.brightness], which indicates if the overall theme
+  ///  * [ColorScheme.brightness], which indicates if the overall [Theme]
   ///    is light or dark.
   final Color? color;
 
@@ -99,7 +99,7 @@ class AppBarTheme with Diagnosticable {
   ///    a [ThemeData].
   ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
   ///    default colors are based on.
-  ///  * [ThemeData.colorScheme.brightness], which indicates if the overall theme
+  ///  * [ColorScheme.brightness], which indicates if the overall [Theme]
   ///    is light or dark.
   final Color? foregroundColor;
 
