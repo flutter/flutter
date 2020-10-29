@@ -57,7 +57,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await failToEvaluateExpression(_flutter);
     await cleanProject();
-  }, skip: platform.isMacOS);
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
 
  testWithoutContext('flutter run expression evaluation - no native javascript objects in static scope', () async {
     await initProject();
@@ -65,7 +65,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await checkStaticScope(_flutter);
     await cleanProject();
-  }, skip: platform.isMacOS);
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
 
   testWithoutContext('flutter run expression evaluation - can handle compilation errors', () async {
     await initProject();
@@ -73,7 +73,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await evaluateErrorExpressions(_flutter);
     await cleanProject();
-  }, skip: platform.isMacOS);
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
 
   testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in top level function', () async {
     await initProject();
@@ -81,7 +81,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
-  }, skip: platform.isMacOS);
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
 
   testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in build method', () async {
     await initProject();
@@ -89,7 +89,7 @@ void batch1() {
     await breakInBuildMethod(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
-  }, skip: platform.isMacOS);
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
 
   testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in top level function', () async {
     await initProject();
@@ -97,7 +97,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  }, skip: platform.isMacOS);
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
 
   testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in build method', () async {
     await initProject();
@@ -105,7 +105,7 @@ void batch1() {
     await breakInBuildMethod(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  }, skip: platform.isMacOS);
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
 }
 
 void batch2() {
@@ -149,7 +149,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await failToEvaluateExpression(_flutter);
     await cleanProject();
-  }, skip: platform.isMacOS);
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
 
   testWithoutContext('flutter test expression evaluation - can evaluate trivial expressions in a test', () async {
     await initProject();
@@ -157,7 +157,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
-  }, skip: platform.isMacOS);
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
 
   testWithoutContext('flutter test expression evaluation - can evaluate complex expressions in a test', () async {
     await initProject();
@@ -165,7 +165,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  }, skip: platform.isMacOS);
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
 }
 
 Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {
