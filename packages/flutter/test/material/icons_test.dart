@@ -18,18 +18,19 @@ void main() {
   });
 
   testWidgets('Adaptive icons are correct on cupertino platforms',
-      (WidgetTester tester) async {
-    expect(Icons.adaptive.arrow_back, Icons.arrow_back_ios);
-    expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_ios_outlined);
-  },
-      variant: const TargetPlatformVariant(<TargetPlatform>{
-        TargetPlatform.iOS,
-        TargetPlatform.macOS,
-      }));
+        (WidgetTester tester) async {
+      expect(Icons.adaptive.arrow_back, Icons.arrow_back_ios);
+      expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_ios_outlined);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
 
   testWidgets(
     'Adaptive icons are correct on non-cupertino platforms',
-    (WidgetTester tester) async {
+        (WidgetTester tester) async {
       expect(Icons.adaptive.arrow_back, Icons.arrow_back);
       expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_outlined);
     },
