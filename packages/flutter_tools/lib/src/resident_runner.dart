@@ -896,14 +896,6 @@ abstract class ResidentRunner {
     globals.logger.printTrace('complete');
   }
 
-  /// Toggle whether canvaskit is being used for rendering, returning the new
-  /// state.
-  ///
-  /// Only supported on the web.
-  Future<bool> toggleCanvaskit() {
-    throw Exception('Canvaskit not supported by this runner.');
-  }
-
   /// Write the SkSL shaders to a zip file in build directory.
   ///
   /// Returns the name of the file, or `null` on failures.
