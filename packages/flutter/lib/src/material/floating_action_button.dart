@@ -415,9 +415,7 @@ class FloatingActionButton extends StatelessWidget {
   final BoxConstraints _sizeConstraints;
 
   static const double _defaultElevation = 6;
-  // TODO(gspencer): verify focus and hover elevation values are correct
-  // according to spec.
-  static const double _defaultFocusElevation = 8;
+  static const double _defaultFocusElevation = 6;
   static const double _defaultHoverElevation = 10;
   static const double _defaultHighlightElevation = 12;
   static const ShapeBorder _defaultShape = CircleBorder();
@@ -481,7 +479,7 @@ class FloatingActionButton extends StatelessWidget {
       ?? theme.materialTapTargetSize;
     final TextStyle textStyle = theme.textTheme.button!.copyWith(
       color: foregroundColor,
-      letterSpacing: 1.2,
+      letterSpacing: 0.25,
     );
     final ShapeBorder shape = this.shape
       ?? floatingActionButtonTheme.shape
