@@ -1220,7 +1220,6 @@ class DevToolsMemoryTest {
     return inDirectory<TaskResult>(project, () async {
       _device = await devices.workingDevice;
       await _device.unlock();
-      await flutter('packages', options: <String>['get']);
 
       await _launchApp();
       if (_observatoryUri == null) {
@@ -1252,14 +1251,21 @@ class DevToolsMemoryTest {
       int maxRss = 0;
       int maxAdbTotal = 0;
       for (final dynamic sample in samples) {
-        maxRss = math.max(maxRss, sample['rss'] as int);
+        if (sample['rss'] != null) {
+          maxRss = math.max(maxRss, sample['rss'] as int);
+        }
         if (sample['adb_memoryInfo'] != null) {
           maxAdbTotal = math.max(maxAdbTotal, sample['adb_memoryInfo']['Total'] as int);
         }
       }
+
+      await flutter('install', options: <String>[
+        '--uninstall-only',
+      ]);
+
       return TaskResult.success(
-          <String, dynamic>{'maxRss': maxRss, 'maxAdbTotal': maxAdbTotal},
-          benchmarkScoreKeys: <String>['maxRss', 'maxAdbTotal'],
+        <String, dynamic>{'maxRss': maxRss, 'maxAdbTotal': maxAdbTotal},
+        benchmarkScoreKeys: <String>['maxRss', 'maxAdbTotal'],
       );
     });
   }
