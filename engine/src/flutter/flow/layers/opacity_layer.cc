@@ -17,7 +17,7 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   FML_DCHECK(!GetChildContainer()->layers().empty());  // We can't be a leaf.
 
   SkMatrix child_matrix = matrix;
-  child_matrix.postTranslate(offset_.fX, offset_.fY);
+  child_matrix.preTranslate(offset_.fX, offset_.fY);
 
   // Similar to what's done in TransformLayer::Preroll, we have to apply the
   // reverse transformation to the cull rect to properly cull child layers.

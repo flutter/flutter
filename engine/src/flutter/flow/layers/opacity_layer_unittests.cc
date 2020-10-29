@@ -54,6 +54,23 @@ TEST_F(OpacityLayerTest, PaintBeforePreollDies) {
 }
 #endif
 
+TEST_F(OpacityLayerTest, TranslateChildren) {
+  SkPath child_path1;
+  child_path1.addRect(10.0f, 10.0f, 20.0f, 20.f);
+  SkPaint child_paint1(SkColors::kGray);
+  auto layer = std::make_shared<OpacityLayer>(0.5, SkPoint::Make(10, 10));
+  auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
+  layer->Add(mock_layer1);
+
+  auto initial_transform = SkMatrix::Scale(2.0, 2.0);
+  layer->Preroll(preroll_context(), initial_transform);
+
+  SkRect layer_bounds = mock_layer1->paint_bounds();
+  mock_layer1->parent_matrix().mapRect(&layer_bounds);
+
+  EXPECT_EQ(layer_bounds, SkRect::MakeXYWH(40, 40, 20, 20));
+}
+
 TEST_F(OpacityLayerTest, ChildIsCached) {
   const SkAlpha alpha_half = 255 / 2;
   auto initial_transform = SkMatrix::Translate(50.0, 25.5);
