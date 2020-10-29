@@ -244,8 +244,7 @@ class TooltipTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final TooltipTheme? ancestorTheme = context.findAncestorWidgetOfExactType<TooltipTheme>();
-    return identical(this, ancestorTheme) ? child : TooltipTheme(data: data, child: child);
+    return TooltipTheme(data: data, child: child);
   }
 
   @override

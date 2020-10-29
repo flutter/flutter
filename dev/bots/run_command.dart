@@ -128,10 +128,8 @@ Future<Command> startCommand(String executable, List<String> arguments, {
     .transform(const Utf8Encoder());
   switch (outputMode) {
     case OutputMode.print:
-      await Future.wait<void>(<Future<void>>[
-        io.stdout.addStream(stdoutSource),
-        io.stderr.addStream(process.stderr),
-      ]);
+      stdoutSource.listen(io.stdout.add);
+      process.stderr.listen(io.stderr.add);
       break;
     case OutputMode.capture:
       savedStdout = stdoutSource.toList();

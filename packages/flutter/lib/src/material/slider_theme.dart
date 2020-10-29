@@ -117,8 +117,7 @@ class SliderTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final SliderTheme? ancestorTheme = context.findAncestorWidgetOfExactType<SliderTheme>();
-    return identical(this, ancestorTheme) ? child : SliderTheme(data: data, child: child);
+    return SliderTheme(data: data, child: child);
   }
 
   @override

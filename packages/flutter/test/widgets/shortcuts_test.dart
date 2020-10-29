@@ -211,6 +211,57 @@ void main() {
       expect(shortcuts.shortcuts, isNotNull);
       expect(shortcuts.shortcuts, isEmpty);
     });
+    testWidgets('Shortcuts.of and maybeOf find shortcuts', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
+      final TestShortcutManager testManager = TestShortcutManager(pressedKeys);
+      await tester.pumpWidget(
+        Shortcuts(
+          manager: testManager,
+          shortcuts: <LogicalKeySet, Intent>{
+            LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
+          },
+          child: Focus(
+            autofocus: true,
+            child: Container(key: containerKey, width: 100, height: 100),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(Shortcuts.maybeOf(containerKey.currentContext!), isNotNull);
+      expect(Shortcuts.maybeOf(containerKey.currentContext!), equals(testManager));
+      expect(Shortcuts.of(containerKey.currentContext!), equals(testManager));
+    });
+    testWidgets('Shortcuts.of and maybeOf work correctly without shortcuts', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      await tester.pumpWidget(Container(key: containerKey));
+      expect(Shortcuts.maybeOf(containerKey.currentContext!), isNull);
+      late FlutterError error;
+      try {
+        Shortcuts.of(containerKey.currentContext!);
+      } on FlutterError catch (e) {
+        error = e;
+      } finally {
+        expect(error, isNotNull);
+        expect(error.diagnostics.length, 5);
+        expect(error.diagnostics[2].level, DiagnosticLevel.info);
+        expect(
+          error.diagnostics[2].toStringDeep(),
+          'No Shortcuts ancestor could be found starting from the context\n'
+          'that was passed to Shortcuts.of().\n',
+        );
+        expect(error.toStringDeep(), equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   Unable to find a Shortcuts widget in the context.\n'
+          '   Shortcuts.of() was called with a context that does not contain a\n'
+          '   Shortcuts widget.\n'
+          '   No Shortcuts ancestor could be found starting from the context\n'
+          '   that was passed to Shortcuts.of().\n'
+          '   The context used was:\n'
+          '     Container-[GlobalKey#00000]\n',
+        ));
+      }
+    });
     testWidgets('ShortcutManager handles shortcuts', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];

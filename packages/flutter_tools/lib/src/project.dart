@@ -14,7 +14,6 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
-import 'dart/pub.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
@@ -702,7 +701,6 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       templateManifest: null,
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
-      pub: pub,
     );
     template.render(
       target,
@@ -862,7 +860,6 @@ to migrate your project.
       templateManifest: null,
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
-      pub: pub,
     );
     template.render(
       target,
