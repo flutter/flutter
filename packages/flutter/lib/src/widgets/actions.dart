@@ -502,7 +502,7 @@ class Actions extends StatefulWidget {
 
   /// Returns a [VoidCallback] handler that invokes the bound action for the
   /// given `intent` if the action is enabled, and returns null if the action is
-  /// not enabled.
+  /// not enabled, or no matching action is found.
   ///
   /// This is intended to be used in widgets which have something similar to an
   /// `onTap` handler, which takes a `VoidCallback`, and can be set to the
@@ -511,8 +511,8 @@ class Actions extends StatefulWidget {
   /// Creates a dependency on the [Actions] widget that maps the bound action so
   /// that if the actions change, the context will be rebuilt and find the
   /// updated action.
-  static VoidCallback? handler<T extends Intent>(BuildContext context, T intent, {bool nullOk = false}) {
-    final Action<T>? action = Actions.find<T>(context, nullOk: nullOk);
+  static VoidCallback? handler<T extends Intent>(BuildContext context, T intent) {
+    final Action<T>? action = Actions.maybeFind<T>(context);
     if (action != null && action.isEnabled(intent)) {
       return () {
         // Could be that the action was enabled when the closure was created,
@@ -534,7 +534,52 @@ class Actions extends StatefulWidget {
   /// The optional `intent` argument supplies the type of the intent to look for
   /// if the concrete type of the intent sought isn't available. If not
   /// supplied, then `T` is used.
-  static Action<T>? find<T extends Intent>(BuildContext context, {bool nullOk = false, T? intent}) {
+  ///
+  /// If no [Actions] widget surrounds the given context, this function will
+  /// assert in debug mode, and throw an exception in release mode.
+  ///
+  /// See also:
+  ///
+  ///  * [maybeFind], which is similar to this function, but will return null if
+  ///    no [Actions] ancestor is found.
+  static Action<T> find<T extends Intent>(BuildContext context, { T? intent }) {
+    final Action<T>? action = maybeFind(context, intent: intent);
+
+    assert(() {
+      if (action == null) {
+        final Type type = intent?.runtimeType ?? T;
+        throw FlutterError('Unable to find an action for a $type in an $Actions widget '
+            'in the given context.\n'
+            "$Actions.find() was called on a context that doesn't contain an "
+            '$Actions widget with a mapping for the given intent type.\n'
+            'The context used was:\n'
+            '  $context\n'
+            'The intent type requested was:\n'
+            '  $type');
+      }
+      return true;
+    }());
+    return action!;
+  }
+
+  /// Finds the [Action] bound to the given intent type `T` in the given `context`.
+  ///
+  /// Creates a dependency on the [Actions] widget that maps the bound action so
+  /// that if the actions change, the context will be rebuilt and find the
+  /// updated action.
+  ///
+  /// The optional `intent` argument supplies the type of the intent to look for
+  /// if the concrete type of the intent sought isn't available. If not
+  /// supplied, then `T` is used.
+  ///
+  /// If no [Actions] widget surrounds the given context, this function will
+  /// return null.
+  ///
+  /// See also:
+  ///
+  ///  * [find], which is similar to this function, but will throw if
+  ///    no [Actions] ancestor is found.
+  static Action<T>? maybeFind<T extends Intent>(BuildContext context, { T? intent }) {
     Action<T>? action;
 
     // Specialize the type if a runtime example instance of the intent is given.
@@ -558,22 +603,6 @@ class Actions extends StatefulWidget {
       return false;
     });
 
-    assert(() {
-      if (nullOk) {
-        return true;
-      }
-      if (action == null) {
-        throw FlutterError('Unable to find an action for a $type in an $Actions widget '
-            'in the given context.\n'
-            "$Actions.find() was called on a context that doesn't contain an "
-            '$Actions widget with a mapping for the given intent type.\n'
-            'The context used was:\n'
-            '  $context\n'
-            'The intent type requested was:\n'
-            '  $type');
-      }
-      return true;
-    }());
     return action;
   }
 
