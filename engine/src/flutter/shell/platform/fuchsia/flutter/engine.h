@@ -87,6 +87,7 @@ class Engine final {
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
   bool use_legacy_renderer_ = true;
 #endif
+  bool intercept_all_input_ = false;
 
   fml::WeakPtrFactory<Engine> weak_factory_;
 
