@@ -58,7 +58,7 @@ class MockPaintingContext extends Fake implements PaintingContext {
 
 void main() {
   testWidgets('Control test for custom painting', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
       painter: TestCustomPainter(
         log: log,
@@ -82,7 +82,7 @@ void main() {
   testWidgets('Throws FlutterError on custom painter incorrect restore/save calls', (
       WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
-    final List<String> log = <String>[];
+    final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
       key: target,
       isComplex: true,
@@ -174,7 +174,7 @@ void main() {
   testWidgets('Raster cache hints', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
 
-    final List<String> log = <String>[];
+    final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
       key: target,
       isComplex: true,

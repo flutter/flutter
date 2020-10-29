@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -48,7 +50,6 @@ void main () {
             '--bundle',
             '/',
             '--debug',
-            '--noninteractive',
             '--args',
             <String>[
               '--enable-dart-profiling',
@@ -86,7 +87,7 @@ void main () {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
-            stdout: '(lldb)     run\r\nsuccess\r\n(lldb)     autoexit\r\nsuccess\r\nLog on attach1\r\n\r\nLog on attach2\r\n\r\n\r\n\r\nPROCESS_STOPPED\r\nLog after process exit',
+            stdout: '(lldb)     run\r\nsuccess\r\nsuccess\r\nLog on attach1\r\n\r\nLog on attach2\r\n\r\n\r\n\r\nPROCESS_STOPPED\r\nLog after process exit',
           ),
         ]);
         final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
@@ -103,14 +104,17 @@ void main () {
           'success', // ignore first "success" from lldb, but log subsequent ones from real logging.
           'Log on attach1',
           'Log on attach2',
-          '', '']);
+          '',
+          '',
+          'Log after process exit',
+        ]);
       });
 
       testWithoutContext('app exit', () async {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
-            stdout: '(lldb)     run\r\nsuccess\r\n(lldb)     autoexit\r\nLog on attach\r\nProcess 100 exited with status = 0\r\nLog after process exit',
+            stdout: '(lldb)     run\r\nsuccess\r\nLog on attach\r\nProcess 100 exited with status = 0\r\nLog after process exit',
           ),
         ]);
         final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
@@ -123,7 +127,34 @@ void main () {
 
         expect(await iosDeployDebugger.launchAndAttach(), isTrue);
         await logLines.toList();
-        expect(receivedLogLines, <String>['Log on attach']);
+        expect(receivedLogLines, <String>[
+          'Log on attach',
+          'Log after process exit',
+        ]);
+      });
+
+      testWithoutContext('app crash', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ios-deploy'],
+            stdout:
+                '(lldb)     run\r\nsuccess\r\nLog on attach\r\n(lldb) Process 6156 stopped\r\n* thread #1, stop reason = Assertion failed:',
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        final List<String> receivedLogLines = <String>[];
+        final Stream<String> logLines = iosDeployDebugger.logLines
+          ..listen(receivedLogLines.add);
+
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+        await logLines.toList();
+        expect(receivedLogLines, <String>[
+          'Log on attach',
+          '* thread #1, stop reason = Assertion failed:',
+        ]);
       });
 
       testWithoutContext('attach failed', () async {
@@ -195,7 +226,7 @@ void main () {
         expect(logger.errorText, contains('Your device is locked.'));
       });
 
-      testWithoutContext('device locked', () async {
+      testWithoutContext('unknown app launch error', () async {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
@@ -209,21 +240,26 @@ void main () {
         await iosDeployDebugger.launchAndAttach();
         expect(logger.errorText, contains('Try launching from within Xcode'));
       });
+    });
 
-      testWithoutContext('cannot attach', () async {
-        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['ios-deploy'],
-            stdout: 'error: process launch failed: timed out waiting for app to launch',
-          ),
-        ]);
-        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
-          processManager: processManager,
-          logger: logger,
-        );
-        await iosDeployDebugger.launchAndAttach();
-        expect(logger.errorText, contains('Could not attach the debugger'));
-      });
+    testWithoutContext('detach', () async {
+      final StreamController<List<int>> stdin = StreamController<List<int>>();
+      final Stream<String> stdinStream = stdin.stream.transform<String>(const Utf8Decoder());
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'ios-deploy',
+          ],
+          stdout: '(lldb)     run\nsuccess',
+          stdin: IOSink(stdin.sink),
+        ),
+      ]);
+      final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+        processManager: processManager,
+      );
+      await iosDeployDebugger.launchAndAttach();
+      iosDeployDebugger.detach();
+      expect(await stdinStream.first, 'process detach');
     });
   });
 

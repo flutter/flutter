@@ -276,16 +276,18 @@ class PhysicalKeyData {
     input = input.replaceAll(commentRegExp, '');
     input.replaceAllMapped(usbMapRegExp, (Match match) {
       if (match != null) {
+        final int usbHidCode = getHex(match.group(1));
         final int macScanCode = getHex(match.group(5));
         final int linuxScanCode = getHex(match.group(2));
         final int xKbScanCode = getHex(match.group(3));
         final int windowsScanCode = getHex(match.group(4));
         final PhysicalKeyEntry newEntry = PhysicalKeyEntry(
-          usbHidCode: getHex(match.group(1)),
+          usbHidCode: usbHidCode,
           linuxScanCode: linuxScanCode == 0 ? null : linuxScanCode,
           xKbScanCode: xKbScanCode == 0 ? null : xKbScanCode,
           windowsScanCode: windowsScanCode == 0 ? null : windowsScanCode,
           macOsScanCode: macScanCode == 0xffff ? null : macScanCode,
+          iosScanCode: (usbHidCode & 0x070000) == 0x070000 ? (usbHidCode ^ 0x070000) : null,
           name: match.group(6) == 'NULL' ? null : match.group(6),
           // The input data has a typo...
           chromiumName: shoutingToLowerCamel(match.group(7)).replaceAll('Minimium', 'Minimum'),
@@ -326,6 +328,7 @@ class PhysicalKeyEntry {
     this.windowsKeyNames,
     this.windowsKeyCodes,
     this.macOsScanCode,
+    this.iosScanCode,
     @required this.chromiumName,
     this.androidKeyNames,
     this.androidScanCodes,
@@ -352,6 +355,7 @@ class PhysicalKeyEntry {
       windowsKeyCodes: (map['keyCodes']['windows'] as List<dynamic>)?.cast<int>(),
       windowsKeyNames: (map['names']['windows'] as List<dynamic>)?.cast<String>(),
       macOsScanCode: map['scanCodes']['macos'] as int,
+      iosScanCode: map['scanCodes']['ios'] as int,
       glfwKeyNames: (map['names']['glfw'] as List<dynamic>)?.cast<String>(),
       glfwKeyCodes: (map['keyCodes']['glfw'] as List<dynamic>)?.cast<int>(),
     );
@@ -375,6 +379,8 @@ class PhysicalKeyEntry {
   List<String> windowsKeyNames;
   /// The macOS scan code of the key from Chromium's header file.
   int macOsScanCode;
+  /// The iOS scan code of the key from UIKey's documentation (USB Hid table)
+  int iosScanCode;
   /// The name of the key, mostly derived from the DomKey name in Chromium,
   /// but where there was no DomKey representation, derived from the Chromium
   /// symbol name.
@@ -420,6 +426,7 @@ class PhysicalKeyEntry {
         'xkb': xKbScanCode,
         'windows': windowsScanCode,
         'macos': macOsScanCode,
+        'ios': iosScanCode,
       },
       'keyCodes': <String, List<int>>{
         'android': androidKeyCodes,
@@ -486,7 +493,8 @@ class PhysicalKeyEntry {
     return """'$constantName': (name: "$name", usbHidCode: ${toHex(usbHidCode)}, """
         'linuxScanCode: ${toHex(linuxScanCode)}, xKbScanCode: ${toHex(xKbScanCode)}, '
         'windowsKeyCode: ${toHex(windowsScanCode)}, macOsScanCode: ${toHex(macOsScanCode)}, '
-        'windowsScanCode: ${toHex(windowsScanCode)}, chromiumSymbolName: $chromiumName';
+        'windowsScanCode: ${toHex(windowsScanCode)}, chromiumSymbolName: $chromiumName '
+        'iOSScanCode: ${toHex(iosScanCode)})';
   }
 
   /// Returns the static map of printable representations.

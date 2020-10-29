@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -13,10 +11,10 @@ import 'test_widgets.dart';
 class TestParentData {
   TestParentData({ this.top, this.right, this.bottom, this.left });
 
-  final double top;
-  final double right;
-  final double bottom;
-  final double left;
+  final double? top;
+  final double? right;
+  final double? bottom;
+  final double? left;
 }
 
 void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
@@ -27,18 +25,18 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
   expect(element.renderObject, isA<RenderStack>());
   final RenderStack renderObject = element.renderObject as RenderStack;
   try {
-    RenderObject child = renderObject.firstChild;
+    RenderObject? child = renderObject.firstChild;
     for (final TestParentData expected in expectedParentData) {
       expect(child, isA<RenderDecoratedBox>());
-      final RenderDecoratedBox decoratedBox = child as RenderDecoratedBox;
+      final RenderDecoratedBox decoratedBox = child! as RenderDecoratedBox;
       expect(decoratedBox.parentData, isA<StackParentData>());
-      final StackParentData parentData = decoratedBox.parentData as StackParentData;
+      final StackParentData parentData = decoratedBox.parentData! as StackParentData;
       expect(parentData.top, equals(expected.top));
       expect(parentData.right, equals(expected.right));
       expect(parentData.bottom, equals(expected.bottom));
       expect(parentData.left, equals(expected.left));
-      final StackParentData decoratedBoxParentData = decoratedBox.parentData as StackParentData;
-      child = decoratedBoxParentData.nextSibling;
+      final StackParentData? decoratedBoxParentData = decoratedBox.parentData as StackParentData?;
+      child = decoratedBoxParentData?.nextSibling;
     }
     expect(child, isNull);
   } catch (e) {
@@ -431,7 +429,7 @@ void main() {
         child: Container(),
       ),
     );
-    DummyParentData parentData = tester.renderObject(find.byType(Container)).parentData as DummyParentData;
+    DummyParentData parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, isNull);
 
     await tester.pumpWidget(
@@ -442,7 +440,7 @@ void main() {
         ),
       ),
     );
-    parentData = tester.renderObject(find.byType(Container)).parentData as DummyParentData;
+    parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Foo');
 
     await tester.pumpWidget(
@@ -453,16 +451,16 @@ void main() {
         ),
       ),
     );
-    parentData = tester.renderObject(find.byType(Container)).parentData as DummyParentData;
+    parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Bar');
   });
 }
 
 class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
   const TestParentDataWidget({
-    Key key,
-    this.string,
-    Widget child,
+    Key? key,
+    required this.string,
+    required Widget child,
   }) : super(key: key, child: child);
 
   final String string;
@@ -470,7 +468,7 @@ class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is DummyParentData);
-    final DummyParentData parentData = renderObject.parentData as DummyParentData;
+    final DummyParentData parentData = renderObject.parentData! as DummyParentData;
     parentData.string = string;
   }
 
@@ -479,13 +477,13 @@ class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
 }
 
 class DummyParentData extends ParentData {
-  String string;
+  String? string;
 }
 
 class OneAncestorWidget extends SingleChildRenderObjectWidget {
   const OneAncestorWidget({
-    Key key,
-    Widget child,
+    Key? key,
+    required Widget child,
   }) : super(key: key, child: child);
 
   @override
@@ -494,8 +492,8 @@ class OneAncestorWidget extends SingleChildRenderObjectWidget {
 
 class AnotherAncestorWidget extends SingleChildRenderObjectWidget {
   const AnotherAncestorWidget({
-    Key key,
-    Widget child,
+    Key? key,
+    required Widget child,
   }) : super(key: key, child: child);
 
   @override

@@ -132,7 +132,7 @@ class Theme extends StatelessWidget {
       return inheritedTheme.theme.data;
     }
 
-    final MaterialLocalizations? localizations = MaterialLocalizations.of(context);
+    final MaterialLocalizations? localizations = Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
     final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
     final ThemeData theme = inheritedTheme?.theme.data ?? _kFallbackTheme;
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
@@ -176,8 +176,7 @@ class _InheritedTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final _InheritedTheme? ancestorTheme = context.findAncestorWidgetOfExactType<_InheritedTheme>();
-    return identical(this, ancestorTheme) ? child : Theme(data: theme.data, child: child);
+    return Theme(data: theme.data, child: child);
   }
 
   @override

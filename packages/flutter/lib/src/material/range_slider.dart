@@ -637,7 +637,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // This size is used as the max bounds for the painting of the value
     // indicators. It must be kept in sync with the function with the same name
     // in slider.dart.
-    Size _screenSize() => MediaQuery.of(context)!.size;
+    Size _screenSize() => MediaQuery.of(context).size;
 
     return CompositedTransformTarget(
       link: _layerLink,
@@ -646,7 +646,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         divisions: widget.divisions,
         labels: widget.labels,
         sliderTheme: sliderTheme,
-        textScaleFactor: MediaQuery.of(context)!.textScaleFactor,
+        textScaleFactor: MediaQuery.of(context).textScaleFactor,
         screenSize: _screenSize(),
         onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
         onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
@@ -1317,6 +1317,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
     final bool startThumbSelected = _lastThumbSelection == Thumb.start;
     final bool endThumbSelected = _lastThumbSelection == Thumb.end;
+    final Size resolvedscreenSize = screenSize.isEmpty ? size : screenSize;
 
     if (!_overlayAnimation.isDismissed) {
       if (startThumbSelected) {
@@ -1331,6 +1332,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           sliderTheme: _sliderTheme,
           textDirection: _textDirection,
           value: startValue,
+          textScaleFactor: _textScaleFactor,
+          sizeWithOverflow: resolvedscreenSize,
         );
       }
       if (endThumbSelected) {
@@ -1345,6 +1348,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           sliderTheme: _sliderTheme,
           textDirection: _textDirection,
           value: endValue,
+          textScaleFactor: _textScaleFactor,
+          sizeWithOverflow: resolvedscreenSize,
         );
       }
     }
@@ -1392,7 +1397,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final double bottomValue = isLastThumbStart ? endValue : startValue;
     final double topValue = isLastThumbStart ? startValue : endValue;
     final bool shouldPaintValueIndicators = isEnabled && labels != null && !_valueIndicatorAnimation.isDismissed && showValueIndicator;
-    final Size resolvedscreenSize = screenSize.isEmpty ? size : screenSize;
 
     if (shouldPaintValueIndicators) {
       _state.paintBottomValueIndicator = (PaintingContext context, Offset offset) {
@@ -1525,6 +1529,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final SemanticsConfiguration config = SemanticsConfiguration();
     config.isEnabled = isEnabled;
     config.textDirection = textDirection;
+    config.isSlider = true;
     if (isEnabled) {
       config.onIncrease = increaseAction;
       config.onDecrease = decreaseAction;

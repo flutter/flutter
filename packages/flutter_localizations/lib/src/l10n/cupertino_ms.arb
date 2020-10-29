@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Tampal",
   "selectAllButtonLabel": "Pilih Semua",
   "tabSemanticsLabel": "Tab $tabIndex daripada $tabCount",
-  "modalBarrierDismissLabel": "Tolak"
+  "modalBarrierDismissLabel": "Tolak",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

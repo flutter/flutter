@@ -528,7 +528,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            debuggingOptions.initializePlatform,
             false,
             kNoneWorker,
             true,
@@ -596,7 +595,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
           flutterProject,
           target,
           debuggingOptions.buildInfo,
-          debuggingOptions.initializePlatform,
           false,
           kNoneWorker,
           true,
@@ -657,7 +655,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
 
       final bool hasWebPlugins = (await findPlugins(flutterProject))
         .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-      await injectPlugins(flutterProject, checkProjects: true);
+      await injectPlugins(flutterProject, webPlatform: true);
 
       final Uri generatedUri = globals.fs.currentDirectory
         .childDirectory('lib')
@@ -848,14 +846,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
     }
     await cleanupAtFinish();
     return 0;
-  }
-
-  @override
-  Future<bool> toggleCanvaskit() async {
-    final WebDevFS webDevFS = device.devFS as WebDevFS;
-    webDevFS.webAssetServer.canvasKitRendering = !webDevFS.webAssetServer.canvasKitRendering;
-    await _wipConnection?.sendCommand('Page.reload');
-    return webDevFS.webAssetServer.canvasKitRendering;
   }
 
   @override

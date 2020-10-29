@@ -240,7 +240,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   @override
   void didChangeDependencies() {
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     // If we transition from accessible navigation to non-accessible navigation
     // and there is a SnackBar that would have timed out that has already
     // completed its timer, dismiss that SnackBar. If the timer hasn't finished
@@ -406,7 +406,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     _accessibleNavigation = mediaQuery.accessibleNavigation;
 
     if (_snackBars.isNotEmpty) {
@@ -418,7 +418,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
             assert(_snackBarController!.status == AnimationStatus.forward ||
                    _snackBarController!.status == AnimationStatus.completed);
             // Look up MediaQuery again in case the setting changed.
-            final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+            final MediaQueryData mediaQuery = MediaQuery.of(context);
             if (mediaQuery.accessibleNavigation && snackBar.action != null)
               return;
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
@@ -769,7 +769,7 @@ class _BodyBuilder extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final _BodyBoxConstraints bodyConstraints = constraints as _BodyBoxConstraints;
-        final MediaQueryData metrics = MediaQuery.of(context)!;
+        final MediaQueryData metrics = MediaQuery.of(context);
 
         final double bottom = extendBody
           ? math.max(metrics.padding.bottom, bodyConstraints.bottomWidgetsHeight)
@@ -2146,7 +2146,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// See also:
   ///
   ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
-  // TODO(Piinks): Deprecate & defer to ScaffoldMessenger after customers are migrated.
+  @Deprecated(
+    'Use ScaffoldMessenger.showSnackBar. '
+    'This feature was deprecated after v1.23.0-14.0.pre.'
+  )
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
@@ -2205,7 +2208,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// See also:
   ///
   ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
-  // TODO(Piinks): Deprecate & defer to ScaffoldMessenger after customers are migrated
+  @Deprecated(
+    'Use ScaffoldMessenger.removeCurrentSnackBar. '
+    'This feature was deprecated after v1.23.0-14.0.pre.'
+  )
   void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
     assert(reason != null);
 
@@ -2247,7 +2253,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// See also:
   ///
   ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
-  // TODO(Piinks): Deprecate & defer to ScaffoldMessenger after customers are migrated.
+  @Deprecated(
+    'Use ScaffoldMessenger.hideCurrentSnackBar. '
+    'This feature was deprecated after v1.23.0-14.0.pre.'
+  )
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
     assert(reason != null);
 
@@ -2272,7 +2281,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     if (_snackBars.isEmpty || _snackBarController!.status == AnimationStatus.dismissed)
       return;
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
     if (mediaQuery.accessibleNavigation) {
       _snackBarController!.value = 0.0;
@@ -2716,7 +2725,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _scaffoldMessenger?._register(this);
 
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     // If we transition from accessible navigation to non-accessible navigation
     // and there is a SnackBar that would have timed out that has already
     // completed its timer, dismiss that SnackBar. If the timer hasn't finished
@@ -2764,7 +2773,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     bool removeBottomInset = false,
     bool maintainBottomViewPadding = false,
   }) {
-    MediaQueryData data = MediaQuery.of(context)!.removePadding(
+    MediaQueryData data = MediaQuery.of(context).removePadding(
       removeLeft: removeLeftPadding,
       removeTop: removeTopPadding,
       removeRight: removeRightPadding,
@@ -2860,7 +2869,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final ThemeData themeData = Theme.of(context)!;
     final TextDirection textDirection = Directionality.of(context)!;
 
@@ -2875,7 +2884,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             assert(_snackBarController!.status == AnimationStatus.forward ||
                    _snackBarController!.status == AnimationStatus.completed);
             // Look up MediaQuery again in case the setting changed.
-            final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+            final MediaQueryData mediaQuery = MediaQuery.of(context);
             if (mediaQuery.accessibleNavigation && snackBar.action != null)
               return;
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);

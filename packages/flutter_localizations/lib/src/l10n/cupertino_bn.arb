@@ -20,5 +20,6 @@
   "pasteButtonLabel": "পেস্ট করুন",
   "selectAllButtonLabel": "সব বেছে নিন",
   "tabSemanticsLabel": "$tabCount-এর মধ্যে $tabIndex নম্বর ট্যাব",
-  "modalBarrierDismissLabel": "খারিজ করুন"
+  "modalBarrierDismissLabel": "খারিজ করুন",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

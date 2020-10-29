@@ -36,8 +36,8 @@ void main() {
       nullAssertions: true,
     );
 
-    expect(result, contains(
-'''  if (true) {
+    expect(result, contains('''
+  if (true) {
     dart_sdk.dart.nonNullAsserts(true);'''));
   });
 }
