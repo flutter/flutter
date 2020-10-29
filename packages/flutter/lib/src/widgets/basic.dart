@@ -2291,9 +2291,9 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// If the box cannot expand enough to accommodate the entire child, the
 /// child will be clipped.
 ///
-/// In debug mode, if the child overflows the container, a warning will be
-/// printed on the console, and black and yellow striped areas will appear where
-/// the overflow occurs.
+/// In debug mode, if the child overflows the container and the [clipBehavior]
+/// is [Clip.none], a warning will be printed on the console, and black and
+/// yellow striped areas will appear where the overflow occurs.
 ///
 /// See also:
 ///

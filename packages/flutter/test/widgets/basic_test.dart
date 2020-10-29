@@ -344,6 +344,23 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
+  testWidgets('overflow indicator is not shown when overflowing but [clipBehavior] is not [Clip.none]', (WidgetTester tester) async {
+    const UnconstrainedBox box = UnconstrainedBox(
+      clipBehavior: Clip.hardEdge,
+      child: SizedBox(width: 200.0, height: 200.0),
+    );
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          height: 100.0,
+          child: box,
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
   group('ColoredBox', () {
     late _MockCanvas mockCanvas;
     late _MockPaintingContext mockContext;

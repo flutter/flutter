@@ -715,17 +715,17 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
     if (clipBehavior == Clip.none) {
       _clipRectLayer = null;
       super.paint(context, offset);
+
+      // Display the overflow indicator.
+      assert(() {
+        paintOverflowIndicator(context, offset, _overflowContainerRect, _overflowChildRect);
+        return true;
+      }());
     } else {
       // We have overflow and the clipBehavior isn't none. Clip it.
       _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint,
           clipBehavior: clipBehavior, oldLayer:_clipRectLayer);
     }
-
-    // Display the overflow indicator.
-    assert(() {
-      paintOverflowIndicator(context, offset, _overflowContainerRect, _overflowChildRect);
-      return true;
-    }());
   }
 
   ClipRectLayer? _clipRectLayer;
