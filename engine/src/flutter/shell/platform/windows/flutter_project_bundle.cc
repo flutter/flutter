@@ -20,6 +20,11 @@ FlutterProjectBundle::FlutterProjectBundle(
     aot_library_path_ = std::filesystem::path(properties.aot_library_path);
   }
 
+  for (int i = 0; i < properties.dart_entrypoint_argc; i++) {
+    dart_entrypoint_arguments_.push_back(
+        std::string(properties.dart_entrypoint_argv[i]));
+  }
+
   // Resolve any relative paths.
   if (assets_path_.is_relative() || icu_path_.is_relative() ||
       (!aot_library_path_.empty() && aot_library_path_.is_relative())) {

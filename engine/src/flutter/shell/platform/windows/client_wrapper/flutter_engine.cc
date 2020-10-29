@@ -17,6 +17,19 @@ FlutterEngine::FlutterEngine(const DartProject& project) {
   c_engine_properties.icu_data_path = project.icu_data_path().c_str();
   c_engine_properties.aot_library_path = project.aot_library_path().c_str();
 
+  const std::vector<std::string>& entrypoint_args =
+      project.dart_entrypoint_arguments();
+  std::vector<const char*> entrypoint_argv;
+  std::transform(
+      entrypoint_args.begin(), entrypoint_args.end(),
+      std::back_inserter(entrypoint_argv),
+      [](const std::string& arg) -> const char* { return arg.c_str(); });
+
+  c_engine_properties.dart_entrypoint_argc =
+      static_cast<int>(entrypoint_argv.size());
+  c_engine_properties.dart_entrypoint_argv =
+      entrypoint_argv.size() > 0 ? entrypoint_argv.data() : nullptr;
+
   engine_ = FlutterDesktopEngineCreate(c_engine_properties);
 
   auto core_messenger = FlutterDesktopEngineGetMessenger(engine_);
