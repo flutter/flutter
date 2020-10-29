@@ -469,6 +469,8 @@ class EditableText extends StatefulWidget {
     this.autofillHints,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.onFocus,
+    this.onBlur,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1294,6 +1296,13 @@ class EditableText extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
+
+  /// Called when focus is obtain from this text field, including set the focus
+  /// obtained by [autofocus].
+  final VoidCallback? onFocus;
+
+  /// Called when the focus of this text word is lost.
+  final VoidCallback? onBlur;
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
@@ -2372,11 +2381,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // Place cursor at the end if the selection is invalid when we receive focus.
         _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), renderEditable, null);
       }
+      widget.onFocus?.call();
     } else {
       WidgetsBinding.instance!.removeObserver(this);
       // Clear the selection and composition state if this widget lost focus.
       _value = TextEditingValue(text: _value.text);
       _currentPromptRectRange = null;
+
+      widget.onBlur?.call();
     }
     updateKeepAlive();
   }
