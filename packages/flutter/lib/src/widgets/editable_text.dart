@@ -1706,6 +1706,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     _lastKnownRemoteTextEditingValue = value;
 
+    if (_hasInputConnection) {
+      // To keep the cursor from blinking while typing, we want to restart the
+      // cursor timer every time a new character is typed or the cursor moves.
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
+    }
+
     if (value == _value) {
       // This is possible, for example, when the numeric keyboard is input,
       // the engine will notify twice for the same value.
@@ -1729,13 +1736,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
 
       _formatAndSetValue(value);
-    }
-
-    if (_hasInputConnection) {
-      // To keep the cursor from blinking while typing, we want to restart the
-      // cursor timer every time a new character is typed.
-      _stopCursorTimer(resetCharTicks: false);
-      _startCursorTimer();
     }
   }
 
