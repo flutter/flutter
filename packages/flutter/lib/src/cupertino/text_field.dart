@@ -431,7 +431,7 @@ class CupertinoTextField extends StatefulWidget {
   final ToolbarOptions toolbarOptions;
 
   /// {@macro flutter.widgets.inputDecorator.textAlignVertical}
-  final VerticalAlignment? textAlignVertical;
+  final TextAlignVertical? textAlignVertical;
 
   /// {@macro flutter.widgets.editableText.readOnly}
   final bool readOnly;
@@ -623,7 +623,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
-    properties.add(DiagnosticsProperty<VerticalAlignment>('textAlignVertical', textAlignVertical, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
   }
 }
 
@@ -795,11 +795,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   // Provide default behavior if widget.textAlignVertical is not set.
   // CupertinoTextField has top alignment by default, unless it has decoration
   // like a prefix or suffix, in which case it's aligned to the center.
-  VerticalAlignment get _textAlignVertical {
+  TextAlignVertical get _textAlignVertical {
     if (widget.textAlignVertical != null) {
       return widget.textAlignVertical!;
     }
-    return _hasDecoration ? VerticalAlignment.center : VerticalAlignment.top;
+    return _hasDecoration ? TextAlignVertical.center : TextAlignVertical.top;
   }
 
   Widget _addTextDependentAttachments(Widget editableText, TextStyle textStyle, TextStyle placeholderStyle) {

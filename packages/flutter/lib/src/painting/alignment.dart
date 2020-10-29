@@ -631,36 +631,6 @@ class _MixedAlignment extends AlignmentGeometry {
   }
 }
 
-/// The vertical alignment of a widget within an input box.
-///
-/// A single [y] value that can range from -1.0 to 1.0 inclusive. -1.0 aligns to the top
-/// of the input box so that the top of the widget fits within the box and its
-/// padding. 0.0 aligns to the center of the box. 1.0 aligns so that the bottom
-/// of the widget aligns with the bottom interior edge of the input box.
-class VerticalAlignment {
-  /// Creates a VerticalAlignment from any y value between -1.0 and 1.0 inclusive.
-  const VerticalAlignment({
-    required this.y,
-  }) : assert(y != null),
-       assert(y >= -1.0 && y <= 1.0);
-
-  /// A value ranging from -1.0 to 1.0 inclusive that defines the topmost
-  /// and bottommost locations of the top and bottom of the input box.
-  final double y;
-
-  /// Aligns the widget with the topmost location within the input box.
-  static const VerticalAlignment top = VerticalAlignment(y: -1.0);
-  /// Aligns the widget to the center of the input box.
-  static const VerticalAlignment center = VerticalAlignment(y: 0.0);
-  /// Aligns the widget with the bottommost location within a input box.
-  static const VerticalAlignment bottom = VerticalAlignment(y: 1.0);
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'VerticalAlignment')}(y: $y)';
-  }
-}
-
 /// The vertical alignment of text within an input box.
 ///
 /// A single [y] value that can range from -1.0 to 1.0. -1.0 aligns to the top
@@ -676,17 +646,20 @@ class VerticalAlignment {
 ///    the parameter in TextField.
 ///  * [InputDecorator.textAlignVertical], which defines the alignment of
 ///    prefix, input, and suffix within an [InputDecorator].
-@Deprecated(
-  'This class is deprecated. Use VerticalAlignment instead, which has the same interface. '
-  'This feature was deprecated after v1.24.0-1.0.pre.'
-)
-class TextAlignVertical extends VerticalAlignment {
+///  * [InputDecorator.prefixIconAlignment], which defines the alignment of
+///    prefixIcon within an [InputDecorator].
+///  * [InputDecorator.suffixIconAlignment], which defines the alignment of
+///    suffixIcon within an [InputDecorator].
+class TextAlignVertical {
   /// Creates a TextAlignVertical from any y value between -1.0 and 1.0.
   const TextAlignVertical({
-    required double y,
+    required this.y,
   }) : assert(y != null),
-       assert(y >= -1.0 && y <= 1.0),
-       super(y: y);
+       assert(y >= -1.0 && y <= 1.0);
+
+  /// A value ranging from -1.0 to 1.0 inclusive that defines the topmost
+  /// and bottommost locations of the top and bottom of the input box.
+  final double y;
 
   /// Aligns a TextField's input Text with the topmost location within a
   /// TextField's input box.

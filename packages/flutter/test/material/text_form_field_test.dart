@@ -55,7 +55,7 @@ void main() {
   });
 
   testWidgets('Passes textAlignVertical to underlying TextField', (WidgetTester tester) async {
-    const VerticalAlignment textAlignVertical = VerticalAlignment.bottom;
+    const TextAlignVertical textAlignVertical = TextAlignVertical.bottom;
 
     await tester.pumpWidget(
       MaterialApp(

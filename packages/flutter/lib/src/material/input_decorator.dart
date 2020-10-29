@@ -541,8 +541,8 @@ class _Decoration {
   final Widget? suffix;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
-  final VerticalAlignment? prefixIconAlignment;
-  final VerticalAlignment? suffixIconAlignment;
+  final TextAlignVertical? prefixIconAlignment;
+  final TextAlignVertical? suffixIconAlignment;
   final Widget? helperError;
   final Widget? counter;
   final Widget? container;
@@ -636,7 +636,7 @@ class _RenderDecoration extends RenderBox {
     required TextBaseline textBaseline,
     required bool isFocused,
     required bool expands,
-    VerticalAlignment? textAlignVertical,
+    TextAlignVertical? textAlignVertical,
   }) : assert(decoration != null),
        assert(textDirection != null),
        assert(textBaseline != null),
@@ -785,12 +785,12 @@ class _RenderDecoration extends RenderBox {
     markNeedsLayout();
   }
 
-  VerticalAlignment get _defaultTextAlignVertical => _isOutlineAligned
-      ? VerticalAlignment.center
-      : VerticalAlignment.top;
-  VerticalAlignment? get textAlignVertical => _textAlignVertical ?? _defaultTextAlignVertical;
-  VerticalAlignment? _textAlignVertical;
-  set textAlignVertical(VerticalAlignment? value) {
+  TextAlignVertical get _defaultTextAlignVertical => _isOutlineAligned
+      ? TextAlignVertical.center
+      : TextAlignVertical.top;
+  TextAlignVertical? get textAlignVertical => _textAlignVertical ?? _defaultTextAlignVertical;
+  TextAlignVertical? _textAlignVertical;
+  set textAlignVertical(TextAlignVertical? value) {
     if (_textAlignVertical == value) {
       return;
     }
@@ -1195,7 +1195,7 @@ class _RenderDecoration extends RenderBox {
   // alignment is greater than zero, it interpolates between the centered box's
   // top and the position that would align the bottom of the box with the bottom
   // padding.
-  double _interpolateThree(double begin, double middle, double end, VerticalAlignment textAlignVertical) {
+  double _interpolateThree(double begin, double middle, double end, TextAlignVertical textAlignVertical) {
     if (textAlignVertical.y <= 0) {
       // It's possible for begin, middle, and end to not be in order because of
       // excessive padding. Those cases are handled by using middle.
@@ -1324,7 +1324,7 @@ class _RenderDecoration extends RenderBox {
       return box.size.width;
     }
 
-    // Lays out based on y as a VerticalAlignment y value.
+    // Lays out based on y as a TextAlignVertical y value.
     double alignedLayout(RenderBox box, double x, double alignmentY) {
       final double scaleY = (alignmentY + 1.0) / 2.0;
       _boxParentData(box).offset = Offset(
@@ -1362,7 +1362,7 @@ class _RenderDecoration extends RenderBox {
           start -= alignedLayout(
             prefixIcon!,
             start - prefixIcon!.size.width,
-            (decoration.prefixIconAlignment ?? VerticalAlignment.center).y
+            (decoration.prefixIconAlignment ?? TextAlignVertical.center).y
           );
         }
         if (label != null) {
@@ -1383,7 +1383,7 @@ class _RenderDecoration extends RenderBox {
           end += alignedLayout(
             suffixIcon!,
             end,
-            (decoration.suffixIconAlignment ?? VerticalAlignment.center).y
+            (decoration.suffixIconAlignment ?? TextAlignVertical.center).y
           );
         }
         if (suffix != null)
@@ -1398,7 +1398,7 @@ class _RenderDecoration extends RenderBox {
           start +=  alignedLayout(
             prefixIcon!,
             start,
-            (decoration.prefixIconAlignment ?? VerticalAlignment.center).y
+            (decoration.prefixIconAlignment ?? TextAlignVertical.center).y
           );
         }
         if (label != null) {
@@ -1419,7 +1419,7 @@ class _RenderDecoration extends RenderBox {
           end -= alignedLayout(
             suffixIcon!,
             end - suffixIcon!.size.width,
-            (decoration.suffixIconAlignment ?? VerticalAlignment.center).y
+            (decoration.suffixIconAlignment ?? TextAlignVertical.center).y
           );
         }
         if (suffix != null)
@@ -1721,7 +1721,7 @@ class _Decorator extends RenderObjectWidget {
   final _Decoration decoration;
   final TextDirection textDirection;
   final TextBaseline textBaseline;
-  final VerticalAlignment? textAlignVertical;
+  final TextAlignVertical? textAlignVertical;
   final bool isFocused;
   final bool expands;
 
@@ -1848,7 +1848,7 @@ class InputDecorator extends StatefulWidget {
   /// How the text should be aligned vertically.
   ///
   /// Determines the alignment of the baseline within the available space of
-  /// the input (typically a TextField). For example, VerticalAlignment.top will
+  /// the input (typically a TextField). For example, TextAlignVertical.top will
   /// place the baseline such that the text, and any attached decoration like
   /// prefix and suffix, is as close to the top of the input as possible without
   /// overflowing. The heights of the prefix and suffix are similarly included
@@ -1856,7 +1856,7 @@ class InputDecorator extends StatefulWidget {
   /// available, then the prefix and suffix will be allowed to overflow first
   /// before the text scrolls.
   /// {@endtemplate}
-  final VerticalAlignment? textAlignVertical;
+  final TextAlignVertical? textAlignVertical;
 
   /// Whether the input field has focus.
   ///
@@ -2398,8 +2398,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         hint: hint,
         prefix: prefix,
         suffix: suffix,
-        prefixIconAlignment: decoration!.prefixIconAlignment ?? VerticalAlignment.center,
-        suffixIconAlignment: decoration!.suffixIconAlignment ?? VerticalAlignment.center,
+        prefixIconAlignment: decoration!.prefixIconAlignment ?? TextAlignVertical.center,
+        suffixIconAlignment: decoration!.suffixIconAlignment ?? TextAlignVertical.center,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         helperError: helperError,
@@ -2878,13 +2878,13 @@ class InputDecoration {
   ///   decoration: InputDecoration(
   ///     hintText:'Top Icon Alignment',
   ///     prefixIcon: Icon(Icons.search),
-  ///     prefixIconAlignment: VerticalAlignment.top,
+  ///     prefixIconAlignment: TextAlignVertical.top,
   ///   ),
   /// )
   /// ```
   ///
-  /// The default value is [VerticalAlignment.center].
-  final VerticalAlignment? prefixIconAlignment;
+  /// The default value is [TextAlignVertical.center].
+  final TextAlignVertical? prefixIconAlignment;
 
   /// The constraints for the prefix icon.
   ///
@@ -3025,13 +3025,13 @@ class InputDecoration {
   ///   decoration: InputDecoration(
   ///     hintText:'Top Icon Alignment',
   ///     suffixIcon: Icon(Icons.search),
-  ///     suffixIconAlignment: VerticalAlignment.top,
+  ///     suffixIconAlignment: TextAlignVertical.top,
   ///   ),
   /// )
   /// ```
   ///
-  /// The default value is [VerticalAlignment.center].
-  final VerticalAlignment? suffixIconAlignment;
+  /// The default value is [TextAlignVertical.center].
+  final TextAlignVertical? suffixIconAlignment;
 
   /// Optional widget to place on the line after the input.
   ///
@@ -3396,13 +3396,13 @@ class InputDecoration {
     bool? isDense,
     EdgeInsetsGeometry? contentPadding,
     Widget? prefixIcon,
-    VerticalAlignment? prefixIconAlignment,
+    TextAlignVertical? prefixIconAlignment,
     Widget? prefix,
     String? prefixText,
     BoxConstraints? prefixIconConstraints,
     TextStyle? prefixStyle,
     Widget? suffixIcon,
-    VerticalAlignment? suffixIconAlignment,
+    TextAlignVertical? suffixIconAlignment,
     Widget? suffix,
     String? suffixText,
     TextStyle? suffixStyle,
