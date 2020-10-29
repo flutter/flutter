@@ -945,11 +945,11 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Updates dart-defines based on [webRenderer].
   List<String> _updateDartDefines(List<String> dartDefines, String webRenderer) {
-    if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT=')) && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
-      throwToolExit('Only one of "--web-renderer" and '
-          '"--dart-define=FLUTTER_WEB_USE_SKIA" may be specified.');
-    }
     final Set<String> dartDefinesSet = dartDefines.toSet();
+    if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
+        && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
+      dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
+    }
     dartDefinesSet.addAll(_webRendererDartDefines[webRenderer]);
     return dartDefinesSet.toList();
   }
