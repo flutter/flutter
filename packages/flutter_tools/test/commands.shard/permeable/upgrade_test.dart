@@ -352,6 +352,25 @@ void main() {
         Platform: () => fakePlatform,
       });
 
+      testUsingContext('Show current version to the upgrade message.', () async {
+        const String revision = 'abc123';
+        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          force: false,
+          continueFlow: false,
+          testFlow: false,
+          gitTagVersion: gitTagVersion,
+          flutterVersion: flutterVersion,
+          verifyOnly: false,
+        );
+        expect(await result, FlutterCommandResult.success());
+        await realCommandRunner.upgradeChannel(flutterVersion, revision);
+        expect(testLogger.statusText, contains('Upgrading Flutter to $revision from ${flutterVersion.frameworkRevision} in ${realCommandRunner.workingDirectory}'));
+        expect(processManager.hasRemainingExpectations, isFalse);
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      });
+
       testUsingContext("Doesn't throw on known tag, dev branch, no force", () async {
         final MockFlutterVersion latestVersion = MockFlutterVersion();
         fakeCommandRunner.remoteVersion = latestVersion;
