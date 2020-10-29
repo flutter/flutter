@@ -18,7 +18,7 @@ namespace flutter {
 std::unique_ptr<IOSSurface> IOSSurface::Create(
     std::shared_ptr<IOSContext> context,
     fml::scoped_nsobject<CALayer> layer,
-    const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller) {
+    const std::shared_ptr<IOSExternalViewEmbedder>& external_view_embedder) {
   FML_DCHECK(layer);
   FML_DCHECK(context);
 
@@ -27,7 +27,7 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(
         fml::scoped_nsobject<CAEAGLLayer>(
             reinterpret_cast<CAEAGLLayer*>([layer.get() retain])),  // EAGL layer
         std::move(context),                                         // context
-        platform_views_controller                                   // platform views controller
+        external_view_embedder                                      // external view embedder
     );
   }
 
@@ -38,26 +38,22 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(
           fml::scoped_nsobject<CAMetalLayer>(
               reinterpret_cast<CAMetalLayer*>([layer.get() retain])),  // Metal layer
           std::move(context),                                          // context
-          platform_views_controller                                    // platform views controller
+          external_view_embedder                                       // external view embedder
       );
     }
   }
 #endif  // FLUTTER_SHELL_ENABLE_METAL
 
-  return std::make_unique<IOSSurfaceSoftware>(
-      std::move(layer),          // layer
-      std::move(context),        // context
-      platform_views_controller  // platform views controller
+  return std::make_unique<IOSSurfaceSoftware>(std::move(layer),       // layer
+                                              std::move(context),     // context
+                                              external_view_embedder  // external view embedder
   );
 }
 
-IOSSurface::IOSSurface(
-    std::shared_ptr<IOSContext> ios_context,
-    const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller)
-    : ios_context_(std::move(ios_context)) {
+IOSSurface::IOSSurface(std::shared_ptr<IOSContext> ios_context,
+                       const std::shared_ptr<IOSExternalViewEmbedder>& external_view_embedder)
+    : ios_context_(std::move(ios_context)), external_view_embedder_(external_view_embedder) {
   FML_DCHECK(ios_context_);
-  external_view_embedder_ =
-      std::make_shared<IOSExternalViewEmbedder>(platform_views_controller, ios_context_);
 }
 
 IOSSurface::~IOSSurface() = default;
