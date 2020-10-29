@@ -7,8 +7,7 @@
 
 angle_root = "//third_party/angle"
 
-# Flutter's buildroot looks enough like Chromium to satisfy Angle, and enough
-# to cause GN variable collisions if we don't set this.
+# Flutter's buildroot looks enough like Chromium to satisfy Angle.
 angle_has_build = true
 
 angle_googletest_dir = "//third_party/googletest/src"
@@ -16,7 +15,3 @@ angle_libpng_dir = "//third_party/libpng"
 # Note: This path doesn't actually exist; see
 # //build/secondary/third_party/jsoncpp/BUILD.gn
 angle_jsoncpp_dir = "//third_party/jsoncpp"
-
-# This is a general Chromium flag, but in the Flutter build only ANGLE needs it
-# so it is defined here.
-is_cfi = false

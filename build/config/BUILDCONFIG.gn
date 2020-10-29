@@ -284,11 +284,6 @@ if (current_os == "win") {
   is_win = false
 }
 
-is_apple = is_ios || is_mac
-
-# Needed for some third_party build files from Chromium.
-is_nacl = false
-
 default_library_type = "static_library"
 
 # =============================================================================
