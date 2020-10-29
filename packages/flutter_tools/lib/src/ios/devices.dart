@@ -164,7 +164,7 @@ class IOSDevice extends Device {
           platformType: PlatformType.ios,
           ephemeral: true,
       ) {
-    if (!platform.isMacOS) {
+    if (!_platform.isMacOS) {
       assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
       return;
     }
@@ -307,8 +307,6 @@ class IOSDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    @visibleForTesting Duration fallbackPollingDelay,
-    @visibleForTesting Duration fallbackThrottleTimeout,
     String userIdentifier,
   }) async {
     String packageId;
@@ -356,6 +354,10 @@ class IOSDevice extends Device {
       if (debuggingOptions.startPaused) '--start-paused',
       if (dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
       if (debuggingOptions.useTestFonts) '--use-test-fonts',
+      if (debuggingOptions.debuggingEnabled) ...<String>[
+        '--enable-checked-mode',
+        '--verify-entry-points',
+      ],
       if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
       if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
       if (debuggingOptions.traceSkia) '--trace-skia',
@@ -365,7 +367,6 @@ class IOSDevice extends Device {
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
       if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
-      if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
 
@@ -377,7 +378,7 @@ class IOSDevice extends Device {
       int installationResult = 1;
       if (debuggingOptions.debuggingEnabled) {
         _logger.printTrace('Debugging is enabled, connecting to observatory');
-        final IOSDeviceLogReader deviceLogReader = getLogReader(app: package) as IOSDeviceLogReader;
+        final DeviceLogReader deviceLogReader = getLogReader(app: package);
 
         // If the device supports syslog reading, prefer launching the app without
         // attaching the debugger to avoid the overhead of the unnecessary extra running process.
@@ -388,12 +389,13 @@ class IOSDevice extends Device {
             launchArguments: launchArguments,
             interfaceType: interfaceType,
           );
-          deviceLogReader.debuggerStream = iosDeployDebugger;
+          if (deviceLogReader is IOSDeviceLogReader) {
+            deviceLogReader.debuggerStream = iosDeployDebugger;
+          }
         }
         observatoryDiscovery = ProtocolDiscovery.observatory(
           deviceLogReader,
           portForwarder: portForwarder,
-          throttleDuration: fallbackPollingDelay,
           hostPort: debuggingOptions.hostVmServicePort,
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
