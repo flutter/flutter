@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -11,6 +12,8 @@ import 'button_theme.dart';
 import 'material_button.dart';
 import 'theme.dart';
 import 'theme_data.dart';
+
+enum _RaisedButtonType { material, adaptive }
 
 /// A material design "raised button".
 ///
@@ -148,44 +151,130 @@ class RaisedButton extends MaterialButton {
     MaterialTapTargetSize? materialTapTargetSize,
     Duration? animationDuration,
     Widget? child,
-  }) : assert(autofocus != null),
-       assert(elevation == null || elevation >= 0.0),
-       assert(focusElevation == null || focusElevation >= 0.0),
-       assert(hoverElevation == null || hoverElevation >= 0.0),
-       assert(highlightElevation == null || highlightElevation >= 0.0),
-       assert(disabledElevation == null || disabledElevation >= 0.0),
-       assert(clipBehavior != null),
-       super(
-         key: key,
-         onPressed: onPressed,
-         onLongPress: onLongPress,
-         onHighlightChanged: onHighlightChanged,
-         mouseCursor: mouseCursor,
-         textTheme: textTheme,
-         textColor: textColor,
-         disabledTextColor: disabledTextColor,
-         color: color,
-         disabledColor: disabledColor,
-         focusColor: focusColor,
-         hoverColor: hoverColor,
-         highlightColor: highlightColor,
-         splashColor: splashColor,
-         colorBrightness: colorBrightness,
-         elevation: elevation,
-         focusElevation: focusElevation,
-         hoverElevation: hoverElevation,
-         highlightElevation: highlightElevation,
-         disabledElevation: disabledElevation,
-         padding: padding,
-         visualDensity: visualDensity,
-         shape: shape,
-         clipBehavior: clipBehavior,
-         focusNode: focusNode,
-         autofocus: autofocus,
-         materialTapTargetSize: materialTapTargetSize,
-         animationDuration: animationDuration,
-         child: child,
-       );
+  })  : _buttonType = _RaisedButtonType.material,
+        assert(autofocus != null),
+        assert(elevation == null || elevation >= 0.0),
+        assert(focusElevation == null || focusElevation >= 0.0),
+        assert(hoverElevation == null || hoverElevation >= 0.0),
+        assert(highlightElevation == null || highlightElevation >= 0.0),
+        assert(disabledElevation == null || disabledElevation >= 0.0),
+        assert(clipBehavior != null),
+        super(
+          key: key,
+          onPressed: onPressed,
+          onLongPress: onLongPress,
+          onHighlightChanged: onHighlightChanged,
+          mouseCursor: mouseCursor,
+          textTheme: textTheme,
+          textColor: textColor,
+          disabledTextColor: disabledTextColor,
+          color: color,
+          disabledColor: disabledColor,
+          focusColor: focusColor,
+          hoverColor: hoverColor,
+          highlightColor: highlightColor,
+          splashColor: splashColor,
+          colorBrightness: colorBrightness,
+          elevation: elevation,
+          focusElevation: focusElevation,
+          hoverElevation: hoverElevation,
+          highlightElevation: highlightElevation,
+          disabledElevation: disabledElevation,
+          padding: padding,
+          visualDensity: visualDensity,
+          shape: shape,
+          clipBehavior: clipBehavior,
+          focusNode: focusNode,
+          autofocus: autofocus,
+          materialTapTargetSize: materialTapTargetSize,
+          animationDuration: animationDuration,
+          child: child,
+        );
+
+  /// Create an adaptive filled button that displays [CupertinoButton] in iOS.
+  ///
+  /// The [autofocus] and [clipBehavior] arguments must not be null.
+  /// Additionally,  [elevation], [hoverElevation], [focusElevation],
+  /// [highlightElevation], and [disabledElevation] must be non-negative, if
+  /// specified.
+  ///
+  /// The [onLongPress], [onHighlightChanged], [mouseCursor], [textTheme], 
+  /// [textColor], [disabledTextColor], [color], [disabledColor], [focusColor], 
+  /// [hoverColor], [highlightColor], [splashColor], [colorBrightness], 
+  /// [elevation], [focusElevation], [hoverElevation], [highlightElevation], 
+  /// [disabledElevation], [visualDensity], [shape], [clipBehavior], 
+  /// [focusNode], [autofocus], [materialTapTargetSize], and 
+  /// [animationDuration] parameters are ignore in iOS.
+  const RaisedButton.adaptive({
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ValueChanged<bool>? onHighlightChanged,
+    MouseCursor? mouseCursor,
+    ButtonTextTheme? textTheme,
+    Color? textColor,
+    Color? disabledTextColor,
+    Color? color,
+    Color? disabledColor,
+    Color? focusColor,
+    Color? hoverColor,
+    Color? highlightColor,
+    Color? splashColor,
+    Brightness? colorBrightness,
+    double? elevation,
+    double? focusElevation,
+    double? hoverElevation,
+    double? highlightElevation,
+    double? disabledElevation,
+    EdgeInsetsGeometry? padding,
+    VisualDensity? visualDensity,
+    ShapeBorder? shape,
+    Clip clipBehavior = Clip.none,
+    FocusNode? focusNode,
+    bool autofocus = false,
+    MaterialTapTargetSize? materialTapTargetSize,
+    Duration? animationDuration,
+    Widget? child,
+  })  : _buttonType = _RaisedButtonType.adaptive,
+        assert(child != null),
+        assert(autofocus != null),
+        assert(elevation == null || elevation >= 0.0),
+        assert(focusElevation == null || focusElevation >= 0.0),
+        assert(hoverElevation == null || hoverElevation >= 0.0),
+        assert(highlightElevation == null || highlightElevation >= 0.0),
+        assert(disabledElevation == null || disabledElevation >= 0.0),
+        assert(clipBehavior != null),
+        super(
+          key: key,
+          onPressed: onPressed,
+          onLongPress: onLongPress,
+          onHighlightChanged: onHighlightChanged,
+          mouseCursor: mouseCursor,
+          textTheme: textTheme,
+          textColor: textColor,
+          disabledTextColor: disabledTextColor,
+          color: color,
+          disabledColor: disabledColor,
+          focusColor: focusColor,
+          hoverColor: hoverColor,
+          highlightColor: highlightColor,
+          splashColor: splashColor,
+          colorBrightness: colorBrightness,
+          elevation: elevation,
+          focusElevation: focusElevation,
+          hoverElevation: hoverElevation,
+          highlightElevation: highlightElevation,
+          disabledElevation: disabledElevation,
+          padding: padding,
+          visualDensity: visualDensity,
+          shape: shape,
+          clipBehavior: clipBehavior,
+          focusNode: focusNode,
+          autofocus: autofocus,
+          materialTapTargetSize: materialTapTargetSize,
+          animationDuration: animationDuration,
+          child: child,
+        );
 
   /// Create a filled button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -225,8 +314,19 @@ class RaisedButton extends MaterialButton {
     required Widget label,
   }) = _RaisedButtonWithIcon;
 
-  @override
-  Widget build(BuildContext context) {
+  final _RaisedButtonType _buttonType;
+
+  Widget _buildCupertinoButton(BuildContext context) {
+    return CupertinoButton.filled(
+        key: key,
+        disabledColor: disabledColor ?? CupertinoColors.quaternarySystemFill,
+        padding: padding,
+        child: child!,
+        onPressed: onPressed,
+      );
+  }
+
+  Widget _buildMaterialButton(BuildContext context) {
     final ThemeData theme = Theme.of(context)!;
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     return RawMaterialButton(
@@ -256,6 +356,27 @@ class RaisedButton extends MaterialButton {
       materialTapTargetSize: buttonTheme.getMaterialTapTargetSize(this),
       child: child,
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    switch (_buttonType) {
+      case _RaisedButtonType.material:
+        return _buildMaterialButton(context);
+      case _RaisedButtonType.adaptive:
+        final ThemeData theme = Theme.of(context)!;
+        assert(theme.platform != null);
+        switch (theme.platform) {
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            return _buildCupertinoButton(context);
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            return _buildMaterialButton(context);
+        }
+    }
   }
 
   @override

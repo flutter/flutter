@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -727,6 +728,54 @@ void main() {
     expect(paddingRect.top, tallerWidget.top - 5);
     expect(paddingRect.bottom, tallerWidget.bottom + 12);
   });
+
+  testWidgets(
+    'Adaptive RaisedButton displays CupertinoButton in iOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Material(
+              child: RaisedButton.adaptive(
+                child: Text("Button"),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(CupertinoButton), findsOneWidget);
+    }, variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    })
+  );
+
+  testWidgets(
+    'Adaptive RaisedButton does not display CupertinoButton in non-iOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Material(
+              child: RaisedButton.adaptive(
+                child: Text("Button"),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(CupertinoButton), findsNothing);
+    }, variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+    }),
+  );
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
