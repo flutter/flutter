@@ -28,7 +28,7 @@ void main() {
     testWidgets('completes when matcher completes', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer));
-      String result;
+      String? result;
       future.then<void>((void value) {
         result = '123';
       });
@@ -60,7 +60,7 @@ void main() {
     });
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      TestFailure failure;
+      late TestFailure failure;
       try {
         expect(find.text('foo', skipOffstage: false), findsOneWidget);
       } on TestFailure catch (e) {
@@ -83,7 +83,7 @@ void main() {
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
-      TestFailure failure;
+      late TestFailure failure;
       try {
         expect(find.text('foo', skipOffstage: false), findsNothing);
       } on TestFailure catch (e) {
@@ -101,7 +101,7 @@ void main() {
     testWidgets('fails with a descriptive message when skipping', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
-      TestFailure failure;
+      late TestFailure failure;
       try {
         expect(find.text('foo'), findsNothing);
       } on TestFailure catch (e) {
@@ -154,13 +154,13 @@ void main() {
 
     testWidgets('pumpFrames', (WidgetTester tester) async {
       final List<int> logPaints = <int>[];
-      int initial;
+      int? initial;
 
       final Widget target = _AlwaysAnimating(
         onPaint: () {
-          final int current = SchedulerBinding.instance.currentFrameTimeStamp.inMicroseconds;
+          final int current = SchedulerBinding.instance!.currentFrameTimeStamp.inMicroseconds;
           initial ??= current;
-          logPaints.add(current - initial);
+          logPaints.add(current - initial!);
         },
       );
 
@@ -180,7 +180,7 @@ void main() {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
       const String customDescription = 'custom description';
-      TestFailure failure;
+      late TestFailure failure;
       try {
         expect(find.byElementPredicate((_) => false, description: customDescription), findsOneWidget);
       } on TestFailure catch (e) {
@@ -197,7 +197,7 @@ void main() {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
       const String customDescription = 'custom description';
-      TestFailure failure;
+      late TestFailure failure;
       try {
         expect(find.byWidgetPredicate((_) => false, description: customDescription), findsOneWidget);
       } on TestFailure catch (e) {
@@ -248,7 +248,7 @@ void main() {
         ],
       ));
 
-      TestFailure failure;
+      late TestFailure failure;
       try {
         expect(find.descendant(
           of: find.widgetWithText(Column, 'foo'),
@@ -310,7 +310,7 @@ void main() {
         ],
       ));
 
-      TestFailure failure;
+      late TestFailure failure;
       try {
         expect(find.ancestor(
           of: find.text('bar'),
@@ -552,7 +552,7 @@ void main() {
 
   group('runAsync', () {
     testWidgets('works with no async calls', (WidgetTester tester) async {
-      String value;
+      String? value;
       await tester.runAsync(() async {
         value = '123';
       });
@@ -572,14 +572,14 @@ void main() {
     });
 
     testWidgets('propagates return values', (WidgetTester tester) async {
-      final String value = await tester.runAsync<String>(() async {
+      final String? value = await tester.runAsync<String>(() async {
         return '123';
       });
       expect(value, '123');
     });
 
     testWidgets('reports errors via framework', (WidgetTester tester) async {
-      final String value = await tester.runAsync<String>(() async {
+      final String? value = await tester.runAsync<String>(() async {
         throw ArgumentError();
       });
       expect(value, isNull);
@@ -628,7 +628,7 @@ void main() {
   });
 
   testWidgets('verifyTickersWereDisposed control test', (WidgetTester tester) async {
-    FlutterError error;
+    late FlutterError error;
     final Ticker ticker = tester.createTicker((Duration duration) {});
     ticker.start();
     try {
@@ -683,7 +683,7 @@ void main() {
 
   group('TargetPlatformVariant', () {
     int numberOfVariationsRun = 0;
-    TargetPlatform origTargetPlatform;
+    TargetPlatform? origTargetPlatform;
 
     setUpAll((){
       origTargetPlatform = debugDefaultTargetPlatformOverride;
@@ -715,7 +715,7 @@ void main() {
   });
 
   group('Pending timer', () {
-    TestExceptionReporter currentExceptionReporter;
+    late TestExceptionReporter currentExceptionReporter;
     setUp(() {
       currentExceptionReporter = reportTestException;
     });
@@ -725,7 +725,7 @@ void main() {
     });
 
     test('Throws assertion message without code', () async {
-      FlutterErrorDetails flutterErrorDetails;
+      late FlutterErrorDetails flutterErrorDetails;
       reportTestException = (FlutterErrorDetails details, String testDescription) {
         flutterErrorDetails = details;
       };
@@ -736,8 +736,8 @@ void main() {
         expect(timer.isActive, true);
       }, () {});
 
-      expect(flutterErrorDetails?.exception, isA<AssertionError>());
-      expect(flutterErrorDetails?.exception?.message, 'A Timer is still pending even after the widget tree was disposed.');
+      expect(flutterErrorDetails.exception, isA<AssertionError>());
+      expect((flutterErrorDetails.exception as AssertionError).message, 'A Timer is still pending even after the widget tree was disposed.');
     });
   });
 }
@@ -748,8 +748,8 @@ class FakeMatcher extends AsyncMatcher {
   final Completer<void> completer;
 
   @override
-  Future<String> matchAsync(dynamic object) {
-    return completer.future.then<String>((void value) {
+  Future<String?> matchAsync(dynamic object) {
+    return completer.future.then<String?>((void value) {
       return object?.toString();
     });
   }
@@ -759,14 +759,14 @@ class FakeMatcher extends AsyncMatcher {
 }
 
 class _SingleTickerTest extends StatefulWidget {
-  const _SingleTickerTest({Key key}) : super(key: key);
+  const _SingleTickerTest({Key? key}) : super(key: key);
 
   @override
   _SingleTickerTestState createState() => _SingleTickerTestState();
 }
 
 class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerProviderStateMixin {
-  AnimationController controller;
+  late AnimationController controller;
 
   @override
   void initState() {
@@ -786,10 +786,10 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
 class _AlwaysAnimating extends StatefulWidget {
   const _AlwaysAnimating({
     this.child,
-    this.onPaint,
+    required this.onPaint,
   });
 
-  final Widget child;
+  final Widget? child;
   final VoidCallback onPaint;
 
   @override
@@ -797,7 +797,7 @@ class _AlwaysAnimating extends StatefulWidget {
 }
 
 class _AlwaysAnimatingState extends State<_AlwaysAnimating> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
 
   @override
   void initState() {
@@ -819,7 +819,7 @@ class _AlwaysAnimatingState extends State<_AlwaysAnimating> with SingleTickerPro
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller.view,
-      builder: (BuildContext context, Widget child) {
+      builder: (BuildContext context, Widget? child) {
         return CustomPaint(
           painter: _AlwaysRepaint(widget.onPaint),
           child: widget.child,

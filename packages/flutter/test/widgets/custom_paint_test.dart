@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,10 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 import '../flutter_test_alternative.dart' show Fake;
 
 class TestCustomPainter extends CustomPainter {
-  TestCustomPainter({ this.log, this.name });
+  TestCustomPainter({ required this.log, this.name });
 
-  final List<String> log;
-  final String name;
+  final List<String?> log;
+  final String? name;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -60,7 +58,7 @@ class MockPaintingContext extends Fake implements PaintingContext {
 
 void main() {
   testWidgets('Control test for custom painting', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
       painter: TestCustomPainter(
         log: log,
@@ -84,18 +82,18 @@ void main() {
   testWidgets('Throws FlutterError on custom painter incorrect restore/save calls', (
       WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
-    final List<String> log = <String>[];
+    final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
       key: target,
       isComplex: true,
       painter: TestCustomPainter(log: log),
     ));
-    final RenderCustomPaint renderCustom = target.currentContext.findRenderObject() as RenderCustomPaint;
+    final RenderCustomPaint renderCustom = target.currentContext!.findRenderObject()! as RenderCustomPaint;
     final MockPaintingContext paintingContext = MockPaintingContext();
     final MockCanvas canvas = paintingContext.canvas;
 
     FlutterError getError() {
-      FlutterError error;
+      late FlutterError error;
       try {
         renderCustom.paint(paintingContext, const Offset(0, 0));
       } on FlutterError catch (e) {
@@ -138,93 +136,51 @@ void main() {
     expect(error.toStringDeep(), contains('2 more times'));
   });
 
-  testWidgets('assembleSemanticsNode throws FlutterError', (WidgetTester tester) async {
-    final List<String> log = <String>[];
-    final GlobalKey target = GlobalKey();
-    await tester.pumpWidget(CustomPaint(
-      key: target,
-      isComplex: true,
-      painter: TestCustomPainter(log: log),
-    ));
-    final RenderCustomPaint renderCustom = target.currentContext.findRenderObject() as RenderCustomPaint;
-    dynamic error;
-    try {
-      renderCustom.assembleSemanticsNode(
-        null,
-        null,
-        <SemanticsNode>[SemanticsNode()],
-      );
-    } on FlutterError catch (e) {
-      error = e;
-    }
-    expect(error, isNotNull);
-    expect(error.toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   RenderCustomPaint does not have a child widget but received a\n'
-      '   non-empty list of child SemanticsNode:\n'
-      '   SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), invisible)\n'
-    ));
-
-    await tester.pumpWidget(CustomPaint(
-      key: target,
-      isComplex: true,
-      painter: TestCustomPainterWithCustomSemanticsBuilder(),
-    ));
-    final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
-    error = exception;
-    expect(error.toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   Failed to update the list of CustomPainterSemantics:\n'
-      "   - duplicate key [<'0'>] found at position 1\n"
-    ));
-  });
-
   testWidgets('CustomPaint sizing', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
 
     await tester.pumpWidget(Center(
       child: CustomPaint(key: target),
     ));
-    expect(target.currentContext.size, Size.zero);
+    expect(target.currentContext!.size, Size.zero);
 
     await tester.pumpWidget(Center(
       child: CustomPaint(key: target, child: Container()),
     ));
-    expect(target.currentContext.size, const Size(800.0, 600.0));
+    expect(target.currentContext!.size, const Size(800.0, 600.0));
 
     await tester.pumpWidget(Center(
       child: CustomPaint(key: target, size: const Size(20.0, 20.0)),
     ));
-    expect(target.currentContext.size, const Size(20.0, 20.0));
+    expect(target.currentContext!.size, const Size(20.0, 20.0));
 
     await tester.pumpWidget(Center(
       child: CustomPaint(key: target, size: const Size(2000.0, 100.0)),
     ));
-    expect(target.currentContext.size, const Size(800.0, 100.0));
+    expect(target.currentContext!.size, const Size(800.0, 100.0));
 
     await tester.pumpWidget(Center(
       child: CustomPaint(key: target, size: Size.zero, child: Container()),
     ));
-    expect(target.currentContext.size, const Size(800.0, 600.0));
+    expect(target.currentContext!.size, const Size(800.0, 600.0));
 
     await tester.pumpWidget(Center(
       child: CustomPaint(key: target, child: const SizedBox(height: 0.0, width: 0.0)),
     ));
-    expect(target.currentContext.size, Size.zero);
+    expect(target.currentContext!.size, Size.zero);
 
   });
 
   testWidgets('Raster cache hints', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
 
-    final List<String> log = <String>[];
+    final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
       key: target,
       isComplex: true,
       painter: TestCustomPainter(log: log),
     ));
-    RenderCustomPaint renderCustom = target.currentContext.findRenderObject() as RenderCustomPaint;
+    RenderCustomPaint renderCustom = target.currentContext!.findRenderObject()! as RenderCustomPaint;
     expect(renderCustom.isComplex, true);
     expect(renderCustom.willChange, false);
 
@@ -233,7 +189,7 @@ void main() {
       willChange: true,
       foregroundPainter: TestCustomPainter(log: log),
     ));
-    renderCustom = target.currentContext.findRenderObject() as RenderCustomPaint;
+    renderCustom = target.currentContext!.findRenderObject()! as RenderCustomPaint;
     expect(renderCustom.isComplex, false);
     expect(renderCustom.willChange, true);
   });

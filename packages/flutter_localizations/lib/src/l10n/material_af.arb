@@ -52,7 +52,7 @@
   "remainingTextFieldCharacterCountOther": "$remainingCount karakters oor",
   "refreshIndicatorSemanticLabel": "Herlaai",
   "moreButtonTooltip": "Nog",
-  "dateSeparator": "/",
+  "dateSeparator": "-",
   "dateHelpText": "dd-mm-jjjj",
   "selectYearSemanticsLabel": "Kies jaar",
   "unspecifiedDate": "Datum",

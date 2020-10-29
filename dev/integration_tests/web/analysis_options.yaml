@@ -3,3 +3,4 @@
 analyzer:
   exclude:
     - lib/null_safe_main.dart
+    - lib/sound_mode.dart

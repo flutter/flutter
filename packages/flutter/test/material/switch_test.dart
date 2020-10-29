@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -318,7 +316,7 @@ void main() {
         Material.of(tester.element(find.byType(Switch))),
         paints
           ..rrect(
-              color: Colors.blue[600].withAlpha(0x80),
+              color: Colors.blue[600]!.withAlpha(0x80),
               rrect: RRect.fromLTRBR(
                   383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
           ..circle(color: const Color(0x33000000))
@@ -608,10 +606,10 @@ void main() {
     expect(value, true);
     expect(semanticEvent, <String, dynamic>{
       'type': 'tap',
-      'nodeId': object.debugSemantics.id,
+      'nodeId': object.debugSemantics!.id,
       'data': <String, dynamic>{},
     });
-    expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
+    expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
     semanticsTester.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
@@ -658,10 +656,10 @@ void main() {
     expect(value, true);
     expect(semanticEvent, <String, dynamic>{
       'type': 'tap',
-      'nodeId': object.debugSemantics.id,
+      'nodeId': object.debugSemantics!.id,
       'data': <String, dynamic>{},
     });
-    expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
+    expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
     semanticsTester.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
@@ -796,6 +794,34 @@ void main() {
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
         ..circle(color: const Color(0xffbdbdbd)),
+    );
+  });
+
+  testWidgets('Switch with splash radius set', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const double splashRadius = 30;
+    Widget buildApp() {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Switch(
+                value: true,
+                onChanged: (bool newValue) {},
+                focusColor: Colors.orange[500],
+                autofocus: true,
+                splashRadius: splashRadius,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..circle(color: Colors.orange[500], radius: splashRadius)
     );
   });
 
@@ -943,7 +969,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test Switch() constructor
     await tester.pumpWidget(
@@ -967,7 +993,7 @@ void main() {
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -989,7 +1015,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -1011,8 +1037,55 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('Material switch should not recreate its render object when disabled', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/61247.
+    bool value = true;
+    bool enabled = true;
+    late StateSetter stateSetter;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Material(
+              child: Center(
+                child: Switch(
+                  value: value,
+                  onChanged: !enabled ? null : (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final RenderToggleable oldSwitchRenderObject = tester
+      .renderObject(find.byWidgetPredicate((Widget widget) => widget is LeafRenderObjectWidget));
+
+    stateSetter(() { value = false; });
+    await tester.pump();
+    // Disable the switch when the implicit animation begins.
+    stateSetter(() { enabled = false; });
+    await tester.pump();
+
+    final RenderToggleable updatedSwitchRenderObject = tester
+      .renderObject(find.byWidgetPredicate((Widget widget) => widget is LeafRenderObjectWidget));
+
+
+    expect(updatedSwitchRenderObject.isInteractive, false);
+    expect(updatedSwitchRenderObject, oldSwitchRenderObject);
+    expect(updatedSwitchRenderObject.position.isCompleted, false);
+    expect(updatedSwitchRenderObject.position.isDismissed, false);
   });
 }

@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import '../artifacts.dart';
+import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
@@ -20,10 +21,11 @@ Future<void> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
     String target = 'lib/main.dart',
+    SizeAnalyzer sizeAnalyzer,
   }) async {
   if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
-      'https://github.com/flutter/flutter/wiki/Desktop-shells#create '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-app '
       'to learn about adding Linux support to a project.');
   }
 
@@ -43,7 +45,6 @@ Future<void> buildLinux(
 
   final Status status = globals.logger.startProgress(
     'Building Linux application...',
-    timeout: null,
   );
   try {
     final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
@@ -52,6 +53,29 @@ Future<void> buildLinux(
     await _runBuild(buildDirectory);
   } finally {
     status.cancel();
+  }
+  if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
+    final String arch = getNameForTargetPlatform(TargetPlatform.linux_x64);
+    final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
+      .childFile('snapshot.$arch.json');
+    final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
+      .childFile('trace.$arch.json');
+    final Map<String, Object> output = await sizeAnalyzer.analyzeAotSnapshot(
+      aotSnapshot: codeSizeFile,
+      // This analysis is only supported for release builds.
+      outputDirectory: globals.fs.directory(
+        globals.fs.path.join(getLinuxBuildDirectory(), 'release', 'bundle'),
+      ),
+      precompilerTrace: precompilerTrace,
+      type: 'linux',
+    );
+    final File outputFile = globals.fsUtils.getUniqueFile(
+      globals.fs.directory(getBuildDirectory()),'linux-code-size-analysis', 'json',
+    )..writeAsStringSync(jsonEncode(output));
+    // This message is used as a sentinel in analyze_apk_size_test.dart
+    globals.printStatus(
+      'A summary of your Linux bundle analysis can be found at: ${outputFile.path}',
+    );
   }
 }
 
@@ -63,7 +87,7 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
   final String buildFlag = toTitleCase(buildModeName);
   int result;
   try {
-    result = await processUtils.stream(
+    result = await globals.processUtils.stream(
       <String>[
         'cmake',
         '-G',
@@ -92,7 +116,7 @@ Future<void> _runBuild(Directory buildDir) async {
 
   int result;
   try {
-    result = await processUtils.stream(
+    result = await globals.processUtils.stream(
       <String>[
         'ninja',
         '-C',

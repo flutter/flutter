@@ -2,33 +2,47 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../flutter_test_alternative.dart';
 
 typedef HandleEventCallback = void Function(PointerEvent event);
 
-class TestGestureFlutterBinding extends BindingBase with GestureBinding {
-  HandleEventCallback callback;
+class TestGestureFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
+  HandleEventCallback? callback;
+  FrameCallback? frameCallback;
+  Duration? frameTime;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
     if (callback != null)
-      callback(event);
+      callback?.call(event);
+  }
+
+  @override
+  Duration get currentSystemFrameTimeStamp {
+    assert(frameTime != null);
+    return frameTime!;
+  }
+
+  @override
+  int scheduleFrameCallback(FrameCallback callback, {bool rescheduling = false}) {
+    frameCallback = callback;
+    return 0;
   }
 }
 
-TestGestureFlutterBinding _binding = TestGestureFlutterBinding();
+TestGestureFlutterBinding? _binding;
 
 void ensureTestGestureBinding() {
   _binding ??= TestGestureFlutterBinding();
   assert(GestureBinding.instance != null);
+  assert(SchedulerBinding.instance != null);
 }
 
 void main() {
@@ -43,12 +57,12 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = events.add;
+    _binding!.callback = events.add;
 
-    ui.window.onPointerDataPacket(packet);
+    ui.window.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
-    expect(events[0].runtimeType, equals(PointerDownEvent));
-    expect(events[1].runtimeType, equals(PointerUpEvent));
+    expect(events[0], isA<PointerDownEvent>());
+    expect(events[1], isA<PointerUpEvent>());
   });
 
   test('Pointer move events', () {
@@ -61,13 +75,13 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = events.add;
+    _binding!.callback = events.add;
 
-    ui.window.onPointerDataPacket(packet);
+    ui.window.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
-    expect(events[0].runtimeType, equals(PointerDownEvent));
-    expect(events[1].runtimeType, equals(PointerMoveEvent));
-    expect(events[2].runtimeType, equals(PointerUpEvent));
+    expect(events[0], isA<PointerDownEvent>());
+    expect(events[1], isA<PointerMoveEvent>());
+    expect(events[2], isA<PointerUpEvent>());
   });
 
   test('Pointer hover events', () {
@@ -83,21 +97,24 @@ void main() {
     );
 
     final List<PointerEvent> pointerRouterEvents = <PointerEvent>[];
-    GestureBinding.instance.pointerRouter.addGlobalRoute(pointerRouterEvents.add);
+    GestureBinding.instance!.pointerRouter.addGlobalRoute(pointerRouterEvents.add);
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = events.add;
+    _binding!.callback = events.add;
 
-    ui.window.onPointerDataPacket(packet);
-    expect(events.length, 0);
+    ui.window.onPointerDataPacket?.call(packet);
+    expect(events.length, 3);
+    expect(events[0], isA<PointerHoverEvent>());
+    expect(events[1], isA<PointerHoverEvent>());
+    expect(events[2], isA<PointerHoverEvent>());
     expect(pointerRouterEvents.length, 6,
         reason: 'pointerRouterEvents contains: $pointerRouterEvents');
-    expect(pointerRouterEvents[0].runtimeType, equals(PointerAddedEvent));
-    expect(pointerRouterEvents[1].runtimeType, equals(PointerHoverEvent));
-    expect(pointerRouterEvents[2].runtimeType, equals(PointerHoverEvent));
-    expect(pointerRouterEvents[3].runtimeType, equals(PointerRemovedEvent));
-    expect(pointerRouterEvents[4].runtimeType, equals(PointerAddedEvent));
-    expect(pointerRouterEvents[5].runtimeType, equals(PointerHoverEvent));
+    expect(pointerRouterEvents[0], isA<PointerAddedEvent>());
+    expect(pointerRouterEvents[1], isA<PointerHoverEvent>());
+    expect(pointerRouterEvents[2], isA<PointerHoverEvent>());
+    expect(pointerRouterEvents[3], isA<PointerRemovedEvent>());
+    expect(pointerRouterEvents[4], isA<PointerAddedEvent>());
+    expect(pointerRouterEvents[5], isA<PointerHoverEvent>());
   });
 
   test('Pointer cancel events', () {
@@ -109,12 +126,12 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = events.add;
+    _binding!.callback = events.add;
 
-    ui.window.onPointerDataPacket(packet);
+    ui.window.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
-    expect(events[0].runtimeType, equals(PointerDownEvent));
-    expect(events[1].runtimeType, equals(PointerCancelEvent));
+    expect(events[0], isA<PointerDownEvent>());
+    expect(events[1], isA<PointerCancelEvent>());
   });
 
   test('Can cancel pointers', () {
@@ -126,16 +143,16 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = (PointerEvent event) {
+    _binding!.callback = (PointerEvent event) {
       events.add(event);
       if (event is PointerDownEvent)
-        _binding.cancelPointer(event.pointer);
+        _binding!.cancelPointer(event.pointer);
     };
 
-    ui.window.onPointerDataPacket(packet);
+    ui.window.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
-    expect(events[0].runtimeType, equals(PointerDownEvent));
-    expect(events[1].runtimeType, equals(PointerCancelEvent));
+    expect(events[0], isA<PointerDownEvent>());
+    expect(events[1], isA<PointerCancelEvent>());
   });
 
   test('Can expand add and hover pointers', () {
@@ -153,11 +170,11 @@ void main() {
       packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
-    expect(events[0].runtimeType, equals(PointerAddedEvent));
-    expect(events[1].runtimeType, equals(PointerHoverEvent));
-    expect(events[2].runtimeType, equals(PointerRemovedEvent));
-    expect(events[3].runtimeType, equals(PointerAddedEvent));
-    expect(events[4].runtimeType, equals(PointerHoverEvent));
+    expect(events[0], isA<PointerAddedEvent>());
+    expect(events[1], isA<PointerHoverEvent>());
+    expect(events[2], isA<PointerRemovedEvent>());
+    expect(events[3], isA<PointerAddedEvent>());
+    expect(events[4], isA<PointerHoverEvent>());
   });
 
   test('Can expand pointer scroll events', () {
@@ -172,8 +189,8 @@ void main() {
       packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 2);
-    expect(events[0].runtimeType, equals(PointerAddedEvent));
-    expect(events[1].runtimeType, equals(PointerScrollEvent));
+    expect(events[0], isA<PointerAddedEvent>());
+    expect(events[1], isA<PointerScrollEvent>());
   });
 
   test('Should synthesize kPrimaryButton for touch', () {
@@ -193,15 +210,15 @@ void main() {
       packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
-    expect(events[0].runtimeType, equals(PointerAddedEvent));
+    expect(events[0], isA<PointerAddedEvent>());
     expect(events[0].buttons, equals(0));
-    expect(events[1].runtimeType, equals(PointerHoverEvent));
+    expect(events[1], isA<PointerHoverEvent>());
     expect(events[1].buttons, equals(0));
-    expect(events[2].runtimeType, equals(PointerDownEvent));
+    expect(events[2], isA<PointerDownEvent>());
     expect(events[2].buttons, equals(kPrimaryButton));
-    expect(events[3].runtimeType, equals(PointerMoveEvent));
+    expect(events[3], isA<PointerMoveEvent>());
     expect(events[3].buttons, equals(kPrimaryButton));
-    expect(events[4].runtimeType, equals(PointerUpEvent));
+    expect(events[4], isA<PointerUpEvent>());
     expect(events[4].buttons, equals(0));
   });
 
@@ -226,15 +243,15 @@ void main() {
         packet.data, ui.window.devicePixelRatio).toList();
 
       expect(events.length, 5);
-      expect(events[0].runtimeType, equals(PointerAddedEvent));
+      expect(events[0], isA<PointerAddedEvent>());
       expect(events[0].buttons, equals(0));
-      expect(events[1].runtimeType, equals(PointerHoverEvent));
+      expect(events[1], isA<PointerHoverEvent>());
       expect(events[1].buttons, equals(0));
-      expect(events[2].runtimeType, equals(PointerDownEvent));
+      expect(events[2], isA<PointerDownEvent>());
       expect(events[2].buttons, equals(kPrimaryButton));
-      expect(events[3].runtimeType, equals(PointerMoveEvent));
+      expect(events[3], isA<PointerMoveEvent>());
       expect(events[3].buttons, equals(kPrimaryButton | kSecondaryStylusButton));
-      expect(events[4].runtimeType, equals(PointerUpEvent));
+      expect(events[4], isA<PointerUpEvent>());
       expect(events[4].buttons, equals(0));
     }
   });
@@ -256,15 +273,15 @@ void main() {
       packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
-    expect(events[0].runtimeType, equals(PointerAddedEvent));
+    expect(events[0], isA<PointerAddedEvent>());
     expect(events[0].buttons, equals(0));
-    expect(events[1].runtimeType, equals(PointerHoverEvent));
+    expect(events[1], isA<PointerHoverEvent>());
     expect(events[1].buttons, equals(0));
-    expect(events[2].runtimeType, equals(PointerDownEvent));
+    expect(events[2], isA<PointerDownEvent>());
     expect(events[2].buttons, equals(kPrimaryButton));
-    expect(events[3].runtimeType, equals(PointerMoveEvent));
+    expect(events[3], isA<PointerMoveEvent>());
     expect(events[3].buttons, equals(kPrimaryButton));
-    expect(events[4].runtimeType, equals(PointerUpEvent));
+    expect(events[4], isA<PointerUpEvent>());
     expect(events[4].buttons, equals(0));
   });
 
@@ -287,15 +304,15 @@ void main() {
         packet.data, ui.window.devicePixelRatio).toList();
 
       expect(events.length, 5);
-      expect(events[0].runtimeType, equals(PointerAddedEvent));
+      expect(events[0], isA<PointerAddedEvent>());
       expect(events[0].buttons, equals(0));
-      expect(events[1].runtimeType, equals(PointerHoverEvent));
+      expect(events[1], isA<PointerHoverEvent>());
       expect(events[1].buttons, equals(0));
-      expect(events[2].runtimeType, equals(PointerDownEvent));
+      expect(events[2], isA<PointerDownEvent>());
       expect(events[2].buttons, equals(kMiddleMouseButton));
-      expect(events[3].runtimeType, equals(PointerMoveEvent));
+      expect(events[3], isA<PointerMoveEvent>());
       expect(events[3].buttons, equals(kMiddleMouseButton | kSecondaryMouseButton));
-      expect(events[4].runtimeType, equals(PointerUpEvent));
+      expect(events[4], isA<PointerUpEvent>());
       expect(events[4].buttons, equals(0));
     }
   });

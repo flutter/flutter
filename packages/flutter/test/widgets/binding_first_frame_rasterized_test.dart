@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -21,14 +19,14 @@ void main() {
 
       // Simulates the engine completing a frame render to trigger the
       // appropriate callback setting [WidgetBinding.firstFrameRasterized].
-      binding.window.onReportTimings(<FrameTiming>[]);
+      binding.window.onReportTimings!(<FrameTiming>[]);
       expect(binding.firstFrameRasterized, isFalse);
 
       binding.allowFirstFrame();
       fakeAsync.flushTimers();
 
       // Simulates the engine again.
-      binding.window.onReportTimings(<FrameTiming>[]);
+      binding.window.onReportTimings!(<FrameTiming>[]);
       expect(binding.firstFrameRasterized, isTrue);
     });
   });

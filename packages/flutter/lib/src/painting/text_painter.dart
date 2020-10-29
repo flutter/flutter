@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' show min, max;
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, TextHeightBehavior, BoxHeightStyle, BoxWidthStyle;
 
@@ -16,6 +15,11 @@ import 'strut_style.dart';
 import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
+
+// The default font size if none is specified. This should be kept in
+// sync with the default values in text_style.dart, as well as the
+// defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
+const double _kDefaultFontSize = 14.0;
 
 /// Holds the [Size] and baseline required to represent the dimensions of
 /// a placeholder in text.
@@ -44,6 +48,9 @@ class PlaceholderDimensions {
     this.baselineOffset,
   }) : assert(size != null),
        assert(alignment != null);
+
+  /// A constant representing an empty placeholder.
+  static const PlaceholderDimensions empty = PlaceholderDimensions(size: Size.zero, alignment: ui.PlaceholderAlignment.bottom);
 
   /// Width and height dimensions of the placeholder.
   final Size size;
@@ -418,6 +425,10 @@ class TextPainter {
     ) ?? ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
+      // Use the default font size to multiply by as RichText does not
+      // perform inheriting [TextStyle]s and would otherwise
+      // fail to apply textScaleFactor.
+      fontSize: _kDefaultFontSize * textScaleFactor,
       maxLines: maxLines,
       textHeightBehavior: _textHeightBehavior,
       ellipsis: ellipsis,
@@ -580,7 +591,7 @@ class TextPainter {
           newWidth = maxIntrinsicWidth;
           break;
       }
-      newWidth = newWidth.clamp(minWidth, maxWidth) as double; // ignore: unnecessary_cast
+      newWidth = newWidth.clamp(minWidth, maxWidth);
       if (newWidth != _applyFloatingPointHack(_paragraph!.width)) {
         _paragraph!.layout(ui.ParagraphConstraints(width: newWidth));
       }
@@ -782,7 +793,9 @@ class TextPainter {
     return _caretMetrics.offset;
   }
 
-  /// Returns the tight bounded height of the glyph at the given [position].
+  /// {@template flutter.painting.textPainter.getFullHeightForCaret}
+  /// Returns the strut bounded height of the glyph at the given `position`.
+  /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
   double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {

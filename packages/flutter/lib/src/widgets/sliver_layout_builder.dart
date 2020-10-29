@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -31,8 +29,8 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   ///
   /// The [builder] argument must not be null.
   const SliverLayoutBuilder({
-    Key key,
-    SliverLayoutWidgetBuilder builder,
+    Key? key,
+    required SliverLayoutWidgetBuilder builder,
   }) : super(key: key, builder: builder);
 
   /// Called at layout time to construct the widget tree.
@@ -71,13 +69,13 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
   void paint(PaintingContext context, Offset offset) {
     // This renderObject does not introduce additional offset to child's position.
     if (child?.geometry?.visible == true)
-      context.paintChild(child, offset);
+      context.paintChild(child!, offset);
   }
 
   @override
-  bool hitTestChildren(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
+  bool hitTestChildren(SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
     return child != null
-        && child.geometry.hitTestExtent > 0
-        && child.hitTest(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
+        && child!.geometry!.hitTestExtent > 0
+        && child!.hitTest(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
   }
 }

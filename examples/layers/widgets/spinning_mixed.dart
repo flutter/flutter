@@ -11,13 +11,13 @@ import '../rendering/src/solid_color_box.dart';
 void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex = 0 }) {
   final RenderSolidColorBox child = RenderSolidColorBox(backgroundColor);
   parent.add(child);
-  final FlexParentData childParentData = child.parentData as FlexParentData;
+  final FlexParentData childParentData = child.parentData! as FlexParentData;
   childParentData.flex = flex;
 }
 
 // Solid color, Widget version
 class Rectangle extends StatelessWidget {
-  const Rectangle(this.color, { Key key }) : super(key: key);
+  const Rectangle(this.color, { Key? key }) : super(key: key);
 
   final Color color;
 
@@ -31,8 +31,8 @@ class Rectangle extends StatelessWidget {
   }
 }
 
-double value;
-RenderObjectToWidgetElement<RenderBox> element;
+double? value;
+RenderObjectToWidgetElement<RenderBox>? element;
 BuildOwner owner = BuildOwner();
 void attachWidgetTreeToRenderTree(RenderProxyBox container) {
   element = RenderObjectToWidgetAdapter<RenderBox>(
@@ -50,7 +50,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                 margin: const EdgeInsets.all(10.0),
                 child: Row(
                   children: <Widget>[
-                    RaisedButton(
+                    ElevatedButton(
                       child: Row(
                         children: <Widget>[
                           Image.network('https://flutter.dev/images/favicon.png'),
@@ -58,7 +58,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                         ],
                       ),
                       onPressed: () {
-                        value = value == null ? 0.1 : (value + 0.1) % 1.0;
+                        value = value == null ? 0.1 : (value! + 0.1) % 1.0;
                         attachWidgetTreeToRenderTree(container);
                       },
                     ),
@@ -77,17 +77,17 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
   ).attachToRenderTree(owner, element);
 }
 
-Duration timeBase;
-RenderTransform transformBox;
+Duration? timeBase;
+late RenderTransform transformBox;
 
 void rotate(Duration timeStamp) {
   timeBase ??= timeStamp;
-  final double delta = (timeStamp - timeBase).inMicroseconds.toDouble() / Duration.microsecondsPerSecond; // radians
+  final double delta = (timeStamp - timeBase!).inMicroseconds.toDouble() / Duration.microsecondsPerSecond; // radians
 
   transformBox.setIdentity();
   transformBox.rotateZ(delta);
 
-  owner.buildScope(element);
+  owner.buildScope(element!);
 }
 
 void main() {

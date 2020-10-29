@@ -36,7 +36,7 @@ Future<void> main() async {
     await binding.runTest(() async {
       final DebugPrintCallback oldDebugPrint = debugPrint;
       try {
-        debugPrint = (String message, {int wrapWidth}) {};
+        debugPrint = (String? message, {int? wrapWidth}) {};
         debugPrintStack(
           stackTrace: await getMangledStack(),
         );

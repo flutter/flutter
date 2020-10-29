@@ -8,11 +8,13 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package show TestFailure;
 
 import 'goldens.dart';
+import 'test_async_utils.dart';
 
 /// The default [GoldenFileComparator] implementation for `flutter test`.
 ///
@@ -61,15 +63,15 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   /// directory in which [testFile] resides.
   ///
   /// The [testFile] URL must represent a file.
-  LocalFileComparator(Uri testFile, {path.Style pathStyle})
+  LocalFileComparator(Uri testFile, {path.Style? pathStyle})
     : basedir = _getBasedir(testFile, pathStyle),
       _path = _getPath(pathStyle);
 
-  static path.Context _getPath(path.Style style) {
+  static path.Context _getPath(path.Style? style) {
     return path.Context(style: style ?? path.Style.platform);
   }
 
-  static Uri _getBasedir(Uri testFile, path.Style pathStyle) {
+  static Uri _getBasedir(Uri testFile, path.Style? pathStyle) {
     final path.Context context = _getPath(pathStyle);
     final String testFilePath = context.fromUri(testFile);
     final String testDirectoryPath = context.dirname(testFilePath);
@@ -102,7 +104,8 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
     );
 
     if (!result.passed) {
-      await generateFailureOutput(result, golden, basedir);
+      final String error = await generateFailureOutput(result, golden, basedir);
+      throw FlutterError(error);
     }
     return result.passed;
   }
@@ -125,17 +128,16 @@ class LocalComparisonOutput {
   /// Writes out diffs from the [ComparisonResult] of a golden file test.
   ///
   /// Will throw an error if a null result is provided.
-  Future<void> generateFailureOutput(
+  Future<String> generateFailureOutput(
     ComparisonResult result,
     Uri golden,
     Uri basedir, {
     String key = '',
-  }) async {
+  }) async => TestAsyncUtils.guard<String>(() async {
     String additionalFeedback = '';
     if (result.diffs != null) {
-      additionalFeedback = '\nFailure feedback can be found at '
-        '${path.join(basedir.path, 'failures')}';
-      final Map<String, Image> diffs = result.diffs.cast<String, Image>();
+      additionalFeedback = '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
+      final Map<String, Image> diffs = result.diffs!.cast<String, Image>();
       for (final MapEntry<String, Image> entry in diffs.entries) {
         final File output = getFailureFile(
           key.isEmpty ? entry.key : entry.key + '_' + key,
@@ -143,15 +145,12 @@ class LocalComparisonOutput {
           basedir,
         );
         output.parent.createSync(recursive: true);
-        final ByteData pngBytes =
-            await entry.value.toByteData(format: ImageByteFormat.png);
-        output.writeAsBytesSync(pngBytes.buffer.asUint8List());
+        final ByteData? pngBytes = await entry.value.toByteData(format: ImageByteFormat.png);
+        output.writeAsBytesSync(pngBytes!.buffer.asUint8List());
       }
     }
-    throw test_package.TestFailure(
-      'Golden "$golden": ${result.error}$additionalFeedback'
-    );
-  }
+    return 'Golden "$golden": ${result.error}$additionalFeedback';
+  });
 
   /// Returns the appropriate file for a given diff from a [ComparisonResult].
   File getFailureFile(String failure, Uri golden, Uri basedir) {
@@ -169,7 +168,7 @@ class LocalComparisonOutput {
 
 /// Returns a [ComparisonResult] to describe the pixel differential of the
 /// [test] and [master] image bytes provided.
-Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
+Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async {
   if (identical(test, master))
     return ComparisonResult(passed: true);
 
@@ -183,15 +182,12 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
   final Codec testImageCodec =
       await instantiateImageCodec(Uint8List.fromList(test));
   final Image testImage = (await testImageCodec.getNextFrame()).image;
-  final ByteData testImageRgba = await testImage.toByteData();
+  final ByteData? testImageRgba = await testImage.toByteData();
 
   final Codec masterImageCodec =
       await instantiateImageCodec(Uint8List.fromList(master));
   final Image masterImage = (await masterImageCodec.getNextFrame()).image;
-  final ByteData masterImageRgba = await masterImage.toByteData();
-
-  assert(testImage != null);
-  assert(masterImage != null);
+  final ByteData? masterImageRgba = await masterImage.toByteData();
 
   final int width = testImage.width;
   final int height = testImage.height;
@@ -207,10 +203,10 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
 
   int pixelDiffCount = 0;
   final int totalPixels = width * height;
-  final ByteData invertedMasterRgba = _invert(masterImageRgba);
-  final ByteData invertedTestRgba = _invert(testImageRgba);
+  final ByteData invertedMasterRgba = _invert(masterImageRgba!);
+  final ByteData invertedTestRgba = _invert(testImageRgba!);
 
-  final Uint8List testImageBytes = (await testImage.toByteData()).buffer.asUint8List();
+  final Uint8List testImageBytes = (await testImage.toByteData())!.buffer.asUint8List();
   final ByteData maskedDiffRgba = ByteData(testImageBytes.length);
   maskedDiffRgba.buffer.asUint8List().setRange(0, testImageBytes.length, testImageBytes);
   final ByteData isolatedDiffRgba = ByteData(width * height * 4);

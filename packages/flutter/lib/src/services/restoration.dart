@@ -97,6 +97,25 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 ///  * [RestorationMixin], which uses [RestorationBucket]s behind the scenes
 ///    to make [State] objects of [StatefulWidget]s restorable.
 class RestorationManager extends ChangeNotifier {
+  /// Construct the restoration manager and set up the communications channels
+  /// with the engine to get restoration messages (by calling [initChannels]).
+  RestorationManager() {
+    initChannels();
+  }
+
+  /// Sets up the method call handler for [SystemChannels.restoration].
+  ///
+  /// This is called by the constructor to configure the communications channel
+  /// with the Flutter engine to get restoration messages.
+  ///
+  /// Subclasses (especially in tests) can override this to avoid setting up
+  /// that communications channel, or to set it up differently, as necessary.
+  @protected
+  void initChannels() {
+    assert(!SystemChannels.restoration.checkMethodCallHandler(_methodHandler));
+    SystemChannels.restoration.setMethodCallHandler(_methodHandler);
+  }
+
   /// The root of the [RestorationBucket] hierarchy containing the restoration
   /// data.
   ///
@@ -128,20 +147,17 @@ class RestorationManager extends ChangeNotifier {
   ///  * [RootRestorationScope], which makes the root bucket available in the
   ///    [Widget] tree.
   Future<RestorationBucket?> get rootBucket {
-    if (!SystemChannels.restoration.checkMethodCallHandler(_methodHandler)) {
-      SystemChannels.restoration.setMethodCallHandler(_methodHandler);
-    }
     if (_rootBucketIsValid) {
       return SynchronousFuture<RestorationBucket?>(_rootBucket);
     }
     if (_pendingRootBucket == null) {
-      _pendingRootBucket = Completer<RestorationBucket>();
+      _pendingRootBucket = Completer<RestorationBucket?>();
       _getRootBucketFromEngine();
     }
     return _pendingRootBucket!.future;
   }
   RestorationBucket? _rootBucket; // May be null to indicate that restoration is turned off.
-  Completer<RestorationBucket>? _pendingRootBucket;
+  Completer<RestorationBucket?>? _pendingRootBucket;
   bool _rootBucketIsValid = false;
 
   /// Returns true for the frame after [rootBucket] has been replaced with a
@@ -170,7 +186,7 @@ class RestorationManager extends ChangeNotifier {
   void _parseAndHandleRestorationUpdateFromEngine(Map<dynamic, dynamic>? update) {
     handleRestorationUpdateFromEngine(
       enabled: update != null && update['enabled'] as bool,
-      data: update == null ? null : update['data'] as Uint8List,
+      data: update == null ? null : update['data'] as Uint8List?,
     );
   }
 
@@ -564,10 +580,10 @@ class RestorationBucket {
   ///  * [remove], which removes a value from the bucket.
   ///  * [contains], which checks whether any value is stored under a given
   ///    restoration ID.
-  P read<P>(String restorationId) {
+  P? read<P>(String restorationId) {
     assert(_debugAssertNotDisposed());
     assert(restorationId != null);
-    return _rawValues[restorationId] as P;
+    return _rawValues[restorationId] as P?;
   }
 
   /// Stores the provided `value` of type `P` under the provided `restorationId`
@@ -608,11 +624,11 @@ class RestorationBucket {
   ///  * [write], which stores a value in the bucket.
   ///  * [contains], which checks whether any value is stored under a given
   ///    restoration ID.
-  P remove<P>(String restorationId) {
+  P? remove<P>(String restorationId) {
     assert(_debugAssertNotDisposed());
     assert(restorationId != null);
     final bool needsUpdate = _rawValues.containsKey(restorationId);
-    final P result = _rawValues.remove(restorationId) as P;
+    final P? result = _rawValues.remove(restorationId) as P?;
     if (_rawValues.isEmpty) {
       _rawData.remove(_valuesMapKey);
     }

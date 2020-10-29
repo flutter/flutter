@@ -2,55 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
+
+import 'package:path/path.dart' as path;
 
 import 'utils.dart';
 
 typedef SimulatorFunction = Future<void> Function(String deviceId);
-
-void _checkExitCode(int code) {
-  if (code != 0) {
-    throw Exception(
-      'Unexpected exit code = $code!',
-    );
-  }
-}
-
-Future<void> _execAndCheck(String executable, List<String> args) async {
-  _checkExitCode(await exec(executable, args));
-}
-
-// Measure the CPU/GPU percentage for [duration] while a Flutter app is running
-// on an iOS device (e.g., right after a Flutter driver test has finished, which
-// doesn't close the Flutter app, and the Flutter app has an indefinite
-// animation). The return should have a format like the following json
-// ```
-// {"gpu_percentage":12.6,"cpu_percentage":18.15}
-// ```
-Future<Map<String, dynamic>> measureIosCpuGpu({
-    Duration duration = const Duration(seconds: 10),
-    String deviceId,
-}) async {
-  await _execAndCheck('pub', <String>[
-    'global',
-    'activate',
-    'gauge',
-    '0.1.5',
-  ]);
-
-  await _execAndCheck('pub', <String>[
-    'global',
-    'run',
-    'gauge',
-    'ioscpugpu',
-    'new',
-    if (deviceId != null) ...<String>['-w', deviceId],
-    '-l',
-    '${duration.inMilliseconds}',
-  ]);
-  return json.decode(file('$cwd/result.json').readAsStringSync()) as Map<String, dynamic>;
-}
 
 Future<String> dylibSymbols(String pathToDylib) {
   return eval('nm', <String>['-g', pathToDylib]);
@@ -101,6 +59,40 @@ Future<bool> containsBitcode(String pathToBinary) async {
   });
   return !emptyBitcodeMarkerFound;
 }
+
+Future<bool> dartObservatoryBonjourServiceFound(String appBundlePath) async =>
+  (await eval(
+    'plutil',
+    <String>[
+      '-extract',
+      'NSBonjourServices',
+      'xml1',
+      '-o',
+      '-',
+      path.join(
+        appBundlePath,
+        'Info.plist',
+      ),
+    ],
+    canFail: true,
+  )).contains('_dartobservatory._tcp');
+
+Future<bool> localNetworkUsageFound(String appBundlePath) async =>
+  await exec(
+    'plutil',
+    <String>[
+      '-extract',
+      'NSLocalNetworkUsageDescription',
+      'xml1',
+      '-o',
+      '-',
+      path.join(
+        appBundlePath,
+        'Info.plist',
+      ),
+    ],
+    canFail: true,
+  ) == 0;
 
 /// Creates and boots a new simulator, passes the new simulator's identifier to
 /// `testFunction`.

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -41,14 +39,14 @@ class SafeArea extends StatelessWidget {
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be
   /// null.
   const SafeArea({
-    Key key,
+    Key? key,
     this.left = true,
     this.top = true,
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
     this.maintainBottomViewPadding = false,
-    @required this.child,
+    required this.child,
   }) : assert(left != null),
        assert(top != null),
        assert(right != null),
@@ -156,13 +154,13 @@ class SliverSafeArea extends StatelessWidget {
   ///
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be null.
   const SliverSafeArea({
-    Key key,
+    Key? key,
     this.left = true,
     this.top = true,
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
-    @required this.sliver,
+    required this.sliver,
   }) : assert(left != null),
        assert(top != null),
        assert(right != null),

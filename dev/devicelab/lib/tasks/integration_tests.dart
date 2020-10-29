@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:io';
-
-import 'package:path/path.dart' as path;
 import '../framework/adb.dart';
 import '../framework/framework.dart';
+import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 TaskFunction createChannelsIntegrationTest() {
@@ -88,22 +85,6 @@ TaskFunction createImageLoadingIntegrationTest() {
   );
 }
 
-TaskFunction createFlutterCreateOfflineTest() {
-  return () async {
-    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_create_test.');
-    String output;
-    await inDirectory(tempDir, () async {
-      output = await eval(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>['create', '--offline', 'flutter_create_test']);
-    });
-    if (output.contains(RegExp('building flutter tool', caseSensitive: false))) {
-      return TaskResult.failure('`flutter create --offline` should not rebuild flutter tool');
-    } else if (!output.contains('All done!')) {
-      return TaskResult.failure('`flutter create` failed');
-    }
-    return TaskResult.success(null);
-  };
-}
-
 TaskFunction createAndroidSplashScreenKitchenSinkTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink',
@@ -111,19 +92,48 @@ TaskFunction createAndroidSplashScreenKitchenSinkTest() {
   );
 }
 
-/// Executes a driver test that takes a screenshot and compares it against a golden image.
-/// The golden image is served by Flutter Gold (https://flutter-gold.skia.org/).
-TaskFunction createFlutterDriverScreenshotTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/flutter_driver_screenshot_test',
-    'lib/main.dart',
-  );
-}
-
 TaskFunction createIOSPlatformViewTests() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests',
     'lib/main.dart',
+  );
+}
+
+TaskFunction createEndToEndKeyboardTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/keyboard_resize.dart',
+  );
+}
+
+TaskFunction createEndToEndDriverTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/driver.dart',
+  );
+}
+
+TaskFunction createEndToEndScreenshotTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/screenshot.dart',
+  );
+}
+
+TaskFunction createEndToEndKeyboardTextfieldTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/keyboard_textfield.dart',
+  );
+}
+
+TaskFunction dartDefinesTask() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/defines.dart', extraOptions: <String>[
+    '--dart-define=test.valueA=Example',
+    '--dart-define=test.valueB=Value',
+    ],
   );
 }
 
@@ -149,6 +159,7 @@ class DriverTest {
       await flutter('packages', options: <String>['get']);
 
       final List<String> options = <String>[
+        '--no-android-gradle-daemon',
         '-v',
         '-t',
         testTarget,

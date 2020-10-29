@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -15,6 +13,17 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 /// A material design "raised button".
+///
+/// ### This class is obsolete, please use [ElevatedButton] instead.
+///
+/// FlatButton, RaisedButton, and OutlineButton have been replaced by
+/// TextButton, ElevatedButton, and OutlinedButton respectively.
+/// ButtonTheme has been replaced by TextButtonTheme,
+/// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
+/// will be deprecated soon, please migrate code that uses them.
+/// There's a detailed migration guide for the new button and button
+/// theme classes in
+/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
 ///
 /// A raised button is based on a [Material] widget whose [Material.elevation]
 /// increases when the button is pressed.
@@ -110,35 +119,35 @@ class RaisedButton extends MaterialButton {
   /// [highlightElevation], and [disabledElevation] must be non-negative, if
   /// specified.
   const RaisedButton({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ValueChanged<bool> onHighlightChanged,
-    MouseCursor mouseCursor,
-    ButtonTextTheme textTheme,
-    Color textColor,
-    Color disabledTextColor,
-    Color color,
-    Color disabledColor,
-    Color focusColor,
-    Color hoverColor,
-    Color highlightColor,
-    Color splashColor,
-    Brightness colorBrightness,
-    double elevation,
-    double focusElevation,
-    double hoverElevation,
-    double highlightElevation,
-    double disabledElevation,
-    EdgeInsetsGeometry padding,
-    VisualDensity visualDensity,
-    ShapeBorder shape,
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ValueChanged<bool>? onHighlightChanged,
+    MouseCursor? mouseCursor,
+    ButtonTextTheme? textTheme,
+    Color? textColor,
+    Color? disabledTextColor,
+    Color? color,
+    Color? disabledColor,
+    Color? focusColor,
+    Color? hoverColor,
+    Color? highlightColor,
+    Color? splashColor,
+    Brightness? colorBrightness,
+    double? elevation,
+    double? focusElevation,
+    double? hoverElevation,
+    double? highlightElevation,
+    double? disabledElevation,
+    EdgeInsetsGeometry? padding,
+    VisualDensity? visualDensity,
+    ShapeBorder? shape,
     Clip clipBehavior = Clip.none,
-    FocusNode focusNode,
+    FocusNode? focusNode,
     bool autofocus = false,
-    MaterialTapTargetSize materialTapTargetSize,
-    Duration animationDuration,
-    Widget child,
+    MaterialTapTargetSize? materialTapTargetSize,
+    Duration? animationDuration,
+    Widget? child,
   }) : assert(autofocus != null),
        assert(elevation == null || elevation >= 0.0),
        assert(focusElevation == null || focusElevation >= 0.0),
@@ -188,7 +197,7 @@ class RaisedButton extends MaterialButton {
   /// [label], and [clipBehavior] arguments must not be null.
   factory RaisedButton.icon({
     Key key,
-    @required VoidCallback onPressed,
+    required VoidCallback onPressed,
     VoidCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
     MouseCursor mouseCursor,
@@ -212,13 +221,13 @@ class RaisedButton extends MaterialButton {
     EdgeInsetsGeometry padding,
     MaterialTapTargetSize materialTapTargetSize,
     Duration animationDuration,
-    @required Widget icon,
-    @required Widget label,
+    required Widget icon,
+    required Widget label,
   }) = _RaisedButtonWithIcon;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context)!;
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     return RawMaterialButton(
       onPressed: onPressed,
@@ -227,7 +236,7 @@ class RaisedButton extends MaterialButton {
       mouseCursor: mouseCursor,
       clipBehavior: clipBehavior,
       fillColor: buttonTheme.getFillColor(this),
-      textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
+      textStyle: theme.textTheme.button!.copyWith(color: buttonTheme.getTextColor(this)),
       focusColor: buttonTheme.getFocusColor(this),
       hoverColor: buttonTheme.getHoverColor(this),
       highlightColor: buttonTheme.getHighlightColor(this),
@@ -266,33 +275,33 @@ class RaisedButton extends MaterialButton {
 /// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
 class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixin {
   _RaisedButtonWithIcon({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ValueChanged<bool> onHighlightChanged,
-    MouseCursor mouseCursor,
-    ButtonTextTheme textTheme,
-    Color textColor,
-    Color disabledTextColor,
-    Color color,
-    Color disabledColor,
-    Color focusColor,
-    Color hoverColor,
-    Color highlightColor,
-    Color splashColor,
-    Brightness colorBrightness,
-    double elevation,
-    double highlightElevation,
-    double disabledElevation,
-    ShapeBorder shape,
+    Key? key,
+    required VoidCallback onPressed,
+    VoidCallback? onLongPress,
+    ValueChanged<bool>? onHighlightChanged,
+    MouseCursor? mouseCursor,
+    ButtonTextTheme? textTheme,
+    Color? textColor,
+    Color? disabledTextColor,
+    Color? color,
+    Color? disabledColor,
+    Color? focusColor,
+    Color? hoverColor,
+    Color? highlightColor,
+    Color? splashColor,
+    Brightness? colorBrightness,
+    double? elevation,
+    double? highlightElevation,
+    double? disabledElevation,
+    ShapeBorder? shape,
     Clip clipBehavior = Clip.none,
-    FocusNode focusNode,
+    FocusNode? focusNode,
     bool autofocus = false,
-    EdgeInsetsGeometry padding,
-    MaterialTapTargetSize materialTapTargetSize,
-    Duration animationDuration,
-    @required Widget icon,
-    @required Widget label,
+    EdgeInsetsGeometry? padding,
+    MaterialTapTargetSize? materialTapTargetSize,
+    Duration? animationDuration,
+    required Widget icon,
+    required Widget label,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),

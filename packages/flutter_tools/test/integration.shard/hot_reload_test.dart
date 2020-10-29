@@ -6,9 +6,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:vm_service/vm_service.dart';
-import 'package:vm_service/vm_service_io.dart';
 
 import '../src/common.dart';
 import 'test_data/hot_reload_project.dart';
@@ -31,12 +29,12 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('hot reload works without error', () async {
+  testWithoutContext('hot reload works without error', () async {
     await flutter.run();
     await flutter.hotReload();
   });
 
-  test('multiple overlapping hot reload are debounced and queued', () async {
+  testWithoutContext('multiple overlapping hot reload are debounced and queued', () async {
     await flutter.run();
     // Capture how many *real* hot reloads occur.
     int numReloads = 0;
@@ -70,7 +68,7 @@ void main() {
     }
   });
 
-  test('newly added code executes during hot reload', () async {
+  testWithoutContext('newly added code executes during hot reload', () async {
     final StringBuffer stdout = StringBuffer();
     final StreamSubscription<String> subscription = flutter.stdout.listen(stdout.writeln);
     await flutter.run();
@@ -83,79 +81,12 @@ void main() {
     }
   });
 
-  test('fastReassemble behavior triggers hot reload behavior with evaluation of expression', () async {
-    final Completer<void> tick1 = Completer<void>();
-    final Completer<void> tick2 = Completer<void>();
-    final Completer<void> tick3 = Completer<void>();
-    final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
-      if (line.contains('TICK 1')) {
-        tick1.complete();
-      }
-      if (line.contains('TICK 2')) {
-        tick2.complete();
-      }
-      if (line.contains('TICK 3')) {
-        tick3.complete();
-      }
-    });
-    await flutter.run(withDebugger: true);
-
-    final int port = flutter.vmServicePort;
-    final VmService vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
-    await tick1.future;
-    try {
-      // Since the single-widget reload feature is not yet implemented, manually
-      // evaluate the expression for the reload.
-      final Isolate isolate = await waitForExtension(vmService);
-      final LibraryRef targetRef = isolate.libraries.firstWhere((LibraryRef libraryRef) {
-        return libraryRef.uri == 'package:test/main.dart';
-      });
-      await vmService.evaluate(
-        isolate.id,
-        targetRef.id,
-        '((){debugFastReassembleMethod=(Object x) => x is MyApp})()',
-      );
-
-      final Response fastReassemble1 = await vmService
-        .callServiceExtension('ext.flutter.fastReassemble', isolateId: isolate.id);
-
-      // _extensionType indicates success.
-      expect(fastReassemble1.type, '_extensionType');
-      await tick2.future;
-
-      // verify evaluation did not produce invalidat type by checking with dart:core
-      // type.
-      await vmService.evaluate(
-        isolate.id,
-        targetRef.id,
-        '((){debugFastReassembleMethod=(Object x) => x is bool})()',
-      );
-
-      final Response fastReassemble2 = await vmService
-        .callServiceExtension('ext.flutter.fastReassemble', isolateId: isolate.id);
-
-      // _extensionType indicates success.
-      expect(fastReassemble2.type, '_extensionType');
-      unawaited(tick3.future.whenComplete(() {
-        fail('Should not complete');
-      }));
-
-      // Invocation without evaluation leads to runtime error.
-      expect(vmService
-        .callServiceExtension('ext.flutter.fastReassemble', isolateId: isolate.id),
-        throwsA(isA<Exception>())
-      );
-    } finally {
-      await subscription.cancel();
-    }
-  });
-
-  test('hot restart works without error', () async {
+  testWithoutContext('hot restart works without error', () async {
     await flutter.run();
     await flutter.hotRestart();
   });
 
-  test('breakpoints are hit after hot reload', () async {
+  testWithoutContext('breakpoints are hit after hot reload', () async {
     Isolate isolate;
     final Completer<void> sawTick1 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage = Completer<void>();
@@ -209,7 +140,7 @@ void main() {
     await subscription.cancel();
   });
 
-  test("hot reload doesn't reassemble if paused", () async {
+  testWithoutContext("hot reload doesn't reassemble if paused", () async {
     final Completer<void> sawTick1 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage1 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage2 = Completer<void>();

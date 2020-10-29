@@ -2,16 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('!chrome') // web has different stack traces
-
-import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 
-dynamic getAssertionErrorWithMessage() {
+Object getAssertionErrorWithMessage() {
   try {
     assert(false, 'Message goes here.');
   } catch (e) {
@@ -20,7 +16,7 @@ dynamic getAssertionErrorWithMessage() {
   throw 'assert failed';
 }
 
-dynamic getAssertionErrorWithoutMessage() {
+Object getAssertionErrorWithoutMessage() {
   try {
     assert(false);
   } catch (e) {
@@ -29,7 +25,7 @@ dynamic getAssertionErrorWithoutMessage() {
   throw 'assert failed';
 }
 
-dynamic getAssertionErrorWithLongMessage() {
+Object getAssertionErrorWithLongMessage() {
   try {
     assert(false, 'word ' * 100);
   } catch (e) {
@@ -43,13 +39,13 @@ Future<StackTrace> getSampleStack() async {
 }
 
 Future<void> main() async {
-  final List<String> console = <String>[];
+  final List<String?> console = <String?>[];
 
   final StackTrace sampleStack = await getSampleStack();
 
   setUp(() async {
     expect(debugPrint, equals(debugPrintThrottled));
-    debugPrint = (String message, { int wrapWidth }) {
+    debugPrint = (String? message, { int? wrapWidth }) {
       console.add(message);
     };
   });
@@ -155,14 +151,14 @@ Future<void> main() async {
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: getAssertionErrorWithoutMessage(),
     ));
-    expect(console.join('\n'), matches("Another exception was thrown: '[^']+flutter/test/foundation/error_reporting_test\\.dart': Failed assertion: line [0-9]+ pos [0-9]+: 'false': is not true\\."));
+    expect(console.join('\n'), matches(r"Another exception was thrown: '[^']+flutter/test/foundation/error_reporting_test\.dart': Failed assertion: line [0-9]+ pos [0-9]+: 'false': is not true\."));
     console.clear();
     FlutterError.resetErrorCount();
   });
 
   test('Error reporting - NoSuchMethodError', () async {
     expect(console, isEmpty);
-    final dynamic exception = NoSuchMethodError.withInvocation(5,
+    final Object exception = NoSuchMethodError.withInvocation(5,
         Invocation.method(#foo, <dynamic>[2, 4]));
 
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(

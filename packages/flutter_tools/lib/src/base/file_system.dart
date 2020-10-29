@@ -105,7 +105,23 @@ class FileSystemUtils {
       if (!file.existsSync()) {
         return file;
       }
-      i++;
+      i += 1;
+    }
+  }
+
+  /// Appends a number to a directory name in order to make it unique under a
+  /// directory.
+  Directory getUniqueDirectory(Directory dir, String baseName) {
+    final FileSystem fs = dir.fileSystem;
+    int i = 1;
+
+    while (true) {
+      final String name = '${baseName}_${i.toString().padLeft(2, '0')}';
+      final Directory directory = fs.directory(_fileSystem.path.join(dir.path, name));
+      if (!directory.existsSync()) {
+        return directory;
+      }
+      i += 1;
     }
   }
 
@@ -164,7 +180,7 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
     List<ProcessSignal> fatalSignals = Signals.defaultExitSignals,
   }) : this._(signals, fatalSignals);
 
-  // Unless we're in a test of this class's signal hanlding features, we must
+  // Unless we're in a test of this class's signal handling features, we must
   // have only one instance created with the singleton LocalSignals instance
   // and the catchable signals it considers to be fatal.
   static LocalFileSystem _instance;

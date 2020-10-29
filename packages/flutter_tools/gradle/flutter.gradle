@@ -628,6 +628,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('performance-measurement-file')) {
             performanceMeasurementFileValue = project.property('performance-measurement-file')
         }
+        String codeSizeDirectoryValue;
+        if (project.hasProperty('code-size-directory')) {
+            codeSizeDirectoryValue = project.property('code-size-directory')
+        }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {
@@ -668,6 +672,7 @@ class FlutterPlugin implements Plugin<Project> {
                 dartDefines dartDefinesValue
                 bundleSkSLPath bundleSkSLPathValue
                 performanceMeasurementFile performanceMeasurementFileValue
+                codeSizeDirectory codeSizeDirectoryValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -862,6 +867,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     String dartDefines
     @Optional @Input
     String bundleSkSLPath
+    @Optional @Input
+    String codeSizeDirectory;
     String performanceMeasurementFile;
 
     @OutputFiles
@@ -886,11 +893,7 @@ abstract class BaseFlutterTask extends DefaultTask {
         // cache.
         String[] ruleNames;
         if (buildMode == "debug") {
-            if (fastStart) {
-                ruleNames = ["faststart_android_application"]
-            } else {
-                ruleNames = ["debug_android_application"]
-            }
+            ruleNames = ["debug_android_application"]
         } else {
             ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
         }
@@ -937,6 +940,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (bundleSkSLPath != null) {
                 args "-iBundleSkSLPath=${bundleSkSLPath}"
+            }
+            if (codeSizeDirectory != null) {
+                args "-dCodeSizeDirectory=${codeSizeDirectory}"
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"

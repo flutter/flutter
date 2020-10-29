@@ -2,15 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'reorderable_list.dart';
-import 'text_theme.dart';
+import 'debug.dart';
 import 'time.dart';
 import 'typography.dart';
 
@@ -137,7 +132,7 @@ abstract class MaterialLocalizations {
   /// there are, e.g. 'Tab 1 of 2' in United States English.
   ///
   /// `tabIndex` and `tabCount` must be greater than or equal to one.
-  String tabLabel({ int tabIndex, int tabCount });
+  String tabLabel({ required int tabIndex, required int tabCount });
 
   /// Title for the [PaginatedDataTable]'s selected row count header.
   String selectedRowCountTitle(int selectedRowCount);
@@ -321,7 +316,7 @@ abstract class MaterialLocalizations {
   ///
   /// See also:
   ///   * [formatCompactDate], which will convert a [DateTime] into a string in the compact format.
-  DateTime parseCompactDate(String inputString);
+  DateTime? parseCompactDate(String? inputString);
 
   /// List of week day names in narrow format, usually 1- or 2-letter
   /// abbreviations of full names.
@@ -498,8 +493,11 @@ abstract class MaterialLocalizations {
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
+  /// If no [MaterialLocalizations] are available in the given `context`, this
+  /// method throws an exception.
+  ///
   /// This method is just a convenient shorthand for:
-  /// `Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)`.
+  /// `Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)!`.
   ///
   /// References to the localized resources defined by this class are typically
   /// written in terms of this method. For example:
@@ -508,7 +506,8 @@ abstract class MaterialLocalizations {
   /// tooltip: MaterialLocalizations.of(context).backButtonTooltip,
   /// ```
   static MaterialLocalizations of(BuildContext context) {
-    return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
+    assert(debugCheckHasMaterialLocalizations(context));
+    return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)!;
   }
 }
 
@@ -698,24 +697,28 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  DateTime parseCompactDate(String inputString) {
+  DateTime? parseCompactDate(String? inputString) {
+    if (inputString == null) {
+      return null;
+    }
+
     // Assumes US mm/dd/yyyy format
     final List<String> inputParts = inputString.split('/');
     if (inputParts.length != 3) {
       return null;
     }
 
-    final int year = int.tryParse(inputParts[2], radix: 10);
+    final int? year = int.tryParse(inputParts[2], radix: 10);
     if (year == null || year < 1) {
       return null;
     }
 
-    final int month = int.tryParse(inputParts[0], radix: 10);
+    final int? month = int.tryParse(inputParts[0], radix: 10);
     if (month == null || month < 1 || month > 12) {
       return null;
     }
 
-    final int day = int.tryParse(inputParts[1], radix: 10);
+    final int? day = int.tryParse(inputParts[1], radix: 10);
     if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
       return null;
     }
@@ -810,7 +813,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
       case DayPeriod.pm:
         return postMeridiemAbbreviation;
     }
-    return null;
   }
 
   @override
@@ -934,7 +936,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get rowsPerPageTitle => 'Rows per page:';
 
   @override
-  String tabLabel({ int tabIndex, int tabCount }) {
+  String tabLabel({ required int tabIndex, required int tabCount }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     return 'Tab $tabIndex of $tabCount';

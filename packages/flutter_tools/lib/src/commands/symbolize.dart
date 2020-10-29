@@ -14,10 +14,10 @@ import '../base/io.dart';
 import '../convert.dart';
 import '../runner/flutter_command.dart';
 
-/// Support for symbolicating a Dart stack trace.
+/// Support for symbolizing a Dart stack trace.
 ///
 /// This command accepts either paths to an input file containing the
-/// stack trace and an output file for the symbolicated trace to be
+/// stack trace and an output file for the symbolizing trace to be
 /// written, or it accepts a stack trace over stdin and outputs it
 /// over stdout.
 class SymbolizeCommand extends FlutterCommand {
@@ -43,7 +43,7 @@ class SymbolizeCommand extends FlutterCommand {
     argParser.addOption(
       'output',
       abbr: 'o',
-      valueHelp: 'A file path for a symbolicated stack trace to be written to.'
+      valueHelp: 'A file path for a symbolized stack trace to be written to.'
     );
   }
 
@@ -52,7 +52,7 @@ class SymbolizeCommand extends FlutterCommand {
   final DwarfSymbolizationService _dwarfSymbolizationService;
 
   @override
-  String get description => 'Symbolize a stack trace from an AOT compiled flutter application.';
+  String get description => 'Symbolize a stack trace from an AOT-compiled Flutter app.';
 
   @override
   String get name => 'symbolize';
@@ -63,7 +63,7 @@ class SymbolizeCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() {
     if (!argResults.wasParsed('debug-info')) {
-      throwToolExit('"--debug-info" is required to symbolicate stack traces.');
+      throwToolExit('"--debug-info" is required to symbolize stack traces.');
     }
     if (!_fileSystem.isFileSync(stringArg('debug-info'))) {
       throwToolExit('${stringArg('debug-info')} does not exist.');

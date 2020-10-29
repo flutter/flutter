@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -986,13 +984,18 @@ void _tests() {
                   TestSemantics(
                     tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
+                      TestSemantics(),
                       TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.namesRoute,
-                          SemanticsFlag.isHeader,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
+                            ],
+                            label: 'Forward app bar',
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        label: 'Forward app bar',
-                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -1096,13 +1099,18 @@ void _tests() {
                   TestSemantics(
                     tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
+                      TestSemantics(),
                       TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.namesRoute,
-                          SemanticsFlag.isHeader,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
+                            ],
+                            label: 'Backward app bar',
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        label: 'Backward app bar',
-                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),

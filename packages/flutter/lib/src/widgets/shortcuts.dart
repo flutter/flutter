@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -37,9 +35,9 @@ class KeySet<T extends KeyboardKey> {
   /// not be appear more than once in the set.
   KeySet(
     T key1, [
-    T key2,
-    T key3,
-    T key4,
+    T? key2,
+    T? key3,
+    T? key4,
   ])  : assert(key1 != null),
         _keys = HashSet<T>()..add(key1) {
     int count = 1;
@@ -98,14 +96,14 @@ class KeySet<T extends KeyboardKey> {
 
   // Cached hash code value. Improves [hashCode] performance by 27%-900%,
   // depending on key set size and read/write ratio.
-  int _hashCode;
+  int? _hashCode;
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes, to remove in NNBD with a late final hashcode
   int get hashCode {
     // Return cached hash code if available.
     if (_hashCode != null) {
-      return _hashCode;
+      return _hashCode!;
     }
 
     // Compute order-independent hash and cache it.
@@ -168,9 +166,9 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable {
   /// not be appear more than once in the set.
   LogicalKeySet(
     LogicalKeyboardKey key1, [
-    LogicalKeyboardKey key2,
-    LogicalKeyboardKey key3,
-    LogicalKeyboardKey key4,
+    LogicalKeyboardKey? key2,
+    LogicalKeyboardKey? key3,
+    LogicalKeyboardKey? key4,
   ]) : super(key1, key2, key3, key4);
 
   /// Create  a [LogicalKeySet] from a set of [LogicalKeyboardKey]s.
@@ -202,7 +200,7 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable {
           } else if (bIsModifier && !aIsModifier) {
             return 1;
           }
-          return a.debugName.compareTo(b.debugName);
+          return a.debugName!.compareTo(b.debugName!);
         }
     );
     return sortedKeys.map<String>((LogicalKeyboardKey key) => key.debugName.toString()).join(' + ');
@@ -228,7 +226,7 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<LogicalKeySet, Intent>
     bool showName = true,
     Object defaultValue = kNoDefaultValue,
     DiagnosticLevel level = DiagnosticLevel.info,
-    String description,
+    String? description,
   }) : assert(showName != null),
        assert(level != null),
        super(
@@ -241,7 +239,10 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<LogicalKeySet, Intent>
        );
 
   @override
-  String valueToString({ TextTreeConfiguration parentConfiguration }) {
+  Map<LogicalKeySet, Intent> get value => super.value!;
+
+  @override
+  String valueToString({ TextTreeConfiguration? parentConfiguration }) {
     return '{${value.keys.map<String>((LogicalKeySet keySet) => '{${keySet.debugDescribeKeys()}}: ${value[keySet]}').join(', ')}}';
   }
 }
@@ -263,9 +264,13 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// True if the [ShortcutManager] should not pass on keys that it doesn't
   /// handle to any key-handling widgets that are ancestors to this one.
   ///
-  /// Setting [modal] to true is the equivalent of always handling any key given
-  /// to it, even if that key doesn't appear in the [shortcuts] map. Keys that
-  /// don't appear in the map will be dropped.
+  /// Setting [modal] to true will prevent any key event given to this manager
+  /// from being given to any ancestor managers, even if that key doesn't appear
+  /// in the [shortcuts] map.
+  ///
+  /// The net effect of setting `modal` to true is to return
+  /// [KeyEventResult.skipRemainingHandlers] from [handleKeypress] if it does not
+  /// exist in the shortcut map, instead of returning [KeyEventResult.ignored].
   final bool modal;
 
   /// Returns the shortcut map.
@@ -283,68 +288,91 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     }
   }
 
-  /// Handles a key pressed `event` in the given `context`.
+  /// Returns the [Intent], if any, that matches the current set of pressed
+  /// keys.
   ///
-  /// The optional `keysPressed` argument provides an override to keys that the
-  /// [RawKeyboard] reports. If not specified, uses [RawKeyboard.keysPressed]
-  /// instead.
+  /// Returns null if no intent matches the current set of pressed keys.
   ///
-  /// If a key mapping is found, then the associated action will be invoked
-  /// using the [Intent] that the [LogicalKeySet] maps to, and the currently
-  /// focused widget's context (from [FocusManager.primaryFocus]).
-  ///
-  /// The object returned is the result of [Action.invoke] being called on the
-  /// [Action] bound to the [Intent] that the key press maps to, or null, if the
-  /// key press didn't match any intent.
-  @protected
-  bool handleKeypress(
-    BuildContext context,
-    RawKeyEvent event, {
-    LogicalKeySet keysPressed,
-  }) {
-    if (event is! RawKeyDownEvent) {
-      return false;
+  /// Defaults to a set derived from [RawKeyboard.keysPressed] if `keysPressed` is
+  /// not supplied.
+  Intent? _find({ LogicalKeySet? keysPressed }) {
+    if (keysPressed == null && RawKeyboard.instance.keysPressed.isEmpty) {
+      return null;
     }
-    assert(context != null);
-    LogicalKeySet keySet = keysPressed;
-    if (keySet == null) {
-      assert(RawKeyboard.instance.keysPressed.isNotEmpty,
-        'Received a key down event when no keys are in keysPressed. '
-        "This state can occur if the key event being sent doesn't properly "
-        'set its modifier flags. This was the event: $event and its data: '
-        '${event.data}');
-      // Avoid the crash in release mode, since it's easy to miss a particular
-      // bad key sequence in testing, and so shouldn't crash the app in release.
-      if (RawKeyboard.instance.keysPressed.isNotEmpty) {
-        keySet = LogicalKeySet.fromSet(RawKeyboard.instance.keysPressed);
-      } else {
-        return false;
-      }
-    }
-    Intent matchedIntent = _shortcuts[keySet];
+    keysPressed ??= LogicalKeySet.fromSet(RawKeyboard.instance.keysPressed);
+    Intent? matchedIntent = _shortcuts[keysPressed];
     if (matchedIntent == null) {
       // If there's not a more specific match, We also look for any keys that
       // have synonyms in the map.  This is for things like left and right shift
       // keys mapping to just the "shift" pseudo-key.
       final Set<LogicalKeyboardKey> pseudoKeys = <LogicalKeyboardKey>{};
-      for (final LogicalKeyboardKey setKey in keySet.keys) {
-        final Set<LogicalKeyboardKey> synonyms = setKey.synonyms;
-        if (synonyms.isNotEmpty) {
-          // There currently aren't any synonyms that match more than one key.
-          pseudoKeys.add(synonyms.first);
-        } else {
-          pseudoKeys.add(setKey);
+      for (final KeyboardKey setKey in keysPressed.keys) {
+        if (setKey is LogicalKeyboardKey) {
+          final Set<LogicalKeyboardKey> synonyms = setKey.synonyms;
+          if (synonyms.isNotEmpty) {
+            // There currently aren't any synonyms that match more than one key.
+            assert(synonyms.length == 1, 'Unexpectedly encountered a key synonym with more than one key.');
+            pseudoKeys.add(synonyms.first);
+          } else {
+            pseudoKeys.add(setKey);
+          }
         }
       }
       matchedIntent = _shortcuts[LogicalKeySet.fromSet(pseudoKeys)];
     }
-    if (matchedIntent != null) {
-      final BuildContext primaryContext = primaryFocus?.context;
-      assert (primaryContext != null);
-      Actions.invoke(primaryContext, matchedIntent, nullOk: true);
-      return true;
+    return matchedIntent;
+  }
+
+  /// Handles a key press `event` in the given `context`.
+  ///
+  /// The optional `keysPressed` argument is used as the set of currently
+  /// pressed keys. Defaults to a set derived from [RawKeyboard.keysPressed] if
+  /// `keysPressed` is not supplied.
+  ///
+  /// If a key mapping is found, then the associated action will be invoked
+  /// using the [Intent] that the `keysPressed` maps to, and the currently
+  /// focused widget's context (from [FocusManager.primaryFocus]).
+  ///
+  /// Returns a [KeyEventResult.handled] if an action was invoked, otherwise a
+  /// [KeyEventResult.skipRemainingHandlers] if [modal] is true, or if it maps to a
+  /// [DoNothingAction] with [DoNothingAction.consumesKey] set to false, and
+  /// in all other cases returns [KeyEventResult.ignored].
+  ///
+  /// In order for an action to be invoked (and [KeyEventResult.handled]
+  /// returned), a pressed [KeySet] must be mapped to an [Intent], the [Intent]
+  /// must be mapped to an [Action], and the [Action] must be enabled.
+  @protected
+  KeyEventResult handleKeypress(
+    BuildContext context,
+    RawKeyEvent event, {
+    LogicalKeySet? keysPressed,
+  }) {
+    if (event is! RawKeyDownEvent) {
+      return KeyEventResult.ignored;
     }
-    return false;
+    assert(context != null);
+    assert(keysPressed != null || RawKeyboard.instance.keysPressed.isNotEmpty,
+      'Received a key down event when no keys are in keysPressed. '
+      "This state can occur if the key event being sent doesn't properly "
+      'set its modifier flags. This was the event: $event and its data: '
+      '${event.data}');
+    final Intent? matchedIntent = _find(keysPressed: keysPressed);
+    if (matchedIntent != null) {
+      final BuildContext primaryContext = primaryFocus!.context!;
+      assert (primaryContext != null);
+      final Action<Intent>? action = Actions.find<Intent>(
+        primaryContext,
+        intent: matchedIntent,
+        nullOk: true,
+      );
+      if (action != null && action.isEnabled(matchedIntent)) {
+        Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
+        return action.consumesKey(matchedIntent)
+            ? KeyEventResult.handled
+            : KeyEventResult.skipRemainingHandlers;
+      }
+    }
+    return modal ? KeyEventResult.skipRemainingHandlers : KeyEventResult.ignored;
   }
 
   @override
@@ -369,10 +397,10 @@ class Shortcuts extends StatefulWidget {
   ///
   /// The [child] and [shortcuts] arguments are required and must not be null.
   const Shortcuts({
-    Key key,
+    Key? key,
     this.manager,
-    @required this.shortcuts,
-    @required this.child,
+    required this.shortcuts,
+    required this.child,
     this.debugLabel,
   }) : assert(shortcuts != null),
        assert(child != null),
@@ -385,7 +413,7 @@ class Shortcuts extends StatefulWidget {
   ///
   /// This manager will be given new [shortcuts] to manage whenever the
   /// [shortcuts] change materially.
-  final ShortcutManager manager;
+  final ShortcutManager? manager;
 
   /// {@template flutter.widgets.shortcuts.shortcuts}
   /// The map of shortcuts that the [ShortcutManager] will be given to manage.
@@ -408,15 +436,15 @@ class Shortcuts extends StatefulWidget {
   ///
   /// This allows simplifying the diagnostic output to avoid cluttering it
   /// unnecessarily with the default shortcut map.
-  final String debugLabel;
+  final String? debugLabel;
 
   /// Returns the [ActionDispatcher] that most tightly encloses the given
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.
-  static ShortcutManager of(BuildContext context, {bool nullOk = false}) {
+  static ShortcutManager? of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
-    final _ShortcutsMarker inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
+    final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
     assert(() {
       if (nullOk) {
         return true;
@@ -432,7 +460,7 @@ class Shortcuts extends StatefulWidget {
       }
       return true;
     }());
-    return inherited?.notifier;
+    return inherited?.manager;
   }
 
   @override
@@ -447,8 +475,8 @@ class Shortcuts extends StatefulWidget {
 }
 
 class _ShortcutsState extends State<Shortcuts> {
-  ShortcutManager _internalManager;
-  ShortcutManager get manager => widget.manager ?? _internalManager;
+  ShortcutManager? _internalManager;
+  ShortcutManager get manager => widget.manager ?? _internalManager!;
 
   @override
   void dispose() {
@@ -479,11 +507,11 @@ class _ShortcutsState extends State<Shortcuts> {
     manager.shortcuts = widget.shortcuts;
   }
 
-  bool _handleOnKey(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleOnKey(FocusNode node, RawKeyEvent event) {
     if (node.context == null) {
-      return false;
+      return KeyEventResult.ignored;
     }
-    return manager.handleKeypress(node.context, event) || manager.modal;
+    return manager.handleKeypress(node.context!, event);
   }
 
   @override
@@ -502,9 +530,11 @@ class _ShortcutsState extends State<Shortcuts> {
 
 class _ShortcutsMarker extends InheritedNotifier<ShortcutManager> {
   const _ShortcutsMarker({
-    @required ShortcutManager manager,
-    @required Widget child,
+    required ShortcutManager manager,
+    required Widget child,
   })  : assert(manager != null),
         assert(child != null),
         super(notifier: manager, child: child);
+
+  ShortcutManager get manager => super.notifier!;
 }

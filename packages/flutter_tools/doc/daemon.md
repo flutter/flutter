@@ -108,15 +108,9 @@ The `restart()` restarts the given application. It returns a Map of `{ int code,
 - `pause`: optional; when doing a hot restart the isolate should enter a paused mode
 - `debounce`: optional; whether to automatically debounce multiple requests sent in quick succession (this may introduce a short delay in processing the request)
 
-#### app.reloadMethod
+#### app.reloadMethod (Removed)
 
-Performs a limited hot restart which does not sync assets and only marks elements as dirty, instead of reassembling the full application. A `code` of `0` indicates success, and non-zero indicates a failure.
-
-- `appId`: the id of a previously started app; this is required.
-- `library`: the absolute file URI of the library to be updated; this is required.
-- `class`: the name of the StatelessWidget that was updated, or the StatefulWidget
-corresponding to the updated State class; this is required.
-- `debounce`: optional; whether to automatically debounce multiple requests sent in quick succession (this may introduce a short delay in processing the request)
+This functionality was deprecated and removed after Flutter version 1.23.0
 
 #### app.callServiceExtension
 

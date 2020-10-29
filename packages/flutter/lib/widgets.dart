@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 /// The Flutter widgets framework.
 ///
 /// To use, import `package:flutter/widgets.dart`.
@@ -25,6 +23,7 @@ export 'src/widgets/animated_switcher.dart';
 export 'src/widgets/annotated_region.dart';
 export 'src/widgets/app.dart';
 export 'src/widgets/async.dart';
+export 'src/widgets/autocomplete.dart';
 export 'src/widgets/autofill.dart';
 export 'src/widgets/automatic_keep_alive.dart';
 export 'src/widgets/banner.dart';

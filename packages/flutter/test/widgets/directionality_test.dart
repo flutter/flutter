@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -12,7 +10,7 @@ void main() {
     final List<TextDirection> log = <TextDirection>[];
     final Widget inner = Builder(
       builder: (BuildContext context) {
-        log.add(Directionality.of(context));
+        log.add(Directionality.of(context)!);
         return const Placeholder();
       }
     );
@@ -57,7 +55,7 @@ void main() {
     bool good = false;
     await tester.pumpWidget(Builder(
       builder: (BuildContext context) {
-        expect(Directionality.of(context), isNull);
+        expect(Directionality.maybeOf(context), isNull);
         good = true;
         return const Placeholder();
       },
@@ -65,9 +63,21 @@ void main() {
     expect(good, isTrue);
   });
 
-  testWidgets("Directionality can't be null", (WidgetTester tester) async {
-    expect(() {
-      Directionality(textDirection: nonconst(null), child: const Placeholder());
-    }, throwsAssertionError);
+  testWidgets('Directionality.maybeOf', (WidgetTester tester) async {
+    final GlobalKey hasDirectionality = GlobalKey();
+    final GlobalKey noDirectionality = GlobalKey();
+    await tester.pumpWidget(
+      Container(
+        key: noDirectionality,
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Container(
+            key: hasDirectionality,
+          ),
+        )
+      )
+    );
+    expect(Directionality.maybeOf(noDirectionality.currentContext!), isNull);
+    expect(Directionality.maybeOf(hasDirectionality.currentContext!), TextDirection.rtl);
   });
 }
