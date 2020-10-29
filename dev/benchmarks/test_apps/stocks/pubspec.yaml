@@ -10,7 +10,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: 0.16.1
-  intl_translation: 0.17.10+1
   http: 0.12.2
   isolate: 2.0.3
 

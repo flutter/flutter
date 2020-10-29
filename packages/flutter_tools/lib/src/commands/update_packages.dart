@@ -38,6 +38,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'clock': '1.1.0-nullsafety.2',
   'collection': '1.15.0-nullsafety.4',
   'fake_async': '1.2.0-nullsafety.2',
+  'intl': '0.17.0-nullsafety.1',
   'js': '0.6.3-nullsafety.2',
   'matcher': '0.12.10-nullsafety.2',
   'meta': '1.3.0-nullsafety.5',
