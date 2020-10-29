@@ -81,6 +81,24 @@ void main() {
       expect('$e', contains('Got a stack frame from package:stack_trace'));
     }
   });
+
+  test('Can parse web constructor invocation with unknown class name', () {
+    const String stackTraceLine = '#32     new (http://localhost:42191/dart-sdk/lib/async/stream_controller.dart:880:9)';
+    expect(
+      StackFrame.fromStackTraceLine(stackTraceLine),
+      const StackFrame(
+        number: 32,
+        className: '<unknown>',
+        method: '',
+        packageScheme: 'http',
+        package: '<unknown>',
+        packagePath: 'dart-sdk/lib/async/stream_controller.dart',
+        line: 880,
+        column: 9,
+        source: stackTraceLine,
+      ),
+    );
+  });
 }
 
 const String stackString = '''

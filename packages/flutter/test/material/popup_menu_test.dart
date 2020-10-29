@@ -138,7 +138,7 @@ void main() {
       return MaterialApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(
+            data: MediaQuery.of(context).copyWith(
               navigationMode: NavigationMode.directional,
             ),
             child: Material(
@@ -254,7 +254,7 @@ void main() {
       MaterialApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(
+            data: MediaQuery.of(context).copyWith(
               navigationMode: NavigationMode.directional,
             ),
             child: Material(
@@ -755,7 +755,7 @@ void main() {
 
     await tester.pump();
 
-    expect(MediaQuery.of(popupContext)!.padding, EdgeInsets.zero);
+    expect(MediaQuery.of(popupContext).padding, EdgeInsets.zero);
   });
 
   testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
