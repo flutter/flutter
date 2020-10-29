@@ -368,7 +368,7 @@ void main() {
     expect(find.text('popped inner2'), findsOneWidget);
   });
 
-  testWidgets('ChildBackButtonDispatcher can be disposed without calling take priority', (WidgetTester tester) async {
+  testWidgets('ChildBackButtonDispatcher can be replaced without calling the takePriority', (WidgetTester tester) async {
 
     final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
     BackButtonDispatcher innerDispatcher = ChildBackButtonDispatcher(outerDispatcher);
@@ -397,7 +397,7 @@ void main() {
     ));
 
     // Creates a new child back button dispatcher and rebuild, this will cause
-    // the old one be disposed without calling the take prioirty method.
+    // the old one to be replaced and discarded.
     innerDispatcher = ChildBackButtonDispatcher(outerDispatcher);
     await tester.pumpWidget(buildBoilerPlate(
       Router<RouteInformation>(
@@ -426,7 +426,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-testWidgets('ChildBackButtonDispatcher can be take priority recursively', (WidgetTester tester) async {
+testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester tester) async {
 
     final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
     final BackButtonDispatcher innerDispatcher1 = ChildBackButtonDispatcher(outerDispatcher);
@@ -469,6 +469,8 @@ testWidgets('ChildBackButtonDispatcher can be take priority recursively', (Widge
         ),
       )
     ));
+    // This should work without calling the takePrioirty on the innerDispatcher2
+    // and the innerDispatcher1.
     innerDispatcher3.takePriority();
     bool result = false;
     result = await outerDispatcher.invokeCallback(SynchronousFuture<bool>(false));

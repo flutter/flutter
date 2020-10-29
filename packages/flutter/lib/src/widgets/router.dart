@@ -829,7 +829,7 @@ abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> 
       int childIndex = children.length - 1;
 
       Future<bool> notifyNextChild(bool result) {
-        // If the previous child handles the callback, we returns the result.
+        // If the previous child handles the callback, we return the result.
         if (result)
           return SynchronousFuture<bool>(result);
         // If the previous child did not handle the callback, we ask the next
