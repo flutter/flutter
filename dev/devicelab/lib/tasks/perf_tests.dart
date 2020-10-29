@@ -771,7 +771,7 @@ class PerfTestWithSkSL extends PerfTest {
         'run',
         if (deviceOperatingSystem == DeviceOperatingSystem.ios)
           ...<String>[
-            '--device-timeout', '10',
+            '--device-timeout', '5',
           ],
         '--verbose',
         '--verbose-system-logs',
