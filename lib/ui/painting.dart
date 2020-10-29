@@ -4414,7 +4414,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///         Rect.fromLTWH(sprite.index * 10.0, 0.0, 10.0, 10.0),
   ///     ], <Color>[
   ///       for (Sprite sprite in allSprites)
-  ///         Color.white.withAlpha(sprite.alpha),
+  ///         Colors.white.withAlpha(sprite.alpha),
   ///     ], BlendMode.srcIn, null, paint);
   ///   }
   ///
