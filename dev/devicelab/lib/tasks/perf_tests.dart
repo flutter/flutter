@@ -482,8 +482,10 @@ class StartupTest {
           break;
       }
 
+      const int maxFailures = 3;
+      int currentFailures = 0;
       for (int i = 0; i < iterations; i += 1) {
-        await flutter('run', options: <String>[
+        final int result = await flutter('run', options: <String>[
           '--no-android-gradle-daemon',
           '--verbose',
           '--profile',
@@ -492,11 +494,19 @@ class StartupTest {
           device.deviceId,
           if (applicationBinaryPath != null)
             '--use-application-binary=$applicationBinaryPath',
-        ]);
-        final Map<String, dynamic> data = json.decode(
-          file('$testDirectory/build/start_up_info.json').readAsStringSync(),
-        ) as Map<String, dynamic>;
-        results.add(data);
+         ], canFail: true);
+        if (result == 0) {
+          final Map<String, dynamic> data = json.decode(
+            file('$testDirectory/build/start_up_info.json').readAsStringSync(),
+          ) as Map<String, dynamic>;
+          results.add(data);
+        } else {
+          currentFailures += 1;
+          i -= 1;
+          if (currentFailures == maxFailures) {
+            return TaskResult.failure('Application failed to start $maxFailures times');
+          }
+        }
 
         await flutter('install', options: <String>[
           '--uninstall-only',
@@ -606,7 +616,6 @@ class PerfTest {
       final Device device = await devices.workingDevice;
       await device.unlock();
       final String deviceId = device.deviceId;
-      await flutter('packages', options: <String>['get']);
 
       await flutter('drive', options: <String>[
         '--no-android-gradle-daemon',
