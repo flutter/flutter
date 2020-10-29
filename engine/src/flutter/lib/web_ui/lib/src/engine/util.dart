@@ -333,9 +333,17 @@ String _pathToSvgClipPath(ui.Path path,
   sb.write('<defs>');
 
   final String clipId = 'svgClip$_clipIdCounter';
-  sb.write('<clipPath id=$clipId clipPathUnits="objectBoundingBox">');
 
-  sb.write('<path transform="scale($scaleX, $scaleY)" fill="#FFFFFF" d="');
+  if (browserEngine == BrowserEngine.firefox) {
+    // Firefox objectBoundingBox fails to scale to 1x1 units, instead use
+    // no clipPathUnits but write the path in target units.
+    sb.write('<clipPath id=$clipId>');
+    sb.write('<path fill="#FFFFFF" d="');
+  } else {
+    sb.write('<clipPath id=$clipId clipPathUnits="objectBoundingBox">');
+    sb.write('<path transform="scale($scaleX, $scaleY)" fill="#FFFFFF" d="');
+  }
+
   pathToSvg(path as SurfacePath, sb, offsetX: offsetX, offsetY: offsetY);
   sb.write('"></path></clipPath></defs></svg');
   return sb.toString();
