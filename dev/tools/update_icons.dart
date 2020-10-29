@@ -262,13 +262,17 @@ String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
         for (final IconStyle iconStyle in IconStyle.values) {
           final String style = iconStyle.idSuffix();
           try {
-            final _Icon agnosticIcon = newIcons.firstWhere((_Icon icon) => icon.id == '${ids[0]}$style');
-            final _Icon iOSIcon = newIcons.firstWhere((_Icon icon) => icon.id == '${ids[1]}$style');
+            final _Icon agnosticIcon = newIcons.firstWhere(
+                (_Icon icon) => icon.id == '${ids[0]}$style',
+                orElse: () => throw ids[0]);
+            final _Icon iOSIcon = newIcons.firstWhere(
+                (_Icon icon) => icon.id == '${ids[1]}$style',
+                orElse: () => throw ids[1]);
 
             platformAdaptiveDeclarations.add(_Icon.platformAdaptiveDeclaration('$flutterId$style', agnosticIcon, iOSIcon));
           } catch (e) {
             if (iconStyle == IconStyle.regular) {
-              stderr.writeln('Error while generating platformAdaptiveDeclarations: One or both of $ids not found.');
+              stderr.writeln("Error while generating platformAdaptiveDeclarations: Icon '$e' not found.");
               exit(1);
             } else {
               // Ignore errors for styled icons since some don't exist.
@@ -399,7 +403,7 @@ class _Icon {
   static String platformAdaptiveDeclaration(String flutterId, _Icon agnosticIcon, _Icon iOSIcon) => '''
 
   /// Platform-adaptive icon for ${agnosticIcon.dartDoc} and ${iOSIcon.dartDoc}.;
-  IconData get $flutterId => !isApplePlatform ? Icons.${agnosticIcon.flutterId} : Icons.${iOSIcon.flutterId};
+  IconData get $flutterId => !isCupertino ? Icons.${agnosticIcon.flutterId} : Icons.${iOSIcon.flutterId};
 ''';
 
   @override
