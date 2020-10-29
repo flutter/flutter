@@ -246,7 +246,7 @@ String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
   final Iterable<_Icon> newIcons = tokenPairMap.entries.map((MapEntry<String, String> entry) => _Icon(entry));
   final StringBuffer buf = StringBuffer();
   bool generating = false;
-  
+
   for (final String line in LineSplitter.split(iconData)) {
     if (!generating) {
       buf.writeln(line);
