@@ -5,12 +5,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'button.dart';
 import 'button_theme.dart';
 import 'material_button.dart';
 import 'theme.dart';
 import 'theme_data.dart';
+
+enum _FlatButtonType { material, adaptive }
 
 /// A material design "flat button".
 ///
@@ -138,7 +141,8 @@ class FlatButton extends MaterialButton {
     required Widget child,
     double? height,
     double? minWidth,
-  }) : assert(clipBehavior != null),
+  }) : _buttonType = _FlatButtonType.material,
+       assert(clipBehavior != null),
        assert(autofocus != null),
        super(
          key: key,
@@ -166,7 +170,73 @@ class FlatButton extends MaterialButton {
          autofocus: autofocus,
          materialTapTargetSize: materialTapTargetSize,
          child: child,
-      );
+       );
+
+  /// Create a simple text button.
+  ///
+  /// The [autofocus] and [clipBehavior] arguments must not be null.
+  ///
+  /// The [onLongPress], [onHighlightChanged], [mouseCursor], [textTheme],
+  /// [textColor], [disabledTextColor], [focusColor], [hoverColor],
+  /// [highlightColor], [splashColor], [colorBrightness], [visualDensity],
+  /// [shape], [clipBehavior], [focusNode], [autofocus], [materialTapTargetSize]
+  /// and [height], will be ignored in iOS.
+  const FlatButton.adaptive({
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ValueChanged<bool>? onHighlightChanged,
+    MouseCursor? mouseCursor,
+    ButtonTextTheme? textTheme,
+    Color? textColor,
+    Color? disabledTextColor,
+    Color? color,
+    Color? disabledColor,
+    Color? focusColor,
+    Color? hoverColor,
+    Color? highlightColor,
+    Color? splashColor,
+    Brightness? colorBrightness,
+    EdgeInsetsGeometry? padding,
+    VisualDensity? visualDensity,
+    ShapeBorder? shape,
+    Clip clipBehavior = Clip.none,
+    FocusNode? focusNode,
+    bool autofocus = false,
+    MaterialTapTargetSize? materialTapTargetSize,
+    required Widget child,
+    double? height,
+    double? minWidth,
+  }) : _buttonType = _FlatButtonType.adaptive,
+       assert(clipBehavior != null),
+       assert(autofocus != null),
+       super(
+         key: key,
+         height: height,
+         minWidth: minWidth,
+         onPressed: onPressed,
+         onLongPress: onLongPress,
+         onHighlightChanged: onHighlightChanged,
+         mouseCursor: mouseCursor,
+         textTheme: textTheme,
+         textColor: textColor,
+         disabledTextColor: disabledTextColor,
+         color: color,
+         disabledColor: disabledColor,
+         focusColor: focusColor,
+         hoverColor: hoverColor,
+         highlightColor: highlightColor,
+         splashColor: splashColor,
+         colorBrightness: colorBrightness,
+         padding: padding,
+         visualDensity: visualDensity,
+         shape: shape,
+         clipBehavior: clipBehavior,
+         focusNode: focusNode,
+         autofocus: autofocus,
+         materialTapTargetSize: materialTapTargetSize,
+         child: child,
+       );
 
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -203,8 +273,21 @@ class FlatButton extends MaterialButton {
     double height,
   }) = _FlatButtonWithIcon;
 
-  @override
-  Widget build(BuildContext context) {
+  final _FlatButtonType _buttonType;
+
+  Widget _buildCupertinoButton(BuildContext context) {
+    return CupertinoButton(
+      key: key, 
+      onPressed: onPressed, 
+      color: color, 
+      disabledColor: disabledColor ?? CupertinoColors.quaternarySystemFill, 
+      padding: padding, 
+      child: child!,
+      minWidth: minWidth,
+    );
+  }
+
+  Widget _buildMaterialButton(BuildContext context) {
     final ThemeData theme = Theme.of(context)!;
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     return RawMaterialButton(
@@ -237,6 +320,27 @@ class FlatButton extends MaterialButton {
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    switch (_buttonType) {
+      case _FlatButtonType.material:
+        return _buildMaterialButton(context);
+      case _FlatButtonType.adaptive:
+        final ThemeData theme = Theme.of(context)!;
+        assert(theme.platform != null);
+        switch (theme.platform) {
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            return _buildCupertinoButton(context);
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            return _buildMaterialButton(context);
+        }
+    }
   }
 }
 
@@ -308,5 +412,4 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
          minWidth: minWidth,
          height: height,
        );
-
 }

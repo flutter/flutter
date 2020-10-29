@@ -37,12 +37,16 @@ class CupertinoButton extends StatefulWidget {
     this.padding,
     this.color,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
-    this.minSize = kMinInteractiveDimensionCupertino,
+    this.minSize,
+    this.minWidth,
+    this.minHeight,
     this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        assert(disabledColor != null),
+       assert((minSize == null) || (minWidth == null)),
+       assert((minSize == null) || (minHeight == null)),
        _filled = false,
        super(key: key);
 
@@ -57,12 +61,16 @@ class CupertinoButton extends StatefulWidget {
     required this.child,
     this.padding,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
-    this.minSize = kMinInteractiveDimensionCupertino,
+    this.minSize,
+    this.minWidth,
+    this.minHeight,
     this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        assert(disabledColor != null),
+       assert((minSize == null) || (minWidth == null)),
+       assert((minSize == null) || (minHeight == null)),
        color = null,
        _filled = true,
        super(key: key);
@@ -103,6 +111,18 @@ class CupertinoButton extends StatefulWidget {
   /// Defaults to kMinInteractiveDimensionCupertino which the iOS Human
   /// Interface Guidelines recommends as the minimum tappable area.
   final double? minSize;
+
+  /// Minimum width of the button.
+  ///
+  /// Defaults to kMinInteractiveDimensionCupertino which the iOS Human
+  /// Interface Guidelines recommends as the minimum tappable width.
+  final double? minWidth;
+
+  /// Minimum height of the button.
+  ///
+  /// Defaults to kMinInteractiveDimensionCupertino which the iOS Human
+  /// Interface Guidelines recommends as the minimum tappable height.
+  final double? minHeight;
 
   /// The opacity that the button will fade to when it is pressed.
   /// The button will have an opacity of 1.0 when it is not pressed.
@@ -224,6 +244,21 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
     final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
 
+    final BoxConstraints boxConstraints;
+    
+    if (widget.minSize == null && widget.minHeight == null && widget.minWidth == null) {
+      boxConstraints = const BoxConstraints();
+    } else {
+      boxConstraints = BoxConstraints(
+          minWidth: widget.minWidth
+          ?? widget.minSize 
+          ?? kMinInteractiveDimensionCupertino,
+          minHeight: widget.minHeight 
+          ?? widget.minSize 
+          ?? kMinInteractiveDimensionCupertino,
+        );
+    }
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: enabled ? _handleTapDown : null,
@@ -233,12 +268,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       child: Semantics(
         button: true,
         child: ConstrainedBox(
-          constraints: widget.minSize == null
-            ? const BoxConstraints()
-            : BoxConstraints(
-                minWidth: widget.minSize!,
-                minHeight: widget.minSize!,
-              ),
+          constraints: boxConstraints,
           child: FadeTransition(
             opacity: _opacityAnimation,
             child: DecoratedBox(
