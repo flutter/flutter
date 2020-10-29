@@ -3966,7 +3966,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.crossAxisAlignment = CrossAxisAlignment.center,
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
-    this.textBaseline = TextBaseline.alphabetic,
+    this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     this.clipBehavior = Clip.none,
     List<Widget> children = const <Widget>[],
   }) : assert(direction != null),
@@ -4064,7 +4064,8 @@ class Flex extends MultiChildRenderObjectWidget {
 
   /// If aligning items according to their baseline, which baseline to use.
   ///
-  /// Defaults to [TextBaseline.alphabetic].
+  /// This must be set if using baseline alignment. There is no default because there is no
+  /// way for the framework to know the correct baseline _a priori_.
   final TextBaseline? textBaseline;
 
   /// {@macro flutter.widgets.Clip}
@@ -4341,7 +4342,7 @@ class Row extends Flex {
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     TextDirection? textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
-    TextBaseline textBaseline = TextBaseline.alphabetic,
+    TextBaseline? textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     List<Widget> children = const <Widget>[],
   }) : super(
     children: children,
