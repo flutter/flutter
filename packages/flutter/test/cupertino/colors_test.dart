@@ -283,7 +283,7 @@ void main() {
 
       // Asserts when the required dependency is missing.
       await tester.pumpWidget(const DependentWidget(color: contrastDependentColor1));
-      expect(tester.takeException()?.toString(), contains('does not contain a MediaQuery'));
+      expect(tester.takeException()?.toString(), contains('No MediaQuery widget ancestor found'));
   });
 
   testWidgets(
@@ -505,7 +505,7 @@ void main() {
     setUp(() { color = null; });
 
     testWidgets('dynamic color works in cupertino override theme', (WidgetTester tester) async {
-      final CupertinoDynamicColor Function() typedColor = () => color as CupertinoDynamicColor;
+      final CupertinoDynamicColor Function() typedColor = () => color! as CupertinoDynamicColor;
 
       await tester.pumpWidget(
         MaterialApp(

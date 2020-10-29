@@ -96,7 +96,9 @@ class ListTileTheme extends InheritedTheme {
   /// If true then [ListTile]s will have the vertically dense layout.
   final bool dense;
 
+  /// {@template flutter.material.ListTile.shape}
   /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
+  /// {@endtemplate}
   final ShapeBorder? shape;
 
   /// If specified, [style] defines the font used for [ListTile] titles.
@@ -143,8 +145,7 @@ class ListTileTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ListTileTheme? ancestorTheme = context.findAncestorWidgetOfExactType<ListTileTheme>();
-    return identical(this, ancestorTheme) ? child : ListTileTheme(
+    return ListTileTheme(
       dense: dense,
       shape: shape,
       style: style,
@@ -886,10 +887,12 @@ class ListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// {@template flutter.material.ListTile.tileColor}
   /// Defines the background color of `ListTile` when [selected] is false.
   ///
   /// When the value is null, the `tileColor` is set to [ListTileTheme.tileColor]
   /// if it's not null and to [Colors.transparent] if it's null.
+  /// {@endtemplate}
   final Color? tileColor;
 
   /// Defines the background color of `ListTile` when [selected] is true.
@@ -974,7 +977,7 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _titleTextStyle(ThemeData theme, ListTileTheme? tileTheme) {
-    TextStyle style;
+    final TextStyle style;
     if (tileTheme != null) {
       switch (tileTheme.style) {
         case ListTileStyle.drawer:
@@ -1565,13 +1568,13 @@ class _RenderListTile extends RenderBox {
     final Size leadingSize = _layoutBox(leading, iconConstraints);
     final Size trailingSize = _layoutBox(trailing, iconConstraints);
     assert(
-      tileWidth != leadingSize.width,
+      tileWidth != leadingSize.width || tileWidth == 0.0,
       'Leading widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
       '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'
     );
     assert(
-      tileWidth != trailingSize.width,
+      tileWidth != trailingSize.width || tileWidth == 0.0,
       'Trailing widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
       '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'
@@ -1644,8 +1647,8 @@ class _RenderListTile extends RenderBox {
     //  - For smaller tiles, trailing should always be centered. Leading can be
     //    centered or closer to the top. It should never be further than 16dp
     //    to the top.
-    double leadingY;
-    double trailingY;
+    final double leadingY;
+    final double trailingY;
     if (tileHeight > 72.0) {
       leadingY = 16.0;
       trailingY = 16.0;
@@ -1686,7 +1689,7 @@ class _RenderListTile extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     void doPaint(RenderBox? child) {
       if (child != null) {
-        final BoxParentData parentData = child.parentData as BoxParentData;
+        final BoxParentData parentData = child.parentData! as BoxParentData;
         context.paintChild(child, parentData.offset + offset);
       }
     }
@@ -1703,7 +1706,7 @@ class _RenderListTile extends RenderBox {
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     assert(position != null);
     for (final RenderBox child in _children) {
-      final BoxParentData parentData = child.parentData as BoxParentData;
+      final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,

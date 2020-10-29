@@ -835,7 +835,7 @@ class _BuildInstance {
         elapsedMilliseconds: stopwatch.elapsedMilliseconds,
         skipped: skipped,
         succeeded: succeeded,
-        analyicsName: node.target.analyticsName,
+        analyticsName: node.target.analyticsName,
       );
     }
     return succeeded;
@@ -864,14 +864,14 @@ class PerformanceMeasurement {
     @required this.elapsedMilliseconds,
     @required this.skipped,
     @required this.succeeded,
-    @required this.analyicsName,
+    @required this.analyticsName,
   });
 
   final int elapsedMilliseconds;
   final String target;
   final bool skipped;
   final bool succeeded;
-  final String analyicsName;
+  final String analyticsName;
 }
 
 /// Check if there are any dependency cycles in the target.
@@ -1062,7 +1062,7 @@ class Node {
       }
     }
 
-    // If we depend on a file that doesnt exist on disk, mark the build as
+    // If we depend on a file that doesn't exist on disk, mark the build as
     // dirty. if the rule is not correctly specified, this will result in it
     // always being rerun.
     if (missingInputs.isNotEmpty) {

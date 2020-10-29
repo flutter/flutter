@@ -30,5 +30,6 @@
   "pasteButtonLabel": "Įklijuoti",
   "selectAllButtonLabel": "Pasirinkti viską",
   "tabSemanticsLabel": "$tabIndex skirtukas iš $tabCount",
-  "modalBarrierDismissLabel": "Atsisakyti"
+  "modalBarrierDismissLabel": "Atsisakyti",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

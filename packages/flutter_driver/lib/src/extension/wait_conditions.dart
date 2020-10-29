@@ -164,13 +164,7 @@ class _InternalCombinedCondition implements WaitCondition {
     if (condition.conditionName != 'CombinedCondition')
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
     final CombinedCondition combinedCondition = condition as CombinedCondition;
-    if (combinedCondition.conditions == null) {
-      return const _InternalCombinedCondition(<WaitCondition>[]);
-    }
-
-    final List<WaitCondition> conditions = combinedCondition.conditions.map(
-        (SerializableWaitCondition serializableCondition) => deserializeCondition(serializableCondition)
-      ).toList();
+    final List<WaitCondition> conditions = combinedCondition.conditions.map(deserializeCondition).toList();
     return _InternalCombinedCondition(conditions);
   }
 

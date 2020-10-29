@@ -323,7 +323,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       final OffsetPair delta = _pendingDragOffset;
       final Duration timestamp = _lastPendingEventTimestamp!;
       final Matrix4? transform = _lastTransform;
-      Offset localUpdateDelta;
+      final Offset localUpdateDelta;
       switch (dragStartBehavior) {
         case DragStartBehavior.start:
           _initialPosition = _initialPosition + delta;
@@ -336,7 +336,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _pendingDragOffset = OffsetPair.zero;
       _lastPendingEventTimestamp = null;
       _lastTransform = null;
-      _checkStart(timestamp);
+      _checkStart(timestamp, pointer);
       if (localUpdateDelta != Offset.zero && onUpdate != null) {
         final Matrix4? localToGlobal = transform != null ? Matrix4.tryInvert(transform) : null;
         final Offset correctedLocalPosition = _initialPosition.local + localUpdateDelta;
@@ -404,12 +404,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       invokeCallback<void>('onDown', () => onDown!(details));
   }
 
-  void _checkStart(Duration timestamp) {
+  void _checkStart(Duration timestamp, int pointer) {
     assert(_initialButtons == kPrimaryButton);
     final DragStartDetails details = DragStartDetails(
       sourceTimeStamp: timestamp,
       globalPosition: _initialPosition.global,
       localPosition: _initialPosition.local,
+      kind: getKindForPointer(pointer),
     );
     if (onStart != null)
       invokeCallback<void>('onStart', () => onStart!(details));
@@ -442,8 +443,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     final VelocityTracker tracker = _velocityTrackers[pointer]!;
     assert(tracker != null);
 
-    DragEndDetails details;
-    String Function() debugReport;
+    final DragEndDetails details;
+    final String Function() debugReport;
 
     final VelocityEstimate? estimate = tracker.getVelocityEstimate();
     if (estimate != null && isFlingGesture(estimate, tracker.kind)) {

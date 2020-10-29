@@ -174,7 +174,7 @@ class SelectableText extends StatefulWidget {
   /// must not be null. If specified, the [maxLines] argument must be greater
   /// than zero.
   const SelectableText(
-    this.data, {
+    String this.data, {
     Key? key,
     this.focusNode,
     this.style,
@@ -193,6 +193,7 @@ class SelectableText extends StatefulWidget {
     this.cursorColor,
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection = true,
+    this.selectionControls,
     this.onTap,
     this.scrollPhysics,
     this.textHeightBehavior,
@@ -226,7 +227,7 @@ class SelectableText extends StatefulWidget {
   ///
   /// The [autofocus] and [dragStartBehavior] arguments must not be null.
   const SelectableText.rich(
-    this.textSpan, {
+    TextSpan this.textSpan, {
     Key? key,
     this.focusNode,
     this.style,
@@ -245,6 +246,7 @@ class SelectableText extends StatefulWidget {
     this.cursorColor,
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection = true,
+    this.selectionControls,
     this.onTap,
     this.scrollPhysics,
     this.textHeightBehavior,
@@ -353,6 +355,9 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
+  /// {@macro flutter.widgets.editableText.selectionControls}
+  final TextSelectionControls? selectionControls;
+
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
@@ -416,6 +421,7 @@ class SelectableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
+    properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
@@ -565,12 +571,12 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
     final FocusNode focusNode = _effectiveFocusNode;
 
-    TextSelectionControls textSelectionControls;
-    bool paintCursorAboveText;
-    bool cursorOpacityAnimates;
+    TextSelectionControls? textSelectionControls =  widget.selectionControls;
+    final bool paintCursorAboveText;
+    final bool cursorOpacityAnimates;
     Offset? cursorOffset;
     Color? cursorColor = widget.cursorColor;
-    Color selectionColor;
+    final Color selectionColor;
     Radius? cursorRadius = widget.cursorRadius;
 
     switch (theme.platform) {
@@ -578,13 +584,13 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       case TargetPlatform.macOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
         forcePressEnabled = true;
-        textSelectionControls = cupertinoTextSelectionControls;
+        textSelectionControls ??= cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
         cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context)!.devicePixelRatio, 0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
 
       case TargetPlatform.android:
@@ -592,7 +598,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         forcePressEnabled = false;
-        textSelectionControls = materialTextSelectionControls;
+        textSelectionControls ??= materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;

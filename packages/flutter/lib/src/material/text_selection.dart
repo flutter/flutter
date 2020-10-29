@@ -852,7 +852,7 @@ class _TextSelectionToolbarItemsLayoutRenderBox extends RenderBox with Container
     });
 
     // Place the navigation button if needed.
-    final ToolbarItemsParentData navButtonParentData = navButton.parentData as ToolbarItemsParentData;
+    final ToolbarItemsParentData navButtonParentData = navButton.parentData! as ToolbarItemsParentData;
     if (_shouldPaintChild(firstChild!, 0)) {
       navButtonParentData.shouldPaint = true;
       if (overflowOpen) {
@@ -890,7 +890,7 @@ class _TextSelectionToolbarItemsLayoutRenderBox extends RenderBox with Container
   void paint(PaintingContext context, Offset offset) {
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
       if (!childParentData.shouldPaint) {
         return;
       }
@@ -911,7 +911,7 @@ class _TextSelectionToolbarItemsLayoutRenderBox extends RenderBox with Container
     // The x, y parameters have the top left of the node's box as the origin.
     RenderBox? child = lastChild;
     while (child != null) {
-      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
 
       // Don't hit test children aren't shown.
       if (!childParentData.shouldPaint) {
@@ -939,7 +939,7 @@ class _TextSelectionToolbarItemsLayoutRenderBox extends RenderBox with Container
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
       if (childParentData.shouldPaint) {
         visitor(renderObjectChild);
       }

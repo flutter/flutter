@@ -140,7 +140,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar which is typically used as a
   /// [Scaffold]'s [Scaffold.bottomNavigationBar] argument.
   ///
-  /// The length of [items] must be at least two and each item's icon and title
+  /// The length of [items] must be at least two and each item's icon and label
   /// must not be null.
   ///
   /// If [type] is null then [BottomNavigationBarType.fixed] is used when there
@@ -164,10 +164,14 @@ class BottomNavigationBar extends StatefulWidget {
   /// former is preferred, [fixedColor] only exists for the sake of
   /// backwards compatibility.
   ///
-  /// The [showSelectedLabels] argument must be non-null.
+  /// If [showSelectedLabels] is `null`, [BottomNavigationBarThemeData.showSelectedLabels]
+  /// is used. If [BottomNavigationBarThemeData.showSelectedLabels]  is null,
+  /// then [showSelectedLabels] defaults to `true`.
   ///
-  /// The [showUnselectedLabels] argument defaults to `true` if [type] is
-  /// [BottomNavigationBarType.fixed] and `false` if [type] is
+  /// If [showUnselectedLabels] is `null`, [BottomNavigationBarThemeData.showUnselectedLabels]
+  /// is used. If [BottomNavigationBarThemeData.showSelectedLabels] is null,
+  /// then [showUnselectedLabels] defaults to `true` when [type] is
+  /// [BottomNavigationBarType.fixed] and `false` when [type] is
   /// [BottomNavigationBarType.shifting].
   BottomNavigationBar({
     Key? key,
@@ -187,7 +191,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.unselectedFontSize = 12.0,
     this.selectedLabelStyle,
     this.unselectedLabelStyle,
-    this.showSelectedLabels = true,
+    this.showSelectedLabels,
     this.showUnselectedLabels,
     this.mouseCursor,
   }) : assert(items != null),
@@ -206,7 +210,6 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
-       assert(showSelectedLabels != null),
        selectedItemColor = selectedItemColor ?? fixedColor,
        super(key: key);
 
@@ -286,7 +289,7 @@ class BottomNavigationBar extends StatefulWidget {
   ///
   /// It this field is provided, it must contain non-null [IconThemeData.size]
   /// and [IconThemeData.color] properties. Also, if this field is supplied,
-  /// [unselectedIconTheme] must be provided.
+  /// [selectedIconTheme] must be provided.
   final IconThemeData? unselectedIconTheme;
 
   /// The [TextStyle] of the [BottomNavigationBarItem] labels when they are
@@ -314,11 +317,11 @@ class BottomNavigationBar extends StatefulWidget {
   /// Defaults to `12.0`.
   final double unselectedFontSize;
 
-  /// Whether the labels are shown for the selected [BottomNavigationBarItem].
+  /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
   final bool? showUnselectedLabels;
 
-  /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
-  final bool showSelectedLabels;
+  /// Whether the labels are shown for the selected [BottomNavigationBarItem].
+  final bool? showSelectedLabels;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// tiles.
@@ -346,8 +349,8 @@ class _BottomNavigationTile extends StatelessWidget {
     required this.unselectedLabelStyle,
     required this.selectedIconTheme,
     required this.unselectedIconTheme,
-    this.showSelectedLabels,
-    this.showUnselectedLabels,
+    required this.showSelectedLabels,
+    required this.showUnselectedLabels,
     this.indexLabel,
     required this.mouseCursor,
     }) : assert(type != null),
@@ -371,8 +374,8 @@ class _BottomNavigationTile extends StatelessWidget {
   final TextStyle selectedLabelStyle;
   final TextStyle unselectedLabelStyle;
   final String? indexLabel;
-  final bool? showSelectedLabels;
-  final bool? showUnselectedLabels;
+  final bool showSelectedLabels;
+  final bool showUnselectedLabels;
   final MouseCursor mouseCursor;
 
   @override
@@ -381,18 +384,12 @@ class _BottomNavigationTile extends StatelessWidget {
     // need to divide the changes in flex allotment into smaller pieces to
     // produce smooth animation. We do this by multiplying the flex value
     // (which is an integer) by a large number.
-    int size;
-
-    final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
+    final int size;
 
     final double selectedFontSize = selectedLabelStyle.fontSize!;
 
-    final double selectedIconSize = selectedIconTheme?.size
-      ?? bottomTheme.selectedIconTheme?.size
-      ?? iconSize;
-    final double unselectedIconSize = unselectedIconTheme?.size
-      ?? bottomTheme.unselectedIconTheme?.size
-      ?? iconSize;
+    final double selectedIconSize = selectedIconTheme?.size ?? iconSize;
+    final double unselectedIconSize = unselectedIconTheme?.size ?? iconSize;
 
     // The amount that the selected icon is bigger than the unselected icons,
     // (or zero if the selected icon is not bigger than the unselected icons).
@@ -420,7 +417,7 @@ class _BottomNavigationTile extends StatelessWidget {
     // =======
     double bottomPadding;
     double topPadding;
-    if (showSelectedLabels! && !showUnselectedLabels!) {
+    if (showSelectedLabels && !showUnselectedLabels) {
       bottomPadding = Tween<double>(
         begin: selectedIconDiff / 2.0,
         end: selectedFontSize / 2.0 - unselectedIconDiff / 2.0,
@@ -429,7 +426,7 @@ class _BottomNavigationTile extends StatelessWidget {
         begin: selectedFontSize + selectedIconDiff / 2.0,
         end: selectedFontSize / 2.0 - unselectedIconDiff / 2.0,
       ).evaluate(animation);
-    } else if (!showSelectedLabels! && !showUnselectedLabels!) {
+    } else if (!showSelectedLabels && !showUnselectedLabels) {
       bottomPadding = Tween<double>(
         begin: selectedIconDiff / 2.0,
         end: unselectedIconDiff / 2.0,
@@ -474,8 +471,8 @@ class _BottomNavigationTile extends StatelessWidget {
               iconSize: iconSize,
               selected: selected,
               item: item,
-              selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
-              unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
+              selectedIconTheme: selectedIconTheme,
+              unselectedIconTheme: unselectedIconTheme,
             ),
             _Label(
               colorTween: colorTween!,
@@ -483,8 +480,8 @@ class _BottomNavigationTile extends StatelessWidget {
               item: item,
               selectedLabelStyle: selectedLabelStyle,
               unselectedLabelStyle: unselectedLabelStyle,
-              showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels!,
-              showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels!,
+              showSelectedLabels: showSelectedLabels,
+              showUnselectedLabels: showUnselectedLabels,
             ),
           ],
         ),
@@ -660,7 +657,7 @@ class _Label extends StatelessWidget {
     if (item.label != null) {
       // Do not grow text in bottom navigation bar when we can show a tooltip
       // instead.
-      final MediaQueryData mediaQueryData = MediaQuery.of(context)!;
+      final MediaQueryData mediaQueryData = MediaQuery.of(context);
       text = MediaQuery(
         data: mediaQueryData.copyWith(
           textScaleFactor: math.min(1.0, mediaQueryData.textScaleFactor),
@@ -823,7 +820,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   }
 
   List<Widget> _createTiles() {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     assert(localizations != null);
 
     final ThemeData themeData = Theme.of(context)!;
@@ -840,7 +837,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         widget.unselectedFontSize,
       );
 
-    Color themeColor;
+    final Color themeColor;
     switch (themeData.brightness) {
       case Brightness.light:
         themeColor = themeData.primaryColor;
@@ -850,7 +847,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         break;
     }
 
-    ColorTween colorTween;
+    final ColorTween colorTween;
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
         colorTween = ColorTween(
@@ -894,7 +891,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         colorTween: colorTween,
         flex: _evaluateFlex(_animations[i]),
         selected: i == widget.currentIndex,
-        showSelectedLabels: widget.showSelectedLabels,
+        showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels ?? true,
         showUnselectedLabels: widget.showUnselectedLabels ?? bottomTheme.showUnselectedLabels ?? _defaultShowUnselected,
         indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
         mouseCursor: effectiveMouseCursor,
@@ -923,7 +920,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 
     // Labels apply up to _bottomMargin padding. Remainder is media padding.
-    final double additionalBottomPadding = math.max(MediaQuery.of(context)!.padding.bottom - widget.selectedFontSize / 2.0, 0.0);
+    final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - widget.selectedFontSize / 2.0, 0.0);
     Color? backgroundColor;
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
@@ -1051,7 +1048,7 @@ class _RadialPainter extends CustomPainter {
       final Paint paint = Paint()..color = circle.color;
       final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
-      double leftFraction;
+      final double leftFraction;
       switch (textDirection) {
         case TextDirection.rtl:
           leftFraction = 1.0 - circle.horizontalLeadingOffset;

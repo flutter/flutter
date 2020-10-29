@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,12 +17,12 @@ void main() {
       builder: (BuildContext context) {
         return Container(
           key: primaryContainerKey,
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context)!.primaryColor,
         );
       },
     );
 
-    BuildContext navigatorContext;
+    late BuildContext navigatorContext;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -33,7 +31,7 @@ void main() {
             builder: (BuildContext context) {
               navigatorContext = context;
               return Theme(
-                data: Theme.of(context).copyWith(primaryColor: primaryColor),
+                data: Theme.of(context)!.copyWith(primaryColor: primaryColor),
                 child: Builder( // Introduce a context so the shadow Theme is visible to captureAll().
                   builder: (BuildContext context) {
                     return Center(
@@ -43,7 +41,7 @@ void main() {
                           ElevatedButton(
                             child: const Text('push unwrapped'),
                             onPressed: () {
-                              Navigator.of(context).push<void>(
+                              Navigator.of(context)!.push<void>(
                                 MaterialPageRoute<void>(
                                   // The primaryBox will see the default Theme when built.
                                   builder: (BuildContext _) => primaryBox,
@@ -54,7 +52,7 @@ void main() {
                           ElevatedButton(
                             child: const Text('push wrapped'),
                             onPressed: () {
-                              Navigator.of(context).push<void>(
+                              Navigator.of(context)!.push<void>(
                                 MaterialPageRoute<void>(
                                   // Capture the shadow Theme.
                                   builder: (BuildContext _) => InheritedTheme.captureAll(context, primaryBox),
@@ -75,7 +73,7 @@ void main() {
     }
 
     Color containerColor() {
-      return tester.widget<Container>(find.byKey(primaryContainerKey)).color;
+      return tester.widget<Container>(find.byKey(primaryContainerKey)).color!;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -86,7 +84,7 @@ void main() {
     await tester.pumpAndSettle(); // route animation
     expect(containerColor(), primaryColor);
 
-    Navigator.of(navigatorContext).pop();
+    Navigator.of(navigatorContext)!.pop();
     await tester.pumpAndSettle(); // route animation
 
     // Show the route which contains primaryBox
@@ -98,7 +96,6 @@ void main() {
   testWidgets('PopupMenuTheme.wrap()', (WidgetTester tester) async {
     const double menuFontSize = 24;
     const Color menuTextColor = Color(0xFF0000FF);
-    bool captureInheritedThemes = true;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -114,7 +111,6 @@ void main() {
                 // The appearance of the menu items' text is defined by the
                 // PopupMenuTheme defined above. Popup menus use
                 // InheritedTheme.captureAll() by default.
-                captureInheritedThemes: captureInheritedThemes,
                 child: const Text('show popupmenu'),
                 onSelected: (int result) { },
                 itemBuilder: (BuildContext context) {
@@ -133,7 +129,7 @@ void main() {
     TextStyle itemTextStyle(String text) {
       return tester.widget<RichText>(
         find.descendant(of: find.text(text), matching: find.byType(RichText)),
-      ).text.style;
+      ).text.style!;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -148,17 +144,6 @@ void main() {
     // Dismiss the menu
     await tester.tap(find.text('One'));
     await tester.pumpAndSettle(); // menu route animation
-
-    // Defeat the default support for capturing the PopupMenuTheme.
-    captureInheritedThemes = false;
-    await tester.pumpWidget(buildFrame());
-
-    await tester.tap(find.text('show popupmenu'));
-    await tester.pumpAndSettle(); // menu route animation
-    expect(itemTextStyle('One').fontSize, isNot(menuFontSize));
-    expect(itemTextStyle('One').color,  isNot(menuTextColor));
-    expect(itemTextStyle('Two').fontSize, isNot(menuFontSize));
-    expect(itemTextStyle('Two').color,  isNot(menuTextColor));
   });
 
   testWidgets('BannerTheme.wrap()', (WidgetTester tester) async {
@@ -176,7 +161,7 @@ void main() {
       ],
     );
 
-    BuildContext navigatorContext;
+    late BuildContext navigatorContext;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -196,7 +181,7 @@ void main() {
                       ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
-                          Navigator.of(context).push<void>(
+                          Navigator.of(context)!.push<void>(
                             MaterialPageRoute<void>(
                               // The Banner will see the default BannerTheme when built.
                               builder: (BuildContext _) => banner,
@@ -207,7 +192,7 @@ void main() {
                       ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
-                          Navigator.of(context).push<void>(
+                          Navigator.of(context)!.push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow BannerTheme.
                               builder: (BuildContext _) => InheritedTheme.captureAll(context, banner),
@@ -228,7 +213,7 @@ void main() {
     Color bannerColor() {
       return tester.widget<Container>(
         find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Container)).first,
-      ).color;
+      ).color!;
     }
 
     TextStyle getTextStyle(String text) {
@@ -237,7 +222,7 @@ void main() {
           of: find.text(text),
           matching: find.byType(RichText),
         ),
-      ).text.style;
+      ).text.style!;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -249,7 +234,7 @@ void main() {
     expect(getTextStyle('hello').fontSize, bannerFontSize);
     expect(getTextStyle('hello').color, bannerTextColor);
 
-    Navigator.of(navigatorContext).pop();
+    Navigator.of(navigatorContext)!.pop();
     await tester.pumpAndSettle(); // route animation
 
     await tester.tap(find.text('push unwrapped'));
@@ -265,7 +250,7 @@ void main() {
     const double dividerThickness = 7;
     const Widget divider = Center(child: Divider());
 
-    BuildContext navigatorContext;
+    late BuildContext navigatorContext;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -286,7 +271,7 @@ void main() {
                       ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
-                          Navigator.of(context).push<void>(
+                          Navigator.of(context)!.push<void>(
                             MaterialPageRoute<void>(
                               // The Banner will see the default BannerTheme when built.
                               builder: (BuildContext _) => divider,
@@ -297,7 +282,7 @@ void main() {
                       ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
-                          Navigator.of(context).push<void>(
+                          Navigator.of(context)!.push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow BannerTheme.
                               builder: (BuildContext _) => InheritedTheme.captureAll(context, divider),
@@ -318,8 +303,8 @@ void main() {
     BorderSide dividerBorder() {
       final BoxDecoration decoration = tester.widget<Container>(
         find.descendant(of: find.byType(Divider), matching: find.byType(Container)).first,
-      ).decoration as BoxDecoration;
-      return decoration.border.bottom;
+      ).decoration! as BoxDecoration;
+      return decoration.border!.bottom;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -331,7 +316,7 @@ void main() {
     expect(dividerBorder().color, dividerColor);
     expect(dividerBorder().width, dividerThickness);
 
-    Navigator.of(navigatorContext).pop();
+    Navigator.of(navigatorContext)!.pop();
     await tester.pumpAndSettle(); // route animation
 
     await tester.tap(find.text('push unwrapped'));
@@ -371,7 +356,7 @@ void main() {
       ),
     );
 
-    BuildContext navigatorContext;
+    late BuildContext navigatorContext;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -390,7 +375,7 @@ void main() {
                       ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
-                          Navigator.of(context).push<void>(
+                          Navigator.of(context)!.push<void>(
                             MaterialPageRoute<void>(
                               // The Banner will see the default BannerTheme when built.
                               builder: (BuildContext _) => listTiles,
@@ -401,7 +386,7 @@ void main() {
                       ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
-                          Navigator.of(context).push<void>(
+                          Navigator.of(context)!.push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow BannerTheme.
                               builder: (BuildContext _) => InheritedTheme.captureAll(context, listTiles),
@@ -422,7 +407,7 @@ void main() {
     TextStyle getTextStyle(String text) {
       return tester.widget<RichText>(
         find.descendant(of: find.text(text), matching: find.byType(RichText)),
-      ).text.style;
+      ).text.style!;
     }
 
     TextStyle getIconStyle(Key key) {
@@ -431,7 +416,7 @@ void main() {
           of: find.byKey(key),
           matching: find.byType(RichText),
         ),
-      ).text.style;
+      ).text.style!;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -444,7 +429,7 @@ void main() {
     expect(getIconStyle(selectedIconKey).color, tileSelectedColor);
     expect(getIconStyle(unselectedIconKey).color, tileIconColor);
 
-    Navigator.of(navigatorContext).pop();
+    Navigator.of(navigatorContext)!.pop();
     await tester.pumpAndSettle(); // route animation
 
     await tester.tap(find.text('push unwrapped'));
@@ -469,7 +454,7 @@ void main() {
       ),
     );
 
-    BuildContext navigatorContext;
+    late BuildContext navigatorContext;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -490,7 +475,7 @@ void main() {
                       ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
-                          Navigator.of(context).push<void>(
+                          Navigator.of(context)!.push<void>(
                             MaterialPageRoute<void>(
                               // The slider will see the default SliderTheme when built.
                               builder: (BuildContext _) => slider,
@@ -501,7 +486,7 @@ void main() {
                       ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
-                          Navigator.of(context).push<void>(
+                          Navigator.of(context)!.push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow SliderTheme.
                               builder: (BuildContext _) => InheritedTheme.captureAll(context, slider),
@@ -528,7 +513,7 @@ void main() {
     expect(sliderBox, paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor));
     expect(sliderBox, paints..circle(color: thumbColor));
 
-    Navigator.of(navigatorContext).pop();
+    Navigator.of(navigatorContext)!.pop();
     await tester.pumpAndSettle(); // route animation
 
     await tester.tap(find.text('push unwrapped'));
@@ -555,7 +540,7 @@ void main() {
       ),
     );
 
-    BuildContext navigatorContext;
+    late BuildContext navigatorContext;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -575,7 +560,7 @@ void main() {
                       ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
-                          Navigator.of(context).push<void>(
+                          Navigator.of(context)!.push<void>(
                             MaterialPageRoute<void>(
                               // The slider will see the default ToggleButtonsTheme when built.
                               builder: (BuildContext _) => toggleButtons,
@@ -586,7 +571,7 @@ void main() {
                       ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
-                          Navigator.of(context).push<void>(
+                          Navigator.of(context)!.push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow toggleButtons.
                               builder: (BuildContext _) => InheritedTheme.captureAll(context, toggleButtons),
@@ -607,7 +592,7 @@ void main() {
     Color getTextColor(String text) {
       return tester.widget<RichText>(
         find.descendant(of: find.text(text), matching: find.byType(RichText)),
-      ).text.style.color;
+      ).text.style!.color!;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -618,7 +603,7 @@ void main() {
     expect(getTextColor('selected'), selectedButtonColor);
     expect(getTextColor('unselected'), buttonColor);
 
-    Navigator.of(navigatorContext).pop();
+    Navigator.of(navigatorContext)!.pop();
     await tester.pumpAndSettle(); // route animation
 
     await tester.tap(find.text('push unwrapped'));
@@ -644,7 +629,7 @@ void main() {
       ),
     );
 
-    BuildContext navigatorContext;
+    late BuildContext navigatorContext;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -664,7 +649,7 @@ void main() {
                       RaisedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
-                          Navigator.of(context).push<void>(
+                          Navigator.of(context)!.push<void>(
                             MaterialPageRoute<void>(
                               // The slider will see the default ButtonTheme when built.
                               builder: (BuildContext _) => buttons,
@@ -675,7 +660,7 @@ void main() {
                       RaisedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
-                          Navigator.of(context).push<void>(
+                          Navigator.of(context)!.push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow toggleButtons.
                               builder: (BuildContext _) => InheritedTheme.captureAll(context, buttons),
@@ -699,7 +684,7 @@ void main() {
           of: find.widgetWithText(RawMaterialButton, text),
           matching: find.byType(Material),
         ),
-      ).color;
+      ).color!;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -710,7 +695,7 @@ void main() {
     expect(getButtonColor('disabled'), disabledButtonColor);
     expect(getButtonColor('enabled'), buttonColor);
 
-    Navigator.of(navigatorContext).pop();
+    Navigator.of(navigatorContext)!.pop();
     await tester.pumpAndSettle(); // route animation
 
     await tester.tap(find.text('push unwrapped'));

@@ -301,7 +301,7 @@ void main() {
     final BoxDecoration decoration = tester.widget<Container>(find.descendant(
       of: find.byType(UnconstrainedBox),
       matching: find.byType(Container),
-    )).decoration as BoxDecoration;
+    )).decoration! as BoxDecoration;
 
     expect(getRenderSegmentedControl(tester).thumbColor.value, CupertinoColors.systemGreen.color.value);
     expect(decoration.color!.value, CupertinoColors.systemRed.color.value);
@@ -312,7 +312,7 @@ void main() {
     final BoxDecoration decorationDark = tester.widget<Container>(find.descendant(
       of: find.byType(UnconstrainedBox),
       matching: find.byType(Container),
-    )).decoration as BoxDecoration;
+    )).decoration! as BoxDecoration;
 
 
     expect(getRenderSegmentedControl(tester).thumbColor.value, CupertinoColors.systemGreen.darkColor.value);

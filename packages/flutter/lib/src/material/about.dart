@@ -201,7 +201,7 @@ class AboutListTile extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     return ListTile(
       leading: icon,
-      title: child ?? Text(MaterialLocalizations.of(context)!.aboutListTileTitle(
+      title: child ?? Text(MaterialLocalizations.of(context).aboutListTileTitle(
         applicationName ?? _defaultApplicationName(context),
       )),
       dense: dense,
@@ -405,7 +405,7 @@ class AboutDialog extends StatelessWidget {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text(MaterialLocalizations.of(context)!.viewLicensesButtonLabel),
+          child: Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
           onPressed: () {
             showLicensePage(
               context: context,
@@ -417,7 +417,7 @@ class AboutDialog extends StatelessWidget {
           },
         ),
         TextButton(
-          child: Text(MaterialLocalizations.of(context)!.closeButtonLabel),
+          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -493,7 +493,7 @@ class _LicensePageState extends State<LicensePage> {
   Widget build(BuildContext context) {
     return _MasterDetailFlow(
       detailPageFABlessGutterWidth: _getGutterSize(context),
-      title: Text(MaterialLocalizations.of(context)!.licensesPageTitle),
+      title: Text(MaterialLocalizations.of(context).licensesPageTitle),
       detailPageBuilder: _packageLicensePage,
       masterViewBuilder: _packagesView,
     );
@@ -501,7 +501,7 @@ class _LicensePageState extends State<LicensePage> {
 
   Widget _packageLicensePage(BuildContext _, Object? args, ScrollController? scrollController) {
     assert(args is _DetailArguments);
-    final _DetailArguments detailArguments = args as _DetailArguments;
+    final _DetailArguments detailArguments = args! as _DetailArguments;
     return _PackageLicensePage(
       packageName: detailArguments.packageName,
       licenseEntries: detailArguments.licenseEntries,
@@ -720,7 +720,7 @@ class _PackageListTile extends StatelessWidget {
       color: isSelected ? Theme.of(context)!.highlightColor : Theme.of(context)!.cardColor,
       child: ListTile(
         title: Text(packageName),
-        subtitle: Text(MaterialLocalizations.of(context)!.licensesPackageDetailText(numberLicenses)),
+        subtitle: Text(MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses)),
         selected: isSelected,
         onTap: onTap,
       ),
@@ -890,7 +890,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData? theme = Theme.of(context);
     final String title = widget.packageName;
     final String subtitle = localizations.licensesPackageDetailText(widget.licenseEntries.length);
@@ -907,7 +907,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
         ),
     ];
 
-    Widget page;
+    final Widget page;
     if (widget.scrollController == null) {
       page = Scaffold(
         appBar: AppBar(
@@ -1018,7 +1018,7 @@ const double _wideGutterSize = 24.0;
 const double _narrowGutterSize = 12.0;
 
 double _getGutterSize(BuildContext context) =>
-    MediaQuery.of(context)!.size.width >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
+    MediaQuery.of(context).size.width >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
 
 /// Signature for the builder callback used by [_MasterDetailFlow].
 typedef _MasterViewBuilder = Widget Function(BuildContext context, bool isLateralUI);
@@ -1282,7 +1282,6 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
       case _LayoutMode.lateral:
         return _lateralUI(context);
       case _LayoutMode.auto:
-      default:
         return LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               final double availableWidth = constraints.maxWidth;
@@ -1310,7 +1309,6 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
             case _Focus.master:
               return <Route<void>>[masterPageRoute];
             case _Focus.detail:
-            default:
               return <Route<void>>[
                 masterPageRoute,
                 _detailPageRoute(_cachedDetailArguments)
@@ -1629,7 +1627,7 @@ class _DetailView extends StatelessWidget {
     if (_arguments == null) {
       return Container();
     }
-    final double screenHeight = MediaQuery.of(context)!.size.height;
+    final double screenHeight = MediaQuery.of(context).size.height;
     final double minHeight = (screenHeight - kToolbarHeight) / screenHeight;
 
     return DraggableScrollableSheet(
