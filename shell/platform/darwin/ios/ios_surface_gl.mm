@@ -14,11 +14,10 @@ static IOSContextGL* CastToGLContext(const std::shared_ptr<IOSContext>& context)
   return reinterpret_cast<IOSContextGL*>(context.get());
 }
 
-IOSSurfaceGL::IOSSurfaceGL(
-    fml::scoped_nsobject<CAEAGLLayer> layer,
-    std::shared_ptr<IOSContext> context,
-    const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller)
-    : IOSSurface(context, platform_views_controller) {
+IOSSurfaceGL::IOSSurfaceGL(fml::scoped_nsobject<CAEAGLLayer> layer,
+                           std::shared_ptr<IOSContext> context,
+                           const std::shared_ptr<IOSExternalViewEmbedder>& external_view_embedder)
+    : IOSSurface(context, external_view_embedder) {
   render_target_ = CastToGLContext(context)->CreateRenderTarget(std::move(layer));
 }
 
