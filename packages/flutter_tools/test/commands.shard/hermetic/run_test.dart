@@ -238,6 +238,8 @@ void main() {
         when(mockDevice.id).thenReturn('mock-id');
         when(mockDevice.name).thenReturn('mock-name');
         when(mockDevice.platformType).thenReturn(PlatformType.android);
+        when(mockDevice.targetPlatformDisplayName)
+            .thenAnswer((Invocation invocation) async => 'mock-platform');
         when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) => Future<String>.value('api-14'));
 
         when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
