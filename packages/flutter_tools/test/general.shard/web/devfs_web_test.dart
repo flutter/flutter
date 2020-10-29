@@ -942,12 +942,12 @@ void main() {
       useSseForDebugBackend: true,
       nullAssertions: true,
       buildInfo: const BuildInfo(
-          BuildMode.debug,
-          '',
-          treeShakeIcons: false,
-          dartDefines: <String>[
-            'FLUTTER_WEB_AUTO_DETECT=true',
-          ]
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        dartDefines: <String>[
+          'FLUTTER_WEB_AUTO_DETECT=true',
+        ]
       ),
       enableDwds: false,
       entrypoint: Uri.base,
