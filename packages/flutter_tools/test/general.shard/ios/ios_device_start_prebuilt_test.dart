@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -119,8 +118,7 @@ void main() {
     verify(devicePortForwarder.dispose()).called(1);
   });
 
-  // Still uses context for analytics.
-  testUsingContext('IOSDevice.startApp attaches in debug mode via log reading on iOS 13+', () async {
+  testWithoutContext('IOSDevice.startApp attaches in debug mode via log reading on iOS 13+', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kDeployCommand,
@@ -157,8 +155,7 @@ void main() {
     expect(await device.stopApp(iosApp), false);
   });
 
-  // Still uses context for analytics.
-  testUsingContext('IOSDevice.startApp launches in debug mode via log reading on <iOS 13', () async {
+  testWithoutContext('IOSDevice.startApp launches in debug mode via log reading on <iOS 13', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kDeployCommand,
@@ -196,8 +193,7 @@ void main() {
     expect(await device.stopApp(iosApp), false);
   });
 
-  // Still uses context for TimeoutConfiguration and usage
-  testUsingContext('IOSDevice.startApp succeeds in release mode', () async {
+  testWithoutContext('IOSDevice.startApp succeeds in release mode', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kDeployCommand,
@@ -223,12 +219,9 @@ void main() {
     expect(launchResult.hasObservatory, false);
     expect(await device.stopApp(iosApp), false);
     expect(processManager.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
   });
 
-  // Still uses context for analytics.
-  testUsingContext('IOSDevice.startApp forwards all supported debugging options', () async {
+  testWithoutContext('IOSDevice.startApp forwards all supported debugging options', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kDeployCommand,
@@ -317,8 +310,6 @@ void main() {
     expect(launchResult.started, true);
     expect(await device.stopApp(iosApp), false);
     expect(processManager.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
   });
 }
 
@@ -370,7 +361,6 @@ IOSDevice setUpIOSDevice({
 
 class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
-class MockUsage extends Mock implements Usage {}
 class MockVmService extends Mock implements VmService {}
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
 class MockIOSDeployDebugger extends Mock implements IOSDeployDebugger {}
