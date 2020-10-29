@@ -1,8 +1,14 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// FLUTTER_NOLINT
+
+#include "gtest/gtest.h"
 
 #include "flutter/shell/platform/linux/testing/fl_test.h"
+
+#include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/testing/mock_renderer.h"
 
 static uint8_t hex_digit_to_int(char value) {
   if (value >= '0' && value <= '9')
@@ -38,4 +44,15 @@ gchar* bytes_to_hex_string(GBytes* bytes) {
   for (size_t i = 0; i < data_length; i++)
     g_string_append_printf(hex_string, "%02x", data[i]);
   return g_string_free(hex_string, FALSE);
+}
+
+FlEngine* make_mock_engine() {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project, FL_RENDERER(renderer));
+  g_autoptr(GError) engine_error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &engine_error));
+  EXPECT_EQ(engine_error, nullptr);
+
+  return static_cast<FlEngine*>(g_object_ref(engine));
 }
