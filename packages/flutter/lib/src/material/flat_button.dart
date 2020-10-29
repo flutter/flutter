@@ -172,7 +172,7 @@ class FlatButton extends MaterialButton {
          child: child,
        );
 
-  /// Create a simple text button.
+  /// Create a simple text button that displays [CupertinoButton] in iOS.
   ///
   /// The [autofocus] and [clipBehavior] arguments must not be null.
   ///
