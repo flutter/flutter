@@ -711,4 +711,173 @@ void main() {
 
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
+
+  testWidgets('Radio active disabled color can be set using stateful color', (WidgetTester tester) async {
+    const Color activeEnabledColor = Color(0xFF000001);
+    const Color activeDisabledColor = Color(0xFF000002);
+
+    Color getActiveColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return activeDisabledColor;
+      }
+      return activeEnabledColor;
+    }
+
+    final Color activeColor = MaterialStateColor.resolveWith(getActiveColor);
+
+    int? groupValue = 0;
+    const Key radioKey = Key('radio');
+    Widget buildApp({required bool enabled}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                width: 100,
+                height: 100,
+                color: Colors.white,
+                child: Radio<int>(
+                  key: radioKey,
+                  value: 0,
+                  activeColor: activeColor,
+                  onChanged: enabled ? (int? newValue) {
+                    setState(() {
+                      groupValue = newValue;
+                    });
+                  } : null,
+                  groupValue: groupValue,
+                ),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(enabled: true));
+
+    // Selected and enabled.
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byKey(radioKey))),
+      paints
+        ..rect(
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..circle(color: activeEnabledColor)
+        ..circle(color: activeEnabledColor),
+    );
+
+    // Check when the radio isn't selected.
+    groupValue = 1;
+    await tester.pumpWidget(buildApp(enabled: true));
+    await tester.pumpAndSettle();
+    expect(
+        Material.of(tester.element(find.byKey(radioKey))),
+        paints
+          ..rect(
+              color: const Color(0xffffffff),
+              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+          ..circle(color: const Color(0x8a000000), style: PaintingStyle.stroke, strokeWidth: 2.0)
+    );
+
+    // Check when the radio is selected, but disabled.
+    groupValue = 0;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byKey(radioKey))),
+      paints
+        ..rect(
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..circle(color: activeDisabledColor)
+        ..circle(color: activeDisabledColor),
+    );
+  });
+
+
+  testWidgets('Radio active disabled color can be set using stateful color from theme', (WidgetTester tester) async {
+    const Color activeEnabledColor = Color(0xFF000001);
+    const Color activeDisabledColor = Color(0xFF000002);
+
+    Color getActiveColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return activeDisabledColor;
+      }
+      return activeEnabledColor;
+    }
+
+    final Color activeColor = MaterialStateColor.resolveWith(getActiveColor);
+
+    int? groupValue = 0;
+    const Key radioKey = Key('radio');
+    Widget buildApp({required bool enabled}) {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(toggleableActiveColor: activeColor),
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                width: 100,
+                height: 100,
+                color: Colors.white,
+                child: Radio<int>(
+                  key: radioKey,
+                  value: 0,
+                  onChanged: enabled ? (int? newValue) {
+                    setState(() {
+                      groupValue = newValue;
+                    });
+                  } : null,
+                  groupValue: groupValue,
+                ),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(enabled: true));
+
+    // Selected and enabled.
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byKey(radioKey))),
+      paints
+        ..rect(
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..circle(color: activeEnabledColor)
+        ..circle(color: activeEnabledColor),
+    );
+
+    // Check when the radio isn't selected.
+    groupValue = 1;
+    await tester.pumpWidget(buildApp(enabled: true));
+    await tester.pumpAndSettle();
+    expect(
+        Material.of(tester.element(find.byKey(radioKey))),
+        paints
+          ..rect(
+              color: const Color(0xffffffff),
+              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+          ..circle(color: const Color(0x8a000000), style: PaintingStyle.stroke, strokeWidth: 2.0)
+    );
+
+    // Check when the radio is selected, but disabled.
+    groupValue = 0;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byKey(radioKey))),
+      paints
+        ..rect(
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..circle(color: activeDisabledColor)
+        ..circle(color: activeDisabledColor),
+    );
+  });
 }

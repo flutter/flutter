@@ -347,6 +347,8 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
             value: widget.value,
             activeColor: effectiveActiveThumbColor,
             inactiveColor: inactiveThumbColor,
+            surfaceColor: theme.colorScheme.surface,
+            useActiveColorInDisabledState: activeThumbColor is MaterialStateProperty<Color>,
             hoverColor: hoverColor,
             focusColor: focusColor,
             activeThumbImage: widget.activeThumbImage,
@@ -432,6 +434,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     required this.hasFocus,
     required this.hovering,
     required this.state,
+    required this.surfaceColor,
+    required this.useActiveColorInDisabledState,
   }) : super(key: key);
 
   final bool value;
@@ -452,6 +456,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final bool hasFocus;
   final bool hovering;
   final _SwitchState state;
+  final Color surfaceColor;
+  final bool useActiveColorInDisabledState;
 
   @override
   _RenderSwitch createRenderObject(BuildContext context) {
@@ -475,6 +481,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       hasFocus: hasFocus,
       hovering: hovering,
       state: state,
+      surfaceColor: surfaceColor,
+      useActiveColorInDisabledState: useActiveColorInDisabledState,
     );
   }
 
@@ -499,7 +507,9 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..dragStartBehavior = dragStartBehavior
       ..hasFocus = hasFocus
       ..hovering = hovering
-      ..vsync = state;
+      ..vsync = state
+      ..surfaceColor = surfaceColor
+      ..useActiveColorInDisabledState = useActiveColorInDisabledState;
   }
 
   void _handleValueChanged(bool? value) {
@@ -535,6 +545,8 @@ class _RenderSwitch extends RenderToggleable {
     required bool hasFocus,
     required bool hovering,
     required this.state,
+    required Color surfaceColor,
+    required bool useActiveColorInDisabledState,
   }) : assert(textDirection != null),
        _activeThumbImage = activeThumbImage,
        _onActiveThumbImageError = onActiveThumbImageError,
@@ -544,6 +556,8 @@ class _RenderSwitch extends RenderToggleable {
        _inactiveTrackColor = inactiveTrackColor,
        _configuration = configuration,
        _textDirection = textDirection,
+       _surfaceColor = surfaceColor,
+       _useActiveColorInDisabledState = useActiveColorInDisabledState,
        super(
          value: value,
          tristate: false,
@@ -648,6 +662,25 @@ class _RenderSwitch extends RenderToggleable {
     if (_drag.dragStartBehavior == value)
       return;
     _drag.dragStartBehavior = value;
+  }
+
+  Color get surfaceColor => _surfaceColor;
+  Color _surfaceColor;
+  set surfaceColor(Color value) {
+    assert(value != null);
+    if (value == _surfaceColor)
+      return;
+    _surfaceColor = value;
+    markNeedsPaint();
+  }
+
+  bool get useActiveColorInDisabledState => _useActiveColorInDisabledState;
+  bool _useActiveColorInDisabledState;
+  set useActiveColorInDisabledState(bool value) {
+    if (useActiveColorInDisabledState == value)
+      return;
+    _useActiveColorInDisabledState = value;
+    markNeedsPaint();
   }
 
   _SwitchState state;
@@ -764,12 +797,17 @@ class _RenderSwitch extends RenderToggleable {
         break;
     }
 
-    final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, currentValue)!;
-    final Color thumbColor = Color.lerp(
-      inactiveColor,
-      Color.alphaBlend(activeColor.withOpacity(.38), Colors.white),
-      currentValue,
-    )!;
+    final Color trackColor = isEnabled || useActiveColorInDisabledState
+      ? Color.lerp(inactiveTrackColor, activeTrackColor, currentValue)!
+      : inactiveTrackColor;
+
+    final Color lerpedThumbColor = isEnabled || useActiveColorInDisabledState
+      ? Color.lerp(inactiveColor, activeColor, currentValue)!
+      : inactiveColor;
+    // Blend the thumb color against a `surfaceColor` background in case the
+    // thumbColor is not opaque. This way we do not see through the thumb to the
+    // track underneath.
+    final Color thumbColor = Color.alphaBlend(lerpedThumbColor, surfaceColor);
 
     final ImageProvider? thumbImage = isEnabled
       ? (currentValue < 0.5 ? inactiveThumbImage : activeThumbImage)

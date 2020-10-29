@@ -326,6 +326,15 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     }
   }
 
+  bool get _selected => widget.value == widget.groupValue;
+
+  Set<MaterialState> get _states => <MaterialState>{
+    if (!enabled) MaterialState.disabled,
+    if (_hovering) MaterialState.hovered,
+    if (_focused) MaterialState.focused,
+    if (_selected) MaterialState.selected,
+  };
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -341,16 +350,16 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     }
     size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
-    final bool selected = widget.value == widget.groupValue;
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
-      <MaterialState>{
-        if (!enabled) MaterialState.disabled,
-        if (_hovering) MaterialState.hovered,
-        if (_focused) MaterialState.focused,
-        if (selected) MaterialState.selected,
-      },
+      _states,
     );
+    final Color activeColor = widget.activeColor ?? themeData.toggleableActiveColor;
+    final Color effectiveActiveColor = MaterialStateProperty.resolveAs<Color>(
+      activeColor,
+      _states,
+    );
+
 
     return FocusableActionDetector(
       actions: _actionMap,
@@ -363,8 +372,9 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
       child: Builder(
         builder: (BuildContext context) {
           return _RadioRenderObjectWidget(
-            selected: selected,
-            activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
+            selected: _selected,
+            activeColor: effectiveActiveColor,
+            useActiveColorInDisabledState: activeColor is MaterialStateProperty<Color>,
             inactiveColor: _getInactiveColor(themeData),
             focusColor: widget.focusColor ?? themeData.focusColor,
             hoverColor: widget.hoverColor ?? themeData.hoverColor,
@@ -395,6 +405,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
     required this.vsync,
     required this.hasFocus,
     required this.hovering,
+    required this.useActiveColorInDisabledState,
   }) : assert(selected != null),
        assert(activeColor != null),
        assert(inactiveColor != null),
@@ -413,6 +424,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
   final bool toggleable;
   final TickerProvider vsync;
   final BoxConstraints additionalConstraints;
+  final bool useActiveColorInDisabledState;
 
   @override
   _RenderRadio createRenderObject(BuildContext context) => _RenderRadio(
@@ -427,6 +439,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
     additionalConstraints: additionalConstraints,
     hasFocus: hasFocus,
     hovering: hovering,
+    useActiveColorInDisabledState: useActiveColorInDisabledState,
   );
 
   @override
@@ -442,7 +455,8 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
       ..additionalConstraints = additionalConstraints
       ..vsync = vsync
       ..hasFocus = hasFocus
-      ..hovering = hovering;
+      ..hovering = hovering
+      ..useActiveColorInDisabledState = useActiveColorInDisabledState;
   }
 }
 
@@ -459,7 +473,9 @@ class _RenderRadio extends RenderToggleable {
     required TickerProvider vsync,
     required bool hasFocus,
     required bool hovering,
-  }) : super(
+    required bool useActiveColorInDisabledState,
+  }) :  _useActiveColorInDisabledState = useActiveColorInDisabledState,
+        super(
          value: value,
          activeColor: activeColor,
          inactiveColor: inactiveColor,
@@ -473,6 +489,15 @@ class _RenderRadio extends RenderToggleable {
          hovering: hovering,
        );
 
+  bool get useActiveColorInDisabledState => _useActiveColorInDisabledState;
+  bool _useActiveColorInDisabledState;
+  set useActiveColorInDisabledState(bool value) {
+    if (useActiveColorInDisabledState == value)
+      return;
+    _useActiveColorInDisabledState = value;
+    markNeedsPaint();
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
@@ -480,7 +505,9 @@ class _RenderRadio extends RenderToggleable {
     paintRadialReaction(canvas, offset, size.center(Offset.zero));
 
     final Offset center = (offset & size).center;
-    final Color radioColor = onChanged != null ? activeColor : inactiveColor;
+    final Color radioColor = onChanged != null || useActiveColorInDisabledState
+      ? activeColor
+      : inactiveColor;
 
     // Outer circle
     final Paint paint = Paint()

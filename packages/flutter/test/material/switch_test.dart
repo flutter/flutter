@@ -1060,4 +1060,174 @@ void main() {
     expect(updatedSwitchRenderObject.position.isCompleted, false);
     expect(updatedSwitchRenderObject.position.isDismissed, false);
   });
+
+  testWidgets('Checkbox active disabled color can be set using a stateful color', (WidgetTester tester) async {
+    const Color activeEnabledColor = Color(0xFF000001);
+    const Color activeDisabledColor = Color(0xFF000002);
+
+    Color getActiveColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return activeDisabledColor;
+      }
+      return activeEnabledColor;
+    }
+
+    final Color activeColor = MaterialStateColor.resolveWith(getActiveColor);
+
+    Widget buildSwitch({required bool enabled, required bool active}) {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: Switch(
+                  activeColor: activeColor,
+                  value: active,
+                  onChanged: enabled ? (_) { } : null,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch(enabled: false, active: false));
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: Colors.black12,
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: Colors.grey.shade400),
+      reason: 'Inactive disabled switch should still use default colors',
+    );
+
+
+    await tester.pumpWidget(buildSwitch(enabled: false, active: true));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: activeDisabledColor.withAlpha(0x80),
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: activeDisabledColor),
+      reason: 'Active disabled switch should match these colors',
+    );
+
+    await tester.pumpWidget(buildSwitch(enabled: true, active: true));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: activeEnabledColor.withAlpha(0x80),
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: activeEnabledColor),
+      reason: 'Active disabled switch should match these colors',
+    );
+  });
+
+  testWidgets('Checkbox active disabled color can be set using a stateful color from theme', (WidgetTester tester) async {
+    const Color activeEnabledColor = Color(0xFF000001);
+    const Color activeDisabledColor = Color(0xFF000002);
+
+    Color getActiveColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return activeDisabledColor;
+      }
+      return activeEnabledColor;
+    }
+
+    final Color activeColor = MaterialStateColor.resolveWith(getActiveColor);
+
+    Widget buildSwitch({required bool enabled, required bool active}) {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Theme(
+              data: ThemeData.light().copyWith(toggleableActiveColor: activeColor),
+              child: Material(
+                child: Center(
+                  child: Switch(
+                    value: active,
+                    onChanged: enabled ? (_) { } : null,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch(enabled: false, active: false));
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: Colors.black12,
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: Colors.grey.shade400),
+      reason: 'Inactive disabled switch should still use default colors',
+    );
+
+
+    await tester.pumpWidget(buildSwitch(enabled: false, active: true));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: activeDisabledColor.withAlpha(0x80),
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: activeDisabledColor),
+      reason: 'Active disabled switch should match these colors',
+    );
+
+    await tester.pumpWidget(buildSwitch(enabled: true, active: true));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: activeEnabledColor.withAlpha(0x80),
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: activeEnabledColor),
+      reason: 'Active disabled switch should match these colors',
+    );
+  });
 }
