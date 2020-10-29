@@ -28,11 +28,11 @@ const String _endPlatformAdaptiveGeneratedMark = '// END GENERATED PLATFORM ADAP
 const Map<String, List<String>> _platformAdaptiveIdentifiers = <String, List<String>>{
   // Mapping of Flutter IDs to an Android/agnostic ID and an iOS ID.
   // Flutter IDs can be anything, but should be chosen to be agnostic.
-  'arrow_back': ['arrow_back', 'arrow_back_ios'],
-  'arrow_forward': ['arrow_forward', 'arrow_forward_ios'],
-  'flip_camera': ['flip_camera_android', 'flip_camera_ios'],
-  'more': ['more_vert', 'more_horiz'],
-  'share': ['share', 'ios_share'],
+  'arrow_back': <String>['arrow_back', 'arrow_back_ios'],
+  'arrow_forward': <String>['arrow_forward', 'arrow_forward_ios'],
+  'flip_camera': <String>['flip_camera_android', 'flip_camera_ios'],
+  'more': <String>['more_vert', 'more_horiz'],
+  'share': <String>['share', 'ios_share'],
 };
 
 const Map<String, String> _identifierRewrites = <String, String>{
