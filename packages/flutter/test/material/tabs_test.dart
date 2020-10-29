@@ -2571,6 +2571,81 @@ void main() {
     expect(find.text('No tabs'), findsOneWidget);
   });
 
+  testWidgets('TabBar - updating to and from zero tabs', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/68962.
+    final List<String> tabTitles = <String>[];
+    final List<Widget> tabContents = <Widget>[];
+    TabController _tabController = TabController(length: tabContents.length, vsync: const TestVSync());
+
+    void _onTabAdd(StateSetter setState) {
+      setState(() {
+        tabTitles.add('Tab ${tabTitles.length + 1}');
+        tabContents.add(
+          Container(
+            color: Colors.red,
+            height: 200,
+            width: 200,
+          ),
+        );
+        _tabController = TabController(length: tabContents.length, vsync: const TestVSync());
+      });
+    }
+
+    void _onTabRemove(StateSetter setState) {
+      setState(() {
+        tabTitles.removeLast();
+        tabContents.removeLast();
+        _tabController = TabController(length: tabContents.length, vsync: const TestVSync());
+      });
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              appBar: AppBar(
+                actions: <Widget>[
+                  FlatButton(
+                    key: const Key('Add tab'),
+                    child: const Text('Add tab'),
+                    onPressed: () => _onTabAdd(setState),
+                  ),
+                  FlatButton(
+                    key: const Key('Remove tab'),
+                    child: const Text('Remove tab'),
+                    onPressed: () => _onTabRemove(setState),
+                  ),
+                ],
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(40.0),
+                  child: Expanded(
+                    child: TabBar(
+                      controller: _tabController,
+                      tabs: tabTitles
+                        .map((String title) => Tab(text: title))
+                        .toList(),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('Add tab'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('Add tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('Remove tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsNothing);
+  });
+
    testWidgets('TabBar expands vertically to accommodate the Icon and child Text() pair the same amount it would expand for Icon and text pair.', (WidgetTester tester) async {
     const double indicatorWeight = 2.0;
 

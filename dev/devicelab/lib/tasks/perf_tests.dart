@@ -769,6 +769,10 @@ class PerfTestWithSkSL extends PerfTest {
       _flutterPath,
       <String>[
         'run',
+        if (deviceOperatingSystem == DeviceOperatingSystem.ios)
+          ...<String>[
+            '--device-timeout', '5',
+          ],
         '--verbose',
         '--verbose-system-logs',
         '--purge-persistent-cache',

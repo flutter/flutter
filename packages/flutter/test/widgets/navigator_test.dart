@@ -3195,6 +3195,43 @@ void main() {
       expect(find.text('initial'), findsOneWidget);
     });
 
+    testWidgets('can update pages before a pageless route has finished popping', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/68162.
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      List<Page<dynamic>> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      ];
+      bool onPopPage(Route<dynamic> route, dynamic result) {
+        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        return route.didPop(result);
+      }
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+      );
+      // Pushes a pageless route.
+      showDialog<void>(
+        useRootNavigator: false,
+        context: navigator.currentContext!,
+        builder: (BuildContext context) => const Text('dialog')
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('dialog'), findsOneWidget);
+      // Pops the pageless route.
+      navigator.currentState!.pop();
+      // Before the pop finishes, updates the page list.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+      ];
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+      );
+      // It should not crash the app.
+      expect(tester.takeException(), isNull);
+      await tester.pumpAndSettle();
+      expect(find.text('initial'), findsOneWidget);
+    });
+
     testWidgets('pages remove and add trigger observer in the right order', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       List<TestPage> myPages = <TestPage>[

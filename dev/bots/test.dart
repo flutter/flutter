@@ -239,13 +239,21 @@ Future<void> _runSmokeTests() async {
         expectFailure: true,
         printOutput: false,
       ),
-      runCommand(flutter,
-        <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
-        workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-        expectNonZeroExit: true,
-        outputMode: OutputMode.capture,
-      ),
     ],
+  );
+
+  // The flutter-tester device cannot be run concurrently in the same project directory.
+  await runCommand(flutter,
+    <String>['drive', '--show-test-device', '-d', 'flutter-tester', '-t', path.join('test_driver', 'success.dart')],
+    workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
+    expectNonZeroExit: false,
+    outputMode: OutputMode.capture,
+  );
+  await runCommand(flutter,
+    <String>['drive', '--show-test-device', '-d', 'flutter-tester', '-t', path.join('test_driver', 'failure.dart')],
+    workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
+    expectNonZeroExit: true,
+    outputMode: OutputMode.capture,
   );
 
   // Verify that we correctly generated the version file.
@@ -776,9 +784,12 @@ Future<void> _runWebUnitTests() async {
 }
 
 Future<void> _runWebIntegrationTests() async {
-  await _runWebStackTraceTest('profile');
-  await _runWebStackTraceTest('release');
+  await _runWebStackTraceTest('profile', 'lib/stack_trace.dart');
+  await _runWebStackTraceTest('release', 'lib/stack_trace.dart');
+  await _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart');
+  await _runWebStackTraceTest('release', 'lib/framework_stack_trace.dart');
   await _runWebDebugTest('lib/stack_trace.dart');
+  await _runWebDebugTest('lib/framework_stack_trace.dart');
   await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
   await _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true);
@@ -807,7 +818,7 @@ Future<void> _runWebIntegrationTests() async {
   ]);
 }
 
-Future<void> _runWebStackTraceTest(String buildMode) async {
+Future<void> _runWebStackTraceTest(String buildMode, String entrypoint) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
   final String appBuildDirectory = path.join(testAppDirectory, 'build', 'web');
 
@@ -824,7 +835,7 @@ Future<void> _runWebStackTraceTest(String buildMode) async {
       'web',
       '--$buildMode',
       '-t',
-      'lib/stack_trace.dart',
+      entrypoint,
     ],
     workingDirectory: testAppDirectory,
     environment: <String, String>{

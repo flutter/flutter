@@ -985,11 +985,15 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
         if (hasPagelessRoute) {
           final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute]!;
           for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
-            assert(pagelessRoute.isWaitingForExitingDecision);
-            if (isLastExitingPageRoute && pagelessRoute == pagelessRoutes.last) {
-              pagelessRoute.markForPop(pagelessRoute.route.currentResult);
-            } else {
-              pagelessRoute.markForComplete(pagelessRoute.route.currentResult);
+            // It is possible that a pageless route that belongs to an exiting
+            // page-based route does not require exiting decision. This can
+            // happen if the page list is updated right after a Navigator.pop.
+            if (pagelessRoute.isWaitingForExitingDecision) {
+              if (isLastExitingPageRoute && pagelessRoute == pagelessRoutes.last) {
+                pagelessRoute.markForPop(pagelessRoute.route.currentResult);
+              } else {
+                pagelessRoute.markForComplete(pagelessRoute.route.currentResult);
+              }
             }
           }
         }
@@ -3041,8 +3045,36 @@ class _RouteEntry extends RouteTransitionRecord {
 
   void dispose() {
     assert(currentState.index < _RouteLifecycle.disposed.index);
-    route.dispose();
     currentState = _RouteLifecycle.disposed;
+
+    // If the overlay entries are still mounted, widgets in the route's subtree
+    // may still reference resources from the route and we delay disposal of
+    // the route until the overlay entries are no longer mounted.
+    // Since the overlay entry is the root of the route's subtree it will only
+    // get unmounted after every other widget in the subtree has been unmounted.
+
+    final Iterable<OverlayEntry> mountedEntries = route.overlayEntries.where((OverlayEntry e) => e.mounted);
+
+    if (mountedEntries.isEmpty) {
+      route.dispose();
+    } else {
+      int mounted = mountedEntries.length;
+      assert(mounted > 0);
+      for (final OverlayEntry entry in mountedEntries) {
+        late VoidCallback listener;
+        listener = () {
+          assert(mounted > 0);
+          assert(!entry.mounted);
+          mounted--;
+          entry.removeListener(listener);
+          if (mounted == 0) {
+            assert(route.overlayEntries.every((OverlayEntry e) => !e.mounted));
+            route.dispose();
+          }
+        };
+        entry.addListener(listener);
+      }
+    }
   }
 
   bool get willBePresent {
@@ -3627,7 +3659,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             () => <_RouteEntry>[],
           );
         pagelessRoutes.add(potentialEntryToRemove);
-        if (previousOldPageRouteEntry!.isWaitingForExitingDecision)
+        if (previousOldPageRouteEntry!.isWaitingForExitingDecision && potentialEntryToRemove.isPresent)
           potentialEntryToRemove.markNeedsExitingDecision();
         continue;
       }

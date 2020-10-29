@@ -335,7 +335,7 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Orientation orientation = mediaQuery.orientation;
     final double textScaleFactor = math.min(mediaQuery.textScaleFactor, 1.3);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -428,7 +428,7 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
         duration: _dialogSizeAnimationDuration,
         curve: Curves.easeIn,
         child: MediaQuery(
-          data: MediaQuery.of(context)!.copyWith(
+          data: MediaQuery.of(context).copyWith(
             textScaleFactor: textScaleFactor,
           ),
           child: Builder(builder: (BuildContext context) {
@@ -479,7 +479,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     final ThemeData theme = Theme.of(context)!;
     final ColorScheme colorScheme = theme.colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final Orientation orientation = MediaQuery.of(context)!.orientation;
+    final Orientation orientation = MediaQuery.of(context).orientation;
     final TextTheme textTheme = theme.textTheme;
     final Color headerForeground = colorScheme.brightness == Brightness.light
       ? colorScheme.onPrimary
@@ -525,7 +525,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
           ],
           bottom: PreferredSize(
             child: Row(children: <Widget>[
-              SizedBox(width: MediaQuery.of(context)!.size.width < 360 ? 42 : 72),
+              SizedBox(width: MediaQuery.of(context).size.width < 360 ? 42 : 72),
               Expanded(
                 child: Semantics(
                   label: '$helpText $startDateText to $endDateText',
@@ -633,7 +633,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     final ThemeData theme = Theme.of(context)!;
     final ColorScheme colorScheme = theme.colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final Orientation orientation = MediaQuery.of(context)!.orientation;
+    final Orientation orientation = MediaQuery.of(context).orientation;
     final TextTheme textTheme = theme.textTheme;
 
     final Color dateColor = colorScheme.brightness == Brightness.light

@@ -565,7 +565,7 @@ class Actions extends StatefulWidget {
       if (action == null) {
         throw FlutterError('Unable to find an action for a $type in an $Actions widget '
             'in the given context.\n'
-            "$Actions.find() was called on a context that doesn\'t contain an "
+            "$Actions.find() was called on a context that doesn't contain an "
             '$Actions widget with a mapping for the given intent type.\n'
             'The context used was:\n'
             '  $context\n'
@@ -1057,7 +1057,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
 
     bool canRequestFocus(FocusableActionDetector target) {
-      final NavigationMode mode = MediaQuery.of(context, nullOk: true)?.navigationMode ?? NavigationMode.traditional;
+      final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
       switch (mode) {
         case NavigationMode.traditional:
           return target.enabled;
@@ -1098,7 +1098,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.of(context, nullOk: true)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return widget.enabled;

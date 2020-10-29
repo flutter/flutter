@@ -591,7 +591,7 @@ class FuchsiaDevice extends Device {
     if (_cachedHostAddress != null) {
       return _cachedHostAddress;
     }
-    final RunResult result = await shell('echo \$SSH_CONNECTION');
+    final RunResult result = await shell(r'echo $SSH_CONNECTION');
     void fail() {
       throwToolExit('Failed to get local address, aborting.\n$result');
     }

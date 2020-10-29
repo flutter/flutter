@@ -139,7 +139,7 @@ class FakeTestCompiler extends TestCompiler {
     BuildInfo buildInfo,
     FlutterProject flutterProject,
     this.residentCompiler,
-  ) : super(buildInfo, flutterProject, <String>[]);
+  ) : super(buildInfo, flutterProject);
 
   final MockResidentCompiler residentCompiler;
 

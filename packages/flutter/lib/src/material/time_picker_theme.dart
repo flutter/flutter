@@ -385,8 +385,7 @@ class TimePickerTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final TimePickerTheme? ancestorTheme = context.findAncestorWidgetOfExactType<TimePickerTheme>();
-    return identical(this, ancestorTheme) ? child : TimePickerTheme(data: data, child: child);
+    return TimePickerTheme(data: data, child: child);
   }
 
   @override
