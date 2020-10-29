@@ -101,7 +101,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// A callback invoked when any window begins a frame.
   ///
-  /// {@template flutter.foundation.PlatformDispatcher.onBeginFrame}
   /// A callback that is invoked to notify the application that it is an
   /// appropriate time to provide a scene using the [SceneBuilder] API and the
   /// [PlatformWindow.render] method.
@@ -109,7 +108,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// screen with the highest VSync rate. This is only called if
   /// [PlatformWindow.scheduleFrame] has been called since the last time this
   /// callback was invoked.
-  /// {@endtemplate}
   @override
   ui.FrameCallback? get onBeginFrame => _onBeginFrame;
   ui.FrameCallback? _onBeginFrame;
@@ -126,13 +124,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _invoke1<Duration>(_onBeginFrame, _onBeginFrameZone, duration);
   }
 
-  /// {@template flutter.foundation.PlatformDispatcher.onDrawFrame}
   /// A callback that is invoked for each frame after [onBeginFrame] has
   /// completed and after the microtask queue has been drained.
   ///
   /// This can be used to implement a second phase of frame rendering that
   /// happens after any deferred work queued by the [onBeginFrame] phase.
-  /// {@endtemplate}
   @override
   ui.VoidCallback? get onDrawFrame => _onDrawFrame;
   ui.VoidCallback? _onDrawFrame;

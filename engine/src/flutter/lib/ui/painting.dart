@@ -19,6 +19,15 @@ part of dart.ui;
 // which can not be rendered by Skia.
 
 // Update this list when changing the list of supported codecs.
+/// {@template dart.ui.imageFormats}
+/// JPEG, PNG, GIF, Animated GIF, WebP, Animated WebP, BMP, and WBMP. Additional
+/// formats may be supported by the underlying platform. Flutter will
+/// attempt to call platform API to decode unrecognized formats, and if the
+/// platform API supports decoding the image Flutter will be able to render it.
+/// {@endtemplate}
+
+// TODO(gspencergoog): remove this template block once the framework templates
+// are renamed to not reference it.
 /// {@template flutter.dart:ui.imageFormats}
 /// JPEG, PNG, GIF, Animated GIF, WebP, Animated WebP, BMP, and WBMP. Additional
 /// formats may be supported by the underlying platform. Flutter will
@@ -1960,7 +1969,7 @@ class Codec extends NativeFieldWrapperClass2 {
 ///
 /// The `list` parameter is the binary image data (e.g a PNG or GIF binary data).
 /// The data can be for either static or animated images. The following image
-/// formats are supported: {@macro flutter.dart:ui.imageFormats}
+/// formats are supported: {@macro dart.ui.imageFormats}
 ///
 /// The `targetWidth` and `targetHeight` arguments specify the size of the
 /// output image, in image pixels. If they are not equal to the intrinsic

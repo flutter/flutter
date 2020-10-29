@@ -209,7 +209,6 @@ class PlatformDispatcher {
 
   /// A callback invoked when any view begins a frame.
   ///
-  /// {@template flutter.foundation.PlatformDispatcher.onBeginFrame}
   /// A callback that is invoked to notify the application that it is an
   /// appropriate time to provide a scene using the [SceneBuilder] API and the
   /// [FlutterView.render] method.
@@ -218,7 +217,6 @@ class PlatformDispatcher {
   /// screen with the highest VSync rate. This is only called if
   /// [PlatformDispatcher.scheduleFrame] has been called since the last time
   /// this callback was invoked.
-  /// {@endtemplate}
   FrameCallback? get onBeginFrame => _onBeginFrame;
   FrameCallback? _onBeginFrame;
   Zone _onBeginFrameZone = Zone.root;
@@ -236,13 +234,11 @@ class PlatformDispatcher {
     );
   }
 
-  /// {@template flutter.foundation.PlatformDispatcher.onDrawFrame}
   /// A callback that is invoked for each frame after [onBeginFrame] has
   /// completed and after the microtask queue has been drained.
   ///
   /// This can be used to implement a second phase of frame rendering that
   /// happens after any deferred work queued by the [onBeginFrame] phase.
-  /// {@endtemplate}
   VoidCallback? get onDrawFrame => _onDrawFrame;
   VoidCallback? _onDrawFrame;
   Zone _onDrawFrameZone = Zone.root;
