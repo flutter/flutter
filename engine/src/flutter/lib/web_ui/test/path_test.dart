@@ -536,5 +536,19 @@ void testMain() {
       end = iter.skipToNextContour();
       expect(start, end);
     });
+
+    /// Regression test for https://github.com/flutter/flutter/issues/68702.
+    test('Path should return correct bounds after transform', () {
+      final Path path1 = Path()
+        ..moveTo(100, 100)
+        ..lineTo(200, 100)
+        ..lineTo(150, 200)
+        ..close();
+      final SurfacePath path2 = Path.from(path1) as SurfacePath;
+      Rect bounds = path2.pathRef.getBounds();
+      SurfacePath transformedPath = path2.transform(
+          Matrix4.identity().scaled(0.5, 0.5).toFloat64());
+      expect(transformedPath.pathRef.getBounds(), isNot(bounds));
+    });
   });
 }
