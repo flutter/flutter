@@ -814,7 +814,7 @@ class WebDevFS implements DevFS {
       webAssetServer.webRenderer = WebRendererMode.autoDetect;
     } else if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
         webAssetServer.webRenderer = WebRendererMode.canvaskit;
-      }
+    }
     if (hostname == 'any') {
       _baseUri = Uri.http('localhost:$port', '');
     } else {
