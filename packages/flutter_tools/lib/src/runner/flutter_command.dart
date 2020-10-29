@@ -843,7 +843,7 @@ abstract class FlutterCommand extends Command<void> {
         : <String>[];
 
     if (argParser.options.containsKey('web-renderer') && argResults.wasParsed('web-renderer')) {
-      dartDefines = _updateDartDefines(dartDefines, stringArg('web-renderer'));
+      dartDefines = updateDartDefines(dartDefines, stringArg('web-renderer'));
     }
 
     return BuildInfo(buildMode,
@@ -944,7 +944,8 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Updates dart-defines based on [webRenderer].
-  List<String> _updateDartDefines(List<String> dartDefines, String webRenderer) {
+  @visibleForTesting
+  static List<String> updateDartDefines(List<String> dartDefines, String webRenderer) {
     final Set<String> dartDefinesSet = dartDefines.toSet();
     if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
         && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
