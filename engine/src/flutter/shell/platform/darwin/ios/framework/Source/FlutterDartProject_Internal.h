@@ -12,8 +12,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle = nil);
+
 @interface FlutterDartProject ()
 
+/**
+ * This is currently used for *only for tests* to override settings.
+ */
+- (instancetype)initWithSettings:(const flutter::Settings&)settings;
 - (const flutter::Settings&)settings;
 - (const flutter::PlatformData)defaultPlatformData;
 

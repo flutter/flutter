@@ -332,6 +332,7 @@
 /* Begin XCBuildConfiguration section */
 		0D6AB6D022BB05E200EEE540 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -391,6 +392,7 @@
 		};
 		0D6AB6D122BB05E200EEE540 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -484,7 +486,6 @@
 		};
 		0D6AB6D622BB05E200EEE540 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
@@ -528,7 +529,6 @@
 		};
 		0D6AB6D722BB05E200EEE540 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
