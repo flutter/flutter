@@ -448,7 +448,7 @@ List<String> flutterCommandArgs(String command, List<String> options) {
     if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
       ...<String>[
         '--device-timeout',
-        '10',
+        '5',
       ],
     if (localEngine != null) ...<String>['--local-engine', localEngine],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
