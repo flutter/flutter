@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_TEST_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_TEST_H_
 
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
+
 #include <glib.h>
 #include <stdint.h>
 
@@ -17,6 +19,9 @@ GBytes* hex_string_to_bytes(const gchar* hex_string);
 
 // Helper function to convert GBytes into a hexadecimal string (e.g. "01feab")
 gchar* bytes_to_hex_string(GBytes* bytes);
+
+// Creates a mock engine that responds to platform messages.
+FlEngine* make_mock_engine();
 
 G_END_DECLS
 
