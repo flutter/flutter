@@ -9,7 +9,7 @@
 #include <algorithm>
 
 #include "flutter/fml/message_loop.h"
-#include "flutter/shell/platform/embedder/embedder_safe_access.h"
+#include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 
 namespace flutter {
 

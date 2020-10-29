@@ -48,7 +48,7 @@ template("embedder_source_set") {
       "embedder_render_target.h",
       "embedder_render_target_cache.cc",
       "embedder_render_target_cache.h",
-      "embedder_safe_access.h",
+      "embedder_struct_macros.h",
       "embedder_surface.cc",
       "embedder_surface.h",
       "embedder_surface_software.cc",
@@ -106,6 +106,14 @@ embedder_source_set("embedder_as_internal_library") {
 
 source_set("embedder_headers") {
   public = [ "embedder.h" ]
+
+  public_configs = [ "//flutter:config" ]
+}
+
+source_set("embedder_test_utils") {
+  public = [ "test_utils/proc_table_replacement.h" ]
+
+  deps = [ ":embedder_headers" ]
 
   public_configs = [ "//flutter:config" ]
 }
@@ -199,6 +207,33 @@ if (enable_unittests) {
 
       deps += [ "//flutter/testing:opengl" ]
     }
+  }
+
+  # Tests the build in FLUTTER_ENGINE_NO_PROTOTYPES mode.
+  executable("embedder_proctable_unittests") {
+    testonly = true
+
+    configs += [
+      ":embedder_gpu_configuration_config",
+      "//flutter:export_dynamic_symbols",
+    ]
+
+    sources = [ "tests/embedder_unittests_proctable.cc" ]
+
+    defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
+
+    deps = [
+      ":embedder",
+      ":embedder_gpu_configuration",
+      ":fixtures",
+      "//flutter/testing",
+
+      #"//flutter/testing:dart",
+      #"//flutter/testing:skia",
+      #"//flutter/third_party/tonic",
+      #"//third_party/dart/runtime/bin:elf_loader",
+      #"//third_party/skia",
+    ]
   }
 }
 
