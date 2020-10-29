@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'container.dart';
+import 'debug.dart';
 import 'framework.dart';
 
 // Examples can assume:
@@ -155,7 +156,7 @@ abstract class WidgetsLocalizations {
   /// that encloses the given context.
   ///
   /// This method is just a convenient shorthand for:
-  /// `Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations)`.
+  /// `Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations)!`.
   ///
   /// References to the localized resources defined by this class are typically
   /// written in terms of this method. For example:
@@ -163,8 +164,9 @@ abstract class WidgetsLocalizations {
   /// ```dart
   /// textDirection: WidgetsLocalizations.of(context).textDirection,
   /// ```
-  static WidgetsLocalizations? of(BuildContext context) {
-    return Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations);
+  static WidgetsLocalizations of(BuildContext context) {
+    assert(debugCheckHasWidgetsLocalizations(context));
+    return Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations)!;
   }
 }
 

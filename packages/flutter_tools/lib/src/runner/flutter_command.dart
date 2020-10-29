@@ -129,6 +129,22 @@ abstract class FlutterCommand extends Command<void> {
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
 
+  /// The map used to convert web-renderer option to a List of dart-defines.
+  static const Map<String, Iterable<String>> _webRendererDartDefines =
+  <String, Iterable<String>> {
+    'auto': <String>[
+      'FLUTTER_WEB_AUTO_DETECT=true',
+    ],
+    'canvaskit': <String>[
+      'FLUTTER_WEB_AUTO_DETECT=false',
+      'FLUTTER_WEB_USE_SKIA=true'
+    ],
+    'html': <String>[
+      'FLUTTER_WEB_AUTO_DETECT=false',
+      'FLUTTER_WEB_USE_SKIA=false'
+    ],
+  };
+
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
@@ -422,6 +438,18 @@ abstract class FlutterCommand extends Command<void> {
             'and double.fromEnvironment constructors.\n'
             'Multiple defines can be passed by repeating --dart-define multiple times.',
       valueHelp: 'foo=bar',
+    );
+  }
+
+  void usesWebRendererOption() {
+    argParser.addOption('web-renderer',
+      defaultsTo: 'html',
+      allowed: <String>['auto', 'canvaskit', 'html'],
+      help: 'Which rendering backend to use for Flutter for Web.'
+          'auto      - Use the HTML renderer on mobile devices,'
+          '            and CanvasKit on desktop devices.'
+          'canvaskit - Always use the CanvasKit renderer.'
+          'html      - Default. Always use the HTML renderer.',
     );
   }
 
@@ -810,6 +838,14 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
+    final List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
+        ? stringsArg(FlutterOptions.kDartDefinesOption)
+        : <String>[];
+
+    if (argParser.options.containsKey('web-renderer') && argResults.wasParsed('web-renderer')) {
+      _updateDartDefines(dartDefines, stringArg('web-renderer'));
+    }
+
     return BuildInfo(buildMode,
       argParser.options.containsKey('flavor')
         ? stringArg('flavor')
@@ -834,9 +870,7 @@ abstract class FlutterCommand extends Command<void> {
       treeShakeIcons: treeShakeIcons,
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
-      dartDefines: argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
-          ? stringsArg(FlutterOptions.kDartDefinesOption)
-          : const <String>[],
+      dartDefines: dartDefines,
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
@@ -907,6 +941,15 @@ abstract class FlutterCommand extends Command<void> {
           'for previous releases of Flutter.');
       globals.printStatus('');
     }
+  }
+
+  /// Updates dart-defines based on [webRenderer].
+  void _updateDartDefines(List<String> dartDefines, String webRenderer) {
+    if (dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
+      throwToolExit('Only one of "--web-renderer" and '
+          '"--dart-defines=FLUTTER_WEB_USE_SKIA" may be specified.');
+    }
+    dartDefines.addAll(_webRendererDartDefines[webRenderer]);
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {

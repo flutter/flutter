@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 
 import '../android/android_device.dart';
 import '../application_package.dart';
@@ -13,6 +14,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
+import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
 import '../globals.dart' as globals;
@@ -178,7 +180,12 @@ class DriveCommand extends RunCommandBase {
       logger: _logger,
       processUtils: globals.processUtils,
       dartSdkPath: globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
-   );
+    );
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      globals.fs.file('.packages'),
+      logger: _logger,
+      throwOnError: false,
+    ) ?? PackageConfig.empty;
     final DriverService driverService = _flutterDriverFactory.createDriverService(web);
     final BuildInfo buildInfo = getBuildInfo();
     final DebuggingOptions debuggingOptions = createDebuggingOptions();
@@ -186,27 +193,41 @@ class DriveCommand extends RunCommandBase {
       ? null
       : _fileSystem.file(stringArg('use-application-binary'));
 
-    await driverService.start(
-      buildInfo,
-      device,
-      debuggingOptions,
-      ipv6,
-      applicationBinary: applicationBinary,
-      route: route,
-      userIdentifier: userIdentifier,
-      mainPath: targetFile,
-      platformArgs: <String, Object>{
-        if (traceStartup)
-          'trace-startup': traceStartup,
-        if (web)
-          '--no-launch-chrome': true,
+    if (stringArg('use-existing-app') == null) {
+      await driverService.start(
+        buildInfo,
+        device,
+        debuggingOptions,
+        ipv6,
+        applicationBinary: applicationBinary,
+        route: route,
+        userIdentifier: userIdentifier,
+        mainPath: targetFile,
+        platformArgs: <String, Object>{
+          if (traceStartup)
+            'trace-startup': traceStartup,
+          if (web)
+            '--no-launch-chrome': true,
+        }
+      );
+    } else {
+      final Uri uri = Uri.tryParse(stringArg('use-existing-app'));
+      if (uri == null) {
+        throwToolExit('Invalid VM Service URI: ${stringArg('use-existing-app')}');
       }
-    );
+      await driverService.reuseApplication(
+        uri,
+        device,
+        debuggingOptions,
+        ipv6,
+      );
+    }
 
     final int testResult = await driverService.startTest(
       testFile,
       stringsArg('test-arguments'),
       <String, String>{},
+      packageConfig,
       chromeBinary: stringArg('chrome-binary'),
       headless: boolArg('headless'),
       browserDimension: stringArg('browser-dimension').split(','),
@@ -226,7 +247,7 @@ class DriveCommand extends RunCommandBase {
       await driverService.stop(userIdentifier: userIdentifier, writeSkslOnExit: skslFile);
     }
     if (testResult != 0) {
-      return FlutterCommandResult.fail();
+      throwToolExit(null);
     }
     return FlutterCommandResult.success();
   }

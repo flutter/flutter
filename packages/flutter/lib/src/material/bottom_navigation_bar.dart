@@ -657,7 +657,7 @@ class _Label extends StatelessWidget {
     if (item.label != null) {
       // Do not grow text in bottom navigation bar when we can show a tooltip
       // instead.
-      final MediaQueryData mediaQueryData = MediaQuery.of(context)!;
+      final MediaQueryData mediaQueryData = MediaQuery.of(context);
       text = MediaQuery(
         data: mediaQueryData.copyWith(
           textScaleFactor: math.min(1.0, mediaQueryData.textScaleFactor),
@@ -920,7 +920,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 
     // Labels apply up to _bottomMargin padding. Remainder is media padding.
-    final double additionalBottomPadding = math.max(MediaQuery.of(context)!.padding.bottom - widget.selectedFontSize / 2.0, 0.0);
+    final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - widget.selectedFontSize / 2.0, 0.0);
     Color? backgroundColor;
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:

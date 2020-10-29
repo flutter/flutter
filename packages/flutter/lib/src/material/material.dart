@@ -453,7 +453,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       child: child,
       clipper: ShapeBorderClipper(
         shape: shape,
-        textDirection: Directionality.of(context),
+        textDirection: Directionality.maybeOf(context),
       ),
       clipBehavior: clipBehavior,
     );
@@ -787,7 +787,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       ),
       clipper: ShapeBorderClipper(
         shape: shape,
-        textDirection: Directionality.of(context),
+        textDirection: Directionality.maybeOf(context),
       ),
       clipBehavior: widget.clipBehavior,
       elevation: elevation,
@@ -812,8 +812,8 @@ class _ShapeBorderPaint extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       child: child,
-      painter: borderOnForeground ? null : _ShapeBorderPainter(shape, Directionality.of(context)),
-      foregroundPainter: borderOnForeground ? _ShapeBorderPainter(shape, Directionality.of(context)) : null,
+      painter: borderOnForeground ? null : _ShapeBorderPainter(shape, Directionality.maybeOf(context)),
+      foregroundPainter: borderOnForeground ? _ShapeBorderPainter(shape, Directionality.maybeOf(context)) : null,
     );
   }
 }
