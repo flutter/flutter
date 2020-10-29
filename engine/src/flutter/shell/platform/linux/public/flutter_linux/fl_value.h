@@ -113,7 +113,7 @@ FlValue* fl_value_new_float(double value);
 
 /**
  * fl_value_new_string:
- * @value: a nul terminated UTF-8 string.
+ * @value: a %NULL-terminated UTF-8 string.
  *
  * Creates an #FlValue that contains UTF-8 text. The equivalent Dart type is a
  * String.
@@ -123,7 +123,7 @@ FlValue* fl_value_new_float(double value);
 FlValue* fl_value_new_string(const gchar* value);
 
 /**
- * fl_value_new_string:
+ * fl_value_new_string_sized:
  * @value: a buffer containing UTF-8 text. It does not require a nul terminator.
  * @value_length: the number of bytes to use from @value.
  *
@@ -136,7 +136,7 @@ FlValue* fl_value_new_string_sized(const gchar* value, size_t value_length);
 
 /**
  * fl_value_new_uint8_list:
- * @value: an arrary of unsigned 8 bit integers.
+ * @value: an array of unsigned 8 bit integers.
  * @value_length: number of elements in @value.
  *
  * Creates an ordered list containing 8 bit unsigned integers. The data is
@@ -147,7 +147,7 @@ FlValue* fl_value_new_string_sized(const gchar* value, size_t value_length);
 FlValue* fl_value_new_uint8_list(const uint8_t* value, size_t value_length);
 
 /**
- * fl_value_new_uint8_list:
+ * fl_value_new_uint8_list_from_bytes:
  * @value: a #GBytes.
  *
  * Creates an ordered list containing 8 bit unsigned integers. The data is
@@ -159,7 +159,7 @@ FlValue* fl_value_new_uint8_list_from_bytes(GBytes* value);
 
 /**
  * fl_value_new_int32_list:
- * @value: an arrary of signed 32 bit integers.
+ * @value: an array of signed 32 bit integers.
  * @value_length: number of elements in @value.
  *
  * Creates an ordered list containing 32 bit integers. The equivalent Dart type
@@ -171,7 +171,7 @@ FlValue* fl_value_new_int32_list(const int32_t* value, size_t value_length);
 
 /**
  * fl_value_new_int64_list:
- * @value: an arrary of signed 64 bit integers.
+ * @value: an array of signed 64 bit integers.
  * @value_length: number of elements in @value.
  *
  * Creates an ordered list containing 64 bit integers. The equivalent Dart type
@@ -183,7 +183,7 @@ FlValue* fl_value_new_int64_list(const int64_t* value, size_t value_length);
 
 /**
  * fl_value_new_float_list:
- * @value: an arrary of floating point numbers.
+ * @value: an array of floating point numbers.
  * @value_length: number of elements in @value.
  *
  * Creates an ordered list containing floating point numbers. The equivalent
@@ -283,7 +283,7 @@ FlValue* fl_value_ref(FlValue* value);
  * fl_value_unref:
  * @value: an #FlValue.
  *
- * Dereases the reference count of an #FlValue. When the refernece count hits
+ * Decreases the reference count of an #FlValue. When the reference count hits
  * zero @value is destroyed and no longer valid.
  */
 void fl_value_unref(FlValue* value);
@@ -323,7 +323,7 @@ bool fl_value_equal(FlValue* a, FlValue* b);
 void fl_value_append(FlValue* value, FlValue* child);
 
 /**
- * fl_value_append:
+ * fl_value_append_take:
  * @value: an #FlValue of type #FL_VALUE_TYPE_LIST.
  * @child: (transfer full): an #FlValue.
  *
@@ -410,13 +410,13 @@ bool fl_value_get_bool(FlValue* value);
 int64_t fl_value_get_int(FlValue* value);
 
 /**
- * fl_value_get_double:
+ * fl_value_get_float:
  * @value: an #FlValue of type #FL_VALUE_TYPE_FLOAT.
  *
  * Gets the floating point number of @value. Calling this with an #FlValue
  * that is not of type #FL_VALUE_TYPE_FLOAT is a programming error.
  *
- * Returns: a UTF-8 encoded string.
+ * Returns: a floating point number.
  */
 double fl_value_get_float(FlValue* value);
 
@@ -511,7 +511,7 @@ FlValue* fl_value_get_list_value(FlValue* value, size_t index);
  * @value: an #FlValue of type #FL_VALUE_TYPE_MAP.
  * @index: an index in the map.
  *
- * Gets an key from the map. It is a programming error to request an index that
+ * Gets a key from the map. It is a programming error to request an index that
  * is outside the size of the list as returned from fl_value_get_length().
  * Calling this with an #FlValue that is not of type #FL_VALUE_TYPE_MAP is a
  * programming error.
@@ -521,7 +521,7 @@ FlValue* fl_value_get_list_value(FlValue* value, size_t index);
 FlValue* fl_value_get_map_key(FlValue* value, size_t index);
 
 /**
- * fl_value_get_map_key:
+ * fl_value_get_map_value:
  * @value: an #FlValue of type #FL_VALUE_TYPE_MAP.
  * @index: an index in the map.
  *
@@ -543,8 +543,8 @@ FlValue* fl_value_get_map_value(FlValue* value, size_t index);
  * fl_value_equal(). Calling this with an #FlValue that is not of type
  * #FL_VALUE_TYPE_MAP is a programming error.
  *
- * Map lookups are not optimised for performance - if have a large map or need
- * frequent access you should copy the data into another structure, e.g.
+ * Map lookups are not optimised for performance - if you have a large map or
+ * need frequent access you should copy the data into another structure, e.g.
  * #GHashTable.
  *
  * Returns: (allow-none): the value with this key or %NULL if not one present.
@@ -560,8 +560,8 @@ FlValue* fl_value_lookup(FlValue* value, FlValue* key);
  * fl_value_equal(). Calling this with an #FlValue that is not of type
  * #FL_VALUE_TYPE_MAP is a programming error.
  *
- * Map lookups are not optimised for performance - if have a large map or need
- * frequent access you should copy the data into another structure, e.g.
+ * Map lookups are not optimised for performance - if you have a large map or
+ * need frequent access you should copy the data into another structure, e.g.
  * #GHashTable.
  *
  * Returns: (allow-none): the value with this key or %NULL if not one present.
@@ -573,7 +573,7 @@ FlValue* fl_value_lookup_string(FlValue* value, const gchar* key);
  * @value: an #FlValue.
  *
  * Converts an #FlValue to a text representation, suitable for logging purposes.
- * The text is formatted to be match the equivalent Dart toString() methods.
+ * The text is formatted to be the equivalent of Dart toString() methods.
  *
  * Returns: UTF-8 text.
  */
