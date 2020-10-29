@@ -168,6 +168,7 @@ std::optional<CpuUsageInfo> ProfilerMetricsIOS::CpuUsage() {
   }
 
   double total_cpu_usage = 0.0;
+  uint32_t num_threads = mach_threads.thread_count;
 
   // Add the CPU usage for each thread. It should be noted that there may be some CPU usage missing
   // from this calculation. If a thread ends between calls to this routine, then its info will be
@@ -182,17 +183,30 @@ std::optional<CpuUsageInfo> ProfilerMetricsIOS::CpuUsage() {
     kernel_return_code =
         thread_info(mach_threads.threads[i], THREAD_BASIC_INFO,
                     reinterpret_cast<thread_info_t>(&basic_thread_info), &thread_info_count);
-    if (kernel_return_code != KERN_SUCCESS) {
-      FML_LOG(ERROR) << "Error retrieving thread information: "
-                     << mach_error_string(kernel_return_code);
-      return std::nullopt;
+    switch (kernel_return_code) {
+      case KERN_SUCCESS: {
+        const double current_thread_cpu_usage =
+            basic_thread_info.cpu_usage / static_cast<float>(TH_USAGE_SCALE);
+        total_cpu_usage += current_thread_cpu_usage;
+        break;
+      }
+      case MACH_SEND_TIMEOUT:
+      case MACH_SEND_TIMED_OUT:
+      case MACH_SEND_INVALID_DEST:
+        // Ignore as this thread been destroyed. The possible return codes are not really well
+        // documented. This handling is inspired from the following sources:
+        // - https://opensource.apple.com/source/xnu/xnu-4903.221.2/tests/task_inspect.c.auto.html
+        // - https://github.com/apple/swift-corelibs-libdispatch/blob/main/src/queue.c#L6617
+        num_threads--;
+        break;
+      default:
+        FML_LOG(ERROR) << "Error retrieving thread information: "
+                       << mach_error_string(kernel_return_code);
+        return std::nullopt;
     }
-    const double current_thread_cpu_usage =
-        basic_thread_info.cpu_usage / static_cast<float>(TH_USAGE_SCALE);
-    total_cpu_usage += current_thread_cpu_usage;
   }
 
-  flutter::CpuUsageInfo cpu_usage_info = {.num_threads = mach_threads.thread_count,
+  flutter::CpuUsageInfo cpu_usage_info = {.num_threads = num_threads,
                                           .total_cpu_usage = total_cpu_usage * 100.0};
   return cpu_usage_info;
 }
