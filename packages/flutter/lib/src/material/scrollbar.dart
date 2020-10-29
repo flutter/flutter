@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
@@ -12,23 +13,24 @@ const double _kScrollbarThickness = 6.0;
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
-/// A material design scrollbar.
+/// A material design scrollbar thumb.
 ///
-/// A scrollbar indicates which portion of a [Scrollable] widget is actually
+/// A scrollbar thumb indicates which portion of a [Scrollable] widget is actually
 /// visible.
 ///
 /// Dynamically changes to an iOS style scrollbar that looks like
 /// [CupertinoScrollbar] on the iOS platform.
 ///
-/// To add a scrollbar to a [ScrollView], simply wrap the scroll view widget in
-/// a [Scrollbar] widget.
+/// To add a scrollbar thumb to a [ScrollView], simply wrap the scroll view
+/// widget in a [Scrollbar] widget.
 ///
 /// See also:
 ///
+///  * [RawScrollbarThumb], the abstract base class this inherits from.
 ///  * [ListView], which display a linear, scrollable list of children.
 ///  * [GridView], which display a 2 dimensional, scrollable array of children.
 class Scrollbar extends RawScrollbarThumb {
-  /// Creates a material design scrollbar that wraps the given [child].
+  /// Creates a material design scrollbar thumb that wraps the given [child].
   ///
   /// The [child] should be a source of [ScrollNotification] notifications,
   /// typically a [Scrollable] widget.
@@ -55,7 +57,8 @@ class Scrollbar extends RawScrollbarThumb {
 }
 
 class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
-  final GlobalKey _customPaintKey = GlobalKey();
+  late TextDirection _textDirection;
+  late Color _themeColor;
   late bool _useCupertinoScrollbar;
 
   @override
@@ -64,7 +67,6 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    print('Scrollbar.didChangeDependencies');
     final ThemeData theme = Theme.of(context)!;
     switch (theme.platform) {
       case TargetPlatform.iOS:
@@ -80,7 +82,8 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        print('Not on ios, set painter, trigger scrollbar');
+        _themeColor = theme.highlightColor.withOpacity(1.0);
+        _textDirection = Directionality.of(context)!;
         painter = _buildMaterialScrollbarPainter();
         _useCupertinoScrollbar = false;
         triggerScrollbar();
@@ -91,9 +94,7 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   @override
   void didUpdateWidget(Scrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    print('Scrollbar.didUpdateWidget');
     if (!_useCupertinoScrollbar) {
-      print('Not using cupertino, so update thickness and radius of painter wiht  ${widget.thickness} ${widget.radius}');
       painter!
         ..thickness = widget.thickness ?? _kScrollbarThickness
         ..radius = widget.radius;
@@ -101,18 +102,9 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   }
 
   ScrollbarPainter _buildMaterialScrollbarPainter() {
-    print('Scrollbar._buildMaterialPainter:'
-      'ScrollbarPainter('
-      'color: ${Theme.of(context)!.highlightColor.withOpacity(1.0)},'
-      'textDirection: ${Directionality.of(context)!},'
-      'thickness: ${widget.thickness ?? _kScrollbarThickness},'
-      'radius: ${widget.radius},'
-      'fadeoutOpacityAnimation: $fadeoutOpacityAnimation,'
-      'padding: ${MediaQuery.of(context).padding},'
-      ');');
     return ScrollbarPainter(
-      color: Theme.of(context)!.highlightColor.withOpacity(1.0),
-      textDirection: Directionality.of(context)!,
+      color: _themeColor,
+      textDirection: _textDirection,
       thickness: widget.thickness ?? _kScrollbarThickness,
       radius: widget.radius,
       fadeoutOpacityAnimation: fadeoutOpacityAnimation,
@@ -122,50 +114,17 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
 
   @override
   bool handleScrollNotification(ScrollNotification notification) {
-    print('Scrollbar.handleScrollNotification');
-    // iOS sub-delegates to the CupertinoScrollbar instead and doesn't handle
-    // scroll notifications here.
+    final ScrollMetrics metrics = notification.metrics;
+    if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
+      return false;
+    }
     if (_useCupertinoScrollbar)
       return false;
     return super.handleScrollNotification(notification);
   }
 
-  // Get the GestureRecognizerFactories used to detect gestures on the scrollbar
-  // thumb.
-  Map<Type, GestureRecognizerFactory> get _gestures {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    if (controller == null)
-      return gestures;
-
-    gestures[_VerticalThumbDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_VerticalThumbDragGestureRecognizer>(
-      () => _VerticalThumbDragGestureRecognizer(
-        debugOwner: this,
-        customPaintKey: _customPaintKey,
-      ),
-      (_VerticalThumbDragGestureRecognizer instance) {
-        instance.onStart = (DragStartDetails details) => handleGestureStart(details.localPosition);
-        instance.onUpdate = (DragUpdateDetails details) => handleGestureUpdate(details.localPosition);
-        instance.onEnd = (DragEndDetails details) => handleGestureEnd(details.velocity.pixelsPerSecond);
-      },
-    );
-    gestures[_HorizontalThumbDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_HorizontalThumbDragGestureRecognizer>(
-      () => _HorizontalThumbDragGestureRecognizer(
-        debugOwner: this,
-        customPaintKey: _customPaintKey,
-      ),
-      (_HorizontalThumbDragGestureRecognizer instance) {
-        instance.onStart = (DragStartDetails details) => handleGestureStart(details.localPosition);
-        instance.onUpdate = (DragUpdateDetails details) => handleGestureUpdate(details.localPosition);
-        instance.onEnd = (DragEndDetails details) => handleGestureEnd(details.velocity.pixelsPerSecond);
-      },
-    );
-
-    return gestures;
-  }
-
   @override
   Widget build(BuildContext context) {
-    print('Scrollbar.build');
     if (_useCupertinoScrollbar) {
       return CupertinoScrollbar(
         child: widget.child,
@@ -180,59 +139,13 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
     return NotificationListener<ScrollNotification>(
       onNotification: handleScrollNotification,
       child: RepaintBoundary(
-        child: RawGestureDetector(
-          gestures: _gestures,
-          child: CustomPaint(
-            key: _customPaintKey,
-            foregroundPainter: painter,
-            child: RepaintBoundary(
-              child: widget.child,
-            ),
+        child: CustomPaint(
+          foregroundPainter: painter,
+          child: RepaintBoundary(
+            child: widget.child,
           ),
         ),
       ),
     );
-  }
-}
-
-// A vertical drag gesture detector that only responds to events on the
-// scrollbar's thumb and ignores everything else.
-class _VerticalThumbDragGestureRecognizer extends VerticalDragGestureRecognizer with ScrollbarThumbHitTestMixin implements _ScrollbarThumbGestureRecognizerMixin {
-  _VerticalThumbDragGestureRecognizer({
-    PointerDeviceKind? kind,
-    required Object debugOwner,
-    required this.customPaintKey,
-  }) : super(
-        kind: kind,
-        debugOwner: debugOwner,
-       );
-  @override
-  final GlobalKey customPaintKey;
-}
-
-// A horizontal drag gesture detector that only responds to events on the
-// scrollbar's thumb and ignores everything else.
-class _HorizontalThumbDragGestureRecognizer extends HorizontalDragGestureRecognizer with ScrollbarThumbHitTestMixin implements  _ScrollbarThumbGestureRecognizerMixin {
-  _HorizontalThumbDragGestureRecognizer({
-    PointerDeviceKind? kind,
-    required Object debugOwner,
-    required this.customPaintKey,
-  }) : super(
-         kind: kind,
-         debugOwner: debugOwner,
-       );
-  @override
-  final GlobalKey customPaintKey;
-}
-
-mixin _ScrollbarThumbGestureRecognizerMixin on DragGestureRecognizer, ScrollbarThumbHitTestMixin {
-  GlobalKey get customPaintKey;
-
-  @override
-  bool isPointerAllowed(PointerEvent event) {
-    if (!hitTestInteractive(customPaintKey, event.position)) {
-      return false;
-    }
-    return super.isPointerAllowed(event);
   }
 }

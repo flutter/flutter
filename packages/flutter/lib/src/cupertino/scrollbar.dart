@@ -195,7 +195,6 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
   }
 
   void _handleLongPress() {
-    print('_handleLongPress');
     if (getDirection() == null) {
       return;
     }
@@ -206,7 +205,6 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
-    print('_handleLongPressEnd');
     final Axis? direction = getDirection();
     if (direction == null) {
       return;
@@ -262,7 +260,6 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
 
   @override
   Widget build(BuildContext context) {
-    print('gestures: $_gestures');
     return NotificationListener<ScrollNotification>(
       onNotification: handleScrollNotification,
       child: RepaintBoundary(
@@ -299,8 +296,6 @@ class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer with Scrol
 
   @override
   bool isPointerAllowed(PointerDownEvent event) {
-    bool result = hitTestInteractive(_customPaintKey, event.position);
-    print('hitTestResult: $result');
     if (!hitTestInteractive(_customPaintKey, event.position)) {
       return false;
     }
