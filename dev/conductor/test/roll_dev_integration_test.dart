@@ -77,7 +77,13 @@ void main() {
       );
 
       final Version finalVersion = framework.flutterVersion();
-      expect(initialVersion.m + 1, finalVersion.m);
+      expect(
+        initialVersion.toString() != finalVersion.toString(),
+        true,
+        reason: 'initialVersion = $initialVersion; finalVersion = $finalVersion',
+      );
+      expect(finalVersion.n, 0);
+      expect(finalVersion.commits, null);
     });
   });
 }

@@ -158,8 +158,10 @@ bool rollDev({
   final Version lastVersion =
       Version.fromString(repository.getFullTag(remoteName));
 
+  print('about to increment $lastVersion'); // TODO
   final Version version =
       skipTagging ? lastVersion : Version.increment(lastVersion, level);
+  print('post increment $version'); // TODO
   final String tagName = version.toString();
 
   if (repository.reverseParse(lastVersion.toString()).contains(commit.trim())) {

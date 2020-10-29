@@ -7,7 +7,7 @@ import 'package:flutter_conductor/version.dart';
 import './common.dart';
 
 void main() {
-  group('incrementLevel()', () {
+  group('Version.increment()', () {
     test('throws exception on nonsensical `level`', () {
       final List<String> levels = <String>['f', '0', 'xyz'];
       for (final String level in levels) {
