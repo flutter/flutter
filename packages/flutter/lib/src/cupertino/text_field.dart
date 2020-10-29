@@ -258,6 +258,8 @@ class CupertinoTextField extends StatefulWidget {
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
+    this.onFocus,
+    this.onBlur,
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
