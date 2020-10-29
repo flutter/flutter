@@ -109,8 +109,8 @@ TEST_F(AccessibilityBridgeTest, UpdatesNodeRoles) {
   flutter::SemanticsNode node0;
   node0.id = 0;
   node0.flags |= static_cast<int>(flutter::SemanticsFlags::kIsButton);
-  node0.childrenInTraversalOrder = {1, 2, 3, 4};
-  node0.childrenInHitTestOrder = {1, 2, 3, 4};
+  node0.childrenInTraversalOrder = {1, 2, 3, 4, 5, 6, 7};
+  node0.childrenInHitTestOrder = {1, 2, 3, 4, 5, 6, 7};
   updates.emplace(0, node0);
 
   flutter::SemanticsNode node1;
@@ -141,6 +141,29 @@ TEST_F(AccessibilityBridgeTest, UpdatesNodeRoles) {
   node4.flags |= static_cast<int>(flutter::SemanticsFlags::kIsSlider);
   updates.emplace(4, node4);
 
+  flutter::SemanticsNode node5;
+  node5.childrenInTraversalOrder = {};
+  node5.childrenInHitTestOrder = {};
+  node5.id = 5;
+  node5.flags |= static_cast<int>(flutter::SemanticsFlags::kIsLink);
+  updates.emplace(5, node5);
+
+  flutter::SemanticsNode node6;
+  node6.childrenInTraversalOrder = {};
+  node6.childrenInHitTestOrder = {};
+  node6.id = 6;
+  node6.flags |= static_cast<int>(flutter::SemanticsFlags::kHasCheckedState);
+  node6.flags |=
+      static_cast<int>(flutter::SemanticsFlags::kIsInMutuallyExclusiveGroup);
+  updates.emplace(6, node6);
+
+  flutter::SemanticsNode node7;
+  node7.childrenInTraversalOrder = {};
+  node7.childrenInHitTestOrder = {};
+  node7.id = 7;
+  node7.flags |= static_cast<int>(flutter::SemanticsFlags::kHasCheckedState);
+  updates.emplace(7, node7);
+
   accessibility_bridge_->AddSemanticsNodeUpdate(std::move(updates), 1.f);
   RunLoopUntilIdle();
 
@@ -150,12 +173,15 @@ TEST_F(AccessibilityBridgeTest, UpdatesNodeRoles) {
           {1u, fuchsia::accessibility::semantics::Role::HEADER},
           {2u, fuchsia::accessibility::semantics::Role::IMAGE},
           {3u, fuchsia::accessibility::semantics::Role::TEXT_FIELD},
-          {4u, fuchsia::accessibility::semantics::Role::SLIDER}};
+          {4u, fuchsia::accessibility::semantics::Role::SLIDER},
+          {5u, fuchsia::accessibility::semantics::Role::LINK},
+          {6u, fuchsia::accessibility::semantics::Role::RADIO_BUTTON},
+          {7u, fuchsia::accessibility::semantics::Role::CHECK_BOX}};
 
   EXPECT_EQ(0, semantics_manager_.DeleteCount());
   EXPECT_EQ(1, semantics_manager_.UpdateCount());
   EXPECT_EQ(1, semantics_manager_.CommitCount());
-  EXPECT_EQ(5U, semantics_manager_.LastUpdatedNodes().size());
+  EXPECT_EQ(8u, semantics_manager_.LastUpdatedNodes().size());
   for (const auto& node : semantics_manager_.LastUpdatedNodes()) {
     ExpectNodeHasRole(node, roles_by_node_id);
   }

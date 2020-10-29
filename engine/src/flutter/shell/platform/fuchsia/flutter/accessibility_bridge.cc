@@ -160,6 +160,10 @@ fuchsia::accessibility::semantics::Role AccessibilityBridge::GetNodeRole(
     return fuchsia::accessibility::semantics::Role::TEXT_FIELD;
   }
 
+  if (node.HasFlag(flutter::SemanticsFlags::kIsLink)) {
+    return fuchsia::accessibility::semantics::Role::LINK;
+  }
+
   if (node.HasFlag(flutter::SemanticsFlags::kIsSlider)) {
     return fuchsia::accessibility::semantics::Role::SLIDER;
   }
@@ -170,6 +174,7 @@ fuchsia::accessibility::semantics::Role AccessibilityBridge::GetNodeRole(
   if (node.HasFlag(flutter::SemanticsFlags::kIsImage)) {
     return fuchsia::accessibility::semantics::Role::IMAGE;
   }
+
   // If a flutter node supports the kIncrease or kDecrease actions, it can be
   // treated as a slider control by assistive technology. This is important
   // because users have special gestures to deal with sliders, and Fuchsia API
@@ -178,6 +183,18 @@ fuchsia::accessibility::semantics::Role AccessibilityBridge::GetNodeRole(
       node.HasAction(flutter::SemanticsAction::kDecrease)) {
     return fuchsia::accessibility::semantics::Role::SLIDER;
   }
+
+  // If a flutter node has a checked state, then we assume it is either a
+  // checkbox or a radio button. We distinguish between checkboxes and
+  // radio buttons based on membership in a mutually exclusive group.
+  if (node.HasFlag(flutter::SemanticsFlags::kHasCheckedState)) {
+    if (node.HasFlag(flutter::SemanticsFlags::kIsInMutuallyExclusiveGroup)) {
+      return fuchsia::accessibility::semantics::Role::RADIO_BUTTON;
+    } else {
+      return fuchsia::accessibility::semantics::Role::CHECK_BOX;
+    }
+  }
+
   return fuchsia::accessibility::semantics::Role::UNKNOWN;
 }
 
