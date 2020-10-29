@@ -75,7 +75,11 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     EngineStrutStyle style = value as EngineStrutStyle;
     final SkStrutStyleProperties skStrutStyle = SkStrutStyleProperties();
     if (style._fontFamily != null) {
-      final List<String> fontFamilies = <String>[style._fontFamily!];
+      String fontFamily = style._fontFamily!;
+      if (!skiaFontCollection.registeredFamilies.contains(fontFamily)) {
+        fontFamily = 'Roboto';
+      }
+      final List<String> fontFamilies = <String>[fontFamily];
       if (style._fontFamilyFallback != null) {
         fontFamilies.addAll(style._fontFamilyFallback!);
       }
@@ -531,10 +535,10 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
     for (int i = 0; i < skRects.length; i++) {
       final List<double> rect = skRects[i];
       result.add(ui.TextBox.fromLTRBD(
-          rect[0],
-          rect[1],
-          rect[2],
-          rect[3],
+        rect[0],
+        rect[1],
+        rect[2],
+        rect[3],
         _paragraphStyle._textDirection!,
       ));
     }
@@ -563,20 +567,10 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
     assert(constraints.width != null); // ignore: unnecessary_null_comparison
     _lastLayoutConstraints = constraints;
 
-    // Infinite width breaks layout, just use a very large number instead.
-    // TODO(het): Remove this once https://bugs.chromium.org/p/skia/issues/detail?id=9874
-    //            is fixed.
-    double width;
-    const double largeFiniteWidth = 1000000;
-    if (constraints.width.isInfinite) {
-      width = largeFiniteWidth;
-    } else {
-      width = constraints.width;
-    }
     // TODO(het): CanvasKit throws an exception when laid out with
     // a font that wasn't registered.
     try {
-      skiaObject.layout(width);
+      skiaObject.layout(constraints.width);
     } catch (e) {
       html.window.console.warn('CanvasKit threw an exception while laying '
           'out the paragraph. The font was "${_paragraphStyle._fontFamily}". '
