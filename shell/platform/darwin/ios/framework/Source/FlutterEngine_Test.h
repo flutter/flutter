@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
+#include "shell/platform/darwin/ios/rendering_api_selection.h"
 
 @class FlutterBinaryMessengerRelay;
 
@@ -10,4 +11,5 @@
 @interface FlutterEngine (Test) <FlutterBinaryMessenger>
 - (void)setBinaryMessenger:(FlutterBinaryMessengerRelay*)binaryMessenger;
 - (void)waitForFirstFrame:(NSTimeInterval)timeout callback:(void (^)(BOOL didTimeout))callback;
+- (flutter::IOSRenderingAPI)platformViewsRenderingAPI;
 @end

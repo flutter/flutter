@@ -5,8 +5,10 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#import "flutter/common/settings.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 
 FLUTTER_ASSERT_ARC
@@ -111,6 +113,25 @@ FLUTTER_ASSERT_ARC
                      }
                    }];
   [self waitForExpectationsWithTimeout:1 handler:nil];
+}
+
+- (void)testPlatformViewsControllerRenderingMetalBackend {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine run];
+  flutter::IOSRenderingAPI renderingApi = [engine platformViewsRenderingAPI];
+
+  XCTAssertEqual(renderingApi, flutter::IOSRenderingAPI::kMetal);
+}
+
+- (void)testPlatformViewsControllerRenderingSoftware {
+  auto settings = FLTDefaultSettingsForBundle();
+  settings.enable_software_rendering = true;
+  FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+  flutter::IOSRenderingAPI renderingApi = [engine platformViewsRenderingAPI];
+
+  XCTAssertEqual(renderingApi, flutter::IOSRenderingAPI::kSoftware);
 }
 
 @end
