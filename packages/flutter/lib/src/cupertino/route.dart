@@ -1104,12 +1104,11 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// barrier behavior (by default, the dialog is not dismissible with a tap on
 /// the barrier).
 ///
-/// This function takes a `builder` which typically builds a [CupertinoDialog]
-/// or [CupertinoAlertDialog] widget. Content below the dialog is dimmed with a
-/// [ModalBarrier]. The widget returned by the `builder` does not share a
-/// context with the location that `showCupertinoDialog` is originally called
-/// from. Use a [StatefulBuilder] or a custom [StatefulWidget] if the dialog
-/// needs to update dynamically.
+/// This function takes a `builder` which typically builds a [CupertinoAlertDialog]
+/// widget. Content below the dialog is dimmed with a [ModalBarrier]. The widget
+/// returned by the `builder` does not share a context with the location that
+/// `showCupertinoDialog` is originally called from. Use a [StatefulBuilder] or
+/// a custom [StatefulWidget] if the dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] for the dialog.
 /// It is only used when the method is called. Its corresponding widget can
@@ -1129,7 +1128,6 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// See also:
 ///
-///  * [CupertinoDialog], an iOS-style dialog.
 ///  * [CupertinoAlertDialog], an iOS-style alert dialog.
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.

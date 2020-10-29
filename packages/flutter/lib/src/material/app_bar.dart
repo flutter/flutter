@@ -487,11 +487,11 @@ class _AppBarState extends State<AppBar> {
   static const Color _defaultShadowColor = Color(0xFF000000);
 
   void _handleDrawerButton() {
-    Scaffold.of(context)!.openDrawer();
+    Scaffold.of(context).openDrawer();
   }
 
   void _handleDrawerButtonEnd() {
-    Scaffold.of(context)!.openEndDrawer();
+    Scaffold.of(context).openEndDrawer();
   }
 
   @override
@@ -500,7 +500,7 @@ class _AppBarState extends State<AppBar> {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData? theme = Theme.of(context);
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
-    final ScaffoldState? scaffold = Scaffold.of(context, nullOk: true);
+    final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
