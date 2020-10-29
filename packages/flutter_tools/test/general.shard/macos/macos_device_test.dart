@@ -167,24 +167,28 @@ void main() {
   });
 
   testWithoutContext('target platform display name on x86_64', () async {
+    final FakeOperatingSystemUtils fakeOperatingSystemUtils =
+        FakeOperatingSystemUtils();
+    fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_x64;
     final MacOSDevice device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
-      operatingSystemUtils:
-      FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+      operatingSystemUtils: fakeOperatingSystemUtils,
     );
 
     expect(await device.targetPlatformDisplayName, 'darwin-x64');
   });
 
   testWithoutContext('target platform display name on ARM', () async {
+    final FakeOperatingSystemUtils fakeOperatingSystemUtils =
+        FakeOperatingSystemUtils();
+    fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_arm;
     final MacOSDevice device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
-      operatingSystemUtils:
-          FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
+      operatingSystemUtils: fakeOperatingSystemUtils,
     );
 
     expect(await device.targetPlatformDisplayName, 'darwin-arm64');
