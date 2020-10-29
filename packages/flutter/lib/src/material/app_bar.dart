@@ -376,7 +376,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///    a [ThemeData].
   ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
   ///    default colors are based on.
-  ///  * [ThemeData.colorScheme.brightness], which indicates if the overall theme
+  ///  * [ColorScheme.brightness], which indicates if the overall [Theme]
   ///    is light or dark.
   final Color? backgroundColor;
 
@@ -400,12 +400,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///    a [ThemeData].
   ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
   ///    default colors are based on.
-  ///  * [ThemeData.colorScheme.brightness], which indicates if the overall theme
+  ///  * [ColorScheme.brightness], which indicates if the overall [Theme]
   ///    is light or dark.
   final Color? foregroundColor;
 
-  /// AppBar uses this value to determine the default [color] and [backgroundColor]
-  /// as well as the app bar's [SystemUiOverlayStyle].
+  /// AppBar uses this value to determine the default [foregroundColor] and
+  /// [backgroundColor] as well as the app bar's [SystemUiOverlayStyle].
   ///
   /// For [Brightness.dark], [SystemUiOverlayStyle.light] is used and for
   /// [Brightness.light], [SystemUiOverlayStyle.dark] is used.
@@ -418,7 +418,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///    a [ThemeData].
   ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
   ///    default colors are based on.
-  ///  * [ThemeData.colorScheme.brightness], which indicates if the overall theme
+  ///  * [ColorScheme.brightness], which indicates if the overall [Theme]
   ///    is light or dark.
   final Brightness? brightness;
 
