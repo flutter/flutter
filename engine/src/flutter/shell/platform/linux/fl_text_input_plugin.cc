@@ -423,11 +423,6 @@ static void method_call_cb(FlMethodChannel* channel,
   }
 }
 
-static void view_weak_notify_cb(gpointer user_data, GObject* object) {
-  FlTextInputPlugin* self = FL_TEXT_INPUT_PLUGIN(object);
-  self->view = nullptr;
-}
-
 static void fl_text_input_plugin_dispose(GObject* object) {
   FlTextInputPlugin* self = FL_TEXT_INPUT_PLUGIN(object);
 
@@ -438,6 +433,7 @@ static void fl_text_input_plugin_dispose(GObject* object) {
     delete self->text_model;
     self->text_model = nullptr;
   }
+  self->view = nullptr;
 
   G_OBJECT_CLASS(fl_text_input_plugin_parent_class)->dispose(object);
 }
@@ -483,7 +479,6 @@ FlTextInputPlugin* fl_text_input_plugin_new(FlBinaryMessenger* messenger,
   fl_method_channel_set_method_call_handler(self->channel, method_call_cb, self,
                                             nullptr);
   self->view = view;
-  g_object_weak_ref(G_OBJECT(view), view_weak_notify_cb, self);
 
   return self;
 }
