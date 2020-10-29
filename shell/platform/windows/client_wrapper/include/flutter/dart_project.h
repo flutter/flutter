@@ -29,6 +29,18 @@ class DartProject {
 
   ~DartProject() = default;
 
+  // Sets the command line arguments that should be passed to the Dart
+  // entrypoint.
+  void set_dart_entrypoint_arguments(std::vector<std::string> arguments) {
+    dart_entrypoint_arguments_ = std::move(arguments);
+  }
+
+  // Returns any command line arguments that should be passed to the Dart
+  // entrypoint.
+  const std::vector<std::string>& dart_entrypoint_arguments() const {
+    return dart_entrypoint_arguments_;
+  }
+
  private:
   // Accessors for internals are private, so that they can be changed if more
   // flexible options for project structures are needed later without it
@@ -49,6 +61,8 @@ class DartProject {
   // The path to the AOT library. This will always return a path, but non-AOT
   // builds will not be expected to actually have a library at that path.
   std::wstring aot_library_path_;
+  // The list of arguments to pass through to the Dart entrypoint.
+  std::vector<std::string> dart_entrypoint_arguments_;
 };
 
 }  // namespace flutter
