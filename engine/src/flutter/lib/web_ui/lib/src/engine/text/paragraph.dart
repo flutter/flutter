@@ -1460,157 +1460,86 @@ String fontWeightIndexToCss({int fontWeightIndex = 3}) {
 
 /// Applies a paragraph [style] to an [element], translating the properties to
 /// their corresponding CSS equivalents.
-///
-/// If [previousStyle] is not null, updates only the mismatching attributes.
 void _applyParagraphStyleToElement({
   required html.HtmlElement element,
   required EngineParagraphStyle style,
-  EngineParagraphStyle? previousStyle,
 }) {
   assert(element != null); // ignore: unnecessary_null_comparison
   assert(style != null); // ignore: unnecessary_null_comparison
   // TODO(yjbanov): What do we do about ParagraphStyle._locale and ellipsis?
   final html.CssStyleDeclaration cssStyle = element.style;
-  if (previousStyle == null) {
-    if (style._textAlign != null) {
-      cssStyle.textAlign = textAlignToCssValue(
-          style._textAlign, style._textDirection ?? ui.TextDirection.ltr);
-    }
-    if (style._lineHeight != null) {
-      cssStyle.lineHeight = '${style._lineHeight}';
-    }
-    if (style._textDirection != null) {
-      cssStyle.direction = _textDirectionToCss(style._textDirection);
-    }
-    if (style._fontSize != null) {
-      cssStyle.fontSize = '${style._fontSize!.floor()}px';
-    }
-    if (style._fontWeight != null) {
-      cssStyle.fontWeight = fontWeightToCss(style._fontWeight);
-    }
-    if (style._fontStyle != null) {
-      cssStyle.fontStyle =
-          style._fontStyle == ui.FontStyle.normal ? 'normal' : 'italic';
-    }
-    cssStyle.fontFamily = canonicalizeFontFamily(style._effectiveFontFamily);
-  } else {
-    if (style._textAlign != previousStyle._textAlign) {
-      cssStyle.textAlign = textAlignToCssValue(
-          style._textAlign, style._textDirection ?? ui.TextDirection.ltr);
-    }
-    if (style._lineHeight != previousStyle._lineHeight) {
-      cssStyle.lineHeight = '${style._lineHeight}';
-    }
-    if (style._textDirection != previousStyle._textDirection) {
-      cssStyle.direction = _textDirectionToCss(style._textDirection);
-    }
-    if (style._fontSize != previousStyle._fontSize) {
-      cssStyle.fontSize =
-          style._fontSize != null ? '${style._fontSize!.floor()}px' : null;
-    }
-    if (style._fontWeight != previousStyle._fontWeight) {
-      cssStyle.fontWeight = fontWeightToCss(style._fontWeight);
-    }
-    if (style._fontStyle != previousStyle._fontStyle) {
-      cssStyle.fontStyle = style._fontStyle != null
-          ? (style._fontStyle == ui.FontStyle.normal ? 'normal' : 'italic')
-          : null;
-    }
-    if (style._fontFamily != previousStyle._fontFamily) {
-      cssStyle.fontFamily = canonicalizeFontFamily(style._fontFamily);
-    }
+
+  if (style._textAlign != null) {
+    cssStyle.textAlign = textAlignToCssValue(
+        style._textAlign, style._textDirection ?? ui.TextDirection.ltr);
   }
+  if (style._lineHeight != null) {
+    cssStyle.lineHeight = '${style._lineHeight}';
+  }
+  if (style._textDirection != null) {
+    cssStyle.direction = _textDirectionToCss(style._textDirection);
+  }
+  if (style._fontSize != null) {
+    cssStyle.fontSize = '${style._fontSize!.floor()}px';
+  }
+  if (style._fontWeight != null) {
+    cssStyle.fontWeight = fontWeightToCss(style._fontWeight);
+  }
+  if (style._fontStyle != null) {
+    cssStyle.fontStyle =
+        style._fontStyle == ui.FontStyle.normal ? 'normal' : 'italic';
+  }
+  cssStyle.fontFamily = canonicalizeFontFamily(style._effectiveFontFamily);
 }
 
 /// Applies a text [style] to an [element], translating the properties to their
 /// corresponding CSS equivalents.
 ///
-/// If [previousStyle] is not null, updates only the mismatching attributes.
 /// If [isSpan] is true, the text element is a span within richtext and
 /// should not assign effectiveFontFamily if fontFamily was not specified.
 void _applyTextStyleToElement({
   required html.HtmlElement element,
   required EngineTextStyle style,
-  EngineTextStyle? previousStyle,
   bool isSpan = false,
 }) {
   assert(element != null); // ignore: unnecessary_null_comparison
   assert(style != null); // ignore: unnecessary_null_comparison
   bool updateDecoration = false;
   final html.CssStyleDeclaration cssStyle = element.style;
-  if (previousStyle == null) {
-    final ui.Color? color = style._foreground?.color ?? style._color;
-    if (color != null) {
-      cssStyle.color = colorToCssString(color);
-    }
-    if (style._fontSize != null) {
-      cssStyle.fontSize = '${style._fontSize!.floor()}px';
-    }
-    if (style._fontWeight != null) {
-      cssStyle.fontWeight = fontWeightToCss(style._fontWeight);
-    }
-    if (style._fontStyle != null) {
-      cssStyle.fontStyle =
-          style._fontStyle == ui.FontStyle.normal ? 'normal' : 'italic';
-    }
-    // For test environment use effectiveFontFamily since we need to
-    // consistently use Ahem font.
-    if (isSpan && !ui.debugEmulateFlutterTesterEnvironment) {
-      cssStyle.fontFamily = canonicalizeFontFamily(style._fontFamily);
-    } else {
-      cssStyle.fontFamily =
-          canonicalizeFontFamily(style._effectiveFontFamily);
-    }
-    if (style._letterSpacing != null) {
-      cssStyle.letterSpacing = '${style._letterSpacing}px';
-    }
-    if (style._wordSpacing != null) {
-      cssStyle.wordSpacing = '${style._wordSpacing}px';
-    }
-    if (style._decoration != null) {
-      updateDecoration = true;
-    }
-    if (style._shadows != null) {
-      cssStyle.textShadow = _shadowListToCss(style._shadows!);
-    }
+
+  final ui.Color? color = style._foreground?.color ?? style._color;
+  if (color != null) {
+    cssStyle.color = colorToCssString(color);
+  }
+  if (style._fontSize != null) {
+    cssStyle.fontSize = '${style._fontSize!.floor()}px';
+  }
+  if (style._fontWeight != null) {
+    cssStyle.fontWeight = fontWeightToCss(style._fontWeight);
+  }
+  if (style._fontStyle != null) {
+    cssStyle.fontStyle =
+        style._fontStyle == ui.FontStyle.normal ? 'normal' : 'italic';
+  }
+  // For test environment use effectiveFontFamily since we need to
+  // consistently use Ahem font.
+  if (isSpan && !ui.debugEmulateFlutterTesterEnvironment) {
+    cssStyle.fontFamily = canonicalizeFontFamily(style._fontFamily);
   } else {
-    if (style._color != previousStyle._color ||
-        style._foreground != previousStyle._foreground) {
-      final ui.Color? color = style._foreground?.color ?? style._color;
-      cssStyle.color = colorToCssString(color);
-    }
-
-    if (style._fontSize != previousStyle._fontSize) {
-      cssStyle.fontSize =
-          style._fontSize != null ? '${style._fontSize!.floor()}px' : null;
-    }
-
-    if (style._fontWeight != previousStyle._fontWeight) {
-      cssStyle.fontWeight = fontWeightToCss(style._fontWeight);
-    }
-
-    if (style._fontStyle != previousStyle._fontStyle) {
-      cssStyle.fontStyle = style._fontStyle != null
-          ? style._fontStyle == ui.FontStyle.normal ? 'normal' : 'italic'
-          : null;
-    }
-    if (style._fontFamily != previousStyle._fontFamily) {
-      cssStyle.fontFamily = canonicalizeFontFamily(style._fontFamily);
-    }
-    if (style._letterSpacing != previousStyle._letterSpacing) {
-      cssStyle.letterSpacing = '${style._letterSpacing}px';
-    }
-    if (style._wordSpacing != previousStyle._wordSpacing) {
-      cssStyle.wordSpacing = '${style._wordSpacing}px';
-    }
-    if (style._decoration != previousStyle._decoration ||
-        style._decorationStyle != previousStyle._decorationStyle ||
-        style._decorationColor != previousStyle._decorationColor) {
-      updateDecoration = true;
-    }
-    if (style._shadows != previousStyle._shadows) {
-      cssStyle.textShadow = _shadowListToCss(style._shadows!);
-    }
+    cssStyle.fontFamily =
+        canonicalizeFontFamily(style._effectiveFontFamily);
+  }
+  if (style._letterSpacing != null) {
+    cssStyle.letterSpacing = '${style._letterSpacing}px';
+  }
+  if (style._wordSpacing != null) {
+    cssStyle.wordSpacing = '${style._wordSpacing}px';
+  }
+  if (style._decoration != null) {
+    updateDecoration = true;
+  }
+  if (style._shadows != null) {
+    cssStyle.textShadow = _shadowListToCss(style._shadows!);
   }
 
   if (updateDecoration) {
@@ -1705,19 +1634,11 @@ String _shadowListToCss(List<ui.Shadow> shadows) {
 void _applyTextBackgroundToElement({
   required html.HtmlElement element,
   required EngineTextStyle style,
-  EngineTextStyle? previousStyle,
 }) {
   final ui.Paint? newBackground = style._background;
-  if (previousStyle == null) {
-    if (newBackground != null) {
-      domRenderer.setElementStyle(
-          element, 'background-color', colorToCssString(newBackground.color));
-    }
-  } else {
-    if (newBackground != previousStyle._background) {
-      domRenderer.setElementStyle(
-          element, 'background-color', colorToCssString(newBackground!.color));
-    }
+  if (newBackground != null) {
+    domRenderer.setElementStyle(
+        element, 'background-color', colorToCssString(newBackground.color));
   }
 }
 
