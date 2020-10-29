@@ -67,7 +67,7 @@ abstract class Browser {
     // Don't return a Future here because there's no need for the caller to wait
     // for the process to actually start. They should just wait for the HTTP
     // request instead.
-    runZoned(() async {
+    runZonedGuarded(() async {
       var process = await startBrowser();
       _processCompleter.complete(process);
 
@@ -110,7 +110,7 @@ abstract class Browser {
       }
 
       _onExitCompleter.complete();
-    }, onError: (dynamic error, StackTrace stackTrace) {
+    }, (dynamic error, StackTrace stackTrace) {
       // Ignore any errors after the browser has been closed.
       if (_closed) {
         return;
