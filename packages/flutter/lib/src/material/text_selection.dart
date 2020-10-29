@@ -32,6 +32,7 @@ const double _kToolbarContentDistance = 8.0;
 
 typedef Widget _ToolbarBuilder(BuildContext context, Widget child);
 
+/// Android Material styled text selection controls.
 class MaterialTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Material handle.
   @override
@@ -62,7 +63,6 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     );
   }
 
-  // TODO(justinmc): Handles should be customizable too.
   /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
@@ -123,6 +123,17 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   }
 }
 
+// The label and callback for the available default text selection menu buttons.
+class _TextSelectionToolbarItemData {
+  const _TextSelectionToolbarItemData({
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+}
+
 // The highest level toolbar widget, built directly by buildToolbar.
 class _TextSelectionToolbar extends StatefulWidget {
   const _TextSelectionToolbar({
@@ -154,11 +165,6 @@ class _TextSelectionToolbar extends StatefulWidget {
   _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
 }
 
-// TODO(justinmc): When this PR is merged, how will users add a custom button
-// to the TSM? Currently, it's fairly involved due to my refusal to make a
-// widget that is specific to buildToolbar. Decide whether to provide a nice
-// widget that may be deprecated soon, or to keep it difficult and break
-// TextSelectionControls later.
 class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
   void _onChangedClipboardStatus() {
     setState(() {
@@ -222,43 +228,47 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       widget.globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
     );
 
+    // Determine which buttons will appear so that the order and total number is
+    // known. A button's position in the menu can slightly affect its
+    // appearance.
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final List<_TextSelectionToolbarItemData> itemDatas = <_TextSelectionToolbarItemData>[
+      if (widget.handleCut != null)
+        _TextSelectionToolbarItemData(
+          label: localizations.cutButtonLabel,
+          onPressed: widget.handleCut!,
+        ),
+      if (widget.handleCopy != null)
+        _TextSelectionToolbarItemData(
+          label: localizations.copyButtonLabel,
+          onPressed: widget.handleCopy!,
+        ),
+      if (widget.handlePaste != null
+          && widget.clipboardStatus.value == ClipboardStatus.pasteable)
+        _TextSelectionToolbarItemData(
+          label: localizations.pasteButtonLabel,
+          onPressed: widget.handlePaste!,
+        ),
+      if (widget.handleSelectAll != null)
+        _TextSelectionToolbarItemData(
+          label: localizations.selectAllButtonLabel,
+          onPressed: widget.handleSelectAll!,
+        ),
+    ];
+
+    int childIndex = 0;
     return TextSelectionToolbar(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
-      children: <Widget>[
-        if (widget.handleCut != null)
-          TextSelectionMenuTextButton(
-            isFirst: true,
-            isLast: false,
-            onPressed: widget.handleCut,
-            child: Text(localizations.cutButtonLabel),
-          ),
-        if (widget.handleCopy != null)
-          TextSelectionMenuTextButton(
-            isFirst: false,
-            isLast: false,
-            onPressed: widget.handleCopy,
-            child: Text(localizations.copyButtonLabel),
-          ),
-        if (widget.handlePaste != null
-            && widget.clipboardStatus.value == ClipboardStatus.pasteable)
-          TextSelectionMenuTextButton(
-            isFirst: false,
-            isLast: false,
-            onPressed: widget.handlePaste,
-            child: Text(localizations.pasteButtonLabel),
-          ),
-        if (widget.handleSelectAll != null)
-          TextSelectionMenuTextButton(
-            isFirst: false,
-            isLast: true,
-            //isLast: false,
-            onPressed: widget.handleSelectAll,
-            child: Text(localizations.selectAllButtonLabel),
-          ),
-      ],
+      children: itemDatas.map((_TextSelectionToolbarItemData itemData) {
+        return TextSelectionMenuTextButton(
+          index: childIndex++,
+          total: itemDatas.length,
+          onPressed: itemData.onPressed,
+          child: Text(itemData.label),
+        );
+      }).toList(),
     );
   }
 }
@@ -297,11 +307,13 @@ class TextSelectionToolbar extends StatelessWidget {
   ///     style text selection toolbar text button.
   final List<Widget> children;
 
-  // TODO(justinmc): Elaborate docs.
-  /// Builds the toolbar that will be populated with [children] and fit inside
-  /// of the layout that adjusts to overflow.
+  /// Builds the toolbar container.
+  ///
+  /// Useful for customizing the high-level background of the toolbar. The given
+  /// child Widget will contain all of the [children].
   final _ToolbarBuilder toolbarBuilder;
 
+  // Build the default Android Material text selection menu toolbar.
   static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
     return _MaterialTextSelectionToolbarShapeNew(
       child: child,
@@ -919,26 +931,66 @@ class _MaterialTextSelectionToolbarShapeNew extends StatelessWidget {
   }
 }
 
-// TODO(justinmc): Instead of isFirst/isLast, use an enum?
+enum _TextSelectionToolbarItemPosition {
+  /// The first item among multiple in the menu.
+  first,
+
+  /// One of several items, not the first or last.
+  middle,
+
+  /// The last item among multiple in the menu.
+  last,
+}
+
 // TODO(justinmc): Document.
 /// A button styled like a Material native Android text selection menu button.
 class TextSelectionMenuTextButton extends StatelessWidget {
+  /// Creates an instance of TextSelectionMenuTextButton.
   const TextSelectionMenuTextButton({
     Key? key,
     required this.child,
-    required this.isFirst,
-    required this.isLast,
+    required this.index,
     this.onPressed,
-  }) : super(key: key);
+    required this.total,
+  }) : assert(total > 0),
+       assert(index >= 0 && index < total),
+       super(key: key);
 
+  /// The child of this button.
+  ///
+  /// Usually a [Text].
   final Widget child;
 
-  // isFirst and isLast modify the padding in agreement with the first and last
-  // items in Material's native Android text selection menu.
-  final bool isFirst;
-  final bool isLast;
-
+  /// Called when this button is pressed.
   final VoidCallback? onPressed;
+
+  /// At what index this button is in the toolbar children.
+  ///
+  /// This is needed becase a button may appear differently depending on where
+  /// it is in the list.
+  ///
+  /// See also:
+  ///   [total], which is the total number of children in the toolbar.
+  final int index;
+
+  /// The total number of children in the toolbar, including this one.
+  ///
+  /// This is needed becase a button may appear differently depending on where
+  /// it is in the list.
+  ///
+  /// See also:
+  ///   [index], which is the index among total where this button appears.
+  final int total;
+
+  _TextSelectionToolbarItemPosition get _position {
+    if (total == 1) {
+      return _TextSelectionToolbarItemPosition.first;
+    }
+    if (index == total - 1) {
+      return _TextSelectionToolbarItemPosition.last;
+    }
+    return _TextSelectionToolbarItemPosition.middle;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -955,8 +1007,8 @@ class TextSelectionMenuTextButton extends StatelessWidget {
         padding: EdgeInsets.only(
           // These values were eyeballed to match the native text selection menu
           // on a Pixel 2 running Android 10.
-          left: 9.5 + (isFirst ? 5.0 : 0.0),
-          right: 9.5 + (isLast ? 5.0 : 0.0),
+          left: 9.5 + (_position == _TextSelectionToolbarItemPosition.first ? 5.0 : 0.0),
+          right: 9.5 + (_position == _TextSelectionToolbarItemPosition.last ? 5.0 : 0.0),
         ),
       ),
       onPressed: onPressed,
@@ -1020,6 +1072,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
 /// Text selection controls that follow the Material Design specification.
 final TextSelectionControls materialTextSelectionControls = MaterialTextSelectionControls();
 
+// TODO(justinmc): Don't say both Toolbar and Menu, choose one.
 // Justin's widget hierarchy directory:
 // _TextSelectionToolbar
 //   Directly handles buildToolbar at the highest level.
