@@ -158,6 +158,7 @@ FILE: ../../../flutter/fml/log_settings.h
 FILE: ../../../flutter/fml/log_settings_state.cc
 FILE: ../../../flutter/fml/logging.cc
 FILE: ../../../flutter/fml/logging.h
+FILE: ../../../flutter/fml/logging_unittests.cc
 FILE: ../../../flutter/fml/macros.h
 FILE: ../../../flutter/fml/make_copyable.h
 FILE: ../../../flutter/fml/mapping.cc
@@ -463,9 +464,6 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/dom_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/dom_renderer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/engine_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/frame_reference.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/history/history.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/history/js_url_strategy.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/history/url_strategy.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/backdrop_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/clip.dart
@@ -499,6 +497,9 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/transform.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html_image_codec.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/mouse_cursor.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/history.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/js_url_strategy.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/url_strategy.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/onscreen_logging.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/picture.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/platform_dispatcher.dart
@@ -586,6 +587,8 @@ FILE: ../../../flutter/runtime/dart_vm_unittests.cc
 FILE: ../../../flutter/runtime/embedder_resources.cc
 FILE: ../../../flutter/runtime/embedder_resources.h
 FILE: ../../../flutter/runtime/fixtures/runtime_test.dart
+FILE: ../../../flutter/runtime/isolate_configuration.cc
+FILE: ../../../flutter/runtime/isolate_configuration.h
 FILE: ../../../flutter/runtime/platform_data.cc
 FILE: ../../../flutter/runtime/platform_data.h
 FILE: ../../../flutter/runtime/ptrace_check.cc
@@ -600,6 +603,7 @@ FILE: ../../../flutter/runtime/skia_concurrent_executor.cc
 FILE: ../../../flutter/runtime/skia_concurrent_executor.h
 FILE: ../../../flutter/runtime/test_font_data.cc
 FILE: ../../../flutter/runtime/test_font_data.h
+FILE: ../../../flutter/runtime/type_conversions_unittests.cc
 FILE: ../../../flutter/shell/common/animator.cc
 FILE: ../../../flutter/shell/common/animator.h
 FILE: ../../../flutter/shell/common/animator_unittests.cc
@@ -615,8 +619,6 @@ FILE: ../../../flutter/shell/common/engine_unittests.cc
 FILE: ../../../flutter/shell/common/fixtures/shell_test.dart
 FILE: ../../../flutter/shell/common/fixtures/shelltest_screenshot.png
 FILE: ../../../flutter/shell/common/input_events_unittests.cc
-FILE: ../../../flutter/shell/common/isolate_configuration.cc
-FILE: ../../../flutter/shell/common/isolate_configuration.h
 FILE: ../../../flutter/shell/common/persistent_cache.cc
 FILE: ../../../flutter/shell/common/persistent_cache.h
 FILE: ../../../flutter/shell/common/persistent_cache_unittests.cc
@@ -636,6 +638,7 @@ FILE: ../../../flutter/shell/common/serialization_callbacks.h
 FILE: ../../../flutter/shell/common/shell.cc
 FILE: ../../../flutter/shell/common/shell.h
 FILE: ../../../flutter/shell/common/shell_benchmarks.cc
+FILE: ../../../flutter/shell/common/shell_fuchsia_unittests.cc
 FILE: ../../../flutter/shell/common/shell_io_manager.cc
 FILE: ../../../flutter/shell/common/shell_io_manager.h
 FILE: ../../../flutter/shell/common/shell_test.cc
@@ -907,6 +910,8 @@ FILE: ../../../flutter/shell/platform/common/cpp/public/flutter_plugin_registrar
 FILE: ../../../flutter/shell/platform/common/cpp/text_input_model.cc
 FILE: ../../../flutter/shell/platform/common/cpp/text_input_model.h
 FILE: ../../../flutter/shell/platform/common/cpp/text_input_model_unittests.cc
+FILE: ../../../flutter/shell/platform/common/cpp/text_range.h
+FILE: ../../../flutter/shell/platform/common/cpp/text_range_unittests.cc
 FILE: ../../../flutter/shell/platform/darwin/common/buffer_conversions.h
 FILE: ../../../flutter/shell/platform/darwin/common/buffer_conversions.mm
 FILE: ../../../flutter/shell/platform/darwin/common/command_line.h
@@ -1272,6 +1277,7 @@ FILE: ../../../flutter/shell/platform/glfw/client_wrapper/include/flutter/flutte
 FILE: ../../../flutter/shell/platform/glfw/client_wrapper/include/flutter/flutter_window.h
 FILE: ../../../flutter/shell/platform/glfw/client_wrapper/include/flutter/flutter_window_controller.h
 FILE: ../../../flutter/shell/platform/glfw/client_wrapper/include/flutter/plugin_registrar_glfw.h
+FILE: ../../../flutter/shell/platform/glfw/client_wrapper/plugin_registrar_glfw_unittests.cc
 FILE: ../../../flutter/shell/platform/glfw/event_loop.cc
 FILE: ../../../flutter/shell/platform/glfw/event_loop.h
 FILE: ../../../flutter/shell/platform/glfw/flutter_glfw.cc
