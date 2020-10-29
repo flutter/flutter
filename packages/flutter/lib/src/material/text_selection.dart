@@ -26,7 +26,7 @@ const double _kHandleSize = 22.0;
 // viewport.
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 44.0;
-// Padding when positioning toolbar below selection.
+// Padding between the toolbar and the anchor.
 const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
@@ -209,28 +209,24 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
 
     // Calculate the positioning of the menu. It is placed above the selection
     // if there is enough room, or otherwise below.
-    final double paddingTop = MediaQuery.of(context)!.padding.top;
-    final bool fitsAbove = TextSelectionToolbar.getFitsAbove(
-      widget.globalEditableRegion,
-      widget.textLineHeight,
-      widget.selectionMidpoint,
-      widget.endpoints,
-      paddingTop,
+    final TextSelectionPoint startTextSelectionPoint = widget.endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = widget.endpoints.length > 1
+      ? widget.endpoints[1]
+      : widget.endpoints[0];
+    final Offset anchorAbove = Offset(
+      widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
+      widget.globalEditableRegion.top + startTextSelectionPoint.point.dy - widget.textLineHeight - _kToolbarContentDistance
     );
-    final Offset anchor = TextSelectionToolbar.getAnchor(
-      widget.globalEditableRegion,
-      widget.textLineHeight,
-      widget.selectionMidpoint,
-      widget.endpoints,
-      fitsAbove,
+    final Offset anchorBelow = Offset(
+      widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
+      widget.globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
     );
 
     assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return TextSelectionToolbar(
-      anchor: anchor,
-      fitsAbove: fitsAbove,
-      upperBounds: TextSelectionToolbar.getUpperBounds(paddingTop),
+      anchorAbove: anchorAbove,
+      anchorBelow: anchorBelow,
       children: <Widget>[
         if (widget.handleCut != null)
           TextSelectionMenuTextButton(
@@ -276,20 +272,21 @@ class TextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of TextSelectionToolbar.
   const TextSelectionToolbar({
     Key? key,
-    required this.anchor,
-    // TODO(justinmc): Why do we have to pass around fitsAbove like this?
-    required this.fitsAbove,
+    required this.anchorAbove,
+    required this.anchorBelow,
     this.toolbarBuilder = _defaultToolbarBuilder,
-    this.upperBounds = 0.0,
     required this.children,
   }) : super(key: key);
 
-  /// The focal point where the toolbar attempts to position itself.
+  /// The focal point that the toolbar attempts to position itself above.
   ///
-  /// If there is not enough room above the anchor before reaching the top of
-  /// the screen, as determined by [fitsAbove], then the toolbar will position
-  /// itself below the anchor.
-  final Offset anchor;
+  /// If there is not enough room above before reaching the top of the screen,
+  /// then the toolbar will position itself below [anchorBelow].
+  final Offset anchorAbove;
+
+  /// The focal point that the toolbar attempts to position itself below, if it
+  /// doesn't fit above [anchorAbove].
+  final Offset anchorBelow;
 
   /// The children that will be displayed in the text selection toolbar.
   ///
@@ -299,13 +296,6 @@ class TextSelectionToolbar extends StatelessWidget {
   ///   * [TextSelectionToolbarTextButton], which builds a default Material-
   ///     style text selection toolbar text button.
   final List<Widget> children;
-
-  /// Whether or not the toolbar fits above the given [anchor] without
-  /// overlapping the top of the screen.
-  final bool fitsAbove;
-
-  /// The upper-most valid y value for the anchor.
-  final double upperBounds;
 
   // TODO(justinmc): Elaborate docs.
   /// Builds the toolbar that will be populated with [children] and fit inside
@@ -318,62 +308,20 @@ class TextSelectionToolbar extends StatelessWidget {
     );
   }
 
-  /// A helper for calculating the [anchor] parameter based on parameters from
-  /// [TextSelectionControls.buildToolbar].
-  static Offset getAnchor(
-      Rect globalEditableRegion,
-      double textLineHeight,
-      Offset selectionMidpoint,
-      List<TextSelectionPoint> endpoints,
-      bool fitsAbove,
-  ) {
-    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
-      ? endpoints[1]
-      : endpoints[0];
-    return Offset(
-      globalEditableRegion.left + selectionMidpoint.dx,
-      fitsAbove
-        ? globalEditableRegion.top + startTextSelectionPoint.point.dy - textLineHeight - _kToolbarContentDistance
-        : globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
-    );
-  }
-
-  /// A helper for calculating the [upperBounds] parameter based on parameters
-  /// from [TextSelectionControls.buildToolbar].
-  static double getUpperBounds(double paddingTop) {
-    return _kToolbarScreenPadding + paddingTop;
-  }
-
-  /// A helper for calculating the [fitsAbove] parameter based on parameters
-  /// from [TextSelectionControls.buildToolbar].
-  //static bool getFitsAbove() {
-  static bool getFitsAbove(
-      Rect globalEditableRegion,
-      double textLineHeight,
-      Offset selectionMidpoint,
-      List<TextSelectionPoint> endpoints,
-      double paddingTop,
-  ) {
-    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    const double closedToolbarHeightNeeded = _kToolbarScreenPadding
-      + _kToolbarHeight
-      + _kToolbarContentDistance;
-    final double availableHeight = globalEditableRegion.top
-      + startTextSelectionPoint.point.dy
-      - textLineHeight
-      - paddingTop;
-    return closedToolbarHeightNeeded <= availableHeight;
-  }
-
   @override
   Widget build(BuildContext context) {
+    final double paddingTop = MediaQuery.of(context).padding.top
+        + _kToolbarScreenPadding;
+    final double availableHeight = anchorAbove.dy
+      - paddingTop;
+    final bool fitsAbove = _kToolbarHeight <= availableHeight;
+
     return Stack(
       children: <Widget>[
         CustomSingleChildLayout(
           delegate: _TextSelectionToolbarLayoutDelegate(
-            anchor,
-            upperBounds,
+            fitsAbove ? anchorAbove : anchorBelow,
+            paddingTop,
             fitsAbove,
           ),
           child: _TextSelectionToolbarOverflowableNew(
@@ -514,7 +462,7 @@ class _TextSelectionToolbarOverflowableNewState extends State<_TextSelectionTool
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     return _TextSelectionToolbarRightEdgeAlign(
       key: _containerKey,

@@ -1516,7 +1516,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   Future<void> update() async {
     // iOS 14 added a notification that appears when an app accesses the
     // clipboard. To avoid the notification, don't access the clipboard on iOS,
-    // and instead always shown the paste button, even when the clipboard is
+    // and instead always show the paste button, even when the clipboard is
     // empty.
     // TODO(justinmc): Use the new iOS 14 clipboard API method hasStrings that
     // won't trigger the notification.
