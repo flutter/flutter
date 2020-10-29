@@ -440,7 +440,6 @@ tasks:
       Verifies that `flutter drive --route` still works. No performance numbers.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   linux_chrome_dev_mode:
     description: >

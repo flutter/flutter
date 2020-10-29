@@ -1483,13 +1483,6 @@ void main() {
     ));
   }));
 
-  testUsingContext('ResidentRunner does support CanvasKit', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-
-    expect(residentRunner.toggleCanvaskit,
-      throwsA(isA<Exception>()));
-  }));
-
   testUsingContext('ResidentRunner handles writeSkSL returning no data', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,

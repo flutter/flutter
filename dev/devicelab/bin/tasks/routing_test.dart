@@ -82,6 +82,9 @@ void main() {
         });
       int result;
       result = await drive.exitCode;
+      await flutter('install', options: <String>[
+        '--uninstall-only',
+      ]);
       if (result != 0)
         throw 'Failed to drive test app (exit code $result).';
       result = await run.exitCode;

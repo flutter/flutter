@@ -37,6 +37,16 @@ import '../project.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 
+/// Web rendering backend mode.
+enum WebRendererMode {
+  /// Auto detects which rendering backend to use.
+  autoDetect,
+  /// Always uses canvaskit.
+  canvaskit,
+  /// Always uses html.
+  html,
+}
+
 typedef DwdsLauncher = Future<Dwds> Function(
     {@required AssetReader assetReader,
     @required Stream<BuildResult> buildResults,
@@ -528,8 +538,8 @@ class WebAssetServer implements AssetReader {
     return modules;
   }
 
-  /// Whether to use the canvaskit SDK for rendering.
-  bool canvasKitRendering = false;
+  /// Determines what rendering backed to use.
+  WebRendererMode webRenderer = WebRendererMode.html;
 
   shelf.Response _serveIndex() {
     final Map<String, String> headers = <String, String>{
@@ -554,33 +564,9 @@ class WebAssetServer implements AssetReader {
     // Return the actual file objects so that local engine changes are automatically picked up.
     switch (path) {
       case 'dart_sdk.js':
-        if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-          return globals.fs.file(canvasKitRendering
-              ? globals.artifacts
-                  .getArtifactPath(Artifact.webPrecompiledCanvaskitSdk)
-              : globals.artifacts.getArtifactPath(Artifact.webPrecompiledSdk));
-        } else {
-          return globals.fs.file(canvasKitRendering
-              ? globals.artifacts
-                  .getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdk)
-              : globals.artifacts
-                  .getArtifactPath(Artifact.webPrecompiledSoundSdk));
-        }
-        break;
+        return _resolveDartSdkJsFile;
       case 'dart_sdk.js.map':
-        if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-          return globals.fs.file(canvasKitRendering
-              ? globals.artifacts.getArtifactPath(
-                  Artifact.webPrecompiledCanvaskitSdkSourcemaps)
-              : globals.artifacts
-                  .getArtifactPath(Artifact.webPrecompiledSdkSourcemaps));
-        } else {
-          return globals.fs.file(canvasKitRendering
-              ? globals.artifacts.getArtifactPath(
-                  Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps)
-              : globals.artifacts
-                  .getArtifactPath(Artifact.webPrecompiledSoundSdkSourcemaps));
-        }
+        return _resolveDartSdkJsMapFile;
     }
     // This is the special generated entrypoint.
     if (path == 'web_entrypoint.dart') {
@@ -630,6 +616,54 @@ class WebAssetServer implements AssetReader {
 
     return webSdkFile;
   }
+
+  static const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> _dartSdkJsArtifactMap =
+    <WebRendererMode, Map<NullSafetyMode, Artifact>> {
+      WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
+        NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
+        NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdk,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
+      },
+      WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
+        NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdk,
+        NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdk,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSoundSdk,
+      },
+      WebRendererMode.html: <NullSafetyMode, Artifact> {
+        NullSafetyMode.sound: Artifact.webPrecompiledSoundSdk,
+        NullSafetyMode.unsound: Artifact.webPrecompiledSdk,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledSoundSdk,
+      },
+    };
+
+  static const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> _dartSdkJsMapArtifactMap =
+    <WebRendererMode, Map<NullSafetyMode, Artifact>> {
+      WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
+        NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
+        NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
+      },
+      WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
+        NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
+        NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdkSourcemaps,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
+      },
+      WebRendererMode.html: <NullSafetyMode, Artifact> {
+        NullSafetyMode.sound: Artifact.webPrecompiledSoundSdkSourcemaps,
+        NullSafetyMode.unsound: Artifact.webPrecompiledSdkSourcemaps,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledSoundSdkSourcemaps,
+      },
+    };
+
+  File get _resolveDartSdkJsFile =>
+      globals.fs.file(globals.artifacts.getArtifactPath(
+          _dartSdkJsArtifactMap[webRenderer][_buildInfo.nullSafetyMode]
+      ));
+
+  File get _resolveDartSdkJsMapFile =>
+    globals.fs.file(globals.artifacts.getArtifactPath(
+        _dartSdkJsMapArtifactMap[webRenderer][_buildInfo.nullSafetyMode]
+    ));
 
   @override
   Future<String> dartSourceContents(String serverPath) async {
@@ -776,9 +810,11 @@ class WebDevFS implements DevFS {
       expressionCompiler,
       testMode: testMode,
     );
-    if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
-      webAssetServer.canvasKitRendering = true;
-    }
+    if (buildInfo.dartDefines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
+      webAssetServer.webRenderer = WebRendererMode.autoDetect;
+    } else if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
+        webAssetServer.webRenderer = WebRendererMode.canvaskit;
+      }
     if (hostname == 'any') {
       _baseUri = Uri.http('localhost:$port', '');
     } else {
