@@ -3,10 +3,6 @@
 # found in the LICENSE file.
 
 declare_args() {
-  # Use libc++ (buildtools/third_party/libc++ and
-  # buildtools/third_party/libc++abi) instead of stdlibc++ as standard library.
-  use_custom_libcxx = false
-
   # Track where uninitialized memory originates from. From fastest to slowest:
   # 0 - no tracking, 1 - track only the initial allocation site, 2 - track the
   # chain of stores leading from allocation site to use site.
