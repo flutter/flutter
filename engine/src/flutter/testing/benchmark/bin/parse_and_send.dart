@@ -38,18 +38,33 @@ Future<List<FlutterEngineMetricPoint>> _parse(String jsonFileName) async {
   return points;
 }
 
+Future<FlutterDestination> connectFlutterDestination() async {
+  const String kTokenPath = 'TOKEN_PATH';
+  const String kGcpProject = 'GCP_PROJECT';
+  final Map<String, String> env = Platform.environment;
+  if (env.containsKey(kTokenPath) && env.containsKey(kGcpProject)) {
+    return FlutterDestination.makeFromAccessToken(
+      File(env[kTokenPath]).readAsStringSync(),
+      env[kGcpProject],
+    );
+  }
+  return await FlutterDestination.makeFromCredentialsJson(
+    jsonDecode(Platform.environment['BENCHMARK_GCP_CREDENTIALS'])
+        as Map<String, dynamic>,
+  );
+}
+
 Future<void> main(List<String> args) async {
   if (args.length != 1) {
     throw 'Must have one argument: <benchmark_json_file>';
   }
   final List<FlutterEngineMetricPoint> points = await _parse(args[0]);
+
   // The data will be sent to the Datastore of the GCP project specified through
-  // environment variable BENCHMARK_GCP_CREDENTIALS. The engine Cirrus job has
-  // currently configured the GCP project to flutter-cirrus for test. We'll
-  // eventually migrate to flutter-infra project once the test is done.
-  final FlutterDestination destination =
-      await FlutterDestination.makeFromCredentialsJson(
-    jsonDecode(Platform.environment['BENCHMARK_GCP_CREDENTIALS']),
-  );
+  // environment variable BENCHMARK_GCP_CREDENTIALS, or TOKEN_PATH/GCP_PROJECT.
+  // The engine Cirrus job has currently configured the GCP project to
+  // flutter-cirrus for test. We'll eventually migrate to flutter-infra project
+  // once the test is done.
+  final FlutterDestination destination = await connectFlutterDestination();
   await destination.update(points);
 }
