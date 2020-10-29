@@ -879,13 +879,7 @@ abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> 
   ///
   /// The [BackButtonDispatcher] must have a listener registered before it can
   /// be told to take priority.
-  ///
-  /// The this method only takes the priority from its parent by default.
-  /// Calling this method alone does not claim the priority to handle Android
-  /// back button event if the parent themself does not have the priority.
-  /// Sets the `applyToParent` parameter to true to ask parent to recursively
-  /// claim priority from their parent.
-  void takePriority({bool applyToParent= false}) => _children.clear();
+  void takePriority() => _children.clear();
 
   /// Mark the given child as taking priority over this object and the other
   /// children.
@@ -902,10 +896,7 @@ abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> 
   ///
   /// The [BackButtonDispatcher] must have a listener registered before it can
   /// be told to defer to a child.
-  ///
-  /// Sets the `applyToParent` parameter to true to make this back button
-  /// dispatcher to also take priority from its parent.
-  void deferTo(ChildBackButtonDispatcher child, {bool applyToParent = false}) {
+  void deferTo(ChildBackButtonDispatcher child) {
     assert(hasCallbacks);
     _children.remove(child); // child may or may not be in the set already
     _children.add(child);
@@ -987,17 +978,16 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
   }
 
   @override
-  void takePriority({bool applyToParent = false}) {
-    parent.deferTo(this, applyToParent: applyToParent);
-    super.takePriority(applyToParent: applyToParent);
+  void takePriority() {
+    parent.deferTo(this);
+    super.takePriority();
   }
 
   @override
-  void deferTo(ChildBackButtonDispatcher child, {bool applyToParent = false}) {
+  void deferTo(ChildBackButtonDispatcher child) {
     assert(hasCallbacks);
-    if (applyToParent)
-      parent.deferTo(child, applyToParent: applyToParent);
-    super.deferTo(child, applyToParent: applyToParent);
+    parent.deferTo(child);
+    super.deferTo(child);
   }
 
   @override

@@ -469,7 +469,7 @@ testWidgets('ChildBackButtonDispatcher can be take priority recursively', (Widge
         ),
       )
     ));
-    innerDispatcher3.takePriority(applyToParent: true);
+    innerDispatcher3.takePriority();
     bool result = false;
     result = await outerDispatcher.invokeCallback(SynchronousFuture<bool>(false));
     expect(result, isTrue);
