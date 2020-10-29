@@ -425,7 +425,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   /// [RestorableProperty]. Whenever new restoration data has been provided to
   /// the [RestorationMixin] the property is registered to, either this method
   /// or [createDefaultValue] is called before [initWithValue] is invoked.
-  T fromPrimitives(Object data);
+  T fromPrimitives(Object? data);
 
   /// Called by the [RestorationMixin] with the `value` returned by either
   /// [createDefaultValue] or [fromPrimitives] to set the value that this
@@ -884,7 +884,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// restore the internal state of a [State] object, it may be removed from the
   /// restoration data by calling this method.
   @protected
-  void unregisterFromRestoration(RestorableProperty<Object> property) {
+  void unregisterFromRestoration(RestorableProperty<Object?> property) {
     assert(property != null);
     assert(property._owner == this);
     _bucket?.remove<Object?>(property._restorationId!);

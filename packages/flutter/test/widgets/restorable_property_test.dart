@@ -285,7 +285,7 @@ void main() {
   });
 }
 
-class _TestRestorableValue extends RestorableValue<Object> {
+class _TestRestorableValue extends RestorableValue<Object?> {
   @override
   Object createDefaultValue() {
     return 55;
@@ -300,12 +300,12 @@ class _TestRestorableValue extends RestorableValue<Object> {
   }
 
   @override
-  Object fromPrimitives(Object data) {
+  Object? fromPrimitives(Object? data) {
     return data;
   }
 
   @override
-  Object toPrimitives() {
+  Object? toPrimitives() {
     return value;
   }
 }

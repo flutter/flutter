@@ -194,13 +194,13 @@ class UndoIntent extends Intent {
 class UndoAction extends Action<UndoIntent> {
   @override
   bool isEnabled(UndoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext, nullOk: true) as UndoableActionDispatcher;
+    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext) as UndoableActionDispatcher;
     return manager.canUndo;
   }
 
   @override
   void invoke(UndoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext, nullOk: true) as UndoableActionDispatcher;
+    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext) as UndoableActionDispatcher;
     manager?.undo();
   }
 }
@@ -212,13 +212,13 @@ class RedoIntent extends Intent {
 class RedoAction extends Action<RedoIntent> {
   @override
   bool isEnabled(RedoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus.context, nullOk: true) as UndoableActionDispatcher;
+    final UndoableActionDispatcher manager = Actions.of(primaryFocus.context) as UndoableActionDispatcher;
     return manager.canRedo;
   }
 
   @override
   RedoAction invoke(RedoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus.context, nullOk: true) as UndoableActionDispatcher;
+    final UndoableActionDispatcher manager = Actions.of(primaryFocus.context) as UndoableActionDispatcher;
     manager?.redo();
     return this;
   }

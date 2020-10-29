@@ -116,8 +116,7 @@ class ElevatedButtonTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ElevatedButtonTheme? ancestorTheme = context.findAncestorWidgetOfExactType<ElevatedButtonTheme>();
-    return identical(this, ancestorTheme) ? child : ElevatedButtonTheme(data: data, child: child);
+    return ElevatedButtonTheme(data: data, child: child);
   }
 
   @override

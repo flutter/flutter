@@ -382,7 +382,7 @@ void main() {
             children: <Widget>[
               const Text('top', textDirection: TextDirection.ltr),
               Builder(builder: (BuildContext context) {
-                innerMediaQueryPadding = MediaQuery.of(context)!.padding;
+                innerMediaQueryPadding = MediaQuery.of(context).padding;
                 return Container();
               }),
             ],

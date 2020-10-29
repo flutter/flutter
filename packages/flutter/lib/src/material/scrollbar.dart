@@ -167,7 +167,7 @@ class _ScrollbarState extends State<Scrollbar> with SingleTickerProviderStateMix
       thickness: widget.thickness ?? _kScrollbarThickness,
       radius: widget.radius,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
-      padding: MediaQuery.of(context)!.padding,
+      padding: MediaQuery.of(context).padding,
     );
   }
 

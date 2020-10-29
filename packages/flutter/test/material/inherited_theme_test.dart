@@ -96,7 +96,6 @@ void main() {
   testWidgets('PopupMenuTheme.wrap()', (WidgetTester tester) async {
     const double menuFontSize = 24;
     const Color menuTextColor = Color(0xFF0000FF);
-    bool captureInheritedThemes = true;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -112,7 +111,6 @@ void main() {
                 // The appearance of the menu items' text is defined by the
                 // PopupMenuTheme defined above. Popup menus use
                 // InheritedTheme.captureAll() by default.
-                captureInheritedThemes: captureInheritedThemes,
                 child: const Text('show popupmenu'),
                 onSelected: (int result) { },
                 itemBuilder: (BuildContext context) {
@@ -146,17 +144,6 @@ void main() {
     // Dismiss the menu
     await tester.tap(find.text('One'));
     await tester.pumpAndSettle(); // menu route animation
-
-    // Defeat the default support for capturing the PopupMenuTheme.
-    captureInheritedThemes = false;
-    await tester.pumpWidget(buildFrame());
-
-    await tester.tap(find.text('show popupmenu'));
-    await tester.pumpAndSettle(); // menu route animation
-    expect(itemTextStyle('One').fontSize, isNot(menuFontSize));
-    expect(itemTextStyle('One').color,  isNot(menuTextColor));
-    expect(itemTextStyle('Two').fontSize, isNot(menuFontSize));
-    expect(itemTextStyle('Two').color,  isNot(menuTextColor));
   });
 
   testWidgets('BannerTheme.wrap()', (WidgetTester tester) async {

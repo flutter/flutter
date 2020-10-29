@@ -166,8 +166,7 @@ class DividerTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final DividerTheme? ancestorTheme = context.findAncestorWidgetOfExactType<DividerTheme>();
-    return identical(this, ancestorTheme) ? child : DividerTheme(data: data, child: child);
+    return DividerTheme(data: data, child: child);
   }
 
   @override

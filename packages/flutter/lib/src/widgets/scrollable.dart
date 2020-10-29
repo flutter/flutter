@@ -1082,8 +1082,8 @@ class _RestorableScrollOffset extends RestorableValue<double?> {
   }
 
   @override
-  double fromPrimitives(Object data) {
-    return data as double;
+  double fromPrimitives(Object? data) {
+    return data! as double;
   }
 
   @override

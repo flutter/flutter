@@ -60,7 +60,7 @@ import 'inherited_notifier.dart';
 /// ```dart
 /// Color _color = Colors.white;
 ///
-/// bool _handleKeyPress(FocusNode node, RawKeyEvent event) {
+/// KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
 ///   if (event is RawKeyDownEvent) {
 ///     print('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
 ///     if (event.logicalKey == LogicalKeyboardKey.keyR) {
@@ -68,22 +68,22 @@ import 'inherited_notifier.dart';
 ///       setState(() {
 ///         _color = Colors.red;
 ///       });
-///       return true;
+///       return KeyEventResult.handled;
 ///     } else if (event.logicalKey == LogicalKeyboardKey.keyG) {
 ///       print('Changing color to green.');
 ///       setState(() {
 ///         _color = Colors.green;
 ///       });
-///       return true;
+///       return KeyEventResult.handled;
 ///     } else if (event.logicalKey == LogicalKeyboardKey.keyB) {
 ///       print('Changing color to blue.');
 ///       setState(() {
 ///         _color = Colors.blue;
 ///       });
-///       return true;
+///       return KeyEventResult.handled;
 ///     }
 ///   }
-///   return false;
+///   return KeyEventResult.ignored;
 /// }
 ///
 /// @override

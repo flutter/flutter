@@ -46,11 +46,11 @@ const Color _kDisabledBackground = CupertinoDynamicColor.withBrightness(
   darkColor: Color(0xFF050505),
 );
 
-// Value inspected from Xcode 11 & iOS 13.0 Simulator.
+// Value inspected from Xcode 12 & iOS 14.0 Simulator.
 // Note it may not be consistent with https://developer.apple.com/design/resources/.
 const CupertinoDynamicColor _kClearButtonColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFF636366),
-  darkColor: Color(0xFFAEAEB2),
+  color: Color(0x33000000),
+  darkColor: Color(0x33FFFFFF),
 );
 
 // An eyeballed value that moves the cursor slightly left of where it is
@@ -270,6 +270,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection = true,
+    this.selectionControls,
     this.onTap,
     this.scrollController,
     this.scrollPhysics,
@@ -559,6 +560,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
+  /// {@macro flutter.widgets.editableText.selectionControls}
+  final TextSelectionControls? selectionControls;
+
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
@@ -615,6 +619,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(createCupertinoColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
+    properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
@@ -874,8 +879,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
+    final TextSelectionControls textSelectionControls = widget.selectionControls ?? cupertinoTextSelectionControls;
     final bool enabled = widget.enabled ?? true;
-    final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context)!.devicePixelRatio, 0);
+    final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
     if (widget.maxLength != null && widget.maxLengthEnforced) {
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
     }
@@ -895,7 +901,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     final TextStyle placeholderStyle = textStyle.merge(resolvedPlaceholderStyle);
 
-    final Brightness keyboardAppearance = widget.keyboardAppearance ?? CupertinoTheme.brightnessOf(context)!;
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? CupertinoTheme.brightnessOf(context);
     final Color cursorColor = CupertinoDynamicColor.resolve(widget.cursorColor, context) ?? themeData.primaryColor;
     final Color? disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context);
 
@@ -957,7 +963,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             expands: widget.expands,
             selectionColor: selectionColor,
             selectionControls: widget.selectionEnabled
-              ? cupertinoTextSelectionControls : null,
+              ? textSelectionControls : null,
             onChanged: widget.onChanged,
             onSelectionChanged: _handleSelectionChanged,
             onEditingComplete: widget.onEditingComplete,

@@ -4253,6 +4253,58 @@ void main() {
     expect(getOpacity(tester, prefixText), 1.0);
   });
 
+  // Related issue: https://github.com/flutter/flutter/issues/64427
+  testWidgets('OutlineInputBorder and InputDecorator long labels and in Floating, the width should ignore the icon width', (WidgetTester tester) async {
+    const String labelText = 'Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.';
+
+    Widget getLabeledInputDecorator(FloatingLabelBehavior floatingLabelBehavior) => MaterialApp(
+        home: Material(
+          child: Container(
+            width: 300,
+            child: TextField(
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.greenAccent, width: 1.0),
+                ),
+                suffixIcon: const Icon(Icons.arrow_drop_down),
+                floatingLabelBehavior: floatingLabelBehavior,
+                labelText: labelText,
+              ),
+            ),
+          ),
+        ),
+      );
+
+    await tester.pumpWidget(getLabeledInputDecorator(FloatingLabelBehavior.never));
+
+    final double labelWidth = getLabelRect(tester).width;
+
+    await tester.pumpWidget(getLabeledInputDecorator(FloatingLabelBehavior.always));
+    await tester.pumpAndSettle();
+
+    final double floatedLabelWidth = getLabelRect(tester).width;
+
+    expect(floatedLabelWidth > labelWidth, isTrue);
+
+    final Widget target = getLabeledInputDecorator(FloatingLabelBehavior.auto);
+    await tester.pumpWidget(target);
+    await tester.pumpAndSettle();
+
+    expect(getLabelRect(tester).width, labelWidth);
+
+    // Click for Focus.
+    await tester.tap(find.byType(TextField));
+    // Default animation duration is 200 millisecond.
+    await tester.pumpFrames(target, const Duration(milliseconds: 100));
+
+    expect(getLabelRect(tester).width > labelWidth, isTrue);
+    expect(getLabelRect(tester).width < floatedLabelWidth, isTrue);
+
+    await tester.pumpAndSettle();
+
+    expect(getLabelRect(tester).width, floatedLabelWidth);
+  });
+
   testWidgets('given enough space, constrained and unconstrained heights result in the same size widget', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/65572
     final UniqueKey keyUnconstrained = UniqueKey();
