@@ -154,6 +154,17 @@ class Switch extends StatefulWidget {
   /// The color to use when this switch is on.
   ///
   /// Defaults to [ThemeData.toggleableActiveColor].
+  ///
+  /// If [activeColor] is a [MaterialStateColor], it will be resolved in the
+  /// following states:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// Note, when this [Switch] is not selected, the [activeColor] color will
+  /// not fill anything.
   final Color? activeColor;
 
   /// The color to use on the track when this switch is on.

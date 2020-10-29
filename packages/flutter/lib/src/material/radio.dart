@@ -239,6 +239,17 @@ class Radio<T> extends StatefulWidget {
   /// The color to use when this radio button is selected.
   ///
   /// Defaults to [ThemeData.toggleableActiveColor].
+  ///
+  /// If [activeColor] is a [MaterialStateColor], it will be resolved in the
+  /// following states:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// Note, when this [Radio] is not selected, the [activeColor] color will
+  /// not fill anything.
   final Color? activeColor;
 
   /// Configures the minimum size of the tap target.
