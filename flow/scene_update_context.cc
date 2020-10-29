@@ -68,14 +68,16 @@ void SetMaterialColor(scenic::Material& material,
 SceneUpdateContext::SceneUpdateContext(std::string debug_label,
                                        fuchsia::ui::views::ViewToken view_token,
                                        scenic::ViewRefPair view_ref_pair,
-                                       SessionWrapper& session)
+                                       SessionWrapper& session,
+                                       bool intercept_all_input)
     : session_(session),
       root_view_(session_.get(),
                  std::move(view_token),
                  std::move(view_ref_pair.control_ref),
                  std::move(view_ref_pair.view_ref),
                  debug_label),
-      root_node_(session_.get()) {
+      root_node_(session_.get()),
+      intercept_all_input_(intercept_all_input) {
   root_view_.AddChild(root_node_);
   root_node_.SetEventMask(fuchsia::ui::gfx::kMetricsEventMask);
 
@@ -317,6 +319,14 @@ SceneUpdateContext::Frame::Frame(std::shared_ptr<SceneUpdateContext> context,
   // with opacity != 1. For now, clamp to a infinitesimally smaller value than
   // 1, which does not cause visual problems in practice.
   opacity_node_.SetOpacity(std::min(kOneMinusEpsilon, opacity_ / 255.0f));
+
+  if (context->intercept_all_input_) {
+    context->input_interceptor_.emplace(context->session_.get());
+    context->input_interceptor_->UpdateDimensions(
+        context->session_.get(), rrect.width(), rrect.height(),
+        -(local_elevation + kScenicZElevationBetweenLayers * 0.5f));
+    entity_node().AddChild(context->input_interceptor_->node());
+  }
 }
 
 SceneUpdateContext::Frame::~Frame() {
