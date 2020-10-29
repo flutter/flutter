@@ -99,6 +99,8 @@ source_set("flutter_framework_source") {
     "ios_render_target_gl.mm",
     "ios_surface.h",
     "ios_surface.mm",
+    "ios_surface_factory.h",
+    "ios_surface_factory.mm",
     "ios_surface_gl.h",
     "ios_surface_gl.mm",
     "ios_surface_software.h",
@@ -219,6 +221,7 @@ shared_library("ios_test_flutter") {
   deps = [
     ":flutter_framework_source",
     ":ios_test_flutter_mrc",
+    "//flutter/common:common",
     "//flutter/shell/platform/darwin/common:framework_shared",
     "//flutter/third_party/tonic",
     "//flutter/third_party/txt",

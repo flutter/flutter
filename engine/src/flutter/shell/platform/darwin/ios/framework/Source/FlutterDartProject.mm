@@ -27,7 +27,7 @@ extern const intptr_t kPlatformStrongDillSize;
 
 static const char* kApplicationKernelSnapshotFileName = "kernel_blob.bin";
 
-static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
+flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   auto command_line = flutter::CommandLineFromNSProcessInfo();
 
   // Precedence:
@@ -181,7 +181,17 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
   self = [super init];
 
   if (self) {
-    _settings = DefaultSettingsForProcess(bundle);
+    _settings = FLTDefaultSettingsForBundle(bundle);
+  }
+
+  return self;
+}
+
+- (instancetype)initWithSettings:(const flutter::Settings&)settings {
+  self = [self initWithPrecompiledDartBundle:nil];
+
+  if (self) {
+    _settings = settings;
   }
 
   return self;
