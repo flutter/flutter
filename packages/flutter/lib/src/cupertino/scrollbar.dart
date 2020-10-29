@@ -46,6 +46,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 ///  * [GridView], which display a 2 dimensional, scrollable array of children.
 ///  * [Scrollbar], a Material Design scrollbar that dynamically adapts to the
 ///    platform showing either an Android style or iOS style scrollbar.
+///  * [RawScrollbarThumb], the abstract base class this inherits from.
 class CupertinoScrollbar extends RawScrollbarThumb {
   /// Creates an iOS style scrollbar that wraps the given [child].
   ///
@@ -112,11 +113,12 @@ class CupertinoScrollbar extends RawScrollbarThumb {
 }
 
 class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar> {
-  final GlobalKey _customPaintKey = GlobalKey();
   late AnimationController _thicknessAnimationController;
 
   @override
   ScrollbarPainter? painter;
+  @override
+  final GlobalKey customPaintKey = GlobalKey();
 
   double get _thickness {
     return widget.thickness! + _thicknessAnimationController.value * (widget.thicknessWhileDragging - widget.thickness!);
@@ -181,36 +183,38 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
   // on the scrollbar thumb and then drags the scrollbar without releasing.
 
   @override
-  void handleGestureStart(Offset localPosition) {
-    super.handleGestureStart(localPosition);
+  void handleLongPressStart(LongPressStartDetails details) {
+    super.handleLongPressStart(details);
     final Axis direction = getDirection()!;
     switch (direction) {
       case Axis.vertical:
-        _pressStartAxisPosition = localPosition.dy;
+        _pressStartAxisPosition = details.localPosition.dy;
         break;
       case Axis.horizontal:
-        _pressStartAxisPosition = localPosition.dx;
+        _pressStartAxisPosition = details.localPosition.dx;
         break;
     }
   }
 
-  void _handleLongPress() {
+  @override
+  void handleLongPress() {
     if (getDirection() == null) {
       return;
     }
-    fadeoutTimer?.cancel();
+    super.handleLongPress();
     _thicknessAnimationController.forward().then<void>(
           (_) => HapticFeedback.mediumImpact(),
     );
   }
 
-  void _handleLongPressEnd(LongPressEndDetails details) {
+  @override
+  void handleLongPressEnd(LongPressEndDetails details) {
     final Axis? direction = getDirection();
     if (direction == null) {
       return;
     }
     _thicknessAnimationController.reverse();
-    handleGestureEnd(details.velocity.pixelsPerSecond);
+    super.handleLongPressEnd(details);
     switch(direction) {
       case Axis.vertical:
         if (details.velocity.pixelsPerSecond.dy.abs() < 10 &&
@@ -227,31 +231,6 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
     }
   }
 
-  // Get the GestureRecognizerFactories used to detect gestures on the scrollbar
-  // thumb.
-  Map<Type, GestureRecognizerFactory> get _gestures {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    if (controller == null)
-      return gestures;
-
-    gestures[_ThumbPressGestureRecognizer] =
-        GestureRecognizerFactoryWithHandlers<_ThumbPressGestureRecognizer>(
-      () => _ThumbPressGestureRecognizer(
-        debugOwner: this,
-        customPaintKey: _customPaintKey,
-      ),
-      (_ThumbPressGestureRecognizer instance) {
-        instance.onLongPressStart = (LongPressStartDetails details) => handleGestureStart(details.localPosition);
-        instance.onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) => handleGestureUpdate(details.localPosition);
-        instance
-          ..onLongPress = _handleLongPress
-          ..onLongPressEnd = _handleLongPressEnd;
-      },
-    );
-
-    return gestures;
-  }
-
   @override
   void dispose() {
     _thicknessAnimationController.dispose();
@@ -264,41 +243,14 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
       onNotification: handleScrollNotification,
       child: RepaintBoundary(
         child: RawGestureDetector(
-          gestures: _gestures,
+          gestures: gestures,
           child: CustomPaint(
-            key: _customPaintKey,
+            key: customPaintKey,
             foregroundPainter: painter,
             child: RepaintBoundary(child: widget.child),
           ),
         ),
       ),
     );
-  }
-}
-
-// A longpress gesture detector that only responds to events on the scrollbar's
-// thumb and ignores everything else.
-class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer with ScrollbarThumbHitTestMixin {
-  _ThumbPressGestureRecognizer({
-    double? postAcceptSlopTolerance,
-    PointerDeviceKind? kind,
-    required Object debugOwner,
-    required GlobalKey customPaintKey,
-  }) :  _customPaintKey = customPaintKey,
-        super(
-          postAcceptSlopTolerance: postAcceptSlopTolerance,
-          kind: kind,
-          debugOwner: debugOwner,
-          duration: const Duration(milliseconds: 100),
-        );
-
-  final GlobalKey _customPaintKey;
-
-  @override
-  bool isPointerAllowed(PointerDownEvent event) {
-    if (!hitTestInteractive(_customPaintKey, event.position)) {
-      return false;
-    }
-    return super.isPointerAllowed(event);
   }
 }

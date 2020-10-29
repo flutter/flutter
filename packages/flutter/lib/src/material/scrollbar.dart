@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 
@@ -65,6 +63,9 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   ScrollbarPainter? painter;
 
   @override
+  final GlobalKey customPaintKey = GlobalKey();
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ThemeData theme = Theme.of(context)!;
@@ -114,10 +115,6 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
 
   @override
   bool handleScrollNotification(ScrollNotification notification) {
-    final ScrollMetrics metrics = notification.metrics;
-    if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
-      return false;
-    }
     if (_useCupertinoScrollbar)
       return false;
     return super.handleScrollNotification(notification);
@@ -139,10 +136,12 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
     return NotificationListener<ScrollNotification>(
       onNotification: handleScrollNotification,
       child: RepaintBoundary(
-        child: CustomPaint(
-          foregroundPainter: painter,
-          child: RepaintBoundary(
-            child: widget.child,
+        child: RawGestureDetector(
+          gestures: gestures,
+          child: CustomPaint(
+            key: customPaintKey,
+            foregroundPainter: painter,
+            child: RepaintBoundary(child: widget.child),
           ),
         ),
       ),
