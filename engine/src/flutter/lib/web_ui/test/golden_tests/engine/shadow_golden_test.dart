@@ -163,7 +163,7 @@ void testMain() async {
       await matchGoldenFile(
         'shadows.png',
         region: region,
-        maxDiffRatePercent: 0.0,
+        maxDiffRatePercent: 0.23,
         pixelComparison: PixelComparison.precise,
       );
     },

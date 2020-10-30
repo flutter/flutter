@@ -90,6 +90,7 @@ class PersistedPicture extends PersistedLeafSurface {
   final EnginePicture picture;
   final ui.Rect? localPaintBounds;
   final int hints;
+  double _density = 1.0;
 
   /// Cache for reusing elements such as images across picture updates.
   CrossFrameCache<html.HtmlElement>? _elementCache =
@@ -106,6 +107,23 @@ class PersistedPicture extends PersistedLeafSurface {
     if (dx != 0.0 || dy != 0.0) {
       _transform = _transform!.clone();
       _transform!.translate(dx, dy);
+    }
+    final double paintWidth = localPaintBounds!.width;
+    final double paintHeight = localPaintBounds!.height;
+    final double newDensity = localPaintBounds == null || paintWidth == 0 || paintHeight == 0
+        ? 1.0 : _computePixelDensity(_transform, paintWidth, paintHeight);
+    if (newDensity != _density) {
+      _density = newDensity;
+      if (_canvas != null) {
+        // If cull rect and density hasn't changed, this will only repaint.
+        // If density doesn't match canvas, a new canvas will be created
+        // and paint queued.
+        //
+        // Similar to preroll for transform where transform is updated, for
+        // picture this means we need to repaint so pixelation doesn't occur
+        // due to transform changing overall dpi.
+        applyPaint(_canvas);
+      }
     }
     _computeExactCullRects();
   }
@@ -296,7 +314,12 @@ class PersistedPicture extends PersistedLeafSurface {
       // painting. This removes all the setup work and scaffolding objects
       // that won't be useful for anything anyway.
       _recycleCanvas(oldCanvas);
-      domRenderer.clearDom(rootElement!);
+      if (rootElement != null) {
+        domRenderer.clearDom(rootElement!);
+      }
+      if (_canvas != null) {
+        _recycleCanvas(_canvas);
+      }
       _canvas = null;
       return;
     }
@@ -339,7 +362,7 @@ class PersistedPicture extends PersistedLeafSurface {
         // We did not allocate a canvas last time. This can happen when the
         // picture is completely clipped out of the view.
         return 1.0;
-      } else if (!oldCanvas.doesFitBounds(_exactLocalCullRect!)) {
+      } else if (!oldCanvas.doesFitBounds(_exactLocalCullRect!, _density)) {
         // The canvas needs to be resized before painting.
         return 1.0;
       } else {
@@ -382,7 +405,7 @@ class PersistedPicture extends PersistedLeafSurface {
 
   void _applyBitmapPaint(EngineCanvas? oldCanvas) {
     if (oldCanvas is BitmapCanvas &&
-        oldCanvas.doesFitBounds(_optimalLocalCullRect!) &&
+        oldCanvas.doesFitBounds(_optimalLocalCullRect!, _density) &&
         oldCanvas.isReusable()) {
       if (_debugShowCanvasReuseStats) {
         DebugCanvasReuseOverlay.instance.keptCount++;
@@ -451,7 +474,7 @@ class PersistedPicture extends PersistedLeafSurface {
       final double candidatePixelCount =
           candidateSize.width * candidateSize.height;
 
-      final bool fits = candidate.doesFitBounds(bounds);
+      final bool fits = candidate.doesFitBounds(bounds, _density);
       final bool isSmaller = candidatePixelCount < lastPixelCount;
       if (fits && isSmaller) {
         // [isTooSmall] is used to make sure that a small picture doesn't
@@ -493,7 +516,7 @@ class PersistedPicture extends PersistedLeafSurface {
     if (_debugShowCanvasReuseStats) {
       DebugCanvasReuseOverlay.instance.createdCount++;
     }
-    final BitmapCanvas canvas = BitmapCanvas(bounds);
+    final BitmapCanvas canvas = BitmapCanvas(bounds, density: _density);
     canvas.setElementCache(_elementCache);
     if (_debugExplainSurfaceStats) {
       _surfaceStatsFor(this)
@@ -536,8 +559,12 @@ class PersistedPicture extends PersistedLeafSurface {
     final bool cullRectChangeRequiresRepaint =
         _computeOptimalCullRect(oldSurface);
     if (identical(picture, oldSurface.picture)) {
+      bool densityChanged =
+          (_canvas is BitmapCanvas &&
+              _density != (_canvas as BitmapCanvas)._density);
+
       // The picture is the same. Attempt to avoid repaint.
-      if (cullRectChangeRequiresRepaint) {
+      if (cullRectChangeRequiresRepaint || densityChanged) {
         // Cull rect changed such that a repaint is still necessary.
         _applyPaint(oldSurface);
       } else {
@@ -602,4 +629,73 @@ class PersistedPicture extends PersistedLeafSurface {
       }
     }
   }
+}
+
+/// Given size of a rectangle and transform, computes pixel density
+/// (scale factor).
+double _computePixelDensity(Matrix4? transform, double width, double height) {
+  if (transform == null || transform.isIdentity()) {
+    return 1.0;
+  }
+  final Float32List m = transform.storage;
+  // Apply perspective transform to all 4 corners. Can't use left,top, bottom,
+  // right since for example rotating 45 degrees would yield inaccurate size.
+  double minX = m[12] * m[15];
+  double minY = m[13] * m[15];
+  double maxX = minX;
+  double maxY = minY;
+  double x = width;
+  double y = height;
+  double wp = 1.0 / ((m[3] * x) + (m[7] * y) + m[15]);
+  double xp = ((m[0] * x) + (m[4] * y) + m[12]) * wp;
+  double yp = ((m[1] * x) + (m[5] * y) + m[13]) * wp;
+  print('$xp,$yp');
+  minX = math.min(minX, xp);
+  maxX = math.max(maxX, xp);
+  minY = math.min(minY, yp);
+  maxY = math.max(maxY, yp);
+  x = 0;
+  wp = 1.0 / ((m[3] * x) + (m[7] * y) + m[15]);
+  xp = ((m[0] * x) + (m[4] * y) + m[12]) * wp;
+  yp = ((m[1] * x) + (m[5] * y) + m[13]) * wp;
+  print('$xp,$yp');
+  minX = math.min(minX, xp);
+  maxX = math.max(maxX, xp);
+  minY = math.min(minY, yp);
+  maxY = math.max(maxY, yp);
+  x = width;
+  y = 0;
+  wp = 1.0 / ((m[3] * x) + (m[7] * y) + m[15]);
+  xp = ((m[0] * x) + (m[4] * y) + m[12]) * wp;
+  yp = ((m[1] * x) + (m[5] * y) + m[13]) * wp;
+  print('$xp,$yp');
+  minX = math.min(minX, xp);
+  maxX = math.max(maxX, xp);
+  minY = math.min(minY, yp);
+  maxY = math.max(maxY, yp);
+  double scaleX = (maxX - minX) / width;
+  double scaleY = (maxY - minY) / height;
+  double scale = math.min(scaleX, scaleY);
+  // kEpsilon guards against divide by zero below.
+  if (scale < kEpsilon || scale == 1) {
+    // Handle local paint bounds scaled to 0, typical when using
+    // transform animations and nothing is drawn.
+    return 1.0;
+  }
+  if (scale > 1) {
+    // Normalize scale to multiples of 2: 1x, 2x, 4x, 6x, 8x.
+    // This is to prevent frequent rescaling of canvas during animations.
+    //
+    // On a fullscreen high dpi device dpi*density*resolution will demand
+    // too much memory, so clamp at 4.
+    scale = math.min(4.0, ((scale / 2.0).ceil() * 2.0));
+    // Guard against webkit absolute limit.
+    const double kPixelLimit = 1024 * 1024 * 4;
+    if ((width * height * scale * scale) > kPixelLimit && scale > 2) {
+      scale = (kPixelLimit * 0.8) / (width * height);
+    }
+  } else {
+    scale = math.max(2.0 / (2.0 / scale).floor(), 0.0001);
+  }
+  return scale;
 }
