@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../painting/borders.dart';
 import 'list_tile.dart';
 import 'radio.dart';
 import 'theme.dart';
