@@ -62,7 +62,7 @@ FLUTTER_ASSERT_ARC
   return expectations;
 }
 
-- (void)testDismissedFlutterViewControllerNotRespondingToApplicationLifecycle {
+- (void)skip_testDismissedFlutterViewControllerNotRespondingToApplicationLifecycle {
   XCTestExpectation* engineStartedExpectation = [self expectationWithDescription:@"Engine started"];
   // Let the engine finish booting (at the end of which the channels are properly set-up) before
   // moving onto the next step of showing the next view controller.
@@ -197,7 +197,7 @@ FLUTTER_ASSERT_ARC
   [engine destroyContext];
 }
 
-- (void)testVisibleFlutterViewControllerRespondsToApplicationLifecycle {
+- (void)skip_testVisibleFlutterViewControllerRespondsToApplicationLifecycle {
   XCTestExpectation* engineStartedExpectation = [self expectationWithDescription:@"Engine started"];
 
   // Let the engine finish booting (at the end of which the channels are properly set-up) before
@@ -300,7 +300,7 @@ FLUTTER_ASSERT_ARC
   [engine destroyContext];
 }
 
-- (void)testFlutterViewControllerDetachingSendsApplicationLifecycle {
+- (void)skip_testFlutterViewControllerDetachingSendsApplicationLifecycle {
   XCTestExpectation* engineStartedExpectation = [self expectationWithDescription:@"Engine started"];
 
   // Let the engine finish booting (at the end of which the channels are properly set-up) before
