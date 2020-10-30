@@ -104,18 +104,23 @@ class BitmapCanvas extends EngineCanvas {
   /// can be constructed from contents.
   bool _preserveImageData = false;
 
+  /// Canvas pixel to screen pixel ratio. Similar to dpi but
+  /// uses global transform of canvas to compute ratio.
+  final double _density;
+
   /// Allocates a canvas with enough memory to paint a picture within the given
   /// [bounds].
   ///
   /// This canvas can be reused by pictures with different paint bounds as long
   /// as the [Rect.size] of the bounds fully fit within the size used to
   /// initialize this canvas.
-  BitmapCanvas(this._bounds)
+  BitmapCanvas(this._bounds, {double density = 1.0})
       : assert(_bounds != null), // ignore: unnecessary_null_comparison
+        _density = density,
         _widthInBitmapPixels = _widthToPhysical(_bounds.width),
         _heightInBitmapPixels = _heightToPhysical(_bounds.height),
         _canvasPool = _CanvasPool(_widthToPhysical(_bounds.width),
-            _heightToPhysical(_bounds.height)) {
+            _heightToPhysical(_bounds.height), density) {
     rootElement.style.position = 'absolute';
     // Adds one extra pixel to the requested size. This is to compensate for
     // _initializeViewport() snapping canvas position to 1 pixel, causing
@@ -179,10 +184,11 @@ class BitmapCanvas extends EngineCanvas {
   }
 
   // Used by picture to assess if canvas is large enough to reuse as is.
-  bool doesFitBounds(ui.Rect newBounds) {
+  bool doesFitBounds(ui.Rect newBounds, double newDensity) {
     assert(newBounds != null); // ignore: unnecessary_null_comparison
     return _widthInBitmapPixels >= _widthToPhysical(newBounds.width) &&
-        _heightInBitmapPixels >= _heightToPhysical(newBounds.height);
+        _heightInBitmapPixels >= _heightToPhysical(newBounds.height) &&
+        _density == newDensity;
   }
 
   @override

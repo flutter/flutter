@@ -11,7 +11,7 @@ abstract class EngineGradient implements ui.Gradient {
 
   /// Creates a fill style to be used in painting.
   Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
-      ui.Rect? shaderBounds);
+      ui.Rect? shaderBounds, double density);
 }
 
 class GradientSweep extends EngineGradient {
@@ -29,7 +29,7 @@ class GradientSweep extends EngineGradient {
 
   @override
   Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
-      ui.Rect? shaderBounds) {
+      ui.Rect? shaderBounds, double density) {
     assert(shaderBounds != null);
     int widthInPixels = shaderBounds!.right.ceil();
     int heightInPixels = shaderBounds.bottom.ceil();
@@ -167,7 +167,7 @@ class GradientLinear extends EngineGradient {
 
   @override
   html.CanvasGradient createPaintStyle(html.CanvasRenderingContext2D? ctx,
-      ui.Rect? shaderBounds) {
+      ui.Rect? shaderBounds, double density) {
     _FastMatrix64? matrix4 = this.matrix4;
     html.CanvasGradient gradient;
     if (matrix4 != null) {
@@ -215,7 +215,7 @@ class GradientRadial extends EngineGradient {
 
   @override
   Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
-      ui.Rect? shaderBounds) {
+      ui.Rect? shaderBounds, double density) {
     if (!useCanvasKit) {
       if (tileMode != ui.TileMode.clamp) {
         throw UnimplementedError(
@@ -255,7 +255,7 @@ class GradientConical extends EngineGradient {
 
   @override
   Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
-      ui.Rect? shaderBounds) {
+      ui.Rect? shaderBounds, double density) {
     throw UnimplementedError();
   }
 }
