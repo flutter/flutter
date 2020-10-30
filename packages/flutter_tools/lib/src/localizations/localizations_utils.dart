@@ -250,7 +250,7 @@ String describeLocale(String tag) {
 /// This function is used by tools that take in a JSON-formatted file to
 /// generate Dart code. For this reason, characters with special meaning
 /// in JSON files are escaped. For example, the backspace character (\b)
-/// have to be properly escaped by this function so that the generated
+/// has to be properly escaped by this function so that the generated
 /// Dart code correctly represents this character:
 /// ```
 /// foo\bar => 'foo\\bar'
