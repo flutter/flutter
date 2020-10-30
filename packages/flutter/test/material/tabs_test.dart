@@ -2892,6 +2892,80 @@ void main() {
     // No other tab got instantiated during the animation.
     expect(log, <String>['init: 0', 'init: 3', 'dispose: 0']);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/10969.
+  testWidgets('Correct restore with PageStorageKey', (WidgetTester tester) async {
+    final GlobalKey<State<StatefulWidget>> globalKey = GlobalKey();
+    final PageController pageController = PageController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PageView(
+            key: globalKey,
+            controller: pageController,
+            children: <Widget>[
+              DefaultTabController(
+                length: 2,
+                key: const PageStorageKey<Type>(DefaultTabController),
+                child: Column(
+                  children: const <Widget>[
+                    TabBar(
+                      tabs: <Widget>[
+                        Tab(text: 'A'),
+                        Tab(text: 'B'),
+                      ],
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        children: <Widget>[
+                          Text('C'),
+                          Text('D'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Text('E'),
+            ],
+          ),
+        ),
+      ));
+
+    final TabController tabController = DefaultTabController.of(tester.element(find.text('A')))!;
+
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+    expect(find.text('E'), findsNothing);
+    expect(tabController.index, 0);
+
+    tabController.index = 1;
+    await tester.pumpAndSettle();
+
+    expect(tabController.index, 1);
+    expect(find.text('C'), findsNothing);
+    expect(find.text('D'), findsOneWidget);
+
+    pageController.jumpToPage(1);
+    await tester.pumpAndSettle();
+
+    expect(find.text('E'), findsOneWidget);
+
+    pageController.jumpToPage(0);
+    await tester.pumpAndSettle();
+
+    expect(tabController.index, 1);
+    expect(find.text('C'), findsNothing);
+    expect(find.text('D'), findsOneWidget);
+
+    final Element pageViewElement = find.byType(PageView).evaluate().firstWhere((Element element) => element != globalKey.currentContext);
+    final PageController internalPageController = (pageViewElement.widget as PageView).controller;
+    expect(internalPageController.page, tabController.index.toDouble());
+  });
+
+
 }
 
 class KeepAliveInk extends StatefulWidget {
