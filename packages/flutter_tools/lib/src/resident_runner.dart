@@ -27,7 +27,6 @@ import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
-import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
@@ -102,31 +101,14 @@ class FlutterDevice {
         platformDillArtifact = Artifact.webPlatformSoundKernelDill;
         extraFrontEndOptions =  buildInfo.extraFrontEndOptions;
       } else {
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          globals.fs.file(buildInfo.packagesPath),
-          logger: globals.logger,
-          throwOnError: false,
-        ) ?? PackageConfig.empty;
-        final LanguageVersion languageVersion = target != null
-          ? packageConfig?.packageOf(Uri.parse(target))?.languageVersion
-          : null;
-        // TODO(jonahwilliams): This logic is not correct - in general the language version
-        // being null means "current language version". For web, this needs to also be able
-        // to parse the language version comment out of the entrypoint file if provided.
-        final bool isNullSafe = languageVersion != null && (languageVersion.major >= 2 && languageVersion.minor >= 12);
-        if (isNullSafe) {
-          platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-          extraFrontEndOptions =  <String>[
-            ...?buildInfo.extraFrontEndOptions,
-            '--sound-null-safety',
-          ];
-        } else {
-          platformDillArtifact = Artifact.webPlatformKernelDill;
-          extraFrontEndOptions =  <String>[
-            ...?buildInfo.extraFrontEndOptions,
-            '--no-sound-null-safety',
-          ];
-        }
+        // TODO(jonahwilliams): null-safe auto detection does not currently
+        // work on the web. Always opt out of null safety if it was not
+        // specifically requested.
+        platformDillArtifact = Artifact.webPlatformKernelDill;
+        extraFrontEndOptions =  <String>[
+          ...?buildInfo.extraFrontEndOptions,
+          '--no-sound-null-safety',
+        ];
       }
 
       generator = ResidentCompiler(
