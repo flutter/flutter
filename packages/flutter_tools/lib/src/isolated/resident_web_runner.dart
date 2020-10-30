@@ -483,11 +483,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
       'Launching ${globals.fsUtils.getDisplayPath(target)} '
       'on ${device.device.name} in $modeName mode...',
     );
-    final String effectiveHostname = debuggingOptions.hostname ?? 'localhost';
-    final int hostPort = debuggingOptions.port == null
-        ? await globals.os.findFreePort()
-        : int.tryParse(debuggingOptions.port);
-
     if (device.device is ChromiumDevice) {
       _chromiumLauncher = (device.device as ChromiumDevice).chromeLauncher;
     }
@@ -498,10 +493,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions.webEnableExpressionEvaluation
               ? WebExpressionCompiler(device.generator)
               : null;
-
         device.devFS = WebDevFS(
-          hostname: effectiveHostname,
-          port: hostPort,
+          hostname: debuggingOptions.hostname ?? 'localhost',
+          port: debuggingOptions.port != null
+            ? int.tryParse(debuggingOptions.port)
+            : null,
           packagesFilePath: packagesFilePath,
           urlTunneller: urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
