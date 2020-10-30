@@ -70,7 +70,6 @@ class FlutterDevice {
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
-    @required FlutterProject flutterProject,
     @required String target,
     @required BuildInfo buildInfo,
     @required Platform platform,
@@ -118,7 +117,8 @@ class FlutterDevice {
         initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
-          extraFrontEndOptions: extraFrontEndOptions
+          extraFrontEndOptions: extraFrontEndOptions,
+          nullSafetyMode: buildInfo.nullSafetyMode,
         ),
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
@@ -160,6 +160,7 @@ class FlutterDevice {
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
+          nullSafetyMode: buildInfo.nullSafetyMode,
         ),
         packagesPath: buildInfo.packagesPath,
         artifacts: globals.artifacts,
@@ -895,14 +896,6 @@ abstract class ResidentRunner {
     globals.logger.printTrace('complete');
   }
 
-  /// Toggle whether canvaskit is being used for rendering, returning the new
-  /// state.
-  ///
-  /// Only supported on the web.
-  Future<bool> toggleCanvaskit() {
-    throw Exception('Canvaskit not supported by this runner.');
-  }
-
   /// Write the SkSL shaders to a zip file in build directory.
   ///
   /// Returns the name of the file, or `null` on failures.
@@ -1183,6 +1176,7 @@ abstract class ResidentRunner {
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
+        nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
       );
       globals.fs
           .file(copyPath)

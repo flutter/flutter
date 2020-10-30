@@ -114,6 +114,7 @@ class Radio<T> extends StatefulWidget {
     this.activeColor,
     this.focusColor,
     this.hoverColor,
+    this.splashRadius,
     this.materialTapTargetSize,
     this.visualDensity,
     this.focusNode,
@@ -276,6 +277,11 @@ class Radio<T> extends StatefulWidget {
   /// The color for the radio's [Material] when a pointer is hovering over it.
   final Color? hoverColor;
 
+  /// The splash radius of the circular [Material] ink response.
+  ///
+  /// If null, then [kRadialReactionRadius] is used.
+  final double? splashRadius;
+
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
@@ -352,10 +358,10 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     Size size;
     switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        size = const Size(2 * kRadialReactionRadius + 8.0, 2 * kRadialReactionRadius + 8.0);
+        size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
         break;
       case MaterialTapTargetSize.shrinkWrap:
-        size = const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius);
+        size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
         break;
     }
     size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
@@ -388,6 +394,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
             inactiveColor: _getInactiveColor(themeData),
             focusColor: widget.focusColor ?? themeData.focusColor,
             hoverColor: widget.hoverColor ?? themeData.hoverColor,
+            splashRadius: widget.splashRadius ?? kRadialReactionRadius,
             onChanged: enabled ? _handleChanged : null,
             toggleable: widget.toggleable,
             additionalConstraints: additionalConstraints,
@@ -415,6 +422,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
     required this.vsync,
     required this.hasFocus,
     required this.hovering,
+    required this.splashRadius,
     required this.useActiveColorInDisabledState,
   }) : assert(selected != null),
        assert(activeColor != null),
@@ -430,6 +438,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
   final Color activeColor;
   final Color focusColor;
   final Color hoverColor;
+  final double splashRadius;
   final ValueChanged<bool?>? onChanged;
   final bool toggleable;
   final TickerProvider vsync;
@@ -443,6 +452,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
     inactiveColor: inactiveColor,
     focusColor: focusColor,
     hoverColor: hoverColor,
+    splashRadius: splashRadius,
     onChanged: onChanged,
     tristate: toggleable,
     vsync: vsync,
@@ -460,6 +470,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
       ..inactiveColor = inactiveColor
       ..focusColor = focusColor
       ..hoverColor = hoverColor
+      ..splashRadius = splashRadius
       ..onChanged = onChanged
       ..tristate = toggleable
       ..additionalConstraints = additionalConstraints
@@ -477,6 +488,7 @@ class _RenderRadio extends RenderToggleable {
     required Color inactiveColor,
     required Color focusColor,
     required Color hoverColor,
+    required double splashRadius,
     required ValueChanged<bool?>? onChanged,
     required bool tristate,
     required BoxConstraints additionalConstraints,
@@ -491,6 +503,7 @@ class _RenderRadio extends RenderToggleable {
          inactiveColor: inactiveColor,
          focusColor: focusColor,
          hoverColor: hoverColor,
+         splashRadius: splashRadius,
          onChanged: onChanged,
          tristate: tristate,
          additionalConstraints: additionalConstraints,

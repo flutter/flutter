@@ -449,6 +449,7 @@ Matcher matchesSemantics({
   bool isChecked = false,
   bool isSelected = false,
   bool isButton = false,
+  bool isSlider = false,
   bool isLink = false,
   bool isFocused = false,
   bool isFocusable = false,
@@ -468,7 +469,6 @@ Matcher matchesSemantics({
   bool hasToggledState = false,
   bool isToggled = false,
   bool hasImplicitScrolling = false,
-  bool isSlider = false,
   // Actions //
   bool hasTapAction = false,
   bool hasLongPressAction = false,
@@ -501,6 +501,7 @@ Matcher matchesSemantics({
     if (isChecked) SemanticsFlag.isChecked,
     if (isSelected) SemanticsFlag.isSelected,
     if (isButton) SemanticsFlag.isButton,
+    if (isSlider) SemanticsFlag.isSlider,
     if (isLink) SemanticsFlag.isLink,
     if (isTextField) SemanticsFlag.isTextField,
     if (isReadOnly) SemanticsFlag.isReadOnly,

@@ -464,7 +464,7 @@ void main() {
     double? textScaleFactor;
     await tester.pumpWidget(MaterialApp(
       home: Builder(builder:(BuildContext context) {
-        textScaleFactor = MediaQuery.of(context)!.textScaleFactor;
+        textScaleFactor = MediaQuery.of(context).textScaleFactor;
         return Container();
       }),
     ));
@@ -500,8 +500,8 @@ void main() {
           builder: (BuildContext context) {
             return Column(
               children: <Widget>[
-                Text(MaterialLocalizations.of(context)!.selectAllButtonLabel),
-                Text(CupertinoLocalizations.of(context)!.selectAllButtonLabel),
+                Text(MaterialLocalizations.of(context).selectAllButtonLabel),
+                Text(CupertinoLocalizations.of(context).selectAllButtonLabel),
               ],
             );
           },

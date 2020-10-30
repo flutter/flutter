@@ -534,15 +534,7 @@ class _HeroFlight {
     );
   }
 
-  void _handleAnimationUpdate(AnimationStatus status) {
-    // The animation will not finish until the user lifts their finger, so we
-    // should ignore the status update if the gesture is in progress.
-    //
-    // This also relies on the animation to update its status at the end of the
-    // gesture. See the _CupertinoBackGestureController.dragEnd for how
-    // cupertino page route achieves that.
-    if (manifest!.fromRoute.navigator?.userGestureInProgress == true)
-      return;
+  void _performAnimationUpdate(AnimationStatus status) {
     if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
       _proxyAnimation.parent = null;
 
@@ -558,6 +550,35 @@ class _HeroFlight {
       manifest!.toHero.endFlight(keepPlaceholder: status == AnimationStatus.dismissed);
       onFlightEnded(this);
     }
+  }
+
+  bool _scheduledPerformAnimtationUpdate = false;
+  void _handleAnimationUpdate(AnimationStatus status) {
+    // The animation will not finish until the user lifts their finger, so we
+    // should suppress the status update if the gesture is in progress, and
+    // delay it until the finger is lifted.
+    if (manifest!.fromRoute.navigator?.userGestureInProgress != true) {
+      _performAnimationUpdate(status);
+      return;
+    }
+
+    if (_scheduledPerformAnimtationUpdate)
+      return;
+
+    // The `navigator` must be non-null here, or the first if clause above would
+    // have returned from this method.
+    final NavigatorState navigator = manifest!.fromRoute.navigator!;
+
+    void delayedPerformAnimtationUpdate() {
+      assert(!navigator.userGestureInProgress);
+      assert(_scheduledPerformAnimtationUpdate);
+      _scheduledPerformAnimtationUpdate = false;
+      navigator.userGestureInProgressNotifier.removeListener(delayedPerformAnimtationUpdate);
+      _performAnimationUpdate(_proxyAnimation.status);
+    }
+    assert(navigator.userGestureInProgress);
+    _scheduledPerformAnimtationUpdate = true;
+    navigator.userGestureInProgressNotifier.addListener(delayedPerformAnimtationUpdate);
   }
 
   // The simple case: we're either starting a push or a pop animation.

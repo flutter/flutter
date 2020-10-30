@@ -180,13 +180,12 @@ class Drawer extends StatelessWidget {
     switch (Theme.of(context)!.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        label = semanticLabel;
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        label = semanticLabel ?? MaterialLocalizations.of(context)?.drawerLabel;
+        label = semanticLabel ?? MaterialLocalizations.of(context).drawerLabel;
     }
     return Semantics(
       scopesRoute: true,
@@ -499,12 +498,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   Widget _buildDrawer(BuildContext context) {
     final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
-    final EdgeInsets padding = MediaQuery.of(context)!.padding;
-    final TextDirection? textDirection = Directionality.of(context);
+    final EdgeInsets padding = MediaQuery.of(context).padding;
+    final TextDirection textDirection = Directionality.of(context)!;
 
     double? dragAreaWidth = widget.edgeDragWidth;
     if (widget.edgeDragWidth == null) {
-      switch (textDirection!) {
+      switch (textDirection) {
         case TextDirection.ltr:
           dragAreaWidth = _kEdgeDragWidth +
             (drawerIsStart ? padding.left : padding.right);
@@ -566,7 +565,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   child: GestureDetector(
                     onTap: close,
                     child: Semantics(
-                      label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
+                      label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
                       child: MouseRegion(
                         opaque: true,
                         child: Container( // The drawer's "scrim"

@@ -78,15 +78,37 @@ class CupertinoTheme extends StatelessWidget {
   /// is null, it will fall back to [MediaQueryData.platformBrightness].
   ///
   /// Throws an exception if no valid [CupertinoTheme] or [MediaQuery] widgets
-  /// exist in the ancestry tree, unless [nullOk] is set to true.
+  /// exist in the ancestry tree.
+  ///
+  /// See also:
+  ///
+  /// * [maybeBrightnessOf], which returns null if no valid [CupertinoTheme] or
+  ///   [MediaQuery] exists, instead of throwing.
+  /// * [CupertinoThemeData.brightness], the property takes precedence over
+  ///   [MediaQueryData.platformBrightness] for descendant Cupertino widgets.
+  static Brightness brightnessOf(BuildContext context) {
+    final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
+    return inheritedTheme?.theme.data.brightness ?? MediaQuery.of(context).platformBrightness;
+  }
+
+  /// Retrieves the [Brightness] to use for descendant Cupertino widgets, based
+  /// on the value of [CupertinoThemeData.brightness] in the given [context].
+  ///
+  /// If no [CupertinoTheme] can be found in the given [context], it will fall
+  /// back to [MediaQueryData.platformBrightness].
+  ///
+  /// Returns null if no valid [CupertinoTheme] or [MediaQuery] widgets exist in
+  /// the ancestry tree.
   ///
   /// See also:
   ///
   /// * [CupertinoThemeData.brightness], the property takes precedence over
   ///   [MediaQueryData.platformBrightness] for descendant Cupertino widgets.
-  static Brightness? brightnessOf(BuildContext context, { bool nullOk = false }) {
+  /// * [brightnessOf], which throws if no valid [CupertinoTheme] or
+  ///   [MediaQuery] exists, instead of returning null.
+  static Brightness? maybeBrightnessOf(BuildContext context) {
     final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
-    return inheritedTheme?.theme.data.brightness ?? MediaQuery.of(context, nullOk: nullOk)?.platformBrightness;
+    return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybeOf(context)?.platformBrightness;
   }
 
   /// The widget below this widget in the tree.
