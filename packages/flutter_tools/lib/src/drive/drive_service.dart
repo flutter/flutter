@@ -5,6 +5,7 @@
 import 'package:dds/dds.dart' as dds;
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
@@ -64,12 +65,21 @@ abstract class DriverService {
     Map<String, Object> platformArgs = const <String, Object>{},
   });
 
+  /// If --use-existing-app is provided, configured the correct VM Service URI.
+  Future<void> reuseApplication(
+    Uri vmServiceUri,
+    Device device,
+    DebuggingOptions debuggingOptions,
+    bool ipv6,
+  );
+
   /// Start the test file with the provided [arguments] and [environment], returning
   /// the test process exit code.
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment, {
+    Map<String, String> environment,
+    PackageConfig packageConfig, {
     bool headless,
     String chromeBinary,
     String browserName,
@@ -168,10 +178,32 @@ class FlutterDriverService extends DriverService {
     if (result == null || !result.started) {
       throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
     }
-    _vmServiceUri = result.observatoryUri.toString();
+    return reuseApplication(
+      result.observatoryUri,
+      device,
+      debuggingOptions,
+      ipv6,
+    );
+  }
+
+  @override
+  Future<void> reuseApplication(
+    Uri vmServiceUri,
+    Device device,
+    DebuggingOptions debuggingOptions,
+    bool ipv6,
+  ) async {
+    Uri uri;
+    if (vmServiceUri.scheme == 'ws') {
+      uri = vmServiceUri.replace(scheme: 'http', path: vmServiceUri.path.replaceFirst('ws/', ''));
+    } else {
+      uri = vmServiceUri;
+    }
+    _vmServiceUri = uri.toString();
+    _device = device;
     try {
       await device.dds.startDartDevelopmentService(
-        result.observatoryUri,
+        uri,
         debuggingOptions.ddsPort,
         ipv6,
         debuggingOptions.disableServiceAuthCodes,
@@ -182,7 +214,7 @@ class FlutterDriverService extends DriverService {
       // application, DDS will already be running remotely and this call will fail.
       // This can be ignored to continue to use the existing remote DDS instance.
     }
-    _vmService = await _vmServiceConnector(Uri.parse(_vmServiceUri), device: _device);
+    _vmService = await _vmServiceConnector(uri, device: _device);
     final DeviceLogReader logReader = await device.getLogReader(app: _applicationPackage);
     logReader.logLines.listen(_logger.printStatus);
 
@@ -194,7 +226,8 @@ class FlutterDriverService extends DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment, {
+    Map<String, String> environment,
+    PackageConfig packageConfig, {
     bool headless,
     String chromeBinary,
     String browserName,
@@ -202,14 +235,16 @@ class FlutterDriverService extends DriverService {
     int driverPort,
     List<String> browserDimension,
   }) async {
+    // Check if package:test is available. If not, fall back to invoking
+    // the test script directly. `pub run test` is strictly better because
+    // in the even that a socket or something similar is left open, the
+    // test runner will correctly shutdown the VM instead of hanging forever.
     return _processUtils.stream(<String>[
       _dartSdkPath,
-      'pub',
-      'run',
-      'test',
-      ...arguments,
-      testFile,
-      '-rexpanded',
+      if (packageConfig['test'] != null)
+        ...<String>['pub', 'run', 'test', ...arguments, testFile, '-rexpanded']
+      else
+        ...<String>[...arguments, testFile, '-rexpanded'],
     ], environment: <String, String>{
       'VM_SERVICE_URL': _vmServiceUri,
       ...environment,
@@ -228,20 +263,24 @@ class FlutterDriverService extends DriverService {
       );
       await sharedSkSlWriter(_device, result, outputFile: writeSkslOnExit, logger: _logger);
     }
-    try {
+    // If the application package is available, stop and uninstall.
+    if (_applicationPackage != null) {
       if (!await _device.stopApp(_applicationPackage, userIdentifier: userIdentifier)) {
         _logger.printError('Failed to stop app');
       }
-    } on Exception catch (err) {
-      _logger.printError('Failed to stop app due to unhandled error: $err');
-    }
-
-    try {
       if (!await _device.uninstallApp(_applicationPackage, userIdentifier: userIdentifier)) {
-       _logger.printError('Failed to uninstall app');
+        _logger.printError('Failed to uninstall app');
       }
-    } on Exception catch (err) {
-      _logger.printError('Failed to uninstall app due to unhandled error: $err');
+    } else if (_device.supportsFlutterExit) {
+      // Otherwise use the VM Service URI to stop the app as a best effort approach.
+      final vm_service.VM vm = await _vmService.getVM();
+      final vm_service.IsolateRef isolateRef = vm.isolates
+        .firstWhere((vm_service.IsolateRef element) {
+          return !element.isSystemIsolate;
+        }, orElse: () => null);
+      unawaited(_vmService.flutterExit(isolateId: isolateRef.id));
+    } else {
+      _logger.printTrace('No application package for $_device, leaving app running');
     }
     await _device.dispose();
   }

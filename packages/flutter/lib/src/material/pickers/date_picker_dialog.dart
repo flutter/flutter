@@ -331,7 +331,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   }
 
   Size _dialogSize(BuildContext context) {
-    final Orientation orientation = MediaQuery.of(context)!.orientation;
+    final Orientation orientation = MediaQuery.of(context).orientation;
     switch (_entryMode) {
       case DatePickerEntryMode.calendar:
         switch (orientation) {
@@ -360,11 +360,11 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     final ThemeData theme = Theme.of(context)!;
     final ColorScheme colorScheme = theme.colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final Orientation orientation = MediaQuery.of(context)!.orientation;
+    final Orientation orientation = MediaQuery.of(context).orientation;
     final TextTheme textTheme = theme.textTheme;
     // Constrain the textScaleFactor to the largest supported value to prevent
     // layout issues.
-    final double textScaleFactor = math.min(MediaQuery.of(context)!.textScaleFactor, 1.3);
+    final double textScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 1.3);
 
     final String dateText = localizations.formatMediumDate(_selectedDate);
     final Color dateColor = colorScheme.brightness == Brightness.light
@@ -467,7 +467,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         duration: _dialogSizeAnimationDuration,
         curve: Curves.easeIn,
         child: MediaQuery(
-          data: MediaQuery.of(context)!.copyWith(
+          data: MediaQuery.of(context).copyWith(
             textScaleFactor: textScaleFactor,
           ),
           child: Builder(builder: (BuildContext context) {

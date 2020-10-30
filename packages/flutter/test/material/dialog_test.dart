@@ -25,7 +25,7 @@ MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textSc
                   context: context,
                   builder: (BuildContext context) {
                     return MediaQuery(
-                      data: MediaQuery.of(context)!.copyWith(textScaleFactor: textScaleFactor),
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
                       child: dialog,
                     );
                   },
@@ -1188,12 +1188,12 @@ void main() {
 
     await tester.pump();
 
-    expect(MediaQuery.of(outerContext)!.padding, const EdgeInsets.all(50.0));
-    expect(MediaQuery.of(routeContext)!.padding, EdgeInsets.zero);
-    expect(MediaQuery.of(dialogContext)!.padding, EdgeInsets.zero);
-    expect(MediaQuery.of(outerContext)!.viewInsets, const EdgeInsets.only(left: 25.0, bottom: 75.0));
-    expect(MediaQuery.of(routeContext)!.viewInsets, const EdgeInsets.only(left: 25.0, bottom: 75.0));
-    expect(MediaQuery.of(dialogContext)!.viewInsets, EdgeInsets.zero);
+    expect(MediaQuery.of(outerContext).padding, const EdgeInsets.all(50.0));
+    expect(MediaQuery.of(routeContext).padding, EdgeInsets.zero);
+    expect(MediaQuery.of(dialogContext).padding, EdgeInsets.zero);
+    expect(MediaQuery.of(outerContext).viewInsets, const EdgeInsets.only(left: 25.0, bottom: 75.0));
+    expect(MediaQuery.of(routeContext).viewInsets, const EdgeInsets.only(left: 25.0, bottom: 75.0));
+    expect(MediaQuery.of(dialogContext).viewInsets, EdgeInsets.zero);
   });
 
   testWidgets('Dialog widget insets by viewInsets', (WidgetTester tester) async {

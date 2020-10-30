@@ -23,6 +23,7 @@ class BuildWebCommand extends BuildSubCommand {
     usesPubOption();
     addBuildModeFlags(excludeDebug: true);
     usesDartDefineOption();
+    usesWebRendererOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     argParser.addFlag('csp',
@@ -88,7 +89,7 @@ class BuildWebCommand extends BuildSubCommand {
       buildInfo,
       boolArg('csp'),
       stringArg('pwa-strategy'),
-      boolArg('source-maps')
+      boolArg('source-maps'),
     );
     return FlutterCommandResult.success();
   }

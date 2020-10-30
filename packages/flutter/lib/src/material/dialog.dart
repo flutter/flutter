@@ -128,7 +128,7 @@ class Dialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DialogTheme dialogTheme = DialogTheme.of(context);
-    final EdgeInsets effectivePadding = MediaQuery.of(context)!.viewInsets + (insetPadding ?? const EdgeInsets.all(0.0));
+    final EdgeInsets effectivePadding = MediaQuery.of(context).viewInsets + (insetPadding ?? const EdgeInsets.all(0.0));
     return AnimatedPadding(
       padding: effectivePadding,
       duration: insetAnimationDuration,
@@ -468,7 +468,7 @@ class AlertDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.
-    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context)!.textScaleFactor);
+    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
     final TextDirection? textDirection = Directionality.maybeOf(context);
 
     Widget? titleWidget;
@@ -825,7 +825,7 @@ class SimpleDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
-    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context)!.textScaleFactor);
+    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
     final TextDirection? textDirection = Directionality.maybeOf(context);
 
     Widget? titleWidget;

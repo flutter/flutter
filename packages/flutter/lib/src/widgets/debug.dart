@@ -216,13 +216,16 @@ bool debugCheckHasMediaQuery(BuildContext context) {
   assert(() {
     if (context.widget is! MediaQuery && context.findAncestorWidgetOfExactType<MediaQuery>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('No MediaQuery widget found.'),
+        ErrorSummary('No MediaQuery widget ancestor found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.'),
         context.describeWidget('The specific widget that could not find a MediaQuery ancestor was'),
         context.describeOwnershipChain('The ownership chain for the affected widget is'),
         ErrorHint(
-          'Typically, the MediaQuery widget is introduced by the MaterialApp or '
-          'WidgetsApp widget at the top of your application widget tree.'
+          'No MediaQuery ancestor could be found starting from the context '
+          'that was passed to MediaQuery.of(). This can happen because you '
+          'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget '
+          '(those widgets introduce a MediaQuery), or it can happen if the '
+          'context you use comes from a widget above those widgets.'
         ),
       ]);
     }

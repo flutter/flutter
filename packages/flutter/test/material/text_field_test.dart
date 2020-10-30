@@ -5439,7 +5439,7 @@ void main() {
       boilerplate(
         child: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(
+            data: MediaQuery.of(context).copyWith(
               navigationMode: NavigationMode.directional,
             ),
             child: TextField(
@@ -5460,7 +5460,7 @@ void main() {
       boilerplate(
         child: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(
+            data: MediaQuery.of(context).copyWith(
               navigationMode: NavigationMode.directional,
             ),
             child:  TextField(
