@@ -395,7 +395,8 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   args.platform_message_callback = fl_engine_platform_message_cb;
   args.custom_task_runners = &custom_task_runners;
   args.shutdown_dart_vm_when_done = true;
-  args.dart_entrypoint_argc = g_strv_length(dart_entrypoint_args);
+  args.dart_entrypoint_argc =
+      dart_entrypoint_args != nullptr ? g_strv_length(dart_entrypoint_args) : 0;
   args.dart_entrypoint_argv =
       reinterpret_cast<const char* const*>(dart_entrypoint_args);
 
