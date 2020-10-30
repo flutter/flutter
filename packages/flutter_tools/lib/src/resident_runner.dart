@@ -110,7 +110,7 @@ class FlutterDevice {
         final LanguageVersion languageVersion = target != null
           ? packageConfig?.packageOf(Uri.parse(target))?.languageVersion
           : null;
-        final bool isNullSafe = languageVersion != null && languageVersion.major >= 2 && languageVersion.minor >= 11;
+        final bool isNullSafe = languageVersion != null || (languageVersion.major >= 2 && languageVersion.minor >= 11);
         if (isNullSafe) {
           platformDillArtifact = Artifact.webPlatformSoundKernelDill;
           extraFrontEndOptions =  <String>[
