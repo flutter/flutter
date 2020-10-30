@@ -1059,5 +1059,6 @@ class MockDevice extends Mock implements Device {
     when(id).thenReturn('device-id');
     when(isLocalEmulator).thenAnswer((_) => Future<bool>.value(false));
     when(targetPlatform).thenAnswer((_) => Future<TargetPlatform>.value(TargetPlatform.android));
+    when(targetPlatformDisplayName).thenAnswer((_) async => 'android');
   }
 }
