@@ -21,6 +21,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
+import '../macos/xcode.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
@@ -376,6 +377,7 @@ end
             kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
           kIosArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64]
             .map(getNameForDarwinArch).join(' '),
+          kSdkRoot: await globals.xcode.sdkLocation(SdkType.iPhone),
         },
         artifacts: globals.artifacts,
         fileSystem: globals.fs,

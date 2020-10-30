@@ -586,7 +586,7 @@ class XCDevice {
         if (architecture.startsWith('armv7')) {
           cpuArchitecture = DarwinArch.armv7;
         } else {
-          cpuArchitecture = defaultIOSArchs.first;
+          cpuArchitecture = DarwinArch.arm64;
         }
         _logger.printError(
           'Unknown architecture $architecture, defaulting to '
