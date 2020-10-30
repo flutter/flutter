@@ -255,20 +255,6 @@ Future<void> _runSmokeTests() async {
     ],
   );
 
-  // The flutter-tester device cannot be run concurrently in the same project directory.
-  await runCommand(flutter,
-    <String>['drive', '--show-test-device', '-d', 'flutter-tester', '-t', path.join('test_driver', 'success.dart')],
-    workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-    expectNonZeroExit: false,
-    outputMode: OutputMode.capture,
-  );
-  await runCommand(flutter,
-    <String>['drive', '--show-test-device', '-d', 'flutter-tester', '-t', path.join('test_driver', 'failure.dart')],
-    workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-    expectNonZeroExit: true,
-    outputMode: OutputMode.capture,
-  );
-
   // Verify that we correctly generated the version file.
   final String versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
   if (versionError != null)
