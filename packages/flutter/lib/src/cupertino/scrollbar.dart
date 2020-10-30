@@ -76,6 +76,7 @@ class CupertinoScrollbar extends RawScrollbarThumb {
       radius: radius,
       fadeDuration: _kScrollbarFadeDuration,
       timeToFade: _kScrollbarTimeToFade,
+      pressDuration: const Duration(milliseconds: 100),
     );
 
   /// Default value for [thickness] if it's not specified in [CupertinoScrollbar].

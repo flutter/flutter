@@ -48,6 +48,7 @@ class Scrollbar extends RawScrollbarThumb {
     radius: radius,
     fadeDuration: _kScrollbarFadeDuration,
     timeToFade: _kScrollbarTimeToFade,
+    pressDuration: Duration.zero,
   );
 
   @override
@@ -75,7 +76,6 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
         // On iOS, stop all local animations. CupertinoScrollbar has its own
         // animations.
         fadeoutTimer?.cancel();
-        fadeoutTimer = null;
         fadeoutAnimationController.reset();
         _useCupertinoScrollbar = true;
         break;

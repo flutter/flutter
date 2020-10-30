@@ -23,9 +23,9 @@ import 'ticker_provider.dart';
 const double _kMinThumbExtent = 18.0;
 const double _kMinInteractiveSize = 48.0;
 
-/// A [CustomPainter] for painting scrollbars.
+/// A [CustomPainter] for painting scrollbar thumbs.
 ///
-/// The size of the scrollbar along its scroll direction is typically
+/// The size of the scrollbar thumb along its scroll direction is typically
 /// proportional to the percentage of content completely visible on screen,
 /// as long as its size isn't less than [minLength] and it isn't overscrolling.
 ///
@@ -35,10 +35,10 @@ const double _kMinInteractiveSize = 48.0;
 /// rebuilding when:
 ///
 ///  * the scroll position changes; and
-///  * when the scrollbar fades away.
+///  * when the scrollbar thumb fades away.
 ///
 /// Calling [update] with the new [ScrollMetrics] will repaint the new scrollbar
-/// position.
+/// thumb position.
 ///
 /// Updating the value on the provided [fadeoutOpacityAnimation] will repaint
 /// with the new opacity.
@@ -52,7 +52,7 @@ const double _kMinInteractiveSize = 48.0;
 ///  * [CupertinoScrollbar] for a widget showing a scrollbar around a
 ///    [Scrollable] in the iOS style.
 class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
-  /// Creates a scrollbar with customizations given by construction arguments.
+  /// Creates a scrollbar thumb with customizations given by construction arguments.
   ScrollbarPainter({
     required Color color,
     required TextDirection textDirection,
@@ -363,7 +363,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     return interactiveThumbRect.contains(position);
   }
 
-  // Scrollbars can be interactive in Cupertino.
+  // Scrollbar thumbs are interactive.
   @override
   bool? hitTest(Offset? position) {
     if (_thumbRect == null) {
@@ -397,9 +397,27 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   SemanticsBuilderCallback? get semanticsBuilder => null;
 }
 
+/// An abstract class for building animated scrollbar thumbs.
 ///
+/// A scrollbar thumb indicates which portion of a [Scrollable] widget is actually
+/// visible.
+///
+/// When [isAlwaysShown] is false, the thumb will fade in and out as the child
+/// scroll view widget scrolls.
+///
+/// To add a scrollbar thumb to a [ScrollView], simply wrap the scroll view
+/// widget in a [Scrollbar] widget.
+///
+/// See also:
+///
+///  * [RawScrollbarThumb], the abstract base class this inherits from.
+///  * [ListView], which display a linear, scrollable list of children.
+///  * [GridView], which display a 2 dimensional, scrollable array of children.
 abstract class RawScrollbarThumb extends StatefulWidget {
   /// Initializes fields for subclasses.
+  ///
+  /// The [child], [isAlwaysShown], [fadeDuration], and [timeToFade] arguments
+  /// must not be null.
   const RawScrollbarThumb({
     Key? key,
     required this.child,
@@ -409,6 +427,7 @@ abstract class RawScrollbarThumb extends StatefulWidget {
     this.thickness,
     required this.fadeDuration,
     required this.timeToFade,
+    required this.pressDuration,
   }) : assert(!isAlwaysShown || controller != null, 'When isAlwaysShown is true, must pass a controller that is attached to a scroll view'),
        super(key: key);
 
@@ -540,11 +559,18 @@ abstract class RawScrollbarThumb extends StatefulWidget {
   /// calls for such behavior.
   final double? thickness;
 
+  /// The [Duration] of the fade animation.
   ///
+  /// Cannot be null.
   final Duration fadeDuration;
 
+  /// The [Duration] of time until the fade animation begins.
   ///
+  /// Cannot be null.
   final Duration timeToFade;
+
+  ///
+  final Duration pressDuration;
 
   @override
   RawScrollbarThumbState<RawScrollbarThumb> createState();
@@ -578,9 +604,6 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
   @protected
   Timer? get fadeoutTimer => _fadeoutTimer;
   Timer? _fadeoutTimer;
-  set fadeoutTimer(Timer? value) {
-    _fadeoutTimer = value;
-  }
   
   @override
   void initState() {
@@ -667,7 +690,8 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
     }
   }
 
-  /// Doc
+  /// Returns the [Axis] of the child scroll view, or null if one is not
+  /// determined.
   @protected
   Axis? getDirection() {
     try {
@@ -678,7 +702,7 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
     }
   }
 
-  ///
+  /// Cancels the [fadeoutTimer] when a long press gesture has been recognized.
   @protected
   void handleLongPress() {
     if (getDirection() == null) {
@@ -687,7 +711,10 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
     fadeoutTimer?.cancel();
   }
 
-  /// Doc
+  /// Handler called when a long press gesture has started.
+  ///
+  /// Begins the fade out animation and updates the position of the child
+  /// scrollable.
   @protected
   void handleLongPressStart(LongPressStartDetails details) {
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
@@ -709,7 +736,9 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
     }
   }
 
-  /// Doc
+  /// Handler called when currently active long press gesture moves.
+  ///
+  /// Updates the position of the child scrollable.
   @protected
   void handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
     final Axis? direction = getDirection();
@@ -728,7 +757,9 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
     }
   }
 
-  /// Doc
+  /// Handler called when a long press has ended.
+  ///
+  /// Finishes any active drag action on the child scroll view.
   @protected
   void handleLongPressEnd(LongPressEndDetails details) {
     final Axis? direction = getDirection();
@@ -754,7 +785,8 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
     _currentController = null;
   }
 
-  /// Handles [ScrollNotification]s
+  /// Updates the scrollbar thumb and it's animations based ont he received
+  /// [ScrollNotification].
   @protected
   bool handleScrollNotification(ScrollNotification notification) {
     final ScrollMetrics metrics = notification.metrics;
@@ -790,6 +822,7 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
           () => _ThumbPressGestureRecognizer(
           debugOwner: this,
           customPaintKey: customPaintKey,
+          pressDuration: widget.pressDuration,
         ),
           (_ThumbPressGestureRecognizer instance) {
           instance
@@ -811,6 +844,7 @@ abstract class RawScrollbarThumbState<T extends RawScrollbarThumb> extends State
     super.dispose();
   }
 }
+
 // A long press gesture detector that only responds to events on the scrollbar's
 // thumb and ignores everything else.
 class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
@@ -819,12 +853,13 @@ class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
     PointerDeviceKind? kind,
     required Object debugOwner,
     required GlobalKey customPaintKey,
+    required Duration pressDuration,
   }) :  _customPaintKey = customPaintKey,
       super(
       postAcceptSlopTolerance: postAcceptSlopTolerance,
       kind: kind,
       debugOwner: debugOwner,
-      duration: const Duration(milliseconds: 100),
+      duration: pressDuration,
     );
 
   final GlobalKey _customPaintKey;
