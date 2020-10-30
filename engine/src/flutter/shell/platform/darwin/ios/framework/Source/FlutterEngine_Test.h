@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
-#include "shell/platform/darwin/ios/rendering_api_selection.h"
+#import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 @class FlutterBinaryMessengerRelay;
 
