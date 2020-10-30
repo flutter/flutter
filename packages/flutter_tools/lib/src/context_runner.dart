@@ -85,6 +85,10 @@ Future<T> runInContext<T>(
         userMessages: globals.userMessages,
       ),
       AndroidWorkflow: () => AndroidWorkflow(
+        platform: globals.platform,
+        processManager: globals.processManager,
+        logger: globals.logger,
+        fileSystem: globals.fs,
         androidSdk: globals.androidSdk,
         featureFlags: featureFlags,
       ),

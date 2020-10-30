@@ -15,6 +15,7 @@ import '../base/platform.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
+import '../build_info.dart';
 import '../convert.dart';
 import '../doctor.dart';
 import '../features.dart';
@@ -43,16 +44,29 @@ final RegExp licenseAccepted = RegExp(r'All SDK package licenses accepted.');
 
 class AndroidWorkflow implements Workflow {
   AndroidWorkflow({
+    @required Platform platform,
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required FileSystem fileSystem,
     @required AndroidSdk androidSdk,
     @required FeatureFlags featureFlags,
-  }) : _androidSdk = androidSdk,
+  }) : _operatingSystemUtils = OperatingSystemUtils(
+         fileSystem: fileSystem,
+         logger: logger,
+         platform: platform,
+         processManager: processManager,
+       ),
+       _androidSdk = androidSdk,
        _featureFlags = featureFlags;
 
+  final OperatingSystemUtils _operatingSystemUtils;
   final AndroidSdk _androidSdk;
   final FeatureFlags _featureFlags;
 
   @override
-  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled;
+  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled
+    // Android Studio is not currently supported on Linux Arm64 Hosts.
+    && _operatingSystemUtils.hostPlatform != HostPlatform.linux_arm64;
 
   @override
   bool get canListDevices => _androidSdk != null
