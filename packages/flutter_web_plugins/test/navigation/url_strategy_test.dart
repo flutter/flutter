@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:html';
 
 @TestOn('chrome') // Uses web-only Flutter SDK
@@ -119,7 +117,6 @@ void main() {
       location.baseHref = 'https://example.com/foo/';
       location.pathname = '/foo/bar';
       final PathUrlStrategy strategy = PathUrlStrategy(location);
-
 
       location.search = '?q=1';
       expect(strategy.getPath(), '/bar?q=1');
