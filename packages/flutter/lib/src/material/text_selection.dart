@@ -49,7 +49,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
   ) {
-    return _TextSelectionToolbar(
+    return _TextSelectionControlsToolbar(
       globalEditableRegion: globalEditableRegion,
       textLineHeight: textLineHeight,
       selectionMidpoint: selectionMidpoint,
@@ -135,8 +135,8 @@ class _TextSelectionToolbarItemData {
 }
 
 // The highest level toolbar widget, built directly by buildToolbar.
-class _TextSelectionToolbar extends StatefulWidget {
-  const _TextSelectionToolbar({
+class _TextSelectionControlsToolbar extends StatefulWidget {
+  const _TextSelectionControlsToolbar({
     Key? key,
     required this.clipboardStatus,
     required this.delegate,
@@ -162,10 +162,10 @@ class _TextSelectionToolbar extends StatefulWidget {
   final double textLineHeight;
 
   @override
-  _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
+  _TextSelectionControlsToolbarState createState() => _TextSelectionControlsToolbarState();
 }
 
-class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
+class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToolbar> with TickerProviderStateMixin {
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
@@ -180,7 +180,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   }
 
   @override
-  void didUpdateWidget(_TextSelectionToolbar oldWidget) {
+  void didUpdateWidget(_TextSelectionControlsToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.clipboardStatus != oldWidget.clipboardStatus) {
       widget.clipboardStatus.addListener(_onChangedClipboardStatus);
@@ -262,7 +262,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
       children: itemDatas.map((_TextSelectionToolbarItemData itemData) {
-        return TextSelectionMenuTextButton(
+        return TextSelectionToolbarTextButton(
           index: childIndex++,
           total: itemDatas.length,
           onPressed: itemData.onPressed,
@@ -315,7 +315,7 @@ class TextSelectionToolbar extends StatelessWidget {
 
   // Build the default Android Material text selection menu toolbar.
   static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
-    return _MaterialTextSelectionToolbarShapeNew(
+    return _MaterialTextSelectionToolbarContainer(
       child: child,
     );
   }
@@ -336,7 +336,7 @@ class TextSelectionToolbar extends StatelessWidget {
             paddingTop,
             fitsAbove,
           ),
-          child: _TextSelectionToolbarOverflowableNew(
+          child: _TextSelectionToolbarOverflowable(
             isAbove: fitsAbove,
             toolbarBuilder: toolbarBuilder,
             children: children,
@@ -415,8 +415,8 @@ class _TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
 // A toolbar containing the given children. If they overflow the width
 // available, then the overflowing children will be displayed in an overflow
 // menu.
-class _TextSelectionToolbarOverflowableNew extends StatefulWidget {
-  const _TextSelectionToolbarOverflowableNew({
+class _TextSelectionToolbarOverflowable extends StatefulWidget {
+  const _TextSelectionToolbarOverflowable({
     Key? key,
     required this.isAbove,
     required this.toolbarBuilder,
@@ -434,10 +434,10 @@ class _TextSelectionToolbarOverflowableNew extends StatefulWidget {
   final _ToolbarBuilder toolbarBuilder;
 
   @override
-  _TextSelectionToolbarOverflowableNewState createState() => _TextSelectionToolbarOverflowableNewState();
+  _TextSelectionToolbarOverflowableState createState() => _TextSelectionToolbarOverflowableState();
 }
 
-class _TextSelectionToolbarOverflowableNewState extends State<_TextSelectionToolbarOverflowableNew> with TickerProviderStateMixin {
+class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbarOverflowable> with TickerProviderStateMixin {
   // Whether or not the overflow menu is open. When it is closed, the menu
   // items that don't overflow are shown. When it is open, only the overflowing
   // menu items are shown.
@@ -461,7 +461,7 @@ class _TextSelectionToolbarOverflowableNewState extends State<_TextSelectionTool
   }
 
   @override
-  void didUpdateWidget(_TextSelectionToolbarOverflowableNew oldWidget) {
+  void didUpdateWidget(_TextSelectionToolbarOverflowable oldWidget) {
     super.didUpdateWidget(oldWidget);
     // If the children are changing, the current page should be reset.
     if (widget.children != oldWidget.children) {
@@ -490,7 +490,7 @@ class _TextSelectionToolbarOverflowableNewState extends State<_TextSelectionTool
           children: <Widget>[
             // The navButton that shows and hides the overflow menu is the
             // first child.
-            _TextSelectionMenuOverflowButton(
+            _TextSelectionToolbarOverflowButton(
               icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
               onPressed: () {
                 setState(() {
@@ -909,8 +909,8 @@ class _TextSelectionToolbarItemsLayoutRenderBox extends RenderBox with Container
 
 // The Material-styled toolbar outline. Fill it with any widgets you want. No
 // overflow ability.
-class _MaterialTextSelectionToolbarShapeNew extends StatelessWidget {
-  const _MaterialTextSelectionToolbarShapeNew({
+class _MaterialTextSelectionToolbarContainer extends StatelessWidget {
+  const _MaterialTextSelectionToolbarContainer({
     Key? key,
     required this.child,
   }) : super(key: key);
@@ -942,11 +942,10 @@ enum _TextSelectionToolbarItemPosition {
   last,
 }
 
-// TODO(justinmc): Document.
 /// A button styled like a Material native Android text selection menu button.
-class TextSelectionMenuTextButton extends StatelessWidget {
-  /// Creates an instance of TextSelectionMenuTextButton.
-  const TextSelectionMenuTextButton({
+class TextSelectionToolbarTextButton extends StatelessWidget {
+  /// Creates an instance of TextSelectionToolbarTextButton.
+  const TextSelectionToolbarTextButton({
     Key? key,
     required this.child,
     required this.index,
@@ -1019,8 +1018,8 @@ class TextSelectionMenuTextButton extends StatelessWidget {
 
 // A button styled like a Material native Android text selection overflow menu
 // forward and back controls.
-class _TextSelectionMenuOverflowButton extends StatelessWidget {
-  const _TextSelectionMenuOverflowButton({
+class _TextSelectionToolbarOverflowButton extends StatelessWidget {
+  const _TextSelectionToolbarOverflowButton({
     Key? key,
     required this.icon,
     this.onPressed,
@@ -1071,48 +1070,3 @@ class _TextSelectionHandlePainter extends CustomPainter {
 
 /// Text selection controls that follow the Material Design specification.
 final TextSelectionControls materialTextSelectionControls = MaterialTextSelectionControls();
-
-// TODO(justinmc): Don't say both Toolbar and Menu, choose one.
-// Justin's widget hierarchy directory:
-// _TextSelectionToolbar
-//   Directly handles buildToolbar at the highest level.
-//   Shouldn't be made public, but users may learn from it as an example of how
-//   to use the other public classes.
-// TODO(justinmc): Rename so it's not so similar to TextSelectionToolbar.
-//
-// TextSelectionToolbar
-//   Takes in simple parameters and builds a fully functional toolbar.
-//   The main public class.
-// TODO(justinmc): Is it ok that it needs fitsAbove? Why again?
-//
-// _TextSelectionToolbarLayoutDelegate
-//   Centers the toolbar at the given anchor and ensures it remains on screen.
-//   Candidate for a second round of making things public.
-//
-// _TextSelectionToolbarOverflowableNew
-//   Renders the given children in the given toolbarBuilder, creates the
-//   overflow navigation button, and maintains overflowOpen (whether the
-//   overflow menu is open, not whether or not it overflows).
-// TODO(justinmc): Rename.
-//
-// _TextSelectionToolbarRightEdgeAlign
-//   Layout only, lines up right edge when overflow is open.
-//
-// _TextSelectionToolbarItemsLayout
-//   Layout only.
-//   Does all of the hard overflow work. Detects overflow. Lays out the buttons
-//   in regular or overflow menu.
-//
-// _MaterialTextSelectionToolbarShapeNew
-//   Just does the shape and elevation of the toolbar.
-//   Phase 2 public thing.
-// TODO(justinmc): Rename.
-//
-// TextSelectionMenuTextButton
-//   A Material-style text selection menu button.
-//   Public!
-//
-// Critical user journeys:
-//   Add another button that looks like the others.
-//   Remove an existing button.
-//   Change the appearance of everything.
