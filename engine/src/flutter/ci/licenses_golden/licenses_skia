@@ -1,4 +1,4 @@
-Signature: a34a0c9a361d1e4d429e487a889f05c0
+Signature: ff2759245c2168540e345c478cd825f9
 
 UNUSED LICENSES:
 
@@ -5602,7 +5602,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLModifiersPool.h
 FILE: ../../../third_party/skia/src/sksl/SkSLRehydrator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLRehydrator.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructor.cpp
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLIRNode.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLNodeArrayWrapper.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google LLC.
