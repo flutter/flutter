@@ -5,7 +5,6 @@
 import 'package:dds/dds.dart' as dds;
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:package_config/package_config_types.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
@@ -78,8 +77,7 @@ abstract class DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment,
-    PackageConfig packageConfig, {
+    Map<String, String> environment, {
     bool headless,
     String chromeBinary,
     String browserName,
@@ -226,8 +224,7 @@ class FlutterDriverService extends DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment,
-    PackageConfig packageConfig, {
+    Map<String, String> environment, {
     bool headless,
     String chromeBinary,
     String browserName,
@@ -241,10 +238,7 @@ class FlutterDriverService extends DriverService {
     // test runner will correctly shutdown the VM instead of hanging forever.
     return _processUtils.stream(<String>[
       _dartSdkPath,
-      if (packageConfig['test'] != null)
-        ...<String>['pub', 'run', 'test', ...arguments, testFile, '-rexpanded']
-      else
-        ...<String>[...arguments, testFile, '-rexpanded'],
+      ...<String>[...arguments, testFile, '-rexpanded'],
     ], environment: <String, String>{
       'VM_SERVICE_URL': _vmServiceUri,
       ...environment,

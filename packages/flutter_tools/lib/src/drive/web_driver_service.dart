@@ -7,7 +7,6 @@ import 'dart:math' as math;
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:package_config/package_config.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../base/common.dart';
@@ -83,7 +82,7 @@ class WebDriverService extends DriverService {
   }
 
   @override
-  Future<int> startTest(String testFile, List<String> arguments, Map<String, String> environment, PackageConfig packageConfig, {
+  Future<int> startTest(String testFile, List<String> arguments, Map<String, String> environment, {
     bool headless,
     String chromeBinary,
     String browserName,
