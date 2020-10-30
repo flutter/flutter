@@ -1090,17 +1090,27 @@ void main() {
   });
 
   testWidgets('Switch active disabled color can be set using a stateful color', (WidgetTester tester) async {
-    const Color activeEnabledColor = Color(0xFF000001);
-    const Color activeDisabledColor = Color(0xFF000002);
+    const Color activeEnabledThumbColor = Color(0xFF000001);
+    const Color activeDisabledThumbColor = Color(0xFF000002);
+    const Color activeEnabledTrackColor = Color(0xFF000003);
+    const Color activeDisabledTrackColor = Color(0xFF000004);
 
-    Color getActiveColor(Set<MaterialState> states) {
+    Color getActiveThumbColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        return activeDisabledColor;
+        return activeDisabledThumbColor;
       }
-      return activeEnabledColor;
+      return activeEnabledThumbColor;
     }
 
-    final Color activeColor = MaterialStateColor.resolveWith(getActiveColor);
+    Color getActiveTrackColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return activeDisabledTrackColor;
+      }
+      return activeEnabledTrackColor;
+    }
+
+    final Color activeThumbColor = MaterialStateColor.resolveWith(getActiveThumbColor);
+    final Color activeTrackColor = MaterialStateColor.resolveWith(getActiveTrackColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
@@ -1110,7 +1120,8 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
-                  activeColor: activeColor,
+                  activeColor: activeThumbColor,
+                  activeTrackColor: activeTrackColor,
                   value: active,
                   onChanged: enabled ? (_) { } : null,
                 ),
@@ -1145,13 +1156,13 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: activeDisabledColor.withAlpha(0x80),
+            color: activeDisabledTrackColor,
             rrect: RRect.fromLTRBR(
                 383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: activeDisabledColor),
+        ..circle(color: activeDisabledThumbColor),
       reason: 'Active disabled switch should match these colors',
     );
 
@@ -1162,13 +1173,13 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: activeEnabledColor.withAlpha(0x80),
+            color: activeEnabledTrackColor,
             rrect: RRect.fromLTRBR(
                 383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: activeEnabledColor),
+        ..circle(color: activeEnabledThumbColor),
       reason: 'Active disabled switch should match these colors',
     );
   });

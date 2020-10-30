@@ -332,6 +332,10 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       _states,
     );
     final Color activeTrackColor = widget.activeTrackColor ?? effectiveActiveThumbColor.withAlpha(0x80);
+    final Color effectiveActiveTrackColor = MaterialStateProperty.resolveAs<Color>(
+      activeTrackColor,
+      _states,
+    );
     final Color hoverColor = widget.hoverColor ?? theme.hoverColor;
     final Color focusColor = widget.focusColor ?? theme.focusColor;
 
@@ -374,7 +378,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
             onActiveThumbImageError: widget.onActiveThumbImageError,
             inactiveThumbImage: widget.inactiveThumbImage,
             onInactiveThumbImageError: widget.onInactiveThumbImageError,
-            activeTrackColor: activeTrackColor,
+            activeTrackColor: effectiveActiveTrackColor,
             inactiveTrackColor: inactiveTrackColor,
             configuration: createLocalImageConfiguration(context),
             onChanged: widget.onChanged,
