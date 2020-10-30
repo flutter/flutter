@@ -100,7 +100,8 @@ static void platform_message_handler_free(gpointer data) {
   g_free(self);
 }
 
-static void engine_weak_notify_cb(gpointer user_data, GObject* object) {
+static void engine_weak_notify_cb(gpointer user_data,
+                                  GObject* where_the_object_was) {
   FlBinaryMessenger* self = FL_BINARY_MESSENGER(user_data);
   self->engine = nullptr;
 

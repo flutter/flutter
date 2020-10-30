@@ -140,8 +140,9 @@ static void method_call_cb(FlMethodChannel* channel,
   }
 }
 
-static void view_weak_notify_cb(gpointer user_data, GObject* object) {
-  FlMouseCursorPlugin* self = FL_MOUSE_CURSOR_PLUGIN(object);
+static void view_weak_notify_cb(gpointer user_data,
+                                GObject* where_the_object_was) {
+  FlMouseCursorPlugin* self = FL_MOUSE_CURSOR_PLUGIN(user_data);
   self->view = nullptr;
 }
 
