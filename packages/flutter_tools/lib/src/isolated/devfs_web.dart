@@ -187,7 +187,7 @@ class WebAssetServer implements AssetReader {
         break;
       } on SocketException catch (error) {
         lastError = error;
-        await Future<void>.delayed(milliseconds: 100);
+        await Future<void>.delayed(Duration(milliseconds: 100));
       }
     }
     if (httpServer == null) {
