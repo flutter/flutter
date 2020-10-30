@@ -593,20 +593,6 @@ Future<void> _runFrameworkTests() async {
   final List<String> mixedModeNullSafetyOptions = <String>['--enable-experiment=non-nullable', '--null-assertions', '--no-sound-null-safety'];
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
-  // The flutter-tester device cannot be run concurrently in the same project directory.
-  await runCommand(flutter,
-    <String>['drive', '--show-test-device', '-d', 'flutter-tester', '-t', path.join('test_driver', 'success.dart')],
-    workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-    expectNonZeroExit: false,
-    outputMode: OutputMode.capture,
-  );
-  await runCommand(flutter,
-    <String>['drive', '--show-test-device', '-d', 'flutter-tester', '-t', path.join('test_driver', 'failure.dart')],
-    workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-    expectNonZeroExit: true,
-    outputMode: OutputMode.capture,
-  );
-
   Future<void> runWidgets() async {
     print('${green}Running packages/flutter tests for$reset: ${cyan}test/widgets/$reset');
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
