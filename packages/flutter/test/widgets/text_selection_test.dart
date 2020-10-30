@@ -557,6 +557,31 @@ void main() {
     expect(renderEditable.selectWordsInRangeCalled, isTrue);
   });
 
+  testWidgets('Mouse drag does not show handles nor toolbar', (WidgetTester tester) async {
+    // Regressing test for https://github.com/flutter/flutter/issues/69001
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SelectableText('I love Flutter!'),
+        ),
+      ),
+    );
+
+    final Offset textFieldStart = tester.getTopLeft(find.byType(SelectableText));
+
+    final TestGesture gesture = await tester.startGesture(textFieldStart, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textFieldStart + const Offset(50.0, 0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
+    expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
+  });
+
   testWidgets('test TextSelectionGestureDetectorBuilder selection disabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester, selectionEnabled: false);
     final TestGesture gesture = await tester.startGesture(

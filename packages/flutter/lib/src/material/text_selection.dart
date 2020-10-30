@@ -760,7 +760,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     const double closedToolbarHeightNeeded = _kToolbarScreenPadding
       + _kToolbarHeight
       + _kToolbarContentDistance;
-    final double paddingTop = MediaQuery.of(context)!.padding.top;
+    final double paddingTop = MediaQuery.of(context).padding.top;
     final double availableHeight = globalEditableRegion.top
       + startTextSelectionPoint.point.dy
       - textLineHeight

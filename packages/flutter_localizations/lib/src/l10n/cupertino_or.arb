@@ -20,5 +20,6 @@
   "pasteButtonLabel": "ପେଷ୍ଟ କରନ୍ତୁ",
   "selectAllButtonLabel": "ସମସ୍ତ ଚୟନ କରନ୍ତୁ",
   "tabSemanticsLabel": "$tabCountର $tabIndex ଟାବ୍",
-  "modalBarrierDismissLabel": "ଖାରଜ କରନ୍ତୁ"
+  "modalBarrierDismissLabel": "ଖାରଜ କରନ୍ତୁ",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

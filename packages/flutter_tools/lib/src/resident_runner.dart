@@ -70,7 +70,6 @@ class FlutterDevice {
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
-    @required FlutterProject flutterProject,
     @required String target,
     @required BuildInfo buildInfo,
     @required Platform platform,
@@ -895,14 +894,6 @@ abstract class ResidentRunner {
       }
     }
     globals.logger.printTrace('complete');
-  }
-
-  /// Toggle whether canvaskit is being used for rendering, returning the new
-  /// state.
-  ///
-  /// Only supported on the web.
-  Future<bool> toggleCanvaskit() {
-    throw Exception('Canvaskit not supported by this runner.');
   }
 
   /// Write the SkSL shaders to a zip file in build directory.

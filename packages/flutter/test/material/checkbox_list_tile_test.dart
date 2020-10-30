@@ -98,7 +98,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext!, nullOk: true)!.hasPrimaryFocus, isTrue);
+    expect(Focus.maybeOf(childKey.currentContext!)!.hasPrimaryFocus, isTrue);
 
     await tester.pumpWidget(
       wrap(
@@ -112,7 +112,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext!, nullOk: true)!.hasPrimaryFocus, isFalse);
+    expect(Focus.maybeOf(childKey.currentContext!)!.hasPrimaryFocus, isFalse);
   });
 
   testWidgets('CheckboxListTile contentPadding test', (WidgetTester tester) async {

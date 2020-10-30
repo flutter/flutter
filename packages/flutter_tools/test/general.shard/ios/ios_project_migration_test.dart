@@ -99,8 +99,8 @@ void main () {
       });
 
       testWithoutContext('skips migrating script with embed', () {
-        const String contents = '''
-shellScript = "/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" embed\\n/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" thin";
+        const String contents = r'''
+shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed\n/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" thin";
 			''';
         xcodeProjectInfoFile.writeAsStringSync(contents);
 
@@ -116,7 +116,7 @@ shellScript = "/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend
       });
 
       testWithoutContext('Xcode project is migrated', () {
-        xcodeProjectInfoFile.writeAsStringSync('''
+        xcodeProjectInfoFile.writeAsStringSync(r'''
 prefix 3B80C3941E831B6300D905FE
 3B80C3951E831B6300D905FE suffix
 741F496821356857001E2961
@@ -128,7 +128,7 @@ keep this 1
 741F496221355F47001E2961
 9740EEBA1CF902C7004384FC
 741F495E21355F27001E2961
-			shellScript = "/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" thin";
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" thin";
 keep this 2
 ''');
 
@@ -141,9 +141,9 @@ keep this 2
         expect(iosProjectMigration.migrate(), isTrue);
         verifyNever(mockUsage.sendEvent(any, any, label: anyNamed('label'), value: anyNamed('value')));
 
-        expect(xcodeProjectInfoFile.readAsStringSync(), '''
+        expect(xcodeProjectInfoFile.readAsStringSync(), r'''
 keep this 1
-			shellScript = "/bin/sh "\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" embed_and_thin";
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
 keep this 2
 ''');
         expect(testLogger.statusText, contains('Upgrading project.pbxproj'));

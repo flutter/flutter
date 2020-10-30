@@ -207,8 +207,7 @@ class NavigationRailTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final NavigationRailTheme? ancestorTheme = context.findAncestorWidgetOfExactType<NavigationRailTheme>();
-    return identical(this, ancestorTheme) ? child : NavigationRailTheme(data: data, child: child);
+    return NavigationRailTheme(data: data, child: child);
   }
 
   @override

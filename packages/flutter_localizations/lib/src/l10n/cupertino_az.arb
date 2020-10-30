@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Yerləşdirin",
   "selectAllButtonLabel": "Hamısını seçin",
   "tabSemanticsLabel": "Tab $tabIndex/$tabCount",
-  "modalBarrierDismissLabel": "İmtina edin"
+  "modalBarrierDismissLabel": "İmtina edin",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

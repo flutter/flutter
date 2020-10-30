@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Coller",
   "selectAllButtonLabel": "Tout sélect.",
   "tabSemanticsLabel": "Onglet $tabIndex sur $tabCount",
-  "modalBarrierDismissLabel": "Ignorer"
+  "modalBarrierDismissLabel": "Ignorer",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

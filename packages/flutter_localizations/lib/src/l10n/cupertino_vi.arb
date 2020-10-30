@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Dán",
   "selectAllButtonLabel": "Chọn tất cả",
   "tabSemanticsLabel": "Thẻ $tabIndex/$tabCount",
-  "modalBarrierDismissLabel": "Bỏ qua"
+  "modalBarrierDismissLabel": "Bỏ qua",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

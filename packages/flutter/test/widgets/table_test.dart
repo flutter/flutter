@@ -930,29 +930,15 @@ void main() {
     },
   );
 
-  testWidgets(
-    'Table widget - Default textBaseline is set to TableBaseline.alphabetic',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Table(
-            defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
-            children: const <TableRow>[
-              TableRow(
-                children: <Widget>[
-                  Text('Some Text'),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-
-      final RenderTable table = tester.renderObject(find.byType(Table));
-      expect(table.textBaseline, TextBaseline.alphabetic);
-    },
-  );
+  testWidgets('Table widget - Default textBaseline is null', (WidgetTester tester) async {
+    expect(
+      () => Table(defaultVerticalAlignment: TableCellVerticalAlignment.baseline),
+      throwsA(
+        isAssertionError
+          .having((AssertionError error) => error.message, 'exception message', contains('baseline')),
+      ),
+    );
+  });
 
   testWidgets(
     'Table widget requires all TableRows to have non-null children',

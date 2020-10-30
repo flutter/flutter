@@ -30,10 +30,9 @@ void main() {
     testUsingContext('ensureConfiguration throws an error if an '
       'explicitObservatoryPort is specified and more than one test file', () async {
       final FlutterPlatform flutterPlatform = FlutterPlatform(
-        buildMode: BuildMode.debug,
+        buildInfo: BuildInfo.debug,
         shellPath: '/',
         explicitObservatoryPort: 1234,
-        extraFrontEndOptions: <String>[],
       );
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
 
@@ -46,10 +45,9 @@ void main() {
     testUsingContext('ensureConfiguration throws an error if a precompiled '
       'entrypoint is specified and more that one test file', () {
       final FlutterPlatform flutterPlatform = FlutterPlatform(
-        buildMode: BuildMode.debug,
+        buildInfo: BuildInfo.debug,
         shellPath: '/',
         precompiledDillPath: 'example.dill',
-        extraFrontEndOptions: <String>[],
       );
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
 
@@ -170,22 +168,18 @@ void main() {
 
     testUsingContext('installHook creates a FlutterPlatform', () {
       expect(() => installHook(
-        buildMode: BuildMode.debug,
+        buildInfo: BuildInfo.debug,
         shellPath: 'abc',
         enableObservatory: false,
         startPaused: true,
-        extraFrontEndOptions: <String>[],
-        buildInfo: BuildInfo.debug,
       ), throwsAssertionError);
 
       expect(() => installHook(
-        buildMode: BuildMode.debug,
+        buildInfo: BuildInfo.debug,
         shellPath: 'abc',
         enableObservatory: false,
         startPaused: false,
         observatoryPort: 123,
-        extraFrontEndOptions: <String>[],
-        buildInfo: BuildInfo.debug,
       ), throwsAssertionError);
 
       FlutterPlatform capturedPlatform;
@@ -199,15 +193,12 @@ void main() {
         port: 100,
         precompiledDillPath: 'def',
         precompiledDillFiles: expectedPrecompiledDillFiles,
-        buildMode: BuildMode.debug,
-        trackWidgetCreation: true,
+        buildInfo: BuildInfo.debug,
         updateGoldens: true,
         buildTestAssets: true,
         observatoryPort: 200,
         serverType: InternetAddressType.IPv6,
         icudtlPath: 'ghi',
-        extraFrontEndOptions: <String>[],
-        buildInfo: BuildInfo.debug,
         platformPluginRegistration: (FlutterPlatform platform) {
           capturedPlatform = platform;
         });
@@ -223,8 +214,7 @@ void main() {
       expect(flutterPlatform.explicitObservatoryPort, equals(200));
       expect(flutterPlatform.precompiledDillPath, equals('def'));
       expect(flutterPlatform.precompiledDillFiles, expectedPrecompiledDillFiles);
-      expect(flutterPlatform.buildMode, equals(BuildMode.debug));
-      expect(flutterPlatform.trackWidgetCreation, equals(true));
+      expect(flutterPlatform.buildInfo, equals(BuildInfo.debug));
       expect(flutterPlatform.updateGoldens, equals(true));
       expect(flutterPlatform.buildTestAssets, equals(true));
       expect(flutterPlatform.icudtlPath, equals('ghi'));
@@ -247,7 +237,7 @@ class MockHttpServer extends Mock implements HttpServer {}
 // Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterPlatform extends FlutterPlatform {
   TestFlutterPlatform() : super(
-    buildMode: BuildMode.debug,
+    buildInfo: BuildInfo.debug,
     shellPath: '/',
     precompiledDillPath: 'example.dill',
     host: InternetAddress.loopbackIPv6,
@@ -256,7 +246,6 @@ class TestFlutterPlatform extends FlutterPlatform {
     startPaused: false,
     enableObservatory: false,
     buildTestAssets: false,
-    extraFrontEndOptions: <String>[],
     disableDds: true,
   );
 
@@ -270,7 +259,7 @@ class TestFlutterPlatform extends FlutterPlatform {
 // Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestObservatoryFlutterPlatform extends FlutterPlatform {
   TestObservatoryFlutterPlatform() : super(
-    buildMode: BuildMode.debug,
+    buildInfo: BuildInfo.debug,
     shellPath: '/',
     precompiledDillPath: 'example.dill',
     host: InternetAddress.loopbackIPv6,
@@ -280,7 +269,6 @@ class TestObservatoryFlutterPlatform extends FlutterPlatform {
     enableObservatory: true,
     explicitObservatoryPort: 1234,
     buildTestAssets: false,
-    extraFrontEndOptions: <String>[],
     disableServiceAuthCodes: false,
     disableDds: false,
   );

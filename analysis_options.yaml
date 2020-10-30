@@ -209,7 +209,7 @@ linter:
     - unnecessary_parenthesis
     # - unnecessary_raw_strings # not yet tested
     - unnecessary_statements
-    # - unnecessary_string_escapes # not yet tested
+    - unnecessary_string_escapes
     - unnecessary_string_interpolations
     - unnecessary_this
     - unrelated_type_equality_checks
@@ -219,7 +219,7 @@ linter:
     - use_is_even_rather_than_modulo
     # - use_key_in_widget_constructors # not yet tested
     - use_late_for_private_fields_and_variables
-    # - use_raw_strings # not yet tested
+    - use_raw_strings
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
     # - use_string_buffers # has false positives: https://github.com/dart-lang/sdk/issues/34182

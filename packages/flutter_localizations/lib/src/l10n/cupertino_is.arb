@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Líma",
   "selectAllButtonLabel": "Velja allt",
   "tabSemanticsLabel": "Flipi $tabIndex af $tabCount",
-  "modalBarrierDismissLabel": "Hunsa"
+  "modalBarrierDismissLabel": "Hunsa",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

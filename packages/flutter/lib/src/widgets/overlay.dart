@@ -45,13 +45,17 @@ import 'ticker_provider.dart';
 /// if widgets in an overlay entry with [maintainState] set to true repeatedly
 /// call [State.setState], the user's battery will be drained unnecessarily.
 ///
+/// [OverlayEntry] is a [ChangeNotifier] that notifies when the widget built by
+/// [builder] is mounted or unmounted, whose exact state can be queried by
+/// [mounted].
+///
 /// See also:
 ///
 ///  * [Overlay]
 ///  * [OverlayState]
 ///  * [WidgetsApp]
 ///  * [MaterialApp]
-class OverlayEntry {
+class OverlayEntry extends ChangeNotifier {
   /// Creates an overlay entry.
   ///
   /// To insert the entry into an [Overlay], first find the overlay using
@@ -113,6 +117,19 @@ class OverlayEntry {
     _overlay!._didChangeEntryOpacity();
   }
 
+  /// Whether the [OverlayEntry] is currently mounted in the widget tree.
+  ///
+  /// The [OverlayEntry] notifies its listeners when this value changes.
+  bool get mounted => _mounted;
+  bool _mounted = false;
+  void _updateMounted(bool value) {
+    if (value == _mounted) {
+      return;
+    }
+    _mounted = value;
+    notifyListeners();
+  }
+
   OverlayState? _overlay;
   final GlobalKey<_OverlayEntryWidgetState> _key = GlobalKey<_OverlayEntryWidgetState>();
 
@@ -172,6 +189,18 @@ class _OverlayEntryWidget extends StatefulWidget {
 }
 
 class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
+  @override
+  void initState() {
+    super.initState();
+    widget.entry._updateMounted(true);
+  }
+
+  @override
+  void dispose() {
+    widget.entry._updateMounted(false);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return TickerMode(

@@ -408,7 +408,7 @@ void main() {
     await tester.pump();
 
     expect(
-      MediaQuery.of(bottomSheetContext)!.padding,
+      MediaQuery.of(bottomSheetContext).padding,
       const EdgeInsets.only(
         bottom: 50.0,
         left: 50.0,

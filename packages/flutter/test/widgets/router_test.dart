@@ -77,7 +77,7 @@ void main() {
     });
   });
 
-  testWidgets('Router.of can be null', (WidgetTester tester) async {
+  testWidgets('Router.maybeOf can be null', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(buildBoilerPlate(
       Text('dummy', key: key)
@@ -85,7 +85,7 @@ void main() {
     final BuildContext textContext = key.currentContext!;
 
     // This should not throw error.
-    Router<dynamic>? router = Router.of(textContext, nullOk: true);
+    Router<dynamic>? router = Router.maybeOf(textContext);
     expect(router, isNull);
 
     // Test when the nullOk is not specified.

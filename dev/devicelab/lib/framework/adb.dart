@@ -636,7 +636,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   Future<List<String>> discoverDevices() async {
     final List<dynamic> results = json.decode(await eval(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
-      <String>['devices', '--machine', '--suppress-analytics', '--device-timeout', '10'],
+      <String>['devices', '--machine', '--suppress-analytics', '--device-timeout', '5'],
     )) as List<dynamic>;
 
     // [

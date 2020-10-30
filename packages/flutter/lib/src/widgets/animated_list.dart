@@ -382,26 +382,53 @@ class AnimatedList extends StatefulWidget {
   /// This method is typically used by [AnimatedList] item widgets that insert
   /// or remove items in response to user input.
   ///
-  /// ```dart
-  /// AnimatedListState animatedList = AnimatedList.of(context);
-  /// ```
-  static AnimatedListState? of(BuildContext context, { bool nullOk = false }) {
+  /// If no [AnimatedList] surrounds the context given, then this function will
+  /// assert in debug mode and throw an exception in release mode.
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], a similar function that will return null if no
+  ///    [AnimatedList] ancestor is found.
+  static AnimatedListState of(BuildContext context) {
     assert(context != null);
-    assert(nullOk != null);
     final AnimatedListState? result = context.findAncestorStateOfType<AnimatedListState>();
-    if (nullOk || result != null)
-      return result;
-    throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary('AnimatedList.of() called with a context that does not contain an AnimatedList.'),
-      ErrorDescription('No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of().'),
-      ErrorHint(
-        'This can happen when the context provided is from the same StatefulWidget that '
-        'built the AnimatedList. Please see the AnimatedList documentation for examples '
-        'of how to refer to an AnimatedListState object:'
-        '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html'
-      ),
-      context.describeElement('The context used was')
-    ]);
+    assert((){
+      if (result == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'AnimatedList.of() called with a context that does not contain an AnimatedList.'),
+          ErrorDescription(
+            'No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of().'),
+          ErrorHint(
+            'This can happen when the context provided is from the same StatefulWidget that '
+            'built the AnimatedList. Please see the AnimatedList documentation for examples '
+            'of how to refer to an AnimatedListState object:'
+            '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html'
+          ),
+          context.describeElement('The context used was')
+        ]);
+      }
+      return true;
+    }());
+    return result!;
+  }
+
+  /// The state from the closest instance of this class that encloses the given
+  /// context.
+  ///
+  /// This method is typically used by [AnimatedList] item widgets that insert
+  /// or remove items in response to user input.
+  ///
+  /// If no [AnimatedList] surrounds the context given, then this function will
+  /// return null.
+  ///
+  /// See also:
+  ///
+  ///  * [of], a similar function that will throw if no [AnimatedList] ancestor
+  ///    is found.
+  static AnimatedListState? maybeOf(BuildContext context) {
+    assert(context != null);
+    return context.findAncestorStateOfType<AnimatedListState>();
   }
 
   @override
@@ -770,25 +797,50 @@ class SliverAnimatedList extends StatefulWidget {
   /// This method is typically used by [SliverAnimatedList] item widgets that
   /// insert or remove items in response to user input.
   ///
-  /// ```dart
-  /// SliverAnimatedListState animatedList = SliverAnimatedList.of(context);
-  /// ```
-  static SliverAnimatedListState? of(BuildContext context, {bool nullOk = false}) {
+  /// If no [SliverAnimatedList] surrounds the context given, then this function
+  /// will assert in debug mode and throw an exception in release mode.
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], a similar function that will return null if no
+  ///    [SliverAnimatedList] ancestor is found.
+  static SliverAnimatedListState of(BuildContext context) {
     assert(context != null);
-    assert(nullOk != null);
     final SliverAnimatedListState? result = context.findAncestorStateOfType<SliverAnimatedListState>();
-    if (nullOk || result != null)
-      return result;
-    throw FlutterError(
-        'SliverAnimatedList.of() called with a context that does not contain a SliverAnimatedList.\n'
-        'No SliverAnimatedListState ancestor could be found starting from the '
-        'context that was passed to SliverAnimatedListState.of(). This can '
-        'happen when the context provided is from the same StatefulWidget that '
-        'built the AnimatedList. Please see the SliverAnimatedList documentation '
-        'for examples of how to refer to an AnimatedListState object: '
-        'https://docs.flutter.io/flutter/widgets/SliverAnimatedListState-class.html \n'
-        'The context used was:\n'
-        '  $context');
+    assert((){
+      if (result == null) {
+        throw FlutterError(
+          'SliverAnimatedList.of() called with a context that does not contain a SliverAnimatedList.\n'
+          'No SliverAnimatedListState ancestor could be found starting from the '
+          'context that was passed to SliverAnimatedListState.of(). This can '
+          'happen when the context provided is from the same StatefulWidget that '
+          'built the AnimatedList. Please see the SliverAnimatedList documentation '
+          'for examples of how to refer to an AnimatedListState object: '
+          'https://docs.flutter.io/flutter/widgets/SliverAnimatedListState-class.html\n'
+          'The context used was:\n'
+          '  $context');
+      }
+      return true;
+    }());
+    return result!;
+  }
+
+  /// The state from the closest instance of this class that encloses the given
+  /// context.
+  ///
+  /// This method is typically used by [SliverAnimatedList] item widgets that
+  /// insert or remove items in response to user input.
+  ///
+  /// If no [SliverAnimatedList] surrounds the context given, then this function
+  /// will return null.
+  ///
+  /// See also:
+  ///
+  ///  * [of], a similar function that will throw if no [SliverAnimatedList]
+  ///    ancestor is found.
+  static SliverAnimatedListState? maybeOf(BuildContext context) {
+    assert(context != null);
+    return context.findAncestorStateOfType<SliverAnimatedListState>();
   }
 }
 

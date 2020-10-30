@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Yapıştır",
   "selectAllButtonLabel": "Tümünü Seç",
   "tabSemanticsLabel": "Sekme $tabIndex/$tabCount",
-  "modalBarrierDismissLabel": "Kapat"
+  "modalBarrierDismissLabel": "Kapat",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

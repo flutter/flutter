@@ -356,6 +356,42 @@ void main() {
     );
   });
 
+  testWidgets('Radio with splash radius set', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const double splashRadius = 30;
+    Widget buildApp() {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                width: 100,
+                height: 100,
+                color: Colors.white,
+                child: Radio<int>(
+                  value: 0,
+                  onChanged: (int? newValue) {},
+                  focusColor: Colors.orange[500],
+                  autofocus: true,
+                  groupValue: 0,
+                  splashRadius: splashRadius,
+                ),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(
+        find.byWidgetPredicate((Widget widget) => widget is Radio<int>),
+      )),
+      paints..circle(color: Colors.orange[500], radius: splashRadius)
+    );
+  });
+
   testWidgets('Radio is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;

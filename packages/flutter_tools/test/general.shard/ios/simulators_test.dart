@@ -726,14 +726,14 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
               '--predicate',
               logPredicate,
             ],
-            stdout: '''
+            stdout: r'''
 },{
   "traceID" : 37579774151491588,
   "eventMessage" : "Single line message",
   "eventType" : "logEvent"
 },{
   "traceID" : 37579774151491588,
-  "eventMessage" : "Multi line message\\n  continues...\\n  continues..."
+  "eventMessage" : "Multi line message\n  continues...\n  continues..."
 },{
   "traceID" : 37579774151491588,
   "eventMessage" : "Single line message, not the part of the above",

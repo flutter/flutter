@@ -1018,7 +1018,7 @@ const double _wideGutterSize = 24.0;
 const double _narrowGutterSize = 12.0;
 
 double _getGutterSize(BuildContext context) =>
-    MediaQuery.of(context)!.size.width >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
+    MediaQuery.of(context).size.width >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
 
 /// Signature for the builder callback used by [_MasterDetailFlow].
 typedef _MasterViewBuilder = Widget Function(BuildContext context, bool isLateralUI);
@@ -1627,7 +1627,7 @@ class _DetailView extends StatelessWidget {
     if (_arguments == null) {
       return Container();
     }
-    final double screenHeight = MediaQuery.of(context)!.size.height;
+    final double screenHeight = MediaQuery.of(context).size.height;
     final double minHeight = (screenHeight - kToolbarHeight) / screenHeight;
 
     return DraggableScrollableSheet(

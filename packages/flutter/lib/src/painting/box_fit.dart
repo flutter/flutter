@@ -29,17 +29,26 @@ enum BoxFit {
 
   /// As small as possible while still covering the entire target box.
   ///
+  /// {@template clip_with_box_fit}
+  /// To actually clip the content, use `clipBehavior: Clip.hardEdge` alongside
+  /// this in a [FittedBox].
+  /// {@endtemplate}
+  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/box_fit_cover.png)
   cover,
 
   /// Make sure the full width of the source is shown, regardless of
   /// whether this means the source overflows the target box vertically.
   ///
+  /// {@macro clip_with_box_fit}
+  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/box_fit_fitWidth.png)
   fitWidth,
 
   /// Make sure the full height of the source is shown, regardless of
   /// whether this means the source overflows the target box horizontally.
+  ///
+  /// {@macro clip_with_box_fit}
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/box_fit_fitHeight.png)
   fitHeight,
@@ -48,6 +57,8 @@ enum BoxFit {
   /// any portions of the source that lie outside the box.
   ///
   /// The source image is not resized.
+  ///
+  /// {@macro clip_with_box_fit}
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/box_fit_none.png)
   none,

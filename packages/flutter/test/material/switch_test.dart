@@ -797,6 +797,34 @@ void main() {
     );
   });
 
+  testWidgets('Switch with splash radius set', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const double splashRadius = 30;
+    Widget buildApp() {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Switch(
+                value: true,
+                onChanged: (bool newValue) {},
+                focusColor: Colors.orange[500],
+                autofocus: true,
+                splashRadius: splashRadius,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..circle(color: Colors.orange[500], radius: splashRadius)
+    );
+  });
+
   testWidgets('Switch can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool value = true;

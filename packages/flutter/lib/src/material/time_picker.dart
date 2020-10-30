@@ -135,7 +135,7 @@ class _TimePickerHeader extends StatelessWidget {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData themeData = Theme.of(context)!;
     final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat(
-      alwaysUse24HourFormat: MediaQuery.of(context)!.alwaysUse24HourFormat,
+      alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
     );
 
     final _TimePickerFragmentContext fragmentContext = _TimePickerFragmentContext(
@@ -321,7 +321,7 @@ class _HourControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final bool alwaysUse24HourFormat = MediaQuery.of(context)!.alwaysUse24HourFormat;
+    final bool alwaysUse24HourFormat = MediaQuery.of(context).alwaysUse24HourFormat;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String formattedHour = localizations.formatHour(
       fragmentContext.selectedTime,
@@ -563,7 +563,7 @@ class _DayPeriodControl extends StatelessWidget {
       side: borderSide,
     );
 
-    final double buttonTextScaleFactor = math.min(MediaQuery.of(context)!.textScaleFactor, 2.0);
+    final double buttonTextScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2.0);
 
     final Widget amButton = Material(
       color: MaterialStateProperty.resolveAs(backgroundColor, amStates),
@@ -942,7 +942,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     assert(debugCheckHasMediaQuery(context));
     themeData = Theme.of(context)!;
     localizations = MaterialLocalizations.of(context);
-    media = MediaQuery.of(context)!;
+    media = MediaQuery.of(context);
   }
 
   @override
@@ -1152,7 +1152,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   _TappableLabel _buildTappableLabel(TextTheme textTheme, Color color, int value, String label, VoidCallback onTap) {
     final TextStyle style = textTheme.bodyText1!.copyWith(color: color);
-    final double labelScaleFactor = math.min(MediaQuery.of(context)!.textScaleFactor, 2.0);
+    final double labelScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2.0);
     return _TappableLabel(
       value: value,
       painter: TextPainter(
@@ -1322,7 +1322,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
       return null;
     }
 
-    if (MediaQuery.of(context)!.alwaysUse24HourFormat) {
+    if (MediaQuery.of(context).alwaysUse24HourFormat) {
       if (newHour >= 0 && newHour < 24) {
         return newHour;
       }
@@ -1408,7 +1408,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData media = MediaQuery.of(context)!;
+    final MediaQueryData media = MediaQuery.of(context);
     final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat(alwaysUse24HourFormat: media.alwaysUse24HourFormat);
     final bool use24HourDials = hourFormat(of: timeOfDayFormat) != HourFormat.h;
     final ThemeData theme = Theme.of(context)!;
@@ -1631,7 +1631,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
   }
 
   String get _formattedValue {
-    final bool alwaysUse24HourFormat = MediaQuery.of(context)!.alwaysUse24HourFormat;
+    final bool alwaysUse24HourFormat = MediaQuery.of(context).alwaysUse24HourFormat;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return !widget.isHour ? localizations.formatMinute(widget.selectedTime) : localizations.formatHour(
       widget.selectedTime,
@@ -1677,7 +1677,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
     //
     // TODO(rami-a): Once https://github.com/flutter/flutter/issues/67571 is
     // resolved, remove the window check for semantics being enabled on web.
-    final String? hintText = MediaQuery.of(context)!.accessibleNavigation || ui.window.semanticsEnabled
+    final String? hintText = MediaQuery.of(context).accessibleNavigation || ui.window.semanticsEnabled
         ? widget.semanticHintText
         : (focusNode.hasFocus ? null : _formattedValue);
     inputDecoration = inputDecoration.copyWith(
@@ -1688,7 +1688,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
     return SizedBox(
       height: _kTimePickerHeaderControlHeight,
       child: MediaQuery(
-        data: MediaQuery.of(context)!.copyWith(textScaleFactor: 1.0),
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
         child: TextFormField(
           autofocus: widget.autofocus ?? false,
           expands: true,
@@ -1854,7 +1854,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     if (_announcedInitialTime)
       return;
 
-    final MediaQueryData media = MediaQuery.of(context)!;
+    final MediaQueryData media = MediaQuery.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     _announceToAccessibility(
       context,
@@ -1903,12 +1903,12 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   }
 
   Size _dialogSize(BuildContext context) {
-    final Orientation orientation = MediaQuery.of(context)!.orientation;
+    final Orientation orientation = MediaQuery.of(context).orientation;
     final ThemeData theme = Theme.of(context)!;
     // Constrain the textScaleFactor to prevent layout issues. Since only some
     // parts of the time picker scale up with textScaleFactor, we cap the factor
     // to 1.1 as that provides enough space to reasonably fit all the content.
-    final double textScaleFactor = math.min(MediaQuery.of(context)!.textScaleFactor, 1.1);
+    final double textScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 1.1);
 
     final double timePickerWidth;
     final double timePickerHeight;
@@ -1940,7 +1940,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData media = MediaQuery.of(context)!;
+    final MediaQueryData media = MediaQuery.of(context);
     final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: media.alwaysUse24HourFormat);
     final bool use24HourDials = hourFormat(of: timeOfDayFormat) != HourFormat.h;
     final ThemeData theme = Theme.of(context)!;

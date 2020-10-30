@@ -13,9 +13,6 @@ import 'constants.dart';
 // Duration of the animation that moves the toggle from one state to another.
 const Duration _kToggleDuration = Duration(milliseconds: 200);
 
-// Radius of the radial reaction over time.
-final Animatable<double> _kRadialReactionRadiusTween = Tween<double>(begin: 0.0, end: kRadialReactionRadius);
-
 // Duration of the fade animation for the reaction when focus and hover occur.
 const Duration _kReactionFadeDuration = Duration(milliseconds: 50);
 
@@ -36,6 +33,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     required Color inactiveColor,
     Color? hoverColor,
     Color? focusColor,
+    required double splashRadius,
     ValueChanged<bool?>? onChanged,
     required BoxConstraints additionalConstraints,
     required TickerProvider vsync,
@@ -52,6 +50,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
        _inactiveColor = inactiveColor,
        _hoverColor = hoverColor ?? activeColor.withAlpha(kRadialReactionAlpha),
        _focusColor = focusColor ?? activeColor.withAlpha(kRadialReactionAlpha),
+       _splashRadius = splashRadius,
        _onChanged = onChanged,
        _hasFocus = hasFocus,
        _hovering = hovering,
@@ -331,6 +330,16 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
+  /// The splash radius for the radial reaction.
+  double get splashRadius => _splashRadius;
+  double _splashRadius;
+  set splashRadius(double value) {
+    if (value == _splashRadius)
+      return;
+    _splashRadius = value;
+    markNeedsPaint();
+  }
+
   /// Called when the control changes value.
   ///
   /// If the control is tapped, [onChanged] is called immediately with the new
@@ -457,9 +466,13 @@ abstract class RenderToggleable extends RenderConstrainedBox {
           _reactionFocusFade.value,
         )!;
       final Offset center = Offset.lerp(_downPosition ?? origin, origin, _reaction.value)!;
+      final Animatable<double> radialReactionRadiusTween = Tween<double>(
+        begin: 0.0,
+        end: splashRadius,
+      );
       final double reactionRadius = hasFocus || hovering
-          ? kRadialReactionRadius
-          : _kRadialReactionRadiusTween.evaluate(_reaction);
+          ? splashRadius
+          : radialReactionRadiusTween.evaluate(_reaction);
       if (reactionRadius > 0.0) {
         canvas.drawCircle(center + offset, reactionRadius, reactionPaint);
       }

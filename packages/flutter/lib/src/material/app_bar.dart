@@ -487,11 +487,11 @@ class _AppBarState extends State<AppBar> {
   static const Color _defaultShadowColor = Color(0xFF000000);
 
   void _handleDrawerButton() {
-    Scaffold.of(context)!.openDrawer();
+    Scaffold.of(context).openDrawer();
   }
 
   void _handleDrawerButtonEnd() {
-    Scaffold.of(context)!.openEndDrawer();
+    Scaffold.of(context).openEndDrawer();
   }
 
   @override
@@ -500,7 +500,7 @@ class _AppBarState extends State<AppBar> {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData? theme = Theme.of(context);
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
-    final ScaffoldState? scaffold = Scaffold.of(context, nullOk: true);
+    final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
@@ -593,7 +593,7 @@ class _AppBarState extends State<AppBar> {
       // sizes. To opt out, wrap the [title] widget in a [MediaQuery] widget
       // with [MediaQueryData.textScaleFactor] set to
       // `MediaQuery.textScaleFactorOf(context)`.
-      final MediaQueryData mediaQueryData = MediaQuery.of(context)!;
+      final MediaQueryData mediaQueryData = MediaQuery.of(context);
       title = MediaQuery(
         data: mediaQueryData.copyWith(
           textScaleFactor: math.min(
@@ -1447,7 +1447,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
-    final double topPadding = widget.primary ? MediaQuery.of(context)!.padding.top : 0.0;
+    final double topPadding = widget.primary ? MediaQuery.of(context).padding.top : 0.0;
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
       ? (widget.collapsedHeight ?? 0.0) + bottomHeight + topPadding
       : (widget.collapsedHeight ?? widget.toolbarHeight) + bottomHeight + topPadding;

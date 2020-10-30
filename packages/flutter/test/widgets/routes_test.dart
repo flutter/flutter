@@ -101,13 +101,16 @@ Future<void> runNavigatorTest(
   WidgetTester tester,
   NavigatorState host,
   VoidCallback test,
-  List<String> expectations,
-) async {
+  List<String> expectations, [
+  List<String> expectationsAfterAnotherPump = const <String>[],
+]) async {
   expect(host, isNotNull);
   test();
   expect(results, equals(expectations));
   results.clear();
   await tester.pump();
+  expect(results, equals(expectationsAfterAnotherPump));
+  results.clear();
 }
 
 void main() {
@@ -199,6 +202,8 @@ void main() {
       <String>[ // stack is: initial, two
         'third: didPop hello',
         'two: didPopNext third',
+      ],
+      <String>[
         'third: dispose',
       ],
     );
@@ -209,6 +214,8 @@ void main() {
       <String>[ // stack is: initial
         'two: didPop good bye',
         'initial: didPopNext two',
+      ],
+      <String>[
         'two: dispose',
       ],
     );
@@ -278,6 +285,8 @@ void main() {
       <String>[
         'third: didPop good bye',
         'second: didPopNext third',
+      ],
+      <String>[
         'third: dispose',
       ],
     );
@@ -320,6 +329,8 @@ void main() {
       <String>[
         'four: didPop the end',
         'second: didPopNext four',
+      ],
+      <String>[
         'four: dispose',
       ],
     );
@@ -395,6 +406,8 @@ void main() {
       <String>[
         'C: didPop null',
         'b: didPopNext C',
+      ],
+      <String>[
         'C: dispose',
       ],
     );

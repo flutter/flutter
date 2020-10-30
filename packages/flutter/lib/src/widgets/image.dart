@@ -50,9 +50,9 @@ export 'package:flutter/painting.dart' show
 ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? size }) {
   return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
-    devicePixelRatio: MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
+    devicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
     locale: Localizations.localeOf(context, nullOk: true),
-    textDirection: Directionality.of(context),
+    textDirection: Directionality.maybeOf(context),
     size: size,
     platform: defaultTargetPlatform,
   );
@@ -1145,7 +1145,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _updateInvertColors() {
-    _invertColors = MediaQuery.of(context, nullOk: true)?.invertColors
+    _invertColors = MediaQuery.maybeOf(context)?.invertColors
         ?? SemanticsBinding.instance!.accessibilityFeatures.invertColors;
   }
 

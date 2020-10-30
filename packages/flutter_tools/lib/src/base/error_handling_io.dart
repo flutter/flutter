@@ -4,12 +4,14 @@
 
 import 'dart:convert';
 import 'dart:io' as io show Directory, File, Link, ProcessException, ProcessResult, ProcessSignal, systemEncoding, Process, ProcessStartMode;
+import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:process/process.dart';
 
+import '../reporting/reporting.dart';
 import 'common.dart' show throwToolExit;
 import 'platform.dart';
 
@@ -270,6 +272,66 @@ class ErrorHandlingFile
       platform: _platform,
       failureMessage: 'Flutter failed to open a file at "${delegate.path}"',
     );
+  }
+
+  /// This copy method attempts to handle file system errors from both reading
+  /// and writing the copied file.
+  @override
+  File copySync(String newPath) {
+    final File resultFile = fileSystem.file(newPath);
+    // First check if the source file can be read. If not, bail through error
+    // handling.
+    _runSync<void>(
+      () => delegate.openSync(mode: FileMode.read).closeSync(),
+      platform: _platform,
+      failureMessage: 'Flutter failed to copy $path to $newPath due to source location error'
+    );
+    // Next check if the destination file can be written. If not, bail through
+    // error handling.
+    _runSync<void>(
+      ()  {
+        resultFile.createSync(recursive: true);
+        resultFile.openSync(mode: FileMode.writeOnly).closeSync();
+      },
+      platform: _platform,
+      failureMessage: 'Flutter faiuled to copy $path to $newPath due to destination location error'
+    );
+    // If both of the above checks passed, attempt to copy the file and catch
+    // any thrown errors.
+    try {
+      return wrapFile(delegate.copySync(newPath));
+    } on FileSystemException {
+      // Proceed below
+    }
+    // If the copy failed but both of the above checks passed, copy the bytes
+    // directly.
+    _runSync(() {
+      RandomAccessFile source;
+      RandomAccessFile sink;
+      try {
+        source = delegate.openSync(mode: FileMode.read);
+        sink = resultFile.openSync(mode: FileMode.writeOnly);
+        // 64k is the same sized buffer used by dart:io for `File.openRead`.
+        final Uint8List buffer = Uint8List(64 * 1024);
+        final int totalBytes = source.lengthSync();
+        int bytes = 0;
+        while (bytes < totalBytes) {
+          final int chunkLength = source.readIntoSync(buffer);
+          sink.writeFromSync(buffer, 0, chunkLength);
+          bytes += chunkLength;
+        }
+      } catch (err) { // ignore: avoid_catches_without_on_clauses
+        ErrorHandlingFileSystem.deleteIfExists(resultFile, recursive: true);
+        rethrow;
+      } finally {
+        source?.closeSync();
+        sink?.closeSync();
+      }
+    }, platform: _platform, failureMessage: 'Flutter failed to copy $path to $newPath due to unknown error');
+    // The original copy failed, but the manual copy worked. Report an analytics event to
+    // track this to determine if this code path is actually hit.
+    ErrorHandlingEvent('copy-fallback').send();
+    return wrapFile(resultFile);
   }
 
   @override

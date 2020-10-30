@@ -143,7 +143,7 @@ class FocusAttachment {
     assert(_node != null);
     if (isAttached) {
       assert(_node.context != null);
-      parent ??= Focus.of(_node.context!, nullOk: true, scopeOk: true);
+      parent ??= Focus.maybeOf(_node.context!, scopeOk: true);
       parent ??= _node.context!.owner!.focusManager.rootScope;
       assert(parent != null);
       parent._reparent(_node);
@@ -1005,7 +1005,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       _manager?.primaryFocus?._setAsFocusedChildForScope();
     }
     if (oldScope != null && child.context != null && child.enclosingScope != oldScope) {
-      FocusTraversalGroup.of(child.context!, nullOk: true)?.changedScope(node: child, oldScope: oldScope);
+      FocusTraversalGroup.maybeOf(child.context!)?.changedScope(node: child, oldScope: oldScope);
     }
     if (child._requestFocusWhenReparented) {
       child._doRequestFocus(findFirstFocus: true);
@@ -1145,19 +1145,19 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// [FocusTraversalPolicy.next] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool nextFocus() => FocusTraversalGroup.of(context!)!.next(this);
+  bool nextFocus() => FocusTraversalGroup.of(context!).next(this);
 
   /// Request to move the focus to the previous focus node, by calling the
   /// [FocusTraversalPolicy.previous] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool previousFocus() => FocusTraversalGroup.of(context!)!.previous(this);
+  bool previousFocus() => FocusTraversalGroup.of(context!).previous(this);
 
   /// Request to move the focus to the nearest focus node in the given
   /// direction, by calling the [FocusTraversalPolicy.inDirection] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool focusInDirection(TraversalDirection direction) => FocusTraversalGroup.of(context!)!.inDirection(this, direction);
+  bool focusInDirection(TraversalDirection direction) => FocusTraversalGroup.of(context!).inDirection(this, direction);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -89,8 +89,8 @@ class WebSteppingProject extends Project {
 
     Future<void> doAsyncStuff() async {
       print("test"); // BREAKPOINT
-      await new Future.value(true); // STEP 1 // STEP 2
-      await new Future.microtask(() => true);
+      await new Future.value(true); // STEP 1
+      await new Future.microtask(() => true); // STEP 2
       await new Future.delayed(const Duration(milliseconds: 1));  // STEP 3
       print("done!"); // STEP 4
     } // STEP 5

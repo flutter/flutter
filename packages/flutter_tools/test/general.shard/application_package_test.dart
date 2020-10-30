@@ -10,8 +10,10 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/fuchsia/application_package.dart';
@@ -130,67 +132,114 @@ void main() {
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: overrides);
 
-    testUsingContext('returns null when failed to extract manifest', () async {
+    testWithoutContext('returns null when failed to extract manifest', () async {
       final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
       when(sdk.latestVersion).thenReturn(sdkVersion);
+      final AndroidApk androidApk = AndroidApk.fromApk(
+        null,
+        processManager: fakeProcessManager,
+        logger: BufferLogger.test(),
+        userMessages: UserMessages(),
+        androidSdk: sdk,
+      );
 
-      expect(AndroidApk.fromApk(null), isNull);
+      expect(androidApk, isNull);
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
-    }, overrides: overrides);
+    });
   });
 
   group('ApkManifestData', () {
-    testUsingContext('Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithExplicitEnabledAndMainLauncherActivity);
+    testWithoutContext('Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithExplicitEnabledAndMainLauncherActivity,
+        BufferLogger.test(),
+      );
+
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
-    }, overrides: noColorTerminalOverride);
+    });
 
-    testUsingContext('Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDefaultEnabledAndMainLauncherActivity);
+    testWithoutContext('Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithDefaultEnabledAndMainLauncherActivity,
+        BufferLogger.test(),
+      );
+
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
-    }, overrides: noColorTerminalOverride);
+    });
 
-    testUsingContext('Parses manifest with a dist namespace', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDistNamespace);
+    testWithoutContext('Parses manifest with a dist namespace', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithDistNamespace,
+        BufferLogger.test(),
+      );
+
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity');
-    }, overrides: noColorTerminalOverride);
+    });
 
-    testUsingContext('Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoEnabledActivity);
+    testWithoutContext('Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field', () {
+      final BufferLogger logger = BufferLogger.test();
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithNoEnabledActivity,
+        logger,
+      );
+
       expect(data, isNull);
       expect(
-          testLogger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
-    }, overrides: noColorTerminalOverride);
+        logger.errorText,
+        'Error running io.flutter.examples.hello_world. Default activity not found\n',
+      );
+    });
 
-    testUsingContext('Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoMainActivity);
+    testWithoutContext('Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN', () {
+      final BufferLogger logger = BufferLogger.test();
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithNoMainActivity,
+        logger,
+      );
+
       expect(data, isNull);
       expect(
-          testLogger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
-    }, overrides: noColorTerminalOverride);
+        logger.errorText,
+        'Error running io.flutter.examples.hello_world. Default activity not found\n',
+      );
+    });
 
-    testUsingContext('Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoLauncherActivity);
+    testWithoutContext('Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER', () {
+      final BufferLogger logger = BufferLogger.test();
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithNoLauncherActivity,
+        logger,
+      );
+
       expect(data, isNull);
       expect(
-          testLogger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
-    }, overrides: noColorTerminalOverride);
+        logger.errorText,
+        'Error running io.flutter.examples.hello_world. Default activity not found\n',
+      );
+    });
 
-    testUsingContext('Parsing manifest with Activity that has multiple category, android.intent.category.LAUNCHER and android.intent.category.DEFAULT', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithLauncherAndDefaultActivity);
+    testWithoutContext('Parsing manifest with Activity that has multiple category, android.intent.category.LAUNCHER and android.intent.category.DEFAULT', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithLauncherAndDefaultActivity,
+        BufferLogger.test(),
+      );
+
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity');
-    }, overrides: noColorTerminalOverride);
+    });
 
-    testUsingContext('Parses manifest with missing application tag', () async {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithoutApplication);
+    testWithoutContext('Parses manifest with missing application tag', () async {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithoutApplication,
+        BufferLogger.test(),
+      );
 
       expect(data, isNull);
     });

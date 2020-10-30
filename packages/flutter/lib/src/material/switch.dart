@@ -21,9 +21,10 @@ const double _kTrackHeight = 14.0;
 const double _kTrackWidth = 33.0;
 const double _kTrackRadius = _kTrackHeight / 2.0;
 const double _kThumbRadius = 10.0;
-const double _kSwitchWidth = _kTrackWidth - 2 * _kTrackRadius + 2 * kRadialReactionRadius;
-const double _kSwitchHeight = 2 * kRadialReactionRadius + 8.0;
-const double _kSwitchHeightCollapsed = 2 * kRadialReactionRadius;
+const double _kSwitchMinSize = kMinInteractiveDimension - 8.0;
+const double _kSwitchWidth = _kTrackWidth - 2 * _kTrackRadius + _kSwitchMinSize;
+const double _kSwitchHeight = _kSwitchMinSize + 8.0;
+const double _kSwitchHeightCollapsed = _kSwitchMinSize;
 
 enum _SwitchType { material, adaptive }
 
@@ -80,6 +81,7 @@ class Switch extends StatefulWidget {
     this.mouseCursor,
     this.focusColor,
     this.hoverColor,
+    this.splashRadius,
     this.focusNode,
     this.autofocus = false,
   })  : _switchType = _SwitchType.material,
@@ -114,6 +116,7 @@ class Switch extends StatefulWidget {
     this.mouseCursor,
     this.focusColor,
     this.hoverColor,
+    this.splashRadius,
     this.focusNode,
     this.autofocus = false,
   })  : assert(autofocus != null),
@@ -229,6 +232,11 @@ class Switch extends StatefulWidget {
   /// The color for the button's [Material] when a pointer is hovering over it.
   final Color? hoverColor;
 
+  /// The splash radius of the circular [Material] ink response.
+  ///
+  /// If null, then [kRadialReactionRadius] is used.
+  final double? splashRadius;
+
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
@@ -343,6 +351,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
             inactiveColor: inactiveThumbColor,
             hoverColor: hoverColor,
             focusColor: focusColor,
+            splashRadius: widget.splashRadius ?? kRadialReactionRadius,
             activeThumbImage: widget.activeThumbImage,
             onActiveThumbImageError: widget.onActiveThumbImageError,
             inactiveThumbImage: widget.inactiveThumbImage,
@@ -413,6 +422,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     required this.inactiveColor,
     required this.hoverColor,
     required this.focusColor,
+    required this.splashRadius,
     required this.activeThumbImage,
     required this.onActiveThumbImageError,
     required this.inactiveThumbImage,
@@ -433,6 +443,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final Color inactiveColor;
   final Color hoverColor;
   final Color focusColor;
+  final double splashRadius;
   final ImageProvider? activeThumbImage;
   final ImageErrorListener? onActiveThumbImageError;
   final ImageProvider? inactiveThumbImage;
@@ -456,6 +467,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       inactiveColor: inactiveColor,
       hoverColor: hoverColor,
       focusColor: focusColor,
+      splashRadius: splashRadius,
       activeThumbImage: activeThumbImage,
       onActiveThumbImageError: onActiveThumbImageError,
       inactiveThumbImage: inactiveThumbImage,
@@ -480,6 +492,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..inactiveColor = inactiveColor
       ..hoverColor = hoverColor
       ..focusColor = focusColor
+      ..splashRadius = splashRadius
       ..activeThumbImage = activeThumbImage
       ..onActiveThumbImageError = onActiveThumbImageError
       ..inactiveThumbImage = inactiveThumbImage
@@ -515,6 +528,7 @@ class _RenderSwitch extends RenderToggleable {
     required Color inactiveColor,
     required Color hoverColor,
     required Color focusColor,
+    required double splashRadius,
     required ImageProvider? activeThumbImage,
     required ImageErrorListener? onActiveThumbImageError,
     required ImageProvider? inactiveThumbImage,
@@ -545,6 +559,7 @@ class _RenderSwitch extends RenderToggleable {
          inactiveColor: inactiveColor,
          hoverColor: hoverColor,
          focusColor: focusColor,
+         splashRadius: splashRadius,
          onChanged: onChanged,
          additionalConstraints: additionalConstraints,
          hasFocus: hasFocus,
@@ -668,7 +683,7 @@ class _RenderSwitch extends RenderToggleable {
     super.detach();
   }
 
-  double get _trackInnerLength => size.width - 2.0 * kRadialReactionRadius;
+  double get _trackInnerLength => size.width - _kSwitchMinSize;
 
   late HorizontalDragGestureRecognizer _drag;
 

@@ -298,10 +298,18 @@ class Router<T> extends StatefulWidget {
   /// This method provides access to the delegates in the [Router]. For example,
   /// this can be used to access the [backButtonDispatcher] of the parent router
   /// when creating a [ChildBackButtonDispatcher] for a nested [Router].
-  static Router<dynamic>? of(BuildContext context, {bool nullOk = false}) {
+  ///
+  /// If no [Router] ancestor exists for the given context, this will assert in
+  /// debug mode, and throw an exception in release mode.
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], which is a similar function, but it will return null instead
+  ///    of throwing an exception if no [Router] ancestor exists.
+  static Router<dynamic> of(BuildContext context) {
     final _RouterScope? scope = context.dependOnInheritedWidgetOfExactType<_RouterScope>();
     assert(() {
-      if (scope == null && !nullOk) {
+      if (scope == null) {
         throw FlutterError(
           'Router operation requested with a context that does not include a Router.\n'
           'The context used to retrieve the Router must be that of a widget that '
@@ -310,6 +318,24 @@ class Router<T> extends StatefulWidget {
       }
       return true;
     }());
+    return scope!.routerState.widget;
+  }
+
+  /// Retrieves the immediate [Router] ancestor from the given context.
+  ///
+  /// This method provides access to the delegates in the [Router]. For example,
+  /// this can be used to access the [backButtonDispatcher] of the parent router
+  /// when creating a [ChildBackButtonDispatcher] for a nested [Router].
+  ///
+  /// If no `Router` ancestor exists for the given context, this will return
+  /// null.
+  ///
+  /// See also:
+  ///
+  ///  * [of], a similar method that returns a non-nullable value, and will
+  ///    throw if no [Router] ancestor exists.
+  static Router<dynamic>? maybeOf(BuildContext context) {
+    final _RouterScope? scope = context.dependOnInheritedWidgetOfExactType<_RouterScope>();
     return scope?.routerState.widget;
   }
 

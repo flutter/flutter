@@ -271,8 +271,7 @@ class ToggleButtonsTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ToggleButtonsTheme? ancestorTheme = context.findAncestorWidgetOfExactType<ToggleButtonsTheme>();
-    return identical(this, ancestorTheme) ? child : ToggleButtonsTheme(data: data, child: child);
+    return ToggleButtonsTheme(data: data, child: child);
   }
 
   @override

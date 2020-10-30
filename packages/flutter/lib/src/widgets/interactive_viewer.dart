@@ -227,6 +227,11 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// The scale will be clamped between this and [maxScale] inclusively.
   ///
+  /// Scale is also affected by [boundaryMargin]. If the scale would result in
+  /// viewing beyond the boundary, then it will not be allowed. By default,
+  /// boundaryMargin is EdgeInsets.zero, so scaling below 1.0 will not be
+  /// allowed in most cases without first increasing the boundaryMargin.
+  ///
   /// Defaults to 0.8.
   ///
   /// Cannot be null, and must be a finite number greater than zero and less

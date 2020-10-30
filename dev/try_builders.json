@@ -154,6 +154,13 @@
          "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_tools/", "packages/flutter_web_plugins/", "bin/"]
       },
       {
+         "name": "Linux web_long_running_tests",
+         "repo":"flutter",
+         "task_name":"web_long_running_tests",
+         "enabled":true,
+         "run_if":["dev/", "packages/", "bin/"]
+      },
+      {
         "name":"Linux web_e2e_test",
         "repo":"flutter",
         "task_name":"linux_web_e2e_test",

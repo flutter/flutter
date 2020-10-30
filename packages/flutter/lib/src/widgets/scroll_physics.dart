@@ -85,21 +85,28 @@ class ScrollPhysics {
   @protected
   ScrollPhysics? buildParent(ScrollPhysics? ancestor) => parent?.applyTo(ancestor) ?? ancestor;
 
-  /// If [parent] is null then return a [ScrollPhysics] with the same
-  /// [runtimeType] where the [parent] has been replaced with the [ancestor].
+  /// Combines this [ScrollPhysics] instance with the given physics.
   ///
-  /// If this scroll physics object already has a parent, then this method
-  /// is applied recursively and ancestor will appear at the end of the
-  /// existing chain of parents.
+  /// The returned object uses this instance's physics when it has an
+  /// opinion, and defers to the given `ancestor` object's physics
+  /// when it does not.
   ///
-  /// The returned object will combine some of the behaviors from this
-  /// [ScrollPhysics] instance and some of the behaviors from [ancestor].
+  /// If [parent] is null then this returns a [ScrollPhysics] with the
+  /// same [runtimeType], but where the [parent] has been replaced
+  /// with the [ancestor].
+  ///
+  /// If this scroll physics object already has a parent, then this
+  /// method is applied recursively and ancestor will appear at the
+  /// end of the existing chain of parents.
+  ///
+  /// Calling this method with a null argument will copy the current
+  /// object. This is inefficient.
   ///
   /// {@tool snippet}
   ///
   /// In the following example, the [applyTo] method is used to combine the
-  /// scroll physics of two [ScrollPhysics] objects, the resulting [ScrollPhysics]
-  /// `x` has the same behavior as `y`:
+  /// scroll physics of two [ScrollPhysics] objects. The resulting [ScrollPhysics]
+  /// `x` has the same behavior as `y`.
   ///
   /// ```dart
   /// final FooScrollPhysics x = FooScrollPhysics().applyTo(BarScrollPhysics());
@@ -107,10 +114,27 @@ class ScrollPhysics {
   /// ```
   /// {@end-tool}
   ///
+  /// ## Implementing `applyTo`
+  ///
+  /// When creating a custom [ScrollPhysics] subclass, this method
+  /// must be implemented. If the physics class has no constructor
+  /// arguments, then implementing this method is merely a matter of
+  /// calling the constructor with a [parent] constructed using
+  /// [buildParent], as follows:
+  ///
+  /// ```dart
+  /// FooScrollPhysics applyTo(ScrollPhysics ancestor) {
+  ///   return FooScrollPhysics(parent: buildParent(ancestor));
+  /// }
+  /// ```
+  ///
+  /// If the physics class has constructor arguments, they must be passed to
+  /// the constructor here as well, so as to create a clone.
+  ///
   /// See also:
   ///
   ///  * [buildParent], a utility method that's often used to define [applyTo]
-  ///    methods for ScrollPhysics subclasses.
+  ///    methods for [ScrollPhysics] subclasses.
   ScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return ScrollPhysics(parent: buildParent(ancestor));
   }

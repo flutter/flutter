@@ -590,7 +590,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context)!.devicePixelRatio, 0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
 
       case TargetPlatform.android:

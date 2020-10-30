@@ -360,10 +360,9 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     if (matchedIntent != null) {
       final BuildContext primaryContext = primaryFocus!.context!;
       assert (primaryContext != null);
-      final Action<Intent>? action = Actions.find<Intent>(
+      final Action<Intent>? action = Actions.maybeFind<Intent>(
         primaryContext,
         intent: matchedIntent,
-        nullOk: true,
       );
       if (action != null && action.isEnabled(matchedIntent)) {
         Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
@@ -442,13 +441,18 @@ class Shortcuts extends StatefulWidget {
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.
-  static ShortcutManager? of(BuildContext context, {bool nullOk = false}) {
+  ///
+  /// If no [Shortcuts] widget encloses the context given, will assert in debug
+  /// mode and throw an exception in release mode.
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], which is similar to this function, but will return null if
+  ///    it doesn't find a [Shortcuts] ancestor.
+  static ShortcutManager of(BuildContext context) {
     assert(context != null);
     final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
     assert(() {
-      if (nullOk) {
-        return true;
-      }
       if (inherited == null) {
         throw FlutterError('Unable to find a $Shortcuts widget in the context.\n'
             '$Shortcuts.of() was called with a context that does not contain a '
@@ -460,6 +464,24 @@ class Shortcuts extends StatefulWidget {
       }
       return true;
     }());
+    return inherited!.manager;
+  }
+
+  /// Returns the [ActionDispatcher] that most tightly encloses the given
+  /// [BuildContext].
+  ///
+  /// The [context] argument must not be null.
+  ///
+  /// If no [Shortcuts] widget encloses the context given, will return null.
+  ///
+  /// See also:
+  ///
+  ///  * [of], which is similar to this function, but returns a non-nullable
+  ///    result, and will throw an exception if it doesn't find a [Shortcuts]
+  ///    ancestor.
+  static ShortcutManager? maybeOf(BuildContext context) {
+    assert(context != null);
+    final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
     return inherited?.manager;
   }
 

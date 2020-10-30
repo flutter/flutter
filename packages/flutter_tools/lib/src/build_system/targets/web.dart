@@ -22,9 +22,6 @@ import 'assets.dart';
 import 'common.dart';
 import 'localizations.dart';
 
-/// Whether web builds should call the platform initialization logic.
-const String kInitializePlatform = 'InitializePlatform';
-
 /// Whether the application has web plugins.
 const String kHasWebPlugins = 'HasWebPlugins';
 
@@ -89,7 +86,6 @@ class WebEntrypointTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final String targetFile = environment.defines[kTargetFile];
-    final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
     // TODO(jonahwilliams): support configuration of this file.
@@ -137,9 +133,7 @@ import '$mainImport' as entrypoint;
 
 Future<void> main() async {
   registerPlugins(webPluginRegistry);
-  if ($shouldInitializePlatform) {
-    await ui.webOnlyInitializePlatform();
-  }
+  await ui.webOnlyInitializePlatform();
   entrypoint.main();
 }
 ''';
@@ -152,9 +146,7 @@ import 'dart:ui' as ui;
 import '$mainImport' as entrypoint;
 
 Future<void> main() async {
-  if ($shouldInitializePlatform) {
-    await ui.webOnlyInitializePlatform();
-  }
+  await ui.webOnlyInitializePlatform();
   entrypoint.main();
 }
 ''';

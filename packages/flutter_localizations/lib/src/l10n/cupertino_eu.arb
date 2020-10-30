@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Itsatsi",
   "selectAllButtonLabel": "Hautatu guztiak",
   "tabSemanticsLabel": "$tabIndex/$tabCount fitxa",
-  "modalBarrierDismissLabel": "Baztertu"
+  "modalBarrierDismissLabel": "Baztertu",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

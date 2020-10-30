@@ -93,7 +93,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
   Widget build(BuildContext context) {
     Widget paddedContent = widget.child;
 
-    final MediaQueryData existingMediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData existingMediaQuery = MediaQuery.of(context);
     if (widget.navigationBar != null) {
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912

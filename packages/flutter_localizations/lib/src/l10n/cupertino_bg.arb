@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Поставяне",
   "selectAllButtonLabel": "Избиране на всички",
   "tabSemanticsLabel": "Раздел $tabIndex от $tabCount",
-  "modalBarrierDismissLabel": "Отхвърляне"
+  "modalBarrierDismissLabel": "Отхвърляне",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

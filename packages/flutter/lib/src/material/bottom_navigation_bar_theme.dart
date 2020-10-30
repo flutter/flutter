@@ -58,11 +58,19 @@ class BottomNavigationBarThemeData with Diagnosticable {
   /// The size, opacity, and color of the icon in the currently selected
   /// [BottomNavigationBarItem.icon].
   ///
+  /// If [BottomNavigationBar.selectedIconTheme] is non-null on the widget,
+  /// the whole [IconThemeData] from the widget will be used over this
+  /// [selectedIconTheme].
+  ///
   /// See [BottomNavigationBar.selectedIconTheme].
   final IconThemeData? selectedIconTheme;
 
   /// The size, opacity, and color of the icon in the currently unselected
   /// [BottomNavigationBarItem.icon]s.
+  ///
+  /// If [BottomNavigationBar.unselectedIconTheme] is non-null on the widget,
+  /// the whole [IconThemeData] from the widget will be used over this
+  /// [unselectedIconTheme].
   ///
   /// See [BottomNavigationBar.unselectedIconTheme].
   final IconThemeData? unselectedIconTheme;

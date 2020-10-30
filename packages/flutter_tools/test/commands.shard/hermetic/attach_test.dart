@@ -47,6 +47,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   pauseOnExit: false,
   runnable: true,
   startTime: 0,
+  isSystemIsolate: false,
 );
 
 void main() {

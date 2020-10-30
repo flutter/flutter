@@ -1597,8 +1597,8 @@ void main() {
       await tester.testTextInput.receiveAction(action);
       await tester.pump();
 
-      expect(Focus.of(nextKey.currentContext!)!.hasFocus, equals(shouldFocusNext));
-      expect(Focus.of(previousKey.currentContext!)!.hasFocus, equals(shouldFocusPrevious));
+      expect(Focus.of(nextKey.currentContext!).hasFocus, equals(shouldFocusNext));
+      expect(Focus.of(previousKey.currentContext!).hasFocus, equals(shouldFocusPrevious));
       expect(focusNode.hasFocus, equals(!shouldLoseFocus));
     }
 

@@ -147,8 +147,7 @@ class MaterialBannerTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final MaterialBannerTheme? ancestorTheme = context.findAncestorWidgetOfExactType<MaterialBannerTheme>();
-    return identical(this, ancestorTheme) ? child : MaterialBannerTheme(data: data, child: child);
+    return MaterialBannerTheme(data: data, child: child);
   }
 
   @override

@@ -34,7 +34,11 @@ class UserMessages {
 
   // Messages used in NoIdeValidator
   String get noIdeStatusInfo => 'No supported IDEs installed';
-  String get noIdeInstallationInfo => 'IntelliJ - https://www.jetbrains.com/idea/';
+  List<String> get noIdeInstallationInfo => <String>[
+    'IntelliJ - https://www.jetbrains.com/idea/',
+    'Android Studio - https://developer.android.com/studio/',
+    'VS Code - https://code.visualstudio.com/',
+  ];
 
   // Messages used in IntellijValidator
   String intellijStatusInfo(String version) => 'version $version';
