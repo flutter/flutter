@@ -9,6 +9,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
+import 'base/os.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'globals.dart' as globals;
 
@@ -436,6 +437,23 @@ String getNameForHostPlatform(HostPlatform platform) {
   return null;
 }
 
+String getNameForHostPlatformArch(HostPlatform platform) {
+  switch (platform) {
+    case HostPlatform.darwin_x64:
+      return 'x64';
+    case HostPlatform.darwin_arm:
+      return 'arm';
+    case HostPlatform.linux_x64:
+      return 'x64';
+    case HostPlatform.linux_arm64:
+      return 'arm64';
+    case HostPlatform.windows_x64:
+      return 'x64';
+  }
+  assert(false);
+  return null;
+}
+
 enum TargetPlatform {
   android,
   ios,
@@ -640,7 +658,14 @@ HostPlatform getCurrentHostPlatform() {
     return HostPlatform.darwin_x64;
   }
   if (globals.platform.isLinux) {
-    return HostPlatform.linux_x64;
+    final OperatingSystemUtils operatingSystemUtils =
+        OperatingSystemUtils(
+            fileSystem: globals.fs,
+            logger: globals.logger,
+            platform: globals.platform,
+            processManager: globals.processManager,
+        );
+    return operatingSystemUtils.hostPlatform;
   }
   if (globals.platform.isWindows) {
     return HostPlatform.windows_x64;
@@ -649,6 +674,12 @@ HostPlatform getCurrentHostPlatform() {
   globals.printError('Unsupported host platform, defaulting to Linux');
 
   return HostPlatform.linux_x64;
+}
+
+/// Returns current host cpu architecture.
+String getCurrentHostPlatformArchName() {
+  final HostPlatform hostPlatform = getCurrentHostPlatform();
+  return getNameForHostPlatformArch(hostPlatform);
 }
 
 /// Returns the top-level build output directory.
@@ -705,7 +736,8 @@ String getWebBuildDirectory() {
 
 /// Returns the Linux build output directory.
 String getLinuxBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'linux');
+  final String subDirs = 'linux/' + getCurrentHostPlatformArchName();
+  return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
 /// Returns the Windows build output directory.
