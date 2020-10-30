@@ -163,8 +163,7 @@ class Switch extends StatefulWidget {
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// Note, when this [Switch] is not selected, the [activeColor] color will
-  /// not fill anything.
+  /// Note, the [activeColor] is only used when this [Switch] is selected.
   final Color? activeColor;
 
   /// The color to use on the track when this switch is on.
@@ -685,6 +684,9 @@ class _RenderSwitch extends RenderToggleable {
     markNeedsPaint();
   }
 
+  /// If the active color is a [MaterialStateProperty<Color>], then we should
+  /// use that in the active state instead of the inactive color (the default),
+  /// since the user may be customizing the active + disabled color.
   bool get useActiveColorInDisabledState => _useActiveColorInDisabledState;
   bool _useActiveColorInDisabledState;
   set useActiveColorInDisabledState(bool value) {

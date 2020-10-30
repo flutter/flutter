@@ -138,8 +138,7 @@ class Checkbox extends StatefulWidget {
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// Note, when this [Checkbox] is not selected, the [activeColor] color will
-  /// not fill anything.
+  /// Note, the [activeColor] is only used when this [Checkbox] is selected.
   final Color? activeColor;
 
   /// The color to use for the check icon when this checkbox is checked.
@@ -413,6 +412,9 @@ class _RenderCheckbox extends RenderToggleable {
          hovering: hovering,
        );
 
+  /// If the active color is a [MaterialStateProperty<Color>], then we should
+  /// use that in the active state instead of the inactive color (the default),
+  /// since the user may be customizing the active + disabled color.
   bool useActiveColorInDisabledState;
 
   bool? _oldValue;

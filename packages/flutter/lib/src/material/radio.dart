@@ -248,8 +248,7 @@ class Radio<T> extends StatefulWidget {
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// Note, when this [Radio] is not selected, the [activeColor] color will
-  /// not fill anything.
+  /// Note, the [activeColor] is only used when this [Radio] is selected.
   final Color? activeColor;
 
   /// Configures the minimum size of the tap target.
@@ -500,6 +499,9 @@ class _RenderRadio extends RenderToggleable {
          hovering: hovering,
        );
 
+  /// If the active color is a [MaterialStateProperty<Color>], then we should
+  /// use that in the active state instead of the inactive color (the default),
+  /// since the user may be customizing the active + disabled color.
   bool get useActiveColorInDisabledState => _useActiveColorInDisabledState;
   bool _useActiveColorInDisabledState;
   set useActiveColorInDisabledState(bool value) {
