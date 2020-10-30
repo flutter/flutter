@@ -838,12 +838,12 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
-    final List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
+    List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
         ? stringsArg(FlutterOptions.kDartDefinesOption)
         : <String>[];
 
     if (argParser.options.containsKey('web-renderer') && argResults.wasParsed('web-renderer')) {
-      _updateDartDefines(dartDefines, stringArg('web-renderer'));
+      dartDefines = updateDartDefines(dartDefines, stringArg('web-renderer'));
     }
 
     return BuildInfo(buildMode,
@@ -944,12 +944,15 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Updates dart-defines based on [webRenderer].
-  void _updateDartDefines(List<String> dartDefines, String webRenderer) {
-    if (dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
-      throwToolExit('Only one of "--web-renderer" and '
-          '"--dart-defines=FLUTTER_WEB_USE_SKIA" may be specified.');
+  @visibleForTesting
+  static List<String> updateDartDefines(List<String> dartDefines, String webRenderer) {
+    final Set<String> dartDefinesSet = dartDefines.toSet();
+    if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
+        && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
+      dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
     }
-    dartDefines.addAll(_webRendererDartDefines[webRenderer]);
+    dartDefinesSet.addAll(_webRendererDartDefines[webRenderer]);
+    return dartDefinesSet.toList();
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
