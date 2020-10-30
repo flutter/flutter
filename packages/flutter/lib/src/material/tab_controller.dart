@@ -370,6 +370,7 @@ class DefaultTabController extends StatefulWidget {
   /// match [TabBar.tabs]'s and [TabBarView.children]'s length.
   ///
   /// The [initialIndex] argument must not be null.
+  ///
   /// See also:
   ///  * [PageStorageKey] are used to remember the index.
   const DefaultTabController({
