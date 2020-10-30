@@ -463,10 +463,13 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
   @override
   void didUpdateWidget(_TextSelectionToolbarOverflowable oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If the children are changing, the current page should be reset.
-    if (widget.children != oldWidget.children) {
-      // TODO(justinmc): Do I need to check individual children equality, or
-      // just the List?
+    int childIndex = 0;
+    final bool childrenEqual = widget.children != oldWidget.children
+        && widget.children.every((Widget child) {
+      return child == oldWidget.children[childIndex++];
+    });
+    // If the children are changing at all, the current page should be reset.
+    if (childrenEqual) {
       _reset();
     }
   }
