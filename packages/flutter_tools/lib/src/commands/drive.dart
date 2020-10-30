@@ -128,7 +128,9 @@ class DriveCommand extends RunCommandBase {
           'Attempts to write an SkSL file when the drive process is finished '
           'to the provided file, overwriting it if necessary.')
       ..addMultiOption('test-arguments', help: 'Additional arguments to pass to the '
-          'Dart VM running The test script.');
+          'Dart VM running The test script.')
+      ..addFlag('force-dart-script', help: 'Run the test file through "dart" directly '
+        'not through "pub run test"', defaultsTo: false, hide: true);
   }
 
   FlutterDriverFactory _flutterDriverFactory;
@@ -227,7 +229,7 @@ class DriveCommand extends RunCommandBase {
       testFile,
       stringsArg('test-arguments'),
       <String, String>{},
-      packageConfig,
+      boolArg('force-dart-script') ? PackageConfig.empty : packageConfig,
       chromeBinary: stringArg('chrome-binary'),
       headless: boolArg('headless'),
       browserDimension: stringArg('browser-dimension').split(','),
