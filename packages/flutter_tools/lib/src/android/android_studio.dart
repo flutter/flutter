@@ -127,7 +127,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final int major = version?.major;
     final int minor = version?.minor;
     if (globals.platform.isMacOS) {
-      /// plugin path of Android Studio which version >= 4.1 has changed.
+      /// plugin path of Android Studio has been changed after version 4.1.
       if(double.parse('$major.$minor') >= 4.1) {
         return globals.fs.path.join(
           globals.fsUtils.homeDirPath,
