@@ -22,6 +22,7 @@ struct ThreadHost {
     Profiler = 1 << 4,
   };
 
+  std::string name_prefix;
   std::unique_ptr<fml::Thread> platform_thread;
   std::unique_ptr<fml::Thread> ui_thread;
   std::unique_ptr<fml::Thread> raster_thread;
