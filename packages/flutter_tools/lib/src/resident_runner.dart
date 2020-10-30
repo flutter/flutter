@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -94,16 +95,33 @@ class FlutterDevice {
     if (targetPlatform == TargetPlatform.web_javascript) {
       Artifact platformDillArtifact;
       List<String> extraFrontEndOptions;
+      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+        globals.fs.file(buildInfo.packagesPath),
+        logger: globals.logger,
+        throwOnError: false,
+      ) ?? PackageConfig.empty;
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
         platformDillArtifact = Artifact.webPlatformKernelDill;
         extraFrontEndOptions = buildInfo.extraFrontEndOptions;
-      } else {
+      } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
         platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-        extraFrontEndOptions = <String>[
-          ...?buildInfo?.extraFrontEndOptions,
-          if (!(buildInfo?.extraFrontEndOptions?.contains('--sound-null-safety') ?? false))
-            '--sound-null-safety'
-        ];
+        extraFrontEndOptions =  buildInfo.extraFrontEndOptions;
+      } else {
+        final LanguageVersion languageVersion = packageConfig?.packageOf(Uri.parse(target))?.languageVersion;
+        final bool isNullSafe = languageVersion != null && languageVersion.major >= 2 && languageVersion.minor >= 11;
+        if (isNullSafe) {
+          platformDillArtifact = Artifact.webPlatformSoundKernelDill;
+          extraFrontEndOptions =  <String>[
+            ...?buildInfo.extraFrontEndOptions,
+            '--sound-null-safety',
+          ];
+        } else {
+          platformDillArtifact = Artifact.webPlatformKernelDill;
+          extraFrontEndOptions =  <String>[
+            ...?buildInfo.extraFrontEndOptions,
+            '--no-sound-null-safety',
+          ];
+        }
       }
 
       generator = ResidentCompiler(
