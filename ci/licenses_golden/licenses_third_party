@@ -1,4 +1,4 @@
-Signature: df32ba1b81ccb800b01c3d2bf007a2a8
+Signature: c7b3b09f8e57e8e336788e790a01ba6f
 
 UNUSED LICENSES:
 
@@ -8280,8 +8280,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/type_propagator_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/typed_data_aot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/yield_position_test.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_fingerprints.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_fingerprints.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_arm.cc
@@ -8306,9 +8304,7 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/type_testing_stubs_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_ia32.cc
-FILE: ../../../third_party/dart/runtime/vm/constants_kbc.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_x64.cc
-FILE: ../../../third_party/dart/runtime/vm/debugger_kbc.cc
 FILE: ../../../third_party/dart/runtime/vm/elf.cc
 FILE: ../../../third_party/dart/runtime/vm/elf.h
 FILE: ../../../third_party/dart/runtime/vm/ffi_callback_trampolines.cc
@@ -8406,6 +8402,12 @@ FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson/dart/latency.dar
 FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson/dart2/EventLoopLatencyJson.dart
 FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson/dart2/json_benchmark.dart
 FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson/dart2/latency.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson350KB/dart/EventLoopLatencyJson350KB.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson350KB/dart/json_benchmark.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson350KB/dart/latency.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson350KB/dart2/EventLoopLatencyJson350KB.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson350KB/dart2/json_benchmark.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson350KB/dart2/latency.dart
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart2/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/MD5/dart/md5.dart
@@ -9384,9 +9386,6 @@ FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_test.dart
 FILE: ../../../third_party/dart/runtime/vm/base64.cc
 FILE: ../../../third_party/dart/runtime/vm/base64.h
 FILE: ../../../third_party/dart/runtime/vm/base64_test.cc
-FILE: ../../../third_party/dart/runtime/vm/code_patcher_kbc.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/compile_type.h
@@ -9402,11 +9401,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_state.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_state.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/base_flow_graph_builder.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/base_flow_graph_builder.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_flow_graph_builder.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_flow_graph_builder.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_scope_builder.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_reader.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_reader.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_fingerprints.cc
@@ -9417,19 +9411,13 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/scope_builder.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/relocation.h
 FILE: ../../../third_party/dart/runtime/vm/constants.h
-FILE: ../../../third_party/dart/runtime/vm/constants_kbc.h
 FILE: ../../../third_party/dart/runtime/vm/datastream.cc
 FILE: ../../../third_party/dart/runtime/vm/finalizable_data.h
 FILE: ../../../third_party/dart/runtime/vm/hash.h
-FILE: ../../../third_party/dart/runtime/vm/instructions_kbc.cc
-FILE: ../../../third_party/dart/runtime/vm/instructions_kbc.h
-FILE: ../../../third_party/dart/runtime/vm/interpreter.cc
-FILE: ../../../third_party/dart/runtime/vm/interpreter.h
 FILE: ../../../third_party/dart/runtime/vm/raw_object_fields.cc
 FILE: ../../../third_party/dart/runtime/vm/raw_object_fields.h
 FILE: ../../../third_party/dart/runtime/vm/reverse_pc_lookup_cache.cc
 FILE: ../../../third_party/dart/runtime/vm/reverse_pc_lookup_cache.h
-FILE: ../../../third_party/dart/runtime/vm/stack_frame_kbc.h
 FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.cc
 FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.h
 FILE: ../../../third_party/dart/runtime/vm/v8_snapshot_writer.cc
@@ -10604,41 +10592,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_scope_builder.h + ../../../third_party/dart/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_scope_builder.h
-FILE: ../../../third_party/dart/sdk/lib/io/network_profiling.dart
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2019, the Dart project authors. Please see the AUTHORS file
-for details. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: dart
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/vm/lib/bigint_patch.dart
 TYPE: LicenseType.mit
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/bigint_patch.dart
@@ -10683,6 +10636,40 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/bigint_patch.dart
 Copyright 2009 The Go Authors. All rights reserved.
 Use of this source code is governed by a BSD-style
 license that can be found in the LICENSE file
+====================================================================================================
+
+====================================================================================================
+LIBRARY: dart
+ORIGIN: ../../../third_party/dart/sdk/lib/io/network_profiling.dart + ../../../third_party/dart/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/dart/sdk/lib/io/network_profiling.dart
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2019, the Dart project authors. Please see the AUTHORS file
+for details. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
