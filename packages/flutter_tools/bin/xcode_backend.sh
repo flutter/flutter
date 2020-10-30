@@ -179,7 +179,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
     ${flutter_engine_flag}                                                \
     ${local_engine_flag}                                                  \
     assemble                                                              \
-    --output="${derived_dir}/"                                            \
+    --output="${BUILT_PRODUCTS_DIR}/"                                     \
     ${performance_measurement_option}                                     \
     -dTargetPlatform=ios                                                  \
     -dTargetFile="${target_path}"                                         \
@@ -287,25 +287,23 @@ EmbedFlutterFrameworks() {
     project_path="${FLUTTER_APPLICATION_PATH}"
   fi
 
-  # Prefer the hidden .ios folder, but fallback to a visible ios folder if .ios
-  # doesn't exist.
-  local flutter_ios_out_folder="${project_path}/.ios/Flutter"
-  local flutter_ios_engine_folder="${project_path}/.ios/Flutter/engine"
-  if [[ ! -d ${flutter_ios_out_folder} ]]; then
-    flutter_ios_out_folder="${project_path}/ios/Flutter"
-    flutter_ios_engine_folder="${project_path}/ios/Flutter"
-  fi
-
-  AssertExists "${flutter_ios_out_folder}"
-
   # Embed App.framework from Flutter into the app (after creating the Frameworks directory
   # if it doesn't already exist).
   local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
   RunCommand mkdir -p -- "${xcode_frameworks_dir}"
-  RunCommand rsync -av --delete "${flutter_ios_out_folder}/App.framework" "${xcode_frameworks_dir}"
+  RunCommand rsync -av --delete --filter "- .DS_Store/" "${BUILT_PRODUCTS_DIR}/App.framework" "${xcode_frameworks_dir}"
 
   # Embed the actual Flutter.framework that the Flutter app expects to run against,
   # which could be a local build or an arch/type specific build.
+
+  # Prefer the hidden .ios folder, but fallback to a visible ios folder if .ios
+  # doesn't exist.
+  local flutter_ios_engine_folder="${project_path}/.ios/Flutter/engine"
+  if [[ ! -d ${flutter_ios_engine_folder} ]]; then
+    flutter_ios_engine_folder="${project_path}/ios/Flutter"
+  fi
+
+  AssertExists "${flutter_ios_engine_folder}"
 
   # Copy Xcode behavior and don't copy over headers or modules.
   RunCommand rsync -av --delete --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${flutter_ios_engine_folder}/Flutter.framework" "${xcode_frameworks_dir}/"
