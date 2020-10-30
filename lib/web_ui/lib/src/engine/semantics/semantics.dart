@@ -851,13 +851,25 @@ class SemanticsObject {
         hasIdentityTransform &&
         verticalContainerAdjustment == 0.0 &&
         horizontalContainerAdjustment == 0.0) {
-      element.style
-        ..removeProperty('transform-origin')
-        ..removeProperty('transform');
-      if (containerElement != null) {
-        containerElement.style
+      if (isDesktop) {
+        element.style
           ..removeProperty('transform-origin')
           ..removeProperty('transform');
+      } else {
+        element.style
+          ..removeProperty('top')
+          ..removeProperty('left');
+      }
+      if (containerElement != null) {
+        if (isDesktop) {
+          containerElement.style
+            ..removeProperty('transform-origin')
+            ..removeProperty('transform');
+        } else {
+          containerElement.style
+            ..removeProperty('top')
+            ..removeProperty('left');
+        }
       }
       return;
     }
@@ -882,13 +894,36 @@ class SemanticsObject {
     }
 
     if (!effectiveTransformIsIdentity) {
-      element.style
-        ..transformOrigin = '0 0 0'
-        ..transform = matrix4ToCssTransform(effectiveTransform);
+      if (isDesktop) {
+        element.style
+          ..transformOrigin = '0 0 0'
+          ..transform = matrix4ToCssTransform(effectiveTransform);
+      } else {
+        // Mobile screen readers observed to have errors while calculating the
+        // semantics focus borders if css `transform` properties are used.
+        // See: https://github.com/flutter/flutter/issues/68225
+        // Therefore we are calculating a bounding rectangle for the
+        // effective transform and use that rectangle to set TLWH css style
+        // properties.
+        // Note: Identity matrix is not using this code path.
+        final ui.Rect rect =
+            computeBoundingRectangleFromMatrix(effectiveTransform, _rect!);
+        element.style
+          ..top = '${rect.top}px'
+          ..left = '${rect.left}px'
+          ..width = '${rect.width}px'
+          ..height = '${rect.height}px';
+      }
     } else {
-      element.style
-        ..removeProperty('transform-origin')
-        ..removeProperty('transform');
+      if (isDesktop) {
+        element.style
+          ..removeProperty('transform-origin')
+          ..removeProperty('transform');
+      } else {
+        element.style
+          ..removeProperty('top')
+          ..removeProperty('left');
+      }
     }
 
     if (containerElement != null) {
@@ -897,13 +932,25 @@ class SemanticsObject {
           horizontalContainerAdjustment != 0.0) {
         final double translateX = -_rect!.left + horizontalContainerAdjustment;
         final double translateY = -_rect!.top + verticalContainerAdjustment;
-        containerElement.style
-          ..transformOrigin = '0 0 0'
-          ..transform = 'translate(${translateX}px, ${translateY}px)';
+        if (isDesktop) {
+          containerElement.style
+            ..transformOrigin = '0 0 0'
+            ..transform = 'translate(${translateX}px, ${translateY}px)';
+        } else {
+          containerElement.style
+            ..top = '${translateY}px'
+            ..left = '${translateX}px';
+        }
       } else {
-        containerElement.style
-          ..removeProperty('transform-origin')
-          ..removeProperty('transform');
+        if (isDesktop) {
+          containerElement.style
+            ..removeProperty('transform-origin')
+            ..removeProperty('transform');
+        } else {
+          containerElement.style
+            ..removeProperty('top')
+            ..removeProperty('left');
+        }
       }
     }
   }
