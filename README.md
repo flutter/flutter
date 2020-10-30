@@ -19,8 +19,7 @@ and open source.
 For announcements about new releases and breaking changes, follow the
 [flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce)
 mailing list or see the
-[breaking changes](https://flutter.dev/docs/release/breaking-changes) page of
-Flutter's official website.
+[breaking changes](https://flutter.dev/docs/release/breaking-changes) page.
 
 ## About Flutter
 
