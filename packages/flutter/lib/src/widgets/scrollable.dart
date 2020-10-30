@@ -966,6 +966,7 @@ class ScrollIntent extends Intent {
 class ScrollAction extends Action<ScrollIntent> {
   @override
   bool isEnabled(ScrollIntent intent) {
+    print('isEnabled');
     final FocusNode? focus = primaryFocus;
     return focus != null && focus.context != null && Scrollable.of(focus.context!) != null;
   }
@@ -1123,15 +1124,18 @@ class PrimaryScrollNavigatorState extends State<PrimaryScrollNavigator> {
     _primaryScrollController = null;
   }
 
+  bool _handleOnKey(FocusNode node, RawKeyEvent event) {
+    // Reconcile RawKeyEvent with current Shortcuts?
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return FocusScope(
       node: FocusScopeNode(
         debugLabel: '$PrimaryScrollNavigatorState Focus Scope',
-        onKey: (FocusNode node, RawKeyEvent event) {
-          print('yo');
-          return true;
-        },
+        canRequestFocus: false,
+        onKey: _handleOnKey,
       ),
       child: widget.child,
     );
