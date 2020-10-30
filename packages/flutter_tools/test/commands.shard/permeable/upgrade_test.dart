@@ -101,8 +101,10 @@ void main() {
 
     testUsingContext('Correctly provides upgrade version on verify only', () async {
       const String revision = 'abc123';
+      const String upstreamRevision = 'def456';
       when(flutterVersion.frameworkRevision).thenReturn(revision);
       fakeCommandRunner.alreadyUpToDate = false;
+      fakeCommandRunner.remoteRevision = upstreamRevision;
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         force: false,
         continueFlow: false,
@@ -113,8 +115,8 @@ void main() {
       );
       expect(await result, FlutterCommandResult.success());
       expect(testLogger.statusText, contains('A new version of Flutter is available'));
-      expect(testLogger.statusText, contains(fakeCommandRunner.remoteRevision));
-      expect(testLogger.statusText, contains(revision));
+      expect(testLogger.statusText, contains('The latest version: ${gitTagVersion.frameworkVersionFor(fakeCommandRunner.remoteRevision)}'));
+      expect(testLogger.statusText, contains('Your current version: ${flutterVersion.frameworkVersion}'));
       expect(processManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
