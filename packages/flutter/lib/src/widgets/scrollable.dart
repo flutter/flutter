@@ -967,6 +967,8 @@ class ScrollAction extends Action<ScrollIntent> {
   @override
   bool isEnabled(ScrollIntent intent) {
     final FocusNode? focus = primaryFocus;
+    // Key option would actually mean we place the PrimaryScrollNavigator
+    // above the Shortcuts
     final GlobalKey? _primaryScrollKey = PrimaryScrollNavigator.of(focus!.context!).key;
     return _primaryScrollKey != null && focus != null && focus.context != null && Scrollable.of(focus.context!) != null;
   }
@@ -1126,6 +1128,7 @@ class PrimaryScrollNavigatorState extends State<PrimaryScrollNavigator> {
 
   @override
   void didChangeDependencies() {
+    // For controller option, key option would be above the shortcuts.
     _shortcuts = Shortcuts.maybeOf(context)?.shortcuts;
     super.didChangeDependencies();
   }
@@ -1138,12 +1141,10 @@ class PrimaryScrollNavigatorState extends State<PrimaryScrollNavigator> {
 
   void unset() {
     _primaryScrollController = null;
-    // Or
-    _primaryScrollKey = null;
   }
 
   bool _handleOnKey(FocusNode node, RawKeyEvent event) {
-    // Reconcile RawKeyEvent with current Shortcuts?
+    // Reconcile RawKeyEvent with current Shortcuts
     // (_primaryScrollController approach)
     return true;
   }
