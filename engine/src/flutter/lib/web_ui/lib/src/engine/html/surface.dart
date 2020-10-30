@@ -33,21 +33,24 @@ const double _kScreenPixelRatioWarningThreshold = 6.0;
 /// Performs any outstanding painting work enqueued by [PersistedPicture]s.
 void commitScene(PersistedScene scene) {
   if (_paintQueue.isNotEmpty) {
-    if (_paintQueue.length > 1) {
-      // Sort paint requests in decreasing canvas size order. Paint requests
-      // attempt to reuse canvases. For efficiency we want the biggest pictures
-      // to find canvases before the smaller ones claim them.
-      _paintQueue.sort((_PaintRequest a, _PaintRequest b) {
-        final double aSize = a.canvasSize.height * a.canvasSize.width;
-        final double bSize = b.canvasSize.height * b.canvasSize.width;
-        return bSize.compareTo(aSize);
-      });
-    }
+    try {
+      if (_paintQueue.length > 1) {
+        // Sort paint requests in decreasing canvas size order. Paint requests
+        // attempt to reuse canvases. For efficiency we want the biggest pictures
+        // to find canvases before the smaller ones claim them.
+        _paintQueue.sort((_PaintRequest a, _PaintRequest b) {
+          final double aSize = a.canvasSize.height * a.canvasSize.width;
+          final double bSize = b.canvasSize.height * b.canvasSize.width;
+          return bSize.compareTo(aSize);
+        });
+      }
 
-    for (_PaintRequest request in _paintQueue) {
-      request.paintCallback();
+      for (_PaintRequest request in _paintQueue) {
+        request.paintCallback();
+      }
+    } finally {
+      _paintQueue = <_PaintRequest>[];
     }
-    _paintQueue = <_PaintRequest>[];
   }
 
   // After the update the retained surfaces are back to active.
@@ -356,6 +359,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
     assert(rootElement == null);
     assert(debugAssertSurfaceState(this, PersistedSurfaceState.created));
     rootElement = createElement();
+    assert(rootElement != null);
     applyWebkitClipFix(rootElement);
     if (_debugExplainSurfaceStats) {
       _surfaceStatsFor(this).allocatedDomNodeCount++;
