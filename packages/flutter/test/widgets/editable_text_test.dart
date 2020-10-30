@@ -6520,8 +6520,7 @@ void main() {
             ),
           ],
         ),
-      ),
-    );
+      ));
 
 
     expect(focusNodeFoo.hasFocus, true);
