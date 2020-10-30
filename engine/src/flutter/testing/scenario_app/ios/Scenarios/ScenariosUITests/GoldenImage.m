@@ -5,6 +5,7 @@
 #import "GoldenImage.h"
 
 #import <XCTest/XCTest.h>
+#import <os/log.h>
 #include <sys/sysctl.h>
 
 static const double kRmseThreshold = 0.5;
@@ -29,6 +30,7 @@ static const double kRmseThreshold = 0.5;
 
 - (BOOL)compareGoldenToImage:(UIImage*)image {
   if (!self.image || !image) {
+    os_log_error(OS_LOG_DEFAULT, "GOLDEN DIFF FAILED: image does not exists.");
     return NO;
   }
   CGImageRef imageRefA = [self.image CGImage];
@@ -40,6 +42,7 @@ static const double kRmseThreshold = 0.5;
   NSUInteger heightB = CGImageGetHeight(imageRefB);
 
   if (widthA != widthB || heightA != heightB) {
+    os_log_error(OS_LOG_DEFAULT, "GOLDEN DIFF FAILED: images sizes do not match.");
     return NO;
   }
   NSUInteger bytesPerPixel = 4;
@@ -48,6 +51,7 @@ static const double kRmseThreshold = 0.5;
   NSMutableData* rawB = [NSMutableData dataWithLength:size];
 
   if (!rawA || !rawB) {
+    os_log_error(OS_LOG_DEFAULT, "GOLDEN DIFF FAILED: image data length do not match.");
     return NO;
   }
 
@@ -87,7 +91,14 @@ static const double kRmseThreshold = 0.5;
     }
   }
   double rmse = sqrt(sum / size);
-  return rmse <= kRmseThreshold;
+  if (rmse > kRmseThreshold) {
+    os_log_error(
+        OS_LOG_DEFAULT,
+        "GOLDEN DIFF FAILED: image diff greater than threshold. Current diff: %@, threshold: %@",
+        @(rmse), @(kRmseThreshold));
+    return NO;
+  }
+  return YES;
 }
 
 NS_INLINE NSString* _platformName() {
