@@ -95,11 +95,6 @@ class FlutterDevice {
     if (targetPlatform == TargetPlatform.web_javascript) {
       Artifact platformDillArtifact;
       List<String> extraFrontEndOptions;
-      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        globals.fs.file(buildInfo.packagesPath),
-        logger: globals.logger,
-        throwOnError: false,
-      ) ?? PackageConfig.empty;
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
         platformDillArtifact = Artifact.webPlatformKernelDill;
         extraFrontEndOptions = buildInfo.extraFrontEndOptions;
@@ -107,10 +102,18 @@ class FlutterDevice {
         platformDillArtifact = Artifact.webPlatformSoundKernelDill;
         extraFrontEndOptions =  buildInfo.extraFrontEndOptions;
       } else {
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          globals.fs.file(buildInfo.packagesPath),
+          logger: globals.logger,
+          throwOnError: false,
+        ) ?? PackageConfig.empty;
         final LanguageVersion languageVersion = target != null
           ? packageConfig?.packageOf(Uri.parse(target))?.languageVersion
           : null;
-        final bool isNullSafe = languageVersion == null || (languageVersion.major >= 2 && languageVersion.minor >= 11);
+        // TODO(jonahwilliams): This logic is not correct - in general the language version
+        // being null means "current language version". For web, this needs to also be able
+        // to parse the language version comment out of the entrypoint file if provided.
+        final bool isNullSafe = languageVersion != null && (languageVersion.major >= 2 && languageVersion.minor >= 12);
         if (isNullSafe) {
           platformDillArtifact = Artifact.webPlatformSoundKernelDill;
           extraFrontEndOptions =  <String>[
