@@ -363,8 +363,8 @@ void main() {
           verifyOnly: false,
         );
         expect(await result, FlutterCommandResult.success());
-        await realCommandRunner.upgradeChannel(flutterVersion, revision);
-        expect(testLogger.statusText, contains('Upgrading Flutter to $revision from ${flutterVersion.frameworkRevision} in ${realCommandRunner.workingDirectory}'));
+        await realCommandRunner.upgradeChannel(flutterVersion, gitTagVersion.frameworkVersionFor(revision));
+        expect(testLogger.statusText, contains('Upgrading Flutter to ${gitTagVersion.frameworkVersionFor(revision)} from ${flutterVersion.frameworkVersion} in ${realCommandRunner.workingDirectory}'));
         expect(processManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
         ProcessManager: () => processManager,
