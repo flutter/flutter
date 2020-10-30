@@ -1627,7 +1627,7 @@ class Navigator extends StatefulWidget {
   /// provided,
   /// {@endtemplate}
   ///
-  /// {@template flutter.widgets.navigator.pushNamed.arguments}
+  /// {@template flutter.widgets.Navigator.pushNamed}
   /// The provided `arguments` are passed to the pushed route via
   /// [RouteSettings.arguments]. Any object can be passed as `arguments` (e.g. a
   /// [String], [int], or an instance of a custom `MyRouteArguments` class).
@@ -1716,7 +1716,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed}
   ///
-  /// {@template flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@template flutter.widgets.Navigator.restorablePushNamed.arguments}
   /// The provided `arguments` are passed to the pushed route via
   /// [RouteSettings.arguments]. Any object that is serializable via the
   /// [StandardMessageCodec] can be passed as `arguments`. Often, a Map is used
@@ -1726,7 +1726,7 @@ class Navigator extends StatefulWidget {
   /// [Navigator.onUnknownRoute] to construct the route.
   /// {@endtemplate}
   ///
-  /// {@template flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@template flutter.widgets.Navigator.restorablePushNamed.returnValue}
   /// The method returns an opaque ID for the pushed route that can be used by
   /// the [RestorableRouteFuture] to gain access to the actual [Route] object
   /// added to the navigator and its return value. You can ignore the return
@@ -1796,7 +1796,7 @@ class Navigator extends StatefulWidget {
   /// be provided.
   /// {@endtemplate}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -1835,9 +1835,9 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushReplacementNamed}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -1890,7 +1890,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@endtemplate}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -1928,9 +1928,9 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.popAndPushNamed}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -1994,7 +1994,7 @@ class Navigator extends StatefulWidget {
   /// must be provided.
   /// {@endtemplate}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -2033,9 +2033,9 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushNamedAndRemoveUntil}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -2106,7 +2106,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.push}
   ///
-  /// {@template flutter.widgets.navigator.restorablePush.arguments}
+  /// {@template flutter.widgets.Navigator.restorablePush}
   /// The method takes a _static_ [RestorableRouteBuilder] as argument, which
   /// must instantiate and return a new [Route] object that will be added to
   /// the navigator. The provided `arguments` object is passed to the
@@ -2117,7 +2117,7 @@ class Navigator extends StatefulWidget {
   /// passed as `arguments`. Often, a Map is used to pass key-value pairs.
   /// {@endtemplate}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
@@ -2210,9 +2210,9 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushReplacement}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
@@ -2315,9 +2315,9 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushAndRemoveUntil}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
@@ -2402,9 +2402,9 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.replace}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   static String restorableReplace<T extends Object?>(BuildContext context, { required Route<dynamic> oldRoute, required RestorableRouteBuilder<T> newRouteBuilder, Object? arguments }) {
     return Navigator.of(context)!.restorableReplace<T>(oldRoute: oldRoute, newRouteBuilder: newRouteBuilder, arguments: arguments);
@@ -2458,9 +2458,9 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.replaceRouteBelow}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   static String restorableReplaceRouteBelow<T extends Object?>(BuildContext context, { required Route<dynamic> anchorRoute, required RestorableRouteBuilder<T> newRouteBuilder, Object? arguments }) {
     return Navigator.of(context)!.restorableReplaceRouteBelow<T>(anchorRoute: anchorRoute, newRouteBuilder: newRouteBuilder, arguments: arguments);
@@ -4014,7 +4014,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushNamed}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -4045,9 +4045,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushNamed}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -4081,7 +4081,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushReplacementNamed}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -4115,9 +4115,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushReplacementNamed}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -4151,7 +4151,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.popAndPushNamed}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -4185,9 +4185,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.popAndPushNamed}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -4214,7 +4214,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushNamedAndRemoveUntil}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -4247,9 +4247,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushNamedAndRemoveUntil}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -4319,9 +4319,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.push}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
@@ -4457,9 +4457,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushReplacement}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
@@ -4563,9 +4563,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushAndRemoveUntil}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
@@ -4661,9 +4661,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.replace}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorableReplace<T extends Object?>({ required Route<dynamic> oldRoute, required RestorableRouteBuilder<T> newRouteBuilder, Object? arguments }) {
     assert(oldRoute != null);
@@ -4733,9 +4733,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.replaceRouteBelow}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorableReplaceRouteBelow<T extends Object?>({ required Route<dynamic> anchorRoute, required RestorableRouteBuilder<T> newRouteBuilder, Object? arguments }) {
     assert(anchorRoute != null);

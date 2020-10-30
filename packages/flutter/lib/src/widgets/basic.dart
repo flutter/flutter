@@ -624,7 +624,7 @@ class ClipRect extends SingleChildRenderObjectWidget {
   /// If non-null, determines which clip to use.
   final CustomClipper<Rect>? clipper;
 
-  /// {@macro flutter.clipper.clipBehavior}
+  /// {@macro flutter.rendering.ClipRectLayer.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
@@ -699,7 +699,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// If non-null, determines which clip to use.
   final CustomClipper<RRect>? clipper;
 
-  /// {@macro flutter.clipper.clipBehavior}
+  /// {@macro flutter.rendering.ClipRectLayer.clipBehavior}
   ///
   /// Defaults to [Clip.antiAlias].
   final Clip clipBehavior;
@@ -763,7 +763,7 @@ class ClipOval extends SingleChildRenderObjectWidget {
   /// object) instead.
   final CustomClipper<Rect>? clipper;
 
-  /// {@macro flutter.clipper.clipBehavior}
+  /// {@macro flutter.rendering.ClipRectLayer.clipBehavior}
   ///
   /// Defaults to [Clip.antiAlias].
   final Clip clipBehavior;
@@ -864,7 +864,7 @@ class ClipPath extends SingleChildRenderObjectWidget {
   /// efficient way of obtaining that effect.
   final CustomClipper<Path>? clipper;
 
-  /// {@macro flutter.clipper.clipBehavior}
+  /// {@macro flutter.rendering.ClipRectLayer.clipBehavior}
   ///
   /// Defaults to [Clip.antiAlias].
   final Clip clipBehavior;
@@ -935,7 +935,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   /// The type of shape.
   final BoxShape shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
@@ -1034,7 +1034,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   /// shape for use with this widget.
   final CustomClipper<Path> clipper;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
@@ -1411,7 +1411,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// The anchor point on the linked [CompositedTransformTarget] that
   /// [followerAnchor] will line up with.
   ///
-  /// {@template flutter.widgets.followerLayer.anchor}
+  /// {@template flutter.widgets.CompositedTransformFollower.targetAnchor}
   /// For example, when [targetAnchor] and [followerAnchor] are both
   /// [Alignment.topLeft], this widget will be top left aligned with the linked
   /// [CompositedTransformTarget]. When [targetAnchor] is
@@ -1427,7 +1427,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// The anchor point on this widget that will line up with [followerAnchor] on
   /// the linked [CompositedTransformTarget].
   ///
-  /// {@macro flutter.widgets.followerLayer.anchor}
+  /// {@macro flutter.widgets.CompositedTransformFollower.targetAnchor}
   ///
   /// Defaults to [Alignment.topLeft].
   final Alignment followerAnchor;
@@ -1502,7 +1502,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
   ///    relative to text direction.
   final AlignmentGeometry alignment;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
@@ -2343,7 +2343,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// will be retained.
   final Axis? constrainedAxis;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
@@ -3064,7 +3064,7 @@ class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
 /// is a basic sliver that insets another sliver by applying padding on each
 /// side.
 ///
-/// {@macro flutter.rendering.sliverPadding.limitation}
+/// {@macro flutter.rendering.RenderSliverEdgeInsetsPadding}
 ///
 /// See also:
 ///
@@ -3395,7 +3395,7 @@ class Stack extends MultiChildRenderObjectWidget {
   )
   final Overflow overflow;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
@@ -3860,7 +3860,7 @@ class PositionedDirectional extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
@@ -4068,7 +4068,7 @@ class Flex extends MultiChildRenderObjectWidget {
   /// way for the framework to know the correct baseline _a priori_.
   final TextBaseline? textBaseline;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
@@ -4958,7 +4958,7 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// [verticalDirection] must not be null.
   final VerticalDirection verticalDirection;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
@@ -5197,7 +5197,7 @@ class Flow extends MultiChildRenderObjectWidget {
   /// The delegate that controls the transformation matrices of the children.
   final FlowDelegate delegate;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
@@ -6070,7 +6070,7 @@ class MouseRegion extends StatefulWidget {
   /// is unmounted while being hovered by a pointer, the [onExit] of the widget
   /// callback will never called. For more details, see [onExit].
   ///
-  /// {@template flutter.mouseRegion.triggerTime}
+  /// {@template flutter.widgets.MouseRegion.onEnter.triggerTime}
   /// The time that this callback is triggered is always between frames: either
   /// during the post-frame callbacks, or during the callback of a pointer
   /// event.
@@ -6262,7 +6262,7 @@ class MouseRegion extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@macro flutter.mouseRegion.triggerTime}
+  /// {@macro flutter.widgets.MouseRegion.onEnter.triggerTime}
   ///
   /// See also:
   ///
@@ -6301,7 +6301,7 @@ class MouseRegion extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   @override
@@ -7168,7 +7168,7 @@ class KeyedSubtree extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// Wrap each item in a KeyedSubtree whose key is based on the item's existing key or

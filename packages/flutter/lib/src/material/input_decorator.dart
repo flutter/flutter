@@ -1812,7 +1812,7 @@ class InputDecorator extends StatefulWidget {
   /// How the text in the decoration should be aligned horizontally.
   final TextAlign? textAlign;
 
-  /// {@template flutter.widgets.inputDecorator.textAlignVertical}
+  /// {@template flutter.material.InputDecorator.textAlignVertical}
   /// How the text should be aligned vertically.
   ///
   /// Determines the alignment of the baseline within the available space of

@@ -68,7 +68,7 @@ class DrawerHeader extends StatelessWidget {
   /// This widget will be sized to the size of the header. To position the child
   /// precisely, consider using an [Align] or [Center] widget.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   @override

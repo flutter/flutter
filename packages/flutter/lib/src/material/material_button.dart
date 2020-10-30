@@ -130,7 +130,7 @@ class MaterialButton extends StatelessWidget {
   /// [State.setState] is not allowed).
   final ValueChanged<bool>? onHighlightChanged;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   final MouseCursor? mouseCursor;
 
   /// Defines the button's base colors, and the defaults for the button's minimum
@@ -352,7 +352,7 @@ class MaterialButton extends StatelessWidget {
   /// [ButtonThemeData.shape].
   final ShapeBorder? shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;

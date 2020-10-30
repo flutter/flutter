@@ -495,7 +495,7 @@ class TextInputConfiguration {
   /// Android and web, setting [autofillConfiguration] to null disables autofill.
   final AutofillConfiguration? autofillConfiguration;
 
-  /// {@template flutter.services.textInput.smartDashesType}
+  /// {@template flutter.services.TextInputConfiguration.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
   ///
   /// This flag only affects iOS versions 11 and above. It sets
@@ -520,7 +520,7 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final SmartDashesType smartDashesType;
 
-  /// {@template flutter.services.textInput.smartQuotesType}
+  /// {@template flutter.services.TextInputConfiguration.smartQuotesType}
   /// Whether to allow the platform to automatically format quotes.
   ///
   /// This flag only affects iOS. It sets
@@ -545,7 +545,7 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final SmartQuotesType smartQuotesType;
 
-  /// {@template flutter.services.textInput.enableSuggestions}
+  /// {@template flutter.services.TextInputConfiguration.enableSuggestions}
   /// Whether to show input suggestions as the user types.
   ///
   /// This flag only affects Android. On iOS, suggestions are tied directly to
@@ -1377,7 +1377,7 @@ class TextInput {
   /// automatically when they are disposed. The default behavior can be
   /// overridden in [AutofillGroup.onDisposeAction].
   ///
-  /// {@template flutter.services.autofill.autofillContext}
+  /// {@template flutter.services.TextInput.finishAutofillContext}
   /// An autofill context is a collection of input fields that live in the
   /// platform's text input plugin. The platform is encouraged to save the user
   /// input stored in the current autofill context before the context is

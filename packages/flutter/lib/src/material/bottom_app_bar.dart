@@ -62,7 +62,7 @@ class BottomAppBar extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   ///
   /// Typically this the child will be a [Row], with the first child
   /// being an [IconButton] with the [Icons.menu] icon.
@@ -93,7 +93,7 @@ class BottomAppBar extends StatefulWidget {
   /// be rectangular with no notch.
   final NotchedShape? shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;

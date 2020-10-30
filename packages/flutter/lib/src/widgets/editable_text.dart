@@ -610,13 +610,13 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool autocorrect;
 
-  /// {@macro flutter.services.textInput.smartDashesType}
+  /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
   final SmartDashesType smartDashesType;
 
-  /// {@macro flutter.services.textInput.smartQuotesType}
+  /// {@macro flutter.services.TextInputConfiguration.smartQuotesType}
   final SmartQuotesType smartQuotesType;
 
-  /// {@macro flutter.services.textInput.enableSuggestions}
+  /// {@macro flutter.services.TextInputConfiguration.enableSuggestions}
   final bool enableSuggestions;
 
   /// The text style to use for the editable text.
@@ -974,7 +974,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// ## Handling emojis and other complex characters
-  /// {@template flutter.widgets.editableText.complexCharacters}
+  /// {@template flutter.widgets.EditableText.onChanged}
   /// It's important to always use
   /// [characters](https://pub.dev/packages/characters) when dealing with user
   /// input text that may contain complex characters. This will ensure that
@@ -1105,7 +1105,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final SelectionChangedCallback? onSelectionChanged;
 
-  /// {@macro flutter.widgets.textSelection.onSelectionHandleTapped}
+  /// {@macro flutter.widgets.TextSelectionOverlay.onSelectionHandleTapped}
   final VoidCallback? onSelectionHandleTapped;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
@@ -1168,10 +1168,10 @@ class EditableText extends StatefulWidget {
   /// animate on Android platforms.
   final bool cursorOpacityAnimates;
 
-  ///{@macro flutter.rendering.editable.cursorOffset}
+  ///{@macro flutter.rendering.RenderEditable.cursorOffset}
   final Offset? cursorOffset;
 
-  ///{@macro flutter.rendering.editable.paintCursorOnTop}
+  ///{@macro flutter.rendering.RenderEditable.paintCursorAboveText}
   final bool paintCursorAboveText;
 
   /// Controls how tall the selection highlight boxes are computed to be.
@@ -1282,10 +1282,10 @@ class EditableText extends StatefulWidget {
   ///   compatible [keyboardType]. Empirically, [TextInputType.name] works well
   ///   with many autofill hints that are predefined on iOS.
   /// {@endtemplate}
-  /// {@macro flutter.services.autofill.autofillHints}
+  /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;

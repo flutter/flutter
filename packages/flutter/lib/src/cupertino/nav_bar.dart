@@ -235,7 +235,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
        ),
        super(key: key);
 
-  /// {@template flutter.cupertino.navBar.leading}
+  /// {@template flutter.cupertino.CupertinoNavigationBar.leading}
   /// Widget to place at the start of the navigation bar. Normally a back button
   /// for a normal page or a cancel button for full page dialogs.
   ///
@@ -244,7 +244,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Widget? leading;
 
-  /// {@template flutter.cupertino.navBar.automaticallyImplyLeading}
+  /// {@template flutter.cupertino.CupertinoNavigationBar.automaticallyImplyLeading}
   /// Controls whether we should try to imply the leading widget if null.
   ///
   /// If true and [leading] is null, automatically try to deduce what the [leading]
@@ -272,7 +272,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// This value cannot be null.
   final bool automaticallyImplyMiddle;
 
-  /// {@template flutter.cupertino.navBar.previousPageTitle}
+  /// {@template flutter.cupertino.CupertinoNavigationBar.previousPageTitle}
   /// Manually specify the previous route's title when automatically implying
   /// the leading back button.
   ///
@@ -293,7 +293,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// has a `title`.
   final Widget? middle;
 
-  /// {@template flutter.cupertino.navBar.trailing}
+  /// {@template flutter.cupertino.CupertinoNavigationBar.trailing}
   /// Widget to place at the end of the navigation bar. Normally additional actions
   /// taken on the page such as a search or edit function.
   /// {@endtemplate}
@@ -302,7 +302,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   // TODO(xster): https://github.com/flutter/flutter/issues/10469 implement
   // support for double row navigation bars.
 
-  /// {@template flutter.cupertino.navBar.backgroundColor}
+  /// {@template flutter.cupertino.CupertinoNavigationBar.backgroundColor}
   /// The background color of the navigation bar. If it contains transparency, the
   /// tab bar will automatically produce a blurring effect to the content
   /// behind it.
@@ -311,7 +311,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Color? backgroundColor;
 
-  /// {@template flutter.cupertino.navBar.brightness}
+  /// {@template flutter.cupertino.CupertinoNavigationBar.brightness}
   /// The brightness of the specified [backgroundColor].
   ///
   /// Setting this value changes the style of the system status bar. Typically
@@ -323,7 +323,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Brightness? brightness;
 
-  /// {@template flutter.cupertino.navBar.padding}
+  /// {@template flutter.cupertino.CupertinoNavigationBar.padding}
   /// Padding for the contents of the navigation bar.
   ///
   /// If null, the navigation bar will adopt the following defaults:
@@ -338,14 +338,14 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final EdgeInsetsDirectional? padding;
 
-  /// {@template flutter.cupertino.navBar.border}
+  /// {@template flutter.cupertino.CupertinoNavigationBar.border}
   /// The border of the navigation bar. By default renders a single pixel bottom border side.
   ///
   /// If a border is null, the navigation bar will not display a border.
   /// {@endtemplate}
   final Border? border;
 
-  /// {@template flutter.cupertino.navBar.actionsForegroundColor}
+  /// {@template flutter.cupertino.CupertinoNavigationBar.actionsForegroundColor}
   /// Default color used for text and icons of the [leading] and [trailing]
   /// widgets in the navigation bar.
   ///
@@ -360,7 +360,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   )
   final Color? actionsForegroundColor;
 
-  /// {@template flutter.cupertino.navBar.transitionBetweenRoutes}
+  /// {@template flutter.cupertino.CupertinoNavigationBar.transitionBetweenRoutes}
   /// Whether to transition between navigation bars.
   ///
   /// When [transitionBetweenRoutes] is true, this navigation bar will transition
@@ -379,7 +379,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final bool transitionBetweenRoutes;
 
-  /// {@template flutter.cupertino.navBar.heroTag}
+  /// {@template flutter.cupertino.CupertinoNavigationBar.heroTag}
   /// Tag for the navigation bar's Hero widget if [transitionBetweenRoutes] is true.
   ///
   /// Defaults to a common tag between all [CupertinoNavigationBar] and
@@ -608,12 +608,12 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// ([CupertinoPageRoute.title]) and [automaticallyImplyTitle] must be true.
   final Widget? largeTitle;
 
-  /// {@macro flutter.cupertino.navBar.leading}
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.leading}
   ///
   /// This widget is visible in both collapsed and expanded states.
   final Widget? leading;
 
-  /// {@macro flutter.cupertino.navBar.automaticallyImplyLeading}
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.automaticallyImplyLeading}
   final bool automaticallyImplyLeading;
 
   /// Controls whether we should try to imply the [largeTitle] widget if null.
@@ -625,7 +625,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// This value cannot be null.
   final bool automaticallyImplyTitle;
 
-  /// {@macro flutter.cupertino.navBar.previousPageTitle}
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.previousPageTitle}
   final String? previousPageTitle;
 
   /// A widget to place in the middle of the static navigation bar instead of
@@ -636,24 +636,24 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// [middle] widget is provided.
   final Widget? middle;
 
-  /// {@macro flutter.cupertino.navBar.trailing}
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.trailing}
   ///
   /// This widget is visible in both collapsed and expanded states.
   final Widget? trailing;
 
-  /// {@macro flutter.cupertino.navBar.backgroundColor}
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.backgroundColor}
   final Color? backgroundColor;
 
-  /// {@macro flutter.cupertino.navBar.brightness}
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.brightness}
   final Brightness? brightness;
 
-  /// {@macro flutter.cupertino.navBar.padding}
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.padding}
   final EdgeInsetsDirectional? padding;
 
-  /// {@macro flutter.cupertino.navBar.border}
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.border}
   final Border? border;
 
-  /// {@macro flutter.cupertino.navBar.actionsForegroundColor}
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.actionsForegroundColor}
   ///
   /// The default color for text in the [largeTitle] slot is always black, as per
   /// iOS standard design.
@@ -663,10 +663,10 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   )
   final Color? actionsForegroundColor;
 
-  /// {@macro flutter.cupertino.navBar.transitionBetweenRoutes}
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.transitionBetweenRoutes}
   final bool transitionBetweenRoutes;
 
-  /// {@macro flutter.cupertino.navBar.heroTag}
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.heroTag}
   final Object heroTag;
 
   /// True if the navigation bar's background color has no transparency.

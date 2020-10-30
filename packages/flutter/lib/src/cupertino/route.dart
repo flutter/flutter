@@ -96,7 +96,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   @protected
   Widget buildContent(BuildContext context);
 
-  /// {@template flutter.cupertino.cupertinoRouteTransitionMixin.title}
+  /// {@template flutter.cupertino.CupertinoRouteTransitionMixin.title}
   /// A title string for this route.
   ///
   /// Used to auto-populate [CupertinoNavigationBar] and
@@ -433,13 +433,13 @@ class CupertinoPage<T> extends Page<T> {
   /// The content to be shown in the [Route] created by this page.
   final Widget child;
 
-  /// {@macro flutter.cupertino.cupertinoRouteTransitionMixin.title}
+  /// {@macro flutter.cupertino.CupertinoRouteTransitionMixin.title}
   final String? title;
 
-  /// {@macro flutter.widgets.modalRoute.maintainState}
+  /// {@macro flutter.widgets.ModalRoute.maintainState}
   final bool maintainState;
 
-  /// {@macro flutter.widgets.pageRoute.fullscreenDialog}
+  /// {@macro flutter.widgets.PageRoute.fullscreenDialog}
   final bool fullscreenDialog;
 
   @override

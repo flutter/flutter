@@ -221,7 +221,7 @@ class ToggleButtons extends StatelessWidget {
   /// When the callback is null, all toggle buttons will be disabled.
   final void Function(int index)? onPressed;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   final MouseCursor? mouseCursor;
 
   /// The [TextStyle] to apply to any text in these toggle buttons.
@@ -734,7 +734,7 @@ class _ToggleButton extends StatelessWidget {
   /// If this is null, the button will be disabled, see [enabled].
   final VoidCallback? onPressed;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   final MouseCursor? mouseCursor;
 
   /// The width and color of the button's leading side border.

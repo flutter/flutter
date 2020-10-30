@@ -70,7 +70,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Null by default.
   final ButtonStyle? style;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
