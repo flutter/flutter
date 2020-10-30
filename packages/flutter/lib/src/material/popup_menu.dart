@@ -591,10 +591,12 @@ class _PopupMenu<T> extends StatelessWidget {
 
 // Positioning of the menu on the screen.
 class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
-  _PopupMenuRouteLayout(this.position, this.itemSizes, this.selectedItemIndex, this.textDirection);
+  _PopupMenuRouteLayout(this.position, this.overlaySize, this.itemSizes, this.selectedItemIndex, this.textDirection);
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
   final RelativeRect position;
+
+  final Size? overlaySize;
 
   // The sizes of each item are computed when the menu is laid out, and before
   // the route is laid out.
@@ -622,18 +624,26 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    // size: The size of the overlay.
+    // size: The safe area size of the overlay.
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
+    final Size _overlaySize = overlaySize ?? size;
+    print('_overlaySize[$_overlaySize]');
+
+    final double unsafeHeight = _overlaySize.height - size.height;
+    final double buttonHeight = _overlaySize.height - position.top - position.bottom;
+
+    print('size[$size] overlaySize[$overlaySize] unsafeHeight[$unsafeHeight] buttonHeight[$buttonHeight]');
+    print('position[$position]');
 
     // Find the ideal vertical position.
-    double y = position.top;
+    double y = position.top - unsafeHeight + buttonHeight;
     if (selectedItemIndex != null && itemSizes != null) {
       double selectedItemOffset = _kMenuVerticalPadding;
       for (int index = 0; index < selectedItemIndex!; index += 1)
         selectedItemOffset += itemSizes[index]!.height;
       selectedItemOffset += itemSizes[selectedItemIndex!]!.height / 2;
-      y = position.top + (size.height - position.top - position.bottom) / 2.0 - selectedItemOffset;
+      y = y - buttonHeight / 2.0 - selectedItemOffset;
     }
 
     // Find the ideal horizontal position.
@@ -678,15 +688,17 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     assert(itemSizes.length == oldDelegate.itemSizes.length);
 
     return position != oldDelegate.position
-        || selectedItemIndex != oldDelegate.selectedItemIndex
-        || textDirection != oldDelegate.textDirection
-        || !listEquals(itemSizes, oldDelegate.itemSizes);
+      || overlaySize != oldDelegate.overlaySize
+      || selectedItemIndex != oldDelegate.selectedItemIndex
+      || textDirection != oldDelegate.textDirection
+      || !listEquals(itemSizes, oldDelegate.itemSizes);
   }
 }
 
 class _PopupMenuRoute<T> extends PopupRoute<T> {
   _PopupMenuRoute({
     required this.position,
+    required this.overlaySize,
     required this.items,
     this.initialValue,
     this.elevation,
@@ -698,6 +710,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   }) : itemSizes = List<Size?>.filled(items.length, null);
 
   final RelativeRect position;
+  final Size? overlaySize;
   final List<PopupMenuEntry<T>> items;
   final List<Size?> itemSizes;
   final T? initialValue;
@@ -747,6 +760,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
           return CustomSingleChildLayout(
             delegate: _PopupMenuRouteLayout(
               position,
+              overlaySize,
               itemSizes,
               selectedItemIndex,
               Directionality.of(context),
@@ -817,6 +831,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 Future<T?> showMenu<T>({
   required BuildContext context,
   required RelativeRect position,
+  Size?  overlaySize,
   required List<PopupMenuEntry<T>> items,
   T? initialValue,
   double? elevation,
@@ -845,6 +860,7 @@ Future<T?> showMenu<T>({
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator)!;
   return navigator.push(_PopupMenuRoute<T>(
     position: position,
+    overlaySize: overlaySize,
     items: items,
     initialValue: initialValue,
     elevation: elevation,
@@ -1038,6 +1054,7 @@ class PopupMenuButton<T> extends StatefulWidget {
 /// See [showButtonMenu] for a way to programmatically open the popup menu
 /// of your button state.
 class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
+  final GlobalKey _menuButtonKey = GlobalKey();
   /// A method to show a popup menu with the items supplied to
   /// [PopupMenuButton.itemBuilder] at the position of your [PopupMenuButton].
   ///
@@ -1048,7 +1065,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   /// show the menu of the button with `globalKey.currentState.showButtonMenu`.
   void showButtonMenu() {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    final RenderBox button = context.findRenderObject()! as RenderBox;
+    final RenderBox button = _menuButtonKey.currentContext!.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(context)!.overlay!.context.findRenderObject()! as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
@@ -1066,6 +1083,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         items: items,
         initialValue: widget.initialValue,
         position: position,
+        overlaySize: overlay.size,
         shape: widget.shape ?? popupMenuTheme.shape,
         color: widget.color ?? popupMenuTheme.color,
       )
@@ -1117,15 +1135,37 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
-          child: widget.child,
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return UnconstrainedBox(
+                constrainedAxis: Axis.horizontal,
+                child: LimitedBox(
+                  key: _menuButtonKey,
+                  maxHeight: constraints.maxHeight,
+                  child: widget.child,
+                ),
+              );
+            },
+          ),
         ),
       );
 
-    return IconButton(
-      icon: widget.icon ?? _getIcon(Theme.of(context).platform),
-      padding: widget.padding,
-      tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
-      onPressed: widget.enabled ? showButtonMenu : null,
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return UnconstrainedBox(
+            constrainedAxis: Axis.horizontal,
+            child: LimitedBox(
+              maxHeight: constraints.maxHeight,
+              child: IconButton(
+                key: _menuButtonKey,
+                icon: widget.icon ?? _getIcon(Theme.of(context).platform),
+                padding: widget.padding,
+                tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
+                onPressed: widget.enabled ? showButtonMenu : null,
+              ),
+            ),
+          );
+        },
     );
   }
 }
