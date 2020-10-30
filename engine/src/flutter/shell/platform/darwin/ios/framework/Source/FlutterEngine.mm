@@ -373,10 +373,11 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _keyEventChannel.reset();
 }
 
-- (void)startProfiler:(NSString*)threadLabel {
+- (void)startProfiler {
+  FML_DCHECK(!_threadHost.name_prefix.empty());
   _profiler_metrics = std::make_unique<flutter::ProfilerMetricsIOS>();
   _profiler = std::make_unique<flutter::SamplingProfiler>(
-      threadLabel.UTF8String, _threadHost.profiler_thread->GetTaskRunner(),
+      _threadHost.name_prefix.c_str(), _threadHost.profiler_thread->GetTaskRunner(),
       [self]() { return self->_profiler_metrics->GenerateSample(); }, kNumProfilerSamplesPerSec);
   _profiler->Start();
 }
@@ -487,6 +488,46 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                                                             libraryOrNil:libraryOrNil]);
 }
 
+- (void)setupShell:(std::unique_ptr<flutter::Shell>)shell
+    withObservatoryPublication:(BOOL)doesObservatoryPublication {
+  _shell = std::move(shell);
+  [self setupChannels];
+  [self onLocaleUpdated:nil];
+  [self initializeDisplays];
+  _publisher.reset([[FlutterObservatoryPublisher alloc]
+      initWithEnableObservatoryPublication:doesObservatoryPublication]);
+  [self maybeSetupPlatformViewChannels];
+  _shell->GetIsGpuDisabledSyncSwitch()->SetSwitch(_isGpuDisabled ? true : false);
+}
+
++ (BOOL)isProfilerEnabled {
+  bool profilerEnabled = false;
+#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG) || \
+    (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE)
+  profilerEnabled = true;
+#endif
+  return profilerEnabled;
+}
+
++ (NSString*)generateThreadLabel:(NSString*)labelPrefix {
+  static size_t s_shellCount = 0;
+  return [NSString stringWithFormat:@"%@.%zu", labelPrefix, ++s_shellCount];
+}
+
++ (flutter::ThreadHost)makeThreadHost:(NSString*)threadLabel {
+  // The current thread will be used as the platform thread. Ensure that the message loop is
+  // initialized.
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+
+  uint32_t threadHostType = flutter::ThreadHost::Type::UI | flutter::ThreadHost::Type::GPU |
+                            flutter::ThreadHost::Type::IO;
+  if ([FlutterEngine isProfilerEnabled]) {
+    threadHostType = threadHostType | flutter::ThreadHost::Type::Profiler;
+  }
+  return {threadLabel.UTF8String,  // label
+          threadHostType};
+}
+
 - (BOOL)createShell:(NSString*)entrypoint
          libraryURI:(NSString*)libraryURI
        initialRoute:(NSString*)initialRoute {
@@ -495,7 +536,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     return NO;
   }
 
-  static size_t shellCount = 1;
   self.initialRoute = initialRoute;
 
   auto settings = [_dartProject.get() settings];
@@ -515,24 +555,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     settings.advisory_script_uri = std::string("main.dart");
   }
 
-  const auto threadLabel = [NSString stringWithFormat:@"%@.%zu", _labelPrefix, shellCount++];
-
-  // The current thread will be used as the platform thread. Ensure that the message loop is
-  // initialized.
-  fml::MessageLoop::EnsureInitializedForCurrentThread();
-
-  uint32_t threadHostType = flutter::ThreadHost::Type::UI | flutter::ThreadHost::Type::GPU |
-                            flutter::ThreadHost::Type::IO;
-  bool profilerEnabled = false;
-#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG) || \
-    (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE)
-  profilerEnabled = true;
-#endif
-  if (profilerEnabled) {
-    threadHostType = threadHostType | flutter::ThreadHost::Type::Profiler;
-  }
-  _threadHost = {threadLabel.UTF8String,  // label
-                 threadHostType};
+  NSString* threadLabel = [FlutterEngine generateThreadLabel:_labelPrefix];
+  _threadHost = [FlutterEngine makeThreadHost:threadLabel];
 
   // Lambda captures by pointers to ObjC objects are fine here because the
   // create call is synchronous.
@@ -554,26 +578,22 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   );
 
   // Create the shell. This is a blocking operation.
-  _shell = flutter::Shell::Create(std::move(task_runners),  // task runners
-                                  std::move(platformData),  // window data
-                                  std::move(settings),      // settings
-                                  on_create_platform_view,  // platform view creation
-                                  on_create_rasterizer      // rasterzier creation
-  );
+  std::unique_ptr<flutter::Shell> shell =
+      flutter::Shell::Create(std::move(task_runners),  // task runners
+                             std::move(platformData),  // window data
+                             std::move(settings),      // settings
+                             on_create_platform_view,  // platform view creation
+                             on_create_rasterizer      // rasterzier creation
+      );
 
-  if (_shell == nullptr) {
+  if (shell == nullptr) {
     FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "
                    << entrypoint.UTF8String;
   } else {
-    [self setupChannels];
-    [self onLocaleUpdated:nil];
-    [self initializeDisplays];
-    _publisher.reset([[FlutterObservatoryPublisher alloc]
-        initWithEnableObservatoryPublication:settings.enable_observatory_publication]);
-    [self maybeSetupPlatformViewChannels];
-    _shell->GetIsGpuDisabledSyncSwitch()->SetSwitch(_isGpuDisabled ? true : false);
-    if (profilerEnabled) {
-      [self startProfiler:threadLabel];
+    [self setupShell:std::move(shell)
+        withObservatoryPublication:settings.enable_observatory_publication];
+    if ([FlutterEngine isProfilerEnabled]) {
+      [self startProfiler];
     }
   }
 

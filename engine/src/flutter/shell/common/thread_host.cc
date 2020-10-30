@@ -10,7 +10,8 @@ ThreadHost::ThreadHost() = default;
 
 ThreadHost::ThreadHost(ThreadHost&&) = default;
 
-ThreadHost::ThreadHost(std::string name_prefix, uint64_t mask) {
+ThreadHost::ThreadHost(std::string name_prefix_arg, uint64_t mask)
+    : name_prefix(name_prefix_arg) {
   if (mask & ThreadHost::Type::Platform) {
     platform_thread = std::make_unique<fml::Thread>(name_prefix + ".platform");
   }
