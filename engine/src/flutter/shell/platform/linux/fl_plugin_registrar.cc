@@ -22,7 +22,8 @@ G_MODULE_EXPORT GType fl_plugin_registrar_get_type();
 
 G_DEFINE_TYPE(FlPluginRegistrar, fl_plugin_registrar, G_TYPE_OBJECT)
 
-static void view_weak_notify_cb(gpointer user_data, GObject* object) {
+static void view_weak_notify_cb(gpointer user_data,
+                                GObject* where_the_object_was) {
   FlPluginRegistrar* self = FL_PLUGIN_REGISTRAR(user_data);
   self->view = nullptr;
 }

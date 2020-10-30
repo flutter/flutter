@@ -152,7 +152,8 @@ static gboolean flutter_source_dispatch(GSource* source,
 }
 
 // Called when the engine is disposed.
-static void engine_weak_notify_cb(gpointer user_data, GObject* object) {
+static void engine_weak_notify_cb(gpointer user_data,
+                                  GObject* where_the_object_was) {
   FlutterSource* source = reinterpret_cast<FlutterSource*>(user_data);
   source->engine = nullptr;
   g_source_destroy(reinterpret_cast<GSource*>(source));
