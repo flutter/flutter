@@ -425,8 +425,12 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
     _controller = TabController(
       vsync: this,
       length: widget.length,
-      initialIndex: widget.initialIndex,
-    );
+      initialIndex: (PageStorage.of(context)?.readState(context) as num?)?.toInt() ?? widget.initialIndex,
+    )..addListener(() {
+      if (mounted) {
+        PageStorage.of(context)?.writeState(context, _controller.index);
+      }
+    });
   }
 
   @override
