@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
@@ -37,15 +36,7 @@ Future<void> buildWeb(
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());
-  try {
-    ErrorHandlingFileSystem.deleteIfExists(outputDirectory, recursive: true);
-    outputDirectory.createSync(recursive: true);
-  } on FileSystemException catch (err) {
-    globals.logger.printError(
-      'Error when clearing directory: $err.\nStale files may'
-      'be present in build directory.'
-    );
-  }
+  outputDirectory.createSync(recursive: true);
 
   await injectPlugins(flutterProject, webPlatform: true);
   final Status status = globals.logger.startProgress('Compiling $target for the Web...');
