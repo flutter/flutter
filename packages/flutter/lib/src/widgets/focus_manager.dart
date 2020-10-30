@@ -1644,7 +1644,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     // stop propagation, stop.
     bool handled = false;
     for (final FocusNode node in <FocusNode>[_primaryFocus!, ..._primaryFocus!.ancestors]) {
-      print('node: $node');
       if (node.onKey != null) {
         // TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
         final dynamic result = node.onKey!(node, event);

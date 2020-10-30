@@ -966,9 +966,9 @@ class ScrollIntent extends Intent {
 class ScrollAction extends Action<ScrollIntent> {
   @override
   bool isEnabled(ScrollIntent intent) {
-    print('isEnabled');
     final FocusNode? focus = primaryFocus;
-    return focus != null && focus.context != null && Scrollable.of(focus.context!) != null;
+    final GlobalKey? _primaryScrollKey = PrimaryScrollNavigator.of(focus!.context!).key;
+    return _primaryScrollKey != null && focus != null && focus.context != null && Scrollable.of(focus.context!) != null;
   }
 
   // Returns the scroll increment for a single scroll request, for use when
@@ -1052,7 +1052,11 @@ class ScrollAction extends Action<ScrollIntent> {
 
   @override
   void invoke(ScrollIntent intent) {
-    final ScrollableState? state = Scrollable.of(primaryFocus!.context!);
+    ScrollableState? state = Scrollable.of(primaryFocus!.context!);
+    if (state == null) {
+      final GlobalKey? _primaryScrollKey = PrimaryScrollNavigator.of(primaryFocus!.context!).key;
+      state = Scrollable.of(_primaryScrollKey!.currentContext!);
+    }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
     assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
     assert(state!.position.viewportDimension != null);
@@ -1108,7 +1112,17 @@ class PrimaryScrollNavigator extends StatefulWidget {
 ///
 class PrimaryScrollNavigatorState extends State<PrimaryScrollNavigator> {
   Map<LogicalKeySet, Intent>? _shortcuts;
+
+  /// Developer provides the scroll controller of the scroll view they would
+  /// like to have respond to Shortcuts by default.
   ScrollController? _primaryScrollController;
+
+  /// OR since ScrollAction is modeled around ScrollableState, instead of a
+  /// scroll controller, developers would provide a GlobalKey that is
+  /// enclosed within the context of the Scrollable they want to respond to
+  /// shortcuts.
+  GlobalKey? get key => _primaryScrollKey;
+  GlobalKey? _primaryScrollKey;
 
   @override
   void didChangeDependencies() {
@@ -1116,16 +1130,21 @@ class PrimaryScrollNavigatorState extends State<PrimaryScrollNavigator> {
     super.didChangeDependencies();
   }
 
-  void set(ScrollController controller) {
+  void set({ScrollController? controller, GlobalKey? key}) {
     _primaryScrollController = controller;
+    // Or
+    _primaryScrollKey = key;
   }
 
   void unset() {
     _primaryScrollController = null;
+    // Or
+    _primaryScrollKey = null;
   }
 
   bool _handleOnKey(FocusNode node, RawKeyEvent event) {
     // Reconcile RawKeyEvent with current Shortcuts?
+    // (_primaryScrollController approach)
     return true;
   }
 
@@ -1135,6 +1154,7 @@ class PrimaryScrollNavigatorState extends State<PrimaryScrollNavigator> {
       node: FocusScopeNode(
         debugLabel: '$PrimaryScrollNavigatorState Focus Scope',
         canRequestFocus: false,
+        // (_primaryScrollController approach)
         onKey: _handleOnKey,
       ),
       child: widget.child,
