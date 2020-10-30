@@ -580,14 +580,17 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
         zeroSides = calculateShouldZeroSides();
       }
 
-      // Status bar (top) and left/right system insets should partially obscure the content
-      // (padding).
+      // Status bar (top), navigation bar (bottom) and left/right system insets should
+      // partially obscure the content (padding).
       viewportMetrics.paddingTop = statusBarVisible ? insets.getSystemWindowInsetTop() : 0;
       viewportMetrics.paddingRight =
           zeroSides == ZeroSides.RIGHT || zeroSides == ZeroSides.BOTH
               ? 0
               : insets.getSystemWindowInsetRight();
-      viewportMetrics.paddingBottom = 0;
+      viewportMetrics.paddingBottom =
+          navigationBarVisible && guessBottomKeyboardInset(insets) == 0
+              ? insets.getSystemWindowInsetBottom()
+              : 0;
       viewportMetrics.paddingLeft =
           zeroSides == ZeroSides.LEFT || zeroSides == ZeroSides.BOTH
               ? 0
@@ -596,10 +599,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
       // Bottom system inset (keyboard) should adjust scrollable bottom edge (inset).
       viewportMetrics.viewInsetTop = 0;
       viewportMetrics.viewInsetRight = 0;
-      viewportMetrics.viewInsetBottom =
-          navigationBarVisible
-              ? insets.getSystemWindowInsetBottom()
-              : guessBottomKeyboardInset(insets);
+      viewportMetrics.viewInsetBottom = guessBottomKeyboardInset(insets);
       viewportMetrics.viewInsetLeft = 0;
     }
 
