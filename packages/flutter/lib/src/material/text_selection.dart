@@ -30,7 +30,9 @@ const double _kToolbarHeight = 44.0;
 const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
-typedef Widget _ToolbarBuilder(BuildContext context, Widget child);
+// The type for a Function that builds a toolbar's container with the given
+// child.
+typedef _ToolbarBuilder = Widget Function(BuildContext context, Widget child);
 
 /// Android Material styled text selection controls.
 class MaterialTextSelectionControls extends TextSelectionControls {
@@ -491,6 +493,9 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
           isAbove: widget.isAbove,
           overflowOpen: _overflowOpen,
           children: <Widget>[
+            // TODO(justinmc): This overflow button should have its own slot in
+            // _TextSelectionToolbarItemsLayout separate from children, similar
+            // to how it's done in Cupertino's text selection menu.
             // The navButton that shows and hides the overflow menu is the
             // first child.
             _TextSelectionToolbarOverflowButton(
