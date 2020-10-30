@@ -986,7 +986,7 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
   @override
   void deferTo(ChildBackButtonDispatcher child) {
     assert(hasCallbacks);
-    parent.deferTo(child);
+    parent.deferTo(this);
     super.deferTo(child);
   }
 
