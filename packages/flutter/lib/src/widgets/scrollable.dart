@@ -15,6 +15,7 @@ import 'package:flutter/services.dart';
 import 'actions.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
@@ -27,6 +28,7 @@ import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
+import 'shortcuts.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
 
@@ -1070,6 +1072,84 @@ class ScrollAction extends Action<ScrollIntent> {
       curve: Curves.easeInOut,
     );
   }
+}
+
+///
+// Names: PrimaryScrollShortcut, PrimaryScrollKeyListener, PrimaryScroller?
+class PrimaryScrollNavigator extends StatefulWidget {
+  ///
+  const PrimaryScrollNavigator({
+    Key? key,
+    required this.child
+  }) : assert(child != null),
+      super(key: key);
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
+
+  ///
+  static PrimaryScrollNavigatorState of(BuildContext context) {
+    assert(context != null);
+
+    final _PrimaryScrollNavigatorScope scope = context.dependOnInheritedWidgetOfExactType<_PrimaryScrollNavigatorScope>()!;
+    return scope._primaryScrollNavigatorState;
+  }
+
+  // Not sure if this method will be necessary. I think there should always be one.
+  // static PrimaryScrollNavigatorState? maybeOf(BuildContext context) {}
+
+  @override
+  PrimaryScrollNavigatorState createState() => PrimaryScrollNavigatorState();
+}
+
+///
+class PrimaryScrollNavigatorState extends State<PrimaryScrollNavigator> {
+  Map<LogicalKeySet, Intent>? _shortcuts;
+  ScrollController? _primaryScrollController;
+
+  @override
+  void didChangeDependencies() {
+    _shortcuts = Shortcuts.maybeOf(context)?.shortcuts;
+    super.didChangeDependencies();
+  }
+
+  void set(ScrollController controller) {
+    _primaryScrollController = controller;
+  }
+
+  void unset() {
+    _primaryScrollController = null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusScope(
+      node: FocusScopeNode(
+        debugLabel: '$PrimaryScrollNavigatorState Focus Scope',
+        onKey: (FocusNode node, RawKeyEvent event) {
+          print('yo');
+          return true;
+        },
+      ),
+      child: widget.child,
+    );
+  }
+}
+
+class _PrimaryScrollNavigatorScope extends InheritedWidget {
+  const _PrimaryScrollNavigatorScope({
+    Key? key,
+    required Widget child,
+    required PrimaryScrollNavigatorState primaryScrollNavigatorState,
+  }) : _primaryScrollNavigatorState = primaryScrollNavigatorState,
+      super(key: key, child: child);
+
+  final PrimaryScrollNavigatorState _primaryScrollNavigatorState;
+
+  @override
+  bool updateShouldNotify(_PrimaryScrollNavigatorScope old) => _primaryScrollNavigatorState != old._primaryScrollNavigatorState;
 }
 
 // Not using a RestorableDouble because we want to allow null values and override

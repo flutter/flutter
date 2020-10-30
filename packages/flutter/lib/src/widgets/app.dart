@@ -1543,6 +1543,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     }
 
+    result = PrimaryScrollNavigator(child: result);
+
     PerformanceOverlay? performanceOverlay;
     // We need to push a performance overlay if any of the display or checkerboarding
     // options are set.
