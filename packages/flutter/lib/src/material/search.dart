@@ -49,7 +49,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [SearchDelegate] to define the content of the search page.
-Future<T> showSearch<T>({
+Future<T?> showSearch<T>({
   required BuildContext context,
   required SearchDelegate<T> delegate,
   String? query = '',
@@ -199,7 +199,9 @@ abstract class SearchDelegate<T> {
     final ThemeData theme = Theme.of(context)!;
     assert(theme != null);
     return theme.copyWith(
-      primaryColor: Colors.white,
+      primaryColor: theme.brightness == Brightness.dark
+          ? theme.primaryColor
+          : Colors.white,
       primaryIconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
       primaryColorBrightness: Brightness.light,
       primaryTextTheme: theme.textTheme,
@@ -387,7 +389,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  void didComplete(T result) {
+  void didComplete(T? result) {
     super.didComplete(result);
     assert(delegate._route == this);
     delegate._route = null;
@@ -479,7 +481,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = widget.delegate.searchFieldLabel
-      ?? MaterialLocalizations.of(context)!.searchFieldLabel;
+      ?? MaterialLocalizations.of(context).searchFieldLabel;
     final TextStyle? searchFieldStyle = widget.delegate.searchFieldStyle
       ?? theme.inputDecorationTheme.hintStyle;
     Widget? body;

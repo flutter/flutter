@@ -253,7 +253,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   // it.
   _ContextMenuLocation get _contextMenuLocation {
     final Rect childRect = _getRect(_childGlobalKey);
-    final double screenWidth = MediaQuery.of(context)!.size.width;
+    final double screenWidth = MediaQuery.of(context).size.width;
 
     final double center = screenWidth / 2;
     final bool centerDividesChild = childRect.left < center
@@ -652,7 +652,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
         return AlignmentDirectional.topCenter;
       case _ContextMenuLocation.right:
         return AlignmentDirectional.topEnd;
-      default:
+      case _ContextMenuLocation.left:
         return AlignmentDirectional.topStart;
     }
   }
@@ -671,7 +671,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
           ? childRect.bottomRight
           : childRect.topRight;
         return (target - Offset(sheetRect.width, 0.0)) & sheetRect.size;
-      default:
+      case _ContextMenuLocation.left:
         final Offset target = orientation == Orientation.portrait
           ? childRect.bottomLeft
           : childRect.topLeft;
@@ -731,7 +731,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  bool didPop(T result) {
+  bool didPop(T? result) {
     _updateTweenRects();
     return super.didPop(result);
   }
@@ -978,7 +978,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         return orientation == Orientation.portrait
           ? Alignment.bottomCenter
           : Alignment.topLeft;
-      default:
+      case _ContextMenuLocation.left:
         return orientation == Orientation.portrait
           ? Alignment.bottomCenter
           : Alignment.topRight;
@@ -1060,7 +1060,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         return orientation == Orientation.portrait
           ? <Widget>[child, spacer, sheet]
           : <Widget>[sheet, spacer, child];
-      default:
+      case _ContextMenuLocation.left:
         return <Widget>[child, spacer, sheet];
     }
   }
@@ -1081,7 +1081,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   Widget _buildChildAnimation(BuildContext context, Widget? child) {
     _lastScale = _getScale(
       widget.orientation,
-      MediaQuery.of(context)!.size.height,
+      MediaQuery.of(context).size.height,
       _moveAnimation.value.dy,
     );
     return Transform.scale(
@@ -1233,7 +1233,7 @@ class _ContextMenuSheet extends StatelessWidget {
           ),
           menu,
         ];
-      default:
+      case _ContextMenuLocation.left:
         return <Widget>[
           menu,
           const Spacer(

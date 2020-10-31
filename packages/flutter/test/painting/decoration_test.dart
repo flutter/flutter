@@ -352,8 +352,8 @@ void main() {
       '   When DecorationImagePainter.paint() was called, there was no text\n'
       '   direction provided in the ImageConfiguration object to match.\n'
       '   The DecorationImage was:\n'
-      '     DecorationImage(SynchronousTestImageProvider(), center, match\n'
-      '     text direction, scale: 1.0)\n'
+      '     DecorationImage(SynchronousTestImageProvider(),\n'
+      '     Alignment.center, match text direction, scale: 1.0)\n'
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n'
     );

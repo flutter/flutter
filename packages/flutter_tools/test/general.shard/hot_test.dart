@@ -37,6 +37,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   pauseOnExit: false,
   runnable: true,
   startTime: 0,
+  isSystemIsolate: false,
 );
 
 final FlutterView fakeFlutterView = FlutterView(
@@ -283,7 +284,7 @@ void main() {
           method: kRunInViewMethod,
           args: <String, Object>{
             'viewId': fakeFlutterView.id,
-            'mainScript': 'lib/main.dart.dill',
+            'mainScript': 'main.dart.dill',
             'assetDirectory': 'build/flutter_assets',
           }
         ),
@@ -291,7 +292,7 @@ void main() {
           method: kRunInViewMethod,
           args: <String, Object>{
             'viewId': fakeFlutterView.id,
-            'mainScript': 'lib/main.dart.dill',
+            'mainScript': 'main.dart.dill',
             'assetDirectory': 'build/flutter_assets',
           }
         ),
@@ -383,7 +384,7 @@ void main() {
           method: kRunInViewMethod,
           args: <String, Object>{
             'viewId': fakeFlutterView.id,
-            'mainScript': 'lib/main.dart.dill',
+            'mainScript': 'main.dart.dill',
             'assetDirectory': 'build/flutter_assets',
           }
         ),

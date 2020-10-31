@@ -319,6 +319,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
     this.autofocus = false,
+    this.contentPadding,
 
   }) : assert(toggleable != null),
        assert(isThreeLine != null),
@@ -469,6 +470,14 @@ class RadioListTile<T> extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// Defines the insets surrounding the contents of the tile.
+  ///
+  /// Insets the [Radio], [title], [subtitle], and [secondary] widgets
+  /// in [RadioListTile].
+  ///
+  /// When null, `EdgeInsets.symmetric(horizontal: 16.0)` is used.
+  final EdgeInsetsGeometry? contentPadding;
+
   /// Whether this radio button is checked.
   ///
   /// To control this value, set [value] and [groupValue] appropriately.
@@ -519,6 +528,7 @@ class RadioListTile<T> extends StatelessWidget {
           } : null,
           selected: selected,
           autofocus: autofocus,
+          contentPadding: contentPadding,
         ),
       ),
     );

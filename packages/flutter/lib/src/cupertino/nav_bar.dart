@@ -102,7 +102,6 @@ Widget _wrapWithBackground({
         overlayStyle = SystemUiOverlayStyle.light;
         break;
       case Brightness.light:
-      default:
         overlayStyle = SystemUiOverlayStyle.dark;
         break;
     }
@@ -714,7 +713,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       actionsForegroundColor,
       context,
       MediaQuery(
-        data: MediaQuery.of(context)!.copyWith(textScaleFactor: 1),
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
         child: SliverPersistentHeader(
           pinned: true, // iOS navigation bars are always pinned.
           delegate: _LargeTitleNavigationBarSliverDelegate(
@@ -728,7 +727,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
             actionsForegroundColor: actionsForegroundColor,
             transitionBetweenRoutes: widget.transitionBetweenRoutes,
             heroTag: widget.heroTag,
-            persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context)!.padding.top,
+            persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
             alwaysShowMiddle: widget.middle != null,
           ),
         ),
@@ -961,7 +960,7 @@ class _PersistentNavigationBar extends StatelessWidget {
     }
 
     return SizedBox(
-      height: _kNavBarPersistentHeight + MediaQuery.of(context)!.padding.top,
+      height: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
       child: SafeArea(
         bottom: false,
         child: paddedToolbar,
@@ -1375,20 +1374,23 @@ class _BackChevron extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     final TextStyle textStyle = DefaultTextStyle.of(context).style;
 
     // Replicate the Icon logic here to get a tightly sized icon and add
     // custom non-square padding.
-    Widget iconWidget = Text.rich(
-      TextSpan(
-        text: String.fromCharCode(CupertinoIcons.back.codePoint),
-        style: TextStyle(
-          inherit: false,
-          color: textStyle.color,
-          fontSize: 34.0,
-          fontFamily: CupertinoIcons.back.fontFamily,
-          package: CupertinoIcons.back.fontPackage,
+    Widget iconWidget = Padding(
+      padding: const EdgeInsetsDirectional.only(start: 6, end: 2),
+      child: Text.rich(
+        TextSpan(
+          text: String.fromCharCode(CupertinoIcons.back.codePoint),
+          style: TextStyle(
+            inherit: false,
+            color: textStyle.color,
+            fontSize: 30.0,
+            fontFamily: CupertinoIcons.back.fontFamily,
+            package: CupertinoIcons.back.fontPackage,
+          ),
         ),
       ),
     );
@@ -1586,7 +1588,7 @@ class _NavigationBarTransition extends StatelessWidget {
       animation: animation,
       bottomNavBar: bottomNavBar,
       topNavBar: topNavBar,
-      directionality: Directionality.of(context)!,
+      directionality: Directionality.of(context),
     );
 
     final List<Widget> children = <Widget>[
@@ -1629,7 +1631,7 @@ class _NavigationBarTransition extends StatelessWidget {
     // can actually be outside the linearly lerp'ed Rect in the middle of
     // the animation, such as the topLargeTitle.
     return SizedBox(
-      height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.of(context)!.padding.top,
+      height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.of(context).padding.top,
       width: double.infinity,
       child: Stack(
         children: children,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/src/rendering/sliver.dart';
 import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -14,8 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 class Wrapper extends StatelessWidget {
   const Wrapper({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
   }) : assert(child != null),
        super(key: key);
 

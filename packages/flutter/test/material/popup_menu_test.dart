@@ -138,7 +138,7 @@ void main() {
       return MaterialApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(
+            data: MediaQuery.of(context).copyWith(
               navigationMode: NavigationMode.directional,
             ),
             child: Material(
@@ -189,7 +189,7 @@ void main() {
     await tester.pumpWidget(buildApp(directional: true));
 
     // Try to bring up the popup menu and select the first item from it
-    Focus.of(popupButtonKey.currentContext!)!.requestFocus();
+    Focus.of(popupButtonKey.currentContext!).requestFocus();
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
@@ -238,10 +238,10 @@ void main() {
         ),
       ),
     );
-    Focus.of(childKey.currentContext!)!.requestFocus();
+    Focus.of(childKey.currentContext!).requestFocus();
     await tester.pump();
 
-    expect(Focus.of(childKey.currentContext!)!.hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
     expect(itemBuilderCalled, isFalse);
     expect(onSelectedCalled, isFalse);
   });
@@ -254,7 +254,7 @@ void main() {
       MaterialApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(
+            data: MediaQuery.of(context).copyWith(
               navigationMode: NavigationMode.directional,
             ),
             child: Material(
@@ -281,10 +281,10 @@ void main() {
         }),
       ),
     );
-    Focus.of(childKey.currentContext!)!.requestFocus();
+    Focus.of(childKey.currentContext!).requestFocus();
     await tester.pump();
 
-    expect(Focus.of(childKey.currentContext!)!.hasPrimaryFocus, isTrue);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
   });
 
   testWidgets('PopupMenuItem is only focusable when enabled', (WidgetTester tester) async {
@@ -319,7 +319,7 @@ void main() {
     // Open the popup to build and show the menu contents.
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
-    final FocusNode childNode = Focus.of(childKey.currentContext!)!;
+    final FocusNode childNode = Focus.of(childKey.currentContext!);
     // Now that the contents are shown, request focus on the child text.
     childNode.requestFocus();
     await tester.pumpAndSettle();
@@ -362,7 +362,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(itemBuilderCalled, isTrue);
-    expect(Focus.of(childKey.currentContext!)!.hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
   });
 
   testWidgets('PopupMenuButton is horizontal on iOS', (WidgetTester tester) async {
@@ -465,7 +465,7 @@ void main() {
     final WidgetPredicate popupMenu = (Widget widget) {
       final String widgetType = widget.runtimeType.toString();
       // TODO(mraleph): Remove the old case below.
-      return widgetType == '_PopupMenu<int>' // normal case
+      return widgetType == '_PopupMenu<int?>' // normal case
           || widgetType == '_PopupMenu'; // for old versions of Dart that don't reify method type arguments
     };
 
@@ -634,6 +634,89 @@ void main() {
     await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomCenter, TextDirection.rtl, const Rect.fromLTWH(450.0, 500.0, 0.0, 0.0));
   });
 
+  testWidgets('PopupMenu positioning inside nested Overlay', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Example')),
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                OverlayEntry(
+                  builder: (_) => Center(
+                    child: PopupMenuButton<int>(
+                      key: buttonKey,
+                      itemBuilder: (_) => <PopupMenuItem<int>>[
+                        const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+                        const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+                      ],
+                      child: const Text('Show Menu'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    final Finder popupFinder = find.bySemanticsLabel('Popup menu');
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    final Offset buttonTopLeft = tester.getTopLeft(buttonFinder);
+    expect(tester.getTopLeft(popupFinder), buttonTopLeft);
+  });
+
+  testWidgets('PopupMenu positioning inside nested Navigator', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Example')),
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<dynamic>(
+                  builder: (BuildContext context) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: PopupMenuButton<int>(
+                          key: buttonKey,
+                          itemBuilder: (_) => <PopupMenuItem<int>>[
+                            const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+                            const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+                          ],
+                          child: const Text('Show Menu'),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    final Finder popupFinder = find.bySemanticsLabel('Popup menu');
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    final Offset buttonTopLeft = tester.getTopLeft(buttonFinder);
+    expect(tester.getTopLeft(popupFinder), buttonTopLeft);
+  });
+
   testWidgets('PopupMenu removes MediaQuery padding', (WidgetTester tester) async {
     late BuildContext popupContext;
 
@@ -672,7 +755,7 @@ void main() {
 
     await tester.pump();
 
-    expect(MediaQuery.of(popupContext)!.padding, EdgeInsets.zero);
+    expect(MediaQuery.of(popupContext).padding, EdgeInsets.zero);
   });
 
   testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
@@ -711,7 +794,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // The position is different than the offset because the default position isn't at the origin.
-    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int>')), const Offset(364.0, 324.0));
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(364.0, 324.0));
   });
 
   testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {
