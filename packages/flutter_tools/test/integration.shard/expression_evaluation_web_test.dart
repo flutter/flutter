@@ -173,9 +173,7 @@ Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {
   try {
     res = await flutter.evaluateInFrame('"test"');
   } on RPCError catch (e) {
-    expect(e.message, contains(
-      'UnimplementedError: '
-      'Expression evaluation is not supported for this configuration'));
+    expect(e.message, contains('Expression evaluation is not supported for this configuration'));
   }
   expect(res, null);
 }

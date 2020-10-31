@@ -43,7 +43,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: 0.16.1
-  intl_translation: 0.17.8
 ''';
 
   @override

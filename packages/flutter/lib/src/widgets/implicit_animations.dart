@@ -1307,7 +1307,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     return Positioned.directional(
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       child: widget.child,
       start: _start?.evaluate(animation!),
       top: _top?.evaluate(animation!),

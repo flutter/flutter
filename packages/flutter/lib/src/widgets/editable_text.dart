@@ -2429,9 +2429,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   TextDirection get _textDirection {
-    final TextDirection? result = widget.textDirection ?? Directionality.of(context);
+    final TextDirection result = widget.textDirection ?? Directionality.of(context);
     assert(result != null, '$runtimeType created without a textDirection and with no ambient Directionality.');
-    return result!;
+    return result;
   }
 
   /// The renderer for this widget's descendant.

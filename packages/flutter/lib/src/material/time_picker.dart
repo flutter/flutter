@@ -1266,7 +1266,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           accentColor: accentColor,
           dotColor: theme.colorScheme.surface,
           theta: _theta.value,
-          textDirection: Directionality.of(context)!,
+          textDirection: Directionality.of(context),
         ),
       ),
     );
@@ -2210,5 +2210,5 @@ Future<TimeOfDay?> showTimePicker({
 }
 
 void _announceToAccessibility(BuildContext context, String message) {
-  SemanticsService.announce(message, Directionality.of(context)!);
+  SemanticsService.announce(message, Directionality.of(context));
 }

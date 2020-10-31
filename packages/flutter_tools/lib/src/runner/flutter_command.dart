@@ -585,7 +585,7 @@ abstract class FlutterCommand extends Command<void> {
         'Flutter mobile & desktop applications will attempt to run at the null safety '
         'level of their entrypoint library (usually lib/main.dart). Flutter web '
         'applications will default to sound null-safety, unless specifically configured.',
-      defaultsTo: null,
+      defaultsTo: true,
       hide: hide,
     );
     argParser.addFlag(FlutterOptions.kNullAssertions,
@@ -783,18 +783,17 @@ abstract class FlutterCommand extends Command<void> {
 
     NullSafetyMode nullSafetyMode = NullSafetyMode.unsound;
     if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
-      final bool nullSafety = boolArg(FlutterOptions.kNullSafety);
       // Explicitly check for `true` and `false` so that `null` results in not
       // passing a flag. This will use the automatically detected null-safety
       // value based on the entrypoint
-      if (nullSafety == true) {
+      if (!argResults.wasParsed(FlutterOptions.kNullSafety)) {
+        nullSafetyMode = NullSafetyMode.autodetect;
+      } else if (boolArg(FlutterOptions.kNullSafety)) {
         nullSafetyMode = NullSafetyMode.sound;
         extraFrontEndOptions.add('--sound-null-safety');
-      } else if (nullSafety == false) {
+      } else {
         nullSafetyMode = NullSafetyMode.unsound;
         extraFrontEndOptions.add('--no-sound-null-safety');
-      } else if (extraFrontEndOptions.contains('--enable-experiment=non-nullable')) {
-        nullSafetyMode = NullSafetyMode.autodetect;
       }
     }
 
@@ -838,12 +837,12 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
-    final List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
+    List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
         ? stringsArg(FlutterOptions.kDartDefinesOption)
         : <String>[];
 
     if (argParser.options.containsKey('web-renderer') && argResults.wasParsed('web-renderer')) {
-      _updateDartDefines(dartDefines, stringArg('web-renderer'));
+      dartDefines = updateDartDefines(dartDefines, stringArg('web-renderer'));
     }
 
     return BuildInfo(buildMode,
@@ -944,12 +943,15 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Updates dart-defines based on [webRenderer].
-  void _updateDartDefines(List<String> dartDefines, String webRenderer) {
-    if (dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
-      throwToolExit('Only one of "--web-renderer" and '
-          '"--dart-defines=FLUTTER_WEB_USE_SKIA" may be specified.');
+  @visibleForTesting
+  static List<String> updateDartDefines(List<String> dartDefines, String webRenderer) {
+    final Set<String> dartDefinesSet = dartDefines.toSet();
+    if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
+        && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
+      dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
     }
-    dartDefines.addAll(_webRendererDartDefines[webRenderer]);
+    dartDefinesSet.addAll(_webRendererDartDefines[webRenderer]);
+    return dartDefinesSet.toList();
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {

@@ -252,7 +252,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   Alignment _getTitleAlignment(bool effectiveCenterTitle) {
     if (effectiveCenterTitle)
       return Alignment.bottomCenter;
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     assert(textDirection != null);
     switch (textDirection) {
       case TextDirection.rtl:
