@@ -106,15 +106,14 @@ class UpgradeCommandRunner {
     @required bool testFlow,
     @required bool verifyOnly,
   }) async {
-    final String upstreamRevision = await fetchRemoteRevision();
-    if (flutterVersion.frameworkRevision == upstreamRevision) {
+    final FlutterVersion upstreamVersion = await fetchLatestVersion();
+    if (flutterVersion.frameworkRevision == upstreamVersion.frameworkRevision) {
       globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
       globals.printStatus('$flutterVersion');
       return;
     } else if (verifyOnly) {
-      final GitTagVersion upstreamGitTag = GitTagVersion.determine(globals.processUtils, commitRevision: upstreamRevision);
       globals.printStatus('A new version of Flutter is available on channel ${flutterVersion.channel}\n');
-      globals.printStatus('The latest version: ${upstreamGitTag.frameworkVersionFor(upstreamRevision)}(revision ${upstreamGitTag.hash}', emphasis: true);
+      globals.printStatus('The latest version: ${upstreamVersion.frameworkVersion}(revision ${upstreamVersion.frameworkRevisionShort})', emphasis: true);
       globals.printStatus('Your current version: ${flutterVersion.frameworkVersion}(revision ${flutterVersion.frameworkRevisionShort})\n');
       globals.printStatus('To upgrade now, run "flutter upgrade".');
       if (flutterVersion.channel == 'stable') {
@@ -153,7 +152,8 @@ class UpgradeCommandRunner {
       );
     }
     recordState(flutterVersion);
-    await attemptReset(upstreamRevision);
+    await upgradeChannel(flutterVersion);
+    await attemptReset(upstreamVersion.frameworkRevision);
     if (!testFlow) {
       await flutterUpgradeContinue();
     }
@@ -216,10 +216,10 @@ class UpgradeCommandRunner {
     return false;
   }
 
-  /// Returns the remote HEAD revision.
+  /// Returns the remote HEAD flutter version.
   ///
   /// Exits tool if there is no upstream.
-  Future<String> fetchRemoteRevision() async {
+  Future<FlutterVersion> fetchLatestVersion() async {
     String revision;
     try {
       // Fetch upstream branch's commits and tags
@@ -253,7 +253,7 @@ class UpgradeCommandRunner {
         throwToolExit(errorString);
       }
     }
-    return revision;
+    return FlutterVersion(const SystemClock(), workingDirectory, revision);
   }
 
   /// Attempts a hard reset to the given revision.
