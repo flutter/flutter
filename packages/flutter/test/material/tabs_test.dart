@@ -2228,7 +2228,31 @@ void main() {
       feedback.dispose();
     });
 
-    testWidgets('Tab enableFeedback can be disabled', (WidgetTester tester) async {
+    testWidgets('Tab feedback is enabled (default)', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        boilerplate(
+          child: const DefaultTabController(
+            length: 1,
+            child: TabBar(
+              tabs: <Tab>[
+                Tab(text: 'A',)
+              ],
+            )
+          )
+        )
+      );
+      await tester.tap(find.byType(InkWell), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+
+      await tester.tap(find.byType(InkWell), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 2);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('Tab feedback is disabled', (WidgetTester tester) async {
       await tester.pumpWidget(
         boilerplate(
           child: const DefaultTabController(
@@ -2238,12 +2262,19 @@ void main() {
                 Tab(text: 'A',)
               ],
               enableFeedback: false,
-            )
-          )
-        )
+            ),
+          ),
+        ),
       );
-
+      await tester.tap(find.byType(InkWell), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
       expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+
+      await tester.longPress(find.byType(InkWell), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
     });
   });
 
