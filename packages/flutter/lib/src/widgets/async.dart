@@ -204,22 +204,29 @@ enum ConnectionState {
 @immutable
 class AsyncSnapshot<T> {
   /// Creates an [AsyncSnapshot] with the specified [connectionState],
-  /// and optionally either [data] or [error] (but not both).
-  const AsyncSnapshot._(this.connectionState, this.data, this.error)
+  /// and optionally either [data] or [error] with an optional [stackTrace]
+  /// (but not both data and error).
+  const AsyncSnapshot._(this.connectionState, this.data, this.error, this.stackTrace)
     : assert(connectionState != null),
-      assert(!(data != null && error != null));
+      assert(!(data != null && error != null)),
+      assert(stackTrace == null || error != null);
 
   /// Creates an [AsyncSnapshot] in [ConnectionState.none] with null data and error.
-  const AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null);
+  const AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null, null);
 
   /// Creates an [AsyncSnapshot] in [ConnectionState.waiting] with null data and error.
-  const AsyncSnapshot.waiting() : this._(ConnectionState.waiting, null, null);
+  const AsyncSnapshot.waiting() : this._(ConnectionState.waiting, null, null, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [data].
-  const AsyncSnapshot.withData(ConnectionState state, T data): this._(state, data, null);
+  const AsyncSnapshot.withData(ConnectionState state, T data): this._(state, data, null, null);
 
-  /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [error].
-  const AsyncSnapshot.withError(ConnectionState state, Object error) : this._(state, null, error);
+  /// Creates an [AsyncSnapshot] in the specified [state] with the specified [error]
+  /// and an optional [stackTrace].
+  const AsyncSnapshot.withError(
+    ConnectionState state,
+    Object error, {
+    StackTrace? stackTrace,
+  }) : this._(state, null, error, stackTrace);
 
   /// Current state of connection to the asynchronous computation.
   final ConnectionState connectionState;
@@ -254,11 +261,20 @@ class AsyncSnapshot<T> {
   /// If [data] is not null, this will be null.
   final Object? error;
 
+  /// The latest stack trace object received by the asynchronous computation.
+  ///
+  /// If this is non-null, [hasStackTrace] will be true.
+  ///
+  /// If [error] is null, this will be null. However, this can even be null when
+  /// [error] is not null because a stack trace does not always need to be
+  /// provided.
+  final StackTrace? stackTrace;
+
   /// Returns a snapshot like this one, but in the specified [state].
   ///
-  /// The [data] and [error] fields persist unmodified, even if the new state is
-  /// [ConnectionState.none].
-  AsyncSnapshot<T> inState(ConnectionState state) => AsyncSnapshot<T>._(state, data, error);
+  /// The [data], [error], and [stackTrace] fields persist unmodified, even if
+  /// the new state is [ConnectionState.none].
+  AsyncSnapshot<T> inState(ConnectionState state) => AsyncSnapshot<T>._(state, data, error, stackTrace);
 
   /// Returns whether this snapshot contains a non-null [data] value.
   ///
@@ -274,8 +290,16 @@ class AsyncSnapshot<T> {
   /// failure.
   bool get hasError => error != null;
 
+  /// Returns whether this snapshot contains a non-null [stackTrace] value.
+  ///
+  /// This is only true if the asynchronous computation's last result was a
+  /// failure and a stack trace was provided with the error.
+  /// Therefore, this is always false when [hasError] is false, but this can
+  /// even be false when [hasError] is true.
+  bool get hasStackTrace => stackTrace != null;
+
   @override
-  String toString() => '${objectRuntimeType(this, 'AsyncSnapshot')}($connectionState, $data, $error)';
+  String toString() => '${objectRuntimeType(this, 'AsyncSnapshot')}($connectionState, $data, $error, $stackTrace)';
 
   @override
   bool operator ==(Object other) {
@@ -284,7 +308,8 @@ class AsyncSnapshot<T> {
     return other is AsyncSnapshot<T>
         && other.connectionState == connectionState
         && other.data == data
-        && other.error == error;
+        && other.error == error
+        && other.stackTrace == stackTrace;
   }
 
   @override
