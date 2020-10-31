@@ -5,6 +5,7 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -607,11 +608,14 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.overlayColor,
     this.mouseCursor,
+    this.enableFeedback = true,
     this.onTap,
     this.physics,
   }) : assert(tabs != null),
        assert(isScrollable != null),
+       assert(enableFeedback != null),
        assert(dragStartBehavior != null),
        assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
        assert(indicator != null || (indicatorPadding != null)),
@@ -733,6 +737,22 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// bodyText1 definition is used.
   final TextStyle? unselectedLabelStyle;
 
+  /// Defines the ink response focus, hover, and splash colors.
+  ///
+  /// If non-null, it is resolved against one of [MaterialState.focused],
+  /// [MaterialState.hovered], and [MaterialState.pressed].
+  ///
+  /// [MaterialState.pressed] triggers a ripple (an ink splash), per
+  /// the current Material Design spec. The [overlayColor] doesn't map
+  /// a state to [highlightColor] because a separate highlight is not
+  /// used by the current design guidelines. See
+  /// https://material.io/design/interaction/states.html#pressed
+  ///
+  /// If the overlay color is null or resolves to null, then the default values
+  /// for [InkResponse.focusColor], [InkResponse.hoverColor], [InkResponse.splashColor]
+  /// will be used instead.
+  final MaterialStateProperty<Color?>? overlayColor;
+
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
@@ -741,6 +761,14 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If this property is null, [SystemMouseCursors.click] will be used.
   final MouseCursor? mouseCursor;
+
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a long-press
+  /// will produce a short vibration, when feedback is enabled.
+  ///
+  /// Defaults to true.
+  final bool enableFeedback;
 
   /// An optional callback that's called when the [TabBar] is tapped.
   ///
@@ -1084,6 +1112,8 @@ class _TabBarState extends State<TabBar> {
       wrappedTabs[index] = InkWell(
         mouseCursor: widget.mouseCursor ?? SystemMouseCursors.click,
         onTap: () { _handleTap(index); },
+        enableFeedback: widget.enableFeedback,
+        overlayColor: widget.overlayColor,
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
           child: Stack(
