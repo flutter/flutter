@@ -2273,12 +2273,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ),
       );
 
-    final Alignment prefixIconAlignment = decoration!.prefixIconAlignment != null
-      ? Alignment(0.0, decoration!.prefixIconAlignment!.y)
-      : Alignment.center;
     final Widget? prefixIcon = decoration!.prefixIcon == null ? null :
-      Align(
-        alignment: prefixIconAlignment,
+      Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
@@ -2298,12 +2294,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ),
       );
 
-    final Alignment suffixIconAlignment = decoration!.suffixIconAlignment != null
-      ? Alignment(0.0, decoration!.suffixIconAlignment!.y)
-      : Alignment.center;
     final Widget? suffixIcon = decoration!.suffixIcon == null ? null :
-      Align(
-        alignment: suffixIconAlignment,
+      Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
@@ -2876,14 +2868,14 @@ class InputDecoration {
   /// ```dart
   /// TextField(
   ///   decoration: InputDecoration(
-  ///     hintText:'Top Icon Alignment',
+  ///     hintText: 'Top Icon Alignment',
   ///     prefixIcon: Icon(Icons.search),
   ///     prefixIconAlignment: TextAlignVertical.top,
   ///   ),
   /// )
   /// ```
   ///
-  /// The default value is [TextAlignVertical.center].
+  /// Defaults to [TextAlignVertical.center].
   final TextAlignVertical? prefixIconAlignment;
 
   /// The constraints for the prefix icon.
@@ -3023,14 +3015,14 @@ class InputDecoration {
   /// ```dart
   /// TextField(
   ///   decoration: InputDecoration(
-  ///     hintText:'Top Icon Alignment',
+  ///     hintText: 'Top Icon Alignment',
   ///     suffixIcon: Icon(Icons.search),
   ///     suffixIconAlignment: TextAlignVertical.top,
   ///   ),
   /// )
   /// ```
   ///
-  /// The default value is [TextAlignVertical.center].
+  /// Defaults to [TextAlignVertical.center].
   final TextAlignVertical? suffixIconAlignment;
 
   /// Optional widget to place on the line after the input.
