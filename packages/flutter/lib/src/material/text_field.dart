@@ -480,7 +480,13 @@ class TextField extends StatefulWidget {
     this.minLines,
     this.expands = false,
     this.maxLength,
+    @Deprecated(
+      'Use maxLengthEnforcement parameter which provides more specific '
+      'behavior related to the maxLength limit. '
+      'This feature was deprecated after v1.23.0-19.0.pre.'
+    )
     this.maxLengthEnforced = true,
+    this.maxLengthEnforcement = MaxLengthEnforcement.enforced,
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
@@ -517,6 +523,11 @@ class TextField extends StatefulWidget {
        assert(enableSuggestions != null),
        assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
+       assert(maxLengthEnforcement != null),
+       assert(
+         maxLengthEnforced || maxLengthEnforcement == MaxLengthEnforcement.enforced,
+         'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
+       ),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        assert(selectionHeightStyle != null),
@@ -1251,6 +1262,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       expands: widget.expands,
       maxLength: widget.maxLength,
       maxLengthEnforced: widget.maxLengthEnforced,
+      maxLengthEnforcement: widget.maxLengthEnforcement,
       onChanged: widget.onChanged,
       onEditingComplete: widget.onEditingComplete,
       onSubmitted: widget.onSubmitted,
