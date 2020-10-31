@@ -746,6 +746,21 @@ class SliverChildListDelegate extends SliverChildDelegate {
 }
 
 /// A base class for sliver that have [KeepAlive] children.
+/// It is an abstart class.
+///
+///
+/// See also:
+///
+///  * [KeepAlive], used with SliverWithKeepAliveWidgets as base parent,
+///     alive, this widgets wraps around the child which needs to   
+///     be kept. Though it is not need when we use delegates.
+///  * [SliverChildBuilderDelegate] and [SliverChildListDelegate], which 
+///     are commonly used subclasses of [SliverChildDelegate] that use  
+///     a builder callback and an explicit child list, respectively.
+///  * [SliverGrid] and [SliverList], are two sliverWithKeepAliveWidgets 
+///     used with [KeepAlive] Widgets to place children in artibitary 
+///     and vertical postion, respectively.
+/// 
 abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
   const SliverWithKeepAliveWidget({
