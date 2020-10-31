@@ -332,7 +332,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // updated values from happening to leak into the overlay when the overlay
     // rebuilds.
     final Widget overlay = Directionality(
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       child: _TooltipOverlay(
         message: widget.message,
         height: height,
