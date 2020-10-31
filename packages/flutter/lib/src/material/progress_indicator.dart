@@ -332,7 +332,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 
   @override
   Widget build(BuildContext context) {
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
 
     if (widget.value != null)
       return _buildIndicator(context, _controller.value, textDirection);

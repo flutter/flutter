@@ -476,7 +476,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       inactiveTrackColor: inactiveTrackColor,
       configuration: configuration,
       onChanged: onChanged != null ? _handleValueChanged : null,
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       additionalConstraints: additionalConstraints,
       hasFocus: hasFocus,
       hovering: hovering,
@@ -501,7 +501,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..inactiveTrackColor = inactiveTrackColor
       ..configuration = configuration
       ..onChanged = onChanged != null ? _handleValueChanged : null
-      ..textDirection = Directionality.of(context)!
+      ..textDirection = Directionality.of(context)
       ..additionalConstraints = additionalConstraints
       ..dragStartBehavior = dragStartBehavior
       ..hasFocus = hasFocus
