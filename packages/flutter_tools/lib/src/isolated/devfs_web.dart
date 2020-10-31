@@ -136,6 +136,8 @@ class WebAssetServer implements AssetReader {
   final Map<String, String> _modules;
   final Map<String, String> _digests;
 
+  int get selectedPort => _httpServer.port;
+
   void performRestart(List<String> modules) {
     for (final String module in modules) {
       // We skip computing the digest by using the hashCode of the underlying buffer.
@@ -171,113 +173,124 @@ class WebAssetServer implements AssetReader {
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
   }) async {
-    try {
-      InternetAddress address;
-      if (hostname == 'any') {
-        address = InternetAddress.anyIPv4;
-      } else {
-        address = (await InternetAddress.lookup(hostname)).first;
-      }
-      final HttpServer httpServer = await HttpServer.bind(address, port);
-      // Allow rendering in a iframe.
-      httpServer.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
-
-      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        globals.fs.file(buildInfo.packagesPath),
-        logger: globals.logger,
-      );
-      final Map<String, String> digests = <String, String>{};
-      final Map<String, String> modules = <String, String>{};
-      final WebAssetServer server = WebAssetServer(
-        httpServer,
-        packageConfig,
-        address,
-        modules,
-        digests,
-        buildInfo,
-      );
-      if (testMode) {
-        return server;
-      }
-
-      // In release builds deploy a simpler proxy server.
-      if (buildInfo.mode != BuildMode.debug) {
-        final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
-          entrypoint,
-          fileSystem: globals.fs,
-          platform: globals.platform,
-          flutterRoot: Cache.flutterRoot,
-          webBuildDirectory: getWebBuildDirectory(),
-          basePath: server.basePath,
-        );
-        shelf.serveRequests(httpServer, releaseAssetServer.handle);
-        return server;
-      }
-
-      // Return a version string for all active modules. This is populated
-      // along with the `moduleProvider` update logic.
-      Future<Map<String, String>> _digestProvider() async => digests;
-
-      // Ensure dwds is present and provide middleware to avoid trying to
-      // load the through the isolate APIs.
-      final Directory directory =
-          await _loadDwdsDirectory(globals.fs, globals.logger);
-      final shelf.Middleware middleware =
-          (FutureOr<shelf.Response> Function(shelf.Request) innerHandler) {
-        return (shelf.Request request) async {
-          if (request.url.path.endsWith('dwds/src/injected/client.js')) {
-            final Uri uri = directory.uri.resolve('src/injected/client.js');
-            final String result =
-                await globals.fs.file(uri.toFilePath()).readAsString();
-            return shelf.Response.ok(result, headers: <String, String>{
-              HttpHeaders.contentTypeHeader: 'application/javascript'
-            });
-          }
-          return innerHandler(request);
-        };
-      };
-
-      logging.Logger.root.onRecord.listen((logging.LogRecord event) {
-        globals.printTrace('${event.loggerName}: ${event.message}');
-      });
-
-      // In debug builds, spin up DWDS and the full asset server.
-      final Dwds dwds = await dwdsLauncher(
-          assetReader: server,
-          enableDebugExtension: true,
-          buildResults: const Stream<BuildResult>.empty(),
-          chromeConnection: () async {
-            final Chromium chromium = await chromiumLauncher.connectedInstance;
-            return chromium.chromeConnection;
-          },
-          hostname: hostname,
-          urlEncoder: urlTunneller,
-          enableDebugging: true,
-          useSseForDebugProxy: useSseForDebugProxy,
-          useSseForDebugBackend: useSseForDebugBackend,
-          serveDevTools: false,
-          loadStrategy: FrontendServerRequireStrategyProvider(
-                  ReloadConfiguration.none, server, _digestProvider)
-              .strategy,
-          expressionCompiler: expressionCompiler,
-          spawnDds: true);
-      shelf.Pipeline pipeline = const shelf.Pipeline();
-      if (enableDwds) {
-        pipeline = pipeline.addMiddleware(middleware);
-        pipeline = pipeline.addMiddleware(dwds.middleware);
-      }
-      final shelf.Handler dwdsHandler =
-          pipeline.addHandler(server.handleRequest);
-      final shelf.Cascade cascade =
-          shelf.Cascade().add(dwds.handler).add(dwdsHandler);
-      shelf.serveRequests(httpServer, cascade.handler);
-      server.dwds = dwds;
-      return server;
-    } on SocketException catch (err) {
-      throwToolExit('Failed to bind web development server:\n$err');
+    InternetAddress address;
+    if (hostname == 'any') {
+      address = InternetAddress.anyIPv4;
+    } else {
+      address = (await InternetAddress.lookup(hostname)).first;
     }
-    assert(false);
-    return null;
+    HttpServer httpServer;
+    dynamic lastError;
+    for (int i = 0; i < 5; i += 1) {
+      try {
+        httpServer = await HttpServer.bind(address, port ?? await globals.os.findFreePort());
+        break;
+      } on SocketException catch (error) {
+        lastError = error;
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      }
+    }
+    if (httpServer == null) {
+      throwToolExit('Failed to bind web development server:\n$lastError');
+    }
+
+    // Allow rendering in a iframe.
+    httpServer.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
+
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      globals.fs.file(buildInfo.packagesPath),
+      logger: globals.logger,
+    );
+    final Map<String, String> digests = <String, String>{};
+    final Map<String, String> modules = <String, String>{};
+    final WebAssetServer server = WebAssetServer(
+      httpServer,
+      packageConfig,
+      address,
+      modules,
+      digests,
+      buildInfo,
+    );
+    if (testMode) {
+      return server;
+    }
+
+    // In release builds deploy a simpler proxy server.
+    if (buildInfo.mode != BuildMode.debug) {
+      final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
+        entrypoint,
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        flutterRoot: Cache.flutterRoot,
+        webBuildDirectory: getWebBuildDirectory(),
+        basePath: server.basePath,
+      );
+      shelf.serveRequests(httpServer, releaseAssetServer.handle);
+      return server;
+    }
+
+    // Return a version string for all active modules. This is populated
+    // along with the `moduleProvider` update logic.
+    Future<Map<String, String>> _digestProvider() async => digests;
+
+    // Ensure dwds is present and provide middleware to avoid trying to
+    // load the through the isolate APIs.
+    final Directory directory =
+        await _loadDwdsDirectory(globals.fs, globals.logger);
+    final shelf.Middleware middleware =
+        (FutureOr<shelf.Response> Function(shelf.Request) innerHandler) {
+      return (shelf.Request request) async {
+        if (request.url.path.endsWith('dwds/src/injected/client.js')) {
+          final Uri uri = directory.uri.resolve('src/injected/client.js');
+          final String result =
+              await globals.fs.file(uri.toFilePath()).readAsString();
+          return shelf.Response.ok(result, headers: <String, String>{
+            HttpHeaders.contentTypeHeader: 'application/javascript'
+          });
+        }
+        return innerHandler(request);
+      };
+    };
+
+    logging.Logger.root.onRecord.listen((logging.LogRecord event) {
+      globals.printTrace('${event.loggerName}: ${event.message}');
+    });
+
+    // In debug builds, spin up DWDS and the full asset server.
+    final Dwds dwds = await dwdsLauncher(
+      assetReader: server,
+      enableDebugExtension: true,
+      buildResults: const Stream<BuildResult>.empty(),
+      chromeConnection: () async {
+        final Chromium chromium = await chromiumLauncher.connectedInstance;
+        return chromium.chromeConnection;
+      },
+      hostname: hostname,
+      urlEncoder: urlTunneller,
+      enableDebugging: true,
+      useSseForDebugProxy: useSseForDebugProxy,
+      useSseForDebugBackend: useSseForDebugBackend,
+      serveDevTools: false,
+      loadStrategy: FrontendServerRequireStrategyProvider(
+        ReloadConfiguration.none,
+        server,
+        _digestProvider,
+      ).strategy,
+      expressionCompiler: expressionCompiler,
+      spawnDds: true,
+    );
+    shelf.Pipeline pipeline = const shelf.Pipeline();
+    if (enableDwds) {
+      pipeline = pipeline.addMiddleware(middleware);
+      pipeline = pipeline.addMiddleware(dwds.middleware);
+    }
+    final shelf.Handler dwdsHandler =
+        pipeline.addHandler(server.handleRequest);
+    final shelf.Cascade cascade =
+        shelf.Cascade().add(dwds.handler).add(dwdsHandler);
+    shelf.serveRequests(httpServer, cascade.handler);
+    server.dwds = dwds;
+    return server;
   }
 
   final BuildInfo _buildInfo;
@@ -709,7 +722,7 @@ class WebDevFS implements DevFS {
   /// server.
   WebDevFS({
     @required this.hostname,
-    @required this.port,
+    @required int port,
     @required this.packagesFilePath,
     @required this.urlTunneller,
     @required this.useSseForDebugProxy,
@@ -721,11 +734,10 @@ class WebDevFS implements DevFS {
     @required this.chromiumLauncher,
     @required this.nullAssertions,
     this.testMode = false,
-  });
+  }) : _port = port;
 
   final Uri entrypoint;
   final String hostname;
-  final int port;
   final String packagesFilePath;
   final UrlTunneller urlTunneller;
   final bool useSseForDebugProxy;
@@ -736,6 +748,7 @@ class WebDevFS implements DevFS {
   final ExpressionCompiler expressionCompiler;
   final ChromiumLauncher chromiumLauncher;
   final bool nullAssertions;
+  final int _port;
 
   WebAssetServer webAssetServer;
 
@@ -800,7 +813,7 @@ class WebDevFS implements DevFS {
     webAssetServer = await WebAssetServer.start(
       chromiumLauncher,
       hostname,
-      port,
+      _port,
       urlTunneller,
       useSseForDebugProxy,
       useSseForDebugBackend,
@@ -810,15 +823,16 @@ class WebDevFS implements DevFS {
       expressionCompiler,
       testMode: testMode,
     );
+    final int selectedPort = webAssetServer.selectedPort;
     if (buildInfo.dartDefines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
       webAssetServer.webRenderer = WebRendererMode.autoDetect;
     } else if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
-        webAssetServer.webRenderer = WebRendererMode.canvaskit;
+      webAssetServer.webRenderer = WebRendererMode.canvaskit;
     }
     if (hostname == 'any') {
-      _baseUri = Uri.http('localhost:$port', '');
+      _baseUri = Uri.http('localhost:$selectedPort', '');
     } else {
-      _baseUri = Uri.http('$hostname:$port', '');
+      _baseUri = Uri.http('$hostname:$selectedPort', '');
     }
     return _baseUri;
   }

@@ -940,7 +940,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           child: CustomPaint(
             painter: _RadialPainter(
               circles: _circles.toList(),
-              textDirection: Directionality.of(context)!,
+              textDirection: Directionality.of(context),
             ),
             child: Material( // Splashes.
               type: MaterialType.transparency,

@@ -699,7 +699,7 @@ void main() {
       contains('GENERATED'));
 
     // served on localhost
-    expect(uri, Uri.http('localhost:0', ''));
+    expect(uri.host, 'localhost');
 
     await webDevFS.destroy();
   }, overrides: <Type, Generator>{
@@ -813,7 +813,7 @@ void main() {
       contains('GENERATED'));
 
     // served on localhost
-    expect(uri, Uri.http('localhost:0', ''));
+    expect(uri.host, 'localhost');
 
     await webDevFS.destroy();
   }, overrides: <Type, Generator>{
@@ -859,7 +859,7 @@ void main() {
 
     final Uri uri = await webDevFS.create();
 
-    expect(uri, Uri.http('localhost:0', ''));
+    expect(uri.host, 'localhost');
     await webDevFS.destroy();
   }));
 
