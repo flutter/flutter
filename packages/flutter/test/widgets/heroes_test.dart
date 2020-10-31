@@ -2069,7 +2069,7 @@ Future<void> main() async {
     // Root hero is not in the tree.
     expect(find.byKey(rootRouteHero), findsNothing);
 
-    rootNavigator.currentState.push(
+    rootNavigator.currentState!.push(
       MaterialPageRoute<void>(
         builder: (BuildContext context) => Hero(
           tag: heroTag,
@@ -2094,7 +2094,7 @@ Future<void> main() async {
     // Doesn't crash.
     expect(tester.takeException(), isNull);
 
-    rootNavigator.currentState.pop();
+    rootNavigator.currentState!.pop();
     await tester.pumpAndSettle();
 
     // Root hero is not in the tree
