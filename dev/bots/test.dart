@@ -816,8 +816,10 @@ Future<void> _runWebLongRunningTests() async {
     () => _runGalleryE2eWebTest('profile', canvasKit: true),
     () => _runGalleryE2eWebTest('release'),
     () => _runGalleryE2eWebTest('release', canvasKit: true),
-  ].map(_withChromeDriver).toList();
+  ];
+  await _ensureChromeDriverIsRunning();
   await _selectIndexedSubshard(tests, kWebLongRunningTestShardCount);
+  await _stopChromeDriver();
 }
 
 // The `chromedriver` process created by this test.
@@ -826,22 +828,11 @@ Future<void> _runWebLongRunningTests() async {
 // process is reused and this variable remains null.
 Command _chromeDriver;
 
-/// Creates a shard runner that runs the given [originalRunner] with ChromeDriver
-/// enabled.
-ShardRunner _withChromeDriver(ShardRunner originalRunner) {
-  return () async {
-    try {
-      await _ensureChromeDriverIsRunning();
-      await originalRunner();
-    } finally {
-      await _stopChromeDriver();
-    }
-  };
-}
-
 Future<bool> _isChromeDriverRunning() async {
   try {
-    (await Socket.connect('localhost', 4444)).destroy();
+    final RawSocket socket = await RawSocket.connect('localhost', 4444);
+    socket.shutdown(SocketDirection.both);
+    await socket.close();
     return true;
   } on SocketException {
     return false;
@@ -879,11 +870,8 @@ Future<void> _stopChromeDriver() async {
   if (_chromeDriver == null) {
     return;
   }
+  print('Stopping chromedriver');
   _chromeDriver.process.kill();
-  while (await _isChromeDriverRunning()) {
-    await Future<void>.delayed(const Duration(milliseconds: 100));
-    print('Waiting for chromedriver to stop.');
-  }
 }
 
 /// Exercises the old gallery in a browser for a long period of time, looking
