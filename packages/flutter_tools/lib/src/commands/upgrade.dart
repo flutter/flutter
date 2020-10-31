@@ -112,9 +112,10 @@ class UpgradeCommandRunner {
       globals.printStatus('$flutterVersion');
       return;
     } else if (verifyOnly) {
+      final GitTagVersion upstreamGitTag = GitTagVersion.determine(globals.processUtils, commitRevision: upstreamRevision);
       globals.printStatus('A new version of Flutter is available on channel ${flutterVersion.channel}\n');
-      globals.printStatus('The latest version: ${gitTagVersion.frameworkVersionFor(upstreamRevision)}', emphasis: true);
-      globals.printStatus('Your current version: ${flutterVersion.frameworkVersion}\n');
+      globals.printStatus('The latest version: ${upstreamGitTag.frameworkVersionFor(upstreamRevision)}(revision ${upstreamGitTag.hash}', emphasis: true);
+      globals.printStatus('Your current version: ${flutterVersion.frameworkVersion}(revision ${flutterVersion.frameworkRevisionShort})\n');
       globals.printStatus('To upgrade now, run "flutter upgrade".');
       if (flutterVersion.channel == 'stable') {
         globals.printStatus('\nSee the announcement and release notes:');
