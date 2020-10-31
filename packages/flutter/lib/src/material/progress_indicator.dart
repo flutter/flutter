@@ -636,6 +636,208 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// The indicator arc is displayed with [valueColor], an animated value. To
 /// specify a constant color use: `AlwaysStoppedAnimation<Color>(color)`.
 ///
+/// {@tool sample --template=stateless_widget_scaffold}
+///
+/// This example shows a [CircularProgressIndicator] with a fixed value.
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Padding(
+///     padding: const EdgeInsets.all(20.0),
+///     child: Column(
+///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///       children: [
+///         Text(
+///           'Linear progress indicator with a fixed value',
+///           style: const TextStyle(fontSize: 20),
+///         ),
+///         CircularProgressIndicator(
+///           value: 0.5,
+///           semanticsLabel: 'Linear progress indicator',
+///         ),
+///       ],
+///     ),
+///   ),
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This example shows a [CircularProgressIndicator] with a fixed color.
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Padding(
+///     padding: const EdgeInsets.all(20.0),
+///     child: Column(
+///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///       children: [
+///         Text(
+///           'Linear progress indicator with a fixed color',
+///           style: const TextStyle(fontSize: 20),
+///         ),
+///         CircularProgressIndicator(
+///           valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey),
+///           semanticsLabel: 'Linear progress indicator',
+///         ),
+///       ],
+///     ),
+///   ),
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample --template=stateless_widget_scaffold}
+///
+/// This example shows a [CircularProgressIndicator] with
+/// a fixed color, fixed value and a background color.
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Padding(
+///     padding: const EdgeInsets.all(20.0),
+///     child: Column(
+///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///       children: [
+///         Text(
+///           'Linear progress indicator with a background color',
+///           style: const TextStyle(fontSize: 20),
+///         ),
+///         CircularProgressIndicator(
+///           backgroundColor: Colors.blueGrey[100],
+///           valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+///           value: 0.5,
+///           semanticsLabel: 'Linear progress indicator',
+///         ),
+///       ],
+///     ),
+///   ),
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// This example shows a [CircularProgressIndicator] with a changing color.
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// AnimationController controller;
+/// Animation<Color> animation;
+///
+/// @override
+/// void initState() {
+///   controller = AnimationController(
+///     vsync: this,
+///     duration: const Duration(seconds: 5),
+///   );
+///   animation = ColorTween(
+///     begin: Colors.green,
+///     end: Colors.blue,
+///   ).animate(controller);
+///   controller.repeat(reverse: true);
+///   super.initState();
+/// }
+///
+/// @override
+/// void dispose() {
+///   controller.dispose();
+///   super.dispose();
+/// }
+///
+/// Widget build(BuildContext context) {
+///   return Padding(
+///     padding: const EdgeInsets.all(20.0),
+///     child: Column(
+///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///       children: [
+///         Text(
+///           'Linear progress indicator with a fixed color',
+///           style: const TextStyle(fontSize: 20),
+///         ),
+///         CircularProgressIndicator(
+///           valueColor: animation,
+///           semanticsLabel: 'Linear progress indicator',
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// This example shows a [CircularProgressIndicator] with a changing value.
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// AnimationController controller;
+/// Animation<double> animation;
+///
+/// @override
+/// void initState() {
+///   controller = AnimationController(
+///     vsync: this,
+///     duration: const Duration(seconds: 5),
+///   );
+///   animation = Tween<double>(
+///     begin: 0,
+///     end: 1,
+///   ).animate(controller);
+///     ..addListener(() {
+///       setState(() {});
+///     });
+///   controller.repeat(reverse: true);
+///   super.initState();
+/// }
+///
+/// @override
+/// void dispose() {
+///   controller.dispose();
+///   super.dispose();
+/// }
+///
+/// Widget build(BuildContext context) {
+///   return Padding(
+///     padding: const EdgeInsets.all(20.0),
+///     child: Column(
+///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///       children: [
+///         Text(
+///           'Linear progress indicator with a fixed color',
+///           style: const TextStyle(fontSize: 20),
+///         ),
+///         CircularProgressIndicator(
+///           value: animation.value,
+///           semanticsLabel: 'Linear progress indicator',
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [LinearProgressIndicator], which displays progress along a line.
