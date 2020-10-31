@@ -990,7 +990,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   final int total;
 
   _TextSelectionToolbarItemPosition get _position {
-    if (total == 1) {
+    if (index == 0) {
       return _TextSelectionToolbarItemPosition.first;
     }
     if (index == total - 1) {
