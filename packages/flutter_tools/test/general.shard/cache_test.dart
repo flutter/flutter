@@ -666,12 +666,12 @@ void main() {
     });
 
     testWithoutContext('development artifact', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache);
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
     testUsingContext('update', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache);
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
       expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
 
       final Directory gradleWrapperDir = cache.getArtifactDirectory('gradle_wrapper')..createSync(recursive: true);
