@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
 import 'package:flutter_tools/src/base/io.dart';
@@ -648,6 +649,54 @@ void main() {
       context: PubContext.pubGet,
       directory: 'packages/flutter_tools',
     )).called(1);
+  });
+
+  group('AndroidMavenArtifacts', () {
+    MemoryFileSystem memoryFileSystem;
+    MockProcessManager processManager;
+    Cache cache;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem.test();
+      processManager = MockProcessManager();
+      cache = Cache.test(
+        fileSystem: memoryFileSystem,
+        processManager: FakeProcessManager.any(),
+      );
+    });
+
+    testWithoutContext('development artifact', () async {
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache);
+      expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
+    });
+
+    testUsingContext('update', () async {
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache);
+      expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
+
+      final Directory gradleWrapperDir = cache.getArtifactDirectory('gradle_wrapper')..createSync(recursive: true);
+      gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
+      gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
+
+      when(processManager.run(any, environment: captureAnyNamed('environment')))
+        .thenAnswer((Invocation invocation) {
+          final List<String> args = invocation.positionalArguments[0] as List<String>;
+          expect(args.length, 6);
+          expect(args[1], '-b');
+          expect(args[2].endsWith('resolve_dependencies.gradle'), isTrue);
+          expect(args[5], 'resolveDependencies');
+          expect(invocation.namedArguments[#environment], gradleEnvironment);
+          return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
+        });
+
+      await mavenArtifacts.update(MockArtifactUpdater(), BufferLogger.test(), memoryFileSystem, MockOperatingSystemUtils());
+
+      expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
+    }, overrides: <Type, Generator>{
+      Cache: () => cache,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => processManager,
+    });
   });
 }
 

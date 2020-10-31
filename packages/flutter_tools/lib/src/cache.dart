@@ -11,6 +11,7 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
+import 'android/gradle_utils.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
@@ -19,11 +20,13 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
+import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
 import 'features.dart';
+import 'globals.dart' as globals;
 import 'runner/flutter_command.dart';
 import 'runner/flutter_command_runner.dart';
 
@@ -368,7 +371,19 @@ class Cache {
   }
 
   /// The current version of Dart used to build Flutter and run the tool.
-  String get dartSdkVersion => _platform.version;
+  String get dartSdkVersion {
+    if (_dartSdkVersion == null) {
+      // Make the version string more customer-friendly.
+      // Changes '2.1.0-dev.8.0.flutter-4312ae32' to '2.1.0 (build 2.1.0-dev.8.0 4312ae32)'
+      final String justVersion = _platform.version.split(' ')[0];
+      _dartSdkVersion = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
+        final String noFlutter = match[2].replaceAll('.flutter-', ' ');
+        return '${match[1]} (build ${match[1]}$noFlutter)';
+      });
+    }
+    return _dartSdkVersion;
+  }
+  String _dartSdkVersion;
 
   /// The current version of the Flutter engine the flutter tool will download.
   String get engineRevision {
@@ -1122,6 +1137,64 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
 
   @override
   List<String> getLicenseDirs() { return <String>[]; }
+}
+
+/// A cached artifact containing the Maven dependencies used to build Android projects.
+class AndroidMavenArtifacts extends ArtifactSet {
+  AndroidMavenArtifacts(this.cache, {
+    @required Platform platform,
+  }) : _platform = platform,
+       super(DevelopmentArtifact.androidMaven);
+
+  final Platform _platform;
+  final Cache cache;
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
+    final Directory tempDir = cache.getRoot().createTempSync(
+      'flutter_gradle_wrapper.',
+    );
+    gradleUtils.injectGradleWrapperIfNeeded(tempDir);
+
+    final Status status = logger.startProgress('Downloading Android Maven dependencies...');
+    final File gradle = tempDir.childFile(
+      _platform.isWindows ? 'gradlew.bat' : 'gradlew',
+    );
+    try {
+      final String gradleExecutable = gradle.absolute.path;
+      final String flutterSdk = globals.fsUtils.escapePath(Cache.flutterRoot);
+      final RunResult processResult = await globals.processUtils.run(
+        <String>[
+          gradleExecutable,
+          '-b', globals.fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),
+          '--project-cache-dir', tempDir.path,
+          'resolveDependencies',
+        ],
+        environment: gradleEnvironment);
+      if (processResult.exitCode != 0) {
+        logger.printError('Failed to download the Android dependencies');
+      }
+    } finally {
+      status.stop();
+      tempDir.deleteSync(recursive: true);
+    }
+  }
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async {
+    // The dependencies are downloaded and cached by Gradle.
+    // The tool doesn't know if the dependencies are already cached at this point.
+    // Therefore, call Gradle to figure this out.
+    return false;
+  }
+
+  @override
+  String get name => 'android-maven-artifacts';
 }
 
 /// Artifacts used for internal builds. The flutter tool builds Android projects
