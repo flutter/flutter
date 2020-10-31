@@ -13,6 +13,7 @@ import '../flutter_test_alternative.dart' show Fake;
 import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 Widget boilerplate({ Widget? child, TextDirection textDirection = TextDirection.ltr }) {
   return Localizations(
@@ -2214,6 +2215,36 @@ void main() {
       color: Colors.white,
     ));
 
+  });
+
+  group('Tab feedback', () {
+    late FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback.dispose();
+    });
+
+    testWidgets('Tab enableFeedback can be disabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        boilerplate(
+          child: const DefaultTabController(
+            length: 1,
+            child: TabBar(
+              tabs: <Tab>[
+                Tab(text: 'A',)
+              ],
+              enableFeedback: false,
+            )
+          )
+        )
+      );
+
+      expect(feedback.clickSoundCount, 0);
+    });
   });
 
   testWidgets('Skipping tabs with global key does not crash', (WidgetTester tester) async {
