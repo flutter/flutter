@@ -147,6 +147,8 @@ class _TaskRunner {
       await device.reboot();
     } on TimeoutException {
       // Could not find device in order to reboot.
+    } on DeviceException {
+      // No attached device needed to reboot.
     }
   }
 
