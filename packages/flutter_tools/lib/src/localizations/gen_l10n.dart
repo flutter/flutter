@@ -205,16 +205,22 @@ String generateMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(message)', generateMessage());
 }
 
-String generateBaseClassMethod(Message message) {
-  final String comment = message.description ?? 'No description provided in @${message.resourceId}';
+String generateBaseClassMethod(Message message, LocaleInfo templateArbLocale) {
+  final String comment = message.description ?? 'No description provided for @${message.resourceId}.';
+  final String templateLocaleTranslationComment = '''
+  /// In $templateArbLocale, this message translates to:
+  /// **${generateString(message.value)}**''';
+
   if (message.placeholders.isNotEmpty) {
     return baseClassMethodTemplate
       .replaceAll('@(comment)', comment)
+      .replaceAll('@(templateLocaleTranslationComment)', templateLocaleTranslationComment)
       .replaceAll('@(name)', message.resourceId)
       .replaceAll('@(parameters)', generateMethodParameters(message).join(', '));
   }
   return baseClassGetterTemplate
     .replaceAll('@(comment)', comment)
+    .replaceAll('@(templateLocaleTranslationComment)', templateLocaleTranslationComment)
     .replaceAll('@(name)', message.resourceId);
 }
 
@@ -993,7 +999,7 @@ class LocalizationsGenerator {
     _generatedLocalizationsFile = fileTemplate
       .replaceAll('@(header)', header)
       .replaceAll('@(class)', className)
-      .replaceAll('@(methods)', _allMessages.map(generateBaseClassMethod).join('\n'))
+      .replaceAll('@(methods)', _allMessages.map((Message message) => generateBaseClassMethod(message, _templateArbLocale)).join('\n'))
       .replaceAll('@(importFile)', '$directory/$outputFileName')
       .replaceAll('@(supportedLocales)', supportedLocalesCode.join(',\n    '))
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))

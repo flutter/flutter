@@ -891,7 +891,9 @@ mixin WidgetInspectorService {
           }
           index++;
         }
-        assert(index == parameters.length);
+        // Verify that the only arguments other than perhaps 'isolateId' are
+        // arguments we have already handled.
+        assert(index == parameters.length || (index == parameters.length - 1 && parameters.containsKey('isolateId')));
         return <String, Object?>{'result': await callback(args)};
       },
     );

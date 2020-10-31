@@ -1697,6 +1697,58 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked() || isBrowser); // Test requires --track-widget-creation flag.
 
+    testWidgets('ext.flutter.inspector.setPubRootDirectories extra args regression test', (WidgetTester tester) async {
+      // Ensure that passing the isolate id as an argument won't break
+      // setPubRootDirectories command.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: const <Widget>[
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      await service.testExtension('setPubRootDirectories', <String, String>{'isolateId': '34'});
+      service.setSelection(elementA, 'my-group');
+      final Map<String, Object?> jsonObject = (await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}))! as Map<String, Object?>;
+      final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
+      expect(creationLocation, isNotNull);
+      final String fileA = creationLocation['file']! as String;
+      expect(fileA, endsWith('widget_inspector_test.dart'));
+      expect(jsonObject, isNot(contains('createdByLocalProject')));
+      final List<String> segments = Uri.parse(fileA).pathSegments;
+      // Strip a couple subdirectories away to generate a plausible pub root
+      // directory.
+      final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
+      await service.testExtension('setPubRootDirectories', <String, String>{'arg0': pubRootTest, 'isolateId': '34'});
+
+      service.setSelection(elementA, 'my-group');
+      expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
+
+      await service.testExtension('setPubRootDirectories', <String, String>{'arg0': '/invalid/$pubRootTest', 'isolateId': '34'});
+      expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), isNot(contains('createdByLocalProject')));
+
+      await service.testExtension('setPubRootDirectories', <String, String>{'arg0': 'file://$pubRootTest', 'isolateId': '34'});
+      expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
+
+      await service.testExtension('setPubRootDirectories', <String, String>{'arg0': '$pubRootTest/different', 'isolateId': '34'});
+      expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), isNot(contains('createdByLocalProject')));
+
+      await service.testExtension('setPubRootDirectories', <String, String>{
+        'arg0': '/unrelated/$pubRootTest',
+        'isolateId': '34',
+        'arg1': 'file://$pubRootTest',
+      });
+
+      expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked() || isBrowser); // Test requires --track-widget-creation flag.
+
     testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
 

@@ -116,10 +116,11 @@ class Table extends RenderObjectWidget {
     this.textDirection,
     this.border,
     this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
-    this.textBaseline = TextBaseline.alphabetic,
+    this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
   }) : assert(children != null),
        assert(defaultColumnWidth != null),
        assert(defaultVerticalAlignment != null),
+       assert(defaultVerticalAlignment != TableCellVerticalAlignment.baseline || textBaseline != null, 'textBaseline is required if you specify the defaultVerticalAlignment with TableCellVerticalAlignment.baseline'),
        assert(() {
          if (children.any((TableRow row) => row.children == null)) {
            throw FlutterError(
@@ -231,8 +232,9 @@ class Table extends RenderObjectWidget {
 
   /// The text baseline to use when aligning rows using [TableCellVerticalAlignment.baseline].
   ///
-  /// Defaults to [TextBaseline.alphabetic].
-  final TextBaseline textBaseline;
+  /// This must be set if using baseline alignment. There is no default because there is no
+  /// way for the framework to know the correct baseline _a priori_.
+  final TextBaseline? textBaseline;
 
   final List<Decoration?>? _rowDecorations;
 
@@ -247,7 +249,7 @@ class Table extends RenderObjectWidget {
       rows: children.length,
       columnWidths: columnWidths,
       defaultColumnWidth: defaultColumnWidth,
-      textDirection: textDirection ?? Directionality.of(context)!,
+      textDirection: textDirection ?? Directionality.of(context),
       border: border,
       rowDecorations: _rowDecorations,
       configuration: createLocalImageConfiguration(context),
@@ -264,7 +266,7 @@ class Table extends RenderObjectWidget {
     renderObject
       ..columnWidths = columnWidths
       ..defaultColumnWidth = defaultColumnWidth
-      ..textDirection = textDirection ?? Directionality.of(context)!
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..border = border
       ..rowDecorations = _rowDecorations
       ..configuration = createLocalImageConfiguration(context)
@@ -303,16 +305,16 @@ class _TableElement extends RenderObjectElement {
   }
 
   @override
-  void insertRenderObjectChild(RenderObject child, IndexedSlot<Element>? slot) {
+  void insertRenderObjectChild(RenderObject child, dynamic slot) {
     renderObject.setupParentData(child);
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element>? oldSlot, IndexedSlot<Element>? newSlot) {
+  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, IndexedSlot<Element>? slot) {
+  void removeRenderObjectChild(RenderObject child, dynamic slot) {
     final TableCellParentData childParentData = child.parentData! as TableCellParentData;
     renderObject.setChild(childParentData.x!, childParentData.y!, null);
   }

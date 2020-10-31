@@ -159,7 +159,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   ///
   ///  * [ModalRoute.barrierColor], which controls this property for the
   ///    [AnimatedModalBarrier] built by [ModalRoute] pages.
-  Animation<Color> get color => listenable as Animation<Color>;
+  Animation<Color?> get color => listenable as Animation<Color?>;
 
   /// Whether touching the barrier will pop the current route off the [Navigator].
   ///

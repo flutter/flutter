@@ -6,9 +6,8 @@
 
 import 'dart:io';
 
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
-import 'package:vm_service_client/vm_service_client.dart';
+import 'package:vm_service/vm_service.dart' as vms;
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../common/diagnostics_tree.dart';
@@ -92,53 +91,50 @@ abstract class FlutterDriver {
   FlutterDriver();
 
   /// Creates a driver that uses a connection provided by either the combination
-  /// of [webConnection], or the combination of [serviceClient],
-  /// [peer] and [appIsolate]
+  /// of [webConnection], or the combination of [serviceClient] and [appIsolate]
+  /// for the VM.
   @visibleForTesting
   factory FlutterDriver.connectedTo({
     FlutterWebConnection webConnection,
-    VMServiceClient serviceClient,
-    rpc.Peer peer,
-    VMIsolate appIsolate,
+    vms.VmService serviceClient,
+    vms.Isolate appIsolate,
   }) {
     if (webConnection != null) {
       return WebFlutterDriver.connectedTo(webConnection);
     }
-    return VMServiceFlutterDriver.connectedTo(serviceClient, peer, appIsolate);
+    return VMServiceFlutterDriver.connectedTo(serviceClient, appIsolate);
   }
 
   /// Connects to a Flutter application.
   ///
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
   ///
-  /// `dartVmServiceUrl` is the URL to Dart observatory (a.k.a. VM service). If
-  /// not specified, the URL specified by the `VM_SERVICE_URL` environment
-  /// variable is used. One or the other must be specified.
+  /// The `dartVmServiceUrl` parameter is the URL to Dart observatory
+  /// (a.k.a. VM service). If not specified, the URL specified by the
+  /// `VM_SERVICE_URL` environment variable is used. One or the other must be
+  /// specified.
   ///
-  /// `printCommunication` determines whether the command communication between
-  /// the test and the app should be printed to stdout.
+  /// The `printCommunication` parameter determines whether the command
+  /// communication between the test and the app should be printed to stdout.
   ///
-  /// `logCommunicationToFile` determines whether the command communication
-  /// between the test and the app should be logged to `flutter_driver_commands.log`.
+  /// The `logCommunicationToFile` parameter determines whether the command
+  /// communication between the test and the app should be logged to
+  /// `flutter_driver_commands.log`.
   ///
-  /// `isolateNumber` determines the specific isolate to connect to.
-  /// If this is left as `null`, will connect to the first isolate found
+  /// The `isolateNumber` parameter determines the specific isolate to connect
+  /// to. If this is left as `null`, will connect to the first isolate found
   /// running on `dartVmServiceUrl`.
   ///
-  /// `fuchsiaModuleTarget` specifies the pattern for determining which mod to
-  /// control. When running on a Fuchsia device, either this or the environment
-  /// variable `FUCHSIA_MODULE_TARGET` must be set (the environment variable is
-  /// treated as a substring pattern). This field will be ignored if
+  /// The `fuchsiaModuleTarget` parameter specifies the pattern for determining
+  /// which mod to control. When running on a Fuchsia device, either this or the
+  /// environment variable `FUCHSIA_MODULE_TARGET` must be set (the environment
+  /// variable is treated as a substring pattern). This field will be ignored if
   /// `isolateNumber` is set, as this is already enough information to connect
-  /// to an isolate.
+  /// to an isolate. This parameter is ignored on non-fuchsia devices.
   ///
-  /// `headers` optionally specifies HTTP headers to be included in the
-  /// [WebSocket] connection. This is only used for [VMServiceFlutterDriver]
-  /// connections.
-  ///
-  /// `browser` specifies which FlutterDriver implementation to use. If not
-  /// speicifed or set to false, [VMServiceFlutterDriver] implementation
-  /// will be used. Otherwise, [WebFlutterDriver] implementation will be used.
+  /// The `headers` parameter optionally specifies HTTP headers to be included
+  /// in the [WebSocket] connection. This is only used for
+  /// [VMServiceFlutterDriver] connections.
   ///
   /// The return value is a future. This method never times out, though it may
   /// fail (completing with an error). A timeout can be applied by the caller
@@ -156,20 +152,20 @@ abstract class FlutterDriver {
       return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl, timeout: timeout);
     }
     return VMServiceFlutterDriver.connect(
-              dartVmServiceUrl: dartVmServiceUrl,
-              printCommunication: printCommunication,
-              logCommunicationToFile: logCommunicationToFile,
-              isolateNumber: isolateNumber,
-              fuchsiaModuleTarget: fuchsiaModuleTarget,
-              headers: headers,
+      dartVmServiceUrl: dartVmServiceUrl,
+      printCommunication: printCommunication,
+      logCommunicationToFile: logCommunicationToFile,
+      isolateNumber: isolateNumber,
+      fuchsiaModuleTarget: fuchsiaModuleTarget,
+      headers: headers,
     );
   }
 
   /// Getter of appIsolate.
-  VMIsolate get appIsolate => throw UnimplementedError();
+  vms.Isolate get appIsolate => throw UnimplementedError();
 
   /// Getter of serviceClient.
-  VMServiceClient get serviceClient => throw UnimplementedError();
+  vms.VmService get serviceClient => throw UnimplementedError();
 
   /// Getter of webDriver.
   async_io.WebDriver get webDriver => throw UnimplementedError();

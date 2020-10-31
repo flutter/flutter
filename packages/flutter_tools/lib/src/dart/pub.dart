@@ -80,7 +80,6 @@ abstract class Pub {
     @required Platform platform,
     @required BotDetector botDetector,
     @required Usage usage,
-    File Function() toolStampFile,
   }) = _DefaultPub;
 
   /// Runs `pub get`.
@@ -93,8 +92,6 @@ abstract class Pub {
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
-    bool checkLastModified = true,
-    bool skipPubspecYamlCheck = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
   });
@@ -141,9 +138,7 @@ class _DefaultPub implements Pub {
     @required Platform platform,
     @required BotDetector botDetector,
     @required Usage usage,
-   File Function() toolStampFile,
-  }) : _toolStampFile = toolStampFile,
-       _fileSystem = fileSystem,
+  }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
@@ -159,7 +154,6 @@ class _DefaultPub implements Pub {
   final Platform _platform;
   final BotDetector _botDetector;
   final Usage _usage;
-  final File Function() _toolStampFile;
 
   @override
   Future<void> get({
@@ -168,86 +162,50 @@ class _DefaultPub implements Pub {
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
-    bool checkLastModified = true,
-    bool skipPubspecYamlCheck = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
   }) async {
     directory ??= _fileSystem.currentDirectory.path;
-
-    final File pubSpecYaml = _fileSystem.file(
-      _fileSystem.path.join(directory, 'pubspec.yaml'));
     final File packageConfigFile = _fileSystem.file(
       _fileSystem.path.join(directory, '.dart_tool', 'package_config.json'));
     final Directory generatedDirectory = _fileSystem.directory(
       _fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
 
-    if (!skipPubspecYamlCheck && !pubSpecYaml.existsSync()) {
-      if (!skipIfAbsent) {
-        throwToolExit('$directory: no pubspec.yaml found');
-      }
-      return;
-    }
-
-    final DateTime originalPubspecYamlModificationTime = pubSpecYaml.lastModifiedSync();
-
-    if (!checkLastModified || _shouldRunPubGet(
-      pubSpecYaml: pubSpecYaml,
-      packageConfigFile: packageConfigFile,
-    )) {
-      final String command = upgrade ? 'upgrade' : 'get';
-      final Status status = _logger.startProgress(
-        'Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',
+    final String command = upgrade ? 'upgrade' : 'get';
+    final Status status = _logger.startProgress(
+      'Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',
+    );
+    final bool verbose = _logger.isVerbose;
+    final List<String> args = <String>[
+      if (verbose)
+        '--verbose'
+      else
+        '--verbosity=warning',
+      ...<String>[
+        command,
+        '--no-precompile',
+      ],
+      if (offline)
+        '--offline',
+    ];
+    try {
+      await batch(
+        args,
+        context: context,
+        directory: directory,
+        failureMessage: 'pub $command failed',
+        retry: true,
+        flutterRootOverride: flutterRootOverride,
       );
-      final bool verbose = _logger.isVerbose;
-      final List<String> args = <String>[
-        if (verbose)
-          '--verbose'
-        else
-          '--verbosity=warning',
-        ...<String>[
-          command,
-          '--no-precompile',
-        ],
-        if (offline)
-          '--offline',
-      ];
-      try {
-        await batch(
-          args,
-          context: context,
-          directory: directory,
-          failureMessage: 'pub $command failed',
-          retry: true,
-          flutterRootOverride: flutterRootOverride,
-        );
-        status.stop();
-      // The exception is rethrown, so don't catch only Exceptions.
-      } catch (exception) { // ignore: avoid_catches_without_on_clauses
-        status.cancel();
-        rethrow;
-      }
+      status.stop();
+    // The exception is rethrown, so don't catch only Exceptions.
+    } catch (exception) { // ignore: avoid_catches_without_on_clauses
+      status.cancel();
+      rethrow;
     }
 
     if (!packageConfigFile.existsSync()) {
       throwToolExit('$directory: pub did not create .dart_tools/package_config.json file.');
-    }
-    if (pubSpecYaml.lastModifiedSync() != originalPubspecYamlModificationTime) {
-      throwToolExit(
-        '$directory: unexpected concurrent modification of '
-        'pubspec.yaml while running pub.');
-    }
-    // We don't check if dotPackages was actually modified, because as far as we can tell sometimes
-    // pub will decide it does not need to actually modify it.
-    final DateTime now = DateTime.now();
-    if (now.isBefore(originalPubspecYamlModificationTime)) {
-      _logger.printError(
-        'Warning: File "${_fileSystem.path.absolute(pubSpecYaml.path)}" was created in the future. '
-        'Optimizations that rely on comparing time stamps will be unreliable. Check your '
-        'system clock for accuracy.\n'
-        'The timestamp was: $originalPubspecYamlModificationTime\n'
-        'The time now is: $now'
-      );
     }
     await _updatePackageConfig(
       packageConfigFile,
@@ -389,23 +347,6 @@ class _DefaultPub implements Pub {
         'pub'
     ]);
     return <String>[sdkPath, ...arguments];
-  }
-
-  bool _shouldRunPubGet({ @required File pubSpecYaml, @required File packageConfigFile }) {
-    if (!packageConfigFile.existsSync()) {
-      return true;
-    }
-    final DateTime dotPackagesLastModified = packageConfigFile.lastModifiedSync();
-    if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified)) {
-      return true;
-    }
-    final File toolStampFile = _toolStampFile != null ? _toolStampFile() : null;
-    if (toolStampFile != null &&
-        toolStampFile.existsSync() &&
-        toolStampFile.lastModifiedSync().isAfter(dotPackagesLastModified)) {
-      return true;
-    }
-    return false;
   }
 
   // Returns the environment value that should be used when running pub.

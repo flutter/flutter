@@ -134,11 +134,11 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
     assert(debugCheckHasMaterialLocalizations(context));
 
     final ThemeData theme = Theme.of(context)!;
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     Widget accountDetails = CustomMultiChildLayout(
       delegate: _AccountDetailsLayout(
-        textDirection: Directionality.of(context)!,
+        textDirection: Directionality.of(context),
       ),
       children: <Widget>[
         if (widget.accountName != null)
@@ -356,7 +356,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
     assert(debugCheckHasMaterialLocalizations(context));
     return Semantics(
       container: true,
-      label: MaterialLocalizations.of(context)!.signedInLabel,
+      label: MaterialLocalizations.of(context).signedInLabel,
       child: DrawerHeader(
         decoration: widget.decoration ?? BoxDecoration(
           color: Theme.of(context)!.primaryColor,

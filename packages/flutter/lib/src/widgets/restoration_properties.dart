@@ -173,9 +173,9 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
   }
 
   @override
-  T fromPrimitives(Object serialized) {
+  T fromPrimitives(Object? serialized) {
     assert(serialized != null);
-    return serialized as T;
+    return serialized! as T;
   }
 
   @override
@@ -360,8 +360,8 @@ class RestorableTextEditingController extends RestorableChangeNotifier<TextEditi
   }
 
   @override
-  TextEditingController fromPrimitives(Object data) {
-    return TextEditingController(text: data as String);
+  TextEditingController fromPrimitives(Object? data) {
+    return TextEditingController(text: data! as String);
   }
 
   @override
