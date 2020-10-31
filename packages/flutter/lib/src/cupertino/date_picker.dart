@@ -1620,7 +1620,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    textDirection = Directionality.of(context)!;
+    textDirection = Directionality.of(context);
     localizations = CupertinoLocalizations.of(context);
 
     _measureLabelMetrics();

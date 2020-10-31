@@ -547,7 +547,7 @@ class _Theatre extends MultiChildRenderObjectWidget {
   _RenderTheatre createRenderObject(BuildContext context) {
     return _RenderTheatre(
       skipCount: skipCount,
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       clipBehavior: clipBehavior,
     );
   }
@@ -556,7 +556,7 @@ class _Theatre extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderTheatre renderObject) {
     renderObject
       ..skipCount = skipCount
-      ..textDirection = Directionality.of(context)!
+      ..textDirection = Directionality.of(context)
       ..clipBehavior = clipBehavior;
   }
 
