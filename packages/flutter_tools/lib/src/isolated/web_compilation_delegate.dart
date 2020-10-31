@@ -223,7 +223,6 @@ class BuildDaemonCreator {
       '--packages=$buildScriptPackages',
       buildScript,
       'daemon',
-      '--enable-experiment=non-nullable',
       '--skip-build-script-check',
       '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
       // The following will cause build runner to only build tests that were requested.
