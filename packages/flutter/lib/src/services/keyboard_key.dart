@@ -2519,14 +2519,14 @@ class LogicalKeyboardKey extends KeyboardKey {
 
   // A map of keys to the pseudo-key synonym for that key. Used by getSynonyms.
   static final Map<LogicalKeyboardKey, LogicalKeyboardKey> _synonyms = <LogicalKeyboardKey, LogicalKeyboardKey>{
-    shiftLeft: shift,
-    shiftRight: shift,
-    metaLeft: meta,
-    metaRight: meta,
-    altLeft: alt,
-    altRight: alt,
-    controlLeft: control,
-    controlRight: control,
+    // shiftLeft: shift,
+    // shiftRight: shift,
+    // metaLeft: meta,
+    // metaRight: meta,
+    // altLeft: alt,
+    // altRight: alt,
+    // controlLeft: control,
+    // controlRight: control,
   };
 }
 
