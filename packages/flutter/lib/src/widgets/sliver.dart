@@ -752,8 +752,8 @@ class SliverChildListDelegate extends SliverChildDelegate {
 /// See also:
 ///
 ///  * [KeepAlive], used with SliverWithKeepAliveWidgets as base parent,
-///     this widgets wraps around the child which needs to   
-///     be kept alive. Though it is not need when we use delegates.
+///     alive, this widgets wraps around the child which needs to   
+///     be kept. Though it is not need when we use delegates.
 ///  * [SliverChildBuilderDelegate] and [SliverChildListDelegate], which 
 ///     are commonly used subclasses of [SliverChildDelegate] that use  
 ///     a builder callback and an explicit child list, respectively.
