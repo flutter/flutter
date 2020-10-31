@@ -22,6 +22,27 @@ import 'theme.dart';
 /// throughout the codebase.
 const int iOSHorizontalOffset = -2;
 
+/// A class to handle text selection programmatically for the [SelectableText]
+/// widget.
+class SelectableTextController {
+
+  late _TextSpanEditingController _textSpanEditingController;
+
+  /// Select a range of text.
+  void setSelection(int start, int end) {
+    assert(start <= end);
+
+    final TextSelection selection = TextSelection(
+      baseOffset: start,
+      extentOffset: end,
+    );
+
+    _textSpanEditingController.value = _textSpanEditingController.value.copyWith(
+      selection: selection,
+    );
+  }
+}
+
 class _TextSpanEditingController extends TextEditingController {
   _TextSpanEditingController({required TextSpan textSpan}):
     assert(textSpan != null),
@@ -198,6 +219,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
+    this.controller,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -250,6 +272,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
+    this.controller,
   }) :  assert(showCursor != null),
     assert(autofocus != null),
     assert(dragStartBehavior != null),
@@ -395,6 +418,8 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onSelectionChanged}
   final SelectionChangedCallback? onSelectionChanged;
 
+  final SelectableTextController? controller;
+
   @override
   _SelectableTextState createState() => _SelectableTextState();
 
@@ -448,10 +473,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
   void initState() {
     super.initState();
     _selectionGestureDetectorBuilder = _SelectableTextSelectionGestureDetectorBuilder(state: this);
-    _controller = _TextSpanEditingController(
-        textSpan: widget.textSpan ?? TextSpan(text: widget.data)
-    );
-    _controller.addListener(_onControllerChanged);
+    _updateControllerAndSubscribe();
   }
 
   @override
@@ -459,10 +481,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     super.didUpdateWidget(oldWidget);
     if (widget.data != oldWidget.data || widget.textSpan != oldWidget.textSpan) {
       _controller.removeListener(_onControllerChanged);
-      _controller = _TextSpanEditingController(
-          textSpan: widget.textSpan ?? TextSpan(text: widget.data)
-      );
-      _controller.addListener(_onControllerChanged);
+      _updateControllerAndSubscribe();
     }
     if (_effectiveFocusNode.hasFocus && _controller.selection.isCollapsed) {
       _showSelectionHandles = false;
@@ -476,6 +495,16 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     _focusNode?.dispose();
     _controller.removeListener(_onControllerChanged);
     super.dispose();
+  }
+
+  void _updateControllerAndSubscribe() {
+    _controller = _TextSpanEditingController(
+        textSpan: widget.textSpan ?? TextSpan(text: widget.data)
+    );
+    if (widget.controller != null) {
+      widget.controller!._textSpanEditingController = _controller;
+    }
+    _controller.addListener(_onControllerChanged);
   }
 
   void _onControllerChanged() {
