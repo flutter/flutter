@@ -1481,13 +1481,13 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 ///
 ///```dart
 ///Container(
-///      height: 400,
-///      width: 300,
-///      color: Colors.red,
-///      child: FittedBox(
-///      	child: Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
-///      fit: BoxFit.fill,                
-///    	),
+///  height: 400,
+///  width: 300,
+///  color: Colors.red,
+///  child: FittedBox(
+///    child: Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+///    fit: BoxFit.fill,                
+///  ),
 ///);
 ///```
 ///
