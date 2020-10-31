@@ -17,8 +17,12 @@ import 'build.dart';
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({ bool verboseHelp = false }) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
+    final HostPlatform hostPlatform = getCurrentHostPlatform();
+    final String defaultTargetPlatform =
+        (hostPlatform == HostPlatform.linux_arm64) ?
+            'linux-arm64' : 'linux-x64';
     argParser.addOption('target-platform',
-      defaultsTo: 'linux-x64',
+      defaultsTo: defaultTargetPlatform,
       allowed: <String>['linux-arm64', 'linux-x64'],
       help: 'The target platform for which the app is compiled.',
     );
@@ -26,7 +30,7 @@ class BuildLinuxCommand extends BuildSubCommand {
       defaultsTo: '/',
       help: 'The root filesystem path of target platform for which '
             'the app is compiled. This option is valid only '
-            'when target-platform is linux-arm64.',
+            'if the current host and target architectures are different.',
     );
   }
 

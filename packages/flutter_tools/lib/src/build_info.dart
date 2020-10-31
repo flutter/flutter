@@ -437,23 +437,6 @@ String getNameForHostPlatform(HostPlatform platform) {
   return null;
 }
 
-String getNameForHostPlatformArch(HostPlatform platform) {
-  switch (platform) {
-    case HostPlatform.darwin_x64:
-      return 'x64';
-    case HostPlatform.darwin_arm:
-      return 'arm';
-    case HostPlatform.linux_x64:
-      return 'x64';
-    case HostPlatform.linux_arm64:
-      return 'arm64';
-    case HostPlatform.windows_x64:
-      return 'x64';
-  }
-  assert(false);
-  return null;
-}
-
 enum TargetPlatform {
   android,
   ios,
@@ -676,12 +659,6 @@ HostPlatform getCurrentHostPlatform() {
   return HostPlatform.linux_x64;
 }
 
-/// Returns current host cpu architecture.
-String getCurrentHostPlatformArchName() {
-  final HostPlatform hostPlatform = getCurrentHostPlatform();
-  return getNameForHostPlatformArch(hostPlatform);
-}
-
 /// Returns the top-level build output directory.
 String getBuildDirectory([Config config, FileSystem fileSystem]) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
@@ -735,8 +712,11 @@ String getWebBuildDirectory() {
 }
 
 /// Returns the Linux build output directory.
-String getLinuxBuildDirectory() {
-  final String subDirs = 'linux/' + getCurrentHostPlatformArchName();
+String getLinuxBuildDirectory([TargetPlatform targetPlatform = null]) {
+  final String arch = (targetPlatform == null) ?
+      _getCurrentHostPlatformArchName() :
+      _getNameForTargetPlatformOfDesktops(targetPlatform);
+  final String subDirs = 'linux/' + arch;
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
@@ -777,4 +757,39 @@ enum NullSafetyMode {
   sound,
   unsound,
   autodetect,
+}
+
+String _getCurrentHostPlatformArchName() {
+  final HostPlatform hostPlatform = getCurrentHostPlatform();
+  return _getNameForHostPlatformArch(hostPlatform);
+}
+
+String _getNameForTargetPlatformOfDesktops(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.darwin_x64:
+    case TargetPlatform.windows_x64:
+      return 'x64';
+    case TargetPlatform.linux_arm64:
+      return 'arm64';
+  }
+  assert(false);
+  return null;
+}
+
+String _getNameForHostPlatformArch(HostPlatform platform) {
+  switch (platform) {
+    case HostPlatform.darwin_x64:
+      return 'x64';
+    case HostPlatform.darwin_arm:
+      return 'arm';
+    case HostPlatform.linux_x64:
+      return 'x64';
+    case HostPlatform.linux_arm64:
+      return 'arm64';
+    case HostPlatform.windows_x64:
+      return 'x64';
+  }
+  assert(false);
+  return null;
 }
