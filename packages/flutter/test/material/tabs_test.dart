@@ -2278,38 +2278,38 @@ void main() {
     });
   });
 
-group('Tab overlayColor affects ink response', () {
-  testWidgets('Tab\'s ink well changes color on hover with Tab overlayColor',
-  (WidgetTester tester) async {
-    await tester.pumpWidget(
-      boilerplate(
-        child: DefaultTabController(
-          length: 1,
-          child: TabBar(
-            tabs: const <Tab>[
-              Tab(text: 'A',)
-            ],
-            overlayColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered))
-                  return const Color(0xff00ff00);
-                if (states.contains(MaterialState.pressed))
-                  return const Color(0xf00fffff);
-                return const Color(0xffbadbad); // Shouldn't happen.
-              }
-            ),
+  group('Tab overlayColor affects ink response', () {
+    testWidgets('Tab\'s ink well changes color on hover with Tab overlayColor',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        boilerplate(
+          child: DefaultTabController(
+            length: 1,
+            child: TabBar(
+              tabs: const <Tab>[
+                Tab(text: 'A',)
+              ],
+              overlayColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
+                 if (states.contains(MaterialState.hovered))
+                    return const Color(0xff00ff00);
+                  if (states.contains(MaterialState.pressed))
+                    return const Color(0xf00fffff);
+                  return const Color(0xffbadbad); // Shouldn't happen.
+                }
+              ),
+            )
           )
         )
-      )
-    );
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    addTearDown(gesture.removePointer);
-    await gesture.moveTo(tester.getCenter(find.byType(Tab)));
-    await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0.0, 276.0, 800.0, 324.0), color: const Color(0xff00ff00)));
-  });
+      );
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(tester.getCenter(find.byType(Tab)));
+      await tester.pumpAndSettle();
+      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+      expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0.0, 276.0, 800.0, 324.0), color: const Color(0xff00ff00)));
+    });
 
   testWidgets('Tab\'s ink response splashColor matches resolved Tab overlayColor for MaterialState.pressed',
   (WidgetTester tester) async {
