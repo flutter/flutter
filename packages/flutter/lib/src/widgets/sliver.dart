@@ -759,7 +759,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
 ///     a builder callback and an explicit child list, respectively.
 ///  * [SliverGrid] and [SliverList], are two sliverWithKeepAliveWidgets 
 ///     used with [KeepAlive] Widgets to place children in artibitary 
-///     and vertical postion, respectively.
+///     and vertical position, respectively.
 /// 
 abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
