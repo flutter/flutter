@@ -646,9 +646,9 @@ class _MixedAlignment extends AlignmentGeometry {
 ///    the parameter in TextField.
 ///  * [InputDecorator.textAlignVertical], which defines the alignment of
 ///    prefix, input, and suffix within an [InputDecorator].
-///  * [InputDecorator.prefixIconAlignment], which defines the alignment of
+///  * [InputDecoration.prefixIconAlignment], which defines the alignment of
 ///    prefixIcon within an [InputDecorator].
-///  * [InputDecorator.suffixIconAlignment], which defines the alignment of
+///  * [InputDecoration.suffixIconAlignment], which defines the alignment of
 ///    suffixIcon within an [InputDecorator].
 class TextAlignVertical {
   /// Creates a TextAlignVertical from any y value between -1.0 and 1.0.
