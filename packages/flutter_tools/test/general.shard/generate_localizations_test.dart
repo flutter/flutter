@@ -1199,7 +1199,7 @@ void main() {
       expect(baseLocalizationsFileContents, contains(r'''
   /// In en, this message translates to:
   /// **'The price of this item is: \${price}'**'''));
-    }, skip: true);
+    });
 
     test('should generate a file per language', () {
       const String singleEnCaMessageArbFileString = '''
