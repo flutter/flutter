@@ -471,7 +471,7 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
       return child == oldWidget.children[childIndex++];
     });
     // If the children are changing at all, the current page should be reset.
-    if (childrenEqual) {
+    if (!childrenEqual) {
       _reset();
     }
   }
