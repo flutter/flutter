@@ -2129,7 +2129,7 @@ class _ChipRenderWidget extends RenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     return _RenderChip(
       theme: theme,
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       value: value,
       isEnabled: isEnabled,
       checkmarkAnimation: checkmarkAnimation,

@@ -288,7 +288,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
       vsync: vsync,
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
     );
   }
 
@@ -304,7 +304,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
-      ..textDirection = Directionality.of(context)!;
+      ..textDirection = Directionality.of(context);
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }
