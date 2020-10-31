@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 void main() {
   testWidgets('Floating Action Button control test', (WidgetTester tester) async {
@@ -897,6 +898,66 @@ void main() {
       find.byType(FloatingActionButton),
       paints..circle(color: splashColor),
     );
+  });
+
+  group('feedback', () {
+    late FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback.dispose();
+    });
+
+    testWidgets('FloatingActionButton with enabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = true;
+
+      await tester.pumpWidget(MaterialApp(
+        home: FloatingActionButton(
+          onPressed: () {},
+          enableFeedback: enableFeedback,
+          child: const Icon(Icons.access_alarm),
+        ),
+      ));
+
+      await tester.tap(find.byType(RawMaterialButton));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('FloatingActionButton with disabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = false;
+
+      await tester.pumpWidget(MaterialApp(
+        home: FloatingActionButton(
+          onPressed: () {},
+          enableFeedback: enableFeedback,
+          child: const Icon(Icons.access_alarm),
+        ),
+      ));
+
+      await tester.tap(find.byType(RawMaterialButton));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('FloatingActionButton with enabled feedback by default', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: FloatingActionButton(
+          onPressed: () {},
+          child: const Icon(Icons.access_alarm),
+        ),
+      ));
+
+      await tester.tap(find.byType(RawMaterialButton));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
   });
 }
 

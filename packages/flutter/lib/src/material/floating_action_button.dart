@@ -149,6 +149,7 @@ class FloatingActionButton extends StatelessWidget {
     this.autofocus = false,
     this.materialTapTargetSize,
     this.isExtended = false,
+    this.enableFeedback = true,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
@@ -191,6 +192,7 @@ class FloatingActionButton extends StatelessWidget {
     this.autofocus = false,
     Widget? icon,
     required Widget label,
+    this.enableFeedback = true,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
@@ -412,6 +414,16 @@ class FloatingActionButton extends StatelessWidget {
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize? materialTapTargetSize;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool enableFeedback;
+
   final BoxConstraints _sizeConstraints;
 
   static const double _defaultElevation = 6;
@@ -507,6 +519,7 @@ class FloatingActionButton extends StatelessWidget {
       focusNode: focusNode,
       autofocus: autofocus,
       child: child,
+      enableFeedback: enableFeedback,
     );
 
     if (tooltip != null) {
