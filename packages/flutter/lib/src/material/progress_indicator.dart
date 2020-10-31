@@ -652,12 +652,12 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 ///       children: [
 ///         Text(
-///           'Linear progress indicator with a fixed value',
+///           'Circular progress indicator with a fixed value',
 ///           style: const TextStyle(fontSize: 20),
 ///         ),
 ///         CircularProgressIndicator(
 ///           value: 0.5,
-///           semanticsLabel: 'Linear progress indicator',
+///           semanticsLabel: 'Circular progress indicator',
 ///         ),
 ///       ],
 ///     ),
@@ -682,12 +682,12 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 ///       children: [
 ///         Text(
-///           'Linear progress indicator with a fixed color',
+///           'Circular progress indicator with a fixed color',
 ///           style: const TextStyle(fontSize: 20),
 ///         ),
 ///         CircularProgressIndicator(
 ///           valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey),
-///           semanticsLabel: 'Linear progress indicator',
+///           semanticsLabel: 'Circular progress indicator',
 ///         ),
 ///       ],
 ///     ),
@@ -713,14 +713,14 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 ///       children: [
 ///         Text(
-///           'Linear progress indicator with a background color',
+///           'Circular progress indicator with a background color',
 ///           style: const TextStyle(fontSize: 20),
 ///         ),
 ///         CircularProgressIndicator(
 ///           backgroundColor: Colors.blueGrey[100],
 ///           valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
 ///           value: 0.5,
-///           semanticsLabel: 'Linear progress indicator',
+///           semanticsLabel: 'Circular progress indicator',
 ///         ),
 ///       ],
 ///     ),
@@ -768,12 +768,12 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 ///       children: [
 ///         Text(
-///           'Linear progress indicator with a fixed color',
+///           'Circular progress indicator with a fixed color',
 ///           style: const TextStyle(fontSize: 20),
 ///         ),
 ///         CircularProgressIndicator(
 ///           valueColor: animation,
-///           semanticsLabel: 'Linear progress indicator',
+///           semanticsLabel: 'Circular progress indicator',
 ///         ),
 ///       ],
 ///     ),
@@ -824,12 +824,12 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 ///       children: [
 ///         Text(
-///           'Linear progress indicator with a fixed color',
+///           'Circular progress indicator with a fixed color',
 ///           style: const TextStyle(fontSize: 20),
 ///         ),
 ///         CircularProgressIndicator(
 ///           value: animation.value,
-///           semanticsLabel: 'Linear progress indicator',
+///           semanticsLabel: 'Circular progress indicator',
 ///         ),
 ///       ],
 ///     ),
