@@ -246,6 +246,8 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// This example shows a [LinearProgressIndicator] with a fixed value.
+/// 
+/// ![https://flutter.github.io/assets-for-api-docs/assets/material/linear_progress_indicator_fixed_value.png]
 ///
 /// ```dart imports
 /// import 'package:flutter/material.dart';
@@ -307,6 +309,8 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///
 /// This example shows a [LinearProgressIndicator] with
 /// a fixed color, fixed value and a background color.
+///
+/// ![https://flutter.github.io/assets-for-api-docs/assets/material/linear_progress_indicator_background_color.png]
 ///
 /// ```dart imports
 /// import 'package:flutter/material.dart';
@@ -638,6 +642,8 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// This example shows a [CircularProgressIndicator] with a fixed value.
+/// 
+/// ![https://flutter.github.io/assets-for-api-docs/assets/material/circular_progress_indicator_fixed_value.png]
 ///
 /// ```dart imports
 /// import 'package:flutter/material.dart';
@@ -699,6 +705,8 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///
 /// This example shows a [CircularProgressIndicator] with
 /// a fixed color, fixed value and a background color.
+///
+/// ![https://flutter.github.io/assets-for-api-docs/assets/material/circular_progress_indicator_background_color.png]
 ///
 /// ```dart imports
 /// import 'package:flutter/material.dart';
