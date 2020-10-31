@@ -744,8 +744,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// [MaterialState.pressed] triggers a ripple (an ink splash), per
   /// the current Material Design spec. The [overlayColor] doesn't map
-  /// a state to [highlightColor] because a separate highlight is not
-  /// used by the current design guidelines. See
+  /// a state to [InkResponse.highlightColor] because a separate highlight 
+  /// is not used by the current design guidelines. See
   /// https://material.io/design/interaction/states.html#pressed
   ///
   /// If the overlay color is null or resolves to null, then the default values
