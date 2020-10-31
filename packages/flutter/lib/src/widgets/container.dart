@@ -406,7 +406,7 @@ class Container extends StatelessWidget {
       assert(decoration != null);
       current = ClipPath(
         clipper: _DecorationClipper(
-          textDirection: Directionality.of(context),
+          textDirection: Directionality.maybeOf(context),
           decoration: decoration!,
         ),
         clipBehavior: clipBehavior,

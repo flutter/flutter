@@ -241,8 +241,7 @@ class ButtonTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ButtonTheme? ancestorTheme = context.findAncestorWidgetOfExactType<ButtonTheme>();
-    return identical(this, ancestorTheme) ? child : ButtonTheme.fromButtonThemeData(data: data, child: child);
+    return ButtonTheme.fromButtonThemeData(data: data, child: child);
   }
 
   @override

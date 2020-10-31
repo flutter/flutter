@@ -514,7 +514,7 @@ class CupertinoPageTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection textDirection = Directionality.of(context);
     return SlideTransition(
       position: _secondaryPositionAnimation,
       textDirection: textDirection,
@@ -578,7 +578,7 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection textDirection = Directionality.of(context);
     return SlideTransition(
       position: _secondaryPositionAnimation,
       textDirection: textDirection,
@@ -677,7 +677,7 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   }
 
   double _convertToLogical(double value) {
-    switch (Directionality.of(context)!) {
+    switch (Directionality.of(context)) {
       case TextDirection.rtl:
         return -value;
       case TextDirection.ltr:
@@ -691,8 +691,8 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
     // For devices with notches, the drag area needs to be larger on the side
     // that has the notch.
     double dragAreaWidth = Directionality.of(context) == TextDirection.ltr ?
-                           MediaQuery.of(context)!.padding.left :
-                           MediaQuery.of(context)!.padding.right;
+                           MediaQuery.of(context).padding.left :
+                           MediaQuery.of(context).padding.right;
     dragAreaWidth = max(dragAreaWidth, _kBackGestureWidth);
     return Stack(
       fit: StackFit.passthrough,
@@ -1104,12 +1104,11 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// barrier behavior (by default, the dialog is not dismissible with a tap on
 /// the barrier).
 ///
-/// This function takes a `builder` which typically builds a [CupertinoDialog]
-/// or [CupertinoAlertDialog] widget. Content below the dialog is dimmed with a
-/// [ModalBarrier]. The widget returned by the `builder` does not share a
-/// context with the location that `showCupertinoDialog` is originally called
-/// from. Use a [StatefulBuilder] or a custom [StatefulWidget] if the dialog
-/// needs to update dynamically.
+/// This function takes a `builder` which typically builds a [CupertinoAlertDialog]
+/// widget. Content below the dialog is dimmed with a [ModalBarrier]. The widget
+/// returned by the `builder` does not share a context with the location that
+/// `showCupertinoDialog` is originally called from. Use a [StatefulBuilder] or
+/// a custom [StatefulWidget] if the dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] for the dialog.
 /// It is only used when the method is called. Its corresponding widget can
@@ -1129,7 +1128,6 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// See also:
 ///
-///  * [CupertinoDialog], an iOS-style dialog.
 ///  * [CupertinoAlertDialog], an iOS-style alert dialog.
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
@@ -1146,7 +1144,7 @@ Future<T?> showCupertinoDialog<T>({
   return showGeneralDialog(
     context: context,
     barrierDismissible: barrierDismissible,
-    barrierLabel: CupertinoLocalizations.of(context)!.modalBarrierDismissLabel,
+    barrierLabel: CupertinoLocalizations.of(context).modalBarrierDismissLabel,
     barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context)!,
     // This transition duration was eyeballed comparing with iOS
     transitionDuration: const Duration(milliseconds: 250),

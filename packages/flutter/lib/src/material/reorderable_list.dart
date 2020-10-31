@@ -402,7 +402,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       // before index+2, which is after the space at index+1.
       void moveAfter() => reorder(index, index + 2);
 
-      final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+      final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
       // If the item can move to before its current position in the list.
       if (index > 0) {

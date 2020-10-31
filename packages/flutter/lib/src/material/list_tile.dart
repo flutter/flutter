@@ -145,8 +145,7 @@ class ListTileTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ListTileTheme? ancestorTheme = context.findAncestorWidgetOfExactType<ListTileTheme>();
-    return identical(this, ancestorTheme) ? child : ListTileTheme(
+    return ListTileTheme(
       dense: dense,
       shape: shape,
       style: style,
@@ -1068,7 +1067,7 @@ class ListTile extends StatelessWidget {
     }
 
     const EdgeInsets _defaultContentPadding = EdgeInsets.symmetric(horizontal: 16.0);
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     final EdgeInsets resolvedContentPadding = contentPadding?.resolve(textDirection)
       ?? tileTheme.contentPadding?.resolve(textDirection)
       ?? _defaultContentPadding;

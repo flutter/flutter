@@ -796,7 +796,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
       templateManifest: templateManifest,
-      pub: pub,
     );
     return template.render(directory, context, overwriteExisting: overwrite);
   }
