@@ -1474,6 +1474,27 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=T4Uehk3_wlY}
 ///
+/// {@tool sample --template=stateless_widget_scaffold_center}
+///
+/// In this example, the image is stretched to fill the entire [Container], which would
+/// not happen normally without using FittedBox.
+///
+/// ```dart
+/// Widget build(BuildContext) {
+///   return Container(
+///     height: 400,
+///     width: 300,
+///     color: Colors.red,
+///     child: FittedBox(
+///       child: Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+///       fit: BoxFit.fill,
+///     ),
+///   );
+/// }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Transform], which applies an arbitrary transform to its child widget at
