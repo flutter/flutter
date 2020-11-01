@@ -38,10 +38,12 @@ import 'tooltip_theme.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Center(
+///   return Scaffold(
+///     body: const Center(
 ///     child: Tooltip(
 ///       message: "I am a Tooltip",
 ///       child: Text("Tap this text and hold down to show a tooltip."),
+///       ),
 ///     ),
 ///   );
 /// }
@@ -64,7 +66,8 @@ import 'tooltip_theme.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Center(
+///   return Scaffold(
+///     body: const Center(
 ///     child: Tooltip(
 ///       message: "I am a Tooltip",
 ///       child: Text("Tap this text and hold down to show a tooltip."),
@@ -80,6 +83,7 @@ import 'tooltip_theme.dart';
 ///       ),
 ///       showDuration: Duration(seconds: 2),
 ///       waitDuration: Duration(seconds: 1),
+///       ),
 ///     ),
 ///   );
 /// }
