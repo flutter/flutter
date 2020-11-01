@@ -283,7 +283,7 @@ void main() {
 
       // Asserts when the required dependency is missing.
       await tester.pumpWidget(const DependentWidget(color: contrastDependentColor1));
-      expect(tester.takeException()?.toString(), contains('does not contain a MediaQuery'));
+      expect(tester.takeException()?.toString(), contains('No MediaQuery widget ancestor found'));
   });
 
   testWidgets(

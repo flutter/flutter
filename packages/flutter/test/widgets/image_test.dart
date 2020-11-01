@@ -1516,7 +1516,7 @@ void main() {
     expect(imageCache!.liveImageCount, 1);
     expect(imageCache!.containsKey(provider), false);
 
-    final ImageCacheStatus providerLocation = await provider.obtainCacheStatus(configuration: ImageConfiguration.empty);
+    final ImageCacheStatus providerLocation = (await provider.obtainCacheStatus(configuration: ImageConfiguration.empty))!;
 
     expect(providerLocation, isNotNull);
     expect(providerLocation.live, true);

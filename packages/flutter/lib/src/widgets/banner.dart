@@ -304,9 +304,9 @@ class Banner extends StatelessWidget {
     return CustomPaint(
       foregroundPainter: BannerPainter(
         message: message,
-        textDirection: textDirection ?? Directionality.of(context)!,
+        textDirection: textDirection ?? Directionality.of(context),
         location: location,
-        layoutDirection: layoutDirection ?? Directionality.of(context)!,
+        layoutDirection: layoutDirection ?? Directionality.of(context),
         color: color,
         textStyle: textStyle,
       ),

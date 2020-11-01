@@ -388,8 +388,8 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData existingMediaQuery = MediaQuery.of(context)!;
-    MediaQueryData newMediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData existingMediaQuery = MediaQuery.of(context);
+    MediaQueryData newMediaQuery = MediaQuery.of(context);
 
     Widget content = _TabSwitchingView(
       currentTabIndex: _controller.index,
@@ -576,15 +576,18 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
         final bool active = index == widget.currentTabIndex;
         shouldBuildTab[index] = active || shouldBuildTab[index];
 
-        return Offstage(
-          offstage: !active,
-          child: TickerMode(
-            enabled: active,
-            child: FocusScope(
-              node: tabFocusNodes[index],
-              child: Builder(builder: (BuildContext context) {
-                return shouldBuildTab[index] ? widget.tabBuilder(context, index) : Container();
-              }),
+        return HeroMode(
+          enabled: active,
+          child: Offstage(
+            offstage: !active,
+            child: TickerMode(
+              enabled: active,
+              child: FocusScope(
+                node: tabFocusNodes[index],
+                child: Builder(builder: (BuildContext context) {
+                  return shouldBuildTab[index] ? widget.tabBuilder(context, index) : Container();
+                }),
+              ),
             ),
           ),
         );
@@ -619,8 +622,9 @@ class RestorableCupertinoTabController extends RestorableChangeNotifier<Cupertin
   }
 
   @override
-  CupertinoTabController fromPrimitives(Object data) {
-    return CupertinoTabController(initialIndex: data as int);
+  CupertinoTabController fromPrimitives(Object? data) {
+    assert(data != null);
+    return CupertinoTabController(initialIndex: data! as int);
   }
 
   @override

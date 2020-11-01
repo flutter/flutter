@@ -944,13 +944,18 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   /// level), unless [nullOk] is set to false, in which case an exception will be
   /// thrown.
   CupertinoDynamicColor resolveFrom(BuildContext context, { bool nullOk = true }) {
-    final Brightness brightness = _isPlatformBrightnessDependent
-      ? CupertinoTheme.brightnessOf(context, nullOk: nullOk) ?? Brightness.light
-      : Brightness.light;
-
-    final bool isHighContrastEnabled = _isHighContrastDependent
-      && (MediaQuery.of(context, nullOk: nullOk)?.highContrast ?? false);
-
+    Brightness brightness = Brightness.light;
+    if (_isPlatformBrightnessDependent) {
+      brightness = nullOk
+          ? CupertinoTheme.maybeBrightnessOf(context) ?? Brightness.light
+          : CupertinoTheme.brightnessOf(context);
+    }
+    bool isHighContrastEnabled = false;
+    if (_isHighContrastDependent) {
+      isHighContrastEnabled = nullOk
+          ? MediaQuery.maybeOf(context)?.highContrast ?? false
+          : MediaQuery.of(context).highContrast;
+    }
 
     final CupertinoUserInterfaceLevelData level = _isInterfaceElevationDependent
       ? CupertinoUserInterfaceLevel.of(context, nullOk: nullOk) ?? CupertinoUserInterfaceLevelData.base

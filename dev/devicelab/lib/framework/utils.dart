@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
@@ -282,7 +283,6 @@ Future<Process> startProcess(
       + (environment != null ? ' with environment $environment' : ''));
   final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
-  newEnvironment['FLUTTER_IOS_SCREENSHOT_ON_CONNECTION_FAILURE'] = 'true';
   final Process process = await _processManager.start(
     <String>[executable, ...arguments],
     environment: newEnvironment,
@@ -433,8 +433,23 @@ Future<String> eval(
 }
 
 List<String> flutterCommandArgs(String command, List<String> options) {
+  // Commands support the --device-timeout flag.
+  final Set<String> supportedDeviceTimeoutCommands = <String>{
+    'attach',
+    'devices',
+    'drive',
+    'install',
+    'logs',
+    'run',
+    'screenshot',
+  };
   return <String>[
     command,
+    if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
+      ...<String>[
+        '--device-timeout',
+        '5',
+      ],
     if (localEngine != null) ...<String>['--local-engine', localEngine],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
     ...options,

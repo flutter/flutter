@@ -222,7 +222,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// Creates the [RestorationManager] instance available via
   /// [restorationManager].
   ///
-  /// Can be overriden in subclasses to create a different [RestorationManager].
+  /// Can be overridden in subclasses to create a different [RestorationManager].
   @protected
   RestorationManager createRestorationManager() {
     return RestorationManager();

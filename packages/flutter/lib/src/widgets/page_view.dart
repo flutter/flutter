@@ -846,7 +846,7 @@ class _PageViewState extends State<PageView> {
     switch (widget.scrollDirection) {
       case Axis.horizontal:
         assert(debugCheckHasDirectionality(context));
-        final TextDirection textDirection = Directionality.of(context)!;
+        final TextDirection textDirection = Directionality.of(context);
         final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
         return widget.reverse ? flipAxisDirection(axisDirection) : axisDirection;
       case Axis.vertical:

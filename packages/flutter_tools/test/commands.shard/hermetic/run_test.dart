@@ -238,6 +238,8 @@ void main() {
         when(mockDevice.id).thenReturn('mock-id');
         when(mockDevice.name).thenReturn('mock-name');
         when(mockDevice.platformType).thenReturn(PlatformType.android);
+        when(mockDevice.targetPlatformDisplayName)
+            .thenAnswer((Invocation invocation) async => 'mock-platform');
         when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) => Future<String>.value('api-14'));
 
         when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
@@ -503,6 +505,47 @@ void main() {
       }));
     }, overrides: <Type, Generator>{
       DeviceManager: () => mockDeviceManager,
+    });
+  });
+
+  group('dart-defines and web-renderer options', () {
+    List<String> dartDefines;
+
+    setUp(() {
+      dartDefines = <String>[];
+    });
+
+    test('auto web-renderer with no dart-defines', () {
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'auto');
+      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
+    });
+
+    test('canvaskit web-renderer with no dart-defines', () {
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'canvaskit');
+      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=true']);
+    });
+
+    test('html web-renderer with no dart-defines', () {
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'html');
+      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=false']);
+    });
+
+    test('auto web-renderer with existing dart-defines', () {
+      dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'auto');
+      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
+    });
+
+    test('canvaskit web-renderer with no dart-defines', () {
+      dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'canvaskit');
+      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=true']);
+    });
+
+    test('html web-renderer with no dart-defines', () {
+      dartDefines = <String>['FLUTTER_WEB_USE_SKIA=true'];
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'html');
+      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=false']);
     });
   });
 }
