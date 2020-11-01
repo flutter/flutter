@@ -18,6 +18,35 @@ import 'theme.dart';
 /// They are persistent and non-modal, allowing the user to either ignore them or
 /// interact with them at any time.
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///       return MaterialBanner(
+///       padding: const EdgeInsets.all(20),
+///       content: Text(
+///         "Hey, I am an Material Banner",
+///       ),
+///       leading: Icon(
+///         Icons.agriculture_outlined,
+///       ),
+///       backgroundColor: Colors.grey[300],
+///       actions: <Widget>[
+///         FlatButton(
+///           child: Text("OPEN"),
+///           onPressed: () {},
+///         ),
+///         FlatButton(
+///           child: Text("DISMISS"),
+///           onPressed: () {},
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// The [actions] will be placed beside the [content] if there is only one.
 /// Otherwise, the [actions] will be placed below the [content]. Use
 /// [forceActionsBelow] to override this behavior.
@@ -42,10 +71,10 @@ class MaterialBanner extends StatelessWidget {
     this.padding,
     this.leadingPadding,
     this.forceActionsBelow = false,
-  }) : assert(content != null),
-       assert(actions != null),
-       assert(forceActionsBelow != null),
-       super(key: key);
+  })  : assert(content != null),
+        assert(actions != null),
+        assert(forceActionsBelow != null),
+        super(key: key);
 
   /// The content of the [MaterialBanner].
   ///
@@ -106,12 +135,15 @@ class MaterialBanner extends StatelessWidget {
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
 
     final bool isSingleRow = actions.length == 1 && !forceActionsBelow;
-    final EdgeInsetsGeometry padding = this.padding ?? bannerTheme.padding ?? (isSingleRow
-        ? const EdgeInsetsDirectional.only(start: 16.0, top: 2.0)
-        : const EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0));
-    final EdgeInsetsGeometry leadingPadding = this.leadingPadding
-        ?? bannerTheme.leadingPadding
-        ?? const EdgeInsetsDirectional.only(end: 16.0);
+    final EdgeInsetsGeometry padding = this.padding ??
+        bannerTheme.padding ??
+        (isSingleRow
+            ? const EdgeInsetsDirectional.only(start: 16.0, top: 2.0)
+            : const EdgeInsetsDirectional.only(
+                start: 16.0, top: 24.0, end: 16.0, bottom: 4.0));
+    final EdgeInsetsGeometry leadingPadding = this.leadingPadding ??
+        bannerTheme.leadingPadding ??
+        const EdgeInsetsDirectional.only(end: 16.0);
 
     final Widget buttonBar = Container(
       alignment: AlignmentDirectional.centerEnd,
@@ -123,12 +155,12 @@ class MaterialBanner extends StatelessWidget {
       ),
     );
 
-    final Color backgroundColor = this.backgroundColor
-        ?? bannerTheme.backgroundColor
-        ?? theme!.colorScheme.surface;
-    final TextStyle? textStyle = contentTextStyle
-        ?? bannerTheme.contentTextStyle
-        ?? theme!.textTheme.bodyText2;
+    final Color backgroundColor = this.backgroundColor ??
+        bannerTheme.backgroundColor ??
+        theme!.colorScheme.surface;
+    final TextStyle? textStyle = contentTextStyle ??
+        bannerTheme.contentTextStyle ??
+        theme!.textTheme.bodyText2;
 
     return Container(
       color: backgroundColor,
@@ -149,13 +181,11 @@ class MaterialBanner extends StatelessWidget {
                     child: content,
                   ),
                 ),
-                if (isSingleRow)
-                  buttonBar,
+                if (isSingleRow) buttonBar,
               ],
             ),
           ),
-          if (!isSingleRow)
-            buttonBar,
+          if (!isSingleRow) buttonBar,
           const Divider(height: 0),
         ],
       ),
