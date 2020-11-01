@@ -22,26 +22,21 @@ import 'theme.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///       return MaterialBanner(
-///       padding: const EdgeInsets.all(20),
-///       content: Text(
-///         "Hey, I am an Material Banner",
+///   return MaterialBanner(
+///     padding: const EdgeInsets.all(20),
+///     content: Text("Hey, I am an Material Banner"),
+///     leading: Icon(Icons.agriculture_outlined),
+///     backgroundColor: Colors.grey[300],
+///     actions: <Widget>[
+///       FlatButton(
+///         child: Text("OPEN"),
+///         onPressed: () {},
 ///       ),
-///       leading: Icon(
-///         Icons.agriculture_outlined,
+///       FlatButton(
+///         child: Text("DISMISS"),
+///         onPressed: () {},
 ///       ),
-///       backgroundColor: Colors.grey[300],
-///       actions: <Widget>[
-///         FlatButton(
-///           child: Text("OPEN"),
-///           onPressed: () {},
-///         ),
-///         FlatButton(
-///           child: Text("DISMISS"),
-///           onPressed: () {},
-///         ),
-///       ],
-///     ),
+///     ],
 ///   );
 /// }
 /// ```
