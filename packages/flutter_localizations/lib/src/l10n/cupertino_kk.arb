@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Қою",
   "selectAllButtonLabel": "Барлығын таңдау",
   "tabSemanticsLabel": "Қойынды: $tabIndex/$tabCount",
-  "modalBarrierDismissLabel": "Жабу"
+  "modalBarrierDismissLabel": "Жабу",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

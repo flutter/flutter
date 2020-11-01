@@ -1957,7 +1957,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return MediaQuery(
-              data: MediaQuery.of(context)!.copyWith(textScaleFactor: textScaleFactor),
+              data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
               child: Scaffold(
                 appBar: AppBar(
                   centerTitle: false,
@@ -2002,7 +2002,7 @@ void main() {
                     appBar: AppBar(
                       centerTitle: centerTitle,
                       title: MediaQuery(
-                        data: MediaQuery.of(context)!.copyWith(textScaleFactor: textScaleFactor),
+                        data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
                         child: const Text('Jumbo'),
                       ),
                     ),

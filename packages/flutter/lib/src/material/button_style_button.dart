@@ -87,9 +87,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Returns a non-null [ButtonStyle] that's based primarily on the [Theme]'s
   /// [ThemeData.textTheme] and [ThemeData.colorScheme].
   ///
-  /// The returned style can be overriden by the [style] parameter and
+  /// The returned style can be overridden by the [style] parameter and
   /// by the style returned by [themeStyleOf]. For example the default
-  /// style of the [TextButton] subclass can be overidden with its
+  /// style of the [TextButton] subclass can be overridden with its
   /// [TextButton.style] constructor parameter, or with a
   /// [TextButtonTheme].
   ///
@@ -105,7 +105,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
 
   /// Returns the ButtonStyle that belongs to the button's component theme.
   ///
-  /// The returned style can be overriden by the [style] parameter.
+  /// The returned style can be overridden by the [style] parameter.
   ///
   /// Concrete button subclasses should return the ButtonStyle for the
   /// nearest subclass-specific inherited theme, and if no such theme

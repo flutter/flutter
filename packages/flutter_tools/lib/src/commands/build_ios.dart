@@ -8,17 +8,18 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/logger.dart';
+import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/mac.dart';
-import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
+import '../runner/flutter_command.dart';
 import 'build.dart';
 
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
-/// or simulator. Can only be run on a macOS host. For producing deployment
-/// .ipas, see https://flutter.dev/docs/deployment/ios.
+/// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
   BuildIOSCommand({ @required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
     argParser
@@ -56,14 +57,27 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   bool get shouldCodesign => boolArg('codesign');
 }
 
-/// Builds an .xcarchive for an iOS app to be generated for App Store submission.
+/// Builds an .xcarchive and optionally .ipa for an iOS app to be generated for
+/// App Store submission.
+///
 /// Can only be run on a macOS host.
-/// For producing deployment .ipas, see https://flutter.dev/docs/deployment/ios.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
-  BuildIOSArchiveCommand({ @required bool verboseHelp }) : super(verboseHelp: verboseHelp);
+  BuildIOSArchiveCommand({@required bool verboseHelp})
+      : super(verboseHelp: verboseHelp) {
+    argParser.addOption(
+      'export-options-plist',
+      valueHelp: 'ExportOptions.plist',
+      // TODO(jmagman): Update help text with link to Flutter docs.
+      help:
+          'Optionally export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
+    );
+  }
 
   @override
-  final String name = 'xcarchive';
+  final String name = 'ipa';
+
+  @override
+  final List<String> aliases = <String>['xcarchive'];
 
   @override
   final String description = 'Build an iOS archive bundle (Mac OS X host only).';
@@ -79,6 +93,76 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
   @override
   final bool shouldCodesign = true;
+
+  String get exportOptionsPlist => stringArg('export-options-plist');
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    if (exportOptionsPlist != null) {
+      final FileSystemEntityType type = globals.fs.typeSync(exportOptionsPlist);
+      if (type == FileSystemEntityType.notFound) {
+        throwToolExit(
+            '"$exportOptionsPlist" property list does not exist.');
+      } else if (type != FileSystemEntityType.file) {
+        throwToolExit(
+            '"$exportOptionsPlist" is not a file. See "xcodebuild -h" for available keys.');
+      }
+    }
+    final FlutterCommandResult xcarchiveResult = await super.runCommand();
+
+    if (exportOptionsPlist == null) {
+      return xcarchiveResult;
+    }
+
+    // xcarchive failed or not at expected location.
+    if (xcarchiveResult.exitStatus != ExitStatus.success) {
+      globals.logger.printStatus('Skipping IPA');
+      return xcarchiveResult;
+    }
+
+    // Build IPA from generated xcarchive.
+    final BuildableIOSApp app = await buildableIOSApp;
+    Status status;
+    RunResult result;
+    final String outputPath = globals.fs.path.absolute(app.ipaOutputPath);
+    try {
+      status = globals.logger.startProgress('Building IPA...');
+
+      result = await globals.processUtils.run(
+        <String>[
+          ...globals.xcode.xcrunCommand(),
+          'xcodebuild',
+          '-exportArchive',
+          '-archivePath',
+          globals.fs.path.absolute(app.archiveBundleOutputPath),
+          '-exportPath',
+          outputPath,
+          '-exportOptionsPlist',
+          globals.fs.path.absolute(exportOptionsPlist),
+        ],
+      );
+    } finally {
+      status.stop();
+    }
+
+    if (result.exitCode != 0) {
+      final StringBuffer errorMessage = StringBuffer();
+
+      // "error:" prefixed lines are the nicely formatted error message, the
+      // rest is the same message but printed as a IDEFoundationErrorDomain.
+      // Example:
+      // error: exportArchive: exportOptionsPlist error for key 'method': expected one of {app-store, ad-hoc, enterprise, development, validation}, but found developmentasdasd
+      // Error Domain=IDEFoundationErrorDomain Code=1 "exportOptionsPlist error for key 'method': expected one of {app-store, ad-hoc, enterprise, development, validation}, but found developmentasdasd" ...
+      LineSplitter.split(result.stderr)
+          .where((String line) => line.contains('error: '))
+          .forEach(errorMessage.writeln);
+      throwToolExit('Encountered error while building IPA:\n$errorMessage');
+    }
+
+    globals.logger.printStatus('Built IPA to $outputPath.');
+
+    return FlutterCommandResult.success();
+  }
 }
 
 abstract class _BuildIOSSubCommand extends BuildSubCommand {
@@ -111,10 +195,26 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   bool get configOnly;
   bool get shouldCodesign;
 
+  BuildInfo get buildInfo {
+    _buildInfo ??= getBuildInfo();
+    return _buildInfo;
+  }
+
+  BuildInfo _buildInfo;
+
+  Future<BuildableIOSApp> get buildableIOSApp async {
+    _buildableIOSApp ??= await applicationPackages.getPackageForPlatform(
+      TargetPlatform.ios,
+      buildInfo: buildInfo,
+    ) as BuildableIOSApp;
+    return _buildableIOSApp;
+  }
+
+  BuildableIOSApp _buildableIOSApp;
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
-    final BuildInfo buildInfo = getBuildInfo();
 
     if (!globals.platform.isMacOS) {
       throwToolExit('Building for iOS is only supported on macOS.');
@@ -132,10 +232,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       );
     }
 
-    final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(
-      TargetPlatform.ios,
-      buildInfo: buildInfo,
-    ) as BuildableIOSApp;
+    final BuildableIOSApp app = await buildableIOSApp;
 
     if (app == null) {
       throwToolExit('Application not configured for iOS');
@@ -204,8 +301,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
     if (result.output != null) {
       globals.printStatus('Built ${result.output}.');
+
+      return FlutterCommandResult.success();
     }
 
-    return FlutterCommandResult.success();
+    return FlutterCommandResult.fail();
   }
 }

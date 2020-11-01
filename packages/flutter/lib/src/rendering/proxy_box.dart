@@ -4087,7 +4087,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     final bool hadValue = _onTap != null;
     _onTap = handler;
-    if ((handler != null) == hadValue)
+    if ((handler != null) != hadValue)
       markNeedsSemanticsUpdate();
   }
 
@@ -4105,7 +4105,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     final bool hadValue = _onDismiss != null;
     _onDismiss = handler;
-    if ((handler != null) == hadValue)
+    if ((handler != null) != hadValue)
       markNeedsSemanticsUpdate();
   }
 

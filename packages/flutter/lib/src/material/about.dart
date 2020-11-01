@@ -201,7 +201,7 @@ class AboutListTile extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     return ListTile(
       leading: icon,
-      title: child ?? Text(MaterialLocalizations.of(context)!.aboutListTileTitle(
+      title: child ?? Text(MaterialLocalizations.of(context).aboutListTileTitle(
         applicationName ?? _defaultApplicationName(context),
       )),
       dense: dense,
@@ -405,7 +405,7 @@ class AboutDialog extends StatelessWidget {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text(MaterialLocalizations.of(context)!.viewLicensesButtonLabel),
+          child: Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
           onPressed: () {
             showLicensePage(
               context: context,
@@ -417,7 +417,7 @@ class AboutDialog extends StatelessWidget {
           },
         ),
         TextButton(
-          child: Text(MaterialLocalizations.of(context)!.closeButtonLabel),
+          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -493,7 +493,7 @@ class _LicensePageState extends State<LicensePage> {
   Widget build(BuildContext context) {
     return _MasterDetailFlow(
       detailPageFABlessGutterWidth: _getGutterSize(context),
-      title: Text(MaterialLocalizations.of(context)!.licensesPageTitle),
+      title: Text(MaterialLocalizations.of(context).licensesPageTitle),
       detailPageBuilder: _packageLicensePage,
       masterViewBuilder: _packagesView,
     );
@@ -720,7 +720,7 @@ class _PackageListTile extends StatelessWidget {
       color: isSelected ? Theme.of(context)!.highlightColor : Theme.of(context)!.cardColor,
       child: ListTile(
         title: Text(packageName),
-        subtitle: Text(MaterialLocalizations.of(context)!.licensesPackageDetailText(numberLicenses)),
+        subtitle: Text(MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses)),
         selected: isSelected,
         onTap: onTap,
       ),
@@ -753,7 +753,7 @@ class _LicenseData {
     licenses.add(entry); // Completion of the contract above.
   }
 
-  /// Add a package and initialise package license binding. This is a no-op if
+  /// Add a package and initialize package license binding. This is a no-op if
   /// the package has been seen before.
   void _addPackage(String package) {
     if (!packageLicenseBindings.containsKey(package)) {
@@ -890,7 +890,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData? theme = Theme.of(context);
     final String title = widget.packageName;
     final String subtitle = localizations.licensesPackageDetailText(widget.licenseEntries.length);
@@ -1018,7 +1018,7 @@ const double _wideGutterSize = 24.0;
 const double _narrowGutterSize = 12.0;
 
 double _getGutterSize(BuildContext context) =>
-    MediaQuery.of(context)!.size.width >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
+    MediaQuery.of(context).size.width >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
 
 /// Signature for the builder callback used by [_MasterDetailFlow].
 typedef _MasterViewBuilder = Widget Function(BuildContext context, bool isLateralUI);
@@ -1151,7 +1151,7 @@ class _MasterDetailFlow extends StatefulWidget {
   /// See [AppBar.automaticallyImplyLeading].
   final bool automaticallyImplyLeading;
 
-  /// Override the framework from determining whether to display the title in the centre of the
+  /// Override the framework from determining whether to display the title in the center of the
   /// app bar or not.
   ///
   /// See [AppBar.centerTitle].
@@ -1246,7 +1246,7 @@ abstract class _PageOpener {
 const int _materialWideDisplayThreshold = 840;
 
 class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOpener {
-  /// Tracks whether focus is on the detail or master views. Determines behaviour when switching
+  /// Tracks whether focus is on the detail or master views. Determines behavior when switching
   /// from lateral to nested navigation.
   _Focus focus = _Focus.master;
 
@@ -1627,7 +1627,7 @@ class _DetailView extends StatelessWidget {
     if (_arguments == null) {
       return Container();
     }
-    final double screenHeight = MediaQuery.of(context)!.size.height;
+    final double screenHeight = MediaQuery.of(context).size.height;
     final double minHeight = (screenHeight - kToolbarHeight) / screenHeight;
 
     return DraggableScrollableSheet(

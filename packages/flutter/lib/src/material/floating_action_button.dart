@@ -241,7 +241,7 @@ class FloatingActionButton extends StatelessWidget {
   /// is used.
   ///
   /// Although the color of theme's `accentIconTheme` currently provides a
-  /// default that supercedes the `onSecondary` color, this dependency
+  /// default that supersedes the `onSecondary` color, this dependency
   /// has been deprecated:  https://flutter.dev/go/remove-fab-accent-theme-dependency.
   /// It will be removed in the future.
   final Color? foregroundColor;
