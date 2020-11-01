@@ -26,11 +26,10 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 /// it's [ScrollStartNotification]or[ScrollEndNotification].
 ///
 /// ```dart
-/// final List<String> _tabs = ["Months", "Days"];
-/// final List<String> _months = [ "January","February","March", ];
-/// final List<String> _days = [ "Sunday", "Monday","Tuesday", ];
-///
 /// Widget build(BuildContext context) {
+/// const List<String> _tabs = ["Months", "Days"];
+/// const List<String> _months = [ "January","February","March", ];
+/// const List<String> _days = [ "Sunday", "Monday","Tuesday", ];
 ///   return DefaultTabController(
 ///     length: _tabs.length,
 ///     child: Scaffold(
