@@ -3442,7 +3442,7 @@ class InputDecoration {
         && other.helperMaxLines == helperMaxLines
         && other.hintText == hintText
         && other.hintStyle == hintStyle
-        && other.hintTextDirection== hintTextDirection
+        && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
         && other.errorText == errorText
         && other.errorStyle == errorStyle
