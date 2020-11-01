@@ -1481,7 +1481,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 ///
 ///```dart
 ///Widget build(BuildContext) {
-///  Container(
+///  return Container(
 ///    height: 400,
 ///    width: 300,
 ///    color: Colors.red,
