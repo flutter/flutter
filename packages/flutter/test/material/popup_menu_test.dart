@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 void main() {
   testWidgets('Navigator.push works within a PopupMenuButton', (WidgetTester tester) async {
@@ -1778,6 +1779,96 @@ void main() {
       tester.getBottomLeft(find.byKey(_lastKey)).dy,
       lessThan(600 - windowPaddingBottom), // Device height is 600.
     );
+  });
+
+  group('feedback', () {
+    late FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback.dispose();
+    });
+
+    testWidgets('PopupMenu with enabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PopupMenuButton<dynamic>(
+              enableFeedback: enableFeedback,
+              child: const Text('Abc'),
+              itemBuilder: (BuildContext context) => Iterable<PopupMenuItem<int>>.generate(
+                5, (int i) => PopupMenuItem<int>(
+                  // Set globalKey to the first and last item.
+                  value: i,
+                  child: Text('Item $i'),
+                ),
+              ).toList(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(PopupMenuButton));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('PopupMenu with disabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PopupMenuButton<dynamic>(
+              enableFeedback: enableFeedback,
+              child: const Text('Show Menu'),
+              itemBuilder: (BuildContext context) => Iterable<PopupMenuItem<int>>.generate(
+                5, (int i) => PopupMenuItem<int>(
+                  // Set globalKey to the first and last item.
+                  value: i,
+                  child: Text('Item $i'),
+                ),
+              ).toList(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(PopupMenuButton));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('PopupMenu with enabled feedback by default', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PopupMenuButton<dynamic>(
+              child: const Text('Show Menu'),
+              itemBuilder: (BuildContext context) => Iterable<PopupMenuItem<int>>.generate(
+                5, (int i) => PopupMenuItem<int>(
+                  // Set globalKey to the first and last item.
+                  value: i,
+                  child: Text('Item $i'),
+                ),
+              ).toList(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(PopupMenuButton));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
   });
 }
 
