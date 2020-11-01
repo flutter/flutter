@@ -30,7 +30,7 @@ import 'tooltip_theme.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EeEfD5fI-5Q}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// This example show a basic [Tooltip] which has a [Text] as child.
 /// [message] contains your label to be shown by the tooltip when
@@ -38,19 +38,17 @@ import 'tooltip_theme.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: const Center(
+///   return Center(
 ///     child: Tooltip(
 ///       message: "I am a Tooltip",
 ///       child: Text("Tap this text and hold down to show a tooltip."),
-///       ),
 ///     ),
 ///   );
 /// }
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// This example covers most of the attributes available in Tooltip.
 /// `decoration` has been used to give a gradient and borderRadius to Tooltip.
@@ -66,8 +64,7 @@ import 'tooltip_theme.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: const Center(
+///   return Center(
 ///     child: Tooltip(
 ///       message: "I am a Tooltip",
 ///       child: Text("Tap this text and hold down to show a tooltip."),
@@ -83,7 +80,6 @@ import 'tooltip_theme.dart';
 ///       ),
 ///       showDuration: Duration(seconds: 2),
 ///       waitDuration: Duration(seconds: 1),
-///       ),
 ///     ),
 ///   );
 /// }
