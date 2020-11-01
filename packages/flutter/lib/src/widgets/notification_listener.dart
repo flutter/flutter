@@ -13,10 +13,9 @@ import 'framework.dart';
 ///
 /// [NotificationListener] is useful when listening scroll events
 /// in [ListView],[NestedScrollView],[GridView] or any Scrolling widgets.
-///
 /// Used by [NotificationListener.onNotification].
-typedef NotificationListenerCallback<T extends Notification> = bool Function(
-    T notification);
+
+typedef NotificationListenerCallback<T extends Notification> = bool Function(T notification);
 
 /// {@tool dartpad --template=stateless_widget_material}
 ///
@@ -90,7 +89,6 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(
 /// ### [ScrollEndNotification] which returns the end position of scrolling.
 /// ### [NestedScrollView] which creates a nested scroll view.
 ///
-
 /// A notification that can bubble up the widget tree.
 ///
 /// You can determine the type of a notification using the `is` operator to
@@ -121,8 +119,7 @@ abstract class Notification {
     if (element is StatelessElement) {
       final StatelessWidget widget = element.widget;
       if (widget is NotificationListener<Notification>) {
-        if (widget._dispatch(
-            this, element)) // that function checks the type dynamically
+        if (widget._dispatch(this, element)) // that function checks the type dynamically
           return false;
       }
     }
@@ -159,7 +156,7 @@ abstract class Notification {
   /// `super.debugFillDescription(description)`.
   @protected
   @mustCallSuper
-  void debugFillDescription(List<String> description) {}
+  void debugFillDescription(List<String> description) { }
 }
 
 /// A widget that listens for [Notification]s bubbling up the tree.
@@ -244,4 +241,4 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
 /// useful for paint effects that depend on the layout. If you were to use this
 /// notification to change the build, for instance, you would always be one
 /// frame behind, which would look really ugly and laggy.
-class LayoutChangedNotification extends Notification {}
+class LayoutChangedNotification extends Notification { }
