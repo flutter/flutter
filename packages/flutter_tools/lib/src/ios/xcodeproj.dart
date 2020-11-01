@@ -202,7 +202,7 @@ List<String> _xcodeBuildSettingsLines({
   final String buildNumber = parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
-  if (globals.artifacts is LocalEngineArtifacts) {
+  if (globals.artifacts.isLocalEngine) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');

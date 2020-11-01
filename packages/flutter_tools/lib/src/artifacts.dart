@@ -194,8 +194,16 @@ class EngineBuildPaths {
 abstract class Artifacts {
   /// A test-specific implementation of artifacts that returns stable paths for
   /// all artifacts.
+  ///
+  /// if [localEngine] is non-null, creates a test artifacts instance that implements
+  /// [LocalEngineArtifacts].
   @visibleForTesting
-  factory Artifacts.test() = _TestArtifacts;
+  factory Artifacts.test({String localEngine}) {
+    if (localEngine != null) {
+      return _TestLocalEngineArtifacts(localEngine);
+    }
+    return _TestArtifacts();
+  }
 
   static LocalEngineArtifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
     return LocalEngineArtifacts(
@@ -513,8 +521,21 @@ HostPlatform _currentHostPlatformAsHost(Platform platform) {
 }
 
 /// Manages the artifacts of a locally built engine.
-class LocalEngineArtifacts implements Artifacts {
-  LocalEngineArtifacts(
+abstract class LocalEngineArtifacts implements Artifacts {
+  factory LocalEngineArtifacts(
+    String engineOutPath,
+    String _hostEngineOutPath, {
+    @required FileSystem fileSystem,
+    @required Cache cache,
+    @required ProcessManager processManager,
+    @required Platform platform,
+  }) = _LocalEngineArtifacts;
+
+  String get engineOutPath;
+}
+
+class _LocalEngineArtifacts implements LocalEngineArtifacts {
+  _LocalEngineArtifacts(
     this.engineOutPath,
     this._hostEngineOutPath, {
     @required FileSystem fileSystem,
@@ -526,7 +547,8 @@ class LocalEngineArtifacts implements Artifacts {
        _processManager = processManager,
        _platform = platform;
 
-  final String engineOutPath; // TODO(goderbauer): This should be private.
+  @override
+  final String engineOutPath;
   final String _hostEngineOutPath;
   final FileSystem _fileSystem;
   final Cache _cache;
@@ -757,6 +779,16 @@ class _TestArtifacts implements Artifacts {
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
     return 'test-engine';
   }
+
+  @override
+  bool get isLocalEngine => false;
+}
+
+class _TestLocalEngineArtifacts extends _TestArtifacts implements LocalEngineArtifacts {
+  _TestLocalEngineArtifacts(this.engineOutPath);
+
+  @override
+  final String engineOutPath;
 
   @override
   bool get isLocalEngine => false;

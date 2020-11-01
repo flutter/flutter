@@ -165,7 +165,7 @@ void _writeGeneratedFlutterConfig(
       'FLUTTER_TARGET': target,
     ...buildInfo.toEnvironmentConfig(),
   };
-  if (globals.artifacts is LocalEngineArtifacts) {
+  if (globals.artifacts.isLocalEngine) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));

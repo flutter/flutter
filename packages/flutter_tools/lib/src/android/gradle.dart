@@ -282,7 +282,7 @@ Future<void> buildGradleApp({
   if (!buildInfo.androidGradleDaemon) {
     command.add('--no-daemon');
   }
-  if (globals.artifacts is LocalEngineArtifacts) {
+  if (globals.artifacts.isLocalEngine) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final Directory localEngineRepo = _getLocalEngineRepo(
       engineOutPath: localEngineArtifacts.engineOutPath,
