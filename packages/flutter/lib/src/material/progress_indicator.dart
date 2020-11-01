@@ -246,7 +246,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// This example shows a [LinearProgressIndicator] with a fixed value.
-/// 
+///
 /// ![https://flutter.github.io/assets-for-api-docs/assets/material/linear_progress_indicator_fixed_value.png]
 ///
 /// ```dart imports
@@ -642,7 +642,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// This example shows a [CircularProgressIndicator] with a fixed value.
-/// 
+///
 /// ![https://flutter.github.io/assets-for-api-docs/assets/material/circular_progress_indicator_fixed_value.png]
 ///
 /// ```dart imports
