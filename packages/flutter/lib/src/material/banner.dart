@@ -17,6 +17,35 @@ import 'theme.dart';
 /// Banners should be displayed at the top of the screen, below a top app bar.
 /// They are persistent and non-modal, allowing the user to either ignore them or
 /// interact with them at any time.
+/// 
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///       return MaterialBanner(
+///       padding: const EdgeInsets.all(20),
+///       content: Text(
+///         "Hey, I am an Material Banner",
+///       ),
+///       leading: Icon(
+///         Icons.agriculture_outlined,
+///       ),
+///       backgroundColor: Colors.grey[300],
+///       actions: <Widget>[
+///         FlatButton(
+///           child: Text("OPEN"),
+///           onPressed: () {},
+///         ),
+///         FlatButton(
+///           child: Text("DISMISS"),
+///           onPressed: () {},
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// The [actions] will be placed beside the [content] if there is only one.
 /// Otherwise, the [actions] will be placed below the [content]. Use
