@@ -20,16 +20,16 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(
 
 /// {@tool dartpad --template=stateless_widget_material}
 ///
-///This example shows a [NotificationListener ] widget
-///which its type is [ScrollNotification ], when there is scroll
-///event occurs in the [NestedScrollView],
-///We want to be notified the current scroll position whether
-///it's [ScrollStartNotification]or[ScrollEndNotification].
+/// This example shows a [NotificationListener ] widget
+/// which its type is [ScrollNotification ], when there is scroll
+/// event occurs in the [NestedScrollView],
+/// We want to be notified the current scroll position whether
+/// it's [ScrollStartNotification]or[ScrollEndNotification].
 ///
 /// ```dart
-///final List<String> _tabs = ["Months", "Days"];
-///final List<String> _months = [ "January","February","March", ];
-///final List<String> _days = [ "Sunday", "Monday","Tuesday", ];
+/// final List<String> _tabs = ["Months", "Days"];
+/// final List<String> _months = [ "January","February","March", ];
+/// final List<String> _days = [ "Sunday", "Monday","Tuesday", ];
 ///
 /// Widget build(BuildContext context) {
 ///   return DefaultTabController(
