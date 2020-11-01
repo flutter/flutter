@@ -746,7 +746,6 @@ class SliverChildListDelegate extends SliverChildDelegate {
 }
 
 /// A base class for sliver that have [KeepAlive] children.
-/// It is an abstart class.
 ///
 /// See also:
 ///
