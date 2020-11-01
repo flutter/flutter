@@ -2837,7 +2837,7 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This example shows when width constraint is finite, width gets biggest allowed
-/// width and height gets width / aspectRatio.   
+/// width and height gets width / aspectRatio.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
