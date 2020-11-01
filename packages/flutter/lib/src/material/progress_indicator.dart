@@ -274,7 +274,6 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This example shows a [LinearProgressIndicator] with a fixed color.
-
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -304,7 +303,6 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// a fixed color, fixed value and a background color.
 ///
 /// ![https://flutter.github.io/assets-for-api-docs/assets/material/linear_progress_indicator_background_color.png]
-
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -333,7 +331,6 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// This example shows a [LinearProgressIndicator] with a changing color.
-
 ///
 /// ```dart
 /// AnimationController controller;
@@ -383,7 +380,6 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// This example shows a [LinearProgressIndicator] with a changing value.
-
 ///
 /// ```dart
 /// AnimationController controller;
@@ -628,7 +624,6 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// This example shows a [CircularProgressIndicator] with a fixed value.
 ///
 /// ![https://flutter.github.io/assets-for-api-docs/assets/material/circular_progress_indicator_fixed_value.png]
-
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -655,7 +650,6 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This example shows a [CircularProgressIndicator] with a fixed color.
-
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -685,7 +679,6 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// a fixed color, fixed value and a background color.
 ///
 /// ![https://flutter.github.io/assets-for-api-docs/assets/material/circular_progress_indicator_background_color.png]
-
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -714,7 +707,6 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// This example shows a [CircularProgressIndicator] with a changing color.
-
 ///
 /// ```dart
 /// AnimationController controller;
@@ -764,7 +756,6 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// This example shows a [CircularProgressIndicator] with a changing value.
-
 ///
 /// ```dart
 /// AnimationController controller;
