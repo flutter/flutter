@@ -1086,6 +1086,7 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 ///           },
 ///           child: Container(
 ///             color: Colors.blue,
+///             child: Text('Tap me to start the animated transition'),
 ///           ),
 ///         ),
 ///       ),
