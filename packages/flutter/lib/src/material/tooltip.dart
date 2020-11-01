@@ -30,6 +30,59 @@ import 'tooltip_theme.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EeEfD5fI-5Q}
 ///
+/// ## Example
+///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// This example show a basic [Tooltip] which has a [Text] as child.
+/// [message] contains your label to be shown on long pressed.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Tooltip(
+///       message: "Welcome Greetings",
+///       child: Text("Hello Flutter"),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// This example covers most of the attributes available in Tooltip.
+/// `decoration` has been used to give a gradient and borderRadius to Tooltip.
+/// `height` has been used to set a specific size of the Tooltip.
+/// `preferBelow` accepts two values true or false, true will show tooltip below
+/// the child and false will show tooltip above child.
+/// `textStyle` has been used to set fontSize of 'message'.
+/// `showDuration` accepts a Duration to show the message after long Press released.
+/// `waitDuration` accepts a Duration to show the message after Long Press initiated.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Tooltip(
+///       message: "Welcome Greetings",
+///       child: Text("Hello Flutter"),
+///       decoration: BoxDecoration(
+///         borderRadius: BorderRadius.circular(25),
+///         gradient: LinearGradient(colors: [Colors.amber, Colors.red]),
+///       ),
+///       height: 50,
+///       padding: EdgeInsets.all(8.0),
+///       preferBelow: false,
+///       textStyle: TextStyle(
+///         fontSize: 24,
+///       ),
+///       showDuration: Duration(seconds: 2),
+///       waitDuration: Duration(seconds: 1),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
