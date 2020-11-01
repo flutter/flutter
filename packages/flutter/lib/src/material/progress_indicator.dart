@@ -414,7 +414,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///   animation = Tween<double>(
 ///     begin: 0,
 ///     end: 1,
-///   ).animate(controller);
+///   ).animate(controller)
 ///     ..addListener(() {
 ///       setState(() {});
 ///     });
@@ -810,7 +810,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///   animation = Tween<double>(
 ///     begin: 0,
 ///     end: 1,
-///   ).animate(controller);
+///   ).animate(controller)
 ///     ..addListener(() {
 ///       setState(() {});
 ///     });
