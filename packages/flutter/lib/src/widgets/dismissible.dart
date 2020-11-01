@@ -64,7 +64,8 @@ enum DismissDirection {
 ///
 /// {@tool dartpad --template=statefull_widget_scaffold}
 /// 
-/// A DartPad sample showing Dismissbile in action:
+/// This sample shows how you can use the [Dismissible] widget to 
+/// remove list items using swipe gestures.
 ///
 /// ```dart 
 ///  List<int> items = List<int>.generate(100, (index) => index);
