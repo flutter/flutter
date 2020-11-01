@@ -275,7 +275,7 @@ abstract class Route<T> {
   /// screen; instead, the larger scope is popped (e.g. the application quits,
   /// so that the user returns to the previous application).
   ///
-  /// In other cases, the default behaviour is to accept the pop
+  /// In other cases, the default behavior is to accept the pop
   /// ([RoutePopDisposition.pop]).
   ///
   /// The third possible value is [RoutePopDisposition.doNotPop], which causes
@@ -5444,7 +5444,7 @@ class _HistoryProperty extends RestorableProperty<Map<String?, List<Object>>?> {
 typedef NavigatorFinderCallback = NavigatorState Function(BuildContext context);
 
 /// A callback that given some `arguments` and a `navigator` adds a new
-/// restorable route to that `navigator` and resturns the opaque ID of that
+/// restorable route to that `navigator` and returns the opaque ID of that
 /// new route.
 ///
 /// Usually, this callback calls one of the imperative methods on the Navigator
@@ -5699,7 +5699,7 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
 
   /// Whether the [Route] created by [present] is currently shown.
   ///
-  /// Returns true after [present] has been called until the [Route] compeltes.
+  /// Returns true after [present] has been called until the [Route] completes.
   bool get isPresent => route != null;
 
   /// The route that [present] added to the Navigator.

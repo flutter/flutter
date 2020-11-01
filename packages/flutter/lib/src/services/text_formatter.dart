@@ -135,7 +135,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 
   /// A [Pattern] to match and replace in incoming [TextEditingValue]s.
   ///
-  /// The behaviour of the pattern depends on the [allow] property. If
+  /// The behavior of the pattern depends on the [allow] property. If
   /// it is true, then this is an allow list, specifying a pattern that
   /// characters must match to be accepted. Otherwise, it is a deny list,
   /// specifying a pattern that characters must not match to be accepted.

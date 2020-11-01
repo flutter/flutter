@@ -2111,7 +2111,7 @@ class PointerCancelEvent extends PointerEvent with _PointerEventDescription, _Co
   }
 }
 
-/// Determine the approriate hit slop pixels based on the [kind] of pointer.
+/// Determine the appropriate hit slop pixels based on the [kind] of pointer.
 double computeHitSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
@@ -2124,7 +2124,7 @@ double computeHitSlop(PointerDeviceKind kind) {
   }
 }
 
-/// Determine the approriate pan slop pixels based on the [kind] of pointer.
+/// Determine the appropriate pan slop pixels based on the [kind] of pointer.
 double computePanSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
@@ -2137,7 +2137,7 @@ double computePanSlop(PointerDeviceKind kind) {
   }
 }
 
-/// Determine the approriate scale slop pixels based on the [kind] of pointer.
+/// Determine the appropriate scale slop pixels based on the [kind] of pointer.
 double computeScaleSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:

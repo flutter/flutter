@@ -5971,7 +5971,7 @@ class Listener extends SingleChildRenderObjectWidget {
 ///
 /// [MouseRegion] is used
 /// when it is needed to compare the list of objects that a mouse pointer is
-/// hovering over betweeen this frame and the last frame. This means entering
+/// hovering over between this frame and the last frame. This means entering
 /// events, exiting events, and mouse cursors.
 ///
 /// To listen to general pointer events, use [Listener], or more preferably,
@@ -7221,7 +7221,7 @@ class KeyedSubtree extends StatelessWidget {
 /// ```
 ///
 /// Could equally well be defined and used like this, without
-/// definining a new widget class:
+/// defining a new widget class:
 ///
 /// ```dart
 /// Center(
