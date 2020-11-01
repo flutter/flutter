@@ -2809,12 +2809,13 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// This examples shows how AspectRatio sets width when its parent's width constraint is infinite. 
-/// Since its parent's allowed height is a fixed value, the actual width is determined via the 
-/// given AspectRatio.
+/// This examples shows how AspectRatio sets width when its parent's width
+/// constraint is infinite. Since its parent's allowed height is a fixed value,
+/// the actual width is determined via the given AspectRatio.
 ///
-/// Since the height is fixed at 100.0 in this example and the aspect ratio is set to 16 / 9, the width
-/// should then be 100.0 / 9 * 16.
+/// Since the height is fixed at 100.0 in this example and the aspect ratio is
+/// set to 16 / 9, the width should then be 100.0 / 9 * 16.
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Container(
@@ -2840,23 +2841,22 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// This example shows when width constraint is finite, width gets biggest allowed
-/// width and height gets width / aspectRatio.
-///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Container(
-///     color: Colors.purple,
+///     color: Colors.blue,
 ///     alignment: Alignment.center,
 ///     width: 100.0,
 ///     height: 100.0,
 ///     child: AspectRatio(
-///     aspectRatio: 2.0,
-///     child: new Container(
-///     color: Colors.amber,
+///       aspectRatio: 2.0,
+///       child: Container(
+///         width: 100.0,
+///         height: 50.0,
+///         color: Colors.green,
 ///       ),
 ///     ),
-///  );
+///   );
 /// }
 /// ```
 /// {@end-tool}
@@ -2878,17 +2878,19 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Container(
-///     color: Colors.purple,
+///     color: Colors.blue,
 ///     alignment: Alignment.center,
 ///     width: 100.0,
 ///     height: 100.0,
 ///     child: AspectRatio(
-///     aspectRatio: 0.5,
-///     child: new Container(
-///     color: Colors.amber,
+///       aspectRatio: 0.5,
+///       child: Container(
+///         width: 100.0,
+///         height: 50.0,
+///         color: Colors.green,
 ///       ),
 ///     ),
-///  );
+///   );
 /// }
 /// ```
 /// {@end-tool}
