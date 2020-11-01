@@ -66,10 +66,10 @@ abstract class PreferredSizeWidget implements Widget {
 /// This example explain how can we make a custom [AppBar] which has more `height`
 /// than usual. In which we will have a `title`, two [Icons] and a [TabBar] that
 /// controls body content in [Scaffold.body].
-/// 
+///
 /// We assign the `height` parameter of our [PreferredSize] equal to 100, but you
 /// can change this value and see how our [AppBar] behaves. The benefit of using
-/// PreferredSize as an AppBar child its that we can use a different widget for creating 
+/// PreferredSize as an AppBar child its that we can use a different widget for creating
 /// *custom app bars*, in this case. All this work because [Scaffold.appBar]
 /// expect a [PreferredSizeWidget] and, as is describe above AppBar implements it
 ///
