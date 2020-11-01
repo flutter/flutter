@@ -6625,6 +6625,44 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=65HoWqBboI8}
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// The following sample has an [AbsorbPointer] widget wrapping the button on
+/// top of the stack, which absorbs pointer events, preventing its child button
+/// __and__ the button below it in the stack from receiving the pointer events.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Stack(
+///     alignment: AlignmentDirectional.center,
+///     children: [
+///       SizedBox(
+///         width: 200.0,
+///         height: 100.0,
+///         child: ElevatedButton(
+///           onPressed: () {},
+///           child: null,
+///         ),
+///       ),
+///       SizedBox(
+///         width: 100.0,
+///         height: 200.0,
+///         child: AbsorbPointer(
+///           absorbing: true,
+///           child: ElevatedButton(
+///             style: ElevatedButton.styleFrom(
+///               primary: Colors.blue.shade200,
+///             ),
+///             onPressed: () {},
+///             child: null,
+///           ),
+///         ),
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [IgnorePointer], which also prevents its children from receiving pointer
