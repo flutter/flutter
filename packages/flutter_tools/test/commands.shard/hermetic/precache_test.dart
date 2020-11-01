@@ -39,7 +39,6 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache']);
 
-    expect(Cache.isLocked(), isTrue);
     // Do not throw StateError, lock is acquired.
     expect(() => cache.checkLockAcquired(), returnsNormally);
   });
