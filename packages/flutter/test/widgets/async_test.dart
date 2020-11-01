@@ -122,9 +122,9 @@ void main() {
         future: completer.future, builder: snapshotText,
       ));
       expect(find.text('AsyncSnapshot<String>(ConnectionState.waiting, null, null, null)'), findsOneWidget);
-      completer.completeError('bad');
+      completer.completeError('bad', StackTrace.fromString('trace'));
       await eventFiring(tester);
-      expect(find.text('AsyncSnapshot<String>(ConnectionState.done, null, bad, TODO (THIS IS ACTUALLY TODO))'), findsOneWidget);
+      expect(find.text('AsyncSnapshot<String>(ConnectionState.done, null, bad, trace)'), findsOneWidget);
     });
     testWidgets('runs the builder using given initial data', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
@@ -208,9 +208,9 @@ void main() {
       await eventFiring(tester);
       expect(find.text('AsyncSnapshot<String>(ConnectionState.active, 2, null, null)'), findsOneWidget);
       controller.add('3');
-      controller.addError('bad');
+      controller.addError('bad', StackTrace.fromString('trace'));
       await eventFiring(tester);
-      expect(find.text('AsyncSnapshot<String>(ConnectionState.active, null, bad, TODO (THIS IS ACTUALLY TODO))'), findsOneWidget);
+      expect(find.text('AsyncSnapshot<String>(ConnectionState.active, null, bad, trace)'), findsOneWidget);
       controller.add('4');
       controller.close();
       await eventFiring(tester);
@@ -263,9 +263,9 @@ void main() {
         StreamBuilder<String>(stream: completer.future.asStream(), builder: snapshotText),
       ]));
       expect(find.text('AsyncSnapshot<String>(ConnectionState.waiting, null, null, null)'), findsNWidgets(2));
-      completer.completeError('bad');
+      completer.completeError('bad', StackTrace.fromString('trace'));
       await eventFiring(tester);
-      expect(find.text('AsyncSnapshot<String>(ConnectionState.done, null, bad, TODO (THIS IS ACTUALLY TODO))'), findsNWidgets(2));
+      expect(find.text('AsyncSnapshot<String>(ConnectionState.done, null, bad, trace)'), findsNWidgets(2));
     });
     testWidgets('when Future is null', (WidgetTester tester) async {
       await tester.pumpWidget(Column(children: <Widget>[
@@ -326,11 +326,11 @@ void main() {
       final StreamController<String> controller = StreamController<String>();
       await tester.pumpWidget(StringCollector(key: key, stream: controller.stream));
       controller.add('1');
-      controller.addError('bad');
+      controller.addError('bad', StackTrace.fromString('trace'));
       controller.add('2');
       controller.close();
       await eventFiring(tester);
-      expect(find.text('conn, data:1, error:bad, data:2, done'), findsOneWidget);
+      expect(find.text('conn, data:1, error:bad stackTrace:trace, data:2, done'), findsOneWidget);
     });
   });
 }
