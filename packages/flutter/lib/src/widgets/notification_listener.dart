@@ -11,8 +11,85 @@ import 'framework.dart';
 /// Return true to cancel the notification bubbling. Return false to allow the
 /// notification to continue to be dispatched to further ancestors.
 ///
+/// [NotificationListener] is useful when listening scroll events
+/// in [ListView],[NestedScrollView],[GridView] or any Scrolling widgets.
+///
 /// Used by [NotificationListener.onNotification].
-typedef NotificationListenerCallback<T extends Notification> = bool Function(T notification);
+typedef NotificationListenerCallback<T extends Notification> = bool Function(
+    T notification);
+
+/// {@tool dartpad --template=stateless_widget_material}
+///
+///This example shows a [NotificationListener ] widget
+///which its type is [ScrollNotification ], when there is scroll
+///event occurs in the [NestedScrollView],
+///We want to be notified the current scroll position whether
+///it's [ScrollStartNotification]or[ScrollEndNotification].
+///
+/// ```dart
+///final List<String> _tabs = ["Months", "Days"];
+///final List<String> _months = [ "January","February","March", ];
+///final List<String> _days = [ "Sunday", "Monday","Tuesday", ];
+///
+/// Widget build(BuildContext context) {
+///   return DefaultTabController(
+///     length: _tabs.length,
+///     child: Scaffold(
+///       //Listens the scroll events and returns the current position.
+///       body: NotificationListener<ScrollNotification>(
+///         onNotification: (scrollNotification) {
+///           if (scrollNotification is ScrollStartNotification) {
+///             print('Scrolling has Started');
+///           } else if (scrollNotification is ScrollEndNotification) {
+///             print("Scrolling has ended");
+///           }
+///          // Return true to cancel the notification bubbling.
+///           return true;
+///         },
+///         child: NestedScrollView(
+///           headerSliverBuilder:
+///               (BuildContext context, bool innerBoxIsScrolled) {
+///             return <Widget>[
+///               SliverAppBar(
+///                 title: const Text("World"),
+///                 pinned: true,
+///                 floating: true,
+///                 bottom: TabBar(
+///                   tabs: _tabs.map((name) => Tab(text: name)).toList(),
+///                 ),
+///               ),
+///             ];
+///           },
+///           body: TabBarView(
+///             children: [
+///               ListView.builder(
+///                 itemCount: _months.length,
+///                 itemBuilder: (context, index) {
+///                   return ListTile(title: Text(_months[index]));
+///                 },
+///               ),
+///               ListView.builder(
+///                 itemCount: _days.length,
+///                 itemBuilder: (context, index) {
+///                   return ListTile(title: Text(_days[index]));
+///                 },
+///               ),
+///            ],
+///           ),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+/// ### [ScrollNotification ] which describes the notification lifecycle.
+/// ### [ScrollStartNotification] which returns the start position of scrolling.
+/// ### [ScrollEndNotification] which returns the end position of scrolling.
+/// ### [NestedScrollView] which creates a nested scroll view.
+///
 
 /// A notification that can bubble up the widget tree.
 ///
@@ -44,7 +121,8 @@ abstract class Notification {
     if (element is StatelessElement) {
       final StatelessWidget widget = element.widget;
       if (widget is NotificationListener<Notification>) {
-        if (widget._dispatch(this, element)) // that function checks the type dynamically
+        if (widget._dispatch(
+            this, element)) // that function checks the type dynamically
           return false;
       }
     }
@@ -81,7 +159,7 @@ abstract class Notification {
   /// `super.debugFillDescription(description)`.
   @protected
   @mustCallSuper
-  void debugFillDescription(List<String> description) { }
+  void debugFillDescription(List<String> description) {}
 }
 
 /// A widget that listens for [Notification]s bubbling up the tree.
@@ -166,4 +244,4 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
 /// useful for paint effects that depend on the layout. If you were to use this
 /// notification to change the build, for instance, you would always be one
 /// frame behind, which would look really ugly and laggy.
-class LayoutChangedNotification extends Notification { }
+class LayoutChangedNotification extends Notification {}
