@@ -755,7 +755,6 @@ class SliverChildListDelegate extends SliverChildDelegate {
 ///     `addAutomaticKeepAlives` property.
 ///  * [SliverGrid] and [SliverList], two sliver widgets that are commonly
 ///     place children in arbitrary and vertical position, respectively.
-
 abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
   const SliverWithKeepAliveWidget({
