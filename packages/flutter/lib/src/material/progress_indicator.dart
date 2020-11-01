@@ -270,7 +270,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///         ),
 ///       ],
 ///     ),
-///   ),
+///   );
 /// }
 /// ```
 /// {@end-tool}
@@ -300,7 +300,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///         ),
 ///       ],
 ///     ),
-///   ),
+///   );
 /// }
 /// ```
 /// {@end-tool}
@@ -335,7 +335,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///         ),
 ///       ],
 ///     ),
-///   ),
+///   );
 /// }
 /// ```
 /// {@end-tool}
@@ -666,7 +666,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///         ),
 ///       ],
 ///     ),
-///   ),
+///   );
 /// }
 /// ```
 /// {@end-tool}
@@ -696,7 +696,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///         ),
 ///       ],
 ///     ),
-///   ),
+///   );
 /// }
 /// ```
 /// {@end-tool}
@@ -731,7 +731,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///         ),
 ///       ],
 ///     ),
-///   ),
+///   );
 /// }
 /// ```
 /// {@end-tool}
