@@ -75,10 +75,11 @@ abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   /// is combined with the new data item in the fold computation.
   S afterData(S current, T data);
 
-  /// Returns an updated version of the [current] summary following an error.
+  /// Returns an updated version of the [current] summary following an error
+  /// with a stack trace.
   ///
   /// The default implementation returns [current] as is.
-  S afterError(S current, Object error) => current;
+  S afterError(S current, Object error, StackTrace stackTrace) => current;
 
   /// Returns an updated version of the [current] summary following stream
   /// termination.
@@ -138,9 +139,9 @@ class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
         setState(() {
           _summary = widget.afterData(_summary, data);
         });
-      }, onError: (Object error) {
+      }, onError: (Object error, StackTrace stackTrace) {
         setState(() {
-          _summary = widget.afterError(_summary, error);
+          _summary = widget.afterError(_summary, error, stackTrace);
         });
       }, onDone: () {
         setState(() {
@@ -343,12 +344,12 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// of the following snapshots that includes the last one (the one with
 /// ConnectionState.done):
 ///
-/// * `new AsyncSnapshot<int>.withData(ConnectionState.waiting, null)`
-/// * `new AsyncSnapshot<int>.withData(ConnectionState.active, 0)`
-/// * `new AsyncSnapshot<int>.withData(ConnectionState.active, 1)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.waiting, null)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.active, 0)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.active, 1)`
 /// * ...
-/// * `new AsyncSnapshot<int>.withData(ConnectionState.active, 9)`
-/// * `new AsyncSnapshot<int>.withData(ConnectionState.done, 9)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.active, 9)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.done, 9)`
 ///
 /// The actual sequence of invocations of the [builder] depends on the relative
 /// timing of events produced by the stream and the build rate of the Flutter
@@ -357,15 +358,15 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// Changing the [StreamBuilder] configuration to another stream during event
 /// generation introduces snapshot pairs of the form:
 ///
-/// * `new AsyncSnapshot<int>.withData(ConnectionState.none, 5)`
-/// * `new AsyncSnapshot<int>.withData(ConnectionState.waiting, 5)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.none, 5)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.waiting, 5)`
 ///
 /// The latter will be produced only when the new stream is non-null, and the
 /// former only when the old stream is non-null.
 ///
 /// The stream may produce errors, resulting in snapshots of the form:
 ///
-/// * `new AsyncSnapshot<int>.withError(ConnectionState.active, 'some error')`
+/// * `AsyncSnapshot<int>.withError(ConnectionState.active, 'some error', stackTrace: someStackTrace)`
 ///
 /// The data and error fields of snapshots produced are only changed when the
 /// state is `ConnectionState.active`.
@@ -536,8 +537,8 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   }
 
   @override
-  AsyncSnapshot<T> afterError(AsyncSnapshot<T> current, Object error) {
-    return AsyncSnapshot<T>.withError(ConnectionState.active, error);
+  AsyncSnapshot<T> afterError(AsyncSnapshot<T> current, Object error, StackTrace stackTrace) {
+    return AsyncSnapshot<T>.withError(ConnectionState.active, error, stackTrace: stackTrace);
   }
 
   @override
@@ -584,14 +585,14 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// is null, the [builder] will be called with either both or only the latter of
 /// the following snapshots:
 ///
-/// * `new AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
-/// * `new AsyncSnapshot<String>.withData(ConnectionState.done, 'some data')`
+/// * `AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
+/// * `AsyncSnapshot<String>.withData(ConnectionState.done, 'some data')`
 ///
 /// If that same future instead completed with an error, the [builder] would be
 /// called with either both or only the latter of:
 ///
-/// * `new AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
-/// * `new AsyncSnapshot<String>.withError(ConnectionState.done, 'some error')`
+/// * `AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
+/// * `AsyncSnapshot<String>.withError(ConnectionState.done, 'some error', stackTrace: someStackTrace)`
 ///
 /// The initial snapshot data can be controlled by specifying [initialData]. You
 /// would use this facility to ensure that if the [builder] is invoked before
@@ -604,8 +605,8 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// old future has already completed successfully with data as above, changing
 /// configuration to a new future results in snapshot pairs of the form:
 ///
-/// * `new AsyncSnapshot<String>.withData(ConnectionState.none, 'data of first future')`
-/// * `new AsyncSnapshot<String>.withData(ConnectionState.waiting, 'data of second future')`
+/// * `AsyncSnapshot<String>.withData(ConnectionState.none, 'data of first future')`
+/// * `AsyncSnapshot<String>.withData(ConnectionState.waiting, 'data of second future')`
 ///
 /// In general, the latter will be produced only when the new future is
 /// non-null, and the former only when the old future is non-null.
@@ -793,10 +794,10 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
             _snapshot = AsyncSnapshot<T>.withData(ConnectionState.done, data);
           });
         }
-      }, onError: (Object error) {
+      }, onError: (Object error, StackTrace stackTrace) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
-            _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error);
+            _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error, stackTrace: stackTrace);
           });
         }
       });

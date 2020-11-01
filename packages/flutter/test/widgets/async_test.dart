@@ -352,7 +352,7 @@ class StringCollector extends StreamBuilderBase<String, List<String>> {
   List<String> afterData(List<String> current, String data) => current..add('data:$data');
 
   @override
-  List<String> afterError(List<String> current, dynamic error) => current..add('error:$error');
+  List<String> afterError(List<String> current, dynamic error, StackTrace stackTrace) => current..add('error:$error stackTrace:$stackTrace');
 
   @override
   List<String> afterDone(List<String> current) => current..add('done');
