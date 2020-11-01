@@ -63,13 +63,13 @@ enum DismissDirection {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=iEMgjrfuc58}
 ///
 /// {@tool dartpad --template=statefull_widget_scaffold}
-/// 
-/// This sample shows how you can use the [Dismissible] widget to 
+///
+/// This sample shows how you can use the [Dismissible] widget to
 /// remove list items using swipe gestures.
 ///
-/// ```dart 
+/// ```dart
 ///  List<int> items = List<int>.generate(100, (index) => index);
-/// 
+///
 ///  Widget build(BuildContext context) {
 ///    return ListView.builder(
 ///      itemCount: items.length,
@@ -90,7 +90,7 @@ enum DismissDirection {
 ///          });
 ///        },
 ///      ),
-///    ); 
+///    );
 ///  }
 /// ```
 /// {@end-tool}
