@@ -2807,10 +2807,59 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// 16.0/9.0. If the maximum width is infinite, the initial width is determined
 /// by applying the aspect ratio to the maximum height.
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This examples shows how AspectRatio sets width when its parent's width
+/// constraint is infinite. Since its parent's allowed height is a fixed value,
+/// the actual width is determined via the given AspectRatio.
+///
+/// Since the height is fixed at 100.0 in this example and the aspect ratio is
+/// set to 16 / 9, the width should then be 100.0 / 9 * 16.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: Colors.blue,
+///     alignment: Alignment.center,
+///     width: double.infinity,
+///     height: 100.0,
+///     child: AspectRatio(
+///       aspectRatio: 16 / 9,
+///       child: Container(
+///         color: Colors.green,
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// Now consider a second example, this time with an aspect ratio of 2.0 and
 /// layout constraints that require the width to be between 0.0 and 100.0 and
 /// the height to be between 0.0 and 100.0. We'll select a width of 100.0 (the
 /// biggest allowed) and a height of 50.0 (to match the aspect ratio).
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: Colors.blue,
+///     alignment: Alignment.center,
+///     width: 100.0,
+///     height: 100.0,
+///     child: AspectRatio(
+///       aspectRatio: 2.0,
+///       child: Container(
+///         width: 100.0,
+///         height: 50.0,
+///         color: Colors.green,
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// In that same situation, if the aspect ratio is 0.5, we'll also select a
 /// width of 100.0 (still the biggest allowed) and we'll attempt to use a height
@@ -2823,6 +2872,28 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// find a feasible size after consulting each constraint, the widget
 /// will eventually select a size for the child that meets the layout
 /// constraints but fails to meet the aspect ratio constraints.
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: Colors.blue,
+///     alignment: Alignment.center,
+///     width: 100.0,
+///     height: 100.0,
+///     child: AspectRatio(
+///       aspectRatio: 0.5,
+///       child: Container(
+///         width: 100.0,
+///         height: 50.0,
+///         color: Colors.green,
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
