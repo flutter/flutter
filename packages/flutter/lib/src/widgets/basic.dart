@@ -2809,22 +2809,26 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// This example shows when width constraint is infinite, height gets biggest allowed
-/// height and width gets height * aspectRatio.
+/// This examples shows how AspectRatio sets width when its parent's width constraint is infinite. 
+/// Since its parent's allowed height is a fixed value, the actual width is determined via the 
+/// given AspectRatio.
+///
+/// Since the height is fixed at 100.0 in this example and the aspect ratio is set to 16 / 9, the width
+/// should then be 100.0 / 9 * 16.
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Container(
-///     color: Colors.purple,
+///     color: Colors.blue,
 ///     alignment: Alignment.center,
 ///     width: double.infinity,
 ///     height: 100.0,
 ///     child: AspectRatio(
-///     aspectRatio: 16/9,
-///     child: new Container(
-///     color: Colors.amber,
+///       aspectRatio: 16 / 9,
+///       child: Container(
+///         color: Colors.green,
 ///       ),
 ///     ),
-///  );
+///   );
 /// }
 /// ```
 /// {@end-tool}
