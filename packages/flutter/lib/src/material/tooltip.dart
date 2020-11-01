@@ -40,8 +40,8 @@ import 'tooltip_theme.dart';
 /// Widget build(BuildContext context) {
 ///   return Center(
 ///     child: Tooltip(
-///       message: "Welcome Greetings",
-///       child: Text("Hello Flutter"),
+///       message: "I am a Tooltip",
+///       child: Text("Tap this text and hold down to show a tooltip."),
 ///     ),
 ///   );
 /// }
@@ -66,8 +66,8 @@ import 'tooltip_theme.dart';
 /// Widget build(BuildContext context) {
 ///   return Center(
 ///     child: Tooltip(
-///       message: "Welcome Greetings",
-///       child: Text("Hello Flutter"),
+///       message: "I am a Tooltip",
+///       child: Text("Tap this text and hold down to show a tooltip."),
 ///       decoration: BoxDecoration(
 ///         borderRadius: BorderRadius.circular(25),
 ///         gradient: LinearGradient(colors: [Colors.amber, Colors.red]),
