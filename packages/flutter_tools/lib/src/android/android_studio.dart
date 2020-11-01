@@ -127,12 +127,24 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final int major = version?.major;
     final int minor = version?.minor;
     if (globals.platform.isMacOS) {
-      return globals.fs.path.join(
-        globals.fsUtils.homeDirPath,
-        'Library',
-        'Application Support',
-        'AndroidStudio$major.$minor',
-      );
+      // 4.1 and above has a different location for AndroidStudio installs on MacOS.
+      if ((major == 4 && minor >= 1) || (major > 4)) {
+        return globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Application Support',
+          'Google',
+          'AndroidStudio$major.$minor',
+          'plugins',
+        );
+      } else {
+        return globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Application Support',
+          'AndroidStudio$major.$minor',
+        );
+      }
     } else {
       return globals.fs.path.join(
         globals.fsUtils.homeDirPath,
