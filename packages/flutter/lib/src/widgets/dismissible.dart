@@ -274,7 +274,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     if (extent == 0.0)
       return null;
     if (_directionIsXAxis) {
-      switch (Directionality.of(context)!) {
+      switch (Directionality.of(context)) {
         case TextDirection.rtl:
           return extent < 0 ? DismissDirection.startToEnd : DismissDirection.endToStart;
         case TextDirection.ltr:
@@ -332,7 +332,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         break;
 
       case DismissDirection.endToStart:
-        switch (Directionality.of(context)!) {
+        switch (Directionality.of(context)) {
           case TextDirection.rtl:
             if (_dragExtent + delta > 0)
               _dragExtent += delta;
@@ -345,7 +345,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         break;
 
       case DismissDirection.startToEnd:
-        switch (Directionality.of(context)!) {
+        switch (Directionality.of(context)) {
           case TextDirection.rtl:
             if (_dragExtent + delta < 0)
               _dragExtent += delta;

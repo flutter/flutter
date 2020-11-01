@@ -842,7 +842,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           customBorder: widget.customBorder,
           rectCallback: widget.getRectCallback!(referenceBox),
           onRemoved: handleInkRemoval,
-          textDirection: Directionality.of(context)!,
+          textDirection: Directionality.of(context),
           fadeDuration: getFadeDurationForType(type),
         );
         updateKeepAlive();
@@ -900,7 +900,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       borderRadius: borderRadius,
       customBorder: customBorder,
       onRemoved: onRemoved,
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
     );
 
     return splash;

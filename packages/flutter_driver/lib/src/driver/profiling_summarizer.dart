@@ -37,7 +37,7 @@ enum ProfileType {
 
 /// Summarizes [TimelineEvents]s corresponding to [kProfilingEvents] category.
 ///
-/// A sample event (some fields have been omitted for brewity):
+/// A sample event (some fields have been omitted for brevity):
 /// ```
 ///     {
 ///      "category": "embedder",

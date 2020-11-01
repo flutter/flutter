@@ -244,9 +244,47 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   void _updateSystemChrome() {
+    // Take overlay style from the place where a system status bar and system
+    // navigation bar are placed to update system style overlay.
+    // The center of the system navigation bar and the center of the status bar
+    // are used to get SystemUiOverlayStyle's to update system overlay appearance.
+    //
+    //         Horizontal center of the screen
+    //                 V
+    //    ++++++++++++++++++++++++++
+    //    |                        |
+    //    |    System status bar   |  <- Vertical center of the status bar
+    //    |                        |
+    //    ++++++++++++++++++++++++++
+    //    |                        |
+    //    |        Content         |
+    //    ~                        ~
+    //    |                        |
+    //    ++++++++++++++++++++++++++
+    //    |                        |
+    //    |  System navigation bar | <- Vertical center of the navigation bar
+    //    |                        |
+    //    ++++++++++++++++++++++++++ <- bounds.bottom
     final Rect bounds = paintBounds;
-    final Offset top = Offset(bounds.center.dx, _window.padding.top / _window.devicePixelRatio);
-    final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - _window.padding.bottom / _window.devicePixelRatio);
+    // Center of the status bar
+    final Offset top = Offset(
+      // Horizontal center of the screen
+      bounds.center.dx,
+      // The vertical center of the system status bar. The system status bar
+      // height is kept as top window padding.
+      _window.padding.top / 2.0,
+    );
+    // Center of the navigation bar
+    final Offset bottom = Offset(
+      // Horizontal center of the screen
+      bounds.center.dx,
+      // Vertical center of the system navigation bar. The system navigation bar
+      // height is kept as bottom window padding. The "1" needs to be subtracted
+      // from the bottom because available pixels are in (0..bottom) range.
+      // I.e. for a device with 1920 height, bound.bottom is 1920, but the most
+      // bottom drawn pixel is at 1919 position.
+      bounds.bottom - 1.0 - _window.padding.bottom / 2.0,
+    );
     final SystemUiOverlayStyle? upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle? lowerOverlayStyle;

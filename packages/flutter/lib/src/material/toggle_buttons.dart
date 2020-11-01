@@ -577,7 +577,7 @@ class ToggleButtons extends StatelessWidget {
     );
     final ThemeData theme = Theme.of(context)!;
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
 
     return IntrinsicHeight(
       child: Row(
@@ -901,7 +901,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
     borderRadius,
     isFirstButton,
     isLastButton,
-    Directionality.of(context)!,
+    Directionality.of(context),
   );
 
   @override
@@ -913,7 +913,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
       ..borderRadius = borderRadius
       ..isFirstButton = isFirstButton
       ..isLastButton = isLastButton
-      ..textDirection = Directionality.of(context)!;
+      ..textDirection = Directionality.of(context);
   }
 }
 

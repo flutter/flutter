@@ -138,7 +138,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
 
     Widget accountDetails = CustomMultiChildLayout(
       delegate: _AccountDetailsLayout(
-        textDirection: Directionality.of(context)!,
+        textDirection: Directionality.of(context),
       ),
       children: <Widget>[
         if (widget.accountName != null)

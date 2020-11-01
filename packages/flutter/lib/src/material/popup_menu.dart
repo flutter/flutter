@@ -749,7 +749,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
               position,
               itemSizes,
               selectedItemIndex,
-              Directionality.of(context)!,
+              Directionality.of(context),
             ),
             child: capturedThemes.wrap(menu),
           );

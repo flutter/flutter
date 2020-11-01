@@ -100,17 +100,23 @@ class Directionality extends InheritedWidget {
   /// the given context.
   ///
   /// If there is no [Directionality] ancestor widget in the tree at the given
-  /// context, then this will return null.
+  /// context, then this will throw a descriptive [FlutterError] in debug mode
+  /// and an exception in release mode.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
   /// TextDirection textDirection = Directionality.of(context);
   /// ```
-  // TODO(goderbauer): Make this non-null when customers have upgraded to Directionality.maybeOf.
-  static TextDirection? of(BuildContext context) {
-    final Directionality? widget = context.dependOnInheritedWidgetOfExactType<Directionality>();
-    return widget?.textDirection;
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], which will return null if no [Directionality] ancestor
+  ///    widget is in the tree.
+  static TextDirection of(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
+    final Directionality widget = context.dependOnInheritedWidgetOfExactType<Directionality>()!;
+    return widget.textDirection;
   }
 
   /// The text direction from the closest instance of this class that encloses
@@ -124,6 +130,11 @@ class Directionality extends InheritedWidget {
   /// ```dart
   /// TextDirection? textDirection = Directionality.maybeOf(context);
   /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [of], which will throw if no [Directionality] ancestor widget is in the
+  ///    tree.
   static TextDirection? maybeOf(BuildContext context) {
     final Directionality? widget = context.dependOnInheritedWidgetOfExactType<Directionality>();
     return widget?.textDirection;
@@ -3135,7 +3146,7 @@ AxisDirection getAxisDirectionFromAxisReverseAndDirectionality(
   switch (axis) {
     case Axis.horizontal:
       assert(debugCheckHasDirectionality(context));
-      final TextDirection textDirection = Directionality.of(context)!;
+      final TextDirection textDirection = Directionality.of(context);
       final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
       return reverse ? flipAxisDirection(axisDirection) : axisDirection;
     case Axis.vertical:
@@ -3866,7 +3877,7 @@ class PositionedDirectional extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned.directional(
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       start: start,
       top: top,
       end: end,
@@ -5376,7 +5387,7 @@ class RichText extends MultiChildRenderObjectWidget {
     assert(textDirection != null || debugCheckHasDirectionality(context));
     return RenderParagraph(text,
       textAlign: textAlign,
-      textDirection: textDirection ?? Directionality.of(context)!,
+      textDirection: textDirection ?? Directionality.of(context),
       softWrap: softWrap,
       overflow: overflow,
       textScaleFactor: textScaleFactor,
@@ -5394,7 +5405,7 @@ class RichText extends MultiChildRenderObjectWidget {
     renderObject
       ..text = text
       ..textAlign = textAlign
-      ..textDirection = textDirection ?? Directionality.of(context)!
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
       ..overflow = overflow
       ..textScaleFactor = textScaleFactor
@@ -5960,7 +5971,7 @@ class Listener extends SingleChildRenderObjectWidget {
 ///
 /// [MouseRegion] is used
 /// when it is needed to compare the list of objects that a mouse pointer is
-/// hovering over betweeen this frame and the last frame. This means entering
+/// hovering over between this frame and the last frame. This means entering
 /// events, exiting events, and mouse cursors.
 ///
 /// To listen to general pointer events, use [Listener], or more preferably,
@@ -7210,7 +7221,7 @@ class KeyedSubtree extends StatelessWidget {
 /// ```
 ///
 /// Could equally well be defined and used like this, without
-/// definining a new widget class:
+/// defining a new widget class:
 ///
 /// ```dart
 /// Center(

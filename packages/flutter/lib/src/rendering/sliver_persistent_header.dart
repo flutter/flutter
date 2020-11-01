@@ -66,7 +66,7 @@ class PersistentHeaderShowOnScreenConfiguration {
   /// [RenderSliverPersistentHeader.minExtent].
   ///
   /// When a floating persistent header is told to show a [Rect] on screen, it
-  /// may expand itself to accomodate the [Rect]. The minimum extent that is
+  /// may expand itself to accommodate the [Rect]. The minimum extent that is
   /// allowed for such expansion is either
   /// [RenderSliverPersistentHeader.minExtent] or [minShowOnScreenExtent],
   /// whichever is larger. If the persistent header's current extent is already
@@ -86,7 +86,7 @@ class PersistentHeaderShowOnScreenConfiguration {
   /// [RenderSliverPersistentHeader.maxExtent].
   ///
   /// When a floating persistent header is told to show a [Rect] on screen, it
-  /// may expand itself to accomodate the [Rect]. The maximum extent that is
+  /// may expand itself to accommodate the [Rect]. The maximum extent that is
   /// allowed for such expansion is either
   /// [RenderSliverPersistentHeader.maxExtent] or [maxShowOnScreenExtent],
   /// whichever is smaller. If the persistent header's current extent is already

@@ -147,7 +147,7 @@ class Viewport extends MultiChildRenderObjectWidget {
           why: 'to determine the cross-axis direction when the viewport has an \'up\' axisDirection',
           alternative: 'Alternatively, consider specifying the \'crossAxisDirection\' argument on the Viewport.',
         ));
-        return textDirectionToAxisDirection(Directionality.of(context)!);
+        return textDirectionToAxisDirection(Directionality.of(context));
       case AxisDirection.right:
         return AxisDirection.down;
       case AxisDirection.down:
@@ -156,7 +156,7 @@ class Viewport extends MultiChildRenderObjectWidget {
           why: 'to determine the cross-axis direction when the viewport has a \'down\' axisDirection',
           alternative: 'Alternatively, consider specifying the \'crossAxisDirection\' argument on the Viewport.',
         ));
-        return textDirectionToAxisDirection(Directionality.of(context)!);
+        return textDirectionToAxisDirection(Directionality.of(context));
       case AxisDirection.left:
         return AxisDirection.down;
     }

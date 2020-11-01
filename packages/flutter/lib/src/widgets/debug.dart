@@ -252,7 +252,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 ///  * why: explain why the direction is needed, for example "to resolve
 ///    the 'alignment' argument". Should be an adverb phrase describing why.
 ///  * hint: explain why this might be happening, for example "The default
-///    value of the 'aligment' argument of the $runtimeType widget is an
+///    value of the 'alignment' argument of the $runtimeType widget is an
 ///    AlignmentDirectional value.". Should be a fully punctuated sentence.
 ///  * alternative: provide additional advice specific to the situation,
 ///    especially an alternative to providing a Directionality ancestor.

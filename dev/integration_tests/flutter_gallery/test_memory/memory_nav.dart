@@ -4,6 +4,7 @@
 
 // See //dev/devicelab/bin/tasks/flutter_gallery__memory_nav.dart
 
+// @dart = 2.9
 import 'dart:async';
 
 import 'package:flutter/material.dart';

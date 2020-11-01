@@ -720,7 +720,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
       state: state,
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
       platform: Theme.of(context)!.platform,
     );
@@ -741,7 +741,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
-      ..textDirection = Directionality.of(context)!
+      ..textDirection = Directionality.of(context)
       ..semanticFormatterCallback = semanticFormatterCallback
       ..platform = Theme.of(context)!.platform;
   }

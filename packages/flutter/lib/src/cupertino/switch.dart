@@ -254,7 +254,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         ..curve = Curves.linear
         ..reverseCurve = Curves.linear;
       final double delta = details.primaryDelta! / _kTrackInnerLength;
-      switch (Directionality.of(context)!) {
+      switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _positionController.value -= delta;
           break;
@@ -302,7 +302,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         )!,
         trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context)!,
         onChanged: widget.onChanged,
-        textDirection: Directionality.of(context)!,
+        textDirection: Directionality.of(context),
         state: this,
       ),
     );

@@ -57,7 +57,7 @@ const double _monthNavButtonsWidth = 108.0;
 ///    time picker.
 ///
 class CalendarDatePicker extends StatefulWidget {
-  /// Creates a calender date picker.
+  /// Creates a calendar date picker.
   ///
   /// It will display a grid of days for the [initialDate]'s month. The day
   /// indicated by [initialDate] will be selected.
@@ -180,7 +180,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     _localizations = MaterialLocalizations.of(context);
-    _textDirection = Directionality.of(context)!;
+    _textDirection = Directionality.of(context);
     if (!_announcedInitialDate) {
       _announcedInitialDate = true;
       SemanticsService.announce(
@@ -525,7 +525,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _localizations = MaterialLocalizations.of(context);
-    _textDirection = Directionality.of(context)!;
+    _textDirection = Directionality.of(context);
   }
 
   @override
@@ -709,7 +709,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   }
 
   DateTime? _nextDateInDirection(DateTime date, TraversalDirection direction) {
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     DateTime nextDate = utils.addDaysToDate(date, _dayDirectionOffset(direction, textDirection));
     while (!nextDate.isBefore(widget.firstDate) && !nextDate.isAfter(widget.lastDate)) {
       if (_isSelectable(nextDate)) {

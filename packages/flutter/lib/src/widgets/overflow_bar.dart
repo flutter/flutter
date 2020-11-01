@@ -225,7 +225,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
       overflowSpacing: overflowSpacing,
       overflowAlignment: overflowAlignment,
       overflowDirection: overflowDirection,
-      textDirection: textDirection ?? Directionality.of(context)!,
+      textDirection: textDirection ?? Directionality.of(context),
       clipBehavior: clipBehavior,
     );
   }
@@ -237,7 +237,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
       ..overflowSpacing = overflowSpacing
       ..overflowAlignment = overflowAlignment
       ..overflowDirection = overflowDirection
-      ..textDirection = textDirection ?? Directionality.of(context)!
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..clipBehavior = clipBehavior;
   }
 

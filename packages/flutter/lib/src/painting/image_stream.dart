@@ -58,7 +58,7 @@ class ImageInfo {
   ///
   /// This method is a convenience wrapper for [Image.isCloneOf], and is useful
   /// for clients that are trying to determine whether new layout or painting
-  /// logic is required when recieving a new image reference.
+  /// logic is required when receiving a new image reference.
   ///
   /// {@tool snippet}
   ///
@@ -109,7 +109,7 @@ class ImageInfo {
   /// (e.g. in the arguments given to [Canvas.drawImage]).
   final double scale;
 
-  /// A string used for debugging purpopses to identify the source of this image.
+  /// A string used for debugging purposes to identify the source of this image.
   final String? debugLabel;
 
   /// Disposes of this object.
@@ -920,6 +920,12 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       return;
     }
     if (_codec!.frameCount == 1) {
+      // ImageStreamCompleter listeners removed while waiting for next frame to
+      // be decoded.
+      // There's no reason to emit the frame without active listeners.
+      if (!hasListeners) {
+        return;
+      }
       // This is not an animated image, just return it and don't schedule more
       // frames.
       _emitFrame(ImageInfo(

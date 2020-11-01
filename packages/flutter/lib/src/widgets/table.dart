@@ -249,7 +249,7 @@ class Table extends RenderObjectWidget {
       rows: children.length,
       columnWidths: columnWidths,
       defaultColumnWidth: defaultColumnWidth,
-      textDirection: textDirection ?? Directionality.of(context)!,
+      textDirection: textDirection ?? Directionality.of(context),
       border: border,
       rowDecorations: _rowDecorations,
       configuration: createLocalImageConfiguration(context),
@@ -266,7 +266,7 @@ class Table extends RenderObjectWidget {
     renderObject
       ..columnWidths = columnWidths
       ..defaultColumnWidth = defaultColumnWidth
-      ..textDirection = textDirection ?? Directionality.of(context)!
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..border = border
       ..rowDecorations = _rowDecorations
       ..configuration = createLocalImageConfiguration(context)

@@ -237,7 +237,7 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
         border: _border,
         gapAnimation: widget.gapAnimation,
         gap: widget.gap,
-        textDirection: Directionality.of(context)!,
+        textDirection: Directionality.of(context),
         fillColor: widget.fillColor,
         hoverColorTween: _hoverColorTween,
         hoverAnimation: _hoverAnimation,
@@ -2311,7 +2311,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     // The _Decoration widget and _RenderDecoration assume that contentPadding
     // has been resolved to EdgeInsets.
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     final EdgeInsets? decorationContentPadding = decoration!.contentPadding?.resolve(textDirection);
 
     final EdgeInsets contentPadding;

@@ -283,7 +283,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       _painter = _buildCupertinoScrollbarPainter(context);
     } else {
       _painter!
-        ..textDirection = Directionality.of(context)!
+        ..textDirection = Directionality.of(context)
         ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)!
         ..padding = MediaQuery.of(context).padding;
     }
@@ -309,7 +309,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   ScrollbarPainter _buildCupertinoScrollbarPainter(BuildContext context) {
     return ScrollbarPainter(
       color: CupertinoDynamicColor.resolve(_kScrollbarColor, context)!,
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       thickness: _thickness,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       mainAxisMargin: _kScrollbarMainAxisMargin,

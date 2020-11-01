@@ -219,7 +219,7 @@ class RouteInformation {
 ///   widget should update the URL (typically the top-most one created by the
 ///   [WidgetsApp.router], [MaterialApp.router], or [CupertinoApp.router]).
 ///
-/// * The application does not need to implemenent in-app navigation using the
+/// * The application does not need to implement in-app navigation using the
 ///   browser's back and forward buttons.
 ///
 /// In other cases, it is strongly recommended to implement the

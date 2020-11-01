@@ -918,7 +918,7 @@ class _TabBarState extends State<TabBar> {
     if (!widget.isScrollable)
       return 0.0;
     double tabCenter = _indicatorPainter!.centerOf(index);
-    switch (Directionality.of(context)!) {
+    switch (Directionality.of(context)) {
       case TextDirection.rtl:
         tabCenter = _tabStripWidth - tabCenter;
         break;

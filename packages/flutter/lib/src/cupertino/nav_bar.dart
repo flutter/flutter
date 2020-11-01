@@ -1374,7 +1374,7 @@ class _BackChevron extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     final TextStyle textStyle = DefaultTextStyle.of(context).style;
 
     // Replicate the Icon logic here to get a tightly sized icon and add
@@ -1588,7 +1588,7 @@ class _NavigationBarTransition extends StatelessWidget {
       animation: animation,
       bottomNavBar: bottomNavBar,
       topNavBar: topNavBar,
-      directionality: Directionality.of(context)!,
+      directionality: Directionality.of(context),
     );
 
     final List<Widget> children = <Widget>[
