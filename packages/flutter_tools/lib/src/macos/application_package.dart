@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
@@ -65,9 +64,6 @@ abstract class MacOSApp extends ApplicationPackage {
     } else {
       // Try to unpack as a zip.
       final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_app.');
-      shutdownHooks.addShutdownHook(() async {
-        await tempDir.delete(recursive: true);
-      }, ShutdownStage.STILL_RECORDING);
       try {
         globals.os.unzip(globals.fs.file(applicationBundle), tempDir);
       } on ProcessException {
