@@ -2156,6 +2156,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       child: Text(
         decoration!.hintText!,
         style: hintStyle,
+        textDirection: decoration!.hintTextDirection,
         overflow: TextOverflow.ellipsis,
         textAlign: textAlign,
         maxLines: decoration!.hintMaxLines,
@@ -2501,6 +2502,7 @@ class InputDecoration {
     this.helperMaxLines,
     this.hintText,
     this.hintStyle,
+    this.hintTextDirection,
     this.hintMaxLines,
     this.errorText,
     this.errorStyle,
@@ -2558,6 +2560,7 @@ class InputDecoration {
     this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
     this.hintStyle,
+    this.hintTextDirection,
     this.filled = false,
     this.fillColor,
     this.focusColor,
@@ -2678,6 +2681,12 @@ class InputDecoration {
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   final TextStyle? hintStyle;
+
+  /// The direction to use for the [hintText].
+  ///
+  /// If null, defaults to a value derived from [Directionality] for the
+  /// input field and the current context.
+  final TextDirection? hintTextDirection;
 
   /// The maximum number of lines the [hintText] can occupy.
   ///
@@ -3298,6 +3307,7 @@ class InputDecoration {
     int? helperMaxLines,
     String? hintText,
     TextStyle? hintStyle,
+    TextDirection? hintTextDirection,
     int? hintMaxLines,
     String? errorText,
     TextStyle? errorStyle,
@@ -3343,6 +3353,7 @@ class InputDecoration {
       helperMaxLines : helperMaxLines ?? this.helperMaxLines,
       hintText: hintText ?? this.hintText,
       hintStyle: hintStyle ?? this.hintStyle,
+      hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
@@ -3431,6 +3442,7 @@ class InputDecoration {
         && other.helperMaxLines == helperMaxLines
         && other.hintText == hintText
         && other.hintStyle == hintStyle
+        && other.hintTextDirection== hintTextDirection
         && other.hintMaxLines == hintMaxLines
         && other.errorText == errorText
         && other.errorStyle == errorStyle
@@ -3479,6 +3491,7 @@ class InputDecoration {
       helperMaxLines,
       hintText,
       hintStyle,
+      hintTextDirection,
       hintMaxLines,
       errorText,
       errorStyle,
