@@ -61,35 +61,9 @@ void TextInputPlugin::KeyboardHook(FlutterWindowsView* view,
     return;
   }
   if (action == WM_KEYDOWN) {
+    // Most editing keys (arrow keys, backspace, delete, etc.) are handled in
+    // the framework, so don't need to be handled at this layer.
     switch (key) {
-      case VK_LEFT:
-        if (active_model_->MoveCursorBack()) {
-          SendStateUpdate(*active_model_);
-        }
-        break;
-      case VK_RIGHT:
-        if (active_model_->MoveCursorForward()) {
-          SendStateUpdate(*active_model_);
-        }
-        break;
-      case VK_END:
-        active_model_->MoveCursorToEnd();
-        SendStateUpdate(*active_model_);
-        break;
-      case VK_HOME:
-        active_model_->MoveCursorToBeginning();
-        SendStateUpdate(*active_model_);
-        break;
-      case VK_BACK:
-        if (active_model_->Backspace()) {
-          SendStateUpdate(*active_model_);
-        }
-        break;
-      case VK_DELETE:
-        if (active_model_->Delete()) {
-          SendStateUpdate(*active_model_);
-        }
-        break;
       case VK_RETURN:
         EnterPressed(active_model_.get());
         break;
