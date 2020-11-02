@@ -2761,7 +2761,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// This example shows a [FlutterLogo] widget when the `_offstage` member field
-/// is false, and hides it without any room in the parent when it is true. When,
+/// is false, and hides it without any room in the parent when it is true. When
 /// offstage, this app displays a button to get the logo size, which will be
 /// displayed in a [SnackBar].
 ///
@@ -2808,6 +2808,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///         ),
 ///     ],
 ///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
