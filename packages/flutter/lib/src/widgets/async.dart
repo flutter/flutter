@@ -222,12 +222,13 @@ class AsyncSnapshot<T> {
   const AsyncSnapshot.withData(ConnectionState state, T data): this._(state, data, null, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] with the specified [error]
-  /// and an optional [stackTrace].
-  const AsyncSnapshot.withError(
-    ConnectionState state,
-    Object error, {
-    StackTrace? stackTrace,
-  }) : this._(state, null, error, stackTrace);
+  /// and a [stackTrace].
+  ///
+  /// If no [stackTrace] is explicitly specified, [StackTrace.empty] will be used instead.
+  const AsyncSnapshot.withError(ConnectionState state,
+    Object error, [
+    StackTrace stackTrace = StackTrace.empty,
+  ]) : this._(state, null, error, stackTrace);
 
   /// Current state of connection to the asynchronous computation.
   final ConnectionState connectionState;
@@ -266,9 +267,7 @@ class AsyncSnapshot<T> {
   ///
   /// If this is non-null, [hasStackTrace] will be true.
   ///
-  /// If [error] is null, this will be null. However, this can even be null when
-  /// [error] is not null because a stack trace does not always need to be
-  /// provided.
+  /// This will not be null iff [error] is not null.
   final StackTrace? stackTrace;
 
   /// Returns a snapshot like this one, but in the specified [state].
@@ -293,10 +292,10 @@ class AsyncSnapshot<T> {
 
   /// Returns whether this snapshot contains a non-null [stackTrace] value.
   ///
-  /// This is only true if the asynchronous computation's last result was a
-  /// failure and a stack trace was provided with the error.
-  /// Therefore, this is always false when [hasError] is false, but this can
-  /// even be false when [hasError] is true.
+  /// This is always true if the asynchronous computation's last result was
+  /// failure.
+  ///
+  /// Consequently, [hasStackTrace] is always true if [hasError] is true.
   bool get hasStackTrace => stackTrace != null;
 
   @override
@@ -366,7 +365,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///
 /// The stream may produce errors, resulting in snapshots of the form:
 ///
-/// * `AsyncSnapshot<int>.withError(ConnectionState.active, 'some error', stackTrace: someStackTrace)`
+/// * `AsyncSnapshot<int>.withError(ConnectionState.active, 'some error', someStackTrace)`
 ///
 /// The data and error fields of snapshots produced are only changed when the
 /// state is `ConnectionState.active`.
@@ -412,7 +411,11 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///               Padding(
 ///                 padding: const EdgeInsets.only(top: 16),
 ///                 child: Text('Error: ${snapshot.error}'),
-///               )
+///               ),
+///               Padding(
+///                 padding: const EdgeInsets.only(top: 8),
+///                 child: Text('Stack trace: ${snapshot.stackTrace}'),
+///               ),
 ///             ];
 ///           } else {
 ///             switch (snapshot.connectionState) {
@@ -538,7 +541,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 
   @override
   AsyncSnapshot<T> afterError(AsyncSnapshot<T> current, Object error, StackTrace stackTrace) {
-    return AsyncSnapshot<T>.withError(ConnectionState.active, error, stackTrace: stackTrace);
+    return AsyncSnapshot<T>.withError(ConnectionState.active, error, stackTrace);
   }
 
   @override
@@ -592,7 +595,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// called with either both or only the latter of:
 ///
 /// * `AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
-/// * `AsyncSnapshot<String>.withError(ConnectionState.done, 'some error', stackTrace: someStackTrace)`
+/// * `AsyncSnapshot<String>.withError(ConnectionState.done, 'some error', someStackTrace)`
 ///
 /// The initial snapshot data can be controlled by specifying [initialData]. You
 /// would use this facility to ensure that if the [builder] is invoked before
@@ -797,7 +800,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
       }, onError: (Object error, StackTrace stackTrace) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
-            _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error, stackTrace: stackTrace);
+            _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error, stackTrace);
           });
         }
       });

@@ -34,9 +34,20 @@ void main() {
       expect(const AsyncSnapshot<int>.nothing().connectionState, ConnectionState.none);
       expect(const AsyncSnapshot<int>.nothing().data, isNull);
       expect(const AsyncSnapshot<int>.nothing().error, isNull);
+      expect(const AsyncSnapshot<int>.nothing().stackTrace, isNull);
       expect(const AsyncSnapshot<int>.waiting().connectionState, ConnectionState.waiting);
       expect(const AsyncSnapshot<int>.waiting().data, isNull);
       expect(const AsyncSnapshot<int>.waiting().error, isNull);
+      expect(const AsyncSnapshot<int>.waiting().stackTrace, isNull);
+    });
+    test('withError uses empty stack trace if no stack trace is specified', () {
+      // We need to store the error as a local variable in order for the
+      // equality check on the error to be true.
+      final Error error = Error();
+      expect(
+          AsyncSnapshot<int>.withError(ConnectionState.done, error),
+          AsyncSnapshot<int>.withError(
+              ConnectionState.done, error, StackTrace.empty));
     });
   });
   group('Async smoke tests', () {
@@ -256,7 +267,18 @@ void main() {
       await eventFiring(tester);
       expect(find.text('AsyncSnapshot<String>(ConnectionState.done, hello, null, null)'), findsNWidgets(2));
     });
-    testWidgets('when completing with error', (WidgetTester tester) async {
+    testWidgets('when completing with error and with empty stack trace', (WidgetTester tester) async {
+      final Completer<String> completer = Completer<String>();
+      await tester.pumpWidget(Column(children: <Widget>[
+        FutureBuilder<String>(future: completer.future, builder: snapshotText),
+        StreamBuilder<String>(stream: completer.future.asStream(), builder: snapshotText),
+      ]));
+      expect(find.text('AsyncSnapshot<String>(ConnectionState.waiting, null, null, null)'), findsNWidgets(2));
+      completer.completeError('bad', StackTrace.empty);
+      await eventFiring(tester);
+      expect(find.text('AsyncSnapshot<String>(ConnectionState.done, null, bad, )'), findsNWidgets(2));
+    });
+    testWidgets('when completing with error and with stack trace', (WidgetTester tester) async {
       final Completer<String> completer = Completer<String>();
       await tester.pumpWidget(Column(children: <Widget>[
         FutureBuilder<String>(future: completer.future, builder: snapshotText),
