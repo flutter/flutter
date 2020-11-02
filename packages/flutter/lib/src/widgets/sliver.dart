@@ -46,7 +46,7 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 /// of the existing subclasses that provide adaptors to builder callbacks or
 /// explicit child lists.
 ///
-/// {@template flutter.widgets.sliverChildDelegate.lifecycle}
+/// {@template flutter.widgets.SliverChildDelegate.lifecycle}
 /// ## Child elements' lifecycle
 ///
 /// ### Creation
@@ -780,7 +780,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   }) : assert(delegate != null),
        super(key: key);
 
-  /// {@template flutter.widgets.sliverMultiBoxAdaptor.delegate}
+  /// {@template flutter.widgets.SliverMultiBoxAdaptorWidget.delegate}
   /// The delegate that provides the children for this widget.
   ///
   /// The children are constructed lazily using this delegate to avoid creating
@@ -851,7 +851,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 /// [SliverFixedExtentList] does not need to perform layout on its children to
 /// obtain their extent in the main axis and is therefore more efficient.
 ///
-/// {@macro flutter.widgets.sliverChildDelegate.lifecycle}
+/// {@macro flutter.widgets.SliverChildDelegate.lifecycle}
 ///
 /// See also:
 ///
@@ -913,7 +913,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@macro flutter.widgets.sliverChildDelegate.lifecycle}
+/// {@macro flutter.widgets.SliverChildDelegate.lifecycle}
 ///
 /// See also:
 ///
@@ -986,7 +986,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@macro flutter.widgets.sliverChildDelegate.lifecycle}
+/// {@macro flutter.widgets.SliverChildDelegate.lifecycle}
 ///
 /// See also:
 ///

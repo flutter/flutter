@@ -106,7 +106,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// Defaults to [CupertinoColors.secondarySystemFill] when null.
   final Color? trackColor;
 
-  /// {@template flutter.cupertino.switch.dragStartBehavior}
+  /// {@template flutter.cupertino.CupertinoSwitch.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag behavior used to move the

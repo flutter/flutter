@@ -209,7 +209,7 @@ class Switch extends StatefulWidget {
 
   final _SwitchType _switchType;
 
-  /// {@macro flutter.cupertino.switch.dragStartBehavior}
+  /// {@macro flutter.cupertino.CupertinoSwitch.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the

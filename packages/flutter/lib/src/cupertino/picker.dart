@@ -99,7 +99,7 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// The [itemBuilder] argument must not be null. The [childCount] argument
   /// reflects the number of children that will be provided by the [itemBuilder].
-  /// {@macro flutter.widgets.wheelList.childCount}
+  /// {@macro flutter.widgets.ListWheelChildBuilderDelegate.childCount}
   ///
   /// The [itemExtent] argument must be non-null and positive.
   ///
@@ -150,13 +150,13 @@ class CupertinoPicker extends StatefulWidget {
   /// wheel list edge fade gradient from rendering of the widget.
   final Color? backgroundColor;
 
-  /// {@macro flutter.rendering.wheelList.offAxisFraction}
+  /// {@macro flutter.rendering.RenderListWheelViewport.offAxisFraction}
   final double offAxisFraction;
 
-  /// {@macro flutter.rendering.wheelList.useMagnifier}
+  /// {@macro flutter.rendering.RenderListWheelViewport.useMagnifier}
   final bool useMagnifier;
 
-  /// {@macro flutter.rendering.wheelList.magnification}
+  /// {@macro flutter.rendering.RenderListWheelViewport.magnification}
   final double magnification;
 
   /// A [FixedExtentScrollController] to read and control the current item, and
@@ -171,7 +171,7 @@ class CupertinoPicker extends StatefulWidget {
   /// height. Must not be null and must be positive.
   final double itemExtent;
 
-  /// {@macro flutter.rendering.wheelList.squeeze}
+  /// {@macro flutter.rendering.RenderListWheelViewport.squeeze}
   ///
   /// Defaults to `1.45` to visually mimic iOS.
   final double squeeze;
