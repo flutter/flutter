@@ -276,7 +276,7 @@ class IconButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback? onPressed;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
   /// Defaults to [SystemMouseCursors.click].
   final MouseCursor mouseCursor;
@@ -326,7 +326,7 @@ class IconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     Color? currentColor;
     if (onPressed != null)
       currentColor = color;

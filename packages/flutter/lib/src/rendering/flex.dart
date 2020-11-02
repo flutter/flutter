@@ -487,7 +487,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   // are treated as not overflowing.
   bool get _hasOverflow => _overflow! > precisionErrorTolerance;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -739,7 +739,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             ...addendum,
             ErrorDescription(
               "If none of the above helps enough to fix this problem, please don't hesitate to file a bug:\n"
-              '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
+              '  https://github.com/flutter/flutter/issues/new?template=2_bug.md'
             ),
           ]);
         }());

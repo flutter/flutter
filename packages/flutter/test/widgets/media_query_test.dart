@@ -24,31 +24,54 @@ void main() {
     expect(exception, isNotNull);
     expect(exception ,isFlutterError);
     final FlutterError error = exception as FlutterError;
-    expect(error.diagnostics.length, 3);
-    expect(error.diagnostics.last, isA<DiagnosticsProperty<Element>>());
+    expect(error.diagnostics.length, 5);
+    expect(error.diagnostics.last, isA<ErrorHint>());
     expect(
       error.toStringDeep(),
       equalsIgnoringHashCodes(
         'FlutterError\n'
-        '   MediaQuery.of() called with a context that does not contain a\n'
-        '   MediaQuery.\n'
+        '   No MediaQuery widget ancestor found.\n'
+        '   Builder widgets require a MediaQuery widget ancestor.\n'
+        '   The specific widget that could not find a MediaQuery ancestor\n'
+        '   was:\n'
+        '     Builder\n'
+        '   The ownership chain for the affected widget is: "Builder ←\n'
+        '     [root]"\n'
         '   No MediaQuery ancestor could be found starting from the context\n'
         '   that was passed to MediaQuery.of(). This can happen because you\n'
-        '   do not have a WidgetsApp or MaterialApp widget (those widgets\n'
-        '   introduce a MediaQuery), or it can happen if the context you use\n'
-        '   comes from a widget above those widgets.\n'
-        '   The context used was:\n'
-        '     Builder\n',
+        '   have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
+        '   (those widgets introduce a MediaQuery), or it can happen if the\n'
+        '   context you use comes from a widget above those widgets.\n'
       ),
     );
   });
 
-  testWidgets('MediaQuery defaults to null', (WidgetTester tester) async {
+  testWidgets('MediaQuery.of finds a MediaQueryData when there is one', (WidgetTester tester) async {
+    bool tested = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData data = MediaQuery.of(context);
+            expect(data, isNotNull);
+            tested = true;
+            return Container();
+          },
+        ),
+      ),
+    );
+    final dynamic exception = tester.takeException();
+    expect(exception, isNull);
+    expect(tested, isTrue);
+  });
+
+  testWidgets('MediaQuery.maybeOf defaults to null', (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          final MediaQueryData? data = MediaQuery.of(context, nullOk: true);
+          final MediaQueryData? data = MediaQuery.maybeOf(context);
           expect(data, isNull);
           tested = true;
           return Container();
@@ -58,7 +81,25 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQueryData is sane', (WidgetTester tester) async {
+  testWidgets('MediaQuery.maybeOf finds a MediaQueryData when there is one', (WidgetTester tester) async {
+    bool tested = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData? data = MediaQuery.maybeOf(context);
+            expect(data, isNotNull);
+            tested = true;
+            return Container();
+          },
+        ),
+      ),
+    );
+    expect(tested, isTrue);
+  });
+
+  testWidgets('MediaQueryData.fromWindow is sane', (WidgetTester tester) async {
     final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
@@ -169,7 +210,7 @@ void main() {
               removeBottom: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context)!;
+                  unpadded = MediaQuery.of(context);
                   return Container();
                 },
               ),
@@ -225,7 +266,7 @@ void main() {
               context: context,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context)!;
+                  unpadded = MediaQuery.of(context);
                   return Container();
                 },
               ),
@@ -284,7 +325,7 @@ void main() {
               removeBottom: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context)!;
+                  unpadded = MediaQuery.of(context);
                   return Container();
                 },
               ),
@@ -340,7 +381,7 @@ void main() {
               removeBottom: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context)!;
+                  unpadded = MediaQuery.of(context);
                   return Container();
                 },
               ),
@@ -399,7 +440,7 @@ void main() {
               removeBottom: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context)!;
+                  unpadded = MediaQuery.of(context);
                   return Container();
                 },
               ),
@@ -455,7 +496,7 @@ void main() {
               removeLeft: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context)!;
+                  unpadded = MediaQuery.of(context);
                   return Container();
                 },
               ),

@@ -1268,7 +1268,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// These values are set on the binding's
 /// [LiveTestWidgetsFlutterBinding.framePolicy] property.
 ///
-/// {@template flutter.flutter_test.frame_policy}
+/// {@template flutter.flutter_test.LiveTestWidgetsFlutterBindingFramePolicy}
 /// The default is [LiveTestWidgetsFlutterBindingFramePolicy.fadePointers].
 /// Setting this to anything other than
 /// [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] results in pumping
@@ -1417,7 +1417,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// system requests during an asynchronous pause (as would normally happen
   /// when running an application with [WidgetsFlutterBinding]).
   ///
-  /// {@macro flutter.flutter_test.frame_policy}
+  /// {@macro flutter.flutter_test.LiveTestWidgetsFlutterBindingFramePolicy}
   ///
   /// See [LiveTestWidgetsFlutterBindingFramePolicy].
   LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;

@@ -226,7 +226,7 @@ class CupertinoApp extends StatefulWidget {
   /// This callback is passed along to the [WidgetsApp] built by this widget.
   final LocaleListResolutionCallback? localeListResolutionCallback;
 
-  /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
+  /// {@macro flutter.widgets.LocaleResolutionCallback}
   ///
   /// This callback is passed along to the [WidgetsApp] built by this widget.
   final LocaleResolutionCallback? localeResolutionCallback;

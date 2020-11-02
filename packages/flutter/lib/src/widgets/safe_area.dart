@@ -89,13 +89,13 @@ class SafeArea extends StatelessWidget {
   /// The padding on the [MediaQuery] for the [child] will be suitably adjusted
   /// to zero out any sides that were avoided by this widget.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData data = MediaQuery.of(context)!;
+    final MediaQueryData data = MediaQuery.of(context);
     EdgeInsets padding = data.padding;
     // Bottom padding has been consumed - i.e. by the keyboard
     if (data.padding.bottom == 0.0 && data.viewInsets.bottom != 0.0 && maintainBottomViewPadding)
@@ -194,7 +194,7 @@ class SliverSafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final EdgeInsets padding = MediaQuery.of(context)!.padding;
+    final EdgeInsets padding = MediaQuery.of(context).padding;
     return SliverPadding(
       padding: EdgeInsets.only(
         left: math.max(left ? padding.left : 0.0, minimum.left),

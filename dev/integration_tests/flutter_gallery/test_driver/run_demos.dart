@@ -2,15 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.9
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gallery/demo_lists.dart';
 
-const List<String> kSkippedDemos = <String>[];
+/// The demos we don't run as part of the integraiton test.
+///
+/// Demo names are formatted as 'DEMO_NAME@DEMO_CATEGORY' (see
+/// `demo_lists.dart` for more examples).
+final List<String> kSkippedDemos = <String>[
+  // The CI uses Chromium, which lacks the video codecs to run this demo.
+  if (kIsWeb)
+    'Video@Media',
+];
 
 /// Scrolls each demo menu item into view, launches it, then returns to the
 /// home screen twice.

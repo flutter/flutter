@@ -302,7 +302,7 @@ abstract class WidgetController {
   /// If the middle of the widget is not exposed, this might send
   /// events to another object.
   ///
-  /// {@template flutter.flutter_test.fling}
+  /// {@template flutter.flutter_test.WidgetController.fling}
   /// This can pump frames.
   ///
   /// Exactly 50 pointer events are synthesized.
@@ -358,7 +358,7 @@ abstract class WidgetController {
   /// Attempts a fling gesture starting from the given location, moving the
   /// given distance, reaching the given speed.
   ///
-  /// {@macro flutter.flutter_test.fling}
+  /// {@macro flutter.flutter_test.WidgetController.fling}
   ///
   /// A fling is essentially a drag that ends at a particular speed. If you
   /// just want to drag and end without a fling, use [dragFrom].
@@ -476,7 +476,7 @@ abstract class WidgetController {
   /// The operation happens at once. If you want the drag to last for a period
   /// of time, consider using [timedDrag].
   ///
-  /// {@template flutter.flutter_test.drag}
+  /// {@template flutter.flutter_test.WidgetController.drag}
   /// By default, if the x or y component of offset is greater than
   /// [kDragSlopDefault], the gesture is broken up into two separate moves
   /// calls. Changing `touchSlopX` or `touchSlopY` will change the minimum
@@ -521,7 +521,7 @@ abstract class WidgetController {
   /// The operation happens at once. If you want the drag to last for a period
   /// of time, consider using [timedDragFrom].
   ///
-  /// {@macro flutter.flutter_test.drag}
+  /// {@macro flutter.flutter_test.WidgetController.drag}
   Future<void> dragFrom(
     Offset startLocation,
     Offset offset, {
@@ -613,7 +613,7 @@ abstract class WidgetController {
   /// [fling] or ballistic animation, depending on the speed from
   /// `offset/duration`.
   ///
-  /// {@template flutter.flutter_test.timeddrag}
+  /// {@template flutter.flutter_test.WidgetController.timedDrag}
   /// The move events are sent at a given `frequency` in Hz (or events per
   /// second). It defaults to 60Hz.
   ///
@@ -647,7 +647,7 @@ abstract class WidgetController {
   /// [flingFrom] or ballistic animation, depending on the speed from
   /// `offset/duration`.
   ///
-  /// {@macro flutter.flutter_test.timeddrag}
+  /// {@macro flutter.flutter_test.WidgetController.timedDrag}
   Future<void> timedDragFrom(
     Offset startLocation,
     Offset offset,

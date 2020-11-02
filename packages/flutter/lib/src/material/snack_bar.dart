@@ -123,13 +123,13 @@ class _SnackBarActionState extends State<SnackBarAction> {
       _haveTriggeredAction = true;
     });
     widget.onPressed();
-    Scaffold.of(context)!.hideCurrentSnackBar(reason: SnackBarClosedReason.action);
+    Scaffold.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
   }
 
   @override
   Widget build(BuildContext context) {
     Color? resolveForegroundColor(Set<MaterialState> states) {
-      final SnackBarThemeData snackBarTheme = Theme.of(context)!.snackBarTheme;
+      final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
       if (states.contains(MaterialState.disabled))
         return widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor;
       return widget.textColor ?? snackBarTheme.actionTextColor;
@@ -383,9 +383,9 @@ class _SnackBarState extends State<SnackBar> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQueryData = MediaQuery.of(context)!;
+    final MediaQueryData mediaQueryData = MediaQuery.of(context);
     assert(widget.animation != null);
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final bool isThemeDark = theme.brightness == Brightness.dark;
@@ -529,14 +529,14 @@ class _SnackBarState extends State<SnackBar> {
       container: true,
       liveRegion: true,
       onDismiss: () {
-        Scaffold.of(context)!.removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
+        Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
       child: Dismissible(
         key: const Key('dismissible'),
         direction: DismissDirection.down,
         resizeDuration: null,
         onDismissed: (DismissDirection direction) {
-          Scaffold.of(context)!.removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
+          Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
         child: snackBar,
       ),
