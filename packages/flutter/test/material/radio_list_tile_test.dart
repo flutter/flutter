@@ -649,7 +649,7 @@ void main() {
 
   testWidgets('RadioListTile respects shape', (WidgetTester tester) async {
     const ShapeBorder shapeBorder = RoundedRectangleBorder(
-      borderRadius: BorderRadius.horizontal(right: Radius.circular(100))
+      borderRadius: BorderRadius.horizontal(right: Radius.circular(100)),
     );
 
     await tester.pumpWidget(const MaterialApp(
