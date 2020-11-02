@@ -566,6 +566,7 @@ class FlutterDevice {
       prebuiltApplication: prebuiltMode,
       ipv6: hotRunner.ipv6,
       userIdentifier: userIdentifier,
+      dartEntrypointArgs: hotRunner.dartEntrypointArgs,
     );
 
     final LaunchResult result = await futureResult;
@@ -641,6 +642,7 @@ class FlutterDevice {
       prebuiltApplication: prebuiltMode,
       ipv6: coldRunner.ipv6,
       userIdentifier: userIdentifier,
+      dartEntrypointArgs: coldRunner.dartEntrypointArgs,
     );
 
     if (!result.started) {
@@ -725,6 +727,7 @@ abstract class ResidentRunner {
     this.hotMode = true,
     String dillOutputPath,
     this.machine = false,
+    this.dartEntrypointArgs,
   }) : mainPath = findMainDartFile(target),
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -759,6 +762,7 @@ abstract class ResidentRunner {
   final String projectRootPath;
   final String mainPath;
   final AssetBundle assetBundle;
+  final List<String> dartEntrypointArgs;
 
   final CommandHelp commandHelp;
   final bool machine;

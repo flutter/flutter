@@ -124,6 +124,7 @@ abstract class ChromiumDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
+    List<String> dartEntrypointArgs,
   }) async {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
@@ -443,6 +444,7 @@ class WebServerDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
+    List<String> dartEntrypointArgs,
   }) async {
     final String url = platformArgs['uri'] as String;
     if (debuggingOptions.startPaused) {

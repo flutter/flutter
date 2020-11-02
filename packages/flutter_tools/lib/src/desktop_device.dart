@@ -118,6 +118,7 @@ abstract class DesktopDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
+    List<String> dartEntrypointArgs,
   }) async {
     if (!prebuiltApplication) {
       await buildForDevice(
@@ -139,7 +140,7 @@ abstract class DesktopDevice extends Device {
     final Process process = await _processManager.start(
       <String>[
         executable,
-      ],
+      ] + dartEntrypointArgs,
       environment: _computeEnvironment(debuggingOptions, traceStartup, route),
     );
     _runningProcesses.add(process);

@@ -115,7 +115,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         help: 'Filters out all trace events except those that are specified in '
             'this comma separated list of allowed prefixes.',
         valueHelp: 'foo,bar',
-      );
+      )
+      ..addMultiOption('dart-entrypoint-args',
+        abbr: 'a',
+        help: 'Pass a list of arguments to the Dart entrypoint at application '
+              'startup. Specify this option multiple times each with one argument '
+              'to pass multiple arguments to the Dart entrypoint.');
     usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
@@ -547,6 +552,7 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : globals.fs.file(applicationBinaryPath),
+        dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         projectRootPath: stringArg('project-root'),
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
@@ -572,6 +578,7 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : globals.fs.file(applicationBinaryPath),
+        dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         ipv6: ipv6,
         stayResident: stayResident,
       );

@@ -142,6 +142,7 @@ class FlutterTesterDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
+    List<String> dartEntrypointArgs,
   }) async {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
     if (!buildInfo.isDebug) {

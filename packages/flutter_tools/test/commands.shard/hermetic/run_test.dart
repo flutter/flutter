@@ -628,6 +628,7 @@ class FakeDevice extends Fake implements Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
     String userIdentifier,
+    List<String> dartEntrypointArgs,
   }) async {
     final String dartFlags = debuggingOptions.dartFlags;
     // In release mode, --dart-flags should be set to the empty string and

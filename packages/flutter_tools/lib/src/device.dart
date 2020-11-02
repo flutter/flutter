@@ -670,7 +670,8 @@ abstract class Device {
   /// Start an app package on the current device.
   ///
   /// [platformArgs] allows callers to pass platform-specific arguments to the
-  /// start call. The build mode is not used by all platforms.
+  /// start call. The build mode and Dart entrypoint arguments parameters are
+  /// not used by all platforms.
   Future<LaunchResult> startApp(
     covariant ApplicationPackage package, {
     String mainPath,
@@ -680,6 +681,7 @@ abstract class Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
+    List<String> dartEntrypointArgs,
   });
 
   /// Whether this device implements support for hot reload.
