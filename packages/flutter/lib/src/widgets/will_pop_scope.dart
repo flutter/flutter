@@ -29,9 +29,7 @@ import 'routes.dart';
 /// {@tool dartpad --template=stateless_widget_material}
 ///
 /// ```dart
-/// In this example a snackbar is shown when back button is pressed. Here
-/// `false` is returned to prevent the screen from popping. Returning `true`
-/// would pop the screen.
+/// 
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
