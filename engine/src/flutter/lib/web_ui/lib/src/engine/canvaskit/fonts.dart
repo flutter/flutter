@@ -17,7 +17,7 @@ const String _robotoUrl =
 class SkiaFontCollection {
   /// Fonts that have been registered but haven't been loaded yet.
   final List<Future<_RegisteredFont?>> _unloadedFonts =
-      <Future<_RegisteredFont>>[];
+      <Future<_RegisteredFont?>>[];
 
   /// Fonts which have been registered and loaded.
   final List<_RegisteredFont> _registeredFonts = <_RegisteredFont>[];
