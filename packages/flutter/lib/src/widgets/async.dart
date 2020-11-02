@@ -225,7 +225,8 @@ class AsyncSnapshot<T> {
   /// and a [stackTrace].
   ///
   /// If no [stackTrace] is explicitly specified, [StackTrace.empty] will be used instead.
-  const AsyncSnapshot.withError(ConnectionState state,
+  const AsyncSnapshot.withError(
+    ConnectionState state,
     Object error, [
     StackTrace stackTrace = StackTrace.empty,
   ]) : this._(state, null, error, stackTrace);
