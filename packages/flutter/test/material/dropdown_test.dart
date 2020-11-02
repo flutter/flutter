@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 final ValueChanged<String?> onChanged = (_) { };
@@ -2662,5 +2663,120 @@ void main() {
     expect(find.text('third').hitTestable(), findsOneWidget);
     expect(find.text('first').hitTestable(), findsNothing);
     expect(find.text('second').hitTestable(), findsNothing);
+  });
+
+  group('feedback', () {
+    late FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback.dispose();
+    });
+
+    testWidgets('Dropdown with enabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home : Material(
+            child: DropdownButton<String>(
+              iconSize: 24,
+              elevation: 16,
+              enableFeedback: enableFeedback,
+              underline: Container(
+                height: 2,
+                color: Colors.deepPurpleAccent,
+              ),
+              onChanged: onChanged,
+              items: <String>['One', 'Two']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('One'));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.byType(InkWell).first);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('Dropdown with disabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home : Material(
+            child: DropdownButton<String>(
+              iconSize: 24,
+              elevation: 16,
+              enableFeedback: enableFeedback,
+              underline: Container(
+                height: 2,
+                color: Colors.deepPurpleAccent,
+              ),
+              onChanged: onChanged,
+              items: <String>['One', 'Two']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('One'));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.byType(InkWell).first);
+      await tester.tap(find.byType(InkWell).last);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('Dropdown with enabled feedback', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home : Material(
+            child: DropdownButton<String>(
+              iconSize: 24,
+              elevation: 16,
+              underline: Container(
+                height: 2,
+                color: Colors.deepPurpleAccent,
+              ),
+              onChanged: onChanged,
+              items: <String>['One', 'Two']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('One'));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.byType(InkWell).first);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
   });
 }
