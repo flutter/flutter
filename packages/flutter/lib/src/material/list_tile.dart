@@ -378,7 +378,7 @@ enum ListTileControlAffinity {
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// Here is an example of a custom list item that resembles a Youtube related
+/// Here is an example of a custom list item that resembles a YouTube-related
 /// video list item created with [Expanded] and [Container] widgets.
 ///
 /// ![Custom list item a](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_a.png)
@@ -1025,7 +1025,7 @@ class ListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ListTileTheme tileTheme = ListTileTheme.of(context);
 
     IconThemeData? iconThemeData;
@@ -1067,7 +1067,7 @@ class ListTile extends StatelessWidget {
     }
 
     const EdgeInsets _defaultContentPadding = EdgeInsets.symmetric(horizontal: 16.0);
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     final EdgeInsets resolvedContentPadding = contentPadding?.resolve(textDirection)
       ?? tileTheme.contentPadding?.resolve(textDirection)
       ?? _defaultContentPadding;

@@ -338,7 +338,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   final GlobalKey _inkFeatureRenderer = GlobalKey(debugLabel: 'ink renderer');
 
   Color? _getBackgroundColor(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     Color? color = widget.color;
     if (color == null) {
       switch (widget.type) {
@@ -368,7 +368,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     Widget? contents = widget.child;
     if (contents != null) {
       contents = AnimatedDefaultTextStyle(
-        style: widget.textStyle ?? Theme.of(context)!.textTheme.bodyText2!,
+        style: widget.textStyle ?? Theme.of(context).textTheme.bodyText2!,
         duration: widget.animationDuration,
         child: contents,
       );
@@ -406,7 +406,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
         color: ElevationOverlay.applyOverlay(context, backgroundColor!, widget.elevation),
-        shadowColor: widget.shadowColor ?? Theme.of(context)!.shadowColor,
+        shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
         animateColor: false,
         child: contents,
       );
@@ -431,7 +431,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       clipBehavior: widget.clipBehavior,
       elevation: widget.elevation,
       color: backgroundColor!,
-      shadowColor: widget.shadowColor ?? Theme.of(context)!.shadowColor,
+      shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
       child: contents,
     );
   }

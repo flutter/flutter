@@ -177,7 +177,7 @@ class Drawer extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     String? label = semanticLabel;
-    switch (Theme.of(context)!.platform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         break;
@@ -407,7 +407,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         delta = -delta;
         break;
     }
-    switch (Directionality.of(context)!) {
+    switch (Directionality.of(context)) {
       case TextDirection.rtl:
         _controller.value -= delta;
         break;
@@ -434,7 +434,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           visualVelocity = -visualVelocity;
           break;
       }
-      switch (Directionality.of(context)!) {
+      switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _controller.fling(velocity: -visualVelocity);
           if (widget.drawerCallback != null)
@@ -499,7 +499,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   Widget _buildDrawer(BuildContext context) {
     final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
     final EdgeInsets padding = MediaQuery.of(context).padding;
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
 
     double? dragAreaWidth = widget.edgeDragWidth;
     if (widget.edgeDragWidth == null) {
@@ -534,7 +534,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       }
     } else {
       final bool platformHasBackButton;
-      switch (Theme.of(context)!.platform) {
+      switch (Theme.of(context).platform) {
         case TargetPlatform.android:
           platformHasBackButton = true;
           break;

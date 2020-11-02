@@ -255,20 +255,6 @@ Future<void> _runSmokeTests() async {
     ],
   );
 
-  // The flutter-tester device cannot be run concurrently in the same project directory.
-  await runCommand(flutter,
-    <String>['drive', '--show-test-device', '-d', 'flutter-tester', '-t', path.join('test_driver', 'success.dart')],
-    workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-    expectNonZeroExit: false,
-    outputMode: OutputMode.capture,
-  );
-  await runCommand(flutter,
-    <String>['drive', '--show-test-device', '-d', 'flutter-tester', '-t', path.join('test_driver', 'failure.dart')],
-    workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-    expectNonZeroExit: true,
-    outputMode: OutputMode.capture,
-  );
-
   // Verify that we correctly generated the version file.
   final String versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
   if (versionError != null)
@@ -830,8 +816,10 @@ Future<void> _runWebLongRunningTests() async {
     () => _runGalleryE2eWebTest('profile', canvasKit: true),
     () => _runGalleryE2eWebTest('release'),
     () => _runGalleryE2eWebTest('release', canvasKit: true),
-  ].map(_withChromeDriver).toList();
+  ];
+  await _ensureChromeDriverIsRunning();
   await _selectIndexedSubshard(tests, kWebLongRunningTestShardCount);
+  await _stopChromeDriver();
 }
 
 // The `chromedriver` process created by this test.
@@ -840,22 +828,11 @@ Future<void> _runWebLongRunningTests() async {
 // process is reused and this variable remains null.
 Command _chromeDriver;
 
-/// Creates a shard runner that runs the given [originalRunner] with ChromeDriver
-/// enabled.
-ShardRunner _withChromeDriver(ShardRunner originalRunner) {
-  return () async {
-    try {
-      await _ensureChromeDriverIsRunning();
-      await originalRunner();
-    } finally {
-      await _stopChromeDriver();
-    }
-  };
-}
-
 Future<bool> _isChromeDriverRunning() async {
   try {
-    (await Socket.connect('localhost', 4444)).destroy();
+    final RawSocket socket = await RawSocket.connect('localhost', 4444);
+    socket.shutdown(SocketDirection.both);
+    await socket.close();
     return true;
   } on SocketException {
     return false;
@@ -893,11 +870,8 @@ Future<void> _stopChromeDriver() async {
   if (_chromeDriver == null) {
     return;
   }
+  print('Stopping chromedriver');
   _chromeDriver.process.kill();
-  while (await _isChromeDriverRunning()) {
-    await Future<void>.delayed(const Duration(milliseconds: 100));
-    print('Waiting for chromedriver to stop.');
-  }
 }
 
 /// Exercises the old gallery in a browser for a long period of time, looking
@@ -926,6 +900,7 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
       '--driver=test_driver/transitions_perf_e2e_test.dart',
       '--target=test_driver/transitions_perf_e2e.dart',
       '--browser-name=chrome',
+      '--no-sound-null-safety',
       '-d',
       'web-server',
       '--$buildMode',

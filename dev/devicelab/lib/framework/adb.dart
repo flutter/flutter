@@ -83,7 +83,7 @@ abstract class DeviceDiscovery {
   /// returned. For such behavior see [workingDevice].
   Future<void> chooseWorkingDevice();
 
-  /// Select the device with ID strati with deviceId, return the device.
+  /// Selects a device to work with by device ID.
   Future<void> chooseWorkingDeviceById(String deviceId);
 
   /// A device to work with.
