@@ -15,24 +15,33 @@ void skiaInstantiateImageCodec(Uint8List list, Callback<ui.Codec> callback,
   callback(codec);
 }
 
-/// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia after requesting from URI.
-void skiaInstantiateWebImageCodec(String src, Callback<ui.Codec> callback,
-    WebOnlyImageCodecChunkCallback? chunkCallback) {
-  chunkCallback?.call(0, 100);
+/// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia after
+/// requesting from URI.
+Future<ui.Codec> skiaInstantiateWebImageCodec(
+    String src, WebOnlyImageCodecChunkCallback? chunkCallback) {
+  Completer<ui.Codec> completer = Completer<ui.Codec>();
   //TODO: Switch to using MakeImageFromCanvasImageSource when animated images are supported.
-  html.HttpRequest.request(
-    src,
-    responseType: "arraybuffer",
-  ).then((html.HttpRequest response) {
-    chunkCallback?.call(100, 100);
+  html.HttpRequest.request(src, responseType: "arraybuffer",
+      onProgress: (html.ProgressEvent event) {
+    if (event.lengthComputable) {
+      chunkCallback?.call(event.loaded!, event.total!);
+    }
+  }).then((html.HttpRequest response) {
+    if (response.status != 200) {
+      completer.completeError(Exception(
+          'Network image request failed with status: ${response.status}'));
+    }
     final Uint8List list =
         new Uint8List.view((response.response as ByteBuffer));
     final SkAnimatedImage skAnimatedImage =
         canvasKit.MakeAnimatedImageFromEncoded(list);
     final CkAnimatedImage animatedImage = CkAnimatedImage(skAnimatedImage);
     final CkAnimatedImageCodec codec = CkAnimatedImageCodec(animatedImage);
-    callback(codec);
+    completer.complete(codec);
+  }, onError: (dynamic error) {
+    completer.completeError(error);
   });
+  return completer.future;
 }
 
 /// A wrapper for `SkAnimatedImage`.
@@ -43,7 +52,8 @@ class CkAnimatedImage implements ui.Image {
   // being garbage-collected, or by an explicit call to [delete].
   late final SkiaObjectBox box;
 
-  CkAnimatedImage(SkAnimatedImage skAnimatedImage) : this._(skAnimatedImage, null);
+  CkAnimatedImage(SkAnimatedImage skAnimatedImage)
+      : this._(skAnimatedImage, null);
 
   CkAnimatedImage._(this._skAnimatedImage, SkiaObjectBox? boxToClone) {
     if (boxToClone != null) {
@@ -66,19 +76,21 @@ class CkAnimatedImage implements ui.Image {
     if (assertionsEnabled) {
       return _disposed;
     }
-    throw StateError('Image.debugDisposed is only available when asserts are enabled.');
+    throw StateError(
+        'Image.debugDisposed is only available when asserts are enabled.');
   }
 
   ui.Image clone() => CkAnimatedImage._(_skAnimatedImage, box);
 
   @override
   bool isCloneOf(ui.Image other) {
-    return other is CkAnimatedImage
-        && other._skAnimatedImage.isAliasOf(_skAnimatedImage);
+    return other is CkAnimatedImage &&
+        other._skAnimatedImage.isAliasOf(_skAnimatedImage);
   }
 
   @override
-  List<StackTrace>? debugGetOpenHandleStackTraces() => box.debugGetStackTraces();
+  List<StackTrace>? debugGetOpenHandleStackTraces() =>
+      box.debugGetStackTraces();
 
   int get frameCount => _skAnimatedImage.getFrameCount();
 
@@ -115,8 +127,9 @@ class CkAnimatedImage implements ui.Image {
       );
       bytes = _skAnimatedImage.readPixels(imageInfo, 0, 0);
     } else {
-      final SkData skData = _skAnimatedImage.encodeToData(); //defaults to PNG 100%
-      // make a copy that we can return
+      // Defaults to PNG 100%.
+      final SkData skData = _skAnimatedImage.encodeToData();
+      // Make a copy that we can return.
       bytes = Uint8List.fromList(canvasKit.getSkDataBytes(skData));
     }
 
@@ -162,7 +175,8 @@ class CkImage implements ui.Image {
     if (assertionsEnabled) {
       return _disposed;
     }
-    throw StateError('Image.debugDisposed is only available when asserts are enabled.');
+    throw StateError(
+        'Image.debugDisposed is only available when asserts are enabled.');
   }
 
   @override
@@ -170,12 +184,12 @@ class CkImage implements ui.Image {
 
   @override
   bool isCloneOf(ui.Image other) {
-    return other is CkImage
-        && other.skImage.isAliasOf(skImage);
+    return other is CkImage && other.skImage.isAliasOf(skImage);
   }
 
   @override
-  List<StackTrace>? debugGetOpenHandleStackTraces() => box.debugGetStackTraces();
+  List<StackTrace>? debugGetOpenHandleStackTraces() =>
+      box.debugGetStackTraces();
 
   @override
   int get width => skImage.width();
