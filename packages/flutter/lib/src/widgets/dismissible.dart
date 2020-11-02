@@ -68,30 +68,32 @@ enum DismissDirection {
 /// remove list items using swipe gestures.
 ///
 /// ```dart
-///  List<int> items = List<int>.generate(100, (index) => index);
+/// List<int> items = List<int>.generate(100, (index) => index);
 ///
-///  Widget build(BuildContext context) {
-///    return ListView.builder(
-///      itemCount: items.length,
-///      padding: const EdgeInsets.symmetric(vertical: 16),
-///      itemBuilder: (BuildContext context, int index) => Dismissible(
-///        child: ListTile(
-///          title: Text(
-///            'Item ${items[index]}',
-///          ),
-///        ),
-///        background: Container(
-///          color: Colors.green,
-///        ),
-///        key: ValueKey(items[index]),
-///        onDismissed: (DismissDirection direction) {
-///          setState(() {
-///            items.remove(index);
-///          });
-///        },
-///      ),
-///    );
-///  }
+/// Widget build(BuildContext context) {
+///   return ListView.builder(
+///     itemCount: items.length,
+///     padding: const EdgeInsets.symmetric(vertical: 16),
+///     itemBuilder: (BuildContext context, int index) {
+///       return Dismissible(
+///         child: ListTile(
+///           title: Text(
+///             'Item ${items[index]}',
+///           ),
+///         ),
+///         background: Container(
+///           color: Colors.green,
+///         ),
+///         key: ValueKey(items[index]),
+///         onDismissed: (DismissDirection direction) {
+///           setState(() {
+///             items.remove(index);
+///           });
+///         },
+///       );
+///     },
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
