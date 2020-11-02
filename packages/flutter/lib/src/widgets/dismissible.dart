@@ -84,7 +84,7 @@ enum DismissDirection {
 ///          color: Colors.green,
 ///        ),
 ///        key: ValueKey(items[index]),
-///        onDismissed: (direction) {
+///        onDismissed: (DismissDirection direction) {
 ///          setState(() {
 ///            items.remove(index);
 ///          });
