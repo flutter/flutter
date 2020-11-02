@@ -1261,9 +1261,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
-    final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
-    if (widget.maxLength != null && widget.maxLengthEnforced)
-      formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
+    final List<TextInputFormatter> formatters = <TextInputFormatter>[
+      ...?widget.inputFormatters,
+      if (widget.maxLength != null && widget.maxLengthEnforced) LengthLimitingTextInputFormatter(widget.maxLength)
+    ];
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     final bool paintCursorAboveText;
