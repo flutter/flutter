@@ -878,13 +878,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
-    final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     final TextSelectionControls textSelectionControls = widget.selectionControls ?? cupertinoTextSelectionControls;
     final bool enabled = widget.enabled ?? true;
     final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
-    if (widget.maxLength != null && widget.maxLengthEnforced) {
-      formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
-    }
+    final List<TextInputFormatter> formatters = <TextInputFormatter>[
+      ...?widget.inputFormatters,
+      if (widget.maxLength != null && widget.maxLengthEnforced) LengthLimitingTextInputFormatter(widget.maxLength)
+    ];
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
 
     final TextStyle? resolvedStyle = widget.style?.copyWith(
