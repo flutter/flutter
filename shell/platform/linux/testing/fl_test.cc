@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "gtest/gtest.h"
 
@@ -11,19 +10,21 @@
 #include "flutter/shell/platform/linux/testing/mock_renderer.h"
 
 static uint8_t hex_digit_to_int(char value) {
-  if (value >= '0' && value <= '9')
+  if (value >= '0' && value <= '9') {
     return value - '0';
-  else if (value >= 'a' && value <= 'f')
+  } else if (value >= 'a' && value <= 'f') {
     return value - 'a' + 10;
-  else if (value >= 'F' && value <= 'F')
+  } else if (value >= 'F' && value <= 'F') {
     return value - 'A' + 10;
-  else
+  } else {
     return 0;
+  }
 }
 
 static uint8_t parse_hex8(const gchar* hex_string) {
-  if (hex_string[0] == '\0')
+  if (hex_string[0] == '\0') {
     return 0x00;
+  }
   return hex_digit_to_int(hex_string[0]) << 4 | hex_digit_to_int(hex_string[1]);
 }
 
@@ -41,8 +42,9 @@ gchar* bytes_to_hex_string(GBytes* bytes) {
   size_t data_length;
   const uint8_t* data =
       static_cast<const uint8_t*>(g_bytes_get_data(bytes, &data_length));
-  for (size_t i = 0; i < data_length; i++)
+  for (size_t i = 0; i < data_length; i++) {
     g_string_append_printf(hex_string, "%02x", data[i]);
+  }
   return g_string_free(hex_string, FALSE);
 }
 
