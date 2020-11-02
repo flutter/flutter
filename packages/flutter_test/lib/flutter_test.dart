@@ -60,6 +60,7 @@ export 'src/image.dart';
 export 'src/matchers.dart';
 export 'src/nonconst.dart';
 export 'src/platform.dart';
+export 'src/platform_dispatcher.dart';
 export 'src/restoration.dart';
 export 'src/stack_manipulation.dart';
 export 'src/test_async_utils.dart';
