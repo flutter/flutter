@@ -2571,6 +2571,81 @@ void main() {
     expect(find.text('No tabs'), findsOneWidget);
   });
 
+  testWidgets('TabBar - updating to and from zero tabs', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/68962.
+    final List<String> tabTitles = <String>[];
+    final List<Widget> tabContents = <Widget>[];
+    TabController _tabController = TabController(length: tabContents.length, vsync: const TestVSync());
+
+    void _onTabAdd(StateSetter setState) {
+      setState(() {
+        tabTitles.add('Tab ${tabTitles.length + 1}');
+        tabContents.add(
+          Container(
+            color: Colors.red,
+            height: 200,
+            width: 200,
+          ),
+        );
+        _tabController = TabController(length: tabContents.length, vsync: const TestVSync());
+      });
+    }
+
+    void _onTabRemove(StateSetter setState) {
+      setState(() {
+        tabTitles.removeLast();
+        tabContents.removeLast();
+        _tabController = TabController(length: tabContents.length, vsync: const TestVSync());
+      });
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              appBar: AppBar(
+                actions: <Widget>[
+                  FlatButton(
+                    key: const Key('Add tab'),
+                    child: const Text('Add tab'),
+                    onPressed: () => _onTabAdd(setState),
+                  ),
+                  FlatButton(
+                    key: const Key('Remove tab'),
+                    child: const Text('Remove tab'),
+                    onPressed: () => _onTabRemove(setState),
+                  ),
+                ],
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(40.0),
+                  child: Expanded(
+                    child: TabBar(
+                      controller: _tabController,
+                      tabs: tabTitles
+                        .map((String title) => Tab(text: title))
+                        .toList(),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('Add tab'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('Add tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('Remove tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsNothing);
+  });
+
    testWidgets('TabBar expands vertically to accommodate the Icon and child Text() pair the same amount it would expand for Icon and text pair.', (WidgetTester tester) async {
     const double indicatorWeight = 2.0;
 
@@ -2771,6 +2846,52 @@ void main() {
     await tester.pump();
     expect(tabController.animation!.value, pageController.page);
   });
+
+  testWidgets('Does not instantiate intermediate tabs during animation', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/14316.
+    final List<String> log = <String>[];
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 5,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: <Widget>[
+                Tab(text: 'car'),
+                Tab(text: 'transit'),
+                Tab(text: 'bike'),
+                Tab(text: 'boat'),
+                Tab(text: 'bus'),
+              ],
+            ),
+            title: const Text('Tabs Test'),
+          ),
+          body: TabBarView(
+            children: <Widget>[
+              TabBody(index: 0, log: log),
+              TabBody(index: 1, log: log),
+              TabBody(index: 2, log: log),
+              TabBody(index: 3, log: log),
+              TabBody(index: 4, log: log),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('3'), findsNothing);
+    expect(log, <String>['init: 0']);
+
+    await tester.tap(find.text('boat'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('0'), findsNothing);
+    expect(find.text('3'), findsOneWidget);
+
+    // No other tab got instantiated during the animation.
+    expect(log, <String>['init: 0', 'init: 3', 'dispose: 0']);
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
@@ -2826,3 +2947,41 @@ class TabBarDemo extends StatelessWidget {
 }
 
 class MockScrollMetrics extends Fake implements ScrollMetrics {}
+
+class TabBody extends StatefulWidget {
+  const TabBody({ Key? key, required this.index, required this.log }) : super(key: key);
+
+  final int index;
+  final List<String> log;
+
+  @override
+  State<TabBody> createState() => TabBodyState();
+}
+
+class TabBodyState extends State<TabBody> {
+  @override
+  void initState() {
+    widget.log.add('init: ${widget.index}');
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(TabBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // To keep the logging straight, widgets must not change their index.
+    assert(oldWidget.index == widget.index);
+  }
+
+  @override
+  void dispose() {
+    widget.log.add('dispose: ${widget.index}');
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('${widget.index}'),
+    );
+  }
+}

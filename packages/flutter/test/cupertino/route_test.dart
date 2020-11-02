@@ -83,8 +83,8 @@ void main() {
     final List<Element> titles = tester.elementList(find.text('An iPod'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
+          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
           return aParagraph.text.style!.fontSize!.compareTo(
             bParagraph.text.style!.fontSize!
           );
@@ -154,8 +154,8 @@ void main() {
 
     // Also shows the previous page's title next to the back button.
     expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
-    // 2 paddings + 1 ahem character at font size 34.0.
-    expect(tester.getTopLeft(find.text('An iPod')).dx, 8.0 + 34.0 + 6.0);
+    // 3 paddings + 1 ahem character at font size 34.0.
+    expect(tester.getTopLeft(find.text('An iPod')).dx, 8.0 + 4.0 + 34.0 + 6.0);
   });
 
   testWidgets('Previous title is correct on first transition frame', (WidgetTester tester) async {
@@ -261,7 +261,7 @@ void main() {
     // from An iPod to Back (since An Internet communicator is too long to
     // fit in the back button).
     expect(find.widgetWithText(CupertinoButton, 'Back'), findsOneWidget);
-    expect(tester.getTopLeft(find.text('Back')).dx, 8.0 + 34.0 + 6.0);
+    expect(tester.getTopLeft(find.text('Back')).dx, 8.0 + 4.0 + 34.0 + 6.0);
   });
 
   testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
@@ -1345,6 +1345,38 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
+  testWidgets('showCupertinoModalPopup passes RouteSettings to PopupRoute', (WidgetTester tester) async {
+    final RouteSettingsObserver routeSettingsObserver = RouteSettingsObserver();
+
+    await tester.pumpWidget(CupertinoApp(
+      navigatorObservers: <NavigatorObserver>[routeSettingsObserver],
+      home: Navigator(
+        onGenerateRoute: (RouteSettings settings) {
+          return PageRouteBuilder<dynamic>(
+            pageBuilder: (BuildContext context, Animation<double> _,
+                Animation<double> __) {
+              return GestureDetector(
+                onTap: () async {
+                  await showCupertinoModalPopup<void>(
+                    context: context,
+                    builder: (BuildContext context) => const SizedBox(),
+                    routeSettings: const RouteSettings(name: '/modal'),
+                  );
+                },
+                child: const Text('tap'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.text('tap'));
+
+    expect(routeSettingsObserver.routeName, '/modal');
+  });
+
   testWidgets('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
     const Color _kTransparentColor = Color(0x00000000);
 
@@ -1600,6 +1632,57 @@ void main() {
     expect(find.byType(CupertinoButton), findsOneWidget);
     expect(find.text('PointerCancelEvents: 1'), findsOneWidget);
   });
+
+  testWidgets('Popping routes during back swipe should not crash', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/63984#issuecomment-675679939
+
+    final CupertinoPageRoute<void> r = CupertinoPageRoute<void>(builder: (BuildContext context) {
+      return const Scaffold(
+        body: Center(
+          child: Text('child'),
+        ),
+      );
+    });
+
+    late NavigatorState navigator;
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: Builder(builder: (BuildContext context) {
+          return RaisedButton(
+            child: const Text('Home'),
+            onPressed: () {
+              navigator = Navigator.of(context)!;
+              assert(navigator != null);
+              navigator.push<void>(r);
+            },
+          );
+        }),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.down(tester.getCenter(find.byType(RaisedButton)));
+    await gesture.up();
+
+    await tester.pumpAndSettle();
+
+    await gesture.down(const Offset(3, 300), timeStamp: Duration.zero);
+
+    // Need 2 events to form a valid drag
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.moveTo(const Offset(30, 300), timeStamp: const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 200));
+    await gesture.moveTo(const Offset(50, 300), timeStamp: const Duration(milliseconds: 200));
+
+    // Pause a while so that the route is popped when the drag is canceled
+    await tester.pump(const Duration(milliseconds: 1000));
+    await gesture.moveTo(const Offset(51, 300), timeStamp: const Duration(milliseconds: 1200));
+
+    // Remove the drag
+    navigator.removeRoute(r);
+    await tester.pump();
+  });
 }
 
 class MockNavigatorObserver extends NavigatorObserver {
@@ -1652,6 +1735,18 @@ class DialogObserver extends NavigatorObserver {
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route.toString().contains('_DialogRoute')) {
       dialogCount++;
+    }
+    super.didPush(route, previousRoute);
+  }
+}
+
+class RouteSettingsObserver extends NavigatorObserver {
+  String? routeName;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route.toString().contains('_CupertinoModalPopupRoute')) {
+      routeName = route.settings.name;
     }
     super.didPush(route, previousRoute);
   }

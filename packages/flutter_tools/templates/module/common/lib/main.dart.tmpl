@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-{{#withDriverTest}}
-import 'package:flutter_driver/driver_extension.dart';
-{{/withDriverTest}}
 {{#withPluginHook}}
 import 'dart:async';
 
@@ -9,17 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart';
 {{/withPluginHook}}
 
-{{^withDriverTest}}
 void main() => runApp(MyApp());
-{{/withDriverTest}}
-{{#withDriverTest}}
-void main() {
-  // Enable integration testing with the Flutter Driver extension.
-  // See https://flutter.dev/testing/ for more info.
-  enableFlutterDriverExtension();
-  runApp(MyApp());
-}
-{{/withDriverTest}}
 
 {{^withPluginHook}}
 class MyApp extends StatelessWidget {

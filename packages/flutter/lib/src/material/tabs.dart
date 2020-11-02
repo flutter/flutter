@@ -4,6 +4,7 @@
 
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -101,8 +102,8 @@ class Tab extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
 
-    double height;
-    Widget label;
+    final double height;
+    final Widget label;
     if (icon == null) {
       height = _kTabHeight;
       label = _buildLabelText();
@@ -240,7 +241,7 @@ class _TabLabelBarRenderer extends RenderFlex {
     RenderBox? child = firstChild;
     final List<double> xOffsets = <double>[];
     while (child != null) {
-      final FlexParentData childParentData = child.parentData as FlexParentData;
+      final FlexParentData childParentData = child.parentData! as FlexParentData;
       xOffsets.add(childParentData.offset.dx);
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
@@ -331,8 +332,12 @@ class _IndicatorPainter extends CustomPainter {
   final TabBarIndicatorSize? indicatorSize;
   final List<GlobalKey> tabKeys;
 
-  late List<double> _currentTabOffsets;
-  late TextDirection _currentTextDirection;
+  // _currentTabOffsets and _currentTextDirection are set each time TabBar
+  // layout is completed. These values can be null when TabBar contains no
+  // tabs, since there are nothing to lay out.
+  List<double>? _currentTabOffsets;
+  TextDirection? _currentTextDirection;
+
   Rect? _currentRect;
   BoxPainter? _painter;
   bool _needsPaint = false;
@@ -344,38 +349,38 @@ class _IndicatorPainter extends CustomPainter {
     _painter?.dispose();
   }
 
-  void saveTabOffsets(List<double> tabOffsets, TextDirection textDirection) {
+  void saveTabOffsets(List<double>? tabOffsets, TextDirection? textDirection) {
     _currentTabOffsets = tabOffsets;
     _currentTextDirection = textDirection;
   }
 
   // _currentTabOffsets[index] is the offset of the start edge of the tab at index, and
   // _currentTabOffsets[_currentTabOffsets.length] is the end edge of the last tab.
-  int get maxTabIndex => _currentTabOffsets.length - 2;
+  int get maxTabIndex => _currentTabOffsets!.length - 2;
 
   double centerOf(int tabIndex) {
     assert(_currentTabOffsets != null);
-    assert(_currentTabOffsets.isNotEmpty);
+    assert(_currentTabOffsets!.isNotEmpty);
     assert(tabIndex >= 0);
     assert(tabIndex <= maxTabIndex);
-    return (_currentTabOffsets[tabIndex] + _currentTabOffsets[tabIndex + 1]) / 2.0;
+    return (_currentTabOffsets![tabIndex] + _currentTabOffsets![tabIndex + 1]) / 2.0;
   }
 
   Rect indicatorRect(Size tabBarSize, int tabIndex) {
     assert(_currentTabOffsets != null);
     assert(_currentTextDirection != null);
-    assert(_currentTabOffsets.isNotEmpty);
+    assert(_currentTabOffsets!.isNotEmpty);
     assert(tabIndex >= 0);
     assert(tabIndex <= maxTabIndex);
     double tabLeft, tabRight;
-    switch (_currentTextDirection) {
+    switch (_currentTextDirection!) {
       case TextDirection.rtl:
-        tabLeft = _currentTabOffsets[tabIndex + 1];
-        tabRight = _currentTabOffsets[tabIndex];
+        tabLeft = _currentTabOffsets![tabIndex + 1];
+        tabRight = _currentTabOffsets![tabIndex];
         break;
       case TextDirection.ltr:
-        tabLeft = _currentTabOffsets[tabIndex];
-        tabRight = _currentTabOffsets[tabIndex + 1];
+        tabLeft = _currentTabOffsets![tabIndex];
+        tabRight = _currentTabOffsets![tabIndex + 1];
         break;
     }
 
@@ -426,25 +431,13 @@ class _IndicatorPainter extends CustomPainter {
     _painter!.paint(canvas, _currentRect!.topLeft, configuration);
   }
 
-  static bool _tabOffsetsEqual(List<double> a, List<double> b) {
-    // TODO(shihaohong): The following null check should be replaced when a fix
-    // for https://github.com/flutter/flutter/issues/40014 is available.
-    if (a == null || b == null || a.length != b.length)
-      return false;
-    for (int i = 0; i < a.length; i += 1) {
-      if (a[i] != b[i])
-        return false;
-    }
-    return true;
-  }
-
   @override
   bool shouldRepaint(_IndicatorPainter old) {
     return _needsPaint
         || controller != old.controller
         || indicator != old.indicator
         || tabKeys.length != old.tabKeys.length
-        || (!_tabOffsetsEqual(_currentTabOffsets, old._currentTabOffsets))
+        || (!listEquals(_currentTabOffsets, old._currentTabOffsets))
         || _currentTextDirection != old._currentTextDirection;
   }
 }
@@ -925,7 +918,7 @@ class _TabBarState extends State<TabBar> {
     if (!widget.isScrollable)
       return 0.0;
     double tabCenter = _indicatorPainter!.centerOf(index);
-    switch (Directionality.of(context)!) {
+    switch (Directionality.of(context)) {
       case TextDirection.rtl:
         tabCenter = _tabStripWidth - tabCenter;
         break;
@@ -956,7 +949,7 @@ class _TabBarState extends State<TabBar> {
 
     final double index = _controller!.index.toDouble();
     final double value = _controller!.animation!.value;
-    double offset;
+    final double offset;
     if (value == index - 1.0)
       offset = leadingPosition ?? middlePosition;
     else if (value == index + 1.0)
@@ -1030,7 +1023,7 @@ class _TabBarState extends State<TabBar> {
       }
       return true;
     }());
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller!.length == 0) {
       return Container(
         height: _kTabHeight + widget.indicatorWeight,
@@ -1462,7 +1455,7 @@ class TabPageSelector extends StatelessWidget {
     ColorTween selectedColorTween,
     ColorTween previousColorTween,
   ) {
-    Color background;
+    final Color background;
     if (tabController.indexIsChanging) {
       // The selection's animation is animating from previousValue to value.
       final double t = 1.0 - _indexChangeProgress(tabController);

@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'debug_overflow_indicator.dart';
+import 'layer.dart';
 import 'object.dart';
 import 'stack.dart' show RelativeRect;
 
@@ -405,9 +406,9 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   void debugPaintSize(PaintingContext context, Offset offset) {
     super.debugPaintSize(context, offset);
     assert(() {
-      Paint paint;
+      final Paint paint;
       if (child != null && !child!.size.isEmpty) {
-        Path path;
+        final Path path;
         paint = Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0
@@ -672,7 +673,7 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
     if (child != null) {
       // Let the child lay itself out at it's "natural" size, but if
       // constrainedAxis is non-null, keep any constraints on that axis.
-      BoxConstraints childConstraints;
+      final BoxConstraints childConstraints;
       if (constrainedAxis != null) {
         switch (constrainedAxis!) {
           case Axis.horizontal:
@@ -712,10 +713,12 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
     }
 
     if (clipBehavior == Clip.none) {
+      _clipRectLayer = null;
       super.paint(context, offset);
     } else {
       // We have overflow and the clipBehavior isn't none. Clip it.
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint, clipBehavior: clipBehavior);
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint,
+          clipBehavior: clipBehavior, oldLayer:_clipRectLayer);
     }
 
     // Display the overflow indicator.
@@ -724,6 +727,8 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
       return true;
     }());
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) {
@@ -906,7 +911,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    double result;
+    final double result;
     if (child == null) {
       result = super.computeMinIntrinsicWidth(height);
     } else { // the following line relies on double.infinity absorption
@@ -918,7 +923,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    double result;
+    final double result;
     if (child == null) {
       result = super.computeMaxIntrinsicWidth(height);
     } else { // the following line relies on double.infinity absorption
@@ -930,7 +935,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    double result;
+    final double result;
     if (child == null) {
       result = super.computeMinIntrinsicHeight(width);
     } else { // the following line relies on double.infinity absorption
@@ -942,7 +947,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    double result;
+    final double result;
     if (child == null) {
       result = super.computeMaxIntrinsicHeight(width);
     } else { // the following line relies on double.infinity absorption

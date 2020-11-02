@@ -236,7 +236,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   void _handleSelectedItemChanged(int index) {
     // Only the haptic engine hardware on iOS devices would produce the
     // intended effects.
-    bool hasSuitableHapticHardware;
+    final bool hasSuitableHapticHardware;
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         hasSuitableHapticHardware = true;
@@ -413,14 +413,14 @@ class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    return _RenderCupertinoPickerSemantics(scrollController, Directionality.of(context)!);
+    return _RenderCupertinoPickerSemantics(scrollController, Directionality.of(context));
   }
 
   @override
   void updateRenderObject(BuildContext context, covariant _RenderCupertinoPickerSemantics renderObject) {
     assert(debugCheckHasDirectionality(context));
     renderObject
-      ..textDirection = Directionality.of(context)!
+      ..textDirection = Directionality.of(context)
       ..controller = scrollController;
   }
 }

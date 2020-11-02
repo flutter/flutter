@@ -577,7 +577,7 @@ class ToggleButtons extends StatelessWidget {
     );
     final ThemeData theme = Theme.of(context)!;
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
 
     return IntrinsicHeight(
       child: Row(
@@ -767,8 +767,8 @@ class _ToggleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    Color currentColor;
-    Color currentFillColor;
+    final Color currentColor;
+    final Color currentFillColor;
     Color? currentFocusColor;
     Color? currentHoverColor;
     Color? currentSplashColor;
@@ -901,7 +901,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
     borderRadius,
     isFirstButton,
     isLastButton,
-    Directionality.of(context)!,
+    Directionality.of(context),
   );
 
   @override
@@ -913,7 +913,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
       ..borderRadius = borderRadius
       ..isFirstButton = isFirstButton
       ..isLastButton = isLastButton
-      ..textDirection = Directionality.of(context)!;
+      ..textDirection = Directionality.of(context);
   }
 }
 
@@ -1053,8 +1053,8 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     }
 
     final double trailingBorderOffset = isLastButton ? trailingBorderSide.width : 0.0;
-    double leftConstraint;
-    double rightConstraint;
+    final double leftConstraint;
+    final double rightConstraint;
 
     switch (textDirection) {
       case TextDirection.ltr:

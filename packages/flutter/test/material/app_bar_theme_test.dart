@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -31,14 +29,14 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle.statusBarBrightness, Brightness.dark);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.dark);
     expect(widget.color, Colors.blue);
     expect(widget.elevation, 4.0);
     expect(widget.shadowColor, Colors.black);
     expect(iconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
-    expect(actionIconText.text.style.color, Colors.white);
-    expect(text.style, Typography.material2014().englishLike.bodyText2.merge(Typography.material2014().white.bodyText2));
+    expect(actionIconText.text.style!.color, Colors.white);
+    expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().white.bodyText2));
   });
 
   testWidgets('AppBar uses values from AppBarTheme', (WidgetTester tester) async {
@@ -60,14 +58,14 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle.statusBarBrightness, appBarTheme.brightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, appBarTheme.brightness);
     expect(widget.color, appBarTheme.color);
     expect(widget.elevation, appBarTheme.elevation);
     expect(widget.shadowColor, appBarTheme.shadowColor);
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
-    expect(actionIconText.text.style.color, appBarTheme.actionsIconTheme.color);
-    expect(text.style, appBarTheme.textTheme.bodyText2);
+    expect(actionIconText.text.style!.color, appBarTheme.actionsIconTheme!.color);
+    expect(text.style, appBarTheme.textTheme!.bodyText2);
   });
 
   testWidgets('AppBar widget properties take priority over theme', (WidgetTester tester) async {
@@ -103,13 +101,13 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle.statusBarBrightness, brightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, brightness);
     expect(widget.color, color);
     expect(widget.elevation, elevation);
     expect(widget.shadowColor, shadowColor);
     expect(iconTheme.data, iconThemeData);
     expect(actionsIconTheme.data, actionsIconThemeData);
-    expect(actionIconText.text.style.color, actionsIconThemeData.color);
+    expect(actionIconText.text.style!.color, actionsIconThemeData.color);
     expect(text.style, textTheme.bodyText2);
   });
 
@@ -132,7 +130,7 @@ void main() {
     ));
 
     final RichText actionIconText = _getAppBarIconRichText(tester);
-    expect(actionIconText.text.style.color, color);
+    expect(actionIconText.text.style!.color, color);
   });
 
   testWidgets('AppBarTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
@@ -154,14 +152,14 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle.statusBarBrightness, appBarTheme.brightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, appBarTheme.brightness);
     expect(widget.color, appBarTheme.color);
     expect(widget.elevation, appBarTheme.elevation);
     expect(widget.shadowColor, appBarTheme.shadowColor);
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
-    expect(actionIconText.text.style.color, appBarTheme.actionsIconTheme.color);
-    expect(text.style, appBarTheme.textTheme.bodyText2);
+    expect(actionIconText.text.style!.color, appBarTheme.actionsIconTheme!.color);
+    expect(text.style, appBarTheme.textTheme!.bodyText2);
   });
 
   testWidgets('ThemeData properties are used when no AppBarTheme is set', (WidgetTester tester) async {
@@ -182,15 +180,15 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle.statusBarBrightness, themeData.brightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, themeData.brightness);
     expect(widget.color, themeData.primaryColor);
     expect(widget.elevation, 4.0);
     expect(widget.shadowColor, Colors.black);
     expect(iconTheme.data, themeData.primaryIconTheme);
     expect(actionsIconTheme.data, themeData.primaryIconTheme);
-    expect(actionIconText.text.style.color, themeData.primaryIconTheme.color);
+    expect(actionIconText.text.style!.color, themeData.primaryIconTheme.color);
     // Default value for ThemeData.typography is Typography.material2014()
-    expect(text.style, Typography.material2014().englishLike.bodyText2.merge(Typography.material2014().white.bodyText2).merge(themeData.primaryTextTheme.bodyText2));
+    expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().white.bodyText2).merge(themeData.primaryTextTheme.bodyText2));
   });
 
   testWidgets('AppBar uses AppBarTheme.centerTitle when centerTitle is null', (WidgetTester tester) async {

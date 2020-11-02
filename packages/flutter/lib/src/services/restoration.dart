@@ -151,13 +151,13 @@ class RestorationManager extends ChangeNotifier {
       return SynchronousFuture<RestorationBucket?>(_rootBucket);
     }
     if (_pendingRootBucket == null) {
-      _pendingRootBucket = Completer<RestorationBucket>();
+      _pendingRootBucket = Completer<RestorationBucket?>();
       _getRootBucketFromEngine();
     }
     return _pendingRootBucket!.future;
   }
   RestorationBucket? _rootBucket; // May be null to indicate that restoration is turned off.
-  Completer<RestorationBucket>? _pendingRootBucket;
+  Completer<RestorationBucket?>? _pendingRootBucket;
   bool _rootBucketIsValid = false;
 
   /// Returns true for the frame after [rootBucket] has been replaced with a
@@ -186,7 +186,7 @@ class RestorationManager extends ChangeNotifier {
   void _parseAndHandleRestorationUpdateFromEngine(Map<dynamic, dynamic>? update) {
     handleRestorationUpdateFromEngine(
       enabled: update != null && update['enabled'] as bool,
-      data: update == null ? null : update['data'] as Uint8List,
+      data: update == null ? null : update['data'] as Uint8List?,
     );
   }
 
@@ -416,7 +416,7 @@ class RestorationManager extends ChangeNotifier {
 /// its current state changes, the data in the bucket must be updated. At the
 /// same time, the data in the bucket should be kept to a minimum. For example,
 /// for data that can be retrieved from other sources (like a database or
-/// webservice) only enough information (e.g. an ID or resource locator) to
+/// web service) only enough information (e.g. an ID or resource locator) to
 /// re-obtain that data should be stored in the bucket. In addition to managing
 /// the data in a bucket, an owner may also make the bucket available to other
 /// entities so they can claim child buckets from it via [claimChild] for their
@@ -580,10 +580,10 @@ class RestorationBucket {
   ///  * [remove], which removes a value from the bucket.
   ///  * [contains], which checks whether any value is stored under a given
   ///    restoration ID.
-  P read<P>(String restorationId) {
+  P? read<P>(String restorationId) {
     assert(_debugAssertNotDisposed());
     assert(restorationId != null);
-    return _rawValues[restorationId] as P;
+    return _rawValues[restorationId] as P?;
   }
 
   /// Stores the provided `value` of type `P` under the provided `restorationId`
@@ -624,11 +624,11 @@ class RestorationBucket {
   ///  * [write], which stores a value in the bucket.
   ///  * [contains], which checks whether any value is stored under a given
   ///    restoration ID.
-  P remove<P>(String restorationId) {
+  P? remove<P>(String restorationId) {
     assert(_debugAssertNotDisposed());
     assert(restorationId != null);
     final bool needsUpdate = _rawValues.containsKey(restorationId);
-    final P result = _rawValues.remove(restorationId) as P;
+    final P? result = _rawValues.remove(restorationId) as P?;
     if (_rawValues.isEmpty) {
       _rawData.remove(_valuesMapKey);
     }

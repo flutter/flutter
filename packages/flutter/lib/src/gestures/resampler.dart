@@ -164,50 +164,43 @@ class PointerEventResampler {
 
   void _dequeueAndSampleNonHoverOrMovePointerEventsUntil(
       Duration sampleTime,
+      Duration nextSampleTime,
       HandleEventCallback callback,
   ) {
-    while (_queuedEvents.isNotEmpty) {
-      final PointerEvent event = _queuedEvents.first;
+    Duration endTime = sampleTime;
+    // Scan queued events to determine end time.
+    final Iterator<PointerEvent> it = _queuedEvents.iterator;
+    while (it.moveNext()) {
+      final PointerEvent event = it.current;
 
       // Potentially stop dispatching events if more recent than `sampleTime`.
       if (event.timeStamp > sampleTime) {
-        // Stop if event is not up or removed. Otherwise, continue to
-        // allow early processing of up and remove events as this improves
-        // resampling of these events, which is important for fling
-        // animations.
-        if (event is! PointerUpEvent && event is! PointerRemovedEvent) {
+        // Definitely stop if more recent than `nextSampleTime`.
+        if (event.timeStamp >= nextSampleTime) {
           break;
         }
 
-        // When this line is reached, the following two invariants hold:
-        // (1) `event.timeStamp > sampleTime`
-        // (2) `_next` has the smallest time stamp that's no less than
-        //     `sampleTime`
-        //
-        // Therefore, event must satisfy `event.timeStamp >= _next.timeStamp`.
-        //
-        // Those events with the minimum `event.timeStamp == _next.timeStamp`
-        // time stamp are processed early for smoother fling. For events with
-        // `event.timeStamp > _next.timeStamp`, the following lines break the
-        // while loop to stop the early processing.
-        //
-        // Specifically, when `sampleTime < _next.timeStamp`, there must be
-        // at least one event with `_next.timeStamp == event.timeStamp`
-        // and that event is `_next` itself, and it will be processed early.
-        //
-        // When `sampleTime == _next.timeStamp`, all events with
-        // `event.timeStamp > sampleTime` must also have
-        // `event.timeStamp > _next.timeStamp` so no events will be processed
-        // early.
-        //
-        // When the input frequency is no greater than the sampling
-        // frequency, this early processing should guarantee that `up` and
-        // `remove` events are always re-sampled.
-        final Duration nextTimeStamp = _next?.timeStamp ?? Duration.zero;
-        assert(event.timeStamp >= nextTimeStamp);
-        if (event.timeStamp > nextTimeStamp) {
+        // Update `endTime` to allow early processing of up and removed
+        // events as this improves resampling of these events, which is
+        // important for fling animations.
+        if (event is PointerUpEvent || event is PointerRemovedEvent) {
+          endTime = event.timeStamp;
+          continue;
+        }
+
+        // Stop if event is not move or hover.
+        if (event is! PointerMoveEvent && event is! PointerHoverEvent) {
           break;
         }
+      }
+    }
+
+    while (_queuedEvents.isNotEmpty) {
+      final PointerEvent event = _queuedEvents.first;
+
+      // Stop dispatching events if more recent than `endTime`.
+      if (event.timeStamp > endTime) {
+        break;
       }
 
       final bool wasTracked = _isTracked;
@@ -285,11 +278,19 @@ class PointerEventResampler {
   /// state that has changed since last sample.
   ///
   /// Calling [callback] must not add or sample events.
-  void sample(Duration sampleTime, HandleEventCallback callback) {
+  ///
+  /// Positive value for `nextSampleTime` allow early processing of
+  /// up and removed events. This improves resampling of these events,
+  /// which is important for fling animations.
+  void sample(
+    Duration sampleTime,
+    Duration nextSampleTime,
+    HandleEventCallback callback,
+  ) {
     _processPointerEvents(sampleTime);
 
     // Dequeue and sample pointer events until `sampleTime`.
-    _dequeueAndSampleNonHoverOrMovePointerEventsUntil(sampleTime, callback);
+    _dequeueAndSampleNonHoverOrMovePointerEventsUntil(sampleTime, nextSampleTime, callback);
 
     // Dispatch resampled pointer location event if tracked.
     if (_isTracked) {

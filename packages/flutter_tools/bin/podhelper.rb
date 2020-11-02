@@ -32,6 +32,7 @@ def flutter_additional_ios_build_settings(target)
   # [target.deployment_target] is a [String] formatted as "8.0".
   inherit_deployment_target = target.deployment_target[/\d+/].to_i < 9
   target.build_configurations.each do |build_configuration|
+    build_configuration.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
     build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
     # Suppress warning when pod supports a version lower than the minimum supported by Xcode (Xcode 12 - iOS 9).
     # This warning is harmless but confusing--it's not a bad thing for dependencies to support a lower version.

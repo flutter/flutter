@@ -55,7 +55,7 @@ void main() {
     final Iterable<int> integers = CachingIterable<int>(range(1, 5).iterator);
     expect(yieldCount, equals(0));
 
-    final Iterable<int> evens = integers.where((int i) => i % 2 == 0);
+    final Iterable<int> evens = integers.where((int i) => i.isEven);
     expect(yieldCount, equals(0));
 
     expect(evens.first, equals(2));

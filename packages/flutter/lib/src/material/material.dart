@@ -453,7 +453,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       child: child,
       clipper: ShapeBorderClipper(
         shape: shape,
-        textDirection: Directionality.of(context),
+        textDirection: Directionality.maybeOf(context),
       ),
       clipBehavior: clipBehavior,
     );
@@ -637,8 +637,7 @@ abstract class InkFeature {
     final List<RenderObject> descendants = <RenderObject>[referenceBox];
     RenderObject node = referenceBox;
     while (node != _controller) {
-      node = node.parent as RenderObject;
-      assert(node != null);
+      node = node.parent! as RenderObject;
       descendants.add(node);
     }
     // determine the transform that gets our coordinate system to be like theirs
@@ -763,17 +762,17 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       _elevation,
       widget.elevation,
       (dynamic value) => Tween<double>(begin: value as double),
-    ) as Tween<double>;
+    ) as Tween<double>?;
     _shadowColor = visitor(
       _shadowColor,
       widget.shadowColor,
       (dynamic value) => ColorTween(begin: value as Color),
-    ) as ColorTween;
+    ) as ColorTween?;
     _border = visitor(
       _border,
       widget.shape,
       (dynamic value) => ShapeBorderTween(begin: value as ShapeBorder),
-    ) as ShapeBorderTween;
+    ) as ShapeBorderTween?;
   }
 
   @override
@@ -788,7 +787,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       ),
       clipper: ShapeBorderClipper(
         shape: shape,
-        textDirection: Directionality.of(context),
+        textDirection: Directionality.maybeOf(context),
       ),
       clipBehavior: widget.clipBehavior,
       elevation: elevation,
@@ -813,8 +812,8 @@ class _ShapeBorderPaint extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       child: child,
-      painter: borderOnForeground ? null : _ShapeBorderPainter(shape, Directionality.of(context)),
-      foregroundPainter: borderOnForeground ? _ShapeBorderPainter(shape, Directionality.of(context)) : null,
+      painter: borderOnForeground ? null : _ShapeBorderPainter(shape, Directionality.maybeOf(context)),
+      foregroundPainter: borderOnForeground ? _ShapeBorderPainter(shape, Directionality.maybeOf(context)) : null,
     );
   }
 }

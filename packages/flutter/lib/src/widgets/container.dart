@@ -95,7 +95,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    String label;
+    final String label;
     switch (position) {
       case DecorationPosition.background:
         label = 'bg';
@@ -406,7 +406,7 @@ class Container extends StatelessWidget {
       assert(decoration != null);
       current = ClipPath(
         clipper: _DecorationClipper(
-          textDirection: Directionality.of(context),
+          textDirection: Directionality.maybeOf(context),
           decoration: decoration!,
         ),
         clipBehavior: clipBehavior,

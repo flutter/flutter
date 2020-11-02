@@ -587,7 +587,7 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionHandleChanged(TextSelection newSelection, _TextSelectionHandlePosition position) {
-    TextPosition textPosition;
+    final TextPosition textPosition;
     switch (position) {
       case _TextSelectionHandlePosition.start:
         textPosition = newSelection.base;
@@ -695,7 +695,7 @@ class _TextSelectionHandleOverlayState
       return;
     }
 
-    TextSelection newSelection;
+    final TextSelection newSelection;
     switch (widget.position) {
       case _TextSelectionHandlePosition.start:
         newSelection = TextSelection(
@@ -724,8 +724,8 @@ class _TextSelectionHandleOverlayState
 
   @override
   Widget build(BuildContext context) {
-    LayerLink layerLink;
-    TextSelectionHandleType type;
+    final LayerLink layerLink;
+    final TextSelectionHandleType type;
 
     switch (widget.position) {
       case _TextSelectionHandlePosition.start:
@@ -922,8 +922,8 @@ class TextSelectionGestureDetectorBuilder {
     // For backwards-compatibility, we treat a null kind the same as touch.
     final PointerDeviceKind? kind = details.kind;
     _shouldShowSelectionToolbar = kind == null
-                              || kind == PointerDeviceKind.touch
-                              || kind == PointerDeviceKind.stylus;
+      || kind == PointerDeviceKind.touch
+      || kind == PointerDeviceKind.stylus;
   }
 
   /// Handler for [TextSelectionGestureDetector.onForcePressStart].
@@ -1077,6 +1077,11 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onDragSelectionStart(DragStartDetails details) {
+    final PointerDeviceKind? kind = details.kind;
+    _shouldShowSelectionToolbar = kind == null
+      || kind == PointerDeviceKind.touch
+      || kind == PointerDeviceKind.stylus;
+
     renderEditable.selectPositionAt(
       from: details.globalPosition,
       cause: SelectionChangedCause.drag,

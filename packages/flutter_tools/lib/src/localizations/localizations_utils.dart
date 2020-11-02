@@ -238,7 +238,7 @@ String describeLocale(String tag) {
   return output;
 }
 
-/// Return the input string as a Dart-parseable string.
+/// Return the input string as a Dart-parsable string.
 ///
 /// ```
 /// foo => 'foo'
@@ -249,9 +249,9 @@ String describeLocale(String tag) {
 ///
 /// This function is used by tools that take in a JSON-formatted file to
 /// generate Dart code. For this reason, characters with special meaning
-/// in JSON files. For example, the backspace character (\b) have to be
-/// properly escaped by this function so that the generated Dart code
-/// correctly represents this character:
+/// in JSON files are escaped. For example, the backspace character (\b)
+/// has to be properly escaped by this function so that the generated
+/// Dart code correctly represents this character:
 /// ```
 /// foo\bar => 'foo\\bar'
 /// foo\nbar => 'foo\\nbar'
@@ -272,17 +272,17 @@ String generateString(String value) {
   value = value
     // Replace backslashes with a placeholder for now to properly parse
     // other special characters.
-    .replaceAll('\\', backslash)
-    .replaceAll('\$', '\\\$')
-    .replaceAll("'", "\\'")
-    .replaceAll('"', '\\"')
-    .replaceAll('\n', '\\n')
-    .replaceAll('\f', '\\f')
-    .replaceAll('\t', '\\t')
-    .replaceAll('\r', '\\r')
-    .replaceAll('\b', '\\b')
+    .replaceAll(r'\', backslash)
+    .replaceAll(r'$', r'\$')
+    .replaceAll("'", r"\'")
+    .replaceAll('"', r'\"')
+    .replaceAll('\n', r'\n')
+    .replaceAll('\f', r'\f')
+    .replaceAll('\t', r'\t')
+    .replaceAll('\r', r'\r')
+    .replaceAll('\b', r'\b')
     // Reintroduce escaped backslashes into generated Dart string.
-    .replaceAll(backslash, '\\\\');
+    .replaceAll(backslash, r'\\');
 
   return "'$value'";
 }
