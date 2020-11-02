@@ -37,8 +37,7 @@ import 'theme.dart';
 class PaginatedDataTable extends StatefulWidget {
   /// Creates a widget describing a paginated [DataTable] on a [Card].
   ///
-  /// The [header] should give the card's header, typically a [Text] widget. It
-  /// must not be null.
+  /// The [header] should give the card's header, typically a [Text] widget.
   ///
   /// The [columns] argument must be a list of as many [DataColumn] objects as
   /// the table is to have columns, ignoring the leading checkbox column if any.
@@ -64,7 +63,7 @@ class PaginatedDataTable extends StatefulWidget {
   /// both have defaults, though, so don't have to be specified).
   PaginatedDataTable({
     Key? key,
-    required this.header,
+    this.header,
     this.actions,
     required this.columns,
     this.sortColumnIndex,
@@ -82,7 +81,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.onRowsPerPageChanged,
     this.dragStartBehavior = DragStartBehavior.start,
     required this.source,
-  }) : assert(header != null),
+  }) : assert(actions == null || (actions != null && header != null)),
        assert(columns != null),
        assert(dragStartBehavior != null),
        assert(columns.isNotEmpty),
@@ -111,9 +110,10 @@ class PaginatedDataTable extends StatefulWidget {
   ///
   /// If items in the table are selectable, then, when the selection is not
   /// empty, the header is replaced by a count of the selected items.
-  final Widget header;
+  final Widget? header;
 
-  /// Icon buttons to show at the top right of the table.
+  /// Icon buttons to show at the top right of the table. The [header] must not
+  /// be null to show the actions.
   ///
   /// Typically, the exact actions included in this list will vary based on
   /// whether any rows are selected or not.
@@ -337,8 +337,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     // HEADER
     final List<Widget> headerWidgets = <Widget>[];
     double startPadding = 24.0;
-    if (_selectedRowCount == 0) {
-      headerWidgets.add(Expanded(child: widget.header));
+    if (_selectedRowCount == 0 && widget.header != null) {
+      headerWidgets.add(Expanded(child: widget.header!));
       if (widget.header is ButtonBar) {
         // We adjust the padding when a button bar is present, because the
         // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
@@ -347,7 +347,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         // inside of the button to line up with the 24.0 left inset.
         startPadding = 12.0;
       }
-    } else {
+    } else if (widget.header != null) {
       headerWidgets.add(Expanded(
         child: Text(localizations.selectedRowCountTitle(_selectedRowCount)),
       ));
@@ -432,32 +432,33 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Semantics(
-                container: true,
-                child: DefaultTextStyle(
-                  // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
-                  // list and then tweak them appropriately.
-                  // See https://material.io/design/components/data-tables.html#tables-within-cards
-                  style: _selectedRowCount > 0 ? themeData.textTheme.subtitle1!.copyWith(color: themeData.accentColor)
-                                               : themeData.textTheme.headline6!.copyWith(fontWeight: FontWeight.w400),
-                  child: IconTheme.merge(
-                    data: const IconThemeData(
-                      opacity: 0.54
-                    ),
-                    child: Ink(
-                      height: 64.0,
-                      color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: headerWidgets,
+              if (headerWidgets.isNotEmpty)
+                Semantics(
+                  container: true,
+                  child: DefaultTextStyle(
+                    // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
+                    // list and then tweak them appropriately.
+                    // See https://material.io/design/components/data-tables.html#tables-within-cards
+                    style: _selectedRowCount > 0 ? themeData.textTheme.subtitle1!.copyWith(color: themeData.accentColor)
+                                                 : themeData.textTheme.headline6!.copyWith(fontWeight: FontWeight.w400),
+                    child: IconTheme.merge(
+                      data: const IconThemeData(
+                        opacity: 0.54
+                      ),
+                      child: Ink(
+                        height: 64.0,
+                        color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
+                        child: Padding(
+                          padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: headerWidgets,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 dragStartBehavior: widget.dragStartBehavior,
