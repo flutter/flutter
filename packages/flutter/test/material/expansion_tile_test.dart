@@ -536,6 +536,44 @@ void main() {
     expect(find.byType(RotationTransition), findsOneWidget);
   });
 
+  testWidgets('ExpansionTile default trailing no rotation', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SingleChildScrollView(
+          child: Column(
+            children: const <Widget>[
+              ExpansionTile(
+                title: Text('default trailing, won\'t rotate'),
+                rotateTrailing: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.byType(RotationTransition), findsNothing);
+  });
+
+  testWidgets('ExpansionTile default trailing with rotation', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SingleChildScrollView(
+          child: Column(
+            children: const <Widget>[
+              ExpansionTile(
+                title: Text('default trailing, will rotate'),
+                rotateTrailing: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.byType(RotationTransition), findsOneWidget);
+  });
+
   final Key customIconKey = UniqueKey();
 
   testWidgets('ExpansionTile custom trailing default rotation', (WidgetTester tester) async {
@@ -555,5 +593,45 @@ void main() {
     ));
 
     expect(find.byType(RotationTransition), findsNothing);
+  });
+
+  testWidgets('ExpansionTile custom trailing no rotation', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              ExpansionTile(
+                title: const Text('custom trailing, won\t rotate'),
+                trailing: TestIcon(key: customIconKey),
+                rotateTrailing: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.byType(RotationTransition), findsNothing);
+  });
+
+  testWidgets('ExpansionTile custom trailing with rotation', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              ExpansionTile(
+                title: const Text('custom trailing, will rotate'),
+                trailing: TestIcon(key: customIconKey),
+                rotateTrailing: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.byType(RotationTransition), findsOneWidget);
   });
 }
