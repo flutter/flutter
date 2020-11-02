@@ -157,12 +157,12 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///
 /// A SnackBar with an action will not time out when TalkBack or VoiceOver are
 /// enabled. This is controlled by [AccessibilityFeatures.accessibleNavigation].
-/// 
+///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
-/// 
+///
 /// Here is an example of a [SnackBar] with an [action] button implemented using
 /// [SnackBarAction].
-/// 
+///
 /// ```dart preamble
 /// class _ShowSnackBarButton extends StatelessWidget {
 ///   @override
@@ -176,7 +176,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///             action: SnackBarAction(
 ///               label: "Action",
 ///               onPressed: () {
-///                 // Code to execute 
+///                 // Code to execute
 ///               }
 ///             ),
 ///           ),
@@ -186,20 +186,20 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///   }
 /// }
 /// ```
-/// 
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return _ShowSnackBarButton();
 /// }
 /// ```
 /// {@end-tool}
-/// 
+///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
-/// 
+///
 /// Here is an example of a customized [SnackBar]. It utilizes
-/// [behavior], [shape], [padding], [width] to customize the location and 
+/// [behavior], [shape], [padding], [width] to customize the location and
 /// appearance.
-/// 
+///
 /// ```dart preamble
 /// SnackBar _customSnackBar() {
 ///   return SnackBar(
@@ -219,7 +219,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///     ),
 ///   );
 /// }
-/// 
+///
 /// class _ShowSnackBarButton extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -234,14 +234,14 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///   }
 /// }
 /// ```
-/// 
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return _ShowSnackBarButton();
 /// }
 /// ```
 /// {@end-tool}
-/// 
+///
 /// See also:
 ///
 ///  * [ScaffoldMessenger.of], to obtain the current [ScaffoldMessengerState],
