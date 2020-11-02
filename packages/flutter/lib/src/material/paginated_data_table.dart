@@ -479,7 +479,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     checkboxSpacing: widget.checkboxSpacing,
                     columnSpacing: widget.columnSpacing,
                     showCheckboxColumn: widget.showCheckboxColumn,
-                    decoration: const BoxDecoration(),
+                    decoration: const BoxDecoration(),  // With [Card] wrapping the [DataTable], the decoration is empty.
                     showBottomBorder: true,
                     rows: _getRows(_firstRowIndex, widget.rowsPerPage),
                   ),

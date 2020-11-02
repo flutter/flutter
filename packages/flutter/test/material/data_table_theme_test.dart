@@ -23,6 +23,7 @@ void main() {
     expect(themeData.headingTextStyle, null);
     expect(themeData.horizontalMargin, null);
     expect(themeData.columnSpacing, null);
+    expect(themeData.checkboxSpacing, null);
     expect(themeData.dividerThickness, null);
 
     const DataTableTheme theme = DataTableTheme(data: DataTableThemeData(), child: SizedBox());
@@ -35,6 +36,7 @@ void main() {
     expect(theme.data.headingTextStyle, null);
     expect(theme.data.horizontalMargin, null);
     expect(theme.data.columnSpacing, null);
+    expect(theme.data.checkboxSpacing, null);
     expect(theme.data.dividerThickness, null);
   });
 
@@ -66,7 +68,8 @@ void main() {
       headingTextStyle:  const TextStyle(fontSize: 14.0),
       horizontalMargin: 3.0,
       columnSpacing: 4.0,
-      dividerThickness: 5.0,
+      checkboxSpacing: 5.0,
+      dividerThickness: 6.0,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -83,7 +86,8 @@ void main() {
     expect(description[6], 'headingTextStyle: TextStyle(inherit: true, size: 14.0)');
     expect(description[7], 'horizontalMargin: 3.0');
     expect(description[8], 'columnSpacing: 4.0');
-    expect(description[9], 'dividerThickness: 5.0');
+    expect(description[9], 'checkboxSpacing: 5.0');
+    expect(description[10], 'dividerThickness: 6.0');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
@@ -96,7 +100,8 @@ void main() {
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
     const double columnSpacing = 4.0;
-    const double dividerThickness = 5.0;
+    const double checkboxSpacing = 5.0;
+    const double dividerThickness = 6.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -111,6 +116,7 @@ void main() {
             headingTextStyle: headingTextStyle,
             horizontalMargin: horizontalMargin,
             columnSpacing: columnSpacing,
+            checkboxSpacing: checkboxSpacing,
             dividerThickness: dividerThickness,
           ),
         ),
@@ -124,16 +130,20 @@ void main() {
               ),
               const DataColumn(label: Text('B')),
             ],
-            rows: const <DataRow>[
-              DataRow(cells: <DataCell>[
-                DataCell(Text('Data')),
-                DataCell(Text('Data 2')),
-              ]),
+            rows: <DataRow>[
+              DataRow(
+                cells: const <DataCell>[
+                  DataCell(Text('Data')),
+                  DataCell(Text('Data 2')),
+                ],
+                onSelectChanged: (bool? value) {},
+              ),
             ],
           ),
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container));
     expect(tester.widgetList<Container>(tableContainerFinder).first.decoration, decoration);
@@ -149,8 +159,9 @@ void main() {
     expect(_tableRowBoxDecoration(tester: tester, index: 0).color, headingRowColor.resolve(<MaterialState>{}));
 
     expect(tester.getSize(_findFirstContainerFor('A')).height, headingRowHeight);
-    expect(tester.getTopLeft(find.text('A')).dx, horizontalMargin);
+    expect(tester.getTopLeft(find.byType(Checkbox).first).dx, horizontalMargin);
     expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, columnSpacing);
+    expect(tester.getTopLeft(find.text('A')).dx - tester.getTopRight(find.byType(Checkbox).first).dx, checkboxSpacing);
   });
 
   testWidgets('DataTable properties are taken over the theme values', (WidgetTester tester) async {
@@ -163,7 +174,8 @@ void main() {
     const TextStyle themeHeadingTextStyle = TextStyle(fontSize: 13.5);
     const double themeHorizontalMargin = 2.0;
     const double themeColumnSpacing = 3.0;
-    const double themeDividerThickness = 4.0;
+    const double themeCheckboxSpacing = 4.0;
+    const double themeDividerThickness = 5.0;
 
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
     final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
@@ -174,7 +186,8 @@ void main() {
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
     const double columnSpacing = 4.0;
-    const double dividerThickness = 5.0;
+    const double checkboxSpacing = 5.0;
+    const double dividerThickness = 6.0;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -188,6 +201,7 @@ void main() {
             headingTextStyle: themeHeadingTextStyle,
             horizontalMargin: themeHorizontalMargin,
             columnSpacing: themeColumnSpacing,
+            checkboxSpacing: themeCheckboxSpacing,
             dividerThickness: themeDividerThickness,
           ),
         ),
@@ -202,6 +216,7 @@ void main() {
             headingTextStyle: headingTextStyle,
             horizontalMargin: horizontalMargin,
             columnSpacing: columnSpacing,
+            checkboxSpacing: checkboxSpacing,
             dividerThickness: dividerThickness,
             sortColumnIndex: 0,
             columns: <DataColumn>[
@@ -211,11 +226,14 @@ void main() {
               ),
               const DataColumn(label: Text('B')),
             ],
-            rows: const <DataRow>[
-              DataRow(cells: <DataCell>[
-                DataCell(Text('Data')),
-                DataCell(Text('Data 2')),
-              ]),
+            rows: <DataRow>[
+              DataRow(
+                cells: const <DataCell>[
+                  DataCell(Text('Data')),
+                  DataCell(Text('Data 2')),
+                ],
+                onSelectChanged: (bool? value) {},
+              ),
             ],
           ),
         ),
@@ -236,8 +254,9 @@ void main() {
     expect(_tableRowBoxDecoration(tester: tester, index: 0).color, headingRowColor.resolve(<MaterialState>{}));
 
     expect(tester.getSize(_findFirstContainerFor('A')).height, headingRowHeight);
-    expect(tester.getTopLeft(find.text('A')).dx, horizontalMargin);
+    expect(tester.getTopLeft(find.byType(Checkbox).first).dx, horizontalMargin);
     expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, columnSpacing);
+    expect(tester.getTopLeft(find.text('A')).dx - tester.getTopRight(find.byType(Checkbox).first).dx, checkboxSpacing);
   });
 }
 
