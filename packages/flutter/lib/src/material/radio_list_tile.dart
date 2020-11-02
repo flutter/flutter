@@ -320,7 +320,9 @@ class RadioListTile<T> extends StatelessWidget {
     this.controlAffinity = ListTileControlAffinity.platform,
     this.autofocus = false,
     this.contentPadding,
-
+    this.shape,
+    this.tileColor,
+    this.selectedTileColor,
   }) : assert(toggleable != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
@@ -483,6 +485,16 @@ class RadioListTile<T> extends StatelessWidget {
   /// To control this value, set [value] and [groupValue] appropriately.
   bool get checked => value == groupValue;
 
+  /// If specified, [shape] defines the shape of the [RadioListTile]'s [InkWell] border.
+  final ShapeBorder? shape;
+
+  /// If specified, defines the background color for `RadioListTile` when
+  /// [RadioListTile.selected] is false.
+  final Color? tileColor;
+
+  /// If non-null, defines the background color when [RadioListTile.selected] is true.
+  final Color? selectedTileColor;
+
   @override
   Widget build(BuildContext context) {
     final Widget control = Radio<T>(
@@ -517,6 +529,9 @@ class RadioListTile<T> extends StatelessWidget {
           isThreeLine: isThreeLine,
           dense: dense,
           enabled: onChanged != null,
+          shape: shape,
+          tileColor: tileColor,
+          selectedTileColor: selectedTileColor,
           onTap: onChanged != null ? () {
             if (toggleable && checked) {
               onChanged!(null);
