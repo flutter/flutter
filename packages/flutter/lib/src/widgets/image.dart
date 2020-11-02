@@ -50,9 +50,9 @@ export 'package:flutter/painting.dart' show
 ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? size }) {
   return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
-    devicePixelRatio: MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
+    devicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
     locale: Localizations.localeOf(context, nullOk: true),
-    textDirection: Directionality.of(context),
+    textDirection: Directionality.maybeOf(context),
     size: size,
     platform: defaultTargetPlatform,
   );
@@ -726,7 +726,7 @@ class Image extends StatefulWidget {
   /// be passed as the `child` argument to the [loadingBuilder]. For example,
   /// consider the following builders used in conjunction:
   ///
-  /// {@template flutter.widgets.image.chainedBuildersExample}
+  /// {@template flutter.widgets.Image.frameBuilder.chainedBuildersExample}
   /// ```dart
   /// Image(
   ///   ...
@@ -818,7 +818,7 @@ class Image extends StatefulWidget {
   /// builder will contain the _result_ of the [frameBuilder]. For example,
   /// consider the following builders used in conjunction:
   ///
-  /// {@macro flutter.widgets.image.chainedBuildersExample}
+  /// {@macro flutter.widgets.Image.frameBuilder.chainedBuildersExample}
   ///
   /// {@tool dartpad --template=stateless_widget_material}
   ///
@@ -1145,7 +1145,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _updateInvertColors() {
-    _invertColors = MediaQuery.of(context, nullOk: true)?.invertColors
+    _invertColors = MediaQuery.maybeOf(context)?.invertColors
         ?? SemanticsBinding.instance!.accessibilityFeatures.invertColors;
   }
 

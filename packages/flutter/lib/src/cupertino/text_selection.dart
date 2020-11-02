@@ -152,12 +152,12 @@ class _CupertinoTextSelectionToolbarWrapperState extends State<_CupertinoTextSel
     }
 
     final List<Widget> items = <Widget>[];
-    final CupertinoLocalizations? localizations = CupertinoLocalizations.of(context);
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     final EdgeInsets arrowPadding = widget.isArrowPointingDown
       ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
       : EdgeInsets.only(top: _kToolbarArrowSize.height);
     final Widget onePhysicalPixelVerticalDivider =
-        SizedBox(width: 1.0 / MediaQuery.of(context)!.devicePixelRatio);
+        SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
 
     void addToolbarButton(
       String text,
@@ -183,17 +183,17 @@ class _CupertinoTextSelectionToolbarWrapperState extends State<_CupertinoTextSel
     }
 
     if (widget.handleCut != null) {
-      addToolbarButton(localizations!.cutButtonLabel, widget.handleCut!);
+      addToolbarButton(localizations.cutButtonLabel, widget.handleCut!);
     }
     if (widget.handleCopy != null) {
-      addToolbarButton(localizations!.copyButtonLabel, widget.handleCopy!);
+      addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
     }
     if (widget.handlePaste != null
         && _clipboardStatus.value == ClipboardStatus.pasteable) {
-      addToolbarButton(localizations!.pasteButtonLabel, widget.handlePaste!);
+      addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
     }
     if (widget.handleSelectAll != null) {
-      addToolbarButton(localizations!.selectAllButtonLabel, widget.handleSelectAll!);
+      addToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll!);
     }
 
     return CupertinoTextSelectionToolbar._(
@@ -463,7 +463,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     ClipboardStatusNotifier clipboardStatus,
   ) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     // The toolbar should appear below the TextField when there is not enough
     // space above the TextField to show it, assuming there's always enough space
@@ -664,7 +664,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
             pressedOpacity: 0.7,
             child: const Text('◀', style: _kToolbarButtonFontStyle),
           ),
-          dividerWidth: 1.0 / MediaQuery.of(context)!.devicePixelRatio,
+          dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
           nextButton: CupertinoButton(
             borderRadius: null,
             color: _kToolbarBackgroundColor,
@@ -781,7 +781,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     }
     if (slot is IndexedSlot) {
       assert(renderObject.debugValidateChild(child));
-      renderObject.insert(child as RenderBox, after: slot.value?.renderObject as RenderBox);
+      renderObject.insert(child as RenderBox, after: slot.value?.renderObject as RenderBox?);
       return;
     }
     assert(false, 'slot must be _CupertinoTextSelectionToolbarItemsSlot or IndexedSlot');

@@ -80,7 +80,7 @@ void main() {
     // regression test for https://github.com/flutter/flutter/issues/18145
 
     final _TestSearchDelegate delegate = _TestSearchDelegate();
-    final List<String> selectedResults = <String>[];
+    final List<String?> selectedResults = <String?>[];
 
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
@@ -105,7 +105,7 @@ void main() {
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
 
-    expect(selectedResults, <void>[null]);
+    expect(selectedResults, <String?>[null]);
 
     // We are on the homepage again
     expect(find.text('HomeBody'), findsOneWidget);
@@ -374,7 +374,7 @@ void main() {
   });
 
   testWidgets('Closing nested search returns to search', (WidgetTester tester) async {
-    final List<String> nestedSearchResults = <String>[];
+    final List<String?> nestedSearchResults = <String?>[];
     final _TestSearchDelegate nestedSearchDelegate = _TestSearchDelegate(
       suggestions: 'Nested Suggestions',
       result: 'Nested Result',
@@ -389,7 +389,7 @@ void main() {
               tooltip: 'Nested Search',
               icon: const Icon(Icons.search),
               onPressed: () async {
-                final String result = await showSearch(
+                final String? result = await showSearch(
                   context: context,
                   delegate: nestedSearchDelegate,
                 );
@@ -467,7 +467,7 @@ void main() {
               tooltip: 'Nested Search',
               icon: const Icon(Icons.search),
               onPressed: () async {
-                final String result = await showSearch(
+                final String? result = await showSearch(
                   context: context,
                   delegate: nestedSearchDelegate,
                 );
@@ -691,6 +691,56 @@ void main() {
       semantics.dispose();
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   });
+
+  // Regression test for: https://github.com/flutter/flutter/issues/66781
+  testWidgets('text in search bar contrasts background (light mode)', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData.light();
+      final _TestSearchDelegate delegate = _TestSearchDelegate(
+        defaultAppBarTheme: true,
+      );
+      const String query = 'search query';
+      await tester.pumpWidget(TestHomePage(
+        delegate: delegate,
+        passInInitialQuery: true,
+        initialQuery: query,
+        themeData: themeData,
+      ));
+
+      await tester.tap(find.byTooltip('Search'));
+      await tester.pumpAndSettle();
+
+      final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
+      expect(appBar.backgroundColor, Colors.white);
+
+      final TextField textField = tester.widget<TextField>(find.byType(TextField));
+      expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
+      expect(textField.style!.color, isNot(equals(Colors.white)));
+  });
+
+  // Regression test for: https://github.com/flutter/flutter/issues/66781
+  testWidgets('text in search bar contrasts background (dark mode)', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData.dark();
+      final _TestSearchDelegate delegate = _TestSearchDelegate(
+        defaultAppBarTheme: true,
+      );
+      const String query = 'search query';
+      await tester.pumpWidget(TestHomePage(
+        delegate: delegate,
+        passInInitialQuery: true,
+        initialQuery: query,
+        themeData: themeData,
+      ));
+
+      await tester.tap(find.byTooltip('Search'));
+      await tester.pumpAndSettle();
+
+      final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
+      expect(appBar.backgroundColor, themeData.primaryColor);
+
+      final TextField textField = tester.widget<TextField>(find.byType(TextField));
+      expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
+      expect(textField.style!.color, isNot(equals(themeData.primaryColor)));
+  });
 }
 
 class TestHomePage extends StatelessWidget {
@@ -700,16 +750,19 @@ class TestHomePage extends StatelessWidget {
     required this.delegate,
     this.passInInitialQuery = false,
     this.initialQuery,
+    this.themeData,
   }) : super(key: key);
 
-  final List<String>? results;
+  final List<String?>? results;
   final SearchDelegate<String> delegate;
   final bool passInInitialQuery;
+  final ThemeData? themeData;
   final String? initialQuery;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: themeData,
       home: Builder(builder: (BuildContext context) {
         return Scaffold(
           appBar: AppBar(
@@ -719,7 +772,7 @@ class TestHomePage extends StatelessWidget {
                 tooltip: 'Search',
                 icon: const Icon(Icons.search),
                 onPressed: () async {
-                  String selectedResult;
+                  String? selectedResult;
                   if (passInInitialQuery) {
                     selectedResult = await showSearch<String>(
                       context: context,
@@ -749,11 +802,13 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
+    this.defaultAppBarTheme = false,
     TextStyle? searchFieldStyle,
     String? searchHint,
     TextInputAction textInputAction = TextInputAction.search,
   }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction, searchFieldStyle: searchFieldStyle);
 
+  final bool defaultAppBarTheme;
   final String suggestions;
   final String result;
   final List<Widget> actions;
@@ -761,7 +816,10 @@ class _TestSearchDelegate extends SearchDelegate<String> {
 
   @override
   ThemeData appBarTheme(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    if (defaultAppBarTheme) {
+      return super.appBarTheme(context);
+    }
+    final ThemeData theme = Theme.of(context);
     return theme.copyWith(
       inputDecorationTheme: InputDecorationTheme(hintStyle: TextStyle(color: hintTextColor)),
     );

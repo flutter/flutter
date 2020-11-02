@@ -632,7 +632,7 @@ void main() {
   });
 
   test('RestorableProperty throws after disposed', () {
-    final RestorableProperty<Object> property = _TestRestorableProperty(10);
+    final RestorableProperty<Object?> property = _TestRestorableProperty(10);
     property.dispose();
     expect(() => property.dispose(), throwsFlutterError);
   });
@@ -660,8 +660,8 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
   _TestRestorableProperty? additionalProperty;
   bool _rerigisterAdditionalProperty = false;
 
-  final List<RestorationBucket?> restoreStateLog = <RestorationBucket>[];
-  final List<RestorationBucket?> toggleBucketLog = <RestorationBucket>[];
+  final List<RestorationBucket?> restoreStateLog = <RestorationBucket?>[];
+  final List<RestorationBucket?> toggleBucketLog = <RestorationBucket?>[];
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -737,7 +737,7 @@ Map<String, dynamic> _createRawDataSet() {
   };
 }
 
-class _TestRestorableProperty extends RestorableProperty<Object> {
+class _TestRestorableProperty extends RestorableProperty<Object?> {
   _TestRestorableProperty(this._value);
 
   List<String> log = <String>[];
@@ -751,35 +751,35 @@ class _TestRestorableProperty extends RestorableProperty<Object> {
   }
 
   @override
-  Object createDefaultValue() {
+  Object? createDefaultValue() {
     log.add('createDefaultValue');
     return _value;
   }
 
   @override
-  Object fromPrimitives(Object data) {
+  Object? fromPrimitives(Object? data) {
     log.add('fromPrimitives');
     return data;
   }
 
-  Object get value {
+  Object? get value {
     assert(isRegistered);
     return _value;
   }
-  Object _value;
-  set value(Object value) {
+  Object? _value;
+  set value(Object? value) {
     _value = value;
     notifyListeners();
   }
 
   @override
-  void initWithValue(Object v) {
+  void initWithValue(Object? v) {
     log.add('initWithValue');
     _value = v;
   }
 
   @override
-  Object toPrimitives() {
+  Object? toPrimitives() {
     log.add('toPrimitives');
     return _value;
   }

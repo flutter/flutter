@@ -216,7 +216,7 @@ class DataCell {
   /// text should be provided instead, and [placeholder] should be set
   /// to true.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// Whether the [child] is actually a placeholder.
@@ -499,7 +499,7 @@ class DataTable extends StatelessWidget {
   /// translucent color. To set a different color for individual rows, see
   /// [DataRow.color].
   ///
-  /// {@template flutter.material.dataTable.dataRowColorCode}
+  /// {@template flutter.material.DataTable.dataRowColor}
   /// ```dart
   /// DataTable(
   ///   dataRowColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
@@ -547,7 +547,7 @@ class DataTable extends StatelessWidget {
   ///
   /// If null, [DataTableThemeData.headingRowColor] is used.
   ///
-  /// {@template flutter.material.dataTable.headingRowColorCode}
+  /// {@template flutter.material.DataTable.headingRowColor}
   /// ```dart
   /// DataTable(
   ///   headingRowColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
@@ -698,7 +698,7 @@ class DataTable extends StatelessWidget {
     required MaterialStateProperty<Color?>? overlayColor,
     required bool tristate,
   }) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final double effectiveHorizontalMargin = horizontalMargin
       ?? themeData.dataTableTheme.horizontalMargin
       ?? _horizontalMargin;
@@ -745,7 +745,7 @@ class DataTable extends StatelessWidget {
     required bool ascending,
     required MaterialStateProperty<Color?>? overlayColor,
   }) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     label = Row(
       textDirection: numeric ? TextDirection.rtl : null,
       children: <Widget>[
@@ -807,7 +807,7 @@ class DataTable extends StatelessWidget {
     required VoidCallback? onSelectChanged,
     required MaterialStateProperty<Color?>? overlayColor,
   }) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     if (showEditIcon) {
       const Widget icon = Icon(Icons.edit, size: 18.0);
       label = Expanded(child: label);
@@ -854,7 +854,7 @@ class DataTable extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(!_debugInteractive || debugCheckHasMaterial(context));
 
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final MaterialStateProperty<Color?>? effectiveHeadingRowColor = headingRowColor
       ?? theme.dataTableTheme.headingRowColor;
     final MaterialStateProperty<Color?>? effectiveDataRowColor = dataRowColor

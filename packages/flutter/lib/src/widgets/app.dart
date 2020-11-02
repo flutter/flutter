@@ -49,7 +49,7 @@ export 'dart:ui' show Locale;
 ///    is recommended over [LocaleResolutionCallback].
 typedef LocaleListResolutionCallback = Locale? Function(List<Locale>? locales, Iterable<Locale> supportedLocales);
 
-/// {@template flutter.widgets.widgetsApp.localeResolutionCallback}
+/// {@template flutter.widgets.LocaleResolutionCallback}
 /// The signature of [WidgetsApp.localeResolutionCallback].
 ///
 /// It is recommended to provide a [LocaleListResolutionCallback] instead of a
@@ -1095,6 +1095,7 @@ class WidgetsApp extends StatefulWidget {
   /// The default value of [WidgetsApp.actions].
   static Map<Type, Action<Intent>> defaultActions = <Type, Action<Intent>>{
     DoNothingIntent: DoNothingAction(),
+    DoNothingAndStopPropagationIntent: DoNothingAction(consumesKey: false),
     RequestFocusIntent: RequestFocusAction(),
     NextFocusIntent: NextFocusAction(),
     PreviousFocusIntent: PreviousFocusAction(),

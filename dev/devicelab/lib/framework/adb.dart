@@ -83,7 +83,7 @@ abstract class DeviceDiscovery {
   /// returned. For such behavior see [workingDevice].
   Future<void> chooseWorkingDevice();
 
-  /// Select the device with ID strati with deviceId, return the device.
+  /// Selects a device to work with by device ID.
   Future<void> chooseWorkingDeviceById(String deviceId);
 
   /// A device to work with.
@@ -636,7 +636,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   Future<List<String>> discoverDevices() async {
     final List<dynamic> results = json.decode(await eval(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
-      <String>['devices', '--machine', '--suppress-analytics', '--device-timeout', '10'],
+      <String>['devices', '--machine', '--suppress-analytics', '--device-timeout', '5'],
     )) as List<dynamic>;
 
     // [

@@ -152,7 +152,7 @@ class Icon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(this.textDirection != null || debugCheckHasDirectionality(context));
-    final TextDirection textDirection = this.textDirection ?? Directionality.of(context)!;
+    final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
 
     final IconThemeData iconTheme = IconTheme.of(context);
 

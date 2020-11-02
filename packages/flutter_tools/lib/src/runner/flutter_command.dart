@@ -114,6 +114,7 @@ class FlutterOptions {
   static const String kDeviceTimeout = 'device-timeout';
   static const String kAnalyzeSize = 'analyze-size';
   static const String kNullAssertions = 'null-assertions';
+  static const String kAndroidGradleDaemon = 'android-gradle-daemon';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -127,6 +128,22 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
+
+  /// The map used to convert web-renderer option to a List of dart-defines.
+  static const Map<String, Iterable<String>> _webRendererDartDefines =
+  <String, Iterable<String>> {
+    'auto': <String>[
+      'FLUTTER_WEB_AUTO_DETECT=true',
+    ],
+    'canvaskit': <String>[
+      'FLUTTER_WEB_AUTO_DETECT=false',
+      'FLUTTER_WEB_USE_SKIA=true'
+    ],
+    'html': <String>[
+      'FLUTTER_WEB_AUTO_DETECT=false',
+      'FLUTTER_WEB_USE_SKIA=false'
+    ],
+  };
 
   @override
   ArgParser get argParser => _argParser;
@@ -424,6 +441,18 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesWebRendererOption() {
+    argParser.addOption('web-renderer',
+      defaultsTo: 'html',
+      allowed: <String>['auto', 'canvaskit', 'html'],
+      help: 'Which rendering backend to use for Flutter for Web.'
+          'auto      - Use the HTML renderer on mobile devices,'
+          '            and CanvasKit on desktop devices.'
+          'canvaskit - Always use the CanvasKit renderer.'
+          'html      - Default. Always use the HTML renderer.',
+    );
+  }
+
   void usesDeviceUserOption() {
     argParser.addOption(FlutterOptions.kDeviceUser,
       help: 'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
@@ -556,7 +585,7 @@ abstract class FlutterCommand extends Command<void> {
         'Flutter mobile & desktop applications will attempt to run at the null safety '
         'level of their entrypoint library (usually lib/main.dart). Flutter web '
         'applications will default to sound null-safety, unless specifically configured.',
-      defaultsTo: null,
+      defaultsTo: true,
       hide: hide,
     );
     argParser.addFlag(FlutterOptions.kNullAssertions,
@@ -608,6 +637,18 @@ abstract class FlutterCommand extends Command<void> {
       help:
         'The name of a file where flutter assemble performance and '
         'cached-ness information will be written in a JSON format.'
+    );
+  }
+
+  void addAndroidSpecificBuildOptions({ bool hide = false }) {
+    argParser.addFlag(
+      FlutterOptions.kAndroidGradleDaemon,
+      help: 'Whether to enable the Gradle daemon when performing an Android build. '
+        'Starting the daemon is the default behavior of the gradle wrapper script created '
+        ' in a Flutter project. Setting this flag to false corresponds to passing '
+        "'--no-daemon' to the gradle wrapper script. This flag will cause the daemon "
+        'process to terminate after the build is completed',
+      defaultsTo: true,
     );
   }
 
@@ -742,18 +783,17 @@ abstract class FlutterCommand extends Command<void> {
 
     NullSafetyMode nullSafetyMode = NullSafetyMode.unsound;
     if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
-      final bool nullSafety = boolArg(FlutterOptions.kNullSafety);
       // Explicitly check for `true` and `false` so that `null` results in not
       // passing a flag. This will use the automatically detected null-safety
       // value based on the entrypoint
-      if (nullSafety == true) {
+      if (!argResults.wasParsed(FlutterOptions.kNullSafety)) {
+        nullSafetyMode = NullSafetyMode.autodetect;
+      } else if (boolArg(FlutterOptions.kNullSafety)) {
         nullSafetyMode = NullSafetyMode.sound;
         extraFrontEndOptions.add('--sound-null-safety');
-      } else if (nullSafety == false) {
+      } else {
         nullSafetyMode = NullSafetyMode.unsound;
         extraFrontEndOptions.add('--no-sound-null-safety');
-      } else if (extraFrontEndOptions.contains('--enable-experiment=non-nullable')) {
-        nullSafetyMode = NullSafetyMode.autodetect;
       }
     }
 
@@ -763,6 +803,9 @@ abstract class FlutterCommand extends Command<void> {
     final String splitDebugInfoPath = argParser.options.containsKey(FlutterOptions.kSplitDebugInfoOption)
       ? stringArg(FlutterOptions.kSplitDebugInfoOption)
       : null;
+
+    final bool androidGradleDaemon = !argParser.options.containsKey(FlutterOptions.kAndroidGradleDaemon)
+      || boolArg(FlutterOptions.kAndroidGradleDaemon);
 
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
@@ -794,6 +837,14 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
+    List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
+        ? stringsArg(FlutterOptions.kDartDefinesOption)
+        : <String>[];
+
+    if (argParser.options.containsKey('web-renderer') && argResults.wasParsed('web-renderer')) {
+      dartDefines = updateDartDefines(dartDefines, stringArg('web-renderer'));
+    }
+
     return BuildInfo(buildMode,
       argParser.options.containsKey('flavor')
         ? stringArg('flavor')
@@ -818,15 +869,14 @@ abstract class FlutterCommand extends Command<void> {
       treeShakeIcons: treeShakeIcons,
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
-      dartDefines: argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
-          ? stringsArg(FlutterOptions.kDartDefinesOption)
-          : const <String>[],
+      dartDefines: dartDefines,
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
       packagesPath: globalResults['packages'] as String ?? '.packages',
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
+      androidGradleDaemon: androidGradleDaemon,
     );
   }
 
@@ -890,6 +940,18 @@ abstract class FlutterCommand extends Command<void> {
           'for previous releases of Flutter.');
       globals.printStatus('');
     }
+  }
+
+  /// Updates dart-defines based on [webRenderer].
+  @visibleForTesting
+  static List<String> updateDartDefines(List<String> dartDefines, String webRenderer) {
+    final Set<String> dartDefinesSet = dartDefines.toSet();
+    if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
+        && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
+      dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
+    }
+    dartDefinesSet.addAll(_webRendererDartDefines[webRenderer]);
+    return dartDefinesSet.toList();
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
@@ -965,9 +1027,9 @@ abstract class FlutterCommand extends Command<void> {
       // First always update universal artifacts, as some of these (e.g.
       // ios-deploy on macOS) are required to determine `requiredArtifacts`.
       await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
-
       await globals.cache.updateAll(await requiredArtifacts);
     }
+    Cache.releaseLock();
 
     await validateCommand();
 
@@ -994,11 +1056,7 @@ abstract class FlutterCommand extends Command<void> {
         context: PubContext.getVerifyContext(name),
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,
       );
-      // All done updating dependencies. Release the cache lock.
-      Cache.releaseLock();
-      await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
-    } else {
-      Cache.releaseLock();
+      await project.regeneratePlatformSpecificTooling();
     }
 
     setupApplicationPackages();

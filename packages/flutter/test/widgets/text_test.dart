@@ -161,6 +161,42 @@ void main() {
     expect(tester.takeException(), null);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
 
+  testWidgets('inline widgets hitTest works with ellipsis', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/68559
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      Text.rich(
+        TextSpan(
+          children: <InlineSpan>[
+            const TextSpan(
+              text: 'a very very very very very very very very very very long line',
+            ),
+            WidgetSpan(
+              child: SizedBox(
+                width: 20,
+                height: 40,
+                child: Card(
+                  child: RichText(
+                    text: const TextSpan(text: 'widget should be truncated'),
+                    textDirection: TextDirection.rtl,
+                  ),
+                ),
+              ),
+            ),
+          ],
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+
+    await tester.tap(find.byType(Text));
+
+    expect(tester.takeException(), null);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+
   testWidgets('inline widgets works with textScaleFactor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59316
     final UniqueKey key = UniqueKey();

@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'container.dart';
+import 'debug.dart';
 import 'framework.dart';
 
 // Examples can assume:
@@ -155,7 +156,7 @@ abstract class WidgetsLocalizations {
   /// that encloses the given context.
   ///
   /// This method is just a convenient shorthand for:
-  /// `Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations)`.
+  /// `Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations)!`.
   ///
   /// References to the localized resources defined by this class are typically
   /// written in terms of this method. For example:
@@ -163,8 +164,9 @@ abstract class WidgetsLocalizations {
   /// ```dart
   /// textDirection: WidgetsLocalizations.of(context).textDirection,
   /// ```
-  static WidgetsLocalizations? of(BuildContext context) {
-    return Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations);
+  static WidgetsLocalizations of(BuildContext context) {
+    assert(debugCheckHasWidgetsLocalizations(context));
+    return Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations)!;
   }
 }
 
@@ -403,7 +405,7 @@ class Localizations extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The locale of the Localizations widget for the widget tree that
@@ -450,7 +452,7 @@ class Localizations extends StatefulWidget {
     assert(context != null);
     assert(type != null);
     final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
-    return scope?.localizationsState.resourcesFor<T>(type);
+    return scope?.localizationsState.resourcesFor<T?>(type);
   }
 
   @override

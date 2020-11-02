@@ -27,6 +27,7 @@ export 'src/services/platform_views.dart';
 export 'src/services/raw_keyboard.dart';
 export 'src/services/raw_keyboard_android.dart';
 export 'src/services/raw_keyboard_fuchsia.dart';
+export 'src/services/raw_keyboard_ios.dart';
 export 'src/services/raw_keyboard_linux.dart';
 export 'src/services/raw_keyboard_macos.dart';
 export 'src/services/raw_keyboard_web.dart';
