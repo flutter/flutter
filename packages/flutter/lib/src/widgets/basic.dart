@@ -2758,67 +2758,56 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// needed, prefer removing the widget from the tree entirely rather than
 /// keeping it alive in an [Offstage] subtree.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// This example shows a [FlutterLogo] widget when the `_offstage` member field
-/// is false, and hides it without any room in the parent when it is true. The
-/// [Size] of the logo without bringing it on screen will be measured.
+/// is false, and hides it without any room in the parent when it is true. When,
+/// offstage, this app displays a button to get the logo size, which will be
+/// displayed in a [SnackBar].
 ///
 /// ```dart
 /// GlobalKey _key = GlobalKey();
 /// bool _offstage = true;
-/// Size _invisibleLogoSize;
 ///
-/// void _changeOffstageValue() {
-///   setState(() {
-///     _offstage = !_offstage;
-///     _invisibleLogoSize = null;
-///   });
-/// }
-///
-/// void _getInvisibleLogoSize() {
-///   setState(() {
-///     final RenderBox renderLogo = _key.currentContext.findRenderObject();
-///     final sizeLogo = renderLogo.size;
-///     _invisibleLogoSize = sizeLogo;
-///   });
+/// Size _getFlutterLogoSize() {
+///   final RenderBox renderLogo = _key.currentContext.findRenderObject();
+///   return renderLogo.size;
 /// }
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   String isFlutterLogoOffstageText;
-///   if (_offstage) {
-///     isFlutterLogoOffstageText = 'FlutterLogo widget is offstage. '
-///       'It is laid out in the widget tree, but occupies no space visually, '
-///       'cannot be hit tested, and is not painted. Yet, we are able to get its '
-///       'size as if it were painted: $_invisibleLogoSize';
-///   } else {
-///     isFlutterLogoOffstageText = 'FlutterLogo widget is not currently offstage, '
-///       'so it occupies space, is available for hit testing, and painted.';
-///   }
-///
-///   return Scaffold(
-///     body: Center(
-///       child: Column(
-///         mainAxisAlignment: MainAxisAlignment.center,
-///         children: <Widget>[
-///           Offstage(
-///             offstage: _offstage,
-///             child: FlutterLogo(
-///               key: _key,
-///               size: 150.0,
-///             ),
-///           ),
-///           RaisedButton(
-///             child: Text('Toggle Offstage Value'),
-///             onPressed: () { _changeOffstageValue(); },
-///           ),
-///           Text(isFlutterLogoOffstageText),
-///         ],
+///   return Column(
+///     mainAxisAlignment: MainAxisAlignment.center,
+///     children: <Widget>[
+///       Offstage(
+///         offstage: _offstage,
+///         child: FlutterLogo(
+///           key: _key,
+///           size: 150.0,
+///         ),
 ///       ),
-///     ),
+///       Text('Flutter logo is offstage: $_offstage'),
+///       RaisedButton(
+///         child: Text('Toggle Offstage Value'),
+///         onPressed: () {
+///           setState(() {
+///             _offstage = !_offstage;
+///           });
+///         },
+///       ),
+///       if (_offstage)
+///         RaisedButton(
+///           child: Text('Get Flutter Logo size'),
+///           onPressed: () {
+///             ScaffoldMessenger.of(context).showSnackBar(
+///               SnackBar(
+///                 content: Text('Flutter Logo size is ${_getFlutterLogoSize()}'),
+///               ),
+///             );
+///           }
+///         ),
+///     ],
 ///   );
-/// }
 /// ```
 /// {@end-tool}
 ///
