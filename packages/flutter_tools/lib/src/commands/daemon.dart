@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
-import '../android/android_workflow.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
