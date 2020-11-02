@@ -106,6 +106,28 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
+  testWidgets('ElevatedButton.icon defaults', (WidgetTester tester) async {
+    const ColorScheme colorScheme = ColorScheme.light();
+
+    // Enabled ElevatedButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: colorScheme),
+        home: Center(
+          child: ElevatedButton.icon(
+            onPressed: null,
+            key: null,
+            onLongPress: null,
+            style: null,
+            focusNode: null,
+            icon: const Icon(Icons.add),
+            label: const Text('buton'),
+          ),
+        ),
+      ),
+    );
+  });
+
   testWidgets('Default ElevatedButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
@@ -359,82 +381,6 @@ void main() {
             didLongPressButton = true;
           },
           child: const Text('button'),
-        ),
-      ),
-    );
-
-    final Finder elevatedButton = find.byType(ElevatedButton);
-    expect(tester.widget<ElevatedButton>(elevatedButton).enabled, true);
-
-    expect(didPressButton, isFalse);
-    await tester.tap(elevatedButton);
-    expect(didPressButton, isTrue);
-
-    expect(didLongPressButton, isFalse);
-    await tester.longPress(elevatedButton);
-    expect(didLongPressButton, isTrue);
-  });
-
-   testWidgets('ElevatedButton.icon onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
-    bool wasPressed;
-    Finder elevatedButton;
-
-    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: ElevatedButton.icon(
-          label: const Text('button'),
-          icon: const Icon(Icons.add),
-          onPressed: onPressed,
-          onLongPress: onLongPress,
-        ),
-      );
-    }
-
-    // onPressed not null, onLongPress null.
-    wasPressed = false;
-    await tester.pumpWidget(
-      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
-    );
-    elevatedButton = find.byType(ElevatedButton);
-    expect(tester.widget<ElevatedButton>(elevatedButton).enabled, true);
-    await tester.tap(elevatedButton);
-    expect(wasPressed, true);
-
-    // onPressed null, onLongPress not null.
-    wasPressed = false;
-    await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
-    );
-    elevatedButton = find.byType(ElevatedButton);
-    expect(tester.widget<ElevatedButton>(elevatedButton).enabled, true);
-    await tester.longPress(elevatedButton);
-    expect(wasPressed, true);
-
-    // onPressed null, onLongPress null.
-    await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: null),
-    );
-    elevatedButton = find.byType(ElevatedButton);
-    expect(tester.widget<ElevatedButton>(elevatedButton).enabled, false);
-  });
-
-  testWidgets('ElevatedButton.icon onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
-    bool didPressButton = false;
-    bool didLongPressButton = false;
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: ElevatedButton.icon(
-          onPressed: () {
-            didPressButton = true;
-          },
-          onLongPress: () {
-            didLongPressButton = true;
-          },
-          label: const Text('button'),
-          icon: const Icon(Icons.add),
         ),
       ),
     );
