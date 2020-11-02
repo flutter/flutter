@@ -23,15 +23,18 @@ class FlutterDriverFactory {
     @required Logger logger,
     @required ProcessUtils processUtils,
     @required String dartSdkPath,
+    @required String pubExecutablePath,
   }) : _applicationPackageFactory = applicationPackageFactory,
        _logger = logger,
        _processUtils = processUtils,
-       _dartSdkPath = dartSdkPath;
+       _dartSdkPath = dartSdkPath,
+       _pubExecutablePath = pubExecutablePath;
 
   final ApplicationPackageFactory _applicationPackageFactory;
   final Logger _logger;
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
+  final String _pubExecutablePath;
 
   /// Create a driver service for running `flutter drive`.
   DriverService createDriverService(bool web) {
@@ -46,6 +49,7 @@ class FlutterDriverFactory {
       processUtils: _processUtils,
       dartSdkPath: _dartSdkPath,
       applicationPackageFactory: _applicationPackageFactory,
+      pubExecutablePath: _pubExecutablePath,
     );
   }
 }
@@ -107,12 +111,14 @@ class FlutterDriverService extends DriverService {
     @required Logger logger,
     @required ProcessUtils processUtils,
     @required String dartSdkPath,
+    @required String pubExecutablePath,
     @visibleForTesting VMServiceConnector vmServiceConnector = connectToVmService,
   }) : _applicationPackageFactory = applicationPackageFactory,
        _logger = logger,
        _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
-       _vmServiceConnector = vmServiceConnector;
+       _vmServiceConnector = vmServiceConnector,
+       _pubExecutablePath = pubExecutablePath;
 
   static const int _kLaunchAttempts = 3;
 
@@ -120,6 +126,7 @@ class FlutterDriverService extends DriverService {
   final Logger _logger;
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
+  final String _pubExecutablePath;
   final VMServiceConnector _vmServiceConnector;
 
   Device _device;
@@ -240,11 +247,10 @@ class FlutterDriverService extends DriverService {
     // in the even that a socket or something similar is left open, the
     // test runner will correctly shutdown the VM instead of hanging forever.
     return _processUtils.stream(<String>[
-      _dartSdkPath,
       if (packageConfig['test'] != null)
-        ...<String>['pub', 'run', 'test', ...arguments, testFile, '-rexpanded']
+        ...<String>[_pubExecutablePath, 'run', 'test', ...arguments, testFile, '-rexpanded']
       else
-        ...<String>[...arguments, testFile, '-rexpanded'],
+        ...<String>[_dartSdkPath, ...arguments, testFile, '-rexpanded'],
     ], environment: <String, String>{
       'VM_SERVICE_URL': _vmServiceUri,
       ...environment,

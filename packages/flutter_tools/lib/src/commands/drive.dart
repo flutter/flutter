@@ -14,6 +14,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
@@ -173,13 +174,25 @@ class DriveCommand extends RunCommandBase {
     if (device == null) {
       throwToolExit(null);
     }
-
+    // TODO(jonahwilliams): refactor to use artifacts:
+    final String pubExecutable = _fileSystem.path.joinAll(<String>[
+      Cache.flutterRoot,
+      'bin',
+      'cache',
+      'dart-sdk',
+      'bin',
+      if (globals.platform.isWindows)
+        'pub.bat'
+      else
+        'pub'
+    ]);
     final bool web = device is WebServerDevice || device is ChromiumDevice;
     _flutterDriverFactory ??= FlutterDriverFactory(
       applicationPackageFactory: ApplicationPackageFactory.instance,
       logger: _logger,
       processUtils: globals.processUtils,
       dartSdkPath: globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      pubExecutablePath: pubExecutable,
     );
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       globals.fs.file('.packages'),
