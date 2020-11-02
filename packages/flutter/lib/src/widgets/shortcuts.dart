@@ -390,16 +390,16 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// ```dart import
 /// import package:flutter/services.dart
 /// ```
-/// 
+///
 /// ```dart preamble
 /// class Increment extends Intent {}
-/// 
+///
 /// class Decrement extends Intent {}
 /// ```
-/// 
+///
 /// ```dart
 /// int count = 0;
-/// 
+///
 /// Widget build(BuildContext context) {
 ///   return Shortcuts(
 ///     shortcuts: <LogicalKeySet, Intent> {
@@ -423,7 +423,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// }
 /// ```
 /// {@end-tool}
-/// 
+///
 /// See also:
 ///
 ///  * [Intent], a class for containing a description of a user action to be
