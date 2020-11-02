@@ -183,8 +183,8 @@ class DataTableThemeData with Diagnosticable {
     properties.add(DoubleProperty('headingRowHeight', headingRowHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('headingTextStyle', headingTextStyle, defaultValue: null));
     properties.add(DoubleProperty('horizontalMargin', horizontalMargin, defaultValue: null));
-    properties.add(DoubleProperty('checkboxSpacing', checkboxSpacing, defaultValue: null));
     properties.add(DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
+    properties.add(DoubleProperty('checkboxSpacing', checkboxSpacing, defaultValue: null));
     properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: null));
   }
 
