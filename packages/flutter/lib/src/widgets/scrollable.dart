@@ -15,7 +15,6 @@ import 'package:flutter/services.dart';
 import 'actions.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
-import 'focus_scope.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
@@ -28,7 +27,6 @@ import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
-import 'shortcuts.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
 
@@ -94,6 +92,7 @@ class Scrollable extends StatefulWidget {
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.restorationId,
+    this.primaryScrollShortcut = false,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
@@ -190,6 +189,9 @@ class Scrollable extends StatefulWidget {
   ///  * [GestureDetector.excludeFromSemantics], which is used to accomplish the
   ///    exclusion.
   final bool excludeFromSemantics;
+
+  ///
+  final bool primaryScrollShortcut;
 
   /// The number of children that will contribute semantic information.
   ///
@@ -432,6 +434,13 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   @override
   void didChangeDependencies() {
     _updatePosition();
+    if (widget.primaryScrollShortcut) {
+      final PrimaryScrollShortcutState? primaryScrollShortcut = PrimaryScrollShortcut.maybeOf(context);
+      // Similar to notificationContext, _ScrollableScope is placed above the
+      // widget using it: RawGestureDetector, which allows us to access this
+      // ScrollableState
+      primaryScrollShortcut?.primaryScrollKey = _gestureDetectorKey;
+    }
     super.didChangeDependencies();
   }
 
@@ -1095,23 +1104,22 @@ class ScrollAction extends Action<ScrollIntent> {
 }
 
 ///
-class PrimaryScrollShortcut extends InheritedWidget {
+class PrimaryScrollShortcut extends StatefulWidget {
   ///
   const PrimaryScrollShortcut({
     Key? key,
-    required this.primaryScrollKey,
-    required Widget child
-  }) : super(key: key, child: child);
+    required this.child
+  }) : super(key: key);
 
   ///
-  final GlobalKey? primaryScrollKey;
+  final Widget child;
 
   ///
-  static PrimaryScrollShortcut of(BuildContext context) {
+  static PrimaryScrollShortcutState of(BuildContext context) {
     assert(context != null);
-    final PrimaryScrollShortcut? shortcut = context.dependOnInheritedWidgetOfExactType<PrimaryScrollShortcut>();
+    final _PrimaryScrollShortcutScope? scope = context.dependOnInheritedWidgetOfExactType<_PrimaryScrollShortcutScope>();
     assert((){
-      if (shortcut == null) {
+      if (scope == null) {
         throw FlutterError(
           'PrimaryScrollShortcut.of() was called with a context that '
             'does not contain a PrimaryScrollShortcut widget.\n'
@@ -1121,15 +1129,50 @@ class PrimaryScrollShortcut extends InheritedWidget {
       }
       return true;
     }());
-    return shortcut!;
+    return scope!._primaryScrollShortcutState;
   }
   
   ///
-  static PrimaryScrollShortcut? maybeOf(BuildContext context) {
+  static PrimaryScrollShortcutState? maybeOf(BuildContext context) {
     assert(context != null);
-    final PrimaryScrollShortcut? shortcut = context.dependOnInheritedWidgetOfExactType<PrimaryScrollShortcut>();
-    return shortcut;
+    final _PrimaryScrollShortcutScope? scope = context.dependOnInheritedWidgetOfExactType<_PrimaryScrollShortcutScope>();
+    return scope?._primaryScrollShortcutState;
   }
+
+  @override
+  PrimaryScrollShortcutState createState() => PrimaryScrollShortcutState();
+}
+
+///
+class PrimaryScrollShortcutState extends State<PrimaryScrollShortcut> {
+
+  ///
+  GlobalKey? get primaryScrollKey => _primaryScrollKey;
+  GlobalKey? _primaryScrollKey;
+  set primaryScrollKey(GlobalKey? value) {
+    setState((){
+      _primaryScrollKey = value;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _PrimaryScrollShortcutScope(
+      child: widget.child,
+      primaryScrollShortcutState: this,
+    );
+  }
+}
+
+class _PrimaryScrollShortcutScope extends InheritedWidget {
+  const _PrimaryScrollShortcutScope({
+    Key? key,
+    required Widget child,
+    required PrimaryScrollShortcutState primaryScrollShortcutState,
+  }) : _primaryScrollShortcutState = primaryScrollShortcutState,
+      super(key: key, child: child);
+
+  final PrimaryScrollShortcutState _primaryScrollShortcutState;
 
   // Since this ScrollAction fallback  doesn't affect the display of anything,
   // we don't need to force a rebuild of anything that depends upon it.
@@ -1139,7 +1182,7 @@ class PrimaryScrollShortcut extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<GlobalKey>('primaryScrollKey', primaryScrollKey));
+    properties.add(DiagnosticsProperty<PrimaryScrollShortcutState>('_primaryScrollShortcutState', _primaryScrollShortcutState));
   }
 }
 

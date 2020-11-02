@@ -197,7 +197,6 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
-    this.primaryScrollKey,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
        assert(
@@ -318,7 +317,6 @@ class WidgetsApp extends StatefulWidget {
        onUnknownRoute = null,
        routes = null,
        initialRoute = null,
-       primaryScrollKey = null,
        super(key: key);
 
   /// {@template flutter.widgets.widgetsApp.navigatorKey}
@@ -338,9 +336,6 @@ class WidgetsApp extends StatefulWidget {
   /// null, [navigatorKey] must also be null.
   /// {@endtemplate}
   final GlobalKey<NavigatorState>? navigatorKey;
-
-  ///
-  final GlobalKey? primaryScrollKey;
 
   /// {@template flutter.widgets.widgetsApp.onGenerateRoute}
   /// The route generator callback used when the app is navigated to a
@@ -1526,7 +1521,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         onUnknownRoute: _onUnknownRoute,
         observers: widget.navigatorObservers!,
         reportsRouteUpdateToEngine: true,
-        primaryScrollKey: widget.primaryScrollKey,
       );
     }
 

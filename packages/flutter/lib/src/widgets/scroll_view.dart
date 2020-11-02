@@ -92,6 +92,7 @@ abstract class ScrollView extends StatelessWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.primaryScrollShortcut = false,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(shrinkWrap != null),
@@ -270,6 +271,9 @@ abstract class ScrollView extends StatelessWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  ///
+  final bool primaryScrollShortcut;
+
   /// Returns the [AxisDirection] in which the scroll view scrolls.
   ///
   /// Combines the [scrollDirection] with the [reverse] boolean to obtain the
@@ -361,6 +365,7 @@ abstract class ScrollView extends StatelessWidget {
       physics: physics,
       semanticChildCount: semanticChildCount,
       restorationId: restorationId,
+      primaryScrollShortcut: primaryScrollShortcut,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return buildViewport(context, offset, axisDirection, slivers);
       },
@@ -599,6 +604,7 @@ class CustomScrollView extends ScrollView {
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
+    bool primaryScrollShortcut = false,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -615,6 +621,7 @@ class CustomScrollView extends ScrollView {
     keyboardDismissBehavior: keyboardDismissBehavior,
     restorationId: restorationId,
     clipBehavior: clipBehavior,
+    primaryScrollShortcut: primaryScrollShortcut,
   );
 
   /// The slivers to place inside the viewport.
@@ -651,6 +658,7 @@ abstract class BoxScrollView extends ScrollView {
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
+    bool primaryScrollShortcut = false,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -665,6 +673,7 @@ abstract class BoxScrollView extends ScrollView {
     keyboardDismissBehavior: keyboardDismissBehavior,
     restorationId: restorationId,
     clipBehavior: clipBehavior,
+    primaryScrollShortcut: primaryScrollShortcut,
   );
 
   /// The amount of space by which to inset the children.
@@ -1076,6 +1085,7 @@ class ListView extends BoxScrollView {
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
+    bool primaryScrollShortcut = false,
   }) : childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -1097,6 +1107,7 @@ class ListView extends BoxScrollView {
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
          clipBehavior: clipBehavior,
+         primaryScrollShortcut: primaryScrollShortcut,
        );
 
   /// Creates a scrollable, linear array of widgets that are created on demand.
@@ -1151,6 +1162,7 @@ class ListView extends BoxScrollView {
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
+    bool primaryScrollShortcut = false,
   }) : assert(itemCount == null || itemCount >= 0),
        assert(semanticChildCount == null || semanticChildCount <= itemCount!),
        childrenDelegate = SliverChildBuilderDelegate(
@@ -1175,6 +1187,7 @@ class ListView extends BoxScrollView {
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
          clipBehavior: clipBehavior,
+         primaryScrollShortcut: primaryScrollShortcut
        );
 
   /// Creates a fixed-length scrollable linear array of list "items" separated
@@ -1244,6 +1257,7 @@ class ListView extends BoxScrollView {
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
+    bool primaryScrollShortcut = false,
   }) : assert(itemBuilder != null),
        assert(separatorBuilder != null),
        assert(itemCount != null && itemCount >= 0),
@@ -1288,6 +1302,7 @@ class ListView extends BoxScrollView {
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
          clipBehavior: clipBehavior,
+         primaryScrollShortcut: primaryScrollShortcut,
        );
 
   /// Creates a scrollable, linear array of widgets with a custom child model.
@@ -1389,6 +1404,7 @@ class ListView extends BoxScrollView {
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
+    bool primaryScrollShortcut = false,
   }) : assert(childrenDelegate != null),
        super(
          key: key,
@@ -1405,6 +1421,7 @@ class ListView extends BoxScrollView {
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
          clipBehavior: clipBehavior,
+         primaryScrollShortcut: primaryScrollShortcut,
        );
 
   /// If non-null, forces the children to have the given extent in the scroll
@@ -1686,6 +1703,7 @@ class GridView extends BoxScrollView {
     Clip clipBehavior = Clip.hardEdge,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
+    bool primaryScrollShortcut = false,
   }) : assert(gridDelegate != null),
        childrenDelegate = SliverChildListDelegate(
          children,
@@ -1708,6 +1726,7 @@ class GridView extends BoxScrollView {
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
          clipBehavior: clipBehavior,
+         primaryScrollShortcut: primaryScrollShortcut,
        );
 
   /// Creates a scrollable, 2D array of widgets that are created on demand.
@@ -1750,6 +1769,7 @@ class GridView extends BoxScrollView {
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
+    bool primaryScrollShortcut = false,
   }) : assert(gridDelegate != null),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
@@ -1773,6 +1793,7 @@ class GridView extends BoxScrollView {
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
          clipBehavior: clipBehavior,
+         primaryScrollShortcut: primaryScrollShortcut,
        );
 
   /// Creates a scrollable, 2D array of widgets with both a custom
@@ -1799,6 +1820,7 @@ class GridView extends BoxScrollView {
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
+    bool primaryScrollShortcut = false,
   }) : assert(gridDelegate != null),
        assert(childrenDelegate != null),
        super(
@@ -1816,6 +1838,7 @@ class GridView extends BoxScrollView {
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
          clipBehavior: clipBehavior,
+         primaryScrollShortcut: primaryScrollShortcut,
        );
 
   /// Creates a scrollable, 2D array of widgets with a fixed number of tiles in
@@ -1855,6 +1878,7 @@ class GridView extends BoxScrollView {
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
+    bool primaryScrollShortcut = false,
   }) : gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
          crossAxisCount: crossAxisCount,
          mainAxisSpacing: mainAxisSpacing,
@@ -1882,6 +1906,7 @@ class GridView extends BoxScrollView {
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
          clipBehavior: clipBehavior,
+         primaryScrollShortcut: primaryScrollShortcut,
        );
 
   /// Creates a scrollable, 2D array of widgets with tiles that each have a
@@ -1921,6 +1946,7 @@ class GridView extends BoxScrollView {
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
+    bool primaryScrollShortcut = false,
   }) : gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
          maxCrossAxisExtent: maxCrossAxisExtent,
          mainAxisSpacing: mainAxisSpacing,
@@ -1948,6 +1974,7 @@ class GridView extends BoxScrollView {
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
          clipBehavior: clipBehavior,
+         primaryScrollShortcut: primaryScrollShortcut,
        );
 
   /// A delegate that controls the layout of the children within the [GridView].
