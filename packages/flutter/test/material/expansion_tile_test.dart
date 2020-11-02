@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
@@ -481,4 +482,40 @@ void main() {
     expect(columnRect.bottom, paddingRect.bottom - 4);
   });
 
+  testWidgets('ExpansionTile.collapsedBackgroundColor', (WidgetTester tester) async {
+    const Key expansionTileKey = Key('expansionTileKey');
+    const Color backgroundColor = Colors.red;
+    const Color collapsedBackgroundColor = Colors.brown;
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          key: expansionTileKey,
+          title: Text('Title'),
+          backgroundColor: backgroundColor,
+          collapsedBackgroundColor: collapsedBackgroundColor,
+          children: <Widget>[
+            SizedBox(height: 100, width: 100),
+          ],
+        ),
+      ),
+    ));
+
+    BoxDecoration boxDecoration =  tester.firstWidget<Container>(find.descendant(
+      of: find.byKey(expansionTileKey),
+      matching: find.byType(Container),
+    )).decoration! as BoxDecoration;
+
+    expect(boxDecoration.color, collapsedBackgroundColor);
+
+    await tester.tap(find.text('Title'));
+    await tester.pumpAndSettle();
+
+    boxDecoration =  tester.firstWidget<Container>(find.descendant(
+      of: find.byKey(expansionTileKey),
+      matching: find.byType(Container),
+    )).decoration! as BoxDecoration;
+
+    expect(boxDecoration.color, backgroundColor);
+  });
 }
