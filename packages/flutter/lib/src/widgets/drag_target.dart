@@ -98,11 +98,11 @@ enum DragAnchor {
 /// widget always displays [child].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=QzA4c4QHZCY}
-/// 
+///
 /// {@tool dartpad --template=stateful_widget_material}
 ///
-/// The following example has a [Draggable] widget along with a [DragTarget] 
-/// in a row demonstrating an incremented `acceptedData` integer value when 
+/// The following example has a [Draggable] widget along with a [DragTarget]
+/// in a row demonstrating an incremented `acceptedData` integer value when
 /// you drag the element to the target.
 ///
 /// ```dart
