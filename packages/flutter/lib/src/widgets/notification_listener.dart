@@ -19,8 +19,8 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 
 /// {@tool dartpad --template=stateless_widget_material}
 ///
-/// This example shows a [NotificationListener ] widget
-/// which its type is [ScrollNotification ], when there is scroll
+/// This example shows a [NotificationListener] widget
+/// which its type is [ScrollNotification], when there is scroll
 /// event occurs in the [NestedScrollView],
 /// We want to be notified the current scroll position whether
 /// it's [ScrollStartNotification]or[ScrollEndNotification].
@@ -83,10 +83,11 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 /// {@end-tool}
 ///
 /// See also:
-/// ### [ScrollNotification ] which describes the notification lifecycle.
-/// ### [ScrollStartNotification] which returns the start position of scrolling.
-/// ### [ScrollEndNotification] which returns the end position of scrolling.
-/// ### [NestedScrollView] which creates a nested scroll view.
+///
+///  * [ScrollNotification] which describes the notification lifecycle.
+///  * [ScrollStartNotification] which returns the start position of scrolling.
+///  * [ScrollEndNotification] which returns the end position of scrolling.
+///  * [NestedScrollView] which creates a nested scroll view.
 ///
 /// A notification that can bubble up the widget tree.
 ///
