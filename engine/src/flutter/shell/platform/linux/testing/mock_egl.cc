@@ -97,12 +97,14 @@ EGLBoolean eglChooseConfig(EGLDisplay dpy,
                            EGLConfig* configs,
                            EGLint config_size,
                            EGLint* num_config) {
-  if (!check_display(dpy) || !check_initialized(dpy))
+  if (!check_display(dpy) || !check_initialized(dpy)) {
     return EGL_FALSE;
+  }
 
   if (configs == nullptr) {
-    if (num_config != nullptr)
+    if (num_config != nullptr) {
       *num_config = 1;
+    }
     return bool_success();
   }
 
@@ -112,8 +114,9 @@ EGLBoolean eglChooseConfig(EGLDisplay dpy,
     n_returned++;
   }
 
-  if (num_config != nullptr)
+  if (num_config != nullptr) {
     *num_config = n_returned;
+  }
 
   return bool_success();
 }
@@ -122,8 +125,9 @@ EGLContext eglCreateContext(EGLDisplay dpy,
                             EGLConfig config,
                             EGLContext share_context,
                             const EGLint* attrib_list) {
-  if (!check_display(dpy) || !check_initialized(dpy) || !check_config(config))
+  if (!check_display(dpy) || !check_initialized(dpy) || !check_config(config)) {
     return EGL_NO_CONTEXT;
+  }
 
   mock_error = EGL_SUCCESS;
   return &mock_context;
@@ -132,8 +136,9 @@ EGLContext eglCreateContext(EGLDisplay dpy,
 EGLSurface eglCreatePbufferSurface(EGLDisplay dpy,
                                    EGLConfig config,
                                    const EGLint* attrib_list) {
-  if (!check_display(dpy) || !check_initialized(dpy) || !check_config(config))
+  if (!check_display(dpy) || !check_initialized(dpy) || !check_config(config)) {
     return EGL_NO_SURFACE;
+  }
 
   mock_error = EGL_SUCCESS;
   return &mock_surface;
@@ -143,8 +148,9 @@ EGLSurface eglCreateWindowSurface(EGLDisplay dpy,
                                   EGLConfig config,
                                   EGLNativeWindowType win,
                                   const EGLint* attrib_list) {
-  if (!check_display(dpy) || !check_initialized(dpy) || !check_config(config))
+  if (!check_display(dpy) || !check_initialized(dpy) || !check_config(config)) {
     return EGL_NO_SURFACE;
+  }
 
   mock_error = EGL_SUCCESS;
   return &mock_surface;
@@ -154,8 +160,9 @@ EGLBoolean eglGetConfigAttrib(EGLDisplay dpy,
                               EGLConfig config,
                               EGLint attribute,
                               EGLint* value) {
-  if (!check_display(dpy) || !check_initialized(dpy) || !check_config(config))
+  if (!check_display(dpy) || !check_initialized(dpy) || !check_config(config)) {
     return EGL_FALSE;
+  }
 
   MockConfig* c = static_cast<MockConfig*>(config);
   switch (attribute) {
@@ -261,8 +268,9 @@ void (*eglGetProcAddress(const char* procname))(void) {
 }
 
 EGLBoolean eglInitialize(EGLDisplay dpy, EGLint* major, EGLint* minor) {
-  if (!check_display(dpy))
+  if (!check_display(dpy)) {
     return EGL_FALSE;
+  }
 
   if (!display_initialized) {
     mock_config.config_id = 1;
@@ -295,10 +303,12 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint* major, EGLint* minor) {
     display_initialized = true;
   }
 
-  if (major != nullptr)
+  if (major != nullptr) {
     *major = 1;
-  if (minor != nullptr)
-    *major = 5;
+  }
+  if (minor != nullptr) {
+    *minor = 5;
+  }
 
   return bool_success();
 }
@@ -307,15 +317,17 @@ EGLBoolean eglMakeCurrent(EGLDisplay dpy,
                           EGLSurface draw,
                           EGLSurface read,
                           EGLContext ctx) {
-  if (!check_display(dpy) || !check_initialized(dpy))
+  if (!check_display(dpy) || !check_initialized(dpy)) {
     return EGL_FALSE;
+  }
 
   return bool_success();
 }
 
 EGLBoolean eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
-  if (!check_display(dpy) || !check_initialized(dpy))
+  if (!check_display(dpy) || !check_initialized(dpy)) {
     return EGL_FALSE;
+  }
 
   return bool_success();
 }
