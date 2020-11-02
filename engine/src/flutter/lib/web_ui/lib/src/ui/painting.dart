@@ -461,9 +461,9 @@ String? _instantiateImageCodec(Uint8List list, engine.Callback<Codec> callback) 
   return null;
 }
 
-Future<Codec?> webOnlyInstantiateImageCodecFromUrl(Uri uri,
+Future<Codec> webOnlyInstantiateImageCodecFromUrl(Uri uri,
     {engine.WebOnlyImageCodecChunkCallback? chunkCallback}) {
-  return _futurize<Codec?>((engine.Callback<Codec> callback) =>
+  return _futurize<Codec>((engine.Callback<Codec> callback) =>
       _instantiateImageCodecFromUrl(uri, chunkCallback, callback));
 }
 
