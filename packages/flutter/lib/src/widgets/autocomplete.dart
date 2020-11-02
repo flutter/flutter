@@ -167,6 +167,7 @@ class AutocompleteController<T extends Object> {
   ///     [getResults] method instead of specifying all possible options up
   ///     front.
   AutocompleteController({
+    // TODO(justinmc): Rename to optionsBuilder.
     required this.buildOptions,
     AutocompleteOptionToString<T>? displayStringForOption,
     TextEditingController? textEditingController,

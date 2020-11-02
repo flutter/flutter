@@ -45,6 +45,147 @@ void main() {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
+  group('AutocompleteController', () {
+    testWidgets('default filter on options', (WidgetTester tester) async {
+      final AutocompleteController<String> autocompleteController =
+          AutocompleteController<String>(
+            options: kOptions,
+          );
+
+      // Enter text and see that the results are filtered.
+      autocompleteController.textEditingController.text = 'ele';
+      expect(autocompleteController.results.value.length, 2);
+      expect(autocompleteController.results.value[0], 'chameleon');
+      expect(autocompleteController.results.value[1], 'elephant');
+
+      // Modify the text. The results are filtered again.
+      autocompleteController.textEditingController.text = 'e';
+      expect(autocompleteController.results.value.length, 6);
+      expect(autocompleteController.results.value[0], 'chameleon');
+      expect(autocompleteController.results.value[1], 'elephant');
+      expect(autocompleteController.results.value[2], 'goose');
+      expect(autocompleteController.results.value[3], 'lemur');
+      expect(autocompleteController.results.value[4], 'mouse');
+      expect(autocompleteController.results.value[5], 'northern white rhinocerous');
+
+      // The filter is not case sensitive.
+      autocompleteController.textEditingController.text = 'ELE';
+      expect(autocompleteController.results.value.length, 2);
+      expect(autocompleteController.results.value[0], 'chameleon');
+      expect(autocompleteController.results.value[1], 'elephant');
+    });
+
+    testWidgets('custom getResults', (WidgetTester tester) async {
+      final AutocompleteController<String> autocompleteController =
+          AutocompleteController<String>.generated(
+            // A custom getResults that always includes 'goose' in the results.
+            getResults: (TextEditingValue value) {
+              return kOptions
+                .where((String option) => option.contains(value.text) || option == 'goose')
+                .toList();
+            },
+          );
+
+      // Set text in the field and see that the results are filtered by
+      // getResults.
+      autocompleteController.textEditingController.text = 'ele';
+      expect(autocompleteController.results.value.length, 3);
+      expect(autocompleteController.results.value[0], 'chameleon');
+      expect(autocompleteController.results.value[1], 'elephant');
+      expect(autocompleteController.results.value[2], 'goose');
+
+      // Modify the text. The results are filtered again.
+      autocompleteController.textEditingController.text = 'e';
+      expect(autocompleteController.results.value.length, 6);
+      expect(autocompleteController.results.value[0], 'chameleon');
+      expect(autocompleteController.results.value[1], 'elephant');
+      expect(autocompleteController.results.value[2], 'goose');
+      expect(autocompleteController.results.value[3], 'lemur');
+      expect(autocompleteController.results.value[4], 'mouse');
+      expect(autocompleteController.results.value[5], 'northern white rhinocerous');
+    });
+
+    testWidgets('User options with custom filter string', (WidgetTester tester) async {
+      final AutocompleteController<User> autocompleteController =
+          AutocompleteController<User>(
+            options: kOptionsUsers,
+            filterStringForOption: (User option) => option.name + option.email,
+          );
+
+      // Set the field text based on the email and see that the results are
+      // filtered.
+      autocompleteController.textEditingController.text = 'example';
+      expect(autocompleteController.results.value.length, 2);
+      expect(autocompleteController.results.value[0], kOptionsUsers[0]);
+      expect(autocompleteController.results.value[1], kOptionsUsers[1]);
+
+      // Modify the field text. The results appear again and are filtered, this
+      // time by name instead of email.
+      autocompleteController.textEditingController.text = 'B';
+      expect(autocompleteController.results.value.length, 1);
+      expect(autocompleteController.results.value[0], kOptionsUsers[1]);
+    });
+
+    testWidgets('custom getResults on User options', (WidgetTester tester) async {
+      final AutocompleteController<User> autocompleteController =
+          AutocompleteController<User>.generated(
+            // A custom getResults that searches by name case sensitively.
+            getResults: (TextEditingValue value) {
+              return kOptionsUsers
+                .where((User option) => option.name.contains(value.text))
+                .toList();
+            },
+          );
+
+      // Set field text based on the email and see that nothing is found.
+      autocompleteController.textEditingController.text = 'example';
+      expect(autocompleteController.results.value.length, 0);
+
+      // Modify the field text. The results appear again and are filtered. A
+      // lowercase "a" matches "Charlie" and not "Alice".
+      autocompleteController.textEditingController.text = 'a';
+      expect(autocompleteController.results.value.length, 1);
+      expect(autocompleteController.results.value[0], kOptionsUsers[2]);
+
+      // Modify the field text. An uppercase "A" matches "Alice" and not
+      // "Charlie".
+      autocompleteController.textEditingController.text = 'A';
+      expect(autocompleteController.results.value.length, 1);
+      expect(autocompleteController.results.value[0], kOptionsUsers[0]);
+    });
+
+    group('dispose', () {
+      testWidgets('disposes the TextEditingController when not passed in', (WidgetTester tester) async {
+        final AutocompleteController<String> autocompleteController =
+            AutocompleteController<String>(
+              options: kOptions,
+            );
+        expect(autocompleteController.textEditingController, isNotNull);
+
+        autocompleteController.dispose();
+        expect(() {
+          autocompleteController.textEditingController.addListener(() {});
+        }, throwsFlutterError);
+      });
+
+      testWidgets("doesn't dispose the TextEditingController when passed in", (WidgetTester tester) async {
+        final TextEditingController textEditingController = TextEditingController();
+        final AutocompleteController<String> autocompleteController =
+            AutocompleteController<String>(
+              options: kOptions,
+              textEditingController: textEditingController,
+            );
+        expect(autocompleteController.textEditingController, isNotNull);
+
+        autocompleteController.dispose();
+        expect(() {
+          autocompleteController.textEditingController.addListener(() {});
+        }, isNot(throwsException));
+        // No error thrown
+      });
+    });
+  });
+
   group('RawAutocomplete', () {
     testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
