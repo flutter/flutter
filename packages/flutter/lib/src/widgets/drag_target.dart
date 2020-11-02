@@ -99,60 +99,66 @@ enum DragAnchor {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=QzA4c4QHZCY}
 /// 
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 ///
-/// The follwing example has the [Draggable] widget along with the [DragTarget] in a row demonstrating what happens when you drag the element to the target.
+/// The following example has a [Draggable] widget along with a [DragTarget] 
+/// in a row demonstrating an incremented `acceptedData` integer value when 
+/// you drag the element to the target.
 ///
 /// ```dart
+/// var acceptedData = 0;
+/// 
 /// Widget build(BuildContext context) {
-///   var acceptedData = 0;
 ///   return Row(
 ///     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///     children : [
+///     children: [
 ///       Draggable(
 ///         // Data is the value this Draggable stores.
-///         data : 10,
-///         child : Container(
-///           height : 100.0,
-///           width : 100.0,
-///           color : Colors.lightGreenAccent,
-///           child : Center(
-///             child : Text("I am the Draggable")
-///           )
+///         data: 10,
+///         child: Container(
+///           height: 100.0,
+///           width: 100.0,
+///           color: Colors.lightGreenAccent,
+///           child: Center(
+///             child: Text("The Draggable")
+///           ),
 ///         ),
-///         feedback : Container(
-///           height : 100.0,
-///           width : 100.0,
-///           color : Colors.deepOrange,
-///           child : Icon(Icons.directions_run)
+///         feedback: Container(
+///           height: 100.0,
+///           width: 100.0,
+///           color: Colors.deepOrange,
+///           child: Icon(Icons.directions_run)
 ///         ),
-///         childWhenDragging : Container(
-///           height : 100.0,
-///           width : 100.0,
-///           color : Colors.pinkAccent,
-///           child : Center(
-///             child : Text("I am what's left behind.")
-///           )
-///         )
+///         childWhenDragging: Container(
+///           height: 100.0,
+///           width: 100.0,
+///           color: Colors.pinkAccent,
+///           child: Center(
+///             child: Text("Child When Dragging")
+///           ),
+///         ),
 ///       ),
 ///       DragTarget(
-///         builder : (BuildContext context) {
+///         builder: (BuildContext context) {
 ///             Container(
-///               height : 100.0,
-///               width : 100.0,
-///               color : Colors.cyan,
-///               child : Center(
-///                 child : Text("Value is updated to: $acceptedData"),
-///               )
-///             )
+///               height: 100.0,
+///               width: 100.0,
+///               color: Colors.cyan,
+///               child: Center(
+///                 child: Text("Value is updated to: $acceptedData"),
+///               ),
+///             ),
 ///          }
-///          onAccept : (int data){
-///            acceptedData += data;
+///          onAccept: (int data){
+///            setState((){
+///             acceptedData += data;
+///            });
 ///          }
 ///       )
 ///     ]
 ///   );
 /// }
+/// 
 /// ```
 ///
 /// {@end-tool}
