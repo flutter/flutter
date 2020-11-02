@@ -207,7 +207,7 @@ class TestCase {
       printOutputDefault: true,
     );
     final ProcessRunnerResult result = await runner.runProcess(
-      <String>[flutter, 'analyze', '--current-package', '--enable-experiment=non-nullable', '--pub', '--congratulate', '.'],
+      <String>[flutter, 'analyze', '--current-package', '--pub', '--congratulate', '.'],
       failOk: true,
     );
     if (result.exitCode != 0) {
