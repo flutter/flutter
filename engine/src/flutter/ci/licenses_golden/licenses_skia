@@ -1,4 +1,4 @@
-Signature: 54fa1c0b3e7ecf3027410c47231cc116
+Signature: 801073172844be73f22cf6570c46d92b
 
 UNUSED LICENSES:
 
@@ -1349,7 +1349,6 @@ FILE: ../../../third_party/skia/modules/canvaskit/release.js
 FILE: ../../../third_party/skia/modules/canvaskit/rt_shader.js
 FILE: ../../../third_party/skia/modules/canvaskit/skottie.js
 FILE: ../../../third_party/skia/modules/canvaskit/skp.js
-FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/gmtests.html
 FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/viewer.html
 FILE: ../../../third_party/skia/modules/pathkit/chaining.js
 FILE: ../../../third_party/skia/modules/pathkit/externs.js
