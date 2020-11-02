@@ -29,7 +29,6 @@ import 'routes.dart';
 /// {@tool dartpad --template=stateless_widget_material}
 ///
 /// ```dart
-/// 
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
