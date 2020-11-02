@@ -207,6 +207,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // beneath a stylus or mouse cursor.
   @Nullable private SemanticsNode hoveredObject;
 
+  @VisibleForTesting
+  public int getHoveredObjectId() {
+    return hoveredObject.id;
+  }
+
   // A Java/Android cached representation of the Flutter app's navigation stack. The Flutter
   // navigation stack is tracked so that accessibility announcements can be made during Flutter's
   // navigation changes.
@@ -2180,7 +2185,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           return result;
         }
       }
-      return this;
+      return isFocusable() ? this : null;
     }
 
     // TODO(goderbauer): This should be decided by the framework once we have more information
