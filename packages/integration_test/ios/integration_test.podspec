@@ -18,4 +18,3 @@ Runs tests that use the flutter_test API as integration tests.
   s.platform = :ios, '8.0'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }
 end
-
