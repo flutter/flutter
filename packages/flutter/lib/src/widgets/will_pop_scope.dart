@@ -18,15 +18,18 @@ import 'routes.dart';
 /// ```dart
 /// @override
 /// Widget build(BuildContext) {
-///     return WillPopScope(
-///      onWillPop:_handleBackPress,
-///        child:MyWidget(),
+///     return WillPopScope (
+///      onWillPop: _handleBackPress,
+///        child: MyWidget(),
 ///     );
 /// }
 /// ```
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget}
+///
+/// ``` dart imports
+/// import 'package:flutter/material.dart';
 ///
 /// ```dart
 ///   @override
@@ -37,27 +40,27 @@ import 'routes.dart';
 ///         leading: BackButton(),
 ///       ),
 ///       body: WillPopScope(
-///         child:Center(
+///         child: Center(
 ///         child: Text("Press back button in AppBar"),
 ///       ),
-///         onWillPop:_onBackPressed,
+///         onWillPop: _onBackPressed,
 ///       ),
 ///     );
 ///   }
 ///
-///   Future<bool> _onBackPressed(){
+///   Future<bool> _onBackPressed() {
 ///     return showDialog(
-///     context:context,
-///     builder:(context)=>AlertDialog(
-///       title:Text("Do you really want to exit the app?"),
-///       actions:<Widget>[
+///     context: context,
+///     builder: (context) => AlertDialog(
+///       title: Text("Do you really want to exit the app?"),
+///       actions: <Widget>[
 ///         FlatButton(
-///           child:Text("No"),
-///           onPressed:()=> Navigator.pop(context,false),
+///           child: Text("No"),
+///           onPressed:() => Navigator.pop(context,false),
 ///         ),
 ///         FlatButton(
-///           child:Text("Yes"),
-///           onPressed:()=> Navigator.pop(context,true),
+///           child: Text("Yes"),
+///           onPressed:() => Navigator.pop(context,true),
 ///         ),
 ///       ]
 ///     ),
@@ -72,7 +75,8 @@ import 'routes.dart';
 ///  * [ModalRoute.addScopedWillPopCallback] and [ModalRoute.removeScopedWillPopCallback],
 ///    which this widget uses to register and unregister [onWillPop].
 ///  * [Form], which provides an `onWillPop` callback that enables the form
-///    to veto a [pop] initiated by the app's back button.
+///    to veto a `pop` initiated by the app's back button.
+///
 class WillPopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
@@ -83,7 +87,7 @@ class WillPopScope extends StatefulWidget {
     required this.child,
     required this.onWillPop,
   })   : assert(child != null),
-         super(key: key);
+        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
