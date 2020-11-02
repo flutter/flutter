@@ -23,6 +23,7 @@ import 'overlay.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'routes.dart';
+import 'scrollable.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
@@ -1447,6 +1448,7 @@ class Navigator extends StatefulWidget {
     this.reportsRouteUpdateToEngine = false,
     this.observers = const <NavigatorObserver>[],
     this.restorationScopeId,
+    this.primaryScrollKey,
   }) : assert(pages != null),
        assert(onGenerateInitialRoutes != null),
        assert(transitionDelegate != null),
@@ -1602,6 +1604,9 @@ class Navigator extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool reportsRouteUpdateToEngine;
+
+  ///
+  final GlobalKey? primaryScrollKey;
 
   /// Push a named route onto the navigator that most tightly encloses the given
   /// context.
@@ -5116,9 +5121,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             autofocus: true,
             child: UnmanagedRestorationScope(
               bucket: bucket,
-              child: Overlay(
-                key: _overlayKey,
-                initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+              child: PrimaryScrollShortcut(
+                primaryScrollKey: widget.primaryScrollKey,
+                child: Overlay(
+                  key: _overlayKey,
+                  initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+                ),
               ),
             ),
           ),

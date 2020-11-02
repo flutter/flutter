@@ -95,6 +95,7 @@ class CupertinoApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.primaryScrollKey,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -148,10 +149,14 @@ class CupertinoApp extends StatefulWidget {
        onUnknownRoute = null,
        routes = null,
        initialRoute = null,
+       primaryScrollKey = null,
        super(key: key);
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   final GlobalKey<NavigatorState>? navigatorKey;
+
+  ///
+  final GlobalKey? primaryScrollKey;
 
   /// {@macro flutter.widgets.widgetsApp.home}
   final Widget? home;
@@ -440,6 +445,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,
+      primaryScrollKey: widget.primaryScrollKey,
     );
   }
 

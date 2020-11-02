@@ -966,11 +966,24 @@ class ScrollIntent extends Intent {
 class ScrollAction extends Action<ScrollIntent> {
   @override
   bool isEnabled(ScrollIntent intent) {
+    print('isEnabled');
     final FocusNode? focus = primaryFocus;
-    // Key option would actually mean we place the PrimaryScrollNavigator
-    // above the Shortcuts
-    final GlobalKey? _primaryScrollKey = PrimaryScrollNavigator.of(focus!.context!).key;
-    return _primaryScrollKey != null && focus != null && focus.context != null && Scrollable.of(focus.context!) != null;
+    final bool contextIsValid = focus != null && focus.context != null;
+    if (contextIsValid) {
+      print('context is valid');
+      // Check for primary scrollable within the current context
+      if (Scrollable.of(focus!.context!) != null)
+        return true;
+      // Check for secondary scrollable with context from PrimaryScrollNavigator
+      if (PrimaryScrollShortcut.of(focus.context!) != null) {
+        print('looking for PrimaryScrollShortcut');
+        final GlobalKey? primaryScrollKey = PrimaryScrollShortcut.of(focus.context!).primaryScrollKey;
+        print('primaryScrollKey: $primaryScrollKey');
+        print(primaryScrollKey!.currentState);
+        return primaryScrollKey != null && primaryScrollKey.currentContext != null && Scrollable.of(primaryScrollKey.currentContext!) != null;
+      }
+    }
+    return false;
   }
 
   // Returns the scroll increment for a single scroll request, for use when
@@ -1056,8 +1069,8 @@ class ScrollAction extends Action<ScrollIntent> {
   void invoke(ScrollIntent intent) {
     ScrollableState? state = Scrollable.of(primaryFocus!.context!);
     if (state == null) {
-      final GlobalKey? _primaryScrollKey = PrimaryScrollNavigator.of(primaryFocus!.context!).key;
-      state = Scrollable.of(_primaryScrollKey!.currentContext!);
+      final GlobalKey? _secondaryScrollKey = PrimaryScrollShortcut.of(primaryFocus!.context!).primaryScrollKey;
+      state = Scrollable.of(_secondaryScrollKey!.currentContext!);
     }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
     assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
@@ -1082,99 +1095,52 @@ class ScrollAction extends Action<ScrollIntent> {
 }
 
 ///
-// Names: PrimaryScrollShortcut, PrimaryScrollKeyListener, PrimaryScroller?
-class PrimaryScrollNavigator extends StatefulWidget {
+class PrimaryScrollShortcut extends InheritedWidget {
   ///
-  const PrimaryScrollNavigator({
+  const PrimaryScrollShortcut({
     Key? key,
-    required this.child
-  }) : assert(child != null),
-      super(key: key);
-
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
+    required this.primaryScrollKey,
+    required Widget child
+  }) : super(key: key, child: child);
 
   ///
-  static PrimaryScrollNavigatorState of(BuildContext context) {
+  final GlobalKey? primaryScrollKey;
+
+  ///
+  static PrimaryScrollShortcut of(BuildContext context) {
     assert(context != null);
-
-    final _PrimaryScrollNavigatorScope scope = context.dependOnInheritedWidgetOfExactType<_PrimaryScrollNavigatorScope>()!;
-    return scope._primaryScrollNavigatorState;
+    final PrimaryScrollShortcut? shortcut = context.dependOnInheritedWidgetOfExactType<PrimaryScrollShortcut>();
+    assert((){
+      if (shortcut == null) {
+        throw FlutterError(
+          'PrimaryScrollShortcut.of() was called with a context that '
+            'does not contain a PrimaryScrollShortcut widget.\n'
+            'The context used was:\n'
+            '  $context',
+        );
+      }
+      return true;
+    }());
+    return shortcut!;
+  }
+  
+  ///
+  static PrimaryScrollShortcut? maybeOf(BuildContext context) {
+    assert(context != null);
+    final PrimaryScrollShortcut? shortcut = context.dependOnInheritedWidgetOfExactType<PrimaryScrollShortcut>();
+    return shortcut;
   }
 
-  // Not sure if this method will be necessary. I think there should always be one.
-  // static PrimaryScrollNavigatorState? maybeOf(BuildContext context) {}
+  // Since this ScrollAction fallback  doesn't affect the display of anything,
+  // we don't need to force a rebuild of anything that depends upon it.
+  @override
+  bool updateShouldNotify(InheritedWidget oldWidget) => false;
 
   @override
-  PrimaryScrollNavigatorState createState() => PrimaryScrollNavigatorState();
-}
-
-///
-class PrimaryScrollNavigatorState extends State<PrimaryScrollNavigator> {
-  Map<LogicalKeySet, Intent>? _shortcuts;
-
-  /// Developer provides the scroll controller of the scroll view they would
-  /// like to have respond to Shortcuts by default.
-  ScrollController? _primaryScrollController;
-
-  /// OR since ScrollAction is modeled around ScrollableState, instead of a
-  /// scroll controller, developers would provide a GlobalKey that is
-  /// enclosed within the context of the Scrollable they want to respond to
-  /// shortcuts.
-  GlobalKey? get key => _primaryScrollKey;
-  GlobalKey? _primaryScrollKey;
-
-  @override
-  void didChangeDependencies() {
-    // For controller option, key option would be above the shortcuts.
-    _shortcuts = Shortcuts.maybeOf(context)?.shortcuts;
-    super.didChangeDependencies();
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<GlobalKey>('primaryScrollKey', primaryScrollKey));
   }
-
-  void set({ScrollController? controller, GlobalKey? key}) {
-    _primaryScrollController = controller;
-    // Or
-    _primaryScrollKey = key;
-  }
-
-  void unset() {
-    _primaryScrollController = null;
-  }
-
-  bool _handleOnKey(FocusNode node, RawKeyEvent event) {
-    // Reconcile RawKeyEvent with current Shortcuts
-    // (_primaryScrollController approach)
-    return true;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FocusScope(
-      node: FocusScopeNode(
-        debugLabel: '$PrimaryScrollNavigatorState Focus Scope',
-        canRequestFocus: false,
-        // (_primaryScrollController approach)
-        onKey: _handleOnKey,
-      ),
-      child: widget.child,
-    );
-  }
-}
-
-class _PrimaryScrollNavigatorScope extends InheritedWidget {
-  const _PrimaryScrollNavigatorScope({
-    Key? key,
-    required Widget child,
-    required PrimaryScrollNavigatorState primaryScrollNavigatorState,
-  }) : _primaryScrollNavigatorState = primaryScrollNavigatorState,
-      super(key: key, child: child);
-
-  final PrimaryScrollNavigatorState _primaryScrollNavigatorState;
-
-  @override
-  bool updateShouldNotify(_PrimaryScrollNavigatorScope old) => _primaryScrollNavigatorState != old._primaryScrollNavigatorState;
 }
 
 // Not using a RestorableDouble because we want to allow null values and override
