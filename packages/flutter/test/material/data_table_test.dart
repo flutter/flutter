@@ -575,8 +575,10 @@ void main() {
   testWidgets('DataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
     const double _defaultHorizontalMargin = 24.0;
     const double _defaultColumnSpacing = 56.0;
+    const double _defaultCheckboxSpacing = 24.0;
     const double _customHorizontalMargin = 10.0;
     const double _customColumnSpacing = 15.0;
+    const double _customCheckboxSpacing = 13.0;
     Finder cellContent;
     Finder checkbox;
     Finder padding;
@@ -645,7 +647,7 @@ void main() {
     );
     expect(
       tester.getRect(padding).right - tester.getRect(checkbox).right,
-      _defaultHorizontalMargin / 2,
+      _defaultCheckboxSpacing / 2,
     );
 
     // default first column padding
@@ -653,7 +655,7 @@ void main() {
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _defaultHorizontalMargin / 2,
+      _defaultCheckboxSpacing / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
@@ -689,6 +691,7 @@ void main() {
       bool sortAscending = true,
       double? horizontalMargin,
       double? columnSpacing,
+      double? checkboxSpacing,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
@@ -696,6 +699,7 @@ void main() {
         onSelectAll: (bool? value) {},
         horizontalMargin: horizontalMargin,
         columnSpacing: columnSpacing,
+        checkboxSpacing: checkboxSpacing,
         columns: <DataColumn>[
           const DataColumn(
             label: Text('Name'),
@@ -743,6 +747,7 @@ void main() {
       home: Material(child: buildCustomTable(
         horizontalMargin: _customHorizontalMargin,
         columnSpacing: _customColumnSpacing,
+        checkboxSpacing: _customCheckboxSpacing,
       )),
     ));
 
@@ -755,7 +760,7 @@ void main() {
     );
     expect(
       tester.getRect(padding).right - tester.getRect(checkbox).right,
-      _customHorizontalMargin / 2,
+      _customCheckboxSpacing / 2,
     );
 
     // custom first column padding
@@ -763,7 +768,7 @@ void main() {
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _customHorizontalMargin / 2,
+      _customCheckboxSpacing / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,

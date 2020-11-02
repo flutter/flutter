@@ -383,8 +383,10 @@ void main() {
   testWidgets('PaginatedDataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
     const double _defaultHorizontalMargin = 24.0;
     const double _defaultColumnSpacing = 56.0;
+    const double _defaultCheckboxSpacing = 24.0;
     const double _customHorizontalMargin = 10.0;
     const double _customColumnSpacing = 15.0;
+    const double _customCheckboxSpacing = 13.0;
 
     const double _width = 400;
     const double _height = 400;
@@ -430,7 +432,7 @@ void main() {
     );
     expect(
       tester.getRect(padding).right - tester.getRect(checkbox).right,
-      _defaultHorizontalMargin / 2,
+      _defaultCheckboxSpacing / 2,
     );
 
     // default first column padding
@@ -438,7 +440,7 @@ void main() {
     cellContent = find.widgetWithText(Align, 'Frozen yogurt (0)'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _defaultHorizontalMargin / 2,
+      _defaultCheckboxSpacing / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
@@ -489,6 +491,7 @@ void main() {
           ],
           horizontalMargin: _customHorizontalMargin,
           columnSpacing: _customColumnSpacing,
+          checkboxSpacing: _customCheckboxSpacing,
         ),
       ),
     ));
@@ -502,7 +505,7 @@ void main() {
     );
     expect(
       tester.getRect(padding).right - tester.getRect(checkbox).right,
-      _customHorizontalMargin / 2,
+      _customCheckboxSpacing / 2,
     );
 
     // custom first column padding
@@ -510,7 +513,7 @@ void main() {
     cellContent = find.widgetWithText(Align, 'Frozen yogurt (0)'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _customHorizontalMargin / 2,
+      _customCheckboxSpacing / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,

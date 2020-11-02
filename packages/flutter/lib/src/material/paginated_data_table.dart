@@ -73,6 +73,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.dataRowHeight,
     this.headingRowHeight,
     this.horizontalMargin,
+    this.checkboxSpacing,
     this.columnSpacing,
     this.showCheckboxColumn = true,
     this.initialFirstRowIndex = 0,
@@ -152,17 +153,21 @@ class PaginatedDataTable extends StatefulWidget {
   /// The horizontal margin between the edges of the table and the content
   /// in the first and last cells of each row.
   ///
-  /// When a checkbox is displayed, it is also the margin between the checkbox
-  /// the content in the first data column.
-  ///
   /// If null, [DataTableThemeData.horizontalMargin] is used. This value
-  /// defaults to 24.0 to adhere to the Material Design specifications.
+  /// defaults to 24.0.
   final double? horizontalMargin;
+
+  /// The horizontal margin between the checkbox and the content in the first
+  /// data column.
+  ///
+  /// If null, [DataTableThemeData.checkboxSpacing] is used. This value
+  /// defaults to 24.0.
+  final double? checkboxSpacing;
 
   /// The horizontal margin between the contents of each data column.
   ///
   /// If null, [DataTableThemeData.columnSpacing] is used. This value defaults
-  /// to 56.0 to adhere to the Material Design specifications.
+  /// to 56.0.
   final double? columnSpacing;
 
   /// {@macro flutter.material.dataTable.showCheckboxColumn}
@@ -471,6 +476,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     dataRowHeight: widget.dataRowHeight,
                     headingRowHeight: widget.headingRowHeight,
                     horizontalMargin: widget.horizontalMargin,
+                    checkboxSpacing: widget.checkboxSpacing,
                     columnSpacing: widget.columnSpacing,
                     showCheckboxColumn: widget.showCheckboxColumn,
                     decoration: const BoxDecoration(),

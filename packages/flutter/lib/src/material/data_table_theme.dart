@@ -43,6 +43,7 @@ class DataTableThemeData with Diagnosticable {
     this.headingRowHeight,
     this.headingTextStyle,
     this.horizontalMargin,
+    this.checkboxSpacing,
     this.columnSpacing,
     this.dividerThickness,
   });
@@ -73,6 +74,9 @@ class DataTableThemeData with Diagnosticable {
   /// {@macro flutter.material.dataTable.horizontalMargin}
   final double? horizontalMargin;
 
+  /// {@macro flutter.material.dataTable.checkboxSpacing}
+  final double? checkboxSpacing;
+
   /// {@macro flutter.material.dataTable.columnSpacing}
   final double? columnSpacing;
 
@@ -90,6 +94,7 @@ class DataTableThemeData with Diagnosticable {
     double? headingRowHeight,
     TextStyle? headingTextStyle,
     double? horizontalMargin,
+    double? checkboxSpacing,
     double? columnSpacing,
     double? dividerThickness,
   }) {
@@ -102,6 +107,7 @@ class DataTableThemeData with Diagnosticable {
       headingRowHeight: headingRowHeight ?? this.headingRowHeight,
       headingTextStyle: headingTextStyle ?? this.headingTextStyle,
       horizontalMargin: horizontalMargin ?? this.horizontalMargin,
+      checkboxSpacing: checkboxSpacing ?? this.checkboxSpacing,
       columnSpacing: columnSpacing ?? this.columnSpacing,
       dividerThickness: dividerThickness ?? this.dividerThickness,
     );
@@ -123,6 +129,7 @@ class DataTableThemeData with Diagnosticable {
       headingRowHeight: lerpDouble(a.headingRowHeight, b.headingRowHeight, t),
       headingTextStyle: TextStyle.lerp(a.headingTextStyle, b.headingTextStyle, t),
       horizontalMargin: lerpDouble(a.horizontalMargin, b.horizontalMargin, t),
+      checkboxSpacing: lerpDouble(a.checkboxSpacing, b.checkboxSpacing, t),
       columnSpacing: lerpDouble(a.columnSpacing, b.columnSpacing, t),
       dividerThickness: lerpDouble(a.dividerThickness, b.dividerThickness, t)
     );
@@ -139,6 +146,7 @@ class DataTableThemeData with Diagnosticable {
       headingRowHeight,
       headingTextStyle,
       horizontalMargin,
+      checkboxSpacing,
       columnSpacing,
       dividerThickness,
     );
@@ -159,6 +167,7 @@ class DataTableThemeData with Diagnosticable {
       && other.headingRowHeight == headingRowHeight
       && other.headingTextStyle == headingTextStyle
       && other.horizontalMargin == horizontalMargin
+      && other.checkboxSpacing == checkboxSpacing
       && other.columnSpacing == columnSpacing
       && other.dividerThickness == dividerThickness;
   }
@@ -174,6 +183,7 @@ class DataTableThemeData with Diagnosticable {
     properties.add(DoubleProperty('headingRowHeight', headingRowHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('headingTextStyle', headingTextStyle, defaultValue: null));
     properties.add(DoubleProperty('horizontalMargin', horizontalMargin, defaultValue: null));
+    properties.add(DoubleProperty('checkboxSpacing', checkboxSpacing, defaultValue: null));
     properties.add(DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
     properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: null));
   }

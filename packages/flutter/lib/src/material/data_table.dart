@@ -420,6 +420,7 @@ class DataTable extends StatelessWidget {
     this.headingRowHeight,
     this.headingTextStyle,
     this.horizontalMargin,
+    this.checkboxSpacing,
     this.columnSpacing,
     this.showCheckboxColumn = true,
     this.showBottomBorder = false,
@@ -585,21 +586,27 @@ class DataTable extends StatelessWidget {
   /// {@template flutter.material.dataTable.horizontalMargin}
   /// The horizontal margin between the edges of the table and the content
   /// in the first and last cells of each row.
-  ///
-  /// When a checkbox is displayed, it is also the margin between the checkbox
-  /// the content in the first data column.
   /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.horizontalMargin] is used. This value
-  /// defaults to 24.0 to adhere to the Material Design specifications.
+  /// defaults to 24.0.
   final double? horizontalMargin;
+
+  /// {@template flutter.material.dataTable.checkboxSpacing}
+  /// The horizontal margin between the checkbox and the content in the first
+  /// data column.
+  /// {@endtemplate}
+  ///
+  /// If null, [DataTableThemeData.checkboxSpacing] is used. This value
+  /// defaults to 24.0.
+  final double? checkboxSpacing;
 
   /// {@template flutter.material.dataTable.columnSpacing}
   /// The horizontal margin between the contents of each data column.
   /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.columnSpacing] is used. This value defaults
-  /// to 56.0 to adhere to the Material Design specifications.
+  /// to 56.0.
   final double? columnSpacing;
 
   /// {@template flutter.material.dataTable.showCheckboxColumn}
@@ -679,6 +686,10 @@ class DataTable extends StatelessWidget {
   /// in the first and last cells of each row.
   static const double _horizontalMargin = 24.0;
 
+  /// The default margin between the checkbox and the content in the first data
+  /// column.
+  static const double _checkboxSpacing = 24.0;
+
   /// The default horizontal margin between the contents of each data column.
   static const double _columnSpacing = 56.0;
 
@@ -702,12 +713,15 @@ class DataTable extends StatelessWidget {
     final double effectiveHorizontalMargin = horizontalMargin
       ?? themeData.dataTableTheme.horizontalMargin
       ?? _horizontalMargin;
+    final double effectiveCheckboxSpacing = checkboxSpacing
+      ?? themeData.dataTableTheme.checkboxSpacing
+      ?? _checkboxSpacing;
     Widget contents = Semantics(
       container: true,
       child: Padding(
         padding: EdgeInsetsDirectional.only(
           start: effectiveHorizontalMargin,
-          end: effectiveHorizontalMargin / 2.0,
+          end: effectiveCheckboxSpacing / 2.0,
         ),
         child: Center(
           child: Checkbox(
@@ -877,6 +891,9 @@ class DataTable extends StatelessWidget {
     final double effectiveHorizontalMargin = horizontalMargin
       ?? theme.dataTableTheme.horizontalMargin
       ?? _horizontalMargin;
+    final double effectiveCheckboxSpacing = checkboxSpacing
+      ?? theme.dataTableTheme.checkboxSpacing
+      ?? _checkboxSpacing;
     final double effectiveColumnSpacing = columnSpacing
       ?? theme.dataTableTheme.columnSpacing
       ?? _columnSpacing;
@@ -920,7 +937,7 @@ class DataTable extends StatelessWidget {
 
     int displayColumnIndex = 0;
     if (displayCheckboxColumn) {
-      tableColumns[0] = FixedColumnWidth(effectiveHorizontalMargin + Checkbox.width + effectiveHorizontalMargin / 2.0);
+      tableColumns[0] = FixedColumnWidth(effectiveHorizontalMargin + Checkbox.width + effectiveCheckboxSpacing / 2.0);
       tableRows[0].children![0] = _buildCheckbox(
         context: context,
         checked: someChecked ? null : allChecked,
@@ -949,7 +966,7 @@ class DataTable extends StatelessWidget {
 
       final double paddingStart;
       if (dataColumnIndex == 0 && displayCheckboxColumn) {
-        paddingStart = effectiveHorizontalMargin / 2.0;
+        paddingStart = effectiveCheckboxSpacing / 2.0;
       } else if (dataColumnIndex == 0 && !displayCheckboxColumn) {
         paddingStart = effectiveHorizontalMargin;
       } else {
