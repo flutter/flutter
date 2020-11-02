@@ -26,46 +26,31 @@ import 'routes.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget}
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// ``` dart imports
 /// import 'package:flutter/material.dart';
 ///
 /// ```dart
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: Text(widget.title),
-///         leading: BackButton(),
-///       ),
-///       body: WillPopScope(
-///         child: Center(
-///         child: Text("Press back button in AppBar"),
-///       ),
-///         onWillPop: _onBackPressed,
-///       ),
-///     );
-///   }
-///
-///   Future<bool> _onBackPressed() {
-///     return showDialog(
-///     context: context,
-///     builder: (context) => AlertDialog(
-///       title: Text("Do you really want to exit the app?"),
-///       actions: <Widget>[
-///         FlatButton(
-///           child: Text("No"),
-///           onPressed:() => Navigator.pop(context,false),
-///         ),
-///         FlatButton(
-///           child: Text("Yes"),
-///           onPressed:() => Navigator.pop(context,true),
-///         ),
-///       ]
+/// In this example a snackbar is shown when back button is pressed. Here 
+/// `false` is returned to prevent the screen from popping. Returning `true` 
+/// would pop the screen.
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text("WillPopScope demo"),
+///       leading: BackButton(),
 ///     ),
-///    );
-///   }
+///     body: WillPopScope(
+///         child: Center(child: Text("Press back button in AppBar")),
+///         onWillPop: () async {
+///           ScaffoldMessenger.of(context).showSnackBar(
+///               SnackBar(
+///                 content: Text("Callback fired on pressing back button")));
+///           return false;
+///         }),
+///   );
+/// }
 /// ```
 ///
 /// {@end-tool}
@@ -87,7 +72,7 @@ class WillPopScope extends StatefulWidget {
     required this.child,
     required this.onWillPop,
   })   : assert(child != null),
-        super(key: key);
+         super(key: key);
 
   /// The widget below this widget in the tree.
   ///
