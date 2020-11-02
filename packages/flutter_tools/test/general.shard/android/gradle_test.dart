@@ -390,12 +390,15 @@ void main() {
   group('gradle build', () {
     testUsingContext('do not crash if there is no Android SDK', () async {
       expect(() {
-        updateLocalProperties(project: FlutterProject.current());
+        updateLocalProperties(project: FlutterProject.current(),
+          androidSdk: null,
+          fileSystemUtils: globals.fsUtils,
+          logger: globals.logger,
+          flutterUsage: globals.flutterUsage,
+        );
       }, throwsToolExit(
         message: '$warningMark No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.',
       ));
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => null,
     });
 
     test('androidXPluginWarningRegex should match lines with the AndroidX plugin warnings', () {
@@ -560,6 +563,10 @@ include ':app'
         project: FlutterProject.fromPath('path/to/project'),
         buildInfo: buildInfo,
         requireAndroidSdk: false,
+        androidSdk: globals.androidSdk,
+        fileSystemUtils: globals.fsUtils,
+        logger: globals.logger,
+        flutterUsage: globals.flutterUsage,
       );
 
       final File localPropertiesFile = globals.fs.file('path/to/project/android/local.properties');

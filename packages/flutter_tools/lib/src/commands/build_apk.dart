@@ -88,7 +88,7 @@ class BuildApkCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (globals.androidSdk == null) {
-      exitWithNoSdkMessage();
+      exitWithNoSdkMessage(globals.flutterUsage);
     }
     final BuildInfo buildInfo = getBuildInfo();
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(

@@ -80,7 +80,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (globals.androidSdk == null) {
-      exitWithNoSdkMessage();
+      exitWithNoSdkMessage(globals.flutterUsage);
     }
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(getBuildInfo(),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),

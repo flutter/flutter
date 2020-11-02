@@ -144,7 +144,7 @@ Future<void> checkGradleDependencies() async {
     ],
     throwOnError: true,
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
-    environment: gradleEnvironment,
+    environment: gradleUtils.gradleEnvironment,
   );
   globals.androidSdk?.reinitialize();
   progress.stop();
@@ -249,7 +249,14 @@ Future<void> buildGradleApp({
   }
   // The default Gradle script reads the version name and number
   // from the local.properties file.
-  updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
+  updateLocalProperties(
+    project: project,
+    buildInfo: androidBuildInfo.buildInfo,
+    androidSdk: globals.androidSdk,
+    logger: globals.logger,
+    fileSystemUtils: globals.fsUtils,
+    flutterUsage: globals.flutterUsage,
+  );
 
   if (shouldBuildPluginAsAar) {
     // Create a settings.gradle that doesn't import the plugins as subprojects.
@@ -392,7 +399,7 @@ Future<void> buildGradleApp({
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
-      environment: gradleEnvironment,
+      environment: gradleUtils.gradleEnvironment,
       mapFunction: consumeLog,
     );
   } on ProcessException catch (exception) {
@@ -659,7 +666,7 @@ Future<void> buildGradleAar({
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
-      environment: gradleEnvironment,
+      environment: gradleUtils.gradleEnvironment,
     );
   } finally {
     status.stop();

@@ -7,49 +7,73 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
+import 'android_sdk.dart';
 import 'android_studio.dart';
-
-/// The environment variables needed to run Gradle.
-Map<String, String> get gradleEnvironment {
-  final Map<String, String> environment = Map<String, String>.of(globals.platform.environment);
-  if (javaPath != null) {
-    // Use java bundled with Android Studio.
-    environment['JAVA_HOME'] = javaPath;
-  }
-  // Don't log analytics for downstream Flutter commands.
-  // e.g. `flutter build bundle`.
-  environment['FLUTTER_SUPPRESS_ANALYTICS'] = 'true';
-  return environment;
-}
 
 /// Gradle utils in the current [AppContext].
 GradleUtils get gradleUtils => context.get<GradleUtils>();
 
-/// Provides utilities to run a Gradle task,
-/// such as finding the Gradle executable or constructing a Gradle project.
+const String _defaultGradleVersion = '5.6.2';
+
+final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:\(\d+\.\d+\.\d+\)');
+
+/// Provides utilities to run a Gradle task, such as finding the Gradle executable
+/// or constructing a Gradle project.
 class GradleUtils {
+  GradleUtils({
+    @required Platform platform,
+    @required Logger logger,
+    @required FileSystem fileSystem,
+    @required OperatingSystemUtils operatingSystemUtils,
+    @required Cache cache,
+    @required AndroidStudio androidStudio,
+  }) : _platform = platform,
+       _logger = logger,
+       _operatingSystemUtils = operatingSystemUtils,
+       _fileSystem = fileSystem,
+       _cache = cache,
+       _androidStudio = androidStudio,
+       _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
+
+  final Platform _platform;
+  final Logger _logger;
+  final FileSystem _fileSystem;
+  final OperatingSystemUtils _operatingSystemUtils;
+  final FileSystemUtils _fileSystemUtils;
+  final Cache _cache;
+  final AndroidStudio _androidStudio;
+
+  Map<String, String> get gradleEnvironment {
+    return <String, String>{
+      if (javaPath != null)
+        'JAVA_HOME': _androidStudio.javaPath,
+    };
+  }
+
   /// Gets the Gradle executable path and prepares the Gradle project.
   /// This is the `gradlew` or `gradlew.bat` script in the `android/` directory.
   String getExecutable(FlutterProject project) {
     final Directory androidDir = project.android.hostAppGradleRoot;
     // Update the project if needed.
     // TODO(egarciad): https://github.com/flutter/flutter/issues/40460
-    gradleUtils.migrateToR8(androidDir);
-    gradleUtils.injectGradleWrapperIfNeeded(androidDir);
+    migrateToR8(androidDir);
+    injectGradleWrapperIfNeeded(androidDir);
 
     final File gradle = androidDir.childFile(
-      globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
+      _platform.isWindows ? 'gradlew.bat' : 'gradlew',
     );
     if (gradle.existsSync()) {
-      globals.printTrace('Using gradle from ${gradle.absolute.path}.');
+      _logger.printTrace('Using gradle from ${gradle.absolute.path}.');
       // If the Gradle executable doesn't have execute permission,
       // then attempt to set it.
       _giveExecutePermissionIfNeeded(gradle);
@@ -75,10 +99,10 @@ class GradleUtils {
     }
     final String propertiesContent = gradleProperties.readAsStringSync();
     if (propertiesContent.contains('android.enableR8')) {
-      globals.printTrace('gradle.properties already sets `android.enableR8`');
+      _logger.printTrace('gradle.properties already sets `android.enableR8`');
       return;
     }
-    globals.printTrace('set `android.enableR8=true` in gradle.properties');
+    _logger.printTrace('set `android.enableR8=true` in gradle.properties');
     try {
       if (propertiesContent.isNotEmpty && !propertiesContent.endsWith('\n')) {
         // Add a new line if the file doesn't end with a new line.
@@ -95,8 +119,8 @@ class GradleUtils {
 
   /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
   void injectGradleWrapperIfNeeded(Directory directory) {
-    globals.fsUtils.copyDirectorySync(
-      globals.cache.getArtifactDirectory('gradle_wrapper'),
+    _fileSystemUtils.copyDirectorySync(
+      _cache.getArtifactDirectory('gradle_wrapper'),
       directory,
       shouldCopyFile: (File sourceFile, File destinationFile) {
         // Don't override the existing files in the project.
@@ -110,7 +134,7 @@ class GradleUtils {
     );
     // Add the `gradle-wrapper.properties` file if it doesn't exist.
     final Directory propertiesDirectory = directory.childDirectory(
-        globals.fs.path.join('gradle', 'wrapper'));
+      _fileSystem.path.join('gradle', 'wrapper'));
     final File propertiesFile = propertiesDirectory.childFile('gradle-wrapper.properties');
     if (!propertiesFile.existsSync()) {
       propertiesDirectory.createSync(recursive: true);
@@ -121,14 +145,36 @@ distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersion-all.zip
-''', flush: true,
-      );
+''');
+    }
+  }
+
+  static const int _kExecPermissionMask = 0x49; // a+x
+
+  /// Returns [true] if [executable] has all executable flag set.
+  bool _hasAllExecutableFlagSet(File executable) {
+    final FileStat stat = executable.statSync();
+    assert(stat.type != FileSystemEntityType.notFound);
+    _logger.printTrace('${executable.path} mode: ${stat.mode} ${stat.modeString()}.');
+    return stat.mode & _kExecPermissionMask == _kExecPermissionMask;
+  }
+
+  /// Returns [true] if [executable] has any executable flag set.
+  bool _hasAnyExecutableFlagSet(File executable) {
+    final FileStat stat = executable.statSync();
+    assert(stat.type != FileSystemEntityType.notFound);
+    _logger.printTrace('${executable.path} mode: ${stat.mode} ${stat.modeString()}.');
+    return stat.mode & _kExecPermissionMask != 0;
+  }
+
+  /// Gives execute permission to [executable] if it doesn't have it already.
+  void _giveExecutePermissionIfNeeded(File executable) {
+    if (!_hasAllExecutableFlagSet(executable)) {
+      _logger.printTrace('Trying to give execute permission to ${executable.path}.');
+      _operatingSystemUtils.makeExecutable(executable);
     }
   }
 }
-const String _defaultGradleVersion = '5.6.2';
-
-final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:\(\d+\.\d+\.\d+\)');
 
 /// Returns the Gradle version that the current Android plugin depends on when found,
 /// otherwise it returns a default version.
@@ -147,32 +193,6 @@ String getGradleVersionForAndroidPlugin(Directory directory) {
   }
   final String androidPluginVersion = pluginMatches.first.group(1);
   return getGradleVersionFor(androidPluginVersion);
-}
-
-const int _kExecPermissionMask = 0x49; // a+x
-
-/// Returns [true] if [executable] has all executable flag set.
-bool _hasAllExecutableFlagSet(File executable) {
-  final FileStat stat = executable.statSync();
-  assert(stat.type != FileSystemEntityType.notFound);
-  globals.printTrace('${executable.path} mode: ${stat.mode} ${stat.modeString()}.');
-  return stat.mode & _kExecPermissionMask == _kExecPermissionMask;
-}
-
-/// Returns [true] if [executable] has any executable flag set.
-bool _hasAnyExecutableFlagSet(File executable) {
-  final FileStat stat = executable.statSync();
-  assert(stat.type != FileSystemEntityType.notFound);
-  globals.printTrace('${executable.path} mode: ${stat.mode} ${stat.modeString()}.');
-  return stat.mode & _kExecPermissionMask != 0;
-}
-
-/// Gives execute permission to [executable] if it doesn't have it already.
-void _giveExecutePermissionIfNeeded(File executable) {
-  if (!_hasAllExecutableFlagSet(executable)) {
-    globals.printTrace('Trying to give execute permission to ${executable.path}.');
-    globals.os.makeExecutable(executable);
-  }
 }
 
 /// Returns true if [targetVersion] is within the range [min] and [max] inclusive.
@@ -238,9 +258,13 @@ void updateLocalProperties({
   @required FlutterProject project,
   BuildInfo buildInfo,
   bool requireAndroidSdk = true,
+  @required AndroidSdk androidSdk,
+  @required Logger logger,
+  @required FileSystemUtils fileSystemUtils,
+  @required Usage flutterUsage,
 }) {
-  if (requireAndroidSdk && globals.androidSdk == null) {
-    exitWithNoSdkMessage();
+  if (requireAndroidSdk && androidSdk == null) {
+    exitWithNoSdkMessage(flutterUsage);
   }
   final File localProperties = project.android.localPropertiesFile;
   bool changed = false;
@@ -265,23 +289,23 @@ void updateLocalProperties({
     changed = true;
   }
 
-  if (globals.androidSdk != null) {
-    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(globals.androidSdk.directory));
+  if (androidSdk != null) {
+    changeIfNecessary('sdk.dir', fileSystemUtils.escapePath(androidSdk.directory));
   }
 
-  changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot));
+  changeIfNecessary('flutter.sdk', fileSystemUtils.escapePath(Cache.flutterRoot));
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String buildName = validatedBuildNameForPlatform(
       TargetPlatform.android_arm,
       buildInfo.buildName ?? project.manifest.buildName,
-      globals.logger,
+      logger,
     );
     changeIfNecessary('flutter.versionName', buildName);
     final String buildNumber = validatedBuildNumberForPlatform(
       TargetPlatform.android_arm,
       buildInfo.buildNumber ?? project.manifest.buildNumber,
-      globals.logger,
+      logger,
     );
     changeIfNecessary('flutter.versionCode', buildNumber?.toString());
   }
@@ -294,16 +318,19 @@ void updateLocalProperties({
 /// Writes standard Android local properties to the specified [properties] file.
 ///
 /// Writes the path to the Android SDK, if known.
-void writeLocalProperties(File properties) {
+void writeLocalProperties(File properties, {
+  @required AndroidSdk androidSdk,
+  @required FileSystemUtils fileSystemUtils,
+}) {
   final SettingsFile settings = SettingsFile();
-  if (globals.androidSdk != null) {
-    settings.values['sdk.dir'] = globals.fsUtils.escapePath(globals.androidSdk.directory);
+  if (androidSdk != null) {
+    settings.values['sdk.dir'] = fileSystemUtils.escapePath(androidSdk.directory);
   }
   settings.writeContents(properties);
 }
 
-void exitWithNoSdkMessage() {
-  BuildEvent('unsupported-project', eventError: 'android-sdk-not-found', flutterUsage: globals.flutterUsage).send();
+void exitWithNoSdkMessage(Usage usage) {
+  BuildEvent('unsupported-project', eventError: 'android-sdk-not-found', flutterUsage: usage).send();
   throwToolExit(
     '$warningMark No Android SDK found. '
     'Try setting the ANDROID_SDK_ROOT environment variable.'

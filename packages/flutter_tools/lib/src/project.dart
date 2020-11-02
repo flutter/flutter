@@ -828,7 +828,14 @@ to migrate your project.
     if (!hostAppGradleRoot.existsSync()) {
       return;
     }
-    gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
+    gradle.updateLocalProperties(
+      project: parent,
+      requireAndroidSdk: false,
+      androidSdk: globals.androidSdk,
+      logger: globals.logger,
+      fileSystemUtils: globals.fsUtils,
+      flutterUsage: globals.flutterUsage,
+    );
   }
 
   bool _shouldRegenerateFromTemplate() {

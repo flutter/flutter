@@ -300,7 +300,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
       ],
       throwOnError: true,
       workingDirectory: project.android.hostAppGradleRoot.path,
-      environment: gradleEnvironment,
+      environment: gradleUtils.gradleEnvironment,
     );
     // Extract build types and product flavors.
     final Set<String> variants = <String>{};

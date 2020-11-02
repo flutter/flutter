@@ -648,7 +648,13 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
     final bool generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
       gradle.updateLocalProperties(
-        project: project, requireAndroidSdk: false);
+        project: project,
+        requireAndroidSdk: false,
+        androidSdk: globals.androidSdk,
+        logger: globals.logger,
+        fileSystemUtils: globals.fsUtils,
+        flutterUsage: globals.flutterUsage,
+      );
     }
 
     final String projectName = templateContext['projectName'] as String;
@@ -693,7 +699,14 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       );
     }
     if (templateContext['android'] == true) {
-      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+      gradle.updateLocalProperties(
+        project: project,
+        requireAndroidSdk: false,
+        androidSdk: globals.androidSdk,
+        logger: globals.logger,
+        fileSystemUtils: globals.fsUtils,
+        flutterUsage: globals.flutterUsage,
+      );
     }
     return generatedCount;
   }

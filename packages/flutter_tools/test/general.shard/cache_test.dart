@@ -334,7 +334,7 @@ void main() {
           expect(args[1], '-b');
           expect(args[2].endsWith('resolve_dependencies.gradle'), isTrue);
           expect(args[5], 'resolveDependencies');
-          expect(invocation.namedArguments[#environment], gradleEnvironment);
+          expect(invocation.namedArguments[#environment], gradleUtils.gradleEnvironment);
           return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
         });
 
