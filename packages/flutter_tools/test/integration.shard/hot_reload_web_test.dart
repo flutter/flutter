@@ -58,7 +58,7 @@ void main() {
         completer.complete();
       }
     });
-    await flutter.run(chrome: true, args: <String>['--dart-define=FLUTTER_WEB_USE_SKIA=true']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--dart-define=FLUTTER_WEB_USE_SKIA=true']);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
