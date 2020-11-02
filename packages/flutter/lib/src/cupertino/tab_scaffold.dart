@@ -576,15 +576,18 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
         final bool active = index == widget.currentTabIndex;
         shouldBuildTab[index] = active || shouldBuildTab[index];
 
-        return Offstage(
-          offstage: !active,
-          child: TickerMode(
-            enabled: active,
-            child: FocusScope(
-              node: tabFocusNodes[index],
-              child: Builder(builder: (BuildContext context) {
-                return shouldBuildTab[index] ? widget.tabBuilder(context, index) : Container();
-              }),
+        return HeroMode(
+          enabled: active,
+          child: Offstage(
+            offstage: !active,
+            child: TickerMode(
+              enabled: active,
+              child: FocusScope(
+                node: tabFocusNodes[index],
+                child: Builder(builder: (BuildContext context) {
+                  return shouldBuildTab[index] ? widget.tabBuilder(context, index) : Container();
+                }),
+              ),
             ),
           ),
         );

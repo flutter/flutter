@@ -416,7 +416,7 @@ class RestorationManager extends ChangeNotifier {
 /// its current state changes, the data in the bucket must be updated. At the
 /// same time, the data in the bucket should be kept to a minimum. For example,
 /// for data that can be retrieved from other sources (like a database or
-/// webservice) only enough information (e.g. an ID or resource locator) to
+/// web service) only enough information (e.g. an ID or resource locator) to
 /// re-obtain that data should be stored in the bucket. In addition to managing
 /// the data in a bucket, an owner may also make the bucket available to other
 /// entities so they can claim child buckets from it via [claimChild] for their
