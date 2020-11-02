@@ -74,7 +74,7 @@ enum DismissDirection {
 ///    return ListView.builder(
 ///      itemCount: items.length,
 ///      padding: const EdgeInsets.symmetric(vertical: 16),
-///      itemBuilder: (context, index) => Dismissible(
+///      itemBuilder: (BuildContext context, int index) => Dismissible(
 ///        child: ListTile(
 ///          title: Text(
 ///            'Item ${items[index]}',
