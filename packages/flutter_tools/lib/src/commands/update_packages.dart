@@ -64,7 +64,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'build_runner_core': '5.2.0',
   'build_modules': '2.10.1',
   'path_provider': '1.6.14',
-  'video_player': '2.0.0-nullsafety',
+  'video_player': '2.0.0-nullsafety.1',
   'url_launcher': '6.0.0-nullsafety',
   'connectivity': '3.0.0-nullsafety',
   'device_info': '2.0.0-nullsafety',
