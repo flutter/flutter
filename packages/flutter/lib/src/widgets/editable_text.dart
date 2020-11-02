@@ -2222,7 +2222,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // as the pre-formatting value of the previous pass (repeat call).
     final bool textChanged = _value.text != value.text || _value.composing != value.composing;
 
-    // Composing text does not need be formate
+    // Composing text does not need be formate.
     final bool isComposing = value.composing.isValid;
 
     if (textChanged && !isComposing) {
