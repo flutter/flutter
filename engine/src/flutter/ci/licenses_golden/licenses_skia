@@ -1,4 +1,4 @@
-Signature: ff2759245c2168540e345c478cd825f9
+Signature: 54fa1c0b3e7ecf3027410c47231cc116
 
 UNUSED LICENSES:
 
@@ -4133,6 +4133,12 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGGeometryEffect.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_coretext.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode.h
 FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode_icu.cpp
+FILE: ../../../third_party/skia/modules/svg/include/SkSVGFe.h
+FILE: ../../../third_party/skia/modules/svg/include/SkSVGFilter.h
+FILE: ../../../third_party/skia/modules/svg/include/SkSVGFilterContext.h
+FILE: ../../../third_party/skia/modules/svg/src/SkSVGFe.cpp
+FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilter.cpp
+FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilterContext.cpp
 FILE: ../../../third_party/skia/modules/svg/utils/SvgTool.cpp
 FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAudio.cpp
