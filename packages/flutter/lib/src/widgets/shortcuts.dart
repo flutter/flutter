@@ -385,7 +385,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// A widget that establishes an [ShortcutManager] to be used by its descendants
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
-/// 
+///
 /// {@tool dartpad --template=stateful_widget_material}
 /// ```dart import
 /// import package:flutter/services.dart
