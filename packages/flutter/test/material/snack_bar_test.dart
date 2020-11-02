@@ -2124,7 +2124,7 @@ void main() {
     final GlobalKey<ScaffoldState> state = GlobalKey();
     final List<dynamic> exceptions = <dynamic>[];
 
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails errorDetails) {
       exceptions.add(errorDetails.exception);
     };
@@ -2155,7 +2155,7 @@ void main() {
     final GlobalKey<ScaffoldState> state = GlobalKey();
     final List<dynamic> exceptions = <dynamic>[];
 
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails errorDetails) {
       exceptions.add(errorDetails.exception);
     };
