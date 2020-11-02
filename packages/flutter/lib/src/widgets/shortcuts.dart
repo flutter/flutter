@@ -387,7 +387,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// [Intent].
 ///
 /// {@tool dartpad --template=stateful_widget_material}
-/// ```dart import
+/// ```dart imports
 /// import package:flutter/services.dart
 /// ```
 ///
