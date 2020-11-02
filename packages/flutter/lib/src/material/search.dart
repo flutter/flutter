@@ -196,7 +196,7 @@ abstract class SearchDelegate<T> {
   ///  * [AppBar.brightness], which is set to [ThemeData.primaryColorBrightness].
   ThemeData appBarTheme(BuildContext context) {
     assert(context != null);
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     assert(theme != null);
     return theme.copyWith(
       primaryColor: theme.brightness == Brightness.dark

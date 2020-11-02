@@ -219,7 +219,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `enableFeedback` - true
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
@@ -239,7 +239,7 @@ class OutlinedButton extends ButtonStyleButton {
       padding: scaledPadding,
       minimumSize: const Size(64, 36),
       side: BorderSide(
-        color: Theme.of(context)!.colorScheme.onSurface.withOpacity(0.12),
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
         width: 1,
       ),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),

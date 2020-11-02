@@ -2907,7 +2907,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
