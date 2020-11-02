@@ -66,14 +66,26 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         pathsSelectorValue = jvmProperties['idea.paths.selector'] as String;
       }
     }
+
+    final int major = version?.major;
+    final int minor = version?.minor;
     final String presetPluginsPath = pathsSelectorValue == null
       ? null
-      : globals.fs.path.join(
-        globals.fsUtils.homeDirPath,
-        'Library',
-        'Application Support',
-        pathsSelectorValue,
-      );
+      : double.parse('$major.$minor') >= 4.1 
+        ? globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Application Support',
+          'Google',
+          pathsSelectorValue,
+          ) 
+        :
+        globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Application Support',
+          pathsSelectorValue,
+          );
     return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
   }
 
