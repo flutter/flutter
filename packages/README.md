@@ -1,10 +1,6 @@
 Packages
 ================
 
-This directory contains several examples of packages used with Flutter. 
-For more information on how to use or develop new packages, see the [Using Packages]
-(https://flutter.dev/docs/development/packages-and-plugins/using-packages/) guide.
-
 A package allows the creation of modular code that cen easily be shared. For example, packages
 can enable use cases to make network requests, integrate with device APIs, and so on. The minimal
 components of a package include:
@@ -18,6 +14,9 @@ The lib directory containing the package's public code and minimally contains a 
 To implement a pure Dart package, you can either add the functionality inside `lib/<package name>.dart` or add 
 the functionality in several files inside the `lib` directory. 
 
+This directory contains several examples of packages used with Flutter. 
+For more information on how to use or develop new packages, see the [Using Packages]
+(https://flutter.dev/docs/development/packages-and-plugins/using-packages/) guide.
 
 Shared Packages
 ===============================
