@@ -58,12 +58,14 @@ import 'routes.dart';
 ///         FlatButton(
 ///           child:Text("Yes"),
 ///           onPressed:()=> Navigator.pop(context,true),
-///         )
+///         ),
 ///       ]
-///     )
+///     ),
 ///    );
 ///   }
 /// ```
+///
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -81,7 +83,7 @@ class WillPopScope extends StatefulWidget {
     required this.child,
     required this.onWillPop,
   })   : assert(child != null),
-        super(key: key);
+         super(key: key);
 
   /// The widget below this widget in the tree.
   ///
