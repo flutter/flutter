@@ -24,7 +24,7 @@ class ToolExit implements Exception {
   String toString() => 'Exception: $message';
 }
 
-/// Indicates to the linter that the given future is intentionally not `await`-ed.
+/// Indicates to the linter that the given future is intentionally not awaited.
 ///
 /// Has the same functionality as `unawaited` from `package:pedantic`.
 ///
