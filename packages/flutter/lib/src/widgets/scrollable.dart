@@ -454,7 +454,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   void didChangeDependencies() {
     _updatePosition();
     if (widget.primaryScrollShortcut) {
-      final PrimaryScrollShortcutState? primaryScrollShortcut = PrimaryScrollShortcut.maybeOf(context);
+      final _PrimaryScrollShortcutState? primaryScrollShortcut = PrimaryScrollShortcut.maybeOf(context);
       // Similar to notificationContext, _ScrollableScope is placed above the
       // widget using it: RawGestureDetector, which allows us to access this
       // ScrollableState
@@ -1147,7 +1147,7 @@ class PrimaryScrollShortcut extends StatefulWidget {
   ///
   ///  * [maybeOf], which is a similar function but will return null instead of
   ///    throwing if there is no [PrimaryScrollShortcut] ancestor.
-  static PrimaryScrollShortcutState of(BuildContext context) {
+  static _PrimaryScrollShortcutState of(BuildContext context) {
     assert(context != null);
     final _PrimaryScrollShortcutScope? scope = context.dependOnInheritedWidgetOfExactType<_PrimaryScrollShortcutScope>();
     assert((){
@@ -1175,20 +1175,20 @@ class PrimaryScrollShortcut extends StatefulWidget {
   ///  * [of], which is a similar function, except that it will throw an
   ///    exception if a [PrimaryScrollShortcut] is not found in the given
   ///    context.
-  static PrimaryScrollShortcutState? maybeOf(BuildContext context) {
+  static _PrimaryScrollShortcutState? maybeOf(BuildContext context) {
     assert(context != null);
     final _PrimaryScrollShortcutScope? scope = context.dependOnInheritedWidgetOfExactType<_PrimaryScrollShortcutScope>();
     return scope?._primaryScrollShortcutState;
   }
 
   @override
-  PrimaryScrollShortcutState createState() => PrimaryScrollShortcutState();
+  _PrimaryScrollShortcutState createState() => _PrimaryScrollShortcutState();
 }
 
 /// State for a [PrimaryScrollShortcut].
 ///
 /// Typically obtained via [PrimaryScrollShortcut.of].
-class PrimaryScrollShortcutState extends State<PrimaryScrollShortcut> {
+class _PrimaryScrollShortcutState extends State<PrimaryScrollShortcut> {
 
   // The key that is enclosed within the context of the current fallback
   // [Scrollable] for [ScrollAction]s.
@@ -1207,11 +1207,11 @@ class _PrimaryScrollShortcutScope extends InheritedWidget {
   const _PrimaryScrollShortcutScope({
     Key? key,
     required Widget child,
-    required PrimaryScrollShortcutState primaryScrollShortcutState,
+    required _PrimaryScrollShortcutState primaryScrollShortcutState,
   }) : _primaryScrollShortcutState = primaryScrollShortcutState,
       super(key: key, child: child);
 
-  final PrimaryScrollShortcutState _primaryScrollShortcutState;
+  final _PrimaryScrollShortcutState _primaryScrollShortcutState;
 
   // Since this ScrollAction fallback  doesn't affect the display of anything,
   // we don't need to force a rebuild of anything that depends upon it.
@@ -1221,7 +1221,7 @@ class _PrimaryScrollShortcutScope extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<PrimaryScrollShortcutState>('_primaryScrollShortcutState', _primaryScrollShortcutState));
+    properties.add(DiagnosticsProperty<_PrimaryScrollShortcutState>('_primaryScrollShortcutState', _primaryScrollShortcutState));
   }
 }
 
