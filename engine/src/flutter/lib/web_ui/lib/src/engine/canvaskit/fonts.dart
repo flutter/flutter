@@ -123,7 +123,7 @@ class SkiaFontCollection {
     try {
       buffer = await html.window
           .fetch(url)
-          .then(_getArrayBuffer as FutureOr<ByteBuffer> Function(dynamic));
+          .then(_getArrayBuffer);
     } catch (e) {
       html.window.console.warn('Failed to load font $family at $url');
       html.window.console.warn(e);
@@ -149,7 +149,7 @@ class SkiaFontCollection {
     return actualFamily;
   }
 
-  Future<ByteBuffer>? _getArrayBuffer(dynamic fetchResult) {
+  Future<ByteBuffer> _getArrayBuffer(dynamic fetchResult) {
     // TODO(yjbanov): fetchResult.arrayBuffer is a dynamic invocation. Clean it up.
     return fetchResult
         .arrayBuffer()
