@@ -67,7 +67,7 @@ class GridTileBar extends StatelessWidget {
       end: trailing != null ? 8.0 : 16.0,
     );
 
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ThemeData darkTheme = ThemeData(
       brightness: Brightness.dark,
       accentColor: theme.accentColor,

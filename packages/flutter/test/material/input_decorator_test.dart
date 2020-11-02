@@ -32,7 +32,7 @@ Widget buildInputDecorator({
       child: Builder(
         builder: (BuildContext context) {
           return Theme(
-            data: Theme.of(context)!.copyWith(
+            data: Theme.of(context).copyWith(
               inputDecorationTheme: inputDecorationTheme,
               visualDensity: visualDensity,
               fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
@@ -4204,7 +4204,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Theme(
-                data: Theme.of(context)!,
+                data: Theme.of(context),
                 child: Align(
                   alignment: Alignment.topLeft,
                   child: TextField(
@@ -4316,7 +4316,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Theme(
-                data: Theme.of(context)!.copyWith(visualDensity: visualDensity),
+                data: Theme.of(context).copyWith(visualDensity: visualDensity),
                 child: Center(
                   child: Row(
                     children: <Widget>[
@@ -4389,7 +4389,7 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context)!.copyWith(visualDensity: VisualDensity.compact),
+              data: Theme.of(context).copyWith(visualDensity: VisualDensity.compact),
               child: Center(
                 child: Row(
                   children: <Widget>[

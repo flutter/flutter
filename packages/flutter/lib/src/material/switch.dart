@@ -306,7 +306,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
 
   Widget buildMaterialSwitch(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
 
     final Color activeThumbColor = widget.activeColor ?? theme.toggleableActiveColor;
@@ -371,7 +371,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
   }
 
   Widget buildCupertinoSwitch(BuildContext context) {
-    final Size size = getSwitchSize(Theme.of(context)!);
+    final Size size = getSwitchSize(Theme.of(context));
     return Focus(
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
@@ -397,7 +397,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
         return buildMaterialSwitch(context);
 
       case _SwitchType.adaptive: {
-        final ThemeData theme = Theme.of(context)!;
+        final ThemeData theme = Theme.of(context);
         assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.android:

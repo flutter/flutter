@@ -126,7 +126,7 @@ class MaterialBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(actions.isNotEmpty);
 
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
 
     final bool isSingleRow = actions.length == 1 && !forceActionsBelow;
@@ -149,10 +149,10 @@ class MaterialBanner extends StatelessWidget {
 
     final Color backgroundColor = this.backgroundColor
         ?? bannerTheme.backgroundColor
-        ?? theme!.colorScheme.surface;
+        ?? theme.colorScheme.surface;
     final TextStyle? textStyle = contentTextStyle
         ?? bannerTheme.contentTextStyle
-        ?? theme!.textTheme.bodyText2;
+        ?? theme.textTheme.bodyText2;
 
     return Container(
       color: backgroundColor,

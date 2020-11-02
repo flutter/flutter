@@ -266,7 +266,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   // https://material.io/components/tooltips#specs
   double _getDefaultTooltipHeight() {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     switch (theme.platform) {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
@@ -278,7 +278,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   EdgeInsets _getDefaultPadding() {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     switch (theme.platform) {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
@@ -290,7 +290,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   double _getDefaultFontSize() {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     switch (theme.platform) {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
@@ -454,7 +454,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
     final TextStyle defaultTextStyle;
     final BoxDecoration defaultDecoration;
@@ -603,7 +603,7 @@ class _TooltipOverlay extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: height),
               child: DefaultTextStyle(
-                style: Theme.of(context)!.textTheme.bodyText2!,
+                style: Theme.of(context).textTheme.bodyText2!,
                 child: Container(
                   decoration: decoration,
                   padding: padding,
