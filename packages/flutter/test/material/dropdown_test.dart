@@ -2663,4 +2663,31 @@ void main() {
     expect(find.text('first').hitTestable(), findsNothing);
     expect(find.text('second').hitTestable(), findsNothing);
   });
+
+  testWidgets('Dropdown button can have itemHeight less than kMinInteractiveDimension in web', (WidgetTester tester) async  {
+    const String value = 'foo';
+    final UniqueKey itemKey = UniqueKey();
+
+    await tester.pumpWidget(TestApp(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: DropdownButton<String>(
+          value: value,
+          itemHeight: 40,
+          items: <DropdownMenuItem<String>>[
+            DropdownMenuItem<String>(
+              key: itemKey,
+              value: 'foo',
+              child: const Text(value),
+            ),
+          ],
+          isDense: true,
+          onChanged: (_) { },
+          style: const TextStyle(color: Colors.blue),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+  }, skip: !kIsWeb);
 }

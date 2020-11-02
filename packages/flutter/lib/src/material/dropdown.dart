@@ -845,7 +845,7 @@ class DropdownButton<T> extends StatefulWidget {
        assert(isDense != null),
        assert(isExpanded != null),
        assert(autofocus != null),
-       assert(itemHeight == null || itemHeight >=  kMinInteractiveDimension),
+       assert(itemHeight == null || kIsWeb || itemHeight >=  kMinInteractiveDimension),
        super(key: key);
 
   /// The list of items the user can select.
