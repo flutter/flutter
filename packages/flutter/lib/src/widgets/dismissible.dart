@@ -62,6 +62,41 @@ enum DismissDirection {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=iEMgjrfuc58}
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// This sample shows how you can use the [Dismissible] widget to
+/// remove list items using swipe gestures.
+///
+/// ```dart
+/// List<int> items = List<int>.generate(100, (index) => index);
+///
+/// Widget build(BuildContext context) {
+///   return ListView.builder(
+///     itemCount: items.length,
+///     padding: const EdgeInsets.symmetric(vertical: 16),
+///     itemBuilder: (BuildContext context, int index) {
+///       return Dismissible(
+///         child: ListTile(
+///           title: Text(
+///             'Item ${items[index]}',
+///           ),
+///         ),
+///         background: Container(
+///           color: Colors.green,
+///         ),
+///         key: ValueKey(items[index]),
+///         onDismissed: (DismissDirection direction) {
+///           setState(() {
+///             items.remove(index);
+///           });
+///         },
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// Backgrounds can be used to implement the "leave-behind" idiom. If a background
 /// is specified it is stacked behind the Dismissible's child and is exposed when
 /// the child moves.
