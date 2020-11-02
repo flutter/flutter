@@ -328,7 +328,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_material_ticker}
 ///
 /// This example shows a [LinearProgressIndicator] with a changing color.
 ///
@@ -357,20 +357,22 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// }
 ///
 /// Widget build(BuildContext context) {
-///   return Padding(
-///     padding: const EdgeInsets.all(20.0),
-///     child: Column(
-///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///       children: [
-///         Text(
-///           'Linear progress indicator with a fixed color',
-///           style: const TextStyle(fontSize: 20),
-///         ),
-///         LinearProgressIndicator(
-///           valueColor: animation,
-///           semanticsLabel: 'Linear progress indicator',
-///         ),
-///       ],
+///   return Scaffold(
+///     body: Padding(
+///       padding: const EdgeInsets.all(20.0),
+///       child: Column(
+///         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///         children: [
+///           Text(
+///             'Linear progress indicator with a fixed color',
+///             style: const TextStyle(fontSize: 20),
+///           ),
+///           LinearProgressIndicator(
+///             valueColor: animation,
+///             semanticsLabel: 'Linear progress indicator',
+///           ),
+///         ],
+///       ),
 ///     ),
 ///   );
 /// }
@@ -706,7 +708,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_material_ticker}
 ///
 /// This example shows a [CircularProgressIndicator] with a changing color.
 ///
@@ -735,20 +737,22 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// }
 ///
 /// Widget build(BuildContext context) {
-///   return Padding(
-///     padding: const EdgeInsets.all(20.0),
-///     child: Column(
-///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///       children: [
-///         Text(
-///           'Circular progress indicator with a fixed color',
-///           style: const TextStyle(fontSize: 20),
-///         ),
-///         CircularProgressIndicator(
-///           valueColor: animation,
-///           semanticsLabel: 'Circular progress indicator',
-///         ),
-///       ],
+///   return Scaffold(
+///     body: Padding(
+///       padding: const EdgeInsets.all(20.0),
+///       child: Column(
+///         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///         children: [
+///           Text(
+///             'Circular progress indicator with a fixed color',
+///             style: const TextStyle(fontSize: 20),
+///           ),
+///           CircularProgressIndicator(
+///             valueColor: animation,
+///             semanticsLabel: 'Circular progress indicator',
+///           ),
+///         ],
+///       ),
 ///     ),
 ///   );
 /// }
