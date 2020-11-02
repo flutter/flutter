@@ -753,7 +753,7 @@ class _LicenseData {
     licenses.add(entry); // Completion of the contract above.
   }
 
-  /// Add a package and initialise package license binding. This is a no-op if
+  /// Add a package and initialize package license binding. This is a no-op if
   /// the package has been seen before.
   void _addPackage(String package) {
     if (!packageLicenseBindings.containsKey(package)) {
@@ -1151,7 +1151,7 @@ class _MasterDetailFlow extends StatefulWidget {
   /// See [AppBar.automaticallyImplyLeading].
   final bool automaticallyImplyLeading;
 
-  /// Override the framework from determining whether to display the title in the centre of the
+  /// Override the framework from determining whether to display the title in the center of the
   /// app bar or not.
   ///
   /// See [AppBar.centerTitle].
@@ -1246,7 +1246,7 @@ abstract class _PageOpener {
 const int _materialWideDisplayThreshold = 840;
 
 class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOpener {
-  /// Tracks whether focus is on the detail or master views. Determines behaviour when switching
+  /// Tracks whether focus is on the detail or master views. Determines behavior when switching
   /// from lateral to nested navigation.
   _Focus focus = _Focus.master;
 

@@ -737,7 +737,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   assert(builder != null);
   assert(debugCheckHasScaffold(context));
 
-  return Scaffold.of(context)!.showBottomSheet<T>(
+  return Scaffold.of(context).showBottomSheet<T>(
     builder,
     backgroundColor: backgroundColor,
     elevation: elevation,

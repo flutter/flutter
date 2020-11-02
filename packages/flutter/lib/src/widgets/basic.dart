@@ -100,17 +100,23 @@ class Directionality extends InheritedWidget {
   /// the given context.
   ///
   /// If there is no [Directionality] ancestor widget in the tree at the given
-  /// context, then this will return null.
+  /// context, then this will throw a descriptive [FlutterError] in debug mode
+  /// and an exception in release mode.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
   /// TextDirection textDirection = Directionality.of(context);
   /// ```
-  // TODO(goderbauer): Make this non-null when customers have upgraded to Directionality.maybeOf.
-  static TextDirection? of(BuildContext context) {
-    final Directionality? widget = context.dependOnInheritedWidgetOfExactType<Directionality>();
-    return widget?.textDirection;
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], which will return null if no [Directionality] ancestor
+  ///    widget is in the tree.
+  static TextDirection of(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
+    final Directionality widget = context.dependOnInheritedWidgetOfExactType<Directionality>()!;
+    return widget.textDirection;
   }
 
   /// The text direction from the closest instance of this class that encloses
@@ -124,6 +130,11 @@ class Directionality extends InheritedWidget {
   /// ```dart
   /// TextDirection? textDirection = Directionality.maybeOf(context);
   /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [of], which will throw if no [Directionality] ancestor widget is in the
+  ///    tree.
   static TextDirection? maybeOf(BuildContext context) {
     final Directionality? widget = context.dependOnInheritedWidgetOfExactType<Directionality>();
     return widget?.textDirection;
@@ -1463,6 +1474,27 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=T4Uehk3_wlY}
 ///
+/// {@tool sample --template=stateless_widget_scaffold_center}
+///
+/// In this example, the image is stretched to fill the entire [Container], which would
+/// not happen normally without using FittedBox.
+///
+/// ```dart
+/// Widget build(BuildContext) {
+///   return Container(
+///     height: 400,
+///     width: 300,
+///     color: Colors.red,
+///     child: FittedBox(
+///       child: Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+///       fit: BoxFit.fill,
+///     ),
+///   );
+/// }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Transform], which applies an arbitrary transform to its child widget at
@@ -2796,10 +2828,59 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// 16.0/9.0. If the maximum width is infinite, the initial width is determined
 /// by applying the aspect ratio to the maximum height.
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This examples shows how AspectRatio sets width when its parent's width
+/// constraint is infinite. Since its parent's allowed height is a fixed value,
+/// the actual width is determined via the given AspectRatio.
+///
+/// Since the height is fixed at 100.0 in this example and the aspect ratio is
+/// set to 16 / 9, the width should then be 100.0 / 9 * 16.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: Colors.blue,
+///     alignment: Alignment.center,
+///     width: double.infinity,
+///     height: 100.0,
+///     child: AspectRatio(
+///       aspectRatio: 16 / 9,
+///       child: Container(
+///         color: Colors.green,
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// Now consider a second example, this time with an aspect ratio of 2.0 and
 /// layout constraints that require the width to be between 0.0 and 100.0 and
 /// the height to be between 0.0 and 100.0. We'll select a width of 100.0 (the
 /// biggest allowed) and a height of 50.0 (to match the aspect ratio).
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: Colors.blue,
+///     alignment: Alignment.center,
+///     width: 100.0,
+///     height: 100.0,
+///     child: AspectRatio(
+///       aspectRatio: 2.0,
+///       child: Container(
+///         width: 100.0,
+///         height: 50.0,
+///         color: Colors.green,
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// In that same situation, if the aspect ratio is 0.5, we'll also select a
 /// width of 100.0 (still the biggest allowed) and we'll attempt to use a height
@@ -2812,6 +2893,28 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// find a feasible size after consulting each constraint, the widget
 /// will eventually select a size for the child that meets the layout
 /// constraints but fails to meet the aspect ratio constraints.
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: Colors.blue,
+///     alignment: Alignment.center,
+///     width: 100.0,
+///     height: 100.0,
+///     child: AspectRatio(
+///       aspectRatio: 0.5,
+///       child: Container(
+///         width: 100.0,
+///         height: 50.0,
+///         color: Colors.green,
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -3135,7 +3238,7 @@ AxisDirection getAxisDirectionFromAxisReverseAndDirectionality(
   switch (axis) {
     case Axis.horizontal:
       assert(debugCheckHasDirectionality(context));
-      final TextDirection textDirection = Directionality.of(context)!;
+      final TextDirection textDirection = Directionality.of(context);
       final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
       return reverse ? flipAxisDirection(axisDirection) : axisDirection;
     case Axis.vertical:
@@ -3866,7 +3969,7 @@ class PositionedDirectional extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned.directional(
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       start: start,
       top: top,
       end: end,
@@ -3966,7 +4069,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.crossAxisAlignment = CrossAxisAlignment.center,
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
-    this.textBaseline = TextBaseline.alphabetic,
+    this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     this.clipBehavior = Clip.none,
     List<Widget> children = const <Widget>[],
   }) : assert(direction != null),
@@ -4064,7 +4167,8 @@ class Flex extends MultiChildRenderObjectWidget {
 
   /// If aligning items according to their baseline, which baseline to use.
   ///
-  /// Defaults to [TextBaseline.alphabetic].
+  /// This must be set if using baseline alignment. There is no default because there is no
+  /// way for the framework to know the correct baseline _a priori_.
   final TextBaseline? textBaseline;
 
   /// {@macro flutter.widgets.Clip}
@@ -4341,7 +4445,7 @@ class Row extends Flex {
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     TextDirection? textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
-    TextBaseline textBaseline = TextBaseline.alphabetic,
+    TextBaseline? textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     List<Widget> children = const <Widget>[],
   }) : super(
     children: children,
@@ -5375,7 +5479,7 @@ class RichText extends MultiChildRenderObjectWidget {
     assert(textDirection != null || debugCheckHasDirectionality(context));
     return RenderParagraph(text,
       textAlign: textAlign,
-      textDirection: textDirection ?? Directionality.of(context)!,
+      textDirection: textDirection ?? Directionality.of(context),
       softWrap: softWrap,
       overflow: overflow,
       textScaleFactor: textScaleFactor,
@@ -5393,7 +5497,7 @@ class RichText extends MultiChildRenderObjectWidget {
     renderObject
       ..text = text
       ..textAlign = textAlign
-      ..textDirection = textDirection ?? Directionality.of(context)!
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
       ..overflow = overflow
       ..textScaleFactor = textScaleFactor
@@ -5959,7 +6063,7 @@ class Listener extends SingleChildRenderObjectWidget {
 ///
 /// [MouseRegion] is used
 /// when it is needed to compare the list of objects that a mouse pointer is
-/// hovering over betweeen this frame and the last frame. This means entering
+/// hovering over between this frame and the last frame. This means entering
 /// events, exiting events, and mouse cursors.
 ///
 /// To listen to general pointer events, use [Listener], or more preferably,
@@ -6520,6 +6624,44 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// [RenderBox.hitTest].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=65HoWqBboI8}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// The following sample has an [AbsorbPointer] widget wrapping the button on
+/// top of the stack, which absorbs pointer events, preventing its child button
+/// __and__ the button below it in the stack from receiving the pointer events.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Stack(
+///     alignment: AlignmentDirectional.center,
+///     children: [
+///       SizedBox(
+///         width: 200.0,
+///         height: 100.0,
+///         child: ElevatedButton(
+///           onPressed: () {},
+///           child: null,
+///         ),
+///       ),
+///       SizedBox(
+///         width: 100.0,
+///         height: 200.0,
+///         child: AbsorbPointer(
+///           absorbing: true,
+///           child: ElevatedButton(
+///             style: ElevatedButton.styleFrom(
+///               primary: Colors.blue.shade200,
+///             ),
+///             onPressed: () {},
+///             child: null,
+///           ),
+///         ),
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -7209,7 +7351,7 @@ class KeyedSubtree extends StatelessWidget {
 /// ```
 ///
 /// Could equally well be defined and used like this, without
-/// definining a new widget class:
+/// defining a new widget class:
 ///
 /// ```dart
 /// Center(

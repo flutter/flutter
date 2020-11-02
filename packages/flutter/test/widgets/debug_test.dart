@@ -32,8 +32,8 @@ void main() {
           '   If multiple keyed nodes exist as children of another node, they\n'
           '   must have unique keys.\n'
           '   Flex(direction: vertical, mainAxisAlignment: start,\n'
-          '   crossAxisAlignment: center, textBaseline: alphabetic) has\n'
-          "   multiple children with key [<'key'>].\n",
+          '   crossAxisAlignment: center) has multiple children with key\n'
+          '   [<\'key\'>].\n',
         ),
       );
     }

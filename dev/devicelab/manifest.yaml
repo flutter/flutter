@@ -228,7 +228,6 @@ tasks:
       with SkSL shader warm-up with e2e.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
-    flaky: true
 
   backdrop_filter_perf__timeline_summary:
     description: >
@@ -440,7 +439,6 @@ tasks:
       Verifies that `flutter drive --route` still works. No performance numbers.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   linux_chrome_dev_mode:
     description: >

@@ -399,7 +399,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   Widget build(BuildContext context) {
     debugCheckHasDirectionality(context);
 
-    switch (Directionality.of(context)!) {
+    switch (Directionality.of(context)) {
       case TextDirection.ltr:
         keys = widget.children.keys.toList(growable: false);
         break;

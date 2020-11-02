@@ -550,7 +550,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   void _actionHandler(_AdjustSliderIntent intent) {
     final _RenderSlider renderSlider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
-    final TextDirection textDirection = Directionality.of(_renderObjectKey.currentContext!)!;
+    final TextDirection textDirection = Directionality.of(_renderObjectKey.currentContext!);
     switch (intent.type) {
       case _SliderAdjustmentType.right:
         switch (textDirection) {
@@ -825,7 +825,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
       state: state,
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
       platform: Theme.of(context)!.platform,
       hasFocus: hasFocus,
@@ -847,7 +847,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
-      ..textDirection = Directionality.of(context)!
+      ..textDirection = Directionality.of(context)
       ..semanticFormatterCallback = semanticFormatterCallback
       ..platform = Theme.of(context)!.platform
       ..hasFocus = hasFocus
