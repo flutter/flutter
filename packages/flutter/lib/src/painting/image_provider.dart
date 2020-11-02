@@ -802,6 +802,16 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
   }
 }
 
+/// Signature for callbacks that return headers asynchronously.
+///
+/// Used in [NetworkImage].
+///
+/// The resulting [Future] must complete with a non-null map of headers.
+///
+/// If the [Future] or callback throws, the error will be reported by the
+/// associated [ImageStreamCompleter].
+typedef NetworkImageHeaderResolutionCallback = Future<Map<String, String>> Function();
+
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
 /// The image will be cached regardless of cache headers from the server.
@@ -821,7 +831,7 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments [url] and [scale] must not be null.
-  const factory NetworkImage(String url, { double scale, Map<String, String>? headers }) = network_image.NetworkImage;
+  const factory NetworkImage(String url, { double scale, Map<String, String>? headers, NetworkImageHeaderResolutionCallback? headerResolver }) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.
   String get url;
@@ -833,6 +843,17 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   ///
   /// When running flutter on the web, headers are not used.
   Map<String, String>? get headers;
+
+  /// Callback that resolves the HTTP headers that will be used with
+  /// [HttpClient.get] to fetch image from network.
+  ///
+  /// When both [headerResolver] and [headers] are provided, the resulting
+  /// headers are merged together.
+  ///
+  /// See [HttpHeaders.add] for more information on how headers are merged.
+  ///
+  /// When running flutter on the web, headers are not used.
+  NetworkImageHeaderResolutionCallback? get headerResolver;
 
   @override
   ImageStreamCompleter load(NetworkImage key, DecoderCallback decode);

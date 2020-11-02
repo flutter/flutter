@@ -12,7 +12,12 @@ import '../flutter_test_alternative.dart' show Fake;
 import '../image_data.dart';
 
 void main() {
-  final MockHttpClient client = MockHttpClient();
+  late MockHttpClient client;
+
+  setUp(() {
+    client = MockHttpClient();
+    MockHttpHeaders.headers.clear();
+  });
 
   testWidgets('Headers', (WidgetTester tester) async {
     HttpOverrides.runZoned<Future<void>>(() async {
@@ -22,6 +27,50 @@ void main() {
       ));
 
       expect(MockHttpHeaders.headers['flutter'], <String>['flutter']);
+
+    }, createHttpClient: (SecurityContext? _) {
+      return client;
+    });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/57187
+
+  testWidgets('Header Resolver', (WidgetTester tester) async {
+    HttpOverrides.runZoned<Future<void>>(() async {
+      await tester.pumpWidget(Image.network(
+        'https://www.example.com/images/frame2.png',
+        headers: const <String, String>{
+          'flutter': 'flutter',
+          'Accept-Language': 'en-US',
+        },
+        headerResolver: () async => const <String, String>{
+          'flutter': 'async flutter',
+          'Accept-Language': 'de-DE',
+        },
+      ));
+
+      expect(MockHttpHeaders.headers['flutter'], <String>['flutter', 'async flutter']);
+      expect(MockHttpHeaders.headers['Accept-Language'], <String>['en-US', 'de-DE']);
+
+    }, createHttpClient: (SecurityContext? _) {
+      return client;
+    });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/57187
+
+  testWidgets('Throwing Header Resolver', (WidgetTester tester) async {
+    HttpOverrides.runZoned<Future<void>>(() async {
+      Object? imageError;
+      await tester.pumpWidget(Image.network(
+        'https://www.example.com/images/frame3.png',
+        headerResolver: () async => throw StateError('Something went wrong'),
+        errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+          imageError = error;
+          return const SizedBox();
+        },
+      ));
+
+      await tester.pump();
+
+      expect(imageError, isStateError
+        .having((StateError error) => error.message, 'message', 'Something went wrong'));
 
     }, createHttpClient: (SecurityContext? _) {
       return client;

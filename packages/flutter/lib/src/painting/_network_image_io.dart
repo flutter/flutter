@@ -21,7 +21,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments [url] and [scale] must not be null.
-  const NetworkImage(this.url, { this.scale = 1.0, this.headers })
+  const NetworkImage(this.url, { this.scale = 1.0, this.headers, this.headerResolver })
     : assert(url != null),
       assert(scale != null);
 
@@ -33,6 +33,9 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
   @override
   final Map<String, String>? headers;
+
+  @override
+  final image_provider.NetworkImageHeaderResolutionCallback? headerResolver;
 
   @override
   Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {
@@ -91,6 +94,12 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       headers?.forEach((String name, String value) {
         request.headers.add(name, value);
       });
+
+      if (headerResolver != null) {
+        final Map<String, String> headers = await headerResolver!();
+        headers.forEach(request.headers.add);
+      }
+
       final HttpClientResponse response = await request.close();
       if (response.statusCode != HttpStatus.ok) {
         // The network may be only temporarily unavailable, or the file will be
