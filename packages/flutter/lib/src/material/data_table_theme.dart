@@ -241,7 +241,7 @@ class DataTableTheme extends InheritedWidget {
   /// ```
   static DataTableThemeData of(BuildContext context) {
     final DataTableTheme? dataTableTheme = context.dependOnInheritedWidgetOfExactType<DataTableTheme>();
-    return dataTableTheme?.data ?? Theme.of(context)!.dataTableTheme;
+    return dataTableTheme?.data ?? Theme.of(context).dataTableTheme;
   }
 
   @override

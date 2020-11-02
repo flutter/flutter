@@ -1300,7 +1300,7 @@ class EditableText extends StatefulWidget {
   /// the surrounding [RestorationScope] using the provided restoration ID.
   ///
   /// Persisting and restoring the content of the [EditableText] is the
-  /// responsibilility of the owner of the [controller], who may use a
+  /// responsibility of the owner of the [controller], who may use a
   /// [RestorableTextEditingController] for that purpose.
   ///
   /// See also:
@@ -1911,7 +1911,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Begins a new batch edit, within which new updates made to the text editing
   /// value will not be sent to the platform text input plugin.
   ///
-  /// Batch edits nest. When the outmost batch edit finishes, [endBatchEdit]
+  /// Batch edits nest. When the outermost batch edit finishes, [endBatchEdit]
   /// will attempt to send [currentTextEditingValue] to the text input plugin if
   /// it detected a change.
   void beginBatchEdit() {

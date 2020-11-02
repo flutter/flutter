@@ -1144,7 +1144,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// This can be null, in which case the getter will actually return [preferredLineHeight].
   ///
   /// Setting this to itself fixes the value to the current [preferredLineHeight]. Setting
-  /// this to null returns the behaviour of deferring to [preferredLineHeight].
+  /// this to null returns the behavior of deferring to [preferredLineHeight].
   // TODO(ianh): This is a confusing API. We should have a separate getter for the effective cursor height.
   double get cursorHeight => _cursorHeight ?? preferredLineHeight;
   double? _cursorHeight;

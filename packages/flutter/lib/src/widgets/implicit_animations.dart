@@ -1058,6 +1058,44 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// The following example transitions an AnimatedPositioned
+/// between two states. It adjusts the `height`, `width`, and
+/// [Positioned] properties when tapped.
+///
+/// ```dart
+/// bool selected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Stack(
+///     children: [
+///       AnimatedPositioned(
+///         width: selected ? 200.0 : 50.0,
+///         height: selected ? 50.0 : 200.0,
+///         top: selected ? 50.0 : 150.0,
+///         right: 150.0,
+///         duration: Duration(seconds: 2),
+///         curve: Curves.fastOutSlowIn,
+///         child: GestureDetector(
+///           onTap: () {
+///             setState(() {
+///               selected = !selected;
+///             });
+///           },
+///           child: Container(
+///             color: Colors.blue,
+///             child: Text('Tap me to start the animated transition'),
+///           ),
+///         ),
+///       ),
+///     ],
+///   );
+/// }
+///```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AnimatedPositionedDirectional], which adapts to the ambient

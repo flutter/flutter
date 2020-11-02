@@ -109,8 +109,8 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// {@endtemplate}
   final String? semanticsValue;
 
-  Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context)!.backgroundColor;
-  Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context)!.accentColor;
+  Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context).backgroundColor;
+  Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).accentColor;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -595,7 +595,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
           return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
         return _buildAnimation();
       case _ActivityIndicatorType.adaptive:
-        final ThemeData theme = Theme.of(context)!;
+        final ThemeData theme = Theme.of(context);
         assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.iOS:
@@ -739,7 +739,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
         margin: const EdgeInsets.all(4.0), // accommodate the shadow
         child: Material(
           type: MaterialType.circle,
-          color: widget.backgroundColor ?? Theme.of(context)!.canvasColor,
+          color: widget.backgroundColor ?? Theme.of(context).canvasColor,
           elevation: 2.0,
           child: Padding(
             padding: const EdgeInsets.all(12.0),

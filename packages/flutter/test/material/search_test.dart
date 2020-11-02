@@ -819,7 +819,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     if (defaultAppBarTheme) {
       return super.appBarTheme(context);
     }
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     return theme.copyWith(
       inputDecorationTheme: InputDecorationTheme(hintStyle: TextStyle(color: hintTextColor)),
     );

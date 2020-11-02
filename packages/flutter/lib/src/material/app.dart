@@ -662,7 +662,7 @@ class MaterialApp extends StatefulWidget {
 class _MaterialScrollBehavior extends ScrollBehavior {
   @override
   TargetPlatform getPlatform(BuildContext context) {
-    return Theme.of(context)!.platform;
+    return Theme.of(context).platform;
   }
 
   @override
@@ -680,7 +680,7 @@ class _MaterialScrollBehavior extends ScrollBehavior {
         return GlowingOverscrollIndicator(
           child: child,
           axisDirection: axisDirection,
-          color: Theme.of(context)!.accentColor,
+          color: Theme.of(context).accentColor,
         );
     }
   }
