@@ -175,7 +175,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///             label: "Action",
 ///             onPressed: () {
 ///               // Code to execute.
-///             }
+///             },
 ///           ),
 ///         ),
 ///       );
