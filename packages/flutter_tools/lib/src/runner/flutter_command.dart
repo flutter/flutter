@@ -596,8 +596,14 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void usesExtraFrontendOptions() {
+  /// Enables support for the hidden options --extra-front-end-options and
+  /// --extra-gen-snapshot-options.
+  void usesExtraFlagOptions() {
     argParser.addMultiOption(FlutterOptions.kExtraFrontEndOptions,
+      splitCommas: true,
+      hide: true,
+    );
+    argParser.addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
       splitCommas: true,
       hide: true,
     );
@@ -664,7 +670,7 @@ abstract class FlutterCommand extends Command<void> {
     addTreeShakeIconsFlag();
     usesAnalyzeSizeFlag();
     usesDartDefineOption();
-    usesExtraFrontendOptions();
+    usesExtraFlagOptions();
     usesPubOption();
     usesTargetOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
