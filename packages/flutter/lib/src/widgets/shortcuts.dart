@@ -385,7 +385,45 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// A widget that establishes an [ShortcutManager] to be used by its descendants
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
-///
+/// 
+/// {@tool dartpad --template=stateful_widget_material}
+/// ```dart import
+/// import package:flutter/services.dart
+/// ```
+/// 
+/// ```dart preamble
+/// class Increment extends Intent {}
+/// 
+/// class Decrement extends Intent {}
+/// ```
+/// 
+/// ```dart
+/// int count = 0;
+/// 
+/// Widget build(BuildContext context) {
+///   return Shortcuts(
+///     shortcuts: <LogicalKeySet, Intent> {
+///       LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.keyI): Increment(),
+///       LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.keyD): Decrement(),
+///     },
+///     child: Actions(
+///       actions: <Type, Action<Intent>> {
+///         Increment: CallbackAction<Increment>(
+///           onInvoke: (Increment intent) => setState(()=> count = count + 1), 
+///         ),
+///         Decrement: CallbackAction<Decrement>(
+///           onInvoke: (Decrement intent) => setState(()=> count = count - 1), 
+///         ),
+///       },
+///       child: Center(
+///         child: Text('$count'),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+/// 
 /// See also:
 ///
 ///  * [Intent], a class for containing a description of a user action to be
