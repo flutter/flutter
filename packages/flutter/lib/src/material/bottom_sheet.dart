@@ -472,7 +472,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
-    final Widget bottomSheet = MediaQuery.removePadding(
+    Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
       child: Builder(
@@ -490,6 +490,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
         },
       ),
     );
+    if (isScrollControlled)
+      bottomSheet = Padding(
+        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        child: bottomSheet
+      );
     return capturedThemes.wrap(bottomSheet);
   }
 }
@@ -572,7 +577,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
 /// to have a bottom sheet that has a scrollable child such as a [ListView] or
 /// a [GridView] and have the bottom sheet be draggable, you should set this
-/// parameter to true.
+/// parameter to true. When this parameter is set to true the top of [BottomSheet] will be padded
+/// such that it avoids any system top padding given by the [MediaQuery]
 ///
 /// The `useRootNavigator` parameter ensures that the root navigator is used to
 /// display the [BottomSheet] when set to `true`. This is useful in the case
