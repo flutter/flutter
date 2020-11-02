@@ -32,18 +32,6 @@ task:
     mv $CIRRUS_WORKING_DIR flutter
     gclient sync
   matrix:
-    - name: build_and_benchmark_linux_release
-      only_if: $CIRRUS_BRANCH == 'master' # Only run for post-submit commits.
-      compile_host_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/tools/gn --runtime-mode=release
-        ninja -C out/host_release
-      benchmark_host_script: |
-        cd $ENGINE_PATH/src/out/host_release/
-        $ENGINE_PATH/src/flutter/testing/benchmark/generate_metrics.sh
-        cd $ENGINE_PATH/src/flutter/testing/benchmark
-        upload_metrics.sh
-
     # The following test depends on Flutter framework repo. It may fail if the
     # framework repo is currently broken.
     - name: build_and_test_linux_unopt_debug
