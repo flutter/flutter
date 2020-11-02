@@ -190,7 +190,26 @@ class Scrollable extends StatefulWidget {
   ///    exclusion.
   final bool excludeFromSemantics;
 
+  /// {@template flutter.widgets.scrollable.primaryScrollShortcut}
+  /// Indicates whether this [Scrollable] should be used as the
+  /// [PrimaryScrollShortcut].
   ///
+  /// When invoking a [ScrollAction] via a keyboard key combination that maps to
+  /// a [ScrollIntent], the [primaryFocus] is used to find the current
+  /// Scrollable that encloses it. If a Scrollable cannot be found, the
+  /// PrimaryScrollShortcut serves as a fallback, allowing for a default
+  /// scrolling shortcut. Only one Scrollable can be registered with the
+  /// PrimaryScrollShortcut at a time.
+  ///
+  /// When true, this Scrollable will be provided to the PrimaryScrollShortcut
+  /// for ScrollActions. Defaults to false.
+  ///
+  /// See also:
+  ///
+  ///  * [PrimaryScrollShortcut], an inherited widget that provides the ability
+  ///    for default ScrollActions to take place outside of th context fo the
+  ///    current focus.
+  /// {@endtemplate}
   final bool primaryScrollShortcut;
 
   /// The number of children that will contribute semantic information.
@@ -439,7 +458,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       // Similar to notificationContext, _ScrollableScope is placed above the
       // widget using it: RawGestureDetector, which allows us to access this
       // ScrollableState
-      primaryScrollShortcut?.primaryScrollKey = _gestureDetectorKey;
+      primaryScrollShortcut?._primaryScrollKey = _gestureDetectorKey;
     }
     super.didChangeDependencies();
   }
@@ -975,20 +994,15 @@ class ScrollIntent extends Intent {
 class ScrollAction extends Action<ScrollIntent> {
   @override
   bool isEnabled(ScrollIntent intent) {
-    print('isEnabled');
     final FocusNode? focus = primaryFocus;
     final bool contextIsValid = focus != null && focus.context != null;
     if (contextIsValid) {
-      print('context is valid');
       // Check for primary scrollable within the current context
       if (Scrollable.of(focus!.context!) != null)
         return true;
-      // Check for secondary scrollable with context from PrimaryScrollNavigator
+      // Check for fallback scrollable with context from PrimaryScrollShortcut
       if (PrimaryScrollShortcut.of(focus.context!) != null) {
-        print('looking for PrimaryScrollShortcut');
-        final GlobalKey? primaryScrollKey = PrimaryScrollShortcut.of(focus.context!).primaryScrollKey;
-        print('primaryScrollKey: $primaryScrollKey');
-        print(primaryScrollKey!.currentState);
+        final GlobalKey? primaryScrollKey = PrimaryScrollShortcut.of(focus.context!)._primaryScrollKey;
         return primaryScrollKey != null && primaryScrollKey.currentContext != null && Scrollable.of(primaryScrollKey.currentContext!) != null;
       }
     }
@@ -1078,7 +1092,7 @@ class ScrollAction extends Action<ScrollIntent> {
   void invoke(ScrollIntent intent) {
     ScrollableState? state = Scrollable.of(primaryFocus!.context!);
     if (state == null) {
-      final GlobalKey? _secondaryScrollKey = PrimaryScrollShortcut.of(primaryFocus!.context!).primaryScrollKey;
+      final GlobalKey? _secondaryScrollKey = PrimaryScrollShortcut.of(primaryFocus!.context!)._primaryScrollKey;
       state = Scrollable.of(_secondaryScrollKey!.currentContext!);
     }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
@@ -1103,18 +1117,36 @@ class ScrollAction extends Action<ScrollIntent> {
   }
 }
 
+/// Provides a fallback [Scrollable] for [ScrollAction]s.
 ///
+/// The PrimaryScrollShortcut can only provide one Scrollable to ScrollActions.
+///
+// TODO(Piinks): More docs and examples
+///
+/// See also:
+///
+///  * [Scrollable.primaryScrollShortcut], a flag that, when true, will register
+///    the associated Scrollable widget as a fallback for [ScrollAction]s.
 class PrimaryScrollShortcut extends StatefulWidget {
-  ///
+  /// Create a widget for managing a fallback [ScrollAction].
   const PrimaryScrollShortcut({
     Key? key,
     required this.child
   }) : super(key: key);
 
-  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// The state from the closest instance of this class that encloses the given
+  /// context.
   ///
+  /// If there is no [PrimaryScrollShortcut] in scope, then this will assert in
+  /// debug mode, and throw an exception in release mode.
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], which is a similar function but will return null instead of
+  ///    throwing if there is no [PrimaryScrollShortcut] ancestor.
   static PrimaryScrollShortcutState of(BuildContext context) {
     assert(context != null);
     final _PrimaryScrollShortcutScope? scope = context.dependOnInheritedWidgetOfExactType<_PrimaryScrollShortcutScope>();
@@ -1131,8 +1163,18 @@ class PrimaryScrollShortcut extends StatefulWidget {
     }());
     return scope!._primaryScrollShortcutState;
   }
-  
+
+  /// The state from the closest instance of this class that encloses the given
+  /// context, if any.
   ///
+  /// Will return null if a [PrimaryScrollShortcut] is not found in the given
+  /// context.
+  ///
+  /// See also:
+  ///
+  ///  * [of], which is a similar function, except that it will throw an
+  ///    exception if a [PrimaryScrollShortcut] is not found in the given
+  ///    context.
   static PrimaryScrollShortcutState? maybeOf(BuildContext context) {
     assert(context != null);
     final _PrimaryScrollShortcutScope? scope = context.dependOnInheritedWidgetOfExactType<_PrimaryScrollShortcutScope>();
@@ -1143,17 +1185,14 @@ class PrimaryScrollShortcut extends StatefulWidget {
   PrimaryScrollShortcutState createState() => PrimaryScrollShortcutState();
 }
 
+/// State for a [PrimaryScrollShortcut].
 ///
+/// Typically obtained via [PrimaryScrollShortcut.of].
 class PrimaryScrollShortcutState extends State<PrimaryScrollShortcut> {
 
-  ///
-  GlobalKey? get primaryScrollKey => _primaryScrollKey;
+  // The key that is enclosed within the context of the current fallback
+  // [Scrollable] for [ScrollAction]s.
   GlobalKey? _primaryScrollKey;
-  set primaryScrollKey(GlobalKey? value) {
-    setState((){
-      _primaryScrollKey = value;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {

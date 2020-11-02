@@ -721,7 +721,7 @@ class ListWheelScrollView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
-  ///
+  /// {@macro flutter.widgets.scrollable.primaryScrollShortcut}
   final bool primaryScrollShortcut;
 
   @override

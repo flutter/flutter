@@ -302,7 +302,7 @@ class SingleChildScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
-  ///
+  /// {@macro flutter.widgets.scrollable.primaryScrollShortcut}
   final bool primaryScrollShortcut;
 
   AxisDirection _getDirection(BuildContext context) {

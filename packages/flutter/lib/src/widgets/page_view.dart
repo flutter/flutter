@@ -832,7 +832,7 @@ class PageView extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-  ///
+  /// {@macro flutter.widgets.scrollable.primaryScrollShortcut}
   final bool primaryScrollShortcut;
 
   @override
