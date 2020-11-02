@@ -107,7 +107,6 @@ enum DragAnchor {
 ///
 /// ```dart
 /// int acceptedData = 0;
-/// 
 /// Widget build(BuildContext context) {
 ///   return Row(
 ///     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
