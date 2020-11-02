@@ -409,10 +409,10 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///     child: Actions(
 ///       actions: <Type, Action<Intent>> {
 ///         Increment: CallbackAction<Increment>(
-///          onInvoke: (Increment intent) => setState(()=> count = count + 1), 
+///          onInvoke: (Increment intent) => setState(()=> count = count + 1),
 ///         ),
 ///         Decrement: CallbackAction<Decrement>(
-///          onInvoke: (Decrement intent) => setState(()=> count = count - 1), 
+///          onInvoke: (Decrement intent) => setState(()=> count = count - 1),
 ///         ),
 ///       },
 ///       child: Center(
