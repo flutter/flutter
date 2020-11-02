@@ -82,7 +82,7 @@ class ElevatedButton extends ButtonStyleButton {
   ///
   /// The [icon] and [label] arguments must not be null.
   factory ElevatedButton.icon({
-    Key key,
+    Key? key,
     required VoidCallback? onPressed,
     VoidCallback? onLongPress,
     ButtonStyle? style,
