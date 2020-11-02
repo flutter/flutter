@@ -177,7 +177,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     usesBuildNameOption();
     addDartObfuscationOption();
     usesDartDefineOption();
-    usesExtraFlagOptions();
+    usesExtraDartFlagOptions();
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);

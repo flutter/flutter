@@ -18,7 +18,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     addBuildModeFlags();
     usesPubOption();
     usesDartDefineOption();
-    usesExtraFlagOptions();
+    usesExtraDartFlagOptions();
     argParser
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',

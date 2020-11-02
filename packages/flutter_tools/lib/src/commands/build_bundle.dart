@@ -19,7 +19,7 @@ class BuildBundleCommand extends BuildSubCommand {
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
-    usesExtraFlagOptions();
+    usesExtraDartFlagOptions();
     argParser
       ..addFlag(
         'precompiled',

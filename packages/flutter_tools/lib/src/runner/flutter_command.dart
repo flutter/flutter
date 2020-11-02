@@ -598,7 +598,7 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Enables support for the hidden options --extra-front-end-options and
   /// --extra-gen-snapshot-options.
-  void usesExtraFlagOptions() {
+  void usesExtraDartFlagOptions() {
     argParser.addMultiOption(FlutterOptions.kExtraFrontEndOptions,
       splitCommas: true,
       hide: true,
@@ -670,7 +670,7 @@ abstract class FlutterCommand extends Command<void> {
     addTreeShakeIconsFlag();
     usesAnalyzeSizeFlag();
     usesDartDefineOption();
-    usesExtraFlagOptions();
+    usesExtraDartFlagOptions();
     usesPubOption();
     usesTargetOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);

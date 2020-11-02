@@ -49,7 +49,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     usesDartDefineOption();
     addSplitDebugInfoOption();
     addDartObfuscationOption();
-    usesExtraFlagOptions();
+    usesExtraDartFlagOptions();
     addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
 
