@@ -8,11 +8,69 @@ import 'routes.dart';
 
 /// Registers a callback to veto attempts by the user to dismiss the enclosing
 /// [ModalRoute].
+/// 
+/// {@tool snippet --template=stateful_widget}
+/// 
+/// Whenever the back button is pressed, you will get a callback at [onWillPop], 
+/// which returns a [Future]. If the [Future] returned is true, the screen is 
+/// popped and if it is false, the screen is not popped.
+/// 
+/// ```dart
+/// @override
+/// Widget build(BuildContext) {
+///     return WillPopScope(
+///      onWillPop:_handleBackPress,
+///        child:MyWidget(),
+///     );
+/// }
+/// ```
+/// {@end-tool}
+/// 
+/// {@tool dartpad --template=stateful_widget}
+/// 
+/// ```dart
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: AppBar(
+///         title: Text(widget.title),
+///         leading: BackButton(),
+///       ),
+///       body: WillPopScope(
+///         child:Center(
+///         child: Text("Press back button in AppBar"),
+///       ),
+///         onWillPop:_onBackPressed,
+///       ),
+///     );
+///   }
+///   
+///   Future<bool> _onBackPressed(){
+///     return showDialog(
+///     context:context,
+///     builder:(context)=>AlertDialog(
+///       title:Text("Do you really want to exit the app?"),
+///       actions:<Widget>[
+///         FlatButton(
+///           child:Text("No"),
+///           onPressed:()=> Navigator.pop(context,false),
+///         ),
+///         FlatButton(
+///           child:Text("Yes"),
+///           onPressed:()=> Navigator.pop(context,true),
+///         )
+///       ]
+///     )
+///    );
+///   }
+/// ```
 ///
 /// See also:
 ///
 ///  * [ModalRoute.addScopedWillPopCallback] and [ModalRoute.removeScopedWillPopCallback],
 ///    which this widget uses to register and unregister [onWillPop].
+///  * [Form], which provides an `onWillPop` callback that enables the form
+///    to veto a [pop] initiated by the app's back button.
 class WillPopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
