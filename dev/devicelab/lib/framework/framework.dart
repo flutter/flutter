@@ -129,7 +129,7 @@ class _TaskRunner {
       if (noRebootForbidList.contains(device.deviceId)) {
         return;
       }
-      final File rebootFile = File('.reboot-count');
+      final File rebootFile = _rebootFile();
       int runCount;
       if (rebootFile.existsSync()) {
         runCount = int.tryParse(rebootFile.readAsStringSync().trim());
@@ -199,4 +199,14 @@ class _TaskRunner {
     });
     return completer.future;
   }
+}
+
+File _rebootFile() {
+  if (Platform.isLinux || Platform.isMacOS) {
+    return File(path.join(Platform.environment['HOME'], '.reboot-count'));
+  }
+  if (!Platform.isWindows) {
+    throw StateError('Unexpected platform ${Platform.operatingSystem}');
+  }
+  return File(path.join(Platform.environment['USERPROFILE'], '.reboot-count'));
 }
