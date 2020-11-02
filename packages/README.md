@@ -20,7 +20,7 @@ For more information on how to use or develop new packages, see the [Using Packa
 
 Shared Packages
 ===============================
-Flutter supports users sharing their developed packages to the Flutter and Dark community. 
+Flutter supports users sharing their developed packages to the Flutter and Dart community. 
 
 Flutter packages are published to the pub.dev page. Users can find the most popular downloaded
 and most highly recommended Flutter and Dart packages.
