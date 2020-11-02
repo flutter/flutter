@@ -206,7 +206,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///           ),
 ///           content: Text("Awesome SnackBar!"),
 ///           duration: Duration(milliseconds: 1500),
-///           width: 280.0, //Width of the SnackBar.
+///           width: 280.0, // Width of the SnackBar.
 ///           padding: EdgeInsets.symmetric(
 ///             horizontal: 8.0), // Inner padding for SnackBar content.
 ///           behavior: SnackBarBehavior.floating,
