@@ -14,9 +14,9 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:flutter_conductor/repository.dart';
-import 'package:flutter_conductor/roll_dev.dart';
-import 'package:flutter_conductor/stdio.dart';
+import 'package:dev_tools/repository.dart';
+import 'package:dev_tools/roll_dev.dart';
+import 'package:dev_tools/stdio.dart';
 
 void main(List<String> args) {
   const FileSystem fileSystem = LocalFileSystem();

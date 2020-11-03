@@ -5,9 +5,9 @@
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
-import 'package:flutter_conductor/roll_dev.dart';
-import 'package:flutter_conductor/globals.dart';
-import 'package:flutter_conductor/repository.dart';
+import 'package:dev_tools/roll_dev.dart';
+import 'package:dev_tools/globals.dart';
+import 'package:dev_tools/repository.dart';
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 import './common.dart';

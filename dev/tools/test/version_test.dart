@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_conductor/version.dart';
+import 'package:dev_tools/version.dart';
 
 import './common.dart';
 

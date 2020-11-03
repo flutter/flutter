@@ -9,7 +9,7 @@ import 'dart:io';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 import 'package:test/test.dart' as test_package show TypeMatcher;
 
-import 'package:flutter_conductor/stdio.dart';
+import 'package:dev_tools/stdio.dart';
 
 import 'package:args/args.dart';
 //import 'package:process/process.dart';

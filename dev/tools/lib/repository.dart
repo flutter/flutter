@@ -281,13 +281,15 @@ class Checkouts {
       // If a test
       if (platform.script.scheme == 'data') {
         final RegExp pattern = RegExp(
-          r'(file:\/\/[^"]*[/\\]conductor[/\\][^"]+\.dart)',
+          r'(file:\/\/[^"]*[/\\]dev\/tools[/\\][^"]+\.dart)',
           multiLine: true,
         );
         final Match match =
             pattern.firstMatch(Uri.decodeFull(platform.script.path));
         if (match == null) {
-          throw Exception('Cannot determine path of script!');
+          throw Exception(
+            'Cannot determine path of script!\n${platform.script.path}',
+          );
         }
         filePath = Uri.parse(match.group(1)).path;
       } else {

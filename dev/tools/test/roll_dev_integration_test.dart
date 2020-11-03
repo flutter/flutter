@@ -7,9 +7,9 @@ import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-import 'package:flutter_conductor/roll_dev.dart' show rollDev;
-import 'package:flutter_conductor/repository.dart';
-import 'package:flutter_conductor/version.dart';
+import 'package:dev_tools/roll_dev.dart' show rollDev;
+import 'package:dev_tools/repository.dart';
+import 'package:dev_tools/version.dart';
 
 import './common.dart';
 
