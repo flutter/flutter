@@ -389,7 +389,8 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// Here, we will use a [Shortcuts] and [Actions] widget to add and remove from a counter.
 /// This can be done by creating a child widget that is focused and pressing the logical key
 /// sets that have been defined in [Shortcuts] and defining the actions that each key set
-/// 
+/// performs.
+///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// ```dart imports
 /// import 'package:flutter/services.dart';
