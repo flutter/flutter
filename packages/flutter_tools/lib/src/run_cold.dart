@@ -38,7 +38,6 @@ class ColdRunner extends ResidentRunner {
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;
   final File applicationBinary;
-
   bool _didAttach = false;
 
   @override
