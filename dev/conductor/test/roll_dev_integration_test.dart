@@ -5,11 +5,8 @@ import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-//import 'package:flutter_conductor/git.dart';
-//import 'package:flutter_conductor/globals.dart';
 import 'package:flutter_conductor/roll_dev.dart' show rollDev;
 import 'package:flutter_conductor/repository.dart';
-//import 'package:flutter_conductor/stdio.dart';
 import 'package:flutter_conductor/version.dart';
 
 import './common.dart';
@@ -44,7 +41,7 @@ void main() {
         platform: platform,
         localUpstream: true,
         fileSystem: fileSystem,
-        useExistingCheckout: true, // TODO: Make false
+        useExistingCheckout: false,
       );
 
       // This repository has [frameworkUpstream] set as its push/pull remote.

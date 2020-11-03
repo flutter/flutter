@@ -133,11 +133,11 @@ class Repository {
     return revisionHash;
   }
 
-  bool isAncestor(String possibleAncestor, String target) {
+  /// Determines if 
+  bool isAncestor(String possibleAncestor, String possibleDescendant) {
     final int exitcode = git.run(
-      <String>['merge-base', '--is-ancestor', target, possibleAncestor],
-      'verify $possibleAncestor is a direct ancestor of $target. The flag '
-      '`${globals.kForce}` is required to override this check.',
+      <String>['merge-base', '--is-ancestor', possibleDescendant, possibleAncestor],
+      'verify $possibleAncestor is a direct ancestor of $possibleDescendant.',
       allowNonZeroExitCode: true,
       workingDirectory: checkoutDirectory.path,
     );
@@ -307,7 +307,7 @@ class Checkouts {
     String upstream,
     String name,
     bool localUpstream = false,
-    bool useExistingCheckout = true, // TODO: change this to false
+    bool useExistingCheckout = false,
   }) {
     switch (repoType) {
       case RepositoryType.framework:

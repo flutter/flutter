@@ -17,6 +17,7 @@ import './repository.dart';
 import './stdio.dart';
 import './version.dart';
 
+/// Create a new dev release without cherry picks.
 class RollDev extends Command<void> {
   factory RollDev() {
     const FileSystem fileSystem = LocalFileSystem();
