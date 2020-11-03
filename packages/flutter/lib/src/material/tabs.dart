@@ -610,7 +610,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.overlayColor,
     this.mouseCursor,
-    this.enableFeedback = true,
+    this.enableFeedback,
     this.onTap,
     this.physics,
   }) : assert(tabs != null),
