@@ -16,6 +16,8 @@ import 'routes.dart';
 /// popped and if it is false, the screen is not popped.
 ///
 /// ```dart
+/// bool shouldPop = true;
+/// 
 /// @override
 /// Widget build(BuildContext) {
 ///   return WillPopScope (
