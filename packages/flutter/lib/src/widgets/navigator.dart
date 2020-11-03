@@ -5117,7 +5117,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             autofocus: true,
             child: UnmanagedRestorationScope(
               bucket: bucket,
-              child: SecondaryScrollAction(
+              child: DefaultScrollAction(
                 child: Overlay(
                   key: _overlayKey,
                   initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
