@@ -319,7 +319,10 @@ class RadioListTile<T> extends StatelessWidget {
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
     this.autofocus = false,
-
+    this.contentPadding,
+    this.shape,
+    this.tileColor,
+    this.selectedTileColor,
   }) : assert(toggleable != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
@@ -335,7 +338,7 @@ class RadioListTile<T> extends StatelessWidget {
   ///
   /// This radio button is considered selected if its [value] matches the
   /// [groupValue].
-  final T groupValue;
+  final T? groupValue;
 
   /// Called when the user selects this radio button.
   ///
@@ -469,10 +472,28 @@ class RadioListTile<T> extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// Defines the insets surrounding the contents of the tile.
+  ///
+  /// Insets the [Radio], [title], [subtitle], and [secondary] widgets
+  /// in [RadioListTile].
+  ///
+  /// When null, `EdgeInsets.symmetric(horizontal: 16.0)` is used.
+  final EdgeInsetsGeometry? contentPadding;
+
   /// Whether this radio button is checked.
   ///
   /// To control this value, set [value] and [groupValue] appropriately.
   bool get checked => value == groupValue;
+
+  /// If specified, [shape] defines the shape of the [RadioListTile]'s [InkWell] border.
+  final ShapeBorder? shape;
+
+  /// If specified, defines the background color for `RadioListTile` when
+  /// [RadioListTile.selected] is false.
+  final Color? tileColor;
+
+  /// If non-null, defines the background color when [RadioListTile.selected] is true.
+  final Color? selectedTileColor;
 
   @override
   Widget build(BuildContext context) {
@@ -499,7 +520,7 @@ class RadioListTile<T> extends StatelessWidget {
     }
     return MergeSemantics(
       child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context)!.accentColor,
+        selectedColor: activeColor ?? Theme.of(context).accentColor,
         child: ListTile(
           leading: leading,
           title: title,
@@ -508,6 +529,9 @@ class RadioListTile<T> extends StatelessWidget {
           isThreeLine: isThreeLine,
           dense: dense,
           enabled: onChanged != null,
+          shape: shape,
+          tileColor: tileColor,
+          selectedTileColor: selectedTileColor,
           onTap: onChanged != null ? () {
             if (toggleable && checked) {
               onChanged!(null);
@@ -519,6 +543,7 @@ class RadioListTile<T> extends StatelessWidget {
           } : null,
           selected: selected,
           autofocus: autofocus,
+          contentPadding: contentPadding,
         ),
       ),
     );

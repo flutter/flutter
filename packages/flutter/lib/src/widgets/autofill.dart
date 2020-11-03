@@ -28,7 +28,7 @@ enum AutofillContextAction {
 /// [AutofillClient]s that share the same closest [AutofillGroup] ancestor must
 /// be built together, and they be will be autofilled together.
 ///
-/// {@macro flutter.services.autofill.AutofillScope}
+/// {@macro flutter.services.AutofillScope}
 ///
 /// The [AutofillGroup] widget only knows about [AutofillClient]s registered to
 /// it using the [AutofillGroupState.register] API. Typically, [AutofillGroup]
@@ -41,7 +41,7 @@ enum AutofillContextAction {
 /// widget) can be used to clean up the current autofill context when the
 /// current autofill context is no longer relevant.
 ///
-/// {@macro flutter.services.autofill.autofillContext}
+/// {@macro flutter.services.TextInput.finishAutofillContext}
 ///
 /// By default, [onDisposeAction] is set to [AutofillContextAction.commit], in
 /// which case when any of the topmost [AutofillGroup]s is being disposed, the
@@ -158,7 +158,7 @@ class AutofillGroup extends StatefulWidget {
 
   /// Returns the closest [AutofillGroupState] which encloses the given context.
   ///
-  /// {@macro flutter.widgets.autofill.AutofillGroupState}
+  /// {@macro flutter.widgets.AutofillGroupState}
   ///
   /// See also:
   ///
@@ -169,14 +169,14 @@ class AutofillGroup extends StatefulWidget {
     return scope?._scope;
   }
 
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The [AutofillContextAction] to be run when this [AutofillGroup] is the
   /// topmost [AutofillGroup] and it's being disposed, in order to clean up the
   /// current autofill context.
   ///
-  /// {@macro flutter.services.autofill.autofillContext}
+  /// {@macro flutter.services.TextInput.finishAutofillContext}
   ///
   /// Defaults to [AutofillContextAction.commit], which prompts the platform to
   /// save the user input and destroy the current autofill context. No action
@@ -189,7 +189,7 @@ class AutofillGroup extends StatefulWidget {
 
 /// State associated with an [AutofillGroup] widget.
 ///
-/// {@template flutter.widgets.autofill.AutofillGroupState}
+/// {@template flutter.widgets.AutofillGroupState}
 /// An [AutofillGroupState] can be used to register an [AutofillClient] when it
 /// enters this [AutofillGroup] (for example, when an [EditableText] is mounted or
 /// reparented onto the [AutofillGroup]'s subtree), and unregister an

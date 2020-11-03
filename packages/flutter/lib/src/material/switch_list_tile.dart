@@ -258,6 +258,7 @@ class SwitchListTile extends StatelessWidget {
     Key? key,
     required this.value,
     required this.onChanged,
+    this.tileColor,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
@@ -273,6 +274,8 @@ class SwitchListTile extends StatelessWidget {
     this.selected = false,
     this.autofocus = false,
     this.controlAffinity = ListTileControlAffinity.platform,
+    this.shape,
+    this.selectedTileColor,
   }) : _switchListTileType = _SwitchListTileType.material,
        assert(value != null),
        assert(isThreeLine != null),
@@ -293,6 +296,7 @@ class SwitchListTile extends StatelessWidget {
     Key? key,
     required this.value,
     required this.onChanged,
+    this.tileColor,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
@@ -308,6 +312,8 @@ class SwitchListTile extends StatelessWidget {
     this.selected = false,
     this.autofocus = false,
     this.controlAffinity = ListTileControlAffinity.platform,
+    this.shape,
+    this.selectedTileColor,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
        assert(value != null),
        assert(isThreeLine != null),
@@ -344,7 +350,7 @@ class SwitchListTile extends StatelessWidget {
   ///   title: Text('Selection'),
   /// )
   /// ```
-  final ValueChanged<bool?>? onChanged;
+  final ValueChanged<bool>? onChanged;
 
   /// The color to use when this switch is on.
   ///
@@ -371,6 +377,9 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
   final Color? inactiveTrackColor;
+
+  /// {@macro flutter.material.ListTile.tileColor}
+  final Color? tileColor;
 
   /// An image to use on the thumb of this switch when the switch is on.
   final ImageProvider? activeThumbImage;
@@ -435,9 +444,15 @@ class SwitchListTile extends StatelessWidget {
   /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform].
   final ListTileControlAffinity controlAffinity;
 
+  /// {@macro flutter.material.ListTileTheme.shape}
+  final ShapeBorder? shape;
+
+  /// If non-null, defines the background color when [SwitchListTile.selected] is true.
+  final Color? selectedTileColor;
+
   @override
   Widget build(BuildContext context) {
-    Widget control;
+    final Widget control;
     switch (_switchListTileType) {
       case _SwitchListTileType.adaptive:
         control = Switch.adaptive(
@@ -484,7 +499,7 @@ class SwitchListTile extends StatelessWidget {
 
     return MergeSemantics(
       child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context)!.accentColor,
+        selectedColor: activeColor ?? Theme.of(context).accentColor,
         child: ListTile(
           leading: leading,
           title: title,
@@ -496,7 +511,10 @@ class SwitchListTile extends StatelessWidget {
           enabled: onChanged != null,
           onTap: onChanged != null ? () { onChanged!(!value); } : null,
           selected: selected,
+          selectedTileColor: selectedTileColor,
           autofocus: autofocus,
+          shape: shape,
+          tileColor: tileColor,
         ),
       ),
     );

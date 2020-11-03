@@ -169,12 +169,12 @@ class MaterialApp extends StatefulWidget {
     this.navigatorKey,
     this.scaffoldMessengerKey,
     this.home,
-    this.routes = const <String, WidgetBuilder>{},
+    Map<String, WidgetBuilder> this.routes = const <String, WidgetBuilder>{},
     this.initialRoute,
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
-    this.navigatorObservers = const <NavigatorObserver>[],
+    List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
     this.builder,
     this.title = '',
     this.onGenerateTitle,
@@ -218,8 +218,8 @@ class MaterialApp extends StatefulWidget {
     Key? key,
     this.scaffoldMessengerKey,
     this.routeInformationProvider,
-    required this.routeInformationParser,
-    required this.routerDelegate,
+    required RouteInformationParser<Object> this.routeInformationParser,
+    required RouterDelegate<Object> this.routerDelegate,
     this.backButtonDispatcher,
     this.builder,
     this.title = '',
@@ -531,7 +531,7 @@ class MaterialApp extends StatefulWidget {
   /// This callback is passed along to the [WidgetsApp] built by this widget.
   final LocaleListResolutionCallback? localeListResolutionCallback;
 
-  /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
+  /// {@macro flutter.widgets.LocaleResolutionCallback}
   ///
   /// This callback is passed along to the [WidgetsApp] built by this widget.
   final LocaleResolutionCallback? localeResolutionCallback;
@@ -662,7 +662,7 @@ class MaterialApp extends StatefulWidget {
 class _MaterialScrollBehavior extends ScrollBehavior {
   @override
   TargetPlatform getPlatform(BuildContext context) {
-    return Theme.of(context)!.platform;
+    return Theme.of(context).platform;
   }
 
   @override
@@ -680,7 +680,7 @@ class _MaterialScrollBehavior extends ScrollBehavior {
         return GlowingOverscrollIndicator(
           child: child,
           axisDirection: axisDirection,
-          color: Theme.of(context)!.accentColor,
+          color: Theme.of(context).accentColor,
         );
     }
   }

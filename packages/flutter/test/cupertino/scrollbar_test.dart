@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -62,7 +60,7 @@ void main() {
 
   testWidgets('Scrollbar dark mode', (WidgetTester tester) async {
     Brightness brightness = Brightness.light;
-    StateSetter setState;
+    late StateSetter setState;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -608,5 +606,78 @@ void main() {
     await tester.tap(find.byType(CupertinoButton));
     await tester.pumpAndSettle();
     expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
+  });
+
+  testWidgets('Scrollbar thumb can be dragged with long press - horizontal axis', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoScrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              scrollDirection: Axis.horizontal,
+              child: const SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(scrollController.offset, 0.0);
+
+    // Scroll a bit.
+    const double scrollAmount = 10.0;
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    // Scroll right by swiping left.
+    await scrollGesture.moveBy(const Offset(-scrollAmount, 0.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    // Scrollbar thumb is fully showing and scroll offset has moved by
+    // scrollAmount.
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
+    expect(scrollController.offset, scrollAmount);
+    await scrollGesture.up();
+    await tester.pump();
+
+    int hapticFeedbackCalls = 0;
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'HapticFeedback.vibrate') {
+        hapticFeedbackCalls++;
+      }
+    });
+
+    // Long press on the scrollbar thumb and expect a vibration after it resizes.
+    expect(hapticFeedbackCalls, 0);
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(50.0, 596.0));
+    await tester.pump(_kLongPressDuration);
+    expect(hapticFeedbackCalls, 0);
+    await tester.pump(_kScrollbarResizeDuration);
+    // Allow the haptic feedback some slack.
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(hapticFeedbackCalls, 1);
+
+    // Drag the thumb down to scroll back to the left.
+    await dragScrollbarGesture.moveBy(const Offset(scrollAmount, 0.0));
+    await tester.pump(const Duration(milliseconds: 100));
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    // The view has scrolled more than it would have by a swipe gesture of the
+    // same distance.
+    expect(scrollController.offset, greaterThan(scrollAmount * 2));
+    // The scrollbar thumb is still fully visible.
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
+
+    // Let the thumb fade out so all timers have resolved.
+    await tester.pump(_kScrollbarTimeToFade);
+    await tester.pump(_kScrollbarFadeDuration);
   });
 }

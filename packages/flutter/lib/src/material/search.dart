@@ -43,10 +43,13 @@ import 'theme.dart';
 /// the [AppBar.leading] position e.g. from the hamburger menu to the back arrow
 /// used to exit the search page.
 ///
+/// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.EditableText.onChanged}
+///
 /// See also:
 ///
 ///  * [SearchDelegate] to define the content of the search page.
-Future<T> showSearch<T>({
+Future<T?> showSearch<T>({
   required BuildContext context,
   required SearchDelegate<T> delegate,
   String? query = '',
@@ -85,6 +88,9 @@ Future<T> showSearch<T>({
 /// A given [SearchDelegate] can only be associated with one active [showSearch]
 /// call. Call [SearchDelegate.close] before re-using the same delegate instance
 /// for another [showSearch] call.
+///
+/// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.EditableText.onChanged}
 abstract class SearchDelegate<T> {
 
   /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
@@ -190,10 +196,12 @@ abstract class SearchDelegate<T> {
   ///  * [AppBar.brightness], which is set to [ThemeData.primaryColorBrightness].
   ThemeData appBarTheme(BuildContext context) {
     assert(context != null);
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     assert(theme != null);
     return theme.copyWith(
-      primaryColor: Colors.white,
+      primaryColor: theme.brightness == Brightness.dark
+          ? theme.primaryColor
+          : Colors.white,
       primaryIconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
       primaryColorBrightness: Brightness.light,
       primaryTextTheme: theme.textTheme,
@@ -381,7 +389,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  void didComplete(T result) {
+  void didComplete(T? result) {
     super.didComplete(result);
     assert(delegate._route == this);
     delegate._route = null;
@@ -473,7 +481,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = widget.delegate.searchFieldLabel
-      ?? MaterialLocalizations.of(context)!.searchFieldLabel;
+      ?? MaterialLocalizations.of(context).searchFieldLabel;
     final TextStyle? searchFieldStyle = widget.delegate.searchFieldStyle
       ?? theme.inputDecorationTheme.hintStyle;
     Widget? body;
@@ -493,7 +501,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       case null:
         break;
     }
-    String routeName;
+    final String routeName;
     switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:

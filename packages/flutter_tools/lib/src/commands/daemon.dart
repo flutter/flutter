@@ -50,11 +50,9 @@ class DaemonCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     globals.printStatus('Starting device daemon...');
-    isRunningFromDaemon = true;
-
     final Daemon daemon = Daemon(
       stdinCommandStream, stdoutCommandResponse,
-      notifyingLogger: globals.logger as NotifyingLogger,
+      notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
     );
     final int code = await daemon.onExit;
     if (code != 0) {
@@ -466,7 +464,6 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      flutterProject: flutterProject,
       target: target,
       buildInfo: options.buildInfo,
       platform: globals.platform,
@@ -525,7 +522,7 @@ class AppDomain extends Domain {
       enableHotReload,
       cwd,
       LaunchMode.run,
-      globals.logger as AppRunLogger,
+      asLogger<AppRunLogger>(globals.logger),
     );
   }
 
@@ -960,15 +957,14 @@ dynamic _toJsonable(dynamic obj) {
   return '$obj';
 }
 
-class NotifyingLogger extends Logger {
-  NotifyingLogger({ @required this.verbose, this.parent }) {
+class NotifyingLogger extends DelegatingLogger {
+  NotifyingLogger({ @required this.verbose, @required Logger parent }) : super(parent) {
     _messageController = StreamController<LogMessage>.broadcast(
       onListen: _onListen,
     );
   }
 
   final bool verbose;
-  final Logger parent;
   final List<LogMessage> messageBuffer = <LogMessage>[];
   StreamController<LogMessage> _messageController;
 
@@ -1012,7 +1008,7 @@ class NotifyingLogger extends Logger {
     if (!verbose) {
       return;
     }
-    parent?.printError(message);
+    super.printError(message);
   }
 
   @override
@@ -1026,8 +1022,6 @@ class NotifyingLogger extends Logger {
     assert(timeout != null);
     printStatus(message);
     return SilentStatus(
-      timeout: timeout,
-      timeoutConfiguration: timeoutConfiguration,
       stopwatch: Stopwatch(),
     );
   }
@@ -1136,82 +1130,12 @@ class EmulatorDomain extends Domain {
 //
 // TODO(devoncarew): To simplify this code a bit, we could choose to specialize
 // this class into two, one for each of the above use cases.
-class AppRunLogger extends Logger {
-  AppRunLogger({ this.parent });
+class AppRunLogger extends DelegatingLogger {
+  AppRunLogger({ @required Logger parent }) : super(parent);
 
   AppDomain domain;
   AppInstance app;
-  final Logger parent;
   int _nextProgressId = 0;
-
-  @override
-  void printError(
-    String message, {
-    StackTrace stackTrace,
-    bool emphasis,
-    TerminalColor color,
-    int indent,
-    int hangingIndent,
-    bool wrap,
-  }) {
-    if (parent != null) {
-      parent.printError(
-        message,
-        stackTrace: stackTrace,
-        emphasis: emphasis,
-        indent: indent,
-        hangingIndent: hangingIndent,
-        wrap: wrap,
-      );
-    } else {
-      if (stackTrace != null) {
-        _sendLogEvent(<String, dynamic>{
-          'log': message,
-          'stackTrace': stackTrace.toString(),
-          'error': true,
-        });
-      } else {
-        _sendLogEvent(<String, dynamic>{
-          'log': message,
-          'error': true,
-        });
-      }
-    }
-  }
-
-  @override
-  void printStatus(
-    String message, {
-    bool emphasis = false,
-    TerminalColor color,
-    bool newline = true,
-    int indent,
-    int hangingIndent,
-    bool wrap,
-  }) {
-    if (parent != null) {
-      parent.printStatus(
-        message,
-        emphasis: emphasis,
-        color: color,
-        newline: newline,
-        indent: indent,
-        hangingIndent: hangingIndent,
-        wrap: wrap,
-      );
-    } else {
-      _sendLogEvent(<String, dynamic>{'log': message});
-    }
-  }
-
-  @override
-  void printTrace(String message) {
-    if (parent != null) {
-      parent.printTrace(message);
-    } else {
-      _sendLogEvent(<String, dynamic>{'log': message, 'trace': true});
-    }
-  }
 
   Status _status;
 
@@ -1232,8 +1156,6 @@ class AppRunLogger extends Logger {
     );
 
     _status = SilentStatus(
-      timeout: timeout,
-      timeoutConfiguration: timeoutConfiguration,
       onFinish: () {
         _status = null;
         _sendProgressEvent(
@@ -1247,14 +1169,6 @@ class AppRunLogger extends Logger {
 
   void close() {
     domain = null;
-  }
-
-  void _sendLogEvent(Map<String, dynamic> event) {
-    if (domain == null) {
-      printStatus('event sent after app closed: $event');
-    } else {
-      domain._sendAppEvent(app, 'log', event);
-    }
   }
 
   void _sendProgressEvent({

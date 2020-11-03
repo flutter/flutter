@@ -6,10 +6,8 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
@@ -111,40 +109,4 @@ class WindowsDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
-}
-
-final RegExp _whitespace = RegExp(r'\s+');
-
-/// Returns the running process matching `process` name.
-///
-/// This list contains the process name and id.
-@visibleForTesting
-List<String> runningProcess(String processName) {
-  // TODO(jonahwilliams): find a way to do this without powershell.
-  final RunResult result = processUtils.runSync(
-    <String>['powershell', '-script="Get-CimInstance Win32_Process"'],
-  );
-  if (result.exitCode != 0) {
-    return null;
-  }
-  for (final String rawProcess in result.stdout.split('\n')) {
-    final String process = rawProcess.trim();
-    if (!process.contains(processName)) {
-      continue;
-    }
-    final List<String> parts = process.split(_whitespace);
-
-    final String processPid = parts[0];
-    final String currentRunningProcessPid = pid.toString();
-    // Don't kill the flutter tool process
-    if (processPid == currentRunningProcessPid) {
-      continue;
-    }
-    final List<String> data = <String>[
-      processPid, // ID
-      parts[1], // Name
-    ];
-    return data;
-  }
-  return null;
 }

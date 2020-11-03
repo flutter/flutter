@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class TestStatusTransitionWidget extends StatusTransitionWidget {
   const TestStatusTransitionWidget({
-    Key key,
-    this.builder,
-    Animation<double> animation,
+    Key? key,
+    required this.builder,
+    required Animation<double> animation,
   }) : super(key: key, animation: animation);
 
   final WidgetBuilder builder;

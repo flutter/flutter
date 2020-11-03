@@ -70,7 +70,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Null by default.
   final ButtonStyle? style;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
@@ -87,9 +87,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Returns a non-null [ButtonStyle] that's based primarily on the [Theme]'s
   /// [ThemeData.textTheme] and [ThemeData.colorScheme].
   ///
-  /// The returned style can be overriden by the [style] parameter and
+  /// The returned style can be overridden by the [style] parameter and
   /// by the style returned by [themeStyleOf]. For example the default
-  /// style of the [TextButton] subclass can be overidden with its
+  /// style of the [TextButton] subclass can be overridden with its
   /// [TextButton.style] constructor parameter, or with a
   /// [TextButtonTheme].
   ///
@@ -105,7 +105,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
 
   /// Returns the ButtonStyle that belongs to the button's component theme.
   ///
-  /// The returned style can be overriden by the [style] parameter.
+  /// The returned style can be overridden by the [style] parameter.
   ///
   /// Concrete button subclasses should return the ButtonStyle for the
   /// nearest subclass-specific inherited theme, and if no such theme
@@ -371,7 +371,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       ),
     );
 
-    Size minSize;
+    final Size minSize;
     switch (resolvedTapTargetSize!) {
       case MaterialTapTargetSize.padded:
         minSize = Size(
@@ -483,7 +483,7 @@ class _RenderInputPadding extends RenderShiftedBox {
       final double height = math.max(child!.size.width, minSize.width);
       final double width = math.max(child!.size.height, minSize.height);
       size = constraints.constrain(Size(height, width));
-      final BoxParentData childParentData = child!.parentData as BoxParentData;
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
     } else {
       size = Size.zero;

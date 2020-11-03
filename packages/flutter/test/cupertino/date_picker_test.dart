@@ -1214,6 +1214,7 @@ void main() {
           textTheme: CupertinoTextThemeData(
             pickerTextStyle: TextStyle(
               color: Color(0xFF663311),
+              fontSize: 21,
             ),
           ),
         ),
@@ -1327,7 +1328,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.descendant(of: find.byKey(key), matching: find.byType(Row))), const Size(330, 216));
+    expect(tester.getSize(find.descendant(of: find.byKey(key), matching: find.byType(Row))), const Size(342, 216));
   });
 
   testWidgets('scrollController can be removed or added', (WidgetTester tester) async {
@@ -1385,7 +1386,7 @@ void main() {
         home: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
           setState = stateSetter;
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(platformBrightness: brightness),
+            data: MediaQuery.of(context).copyWith(platformBrightness: brightness),
             child: CupertinoDatePicker(
               initialDateTime: DateTime(2019),
               mode: CupertinoDatePickerMode.date,

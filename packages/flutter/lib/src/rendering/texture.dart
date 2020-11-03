@@ -54,7 +54,7 @@ class TextureBox extends RenderBox {
     }
   }
 
-  /// {@macro FilterQuality}
+  /// {@macro flutter.widgets.Texture.filterQuality}
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
   set filterQuality(FilterQuality value) {

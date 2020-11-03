@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter/widgets.dart';
@@ -37,11 +35,11 @@ void main() {
          && widget.itemBuilder == builder;
     }), findsOneWidget);
 
-    listKey.currentState.insertItem(0);
+    listKey.currentState!.insertItem(0);
     await tester.pump();
     expect(find.text('item 2'), findsOneWidget);
 
-    listKey.currentState.removeItem(
+    listKey.currentState!.removeItem(
       2,
       (BuildContext context, Animation<double> animation) {
         return const SizedBox(
@@ -90,8 +88,8 @@ void main() {
       expect(find.text('item 1'), findsOneWidget);
       expect(animations.containsKey(0), true);
       expect(animations.containsKey(1), true);
-      expect(animations[0].value, 1.0);
-      expect(animations[1].value, 1.0);
+      expect(animations[0]!.value, 1.0);
+      expect(animations[1]!.value, 1.0);
     });
 
     testWidgets('insert', (WidgetTester tester) async {
@@ -125,7 +123,7 @@ void main() {
       double itemTop(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
       double itemBottom(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
 
-      listKey.currentState.insertItem(
+      listKey.currentState!.insertItem(
         0,
         duration: const Duration(milliseconds: 100),
       );
@@ -143,11 +141,11 @@ void main() {
       expect(itemTop(0), 0.0);
       expect(itemBottom(0), 100.0);
 
-      listKey.currentState.insertItem(
+      listKey.currentState!.insertItem(
         0,
         duration: const Duration(milliseconds: 100),
       );
-      listKey.currentState.insertItem(
+      listKey.currentState!.insertItem(
         0,
         duration: const Duration(milliseconds: 100),
       );
@@ -223,7 +221,7 @@ void main() {
       expect(find.text('item 2'), findsOneWidget);
 
       items.removeAt(0);
-      listKey.currentState.removeItem(
+      listKey.currentState!.removeItem(
         0,
         (BuildContext context, Animation<double> animation) => buildItem(context, 0, animation),
         duration: const Duration(milliseconds: 100),
@@ -289,11 +287,11 @@ void main() {
       expect(tester.getTopLeft(find.text('item 0')).dy, 200);
       expect(tester.getTopLeft(find.text('item 1')).dy, 300);
 
-      listKey.currentState.insertItem(3);
+      listKey.currentState!.insertItem(3);
       await tester.pumpAndSettle();
       expect(tester.getTopLeft(find.text('item 3')).dy, 500);
 
-      listKey.currentState.removeItem(0,
+      listKey.currentState!.removeItem(0,
         (BuildContext context, Animation<double> animation) {
           return SizeTransition(
             sizeFactor: animation,
@@ -323,17 +321,17 @@ void main() {
     });
   });
 
-  testWidgets('AnimatedList.of() called with a context that does not contain AnimatedList',
+  testWidgets('AnimatedList.of() and maybeOf called with a context that does not contain AnimatedList',
     (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(Container(key: key));
-    FlutterError error;
+    late FlutterError error;
+    expect(AnimatedList.maybeOf(key.currentContext!), isNull);
     try {
-      AnimatedList.of(key.currentContext);
+      AnimatedList.of(key.currentContext!);
     } on FlutterError catch (e) {
       error = e;
     }
-    expect(error, isNotNull);
     expect(error.diagnostics.length, 4);
     expect(error.diagnostics[2].level, DiagnosticLevel.hint);
     expect(

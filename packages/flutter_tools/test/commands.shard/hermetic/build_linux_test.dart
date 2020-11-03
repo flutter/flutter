@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -45,12 +44,12 @@ void main() {
 
   FileSystem fileSystem;
   ProcessManager processManager;
-  MockUsage usage;
+  Usage usage;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     Cache.flutterRoot = _kTestFlutterRoot;
-    usage = MockUsage();
+    usage = Usage.test();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -280,6 +279,8 @@ void main() {
     ]);
     fileSystem.file('lib/other.dart')
       .createSync(recursive: true);
+    fileSystem.file('foo/bar.sksl.json')
+      .createSync(recursive: true);
 
     await createTestCommandRunner(command).run(
       const <String>[
@@ -311,17 +312,17 @@ void main() {
     expect(configLines, containsAll(<String>[
       'file(TO_CMAKE_PATH "$_kTestFlutterRoot" FLUTTER_ROOT)',
       'file(TO_CMAKE_PATH "${fileSystem.currentDirectory.path}" PROJECT_DIR)',
-      '  "DART_DEFINES=\\"foo.bar%3D2,fizz.far%3D3\\""',
-      '  "DART_OBFUSCATION=\\"true\\""',
-      '  "EXTRA_FRONT_END_OPTIONS=\\"--enable-experiment%3Dnon-nullable\\""',
-      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=\\"--enable-experiment%3Dnon-nullable\\""',
-      '  "SPLIT_DEBUG_INFO=\\"foo/\\""',
-      '  "TRACK_WIDGET_CREATION=\\"true\\""',
-      '  "TREE_SHAKE_ICONS=\\"true\\""',
+      r'  "DART_DEFINES=\"foo.bar%3D2,fizz.far%3D3\""',
+      r'  "DART_OBFUSCATION=\"true\""',
+      r'  "EXTRA_FRONT_END_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
+      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
+      r'  "SPLIT_DEBUG_INFO=\"foo/\""',
+      r'  "TRACK_WIDGET_CREATION=\"true\""',
+      r'  "TREE_SHAKE_ICONS=\"true\""',
       '  "FLUTTER_ROOT=\\"$_kTestFlutterRoot\\""',
       '  "PROJECT_DIR=\\"${fileSystem.currentDirectory.path}\\""',
-      '  "FLUTTER_TARGET=\\"lib/other.dart\\""',
-      '  "BUNDLE_SKSL_PATH=\\"foo/bar.sksl.json\\""',
+      r'  "FLUTTER_TARGET=\"lib/other.dart\""',
+      r'  "BUNDLE_SKSL_PATH=\"foo/bar.sksl.json\""',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -381,14 +382,15 @@ set(BINARY_NAME "fizz_bar")
       ninjaCommand('release', onRun: () {
         fileSystem.file('build/flutter_size_01/snapshot.linux-x64.json')
           ..createSync(recursive: true)
-          ..writeAsStringSync('''[
-{
-  "l": "dart:_internal",
-  "c": "SubListIterable",
-  "n": "[Optimized] skip",
-  "s": 2400
-}
-          ]''');
+          ..writeAsStringSync('''
+[
+  {
+    "l": "dart:_internal",
+    "c": "SubListIterable",
+    "n": "[Optimized] skip",
+    "s": 2400
+  }
+]''');
         fileSystem.file('build/flutter_size_01/trace.linux-x64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
@@ -399,11 +401,15 @@ set(BINARY_NAME "fizz_bar")
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.filled(10000, 0));
 
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub', '--analyze-size']
+    // Capture Usage.test() events.
+    final StringBuffer buffer = await capturedConsolePrint(() =>
+      createTestCommandRunner(command).run(
+        const <String>['build', 'linux', '--no-pub', '--analyze-size']
+      )
     );
+
     expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
-    verify(usage.sendEvent('code-size-analysis', 'linux')).called(1);
+    expect(buffer.toString(), contains('event {category: code-size-analysis, action: linux, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -412,5 +418,3 @@ set(BINARY_NAME "fizz_bar")
     Usage: () => usage,
   });
 }
-
-class MockUsage extends Mock implements Usage {}

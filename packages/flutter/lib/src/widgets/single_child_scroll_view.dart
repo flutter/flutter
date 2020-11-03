@@ -287,13 +287,13 @@ class SingleChildScrollView extends StatelessWidget {
 
   /// The widget that scrolls.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
@@ -413,7 +413,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     markNeedsLayout();
   }
 
-  /// {@macro flutter.rendering.viewport.cacheExtent}
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   double get cacheExtent => _cacheExtent;
   double _cacheExtent;
   set cacheExtent(double value) {
@@ -424,7 +424,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     markNeedsLayout();
   }
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -583,12 +583,16 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       }
 
       if (_shouldClipAtPaintOffset(paintOffset) && clipBehavior != Clip.none) {
-        context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContents, clipBehavior: clipBehavior);
+        _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContents,
+            clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
       } else {
+        _clipRectLayer = null;
         paintContents(context, offset);
       }
     }
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
@@ -629,9 +633,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     final Rect bounds = MatrixUtils.transformRect(transform, rect);
     final Size contentSize = child!.size;
 
-    double leadingScrollOffset;
-    double targetMainAxisExtent;
-    double mainAxisExtent;
+    final double leadingScrollOffset;
+    final double targetMainAxisExtent;
+    final double mainAxisExtent;
 
     assert(axisDirection != null);
     switch (axisDirection) {

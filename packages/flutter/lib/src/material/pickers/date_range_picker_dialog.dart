@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 
 import '../app_bar.dart';
 import '../back_button.dart';
-import '../button_theme.dart';
 import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
@@ -106,7 +105,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///    select a single date.
 ///  * [DateTimeRange], which is used to describe a date range.
 ///
-Future<DateTimeRange> showDateRangePicker({
+Future<DateTimeRange?> showDateRangePicker({
   required BuildContext context,
   DateTimeRange? initialDateRange,
   required DateTime firstDate,
@@ -336,16 +335,16 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Orientation orientation = mediaQuery.orientation;
     final double textScaleFactor = math.min(mediaQuery.textScaleFactor, 1.3);
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
-    Widget contents;
-    Size size;
+    final Widget contents;
+    final Size size;
     ShapeBorder? shape;
-    double elevation;
-    EdgeInsets insetPadding;
+    final double elevation;
+    final EdgeInsets insetPadding;
     switch (_entryMode) {
       case DatePickerEntryMode.calendar:
         contents = _CalendarRangePickerDialog(
@@ -414,7 +413,7 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
           cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
           helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
         );
-        final DialogTheme dialogTheme = Theme.of(context)!.dialogTheme;
+        final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
         size = orientation == Orientation.portrait ? _inputPortraitDialogSize : _inputLandscapeDialogSize;
         insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0);
         shape = dialogTheme.shape;
@@ -429,7 +428,7 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
         duration: _dialogSizeAnimationDuration,
         curve: Curves.easeIn,
         child: MediaQuery(
-          data: MediaQuery.of(context)!.copyWith(
+          data: MediaQuery.of(context).copyWith(
             textScaleFactor: textScaleFactor,
           ),
           child: Builder(builder: (BuildContext context) {
@@ -477,10 +476,10 @@ class _CalendarRangePickerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
-    final Orientation orientation = MediaQuery.of(context)!.orientation;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final Orientation orientation = MediaQuery.of(context).orientation;
     final TextTheme textTheme = theme.textTheme;
     final Color headerForeground = colorScheme.brightness == Brightness.light
       ? colorScheme.onPrimary
@@ -518,18 +517,15 @@ class _CalendarRangePickerDialog extends StatelessWidget {
           ),
           actions: <Widget>[
             if (orientation == Orientation.landscape) entryModeIcon,
-            ButtonTheme(
-              minWidth: 64,
-              child: TextButton(
-                onPressed: onConfirm,
-                child: Text(confirmText, style: saveButtonStyle),
-              ),
+            TextButton(
+              onPressed: onConfirm,
+              child: Text(confirmText, style: saveButtonStyle),
             ),
             const SizedBox(width: 8),
           ],
           bottom: PreferredSize(
             child: Row(children: <Widget>[
-              SizedBox(width: MediaQuery.of(context)!.size.width < 360 ? 42 : 72),
+              SizedBox(width: MediaQuery.of(context).size.width < 360 ? 42 : 72),
               Expanded(
                 child: Semantics(
                   label: '$helpText $startDateText to $endDateText',
@@ -619,7 +615,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
   final String? helpText;
 
   String _formatDateRange(BuildContext context, DateTime? start, DateTime? end, DateTime now) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String startText = utils.formatRangeStartDate(localizations, start, end);
     final String endText = utils.formatRangeEndDate(localizations, start, end, now);
     if (start == null || end == null) {
@@ -634,10 +630,10 @@ class _InputDateRangePickerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
-    final Orientation orientation = MediaQuery.of(context)!.orientation;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final Orientation orientation = MediaQuery.of(context).orientation;
     final TextTheme textTheme = theme.textTheme;
 
     final Color dateColor = colorScheme.brightness == Brightness.light

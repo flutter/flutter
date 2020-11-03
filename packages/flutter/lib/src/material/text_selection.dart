@@ -83,7 +83,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     assert(isLast != null);
 
     // TODO(hansmuller): Should be colorScheme.onSurface
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final bool isDark = theme.colorScheme.brightness == Brightness.dark;
     final Color primary = isDark ? Colors.white : Colors.black87;
 
@@ -183,7 +183,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final List<_ItemData> itemDatas = <_ItemData>[
       if (widget.handleCut != null)
         _ItemData(widget.handleCut!, localizations.cutButtonLabel),
@@ -550,7 +550,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     });
 
     // Place the navigation button if needed.
-    final ToolbarItemsParentData navButtonParentData = navButton.parentData as ToolbarItemsParentData;
+    final ToolbarItemsParentData navButtonParentData = navButton.parentData! as ToolbarItemsParentData;
     if (_shouldPaintChild(firstChild!, 0)) {
       navButtonParentData.shouldPaint = true;
       if (overflowOpen) {
@@ -588,7 +588,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
   void paint(PaintingContext context, Offset offset) {
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
       if (!childParentData.shouldPaint) {
         return;
       }
@@ -609,7 +609,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     // The x, y parameters have the top left of the node's box as the origin.
     RenderBox? child = lastChild;
     while (child != null) {
-      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
 
       // Don't hit test children aren't shown.
       if (!childParentData.shouldPaint) {
@@ -637,7 +637,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
       if (childParentData.shouldPaint) {
         visitor(renderObjectChild);
       }
@@ -760,7 +760,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     const double closedToolbarHeightNeeded = _kToolbarScreenPadding
       + _kToolbarHeight
       + _kToolbarContentDistance;
-    final double paddingTop = MediaQuery.of(context)!.padding.top;
+    final double paddingTop = MediaQuery.of(context).padding.top;
     final double availableHeight = globalEditableRegion.top
       + startTextSelectionPoint.point.dy
       - textLineHeight
@@ -797,7 +797,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final Color handleColor = TextSelectionTheme.of(context).selectionHandleColor ?? theme.colorScheme.primary;
     final Widget handle = SizedBox(
       width: _kHandleSize,

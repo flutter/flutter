@@ -237,7 +237,7 @@ abstract class ScrollView extends StatelessWidget {
   /// the viewport.
   final double anchor;
 
-  /// {@macro flutter.rendering.viewport.cacheExtent}
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   final double? cacheExtent;
 
   /// The number of children that will contribute semantic information.
@@ -265,7 +265,7 @@ abstract class ScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
@@ -675,7 +675,7 @@ abstract class BoxScrollView extends ScrollView {
     Widget sliver = buildChildLayout(context);
     EdgeInsetsGeometry? effectivePadding = padding;
     if (padding == null) {
-      final MediaQueryData? mediaQuery = MediaQuery.of(context, nullOk: true);
+      final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
       if (mediaQuery != null) {
         // Automatically pad sliver with padding from MediaQuery.
         final EdgeInsets mediaQueryHorizontalPadding =
@@ -1042,6 +1042,10 @@ class ListView extends BoxScrollView {
   /// child that could possibly be displayed in the list view instead of just
   /// those children that are actually visible.
   ///
+  /// Like other widgets in the framework, this widget expects that
+  /// the [children] list will not be mutated after it has been passed in here.
+  /// See the documentation at [SliverChildListDelegate.children] for more details.
+  ///
   /// It is usually more efficient to create children on demand using
   /// [ListView.builder] because it will create the widget children lazily as necessary.
   ///
@@ -1247,7 +1251,7 @@ class ListView extends BoxScrollView {
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
-           Widget widget;
+           final Widget widget;
            if (index.isEven) {
              widget = itemBuilder(context, itemIndex);
            } else {

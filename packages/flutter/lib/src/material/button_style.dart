@@ -14,8 +14,8 @@ import 'theme_data.dart';
 /// The visual properties that most buttons have in common.
 ///
 /// Buttons and their themes have a ButtonStyle property which defines the visual
-/// properties whose default values are to be overidden. The default values are
-/// defined by the invidual button widgets and are typically based on overall
+/// properties whose default values are to be overridden. The default values are
+/// defined by the individual button widgets and are typically based on overall
 /// theme's [ThemeData.colorScheme] and [ThemeData.textTheme].
 ///
 /// All of the ButtonStyle properties are null by default.

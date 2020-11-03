@@ -98,6 +98,55 @@ const double _kDividerThickness = 1.0;
 /// [showCupertinoModalPopup], which displays the action sheet by sliding it up
 /// from the bottom of the screen.
 ///
+/// {@tool snippet}
+/// This sample shows how to use a [CupertinoActionSheet].
+///	The [CupertinoActionSheet] shows an alert with a set of two choices
+/// when [CupertinoButton] is pressed.
+///
+/// ```dart
+/// class MyStatefulWidget extends StatefulWidget {
+///   @override
+///   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
+/// }
+///
+/// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+///   @override
+///   Widget build(BuildContext context) {
+///     return CupertinoPageScaffold(
+///       child: Center(
+///         child: CupertinoButton(
+///           onPressed: () {
+///             showCupertinoModalPopup(
+///               context: context,
+///               builder: (BuildContext context) => CupertinoActionSheet(
+///                 title: const Text('Title'),
+///                 message: const Text('Message'),
+///                 actions: [
+///                   CupertinoActionSheetAction(
+///                     child: const Text('Action One'),
+///                     onPressed: () {
+///                       Navigator.pop(context);
+///                     },
+///                   ),
+///                   CupertinoActionSheetAction(
+///                     child: const Text('Action Two'),
+///                     onPressed: () {
+///                       Navigator.pop(context);
+///                     },
+///                   )
+///                 ],
+///               ),
+///             );
+///           },
+///           child: Text('CupertinoActionSheet'),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoActionSheetAction], which is an iOS-style action sheet button.
@@ -225,12 +274,12 @@ class CupertinoActionSheet extends StatelessWidget {
       if (cancelButton != null) _buildCancelButton(),
     ];
 
-    final Orientation orientation = MediaQuery.of(context)!.orientation;
-    double actionSheetWidth;
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    final double actionSheetWidth;
     if (orientation == Orientation.portrait) {
-      actionSheetWidth = MediaQuery.of(context)!.size.width - (_kEdgeHorizontalPadding * 2);
+      actionSheetWidth = MediaQuery.of(context).size.width - (_kEdgeHorizontalPadding * 2);
     } else {
-      actionSheetWidth = MediaQuery.of(context)!.size.height - (_kEdgeHorizontalPadding * 2);
+      actionSheetWidth = MediaQuery.of(context).size.height - (_kEdgeHorizontalPadding * 2);
     }
 
     return SafeArea(
@@ -400,15 +449,15 @@ class _CupertinoAlertRenderWidget extends RenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     return _RenderCupertinoAlert(
-      dividerThickness: _kDividerThickness / MediaQuery.of(context)!.devicePixelRatio,
-      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!,
+      dividerThickness: _kDividerThickness / MediaQuery.of(context).devicePixelRatio,
+      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context),
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoAlert renderObject) {
     super.updateRenderObject(context, renderObject);
-    renderObject.dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!;
+    renderObject.dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context);
   }
 
   @override
@@ -704,13 +753,13 @@ class _RenderCupertinoAlert extends RenderBox {
     // Set the position of the actions box to sit at the bottom of the alert.
     // The content box defaults to the top left, which is where we want it.
     assert(actionsSection!.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData actionParentData = actionsSection!.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData actionParentData = actionsSection!.parentData! as MultiChildLayoutParentData;
     actionParentData.offset = Offset(0.0, contentSize.height + dividerThickness);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final MultiChildLayoutParentData contentParentData = contentSection!.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData contentParentData = contentSection!.parentData! as MultiChildLayoutParentData;
     contentSection!.paint(context, offset + contentParentData.offset);
 
     final bool hasDivider = contentSection!.size.height > 0.0 && actionsSection!.size.height > 0.0;
@@ -718,7 +767,7 @@ class _RenderCupertinoAlert extends RenderBox {
       _paintDividerBetweenContentAndActions(context.canvas, offset);
     }
 
-    final MultiChildLayoutParentData actionsParentData = actionsSection!.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData actionsParentData = actionsSection!.parentData! as MultiChildLayoutParentData;
     actionsSection!.paint(context, offset + actionsParentData.offset);
   }
 
@@ -736,8 +785,8 @@ class _RenderCupertinoAlert extends RenderBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    final MultiChildLayoutParentData contentSectionParentData = contentSection!.parentData as MultiChildLayoutParentData;
-    final MultiChildLayoutParentData actionsSectionParentData = actionsSection!.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData contentSectionParentData = contentSection!.parentData! as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData actionsSectionParentData = actionsSection!.parentData! as MultiChildLayoutParentData;
     return result.addWithPaintOffset(
              offset: contentSectionParentData.offset,
              position: position,
@@ -895,7 +944,7 @@ class _CupertinoAlertActionSection extends StatefulWidget {
 class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSection> {
   @override
   Widget build(BuildContext context) {
-    final double devicePixelRatio = MediaQuery.of(context)!.devicePixelRatio;
+    final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     final List<Widget> interactiveButtons = <Widget>[];
     for (int i = 0; i < widget.children.length; i += 1) {
@@ -977,7 +1026,7 @@ class _ActionButtonParentDataWidget extends ParentDataWidget<_ActionButtonParent
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is _ActionButtonParentData);
-    final _ActionButtonParentData parentData = renderObject.parentData as _ActionButtonParentData;
+    final _ActionButtonParentData parentData = renderObject.parentData! as _ActionButtonParentData;
     if (parentData.isPressed != isPressed) {
       parentData.isPressed = isPressed;
 
@@ -1022,10 +1071,10 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoAlertActions(
       dividerThickness: _dividerThickness,
-      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!,
+      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context),
       hasCancelButton: _hasCancelButton,
-      backgroundColor: CupertinoDynamicColor.resolve(_kBackgroundColor, context)!,
-      pressedColor: CupertinoDynamicColor.resolve(_kPressedColor, context)!,
+      backgroundColor: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+      pressedColor: CupertinoDynamicColor.resolve(_kPressedColor, context),
     );
   }
 
@@ -1033,10 +1082,10 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderCupertinoAlertActions renderObject) {
     renderObject
       ..dividerThickness = _dividerThickness
-      ..dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!
+      ..dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context)
       ..hasCancelButton = _hasCancelButton
-      ..backgroundColor = CupertinoDynamicColor.resolve(_kBackgroundColor, context)!
-      ..pressedColor = CupertinoDynamicColor.resolve(_kPressedColor, context)!;
+      ..backgroundColor = CupertinoDynamicColor.resolve(_kBackgroundColor, context)
+      ..pressedColor = CupertinoDynamicColor.resolve(_kPressedColor, context);
   }
 }
 
@@ -1232,7 +1281,7 @@ class _RenderCupertinoAlertActions extends RenderBox
       );
 
       assert(child.parentData is MultiChildLayoutParentData);
-      final MultiChildLayoutParentData parentData = child.parentData as MultiChildLayoutParentData;
+      final MultiChildLayoutParentData parentData = child.parentData! as MultiChildLayoutParentData;
       parentData.offset = Offset(0.0, verticalOffset);
 
       verticalOffset += child.size.height;
@@ -1274,13 +1323,13 @@ class _RenderCupertinoAlertActions extends RenderBox
     RenderBox? prevChild;
     while (child != null) {
       assert(child.parentData is _ActionButtonParentData);
-      final _ActionButtonParentData currentButtonParentData = child.parentData as _ActionButtonParentData;
+      final _ActionButtonParentData currentButtonParentData = child.parentData! as _ActionButtonParentData;
       final bool isButtonPressed = currentButtonParentData.isPressed;
 
       bool isPrevButtonPressed = false;
       if (prevChild != null) {
         assert(prevChild.parentData is _ActionButtonParentData);
-        final _ActionButtonParentData previousButtonParentData = prevChild.parentData as _ActionButtonParentData;
+        final _ActionButtonParentData previousButtonParentData = prevChild.parentData! as _ActionButtonParentData;
         isPrevButtonPressed = previousButtonParentData.isPressed;
       }
 
@@ -1330,7 +1379,7 @@ class _RenderCupertinoAlertActions extends RenderBox
   void _drawButtons(PaintingContext context, Offset offset) {
     RenderBox? child = firstChild;
     while (child != null) {
-      final MultiChildLayoutParentData childParentData = child.parentData as MultiChildLayoutParentData;
+      final MultiChildLayoutParentData childParentData = child.parentData! as MultiChildLayoutParentData;
       context.paintChild(child, childParentData.offset + offset);
       child = childAfter(child);
     }

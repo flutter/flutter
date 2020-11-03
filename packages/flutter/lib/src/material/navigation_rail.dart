@@ -431,9 +431,9 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     final Color backgroundColor = widget.backgroundColor ?? navigationRailTheme.backgroundColor ?? theme.colorScheme.surface;
     final double elevation = widget.elevation ?? navigationRailTheme.elevation ?? 0;
@@ -622,7 +622,7 @@ class _RailDestination extends StatelessWidget {
       style: labelTextStyle,
       child: label,
     );
-    Widget content;
+    final Widget content;
     switch (labelType) {
       case NavigationRailLabelType.none:
         final Widget iconPart = SizedBox(
@@ -726,7 +726,7 @@ class _RailDestination extends StatelessWidget {
         break;
     }
 
-    final ColorScheme colors = Theme.of(context)!.colorScheme;
+    final ColorScheme colors = Theme.of(context).colorScheme;
     return Semantics(
       container: true,
       selected: selected,

@@ -116,7 +116,7 @@ class RawMaterialButton extends StatefulWidget {
   /// [State.setState] is not allowed).
   final ValueChanged<bool>? onHighlightChanged;
 
-  /// {@template flutter.material.button.mouseCursor}
+  /// {@template flutter.material.RawMaterialButton.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// button.
   ///
@@ -296,7 +296,7 @@ class RawMaterialButton extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
@@ -451,7 +451,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         ),
       ),
     );
-    Size minSize;
+    final Size minSize;
     switch (widget.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         minSize = Size(
@@ -550,7 +550,7 @@ class _RenderInputPadding extends RenderShiftedBox {
       final double height = math.max(child!.size.width, minSize.width);
       final double width = math.max(child!.size.height, minSize.height);
       size = constraints.constrain(Size(height, width));
-      final BoxParentData childParentData = child!.parentData as BoxParentData;
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
     } else {
       size = Size.zero;
