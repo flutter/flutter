@@ -131,7 +131,7 @@ abstract class Device {
   /// Assumes the device doesn't have a secure unlock pattern.
   Future<void> unlock();
 
-  /// Attempt to reboot the phone, if possible.
+  /// Attempt to reboot the phone.
   Future<void> reboot();
 
   /// Emulate a tap on the touch screen.
