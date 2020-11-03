@@ -17,7 +17,6 @@ import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
 /// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyText1]
