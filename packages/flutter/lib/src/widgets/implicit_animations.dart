@@ -1088,7 +1088,7 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 ///             },
 ///             child: Container(
 ///               color: Colors.blue,
-///               child: Text('Tap me'),
+///               child: Center(child: Text('Tap me')),
 ///             ),
 ///           ),
 ///         ),
