@@ -19,7 +19,9 @@ import 'routes.dart';
 /// @override
 /// Widget build(BuildContext) {
 ///     return WillPopScope (
-///      onWillPop: _handleBackPress,
+///      onWillPop: () async {
+///        return shouldPop;
+///      },
 ///        child: MyWidget(),
 ///     );
 /// }
@@ -27,23 +29,86 @@ import 'routes.dart';
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_material}
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart main
+/// void main() => runApp(MyApp());
+/// ```
 ///
 /// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: Text("WillPopScope demo"),
-///       leading: BackButton(),
-///     ),
-///     body: WillPopScope(
-///         child: Center(child: Text("Press back button in AppBar")),
-///         onWillPop: () async {
-///           ScaffoldMessenger.of(context).showSnackBar(
-///               SnackBar(
-///                 content: Text("Callback fired on pressing back button")));
-///           return false;
-///         }),
-///   );
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       initialRoute: '/',
+///       routes: {
+///         '/': (context) => FirstPage(),
+///         '/second_screen': (context) => SecondPage(),
+///       },
+///     );
+///   }
+/// }
+///
+/// class FirstPage extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: AppBar(
+///         title: Text('WillPopScope demo'),
+///       ),
+///       body: Center(
+///         child: RaisedButton(
+///           child: Text('Go to the second screen'),
+///           onPressed: () {
+///             Navigator.pushNamed(context, '/second_screen');
+///           },
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// class SecondPage extends StatefulWidget {
+///   SecondPage({Key key, this.title}) : super(key: key);
+///   final String title;
+///   @override
+///   _SecondPageState createState() => _SecondPageState();
+/// }
+///
+/// class _SecondPageState extends State<SecondPage> {
+///   bool shouldPop = true;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return WillPopScope(
+///       onWillPop: () async => shouldPop,
+///       child: Scaffold(
+///         appBar: AppBar(
+///           title: Text("WillPopScope demo"),
+///           leading: BackButton(),
+///         ),
+///         body: Center(
+///           child: Column(
+///             mainAxisAlignment: MainAxisAlignment.center,
+///             children: <Widget>[
+///               Text(
+///                   "Toggle shouldPop using the button.Press the back button in appbar to see the effect."),
+///               OutlinedButton(
+///                 child: Text('shouldPop: $shouldPop'),
+///                 onPressed: () {
+///                   setState(() {
+///                     shouldPop = !shouldPop;
+///                   });
+///                 },
+///               ),
+///             ],
+///           ),
+///         ),
+///       ),
+///     );
+///   }
 /// }
 /// ```
 ///
@@ -65,8 +130,8 @@ class WillPopScope extends StatefulWidget {
     Key? key,
     required this.child,
     required this.onWillPop,
-  })   : assert(child != null),
-         super(key: key);
+  }) : assert(child != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
