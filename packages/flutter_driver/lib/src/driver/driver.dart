@@ -204,11 +204,18 @@ abstract class FlutterDriver {
     await sendCommand(Tap(finder, timeout: timeout));
   }
 
-  /// Waits until [finder] locates the target.
+  /// Waits until [finder] locates the target. [finder] will wait until
+  /// There is no pending frame scheduled in the app under test
+  /// Before executing an action.
+  ///
+  /// See also:
+  ///
+  /// * [FlutterDriver.runUnsynchronized], which will execute an action
+  /// With frame sync disabled and while the app under test is undergoing
+  /// A transition.
   Future<void> waitFor(SerializableFinder finder, { Duration timeout }) async {
     await sendCommand(WaitFor(finder, timeout: timeout));
   }
-
   /// Waits until [finder] can no longer locate the target.
   Future<void> waitForAbsent(SerializableFinder finder, { Duration timeout }) async {
     await sendCommand(WaitForAbsent(finder, timeout: timeout));
@@ -684,6 +691,7 @@ abstract class FlutterDriver {
   /// With frame sync disabled, it's the responsibility of the test author to
   /// ensure that no action is performed while the app is undergoing a
   /// transition to avoid flakiness.
+  ///
   Future<T> runUnsynchronized<T>(Future<T> action(), { Duration timeout }) async {
     await sendCommand(SetFrameSync(false, timeout: timeout));
     T result;
