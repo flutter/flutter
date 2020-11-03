@@ -968,6 +968,7 @@ class CompileTest {
         options.insert(0, 'ios');
         options.add('--tree-shake-icons');
         options.add('--split-debug-info=infos/');
+        options.add('--verbose');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
