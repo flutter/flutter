@@ -226,7 +226,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
   @override
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final InputDecorationTheme inputTheme = Theme.of(context)!.inputDecorationTheme;
+    final InputDecorationTheme inputTheme = Theme.of(context).inputDecorationTheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[

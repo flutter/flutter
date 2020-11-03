@@ -425,7 +425,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgets('modal BottomSheet has no top MediaQuery', (WidgetTester tester) async {
+  testWidgets('modal BottomSheet has no top MediaQuery when not scroll controlled', (WidgetTester tester) async {
     late BuildContext outerContext;
     late BuildContext innerContext;
 
@@ -474,6 +474,60 @@ void main() {
       MediaQuery.of(innerContext).padding,
       const EdgeInsets.only(left: 50.0, right: 50.0, bottom: 50.0),
     );
+  });
+
+  testWidgets('modal BottomSheet consumes top MediaQuery when scroll controlled', (WidgetTester tester) async {
+    late BuildContext outerContext;
+    late BuildContext innerContext;
+    final Key containerKey = UniqueKey();
+
+    await tester.pumpWidget(Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultMaterialLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.all(50.0),
+            size: Size(400.0, 600.0),
+          ),
+          child: Navigator(
+            onGenerateRoute: (_) {
+              return PageRouteBuilder<void>(
+                pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                  outerContext = context;
+                  return Container();
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    showModalBottomSheet<void>(
+      context: outerContext,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        innerContext = context;
+        return Container(key: containerKey);
+      },
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(
+      MediaQuery.of(outerContext).padding,
+      const EdgeInsets.all(50.0),
+    );
+    expect(
+      MediaQuery.of(innerContext).padding,
+      const EdgeInsets.only(left: 50.0, right: 50.0, bottom: 50.0),
+    );
+    expect(tester.getTopLeft(find.byKey(containerKey)), const Offset(0.0, 50.0));
   });
 
   testWidgets('modal BottomSheet has semantics', (WidgetTester tester) async {

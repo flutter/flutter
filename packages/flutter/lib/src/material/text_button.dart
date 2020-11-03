@@ -86,13 +86,13 @@ class TextButton extends ButtonStyleButton {
   ///
   /// The [icon] and [label] arguments must not be null.
   factory TextButton.icon({
-    Key key,
-    required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus,
-    Clip clipBehavior,
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ButtonStyle? style,
+    FocusNode? focusNode,
+    bool? autofocus,
+    Clip? clipBehavior,
     required Widget icon,
     required Widget label,
   }) = _TextButtonWithIcon;
@@ -235,7 +235,7 @@ class TextButton extends ButtonStyleButton {
   ///   * `2 < textScaleFactor` - horizontal(4)
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(

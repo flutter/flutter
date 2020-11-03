@@ -390,7 +390,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
     return _RenderCupertinoDialog(
       dividerThickness: _kDividerThickness / MediaQuery.of(context).devicePixelRatio,
       isInAccessibilityMode: _isInAccessibilityMode(context),
-      dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context)!,
+      dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
     );
   }
 
@@ -398,7 +398,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderCupertinoDialog renderObject) {
     renderObject
       ..isInAccessibilityMode = _isInAccessibilityMode(context)
-      ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context)!;
+      ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
   }
 
   @override
@@ -1269,9 +1269,9 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
         ? _kAccessibilityCupertinoDialogWidth
         : _kCupertinoDialogWidth,
       dividerThickness: _dividerThickness,
-      dialogColor: CupertinoDynamicColor.resolve(_kDialogColor, context)!,
-      dialogPressedColor: CupertinoDynamicColor.resolve(_kDialogPressedColor, context)!,
-      dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context)!,
+      dialogColor: CupertinoDynamicColor.resolve(_kDialogColor, context),
+      dialogPressedColor: CupertinoDynamicColor.resolve(_kDialogPressedColor, context),
+      dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
     );
   }
 
@@ -1282,9 +1282,9 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
         ? _kAccessibilityCupertinoDialogWidth
         : _kCupertinoDialogWidth
       ..dividerThickness = _dividerThickness
-      ..dialogColor = CupertinoDynamicColor.resolve(_kDialogColor, context)!
-      ..dialogPressedColor = CupertinoDynamicColor.resolve(_kDialogPressedColor, context)!
-      ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context)!;
+      ..dialogColor = CupertinoDynamicColor.resolve(_kDialogColor, context)
+      ..dialogPressedColor = CupertinoDynamicColor.resolve(_kDialogPressedColor, context)
+      ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
   }
 }
 

@@ -131,7 +131,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// field (e.g., by pressing a button on the soft keyboard), the text field
 /// calls the [onSubmitted] callback.
 ///
-/// {@macro flutter.widgets.editableText.complexCharacters}
+/// {@macro flutter.widgets.EditableText.onChanged}
 ///
 /// To control the text that is displayed in the text field, use the
 /// [controller]. For example, to set the initial value of the text field, use
@@ -442,7 +442,7 @@ class CupertinoTextField extends StatefulWidget {
   /// paste and cut will be disabled regardless.
   final ToolbarOptions toolbarOptions;
 
-  /// {@macro flutter.widgets.inputDecorator.textAlignVertical}
+  /// {@macro flutter.material.InputDecorator.textAlignVertical}
   final TextAlignVertical? textAlignVertical;
 
   /// {@macro flutter.widgets.editableText.readOnly}
@@ -463,13 +463,13 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
 
-  /// {@macro flutter.services.textInput.smartDashesType}
+  /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
   final SmartDashesType smartDashesType;
 
-  /// {@macro flutter.services.textInput.smartQuotesType}
+  /// {@macro flutter.services.TextInputConfiguration.smartQuotesType}
   final SmartQuotesType smartQuotesType;
 
-  /// {@macro flutter.services.textInput.enableSuggestions}
+  /// {@macro flutter.services.TextInputConfiguration.enableSuggestions}
   final bool enableSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
@@ -602,7 +602,7 @@ class CupertinoTextField extends StatefulWidget {
   final GestureTapCallback? onTap;
 
   /// {@macro flutter.widgets.editableText.autofillHints}
-  /// {@macro flutter.services.autofill.autofillHints}
+  /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
 
   /// {@macro flutter.material.textfield.restorationId}
@@ -902,38 +902,40 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
-    final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     final TextSelectionControls textSelectionControls = widget.selectionControls ?? cupertinoTextSelectionControls;
     final bool enabled = widget.enabled ?? true;
     final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
     final MaxLengthEnforcement maxLengthEnforcement = widget.maxLengthEnforced
       ? widget.maxLengthEnforcement
       : MaxLengthEnforcement.none;
-    formatters.add(LengthLimitingTextInputFormatter(
-      widget.maxLength,
-      maxLengthEnforcement: maxLengthEnforcement,
-    ));
+    final List<TextInputFormatter> formatters = <TextInputFormatter>[
+      ...?widget.inputFormatters,
+      LengthLimitingTextInputFormatter(
+        widget.maxLength,
+        maxLengthEnforcement: maxLengthEnforcement,
+      ),
+    ];
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
 
     final TextStyle? resolvedStyle = widget.style?.copyWith(
-      color: CupertinoDynamicColor.resolve(widget.style?.color, context),
-      backgroundColor: CupertinoDynamicColor.resolve(widget.style?.backgroundColor, context),
+      color: CupertinoDynamicColor.maybeResolve(widget.style?.color, context),
+      backgroundColor: CupertinoDynamicColor.maybeResolve(widget.style?.backgroundColor, context),
     );
 
     final TextStyle textStyle = themeData.textTheme.textStyle.merge(resolvedStyle);
 
     final TextStyle? resolvedPlaceholderStyle = widget.placeholderStyle?.copyWith(
-      color: CupertinoDynamicColor.resolve(widget.placeholderStyle?.color, context),
-      backgroundColor: CupertinoDynamicColor.resolve(widget.placeholderStyle?.backgroundColor, context),
+      color: CupertinoDynamicColor.maybeResolve(widget.placeholderStyle?.color, context),
+      backgroundColor: CupertinoDynamicColor.maybeResolve(widget.placeholderStyle?.backgroundColor, context),
     );
 
     final TextStyle placeholderStyle = textStyle.merge(resolvedPlaceholderStyle);
 
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? CupertinoTheme.brightnessOf(context);
-    final Color cursorColor = CupertinoDynamicColor.resolve(widget.cursorColor, context) ?? themeData.primaryColor;
-    final Color? disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context);
+    final Color cursorColor = CupertinoDynamicColor.maybeResolve(widget.cursorColor, context) ?? themeData.primaryColor;
+    final Color disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context);
 
-    final Color? decorationColor = CupertinoDynamicColor.resolve(widget.decoration?.color, context);
+    final Color? decorationColor = CupertinoDynamicColor.maybeResolve(widget.decoration?.color, context);
 
     final BoxBorder? border = widget.decoration?.border;
     Border? resolvedBorder = border as Border?;
@@ -1006,7 +1008,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             cursorOffset: cursorOffset,
             paintCursorAboveText: true,
             autocorrectionTextRectColor: selectionColor,
-            backgroundCursorColor: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)!,
+            backgroundCursorColor: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context),
             selectionHeightStyle: widget.selectionHeightStyle,
             selectionWidthStyle: widget.selectionWidthStyle,
             scrollPadding: widget.scrollPadding,

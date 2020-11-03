@@ -23,12 +23,12 @@ import 'framework.dart';
 /// The embedded Android view is painted just like any other Flutter widget and transformations
 /// apply to it as well.
 ///
-/// {@template flutter.widgets.platformViews.layout}
+/// {@template flutter.widgets.AndroidView.layout}
 /// The widget fills all available space, the parent of this object must provide bounded layout
 /// constraints.
 /// {@endtemplate}
 ///
-/// {@template flutter.widgets.platformViews.gestures}
+/// {@template flutter.widgets.AndroidView.gestures}
 /// The widget participates in Flutter's gesture arenas, and dispatches touch events to the
 /// platform view iff it won the arena. Specific gestures that should be dispatched to the platform
 /// view can be specified in the `gestureRecognizers` constructor parameter. If
@@ -47,7 +47,7 @@ import 'framework.dart';
 ///   }
 /// ```
 ///
-/// {@template flutter.widgets.platformViews.lifetime}
+/// {@template flutter.widgets.AndroidView.lifetime}
 /// The platform view's lifetime is the same as the lifetime of the [State] object for this widget.
 /// When the [State] is disposed the platform view (and auxiliary resources) are lazily
 /// released (some resources are immediately released and some by platform garbage collector).
@@ -58,7 +58,7 @@ import 'framework.dart';
 class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
   ///
-  /// {@template flutter.widgets.platformViews.constructorParams}
+  /// {@template flutter.widgets.AndroidView.constructorArgs}
   /// The `viewType` and `hitTestBehavior` parameters must not be null.
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
   /// {@endtemplate}
@@ -88,21 +88,21 @@ class AndroidView extends StatefulWidget {
   ///  * [AndroidView] for an example of registering a platform view factory.
   final String viewType;
 
-  /// {@template flutter.widgets.platformViews.createdParam}
+  /// {@template flutter.widgets.AndroidView.onPlatformViewCreated}
   /// Callback to invoke after the platform view has been created.
   ///
   /// May be null.
   /// {@endtemplate}
   final PlatformViewCreatedCallback? onPlatformViewCreated;
 
-  /// {@template flutter.widgets.platformViews.hittestParam}
+  /// {@template flutter.widgets.AndroidView.hitTestBehavior}
   /// How this widget should behave during hit testing.
   ///
   /// This defaults to [PlatformViewHitTestBehavior.opaque].
   /// {@endtemplate}
   final PlatformViewHitTestBehavior hitTestBehavior;
 
-  /// {@template flutter.widgets.platformViews.directionParam}
+  /// {@template flutter.widgets.AndroidView.layoutDirection}
   /// The text direction to use for the embedded view.
   ///
   /// If this is null, the ambient [Directionality] is used instead.
@@ -111,7 +111,7 @@ class AndroidView extends StatefulWidget {
 
   /// Which gestures should be forwarded to the Android view.
   ///
-  /// {@template flutter.widgets.platformViews.gestureRecognizersDescHead}
+  /// {@template flutter.widgets.AndroidView.gestureRecognizers.descHead}
   /// The gesture recognizers built by factories in this set participate in the gesture arena for
   /// each pointer that was put down on the widget. If any of these recognizers win the
   /// gesture arena, the entire pointer event sequence starting from the pointer down event
@@ -154,7 +154,7 @@ class AndroidView extends StatefulWidget {
   /// )
   /// ```
   ///
-  /// {@template flutter.widgets.platformViews.gestureRecognizersDescFoot}
+  /// {@template flutter.widgets.AndroidView.gestureRecognizers.descFoot}
   /// A platform view can be configured to consume all pointers that were put down in its bounds
   /// by passing a factory for an [EagerGestureRecognizer] in [gestureRecognizers].
   /// [EagerGestureRecognizer] is a special gesture recognizer that immediately claims the gesture
@@ -183,7 +183,7 @@ class AndroidView extends StatefulWidget {
   /// This must not be null if [creationParams] is not null.
   final MessageCodec<dynamic>? creationParamsCodec;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
@@ -196,16 +196,16 @@ class AndroidView extends StatefulWidget {
 // TODO(ychris): remove the documentation for conic path not supported once https://github.com/flutter/flutter/issues/35062 is resolved.
 /// Embeds an iOS view in the Widget hierarchy.
 ///
-/// {@macro flutter.rendering.platformView.preview}
+/// {@macro flutter.rendering.RenderUiKitView}
 ///
 /// Embedding iOS views is an expensive operation and should be avoided when a Flutter
 /// equivalent is possible.
 ///
-/// {@macro flutter.widgets.platformViews.layout}
+/// {@macro flutter.widgets.AndroidView.layout}
 ///
-/// {@macro flutter.widgets.platformViews.gestures}
+/// {@macro flutter.widgets.AndroidView.gestures}
 ///
-/// {@macro flutter.widgets.platformViews.lifetime}
+/// {@macro flutter.widgets.AndroidView.lifetime}
 ///
 /// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
 /// nothing while maintaining the same layout constraints.
@@ -215,7 +215,7 @@ class AndroidView extends StatefulWidget {
 class UiKitView extends StatefulWidget {
   /// Creates a widget that embeds an iOS view.
   ///
-  /// {@macro flutter.widgets.platformViews.constructorParams}
+  /// {@macro flutter.widgets.AndroidView.constructorArgs}
   const UiKitView({
     Key? key,
     required this.viewType,
@@ -236,13 +236,13 @@ class UiKitView extends StatefulWidget {
   /// A PlatformViewFactory for this type must have been registered.
   final String viewType;
 
-  /// {@macro flutter.widgets.platformViews.createdParam}
+  /// {@macro flutter.widgets.AndroidView.onPlatformViewCreated}
   final PlatformViewCreatedCallback? onPlatformViewCreated;
 
-  /// {@macro flutter.widgets.platformViews.hittestParam}
+  /// {@macro flutter.widgets.AndroidView.hitTestBehavior}
   final PlatformViewHitTestBehavior hitTestBehavior;
 
-  /// {@macro flutter.widgets.platformViews.directionParam}
+  /// {@macro flutter.widgets.AndroidView.layoutDirection}
   final TextDirection? layoutDirection;
 
   /// Passed as the `arguments` argument of [-\[FlutterPlatformViewFactory createWithFrame:viewIdentifier:arguments:\]](/objcdoc/Protocols/FlutterPlatformViewFactory.html#/c:objc(pl)FlutterPlatformViewFactory(im)createWithFrame:viewIdentifier:arguments:)
@@ -260,7 +260,7 @@ class UiKitView extends StatefulWidget {
 
   /// Which gestures should be forwarded to the UIKit view.
   ///
-  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescHead}
+  /// {@macro flutter.widgets.AndroidView.gestureRecognizers.descHead}
   ///
   /// For example, with the following setup vertical drags will not be dispatched to the UIKit
   /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
@@ -295,7 +295,7 @@ class UiKitView extends StatefulWidget {
   /// )
   /// ```
   ///
-  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescFoot}
+  /// {@macro flutter.widgets.AndroidView.gestureRecognizers.descFoot}
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   // TODO(amirh): get a list of GestureRecognizers here.
   // https://github.com/flutter/flutter/issues/20953
@@ -317,7 +317,7 @@ class UiKitView extends StatefulWidget {
 /// transformations apply to it as well. This widget should only be used in
 /// Flutter Web.
 ///
-/// {@macro flutter.widgets.platformViews.layout}
+/// {@macro flutter.widgets.AndroidView.layout}
 ///
 /// Due to security restrictions with cross-origin `<iframe>` elements, Flutter
 /// cannot dispatch pointer events to an HTML view. If an `<iframe>` is the
@@ -337,7 +337,7 @@ class UiKitView extends StatefulWidget {
 /// Make sure that your HTML views are sized no larger than necessary, or you
 /// may cause difficulty for users trying to enable accessibility.
 ///
-/// {@macro flutter.widgets.platformViews.lifetime}
+/// {@macro flutter.widgets.AndroidView.lifetime}
 class HtmlElementView extends StatelessWidget {
   /// Creates a platform view for Flutter Web.
   ///
@@ -772,7 +772,7 @@ typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformVie
 /// Provides common functionality for embedding a platform view (e.g an android.view.View on Android)
 /// with the Flutter framework.
 ///
-/// {@macro flutter.widgets.platformViews.lifetime}
+/// {@macro flutter.widgets.AndroidView.lifetime}
 ///
 /// To implement a new platform view widget, return this widget in the `build` method.
 /// For example:
@@ -951,7 +951,7 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
 
   /// Which gestures should be forwarded to the PlatformView.
   ///
-  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescHead}
+  /// {@macro flutter.widgets.AndroidView.gestureRecognizers.descHead}
   ///
   /// For example, with the following setup vertical drags will not be dispatched to the platform view
   /// as the vertical drag gesture is claimed by the parent [GestureDetector].
@@ -984,13 +984,13 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   /// )
   /// ```
   ///
-  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescFoot}
+  /// {@macro flutter.widgets.AndroidView.gestureRecognizers.descFoot}
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   // TODO(amirh): get a list of GestureRecognizers here.
   // https://github.com/flutter/flutter/issues/20953
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
 
-  /// {@macro flutter.widgets.platformViews.hittestParam}
+  /// {@macro flutter.widgets.AndroidView.hitTestBehavior}
   final PlatformViewHitTestBehavior hitTestBehavior;
 
   @override

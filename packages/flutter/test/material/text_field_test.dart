@@ -3344,6 +3344,22 @@ void main() {
     expect(textController.text, '145623');
   });
 
+  testWidgets('Do not add LengthLimiting formatter to the user supplied list', (WidgetTester tester) async {
+    final List<TextInputFormatter> formatters = <TextInputFormatter>[];
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          decoration: null,
+          maxLength: 5,
+          inputFormatters: formatters,
+        ),
+      ),
+    );
+
+    expect(formatters.isEmpty, isTrue);
+  });
+
   testWidgets('Text field scrolls the caret into view', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
