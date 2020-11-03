@@ -186,8 +186,6 @@ class ExecCommandPasteStrategy implements PasteFromClipboardStrategy {
   @override
   Future<String> getData() {
     // TODO(nurhan): https://github.com/flutter/flutter/issues/48581
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/48580
-    print('Paste is not implemented for this browser.');
-    throw UnimplementedError();
+    throw UnimplementedError('Paste is not implemented for this browser.');
   }
 }
