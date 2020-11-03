@@ -458,7 +458,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       // Similar to notificationContext, _ScrollableScope is placed above the
       // widget using it: RawGestureDetector, which allows us to access this
       // ScrollableState
-      defaultScrollAction?._secondaryScrollKey = _gestureDetectorKey;
+      defaultScrollAction?._defaultScrollKey = _gestureDetectorKey;
     }
     super.didChangeDependencies();
   }
@@ -1002,7 +1002,7 @@ class ScrollAction extends Action<ScrollIntent> {
         return true;
       // Check for fallback scrollable with context from DefaultScrollAction
       if (DefaultScrollAction.of(focus.context!) != null) {
-        final GlobalKey? primaryScrollKey = DefaultScrollAction.of(focus.context!)._secondaryScrollKey;
+        final GlobalKey? primaryScrollKey = DefaultScrollAction.of(focus.context!)._defaultScrollKey;
         return primaryScrollKey != null && primaryScrollKey.currentContext != null && Scrollable.of(primaryScrollKey.currentContext!) != null;
       }
     }
@@ -1092,8 +1092,8 @@ class ScrollAction extends Action<ScrollIntent> {
   void invoke(ScrollIntent intent) {
     ScrollableState? state = Scrollable.of(primaryFocus!.context!);
     if (state == null) {
-      final GlobalKey? _secondaryScrollKey = DefaultScrollAction.of(primaryFocus!.context!)._secondaryScrollKey;
-      state = Scrollable.of(_secondaryScrollKey!.currentContext!);
+      final GlobalKey? _defaultScrollKey = DefaultScrollAction.of(primaryFocus!.context!)._defaultScrollKey;
+      state = Scrollable.of(_defaultScrollKey!.currentContext!);
     }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
     assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
@@ -1192,7 +1192,7 @@ class _DefaultScrollActionState extends State<DefaultScrollAction> {
 
   // The key that is enclosed within the context of the current fallback
   // [Scrollable] for [ScrollAction]s.
-  GlobalKey? _secondaryScrollKey;
+  GlobalKey? _defaultScrollKey;
 
   @override
   Widget build(BuildContext context) {
@@ -1221,7 +1221,7 @@ class _DefaultScrollActionScope extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<_DefaultScrollActionState>('_secondaryScrollShortcutState', _defaultScrollActionState));
+    properties.add(DiagnosticsProperty<_DefaultScrollActionState>('_defaultScrollShortcutState', _defaultScrollActionState));
   }
 }
 
