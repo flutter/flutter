@@ -145,8 +145,8 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'gtk-domkey',
-    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_name_to_gtk_name.json'),
-    help: 'The path to where the GTK keycode to DomKey mapping is.',
+    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'gtk_logical_name_mapping.json'),
+    help: 'The path to where the mapping is from GTK keyval name to Flutter logical key name.',
   );
   argParser.addOption(
     'mask-constants',
@@ -292,7 +292,7 @@ Future<void> main(List<String> rawArguments) async {
         codeGenerator = MacOsCodeGenerator(physicalData, maskConstants);
         break;
       case 'ios':
-        codeGenerator = IosCodeGenerator(data);
+        codeGenerator = IosCodeGenerator(physicalData);
         break;
       case 'windows':
         codeGenerator = WindowsCodeGenerator(physicalData);

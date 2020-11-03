@@ -31,7 +31,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of GTK keyval codes to Flutter logical keys.
   String get gtkKeyvalCodeMap {
     final StringBuffer gtkKeyvalCodeMap = StringBuffer();
-    for (final LogicalKeyEntry entry in logicalData.data) {
+    for (final LogicalKeyEntry entry in logicalData.data.values) {
       zipStrict(entry.gtkValues, entry.gtkNames, (int value, String name) {
         gtkKeyvalCodeMap.writeln('  insert_record(table, ${toHex(value)}, ${toHex(entry.value)});    // ${name}');
       });

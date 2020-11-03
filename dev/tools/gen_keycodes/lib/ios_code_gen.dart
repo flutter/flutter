@@ -5,18 +5,18 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'key_data.dart';
+import 'physical_key_data.dart';
 import 'utils.dart';
 
 /// Generates the key mapping of iOS, based on the information in the key
 /// data structure given to it.
 class IosCodeGenerator extends PlatformCodeGenerator {
-  IosCodeGenerator(KeyData keyData) : super(keyData);
+  IosCodeGenerator(PhysicalKeyData keyData) : super(keyData);
 
   /// This generates the map of iOS key codes to physical keys.
   String get _iosScanCodeMap {
     final StringBuffer iosScanCodeMap = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.iosScanCode != null) {
         iosScanCodeMap.writeln('  { ${toHex(entry.iosScanCode)}, ${toHex(entry.usbHidCode)} },    // ${entry.constantName}');
       }
@@ -27,7 +27,7 @@ class IosCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of iOS number pad key codes to logical keys.
   String get _iosNumpadMap {
     final StringBuffer iosNumPadMap = StringBuffer();
-    for (final Key entry in numpadKeyData) {
+    for (final PhysicalKeyEntry entry in numpadKeyData) {
       if (entry.iosScanCode != null) {
         iosNumPadMap.writeln('  { ${toHex(entry.iosScanCode)}, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
       }

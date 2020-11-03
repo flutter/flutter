@@ -19,7 +19,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
   String get _webLogicalKeyCodeMap {
     final StringBuffer result = StringBuffer();
-    for (final LogicalKeyEntry entry in logicalData.data) {
+    for (final LogicalKeyEntry entry in logicalData.data.values) {
       zipStrict(entry.webValues, entry.webNames, (int value, String name) {
         result.writeln("  '${name}': ${toHex(value, digits: 10)},");
       });

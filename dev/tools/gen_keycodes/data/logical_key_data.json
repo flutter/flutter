@@ -4,17 +4,13 @@
     "english": "Backspace",
     "value": 8,
     "names": {
-      "web": [
-        "Backspace"
-      ],
+      "web": [],
       "gtk": [
         "BackSpace"
       ]
     },
     "values": {
-      "web": [
-        8
-      ],
+      "web": [],
       "gtk": [
         65288
       ]
@@ -25,9 +21,7 @@
     "english": "Tab",
     "value": 9,
     "names": {
-      "web": [
-        "Tab"
-      ],
+      "web": [],
       "gtk": [
         "Tab",
         "KP_Tab",
@@ -35,9 +29,7 @@
       ]
     },
     "values": {
-      "web": [
-        9
-      ],
+      "web": [],
       "gtk": [
         65289,
         65417,
@@ -50,25 +42,21 @@
     "english": "Enter",
     "value": 13,
     "names": {
-      "web": [
-        "Enter"
-      ],
+      "web": [],
       "gtk": [
-        "KP_Enter",
         "Return",
-        "3270_Enter",
-        "ISO_Enter"
+        "KP_Enter",
+        "ISO_Enter",
+        "3270_Enter"
       ]
     },
     "values": {
-      "web": [
-        13
-      ],
+      "web": [],
       "gtk": [
-        65421,
         65293,
-        64798,
-        65076
+        65421,
+        65076,
+        64798
       ]
     }
   },
@@ -77,17 +65,13 @@
     "english": "Escape",
     "value": 27,
     "names": {
-      "web": [
-        "Escape"
-      ],
+      "web": [],
       "gtk": [
         "Escape"
       ]
     },
     "values": {
-      "web": [
-        27
-      ],
+      "web": [],
       "gtk": [
         65307
       ]
@@ -98,22 +82,1321 @@
     "english": "Delete",
     "value": 127,
     "names": {
-      "web": [
-        "Delete"
-      ],
+      "web": [],
       "gtk": [
         "Delete",
         "KP_Delete"
       ]
     },
     "values": {
-      "web": [
-        127
-      ],
+      "web": [],
       "gtk": [
         65535,
         65439
       ]
+    }
+  },
+  "space": {
+    "constant": "space",
+    "english": "Space",
+    "value": 32,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Space"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65408
+      ]
+    }
+  },
+  "exclamation": {
+    "constant": "exclamation",
+    "english": "Exclamation",
+    "value": 33,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "quoteDouble": {
+    "constant": "quoteDouble",
+    "english": "Quote Double",
+    "value": 34,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "numberSign": {
+    "constant": "numberSign",
+    "english": "Number Sign",
+    "value": 35,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "dollar": {
+    "constant": "dollar",
+    "english": "Dollar",
+    "value": 36,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "percent": {
+    "constant": "percent",
+    "english": "Percent",
+    "value": 37,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "ampersand": {
+    "constant": "ampersand",
+    "english": "Ampersand",
+    "value": 38,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "quoteSingle": {
+    "constant": "quoteSingle",
+    "english": "Quote Single",
+    "value": 39,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "parenthesisLeft": {
+    "constant": "parenthesisLeft",
+    "english": "Parenthesis Left",
+    "value": 40,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "parenthesisRight": {
+    "constant": "parenthesisRight",
+    "english": "Parenthesis Right",
+    "value": 41,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "asterisk": {
+    "constant": "asterisk",
+    "english": "Asterisk",
+    "value": 42,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Multiply"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65450
+      ]
+    }
+  },
+  "plus": {
+    "constant": "plus",
+    "english": "Plus",
+    "value": 43,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Add"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65451
+      ]
+    }
+  },
+  "comma": {
+    "constant": "comma",
+    "english": "Comma",
+    "value": 44,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "minus": {
+    "constant": "minus",
+    "english": "Minus",
+    "value": 45,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Subtract"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65453
+      ]
+    }
+  },
+  "period": {
+    "constant": "period",
+    "english": "Period",
+    "value": 46,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Decimal"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65454
+      ]
+    }
+  },
+  "slash": {
+    "constant": "slash",
+    "english": "Slash",
+    "value": 47,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Divide"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65455
+      ]
+    }
+  },
+  "digit0": {
+    "constant": "digit0",
+    "english": "Digit 0",
+    "value": 48,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_0"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65456
+      ]
+    }
+  },
+  "digit1": {
+    "constant": "digit1",
+    "english": "Digit 1",
+    "value": 49,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_1"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65457
+      ]
+    }
+  },
+  "digit2": {
+    "constant": "digit2",
+    "english": "Digit 2",
+    "value": 50,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_2"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65458
+      ]
+    }
+  },
+  "digit3": {
+    "constant": "digit3",
+    "english": "Digit 3",
+    "value": 51,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_3"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65459
+      ]
+    }
+  },
+  "digit4": {
+    "constant": "digit4",
+    "english": "Digit 4",
+    "value": 52,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_4"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65460
+      ]
+    }
+  },
+  "digit5": {
+    "constant": "digit5",
+    "english": "Digit 5",
+    "value": 53,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_5"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65461
+      ]
+    }
+  },
+  "digit6": {
+    "constant": "digit6",
+    "english": "Digit 6",
+    "value": 54,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_6"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65462
+      ]
+    }
+  },
+  "digit7": {
+    "constant": "digit7",
+    "english": "Digit 7",
+    "value": 55,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_7"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65463
+      ]
+    }
+  },
+  "digit8": {
+    "constant": "digit8",
+    "english": "Digit 8",
+    "value": 56,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_8"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65464
+      ]
+    }
+  },
+  "digit9": {
+    "constant": "digit9",
+    "english": "Digit 9",
+    "value": 57,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_9"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65465
+      ]
+    }
+  },
+  "colon": {
+    "constant": "colon",
+    "english": "Colon",
+    "value": 58,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "semicolon": {
+    "constant": "semicolon",
+    "english": "Semicolon",
+    "value": 59,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "less": {
+    "constant": "less",
+    "english": "Less",
+    "value": 60,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "equal": {
+    "constant": "equal",
+    "english": "Equal",
+    "value": 61,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Equal"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65469
+      ]
+    }
+  },
+  "greater": {
+    "constant": "greater",
+    "english": "Greater",
+    "value": 62,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "question": {
+    "constant": "question",
+    "english": "Question",
+    "value": 63,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "at": {
+    "constant": "at",
+    "english": "At",
+    "value": 64,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperA": {
+    "constant": "upperA",
+    "english": "Upper A",
+    "value": 65,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperB": {
+    "constant": "upperB",
+    "english": "Upper B",
+    "value": 66,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperC": {
+    "constant": "upperC",
+    "english": "Upper C",
+    "value": 67,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperD": {
+    "constant": "upperD",
+    "english": "Upper D",
+    "value": 68,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperE": {
+    "constant": "upperE",
+    "english": "Upper E",
+    "value": 69,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperF": {
+    "constant": "upperF",
+    "english": "Upper F",
+    "value": 70,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperG": {
+    "constant": "upperG",
+    "english": "Upper G",
+    "value": 71,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperH": {
+    "constant": "upperH",
+    "english": "Upper H",
+    "value": 72,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperI": {
+    "constant": "upperI",
+    "english": "Upper I",
+    "value": 73,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperJ": {
+    "constant": "upperJ",
+    "english": "Upper J",
+    "value": 74,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperK": {
+    "constant": "upperK",
+    "english": "Upper K",
+    "value": 75,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperL": {
+    "constant": "upperL",
+    "english": "Upper L",
+    "value": 76,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperM": {
+    "constant": "upperM",
+    "english": "Upper M",
+    "value": 77,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperN": {
+    "constant": "upperN",
+    "english": "Upper N",
+    "value": 78,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperO": {
+    "constant": "upperO",
+    "english": "Upper O",
+    "value": 79,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperP": {
+    "constant": "upperP",
+    "english": "Upper P",
+    "value": 80,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperQ": {
+    "constant": "upperQ",
+    "english": "Upper Q",
+    "value": 81,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperR": {
+    "constant": "upperR",
+    "english": "Upper R",
+    "value": 82,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperS": {
+    "constant": "upperS",
+    "english": "Upper S",
+    "value": 83,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperT": {
+    "constant": "upperT",
+    "english": "Upper T",
+    "value": 84,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperU": {
+    "constant": "upperU",
+    "english": "Upper U",
+    "value": 85,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperV": {
+    "constant": "upperV",
+    "english": "Upper V",
+    "value": 86,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperW": {
+    "constant": "upperW",
+    "english": "Upper W",
+    "value": 87,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperX": {
+    "constant": "upperX",
+    "english": "Upper X",
+    "value": 88,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperY": {
+    "constant": "upperY",
+    "english": "Upper Y",
+    "value": 89,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "upperZ": {
+    "constant": "upperZ",
+    "english": "Upper Z",
+    "value": 90,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "bracketLeft": {
+    "constant": "bracketLeft",
+    "english": "Bracket Left",
+    "value": 91,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "backslash": {
+    "constant": "backslash",
+    "english": "Backslash",
+    "value": 92,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "bracketRight": {
+    "constant": "bracketRight",
+    "english": "Bracket Right",
+    "value": 93,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "caret": {
+    "constant": "caret",
+    "english": "Caret",
+    "value": 94,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "backquote": {
+    "constant": "backquote",
+    "english": "Backquote",
+    "value": 96,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "underscore": {
+    "constant": "underscore",
+    "english": "Underscore",
+    "value": 95,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerA": {
+    "constant": "lowerA",
+    "english": "Lower A",
+    "value": 97,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerB": {
+    "constant": "lowerB",
+    "english": "Lower B",
+    "value": 98,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerC": {
+    "constant": "lowerC",
+    "english": "Lower C",
+    "value": 99,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerD": {
+    "constant": "lowerD",
+    "english": "Lower D",
+    "value": 100,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerE": {
+    "constant": "lowerE",
+    "english": "Lower E",
+    "value": 101,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerF": {
+    "constant": "lowerF",
+    "english": "Lower F",
+    "value": 102,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerG": {
+    "constant": "lowerG",
+    "english": "Lower G",
+    "value": 103,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerH": {
+    "constant": "lowerH",
+    "english": "Lower H",
+    "value": 104,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerI": {
+    "constant": "lowerI",
+    "english": "Lower I",
+    "value": 105,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerJ": {
+    "constant": "lowerJ",
+    "english": "Lower J",
+    "value": 106,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerK": {
+    "constant": "lowerK",
+    "english": "Lower K",
+    "value": 107,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerL": {
+    "constant": "lowerL",
+    "english": "Lower L",
+    "value": 108,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerM": {
+    "constant": "lowerM",
+    "english": "Lower M",
+    "value": 109,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerN": {
+    "constant": "lowerN",
+    "english": "Lower N",
+    "value": 110,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerO": {
+    "constant": "lowerO",
+    "english": "Lower O",
+    "value": 111,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerP": {
+    "constant": "lowerP",
+    "english": "Lower P",
+    "value": 112,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerQ": {
+    "constant": "lowerQ",
+    "english": "Lower Q",
+    "value": 113,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerR": {
+    "constant": "lowerR",
+    "english": "Lower R",
+    "value": 114,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerS": {
+    "constant": "lowerS",
+    "english": "Lower S",
+    "value": 115,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerT": {
+    "constant": "lowerT",
+    "english": "Lower T",
+    "value": 116,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerU": {
+    "constant": "lowerU",
+    "english": "Lower U",
+    "value": 117,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerV": {
+    "constant": "lowerV",
+    "english": "Lower V",
+    "value": 118,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerW": {
+    "constant": "lowerW",
+    "english": "Lower W",
+    "value": 119,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerX": {
+    "constant": "lowerX",
+    "english": "Lower X",
+    "value": 120,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerY": {
+    "constant": "lowerY",
+    "english": "Lower Y",
+    "value": 121,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "lowerZ": {
+    "constant": "lowerZ",
+    "english": "Lower Z",
+    "value": 122,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "braceLeft": {
+    "constant": "braceLeft",
+    "english": "Brace Left",
+    "value": 123,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "braceRight": {
+    "constant": "braceRight",
+    "english": "Brace Right",
+    "value": 125,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "tilde": {
+    "constant": "tilde",
+    "english": "Tilde",
+    "value": 126,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "bar": {
+    "constant": "bar",
+    "english": "Bar",
+    "value": 124,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
     }
   },
   "unidentified": {
@@ -124,13 +1407,13 @@
       "web": [
         "Unidentified"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "accel": {
@@ -141,13 +1424,13 @@
       "web": [
         "Accel"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         257
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "alt": {
@@ -181,13 +1464,13 @@
       "web": [
         "AltGraph"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         259
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "capsLock": {
@@ -242,13 +1525,13 @@
       "web": [
         "Fn"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         262
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "fnLock": {
@@ -259,13 +1542,13 @@
       "web": [
         "FnLock"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         263
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "hyper": {
@@ -410,13 +1693,13 @@
       "web": [
         "Symbol"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         271
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "symbolLock": {
@@ -427,13 +1710,13 @@
       "web": [
         "SymbolLock"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         272
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "shiftLevel5": {
@@ -444,13 +1727,13 @@
       "web": [
         "ShiftLevel5"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         273
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "altGraphLatch": {
@@ -461,13 +1744,13 @@
       "web": [
         "AltGraphLatch"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         274
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "arrowDown": {
@@ -684,8 +1967,8 @@
         "Copy"
       ],
       "gtk": [
-        "Copy",
-        "3270_Copy"
+        "3270_Copy",
+        "Copy"
       ]
     },
     "values": {
@@ -693,8 +1976,8 @@
         1026
       ],
       "gtk": [
-        269025111,
-        64789
+        64789,
+        269025111
       ]
     }
   },
@@ -706,13 +1989,13 @@
       "web": [
         "CrSel"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1027
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "cut": {
@@ -872,13 +2155,13 @@
       "web": [
         "Accept"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1281
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "again": {
@@ -889,13 +2172,13 @@
       "web": [
         "Again"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1282
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "attn": {
@@ -1053,19 +2336,13 @@
       "web": [
         "Play"
       ],
-      "gtk": [
-        "3270_Play",
-        "AudioPlay"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [
         1290
       ],
-      "gtk": [
-        64790,
-        269025044
-      ]
+      "gtk": []
     }
   },
   "props": {
@@ -1076,13 +2353,13 @@
       "web": [
         "Props"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1291
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "select": {
@@ -1240,13 +2517,13 @@
       "web": [
         "Power"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1542
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "powerOff": {
@@ -1299,13 +2576,13 @@
       "web": [
         "Hibernate"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1545
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "standby": {
@@ -1358,13 +2635,13 @@
       "web": [
         "AllCandidates"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1793
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "alphanumeric": {
@@ -1375,13 +2652,13 @@
       "web": [
         "Alphanumeric"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1794
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "codeInput": {
@@ -1413,13 +2690,13 @@
       "web": [
         "Compose"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1796
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "convert": {
@@ -1430,13 +2707,13 @@
       "web": [
         "Convert"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1797
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "finalMode": {
@@ -1447,13 +2724,13 @@
       "web": [
         "FinalMode"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1798
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "groupFirst": {
@@ -1569,13 +2846,13 @@
       "web": [
         "NextCandidate"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1804
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "nonConvert": {
@@ -1586,13 +2863,13 @@
       "web": [
         "NonConvert"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1805
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "previousCandidate": {
@@ -1624,13 +2901,13 @@
       "web": [
         "Process"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1807
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "singleCandidate": {
@@ -1704,13 +2981,13 @@
       "web": [
         "JunjaMode"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1811
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "eisu": {
@@ -1784,13 +3061,17 @@
       "web": [
         "HiraganaKatakana"
       ],
-      "gtk": null
+      "gtk": [
+        "Hiragana_Katakana"
+      ]
     },
     "values": {
       "web": [
         1815
       ],
-      "gtk": null
+      "gtk": [
+        65319
+      ]
     }
   },
   "kanaMode": {
@@ -1928,8 +3209,8 @@
         "F1"
       ],
       "gtk": [
-        "F1",
-        "KP_F1"
+        "KP_F1",
+        "F1"
       ]
     },
     "values": {
@@ -1937,8 +3218,8 @@
         2049
       ],
       "gtk": [
-        65470,
-        65425
+        65425,
+        65470
       ]
     }
   },
@@ -1951,8 +3232,8 @@
         "F2"
       ],
       "gtk": [
-        "F2",
-        "KP_F2"
+        "KP_F2",
+        "F2"
       ]
     },
     "values": {
@@ -1960,8 +3241,8 @@
         2050
       ],
       "gtk": [
-        65471,
-        65426
+        65426,
+        65471
       ]
     }
   },
@@ -1974,8 +3255,8 @@
         "F3"
       ],
       "gtk": [
-        "F3",
-        "KP_F3"
+        "KP_F3",
+        "F3"
       ]
     },
     "values": {
@@ -1983,8 +3264,8 @@
         2051
       ],
       "gtk": [
-        65472,
-        65427
+        65427,
+        65472
       ]
     }
   },
@@ -1997,8 +3278,8 @@
         "F4"
       ],
       "gtk": [
-        "F4",
-        "KP_F4"
+        "KP_F4",
+        "F4"
       ]
     },
     "values": {
@@ -2006,8 +3287,8 @@
         2052
       ],
       "gtk": [
-        65473,
-        65428
+        65428,
+        65473
       ]
     }
   },
@@ -2439,13 +3720,13 @@
       "web": [
         "Soft1"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2305
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "soft2": {
@@ -2456,13 +3737,13 @@
       "web": [
         "Soft2"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2306
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "soft3": {
@@ -2473,13 +3754,13 @@
       "web": [
         "Soft3"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2307
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "soft4": {
@@ -2490,13 +3771,13 @@
       "web": [
         "Soft4"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2308
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "soft5": {
@@ -2507,13 +3788,13 @@
       "web": [
         "Soft5"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2309
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "soft6": {
@@ -2524,13 +3805,13 @@
       "web": [
         "Soft6"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2310
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "soft7": {
@@ -2541,13 +3822,13 @@
       "web": [
         "Soft7"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2311
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "soft8": {
@@ -2558,13 +3839,13 @@
       "web": [
         "Soft8"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2312
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "channelDown": {
@@ -2575,13 +3856,13 @@
       "web": [
         "ChannelDown"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3338
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "channelUp": {
@@ -2592,13 +3873,13 @@
       "web": [
         "ChannelUp"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3339
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "close": {
@@ -2693,13 +3974,13 @@
       "web": [
         "MediaClose"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3419
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "mediaFastForward": {
@@ -2753,8 +4034,8 @@
         "MediaPlay"
       ],
       "gtk": [
-        "AudioPlay",
-        "3270_Play"
+        "3270_Play",
+        "AudioPlay"
       ]
     },
     "values": {
@@ -2762,8 +4043,8 @@
         3375
       ],
       "gtk": [
-        269025044,
-        64790
+        64790,
+        269025044
       ]
     }
   },
@@ -2775,13 +4056,13 @@
       "web": [
         "MediaPlayPause"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2565
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "mediaRecord": {
@@ -3002,13 +4283,13 @@
       "web": [
         "Key11"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4609
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "key12": {
@@ -3019,13 +4300,13 @@
       "web": [
         "Key12"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4610
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "audioBalanceLeft": {
@@ -3036,13 +4317,13 @@
       "web": [
         "AudioBalanceLeft"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3329
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "audioBalanceRight": {
@@ -3053,13 +4334,13 @@
       "web": [
         "AudioBalanceRight"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3330
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "audioBassBoostDown": {
@@ -3070,13 +4351,13 @@
       "web": [
         "AudioBassBoostDown"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3331
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "audioBassBoostToggle": {
@@ -3087,13 +4368,13 @@
       "web": [
         "AudioBassBoostToggle"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3586
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "audioBassBoostUp": {
@@ -3104,13 +4385,13 @@
       "web": [
         "AudioBassBoostUp"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3332
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "audioFaderFront": {
@@ -3121,13 +4402,13 @@
       "web": [
         "AudioFaderFront"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3333
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "audioFaderRear": {
@@ -3138,13 +4419,13 @@
       "web": [
         "AudioFaderRear"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3334
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "audioSurroundModeNext": {
@@ -3155,13 +4436,13 @@
       "web": [
         "AudioSurroundModeNext"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3335
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "audioTrebleDown": {
@@ -3172,13 +4453,13 @@
       "web": [
         "AudioTrebleDown"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3588
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "audioTrebleUp": {
@@ -3189,13 +4470,13 @@
       "web": [
         "AudioTrebleUp"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3589
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "audioVolumeDown": {
@@ -3269,13 +4550,13 @@
       "web": [
         "MicrophoneToggle"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3590
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "microphoneVolumeDown": {
@@ -3286,13 +4567,13 @@
       "web": [
         "MicrophoneVolumeDown"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3591
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "microphoneVolumeUp": {
@@ -3303,13 +4584,13 @@
       "web": [
         "MicrophoneVolumeUp"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3592
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "microphoneVolumeMute": {
@@ -3320,13 +4601,13 @@
       "web": [
         "MicrophoneVolumeMute"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3593
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "speechCorrectionList": {
@@ -3337,13 +4618,13 @@
       "web": [
         "SpeechCorrectionList"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3841
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "speechInputToggle": {
@@ -3354,13 +4635,13 @@
       "web": [
         "SpeechInputToggle"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3842
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "launchApplication1": {
@@ -3371,13 +4652,13 @@
       "web": [
         "LaunchApplication1"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2822
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "launchApplication2": {
@@ -3388,13 +4669,13 @@
       "web": [
         "LaunchApplication2"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2817
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "launchCalendar": {
@@ -3426,13 +4707,13 @@
       "web": [
         "LaunchContacts"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2828
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "launchMail": {
@@ -3464,13 +4745,13 @@
       "web": [
         "LaunchMediaPlayer"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2820
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "launchMusicPlayer": {
@@ -3481,13 +4762,13 @@
       "web": [
         "LaunchMusicPlayer"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2821
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "launchPhone": {
@@ -3540,13 +4821,13 @@
       "web": [
         "LaunchSpreadsheet"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2824
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "launchWebBrowser": {
@@ -3557,13 +4838,13 @@
       "web": [
         "LaunchWebBrowser"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2825
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "launchWebCam": {
@@ -3574,13 +4855,13 @@
       "web": [
         "LaunchWebCam"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2826
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "launchWordProcessor": {
@@ -3591,13 +4872,13 @@
       "web": [
         "LaunchWordProcessor"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2827
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "launchAssistant": {
@@ -3608,13 +4889,13 @@
       "web": [
         "LaunchAssistant"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2830
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "launchControlPanel": {
@@ -3625,13 +4906,13 @@
       "web": [
         "LaunchControlPanel"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         2831
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "browserBack": {
@@ -3789,13 +5070,13 @@
       "web": [
         "AppSwitch"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4097
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "call": {
@@ -3806,13 +5087,13 @@
       "web": [
         "Call"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4098
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "camera": {
@@ -3823,13 +5104,13 @@
       "web": [
         "Camera"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         1539
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "cameraFocus": {
@@ -3840,13 +5121,13 @@
       "web": [
         "CameraFocus"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4099
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "endCall": {
@@ -3857,13 +5138,13 @@
       "web": [
         "EndCall"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4100
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "goBack": {
@@ -3874,13 +5155,13 @@
       "web": [
         "GoBack"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4101
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "goHome": {
@@ -3891,13 +5172,13 @@
       "web": [
         "GoHome"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4102
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "headsetHook": {
@@ -3908,13 +5189,13 @@
       "web": [
         "HeadsetHook"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4103
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "lastNumberRedial": {
@@ -3925,13 +5206,13 @@
       "web": [
         "LastNumberRedial"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4104
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "notification": {
@@ -3942,13 +5223,13 @@
       "web": [
         "Notification"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4105
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "mannerMode": {
@@ -3959,13 +5240,13 @@
       "web": [
         "MannerMode"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4106
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "voiceDial": {
@@ -3976,13 +5257,13 @@
       "web": [
         "VoiceDial"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4107
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tv": {
@@ -3993,13 +5274,13 @@
       "web": [
         "TV"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3401
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tV3DMode": {
@@ -4010,13 +5291,13 @@
       "web": [
         "TV3DMode"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4353
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvAntennaCable": {
@@ -4027,13 +5308,13 @@
       "web": [
         "TVAntennaCable"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4354
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvAudioDescription": {
@@ -4044,13 +5325,13 @@
       "web": [
         "TVAudioDescription"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4355
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvAudioDescriptionMixDown": {
@@ -4061,13 +5342,13 @@
       "web": [
         "TVAudioDescriptionMixDown"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4356
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvAudioDescriptionMixUp": {
@@ -4078,13 +5359,13 @@
       "web": [
         "TVAudioDescriptionMixUp"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4357
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvContentsMenu": {
@@ -4095,13 +5376,13 @@
       "web": [
         "TVContentsMenu"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4358
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvDataService": {
@@ -4112,13 +5393,13 @@
       "web": [
         "TVDataService"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4359
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvInput": {
@@ -4129,13 +5410,13 @@
       "web": [
         "TVInput"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3402
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvInputComponent1": {
@@ -4146,13 +5427,13 @@
       "web": [
         "TVInputComponent1"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4360
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvInputComponent2": {
@@ -4163,13 +5444,13 @@
       "web": [
         "TVInputComponent2"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4361
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvInputComposite1": {
@@ -4180,13 +5461,13 @@
       "web": [
         "TVInputComposite1"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4362
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvInputComposite2": {
@@ -4197,13 +5478,13 @@
       "web": [
         "TVInputComposite2"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4363
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvInputHDMI1": {
@@ -4214,13 +5495,13 @@
       "web": [
         "TVInputHDMI1"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4364
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvInputHDMI2": {
@@ -4231,13 +5512,13 @@
       "web": [
         "TVInputHDMI2"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4365
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvInputHDMI3": {
@@ -4248,13 +5529,13 @@
       "web": [
         "TVInputHDMI3"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4366
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvInputHDMI4": {
@@ -4265,13 +5546,13 @@
       "web": [
         "TVInputHDMI4"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4367
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvInputVGA1": {
@@ -4282,13 +5563,13 @@
       "web": [
         "TVInputVGA1"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4368
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvMediaContext": {
@@ -4299,13 +5580,13 @@
       "web": [
         "TVMediaContext"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4369
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvNetwork": {
@@ -4316,13 +5597,13 @@
       "web": [
         "TVNetwork"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4370
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvNumberEntry": {
@@ -4333,13 +5614,13 @@
       "web": [
         "TVNumberEntry"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4371
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvPower": {
@@ -4350,13 +5631,13 @@
       "web": [
         "TVPower"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3403
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvRadioService": {
@@ -4367,13 +5648,13 @@
       "web": [
         "TVRadioService"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4372
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvSatellite": {
@@ -4384,13 +5665,13 @@
       "web": [
         "TVSatellite"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4373
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvSatelliteBS": {
@@ -4401,13 +5682,13 @@
       "web": [
         "TVSatelliteBS"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4374
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvSatelliteCS": {
@@ -4418,13 +5699,13 @@
       "web": [
         "TVSatelliteCS"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4375
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvSatelliteToggle": {
@@ -4435,13 +5716,13 @@
       "web": [
         "TVSatelliteToggle"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4376
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvTerrestrialAnalog": {
@@ -4452,13 +5733,13 @@
       "web": [
         "TVTerrestrialAnalog"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4377
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvTerrestrialDigital": {
@@ -4469,13 +5750,13 @@
       "web": [
         "TVTerrestrialDigital"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4378
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "tvTimer": {
@@ -4486,13 +5767,13 @@
       "web": [
         "TVTimer"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         4379
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "avrInput": {
@@ -4503,13 +5784,13 @@
       "web": [
         "AVRInput"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3336
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "avrPower": {
@@ -4520,13 +5801,13 @@
       "web": [
         "AVRPower"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3337
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "colorF0Red": {
@@ -4537,13 +5818,13 @@
       "web": [
         "ColorF0Red"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3340
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "colorF1Green": {
@@ -4554,13 +5835,13 @@
       "web": [
         "ColorF1Green"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3341
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "colorF2Yellow": {
@@ -4571,13 +5852,13 @@
       "web": [
         "ColorF2Yellow"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3342
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "colorF3Blue": {
@@ -4588,13 +5869,13 @@
       "web": [
         "ColorF3Blue"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3343
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "colorF4Grey": {
@@ -4605,13 +5886,13 @@
       "web": [
         "ColorF4Grey"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3344
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "colorF5Brown": {
@@ -4622,13 +5903,13 @@
       "web": [
         "ColorF5Brown"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3345
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "closedCaptionToggle": {
@@ -4639,13 +5920,13 @@
       "web": [
         "ClosedCaptionToggle"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3346
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "dimmer": {
@@ -4656,13 +5937,13 @@
       "web": [
         "Dimmer"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3347
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "displaySwap": {
@@ -4673,13 +5954,13 @@
       "web": [
         "DisplaySwap"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3348
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "dvr": {
@@ -4690,13 +5971,13 @@
       "web": [
         "DVR"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3407
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "exit": {
@@ -4707,13 +5988,13 @@
       "web": [
         "Exit"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3349
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "favoriteClear0": {
@@ -4724,13 +6005,13 @@
       "web": [
         "FavoriteClear0"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3350
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "favoriteClear1": {
@@ -4741,13 +6022,13 @@
       "web": [
         "FavoriteClear1"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3351
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "favoriteClear2": {
@@ -4758,13 +6039,13 @@
       "web": [
         "FavoriteClear2"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3352
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "favoriteClear3": {
@@ -4775,13 +6056,13 @@
       "web": [
         "FavoriteClear3"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3353
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "favoriteRecall0": {
@@ -4792,13 +6073,13 @@
       "web": [
         "FavoriteRecall0"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3354
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "favoriteRecall1": {
@@ -4809,13 +6090,13 @@
       "web": [
         "FavoriteRecall1"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3355
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "favoriteRecall2": {
@@ -4826,13 +6107,13 @@
       "web": [
         "FavoriteRecall2"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3356
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "favoriteRecall3": {
@@ -4843,13 +6124,13 @@
       "web": [
         "FavoriteRecall3"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3357
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "favoriteStore0": {
@@ -4860,13 +6141,13 @@
       "web": [
         "FavoriteStore0"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3358
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "favoriteStore1": {
@@ -4877,13 +6158,13 @@
       "web": [
         "FavoriteStore1"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3359
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "favoriteStore2": {
@@ -4894,13 +6175,13 @@
       "web": [
         "FavoriteStore2"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3360
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "favoriteStore3": {
@@ -4911,13 +6192,13 @@
       "web": [
         "FavoriteStore3"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3361
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "guide": {
@@ -4928,13 +6209,13 @@
       "web": [
         "Guide"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3362
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "guideNextDay": {
@@ -4945,13 +6226,13 @@
       "web": [
         "GuideNextDay"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3363
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "guidePreviousDay": {
@@ -4962,13 +6243,13 @@
       "web": [
         "GuidePreviousDay"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3364
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "info": {
@@ -4979,13 +6260,13 @@
       "web": [
         "Info"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3365
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "instantReplay": {
@@ -4996,13 +6277,13 @@
       "web": [
         "InstantReplay"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3366
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "link": {
@@ -5013,13 +6294,13 @@
       "web": [
         "Link"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3367
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "listProgram": {
@@ -5030,13 +6311,13 @@
       "web": [
         "ListProgram"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3368
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "liveContent": {
@@ -5047,13 +6328,13 @@
       "web": [
         "LiveContent"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3369
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "lock": {
@@ -5064,13 +6345,13 @@
       "web": [
         "Lock"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3370
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "mediaApps": {
@@ -5081,13 +6362,13 @@
       "web": [
         "MediaApps"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3371
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "mediaAudioTrack": {
@@ -5098,13 +6379,13 @@
       "web": [
         "MediaAudioTrack"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3408
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "mediaLast": {
@@ -5115,13 +6396,13 @@
       "web": [
         "MediaLast"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3373
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "mediaSkipBackward": {
@@ -5132,13 +6413,13 @@
       "web": [
         "MediaSkipBackward"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3409
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "mediaSkipForward": {
@@ -5149,13 +6430,13 @@
       "web": [
         "MediaSkipForward"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3410
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "mediaSkip": {
@@ -5166,13 +6447,13 @@
       "web": [
         "MediaSkip"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3378
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "mediaStepBackward": {
@@ -5183,13 +6464,13 @@
       "web": [
         "MediaStepBackward"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3411
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "mediaStepForward": {
@@ -5200,13 +6481,13 @@
       "web": [
         "MediaStepForward"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3412
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "mediaTopMenu": {
@@ -5217,13 +6498,13 @@
       "web": [
         "MediaTopMenu"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3413
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "navigateIn": {
@@ -5234,13 +6515,13 @@
       "web": [
         "NavigateIn"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3414
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "navigateNext": {
@@ -5251,13 +6532,13 @@
       "web": [
         "NavigateNext"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3415
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "navigateOut": {
@@ -5268,13 +6549,13 @@
       "web": [
         "NavigateOut"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3416
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "navigatePrevious": {
@@ -5285,13 +6566,13 @@
       "web": [
         "NavigatePrevious"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3417
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "nextFavoriteChannel": {
@@ -5302,13 +6583,13 @@
       "web": [
         "NextFavoriteChannel"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3379
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "nextUserProfile": {
@@ -5319,13 +6600,13 @@
       "web": [
         "NextUserProfile"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3380
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "onDemand": {
@@ -5336,13 +6617,13 @@
       "web": [
         "OnDemand"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3381
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "pairing": {
@@ -5353,13 +6634,13 @@
       "web": [
         "Pairing"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3418
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "pInPDown": {
@@ -5370,13 +6651,13 @@
       "web": [
         "PinPDown"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3382
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "pInPMove": {
@@ -5387,13 +6668,13 @@
       "web": [
         "PinPMove"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3383
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "pInPToggle": {
@@ -5404,13 +6685,13 @@
       "web": [
         "PinPToggle"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3384
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "pInPUp": {
@@ -5421,13 +6702,13 @@
       "web": [
         "PinPUp"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3385
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "playSpeedDown": {
@@ -5438,13 +6719,13 @@
       "web": [
         "PlaySpeedDown"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3386
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "playSpeedReset": {
@@ -5455,13 +6736,13 @@
       "web": [
         "PlaySpeedReset"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3387
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "playSpeedUp": {
@@ -5472,13 +6753,13 @@
       "web": [
         "PlaySpeedUp"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3388
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "randomToggle": {
@@ -5489,13 +6770,13 @@
       "web": [
         "RandomToggle"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3389
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "rcLowBattery": {
@@ -5506,13 +6787,13 @@
       "web": [
         "RcLowBattery"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3390
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "recordSpeedNext": {
@@ -5523,13 +6804,13 @@
       "web": [
         "RecordSpeedNext"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3391
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "rfBypass": {
@@ -5540,13 +6821,13 @@
       "web": [
         "RfBypass"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3392
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "scanChannelsToggle": {
@@ -5557,13 +6838,13 @@
       "web": [
         "ScanChannelsToggle"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3393
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "screenModeNext": {
@@ -5574,13 +6855,13 @@
       "web": [
         "ScreenModeNext"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3394
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "settings": {
@@ -5591,13 +6872,13 @@
       "web": [
         "Settings"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3395
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "splitScreenToggle": {
@@ -5608,13 +6889,13 @@
       "web": [
         "SplitScreenToggle"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3396
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "stbInput": {
@@ -5625,13 +6906,13 @@
       "web": [
         "STBInput"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3397
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "stbPower": {
@@ -5642,13 +6923,13 @@
       "web": [
         "STBPower"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3398
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "subtitle": {
@@ -5659,13 +6940,13 @@
       "web": [
         "Subtitle"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3399
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "teletext": {
@@ -5676,13 +6957,13 @@
       "web": [
         "Teletext"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3400
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "videoModeNext": {
@@ -5693,13 +6974,13 @@
       "web": [
         "VideoModeNext"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3404
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "wink": {
@@ -5710,13 +6991,13 @@
       "web": [
         "Wink"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3405
       ],
-      "gtk": null
+      "gtk": []
     }
   },
   "zoomToggle": {
@@ -5727,13 +7008,13 @@
       "web": [
         "ZoomToggle"
       ],
-      "gtk": null
+      "gtk": []
     },
     "values": {
       "web": [
         3406
       ],
-      "gtk": null
+      "gtk": []
     }
   }
 }
