@@ -57,7 +57,7 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 ///
 /// This sample shows by dragging the user can reorder the items of the list.
 /// list of Numbers will be used to display items in listview.
-/// [generate]it is constructor which  is used to form a list of values.
+/// [List.generate]it is constructor which  is used to form a list of values.
 /// [onReorder] This parameter is compulsory. It will be called when list child
 /// is moved to a new position.
 ///
