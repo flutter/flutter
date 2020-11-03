@@ -287,15 +287,14 @@ abstract class SearchDelegate<T> {
   /// If this value is set to null, the value of the ambient [Theme]'s
   /// [InputDecorationTheme.hintStyle] will be used instead.
   ///
-  /// If this value is not null, [searchFieldDecorationTheme]
-  /// will be ignored so this can be used.
+  /// Only one of [searchFieldStyle] or [searchFieldDecorationTheme] can
+  /// be non-null.
   final TextStyle? searchFieldStyle;
 
-  /// The [InputDecorationTheme] for the search field, use
-  /// this if you just want to customize the [TextField]
+  /// The [InputDecorationTheme] used to configure the search field's visuals.
   ///
-  /// If this value is not null, [searchFieldStyle]
-  /// will be ignored so this can be used.
+  /// Only one of [searchFieldStyle] or [searchFieldDecorationTheme] can
+  /// be non-null.
   final InputDecorationTheme? searchFieldDecorationTheme;
 
   /// The type of action button to use for the keyboard.
@@ -501,7 +500,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = widget.delegate.searchFieldLabel
-        ?? MaterialLocalizations.of(context).searchFieldLabel;
+      ?? MaterialLocalizations.of(context).searchFieldLabel;
     Widget? body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
