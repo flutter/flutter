@@ -85,41 +85,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   }
 
   @override
-  void onSingleTapUp(TapUpDetails details) {
-    editableText.hideToolbar();
-    if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          switch (details.kind) {
-            case PointerDeviceKind.mouse:
-            case PointerDeviceKind.stylus:
-            case PointerDeviceKind.invertedStylus:
-              // Precise devices should place the cursor at a precise position.
-              renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-              break;
-            case PointerDeviceKind.touch:
-            case PointerDeviceKind.unknown:
-              // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-              // of the word.
-              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-              break;
-          }
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-          break;
-      }
-    }
-    _state._requestKeyboard();
-    if (_state.widget.onTap != null)
-      _state.widget.onTap!();
-  }
-
-  @override
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
@@ -845,6 +810,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   late _TextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
 
+  // TODO(justinmc): Better way to instantiate this. I was having trouble
+  // getting the platform in initState.
+  TextEditingBehavior? textEditingBehavior;
+
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
   late bool forcePressEnabled;
@@ -935,7 +904,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
+    // TODO(justinmc): Get rid of this gesture detector builder.
+    _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(
+      state: this,
+    );
     if (widget.controller == null) {
       _createLocalController();
     }
@@ -1015,6 +987,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
+    // TODO(justinmc): Another reason to get rid of shouldShowSelectionToolbar.
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
     if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
@@ -1226,6 +1199,14 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       },
     );
 
+    // TODO(justinmc): The TextField shouldn't be able to interact with the
+    // state that TEB is able to manipulate. So shouldn't be manipulating state
+    // through `this` delegate.
+    textEditingBehavior ??= TextEditingBehavior(
+      delegate: this,
+      platform: Theme.of(context).platform,
+    );
+
     return MouseRegion(
       cursor: effectiveMouseCursor,
       onEnter: (PointerEnterEvent event) => _handleHover(true),
@@ -1248,8 +1229,22 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
               child: child,
             );
           },
-          child: _selectionGestureDetectorBuilder.buildGestureDetector(
+          // TODO(justinmc): Are there any actions that TEB should respond to that are
+          // not coming from this gesture detector? What are they?
+          child: TextSelectionGestureDetector(
             behavior: HitTestBehavior.translucent,
+            onTapDown: textEditingBehavior!.onTapDown,
+            //onForcePressStart: delegate.forcePressEnabled ? onForcePressStart : null,
+            //onForcePressEnd: delegate.forcePressEnabled ? onForcePressEnd : null,
+            onSingleTapUp: textEditingBehavior!.onSingleTapUp,
+            //onSingleTapCancel: onSingleTapCancel,
+            //onSingleLongTapStart: onSingleLongTapStart,
+            //onSingleLongTapMoveUpdate: onSingleLongTapMoveUpdate,
+            //onSingleLongTapEnd: onSingleLongTapEnd,
+            //onDoubleTapDown: onDoubleTapDown,
+            //onDragSelectionStart: onDragSelectionStart,
+            //onDragSelectionUpdate: onDragSelectionUpdate,
+            //onDragSelectionEnd: onDragSelectionEnd,
             child: child,
           ),
         ),
