@@ -101,12 +101,12 @@ const TextStyle _kDefaultDateTimePickerTextStyle = TextStyle(
   color: CupertinoColors.label,
 );
 
-TextStyle? _resolveTextStyle(TextStyle? style, BuildContext context, bool nullOk) {
+TextStyle? _resolveTextStyle(TextStyle? style, BuildContext context) {
   // This does not resolve the shadow color, foreground, background, etc.
   return style?.copyWith(
-    color: CupertinoDynamicColor.resolve(style.color, context, nullOk: nullOk),
-    backgroundColor: CupertinoDynamicColor.resolve(style.backgroundColor, context, nullOk: nullOk),
-    decorationColor: CupertinoDynamicColor.resolve(style.decorationColor, context, nullOk: nullOk),
+    color: CupertinoDynamicColor.maybeResolve(style.color, context),
+    backgroundColor: CupertinoDynamicColor.maybeResolve(style.backgroundColor, context),
+    decorationColor: CupertinoDynamicColor.maybeResolve(style.decorationColor, context),
   );
 }
 
@@ -206,22 +206,23 @@ class CupertinoTextThemeData with Diagnosticable {
   /// Returns a copy of the current [CupertinoTextThemeData] with all the colors
   /// resolved against the given [BuildContext].
   ///
-  /// Throws an exception if any of the [InheritedWidget]s required to resolve
-  /// this [CupertinoTextThemeData] is not found in [context], unless [nullOk] is
-  /// set to true, in which case [CupertinoDynamicColor]s that fail to resolve will
-  /// be used as-is.
-  CupertinoTextThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
+  /// If any of the [InheritedWidget]s required to resolve this
+  /// [CupertinoTextThemeData] is not found in [context], any unresolved
+  /// [CupertinoDynamicColor]s will use the default trait value
+  /// ([Brightness.light] platform brightness, normal contrast,
+  /// [CupertinoUserInterfaceLevelData.base] elevation level).
+  CupertinoTextThemeData resolveFrom(BuildContext context) {
     return CupertinoTextThemeData._raw(
-      _defaults.resolveFrom(context, nullOk),
-      CupertinoDynamicColor.resolve(_primaryColor, context, nullOk: nullOk),
-      _resolveTextStyle(_textStyle, context, nullOk),
-      _resolveTextStyle(_actionTextStyle, context, nullOk),
-      _resolveTextStyle(_tabLabelTextStyle, context, nullOk),
-      _resolveTextStyle(_navTitleTextStyle, context, nullOk),
-      _resolveTextStyle(_navLargeTitleTextStyle, context, nullOk),
-      _resolveTextStyle(_navActionTextStyle, context, nullOk),
-      _resolveTextStyle(_pickerTextStyle, context, nullOk),
-      _resolveTextStyle(_dateTimePickerTextStyle, context, nullOk),
+      _defaults.resolveFrom(context),
+      CupertinoDynamicColor.maybeResolve(_primaryColor, context),
+      _resolveTextStyle(_textStyle, context),
+      _resolveTextStyle(_actionTextStyle, context),
+      _resolveTextStyle(_tabLabelTextStyle, context),
+      _resolveTextStyle(_navTitleTextStyle, context),
+      _resolveTextStyle(_navLargeTitleTextStyle, context),
+      _resolveTextStyle(_navActionTextStyle, context),
+      _resolveTextStyle(_pickerTextStyle, context),
+      _resolveTextStyle(_dateTimePickerTextStyle, context),
     );
   }
 
@@ -300,9 +301,9 @@ class _TextThemeDefaultsBuilder {
   TextStyle actionTextStyle({ Color? primaryColor }) => _kDefaultActionTextStyle.copyWith(color: primaryColor);
   TextStyle navActionTextStyle({ Color? primaryColor }) => actionTextStyle(primaryColor: primaryColor);
 
-  _TextThemeDefaultsBuilder resolveFrom(BuildContext context, bool nullOk) {
-    final Color resolvedLabelColor = CupertinoDynamicColor.resolve(labelColor, context, nullOk: nullOk)!;
-    final Color resolvedInactiveGray = CupertinoDynamicColor.resolve(inactiveGrayColor, context, nullOk: nullOk)!;
+  _TextThemeDefaultsBuilder resolveFrom(BuildContext context) {
+    final Color resolvedLabelColor = CupertinoDynamicColor.resolve(labelColor, context);
+    final Color resolvedInactiveGray = CupertinoDynamicColor.resolve(inactiveGrayColor, context);
     return resolvedLabelColor == labelColor && resolvedInactiveGray == CupertinoColors.inactiveGray
       ? this
       : _TextThemeDefaultsBuilder(resolvedLabelColor, resolvedInactiveGray);

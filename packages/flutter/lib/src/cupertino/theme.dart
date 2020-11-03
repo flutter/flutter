@@ -68,7 +68,7 @@ class CupertinoTheme extends StatelessWidget {
   /// given [BuildContext] on a best-effort basis.
   static CupertinoThemeData of(BuildContext context) {
     final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
-    return (inheritedTheme?.theme.data ?? const CupertinoThemeData()).resolveFrom(context, nullOk: true);
+    return (inheritedTheme?.theme.data ?? const CupertinoThemeData()).resolveFrom(context);
   }
 
   /// Retrieves the [Brightness] to use for descendant Cupertino widgets, based
@@ -256,17 +256,17 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   }
 
   @override
-  CupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
-    Color? convertColor(Color? color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+  CupertinoThemeData resolveFrom(BuildContext context) {
+    Color? convertColor(Color? color) => CupertinoDynamicColor.maybeResolve(color, context);
 
     return CupertinoThemeData._rawWithDefaults(
       brightness,
       convertColor(super.primaryColor),
       convertColor(super.primaryContrastingColor),
-      super.textTheme?.resolveFrom(context, nullOk: nullOk),
+      super.textTheme?.resolveFrom(context),
       convertColor(super.barBackgroundColor),
       convertColor(super.scaffoldBackgroundColor),
-      _defaults.resolveFrom(context, super.textTheme == null, nullOk: nullOk),
+      _defaults.resolveFrom(context, super.textTheme == null),
     );
   }
 
@@ -406,14 +406,14 @@ class NoDefaultCupertinoThemeData {
   /// Called by [CupertinoTheme.of] to resolve colors defined in the retrieved
   /// [CupertinoThemeData].
   @protected
-  NoDefaultCupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
-    Color? convertColor(Color? color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+  NoDefaultCupertinoThemeData resolveFrom(BuildContext context) {
+    Color? convertColor(Color? color) => CupertinoDynamicColor.maybeResolve(color, context);
 
     return NoDefaultCupertinoThemeData(
       brightness: brightness,
       primaryColor: convertColor(primaryColor),
       primaryContrastingColor: convertColor(primaryContrastingColor),
-      textTheme: textTheme?.resolveFrom(context, nullOk: nullOk),
+      textTheme: textTheme?.resolveFrom(context),
       barBackgroundColor: convertColor(barBackgroundColor),
       scaffoldBackgroundColor: convertColor(scaffoldBackgroundColor),
     );
@@ -462,9 +462,8 @@ class _CupertinoThemeDefaults {
   final Color scaffoldBackgroundColor;
   final _CupertinoTextThemeDefaults textThemeDefaults;
 
-  _CupertinoThemeDefaults resolveFrom(BuildContext context, bool resolveTextTheme, { required bool nullOk }) {
-    assert(nullOk != null);
-    Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk)!;
+  _CupertinoThemeDefaults resolveFrom(BuildContext context, bool resolveTextTheme) {
+    Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context);
 
     return _CupertinoThemeDefaults(
       brightness,
@@ -472,7 +471,7 @@ class _CupertinoThemeDefaults {
       convertColor(primaryContrastingColor),
       convertColor(barBackgroundColor),
       convertColor(scaffoldBackgroundColor),
-      resolveTextTheme ? textThemeDefaults.resolveFrom(context, nullOk: nullOk) : textThemeDefaults,
+      resolveTextTheme ? textThemeDefaults.resolveFrom(context) : textThemeDefaults,
     );
   }
 }
@@ -487,10 +486,10 @@ class _CupertinoTextThemeDefaults {
   final Color labelColor;
   final Color inactiveGray;
 
-  _CupertinoTextThemeDefaults resolveFrom(BuildContext context, { required bool nullOk }) {
+  _CupertinoTextThemeDefaults resolveFrom(BuildContext context) {
     return _CupertinoTextThemeDefaults(
-      CupertinoDynamicColor.resolve(labelColor, context, nullOk: nullOk)!,
-      CupertinoDynamicColor.resolve(inactiveGray, context, nullOk: nullOk)!,
+      CupertinoDynamicColor.resolve(labelColor, context),
+      CupertinoDynamicColor.resolve(inactiveGray, context),
     );
   }
 
