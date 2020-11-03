@@ -61,7 +61,7 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// [onReorder] This parameter is compulsory. It will be called when list child
 /// is moved to a new position.
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// ```dart
 /// List<String> _list = List.generate(5, (i) => "${i}");
