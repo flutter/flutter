@@ -12,19 +12,9 @@ import 'package:path/path.dart' as path;
 import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import 'adb.dart';
+import 'running_processes.dart';
 import 'task_result.dart';
 import 'utils.dart';
-
-/// Identifiers for devices that should never be rebooted.
-final Set<String> noRebootForbidList = <String>{
-  '822ef7958bba573829d85eef4df6cbdd86593730', // 32bit iPhone requires manual intervention on reboot.
-};
-
-/// The maximum number of test runs before a device must be rebooted.
-///
-/// This number was chosen arbitrarily.
-const int maxiumRuns = 30;
 
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.
@@ -90,15 +80,27 @@ class _TaskRunner {
     try {
       _taskStarted = true;
       print('Running task with a timeout of $taskTimeout.');
+      final String exe = Platform.isWindows ? '.exe' : '';
+      section('Checking running Dart$exe processes');
+      final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(
+        processName: 'dart$exe',
+      ).toSet();
+      final Set<RunningProcessInfo> allProcesses = await getRunningProcesses().toSet();
+      beforeRunningDartInstances.forEach(print);
+      for (final RunningProcessInfo info in allProcesses) {
+        if (info.commandLine.contains('iproxy')) {
+          print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
+        }
+      }
+
       print('enabling configs for macOS, Linux, Windows, and Web...');
       final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
         'config',
-        '-v',
         '--enable-macos-desktop',
         '--enable-windows-desktop',
         '--enable-linux-desktop',
         '--enable-web'
-      ], canFail: true);
+      ]);
       if (configResult != 0) {
         print('Failed to enable configuration, tasks may not run.');
       }
@@ -107,7 +109,34 @@ class _TaskRunner {
       if (taskTimeout != null)
         futureResult = futureResult.timeout(taskTimeout);
 
-      final TaskResult result = await futureResult;
+      TaskResult result = await futureResult;
+
+      section('Checking running Dart$exe processes after task...');
+      final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
+        processName: 'dart$exe',
+      ).toList();
+      for (final RunningProcessInfo info in afterRunningDartInstances) {
+        if (!beforeRunningDartInstances.contains(info)) {
+          print('$info was leaked by this test.');
+          if (result is TaskResultCheckProcesses) {
+            result = TaskResult.failure('This test leaked dart processes');
+          }
+          final bool killed = await killProcess(info.pid);
+          if (!killed) {
+            print('Failed to kill process ${info.pid}.');
+          } else {
+            print('Killed process id ${info.pid}.');
+          }
+        }
+      }
+      final Set<RunningProcessInfo> allEndProcesses = await getRunningProcesses().toSet();
+      for (final RunningProcessInfo info in allEndProcesses) {
+        if (allProcesses.contains(info)) {
+          continue;
+        }
+        print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
+      }
+
       _completer.complete(result);
       return result;
     } on TimeoutException catch (err, stackTrace) {
@@ -118,37 +147,7 @@ class _TaskRunner {
     } finally {
       print('Cleaning up after task...');
       await forceQuitRunningProcesses();
-      await checkForRebootRequired();
       _closeKeepAlivePort();
-    }
-  }
-
-  Future<void> checkForRebootRequired() async {
-    try {
-      final Device device = await devices.workingDevice.timeout(const Duration(seconds: 15));
-      if (noRebootForbidList.contains(device.deviceId)) {
-        return;
-      }
-      final File rebootFile = _rebootFile();
-      int runCount;
-      if (rebootFile.existsSync()) {
-        runCount = int.tryParse(rebootFile.readAsStringSync().trim());
-      } else {
-        runCount = 0;
-      }
-      if (runCount < maxiumRuns) {
-        rebootFile
-          ..createSync()
-          ..writeAsStringSync((runCount + 1).toString());
-        return;
-      }
-      rebootFile.deleteSync();
-      print('Rebooting ${device.deviceId}');
-      await device.reboot();
-    } on TimeoutException {
-      // Could not find device in order to reboot.
-    } on DeviceException {
-      // No attached device needed to reboot.
     }
   }
 
@@ -199,14 +198,4 @@ class _TaskRunner {
     });
     return completer.future;
   }
-}
-
-File _rebootFile() {
-  if (Platform.isLinux || Platform.isMacOS) {
-    return File(path.join(Platform.environment['HOME'], '.reboot-count'));
-  }
-  if (!Platform.isWindows) {
-    throw StateError('Unexpected platform ${Platform.operatingSystem}');
-  }
-  return File(path.join(Platform.environment['USERPROFILE'], '.reboot-count'));
 }
