@@ -1299,6 +1299,88 @@ void main() {
     });
   });
 
+  group('DelegateTransitionRoute', () {
+    testWidgets('secondary animation is kDismissed when route delegates animation to top route',
+        (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(MaterialApp(
+        navigatorKey: navigator,
+        home: const Text('home'),
+      ));
+
+      // Push page one, its secondary animation is kAlwaysDismissedAnimation.
+      late ProxyAnimation secondaryAnimationProxyPageOne;
+      late ProxyAnimation animationPageOne;
+      navigator.currentState!.push(
+        PageRouteBuilder<void>(
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+           
+            return const Text('Page One');
+          },
+           transitionsBuilder:
+              (_, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+             secondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
+            animationPageOne = animation as ProxyAnimation;
+            return child;
+          },
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      final ProxyAnimation secondaryAnimationPageOne =
+          secondaryAnimationProxyPageOne.parent! as ProxyAnimation;
+      expect(animationPageOne.value, 1.0);
+      expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
+
+      // Push page two, the secondary animation of page one is the primary
+      // animation of page two.
+      late ProxyAnimation secondaryAnimationProxyPageTwo;
+      late ProxyAnimation animationPageTwo;
+
+      late ProxyAnimation delegatedSecondaryAnimationProxyPageOne;
+      navigator.currentState!.push(
+        MockDelegateTransitionRoute<void>(
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            return const Text('Page Two');
+          },
+          transitionsBuilder:
+              (_, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+            secondaryAnimationProxyPageTwo = secondaryAnimation as ProxyAnimation;
+            animationPageTwo = animation as ProxyAnimation;
+            return child;
+          },
+          secondaryTransitionBuilder: (_, Animation<double> secondaryAnimation, Widget child) {
+            delegatedSecondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
+            return child;
+          },
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+       final ProxyAnimation delegatedSecondaryAnimationPageOne =
+          delegatedSecondaryAnimationProxyPageOne.parent! as ProxyAnimation;
+      expect(secondaryAnimationProxyPageOne.parent, kAlwaysDismissedAnimation);
+      expect(delegatedSecondaryAnimationPageOne.parent, animationPageTwo.parent);
+
+      await tester.pumpAndSettle();
+      final ProxyAnimation secondaryAnimationPageTwo =
+          secondaryAnimationProxyPageTwo.parent! as ProxyAnimation;
+      expect(animationPageTwo.value, 1.0);
+      expect(secondaryAnimationPageTwo.parent, kAlwaysDismissedAnimation);
+      expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
+
+      // Pop page two, the secondary animation of page one becomes
+      // kAlwaysDismissedAnimation.
+      navigator.currentState!.pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
+      await tester.pumpAndSettle();
+      expect(animationPageTwo.value, 0.0);
+      expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
+    });
+  });
+
   group('ModalRoute', () {
     testWidgets('default barrierCurve', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
@@ -1950,4 +2032,39 @@ Widget buildNavigator({
       ),
     ),
   );
+}
+
+typedef RouteSecondaryAnimationTransitionBuilder = Widget Function(
+    BuildContext context, Animation<double> secondaryAnimation, Widget child);
+
+// Uses the same `secondaryAnimation` transition defined in [transitionsBuilder]
+// to animate the previous route.
+class MockDelegateTransitionRoute<T> extends PageRouteBuilder<T> {
+  MockDelegateTransitionRoute({
+    RouteSettings? settings,
+    required RoutePageBuilder pageBuilder,
+    required RouteTransitionsBuilder transitionsBuilder,
+    required this.secondaryTransitionBuilder,
+    bool fullscreenDialog = false,
+  })  : assert(pageBuilder != null),
+        assert(fullscreenDialog != null),
+        super(
+          settings: settings,
+          fullscreenDialog: fullscreenDialog,
+          pageBuilder: pageBuilder,
+          transitionsBuilder: transitionsBuilder,
+        );
+
+  final RouteSecondaryAnimationTransitionBuilder secondaryTransitionBuilder;
+
+  @override
+  bool handleSecondaryAnimationTransitionForPreviousRoute(Route<dynamic> previousRoute) {
+    return true;
+  }
+
+  @override
+  Widget buildSecondaryAnimationTransitionForPreviousRoute(
+      BuildContext context, Animation<double> secondaryAnimation, Widget child) {
+    return secondaryTransitionBuilder(context, secondaryAnimation, child);
+  }
 }

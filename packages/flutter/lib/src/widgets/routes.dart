@@ -550,7 +550,7 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
 
     if (_nextRoute != null && _nextRoute!.handleSecondaryAnimationTransitionForPreviousRoute(this)) {
       assert(!_nextRoute!._transitionCompleter.isCompleted, 'Cannot reuse a ${_nextRoute!.runtimeType} after disposing it.');
-      final Animation<double> proxySecondaryAnimation = kAlwaysDismissedAnimation;
+      final ProxyAnimation proxySecondaryAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
       final Widget proxyChild = _nextRoute!.buildSecondaryAnimationTransitionForPreviousRoute(context, secondaryAnimation, child);
       return buildTransitions(context, animation, proxySecondaryAnimation, proxyChild);
     } else {
