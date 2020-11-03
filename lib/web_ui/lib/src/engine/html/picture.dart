@@ -91,6 +91,10 @@ class PersistedPicture extends PersistedLeafSurface {
   final ui.Rect? localPaintBounds;
   final int hints;
   double _density = 1.0;
+  /// Cull rect changes and density changes due to transforms should
+  /// call applyPaint for picture when retain() or update() is called after
+  /// preroll is complete.
+  bool _requiresRepaint = false;
 
   /// Cache for reusing elements such as images across picture updates.
   CrossFrameCache<html.HtmlElement>? _elementCache =
@@ -114,16 +118,7 @@ class PersistedPicture extends PersistedLeafSurface {
         ? 1.0 : _computePixelDensity(_transform, paintWidth, paintHeight);
     if (newDensity != _density) {
       _density = newDensity;
-      if (_canvas != null) {
-        // If cull rect and density hasn't changed, this will only repaint.
-        // If density doesn't match canvas, a new canvas will be created
-        // and paint queued.
-        //
-        // Similar to preroll for transform where transform is updated, for
-        // picture this means we need to repaint so pixelation doesn't occur
-        // due to transform changing overall dpi.
-        applyPaint(_canvas);
-      }
+      _requiresRepaint = true;
     }
     _computeExactCullRects();
   }
@@ -204,13 +199,14 @@ class PersistedPicture extends PersistedLeafSurface {
     }
   }
 
-  bool _computeOptimalCullRect(PersistedPicture? oldSurface) {
+  void _computeOptimalCullRect(PersistedPicture? oldSurface) {
     assert(_exactLocalCullRect != null);
 
     if (oldSurface == null || !oldSurface.picture.recordingCanvas!.didDraw) {
       // First useful paint.
       _optimalLocalCullRect = _exactLocalCullRect;
-      return true;
+      _requiresRepaint = true;
+      return;
     }
 
     assert(oldSurface._optimalLocalCullRect != null);
@@ -224,7 +220,10 @@ class PersistedPicture extends PersistedLeafSurface {
       // The clip collapsed into a zero-sized rectangle. If it was already zero,
       // no need to signal cull rect change.
       _optimalLocalCullRect = ui.Rect.zero;
-      return oldOptimalLocalCullRect != ui.Rect.zero;
+      if (oldOptimalLocalCullRect != ui.Rect.zero) {
+        _requiresRepaint = true;
+      }
+      return;
     }
 
     if (rectContainsOther(oldOptimalLocalCullRect!, _exactLocalCullRect!)) {
@@ -233,7 +232,7 @@ class PersistedPicture extends PersistedLeafSurface {
       // a clip when it is scrolled out of the screen. In this case we do not
       // repaint the picture. We just let it be shrunk by the outer clip.
       _optimalLocalCullRect = oldOptimalLocalCullRect;
-      return false;
+      return;
     }
 
     // The new cull rect contains area not covered by a previous rect. Perhaps
@@ -270,9 +269,8 @@ class PersistedPicture extends PersistedLeafSurface {
           _predictTrend(bottomwardDelta, _exactLocalCullRect!.height),
     ).intersect(localPaintBounds!);
 
-    final bool localCullRectChanged = _optimalLocalCullRect != newLocalCullRect;
+    _requiresRepaint = _optimalLocalCullRect != newLocalCullRect;
     _optimalLocalCullRect = newLocalCullRect;
-    return localCullRectChanged;
   }
 
   /// Predicts the delta a particular side of a clip rect will move given the
@@ -309,6 +307,7 @@ class PersistedPicture extends PersistedLeafSurface {
 
   void _applyPaint(PersistedPicture? oldSurface) {
     final EngineCanvas? oldCanvas = oldSurface?._canvas;
+    _requiresRepaint = false;
     if (!picture.recordingCanvas!.didDraw || _optimalLocalCullRect!.isEmpty) {
       // The picture is empty, or it has been completely clipped out. Skip
       // painting. This removes all the setup work and scaffolding objects
@@ -540,6 +539,7 @@ class PersistedPicture extends PersistedLeafSurface {
   @override
   void build() {
     _computeOptimalCullRect(null);
+    _requiresRepaint = true;
     super.build();
   }
 
@@ -556,15 +556,14 @@ class PersistedPicture extends PersistedLeafSurface {
       _applyTranslate();
     }
 
-    final bool cullRectChangeRequiresRepaint =
-        _computeOptimalCullRect(oldSurface);
+    _computeOptimalCullRect(oldSurface);
     if (identical(picture, oldSurface.picture)) {
       bool densityChanged =
           (_canvas is BitmapCanvas &&
               _density != (_canvas as BitmapCanvas)._density);
 
       // The picture is the same. Attempt to avoid repaint.
-      if (cullRectChangeRequiresRepaint || densityChanged) {
+      if (_requiresRepaint || densityChanged) {
         // Cull rect changed such that a repaint is still necessary.
         _applyPaint(oldSurface);
       } else {
@@ -581,8 +580,8 @@ class PersistedPicture extends PersistedLeafSurface {
   @override
   void retain() {
     super.retain();
-    final bool cullRectChangeRequiresRepaint = _computeOptimalCullRect(this);
-    if (cullRectChangeRequiresRepaint) {
+    _computeOptimalCullRect(this);
+    if (_requiresRepaint) {
       _applyPaint(this);
     }
   }
