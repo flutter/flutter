@@ -232,7 +232,7 @@
          "name": "Mac module_test_ios",
          "repo": "flutter",
          "task_name": "mac_module_test_ios",
-         "flaky": false
+         "flaky": true
       },
       {
          "name": "Mac plugin_lint_mac",
