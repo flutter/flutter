@@ -372,6 +372,7 @@ class DefaultTabController extends StatefulWidget {
   /// The [initialIndex] argument must not be null.
   ///
   /// See also:
+  ///
   ///  * [PageStorageKey] are used to remember the index.
   const DefaultTabController({
     Key? key,
