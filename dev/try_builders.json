@@ -186,14 +186,12 @@
          "repo":"flutter",
          "task_name":"mac_build_ios_framework_module_test",
          "enabled":true,
-         "flaky": true,
          "run_if":["dev/**", "bin/**"]
       },
       {
          "name":"Mac build_tests",
          "repo":"flutter",
          "task_name":"mac_build_tests",
-         "flaky": true,
          "enabled":true
       },
       {
