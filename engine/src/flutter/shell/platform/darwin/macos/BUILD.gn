@@ -82,7 +82,10 @@ source_set("flutter_framework_source") {
 
   public_configs = [ "//flutter:config" ]
 
-  defines = [ "FLUTTER_FRAMEWORK" ]
+  defines = [
+    "FLUTTER_FRAMEWORK",
+    "FLUTTER_ENGINE_NO_PROTOTYPES",
+  ]
 
   cflags_objcc = [ "-fobjc-arc" ]
 
@@ -113,7 +116,7 @@ executable("flutter_desktop_darwin_unittests") {
   testonly = true
 
   sources = [
-    "framework/Source/FlutterEngineUnittests.mm",
+    "framework/Source/FlutterEngineTest.mm",
     "framework/Source/FlutterViewControllerTest.mm",
   ]
 
@@ -126,6 +129,7 @@ executable("flutter_desktop_darwin_unittests") {
     ":flutter_framework_source",
     "//flutter/shell/platform/darwin/common:framework_shared",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
+    "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",
     "//flutter/testing:dart",
     "//flutter/testing:skia",
