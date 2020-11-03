@@ -1463,6 +1463,8 @@ FILE: ../../../flutter/third_party/tonic/dart_persistent_value.cc
 FILE: ../../../flutter/third_party/tonic/dart_persistent_value.h
 FILE: ../../../flutter/third_party/tonic/dart_state.cc
 FILE: ../../../flutter/third_party/tonic/dart_state.h
+FILE: ../../../flutter/third_party/tonic/dart_weak_persistent_value.cc
+FILE: ../../../flutter/third_party/tonic/dart_weak_persistent_value.h
 FILE: ../../../flutter/third_party/tonic/dart_wrappable.cc
 FILE: ../../../flutter/third_party/tonic/dart_wrappable.h
 FILE: ../../../flutter/third_party/tonic/dart_wrapper_info.h

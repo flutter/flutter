@@ -1,0 +1,33 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/testing/testing.gni")
+
+test_fixtures("tonic_fixtures") {
+  dart_main = "fixtures/tonic_test.dart"
+  fixtures = []
+}
+
+executable("tonic_unittests") {
+  testonly = true
+
+  public_configs = [ "//flutter:export_dynamic_symbols" ]
+
+  sources = [
+    "dart_state_unittest.cc",
+    "dart_weak_persistent_handle_unittest.cc",
+  ]
+
+  public_deps = [
+    ":tonic_fixtures",
+    "//flutter/runtime:libdart",
+    "//flutter/runtime:runtime",
+    "//flutter/testing",
+    "//flutter/testing:fixture_test",
+    "//third_party/dart/runtime:dart_api",
+    "//third_party/googletest:gtest",
+  ]
+
+  deps = [ "../:tonic" ]
+}

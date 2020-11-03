@@ -5,6 +5,7 @@
 #ifndef LIB_TONIC_DART_STATE_H_
 #define LIB_TONIC_DART_STATE_H_
 
+#include <atomic>
 #include <functional>
 #include <memory>
 
@@ -68,6 +69,9 @@ class DartState : public std::enable_shared_from_this<DartState> {
   void SetReturnCodeCallback(std::function<void(uint32_t)> callback);
   bool has_set_return_code() const { return has_set_return_code_; }
 
+  void SetIsShuttingDown() { is_shutting_down_ = true; }
+  bool IsShuttingDown() { return is_shutting_down_; }
+
   virtual void DidSetIsolate();
 
   static Dart_Handle HandleLibraryTag(Dart_LibraryTag tag,
@@ -83,6 +87,7 @@ class DartState : public std::enable_shared_from_this<DartState> {
   std::function<void(Dart_Handle)> message_epilogue_;
   std::function<void(uint32_t)> set_return_code_callback_;
   bool has_set_return_code_;
+  std::atomic<bool> is_shutting_down_;
 
  protected:
   TONIC_DISALLOW_COPY_AND_ASSIGN(DartState);
