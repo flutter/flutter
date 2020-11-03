@@ -420,7 +420,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///          onInvoke: (Decrement intent) => setState(() { count = count - 1; }),
 ///         ),
 ///       },
-///       Focus(
+///       child: Focus(
 ///         autofocus:true,
 ///         child: Column(
 ///           children: <Widget>[
