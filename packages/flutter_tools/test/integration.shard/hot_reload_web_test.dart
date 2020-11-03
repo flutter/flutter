@@ -44,7 +44,7 @@ void main() {
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
-      await completer.future;
+      await completer.future.timeout(const Duration(seconds: 15));
     } finally {
       await subscription.cancel();
     }
@@ -62,7 +62,7 @@ void main() {
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
-      await completer.future;
+      await completer.future.timeout(const Duration(seconds: 15));
     } finally {
       await subscription.cancel();
     }
