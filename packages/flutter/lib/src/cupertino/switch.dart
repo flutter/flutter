@@ -106,7 +106,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// Defaults to [CupertinoColors.secondarySystemFill] when null.
   final Color? trackColor;
 
-  /// {@template flutter.cupertino.switch.dragStartBehavior}
+  /// {@template flutter.cupertino.CupertinoSwitch.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag behavior used to move the
@@ -299,8 +299,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         activeColor: CupertinoDynamicColor.resolve(
           widget.activeColor ?? CupertinoColors.systemGreen,
           context,
-        )!,
-        trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context)!,
+        ),
+        trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
         onChanged: widget.onChanged,
         textDirection: Directionality.of(context),
         state: this,

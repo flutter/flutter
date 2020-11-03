@@ -26,11 +26,9 @@ class AndroidPlatformView extends StatelessWidget {
   /// A PlatformViewFactory for this type must have been registered.
   final String viewType;
 
-  /// {@template flutter.widgets.platformViews.createdParam}
   /// Callback to invoke after the platform view has been created.
   ///
   /// May be null.
-  /// {@endtemplate}
   final PlatformViewCreatedCallback onPlatformViewCreated;
 
   @override

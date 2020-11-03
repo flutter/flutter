@@ -96,7 +96,7 @@ class ListTileTheme extends InheritedTheme {
   /// If true then [ListTile]s will have the vertically dense layout.
   final bool dense;
 
-  /// {@template flutter.material.ListTile.shape}
+  /// {@template flutter.material.ListTileTheme.shape}
   /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
   /// {@endtemplate}
   final ShapeBorder? shape;
@@ -1025,7 +1025,7 @@ class ListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ListTileTheme tileTheme = ListTileTheme.of(context);
 
     IconThemeData? iconThemeData;

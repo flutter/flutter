@@ -149,7 +149,7 @@ class BottomSheet extends StatefulWidget {
   /// Defaults to null and falls back to [Material]'s default.
   final ShapeBorder? shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defines the bottom sheet's [Material.clipBehavior].
   ///
@@ -248,7 +248,7 @@ class _BottomSheetState extends State<BottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final BottomSheetThemeData bottomSheetTheme = Theme.of(context)!.bottomSheetTheme;
+    final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
     final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor;
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape;
@@ -340,7 +340,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   ParametricCurve<double> animationCurve = _modalBottomSheetCurve;
 
   String _getRouteLabel(MaterialLocalizations localizations) {
-    switch (Theme.of(context)!.platform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         return '';
@@ -472,12 +472,12 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
-    final Widget bottomSheet = MediaQuery.removePadding(
+    Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
       child: Builder(
         builder: (BuildContext context) {
-          final BottomSheetThemeData sheetTheme = Theme.of(context)!.bottomSheetTheme;
+          final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
           return _ModalBottomSheet<T>(
             route: this,
             backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
@@ -490,6 +490,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
         },
       ),
     );
+    if (isScrollControlled)
+      bottomSheet = Padding(
+        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        child: bottomSheet
+      );
     return capturedThemes.wrap(bottomSheet);
   }
 }
@@ -572,7 +577,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
 /// to have a bottom sheet that has a scrollable child such as a [ListView] or
 /// a [GridView] and have the bottom sheet be draggable, you should set this
-/// parameter to true.
+/// parameter to true. When this parameter is set to true the top of [BottomSheet] will be padded
+/// such that it avoids any system top padding given by the [MediaQuery]
 ///
 /// The `useRootNavigator` parameter ensures that the root navigator is used to
 /// display the [BottomSheet] when set to `true`. This is useful in the case

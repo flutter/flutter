@@ -64,7 +64,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   @override
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context)!.platform) {
+      switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
@@ -90,7 +90,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   void onSingleTapUp(TapUpDetails details) {
     editableText.hideToolbar();
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context)!.platform) {
+      switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           switch (details.kind) {
@@ -124,7 +124,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   @override
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context)!.platform) {
+      switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
@@ -260,7 +260,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// [TextEditingController] using [TextEditingController.text].
 ///
   /// ## Handling emojis and other complex characters
-/// {@macro flutter.widgets.editableText.complexCharacters}
+/// {@macro flutter.widgets.EditableText.onChanged}
 ///
 /// In the live Dartpad example above, try typing the emoji 👨‍👩‍👦
 /// into the field and submitting. Because the example code measures the length
@@ -622,7 +622,7 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textAlign}
   final TextAlign textAlign;
 
-  /// {@macro flutter.widgets.inputDecorator.textAlignVertical}
+  /// {@macro flutter.material.InputDecorator.textAlignVertical}
   final TextAlignVertical? textAlignVertical;
 
   /// {@macro flutter.widgets.editableText.textDirection}
@@ -640,13 +640,13 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
 
-  /// {@macro flutter.services.textInput.smartDashesType}
+  /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
   final SmartDashesType smartDashesType;
 
-  /// {@macro flutter.services.textInput.smartQuotesType}
+  /// {@macro flutter.services.TextInputConfiguration.smartQuotesType}
   final SmartQuotesType smartQuotesType;
 
-  /// {@macro flutter.services.textInput.enableSuggestions}
+  /// {@macro flutter.services.TextInputConfiguration.enableSuggestions}
   final bool enableSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
@@ -880,7 +880,7 @@ class TextField extends StatefulWidget {
   final ScrollController? scrollController;
 
   /// {@macro flutter.widgets.editableText.autofillHints}
-  /// {@macro flutter.services.autofill.autofillHints}
+  /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
 
   /// {@template flutter.material.textfield.restorationId}
@@ -982,7 +982,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
       .applyDefaults(themeData.inputDecorationTheme)
       .copyWith(
@@ -1162,7 +1162,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       });
     }
 
-    switch (Theme.of(context)!.platform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         if (cause == SelectionChangedCause.longPress) {
@@ -1255,15 +1255,16 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       'inherit false style must supply fontSize and textBaseline',
     );
 
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
     final TextStyle style = theme.textTheme.subtitle1!.merge(widget.style);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
-    final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
-    if (widget.maxLength != null && widget.maxLengthEnforced)
-      formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
+    final List<TextInputFormatter> formatters = <TextInputFormatter>[
+      ...?widget.inputFormatters,
+      if (widget.maxLength != null && widget.maxLengthEnforced) LengthLimitingTextInputFormatter(widget.maxLength)
+    ];
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     final bool paintCursorAboveText;
@@ -1431,7 +1432,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         return _buildMaterialTextField(context);
 
       case _TextFieldType.adaptive: {
-        final ThemeData theme = Theme.of(context)!;
+        final ThemeData theme = Theme.of(context);
         assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.iOS:

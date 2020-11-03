@@ -13,7 +13,6 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart';
-import '../base/utils.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
@@ -401,7 +400,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.
       try {
-        await waitGroup<void>(<Future<void>>[
+        await Future.wait<void>(<Future<void>>[
           globals.stdio.addStdoutStream(process.stdout),
           globals.stdio.addStderrStream(process.stderr),
         ]);

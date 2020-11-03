@@ -239,9 +239,9 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData? themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     Size size;
-    switch (widget.materialTapTargetSize ?? themeData!.materialTapTargetSize) {
+    switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
         break;
@@ -249,7 +249,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
         size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
         break;
     }
-    size += (widget.visualDensity ?? themeData!.visualDensity).baseSizeAdjustment;
+    size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
@@ -274,9 +274,9 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
           return _CheckboxRenderObjectWidget(
             value: widget.value,
             tristate: widget.tristate,
-            activeColor: widget.activeColor ?? themeData!.toggleableActiveColor,
+            activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
             checkColor: widget.checkColor ?? const Color(0xFFFFFFFF),
-            inactiveColor: enabled ? themeData!.unselectedWidgetColor : themeData!.disabledColor,
+            inactiveColor: enabled ? themeData.unselectedWidgetColor : themeData.disabledColor,
             focusColor: widget.focusColor ?? themeData.focusColor,
             hoverColor: widget.hoverColor ?? themeData.hoverColor,
             splashRadius: widget.splashRadius ?? kRadialReactionRadius,
