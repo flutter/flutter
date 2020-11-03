@@ -4,11 +4,9 @@
 
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
-import 'package:mockito/mockito.dart';
 
 import 'package:flutter_conductor/roll_dev.dart';
 import 'package:flutter_conductor/globals.dart';
-import 'package:flutter_conductor/git.dart';
 import 'package:flutter_conductor/repository.dart';
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
@@ -341,81 +339,175 @@ void main() {
           stdio: stdio,
         ),
         throwsExceptionWith(
-            'Commit $commit is already on the dev branch as $lastVersion'),
+          'Commit $commit is already on the dev branch as $lastVersion',
+        ),
       );
     });
 
-    //test(
-    //    'does not tag if last release is not direct ancestor of desired '
-    //    'commit and --force not supplied', () {
-    //  when(mockGit.getOutput('remote get-url $origin', any))
-    //      .thenReturn(kUpstreamRemote);
-    //  when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
-    //  when(mockGit.getFullTag(origin)).thenReturn(lastVersion);
-    //  when(mockGit.getOutput(
-    //    'rev-parse $lastVersion',
-    //    any,
-    //  )).thenReturn('zxy321');
-    //  when(mockGit.run('merge-base --is-ancestor $lastVersion $commit', any))
-    //      .thenThrow(Exception(
-    //    'Failed to verify $lastVersion is a direct ancestor of $commit. The '
-    //    'flag `--force` is required to force push a new release past a '
-    //    'cherry-pick',
-    //  ));
-    //  fakeArgResults = FakeArgResults(
-    //    level: level,
-    //    commit: commit,
-    //    origin: origin,
-    //  );
-    //  const String errorMessage = 'Failed to verify $lastVersion is a direct '
-    //      'ancestor of $commit. The flag `--force` is required to force push a '
-    //      'new release past a cherry-pick';
-    //  expect(
-    //    () => run(
-    //      argResults: fakeArgResults,
-    //      git: mockGit,
-    //      stdio: stdio,
-    //      usage: usage,
-    //    ),
-    //    throwsExceptionWith(errorMessage),
-    //  );
+    test(
+        'does not tag if last release is not direct ancestor of desired '
+        'commit and --force not supplied', () {
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--',
+          kUpstreamRemote,
+          '${checkoutsParentDirectory}checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'remote',
+          'get-url',
+          remote,
+        ], stdout: kUpstreamRemote),
+        const FakeCommand(command: <String>[
+          'git',
+          'status',
+          '--porcelain',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'fetch',
+          remote,
+          '--tags',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          commit,
+        ], stdout: commit),
+        const FakeCommand(command: <String>[
+          'git',
+          'describe',
+          '--match',
+          '*.*.*-*.*.pre',
+          '--exact-match',
+          '--tags',
+          'refs/remotes/$remote/dev',
+        ], stdout: lastVersion),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          lastVersion,
+        ], stdout: 'zxy321'),
+        const FakeCommand(command: <String>[
+          'git',
+          'merge-base',
+          '--is-ancestor',
+          lastVersion,
+          commit,
+        ], exitCode: 1),
+      ]);
 
-    //  verify(mockGit.run('fetch $origin', any));
-    //  verifyNever(mockGit.run('reset $commit --hard', any));
-    //  verifyNever(mockGit.run('push $origin HEAD:dev', any));
-    //  verifyNever(mockGit.run('tag $nextVersion', any));
-    //});
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        remote: remote,
+      );
+      const String errorMessage = 'The previous dev tag $lastVersion is not a '
+          'direct ancestor of $commit.';
+      expect(
+        () => rollDev(
+          argResults: fakeArgResults,
+          fileSystem: fileSystem,
+          platform: platform,
+          repository: repo,
+          stdio: stdio,
+          usage: usage,
+        ),
+        throwsExceptionWith(errorMessage),
+      );
+    });
 
-    //test('does not tag but updates branch if --skip-tagging provided', () {
-    //  when(mockGit.getOutput('remote get-url $origin', any))
-    //      .thenReturn(kUpstreamRemote);
-    //  when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
-    //  when(mockGit.getFullTag(origin)).thenReturn(lastVersion);
-    //  when(mockGit.getOutput(
-    //    'rev-parse $lastVersion',
-    //    any,
-    //  )).thenReturn('zxy321');
-    //  when(mockGit.getOutput('rev-parse HEAD', any)).thenReturn(commit);
-    //  fakeArgResults = FakeArgResults(
-    //    level: level,
-    //    commit: commit,
-    //    origin: origin,
-    //    skipTagging: true,
-    //  );
-    //  expect(
-    //      run(
-    //        usage: usage,
-    //        argResults: fakeArgResults,
-    //        git: mockGit,
-    //        stdio: stdio,
-    //      ),
-    //      true);
-    //  verify(mockGit.run('fetch $origin', any));
-    //  verify(mockGit.run('reset $commit --hard', any));
-    //  verifyNever(mockGit.run('tag $nextVersion', any));
-    //  verifyNever(mockGit.run('push $origin $nextVersion', any));
-    //  verify(mockGit.run('push $origin HEAD:dev', any));
-    //});
+    test('does not tag but updates branch if --skip-tagging provided', () {
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--',
+          kUpstreamRemote,
+          '${checkoutsParentDirectory}checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'remote',
+          'get-url',
+          remote,
+        ], stdout: kUpstreamRemote),
+        const FakeCommand(command: <String>[
+          'git',
+          'status',
+          '--porcelain',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'fetch',
+          remote,
+          '--tags',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          commit,
+        ], stdout: commit),
+        const FakeCommand(command: <String>[
+          'git',
+          'describe',
+          '--match',
+          '*.*.*-*.*.pre',
+          '--exact-match',
+          '--tags',
+          'refs/remotes/$remote/dev',
+        ], stdout: lastVersion),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          lastVersion,
+        ], stdout: 'zxy321'),
+        const FakeCommand(command: <String>[
+          'git',
+          'describe',
+          '--exact-match',
+          '--tags',
+          commit,
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'merge-base',
+          '--is-ancestor',
+          lastVersion,
+          commit,
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          commit,
+        ], stdout: commit),
+        const FakeCommand(command: <String>[
+          'git',
+          'push',
+          remote,
+          '$commit:dev',
+        ]),
+      ]);
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        remote: remote,
+        skipTagging: true,
+      );
+      expect(
+          rollDev(
+            usage: usage,
+            argResults: fakeArgResults,
+            fileSystem: fileSystem,
+            platform: platform,
+            repository: repo,
+            stdio: stdio,
+          ),
+          true);
+    });
 
     test('successfully tags and publishes release', () {
       processManager.addCommands(<FakeCommand>[
