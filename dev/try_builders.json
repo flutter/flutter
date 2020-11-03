@@ -157,7 +157,7 @@
          "name": "Linux web_long_running_tests",
          "repo":"flutter",
          "task_name":"web_long_running_tests",
-         "enabled":false,
+         "enabled":true,
          "run_if":["dev/", "packages/", "bin/"]
       },
       {

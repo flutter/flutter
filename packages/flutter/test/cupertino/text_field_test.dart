@@ -4289,4 +4289,16 @@ void main() {
     final EditableText widget = tester.widget(find.byType(EditableText));
     expect(widget.selectionControls, equals(selectionControl));
   });
+
+  testWidgets('Do not add LengthLimiting formatter to the user supplied list', (WidgetTester tester) async {
+    final List<TextInputFormatter> formatters = <TextInputFormatter>[];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTextField(maxLength: 5, inputFormatters: formatters),
+      )
+    );
+
+    expect(formatters.isEmpty, isTrue);
+  });
 }

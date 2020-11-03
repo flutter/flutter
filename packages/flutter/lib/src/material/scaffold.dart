@@ -105,7 +105,7 @@ class ScaffoldMessenger extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The state from the closest instance of this class that encloses the given
@@ -1747,7 +1747,7 @@ class Scaffold extends StatefulWidget {
   /// [AppBar.primary], is true.
   final bool primary;
 
-  /// {@macro flutter.material.drawer.dragStartBehavior}
+  /// {@macro flutter.material.DrawerController.dragStartBehavior}
   final DragStartBehavior drawerDragStartBehavior;
 
   /// The width of the area within which a horizontal swipe will open the
@@ -2237,7 +2237,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   /// [ScaffoldMessengerState.removeCurrentSnackBar] removes the current
   /// [SnackBar] (if any) immediately. This method should not be used, and will
-  /// be depracted in the near future.
+  /// be deprecated in the near future.
   ///
   /// The removed snack bar does not run its normal exit animation. If there are
   /// any queued snack bars, they begin their entrance animation immediately.
@@ -2907,8 +2907,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
-    final ThemeData themeData = Theme.of(context)!;
-    final TextDirection textDirection = Directionality.of(context)!;
+    final ThemeData themeData = Theme.of(context);
+    final TextDirection textDirection = Directionality.of(context);
 
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
     _accessibleNavigation = mediaQuery.accessibleNavigation;
