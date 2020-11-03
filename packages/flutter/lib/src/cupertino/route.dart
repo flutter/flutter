@@ -155,7 +155,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Perform outgoing animation if transition is delegated from next route
     return (nextRoute is PageRoute && nextRoute.handleSecondaryAnimationTransitionForPreviousRoute(this))
-    // Don't perform outgoing animation if the next route is a fullscreen dialog. 
+    // Don't perform outgoing animation if the next route is a fullscreen dialog.
     || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog);
   }
 

@@ -435,7 +435,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 /// top route should define the secondary animation transition for this bottom route
 /// and in that case it will delegate that transition
 mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
-  
+
   DelegatedTransitionsRoute<dynamic>? _nextRoute;
 
   /// {@macro flutter.widget.ModalRoute.buildTransitions}
@@ -454,28 +454,28 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
   ///
   /// This method is called only when `handleSecondaryAnimationTransitionForPreviousRoute`
   /// returns true and it will override the transition defined by `secondaryAnimation`
-  /// inside [buildTransitions]. In this case, then the previous route's 
+  /// inside [buildTransitions]. In this case, then the previous route's
   /// [ModalRoute.buildTransitions]  `secondaryAnimation` value will be kAlwaysDismissedAnimation.
-  /// 
-  /// By default, the child (which contains the widget returned by previous 
+  ///
+  /// By default, the child (which contains the widget returned by previous
   /// route's [ModalRoute.buildPage]) is not wrapped in any transition widgets.
   ///
   /// When the [Navigator] pushes this route on the top of its stack, this
-  /// method together with [secondaryAnimation] can be used to define how the 
-  /// previous route that was on the top of the stack leaves the screen. 
-  /// Similarly when the topmost route is popped, the secondaryAnimation 
-  /// can be used to define how the previous route below it reappears on the screen. 
-  /// 
-  /// When the Navigator pushes this new route on the top of its stack, 
-  /// the old topmost route's secondaryAnimation runs from 0.0 to 1.0. 
+  /// method together with [secondaryAnimation] can be used to define how the
+  /// previous route that was on the top of the stack leaves the screen.
+  /// Similarly when the topmost route is popped, the secondaryAnimation
+  /// can be used to define how the previous route below it reappears on the screen.
+  ///
+  /// When the Navigator pushes this new route on the top of its stack,
+  /// the old topmost route's secondaryAnimation runs from 0.0 to 1.0.
   /// When the Navigator pops the topmost route, the
   /// secondaryAnimation for the route below it runs from 1.0 to 0.0.
   ///
   /// The example below adds a transition that's driven by the
   /// [secondaryAnimation]. When the previous route disappears because this route has
-  /// been pushed on top of it, it translates to right. And the opposite when 
+  /// been pushed on top of it, it translates to right. And the opposite when
   /// the route is exposed because this topmost route has been popped off.
-  /// 
+  ///
   /// ```dart
   /// return SlideTransition(
   ///   position: TweenOffset(
@@ -485,7 +485,7 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
   ///   child: child,
   /// );
   /// ```
-  /// 
+  ///
   /// In practice this method is used pretty rarely.
   ///
   /// The arguments to this method are as follows:
@@ -505,8 +505,8 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
     return child;
   }
 
-  /// Returns true if the [previousRoute] bottom route should delegate the 
-  /// `secondaryAnimation` transition when this route is pushed on top of it 
+  /// Returns true if the [previousRoute] bottom route should delegate the
+  /// `secondaryAnimation` transition when this route is pushed on top of it
   /// or when then this route is popped off of it.
   ///
   /// Subclasses can override this method to restrict the set of routes they
@@ -514,9 +514,9 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
   ///
   /// If true, and `previousRoute.canTransitionTo()` is true, then the route
   /// [previousRoute] will delegate its `secondaryAnimation` transition to
-  /// this route's [buildSecondaryAnimationTransitionForPreviousRoute] method 
+  /// this route's [buildSecondaryAnimationTransitionForPreviousRoute] method
   ///
-  /// If false, [previousRoute]'s `secondaryAnimation` transition will be 
+  /// If false, [previousRoute]'s `secondaryAnimation` transition will be
   /// handled by default by [buildTransitions]
   ///
   /// Returns false by default.
@@ -525,7 +525,7 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
   ///  * [canTransitionTo], which must be true for [previousRoute] for the
   ///    [getSecondaryAnimationTransitionForPreviousRoute] `secondaryAnimation` to run.
   ///
-  ///  * [buildSecondaryAnimationTransitionForPreviousRoute], to define 
+  ///  * [buildSecondaryAnimationTransitionForPreviousRoute], to define
   ///    [previousRoute]'s `secondaryAnimation` transition when this is true
   bool handleSecondaryAnimationTransitionForPreviousRoute(Route<dynamic> previousRoute) => false;
 
@@ -545,12 +545,11 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
     Widget child,
   ) {
     // We remove the _nextRoute when has completed animating
-    if (secondaryAnimation.status == AnimationStatus.dismissed) 
+    if (secondaryAnimation.status == AnimationStatus.dismissed)
         _nextRoute = null;
 
     if (_nextRoute != null && _nextRoute!.handleSecondaryAnimationTransitionForPreviousRoute(this)) {
-      assert(!_nextRoute!._transitionCompleter.isCompleted,
-          'Cannot reuse a ${_nextRoute!.runtimeType} after disposing it.');
+      assert(!_nextRoute!._transitionCompleter.isCompleted, 'Cannot reuse a ${_nextRoute!.runtimeType} after disposing it.');
       final Animation<double> proxySecondaryAnimation = kAlwaysDismissedAnimation;
       final Widget proxyChild = _nextRoute!.buildSecondaryAnimationTransitionForPreviousRoute(context, secondaryAnimation, child);
       return buildTransitions(context, animation, proxySecondaryAnimation, proxyChild);
