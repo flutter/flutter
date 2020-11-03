@@ -36,7 +36,7 @@ class MenuDemoState extends State<MenuDemo> {
   }
 
   void showInSnackBar(String value) {
-    ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
      content: Text(value),
     ));
   }
@@ -85,7 +85,7 @@ class MenuDemoState extends State<MenuDemo> {
         ],
       ),
       body: ListTileTheme(
-        iconColor: Theme.of(context)!.brightness == Brightness.light
+        iconColor: Theme.of(context).brightness == Brightness.light
             ? Colors.grey[600]
             : Colors.grey[500],
         child: ListView(

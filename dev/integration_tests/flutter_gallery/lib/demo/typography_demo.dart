@@ -18,7 +18,7 @@ class TextStyleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final TextStyle nameStyle = theme.textTheme.caption!.copyWith(color: theme.textTheme.caption!.color);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
@@ -43,9 +43,9 @@ class TypographyDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextTheme textTheme = Theme.of(context)!.textTheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     final List<Widget> styleItems = <Widget>[
-      if (MediaQuery.of(context)!.size.width > 500.0)
+      if (MediaQuery.of(context).size.width > 500.0)
         TextStyleItem(name: 'Headline 1', style: textTheme.headline1!, text: 'Light 112sp'),
       TextStyleItem(name: 'Headline 2', style: textTheme.headline2!, text: 'Regular 56sp'),
       TextStyleItem(name: 'Headline 3', style: textTheme.headline3!, text: 'Regular 45sp'),

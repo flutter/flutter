@@ -33,7 +33,7 @@ class _LinkTextSpan extends TextSpan {
 }
 
 void showGalleryAboutDialog(BuildContext context) {
-  final ThemeData themeData = Theme.of(context)!;
+  final ThemeData themeData = Theme.of(context);
   final TextStyle? aboutTextStyle = themeData.textTheme.bodyText1;
   final TextStyle linkStyle = themeData.textTheme.bodyText1!.copyWith(color: themeData.accentColor);
 

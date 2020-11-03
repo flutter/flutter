@@ -101,7 +101,7 @@ class CategoryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     return Scrollbar(
       child: ListView(
         key: PageStorageKey<Category?>(category),
@@ -129,7 +129,7 @@ class CategoryView extends StatelessWidget {
                         alignment: AlignmentDirectional.center,
                         child: Text(
                           asset,
-                          style: theme!.textTheme.caption,
+                          style: theme.textTheme.caption,
                         ),
                       ),
                     ],
@@ -165,7 +165,7 @@ class BackdropPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     return Material(
       elevation: 2.0,
       borderRadius: const BorderRadius.only(
@@ -212,7 +212,7 @@ class BackdropTitle extends AnimatedWidget {
   Widget build(BuildContext context) {
     final Animation<double> animation = listenable as Animation<double>;
     return DefaultTextStyle(
-      style: Theme.of(context)!.primaryTextTheme.headline6!,
+      style: Theme.of(context).primaryTextTheme.headline6!,
       softWrap: false,
       overflow: TextOverflow.ellipsis,
       child: Stack(
@@ -324,7 +324,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
       RelativeRectTween(
         begin: RelativeRect.fromLTRB(
           0.0,
-          panelTop - MediaQuery.of(context)!.padding.bottom,
+          panelTop - MediaQuery.of(context).padding.bottom,
           0.0,
           panelTop - panelSize.height,
         ),
@@ -332,7 +332,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
       ),
     );
 
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     final List<Widget> backdropItems = allCategories.map<Widget>((Category category) {
       final bool selected = category == _category;
       return Material(
@@ -354,7 +354,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
 
     return Container(
       key: _backdropKey,
-      color: theme!.primaryColor,
+      color: theme.primaryColor,
       child: Stack(
         children: <Widget>[
           ListTileTheme(

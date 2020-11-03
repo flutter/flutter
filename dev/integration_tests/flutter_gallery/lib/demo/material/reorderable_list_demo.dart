@@ -115,7 +115,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
       });
 
       // Garbage collect the bottom sheet when it closes.
-      _bottomSheet!.closed.whenComplete(() {
+      _bottomSheet?.closed.whenComplete(() {
         if (mounted) {
           setState(() {
             _bottomSheet = null;
@@ -195,7 +195,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
           ),
           IconButton(
             icon: Icon(
-              Theme.of(context)!.platform == TargetPlatform.iOS
+              Theme.of(context).platform == TargetPlatform.iOS
                   ? Icons.more_horiz
                   : Icons.more_vert,
             ),
@@ -209,7 +209,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
           header: _itemType != _ReorderableListType.threeLine
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text('Header of the list', style: Theme.of(context)!.textTheme.headline5))
+                  child: Text('Header of the list', style: Theme.of(context).textTheme.headline5))
               : null,
           onReorder: _onReorder,
           reverse: _reverse!,

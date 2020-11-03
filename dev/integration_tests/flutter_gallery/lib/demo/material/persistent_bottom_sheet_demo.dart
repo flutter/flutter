@@ -29,7 +29,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
       _showBottomSheetCallback = null;
     });
     _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
-      final ThemeData themeData = Theme.of(context)!;
+      final ThemeData themeData = Theme.of(context);
       return Container(
         decoration: BoxDecoration(
           border: Border(top: BorderSide(color: themeData.disabledColor))

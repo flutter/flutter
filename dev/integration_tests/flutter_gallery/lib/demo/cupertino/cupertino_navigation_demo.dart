@@ -156,7 +156,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
           SliverPadding(
             // Top media padding consumed by CupertinoSliverNavigationBar.
             // Left/Right media padding consumed by Tab1RowItem.
-            padding: MediaQuery.of(context)!.removePadding(
+            padding: MediaQuery.of(context).removePadding(
               removeTop: true,
               removeLeft: true,
               removeRight: true,

@@ -50,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 16.0),
                 Text(
                   'SHRINE',
-                  style: Theme.of(context)!.textTheme.headline5,
+                  style: Theme.of(context).textTheme.headline5,
                 ),
               ],
             ),
@@ -132,7 +132,7 @@ class PrimaryColorOverride extends StatelessWidget {
   Widget build(BuildContext context) {
     return Theme(
       child: child!,
-      data: Theme.of(context)!.copyWith(primaryColor: color),
+      data: Theme.of(context).copyWith(primaryColor: color),
     );
   }
 }

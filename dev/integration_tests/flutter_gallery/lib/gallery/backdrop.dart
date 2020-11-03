@@ -147,7 +147,7 @@ class _BackAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     return IconTheme.merge(
       data: theme.primaryIconTheme,
       child: DefaultTextStyle(
@@ -312,7 +312,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
             builder: (BuildContext context, Widget? child) {
               return PhysicalShape(
                 elevation: 12.0,
-                color: Theme.of(context)!.canvasColor,
+                color: Theme.of(context).canvasColor,
                 clipper: ShapeBorderClipper(
                   shape: BeveledRectangleBorder(
                     borderRadius: _kFrontHeadingBevelRadius.transform(_controller!.value),

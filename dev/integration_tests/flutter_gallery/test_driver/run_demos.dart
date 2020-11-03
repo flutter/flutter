@@ -24,9 +24,9 @@ final List<String> kSkippedDemos = <String>[
 
 /// Scrolls each demo menu item into view, launches it, then returns to the
 /// home screen twice.
-Future<void> runDemos(List<String> demos, WidgetController? controller) async {
+Future<void> runDemos(List<String> demos, WidgetController controller) async {
   final Finder demoList = find.byType(Scrollable);
-  String? currentDemoCategory;
+  String currentDemoCategory;
 
   for (final String demo in demos) {
     if (kSkippedDemos.contains(demo))
@@ -35,7 +35,7 @@ Future<void> runDemos(List<String> demos, WidgetController? controller) async {
     final String demoName = demo.substring(0, demo.indexOf('@'));
     final String demoCategory = demo.substring(demo.indexOf('@') + 1);
     print('> $demo');
-    await controller!.pump(const Duration(milliseconds: 250));
+    await controller.pump(const Duration(milliseconds: 250));
 
     if (currentDemoCategory == null) {
       await controller.tap(find.text(demoCategory));
@@ -84,6 +84,6 @@ Future<void> runDemos(List<String> demos, WidgetController? controller) async {
   }
 
   // Return to the home screen
-  await controller!.tap(find.byTooltip('Back'));
+  await controller.tap(find.byTooltip('Back'));
   await controller.pumpAndSettle();
 }

@@ -60,7 +60,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                   child: ListView(
                     // Add more padding to the normal safe area.
                     padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0)
-                        + MediaQuery.of(context)!.padding,
+                        + MediaQuery.of(context).padding,
                     children: <Widget>[
                       CupertinoButton.filled(
                         child: const Text('Alert'),

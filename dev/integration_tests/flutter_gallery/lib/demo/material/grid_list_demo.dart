@@ -339,7 +339,7 @@ class GridListDemoState extends State<GridListDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final Orientation orientation = MediaQuery.of(context)!.orientation;
+    final Orientation orientation = MediaQuery.of(context).orientation;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Grid list'),

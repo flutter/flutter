@@ -43,7 +43,7 @@ class DualHeaderWithHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
 
     return Row(
@@ -93,7 +93,7 @@ class CollapsibleBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
 
     return Column(

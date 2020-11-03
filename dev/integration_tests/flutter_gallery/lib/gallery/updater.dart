@@ -42,7 +42,7 @@ class UpdaterState extends State<Updater> {
   }
 
   Widget _buildDialog(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle =
         theme.textTheme.subtitle1!.copyWith(color: theme.textTheme.caption!.color);
     return AlertDialog(

@@ -115,7 +115,7 @@ class _CalculatorState extends State<Calculator> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context)!.canvasColor,
+        backgroundColor: Theme.of(context).canvasColor,
         elevation: 0.0,
       ),
       body: Column(
@@ -163,7 +163,7 @@ class KeyPad extends StatelessWidget {
     final ThemeData themeData = ThemeData(
       primarySwatch: Colors.purple,
       brightness: Brightness.dark,
-      platform: Theme.of(context)!.platform,
+      platform: Theme.of(context).platform,
     );
     return Theme(
       data: themeData,
@@ -245,7 +245,7 @@ class CalcKey extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Orientation orientation = MediaQuery.of(context)!.orientation;
+    final Orientation orientation = MediaQuery.of(context).orientation;
     return Expanded(
       child: InkResponse(
         onTap: onTap,

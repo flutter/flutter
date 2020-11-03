@@ -124,7 +124,7 @@ IconButton(
   onPressed: () {
     setState(() => value = !value);
   },
-  color: value ? Theme.of(context)!.primaryColor : null,
+  color: value ? Theme.of(context).primaryColor : null,
 );
 // END
 

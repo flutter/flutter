@@ -56,7 +56,7 @@ class _SearchDemoState extends State<SearchDemo> {
           IconButton(
             tooltip: 'More (not implemented)',
             icon: Icon(
-              Theme.of(context)!.platform == TargetPlatform.iOS
+              Theme.of(context).platform == TargetPlatform.iOS
                   ? Icons.more_horiz
                   : Icons.more_vert,
             ),
@@ -234,7 +234,7 @@ class _ResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     return GestureDetector(
       onTap: () {
         searchDelegate!.close(context, integer);
@@ -266,7 +266,7 @@ class _SuggestionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     return ListView.builder(
       itemCount: suggestions!.length,
       itemBuilder: (BuildContext context, int i) {
@@ -276,7 +276,7 @@ class _SuggestionList extends StatelessWidget {
           title: RichText(
             text: TextSpan(
               text: suggestion.substring(0, query!.length),
-              style: theme!.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.bold),
               children: <TextSpan>[
                 TextSpan(
                   text: suggestion.substring(query!.length),

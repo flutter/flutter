@@ -199,7 +199,7 @@ class _ListDemoState extends State<ListDemo> {
         leading: _showAvatars != null ? ExcludeSemantics(child: CircleAvatar(child: Text(item))) : null,
         title: Text('This item represents $item.'),
         subtitle: secondary,
-        trailing: _showIcons != null ? Icon(Icons.info, color: Theme.of(context)?.disabledColor) : null,
+        trailing: _showIcons != null ? Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
       ),
     );
   }
@@ -245,7 +245,7 @@ class _ListDemoState extends State<ListDemo> {
           ),
           IconButton(
             icon: Icon(
-              Theme.of(context)?.platform == TargetPlatform.iOS
+              Theme.of(context).platform == TargetPlatform.iOS
                   ? Icons.more_horiz
                   : Icons.more_vert,
             ),

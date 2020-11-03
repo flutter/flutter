@@ -51,7 +51,7 @@ class _CategoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
 
     // This repaint boundary prevents the entire _CategoriesPage from being
@@ -109,7 +109,7 @@ class _CategoriesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     const double aspectRatio = 160.0 / 180.0;
     final List<GalleryDemoCategory> categoriesList = categories!.toList();
-    final int columnCount = (MediaQuery.of(context)!.orientation == Orientation.portrait) ? 2 : 3;
+    final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
 
     return Semantics(
       scopesRoute: true,
@@ -180,7 +180,7 @@ class _DemoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
     final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
     return RawMaterialButton(
@@ -242,7 +242,7 @@ class _DemosPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // When overriding ListView.padding, it is necessary to manually handle
     // safe areas.
-    final double windowBottomPadding = MediaQuery.of(context)!.padding.bottom;
+    final double windowBottomPadding = MediaQuery.of(context).padding.bottom;
     return KeyedSubtree(
       key: const ValueKey<String>('GalleryDemoList'), // So the tests can find this ListView
       child: Semantics(
@@ -316,9 +316,9 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
-    final MediaQueryData media = MediaQuery.of(context)!;
+    final MediaQueryData media = MediaQuery.of(context);
     final bool centerHome = media.orientation == Orientation.portrait && media.size.height < 800.0;
 
     const Curve switchOutCurve = Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);

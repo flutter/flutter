@@ -111,7 +111,7 @@ class _OptionsItem extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.fade,
           child: IconTheme(
-            data: Theme.of(context)!.primaryIconTheme,
+            data: Theme.of(context).primaryIconTheme,
             child: child!,
           ),
         ),
@@ -131,7 +131,7 @@ class _BooleanItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = Theme.of(context)!.brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return _OptionsItem(
       child: Row(
         children: <Widget>[
@@ -174,7 +174,7 @@ class _TextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     return TextButton(
       style: TextButton.styleFrom(
         primary: theme.colorScheme.onPrimary,
@@ -194,7 +194,7 @@ class _Heading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     return _OptionsItem(
       child: DefaultTextStyle(
         style: theme.textTheme.headline6!.copyWith(
@@ -235,7 +235,7 @@ class _ThemeModeItem extends StatelessWidget {
                 const Text('Theme'),
                 Text(
                   modeLabels[options!.themeMode!]!,
-                  style: Theme.of(context)!.primaryTextTheme.bodyText2,
+                  style: Theme.of(context).primaryTextTheme.bodyText2,
                 ),
               ],
             ),
@@ -282,7 +282,7 @@ class _TextScaleFactorItem extends StatelessWidget {
                 const Text('Text size'),
                 Text(
                   options!.textScaleFactor!.label,
-                  style: Theme.of(context)!.primaryTextTheme.bodyText2,
+                  style: Theme.of(context).primaryTextTheme.bodyText2,
                 ),
               ],
             ),
@@ -328,7 +328,7 @@ class _VisualDensityItem extends StatelessWidget {
                 const Text('Visual density'),
                 Text(
                   options!.visualDensity!.label,
-                  style: Theme.of(context)!.primaryTextTheme.bodyText2,
+                  style: Theme.of(context).primaryTextTheme.bodyText2,
                 ),
               ],
             ),
@@ -440,7 +440,7 @@ class _PlatformItem extends StatelessWidget {
                 const Text('Platform mechanics'),
                  Text(
                    _platformLabel(options!.platform)!,
-                   style: Theme.of(context)!.primaryTextTheme.bodyText2,
+                   style: Theme.of(context).primaryTextTheme.bodyText2,
                  ),
               ],
             ),
@@ -515,7 +515,7 @@ class GalleryOptionsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
 
     return DefaultTextStyle(
       style: theme.primaryTextTheme.subtitle1!,

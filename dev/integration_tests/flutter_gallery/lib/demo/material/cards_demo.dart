@@ -129,7 +129,7 @@ class TappableTravelDestinationItem extends StatelessWidget {
                     print('Card was tapped');
                   },
                   // Generally, material cards use onSurface with 12% opacity for the pressed state.
-                  splashColor: Theme.of(context)!.colorScheme.onSurface.withOpacity(0.12),
+                  splashColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
                   // Generally, material cards do not have a highlight overlay.
                   highlightColor: Colors.transparent,
                   child: TravelDestinationContent(destination: destination),
@@ -162,7 +162,7 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context)!.colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return SafeArea(
       top: false,
@@ -235,7 +235,7 @@ class SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 12.0),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text(title!, style: Theme.of(context)!.textTheme.subtitle1),
+        child: Text(title!, style: Theme.of(context).textTheme.subtitle1),
       ),
     );
   }
@@ -249,7 +249,7 @@ class TravelDestinationContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final TextStyle titleStyle = theme.textTheme.headline5!.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.subtitle1!;
     final ButtonStyle textButtonStyle = TextButton.styleFrom(primary: Colors.amber.shade500);

@@ -96,7 +96,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     setState(() {
       leaveBehindItems.remove(item);
     });
-    ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('You archived item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
@@ -109,7 +109,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     setState(() {
       leaveBehindItems.remove(item);
     });
-    ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('You deleted item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
@@ -212,7 +212,7 @@ class _LeaveBehindListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     return Semantics(
       customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
         const CustomSemanticsAction(label: 'Archive'): _handleArchive,
@@ -242,7 +242,7 @@ class _LeaveBehindListItem extends StatelessWidget {
           return false;
         },
         background: Container(
-          color: theme!.primaryColor,
+          color: theme.primaryColor,
           child: const Center(
             child: ListTile(
               leading: Icon(Icons.delete, color: Colors.white, size: 36.0),

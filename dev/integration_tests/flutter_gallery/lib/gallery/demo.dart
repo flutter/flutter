@@ -132,7 +132,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(demo.description!,
-                      style: Theme.of(context)!.textTheme.subtitle1,
+                      style: Theme.of(context).textTheme.subtitle1,
                     ),
                   ),
                   Expanded(child: demo.demoWidget!),
@@ -173,7 +173,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final SyntaxHighlighterStyle style = Theme.of(context)!.brightness == Brightness.dark
+    final SyntaxHighlighterStyle style = Theme.of(context).brightness == Brightness.dark
       ? SyntaxHighlighterStyle.darkThemeStyle()
       : SyntaxHighlighterStyle.lightThemeStyle();
 

@@ -72,11 +72,11 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
     _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       return Container(
         decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Theme.of(context)!.dividerColor))
+          border: Border(top: BorderSide(color: Theme.of(context).dividerColor))
         ),
         child: Padding(
           padding: const EdgeInsets.all(32.0),
-          child: Text(_explanatoryText, style: Theme.of(context)!.textTheme.subtitle1),
+          child: Text(_explanatoryText, style: Theme.of(context).textTheme.subtitle1),
         ),
       );
     });

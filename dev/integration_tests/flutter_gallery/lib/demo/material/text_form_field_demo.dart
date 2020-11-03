@@ -87,7 +87,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   PersonData person = PersonData();
 
   void showInSnackBar(String value) {
-    ScaffoldMessenger.of(context)!.showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(value),
     ));
   }
@@ -285,7 +285,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   const SizedBox(height: 24.0),
                   Text(
                     '* indicates required field',
-                    style: Theme.of(context)!.textTheme.caption,
+                    style: Theme.of(context).textTheme.caption,
                   ),
                   const SizedBox(height: 24.0),
                 ],

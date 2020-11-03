@@ -248,7 +248,7 @@ class _SlidersState extends State<_Sliders> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: Column(

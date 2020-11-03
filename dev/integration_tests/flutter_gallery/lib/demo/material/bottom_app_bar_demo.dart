@@ -232,7 +232,7 @@ class _RadioItem<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     return Container(
       height: 56.0,
       padding: const EdgeInsetsDirectional.only(start: 16.0),
@@ -320,7 +320,7 @@ class _Heading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     return Container(
       height: 48.0,
       padding: const EdgeInsetsDirectional.only(start: 56.0),
@@ -368,20 +368,20 @@ class _DemoBottomAppBar extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.search, semanticLabel: 'show search action',),
           onPressed: () {
-            ScaffoldMessenger.of(context)!.showSnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('This is a dummy search action.')),
             );
           },
         ),
         IconButton(
           icon: Icon(
-            Theme.of(context)!.platform == TargetPlatform.iOS
+            Theme.of(context).platform == TargetPlatform.iOS
                 ? Icons.more_horiz
                 : Icons.more_vert,
             semanticLabel: 'Show menu actions',
           ),
           onPressed: () {
-            ScaffoldMessenger.of(context)!.showSnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('This is a dummy menu action.')),
             );
           },
@@ -435,7 +435,7 @@ class _DiamondFab extends StatelessWidget {
           width: 56.0,
           height: 56.0,
           child: IconTheme.merge(
-            data: IconThemeData(color: Theme.of(context)!.accentIconTheme.color),
+            data: IconThemeData(color: Theme.of(context).accentIconTheme.color),
             child: child!,
           ),
         ),

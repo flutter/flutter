@@ -25,18 +25,18 @@ List<String> _allDemos = kAllGalleryDemos.map(
 Set<String> _unTestedDemos = Set<String>.from(_allDemos);
 
 class _MessageHandler {
-  static LiveWidgetController? controller;
-  Future<String> call(String? message) async {
+  static LiveWidgetController controller;
+  Future<String> call(String message) async {
     switch(message) {
       case 'demoNames':
         return const JsonEncoder.withIndent('  ').convert(_allDemos);
       case 'profileDemos':
-        controller ??= LiveWidgetController(WidgetsBinding.instance!);
+        controller ??= LiveWidgetController(WidgetsBinding.instance);
         await runDemos(kProfiledDemos, controller);
         _unTestedDemos.removeAll(kProfiledDemos);
         return const JsonEncoder.withIndent('  ').convert(kProfiledDemos);
       case 'restDemos':
-        controller ??= LiveWidgetController(WidgetsBinding.instance!);
+        controller ??= LiveWidgetController(WidgetsBinding.instance);
         final List<String> restDemos =  _unTestedDemos.toList();
         await runDemos(restDemos, controller);
         return const JsonEncoder.withIndent('  ').convert(restDemos);

@@ -76,14 +76,14 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
 
   @override
   Widget build(BuildContext context) {
-    final double statusBarHeight = MediaQuery.of(context)!.padding.top;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
     return Theme(
-      data: _kTheme.copyWith(platform: Theme.of(context)!.platform),
+      data: _kTheme.copyWith(platform: Theme.of(context).platform),
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.edit),
           onPressed: () {
-            ScaffoldMessenger.of(context)!.showSnackBar(const SnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('Not supported.'),
             ));
           },
@@ -108,7 +108,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           icon: const Icon(Icons.search),
           tooltip: 'Search',
           onPressed: () {
-            ScaffoldMessenger.of(context)!.showSnackBar(const SnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('Not supported.'),
             ));
           },
@@ -136,7 +136,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
   }
 
   Widget _buildBody(BuildContext context, double statusBarHeight) {
-    final EdgeInsets mediaPadding = MediaQuery.of(context)!.padding;
+    final EdgeInsets mediaPadding = MediaQuery.of(context).padding;
     final EdgeInsets padding = EdgeInsets.only(
       top: 8.0,
       left: 8.0 + mediaPadding.left,
@@ -177,7 +177,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
       settings: const RouteSettings(name: '/pesto/recipe'),
       builder: (BuildContext context) {
         return Theme(
-          data: _kTheme.copyWith(platform: Theme.of(context)!.platform),
+          data: _kTheme.copyWith(platform: Theme.of(context).platform),
           child: RecipePage(recipe: recipe),
         );
       },
@@ -322,7 +322,7 @@ class RecipePage extends StatefulWidget {
 class _RecipePageState extends State<RecipePage> {
   final TextStyle menuItemStyle = const PestoStyle(fontSize: 15.0, color: Colors.black54, height: 24.0/15.0);
 
-  double _getAppBarHeight(BuildContext context) => MediaQuery.of(context)!.size.height * 0.3;
+  double _getAppBarHeight(BuildContext context) => MediaQuery.of(context).size.height * 0.3;
 
   @override
   Widget build(BuildContext context) {
@@ -330,7 +330,7 @@ class _RecipePageState extends State<RecipePage> {
     // adjusts based on the size of the screen. If the recipe sheet touches
     // the edge of the screen, use a slightly different layout.
     final double appBarHeight = _getAppBarHeight(context);
-    final Size screenSize = MediaQuery.of(context)!.size;
+    final Size screenSize = MediaQuery.of(context).size;
     final bool fullWidth = screenSize.width < _kRecipePageMaxWidth;
     final bool isFavorite = _favoriteRecipes.contains(widget.recipe);
     return Scaffold(

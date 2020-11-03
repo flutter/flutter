@@ -107,7 +107,7 @@ class _GalleryAppState extends State<GalleryApp> {
     return Builder(
       builder: (BuildContext context) {
         return MediaQuery(
-          data: MediaQuery.of(context)!.copyWith(
+          data: MediaQuery.of(context).copyWith(
             textScaleFactor: _options!.textScaleFactor!.scale,
           ),
           child: child,
@@ -158,7 +158,7 @@ class _GalleryAppState extends State<GalleryApp> {
               Builder(builder: (BuildContext context) {
                 return CupertinoTheme(
                   data: CupertinoThemeData(
-                    brightness: Theme.of(context)!.brightness,
+                    brightness: Theme.of(context).brightness,
                   ),
                   child: child!,
                 );

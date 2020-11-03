@@ -354,7 +354,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             onPressed: () {
               setState(() => iconButtonToggle = !iconButtonToggle);
             },
-            color: iconButtonToggle ? Theme.of(context)!.primaryColor : null,
+            color: iconButtonToggle ? Theme.of(context).primaryColor : null,
           ),
           const IconButton(
             icon: Icon(

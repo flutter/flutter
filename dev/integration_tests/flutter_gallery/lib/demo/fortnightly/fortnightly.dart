@@ -41,7 +41,7 @@ class ShortAppBar extends StatelessWidget {
       width: 96,
       height: 50,
       child: Material(
-        color: Theme.of(context)!.colorScheme.surface,
+        color: Theme.of(context).colorScheme.surface,
         elevation: 4,
         shape: const BeveledRectangleBorder(
           borderRadius: BorderRadius.only(bottomRight: Radius.circular(22)),
@@ -86,13 +86,13 @@ over water meant for the whole central valley of California? The story will shoc
 
   @override
   Widget build(BuildContext context) {
-    final TextTheme textTheme = Theme.of(context)!.primaryTextTheme;
+    final TextTheme textTheme = Theme.of(context).primaryTextTheme;
 
     return SingleChildScrollView(
       child: SafeArea(
         top: false,
         child: Container(
-          color: Theme.of(context)!.colorScheme.surface,
+          color: Theme.of(context).colorScheme.surface,
           child: Column(
             children: <Widget>[
               Container(

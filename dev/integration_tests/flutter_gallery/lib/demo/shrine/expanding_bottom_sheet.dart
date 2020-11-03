@@ -310,7 +310,7 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
     final AppStateModel model = ScopedModel.of<AppStateModel>(context);
     final int numProducts = model.productsInCart.keys.length;
     final int totalCartQuantity = model.totalCartQuantity;
-    final Size screenSize = MediaQuery.of(context)!.size;
+    final Size screenSize = MediaQuery.of(context).size;
     final double screenWidth = screenSize.width;
     final double screenHeight = screenSize.height;
 
@@ -540,7 +540,7 @@ class ExtraProductsNumber extends StatelessWidget {
     return Container(
       child: Text(
         '+$displayedOverflowProducts',
-        style: Theme.of(context)!.primaryTextTheme.button,
+        style: Theme.of(context).primaryTextTheme.button,
       ),
     );
   }

@@ -17,7 +17,7 @@ class TooltipDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tooltips'),
@@ -30,7 +30,7 @@ class TooltipDemo extends StatelessWidget {
             bottom: false,
             child: ListView(
               children: <Widget>[
-                Text(_introText, style: theme!.textTheme.subtitle1),
+                Text(_introText, style: theme.textTheme.subtitle1),
                 Row(
                   children: <Widget>[
                     Text('Long press the ', style: theme.textTheme.subtitle1),
@@ -52,7 +52,7 @@ class TooltipDemo extends StatelessWidget {
                     color: theme.iconTheme.color,
                     tooltip: 'Place a phone call',
                     onPressed: () {
-                      ScaffoldMessenger.of(context)!.showSnackBar(const SnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                          content: Text('That was an ordinary tap.'),
                       ));
                     },

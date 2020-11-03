@@ -25,7 +25,7 @@ class ProductCard extends StatelessWidget {
       locale: Localizations.localeOf(context).toString(),
     );
 
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
 
     final Image imageWidget = Image.asset(
       product!.assetName,
@@ -53,7 +53,7 @@ class ProductCard extends StatelessWidget {
                 child: imageWidget,
               ),
               SizedBox(
-                height: kTextBoxHeight * MediaQuery.of(context)!.textScaleFactor,
+                height: kTextBoxHeight * MediaQuery.of(context).textScaleFactor,
                 width: 121.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -61,7 +61,7 @@ class ProductCard extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       product == null ? '' : product!.name,
-                      style: theme!.textTheme.button,
+                      style: theme.textTheme.button,
                       softWrap: false,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,

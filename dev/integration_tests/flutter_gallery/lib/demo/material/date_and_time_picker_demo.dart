@@ -38,7 +38,7 @@ class _InputDropdown extends StatelessWidget {
           children: <Widget>[
             Text(valueText!, style: valueStyle),
             Icon(Icons.arrow_drop_down,
-              color: Theme.of(context)!.brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70,
+              color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70,
             ),
           ],
         ),
@@ -85,7 +85,7 @@ class _DateTimePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle? valueStyle = Theme.of(context)!.textTheme.headline6;
+    final TextStyle? valueStyle = Theme.of(context).textTheme.headline6;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
@@ -147,13 +147,13 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                   labelText: 'Event name',
                   border: OutlineInputBorder(),
                 ),
-                style: Theme.of(context)!.textTheme.headline4,
+                style: Theme.of(context).textTheme.headline4,
               ),
               TextField(
                 decoration: const InputDecoration(
                   labelText: 'Location',
                 ),
-                style: Theme.of(context)!.textTheme.headline4!.copyWith(fontSize: 20.0),
+                style: Theme.of(context).textTheme.headline4!.copyWith(fontSize: 20.0),
               ),
               _DateTimePicker(
                 labelText: 'From',

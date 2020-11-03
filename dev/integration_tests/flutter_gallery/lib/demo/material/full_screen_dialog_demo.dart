@@ -26,7 +26,7 @@ class DateTimeItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
 
     return DefaultTextStyle(
       style: theme.textTheme.subtitle1!,
@@ -111,7 +111,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     if (!_saveNeeded)
       return true;
 
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle = theme.textTheme.subtitle1!.copyWith(color: theme.textTheme.caption!.color);
 
     return await (showDialog<bool>(
@@ -143,7 +143,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(

@@ -12,8 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<void> endOfAnimation() async {
   do {
-    await SchedulerBinding.instance!.endOfFrame;
-  } while (SchedulerBinding.instance!.hasScheduledFrame);
+    await SchedulerBinding.instance.endOfFrame;
+  } while (SchedulerBinding.instance.hasScheduledFrame);
 }
 
 int iteration = 0;
@@ -31,5 +31,5 @@ Future<void> main() async {
   await endOfAnimation();
   await Future<void>.delayed(const Duration(milliseconds: 50));
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
-  WidgetsBinding.instance!.addObserver(LifecycleObserver());
+  WidgetsBinding.instance.addObserver(LifecycleObserver());
 }

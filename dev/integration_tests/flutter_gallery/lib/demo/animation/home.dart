@@ -534,7 +534,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   }
 
   Widget _buildBody(BuildContext context) {
-    final MediaQueryData mediaQueryData = MediaQuery.of(context)!;
+    final MediaQueryData mediaQueryData = MediaQuery.of(context);
     final double statusBarHeight = mediaQueryData.padding.top;
     final double screenHeight = mediaQueryData.size.height;
     final double appBarMaxHeight = screenHeight - statusBarHeight;
