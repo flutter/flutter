@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,7 +52,7 @@ class WebCallbackManager implements CallbackManager {
 
   Future<void> _sendWebDriverCommand(WebDriverCommand command) async {
     try {
-      _webDriverCommandPipe.complete(Future.value(command));
+      _webDriverCommandPipe.complete(command);
       final bool awaitCommand = await _driverCommandComplete.future;
       if (!awaitCommand) {
         throw Exception(
@@ -107,7 +107,7 @@ class WebCallbackManager implements CallbackManager {
       final WebDriverCommand command = await _webDriverCommandPipe.future;
       switch (command.type) {
         case WebDriverCommandType.screenshot:
-          final Map<String, dynamic> data = Map.from(command.values);
+          final Map<String, dynamic> data = Map<String, dynamic>.from(command.values);
           data.addAll(
               WebDriverCommand.typeToMap(WebDriverCommandType.screenshot));
           response = <String, String>{
@@ -115,7 +115,7 @@ class WebCallbackManager implements CallbackManager {
           };
           break;
         case WebDriverCommandType.noop:
-          final Map<String, dynamic> data = Map();
+          final Map<String, dynamic> data = <String, dynamic>{};
           data.addAll(WebDriverCommand.typeToMap(WebDriverCommandType.noop));
           response = <String, String>{
             'message': Response.webDriverCommand(data: data).toJson(),
@@ -125,12 +125,12 @@ class WebCallbackManager implements CallbackManager {
           throw UnimplementedError('${command.type} is not implemented');
       }
     } else {
-      final Map<String, dynamic> data = Map();
+      final Map<String, dynamic> data = <String, dynamic>{};
       data.addAll(WebDriverCommand.typeToMap(WebDriverCommandType.ack));
       response = <String, String>{
         'message': Response.webDriverCommand(data: data).toJson(),
       };
-      _driverCommandComplete.complete(Future.value(message.isSuccess));
+      _driverCommandComplete.complete(message.isSuccess);
       _webDriverCommandPipe = Completer<WebDriverCommand>();
     }
     return <String, dynamic>{
@@ -139,8 +139,7 @@ class WebCallbackManager implements CallbackManager {
     };
   }
 
-  Future<Map<String, dynamic>> _requestData(
-      IntegrationTestResults testRunner) async {
+  Future<Map<String, dynamic>> _requestData(IntegrationTestResults testRunner) async {
     final bool allTestsPassed = await testRunner.allTestsPassed.future;
     final Map<String, String> response = <String, String>{
       'message': allTestsPassed

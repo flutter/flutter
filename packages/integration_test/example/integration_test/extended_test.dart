@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // This is a Flutter widget test can take a screenshot.
 //
 // NOTE: Screenshots are only supported on Web for now. For Web, this needs to

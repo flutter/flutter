@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // This is a basic Flutter widget test.
 //
 // To perform an interaction with a widget in your test, use the WidgetTester
@@ -22,7 +26,7 @@ void main() {
     // Trigger a frame.
     await tester.pumpAndSettle();
 
-    // TODO: https://github.com/flutter/flutter/issues/51890
+    // TODO(nturgut): https://github.com/flutter/flutter/issues/51890
     // Add screenshot capability for mobile platforms.
 
     // Verify that platform version is retrieved.

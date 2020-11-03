@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,31 +11,31 @@ import 'dart:convert';
 /// An object sent from integration_test back to the Flutter Driver in response to
 /// `request_data` command.
 class Response {
+  /// Constructor to use for positive response.
+  Response.allTestsPassed({this.data})
+      : _allTestsPassed = true,
+        _failureDetails = null;
+
+  /// Constructor for failure response.
+  Response.someTestsFailed(this._failureDetails, {this.data})
+      : _allTestsPassed = false;
+
+  /// Constructor for failure response.
+  Response.toolException({String ex})
+      : _allTestsPassed = false,
+        _failureDetails = <Failure>[Failure('ToolException', ex)];
+
+  /// Constructor for web driver commands response.
+  Response.webDriverCommand({this.data})
+      : _allTestsPassed = false,
+        _failureDetails = null;
+
   final List<Failure> _failureDetails;
 
   final bool _allTestsPassed;
 
   /// The extra information to be added along side the test result.
   Map<String, dynamic> data;
-
-  /// Constructor to use for positive response.
-  Response.allTestsPassed({this.data})
-      : this._allTestsPassed = true,
-        this._failureDetails = null;
-
-  /// Constructor for failure response.
-  Response.someTestsFailed(this._failureDetails, {this.data})
-      : this._allTestsPassed = false;
-
-  /// Constructor for failure response.
-  Response.toolException({String ex})
-      : this._allTestsPassed = false,
-        this._failureDetails = [Failure('ToolException', ex)];
-
-  /// Constructor for web driver commands response.
-  Response.webDriverCommand({this.data})
-      : this._allTestsPassed = false,
-        this._failureDetails = null;
 
   /// Whether the test ran successfully or not.
   bool get allTestsPassed => _allTestsPassed;
@@ -56,13 +56,13 @@ class Response {
 
   /// Deserializes the result from JSON.
   static Response fromJson(String source) {
-    final Map<String, dynamic> responseJson = json.decode(source);
+    final Map<String, dynamic> responseJson = json.decode(source) as Map<String, dynamic>;
     if (responseJson['result'] as String == 'true') {
-      return Response.allTestsPassed(data: responseJson['data']);
+      return Response.allTestsPassed(data: responseJson['data'] as Map<String, dynamic>);
     } else {
       return Response.someTestsFailed(
-        _failureDetailsFromJson(responseJson['failureDetails']),
-        data: responseJson['data'],
+        _failureDetailsFromJson(responseJson['failureDetails'] as List<dynamic>),
+        data: responseJson['data'] as Map<String, dynamic>,
       );
     }
   }
@@ -73,52 +73,49 @@ class Response {
       return '';
     }
 
-    StringBuffer sb = StringBuffer();
+    final StringBuffer sb = StringBuffer();
     int failureCount = 1;
-    failureDetails.forEach((Failure f) {
-      sb.writeln('Failure in method: ${f.methodName}');
-      sb.writeln('${f.details}');
+    for (final Failure failure in failureDetails) {
+      sb.writeln('Failure in method: ${failure.methodName}');
+      sb.writeln(failure.details);
       sb.writeln('end of failure ${failureCount.toString()}\n\n');
       failureCount++;
-    });
+    }
     return sb.toString();
   }
 
   /// Create a list of Strings from [_failureDetails].
   List<String> _failureDetailsAsString() {
-    final List<String> list = List<String>();
+    final List<String> list = <String>[];
     if (_failureDetails == null || _failureDetails.isEmpty) {
       return list;
     }
 
-    _failureDetails.forEach((Failure f) {
-      list.add(f.toJson());
-    });
+    for (final Failure failure in _failureDetails) {
+      list.add(failure.toJson());
+    }
 
     return list;
   }
 
   /// Creates a [Failure] list using a json response.
   static List<Failure> _failureDetailsFromJson(List<dynamic> list) {
-    final List<Failure> failureList = List<Failure>();
-    list.forEach((s) {
-      final String failure = s as String;
-      failureList.add(Failure.fromJsonString(failure));
-    });
-    return failureList;
+    return list.map((dynamic s) {
+      return Failure.fromJsonString(s as String);
+    }).toList();
   }
 }
 
 /// Representing a failure includes the method name and the failure details.
 class Failure {
+  /// Constructor requiring all fields during initialization.
+  Failure(this.methodName, this.details);
+
   /// The name of the test method which failed.
   final String methodName;
 
   /// The details of the failure such as stack trace.
   final String details;
-
-  /// Constructor requiring all fields during initialization.
-  Failure(this.methodName, this.details);
 
   /// Serializes the object to JSON.
   String toJson() {
@@ -133,8 +130,8 @@ class Failure {
 
   /// Decode a JSON string to create a Failure object.
   static Failure fromJsonString(String jsonString) {
-    Map<String, dynamic> failure = json.decode(jsonString);
-    return Failure(failure['methodName'], failure['details']);
+    final Map<String, dynamic> failure = json.decode(jsonString) as Map<String, dynamic>;
+    return Failure(failure['methodName'] as String, failure['details'] as String);
   }
 }
 
@@ -146,9 +143,6 @@ class Failure {
 /// These messages are used for the handshake since they carry information on
 /// the driver side test such as: status pending or tests failed.
 class DriverTestMessage {
-  final bool _isSuccess;
-  final bool _isPending;
-
   /// When tests are failed on the driver side.
   DriverTestMessage.error()
       : _isSuccess = false,
@@ -164,6 +158,9 @@ class DriverTestMessage {
   DriverTestMessage.complete()
       : _isSuccess = true,
         _isPending = false;
+
+  final bool _isSuccess;
+  final bool _isPending;
 
   // /// Status of this message.
   // ///
@@ -230,6 +227,16 @@ enum WebDriverCommandType {
 ///
 /// See: https://www.w3.org/TR/webdriver/
 class WebDriverCommand {
+  /// Constructor for [WebDriverCommandType.noop] command.
+  WebDriverCommand.noop()
+      : type = WebDriverCommandType.noop,
+        values = <String, dynamic>{};
+
+  /// Constructor for [WebDriverCommandType.noop] screenshot.
+  WebDriverCommand.screenshot(String screenshotName)
+      : type = WebDriverCommandType.screenshot,
+        values = <String, dynamic>{'screenshot_name': screenshotName};
+
   /// Type of the [WebDriverCommand].
   ///
   /// Currently the only command that triggers a WebDriver API is `screenshot`.
@@ -242,22 +249,12 @@ class WebDriverCommand {
   /// `screenshot`.
   final Map<String, dynamic> values;
 
-  /// Constructor for [WebDriverCommandType.noop] command.
-  WebDriverCommand.noop()
-      : this.type = WebDriverCommandType.noop,
-        this.values = Map();
-
-  /// Constructor for [WebDriverCommandType.noop] screenshot.
-  WebDriverCommand.screenshot(String screenshot_name)
-      : this.type = WebDriverCommandType.screenshot,
-        this.values = {'screenshot_name': screenshot_name};
-
   /// Util method for converting [WebDriverCommandType] to a map entry.
   ///
   /// Used for converting messages to json format.
-  static Map<String, dynamic> typeToMap(WebDriverCommandType type) => {
-        'web_driver_command': '${type}',
-      };
+  static Map<String, dynamic> typeToMap(WebDriverCommandType type) => <String, dynamic>{
+    'web_driver_command': '$type',
+  };
 }
 
 /// Template methods each class that responses the driver side inputs must

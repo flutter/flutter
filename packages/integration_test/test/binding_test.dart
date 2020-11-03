@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -8,13 +12,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
-vm.Timeline _ktimelines = vm.Timeline(
+vm.Timeline _kTimelines = vm.Timeline(
   traceEvents: <vm.TimelineEvent>[],
   timeOriginMicros: 100,
   timeExtentMicros: 200,
 );
 
-void main() async {
+Future<void> main() async {
   Future<Map<String, dynamic>> request;
 
   group('Test Integration binding', () {
@@ -25,7 +29,7 @@ void main() async {
         binding as IntegrationTestWidgetsFlutterBinding;
 
     MockVM mockVM;
-    List<int> clockTimes = [100, 200];
+    final List<int> clockTimes = <int>[100, 200];
 
     setUp(() {
       request = integrationBinding.callback(<String, String>{
@@ -35,14 +39,14 @@ void main() async {
       when(mockVM.getVMTimeline(
         timeOriginMicros: anyNamed('timeOriginMicros'),
         timeExtentMicros: anyNamed('timeExtentMicros'),
-      )).thenAnswer((_) => Future.value(_ktimelines));
+      )).thenAnswer((_) => Future<vm.Timeline>.value(_kTimelines));
       when(mockVM.getVMTimelineMicros()).thenAnswer(
-        (_) => Future.value(vm.Timestamp(timestamp: clockTimes.removeAt(0))),
+        (_) => Future<vm.Timestamp>.value(vm.Timestamp(timestamp: clockTimes.removeAt(0))),
       );
     });
 
     testWidgets('Run Integration app', (WidgetTester tester) async {
-      runApp(MaterialApp(
+      runApp(const MaterialApp(
         home: Text('Test'),
       ));
       expect(tester.binding, integrationBinding);
@@ -50,7 +54,7 @@ void main() async {
     });
 
     testWidgets('setSurfaceSize works', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: Center(child: Text('Test'))));
+      await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
 
       final Size windowCenter = tester.binding.window.physicalSize /
           tester.binding.window.devicePixelRatio /
@@ -82,7 +86,7 @@ void main() async {
       expect(integrationBinding.reportData.containsKey('timeline'), true);
       expect(
         json.encode(integrationBinding.reportData['timeline']),
-        json.encode(_ktimelines),
+        json.encode(_kTimelines),
       );
     });
   });
@@ -94,7 +98,7 @@ void main() async {
     final Map<String, dynamic> response =
         (await request)['response'] as Map<String, dynamic>;
     final String message = response['message'] as String;
-    Response result = Response.fromJson(message);
+    final Response result = Response.fromJson(message);
     assert(result.data['answer'] == 42);
   });
 }

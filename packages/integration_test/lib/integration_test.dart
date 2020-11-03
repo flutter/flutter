@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,17 +14,15 @@ import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 import 'package:vm_service/vm_service_io.dart' as vm_io;
 
-import 'common.dart';
+import '_callback_io.dart' if (dart.library.html) '_callback_web.dart' as driver_actions;
 import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
-import '_callback_io.dart' if (dart.library.html) '_callback_web.dart'
-    as driver_actions;
+import 'common.dart';
 
 const String _success = 'success';
 
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
 /// on a channel to adapt them to native instrumentation test format.
-class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
-    implements IntegrationTestResults {
+class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding implements IntegrationTestResults {
   /// Sets up a listener to report that the tests are finished when everything is
   /// torn down.
   IntegrationTestWidgetsFlutterBinding() {
@@ -43,18 +41,20 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
         await _channel.invokeMethod<void>(
           'allTestsFinished',
           <String, dynamic>{
-            'results': results.map((name, result) {
+            'results': results.map((String name, Object result) {
               if (result is Failure) {
-                return MapEntry(name, result.details);
+                return MapEntry<String, dynamic>(name, result.details);
               }
-              return MapEntry(name, result);
+              return MapEntry<String, Object>(name, result);
             })
           },
         );
       } on MissingPluginException {
         print('Warning: integration_test test plugin was not detected.');
       }
-      if (!_allTestsPassed.isCompleted) _allTestsPassed.complete(true);
+      if (!_allTestsPassed.isCompleted) {
+        _allTestsPassed.complete(true);
+      }
     });
 
     // TODO(jackson): Report the results individually instead of all at once
@@ -70,13 +70,9 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     };
   }
 
-  // TODO(dnfield): Remove the ignore once we bump the minimum Flutter version
-  // ignore: override_on_non_overriding_member
   @override
   bool get overrideHttpClient => false;
 
-  // TODO(dnfield): Remove the ignore once we bump the minimum Flutter version
-  // ignore: override_on_non_overriding_member
   @override
   bool get registerTestTextInput => false;
 
@@ -150,9 +146,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   ///
   /// The default value is `null`.
   @override
-  Map<String, dynamic> get reportData => _reportData;
-  Map<String, dynamic> _reportData;
-  set reportData(Map<String, dynamic> data) => this._reportData = data;
+  Map<String, dynamic> reportData;
 
   /// Manages callbacks received from driver side and commands send to driver
   /// side.
@@ -279,7 +273,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     bool retainPriorEvents = false,
     String reportKey = 'timeline',
   }) async {
-    vm.Timeline timeline = await traceTimeline(
+    final vm.Timeline timeline = await traceTimeline(
       action,
       streams: streams,
       retainPriorEvents: retainPriorEvents,
@@ -311,8 +305,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     // TODO(CareF): remove this when flush FrameTiming is readly in engine.
     //              See https://github.com/flutter/flutter/issues/64808
     //              and https://github.com/flutter/flutter/issues/67593
-    Future<void> delayForFrameTimings() =>
-        Future<void>.delayed(const Duration(seconds: 2));
+    Future<void> delayForFrameTimings() => Future<void>.delayed(const Duration(seconds: 2));
 
     await delayForFrameTimings(); // flush old FrameTimings
     final List<FrameTiming> frameTimings = <FrameTiming>[];

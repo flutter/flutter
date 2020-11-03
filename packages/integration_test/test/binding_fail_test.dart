@@ -1,6 +1,10 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -8,9 +12,9 @@ import 'package:flutter_test/flutter_test.dart';
 const String _flutterBin = 'flutter';
 const String _integrationResultsPrefix =
     'IntegrationTestWidgetsFlutterBinding test results:';
-const String _failureExcerpt = 'Expected: <false>\\n  Actual: <true>';
+const String _failureExcerpt = r'Expected: <false>\n  Actual: <true>';
 
-void main() async {
+Future<void> main() async {
   group('Integration binding result', () {
     test('when multiple tests pass', () async {
       final Map<String, dynamic> results =
@@ -18,7 +22,7 @@ void main() async {
 
       expect(
           results,
-          equals({
+          equals(<String, dynamic>{
             'passing test 1': 'success',
             'passing test 2': 'success',
           }));
@@ -51,7 +55,7 @@ void main() async {
 /// [scriptPath] is relative to the package root.
 Future<Map<String, dynamic>> _runTest(String scriptPath) async {
   final Process process =
-      await Process.start(_flutterBin, ['test', '--machine', scriptPath]);
+      await Process.start(_flutterBin, <String>['test', '--machine', scriptPath]);
 
   /// In the test [tearDownAll] block, the test results are encoded into JSON and
   /// are printed with the [_integrationResultsPrefix] prefix.
@@ -63,17 +67,17 @@ Future<Map<String, dynamic>> _runTest(String scriptPath) async {
           .expand((String text) => text.split('\n'))
           .map((String line) {
             try {
-              return jsonDecode(line);
+              return jsonDecode(line) as Map<String, dynamic>;
             } on FormatException {
               // Only interested in test events which are JSON.
             }
           })
-          .where((dynamic testEvent) =>
+          .where((Map<String, dynamic> testEvent) =>
               testEvent != null && testEvent['type'] == 'print')
-          .map((dynamic printEvent) => printEvent['message'] as String)
+          .map((Map<String, dynamic> printEvent) => printEvent['message'] as String)
           .firstWhere((String message) =>
               message.startsWith(_integrationResultsPrefix)))
       .replaceAll(_integrationResultsPrefix, '');
 
-  return jsonDecode(testResults);
+  return jsonDecode(testResults) as Map<String, dynamic>;
 }

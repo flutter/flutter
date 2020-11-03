@@ -1,11 +1,15 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:integration_test/common.dart';
 
 void main() {
   test('Serialize and deserialize Failure', () {
-    Failure fail = Failure('what a name', 'no detail');
-    Failure restored = Failure.fromJsonString(fail.toString());
+    final Failure fail = Failure('what a name', 'no detail');
+    final Failure restored = Failure.fromJsonString(fail.toString());
     expect(restored.methodName, fail.methodName);
     expect(restored.details, fail.details);
   });
@@ -24,24 +28,24 @@ void main() {
 
     final Failure fail = Failure('what a name', 'no detail');
     final Failure fail2 = Failure('what a name2', 'no detail2');
-    response = Response.someTestsFailed([fail, fail2]);
+    response = Response.someTestsFailed(<Failure>[fail, fail2]);
     jsonString = response.toJson();
     restored = Response.fromJson(jsonString);
     expect(restored.allTestsPassed, response.allTestsPassed);
     expect(restored.data, null);
     expect(restored.formattedFailureDetails, response.formattedFailureDetails);
 
-    Map<String, dynamic> data = <String, dynamic>{'aaa': 'bbb'};
+    final Map<String, dynamic> data = <String, dynamic>{'aaa': 'bbb'};
     response = Response.allTestsPassed(data: data);
     jsonString = response.toJson();
     restored = Response.fromJson(jsonString);
-    expect(restored.data.keys, ['aaa']);
-    expect(restored.data.values, ['bbb']);
+    expect(restored.data.keys, <String>['aaa']);
+    expect(restored.data.values, <String>['bbb']);
 
-    response = Response.someTestsFailed([fail, fail2], data: data);
+    response = Response.someTestsFailed(<Failure>[fail, fail2], data: data);
     jsonString = response.toJson();
     restored = Response.fromJson(jsonString);
-    expect(restored.data.keys, ['aaa']);
-    expect(restored.data.values, ['bbb']);
+    expect(restored.data.keys, <String>['aaa']);
+    expect(restored.data.values, <String>['bbb']);
   });
 }
