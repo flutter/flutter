@@ -1094,7 +1094,7 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 ///         ),
 ///       ],
 ///     ),
-///   ),
+///   );
 /// }
 ///```
 /// {@end-tool}
