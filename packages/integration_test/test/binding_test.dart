@@ -22,11 +22,9 @@ Future<void> main() async {
   Future<Map<String, dynamic>> request;
 
   group('Test Integration binding', () {
-    final WidgetsBinding binding =
-        IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+    final WidgetsBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
     assert(binding is IntegrationTestWidgetsFlutterBinding);
-    final IntegrationTestWidgetsFlutterBinding integrationBinding =
-        binding as IntegrationTestWidgetsFlutterBinding;
+    final IntegrationTestWidgetsFlutterBinding integrationBinding = binding as IntegrationTestWidgetsFlutterBinding;
 
     MockVM mockVM;
     final List<int> clockTimes = <int>[100, 200];

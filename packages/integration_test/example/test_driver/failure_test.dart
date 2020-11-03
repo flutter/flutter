@@ -4,7 +4,7 @@
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:integration_test/common.dart' as common;
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 /// This file is only used for testing of `package:integration_test` – do not
 /// follow the conventions here if you are a user of `package:integration_test`.
