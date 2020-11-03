@@ -15,6 +15,7 @@ import './globals.dart' as globals;
 import './stdio.dart';
 import './version.dart';
 
+/// A source code repository.
 class Repository {
   Repository({
     @required this.name,
@@ -28,19 +29,7 @@ class Repository {
     this.useExistingCheckout = false,
   })  : git = Git(processManager),
         assert(localUpstream != null),
-        assert(useExistingCheckout != null) {
-    // These branches must exist locally for the repo that depends on it to
-    // fetch and push to.
-    if (localUpstream) {
-      for (final String channel in globals.kReleaseChannels) {
-        git.run(
-          <String>['checkout', channel, '--'],
-          'check out branch $channel locally',
-          workingDirectory: checkoutDirectory.path,
-        );
-      }
-    }
-  }
+        assert(useExistingCheckout != null);
 
   final String name;
   final String upstream;
@@ -55,17 +44,17 @@ class Repository {
   /// If the repository will be used as an upstream for a test repo.
   final bool localUpstream;
 
+  Directory _checkoutDirectory;
+
   /// Lazily-loaded directory for the repository checkout.
   ///
-  /// This property is not populated until the repository is ensured to be
-  /// cloned.
-  Directory _checkoutDirectory;
+  /// Cloning a repository is time-consuming, thus the actual repository is not
+  /// ensured to exist until this getter is called.
   Directory get checkoutDirectory {
     if (_checkoutDirectory == null) {
       _checkoutDirectory = parentDirectory.childDirectory(name);
       if (checkoutDirectory.existsSync() && !useExistingCheckout) {
-        stdio.printTrace('Deleting $name from ${checkoutDirectory.path}...');
-        checkoutDirectory.deleteSync(recursive: true);
+        deleteDirectory();
       }
       if (!checkoutDirectory.existsSync()) {
         stdio.printTrace('Cloning $name to ${checkoutDirectory.path}...');
@@ -74,12 +63,34 @@ class Repository {
           'Cloning $name repo',
           workingDirectory: parentDirectory.path,
         );
+        if (localUpstream) {
+          // These branches must exist locally for the repo that depends on it
+          // to fetch and push to.
+          for (final String channel in globals.kReleaseChannels) {
+            git.run(
+              <String>['checkout', channel, '--'],
+              'check out branch $channel locally',
+              workingDirectory: checkoutDirectory.path,
+            );
+          }
+        }
       } else {
         stdio.printTrace(
             'Using existing $name repo at ${checkoutDirectory.path}...');
       }
     }
     return _checkoutDirectory;
+  }
+
+  void deleteDirectory() {
+    if (!checkoutDirectory.existsSync()) {
+      stdio.printTrace(
+        'Tried to delete ${checkoutDirectory.path} but it does not exist.',
+      );
+      return;
+    }
+    stdio.printTrace('Deleting $name from ${checkoutDirectory.path}...');
+    checkoutDirectory.deleteSync(recursive: true);
   }
 
   /// The URL of the remote named [remoteName].
@@ -102,9 +113,9 @@ class Repository {
     return output == '';
   }
 
+  /// Fetch all branches and associated commits and tags from [remoteName].
   void fetch(String remoteName) {
     git.run(
-      // Fetch all branches and associated commits and tags
       <String>['fetch', remoteName, '--tags'],
       'fetch $remoteName --tags',
       workingDirectory: checkoutDirectory.path,
@@ -123,6 +134,7 @@ class Repository {
     );
   }
 
+  /// Look up the commit for [ref].
   String reverseParse(String ref) {
     final String revisionHash = git.getOutput(
       <String>['rev-parse', ref],
@@ -133,7 +145,7 @@ class Repository {
     return revisionHash;
   }
 
-  /// Determines if 
+  /// Determines if one ref is an ancestor for another.
   bool isAncestor(String possibleAncestor, String possibleDescendant) {
     final int exitcode = git.run(
       <String>['merge-base', '--is-ancestor', possibleDescendant, possibleAncestor],

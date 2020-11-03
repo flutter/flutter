@@ -10,56 +10,59 @@
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:file/file.dart';
+import 'package:file/local.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
+import 'package:flutter_conductor/repository.dart';
 import 'package:flutter_conductor/roll_dev.dart';
 import 'package:flutter_conductor/stdio.dart';
 
 void main(List<String> args) {
-  final CommandRunner<void> runner = CommandRunner<void>(
-    'conductor',
-    'A tool for coordinating Flutter releases.',
-    usageLineLength: 80,
-  );
-  addCommands(runner);
+  const FileSystem fileSystem = LocalFileSystem();
+  const ProcessManager processManager = LocalProcessManager();
+  const Platform platform = LocalPlatform();
   final Stdio stdio = VerboseStdio(
     stdout: io.stdout,
     stderr: io.stderr,
     stdin: io.stdin,
   );
+  final Checkouts checkouts = Checkouts(
+    fileSystem: fileSystem,
+    platform: platform,
+    processManager: processManager,
+  );
+  final CommandRunner<void> runner = CommandRunner<void>(
+    'conductor',
+    'A tool for coordinating Flutter releases.',
+    usageLineLength: 80,
+  );
+
+  <Command<void>>[
+    RollDev(
+      fileSystem: fileSystem,
+      platform: platform,
+      repository: checkouts.addRepo(
+        fileSystem: fileSystem,
+        platform: platform,
+        repoType: RepositoryType.framework,
+        stdio: stdio,
+      ),
+      stdio: stdio,
+    ),
+  ].forEach(runner.addCommand);
 
   if (!assertsEnabled()) {
     stdio.printError('The conductor tool must be run with --enable-asserts.');
     io.exit(1);
   }
 
-  //ArgResults argResults;
-  //try {
-  //  argResults = parseArguments(runner.argParser, args);
-  //} on ArgParserException catch (error) {
-  //  stdio.printError(error.message);
-  //  stdio.printError(runner.argParser.usage);
-  //  io.exit(1);
-  //}
-
   try {
     runner.run(args);
-    //run(
-    //  usage: argParser.usage,
-    //  argResults: argResults,
-    //  git: const Git(),
-    //  stdio: stdio,
-    //  platform: const LocalPlatform(),
-    //  fileSystem: const LocalFileSystem(),
-    //);
   } on Exception catch (e) {
     stdio.printError(e.toString());
     io.exit(1);
   }
-}
-
-void addCommands(CommandRunner<void> runner) {
-  <Command<void>>[
-    RollDev(),
-  ].forEach(runner.addCommand);
 }
 
 bool assertsEnabled() {

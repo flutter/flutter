@@ -2,15 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io;
-
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
-import 'package:process/process.dart';
 
 import './globals.dart';
 import './repository.dart';
@@ -19,34 +15,7 @@ import './version.dart';
 
 /// Create a new dev release without cherry picks.
 class RollDev extends Command<void> {
-  factory RollDev() {
-    const FileSystem fileSystem = LocalFileSystem();
-    const ProcessManager processManager = LocalProcessManager();
-    const Platform platform = LocalPlatform();
-    final Stdio stdio = VerboseStdio(
-      stdout: io.stdout,
-      stderr: io.stderr,
-      stdin: io.stdin,
-    );
-    final Checkouts checkouts = Checkouts(
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: processManager,
-    );
-    return RollDev._(
-      fileSystem: fileSystem,
-      platform: platform,
-      repository: checkouts.addRepo(
-        fileSystem: fileSystem,
-        platform: platform,
-        repoType: RepositoryType.framework,
-        stdio: stdio,
-      ),
-      stdio: stdio,
-    );
-  }
-
-  RollDev._({
+  RollDev({
     this.fileSystem,
     this.platform,
     this.repository,

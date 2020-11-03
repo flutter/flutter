@@ -23,7 +23,7 @@ void main() {
     Repository frameworkUpstream;
     Repository framework;
 
-    setUpAll(() {
+    setUp(() {
       platform = const LocalPlatform();
       fileSystem = const LocalFileSystem();
       processManager = const LocalProcessManager();
@@ -59,15 +59,17 @@ void main() {
         remote: 'origin',
       );
 
-      final bool success = rollDev(
-        usage: usageString,
-        argResults: fakeArgResults,
-        stdio: stdio,
-        fileSystem: fileSystem,
-        platform: platform,
-        repository: framework,
+      expect(
+        rollDev(
+          usage: usageString,
+          argResults: fakeArgResults,
+          stdio: stdio,
+          fileSystem: fileSystem,
+          platform: platform,
+          repository: framework,
+        ),
+        true,
       );
-      expect(success, true);
       expect(
         stdio.stdout,
         contains(RegExp(r'Publishing Flutter \d+\.\d+\.\d+-\d+\.\d+\.pre \(')),
@@ -79,6 +81,46 @@ void main() {
         true,
         reason: 'initialVersion = $initialVersion; finalVersion = $finalVersion',
       );
+      expect(finalVersion.n, 0);
+      expect(finalVersion.commits, null);
+    });
+
+    test('increment y', () {
+      final Version initialVersion = framework.flutterVersion();
+
+      final String latestCommit = framework.authorEmptyCommit();
+
+      final FakeArgResults fakeArgResults = FakeArgResults(
+        level: 'y',
+        commit: latestCommit,
+        remote: 'origin',
+      );
+
+      expect(
+        rollDev(
+          usage: usageString,
+          argResults: fakeArgResults,
+          stdio: stdio,
+          fileSystem: fileSystem,
+          platform: platform,
+          repository: framework,
+        ),
+        true,
+      );
+      expect(
+        stdio.stdout,
+        contains(RegExp(r'Publishing Flutter \d+\.\d+\.\d+-\d+\.\d+\.pre \(')),
+      );
+
+      final Version finalVersion = framework.flutterVersion();
+      expect(
+        initialVersion.toString() != finalVersion.toString(),
+        true,
+        reason: 'initialVersion = $initialVersion; finalVersion = $finalVersion',
+      );
+      expect(finalVersion.y, initialVersion.y + 1);
+      expect(finalVersion.z, 0);
+      expect(finalVersion.m, 0);
       expect(finalVersion.n, 0);
       expect(finalVersion.commits, null);
     });
