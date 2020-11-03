@@ -256,11 +256,11 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// the host for the [flutter_driver] style tests.
   ///
   /// This records the timeline during `action` and adds the result to
-  /// [reportData] with `reportKey`. [reportData] contains the extra information
-  /// of the test other than test success/fail. It will be passed back to the
+  /// [reportData] with `reportKey`. The [reportData] contains extra information
+  /// from the test other than test success/fail. It will be passed back to the
   /// host and be processed by the [ResponseDataCallback] defined in
-  /// [integrationDriver]. By default it will be written to
-  /// `build/integration_response_data.json` with the key `timeline`.
+  /// [integration_test_driver.integrationDriver]. By default it will be written
+  /// to `build/integration_response_data.json` with the key `timeline`.
   ///
   /// For tests with multiple calls of this method, `reportKey` needs to be a
   /// unique key, otherwise the later result will override earlier one.

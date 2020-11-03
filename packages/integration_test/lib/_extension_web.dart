@@ -17,7 +17,7 @@ import 'dart:js_util' as js_util;
 ///
 /// See also:
 ///
-///  * [_extension_io.dart], which has the dart:io implementation
+///  * `_extension_io.dart`, which has the dart:io implementation
 void registerWebServiceExtension(
     Future<Map<String, dynamic>> Function(Map<String, String>) call) {
   js_util.setProperty(html.window, r'$flutterDriver',

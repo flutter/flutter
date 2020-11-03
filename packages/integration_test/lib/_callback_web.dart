@@ -12,7 +12,7 @@ import 'common.dart';
 ///
 /// See also:
 ///
-///  * [_callback_io.dart], which has the dart:io implementation
+///  * `_callback_io.dart`, which has the dart:io implementation
 CallbackManager get callbackManager => _singletonWebDriverCommandManager;
 
 /// WebDriverCommandManager singleton.

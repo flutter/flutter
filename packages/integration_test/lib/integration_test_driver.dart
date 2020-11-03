@@ -19,7 +19,7 @@ import 'package:path/path.dart' as path;
 String testOutputsDirectory =
     Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? 'build';
 
-/// The callback type to handle [integration_test.Response.data] after the test
+/// The callback type to handle [Response.data] after the test
 /// succeeds.
 typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>);
 
@@ -49,7 +49,7 @@ Future<void> writeResponseData(
 /// It is not necessarily the execution time for the test app: the test may
 /// finish sooner than the `timeout`.
 ///
-/// `responseDataCallback` is the handler for processing [integration_test.Response.data].
+/// `responseDataCallback` is the handler for processing [Response.data].
 /// The default value is `writeResponseData`.
 ///
 /// To an integration test `<test_name>.dart` using `flutter drive`, put a file named

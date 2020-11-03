@@ -8,7 +8,7 @@ import 'common.dart';
 ///
 /// See also:
 ///
-///  * [_callback_web.dart], which has the dart:html implementation
+///  * `_callback_web.dart`, which has the dart:html implementation
 CallbackManager get callbackManager => _singletonCallbackManager;
 
 /// IOCallbackManager singleton.
