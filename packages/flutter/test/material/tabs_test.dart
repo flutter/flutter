@@ -2964,8 +2964,6 @@ void main() {
     final PageController internalPageController = (pageViewElement.widget as PageView).controller;
     expect(internalPageController.page, tabController.index.toDouble());
   });
-
-
 }
 
 class KeepAliveInk extends StatefulWidget {
