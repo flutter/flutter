@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/win32_task_runner.h"
@@ -65,8 +66,6 @@ class FlutterWindowsEngine {
   void SetPluginRegistrarDestructionCallback(
       FlutterDesktopOnPluginRegistrarDestroyed callback);
 
-  FLUTTER_API_SYMBOL(FlutterEngine) engine() { return engine_; }
-
   FlutterDesktopMessengerRef messenger() { return messenger_.get(); }
 
   IncomingMessageDispatcher* message_dispatcher() {
@@ -79,11 +78,37 @@ class FlutterWindowsEngine {
     return window_proc_delegate_manager_.get();
   }
 
+  // Informs the engine that the window metrics have changed.
+  void SendWindowMetricsEvent(const FlutterWindowMetricsEvent& event);
+
+  // Informs the engine of an incoming pointer event.
+  void SendPointerEvent(const FlutterPointerEvent& event);
+
+  // Sends the given message to the engine, calling |reply| with |user_data|
+  // when a reponse is received from the engine if they are non-null.
+  bool SendPlatformMessage(const char* channel,
+                           const uint8_t* message,
+                           const size_t message_size,
+                           const FlutterDesktopBinaryReply reply,
+                           void* user_data);
+
+  // Sends the given data as the response to an earlier platform message.
+  void SendPlatformMessageResponse(
+      const FlutterDesktopMessageResponseHandle* handle,
+      const uint8_t* data,
+      size_t data_length);
+
   // Callback passed to Flutter engine for notifying window of platform
   // messages.
   void HandlePlatformMessage(const FlutterPlatformMessage*);
 
+  // Informs the engine that the system font list has changed.
+  void ReloadSystemFonts();
+
  private:
+  // Allows swapping out embedder_api_ calls in tests.
+  friend class EngineEmbedderApiModifier;
+
   // Sends system settings (e.g., locale) to the engine.
   //
   // Should be called just after the engine is run, and after any relevant
@@ -92,6 +117,8 @@ class FlutterWindowsEngine {
 
   // The handle to the embedder.h engine instance.
   FLUTTER_API_SYMBOL(FlutterEngine) engine_ = nullptr;
+
+  FlutterEngineProcTable embedder_api_ = {};
 
   std::unique_ptr<FlutterProjectBundle> project_;
 
