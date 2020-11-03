@@ -429,7 +429,6 @@ class IOSSimulator extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
-    List<String> dartEntrypointArgs,
   }) async {
     if (!prebuiltApplication && package is BuildableIOSApp) {
       globals.printTrace('Building ${package.name} for $id.');

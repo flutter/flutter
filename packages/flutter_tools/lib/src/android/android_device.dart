@@ -530,7 +530,6 @@ class AndroidDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
-    List<String> dartEntrypointArgs,
   }) async {
     if (!await _isAdbValid()) {
       return LaunchResult.failed();

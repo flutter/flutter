@@ -308,7 +308,6 @@ class IOSDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
-    List<String> dartEntrypointArgs,
   }) async {
     String packageId;
 

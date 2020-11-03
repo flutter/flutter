@@ -262,8 +262,10 @@ void main() {
     final LaunchResult result = await device.startApp(
       package,
       prebuiltApplication: true,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      dartEntrypointArgs: <String>['arg1', 'arg2'],
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        dartEntrypointArgs: <String>['arg1', 'arg2']
+      ),
     );
 
     expect(result.started, true);

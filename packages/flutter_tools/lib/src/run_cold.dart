@@ -22,7 +22,6 @@ class ColdRunner extends ResidentRunner {
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
-    List<String> dartEntrypointArgs,
     bool ipv6 = false,
     bool stayResident = true,
     bool machine = false,
@@ -34,7 +33,6 @@ class ColdRunner extends ResidentRunner {
           stayResident: stayResident,
           ipv6: ipv6,
           machine: machine,
-          dartEntrypointArgs: dartEntrypointArgs,
         );
 
   final bool traceStartup;

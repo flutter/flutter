@@ -444,7 +444,6 @@ class WebServerDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
-    List<String> dartEntrypointArgs,
   }) async {
     final String url = platformArgs['uri'] as String;
     if (debuggingOptions.startPaused) {

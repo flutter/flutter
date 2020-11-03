@@ -670,8 +670,7 @@ abstract class Device {
   /// Start an app package on the current device.
   ///
   /// [platformArgs] allows callers to pass platform-specific arguments to the
-  /// start call. The build mode and Dart entrypoint arguments parameters are
-  /// not used by all platforms.
+  /// start call. The build mode is not used by all platforms.
   Future<LaunchResult> startApp(
     covariant ApplicationPackage package, {
     String mainPath,
@@ -681,7 +680,6 @@ abstract class Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
-    List<String> dartEntrypointArgs,
   });
 
   /// Whether this device implements support for hot reload.
@@ -837,6 +835,7 @@ class DebuggingOptions {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
     this.disableDds = false,
+    this.dartEntrypointArgs,
     this.dartFlags = '',
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
@@ -867,6 +866,7 @@ class DebuggingOptions {
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
+      this.dartEntrypointArgs,
       this.port,
       this.hostname,
       this.webEnableExposeUrl,
@@ -904,6 +904,7 @@ class DebuggingOptions {
   final BuildInfo buildInfo;
   final bool startPaused;
   final String dartFlags;
+  final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
   final bool disableDds;
   final bool enableSoftwareRendering;

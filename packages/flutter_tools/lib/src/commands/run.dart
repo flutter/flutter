@@ -158,6 +158,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
+        dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
         webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
@@ -172,6 +173,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         startPaused: boolArg('start-paused'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
         disableDds: boolArg('disable-dds'),
+        dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         dartFlags: stringArg('dart-flags') ?? '',
         useTestFonts: argParser.options.containsKey('use-test-fonts') && boolArg('use-test-fonts'),
         enableSoftwareRendering: argParser.options.containsKey('enable-software-rendering') && boolArg('enable-software-rendering'),
@@ -552,7 +554,6 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : globals.fs.file(applicationBinaryPath),
-        dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         projectRootPath: stringArg('project-root'),
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
@@ -578,7 +579,6 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : globals.fs.file(applicationBinaryPath),
-        dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         ipv6: ipv6,
         stayResident: stayResident,
       );

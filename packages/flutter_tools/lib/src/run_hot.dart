@@ -76,7 +76,6 @@ class HotRunner extends ResidentRunner {
     bool stayResident = true,
     bool ipv6 = false,
     bool machine = false,
-    List<String> dartEntrypointArgs,
   }) : super(
           devices,
           target: target,
@@ -87,7 +86,6 @@ class HotRunner extends ResidentRunner {
           dillOutputPath: dillOutputPath,
           ipv6: ipv6,
           machine: machine,
-          dartEntrypointArgs: dartEntrypointArgs,
         );
 
   final bool benchmarkMode;
