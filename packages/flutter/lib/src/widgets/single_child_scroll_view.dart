@@ -221,7 +221,7 @@ class SingleChildScrollView extends StatelessWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
-    this.primaryScrollShortcut = false,
+    this.isDefaultScrollAction = false,
   }) : assert(scrollDirection != null),
        assert(dragStartBehavior != null),
        assert(clipBehavior != null),
@@ -302,8 +302,8 @@ class SingleChildScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
-  /// {@macro flutter.widgets.scrollable.primaryScrollShortcut}
-  final bool primaryScrollShortcut;
+  /// {@macro flutter.widgets.scrollable.isDefaultScrollAction}
+  final bool isDefaultScrollAction;
 
   AxisDirection _getDirection(BuildContext context) {
     return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
@@ -324,7 +324,7 @@ class SingleChildScrollView extends StatelessWidget {
       controller: scrollController,
       physics: physics,
       restorationId: restorationId,
-      primaryScrollShortcut: primaryScrollShortcut,
+      isDefaultScrollAction: isDefaultScrollAction,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return _SingleChildViewport(
           axisDirection: axisDirection,

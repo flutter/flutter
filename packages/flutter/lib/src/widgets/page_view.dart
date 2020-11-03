@@ -612,7 +612,7 @@ class PageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-    this.primaryScrollShortcut = false,
+    this.isDefaultScrollAction = false,
   }) : assert(allowImplicitScrolling != null),
        assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
@@ -651,7 +651,7 @@ class PageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-    this.primaryScrollShortcut = false,
+    this.isDefaultScrollAction = false,
   }) : assert(allowImplicitScrolling != null),
        assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
@@ -753,7 +753,7 @@ class PageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-    this.primaryScrollShortcut = false,
+    this.isDefaultScrollAction = false,
   }) : assert(childrenDelegate != null),
        assert(allowImplicitScrolling != null),
        assert(clipBehavior != null),
@@ -832,8 +832,8 @@ class PageView extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-  /// {@macro flutter.widgets.scrollable.primaryScrollShortcut}
-  final bool primaryScrollShortcut;
+  /// {@macro flutter.widgets.scrollable.isDefaultScrollAction}
+  final bool isDefaultScrollAction;
 
   @override
   _PageViewState createState() => _PageViewState();
@@ -887,7 +887,7 @@ class _PageViewState extends State<PageView> {
         controller: widget.controller,
         physics: physics,
         restorationId: widget.restorationId,
-        primaryScrollShortcut: widget.primaryScrollShortcut,
+        isDefaultScrollAction: widget.isDefaultScrollAction,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return Viewport(
             // TODO(dnfield): we should provide a way to set cacheExtent

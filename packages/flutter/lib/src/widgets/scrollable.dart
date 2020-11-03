@@ -92,7 +92,7 @@ class Scrollable extends StatefulWidget {
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.restorationId,
-    this.primaryScrollShortcut = false,
+    this.isDefaultScrollAction = false,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
@@ -190,27 +190,27 @@ class Scrollable extends StatefulWidget {
   ///    exclusion.
   final bool excludeFromSemantics;
 
-  /// {@template flutter.widgets.scrollable.primaryScrollShortcut}
+  /// {@template flutter.widgets.scrollable.isDefaultScrollAction}
   /// Indicates whether this [Scrollable] should be used as the
-  /// [PrimaryScrollShortcut].
+  /// [SecondaryScrollAction].
   ///
   /// When invoking a [ScrollAction] via a keyboard key combination that maps to
   /// a [ScrollIntent], the [primaryFocus] is used to find the current
   /// Scrollable that encloses it. If a Scrollable cannot be found, the
-  /// PrimaryScrollShortcut serves as a fallback, allowing for a default
+  /// SecondaryScrollAction serves as a fallback, allowing for a default
   /// scrolling shortcut. Only one Scrollable can be registered with the
-  /// PrimaryScrollShortcut at a time.
+  /// SecondaryScrollAction at a time.
   ///
-  /// When true, this Scrollable will be provided to the PrimaryScrollShortcut
+  /// When true, this Scrollable will be provided to the SecondaryScrollAction
   /// for ScrollActions. Defaults to false.
   ///
   /// See also:
   ///
-  ///  * [PrimaryScrollShortcut], an inherited widget that provides the ability
+  ///  * [SecondaryScrollAction], an inherited widget that provides the ability
   ///    for default ScrollActions to take place outside of th context fo the
   ///    current focus.
   /// {@endtemplate}
-  final bool primaryScrollShortcut;
+  final bool isDefaultScrollAction;
 
   /// The number of children that will contribute semantic information.
   ///
@@ -453,12 +453,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   @override
   void didChangeDependencies() {
     _updatePosition();
-    if (widget.primaryScrollShortcut) {
-      final _PrimaryScrollShortcutState? primaryScrollShortcut = PrimaryScrollShortcut.maybeOf(context);
+    if (widget.isDefaultScrollAction) {
+      final _SecondaryScrollActionState? secondaryScrollAction = SecondaryScrollAction.maybeOf(context);
       // Similar to notificationContext, _ScrollableScope is placed above the
       // widget using it: RawGestureDetector, which allows us to access this
       // ScrollableState
-      primaryScrollShortcut?._primaryScrollKey = _gestureDetectorKey;
+      secondaryScrollAction?._secondaryScrollKey = _gestureDetectorKey;
     }
     super.didChangeDependencies();
   }
@@ -1000,9 +1000,9 @@ class ScrollAction extends Action<ScrollIntent> {
       // Check for primary scrollable within the current context
       if (Scrollable.of(focus!.context!) != null)
         return true;
-      // Check for fallback scrollable with context from PrimaryScrollShortcut
-      if (PrimaryScrollShortcut.of(focus.context!) != null) {
-        final GlobalKey? primaryScrollKey = PrimaryScrollShortcut.of(focus.context!)._primaryScrollKey;
+      // Check for fallback scrollable with context from SecondaryScrollAction
+      if (SecondaryScrollAction.of(focus.context!) != null) {
+        final GlobalKey? primaryScrollKey = SecondaryScrollAction.of(focus.context!)._secondaryScrollKey;
         return primaryScrollKey != null && primaryScrollKey.currentContext != null && Scrollable.of(primaryScrollKey.currentContext!) != null;
       }
     }
@@ -1092,7 +1092,7 @@ class ScrollAction extends Action<ScrollIntent> {
   void invoke(ScrollIntent intent) {
     ScrollableState? state = Scrollable.of(primaryFocus!.context!);
     if (state == null) {
-      final GlobalKey? _secondaryScrollKey = PrimaryScrollShortcut.of(primaryFocus!.context!)._primaryScrollKey;
+      final GlobalKey? _secondaryScrollKey = SecondaryScrollAction.of(primaryFocus!.context!)._secondaryScrollKey;
       state = Scrollable.of(_secondaryScrollKey!.currentContext!);
     }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
@@ -1119,17 +1119,17 @@ class ScrollAction extends Action<ScrollIntent> {
 
 /// Provides a fallback [Scrollable] for [ScrollAction]s.
 ///
-/// The PrimaryScrollShortcut can only provide one Scrollable to ScrollActions.
+/// The SecondaryScrollAction can only provide one Scrollable to ScrollActions.
 ///
 // TODO(Piinks): More docs and examples
 ///
 /// See also:
 ///
-///  * [Scrollable.primaryScrollShortcut], a flag that, when true, will register
+///  * [Scrollable.isDefaultScrollAction], a flag that, when true, will register
 ///    the associated Scrollable widget as a fallback for [ScrollAction]s.
-class PrimaryScrollShortcut extends StatefulWidget {
+class SecondaryScrollAction extends StatefulWidget {
   /// Create a widget for managing a fallback [ScrollAction].
-  const PrimaryScrollShortcut({
+  const SecondaryScrollAction({
     Key? key,
     required this.child
   }) : super(key: key);
@@ -1140,78 +1140,78 @@ class PrimaryScrollShortcut extends StatefulWidget {
   /// The state from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// If there is no [PrimaryScrollShortcut] in scope, then this will assert in
+  /// If there is no [SecondaryScrollAction] in scope, then this will assert in
   /// debug mode, and throw an exception in release mode.
   ///
   /// See also:
   ///
   ///  * [maybeOf], which is a similar function but will return null instead of
-  ///    throwing if there is no [PrimaryScrollShortcut] ancestor.
-  static _PrimaryScrollShortcutState of(BuildContext context) {
+  ///    throwing if there is no [SecondaryScrollAction] ancestor.
+  static _SecondaryScrollActionState of(BuildContext context) {
     assert(context != null);
-    final _PrimaryScrollShortcutScope? scope = context.dependOnInheritedWidgetOfExactType<_PrimaryScrollShortcutScope>();
+    final _SecondaryScrollActionScope? scope = context.getElementForInheritedWidgetOfExactType<_SecondaryScrollActionScope>()?.widget as _SecondaryScrollActionScope?;
     assert((){
       if (scope == null) {
         throw FlutterError(
-          'PrimaryScrollShortcut.of() was called with a context that '
-            'does not contain a PrimaryScrollShortcut widget.\n'
-            'The context used was:\n'
-            '  $context',
+          'SecondaryScrollAction.of() was called with a context that '
+          'does not contain a SecondaryScrollAction widget.\n'
+          'The context used was:\n'
+          '  $context',
         );
       }
       return true;
     }());
-    return scope!._primaryScrollShortcutState;
+    return scope!._secondaryScrollActionState;
   }
 
   /// The state from the closest instance of this class that encloses the given
   /// context, if any.
   ///
-  /// Will return null if a [PrimaryScrollShortcut] is not found in the given
+  /// Will return null if a [SecondaryScrollAction] is not found in the given
   /// context.
   ///
   /// See also:
   ///
   ///  * [of], which is a similar function, except that it will throw an
-  ///    exception if a [PrimaryScrollShortcut] is not found in the given
+  ///    exception if a [SecondaryScrollAction] is not found in the given
   ///    context.
-  static _PrimaryScrollShortcutState? maybeOf(BuildContext context) {
+  static _SecondaryScrollActionState? maybeOf(BuildContext context) {
     assert(context != null);
-    final _PrimaryScrollShortcutScope? scope = context.dependOnInheritedWidgetOfExactType<_PrimaryScrollShortcutScope>();
-    return scope?._primaryScrollShortcutState;
+    final _SecondaryScrollActionScope? scope = context.getElementForInheritedWidgetOfExactType<_SecondaryScrollActionScope>()?.widget as _SecondaryScrollActionScope?;
+    return scope?._secondaryScrollActionState;
   }
 
   @override
-  _PrimaryScrollShortcutState createState() => _PrimaryScrollShortcutState();
+  _SecondaryScrollActionState createState() => _SecondaryScrollActionState();
 }
 
-/// State for a [PrimaryScrollShortcut].
+/// State for a [SecondaryScrollAction].
 ///
-/// Typically obtained via [PrimaryScrollShortcut.of].
-class _PrimaryScrollShortcutState extends State<PrimaryScrollShortcut> {
+/// Typically obtained via [SecondaryScrollAction.of].
+class _SecondaryScrollActionState extends State<SecondaryScrollAction> {
 
   // The key that is enclosed within the context of the current fallback
   // [Scrollable] for [ScrollAction]s.
-  GlobalKey? _primaryScrollKey;
+  GlobalKey? _secondaryScrollKey;
 
   @override
   Widget build(BuildContext context) {
-    return _PrimaryScrollShortcutScope(
+    return _SecondaryScrollActionScope(
       child: widget.child,
-      primaryScrollShortcutState: this,
+      secondaryScrollActionState: this,
     );
   }
 }
 
-class _PrimaryScrollShortcutScope extends InheritedWidget {
-  const _PrimaryScrollShortcutScope({
+class _SecondaryScrollActionScope extends InheritedWidget {
+  const _SecondaryScrollActionScope({
     Key? key,
     required Widget child,
-    required _PrimaryScrollShortcutState primaryScrollShortcutState,
-  }) : _primaryScrollShortcutState = primaryScrollShortcutState,
+    required _SecondaryScrollActionState secondaryScrollActionState,
+  }) : _secondaryScrollActionState = secondaryScrollActionState,
       super(key: key, child: child);
 
-  final _PrimaryScrollShortcutState _primaryScrollShortcutState;
+  final _SecondaryScrollActionState _secondaryScrollActionState;
 
   // Since this ScrollAction fallback  doesn't affect the display of anything,
   // we don't need to force a rebuild of anything that depends upon it.
@@ -1221,7 +1221,7 @@ class _PrimaryScrollShortcutScope extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<_PrimaryScrollShortcutState>('_primaryScrollShortcutState', _primaryScrollShortcutState));
+    properties.add(DiagnosticsProperty<_SecondaryScrollActionState>('_secondaryScrollShortcutState', _secondaryScrollActionState));
   }
 }
 
