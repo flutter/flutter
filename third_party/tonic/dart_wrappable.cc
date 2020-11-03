@@ -12,12 +12,17 @@
 namespace tonic {
 
 DartWrappable::~DartWrappable() {
-  TONIC_CHECK(!dart_wrapper_);
+  // Calls the destructor of dart_wrapper_ to delete WeakPersistentHandle.
 }
 
 // TODO(dnfield): Delete this. https://github.com/flutter/flutter/issues/50997
 Dart_Handle DartWrappable::CreateDartWrapper(DartState* dart_state) {
-  TONIC_DCHECK(!dart_wrapper_);
+  if (!dart_wrapper_.is_empty()) {
+    // Any previously given out wrapper must have been GCed.
+    TONIC_DCHECK(Dart_IsNull(dart_wrapper_.Get()));
+    dart_wrapper_.Clear();
+  }
+
   const DartWrapperInfo& info = GetDartWrapperInfo();
 
   Dart_PersistentHandle type = dart_state->class_library().GetClass(info);
@@ -36,14 +41,19 @@ Dart_Handle DartWrappable::CreateDartWrapper(DartState* dart_state) {
   TONIC_DCHECK(!LogIfError(res));
 
   this->RetainDartWrappableReference();  // Balanced in FinalizeDartWrapper.
-  dart_wrapper_ = Dart_NewWeakPersistentHandle(
-      wrapper, this, GetAllocationSize(), &FinalizeDartWrapper);
+  dart_wrapper_.Set(dart_state, wrapper, this, GetAllocationSize(),
+                    &FinalizeDartWrapper);
 
   return wrapper;
 }
 
 void DartWrappable::AssociateWithDartWrapper(Dart_Handle wrapper) {
-  TONIC_DCHECK(!dart_wrapper_);
+  if (!dart_wrapper_.is_empty()) {
+    // Any previously given out wrapper must have been GCed.
+    TONIC_DCHECK(Dart_IsNull(dart_wrapper_.Get()));
+    dart_wrapper_.Clear();
+  }
+
   TONIC_CHECK(!LogIfError(wrapper));
 
   const DartWrapperInfo& info = GetDartWrapperInfo();
@@ -54,26 +64,25 @@ void DartWrappable::AssociateWithDartWrapper(Dart_Handle wrapper) {
       wrapper, kWrapperInfoIndex, reinterpret_cast<intptr_t>(&info))));
 
   this->RetainDartWrappableReference();  // Balanced in FinalizeDartWrapper.
-  dart_wrapper_ = Dart_NewWeakPersistentHandle(
-      wrapper, this, GetAllocationSize(), &FinalizeDartWrapper);
+
+  DartState* dart_state = DartState::Current();
+  dart_wrapper_.Set(dart_state, wrapper, this, GetAllocationSize(),
+                    &FinalizeDartWrapper);
 }
 
 void DartWrappable::ClearDartWrapper() {
-  TONIC_DCHECK(dart_wrapper_);
-  Dart_Handle wrapper = Dart_HandleFromWeakPersistent(dart_wrapper_);
+  TONIC_DCHECK(!dart_wrapper_.is_empty());
+  Dart_Handle wrapper = dart_wrapper_.Get();
   TONIC_CHECK(!LogIfError(Dart_SetNativeInstanceField(wrapper, kPeerIndex, 0)));
   TONIC_CHECK(
       !LogIfError(Dart_SetNativeInstanceField(wrapper, kWrapperInfoIndex, 0)));
-  Dart_DeleteWeakPersistentHandle(dart_wrapper_);
-  dart_wrapper_ = nullptr;
+  dart_wrapper_.Clear();
   this->ReleaseDartWrappableReference();
 }
 
 void DartWrappable::FinalizeDartWrapper(void* isolate_callback_data,
-                                        Dart_WeakPersistentHandle wrapper,
                                         void* peer) {
   DartWrappable* wrappable = reinterpret_cast<DartWrappable*>(peer);
-  wrappable->dart_wrapper_ = nullptr;
   wrappable->ReleaseDartWrappableReference();  // Balanced in CreateDartWrapper.
 }
 

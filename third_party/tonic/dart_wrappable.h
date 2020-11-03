@@ -9,6 +9,7 @@
 #include "tonic/common/macros.h"
 #include "tonic/converter/dart_converter.h"
 #include "tonic/dart_state.h"
+#include "tonic/dart_weak_persistent_value.h"
 #include "tonic/dart_wrapper_info.h"
 #include "tonic/logging/dart_error.h"
 
@@ -26,7 +27,7 @@ class DartWrappable {
     kNumberOfNativeFields,
   };
 
-  DartWrappable() : dart_wrapper_(nullptr) {}
+  DartWrappable() : dart_wrapper_(DartWeakPersistentValue()) {}
 
   // Subclasses that wish to expose a new interface must override this function
   // and provide information about their wrapper. There is no need to call your
@@ -49,7 +50,9 @@ class DartWrappable {
   Dart_Handle CreateDartWrapper(DartState* dart_state);
   void AssociateWithDartWrapper(Dart_Handle wrappable);
   void ClearDartWrapper();  // Warning: Might delete this.
-  Dart_WeakPersistentHandle dart_wrapper() const { return dart_wrapper_; }
+  Dart_WeakPersistentHandle dart_wrapper() const {
+    return dart_wrapper_.value();
+  }
 
  protected:
   virtual ~DartWrappable();
@@ -59,11 +62,9 @@ class DartWrappable {
       const tonic::DartWrapperInfo& wrapper_info);
 
  private:
-  static void FinalizeDartWrapper(void* isolate_callback_data,
-                                  Dart_WeakPersistentHandle wrapper,
-                                  void* peer);
+  static void FinalizeDartWrapper(void* isolate_callback_data, void* peer);
 
-  Dart_WeakPersistentHandle dart_wrapper_;
+  DartWeakPersistentValue dart_wrapper_;
 
   TONIC_DISALLOW_COPY_AND_ASSIGN(DartWrappable);
 };
@@ -103,22 +104,36 @@ struct DartConverter<
     typename std::enable_if<
         std::is_convertible<T*, const DartWrappable*>::value>::type> {
   static Dart_Handle ToDart(DartWrappable* val) {
-    if (!val)
+    if (!val) {
       return Dart_Null();
-    if (Dart_WeakPersistentHandle wrapper = val->dart_wrapper())
-      return Dart_HandleFromWeakPersistent(wrapper);
+    }
+    if (Dart_WeakPersistentHandle wrapper = val->dart_wrapper()) {
+      auto strong_handle = Dart_HandleFromWeakPersistent(wrapper);
+      if (!Dart_IsNull(strong_handle)) {
+        return strong_handle;
+      }
+      // After the weak referenced object has been GCed, the handle points to
+      // Dart_Null(). Fall through create a new wrapper object.
+    }
     return val->CreateDartWrapper(DartState::Current());
   }
 
   static void SetReturnValue(Dart_NativeArguments args,
                              DartWrappable* val,
                              bool auto_scope = true) {
-    if (!val)
+    if (!val) {
       Dart_SetReturnValue(args, Dart_Null());
-    else if (Dart_WeakPersistentHandle wrapper = val->dart_wrapper())
-      Dart_SetWeakHandleReturnValue(args, wrapper);
-    else
-      Dart_SetReturnValue(args, val->CreateDartWrapper(DartState::Current()));
+      return;
+    } else if (Dart_WeakPersistentHandle wrapper = val->dart_wrapper()) {
+      auto strong_handle = Dart_HandleFromWeakPersistent(wrapper);
+      if (!Dart_IsNull(strong_handle)) {
+        Dart_SetReturnValue(args, strong_handle);
+        return;
+      }
+      // After the weak referenced object has been GCed, the handle points to
+      // Dart_Null(). Fall through create a new wrapper object.
+    }
+    Dart_SetReturnValue(args, val->CreateDartWrapper(DartState::Current()));
   }
 
   static T* FromDart(Dart_Handle handle) {

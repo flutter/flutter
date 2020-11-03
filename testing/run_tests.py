@@ -132,6 +132,8 @@ def RunCCTests(build_dir, filter):
 
   RunEngineExecutable(build_dir, 'runtime_unittests', filter, shuffle_flags)
 
+  RunEngineExecutable(build_dir, 'tonic_unittests', filter, shuffle_flags)
+
   if not IsWindows():
     # https://github.com/flutter/flutter/issues/36295
     RunEngineExecutable(build_dir, 'shell_unittests', filter, shuffle_flags)
