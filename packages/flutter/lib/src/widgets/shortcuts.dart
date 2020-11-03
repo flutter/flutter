@@ -386,7 +386,11 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// Here, we will use a [Shortcuts] and [Actions] widget to add and remove from a counter.
+/// This can be done by creating a child widget that is focused and pressing the logical key
+/// sets that have been defined in [Shortcuts] and defining the actions that each key set
+/// 
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// ```dart imports
 /// import 'package:flutter/services.dart';
 /// ```
@@ -403,20 +407,27 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// Widget build(BuildContext context) {
 ///   return Shortcuts(
 ///     shortcuts: <LogicalKeySet, Intent> {
-///       LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.keyI): Increment(),
-///       LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.keyD): Decrement(),
+///       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.numpadAdd): Increment(),
+///       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.numpadSubtract): Decrement(),
 ///     },
 ///     child: Actions(
 ///       actions: <Type, Action<Intent>> {
 ///         Increment: CallbackAction<Increment>(
-///          onInvoke: (Increment intent) => setState(()=> count = count + 1),
+///          onInvoke: (Increment intent) => setState(() { count = count + 1; }),
 ///         ),
 ///         Decrement: CallbackAction<Decrement>(
-///          onInvoke: (Decrement intent) => setState(()=> count = count - 1),
+///          onInvoke: (Decrement intent) => setState(() { count = count - 1; }),
 ///         ),
 ///       },
-///       child: Center(
-///         child: Text('$count'),
+///       Focus(
+///         autofocus:true,
+///         child: Column(
+///           children: <Widget>[
+///             Text('Add to the counter by pressing keyboard Shift and numpad "+"'),
+///             Text('Subtract from the counter by pressing keyboard Shift and numpad "-"'),
+///             Text('count: $count'),
+///           ],
+///         ),
 ///       ),
 ///     ),
 ///   );
