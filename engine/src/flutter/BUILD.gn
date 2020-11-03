@@ -98,6 +98,7 @@ group("flutter") {
       "//flutter/shell/platform/embedder:embedder_proctable_unittests",
       "//flutter/shell/platform/embedder:embedder_unittests",
       "//flutter/testing:testing_unittests",
+      "//flutter/third_party/tonic/tests:tonic_unittests",
       "//flutter/third_party/txt:txt_unittests",
     ]
 

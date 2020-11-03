@@ -35,6 +35,8 @@ source_set("tonic") {
     "dart_persistent_value.h",
     "dart_state.cc",
     "dart_state.h",
+    "dart_weak_persistent_value.cc",
+    "dart_weak_persistent_value.h",
     "dart_wrappable.cc",
     "dart_wrappable.h",
     "dart_wrapper_info.h",

@@ -1922,8 +1922,7 @@ FlutterEngineResult FlutterEnginePostDartObject(
         dart_object.value.as_external_typed_data.data = buffer;
         dart_object.value.as_external_typed_data.peer = peer;
         dart_object.value.as_external_typed_data.callback =
-            +[](void* unused_isolate_callback_data,
-                Dart_WeakPersistentHandle unused_handle, void* peer) {
+            +[](void* unused_isolate_callback_data, void* peer) {
               auto typed_peer = reinterpret_cast<ExternalTypedDataPeer*>(peer);
               typed_peer->trampoline(typed_peer->user_data);
               delete typed_peer;

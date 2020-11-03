@@ -35,9 +35,7 @@ enum ImageByteFormat {
   kPNG,
 };
 
-void FinalizeSkData(void* isolate_callback_data,
-                    Dart_WeakPersistentHandle handle,
-                    void* peer) {
+void FinalizeSkData(void* isolate_callback_data, void* peer) {
   SkData* buffer = reinterpret_cast<SkData*>(peer);
   buffer->unref();
 }

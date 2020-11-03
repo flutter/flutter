@@ -981,6 +981,11 @@ void DartIsolate::AddIsolateShutdownCallback(const fml::closure& closure) {
 }
 
 void DartIsolate::OnShutdownCallback() {
+  tonic::DartState* state = tonic::DartState::Current();
+  if (state != nullptr) {
+    state->SetIsShuttingDown();
+  }
+
   {
     tonic::DartApiScope api_scope;
     Dart_Handle sticky_error = Dart_GetStickyError();

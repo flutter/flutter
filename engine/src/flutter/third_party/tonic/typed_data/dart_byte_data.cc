@@ -16,9 +16,7 @@ namespace {
 // with a buffer allocated outside the Dart heap.
 const int kExternalSizeThreshold = 1000;
 
-void FreeFinalizer(void* isolate_callback_data,
-                   Dart_WeakPersistentHandle handle,
-                   void* peer) {
+void FreeFinalizer(void* isolate_callback_data, void* peer) {
   free(peer);
 }
 

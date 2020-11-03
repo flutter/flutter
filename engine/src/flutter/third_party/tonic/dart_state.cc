@@ -27,7 +27,8 @@ DartState::DartState(int dirfd,
       message_handler_(new DartMessageHandler()),
       file_loader_(new FileLoader(dirfd)),
       message_epilogue_(message_epilogue),
-      has_set_return_code_(false) {}
+      has_set_return_code_(false),
+      is_shutting_down_(false) {}
 
 DartState::~DartState() {}
 
