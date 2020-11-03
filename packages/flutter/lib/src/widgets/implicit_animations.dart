@@ -317,7 +317,7 @@ typedef TweenConstructor<T extends Object> = Tween<T> Function(T targetValue);
 
 /// Signature for callbacks passed to [ImplicitlyAnimatedWidgetState.forEachTween].
 ///
-/// {@template flutter.widgets.implicit_animations.tweenVisitorArguments}
+/// {@template flutter.widgets.TweenVisitor.arguments}
 /// The `tween` argument should contain the current tween value. This will
 /// initially be null when the state is first initialized.
 ///
@@ -448,7 +448,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// result back into the member variable. The arguments to `visitor` are as
   /// follows:
   ///
-  /// {@macro flutter.widgets.implicit_animations.tweenVisitorArguments}
+  /// {@macro flutter.widgets.TweenVisitor.arguments}
   ///
   /// ### When this method will be called
   ///
@@ -664,7 +664,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// the parent provides unbounded constraints, in which case the container
   /// will attempt to be as small as possible.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// Align the [child] within the container.
@@ -840,7 +840,7 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   @override
@@ -974,7 +974,7 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// If non-null, sets its height to the child's height multiplied by this factor.
@@ -1146,7 +1146,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The offset of the child's left edge from the left of the stack.
@@ -1281,7 +1281,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The offset of the child's start edge from the start of the stack.
@@ -1442,7 +1442,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The target opacity.
@@ -1678,7 +1678,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The target text style.
@@ -1810,7 +1810,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The type of shape.
@@ -1818,7 +1818,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// This property is not animated.
   final BoxShape shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;

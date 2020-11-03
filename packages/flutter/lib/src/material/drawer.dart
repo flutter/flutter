@@ -158,7 +158,7 @@ class Drawer extends StatelessWidget {
   ///
   /// Typically a [SliverList].
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The semantic label of the dialog used by accessibility frameworks to
@@ -255,7 +255,7 @@ class DrawerController extends StatefulWidget {
   /// Optional callback that is called when a [Drawer] is opened or closed.
   final DrawerCallback? drawerCallback;
 
-  /// {@template flutter.material.drawer.dragStartBehavior}
+  /// {@template flutter.material.DrawerController.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag behavior used for opening

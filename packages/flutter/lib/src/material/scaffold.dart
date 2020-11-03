@@ -105,7 +105,7 @@ class ScaffoldMessenger extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The state from the closest instance of this class that encloses the given
@@ -1747,7 +1747,7 @@ class Scaffold extends StatefulWidget {
   /// [AppBar.primary], is true.
   final bool primary;
 
-  /// {@macro flutter.material.drawer.dragStartBehavior}
+  /// {@macro flutter.material.DrawerController.dragStartBehavior}
   final DragStartBehavior drawerDragStartBehavior;
 
   /// The width of the area within which a horizontal swipe will open the

@@ -62,7 +62,7 @@ class Theme extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   static final ThemeData _kFallbackTheme = ThemeData.fallback();
@@ -226,7 +226,7 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override

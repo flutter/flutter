@@ -128,7 +128,7 @@ abstract class ChipAttributes {
   ///  * [MaterialState.pressed].
   OutlinedBorder? get shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   Clip get clipBehavior;

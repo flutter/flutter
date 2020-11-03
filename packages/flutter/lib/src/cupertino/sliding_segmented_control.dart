@@ -483,7 +483,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     return _RenderSegmentedControl<T>(
       selectedIndex: selectedIndex,
-      thumbColor: CupertinoDynamicColor.resolve(thumbColor, context),
+      thumbColor: CupertinoDynamicColor.maybeResolve(thumbColor, context),
       state: state,
     );
   }
@@ -491,7 +491,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderSegmentedControl<T> renderObject) {
     renderObject
-      ..thumbColor = CupertinoDynamicColor.resolve(thumbColor, context)
+      ..thumbColor = CupertinoDynamicColor.maybeResolve(thumbColor, context)
       ..guardedSetHighlightedIndex(selectedIndex);
   }
 }

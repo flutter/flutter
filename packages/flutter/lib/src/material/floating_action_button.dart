@@ -290,7 +290,7 @@ class FloatingActionButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback? onPressed;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   final MouseCursor? mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.
@@ -381,7 +381,7 @@ class FloatingActionButton extends StatelessWidget {
   /// shape as well.
   final ShapeBorder? shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
