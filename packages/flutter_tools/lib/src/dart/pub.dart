@@ -165,6 +165,7 @@ class _DefaultPub implements Pub {
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
   }) async {
+    print('===== pub get');
     directory ??= _fileSystem.currentDirectory.path;
     final File packageConfigFile = _fileSystem.file(
       _fileSystem.path.join(directory, '.dart_tool', 'package_config.json'));

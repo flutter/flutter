@@ -239,13 +239,20 @@ class FlutterDriverService extends DriverService {
     // the test script directly. `pub run test` is strictly better because
     // in the even that a socket or something similar is left open, the
     // test runner will correctly shutdown the VM instead of hanging forever.
-    return _processUtils.stream(<String>[
-      _dartSdkPath,
-      if (packageConfig['test'] != null)
-        ...<String>['pub', 'run', 'test', ...arguments, testFile, '-rexpanded']
-      else
-        ...<String>[...arguments, testFile, '-rexpanded'],
-    ], environment: <String, String>{
+    print('=== pub run test begin');
+    List<String> args;
+    if (packageConfig['test'] != null) {
+      print('test availale');
+        args = <String>[_dartSdkPath, 'pub', 'run', 'test', ...arguments, testFile, '-rexpanded'];
+      }
+      else {
+      print('test not available');
+        args = <String>[_dartSdkPath, ...arguments, testFile, '-rexpanded'];
+      }
+    print(_dartSdkPath);
+    args = <String>[_dartSdkPath, ...arguments, testFile, '-rexpanded'];
+    return _processUtils.stream(
+      args, environment: <String, String>{
       'VM_SERVICE_URL': _vmServiceUri,
       ...environment,
     });

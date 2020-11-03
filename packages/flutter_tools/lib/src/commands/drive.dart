@@ -192,7 +192,6 @@ class DriveCommand extends RunCommandBase {
     final File applicationBinary = stringArg('use-application-binary') == null
       ? null
       : _fileSystem.file(stringArg('use-application-binary'));
-
     if (stringArg('use-existing-app') == null) {
       await driverService.start(
         buildInfo,
@@ -222,7 +221,7 @@ class DriveCommand extends RunCommandBase {
         ipv6,
       );
     }
-
+    print('=== driverService.startTest begin');
     final int testResult = await driverService.startTest(
       testFile,
       stringsArg('test-arguments'),
@@ -237,7 +236,7 @@ class DriveCommand extends RunCommandBase {
         : null,
       androidEmulator: boolArg('android-emulator'),
     );
-
+    print('=== driverService.startTest end');
     if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
       _logger.printStatus('Leaving the application running.');
     } else {
