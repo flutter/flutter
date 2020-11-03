@@ -137,7 +137,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   bool opaque(BuildContext context) {
     final Color backgroundColor =
         this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor;
-    return CupertinoDynamicColor.resolve(backgroundColor, context)!.alpha == 0xFF;
+    return CupertinoDynamicColor.resolve(backgroundColor, context).alpha == 0xFF;
   }
 
   @override
@@ -145,7 +145,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     assert(debugCheckHasMediaQuery(context));
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
 
-    final Color? backgroundColor = CupertinoDynamicColor.resolve(
+    final Color backgroundColor = CupertinoDynamicColor.resolve(
       this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor,
       context,
     );
@@ -166,7 +166,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         right: resolveBorderSide(border!.right),
       );
 
-    final Color? inactive = CupertinoDynamicColor.resolve(inactiveColor, context);
+    final Color inactive = CupertinoDynamicColor.resolve(inactiveColor, context);
     Widget result = DecoratedBox(
       decoration: BoxDecoration(
         border: resolvedBorder,
@@ -259,7 +259,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     if (!active)
       return item;
 
-    final Color? activeColor = CupertinoDynamicColor.resolve(
+    final Color activeColor = CupertinoDynamicColor.resolve(
       this.activeColor ?? CupertinoTheme.of(context).primaryColor,
       context,
     );
