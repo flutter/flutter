@@ -14,12 +14,8 @@
 
 namespace flutter {
 
-struct AotDataDeleter {
-  void operator()(FlutterEngineAOTData aot_data) {
-    FlutterEngineCollectAOTData(aot_data);
-  }
-};
-using UniqueAotDataPtr = std::unique_ptr<_FlutterEngineAOTData, AotDataDeleter>;
+using UniqueAotDataPtr =
+    std::unique_ptr<_FlutterEngineAOTData, FlutterEngineCollectAOTDataFnPtr>;
 
 // The data associated with a Flutter project needed to run it in an engine.
 class FlutterProjectBundle {
@@ -49,7 +45,7 @@ class FlutterProjectBundle {
   // retained until any engine instance it is passed to has been shut down.
   //
   // Logs and returns nullptr on failure.
-  UniqueAotDataPtr LoadAotData();
+  UniqueAotDataPtr LoadAotData(const FlutterEngineProcTable& engine_procs);
 
   // Returns the command line arguments to be passed through to the Dart
   // entrypoint.

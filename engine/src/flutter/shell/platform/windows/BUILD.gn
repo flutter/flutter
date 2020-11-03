@@ -82,6 +82,8 @@ source_set("flutter_windows_source") {
 
   public_configs = [ ":relative_angle_headers" ]
 
+  defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
+
   deps = [
     ":flutter_windows_headers",
     "//flutter/shell/platform/common/cpp:common_cpp",
@@ -123,8 +125,10 @@ executable("flutter_windows_unittests") {
 
   sources = [
     "flutter_project_bundle_unittests.cc",
+    "flutter_windows_engine_unittests.cc",
     "string_conversion_unittests.cc",
     "system_utils_unittests.cc",
+    "testing/engine_embedder_api_modifier.h",
     "testing/mock_win32_window.cc",
     "testing/mock_win32_window.h",
     "testing/win32_flutter_window_test.cc",
@@ -141,6 +145,8 @@ executable("flutter_windows_unittests") {
     ":flutter_windows_fixtures",
     ":flutter_windows_headers",
     ":flutter_windows_source",
+    "//flutter/shell/platform/embedder:embedder_as_internal_library",
+    "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",
     "//third_party/rapidjson",
   ]

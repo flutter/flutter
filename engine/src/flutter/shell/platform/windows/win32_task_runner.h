@@ -18,13 +18,17 @@
 
 namespace flutter {
 
+typedef uint64_t (*CurrentTimeProc)();
 // A custom task runner that integrates with user32 GetMessage semantics so that
 // host app can own its own message loop and flutter still gets to process
 // tasks on a timely basis.
 class Win32TaskRunner {
  public:
   using TaskExpiredCallback = std::function<void(const FlutterTask*)>;
+  // Creates a new task runner with the given main thread ID, current time
+  // provider, and callback for tasks that are ready to be run.
   Win32TaskRunner(DWORD main_thread_id,
+                  CurrentTimeProc get_current_time,
                   const TaskExpiredCallback& on_task_expired);
 
   ~Win32TaskRunner();
@@ -53,7 +57,13 @@ class Win32TaskRunner {
       }
     };
   };
+
+  // Returns a TaskTimePoint computed from the given target time from Flutter.
+  TaskTimePoint TimePointFromFlutterTime(
+      uint64_t flutter_target_time_nanos) const;
+
   DWORD main_thread_id_;
+  CurrentTimeProc get_current_time_;
   TaskExpiredCallback on_task_expired_;
   std::mutex task_queue_mutex_;
   std::priority_queue<Task, std::deque<Task>, Task::Comparer> task_queue_;
@@ -61,9 +71,6 @@ class Win32TaskRunner {
   Win32TaskRunner(const Win32TaskRunner&) = delete;
 
   Win32TaskRunner& operator=(const Win32TaskRunner&) = delete;
-
-  static TaskTimePoint TimePointFromFlutterTime(
-      uint64_t flutter_target_time_nanos);
 };
 
 }  // namespace flutter

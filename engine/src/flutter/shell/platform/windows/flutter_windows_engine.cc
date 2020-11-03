@@ -90,15 +90,20 @@ FlutterLocale CovertToFlutterLocale(const LanguageInfo& info) {
 }  // namespace
 
 FlutterWindowsEngine::FlutterWindowsEngine(const FlutterProjectBundle& project)
-    : project_(std::make_unique<FlutterProjectBundle>(project)) {
+    : project_(std::make_unique<FlutterProjectBundle>(project)),
+      aot_data_(nullptr, nullptr) {
+  embedder_api_.struct_size = sizeof(FlutterEngineProcTable);
+  FlutterEngineGetProcAddresses(&embedder_api_);
+
   task_runner_ = std::make_unique<Win32TaskRunner>(
-      GetCurrentThreadId(), [this](const auto* task) {
+      GetCurrentThreadId(), embedder_api_.GetCurrentTime,
+      [this](const auto* task) {
         if (!engine_) {
           std::cerr << "Cannot post an engine task when engine is not running."
                     << std::endl;
           return;
         }
-        if (FlutterEngineRunTask(engine_, task) != kSuccess) {
+        if (embedder_api_.RunTask(engine_, task) != kSuccess) {
           std::cerr << "Failed to post an engine task." << std::endl;
         }
       });
@@ -126,8 +131,8 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
   }
   std::string assets_path_string = project_->assets_path().u8string();
   std::string icu_path_string = project_->icu_path().u8string();
-  if (FlutterEngineRunsAOTCompiledDartCode()) {
-    aot_data_ = project_->LoadAotData();
+  if (embedder_api_.RunsAOTCompiledDartCode()) {
+    aot_data_ = project_->LoadAotData(embedder_api_);
     if (!aot_data_) {
       std::cerr << "Unable to start engine without AOT data." << std::endl;
       return false;
@@ -193,8 +198,8 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
 
   FlutterRendererConfig renderer_config = GetRendererConfig();
 
-  auto result = FlutterEngineRun(FLUTTER_ENGINE_VERSION, &renderer_config,
-                                 &args, this, &engine_);
+  auto result = embedder_api_.Run(FLUTTER_ENGINE_VERSION, &renderer_config,
+                                  &args, this, &engine_);
   if (result != kSuccess || engine_ == nullptr) {
     std::cerr << "Failed to start Flutter engine: error " << result
               << std::endl;
@@ -211,7 +216,7 @@ bool FlutterWindowsEngine::Stop() {
     if (plugin_registrar_destruction_callback_) {
       plugin_registrar_destruction_callback_(plugin_registrar_.get());
     }
-    FlutterEngineResult result = FlutterEngineShutdown(engine_);
+    FlutterEngineResult result = embedder_api_.Shutdown(engine_);
     engine_ = nullptr;
     return (result == kSuccess);
   }
@@ -232,6 +237,60 @@ void FlutterWindowsEngine::SetPluginRegistrarDestructionCallback(
   plugin_registrar_destruction_callback_ = callback;
 }
 
+void FlutterWindowsEngine::SendWindowMetricsEvent(
+    const FlutterWindowMetricsEvent& event) {
+  if (engine_) {
+    embedder_api_.SendWindowMetricsEvent(engine_, &event);
+  }
+}
+
+void FlutterWindowsEngine::SendPointerEvent(const FlutterPointerEvent& event) {
+  if (engine_) {
+    embedder_api_.SendPointerEvent(engine_, &event, 1);
+  }
+}
+
+bool FlutterWindowsEngine::SendPlatformMessage(
+    const char* channel,
+    const uint8_t* message,
+    const size_t message_size,
+    const FlutterDesktopBinaryReply reply,
+    void* user_data) {
+  FlutterPlatformMessageResponseHandle* response_handle = nullptr;
+  if (reply != nullptr && user_data != nullptr) {
+    FlutterEngineResult result =
+        embedder_api_.PlatformMessageCreateResponseHandle(
+            engine_, reply, user_data, &response_handle);
+    if (result != kSuccess) {
+      std::cout << "Failed to create response handle\n";
+      return false;
+    }
+  }
+
+  FlutterPlatformMessage platform_message = {
+      sizeof(FlutterPlatformMessage),
+      channel,
+      message,
+      message_size,
+      response_handle,
+  };
+
+  FlutterEngineResult message_result =
+      embedder_api_.SendPlatformMessage(engine_, &platform_message);
+  if (response_handle != nullptr) {
+    embedder_api_.PlatformMessageReleaseResponseHandle(engine_,
+                                                       response_handle);
+  }
+  return message_result == kSuccess;
+}
+
+void FlutterWindowsEngine::SendPlatformMessageResponse(
+    const FlutterDesktopMessageResponseHandle* handle,
+    const uint8_t* data,
+    size_t data_length) {
+  embedder_api_.SendPlatformMessageResponse(engine_, handle, data, data_length);
+}
+
 void FlutterWindowsEngine::HandlePlatformMessage(
     const FlutterPlatformMessage* engine_message) {
   if (engine_message->struct_size != sizeof(FlutterPlatformMessage)) {
@@ -245,6 +304,10 @@ void FlutterWindowsEngine::HandlePlatformMessage(
 
   message_dispatcher_->HandleMessage(
       message, [this] {}, [this] {});
+}
+
+void FlutterWindowsEngine::ReloadSystemFonts() {
+  embedder_api_.ReloadSystemFonts(engine_);
 }
 
 void FlutterWindowsEngine::SendSystemSettings() {
@@ -261,8 +324,8 @@ void FlutterWindowsEngine::SendSystemSettings() {
       flutter_locales.begin(), flutter_locales.end(),
       std::back_inserter(flutter_locale_list),
       [](const auto& arg) -> const auto* { return &arg; });
-  FlutterEngineUpdateLocales(engine_, flutter_locale_list.data(),
-                             flutter_locale_list.size());
+  embedder_api_.UpdateLocales(engine_, flutter_locale_list.data(),
+                              flutter_locale_list.size());
 
   // TODO: Send 'flutter/settings' channel settings here as well.
 }

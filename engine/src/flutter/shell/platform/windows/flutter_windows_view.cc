@@ -109,16 +109,12 @@ void FlutterWindowsView::OnScroll(double x,
 void FlutterWindowsView::SendWindowMetrics(size_t width,
                                            size_t height,
                                            double dpiScale) const {
-  if (engine_->engine() == nullptr) {
-    return;
-  }
-
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
   event.width = width;
   event.height = height;
   event.pixel_ratio = dpiScale;
-  auto result = FlutterEngineSendWindowMetricsEvent(engine_->engine(), &event);
+  engine_->SendWindowMetricsEvent(event);
 }
 
 void FlutterWindowsView::SendInitialBounds() {
@@ -237,7 +233,7 @@ void FlutterWindowsView::SendPointerEventWithData(
           std::chrono::high_resolution_clock::now().time_since_epoch())
           .count();
 
-  FlutterEngineSendPointerEvent(engine_->engine(), &event, 1);
+  engine_->SendPointerEvent(event);
 
   if (event_data.phase == FlutterPointerPhase::kAdd) {
     SetMouseFlutterStateAdded(true);
