@@ -1405,6 +1405,28 @@ void testMain() {
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
         skip: browserEngine == BrowserEngine.webkit);
 
+    test('Canonicalizes font family', () {
+      showKeyboard();
+
+      final HtmlElement input = textEditing.editingElement.domElement;
+
+      MethodCall setStyle;
+
+      setStyle = configureSetStyleMethodCall(12, 'sans-serif', 4, 4, 1);
+      sendFrameworkMessage(codec.encodeMethodCall(setStyle));
+      expect(input.style.fontFamily, canonicalizeFontFamily('sans-serif'));
+
+      setStyle = configureSetStyleMethodCall(12, '.SF Pro Text', 4, 4, 1);
+      sendFrameworkMessage(codec.encodeMethodCall(setStyle));
+      expect(input.style.fontFamily, canonicalizeFontFamily('.SF Pro Text'));
+
+      setStyle = configureSetStyleMethodCall(12, 'foo bar baz', 4, 4, 1);
+      sendFrameworkMessage(codec.encodeMethodCall(setStyle));
+      expect(input.style.fontFamily, canonicalizeFontFamily('foo bar baz'));
+
+      hideKeyboard();
+    });
+
     test(
         'negative base offset and selection extent values in editing state is handled',
         () {
