@@ -144,7 +144,7 @@ class _TableElementRow {
 /// }
 /// ```
 /// {@end-tool}
-/// 
+///
 /// If you only have one row, the [Row] widget is more appropriate. If you only
 /// have one column, the [SliverList] or [Column] widgets will be more
 /// appropriate.
