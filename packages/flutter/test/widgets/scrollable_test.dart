@@ -368,6 +368,58 @@ void main() {
     expect(getScrollOffset(tester), 20.0);
   });
 
+  group('setCanDrag to false with active drag gesture: ', () {
+    Future<void> pumpTestWidget(WidgetTester tester, bool canDrag) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: CustomScrollView(
+            physics: canDrag ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
+            slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000))],
+          ),
+        ),
+      );
+    }
+
+    testWidgets('hold', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/66816.
+      await pumpTestWidget(tester, true);
+      final RenderIgnorePointer renderIgnorePointer = tester.renderObject<RenderIgnorePointer>(
+        find.descendant(of: find.byType(CustomScrollView), matching: find.byType(IgnorePointer)),
+      );
+
+      expect(renderIgnorePointer.ignoring, false);
+
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+      expect(renderIgnorePointer.ignoring, true);
+
+      await pumpTestWidget(tester, false);
+      expect(renderIgnorePointer.ignoring, false);
+
+      await gesture.up();
+      expect(renderIgnorePointer.ignoring, false);
+    });
+
+    testWidgets('drag', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/66816.
+      await pumpTestWidget(tester, true);
+      final RenderIgnorePointer renderIgnorePointer = tester.renderObject<RenderIgnorePointer>(
+        find.descendant(of: find.byType(CustomScrollView), matching: find.byType(IgnorePointer)),
+      );
+      expect(renderIgnorePointer.ignoring, false);
+
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+      expect(renderIgnorePointer.ignoring, true);
+
+      await gesture.moveBy(const Offset(0, 100));
+
+      await pumpTestWidget(tester, false);
+      expect(renderIgnorePointer.ignoring, false);
+
+      await gesture.up();
+      expect(renderIgnorePointer.ignoring, false);
+    });
+  });
+
   testWidgets("Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics", (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
