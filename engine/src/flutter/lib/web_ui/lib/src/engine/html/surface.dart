@@ -347,16 +347,16 @@ abstract class PersistedSurface implements ui.EngineLayer {
   /// such as on the very first frame.
   @mustCallSuper
   void build() {
-    if (rootElement != null) {
-      try {
-        throw '';
-      } catch (_, stack) {
-        print(
-            'Attempted to build a $runtimeType, but it already has an HTML element ${rootElement!.tagName}.');
-        print(stack.toString().split('\n').take(20).join('\n'));
+    if (assertionsEnabled) {
+      final html.Element? existingElement = rootElement;
+      if (existingElement != null) {
+        throw PersistedSurfaceException(
+          this,
+          'Attempted to build a $runtimeType, but it already has an HTML '
+          'element ${existingElement.tagName}.',
+        );
       }
     }
-    assert(rootElement == null);
     assert(debugAssertSurfaceState(this, PersistedSurfaceState.created));
     rootElement = createElement();
     assert(rootElement != null);
