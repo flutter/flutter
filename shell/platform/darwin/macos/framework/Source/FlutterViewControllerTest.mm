@@ -34,7 +34,7 @@ id mockViewController(NSString* pasteboardString) {
   return viewControllerMock;
 }
 
-TEST(FlutterViewControllerTest, HasStringsWhenPasteboardEmpty) {
+TEST(FlutterViewController, HasStringsWhenPasteboardEmpty) {
   // Mock FlutterViewController so that it behaves like the pasteboard is empty.
   id viewControllerMock = mockViewController(nil);
 
@@ -49,11 +49,11 @@ TEST(FlutterViewControllerTest, HasStringsWhenPasteboardEmpty) {
   FlutterMethodCall* methodCallAfterClear =
       [FlutterMethodCall methodCallWithMethodName:@"Clipboard.hasStrings" arguments:nil];
   [viewControllerMock handleMethodCall:methodCallAfterClear result:resultAfterClear];
-  ASSERT_TRUE(calledAfterClear);
-  ASSERT_FALSE(valueAfterClear);
+  EXPECT_TRUE(calledAfterClear);
+  EXPECT_FALSE(valueAfterClear);
 }
 
-TEST(FlutterViewControllerTest, HasStringsWhenPasteboardFull) {
+TEST(FlutterViewController, HasStringsWhenPasteboardFull) {
   // Mock FlutterViewController so that it behaves like the pasteboard has a
   // valid string.
   id viewControllerMock = mockViewController(@"some string");
@@ -69,8 +69,8 @@ TEST(FlutterViewControllerTest, HasStringsWhenPasteboardFull) {
   FlutterMethodCall* methodCall =
       [FlutterMethodCall methodCallWithMethodName:@"Clipboard.hasStrings" arguments:nil];
   [viewControllerMock handleMethodCall:methodCall result:result];
-  ASSERT_TRUE(called);
-  ASSERT_TRUE(value);
+  EXPECT_TRUE(called);
+  EXPECT_TRUE(value);
 }
 
 }  // flutter::testing
