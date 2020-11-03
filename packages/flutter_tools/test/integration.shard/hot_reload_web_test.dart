@@ -30,7 +30,7 @@ void main() {
   testWithoutContext('hot restart works without error', () async {
     await flutter.run(chrome: true);
     await flutter.hotRestart();
-  }, skip: platform.isMacOS);
+  }, skip: platform.isMacOS, retry: 1);
 
   testWithoutContext('newly added code executes during hot restart', () async {
     final Completer<void> completer = Completer<void>();
@@ -44,9 +44,27 @@ void main() {
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
-      await completer.future;
+      await completer.future.timeout(const Duration(seconds: 15));
     } finally {
       await subscription.cancel();
     }
-  }, skip: platform.isMacOS);
+  }, skip: platform.isMacOS, retry: 1);
+
+  testWithoutContext('newly added code executes during hot restart - canvaskit', () async {
+    final Completer<void> completer = Completer<void>();
+    final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+      print(line);
+      if (line.contains('(((((RELOAD WORKED)))))')) {
+        completer.complete();
+      }
+    });
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--dart-define=FLUTTER_WEB_USE_SKIA=true']);
+    project.uncommentHotReloadPrint();
+    try {
+      await flutter.hotRestart();
+      await completer.future.timeout(const Duration(seconds: 15));
+    } finally {
+      await subscription.cancel();
+    }
+  }, skip: true, retry: 1); // Currently broken: Expected a value of type 'Future<_RegisteredFont>', but got one of type '_Future<_RegisteredFont?>
 }

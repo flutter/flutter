@@ -46,6 +46,7 @@ class ExpansionTile extends StatefulWidget {
     this.expandedCrossAxisAlignment,
     this.expandedAlignment,
     this.childrenPadding,
+    this.collapsedBackgroundColor,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
        assert(
@@ -84,6 +85,9 @@ class ExpansionTile extends StatefulWidget {
 
   /// The color to display behind the sublist when expanded.
   final Color? backgroundColor;
+
+  /// When not null, defines the background color of tile when the sublist is collapsed.
+  final Color? collapsedBackgroundColor;
 
   /// A widget to display instead of a rotating arrow icon.
   final Widget? trailing;
@@ -253,7 +257,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
   @override
   void didChangeDependencies() {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     _borderColorTween.end = theme.dividerColor;
     _headerColorTween
       ..begin = theme.textTheme.subtitle1!.color
@@ -261,7 +265,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _iconColorTween
       ..begin = theme.unselectedWidgetColor
       ..end = theme.accentColor;
-    _backgroundColorTween.end = widget.backgroundColor;
+    _backgroundColorTween
+      ..begin = widget.collapsedBackgroundColor
+      ..end = widget.backgroundColor;
     super.didChangeDependencies();
   }
 

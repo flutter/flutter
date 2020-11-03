@@ -266,7 +266,7 @@ class ToggleButtonsTheme extends InheritedTheme {
   /// ```
   static ToggleButtonsThemeData of(BuildContext context) {
     final ToggleButtonsTheme? toggleButtonsTheme = context.dependOnInheritedWidgetOfExactType<ToggleButtonsTheme>();
-    return toggleButtonsTheme?.data ?? Theme.of(context)!.toggleButtonsTheme;
+    return toggleButtonsTheme?.data ?? Theme.of(context).toggleButtonsTheme;
   }
 
   @override

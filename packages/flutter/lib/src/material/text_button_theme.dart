@@ -111,7 +111,7 @@ class TextButtonTheme extends InheritedTheme {
   /// ```
   static TextButtonThemeData of(BuildContext context) {
     final TextButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<TextButtonTheme>();
-    return buttonTheme?.data ?? Theme.of(context)!.textButtonTheme;
+    return buttonTheme?.data ?? Theme.of(context).textButtonTheme;
   }
 
   @override
