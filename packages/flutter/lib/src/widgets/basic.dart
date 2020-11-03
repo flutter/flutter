@@ -2758,6 +2758,60 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// needed, prefer removing the widget from the tree entirely rather than
 /// keeping it alive in an [Offstage] subtree.
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
+///
+/// This example shows a [FlutterLogo] widget when the `_offstage` member field
+/// is false, and hides it without any room in the parent when it is true. When
+/// offstage, this app displays a button to get the logo size, which will be
+/// displayed in a [SnackBar].
+///
+/// ```dart
+/// GlobalKey _key = GlobalKey();
+/// bool _offstage = true;
+///
+/// Size _getFlutterLogoSize() {
+///   final RenderBox renderLogo = _key.currentContext.findRenderObject();
+///   return renderLogo.size;
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Column(
+///     mainAxisAlignment: MainAxisAlignment.center,
+///     children: <Widget>[
+///       Offstage(
+///         offstage: _offstage,
+///         child: FlutterLogo(
+///           key: _key,
+///           size: 150.0,
+///         ),
+///       ),
+///       Text('Flutter logo is offstage: $_offstage'),
+///       RaisedButton(
+///         child: Text('Toggle Offstage Value'),
+///         onPressed: () {
+///           setState(() {
+///             _offstage = !_offstage;
+///           });
+///         },
+///       ),
+///       if (_offstage)
+///         RaisedButton(
+///           child: Text('Get Flutter Logo size'),
+///           onPressed: () {
+///             ScaffoldMessenger.of(context).showSnackBar(
+///               SnackBar(
+///                 content: Text('Flutter Logo size is ${_getFlutterLogoSize()}'),
+///               ),
+///             );
+///           }
+///         ),
+///     ],
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Visibility], which can hide a child more efficiently (albeit less
