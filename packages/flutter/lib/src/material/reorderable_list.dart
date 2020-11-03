@@ -67,30 +67,29 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// List<String> _list = List.generate(5, (i) => "${i}");
 ///
 /// Widget build(BuildContext context){
-///    return ReorderableListView(
-///      padding : const EdgeInsets.symmetric(horizontal:40),
-///      children: _list.map((String.string) => ListTile(
-///        key: Key(_list[_list.indexOf(string)]),
-///        title: Text(string))).toList(),
-///      onReorder: (oldIndex, newIndex){
-///        String old = _list[oldIndex];
-///        if (oldIndex > newIndex){
-///          for(int i = oldIndex; i> newIndex; i--){
-///            _list[i]= _list[i-1];
-///          }
-///          _list[newIndex]= old;
-///        }
-///        else{
-///          for(int i = oldIndex; i< newIndex-1;i++){
-///            _list[i]= _list[i+1];
-///          }
-///          _list[newIndex -1] = old;
-///        }
-///        setState((){});
-///      },
-///    },
-///  ),
-///};
+///   return ReorderableListView(
+///     padding : const EdgeInsets.symmetric(horizontal:40),
+///     children: _list.map((String string) => ListTile(
+///       key: Key(_list[_list.indexOf(string)]),
+///       title: Text(string))).toList(),
+///     onReorder: (oldIndex, newIndex){
+///       String old = _list[oldIndex];
+///       if (oldIndex > newIndex){
+///         for(int i = oldIndex; i> newIndex; i--){
+///           _list[i]= _list[i-1];
+///         }
+///         _list[newIndex]= old;
+///       }
+///       else{
+///         for(int i = oldIndex; i< newIndex-1;i++){
+///           _list[i]= _list[i+1];
+///         }
+///         _list[newIndex -1] = old;
+///       }
+///       setState((){});
+///     },
+///  );
+///}
 /// ```
 ///{@end-tool}
 ///
