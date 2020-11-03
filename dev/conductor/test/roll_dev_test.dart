@@ -202,14 +202,6 @@ void main() {
     test(
         'exits with exception if --skip-tagging is provided but commit isn\'t '
         'already tagged', () {
-    //  when(mockGit.getOutput('remote get-url $origin', any))
-    //      .thenReturn(kUpstreamRemote);
-    //  when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
-    //  when(mockGit.getFullTag(origin)).thenReturn(lastVersion);
-    //  when(mockGit.getOutput(
-    //    'rev-parse $lastVersion',
-    //    any,
-    //  )).thenReturn('zxy321');
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>[
           'git',
@@ -259,17 +251,13 @@ void main() {
           'describe',
           '--exact-match',
           '--tags',
-          'zxy321',
-        ], stdout: 'zxy321'),
+          commit,
+        ], exitCode: 1),
       ]);
 
-      const String exceptionMessage = 'Failed to verify $commit is already '
-          'tagged. You can only use the flag `$kSkipTagging` if the commit has '
-          'already been tagged.';
-    //  when(mockGit.run(
-    //    'describe --exact-match --tags $commit',
-    //    any,
-    //  )).thenThrow(Exception(exceptionMessage));
+      const String exceptionMessage =
+          'The $kSkipTagging flag is only supported '
+          'for tagged commits.';
 
       fakeArgResults = FakeArgResults(
         level: level,
@@ -288,39 +276,74 @@ void main() {
         ),
         throwsExceptionWith(exceptionMessage),
       );
-    //  verify(mockGit.run('fetch $origin', any));
-    //  verifyNever(mockGit.run('reset $commit --hard', any));
-    //  verifyNever(mockGit.getOutput('rev-parse HEAD', any));
     });
 
-    //test('throws exception if desired commit is already tip of dev branch', () {
-    //  when(mockGit.getOutput('remote get-url $origin', any))
-    //      .thenReturn(kUpstreamRemote);
-    //  when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
-    //  when(mockGit.getFullTag(origin)).thenReturn(lastVersion);
-    //  when(mockGit.getOutput(
-    //    'rev-parse $lastVersion',
-    //    any,
-    //  )).thenReturn(commit);
-    //  fakeArgResults = FakeArgResults(
-    //    level: level,
-    //    commit: commit,
-    //    origin: origin,
-    //    justPrint: true,
-    //  );
-    //  expect(
-    //    () => run(
-    //      usage: usage,
-    //      argResults: fakeArgResults,
-    //      git: mockGit,
-    //      stdio: stdio,
-    //    ),
-    //    throwsExceptionWith('is already on the dev branch as'),
-    //  );
-    //  verify(mockGit.run('fetch $origin', any));
-    //  verifyNever(mockGit.run('reset $commit --hard', any));
-    //  verifyNever(mockGit.getOutput('rev-parse HEAD', any));
-    //});
+    test('throws exception if desired commit is already tip of dev branch', () {
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--',
+          kUpstreamRemote,
+          '${checkoutsParentDirectory}checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'remote',
+          'get-url',
+          remote,
+        ], stdout: kUpstreamRemote),
+        const FakeCommand(command: <String>[
+          'git',
+          'status',
+          '--porcelain',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'fetch',
+          remote,
+          '--tags',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          commit,
+        ], stdout: commit),
+        const FakeCommand(command: <String>[
+          'git',
+          'describe',
+          '--match',
+          '*.*.*-*.*.pre',
+          '--exact-match',
+          '--tags',
+          'refs/remotes/$remote/dev',
+        ], stdout: lastVersion),
+        // [commit] is already [lastVersion]
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          lastVersion,
+        ], stdout: commit),
+      ]);
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        remote: remote,
+        justPrint: true,
+      );
+      expect(
+        () => rollDev(
+          usage: usage,
+          argResults: fakeArgResults,
+          fileSystem: fileSystem,
+          platform: platform,
+          repository: repo,
+          stdio: stdio,
+        ),
+        throwsExceptionWith(
+            'Commit $commit is already on the dev branch as $lastVersion'),
+      );
+    });
 
     //test(
     //    'does not tag if last release is not direct ancestor of desired '
