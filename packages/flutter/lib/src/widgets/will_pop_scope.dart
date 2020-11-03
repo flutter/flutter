@@ -28,88 +28,31 @@ import 'routes.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
-/// ```dart main
-/// void main() => runApp(MyApp());
-/// ```
-///
+/// {@tool dartpad --template=stateful_widget_material}
+/// 
 /// ```dart
-/// class MyApp extends StatelessWidget {
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       initialRoute: '/',
-///       routes: {
-///         '/': (context) => FirstPage(),
-///         '/second_screen': (context) => SecondPage(),
+/// bool shouldPop = true;
+/// @override
+/// Widget build(BuildContext context) {
+///   return WillPopScope(
+///       onWillPop: () async {
+///         setState(() {
+///           shouldPop = !shouldPop;
+///         });
+///         return shouldPop;
 ///       },
-///     );
-///   }
-/// }
-///
-/// class FirstPage extends StatelessWidget {
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: Text('WillPopScope demo'),
-///       ),
-///       body: Center(
-///         child: RaisedButton(
-///           child: Text('Go to the second screen'),
-///           onPressed: () {
-///             Navigator.pushNamed(context, '/second_screen');
-///           },
-///         ),
-///       ),
-///     );
-///   }
-/// }
-///
-/// class SecondPage extends StatefulWidget {
-///   SecondPage({Key key, this.title}) : super(key: key);
-///   final String title;
-///   @override
-///   _SecondPageState createState() => _SecondPageState();
-/// }
-///
-/// class _SecondPageState extends State<SecondPage> {
-///   bool shouldPop = true;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return WillPopScope(
-///       onWillPop: () async => shouldPop,
 ///       child: Scaffold(
-///         appBar: AppBar(
-///           title: Text("WillPopScope demo"),
-///           leading: BackButton(),
-///         ),
-///         body: Center(
-///           child: Column(
-///             mainAxisAlignment: MainAxisAlignment.center,
-///             children: <Widget>[
-///               Text(
-///                   "Toggle shouldPop using the button.Press the back button in appbar to see the effect."),
-///               OutlinedButton(
-///                 child: Text('shouldPop: $shouldPop'),
-///                 onPressed: () {
-///                   setState(() {
-///                     shouldPop = !shouldPop;
-///                   });
-///                 },
-///               ),
-///             ],
+///           appBar: AppBar(
+///             title: Text("Flutter WillPopScope demp"),
+///             leading: BackButton(),
 ///           ),
+///         body: Center(
+///           child: Text(
+///               "Current value of shouldPop is $shouldPop. Tap on back button in appbar to toggle"),
 ///         ),
 ///       ),
 ///     );
 ///   }
-/// }
 /// ```
 ///
 /// {@end-tool}
