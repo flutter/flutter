@@ -18,20 +18,23 @@ import 'routes.dart';
 /// ```dart
 /// @override
 /// Widget build(BuildContext) {
-///     return WillPopScope (
-///      onWillPop: () async {
+///   return WillPopScope (
+///     onWillPop: () async {
 ///        return shouldPop;
-///      },
-///        child: MyWidget(),
-///     );
+///     },
+///     child: Center(),
+///   );
 /// }
 /// ```
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 ///
-/// ```dart
+/// ```dart preamble
 /// bool shouldPop = true;
+/// ```
+///
+/// ```dart
 /// @override
 /// Widget build(BuildContext context) {
 ///   return WillPopScope(
