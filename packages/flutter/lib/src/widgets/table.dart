@@ -81,7 +81,7 @@ class _TableElementRow {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_lbE0wsVZSw}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows a `Table` with borders, multiple types of column widths and different vertical cell alignments.
 ///
@@ -132,7 +132,7 @@ class _TableElementRow {
 ///           ),
 ///           Center(
 ///             child: Container(
-///               height: 64,
+///               height: 32,
 ///               width: 32,
 ///               color: Colors.orange,
 ///             ),
