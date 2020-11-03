@@ -265,10 +265,10 @@ mixin SchedulerBinding on BindingBase {
   void addTimingsCallback(TimingsCallback callback) {
     _timingsCallbacks.add(callback);
     if (_timingsCallbacks.length == 1) {
-      assert(PlatformDispatcher.instance.onReportTimings == null);
-      PlatformDispatcher.instance.onReportTimings = _executeTimingsCallbacks;
+      assert(platformDispatcher.onReportTimings == null);
+      platformDispatcher.onReportTimings = _executeTimingsCallbacks;
     }
-    assert(PlatformDispatcher.instance.onReportTimings == _executeTimingsCallbacks);
+    assert(platformDispatcher.onReportTimings == _executeTimingsCallbacks);
   }
 
   /// Removes a callback that was earlier added by [addTimingsCallback].
@@ -276,7 +276,7 @@ mixin SchedulerBinding on BindingBase {
     assert(_timingsCallbacks.contains(callback));
     _timingsCallbacks.remove(callback);
     if (_timingsCallbacks.isEmpty) {
-      PlatformDispatcher.instance.onReportTimings = null;
+      platformDispatcher.onReportTimings = null;
     }
   }
 
@@ -720,12 +720,12 @@ mixin SchedulerBinding on BindingBase {
       scheduleFrame();
   }
 
-  /// Ensures callbacks for `PlatformDispatcher.instance.onBeginFrame` and
-  /// `PlatformDispatcher.instance.onDrawFrame` are registered.
+  /// Ensures callbacks for [PlatformDispatcher.onBeginFrame] and
+  /// [PlatformDispatcher.onDrawFrame] are registered.
   @protected
   void ensureFrameCallbacksRegistered() {
-    PlatformDispatcher.instance.onBeginFrame ??= _handleBeginFrame;
-    PlatformDispatcher.instance.onDrawFrame ??= _handleDrawFrame;
+    platformDispatcher.onBeginFrame ??= _handleBeginFrame;
+    platformDispatcher.onDrawFrame ??= _handleDrawFrame;
   }
 
   /// Schedules a new frame using [scheduleFrame] if this object is not
@@ -790,7 +790,7 @@ mixin SchedulerBinding on BindingBase {
       return true;
     }());
     ensureFrameCallbacksRegistered();
-    PlatformDispatcher.instance.scheduleFrame();
+    platformDispatcher.scheduleFrame();
     _hasScheduledFrame = true;
   }
 
@@ -827,7 +827,7 @@ mixin SchedulerBinding on BindingBase {
         debugPrintStack(label: 'scheduleForcedFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    PlatformDispatcher.instance.scheduleFrame();
+    platformDispatcher.scheduleFrame();
     _hasScheduledFrame = true;
   }
 
