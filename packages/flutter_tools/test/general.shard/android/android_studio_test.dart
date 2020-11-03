@@ -110,22 +110,22 @@ void main() {
     });
 
     testUsingContext('Can discover Android Studio >=4.1 location on Mac', () {
-    final String studioInApplicationPlistFolder = globals.fs.path.join(
+      final String studioInApplicationPlistFolder = globals.fs.path.join(
         '/',
         'Application',
         'Android Studio.app',
         'Contents',
       );
-    globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
-
-    final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-    when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist4_1);
-
-    final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      
+      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist4_1);
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
       );
-    expect(studio, isNotNull);
-    expect(studio.pluginsPath, equals(globals.fs.path.join(
+      
+      expect(studio, isNotNull);
+      expect(studio.pluginsPath, equals(globals.fs.path.join(
         homeMac,
         'Library',
         'Application Support',
@@ -140,25 +140,25 @@ void main() {
       // so we force the platform to fake Linux here.
       Platform: () => platform,
       PlistParser: () => plistUtils,
-  });
-
-  testUsingContext('Can discover Android Studio <4.1 location on Mac', () {
-    final String studioInApplicationPlistFolder = globals.fs.path.join(
+    });
+    
+    testUsingContext('Can discover Android Studio <4.1 location on Mac', () {
+      final String studioInApplicationPlistFolder = globals.fs.path.join(
         '/',
         'Application',
         'Android Studio.app',
         'Contents',
       );
-    globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-    final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-    when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist);
-
-    final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist);
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
       );
-    expect(studio, isNotNull);
-    expect(studio.pluginsPath, equals(globals.fs.path.join(
+      
+      expect(studio, isNotNull);
+      expect(studio.pluginsPath, equals(globals.fs.path.join(
         homeMac,
         'Library',
         'Application Support',
@@ -172,7 +172,7 @@ void main() {
       // so we force the platform to fake Linux here.
       Platform: () => platform,
       PlistParser: () => plistUtils,
-  });
+    });
 
     testUsingContext('extracts custom paths for directly downloaded Android Studio on Mac', () {
       final String studioInApplicationPlistFolder = globals.fs.path.join(
