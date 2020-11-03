@@ -102,7 +102,7 @@ class PaginatedDataTable extends StatefulWidget {
        assert(source != null),
        super(key: key);
 
-  /// The table card's header.
+  /// The table card's optional header.
   ///
   /// This is typically a [Text] widget, but can also be a [ButtonBar] with
   /// [TextButton]s. Suitable defaults are automatically provided for the font,
