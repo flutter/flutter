@@ -17,17 +17,6 @@ import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-/// Define some default values for convenient external use.
-class ListTileDefaultValue {
-  /// The default horizontal gap between the titles and the leading/trailing widgets.
-  static const double horizontalTitleGap = 16.0;
-
-  /// The default minimum padding on the top and bottom of the title and subtitle widgets.
-  static const double minVerticalPadding = 4.0;
-
-  /// The default minimum leading width.
-  static const double minLeadingWidth = 40.0;
-}
 
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
@@ -720,11 +709,9 @@ class ListTile extends StatelessWidget {
     this.autofocus = false,
     this.tileColor,
     this.selectedTileColor,
-    this.horizontalTitleGap =
-        ListTileDefaultValue.horizontalTitleGap,
-    this.minVerticalPadding =
-        ListTileDefaultValue.minVerticalPadding,
-    this.minLeadingWidth = ListTileDefaultValue.minLeadingWidth,
+    this.horizontalTitleGap = 16.0,
+    this.minVerticalPadding = 4.0,
+    this.minLeadingWidth = 40.0,
   }) : assert(isThreeLine != null),
        assert(enabled != null),
        assert(selected != null),
