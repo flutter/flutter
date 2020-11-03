@@ -309,4 +309,34 @@ void main() {
       expect(notificationTypes, types);
     });
   }
+
+  testWidgets('Builder is not called excessively', (WidgetTester tester) async {
+    int buildCount = 0;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          DraggableScrollableSheet(
+            builder: (BuildContext context, ScrollController scrollController) {
+              buildCount += 1;
+              return Container(
+                color: const Color(0xFFABCDEF),
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemExtent: 100,
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ));
+    expect(buildCount, 1);
+    await tester.flingFrom(const Offset(0, 325), const Offset(0, -325), 200);
+    expect(buildCount, 1);
+    await tester.pumpAndSettle();
+    expect(buildCount, 1);
+  });
 }
