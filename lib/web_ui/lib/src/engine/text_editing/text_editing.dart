@@ -1363,7 +1363,8 @@ class TextEditingChannel {
         throw StateError(
             'Unsupported method call on the flutter/textinput channel: ${call.method}');
     }
-    EnginePlatformDispatcher.instance._replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+    EnginePlatformDispatcher.instance
+        ._replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
   }
 
   /// Used for submitting the forms attached on the DOM.
@@ -1664,7 +1665,8 @@ class EditableTextStyle {
 
   String? get align => textAlignToCssValue(textAlign, textDirection);
 
-  String get cssFont => '${fontWeight} ${fontSize}px ${fontFamily}';
+  String get cssFont =>
+      '${fontWeight} ${fontSize}px ${canonicalizeFontFamily(fontFamily)}';
 
   void applyToDomElement(html.HtmlElement domElement) {
     domElement.style
