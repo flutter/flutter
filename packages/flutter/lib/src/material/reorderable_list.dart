@@ -54,11 +54,12 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// All [children] must have a key.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
-///This sample shows by dragging the user can reorder the items of the list.
-///list of Numbers will be used to display items in listview.
-///[generate]it is constructor which  is used to form a list of values.
-///[onReorder] This parameter is compulsory. It will be called when list child
-///is moved to a new position.
+///
+/// This sample shows by dragging the user can reorder the items of the list.
+/// list of Numbers will be used to display items in listview.
+/// [generate]it is constructor which  is used to form a list of values.
+/// [onReorder] This parameter is compulsory. It will be called when list child
+/// is moved to a new position.
 ///
 /// {@tool sample --template=stateless_widget_scaffold}
 ///
@@ -92,7 +93,9 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 ///};
 /// ```
 ///{@end-tool}
+///
 class ReorderableListView extends StatefulWidget {
+
   /// Creates a reorderable list.
   ReorderableListView({
     Key? key,
@@ -103,14 +106,14 @@ class ReorderableListView extends StatefulWidget {
     this.scrollDirection = Axis.vertical,
     this.padding,
     this.reverse = false,
-  })  : assert(scrollDirection != null),
-        assert(onReorder != null),
-        assert(children != null),
-        assert(
-          children.every((Widget w) => w.key != null),
-          'All children of this widget must have a key.',
-        ),
-        super(key: key);
+  }) : assert(scrollDirection != null),
+       assert(onReorder != null),
+       assert(children != null),
+       assert(
+         children.every((Widget w) => w.key != null),
+         'All children of this widget must have a key.',
+       ),
+       super(key: key);
 
   /// A non-reorderable header widget to show before the list.
   ///
@@ -173,8 +176,7 @@ class ReorderableListView extends StatefulWidget {
 // insert Draggables into the Overlay above itself.
 class _ReorderableListViewState extends State<ReorderableListView> {
   // We use an inner overlay so that the dragging list item doesn't draw outside of the list itself.
-  final GlobalKey _overlayKey =
-      GlobalKey(debugLabel: '$ReorderableListView overlay key');
+  final GlobalKey _overlayKey = GlobalKey(debugLabel: '$ReorderableListView overlay key');
 
   // This entry contains the scrolling list itself.
   late OverlayEntry _listOverlayEntry;
@@ -200,8 +202,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Overlay(key: _overlayKey, initialEntries: <OverlayEntry>[
-      _listOverlayEntry,
+    return Overlay(
+      key: _overlayKey,
+      initialEntries: <OverlayEntry>[
+        _listOverlayEntry,
     ]);
   }
 }
@@ -231,8 +235,8 @@ class _ReorderableListContent extends StatefulWidget {
   _ReorderableListContentState createState() => _ReorderableListContentState();
 }
 
-class _ReorderableListContentState extends State<_ReorderableListContent>
-    with TickerProviderStateMixin<_ReorderableListContent> {
+class _ReorderableListContentState extends State<_ReorderableListContent> with TickerProviderStateMixin<_ReorderableListContent> {
+
   // The extent along the [widget.scrollDirection] axis to allow a child to
   // drop into when the user reorders list children.
   //
@@ -300,18 +304,14 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
   @override
   void initState() {
     super.initState();
-    _entranceController =
-        AnimationController(vsync: this, duration: _reorderAnimationDuration);
-    _ghostController =
-        AnimationController(vsync: this, duration: _reorderAnimationDuration);
+    _entranceController = AnimationController(vsync: this, duration: _reorderAnimationDuration);
+    _ghostController = AnimationController(vsync: this, duration: _reorderAnimationDuration);
     _entranceController.addStatusListener(_onEntranceStatusChanged);
   }
 
   @override
   void didChangeDependencies() {
-    _scrollController = widget.scrollController ??
-        PrimaryScrollController.of(context) ??
-        ScrollController();
+    _scrollController = widget.scrollController ?? PrimaryScrollController.of(context) ?? ScrollController();
     super.didChangeDependencies();
   }
 
@@ -346,10 +346,10 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
 
   // Scrolls to a target context if that context is not on the screen.
   void _scrollTo(BuildContext context) {
-    if (_scrolling) return;
+    if (_scrolling)
+      return;
     final RenderObject contextObject = context.findRenderObject()!;
-    final RenderAbstractViewport viewport =
-        RenderAbstractViewport.of(contextObject)!;
+    final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject)!;
     assert(viewport != null);
     // If and only if the current scroll offset falls in-between the offsets
     // necessary to reveal the selected context at the top or bottom of the
@@ -364,19 +364,16 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
       _scrollController.position.maxScrollExtent,
       viewport.getOffsetToReveal(contextObject, 1.0).offset + margin,
     );
-    final bool onScreen =
-        scrollOffset <= topOffset && scrollOffset >= bottomOffset;
+    final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset;
 
     // If the context is off screen, then we request a scroll to make it visible.
     if (!onScreen) {
       _scrolling = true;
-      _scrollController.position
-          .animateTo(
+      _scrollController.position.animateTo(
         scrollOffset < bottomOffset ? bottomOffset : topOffset,
         duration: _scrollAnimationDuration,
         curve: Curves.easeInOut,
-      )
-          .then((void value) {
+      ).then((void value) {
         setState(() {
           _scrolling = false;
         });
@@ -386,7 +383,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
 
   // Wraps children in Row or Column, so that the children flow in
   // the widget's scrollDirection.
-  Widget _buildContainerForScrollDirection({required List<Widget> children}) {
+  Widget _buildContainerForScrollDirection({ required List<Widget> children }) {
     switch (widget.scrollDirection) {
       case Axis.horizontal:
         return Row(children: children);
@@ -399,8 +396,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
   // Handles up the logic for dragging and reordering items in the list.
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
-    final _ReorderableListViewChildGlobalKey keyIndexGlobalKey =
-        _ReorderableListViewChildGlobalKey(toWrap.key!, this);
+    final _ReorderableListViewChildGlobalKey keyIndexGlobalKey = _ReorderableListViewChildGlobalKey(toWrap.key!, this);
     // We pass the toWrapWithGlobalKey into the Draggable so that when a list
     // item gets dragged, the accessibility framework can preserve the selected
     // state of the dragging item.
@@ -420,7 +416,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
     // Places the value from startIndex one space before the element at endIndex.
     void reorder(int startIndex, int endIndex) {
       setState(() {
-        if (startIndex != endIndex) widget.onReorder(startIndex, endIndex);
+        if (startIndex != endIndex)
+          widget.onReorder(startIndex, endIndex);
         // Animates leftover space in the drop area closed.
         _ghostController.reverse(from: 0);
         _entranceController.reverse(from: 0);
@@ -435,8 +432,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
 
     Widget wrapWithSemantics() {
       // First, determine which semantics actions apply.
-      final Map<CustomSemanticsAction, VoidCallback> semanticsActions =
-          <CustomSemanticsAction, VoidCallback>{};
+      final Map<CustomSemanticsAction, VoidCallback> semanticsActions = <CustomSemanticsAction, VoidCallback>{};
 
       // Create the appropriate semantics actions.
       void moveToStart() => reorder(index, 0);
@@ -446,21 +442,18 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
       // before index+2, which is after the space at index+1.
       void moveAfter() => reorder(index, index + 2);
 
-      final MaterialLocalizations localizations =
-          MaterialLocalizations.of(context);
+      final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
       // If the item can move to before its current position in the list.
       if (index > 0) {
-        semanticsActions[CustomSemanticsAction(
-            label: localizations.reorderItemToStart)] = moveToStart;
+        semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToStart)] = moveToStart;
         String reorderItemBefore = localizations.reorderItemUp;
         if (widget.scrollDirection == Axis.horizontal) {
           reorderItemBefore = Directionality.of(context) == TextDirection.ltr
               ? localizations.reorderItemLeft
               : localizations.reorderItemRight;
         }
-        semanticsActions[CustomSemanticsAction(label: reorderItemBefore)] =
-            moveBefore;
+        semanticsActions[CustomSemanticsAction(label: reorderItemBefore)] = moveBefore;
       }
 
       // If the item can move to after its current position in the list.
@@ -471,11 +464,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
               ? localizations.reorderItemRight
               : localizations.reorderItemLeft;
         }
-        semanticsActions[CustomSemanticsAction(label: reorderItemAfter)] =
-            moveAfter;
-        semanticsActions[
-                CustomSemanticsAction(label: localizations.reorderItemToEnd)] =
-            moveToEnd;
+        semanticsActions[CustomSemanticsAction(label: reorderItemAfter)] = moveAfter;
+        semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToEnd)] = moveToEnd;
       }
 
       // We pass toWrap with a GlobalKey into the Draggable so that when a list
@@ -495,8 +485,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
       );
     }
 
-    Widget buildDragTarget(BuildContext context, List<Key?> acceptedCandidates,
-        List<dynamic> rejectedCandidates) {
+    Widget buildDragTarget(BuildContext context, List<Key?> acceptedCandidates, List<dynamic> rejectedCandidates) {
       final Widget toWrapWithSemantics = wrapWithSemantics();
 
       // We build the draggable inside of a layout builder so that we can
@@ -587,8 +576,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
           // If the target is not the original starting point, then we will accept the drop.
           return _dragging == toAccept && toAccept != toWrap.key;
         },
-        onAccept: (Key accepted) {},
-        onLeave: (Object? leaving) {},
+        onAccept: (Key accepted) { },
+        onLeave: (Object? leaving) { },
       );
     });
   }
@@ -597,8 +586,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
-    return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       const Key endWidgetKey = Key('DraggableList - End Widget');
       final Widget finalDropArea;
       switch (widget.scrollDirection) {
@@ -629,13 +617,10 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
         reverse: widget.reverse,
         child: _buildContainerForScrollDirection(
           children: <Widget>[
-            if (widget.reverse && hasMoreThanOneChildElement)
-              _wrap(finalDropArea, widget.children.length, constraints),
+            if (widget.reverse && hasMoreThanOneChildElement) _wrap(finalDropArea, widget.children.length, constraints),
             if (widget.header != null) widget.header!,
-            for (int i = 0; i < widget.children.length; i += 1)
-              _wrap(widget.children[i], i, constraints),
-            if (!widget.reverse && hasMoreThanOneChildElement)
-              _wrap(finalDropArea, widget.children.length, constraints),
+            for (int i = 0; i < widget.children.length; i += 1) _wrap(widget.children[i], i, constraints),
+            if (!widget.reverse && hasMoreThanOneChildElement) _wrap(finalDropArea, widget.children.length, constraints),
           ],
         ),
       );
@@ -650,8 +635,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
 // of the objects used to generate widgets.
 @optionalTypeArgs
 class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
-  const _ReorderableListViewChildGlobalKey(this.subKey, this.state)
-      : super(subKey);
+
+  const _ReorderableListViewChildGlobalKey(this.subKey, this.state) : super(subKey);
 
   final Key subKey;
 
@@ -659,10 +644,11 @@ class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is _ReorderableListViewChildGlobalKey &&
-        other.subKey == subKey &&
-        other.state == state;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _ReorderableListViewChildGlobalKey
+        && other.subKey == subKey
+        && other.state == state;
   }
 
   @override
