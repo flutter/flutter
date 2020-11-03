@@ -332,8 +332,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   Widget build(BuildContext context) {
     // TODO(ianh): This whole build function doesn't handle RTL yet.
     assert(debugCheckHasMaterialLocalizations(context));
-    final ThemeData themeData = Theme.of(context)!;
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final ThemeData themeData = Theme.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     // HEADER
     final List<Widget> headerWidgets = <Widget>[];
     double startPadding = 24.0;

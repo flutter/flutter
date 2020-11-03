@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +26,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -54,7 +52,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -87,7 +85,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -127,7 +125,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -171,7 +169,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => StatefulBuilder(

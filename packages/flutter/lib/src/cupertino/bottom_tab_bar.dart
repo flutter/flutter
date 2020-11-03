@@ -137,15 +137,15 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   bool opaque(BuildContext context) {
     final Color backgroundColor =
         this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor;
-    return CupertinoDynamicColor.resolve(backgroundColor, context)!.alpha == 0xFF;
+    return CupertinoDynamicColor.resolve(backgroundColor, context).alpha == 0xFF;
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final double bottomPadding = MediaQuery.of(context)!.padding.bottom;
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
 
-    final Color? backgroundColor = CupertinoDynamicColor.resolve(
+    final Color backgroundColor = CupertinoDynamicColor.resolve(
       this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor,
       context,
     );
@@ -166,7 +166,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         right: resolveBorderSide(border!.right),
       );
 
-    final Color? inactive = CupertinoDynamicColor.resolve(inactiveColor, context);
+    final Color inactive = CupertinoDynamicColor.resolve(inactiveColor, context);
     Widget result = DecoratedBox(
       decoration: BoxDecoration(
         border: resolvedBorder,
@@ -209,14 +209,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   List<Widget> _buildTabItems(BuildContext context) {
     final List<Widget> result = <Widget>[];
-    final CupertinoLocalizations? localizations = CupertinoLocalizations.of(context);
-    assert(
-      localizations != null,
-      'CupertinoTabBar requires a Localizations parent in order to provide an '
-        'appropriate Semantics hint for tab indexing. A CupertinoApp will '
-        'provide the DefaultCupertinoLocalizations, or you can instantiate your '
-        'own Localizations.'
-    );
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
 
     for (int index = 0; index < items.length; index += 1) {
       final bool active = index == currentIndex;
@@ -226,7 +219,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
           Expanded(
             child: Semantics(
               selected: active,
-              hint: localizations!.tabSemanticsLabel(
+              hint: localizations.tabSemanticsLabel(
                 tabIndex: index + 1,
                 tabCount: items.length,
               ),
@@ -266,7 +259,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     if (!active)
       return item;
 
-    final Color? activeColor = CupertinoDynamicColor.resolve(
+    final Color activeColor = CupertinoDynamicColor.resolve(
       this.activeColor ?? CupertinoTheme.of(context).primaryColor,
       context,
     );

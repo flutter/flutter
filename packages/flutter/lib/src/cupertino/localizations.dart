@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'date_picker.dart';
+import 'debug.dart';
 
 /// Determines the order of the columns inside [CupertinoDatePicker] in
 /// time and date time mode.
@@ -192,17 +192,29 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String timerPickerHourLabel(int hour);
 
+  /// All possible hour labels that appears next to the hour picker in
+  /// [CupertinoTimerPicker]
+  List<String> get timerPickerHourLabels;
+
   /// Label that appears next to the minute picker in
   /// [CupertinoTimerPicker] when selected minute value is `minute`.
   /// This function will deal with pluralization based on the `minute` parameter.
   // The global version uses the translated string from the arb file.
   String timerPickerMinuteLabel(int minute);
 
+  /// All possible minute labels that appears next to the minute picker in
+  /// [CupertinoTimerPicker]
+  List<String> get timerPickerMinuteLabels;
+
   /// Label that appears next to the minute picker in
   /// [CupertinoTimerPicker] when selected minute value is `second`.
   /// This function will deal with pluralization based on the `second` parameter.
   // The global version uses the translated string from the arb file.
   String timerPickerSecondLabel(int second);
+
+  /// All possible second labels that appears next to the second picker in
+  /// [CupertinoTimerPicker]
+  List<String> get timerPickerSecondLabels;
 
   /// The term used for cutting.
   // The global version uses the translated string from the arb file.
@@ -220,6 +232,10 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get selectAllButtonLabel;
 
+  /// The default placeholder used in [CupertinoSearchTextField].
+  // The global version uses the translated string from the arb file.
+  String get searchTextFieldPlaceholerLabel;
+
   /// Label read out by accessibility tools (VoiceOver) for a modal
   /// barrier to indicate that a tap dismisses the barrier.
   ///
@@ -230,8 +246,11 @@ abstract class CupertinoLocalizations {
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
+  /// If no [CupertinoLocalizations] are available in the given `context`, this
+  /// method throws an exception.
+  ///
   /// This method is just a convenient shorthand for:
-  /// `Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)`.
+  /// `Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)!`.
   ///
   /// References to the localized resources defined by this class are typically
   /// written in terms of this method. For example:
@@ -239,8 +258,9 @@ abstract class CupertinoLocalizations {
   /// ```dart
   /// CupertinoLocalizations.of(context).anteMeridiemAbbreviation;
   /// ```
-  static CupertinoLocalizations? of(BuildContext context) {
-    return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations);
+  static CupertinoLocalizations of(BuildContext context) {
+    assert(debugCheckHasCupertinoLocalizations(context));
+    return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)!;
   }
 }
 
@@ -381,10 +401,19 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String timerPickerHourLabel(int hour) => hour == 1 ? 'hour' : 'hours';
 
   @override
+  List<String> get timerPickerHourLabels => const <String>['hour', 'hours'];
+
+  @override
   String timerPickerMinuteLabel(int minute) => 'min.';
 
   @override
+  List<String> get timerPickerMinuteLabels => const <String>['min.'];
+
+  @override
   String timerPickerSecondLabel(int second) => 'sec.';
+
+  @override
+  List<String> get timerPickerSecondLabels => const <String>['sec.'];
 
   @override
   String get cutButtonLabel => 'Cut';
@@ -397,6 +426,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Select All';
+
+  @override
+  String get searchTextFieldPlaceholerLabel => 'Search';
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';

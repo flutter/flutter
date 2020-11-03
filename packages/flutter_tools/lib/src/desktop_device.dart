@@ -47,8 +47,10 @@ abstract class DesktopDevice extends Device {
   final Set<Process> _runningProcesses = <Process>{};
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
-  DevFSWriter get devFSWriter => _desktopDevFSWriter ??= LocalDevFSWriter(fileSystem: _fileSystem);
-  LocalDevFSWriter _desktopDevFSWriter;
+  @override
+  DevFSWriter createDevFSWriter(covariant ApplicationPackage app, String userIdentifier) {
+    return LocalDevFSWriter(fileSystem: _fileSystem);
+  }
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.

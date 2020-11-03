@@ -516,8 +516,7 @@ class _HitTestableFinder extends ChainedFinder {
   @override
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
     for (final Element candidate in parentCandidates) {
-      final RenderBox box = candidate.renderObject as RenderBox;
-      assert(box != null);
+      final RenderBox box = candidate.renderObject! as RenderBox;
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = HitTestResult();
       WidgetsBinding.instance!.hitTest(hitResult, absoluteOffset);

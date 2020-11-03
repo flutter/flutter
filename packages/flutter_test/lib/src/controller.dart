@@ -205,7 +205,7 @@ abstract class WidgetController {
   /// * Use [renderObjectList] if you expect to match several render objects and want all of them.
   T renderObject<T extends RenderObject>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().single.renderObject as T;
+    return finder.evaluate().single.renderObject! as T;
   }
 
   /// The render object of the first matching widget according to a
@@ -216,7 +216,7 @@ abstract class WidgetController {
   /// * Use [renderObject] if you only expect to match one render object.
   T firstRenderObject<T extends RenderObject>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().first.renderObject as T;
+    return finder.evaluate().first.renderObject! as T;
   }
 
   /// The render objects of the matching widgets in the widget tree.
@@ -226,7 +226,7 @@ abstract class WidgetController {
   Iterable<T> renderObjectList<T extends RenderObject>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
-      final T result = element.renderObject as T;
+      final T result = element.renderObject! as T;
       return result;
     });
   }
@@ -302,7 +302,7 @@ abstract class WidgetController {
   /// If the middle of the widget is not exposed, this might send
   /// events to another object.
   ///
-  /// {@template flutter.flutter_test.fling}
+  /// {@template flutter.flutter_test.WidgetController.fling}
   /// This can pump frames.
   ///
   /// Exactly 50 pointer events are synthesized.
@@ -358,7 +358,7 @@ abstract class WidgetController {
   /// Attempts a fling gesture starting from the given location, moving the
   /// given distance, reaching the given speed.
   ///
-  /// {@macro flutter.flutter_test.fling}
+  /// {@macro flutter.flutter_test.WidgetController.fling}
   ///
   /// A fling is essentially a drag that ends at a particular speed. If you
   /// just want to drag and end without a fling, use [dragFrom].
@@ -476,7 +476,7 @@ abstract class WidgetController {
   /// The operation happens at once. If you want the drag to last for a period
   /// of time, consider using [timedDrag].
   ///
-  /// {@template flutter.flutter_test.drag}
+  /// {@template flutter.flutter_test.WidgetController.drag}
   /// By default, if the x or y component of offset is greater than
   /// [kDragSlopDefault], the gesture is broken up into two separate moves
   /// calls. Changing `touchSlopX` or `touchSlopY` will change the minimum
@@ -521,7 +521,7 @@ abstract class WidgetController {
   /// The operation happens at once. If you want the drag to last for a period
   /// of time, consider using [timedDragFrom].
   ///
-  /// {@macro flutter.flutter_test.drag}
+  /// {@macro flutter.flutter_test.WidgetController.drag}
   Future<void> dragFrom(
     Offset startLocation,
     Offset offset, {
@@ -613,7 +613,7 @@ abstract class WidgetController {
   /// [fling] or ballistic animation, depending on the speed from
   /// `offset/duration`.
   ///
-  /// {@template flutter.flutter_test.timeddrag}
+  /// {@template flutter.flutter_test.WidgetController.timedDrag}
   /// The move events are sent at a given `frequency` in Hz (or events per
   /// second). It defaults to 60Hz.
   ///
@@ -647,7 +647,7 @@ abstract class WidgetController {
   /// [flingFrom] or ballistic animation, depending on the speed from
   /// `offset/duration`.
   ///
-  /// {@macro flutter.flutter_test.timeddrag}
+  /// {@macro flutter.flutter_test.WidgetController.timedDrag}
   Future<void> timedDragFrom(
     Offset startLocation,
     Offset offset,
@@ -812,8 +812,7 @@ abstract class WidgetController {
   Offset _getElementPoint(Finder finder, Offset sizeToPoint(Size size)) {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
-    final RenderBox box = element.renderObject as RenderBox;
-    assert(box != null);
+    final RenderBox box = element.renderObject! as RenderBox;
     return box.localToGlobal(sizeToPoint(box.size));
   }
 
@@ -822,8 +821,7 @@ abstract class WidgetController {
   Size getSize(Finder finder) {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
-    final RenderBox box = element.renderObject as RenderBox;
-    assert(box != null);
+    final RenderBox box = element.renderObject! as RenderBox;
     return box.size;
   }
 
@@ -843,15 +841,18 @@ abstract class WidgetController {
   /// key press. To simulate individual down and/or up events, see
   /// [sendKeyDownEvent] and [sendKeyUpEvent].
   ///
+  /// Returns true if the key down event was handled by the framework.
+  ///
   /// See also:
   ///
   ///  - [sendKeyDownEvent] to simulate only a key down event.
   ///  - [sendKeyUpEvent] to simulate only a key up event.
-  Future<void> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+  Future<bool> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
     assert(platform != null);
-    await simulateKeyDownEvent(key, platform: platform);
+    final bool handled = await simulateKeyDownEvent(key, platform: platform);
     // Internally wrapped in async guard.
-    return simulateKeyUpEvent(key, platform: platform);
+    await simulateKeyUpEvent(key, platform: platform);
+    return handled;
   }
 
   /// Simulates sending a physical key down event through the system channel.
@@ -866,11 +867,13 @@ abstract class WidgetController {
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
+  /// Returns true if the key event was handled by the framework.
+  ///
   /// See also:
   ///
   ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<void> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyDownEvent(key, platform: platform);
@@ -885,11 +888,13 @@ abstract class WidgetController {
   /// [Platform.operatingSystem] to make the event appear to be from that type
   /// of system. Defaults to "android". May not be null.
   ///
+  /// Returns true if the key event was handled by the framework.
+  ///
   /// See also:
   ///
   ///  - [sendKeyDownEvent] to simulate the corresponding key down event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<void> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+  Future<bool> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform);

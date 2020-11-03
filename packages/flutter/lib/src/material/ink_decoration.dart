@@ -187,7 +187,7 @@ class Ink extends StatefulWidget {
 
   /// The [child] contained by the container.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// Empty space to inscribe inside the [decoration]. The [child], if any, is
@@ -255,7 +255,7 @@ class _InkState extends State<Ink> {
         decoration: widget.decoration,
         configuration: createLocalImageConfiguration(context),
         controller: Material.of(context)!,
-        referenceBox: context.findRenderObject() as RenderBox,
+        referenceBox: context.findRenderObject()! as RenderBox,
         onRemoved: _handleRemoved,
       );
     } else {

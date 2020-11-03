@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
@@ -307,6 +306,13 @@ class Scrollable extends StatefulWidget {
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
+    // The `targetRenderObject` is used to record the first target renderObject.
+    // If there are multiple scrollable widgets nested, we should let
+    // the `targetRenderObject` as visible as possible to improve the user experience.
+    // Otherwise, let the outer renderObject as visible as possible maybe cause
+    // the `targetRenderObject` invisible.
+    // Also see https://github.com/flutter/flutter/issues/65100
+    RenderObject? targetRenderObject;
     ScrollableState? scrollable = Scrollable.of(context);
     while (scrollable != null) {
       futures.add(scrollable.position.ensureVisible(
@@ -315,7 +321,10 @@ class Scrollable extends StatefulWidget {
         duration: duration,
         curve: curve,
         alignmentPolicy: alignmentPolicy,
+        targetRenderObject: targetRenderObject,
       ));
+
+      targetRenderObject = targetRenderObject ?? context.findRenderObject();
       context = scrollable.context;
       scrollable = Scrollable.of(context);
     }
@@ -614,9 +623,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   // SCROLL WHEEL
 
-  // Returns the offset that should result from applying [event] to the current
-  // position, taking min/max scroll extent into account.
-  double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
+  // Returns the delta that should result from applying [event] with axis and
+  // direction taken into account.
+  double _targetScrollDeltaForPointerScroll(PointerScrollEvent event) {
     double delta = widget.axis == Axis.horizontal
         ? event.scrollDelta.dx
         : event.scrollDelta.dy;
@@ -625,15 +634,14 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       delta *= -1;
     }
 
-    return math.min(math.max(position.pixels + delta, position.minScrollExtent),
-        position.maxScrollExtent);
+    return delta;
   }
 
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent && _position != null) {
-      final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
+      final double targetScrollOffset = _targetScrollDeltaForPointerScroll(event);
       // Only express interest in the event if it would actually result in a scroll.
-      if (targetScrollOffset != position.pixels) {
+      if (targetScrollOffset != 0) {
         GestureBinding.instance!.pointerSignalResolver.register(event, _handlePointerScroll);
       }
     }
@@ -644,9 +652,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
       return;
     }
-    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
-    if (targetScrollOffset != position.pixels) {
-      position.jumpTo(targetScrollOffset);
+    final double targetScrollOffset = _targetScrollDeltaForPointerScroll(event as PointerScrollEvent);
+    if (targetScrollOffset != 0) {
+      position.pointerScroll(targetScrollOffset);
     }
   }
 
@@ -870,7 +878,7 @@ typedef ScrollIncrementCalculator = double Function(ScrollIncrementDetails detai
 /// This is used to configure a [ScrollIncrementDetails] object to pass to a
 /// [ScrollIncrementCalculator] function on a [Scrollable].
 ///
-/// {@template flutter.widgets.scrollable.scroll_increment_type.intent}
+/// {@template flutter.widgets.ScrollIncrementType.intent}
 /// This indicates the *intent* of the scroll, not necessarily the size. Not all
 /// scrollable areas will have the concept of a "line" or "page", but they can
 /// respond to the different standard key bindings that cause scrolling, which
@@ -914,7 +922,7 @@ class ScrollIncrementDetails {
 
   /// The type of scroll this is (e.g. line, page, etc.).
   ///
-  /// {@macro flutter.widgets.scrollable.scroll_increment_type.intent}
+  /// {@macro flutter.widgets.ScrollIncrementType.intent}
   final ScrollIncrementType type;
 
   /// The current metrics of the scrollable that is being scrolled.
@@ -1074,8 +1082,8 @@ class _RestorableScrollOffset extends RestorableValue<double?> {
   }
 
   @override
-  double fromPrimitives(Object data) {
-    return data as double;
+  double fromPrimitives(Object? data) {
+    return data! as double;
   }
 
   @override

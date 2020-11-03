@@ -317,7 +317,7 @@ typedef TweenConstructor<T extends Object> = Tween<T> Function(T targetValue);
 
 /// Signature for callbacks passed to [ImplicitlyAnimatedWidgetState.forEachTween].
 ///
-/// {@template flutter.widgets.implicit_animations.tweenVisitorArguments}
+/// {@template flutter.widgets.TweenVisitor.arguments}
 /// The `tween` argument should contain the current tween value. This will
 /// initially be null when the state is first initialized.
 ///
@@ -448,7 +448,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// result back into the member variable. The arguments to `visitor` are as
   /// follows:
   ///
-  /// {@macro flutter.widgets.implicit_animations.tweenVisitorArguments}
+  /// {@macro flutter.widgets.TweenVisitor.arguments}
   ///
   /// ### When this method will be called
   ///
@@ -635,7 +635,9 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     BoxConstraints? constraints,
     this.margin,
     this.transform,
+    this.transformAlignment,
     this.child,
+    this.clipBehavior = Clip.none,
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
@@ -662,7 +664,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// the parent provides unbounded constraints, in which case the container
   /// will attempt to be as small as possible.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// Align the [child] within the container.
@@ -709,6 +711,28 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// The transformation matrix to apply before painting the container.
   final Matrix4? transform;
 
+  /// The alignment of the origin, relative to the size of the container, if [transform] is specified.
+  ///
+  /// When [transform] is null, the value of this property is ignored.
+  ///
+  /// See also:
+  ///
+  ///  * [Transform.alignment], which is set by this property.
+  final AlignmentGeometry? transformAlignment;
+
+  /// The clip behavior when [AnimatedContainer.decoration] is not null.
+  ///
+  /// Defaults to [Clip.none]. Must be [Clip.none] if [decoration] is null.
+  ///
+  /// Unlike other properties of [AnimatedContainer], changes to this property
+  /// apply immediately and have no animation.
+  ///
+  /// If a clip is to be applied, the [Decoration.getClipPath] method
+  /// for the provided decoration must return a clip path. (This is not
+  /// supported by all decorations; the default implementation of that
+  /// method throws an [UnsupportedError].)
+  final Clip clipBehavior;
+
   @override
   _AnimatedContainerState createState() => _AnimatedContainerState();
 
@@ -722,6 +746,8 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null, showName: false));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(ObjectFlagProperty<Matrix4>.has('transform', transform));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('transformAlignment', transformAlignment, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 
@@ -733,6 +759,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   BoxConstraintsTween? _constraints;
   EdgeInsetsGeometryTween? _margin;
   Matrix4Tween? _transform;
+  AlignmentGeometryTween? _transformAlignment;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
@@ -743,19 +770,23 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
     _constraints = visitor(_constraints, widget.constraints, (dynamic value) => BoxConstraintsTween(begin: value as BoxConstraints)) as BoxConstraintsTween?;
     _margin = visitor(_margin, widget.margin, (dynamic value) => EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry)) as EdgeInsetsGeometryTween?;
     _transform = visitor(_transform, widget.transform, (dynamic value) => Matrix4Tween(begin: value as Matrix4)) as Matrix4Tween?;
+    _transformAlignment = visitor(_transformAlignment, widget.transformAlignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween?;
   }
 
   @override
   Widget build(BuildContext context) {
+    final Animation<double> animation = this.animation!;
     return Container(
       child: widget.child,
-      alignment: _alignment?.evaluate(animation!),
-      padding: _padding?.evaluate(animation!),
-      decoration: _decoration?.evaluate(animation!),
-      foregroundDecoration: _foregroundDecoration?.evaluate(animation!),
-      constraints: _constraints?.evaluate(animation!),
-      margin: _margin?.evaluate(animation!),
-      transform: _transform?.evaluate(animation!),
+      alignment: _alignment?.evaluate(animation),
+      padding: _padding?.evaluate(animation),
+      decoration: _decoration?.evaluate(animation),
+      foregroundDecoration: _foregroundDecoration?.evaluate(animation),
+      constraints: _constraints?.evaluate(animation),
+      margin: _margin?.evaluate(animation),
+      transform: _transform?.evaluate(animation),
+      transformAlignment: _transformAlignment?.evaluate(animation),
+      clipBehavior: widget.clipBehavior,
     );
   }
 
@@ -769,6 +800,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
     description.add(DiagnosticsProperty<BoxConstraintsTween>('constraints', _constraints, showName: false, defaultValue: null));
     description.add(DiagnosticsProperty<EdgeInsetsGeometryTween>('margin', _margin, defaultValue: null));
     description.add(ObjectFlagProperty<Matrix4Tween>.has('transform', _transform));
+    description.add(DiagnosticsProperty<AlignmentGeometryTween>('transformAlignment', _transformAlignment, defaultValue: null));
   }
 }
 
@@ -808,7 +840,7 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   @override
@@ -942,7 +974,7 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// If non-null, sets its height to the child's height multiplied by this factor.
@@ -1026,6 +1058,44 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// The following example transitions an AnimatedPositioned
+/// between two states. It adjusts the `height`, `width`, and
+/// [Positioned] properties when tapped.
+///
+/// ```dart
+/// bool selected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Stack(
+///     children: [
+///       AnimatedPositioned(
+///         width: selected ? 200.0 : 50.0,
+///         height: selected ? 50.0 : 200.0,
+///         top: selected ? 50.0 : 150.0,
+///         right: 150.0,
+///         duration: Duration(seconds: 2),
+///         curve: Curves.fastOutSlowIn,
+///         child: GestureDetector(
+///           onTap: () {
+///             setState(() {
+///               selected = !selected;
+///             });
+///           },
+///           child: Container(
+///             color: Colors.blue,
+///             child: Text('Tap me to start the animated transition'),
+///           ),
+///         ),
+///       ),
+///     ],
+///   );
+/// }
+///```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AnimatedPositionedDirectional], which adapts to the ambient
@@ -1076,7 +1146,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The offset of the child's left edge from the left of the stack.
@@ -1211,7 +1281,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The offset of the child's start edge from the start of the stack.
@@ -1275,7 +1345,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     return Positioned.directional(
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       child: widget.child,
       start: _start?.evaluate(animation!),
       top: _top?.evaluate(animation!),
@@ -1372,7 +1442,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The target opacity.
@@ -1608,7 +1678,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The target text style.
@@ -1740,7 +1810,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The type of shape.
@@ -1748,7 +1818,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// This property is not animated.
   final BoxShape shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;

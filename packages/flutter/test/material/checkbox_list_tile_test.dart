@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 import '../rendering/mock_canvas.dart';
 
-Widget wrap({ Widget child }) {
+Widget wrap({ required Widget child }) {
   return MediaQuery(
     data: const MediaQueryData(),
     child: Directionality(
@@ -25,7 +23,7 @@ void main() {
     await tester.pumpWidget(wrap(
       child: CheckboxListTile(
         value: true,
-        onChanged: (bool value) { log.add(value); },
+        onChanged: (bool? value) { log.add(value); },
         title: const Text('Hello'),
       ),
     ));
@@ -36,12 +34,12 @@ void main() {
   });
 
   testWidgets('CheckboxListTile checkColor test', (WidgetTester tester) async {
-    Widget buildFrame(Color color) {
+    Widget buildFrame(Color? color) {
       return wrap(
         child: CheckboxListTile(
           value: true,
           checkColor: color,
-          onChanged: (bool value) {},
+          onChanged: (bool? value) {},
         ),
       );
     }
@@ -52,22 +50,22 @@ void main() {
 
     await tester.pumpWidget(buildFrame(null));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFFFFFFFF))); // paints's color is 0xFFFFFFFF (default color)
+    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFFFFFFFF)));
 
     await tester.pumpWidget(buildFrame(const Color(0xFF000000)));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFF000000))); // paints's color is 0xFF000000 (params)
+    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFF000000)));
   });
 
   testWidgets('CheckboxListTile activeColor test', (WidgetTester tester) async {
-    Widget buildFrame(Color themeColor, Color activeColor) {
+    Widget buildFrame(Color? themeColor, Color? activeColor) {
       return wrap(
         child: Theme(
           data: ThemeData(toggleableActiveColor: themeColor),
           child: CheckboxListTile(
             value: true,
             activeColor: activeColor,
-            onChanged: (bool value) {},
+            onChanged: (bool? value) {},
           ),
         ),
       );
@@ -78,11 +76,11 @@ void main() {
 
     await tester.pumpWidget(buildFrame(const Color(0xFF000000), null));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..rrect(color: const Color(0xFF000000))); // paints's color is 0xFF000000 (theme)
+    expect(getCheckboxListTileRenderer(), paints..rrect(color: const Color(0xFF000000)));
 
     await tester.pumpWidget(buildFrame(const Color(0xFF000000), const Color(0xFFFFFFFF)));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..rrect(color: const Color(0xFFFFFFFF))); // paints's color is 0xFFFFFFFF (params)
+    expect(getCheckboxListTileRenderer(), paints..rrect(color: const Color(0xFFFFFFFF)));
   });
 
   testWidgets('CheckboxListTile can autofocus unless disabled.', (WidgetTester tester) async {
@@ -100,7 +98,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isTrue);
+    expect(Focus.maybeOf(childKey.currentContext!)!.hasPrimaryFocus, isTrue);
 
     await tester.pumpWidget(
       wrap(
@@ -114,7 +112,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
+    expect(Focus.maybeOf(childKey.currentContext!)!.hasPrimaryFocus, isFalse);
   });
 
   testWidgets('CheckboxListTile contentPadding test', (WidgetTester tester) async {
@@ -148,7 +146,7 @@ void main() {
   });
 
   testWidgets('CheckboxListTile tristate test', (WidgetTester tester) async {
-    bool _value = false;
+    bool? _value = false;
     bool _tristate = false;
 
     await tester.pumpWidget(
@@ -160,7 +158,7 @@ void main() {
                 title: const Text('Title'),
                 tristate: _tristate,
                 value: _value,
-                onChanged: (bool value) {
+                onChanged: (bool? value) {
                   setState(() {
                     _value = value;
                   });
@@ -223,5 +221,63 @@ void main() {
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
     expect(_value, false);
+  });
+
+  testWidgets('CheckboxListTile respects shape', (WidgetTester tester) async {
+    const ShapeBorder shapeBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.horizontal(right: Radius.circular(100))
+    );
+
+    await tester.pumpWidget(wrap(
+      child: const CheckboxListTile(
+        value: false,
+        onChanged: null,
+        title: Text('Title'),
+        shape: shapeBorder,
+      ),
+    ));
+
+    expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
+  });
+
+  testWidgets('CheckboxListTile respects tileColor', (WidgetTester tester) async {
+    const Color tileColor = Colors.black;
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: CheckboxListTile(
+            value: false,
+            onChanged: null,
+            title: Text('Title'),
+            tileColor: tileColor,
+          ),
+        ),
+      ),
+    );
+
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, equals(tileColor));
+  });
+
+  testWidgets('CheckboxListTile respects selectedTileColor', (WidgetTester tester) async {
+    const Color selectedTileColor = Colors.black;
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: CheckboxListTile(
+            value: false,
+            onChanged: null,
+            title: Text('Title'),
+            selected: true,
+            selectedTileColor: selectedTileColor,
+          ),
+        ),
+      ),
+    );
+
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, equals(selectedTileColor));
   });
 }

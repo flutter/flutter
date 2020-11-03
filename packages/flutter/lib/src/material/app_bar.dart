@@ -171,11 +171,6 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///    can expand and collapse.
 ///  * <https://material.io/design/components/app-bars-top.html>
 ///  * Cookbook: [Place a floating app bar above a list](https://flutter.dev/docs/cookbook/lists/floating-app-bar)
-///  * See our
-///    [AppBar Basics sample](https://flutter.dev/docs/catalog/samples/basic-app-bar)
-///    and our advanced samples with app bars with
-///    [tabs](https://flutter.dev/docs/catalog/samples/tabbed-app-bar) or
-///    [custom bottom widgets](https://flutter.dev/docs/catalog/samples/app-bar-bottom).
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///
@@ -208,7 +203,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.primary = true,
     this.centerTitle,
     this.excludeHeaderSemantics = false,
-    this.titleSpacing = NavigationToolbar.kMiddleSpacing,
+    this.titleSpacing,
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
     this.toolbarHeight,
@@ -216,7 +211,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation == null || elevation >= 0.0),
        assert(primary != null),
-       assert(titleSpacing != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
        preferredSize = Size.fromHeight(toolbarHeight ?? kToolbarHeight + (bottom?.preferredSize.height ?? 0.0)),
@@ -319,7 +313,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// than the [toolbarHeight].
   final List<Widget>? actions;
 
-  /// This widget is stacked behind the toolbar and the tab bar. It's height will
+  /// This widget is stacked behind the toolbar and the tab bar. Its height will
   /// be the same as the app bar's overall height.
   ///
   /// A flexible space isn't actually flexible unless the [AppBar]'s container
@@ -429,7 +423,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [title] to take all the space available, set this value to 0.0.
   ///
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
-  final double titleSpacing;
+  final double? titleSpacing;
 
   /// How opaque the toolbar part of the app bar is.
   ///
@@ -493,20 +487,20 @@ class _AppBarState extends State<AppBar> {
   static const Color _defaultShadowColor = Color(0xFF000000);
 
   void _handleDrawerButton() {
-    Scaffold.of(context)!.openDrawer();
+    Scaffold.of(context).openDrawer();
   }
 
   void _handleDrawerButtonEnd() {
-    Scaffold.of(context)!.openEndDrawer();
+    Scaffold.of(context).openEndDrawer();
   }
 
   @override
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
-    final ScaffoldState? scaffold = Scaffold.of(context, nullOk: true);
+    final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
@@ -518,16 +512,16 @@ class _AppBarState extends State<AppBar> {
 
     IconThemeData overallIconTheme = widget.iconTheme
       ?? appBarTheme.iconTheme
-      ?? theme!.primaryIconTheme;
+      ?? theme.primaryIconTheme;
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
       ?? overallIconTheme;
     TextStyle? centerStyle = widget.textTheme?.headline6
       ?? appBarTheme.textTheme?.headline6
-      ?? theme!.primaryTextTheme.headline6;
+      ?? theme.primaryTextTheme.headline6;
     TextStyle? sideStyle = widget.textTheme?.bodyText2
       ?? appBarTheme.textTheme?.bodyText2
-      ?? theme!.primaryTextTheme.bodyText2;
+      ?? theme.primaryTextTheme.bodyText2;
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
@@ -549,7 +543,7 @@ class _AppBarState extends State<AppBar> {
         leading = IconButton(
           icon: const Icon(Icons.menu),
           onPressed: _handleDrawerButton,
-          tooltip: MaterialLocalizations.of(context)!.openAppDrawerTooltip,
+          tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
       } else {
         if (!hasEndDrawer && canPop)
@@ -566,7 +560,7 @@ class _AppBarState extends State<AppBar> {
     Widget? title = widget.title;
     if (title != null) {
       bool? namesRoute;
-      switch (theme!.platform) {
+      switch (theme.platform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -599,7 +593,7 @@ class _AppBarState extends State<AppBar> {
       // sizes. To opt out, wrap the [title] widget in a [MediaQuery] widget
       // with [MediaQueryData.textScaleFactor] set to
       // `MediaQuery.textScaleFactorOf(context)`.
-      final MediaQueryData mediaQueryData = MediaQuery.of(context)!;
+      final MediaQueryData mediaQueryData = MediaQuery.of(context);
       title = MediaQuery(
         data: mediaQueryData.copyWith(
           textScaleFactor: math.min(
@@ -622,7 +616,7 @@ class _AppBarState extends State<AppBar> {
       actions = IconButton(
         icon: const Icon(Icons.menu),
         onPressed: _handleDrawerButtonEnd,
-        tooltip: MaterialLocalizations.of(context)!.openAppDrawerTooltip,
+        tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
       );
     }
 
@@ -638,8 +632,8 @@ class _AppBarState extends State<AppBar> {
       leading: leading,
       middle: title,
       trailing: actions,
-      centerMiddle: widget._getEffectiveCenterTitle(theme!),
-      middleSpacing: widget.titleSpacing,
+      centerMiddle: widget._getEffectiveCenterTitle(theme),
+      middleSpacing: widget.titleSpacing ?? appBarTheme.titleSpacing ?? NavigationToolbar.kMiddleSpacing,
     );
 
     // If the toolbar is allocated less than toolbarHeight make it
@@ -853,7 +847,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool primary;
   final bool? centerTitle;
   final bool excludeHeaderSemantics;
-  final double titleSpacing;
+  final double? titleSpacing;
   final double? expandedHeight;
   final double collapsedHeight;
   final double topPadding;
@@ -1069,7 +1063,7 @@ class SliverAppBar extends StatefulWidget {
     this.primary = true,
     this.centerTitle,
     this.excludeHeaderSemantics = false,
-    this.titleSpacing = NavigationToolbar.kMiddleSpacing,
+    this.titleSpacing,
     this.collapsedHeight,
     this.expandedHeight,
     this.floating = false,
@@ -1084,7 +1078,6 @@ class SliverAppBar extends StatefulWidget {
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
-       assert(titleSpacing != null),
        assert(floating != null),
        assert(pinned != null),
        assert(snap != null),
@@ -1264,7 +1257,7 @@ class SliverAppBar extends StatefulWidget {
   /// [title] to take all the space available, set this value to 0.0.
   ///
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
-  final double titleSpacing;
+  final double? titleSpacing;
 
   /// Defines the height of the app bar when it is collapsed.
   ///
@@ -1454,7 +1447,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
-    final double topPadding = widget.primary ? MediaQuery.of(context)!.padding.top : 0.0;
+    final double topPadding = widget.primary ? MediaQuery.of(context).padding.top : 0.0;
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
       ? (widget.collapsedHeight ?? 0.0) + bottomHeight + topPadding
       : (widget.collapsedHeight ?? widget.toolbarHeight) + bottomHeight + topPadding;

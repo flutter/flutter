@@ -26,7 +26,7 @@ typedef ShardRunner = Future<void> Function();
 ///
 /// If the output does not match expectations, the function shall return an
 /// appropriate error message.
-typedef OutputChecker = String Function(CapturedOutput);
+typedef OutputChecker = String Function(CommandResult);
 
 final String exe = Platform.isWindows ? '.exe' : '';
 final String bat = Platform.isWindows ? '.bat' : '';
@@ -75,6 +75,11 @@ int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
   ? int.parse(Platform.environment['WEB_SHARD_COUNT'])
   : 8;
 
+/// The number of shards the long-running Web tests are split into.
+///
+/// WARNING: this number must match the shard count in LUCI configs.
+const int kWebLongRunningTestShardCount = 3;
+
 /// Tests that we don't run on Web for various reasons.
 //
 // TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
@@ -122,11 +127,33 @@ Future<void> main(List<String> args) async {
       'tool_tests': _runToolTests,
       'web_tests': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
+      'web_long_running_tests': _runWebLongRunningTests,
     });
   } on ExitException catch (error) {
     error.apply();
   }
   print('$clock ${bold}Test successful.$reset');
+}
+
+/// Returns whether or not Linux desktop tests should be run.
+///
+/// The branch restrictions here should stay in sync with features.dart.
+bool _shouldRunLinux() {
+  return Platform.isLinux && (branchName != 'beta' && branchName != 'stable');
+}
+
+/// Returns whether or not macOS desktop tests should be run.
+///
+/// The branch restrictions here should stay in sync with features.dart.
+bool _shouldRunMacOS() {
+  return Platform.isMacOS && (branchName != 'beta' && branchName != 'stable');
+}
+
+/// Returns whether or not Windows desktop tests should be run.
+///
+/// The branch restrictions here should stay in sync with features.dart.
+bool _shouldRunWindows() {
+  return Platform.isWindows && (branchName != 'beta' && branchName != 'stable');
 }
 
 /// Verify the Flutter Engine is the revision in
@@ -143,9 +170,8 @@ Future<void> _validateEngineHash() async {
     return;
   }
   final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
-  final CapturedOutput flutterTesterOutput = CapturedOutput();
-  await runCommand(flutterTester, <String>['--help'], output: flutterTesterOutput, outputMode: OutputMode.capture);
-  final String actualVersion = flutterTesterOutput.stderr.split('\n').firstWhere((final String line) {
+  final CommandResult result = await runCommand(flutterTester, <String>['--help'], outputMode: OutputMode.capture);
+  final String actualVersion = result.flattenedStderr.split('\n').firstWhere((final String line) {
     return line.startsWith('Flutter Engine Version:');
   });
   if (!actualVersion.contains(expectedVersion)) {
@@ -190,8 +216,8 @@ Future<void> _runSmokeTests() async {
     script: path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
     expectFailure: true,
     printOutput: false,
-    outputChecker: (CapturedOutput output) {
-      return output.stdout.contains('failingPendingTimerTest')
+    outputChecker: (CommandResult result) {
+      return result.flattenedStdout.contains('failingPendingTimerTest')
         ? null
         : 'Failed to find the stack trace for the pending Timer.';
     }
@@ -225,12 +251,6 @@ Future<void> _runSmokeTests() async {
         script: path.join('test_smoke_test', 'disallow_error_reporter_modification_test.dart'),
         expectFailure: true,
         printOutput: false,
-      ),
-      runCommand(flutter,
-        <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
-        workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-        expectNonZeroExit: true,
-        outputMode: OutputMode.discard,
       ),
     ],
   );
@@ -287,7 +307,7 @@ Future<void> _runToolCoverage() async {
       '--report-on=lib/'
     ],
     workingDirectory: toolRoot,
-    outputMode: OutputMode.discard,
+    outputMode: OutputMode.capture,
   );
 }
 
@@ -309,22 +329,12 @@ Future<void> _runToolTests() async {
       final String suffix = Platform.isWindows && subshard == 'commands'
         ? 'permeable'
         : '';
-      // Try out tester on unit test shard
-      if (subshard == 'general') {
-        await _pubRunTester(
-          toolsPath,
-          testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
-          // Detect unit test time regressions (poor time delay handling, etc).
-          perTestTimeout: (subshard == 'general') ? 15 : null,
-        );
-      } else {
-        await _pubRunTest(
-          toolsPath,
-          forceSingleCore: true,
-          testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
-          enableFlutterToolAsserts: true,
-        );
-      }
+      await _pubRunTest(
+        toolsPath,
+        forceSingleCore: subshard != 'general',
+        testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
+        enableFlutterToolAsserts: subshard != 'general',
+      );
     },
   );
 
@@ -341,13 +351,12 @@ Future<void> _runBuildTests() async {
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
 
-  final String branch = Platform.environment['CIRRUS_BRANCH'];
   // The tests are randomly distributed into subshards so as to get a uniform
   // distribution of costs, but the seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
     for (final FileSystemEntity exampleDirectory in exampleDirectories)
         () => _runExampleProjectBuildTests(exampleDirectory),
-    if (branch != 'beta' && branch != 'stable')
+    if (branchName != 'beta' && branchName != 'stable')
       ...<ShardRunner>[
         // Web compilation tests.
           () =>  _flutterBuildDart2js(
@@ -390,6 +399,30 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
     }
   }
+  if (_shouldRunLinux()) {
+    if (Directory(path.join(examplePath, 'linux')).existsSync()) {
+      await _flutterBuildLinux(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+      await _flutterBuildLinux(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+    } else {
+      print('Example project ${path.basename(examplePath)} has no linux directory, skipping Linux');
+    }
+  }
+  if (_shouldRunMacOS()) {
+    if (Directory(path.join(examplePath, 'macos')).existsSync()) {
+      await _flutterBuildMacOS(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+      await _flutterBuildMacOS(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+    } else {
+      print('Example project ${path.basename(examplePath)} has no macos directory, skipping macOS');
+    }
+  }
+  if (_shouldRunWindows()) {
+    if (Directory(path.join(examplePath, 'windows')).existsSync()) {
+      await _flutterBuildWin32(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+      await _flutterBuildWin32(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+    } else {
+      print('Example project ${path.basename(examplePath)} has no windows directory, skipping Win32');
+    }
+  }
 }
 
 Future<void> _flutterBuildApk(String relativePathToApplication, {
@@ -398,43 +431,11 @@ Future<void> _flutterBuildApk(String relativePathToApplication, {
   List<String> additionalArgs = const <String>[],
 }) async {
   print('${green}Testing APK build$reset for $cyan$relativePathToApplication$reset...');
-  await runCommand(flutter,
-    <String>[
-      'build',
-      'apk',
-      ...additionalArgs,
-      if (release)
-        '--release'
-      else
-        '--debug',
-      '-v',
-    ],
-    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+  await _flutterBuild(relativePathToApplication, 'APK', 'apk',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
   );
-
-  if (verifyCaching) {
-    print('${green}Testing APK cache$reset for $cyan$relativePathToApplication$reset...');
-    await runCommand(flutter,
-      <String>[
-        'build',
-        'apk',
-        '--performance-measurement-file=perf.json',
-        ...additionalArgs,
-        if (release)
-          '--release'
-        else
-          '--debug',
-        '-v',
-      ],
-      workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    );
-    final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
-    if (!_allTargetsCached(file)) {
-      print('${red}Not all build targets cached after second run.$reset');
-      print('The target performance data was: ${file.readAsStringSync()}');
-      exit(1);
-    }
-  }
 }
 
 Future<void> _flutterBuildIpa(String relativePathToApplication, {
@@ -456,12 +457,71 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
       },
     );
   }
+  await _flutterBuild(relativePathToApplication, 'IPA', 'ios',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: <String>[...additionalArgs, '--no-codesign'],
+  );
+}
+
+Future<void> _flutterBuildLinux(String relativePathToApplication, {
+  @required bool release,
+  bool verifyCaching = false,
+  List<String> additionalArgs = const <String>[],
+}) async {
+  assert(Platform.isLinux);
+  await runCommand(flutter, <String>['config', '--enable-linux-desktop']);
+  print('${green}Testing Linux build$reset for $cyan$relativePathToApplication$reset...');
+  await _flutterBuild(relativePathToApplication, 'Linux', 'linux',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
+  );
+}
+
+Future<void> _flutterBuildMacOS(String relativePathToApplication, {
+  @required bool release,
+  bool verifyCaching = false,
+  List<String> additionalArgs = const <String>[],
+}) async {
+  assert(Platform.isMacOS);
+  await runCommand(flutter, <String>['config', '--enable-macos-desktop']);
+  print('${green}Testing macOS build$reset for $cyan$relativePathToApplication$reset...');
+  await _flutterBuild(relativePathToApplication, 'macOS', 'macos',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
+  );
+}
+
+Future<void> _flutterBuildWin32(String relativePathToApplication, {
+  @required bool release,
+  bool verifyCaching = false,
+  List<String> additionalArgs = const <String>[],
+}) async {
+  assert(Platform.isWindows);
+  await runCommand(flutter, <String>['config', '--enable-windows-desktop']);
+  print('${green}Testing Windows build$reset for $cyan$relativePathToApplication$reset...');
+  await _flutterBuild(relativePathToApplication, 'Windows', 'windows',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
+  );
+}
+
+Future<void> _flutterBuild(
+  String relativePathToApplication,
+  String platformLabel,
+  String platformBuildName, {
+  @required bool release,
+  bool verifyCaching = false,
+  List<String> additionalArgs = const <String>[],
+}) async {
   await runCommand(flutter,
     <String>[
       'build',
-      'ios',
+      platformBuildName,
       ...additionalArgs,
-      '--no-codesign',
       if (release)
         '--release'
       else
@@ -470,15 +530,15 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
     ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
+
   if (verifyCaching) {
-    print('${green}Testing IPA cache$reset for $cyan$relativePathToApplication$reset...');
+    print('${green}Testing $platformLabel cache$reset for $cyan$relativePathToApplication$reset...');
     await runCommand(flutter,
       <String>[
         'build',
-        'ios',
+        platformBuildName,
         '--performance-measurement-file=perf.json',
         ...additionalArgs,
-        '--no-codesign',
         if (release)
           '--release'
         else
@@ -529,7 +589,8 @@ Future<void> _runAddToAppLifeCycleTests() async {
 
 Future<void> _runFrameworkTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
-  final List<String> nullSafetyOptions = <String>['--null-assertions', '--no-sound-null-safety'];
+  final List<String> soundNullSafetyOptions     = <String>['--enable-experiment=non-nullable', '--null-assertions', '--sound-null-safety'];
+  final List<String> mixedModeNullSafetyOptions = <String>['--enable-experiment=non-nullable', '--null-assertions', '--no-sound-null-safety'];
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
@@ -537,7 +598,7 @@ Future<void> _runFrameworkTests() async {
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
       await _runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
-        options: <String>[trackWidgetCreationOption, ...nullSafetyOptions],
+        options: <String>[trackWidgetCreationOption, ...soundNullSafetyOptions],
         tableData: bigqueryApi?.tabledata,
         tests: <String>[ path.join('test', 'widgets') + path.separator ],
       );
@@ -563,7 +624,7 @@ Future<void> _runFrameworkTests() async {
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
       await _runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
-        options: <String>[trackWidgetCreationOption, ...nullSafetyOptions],
+        options: <String>[trackWidgetCreationOption, ...soundNullSafetyOptions],
         tableData: bigqueryApi?.tabledata,
         tests: tests,
       );
@@ -613,16 +674,15 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata, options: nullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: nullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: mixedModeNullSafetyOptions);
     await _runFlutterTest(
       path.join(flutterRoot, 'dev', 'tracing_tests'),
       options: <String>['--enable-vmservice'],
@@ -643,11 +703,11 @@ Future<void> _runFrameworkTests() async {
       script: path.join('test', 'bindings_test_failure.dart'),
       expectFailure: true,
       printOutput: false,
-      outputChecker: (CapturedOutput output) {
-        final Iterable<Match> matches = httpClientWarning.allMatches(output.stdout);
+      outputChecker: (CommandResult result) {
+        final Iterable<Match> matches = httpClientWarning.allMatches(result.flattenedStdout);
         if (matches == null || matches.isEmpty || matches.length > 1) {
           return 'Failed to print warning about HttpClientUsage, or printed it too many times.\n'
-                 'stdout:\n${output.stdout}';
+                 'stdout:\n${result.flattenedStdout}';
         }
         return null;
       },
@@ -745,10 +805,121 @@ Future<void> _runWebUnitTests() async {
   await selectSubshard(subshards);
 }
 
+/// Coarse-grained integration tests running on the Web.
+///
+/// These tests are sharded into [kWebLongRunningTestShardCount] shards.
+Future<void> _runWebLongRunningTests() async {
+  final List<ShardRunner> tests = <ShardRunner>[
+    () => _runGalleryE2eWebTest('debug'),
+    () => _runGalleryE2eWebTest('debug', canvasKit: true),
+    () => _runGalleryE2eWebTest('profile'),
+    () => _runGalleryE2eWebTest('profile', canvasKit: true),
+    () => _runGalleryE2eWebTest('release'),
+    () => _runGalleryE2eWebTest('release', canvasKit: true),
+  ];
+  await _ensureChromeDriverIsRunning();
+  await _selectIndexedSubshard(tests, kWebLongRunningTestShardCount);
+  await _stopChromeDriver();
+}
+
+// The `chromedriver` process created by this test.
+//
+// If an existing chromedriver is already available on port 4444, the existing
+// process is reused and this variable remains null.
+Command _chromeDriver;
+
+Future<bool> _isChromeDriverRunning() async {
+  try {
+    final RawSocket socket = await RawSocket.connect('localhost', 4444);
+    socket.shutdown(SocketDirection.both);
+    await socket.close();
+    return true;
+  } on SocketException {
+    return false;
+  }
+}
+
+Future<void> _ensureChromeDriverIsRunning() async {
+  // If we cannot connect to ChromeDriver, assume it is not running. Launch it.
+  if (!await _isChromeDriverRunning()) {
+    print('Starting chromedriver');
+    // Assume chromedriver is in the PATH.
+    _chromeDriver = await startCommand(
+      'chromedriver',
+      <String>['--port=4444'],
+    );
+    while (!await _isChromeDriverRunning()) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      print('Waiting for chromedriver to start up.');
+    }
+  }
+
+  final HttpClient client = HttpClient();
+  final Uri chromeDriverUrl = Uri.parse('http://localhost:4444/status');
+  final HttpClientRequest request = await client.getUrl(chromeDriverUrl);
+  final HttpClientResponse response = await request.close();
+  final Map<String, dynamic> webDriverStatus = json.decode(await response.transform(utf8.decoder).join('')) as Map<String, dynamic>;
+  client.close();
+  final bool webDriverReady = webDriverStatus['value']['ready'] as bool;
+  if (!webDriverReady) {
+    throw Exception('WebDriver not available.');
+  }
+}
+
+Future<void> _stopChromeDriver() async {
+  if (_chromeDriver == null) {
+    return;
+  }
+  print('Stopping chromedriver');
+  _chromeDriver.process.kill();
+}
+
+/// Exercises the old gallery in a browser for a long period of time, looking
+/// for memory leaks and dangling pointers.
+///
+/// This is not a performance test.
+///
+/// If [canvasKit] is set to true, runs the test in CanvasKit mode.
+///
+/// The test is written using `package:integration_test` (despite the "e2e" in
+/// the name, which is there for historic reasons).
+Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false }) async {
+  print('${green}Running flutter_gallery integration test in --$buildMode using ${canvasKit ? 'CanvasKit' : 'HTML'} renderer.$reset');
+  final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery');
+  await runCommand(
+    flutter,
+    <String>[ 'clean' ],
+    workingDirectory: testAppDirectory,
+  );
+  await runCommand(
+    flutter,
+    <String>[
+      'drive',
+      if (canvasKit)
+        '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+      '--driver=test_driver/transitions_perf_e2e_test.dart',
+      '--target=test_driver/transitions_perf_e2e.dart',
+      '--browser-name=chrome',
+      '--no-sound-null-safety',
+      '-d',
+      'web-server',
+      '--$buildMode',
+    ],
+    workingDirectory: testAppDirectory,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    },
+  );
+  print('${green}Integration test passed.$reset');
+}
+
 Future<void> _runWebIntegrationTests() async {
-  await _runWebStackTraceTest('profile');
-  await _runWebStackTraceTest('release');
+  await _runWebStackTraceTest('profile', 'lib/stack_trace.dart');
+  await _runWebStackTraceTest('release', 'lib/stack_trace.dart');
+  await _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart');
+  await _runWebStackTraceTest('release', 'lib/framework_stack_trace.dart');
   await _runWebDebugTest('lib/stack_trace.dart');
+  await _runWebDebugTest('lib/framework_stack_trace.dart');
   await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
   await _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true);
@@ -777,7 +948,7 @@ Future<void> _runWebIntegrationTests() async {
   ]);
 }
 
-Future<void> _runWebStackTraceTest(String buildMode) async {
+Future<void> _runWebStackTraceTest(String buildMode, String entrypoint) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
   final String appBuildDirectory = path.join(testAppDirectory, 'build', 'web');
 
@@ -794,7 +965,7 @@ Future<void> _runWebStackTraceTest(String buildMode) async {
       'web',
       '--$buildMode',
       '-t',
-      'lib/stack_trace.dart',
+      entrypoint,
     ],
     workingDirectory: testAppDirectory,
     environment: <String, String>{
@@ -869,9 +1040,8 @@ Future<void> _runWebDebugTest(String target, {
   List<String> additionalArguments = const<String>[],
 }) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
-  final CapturedOutput output = CapturedOutput();
   bool success = false;
-  await runCommand(
+  final CommandResult result = await runCommand(
     flutter,
     <String>[
       'run',
@@ -890,7 +1060,6 @@ Future<void> _runWebDebugTest(String target, {
       '-t',
       target,
     ],
-    output: output,
     outputMode: OutputMode.capture,
     outputListener: (String line, Process process) {
       if (line.contains('--- TEST SUCCEEDED ---')) {
@@ -909,7 +1078,8 @@ Future<void> _runWebDebugTest(String target, {
   if (success) {
     print('${green}Web stack trace integration test passed.$reset');
   } else {
-    print(output.stdout);
+    print(result.flattenedStdout);
+    print(result.flattenedStderr);
     print('${red}Web stack trace integration test failed.$reset');
     exit(1);
   }
@@ -932,68 +1102,6 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
       'FLUTTER_WEB': 'true',
       'FLUTTER_LOW_RESOURCE_MODE': 'true',
     },
-  );
-}
-
-const String _supportedTesterVersion = '0.0.2-dev7';
-
-Future<void> _pubRunTester(String workingDirectory, {
-  List<String> testPaths,
-  bool forceSingleCore = false,
-  int perTestTimeout,
-}) async {
-  int cpus;
-  final String cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
-  if (cpuVariable != null) {
-    cpus = int.tryParse(cpuVariable, radix: 10);
-    if (cpus == null) {
-      print('${red}The CPU environment variable, if set, must be set to the integer number of available cores.$reset');
-      print('Actual value: "$cpuVariable"');
-      exit(1);
-    }
-  } else {
-    cpus = 2; // Don't default to 1, otherwise we won't catch race conditions.
-  }
-  // Integration tests that depend on external processes like chrome
-  // can get stuck if there are multiple instances running at once.
-  if (forceSingleCore) {
-    cpus = 1;
-  }
-  final List<String> args = <String>[
-    'global',
-    'activate',
-    'tester',
-    _supportedTesterVersion
-  ];
-  final Map<String, String> pubEnvironment = <String, String>{
-    'FLUTTER_ROOT': flutterRoot,
-  };
-  if (Directory(pubCache).existsSync()) {
-    pubEnvironment['PUB_CACHE'] = pubCache;
-  }
-  await runCommand(
-    pub,
-    args,
-    workingDirectory: workingDirectory,
-    environment: pubEnvironment,
-  );
-  await runCommand(
-    pub,
-    <String>[
-      'global',
-      'run',
-      'tester',
-      '-j$cpus',
-      '-v',
-      '--ci',
-      if (perTestTimeout != null)
-        '--timeout=$perTestTimeout'
-      else
-        '--timeout=-1',
-      ...testPaths,
-    ],
-    workingDirectory: workingDirectory,
-    environment: pubEnvironment,
   );
 }
 
@@ -1126,29 +1234,22 @@ Future<void> _runFlutterTest(String workingDirectory, {
   args.addAll(tests);
 
   if (!shouldProcessOutput) {
-    OutputMode outputMode = OutputMode.discard;
-    CapturedOutput output;
+    final OutputMode outputMode = outputChecker == null && printOutput
+      ? OutputMode.print
+      : OutputMode.capture;
 
-    if (outputChecker != null) {
-      outputMode = OutputMode.capture;
-      output = CapturedOutput();
-    } else if (printOutput) {
-      outputMode = OutputMode.print;
-    }
-
-    await runCommand(
+    final CommandResult result = await runCommand(
       flutter,
       args,
       workingDirectory: workingDirectory,
       expectNonZeroExit: expectFailure,
       outputMode: outputMode,
-      output: output,
       skip: skip,
       environment: environment,
     );
 
     if (outputChecker != null) {
-      final String message = outputChecker(output);
+      final String message = outputChecker(result);
       if (message != null)
         exitWithError(<String>[message]);
     }
@@ -1328,6 +1429,17 @@ String get gitHash {
       return Platform.environment['CIRRUS_CHANGE_IN_REPO'];
     case CiProviders.luci:
       return 'HEAD'; // TODO(dnfield): Set this in the env for LUCI.
+  }
+  return '';
+}
+
+/// Returns the name of the branch being tested.
+String get branchName {
+  switch(ciProvider) {
+    case CiProviders.cirrus:
+      return Platform.environment['CIRRUS_BRANCH'];
+    case CiProviders.luci:
+      return Platform.environment['LUCI_BRANCH'];
   }
   return '';
 }

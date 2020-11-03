@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -117,7 +115,7 @@ void main() {
     final RenderParagraph hourText = _textRenderParagraph(tester, '7');
     expect(
       hourText.text.style,
-      Typography.material2014().englishLike.headline2
+      Typography.material2014().englishLike.headline2!
           .merge(Typography.material2014().black.headline2)
           .copyWith(color: defaultTheme.colorScheme.primary),
     );
@@ -125,7 +123,7 @@ void main() {
     final RenderParagraph minuteText = _textRenderParagraph(tester, '15');
     expect(
       minuteText.text.style,
-      Typography.material2014().englishLike.headline2
+      Typography.material2014().englishLike.headline2!
           .merge(Typography.material2014().black.headline2)
           .copyWith(color: defaultTheme.colorScheme.onSurface),
     );
@@ -133,7 +131,7 @@ void main() {
     final RenderParagraph amText = _textRenderParagraph(tester, 'AM');
     expect(
       amText.text.style,
-      Typography.material2014().englishLike.subtitle1
+      Typography.material2014().englishLike.subtitle1!
           .merge(Typography.material2014().black.subtitle1)
           .copyWith(color: defaultTheme.colorScheme.primary),
     );
@@ -141,7 +139,7 @@ void main() {
     final RenderParagraph pmText = _textRenderParagraph(tester, 'PM');
     expect(
       pmText.text.style,
-      Typography.material2014().englishLike.subtitle1
+      Typography.material2014().englishLike.subtitle1!
           .merge(Typography.material2014().black.subtitle1)
           .copyWith(color: defaultTheme.colorScheme.onSurface.withOpacity(0.6)),
     );
@@ -149,7 +147,7 @@ void main() {
     final RenderParagraph helperText = _textRenderParagraph(tester, 'SELECT TIME');
     expect(
       helperText.text.style,
-      Typography.material2014().englishLike.overline
+      Typography.material2014().englishLike.overline!
           .merge(Typography.material2014().black.overline),
     );
 
@@ -158,14 +156,14 @@ void main() {
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
       primaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.bodyText1
+      Typography.material2014().englishLike.bodyText1!
         .merge(Typography.material2014().black.bodyText1)
         .copyWith(color: defaultTheme.colorScheme.onSurface),
     );
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
       secondaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.bodyText1
+      Typography.material2014().englishLike.bodyText1!
         .merge(Typography.material2014().white.bodyText1)
         .copyWith(color: defaultTheme.colorScheme.onPrimary),
     );
@@ -217,7 +215,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    final InputDecoration hourDecoration = _textField(tester, '7').decoration;
+    final InputDecoration hourDecoration = _textField(tester, '7').decoration!;
     expect(hourDecoration.filled, true);
     expect(hourDecoration.fillColor, defaultTheme.colorScheme.onSurface.withOpacity(0.12));
     expect(hourDecoration.enabledBorder, const OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)));
@@ -226,8 +224,8 @@ void main() {
     expect(hourDecoration.focusedErrorBorder, OutlineInputBorder(borderSide: BorderSide(color: defaultTheme.colorScheme.error, width: 2)));
     expect(
       hourDecoration.hintStyle,
-      Typography.material2014().englishLike.headline2
-          .merge(defaultTheme.textTheme.headline2.copyWith(color: defaultTheme.colorScheme.onSurface.withOpacity(0.36))),
+      Typography.material2014().englishLike.headline2!
+          .merge(defaultTheme.textTheme.headline2!.copyWith(color: defaultTheme.colorScheme.onSurface.withOpacity(0.36))),
     );
   });
 
@@ -246,14 +244,14 @@ void main() {
     expect(
       dial,
       paints
-        ..circle(color: Color(timePickerTheme.dialBackgroundColor.value)) // Dial background color.
-        ..circle(color: Color(timePickerTheme.dialHandColor.value)), // Dial hand color.
+        ..circle(color: Color(timePickerTheme.dialBackgroundColor!.value)) // Dial background color.
+        ..circle(color: Color(timePickerTheme.dialHandColor!.value)), // Dial hand color.
     );
 
     final RenderParagraph hourText = _textRenderParagraph(tester, '7');
     expect(
       hourText.text.style,
-      Typography.material2014().englishLike.bodyText2
+      Typography.material2014().englishLike.bodyText2!
           .merge(Typography.material2014().black.bodyText2)
           .merge(timePickerTheme.hourMinuteTextStyle)
           .copyWith(color: _selectedColor),
@@ -262,7 +260,7 @@ void main() {
     final RenderParagraph minuteText = _textRenderParagraph(tester, '15');
     expect(
       minuteText.text.style,
-      Typography.material2014().englishLike.bodyText2
+      Typography.material2014().englishLike.bodyText2!
           .merge(Typography.material2014().black.bodyText2)
           .merge(timePickerTheme.hourMinuteTextStyle)
           .copyWith(color: _unselectedColor),
@@ -271,7 +269,7 @@ void main() {
     final RenderParagraph amText = _textRenderParagraph(tester, 'AM');
     expect(
       amText.text.style,
-      Typography.material2014().englishLike.subtitle1
+      Typography.material2014().englishLike.subtitle1!
           .merge(Typography.material2014().black.subtitle1)
           .merge(timePickerTheme.dayPeriodTextStyle)
           .copyWith(color: _selectedColor),
@@ -280,7 +278,7 @@ void main() {
     final RenderParagraph pmText = _textRenderParagraph(tester, 'PM');
     expect(
       pmText.text.style,
-      Typography.material2014().englishLike.subtitle1
+      Typography.material2014().englishLike.subtitle1!
           .merge(Typography.material2014().black.subtitle1)
           .merge(timePickerTheme.dayPeriodTextStyle)
           .copyWith(color: _unselectedColor),
@@ -289,7 +287,7 @@ void main() {
     final RenderParagraph helperText = _textRenderParagraph(tester, 'SELECT TIME');
     expect(
       helperText.text.style,
-      Typography.material2014().englishLike.bodyText2
+      Typography.material2014().englishLike.bodyText2!
           .merge(Typography.material2014().black.bodyText2)
           .merge(timePickerTheme.helpTextStyle),
     );
@@ -299,14 +297,14 @@ void main() {
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
       primaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.bodyText1
+      Typography.material2014().englishLike.bodyText1!
           .merge(Typography.material2014().black.bodyText1)
           .copyWith(color: _unselectedColor),
     );
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
       secondaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.bodyText1
+      Typography.material2014().englishLike.bodyText1!
           .merge(Typography.material2014().white.bodyText1)
           .copyWith(color: _selectedColor),
     );
@@ -328,13 +326,13 @@ void main() {
     final Material dayPeriodMaterial = _dayPeriodMaterial(tester);
     expect(
       dayPeriodMaterial.shape,
-      timePickerTheme.dayPeriodShape.copyWith(side: timePickerTheme.dayPeriodBorderSide),
+      timePickerTheme.dayPeriodShape!.copyWith(side: timePickerTheme.dayPeriodBorderSide),
     );
 
     final Container dayPeriodDivider = _dayPeriodDivider(tester);
     expect(
       dayPeriodDivider.decoration,
-      BoxDecoration(border: Border(left: timePickerTheme.dayPeriodBorderSide)),
+      BoxDecoration(border: Border(left: timePickerTheme.dayPeriodBorderSide!)),
     );
 
     final IconButton entryModeIconButton = _entryModeIconButton(tester);
@@ -351,14 +349,14 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    final InputDecoration hourDecoration = _textField(tester, '7').decoration;
-    expect(hourDecoration.filled, timePickerTheme.inputDecorationTheme.filled);
-    expect(hourDecoration.fillColor, timePickerTheme.inputDecorationTheme.fillColor);
-    expect(hourDecoration.enabledBorder, timePickerTheme.inputDecorationTheme.enabledBorder);
-    expect(hourDecoration.errorBorder, timePickerTheme.inputDecorationTheme.errorBorder);
-    expect(hourDecoration.focusedBorder, timePickerTheme.inputDecorationTheme.focusedBorder);
-    expect(hourDecoration.focusedErrorBorder, timePickerTheme.inputDecorationTheme.focusedErrorBorder);
-    expect(hourDecoration.hintStyle, timePickerTheme.inputDecorationTheme.hintStyle);
+    final InputDecoration hourDecoration = _textField(tester, '7').decoration!;
+    expect(hourDecoration.filled, timePickerTheme.inputDecorationTheme!.filled);
+    expect(hourDecoration.fillColor, timePickerTheme.inputDecorationTheme!.fillColor);
+    expect(hourDecoration.enabledBorder, timePickerTheme.inputDecorationTheme!.enabledBorder);
+    expect(hourDecoration.errorBorder, timePickerTheme.inputDecorationTheme!.errorBorder);
+    expect(hourDecoration.focusedBorder, timePickerTheme.inputDecorationTheme!.focusedBorder);
+    expect(hourDecoration.focusedErrorBorder, timePickerTheme.inputDecorationTheme!.focusedErrorBorder);
+    expect(hourDecoration.hintStyle, timePickerTheme.inputDecorationTheme!.hintStyle);
   });
 
   testWidgets('Time picker uses values from TimePickerThemeData without InputDecorationTheme - input mode', (WidgetTester tester) async {
@@ -368,13 +366,13 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    final InputDecoration hourDecoration = _textField(tester, '7').decoration;
+    final InputDecoration hourDecoration = _textField(tester, '7').decoration!;
     expect(hourDecoration.fillColor, timePickerTheme.hourMinuteColor);
   });
 }
 
-final Color _selectedColor = Colors.green[100];
-final Color _unselectedColor = Colors.green[200];
+final Color _selectedColor = Colors.green[100]!;
+final Color _unselectedColor = Colors.green[200]!;
 
 TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
   Color getColor(Set<MaterialState> states) {
@@ -412,12 +410,12 @@ TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
 
 class _TimePickerLauncher extends StatelessWidget {
   const _TimePickerLauncher({
-    Key key,
+    Key? key,
     this.themeData,
     this.entryMode = TimePickerEntryMode.dial,
   }) : super(key: key);
 
-  final ThemeData themeData;
+  final ThemeData? themeData;
   final TimePickerEntryMode entryMode;
 
   @override
@@ -471,7 +469,7 @@ IconButton _entryModeIconButton(WidgetTester tester) {
 }
 
 RenderParagraph _textRenderParagraph(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.text(text).first).renderObject as RenderParagraph;
+  return tester.element<StatelessElement>(find.text(text).first).renderObject! as RenderParagraph;
 }
 
 final Finder findDialPaint = find.descendant(

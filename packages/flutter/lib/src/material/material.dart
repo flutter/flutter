@@ -198,7 +198,7 @@ class Material extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The kind of material to show (e.g., card or canvas). This
@@ -275,7 +275,7 @@ class Material extends StatefulWidget {
   /// If false, the border will be painted behind the [child].
   final bool borderOnForeground;
 
-  /// {@template flutter.widgets.Clip}
+  /// {@template flutter.material.Material.clipBehavior}
   /// The content will be clipped (or not) according to this option.
   ///
   /// See the enum [Clip] for details of all possible options and their common
@@ -338,7 +338,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   final GlobalKey _inkFeatureRenderer = GlobalKey(debugLabel: 'ink renderer');
 
   Color? _getBackgroundColor(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     Color? color = widget.color;
     if (color == null) {
       switch (widget.type) {
@@ -368,7 +368,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     Widget? contents = widget.child;
     if (contents != null) {
       contents = AnimatedDefaultTextStyle(
-        style: widget.textStyle ?? Theme.of(context)!.textTheme.bodyText2!,
+        style: widget.textStyle ?? Theme.of(context).textTheme.bodyText2!,
         duration: widget.animationDuration,
         child: contents,
       );
@@ -406,7 +406,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
         color: ElevationOverlay.applyOverlay(context, backgroundColor!, widget.elevation),
-        shadowColor: widget.shadowColor ?? Theme.of(context)!.shadowColor,
+        shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
         animateColor: false,
         child: contents,
       );
@@ -431,7 +431,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       clipBehavior: widget.clipBehavior,
       elevation: widget.elevation,
       color: backgroundColor!,
-      shadowColor: widget.shadowColor ?? Theme.of(context)!.shadowColor,
+      shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
       child: contents,
     );
   }
@@ -453,7 +453,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       child: child,
       clipper: ShapeBorderClipper(
         shape: shape,
-        textDirection: Directionality.of(context),
+        textDirection: Directionality.maybeOf(context),
       ),
       clipBehavior: clipBehavior,
     );
@@ -637,8 +637,7 @@ abstract class InkFeature {
     final List<RenderObject> descendants = <RenderObject>[referenceBox];
     RenderObject node = referenceBox;
     while (node != _controller) {
-      node = node.parent as RenderObject;
-      assert(node != null);
+      node = node.parent! as RenderObject;
       descendants.add(node);
     }
     // determine the transform that gets our coordinate system to be like theirs
@@ -707,7 +706,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The border of the widget.
@@ -722,7 +721,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   /// If false, the border will be painted behind the child.
   final bool borderOnForeground;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
@@ -763,17 +762,17 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       _elevation,
       widget.elevation,
       (dynamic value) => Tween<double>(begin: value as double),
-    ) as Tween<double>;
+    ) as Tween<double>?;
     _shadowColor = visitor(
       _shadowColor,
       widget.shadowColor,
       (dynamic value) => ColorTween(begin: value as Color),
-    ) as ColorTween;
+    ) as ColorTween?;
     _border = visitor(
       _border,
       widget.shape,
       (dynamic value) => ShapeBorderTween(begin: value as ShapeBorder),
-    ) as ShapeBorderTween;
+    ) as ShapeBorderTween?;
   }
 
   @override
@@ -788,7 +787,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       ),
       clipper: ShapeBorderClipper(
         shape: shape,
-        textDirection: Directionality.of(context),
+        textDirection: Directionality.maybeOf(context),
       ),
       clipBehavior: widget.clipBehavior,
       elevation: elevation,
@@ -813,8 +812,8 @@ class _ShapeBorderPaint extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       child: child,
-      painter: borderOnForeground ? null : _ShapeBorderPainter(shape, Directionality.of(context)),
-      foregroundPainter: borderOnForeground ? _ShapeBorderPainter(shape, Directionality.of(context)) : null,
+      painter: borderOnForeground ? null : _ShapeBorderPainter(shape, Directionality.maybeOf(context)),
+      foregroundPainter: borderOnForeground ? _ShapeBorderPainter(shape, Directionality.maybeOf(context)) : null,
     );
   }
 }

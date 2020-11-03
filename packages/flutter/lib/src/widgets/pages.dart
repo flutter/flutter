@@ -15,7 +15,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     this.fullscreenDialog = false,
   }) : super(settings: settings);
 
-  /// {@template flutter.widgets.pageRoute.fullscreenDialog}
+  /// {@template flutter.widgets.PageRoute.fullscreenDialog}
   /// Whether this page route is a full-screen dialog.
   ///
   /// In Material and Cupertino, being fullscreen has the effects of making

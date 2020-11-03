@@ -12,7 +12,8 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 
-const String aotSizeOutput = '''[
+const String aotSizeOutput = '''
+[
     {
         "l": "dart:_internal",
         "c": "SubListIterable",

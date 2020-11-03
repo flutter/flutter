@@ -14,7 +14,7 @@ const String kPluginClass = 'pluginClass';
 /// Constant for 'pluginClass' key in plugin maps.
 const String kDartPluginClass = 'dartPluginClass';
 
-/// Marker interface for all platform specific plugin config impls.
+/// Marker interface for all platform specific plugin config implementations.
 abstract class PluginPlatform {
   const PluginPlatform();
 

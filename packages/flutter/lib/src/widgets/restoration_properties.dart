@@ -173,9 +173,9 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
   }
 
   @override
-  T fromPrimitives(Object serialized) {
+  T fromPrimitives(Object? serialized) {
     assert(serialized != null);
-    return serialized as T;
+    return serialized! as T;
   }
 
   @override
@@ -187,7 +187,7 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
 
 /// A [RestorableProperty] that knows how to store and restore a [num].
 ///
-/// {@template flutter.widgets.restoration.primitivevalue}
+/// {@template flutter.widgets.RestorableNum}
 /// The current [value] of this property is stored in the restoration data.
 /// During state restoration the property is restored to the value it had when
 /// the restoration data it is getting restored from was collected.
@@ -202,7 +202,7 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
 class RestorableNum<T extends num> extends _RestorablePrimitiveValue<T> {
   /// Creates a [RestorableNum].
   ///
-  /// {@template flutter.widgets.restoration.primitivevalue.constructor}
+  /// {@template flutter.widgets.RestorableNum.constructor}
   /// If no restoration data is available to restore the value in this property
   /// from, the property will be initialized with the provided `defaultValue`.
   /// {@endtemplate}
@@ -211,41 +211,41 @@ class RestorableNum<T extends num> extends _RestorablePrimitiveValue<T> {
 
 /// A [RestorableProperty] that knows how to store and restore a [double].
 ///
-/// {@macro flutter.widgets.restoration.primitivevalue}
+/// {@macro flutter.widgets.RestorableNum}
 class RestorableDouble extends RestorableNum<double> {
   /// Creates a [RestorableDouble].
   ///
-  /// {@macro flutter.widgets.restoration.primitivevalue.constructor}
+  /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableDouble(double defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore an [int].
 ///
-/// {@macro flutter.widgets.restoration.primitivevalue}
+/// {@macro flutter.widgets.RestorableNum}
 class RestorableInt extends RestorableNum<int> {
   /// Creates a [RestorableInt].
   ///
-  /// {@macro flutter.widgets.restoration.primitivevalue.constructor}
+  /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableInt(int defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [String].
 ///
-/// {@macro flutter.widgets.restoration.primitivevalue}
+/// {@macro flutter.widgets.RestorableNum}
 class RestorableString extends _RestorablePrimitiveValue<String> {
   /// Creates a [RestorableString].
   ///
-  /// {@macro flutter.widgets.restoration.primitivevalue.constructor}
+  /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableString(String defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [bool].
 ///
-/// {@macro flutter.widgets.restoration.primitivevalue}
+/// {@macro flutter.widgets.RestorableNum}
 class RestorableBool extends _RestorablePrimitiveValue<bool> {
   /// Creates a [RestorableBool].
   ///
-  /// {@macro flutter.widgets.restoration.primitivevalue.constructor}
+  /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableBool(bool defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
@@ -292,6 +292,43 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
   }
 }
 
+/// A base class for creating a [RestorableProperty] that stores and restores a
+/// [ChangeNotifier].
+///
+/// This class may be used to implement a [RestorableProperty] for a
+/// [ChangeNotifier], whose information it needs to store in the restoration
+/// data change whenever the [ChangeNotifier] notifies its listeners.
+///
+/// The [RestorationMixin] this property is registered with will call
+/// [toPrimitives] whenever the wrapped [ChangeNotifier] notifies its listeners
+/// to update the information that this property has stored in the restoration
+/// data.
+///
+/// Furthermore, the property will dispose the wrapped [ChangeNotifier] when
+/// either the property itself is disposed or its value is replaced with another
+/// [ChangeNotifier] instance.
+abstract class RestorableChangeNotifier<T extends ChangeNotifier> extends RestorableListenable<T> {
+  @override
+  void initWithValue(T value) {
+    _diposeOldValue();
+    super.initWithValue(value);
+  }
+
+  @override
+  void dispose() {
+    _diposeOldValue();
+    super.dispose();
+  }
+
+  void _diposeOldValue() {
+    if (_value != null) {
+      // Scheduling a microtask for dispose to give other entities a chance
+      // to remove their listeners first.
+      scheduleMicrotask(_value!.dispose);
+    }
+  }
+}
+
 /// A [RestorableProperty] that knows how to store and restore a
 /// [TextEditingController].
 ///
@@ -299,7 +336,7 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
 /// state restoration, the property will restore [TextEditingController.text] to
 /// the value it had when the restoration data it is getting restored from was
 /// collected.
-class RestorableTextEditingController extends RestorableListenable<TextEditingController> {
+class RestorableTextEditingController extends RestorableChangeNotifier<TextEditingController> {
   /// Creates a [RestorableTextEditingController].
   ///
   /// This constructor treats a null `text` argument as if it were the empty
@@ -323,35 +360,12 @@ class RestorableTextEditingController extends RestorableListenable<TextEditingCo
   }
 
   @override
-  TextEditingController fromPrimitives(Object data) {
-    return TextEditingController(text: data as String);
+  TextEditingController fromPrimitives(Object? data) {
+    return TextEditingController(text: data! as String);
   }
 
   @override
   Object toPrimitives() {
     return value.text;
-  }
-
-  TextEditingController? _controller;
-
-  @override
-  void initWithValue(TextEditingController value) {
-    _disposeControllerIfNecessary();
-    _controller = value;
-    super.initWithValue(value);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _disposeControllerIfNecessary();
-  }
-
-  void _disposeControllerIfNecessary() {
-    if (_controller != null) {
-      // Scheduling a microtask for dispose to give other entities a chance
-      // to remove their listeners first.
-      scheduleMicrotask(_controller!.dispose);
-    }
   }
 }
