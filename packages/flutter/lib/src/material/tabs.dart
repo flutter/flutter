@@ -615,7 +615,6 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.physics,
   }) : assert(tabs != null),
        assert(isScrollable != null),
-       assert(enableFeedback != null),
        assert(dragStartBehavior != null),
        assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
        assert(indicator != null || (indicatorPadding != null)),
@@ -768,7 +767,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// will produce a short vibration, when feedback is enabled.
   ///
   /// Defaults to true.
-  final bool enableFeedback;
+  final bool? enableFeedback;
 
   /// An optional callback that's called when the [TabBar] is tapped.
   ///
@@ -1112,7 +1111,7 @@ class _TabBarState extends State<TabBar> {
       wrappedTabs[index] = InkWell(
         mouseCursor: widget.mouseCursor ?? SystemMouseCursors.click,
         onTap: () { _handleTap(index); },
-        enableFeedback: widget.enableFeedback,
+        enableFeedback: widget.enableFeedback ?? true,
         overlayColor: widget.overlayColor,
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
