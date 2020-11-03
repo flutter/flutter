@@ -13,23 +13,20 @@ import 'package:flutter/gestures.dart';
 /// result.
 class TextEditingBehavior {
   TextEditingBehavior({
-    required this.delegate,
+    //required this.delegate,
+    required this.editableTextState,
     //required this.platform,
     this.platform = TargetPlatform.iOS,
   });
 
-  final TextSelectionGestureDetectorBuilderDelegate delegate;
+  //final TextSelectionGestureDetectorBuilderDelegate delegate;
+  final EditableTextState editableTextState;
   final TargetPlatform platform;
-
-  /// The [State] of the [EditableText] for which the builder will provide a
-  /// [TextSelectionGestureDetector].
-  @protected
-  EditableTextState get editableText => delegate.editableTextKey.currentState!;
 
   /// The [RenderObject] of the [EditableText] for which the builder will
   /// provide a [TextSelectionGestureDetector].
   @protected
-  RenderEditable get renderEditable => editableText.renderEditable;
+  RenderEditable get renderEditable => editableTextState.renderEditable;
 
   // TODO(justinmc): I'm skeptical of the shouldShowSelectionToolbar pattern.
   /// Whether to show the selection toolbar.
@@ -64,8 +61,8 @@ class TextEditingBehavior {
   }
 
   onSingleTapUp(TapUpDetails details) {
-    editableText.hideToolbar();
-    if (delegate.selectionEnabled) {
+    editableTextState.hideToolbar();
+    if (editableTextState.widget.selectionEnabled) {
       switch (platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:

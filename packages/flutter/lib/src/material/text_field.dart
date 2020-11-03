@@ -810,10 +810,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   late _TextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
 
-  // TODO(justinmc): Better way to instantiate this. I was having trouble
-  // getting the platform in initState.
-  TextEditingBehavior? textEditingBehavior;
-
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
   late bool forcePressEnabled;
@@ -1199,14 +1195,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       },
     );
 
-    // TODO(justinmc): The TextField shouldn't be able to interact with the
-    // state that TEB is able to manipulate. So shouldn't be manipulating state
-    // through `this` delegate.
-    textEditingBehavior ??= TextEditingBehavior(
-      delegate: this,
-      platform: Theme.of(context).platform,
-    );
-
     return MouseRegion(
       cursor: effectiveMouseCursor,
       onEnter: (PointerEnterEvent event) => _handleHover(true),
@@ -1229,24 +1217,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
               child: child,
             );
           },
-          // TODO(justinmc): Are there any actions that TEB should respond to that are
-          // not coming from this gesture detector? What are they?
-          child: TextSelectionGestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTapDown: textEditingBehavior!.onTapDown,
-            //onForcePressStart: delegate.forcePressEnabled ? onForcePressStart : null,
-            //onForcePressEnd: delegate.forcePressEnabled ? onForcePressEnd : null,
-            onSingleTapUp: textEditingBehavior!.onSingleTapUp,
-            //onSingleTapCancel: onSingleTapCancel,
-            //onSingleLongTapStart: onSingleLongTapStart,
-            //onSingleLongTapMoveUpdate: onSingleLongTapMoveUpdate,
-            //onSingleLongTapEnd: onSingleLongTapEnd,
-            //onDoubleTapDown: onDoubleTapDown,
-            //onDragSelectionStart: onDragSelectionStart,
-            //onDragSelectionUpdate: onDragSelectionUpdate,
-            //onDragSelectionEnd: onDragSelectionEnd,
-            child: child,
-          ),
+          child: child,
         ),
       ),
     );
