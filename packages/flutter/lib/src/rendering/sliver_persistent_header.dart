@@ -755,7 +755,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         showOnScreen.maxShowOnScreenExtent,
       )
       // Clamp the value back to the valid range after applying additional
-      // constriants. Contracting is not allowed.
+      // constraints. Contracting is not allowed.
       .clamp(childExtent, effectiveMaxExtent);
 
     // Expands the header if needed, with animation.

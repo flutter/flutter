@@ -1500,7 +1500,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(alternateChildJson['valueId'], equals(childJson['valueId']));
       alternateChildrenJson = (await service.testExtension('getChildrenSummaryTree', <String, String>{'arg': childJson['objectId']! as String, 'objectGroup': group}))! as List<Object?>;
       expect(alternateChildrenJson.length , equals(0));
-      expect(childJson['chidlren'], isNull);
+      expect(childJson['children'], isNull);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.getSelectedSummaryWidget', (WidgetTester tester) async {

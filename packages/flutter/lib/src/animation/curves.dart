@@ -1306,7 +1306,7 @@ class ElasticInOutCurve extends Curve {
 ///  * [Curve], the interface implemented by the constants available from the
 ///    [Curves] class.
 class Curves {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   Curves._();

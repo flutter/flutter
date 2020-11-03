@@ -835,7 +835,7 @@ void main() {
               height: buttonHeight,
               child: const Text('button'),
               onPressed: () {
-                /*ununsed*/
+                /*unused*/
               },
             ),
           ),
@@ -865,7 +865,7 @@ void main() {
               minWidth: buttonMinWidth,
               child: const Text('button'),
               onPressed: () {
-                /*ununsed*/
+                /*unused*/
               },
             ),
           ),

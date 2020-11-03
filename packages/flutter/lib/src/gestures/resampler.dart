@@ -232,7 +232,7 @@ class PointerEventResampler {
         // Add synthetics `move` or `hover` event if position has changed.
         // Note: Devices without `hover` events are expected to always have
         // `add` and `down` events with the same position and this logic will
-        // therefor never produce `hover` events.
+        // therefore never produce `hover` events.
         if (position != _position) {
           final Offset delta = position - _position;
           callback(_toMoveOrHoverEvent(event, position, delta, _pointerIdentifier, sampleTime, wasDown));

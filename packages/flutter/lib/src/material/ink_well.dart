@@ -777,7 +777,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     super.didUpdateWidget(oldWidget);
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
       if (enabled) {
-        // Don't call wigdet.onHover because many wigets, including the button
+        // Don't call widget.onHover because many widgets, including the button
         // widgets, apply setState to an ancestor context from onHover.
         updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
       }

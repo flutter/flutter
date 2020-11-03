@@ -226,7 +226,7 @@ void main() {
     expect(controller.position.pixels, equals(0.0));
   });
 
-  testWidgets('jumpTo recomends deferred loading', (WidgetTester tester) async {
+  testWidgets('jumpTo recommends deferred loading', (WidgetTester tester) async {
     int loadedWithDeferral = 0;
     int buildCount = 0;
     const double height = 500;

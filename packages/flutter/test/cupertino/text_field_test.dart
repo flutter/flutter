@@ -405,7 +405,7 @@ void main() {
   );
 
   testWidgets(
-    'decoration can be overrriden',
+    'decoration can be overriden',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(

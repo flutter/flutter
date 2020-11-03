@@ -952,7 +952,7 @@ class EditableText extends StatefulWidget {
   ///               context: context,
   ///               builder: (BuildContext context) {
   ///                 return AlertDialog(
-  ///                   title: const Text('Thats correct!'),
+  ///                   title: const Text('That\'s correct!'),
   ///                   content: Text ('13 is the right answer.'),
   ///                   actions: <Widget>[
   ///                     TextButton(
@@ -2873,11 +2873,11 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
   // requiring exposure of the C++ ICU API.
   //
   // LTR covers most scripts and symbols, including but not limited to Latin,
-  // ideographic scripts (Chinese, Japanese, etc), Cyrilic, Indic, and
+  // ideographic scripts (Chinese, Japanese, etc), Cyrillic, Indic, and
   // SE Asian scripts.
   final RegExp _ltrRegExp = RegExp(r'[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF]');
   // RTL covers Arabic, Hebrew, and other RTL languages such as Urdu,
-  // Aramic, Farsi, Dhivehi.
+  // Aramaic, Farsi, Dhivehi.
   final RegExp _rtlRegExp = RegExp(r'[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]');
   // Although whitespaces are not the only codepoints that have weak directionality,
   // these are the primary cause of the caret being misplaced.

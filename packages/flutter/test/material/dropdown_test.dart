@@ -1342,7 +1342,7 @@ void main() {
   });
 
   testWidgets(
-    'DropdowwnButton hint displays when the items list is empty, '
+    'DropdownButton hint displays when the items list is empty, '
     'items is null, and disabledHint is null',
     (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();

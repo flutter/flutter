@@ -688,7 +688,7 @@ void main() {
 
     resampler.stop(result.add);
 
-    // All pointer events should have been returned with orignal
+    // All pointer events should have been returned with original
     // time stamps and positions.
     expect(result.length, 6);
     expect(result[0].timeStamp, const Duration(microseconds: 1000));

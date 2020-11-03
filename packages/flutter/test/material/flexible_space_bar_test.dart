@@ -118,7 +118,7 @@ void main() {
     expect(clipRect.size.height, minExtent);
   });
 
-  testWidgets('Collpased FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
+  testWidgets('Collapsed FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const double expandedHeight = 200;
     await tester.pumpWidget(

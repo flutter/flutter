@@ -749,7 +749,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
 ///
 /// See also:
 ///
-/// * [KeepAlive], which marks whether its chlild widget should be kept alive.
+/// * [KeepAlive], which marks whether its child widget should be kept alive.
 /// * [SliverChildBuilderDelegate] and [SliverChildListDelegate], slivers
 ///    which make usr of the keep alive functionality through the
 ///    `addAutomaticKeepAlives` property.

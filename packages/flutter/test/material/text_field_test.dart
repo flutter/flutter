@@ -2357,7 +2357,7 @@ void main() {
     }
 
     const String hintPlaceholder = 'Placeholder';
-    const String multipleLineText = "Here's a text, which is more than one line, to demostrate the multiple line hint text";
+    const String multipleLineText = "Here's a text, which is more than one line, to demonstrate the multiple line hint text";
     await tester.pumpWidget(builder(null, hintPlaceholder));
 
     RenderBox findHintText(String hint) => tester.renderObject(find.text(hint));

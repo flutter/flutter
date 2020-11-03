@@ -416,7 +416,7 @@ class ScrollPhysics {
   @override
   String toString() {
     if (parent == null)
-      return objectRuntimeType(this, 'ScrollPhsyics');
+      return objectRuntimeType(this, 'ScrollPhysics');
     return '${objectRuntimeType(this, 'ScrollPhysics')} -> $parent';
   }
 }

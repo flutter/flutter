@@ -379,7 +379,7 @@ void main() {
         expect(truncated.selection.extentOffset, stringTruncated.length);
       });
 
-      test('Counts grapheme clustsers as single characters', () async {
+      test('Counts grapheme clusters as single characters', () async {
         const String stringOverflowing = '👨‍👩‍👦01234567890';
         const TextEditingValue value = TextEditingValue(
           text: stringOverflowing,

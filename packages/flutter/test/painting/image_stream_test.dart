@@ -418,7 +418,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
   });
 
-  testWidgets('animation doesnt repeat more than specified', (WidgetTester tester) async {
+  testWidgets('animation doesn\'t repeat more than specified', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = 0;
