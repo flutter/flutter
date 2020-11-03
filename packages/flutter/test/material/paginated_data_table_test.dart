@@ -251,6 +251,7 @@ void main() {
 
     await tester.pumpWidget(buildTable(header: headerText));
     expect(find.text(headerText), findsOneWidget);
+    expect(find.byIcon(Icons.add), findsNothing);
 
     await tester.pumpWidget(buildTable(header: headerText, actions: actions));
     expect(find.text(headerText), findsOneWidget);
@@ -258,6 +259,7 @@ void main() {
 
     await tester.pumpWidget(buildTable());
     expect(find.text(headerText), findsNothing);
+    expect(find.byIcon(Icons.add), findsNothing);
 
     expect(() => buildTable(actions: actions), throwsAssertionError);
 
