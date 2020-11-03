@@ -481,11 +481,6 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
   ///   ).animate(secondaryAnimation),
   ///   child: child,
   /// );
-  /// ```
-  ///
-  /// In practice this method is used pretty rarely.
-  ///
-  /// The arguments to this method are as follows:
   ///
   ///  * `context`: The context in which the route is being built.
   ///  * [secondaryAnimation]: When the Navigator pushes this route
