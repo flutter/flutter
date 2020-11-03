@@ -8,17 +8,17 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:equatable/equatable.dart';
 
-/// Common format of a metric data point
+/// Common format of a metric data point.
 class MetricPoint extends Equatable {
   MetricPoint(
     this.value,
     Map<String, String> tags,
   ) : _tags = SplayTreeMap<String, String>.from(tags);
 
-  /// Can store integer values
+  /// Can store integer values.
   final double value;
 
-  /// Test name, unit, timestamp, configs, git revision, ..., in sorted order
+  /// Test name, unit, timestamp, configs, git revision, ..., in sorted order.
   UnmodifiableMapView<String, String> get tags =>
       UnmodifiableMapView<String, String>(_tags);
 

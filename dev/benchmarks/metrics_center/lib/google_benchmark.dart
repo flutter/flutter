@@ -16,7 +16,7 @@ const List<String> _kNonNumericalValueSubResults = <String>[
   'big_o',
 ];
 
-/// Parse the json result of https://github.com/google/benchmark
+/// Parse the json result of https://github.com/google/benchmark.
 class GoogleBenchmarkParser {
   /// Given a Google benchmark json output, parse its content into a list of [MetricPoint].
   static Future<List<MetricPoint>> parse(String jsonFileName) async {
