@@ -132,19 +132,23 @@ class Step {
 ///      width: 300,
 ///      child: Stepper(
 ///        currentStep: _index,
-///        onStepCancel: (){
-///          if(_index <= 0 ) {return null;}
+///        onStepCancel: () {
+///          if (_index <= 0 ) {
+///           return null;
+///          }
 ///          setState(() {
 ///            _index--;
 ///          });
 ///        },
-///        onStepContinue: (){
-///          if(_index >= 1) {return null;}
+///        onStepContinue: () {
+///          if(_index >= 1) {
+///           return null;
+///          }
 ///          setState(() {
 ///            _index++;
 ///          });
 ///        },
-///        onStepTapped: (index){
+///        onStepTapped: (index) {
 ///          setState(() {
 ///            _index = index;
 ///          });
