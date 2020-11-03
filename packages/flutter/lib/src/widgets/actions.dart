@@ -241,6 +241,111 @@ abstract class Action<T extends Intent> with Diagnosticable {
 /// If you listen to an [Action] widget in a widget hierarchy, you should use
 /// this widget. If you are using an [Action] outside of a widget context, then
 /// you must call removeListener yourself.
+///
+/// {@tool dartpad --template=stateful_widget_material}
+/// This example shows how ActionListener handles adding and removing of
+/// the [listener] in the widget lifecycle.
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart preamble
+/// class ExampleActionListener extends StatefulWidget {
+///   @override
+///   _ExampleActionListenerState createState() => _ExampleActionListenerState();
+/// }
+///
+/// class _ExampleActionListenerState extends State<ExampleActionListener> {
+///   bool _on = false;
+///   MyAction _myAction;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _myAction = MyAction();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Row(
+///       crossAxisAlignment: CrossAxisAlignment.center,
+///       mainAxisAlignment: MainAxisAlignment.center,
+///       children: <Widget>[
+///         Padding(
+///           padding: const EdgeInsets.all(8.0),
+///           child: OutlinedButton(
+///             onPressed: _toggleState,
+///             child: Text(_on ? 'Disable' : 'Enable'),
+///           ),
+///         ),
+///         _on
+///             ? Padding(
+///                 padding: const EdgeInsets.all(8.0),
+///                 child: ActionListener(
+///                   listener: (Action<Intent> action) {
+///                     if (action.intentType == MyIntent) {
+///                       Scaffold.of(context).showSnackBar(
+///                           SnackBar(content: Text('Action Listener Called')));
+///                     }
+///                   },
+///                   action: _myAction,
+///                   child: ElevatedButton(
+///                     onPressed: () =>
+///                         ActionDispatcher().invokeAction(_myAction, MyIntent()),
+///                     child: Text('Call Action Listener'),
+///                   ),
+///                 ),
+///               )
+///             : Container(),
+///       ],
+///     );
+///   }
+///
+///   void _toggleState() {
+///     setState(() {
+///       _on = !_on;
+///     });
+///   }
+/// }
+///
+/// class MyAction extends Action<MyIntent> {
+///   @override
+///   void addActionListener(listener) {
+///     super.addActionListener(listener);
+///     print('Action Listener was added');
+///   }
+///
+///   @override
+///   void removeActionListener(listener) {
+///     print('Action Listener was removed');
+///     super.removeActionListener(listener);
+///   }
+///
+///   @override
+///   bool invoke(covariant MyIntent intent) {
+///     notifyActionListeners();
+///     return true;
+///   }
+/// }
+///
+/// class MyIntent extends Intent {
+///   const MyIntent();
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('ExampleActionListener Example'),
+///     ),
+///     body: Center(child: ExampleActionListener()),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 @immutable
 class ActionListener extends StatefulWidget {
   /// Create a const [ActionListener].
