@@ -1,0 +1,15 @@
+name: metrics_center
+
+dependencies:
+  args: any
+  crypto: any
+  gcloud: any
+  googleapis: any
+  googleapis_auth: any
+  github: ^6.0.0
+  equatable: ^1.1.1
+  mockito: ^4.1.1
+
+dev_dependencies:
+  test: any
+  pedantic: ^1.8.0
