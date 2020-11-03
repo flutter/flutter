@@ -595,7 +595,7 @@ class RenderTable extends RenderBox {
   /// children are simply moved to their new location in the table rather than
   /// removed from the table and re-added.
   void setFlatChildren(int columns, List<RenderBox?> cells) {
-    if (cells == _children && columns == _columns)
+    if (listEquals(cells, _children) && columns == _columns)
       return;
     assert(columns >= 0);
     // consider the case of a newly empty table

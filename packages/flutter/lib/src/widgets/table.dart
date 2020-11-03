@@ -292,21 +292,34 @@ class _TableElement extends RenderObjectElement {
   @override
   void mount(Element? parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    _children = widget.children.map<_TableElementRow>((TableRow row) {
-      return _TableElementRow(
-        key: row.key,
-        children: row.children!.map<Element>((Widget child) {
-          assert(child != null);
-          return inflateWidget(child, null);
-        }).toList(growable: false),
-      );
-    }).toList(growable: false);
-    _updateRenderObjectChildren();
+    int index = 0;
+    final List<_TableElementRow> newChildren = <_TableElementRow>[];
+    for (int y = 0; y < widget.children.length; y++) {
+      final List<Element> elementChildren = <Element>[];
+      Element? previousChild;
+      for (int x = 0; widget.children[y].children != null && x < widget.children[y].children!.length; x++) {
+        assert(widget.children[y].children![x] != null);
+        final Element newChild = inflateWidget(widget.children[y].children![x], IndexedSlot<Element?>(index, previousChild));
+        elementChildren.add(newChild);
+        previousChild = newChild;
+        index++;
+      }
+      newChildren.add(_TableElementRow(
+        key: widget.children[y].key,
+        children: elementChildren,
+      ));
+    }
+    _children = newChildren;
   }
 
   @override
-  void insertRenderObjectChild(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderObject child, IndexedSlot<Element?> slot) {
     renderObject.setupParentData(child);
+    final int _columns = widget.children.isNotEmpty
+      ? (widget.children[0].children != null ? widget.children[0].children!.length : 0)
+      : 0;
+    final int _index = slot.index;
+    renderObject.setChild(_index % _columns, _index ~/ _columns, child as RenderBox);
   }
 
   @override

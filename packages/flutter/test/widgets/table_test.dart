@@ -930,6 +930,35 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/69395.
+  testWidgets(
+    'RenderTable should adopt the new RenderObject if a child RenderObject was replaced by another different type',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(children: const <TableRow>[TableRow(children: <Widget>[TestChildWidget()])]),
+        ),
+      );
+      final RenderTable table = tester.renderObject(find.byType(Table));
+
+      expect(find.text('CRASHHH'), findsNothing);
+      expect(find.byType(SizedBox), findsOneWidget);
+      // The SizeBox should be rendered.
+      expect(table.column(0).first.runtimeType.toString(), 'RenderConstrainedBox');
+
+      final TestChildState state = tester.state(find.byType(TestChildWidget));
+      state.toggleMe();
+      // Trigger a RenderObject change.
+      await tester.pump();
+
+      expect(find.byType(SizedBox), findsNothing);
+      expect(find.text('CRASHHH'), findsOneWidget);
+      // The Text should be rendered.
+      expect(table.column(0).first.runtimeType.toString(), 'RenderParagraph');
+    },
+  );
+
   testWidgets('Table widget - Default textBaseline is null', (WidgetTester tester) async {
     expect(
       () => Table(defaultVerticalAlignment: TableCellVerticalAlignment.baseline),
