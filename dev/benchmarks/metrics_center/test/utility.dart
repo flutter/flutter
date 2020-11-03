@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:test/test.dart';
+import 'common.dart';
 
 // This will be used in many of our unit tests.
 void expectSetMatch<T>(Iterable<T> actual, Iterable<T> expected) {
