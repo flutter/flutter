@@ -89,6 +89,7 @@ abstract class AotAssemblyBase extends Target {
         mainPath: environment.buildDir.childFile('app.dill').path,
         outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),
         darwinArch: darwinArch,
+        sdkRoot: environment.defines[kSdkRoot],
         bitcode: bitcode,
         quiet: true,
         splitDebugInfo: splitDebugInfo,
