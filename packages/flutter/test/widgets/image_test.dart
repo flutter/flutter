@@ -459,18 +459,19 @@ void main() {
 
   testWidgets('Verify Image stops listening to ImageStream', (WidgetTester tester) async {
     final ui.Image image100x100 = (await tester.runAsync(() async => createTestImage(width: 100, height: 100)))!;
+    final int imageSize = (image100x100.width * image100x100.height * 4 * (4/3)).floor();
     // Web does not override the toString, whereas VM does
     final String imageString = image100x100.toString();
 
     final TestImageProvider imageProvider = TestImageProvider();
     await tester.pumpWidget(Image(image: imageProvider, excludeFromSemantics: true));
     final State<Image> image = tester.state/*State<Image>*/(find.byType(Image));
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, unresolved, 2 listeners), pixels: null, loadingProgress: null, frameNumber: null, wasSynchronouslyLoaded: false)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, unresolved, 2 listeners), pixels: null, loadingProgress: ImageChunkEvent#00000(cumulativeBytesLoaded: 0, expectedTotalBytes: null), frameNumber: null, wasSynchronouslyLoaded: false)'));
     imageProvider.complete(image100x100);
     await tester.pump();
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, $imageString @ 1.0x, 1 listener), pixels: $imageString @ 1.0x, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, $imageString @ 1.0x, 1 listener), pixels: $imageString @ 1.0x, loadingProgress: ImageChunkEvent#00000(cumulativeBytesLoaded: $imageSize, expectedTotalBytes: $imageSize), frameNumber: 0, wasSynchronouslyLoaded: false)'));
     await tester.pumpWidget(Container());
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(lifecycle state: defunct, not mounted, stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, $imageString @ 1.0x, 0 listeners), pixels: null, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(lifecycle state: defunct, not mounted, stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, $imageString @ 1.0x, 0 listeners), pixels: null, loadingProgress: ImageChunkEvent#00000(cumulativeBytesLoaded: $imageSize, expectedTotalBytes: $imageSize), frameNumber: 0, wasSynchronouslyLoaded: false)'));
   });
 
   testWidgets('Stream completer errors can be listened to by attaching before resolving', (WidgetTester tester) async {
@@ -1176,9 +1177,9 @@ void main() {
     await tester.pumpWidget(
       Image(
         image: imageProvider,
-        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
           chunkEvents.add(loadingProgress);
-          if (loadingProgress == null)
+          if (loadingProgress.isComplete)
             return child;
           return Directionality(
             textDirection: TextDirection.ltr,
@@ -1189,7 +1190,7 @@ void main() {
     );
 
     expect(chunkEvents.length, 1);
-    expect(chunkEvents.first, isNull);
+    expect(chunkEvents.first, const ImageChunkEvent(cumulativeBytesLoaded: 0));
     expect(tester.binding.hasScheduledFrame, isFalse);
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isTrue);
@@ -1206,6 +1207,7 @@ void main() {
     streamCompleter.setData(imageInfo: ImageInfo(image: image10x10));
     await tester.pump();
     expect(chunkEvents.length, 4);
+    expect(chunkEvents.last, const ImageChunkEvent(cumulativeBytesLoaded: 533, expectedTotalBytes: 533));
     expect(find.byType(Text), findsNothing);
     expect(find.byType(RawImage), findsOneWidget);
   });

@@ -219,7 +219,7 @@ typedef ImageFrameBuilder = Widget Function(
 typedef ImageLoadingBuilder = Widget Function(
   BuildContext context,
   Widget child,
-  ImageChunkEvent? loadingProgress,
+  ImageChunkEvent loadingProgress,
 );
 
 /// Signature used by [Image.errorBuilder] to create a replacement widget to
@@ -1076,7 +1076,7 @@ class Image extends StatefulWidget {
 class _ImageState extends State<Image> with WidgetsBindingObserver {
   ImageStream? _imageStream;
   ImageInfo? _imageInfo;
-  ImageChunkEvent? _loadingProgress;
+  late ImageChunkEvent _loadingProgress;
   bool _isListeningToStream = false;
   late bool _invertColors;
   int? _frameNumber;
@@ -1091,6 +1091,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
     _scrollAwareContext = DisposableBuildContext<State<Image>>(this);
+    _loadingProgress = const ImageChunkEvent(cumulativeBytesLoaded: 0);
   }
 
   @override
@@ -1186,8 +1187,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
     setState(() {
+      final int imageSize = (imageInfo.image.width * imageInfo.image.height * 4 * (4/3)).floor();
       _replaceImage(info: imageInfo);
-      _loadingProgress = null;
+      _loadingProgress = ImageChunkEvent(
+        cumulativeBytesLoaded: imageSize,
+        expectedTotalBytes: imageSize,
+      );
       _lastException = null;
       _lastStack = null;
       _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
@@ -1223,7 +1228,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       setState(() { _replaceImage(info: null); });
 
     setState(() {
-      _loadingProgress = null;
+      _loadingProgress = const ImageChunkEvent(cumulativeBytesLoaded: 0);
       _frameNumber = null;
       _wasSynchronouslyLoaded = false;
     });

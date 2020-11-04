@@ -249,7 +249,7 @@ class ImageChunkEvent with Diagnosticable {
   /// Creates a new chunk event.
   const ImageChunkEvent({
     required this.cumulativeBytesLoaded,
-    required this.expectedTotalBytes,
+    this.expectedTotalBytes,
   }) : assert(cumulativeBytesLoaded >= 0),
        assert(expectedTotalBytes == null || expectedTotalBytes >= 0);
 
@@ -269,11 +269,32 @@ class ImageChunkEvent with Diagnosticable {
   /// loading completion percentage.
   final int? expectedTotalBytes;
 
+  /// Whether this chunk event represents the completion of loading.
+  ///
+  /// [ImageStreamListener]s must not depend on the
+  /// [ImageStreamListener.onChunk] callback ever providing a completed event.
+  /// However, if [ImageStreamListener.onImage] is called, a completed image
+  /// chunk event is implied.
+  bool get isComplete => cumulativeBytesLoaded == expectedTotalBytes;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('cumulativeBytesLoaded', cumulativeBytesLoaded));
     properties.add(IntProperty('expectedTotalBytes', expectedTotalBytes));
+  }
+
+  @override
+  int get hashCode => hashValues(cumulativeBytesLoaded, expectedTotalBytes);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ImageChunkEvent
+        && other.cumulativeBytesLoaded == cumulativeBytesLoaded
+        && other.expectedTotalBytes == expectedTotalBytes;
   }
 }
 
