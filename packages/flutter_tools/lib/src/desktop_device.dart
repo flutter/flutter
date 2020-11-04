@@ -136,10 +136,13 @@ abstract class DesktopDevice extends Device {
       return LaunchResult.failed();
     }
 
+    List<String> command = <String>[ executable, ];
+    if (debuggingOptions?.dartEntrypointArgs != null) {
+      command = command + debuggingOptions?.dartEntrypointArgs;
+    }
+
     final Process process = await _processManager.start(
-      <String>[
-        executable,
-      ] + debuggingOptions?.dartEntrypointArgs,
+      command,
       environment: _computeEnvironment(debuggingOptions, traceStartup, route),
     );
     _runningProcesses.add(process);
