@@ -879,7 +879,7 @@ abstract class FlutterCommand extends Command<void> {
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
       packagesPath: globalResults['packages'] as String
-        ?? globals.fs.path.join('.dart_tool', 'package_config.json'),
+        ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
