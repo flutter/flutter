@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
+
 import '../base/common.dart';
 import '../base/os.dart';
 import '../build_info.dart';
@@ -17,9 +19,9 @@ import '../runner/flutter_command.dart';
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
     addSubcommand(PackagesGetCommand('get', false));
-    addSubcommand(PackagesGetCommand('upgrade', true));
     addSubcommand(PackagesTestCommand());
-    addSubcommand(PackagesPublishCommand());
+    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('upgrade', 'Upgrade the current package\'s dependencies to latest versions.', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
@@ -189,52 +191,16 @@ class PackagesTestCommand extends FlutterCommand {
   }
 }
 
-class PackagesPublishCommand extends FlutterCommand {
-  PackagesPublishCommand() {
-    requiresPubspecYaml();
-    argParser.addFlag('dry-run',
-      abbr: 'n',
-      negatable: false,
-      help: 'Validate but do not publish the package.',
-    );
-    argParser.addFlag('force',
-      abbr: 'f',
-      negatable: false,
-      help: 'Publish without confirmation if there are no errors.',
-    );
-  }
-
-  @override
-  String get name => 'publish';
-
-  @override
-  String get description {
-    return 'Publish the current package to pub.dev';
-  }
-
-  @override
-  String get invocation {
-    return '${runner.executableName} pub publish [--dry-run]';
-  }
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    final List<String> args = <String>[
-      ...argResults.rest,
-      if (boolArg('dry-run')) '--dry-run',
-      if (boolArg('force')) '--force',
-    ];
-    await pub.interactively(<String>['publish', ...args], stdio: globals.stdio);
-    return FlutterCommandResult.success();
-  }
-}
-
 class PackagesForwardCommand extends FlutterCommand {
   PackagesForwardCommand(this._commandName, this._description, {bool requiresPubspec = false}) {
     if (requiresPubspec) {
       requiresPubspecYaml();
     }
   }
+
+  @override
+  ArgParser argParser = ArgParser.allowAnything();
+
   final String _commandName;
   final String _description;
 
@@ -257,7 +223,6 @@ class PackagesForwardCommand extends FlutterCommand {
     await pub.interactively(<String>[_commandName, ...argResults.rest], stdio: globals.stdio);
     return FlutterCommandResult.success();
   }
-
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
