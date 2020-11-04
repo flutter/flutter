@@ -75,18 +75,12 @@ class CupertinoPageScaffold extends StatefulWidget {
 }
 
 class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
-  ScrollController? _primaryScrollController;
-
-  @override
-  void didChangeDependencies() {
-    _primaryScrollController  = PrimaryScrollController.of(context);
-    super.didChangeDependencies();
-  }
 
   void _handleStatusBarTap() {
+    final ScrollController? _primaryScrollController = PrimaryScrollController.of(context);
     // Only act on the scroll controller if it has any attached scroll positions.
-    if (_primaryScrollController != null && _primaryScrollController!.hasClients) {
-      _primaryScrollController!.animateTo(
+    if (_primaryScrollController != null && _primaryScrollController.hasClients) {
+      _primaryScrollController.animateTo(
         0.0,
         // Eyeballed from iOS.
         duration: const Duration(milliseconds: 500),

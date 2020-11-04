@@ -2672,10 +2672,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // On iOS, tapping the status bar scrolls the app's primary scrollable to the
   // top. We implement this by providing a primary scroll controller and
   // scrolling it to the top when tapped.
-  ScrollController? _primaryScrollController;
   void _handleStatusBarTap() {
-    if (_primaryScrollController != null && _primaryScrollController!.hasClients) {
-      _primaryScrollController!.animateTo(
+    final ScrollController? _primaryScrollController = PrimaryScrollController.of(context);
+    if (_primaryScrollController != null && _primaryScrollController.hasClients) {
+      _primaryScrollController.animateTo(
         0.0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.linear, // TODO(ianh): Use a more appropriate curve.
@@ -2758,8 +2758,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     // Register with the current ScaffoldMessenger, if there is one.
     _scaffoldMessenger = _currentScaffoldMessenger;
     _scaffoldMessenger?._register(this);
-
-    _primaryScrollController = PrimaryScrollController.of(context);
 
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
     final MediaQueryData mediaQuery = MediaQuery.of(context);

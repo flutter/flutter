@@ -969,7 +969,7 @@ class ScrollAction extends Action<ScrollIntent> {
       // Check for primary scrollable within the current context
       if (Scrollable.of(focus!.context!) != null)
         return true;
-      // Check for fallback scrollable with context from DefaultScrollAction
+      // Check for fallback scrollable with context from PrimaryScrollController
       if (PrimaryScrollController.of(focus.context!) != null) {
         final ScrollController? primaryScrollController = PrimaryScrollController.of(focus.context!);
         return primaryScrollController != null
