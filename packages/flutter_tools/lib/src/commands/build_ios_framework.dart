@@ -339,7 +339,7 @@ end
       status.stop();
     }
 
-    await _produceXCFramework(buildInfo, fatFlutterFrameworkCopy);
+    await _produceXCFrameworkFromUniversal(buildInfo, fatFlutterFrameworkCopy);
   }
 
   Future<void> _produceAppFramework(BuildInfo buildInfo, Directory modeDirectory) async {
@@ -399,7 +399,7 @@ end
     }
 
     final Directory destinationAppFrameworkDirectory = modeDirectory.childDirectory(appFrameworkName);
-    await _produceXCFramework(buildInfo, destinationAppFrameworkDirectory);
+    await _produceXCFrameworkFromUniversal(buildInfo, destinationAppFrameworkDirectory);
   }
 
   Future<void> _producePlugins(
@@ -496,69 +496,17 @@ end
             continue;
           }
           final String binaryName = globals.fs.path.basenameWithoutExtension(podFrameworkName);
-          if (boolArg('universal')) {
-            globals.fsUtils.copyDirectorySync(
-              podProduct as Directory,
-              modeDirectory.childDirectory(podFrameworkName),
-            );
-            final List<String> lipoCommand = <String>[
-              ...globals.xcode.xcrunCommand(),
-              'lipo',
-              '-create',
-              globals.fs.path.join(podProduct.path, binaryName),
-              if (mode == BuildMode.debug)
-                simulatorBuildConfiguration
-                  .childDirectory(binaryName)
+
+          final List<Directory> frameworks = <Directory>[
+            podProduct as Directory,
+            if (mode == BuildMode.debug)
+              simulatorBuildConfiguration
+                  .childDirectory(builtProduct.basename)
                   .childDirectory(podFrameworkName)
-                  .childFile(binaryName)
-                  .path,
-              '-output',
-              modeDirectory.childDirectory(podFrameworkName).childFile(binaryName).path
-            ];
+          ];
 
-            final RunResult pluginsLipoResult = await globals.processUtils.run(
-              lipoCommand,
-              workingDirectory: outputDirectory.path,
-              allowReentrantFlutter: false,
-            );
-
-            if (pluginsLipoResult.exitCode != 0) {
-              throwToolExit(
-                'Unable to create universal $binaryName.framework: ${buildPluginsResult.stderr}',
-              );
-            }
-          }
-
-          if (boolArg('xcframework')) {
-            final List<String> xcframeworkCommand = <String>[
-              ...globals.xcode.xcrunCommand(),
-              'xcodebuild',
-              '-create-xcframework',
-              '-framework',
-              podProduct.path,
-              if (mode == BuildMode.debug)
-                '-framework',
-              if (mode == BuildMode.debug)
-                simulatorBuildConfiguration
-                  .childDirectory(binaryName)
-                  .childDirectory(podFrameworkName)
-                  .path,
-              '-output',
-              modeDirectory.childFile('$binaryName.xcframework').path
-            ];
-
-            final RunResult xcframeworkResult = await globals.processUtils.run(
-              xcframeworkCommand,
-              workingDirectory: outputDirectory.path,
-              allowReentrantFlutter: false,
-            );
-
-            if (xcframeworkResult.exitCode != 0) {
-              throwToolExit(
-                'Unable to create $binaryName.xcframework: ${xcframeworkResult.stderr}',
-              );
-            }
-          }
+          await _produceUniversalFramework(frameworks, binaryName, modeDirectory);
+          await _produceXCFramework(frameworks, binaryName, modeDirectory);
         }
       }
     } finally {
@@ -566,7 +514,7 @@ end
     }
   }
 
-  Future<void> _produceXCFramework(BuildInfo buildInfo, Directory fatFramework) async {
+  Future<void> _produceXCFrameworkFromUniversal(BuildInfo buildInfo, Directory fatFramework) async {
     if (boolArg('xcframework')) {
       final String frameworkBinaryName = globals.fs.path.basenameWithoutExtension(
           fatFramework.basename);
@@ -578,7 +526,9 @@ end
         if (buildInfo.mode == BuildMode.debug) {
           await _produceDebugXCFramework(fatFramework, frameworkBinaryName);
         } else {
-          await _produceNonDebugXCFramework(buildInfo, fatFramework, frameworkBinaryName);
+          await _produceXCFramework(
+              <Directory>[fatFramework], frameworkBinaryName,
+              fatFramework.parent);
         }
       } finally {
         status.stop();
@@ -660,47 +610,34 @@ end
       }
 
       // Create XCFramework from iOS and simulator frameworks.
-      final List<String> xcframeworkCommand = <String>[
-        ...globals.xcode.xcrunCommand(),
-        'xcodebuild',
-        '-create-xcframework',
-        '-framework', armFlutterFrameworkDirectory.path,
-        '-framework', simulatorFlutterFrameworkDirectory.path,
-        '-output', fatFramework.parent
-            .childFile('$frameworkBinaryName.xcframework')
-            .path
-      ];
-
-      final RunResult xcframeworkResult = await globals.processUtils.run(
-        xcframeworkCommand,
-        allowReentrantFlutter: false,
+      await _produceXCFramework(
+        <Directory>[
+          armFlutterFrameworkDirectory,
+          simulatorFlutterFrameworkDirectory
+        ],
+        frameworkBinaryName,
+        fatFramework.parent,
       );
-
-      if (xcframeworkResult.exitCode != 0) {
-        throwToolExit(
-          'Unable to create XCFramework: ${xcframeworkResult.stderr}',
-        );
-      }
     } finally {
       temporaryOutput.deleteSync(recursive: true);
     }
   }
 
-  Future<void> _produceNonDebugXCFramework(
-    BuildInfo buildInfo,
-    Directory fatFramework,
-    String frameworkBinaryName,
-  ) async {
-    // Simulator is only supported in Debug mode.
-    // "Fat" framework here must only contain arm.
+  Future<void> _produceXCFramework(Iterable<Directory> frameworks,
+      String frameworkBinaryName, Directory outputDirectory) async {
+    if (!boolArg('xcframework')) {
+      return;
+    }
     final List<String> xcframeworkCommand = <String>[
       ...globals.xcode.xcrunCommand(),
       'xcodebuild',
       '-create-xcframework',
-      '-framework', fatFramework.path,
-      '-output', fatFramework.parent
-          .childFile('$frameworkBinaryName.xcframework')
-          .path
+      for (Directory framework in frameworks) ...<String>[
+        '-framework',
+        framework.path
+      ],
+      '-output',
+      outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path
     ];
 
     final RunResult xcframeworkResult = await globals.processUtils.run(
@@ -710,7 +647,45 @@ end
 
     if (xcframeworkResult.exitCode != 0) {
       throwToolExit(
-          'Unable to create XCFramework: ${xcframeworkResult.stderr}');
+          'Unable to create $frameworkBinaryName.xcframework: ${xcframeworkResult.stderr}');
+    }
+  }
+
+  Future<void> _produceUniversalFramework(Iterable<Directory> frameworks,
+      String frameworkBinaryName, Directory outputDirectory) async {
+    if (!boolArg('universal')) {
+      return;
+    }
+    final Directory outputFrameworkDirectory =
+        outputDirectory.childDirectory('$frameworkBinaryName.framework');
+
+    // Copy the first framework over completely to get headers, resources, etc.
+    globals.fsUtils.copyDirectorySync(
+      frameworks.first,
+      outputFrameworkDirectory,
+    );
+
+    // Recreate the framework binary by lipo'ing the framework binaries together.
+    final List<String> lipoCommand = <String>[
+      ...globals.xcode.xcrunCommand(),
+      'lipo',
+      '-create',
+      for (Directory framework in frameworks) ...<String>[
+        framework.childFile(frameworkBinaryName).path
+      ],
+      '-output',
+      outputFrameworkDirectory.childFile(frameworkBinaryName).path
+    ];
+
+    final RunResult lipoResult = await globals.processUtils.run(
+      lipoCommand,
+      workingDirectory: outputDirectory.path,
+      allowReentrantFlutter: false,
+    );
+
+    if (lipoResult.exitCode != 0) {
+      throwToolExit(
+          'Unable to create $frameworkBinaryName.framework: ${lipoResult.stderr}');
     }
   }
 }
