@@ -106,12 +106,12 @@ class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
   @override
   void initState() {
     super.initState();
-    _initialized = widget.controller.value.initialized;
+    _initialized = widget.controller.value.isInitialized;
     widget.controller.addListener(() {
       if (!mounted) {
         return;
       }
-      final bool controllerInitialized = widget.controller.value.initialized;
+      final bool controllerInitialized = widget.controller.value.isInitialized;
       if (_initialized != controllerInitialized) {
         setState(() {
           _initialized = controllerInitialized;
@@ -178,7 +178,7 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
         GestureDetector(
           child: VideoPlayerLoading(controller),
           onTap: () {
-            if (!controller.value.initialized) {
+            if (!controller.value.isInitialized) {
               return;
             }
             if (controller.value.isPlaying) {
