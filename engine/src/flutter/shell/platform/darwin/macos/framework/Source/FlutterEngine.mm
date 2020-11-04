@@ -53,6 +53,11 @@ static FlutterLocale FlutterLocaleFromNSLocale(NSLocale* locale) {
 - (bool)engineCallbackOnPresent;
 
 /**
+ * Called by the engine when framebuffer object ID is requested.
+ */
+- (uint32_t)engineCallbackOnFBO:(const FlutterFrameInfo*)info;
+
+/**
  * Makes the resource context the current context.
  */
 - (bool)engineCallbackOnMakeResourceCurrent;
@@ -146,8 +151,7 @@ static bool OnPresent(FlutterEngine* engine) {
 }
 
 static uint32_t OnFBO(FlutterEngine* engine, const FlutterFrameInfo* info) {
-  CGSize size = CGSizeMake(info->size.width, info->size.height);
-  return [engine.viewController.flutterView getFrameBufferIdForSize:size];
+  return [engine engineCallbackOnFBO:info];
 }
 
 static bool OnMakeResourceCurrent(FlutterEngine* engine) {
@@ -467,6 +471,11 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   }
   [_mainOpenGLContext makeCurrentContext];
   return true;
+}
+
+- (uint32_t)engineCallbackOnFBO:(const FlutterFrameInfo*)info {
+  CGSize size = CGSizeMake(info->size.width, info->size.height);
+  return [_viewController.flutterView frameBufferIDForSize:size];
 }
 
 - (bool)engineCallbackOnClearCurrent {

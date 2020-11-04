@@ -1,41 +1,45 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
-#import "flutter/fml/logging.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/MacOSSwitchableGLContext.h"
 
 #include <OpenGL/gl.h>
 
+#import "flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h"
+
 enum {
-  kFront = 0,
-  kBack = 1,
-  kBufferCount,
+  kFlutterSurfaceManagerFrontBuffer = 0,
+  kFlutterSurfaceManagerBackBuffer = 1,
+  kFlutterSurfaceManagerBufferCount,
 };
 
 @interface FlutterSurfaceManager () {
-  CGSize surfaceSize;
-  CALayer* layer;  // provided (parent layer)
-  CALayer* contentLayer;
+  CGSize _surfaceSize;
+  CALayer* _containingLayer;  // provided (parent layer)
+  CALayer* _contentLayer;
 
-  NSOpenGLContext* openGLContext;
-  uint32_t _frameBufferId[kBufferCount];
-  uint32_t _backingTexture[kBufferCount];
-  IOSurfaceRef _ioSurface[kBufferCount];
+  NSOpenGLContext* _openGLContext;
+  uint32_t _frameBufferId[kFlutterSurfaceManagerBufferCount];
+  uint32_t _backingTexture[kFlutterSurfaceManagerBufferCount];
+  IOSurfaceRef _ioSurface[kFlutterSurfaceManagerBufferCount];
 }
 @end
 
 @implementation FlutterSurfaceManager
 
-- (instancetype)initWithLayer:(CALayer*)layer_ openGLContext:(NSOpenGLContext*)opengLContext_ {
+- (instancetype)initWithLayer:(CALayer*)containingLayer
+                openGLContext:(NSOpenGLContext*)openGLContext {
   if (self = [super init]) {
-    layer = layer_;
-    openGLContext = opengLContext_;
+    _containingLayer = containingLayer;
+    _openGLContext = openGLContext;
 
     // Layer for content. This is separate from provided layer, because it needs to be flipped
     // vertically if we render to OpenGL texture
-    contentLayer = [[CALayer alloc] init];
-    [layer_ addSublayer:contentLayer];
+    _contentLayer = [[CALayer alloc] init];
+    [_containingLayer addSublayer:_contentLayer];
 
-    flutter::GLContextSwitch context_switch(
-        std::make_unique<MacOSSwitchableGLContext>(opengLContext_));
+    MacOSGLContextSwitch context_switch(openGLContext);
 
     glGenFramebuffers(2, _frameBufferId);
     glGenTextures(2, _backingTexture);
@@ -57,15 +61,14 @@ enum {
 }
 
 - (void)ensureSurfaceSize:(CGSize)size {
-  if (CGSizeEqualToSize(size, surfaceSize)) {
+  if (CGSizeEqualToSize(size, _surfaceSize)) {
     return;
   }
-  surfaceSize = size;
+  _surfaceSize = size;
 
-  flutter::GLContextSwitch context_switch(
-      std::make_unique<MacOSSwitchableGLContext>(openGLContext));
+  MacOSGLContextSwitch context_switch(_openGLContext);
 
-  for (int i = 0; i < kBufferCount; ++i) {
+  for (int i = 0; i < kFlutterSurfaceManagerBufferCount; ++i) {
     if (_ioSurface[i]) {
       CFRelease(_ioSurface[i]);
     }
@@ -96,29 +99,33 @@ enum {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE_ARB,
                            _backingTexture[i], 0);
 
-    FML_DCHECK(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+    NSAssert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE,
+             @"Framebuffer status check failed");
   }
 }
 
 - (void)swapBuffers {
-  contentLayer.frame = layer.bounds;
+  _contentLayer.frame = _containingLayer.bounds;
 
   // The surface is an OpenGL texture, which means it has origin in bottom left corner
   // and needs to be flipped vertically
-  contentLayer.transform = CATransform3DMakeScale(1, -1, 1);
-  [contentLayer setContents:(__bridge id)_ioSurface[kBack]];
+  _contentLayer.transform = CATransform3DMakeScale(1, -1, 1);
+  [_contentLayer setContents:(__bridge id)_ioSurface[kFlutterSurfaceManagerBackBuffer]];
 
-  std::swap(_ioSurface[kBack], _ioSurface[kFront]);
-  std::swap(_frameBufferId[kBack], _frameBufferId[kFront]);
-  std::swap(_backingTexture[kBack], _backingTexture[kFront]);
+  std::swap(_ioSurface[kFlutterSurfaceManagerBackBuffer],
+            _ioSurface[kFlutterSurfaceManagerFrontBuffer]);
+  std::swap(_frameBufferId[kFlutterSurfaceManagerBackBuffer],
+            _frameBufferId[kFlutterSurfaceManagerFrontBuffer]);
+  std::swap(_backingTexture[kFlutterSurfaceManagerBackBuffer],
+            _backingTexture[kFlutterSurfaceManagerFrontBuffer]);
 }
 
 - (uint32_t)glFrameBufferId {
-  return _frameBufferId[kBack];
+  return _frameBufferId[kFlutterSurfaceManagerBackBuffer];
 }
 
 - (void)dealloc {
-  for (int i = 0; i < kBufferCount; ++i) {
+  for (int i = 0; i < kFlutterSurfaceManagerBufferCount; ++i) {
     if (_ioSurface[i]) {
       CFRelease(_ioSurface[i]);
     }

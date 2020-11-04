@@ -66,15 +66,13 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterView.mm",
     "framework/Source/FlutterViewController.mm",
     "framework/Source/FlutterViewController_Internal.h",
-    "framework/Source/MacOSSwitchableGLContext.h",
-    "framework/Source/MacOSSwitchableGLContext.mm",
+    "framework/Source/MacOSGLContextSwitch.h",
+    "framework/Source/MacOSGLContextSwitch.mm",
   ]
 
   sources += _flutter_framework_headers
 
   deps = [
-    "//flutter/flow:flow",
-    "//flutter/fml:fml",
     "//flutter/shell/platform/common/cpp:common_cpp_switches",
     "//flutter/shell/platform/darwin/common:framework_shared",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
