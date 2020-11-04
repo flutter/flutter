@@ -1677,7 +1677,7 @@ void main() {
   });
 
   testWidgets('TabBar - directional indicatorPadding (LTR) with STEB padding', (WidgetTester tester) async {
-    final List<Widget> tabs = <Widget>[
+    final List<Widget > tabs = <Widget>[
       SizedBox(key: UniqueKey(), width: 130.0, height: 30.0),
       SizedBox(key: UniqueKey(), width: 140.0, height: 40.0),
       SizedBox(key: UniqueKey(), width: 150.0, height: 50.0),
@@ -1721,7 +1721,7 @@ void main() {
     double tabTop = (tabBarHeight - indicatorWeight - 30.0) / 2.0;
     double tabBottom = tabTop + 30.0;
     Rect tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
-    expect(tester.getRect(find.byKey(tabs[0].key)), tabRect);
+    expect(tester.getRect(find.byKey(tabs[0].key!)), tabRect);
 
     // Tab1 width = 140, height = 40
     tabLeft = tabRight + kTabLabelPadding.right + kTabLabelPadding.left;
@@ -1729,7 +1729,7 @@ void main() {
     tabTop = (tabBarHeight - indicatorWeight - 40.0) / 2.0;
     tabBottom = tabTop + 40.0;
     tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
-    expect(tester.getRect(find.byKey(tabs[1].key)), tabRect);
+    expect(tester.getRect(find.byKey(tabs[1].key!)), tabRect);
 
     // Tab2 width = 150, height = 50
     tabLeft = tabRight + kTabLabelPadding.right + kTabLabelPadding.left;
@@ -1737,7 +1737,7 @@ void main() {
     tabTop = (tabBarHeight - indicatorWeight - 50.0) / 2.0;
     tabBottom = tabTop + 50.0;
     tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
-    expect(tester.getRect(find.byKey(tabs[2].key)), tabRect);
+    expect(tester.getRect(find.byKey(tabs[2].key!)), tabRect);
 
     // Tab 0 selected, indicator padding resolves to left: 8.0, right: 4.0
     const double indicatorLeft = padStart;
@@ -1802,7 +1802,7 @@ void main() {
     double tabTop = (tabBarHeight - indicatorWeight - 50.0) / 2.0;
     double tabBottom = tabTop + 50.0;
     Rect tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
-    expect(tester.getRect(find.byKey(tabs[2].key)), tabRect);
+    expect(tester.getRect(find.byKey(tabs[2].key!)), tabRect);
 
     // Tab1 width = 140, height = 40
     tabLeft = tabRight + kTabLabelPadding.right + kTabLabelPadding.left;
@@ -1810,7 +1810,7 @@ void main() {
     tabTop = (tabBarHeight - indicatorWeight - 40.0) / 2.0;
     tabBottom = tabTop + 40.0;
     tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
-    expect(tester.getRect(find.byKey(tabs[1].key)), tabRect);
+    expect(tester.getRect(find.byKey(tabs[1].key!)), tabRect);
 
     // Tab0 width = 130, height = 30
     tabLeft = tabRight + kTabLabelPadding.right + kTabLabelPadding.left;
@@ -1818,7 +1818,7 @@ void main() {
     tabTop = (tabBarHeight - indicatorWeight - 30.0) / 2.0;
     tabBottom = tabTop + 30.0;
     tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
-    expect(tester.getRect(find.byKey(tabs[0].key)), tabRect);
+    expect(tester.getRect(find.byKey(tabs[0].key!)), tabRect);
 
     // Tab 0 selected, indicator padding resolves to left: 4.0, right: 8.0
     final double indicatorLeft = tabLeft - kTabLabelPadding.left + padEnd;
