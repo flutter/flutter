@@ -36,7 +36,7 @@ void main() {
 
   test('analyze.dart - verifyDeprecations', () async {
     final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), exitCode: 1);
-    expect(result,
+    expect(result, contains(
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
       +
       (
@@ -59,12 +59,12 @@ void main() {
       +
       'See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes\n'
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-    );
+    ));
   });
 
   test('analyze.dart - verifyNoMissingLicense', () async {
     final String result = await capture(() => verifyNoMissingLicense(testRootPath, checkMinimums: false), exitCode: 1);
-    expect(result,
+    expect(result, contains(
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
       +
       (
@@ -79,12 +79,12 @@ void main() {
       '// found in the LICENSE file.\n'
       '...followed by a blank line.\n'
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-    );
+    ));
   });
 
   test('analyze.dart - verifyNoTrailingSpaces', () async {
     final String result = await capture(() => verifyNoTrailingSpaces(testRootPath, minimumMatches: 2), exitCode: 1);
-    expect(result,
+    expect(result, contains(
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
       +
       (
@@ -94,7 +94,7 @@ void main() {
       )
       +
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-    );
+    ));
   });
 
   test('analyze.dart - verifyNoBinaries - positive', () async {
