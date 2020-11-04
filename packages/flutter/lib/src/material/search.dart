@@ -188,16 +188,19 @@ abstract class SearchDelegate<T> {
   ///  * [AppBar.actions], the intended use for the return value of this method.
   List<Widget> buildActions(BuildContext context);
 
-  /// The theme used to style the [AppBar].
+  /// The theme used to configure the search page.
+  ///
+  /// The returned [ThemeData] will be used to wrap the entire search page,
+  /// so it can be used to configure any of its components with the appropriate
+  /// theme properties.
   ///
   /// By default, a white theme is used.
   ///
   /// See also:
   ///
-  ///  * [AppBar.backgroundColor], which is set to [ThemeData.primaryColor].
-  ///  * [AppBar.iconTheme], which is set to [ThemeData.primaryIconTheme].
-  ///  * [AppBar.textTheme], which is set to [ThemeData.primaryTextTheme].
-  ///  * [AppBar.brightness], which is set to [ThemeData.primaryColorBrightness].
+  ///  * [AppBarTheme], which configures the AppBar's appearance.
+  ///  * [InputDecorationTheme], which configures the appearance of the search
+  ///    text field.
   ThemeData appBarTheme(BuildContext context) {
     assert(context != null);
     final ThemeData theme = Theme.of(context);
