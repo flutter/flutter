@@ -973,6 +973,7 @@ class ScrollAction extends Action<ScrollIntent> {
       if (PrimaryScrollController.of(focus.context!) != null) {
         final ScrollController? primaryScrollController = PrimaryScrollController.of(focus.context!);
         return primaryScrollController != null
+          && primaryScrollController.hasClients
           && primaryScrollController.position.context.notificationContext != null
           && Scrollable.of(primaryScrollController.position.context.notificationContext!) != null;
       }

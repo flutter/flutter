@@ -169,6 +169,7 @@ void main() {
       '     ScaffoldMessenger\n'
       '     Builder\n'
       '     DefaultTextStyle\n'
+      '     PrimaryScrollController\n'
       '     CustomPaint\n'
       '     Banner\n'
       '     CheckedModeBanner\n'
