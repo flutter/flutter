@@ -626,27 +626,27 @@ end
     if (!boolArg('xcframework')) {
       return;
     }
-      final List<String> xcframeworkCommand = <String>[
-        ...globals.xcode.xcrunCommand(),
-        'xcodebuild',
-        '-create-xcframework',
-        for (Directory framework in frameworks) ...<String>[
-          '-framework',
-          framework.path
-        ],
-        '-output',
-        outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path
-      ];
+    final List<String> xcframeworkCommand = <String>[
+      ...globals.xcode.xcrunCommand(),
+      'xcodebuild',
+      '-create-xcframework',
+      for (Directory framework in frameworks) ...<String>[
+        '-framework',
+        framework.path
+      ],
+      '-output',
+      outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path
+    ];
 
-      final RunResult xcframeworkResult = await globals.processUtils.run(
-        xcframeworkCommand,
-        allowReentrantFlutter: false,
-      );
+    final RunResult xcframeworkResult = await globals.processUtils.run(
+      xcframeworkCommand,
+      allowReentrantFlutter: false,
+    );
 
-      if (xcframeworkResult.exitCode != 0) {
-        throwToolExit(
-            'Unable to create $frameworkBinaryName.xcframework: ${xcframeworkResult.stderr}');
-      }
+    if (xcframeworkResult.exitCode != 0) {
+      throwToolExit(
+          'Unable to create $frameworkBinaryName.xcframework: ${xcframeworkResult.stderr}');
+    }
   }
 
   Future<void> _produceUniversalFramework(Iterable<Directory> frameworks,
@@ -654,8 +654,8 @@ end
     if (!boolArg('universal')) {
       return;
     }
-    final Directory outputFrameworkDirectory = outputDirectory
-        .childDirectory('$frameworkBinaryName.framework');
+    final Directory outputFrameworkDirectory =
+        outputDirectory.childDirectory('$frameworkBinaryName.framework');
 
     // Copy the first framework over completely to get headers, resources, etc.
     globals.fsUtils.copyDirectorySync(
@@ -669,9 +669,7 @@ end
       'lipo',
       '-create',
       for (Directory framework in frameworks) ...<String>[
-        framework
-            .childFile(frameworkBinaryName)
-            .path
+        framework.childFile(frameworkBinaryName).path
       ],
       '-output',
       outputFrameworkDirectory.childFile(frameworkBinaryName).path
@@ -685,8 +683,7 @@ end
 
     if (lipoResult.exitCode != 0) {
       throwToolExit(
-          'Unable to create $frameworkBinaryName.framework: ${lipoResult
-              .stderr}');
+          'Unable to create $frameworkBinaryName.framework: ${lipoResult.stderr}');
     }
   }
 }
