@@ -1368,10 +1368,9 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   @override
   void restoreScrollOffset() {
-    // If the children of a NestedScrollView have PageStorageKey, the
-    // ScrollOffset should be restored correctly and not controlled by
-    // coordinator.canScrollBody.
-    // Related issues: https://github.com/flutter/flutter/issues/40740
+    // If the children of a [NestedScrollView] have [PageStorageKey], the
+    // scroll offset should be restored correctly and not controlled by
+    // [_NestedScrollCoordinator.canScrollBody].
     Element? elementWithPageStorageKey;
     context.storageContext.visitAncestorElements((Element element) {
       if (element.widget.key is PageStorageKey) {
