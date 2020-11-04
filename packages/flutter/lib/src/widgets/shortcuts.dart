@@ -409,8 +409,8 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// Widget build(BuildContext context) {
 ///   return Shortcuts(
 ///     shortcuts: <LogicalKeySet, Intent> {
-///       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.numpadAdd): Increment(),
-///       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.numpadSubtract): Decrement(),
+///       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.keyK): Increment(),
+///       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.keyL): Decrement(),
 ///     },
 ///     child: Actions(
 ///       actions: <Type, Action<Intent>> {
