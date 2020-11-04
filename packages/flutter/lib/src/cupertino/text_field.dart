@@ -93,6 +93,9 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 
   final _CupertinoTextFieldState _state;
 
+  // TODO(justinmc): Here's something that still needs to happen here! How?
+  // I need to be able to stop the handling of this altogether if it's on the
+  // clear button...
   @override
   void onSingleTapUp(TapUpDetails details) {
     // Because TextSelectionGestureDetector listens to taps that happen on

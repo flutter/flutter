@@ -11,13 +11,14 @@ import 'package:flutter/gestures.dart';
 // _TextFieldSelectionGestureDetectorBuilder.
 /// Links every user-facing action that can happen in text editing to its
 /// result.
-class TextEditingBehavior {
+class TextEditingBehavior extends InheritedWidget {
   TextEditingBehavior({
+    Key? key,
     //required this.delegate,
     required this.editableTextState,
     //required this.platform,
     this.platform = TargetPlatform.iOS,
-  });
+  }) : super(key: key);
 
   //final TextSelectionGestureDetectorBuilderDelegate delegate;
   final EditableTextState editableTextState;
@@ -92,5 +93,9 @@ class TextEditingBehavior {
     // TODO(justinmc): State of keyboard visibility should be controllable here
     // too.
     //_state._requestKeyboard();
+
+    // TODO(justinmc): Still need to handle calling of onTap.
+    //if (_state.widget.onTap != null)
+    //  _state.widget.onTap!();
   }
 }
