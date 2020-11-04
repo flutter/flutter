@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 const String kIncrement = 'increment';
-const String kX = 'x';
-const String kY = 'y';
-const String kZ = 'z';
 const String kCommit = 'commit';
 const String kRemoteName = 'remote';
 const String kJustPrint = 'just-print';

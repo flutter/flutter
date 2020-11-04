@@ -25,10 +25,11 @@ class RollDev extends Command<void> {
       kIncrement,
       help: 'Specifies which part of the x.y.z version number to increment. Required.',
       valueHelp: 'level',
-      allowed: <String>[kY, kZ, 'm', 'n'],
+      allowed: <String>['y', 'z', 'm'],
       allowedHelp: <String, String>{
-        kY: 'Indicates a minor development, e.g. typically changed after a beta release.',
-        kZ: 'Indicates a hotfix to a stable release.',
+        'y': 'Indicates the first dev release after a beta release.',
+        'z': 'Indicates a hotfix to a stable release.',
+        'm': 'Indicates a standard dev release.',
       },
     );
     argParser.addOption(
