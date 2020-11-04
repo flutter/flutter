@@ -1538,6 +1538,307 @@ void main() {
     ));
   });
 
+  testWidgets('TabBar with custom indicator and indicatorPadding(LTR)', (WidgetTester tester) async {
+    const Color indicatorColor = Color(0xFF00FF00);
+    const double padTop = 10.0;
+    const double padBottom = 12.0;
+    const double padLeft = 8.0;
+    const double padRight = 4.0;
+    const Decoration indicator = BoxDecoration(color: indicatorColor);
+
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(text: 'Tab $index');
+    });
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            indicator: indicator,
+            indicatorPadding:
+            const EdgeInsets.fromLTRB(padLeft, padTop, padRight, padBottom),
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox =
+    tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox.size.height, 48.0);
+    // 48 = _kTabHeight(46) + indicatorWeight(2.0) ~default
+
+    const double indicatorBottom = 48.0 - padBottom;
+    const double indicatorTop = padTop;
+    double indicatorLeft = padLeft;
+    double indicatorRight = 200.0 - padRight;
+
+    expect(tabBarBox, paints..rect(
+      rect: Rect.fromLTRB(
+        indicatorLeft,
+        indicatorTop,
+        indicatorRight,
+        indicatorBottom,
+      ),
+      color: indicatorColor,
+    ));
+
+    // Select tab 3
+    controller.index = 3;
+    await tester.pumpAndSettle();
+
+    indicatorLeft = 600.0 + padLeft;
+    indicatorRight = 800.0 - padRight;
+
+    expect(tabBarBox, paints..rect(
+      rect: Rect.fromLTRB(
+        indicatorLeft,
+        indicatorTop,
+        indicatorRight,
+        indicatorBottom,
+      ),
+      color: indicatorColor,
+    ));
+  });
+
+  testWidgets('TabBar with custom indicator and indicatorPadding (RTL)', (WidgetTester tester) async {
+    const Color indicatorColor = Color(0xFF00FF00);
+    const double padTop = 10.0;
+    const double padBottom = 12.0;
+    const double padLeft = 8.0;
+    const double padRight = 4.0;
+    const Decoration indicator = BoxDecoration(color: indicatorColor);
+
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(text: 'Tab $index');
+    });
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.rtl,
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+          indicator: indicator,
+          indicatorPadding: const EdgeInsets.fromLTRB(padLeft, padTop, padRight, padBottom),
+          controller: controller,
+          tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox =
+    tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox.size.height, 48.0);
+    // 48 = _kTabHeight(46) + indicatorWeight(2.0) ~default
+    expect(tabBarBox.size.width, 800.0);
+    const double indicatorBottom = 48.0 - padBottom;
+    const double indicatorTop = padTop;
+    double indicatorLeft = 600.0 + padLeft;
+    double indicatorRight = 800.0 - padRight;
+
+    expect(tabBarBox, paints..rect(
+      rect: Rect.fromLTRB(
+        indicatorLeft,
+        indicatorTop,
+        indicatorRight,
+        indicatorBottom,
+      ),
+      color: indicatorColor,
+    ));
+
+    // Select tab 3
+    controller.index = 3;
+    await tester.pumpAndSettle();
+
+    indicatorLeft = padLeft;
+    indicatorRight = 200.0 - padRight;
+
+    expect(tabBarBox,paints..rect(
+      rect: Rect.fromLTRB(
+        indicatorLeft,
+        indicatorTop,
+        indicatorRight,
+        indicatorBottom,
+      ),
+      color: indicatorColor,
+    ));
+  });
+
+  testWidgets('TabBar with custom indicator - directional indicatorPadding (LTR)', (WidgetTester tester) async {
+    final List<Widget > tabs = <Widget>[
+      SizedBox(key: UniqueKey(), width: 130.0, height: 30.0),
+      SizedBox(key: UniqueKey(), width: 140.0, height: 40.0),
+      SizedBox(key: UniqueKey(), width: 150.0, height: 50.0),
+    ];
+    const Color indicatorColor = Color(0xFF00FF00);
+    const double padTop = 10.0;
+    const double padBottom = 12.0;
+    const double padStart = 8.0;
+    const double padEnd = 4.0;
+    const Decoration indicator = BoxDecoration(color: indicatorColor);
+    const double indicatorWeight = 2.0; // the default
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            indicator: indicator,
+            indicatorPadding: const EdgeInsetsDirectional.fromSTEB(
+              padStart, padTop, padEnd, padBottom),
+            isScrollable: true,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    const double tabBarHeight = 50.0 + indicatorWeight; // 50 = max tab height
+    expect(tabBarBox.size.height, tabBarHeight);
+
+    // Tab0 width = 130, height = 30
+    double tabLeft = kTabLabelPadding.left;
+    double tabRight = tabLeft + 130.0;
+    double tabTop = (tabBarHeight - indicatorWeight - 30.0) / 2.0;
+    double tabBottom = tabTop + 30.0;
+    Rect tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[0].key!)), tabRect);
+
+    // Tab1 width = 140, height = 40
+    tabLeft = tabRight + kTabLabelPadding.right + kTabLabelPadding.left;
+    tabRight = tabLeft + 140.0;
+    tabTop = (tabBarHeight - indicatorWeight - 40.0) / 2.0;
+    tabBottom = tabTop + 40.0;
+    tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[1].key!)), tabRect);
+
+    // Tab2 width = 150, height = 50
+    tabLeft = tabRight + kTabLabelPadding.right + kTabLabelPadding.left;
+    tabRight = tabLeft + 150.0;
+    tabTop = (tabBarHeight - indicatorWeight - 50.0) / 2.0;
+    tabBottom = tabTop + 50.0;
+    tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[2].key!)), tabRect);
+
+    // Tab 0 selected, indicator padding resolves to left: 8.0, right: 4.0
+    const double indicatorLeft = padStart;
+    final double indicatorRight = 130.0 + kTabLabelPadding.horizontal - padEnd;
+    const double indicatorTop = padTop;
+    const double indicatorBottom = tabBarHeight - padBottom;
+    expect(tabBarBox, paints..rect(
+      rect: Rect.fromLTRB(
+        indicatorLeft,
+        indicatorTop,
+        indicatorRight,
+        indicatorBottom,
+      ),
+      color: indicatorColor,
+    ));
+  });
+
+  testWidgets('TabBar with custom indicator - directional indicatorPadding (RTL)', (WidgetTester tester) async {
+    final List<Widget> tabs = <Widget>[
+      SizedBox(key: UniqueKey(), width: 130.0, height: 30.0),
+      SizedBox(key: UniqueKey(), width: 140.0, height: 40.0),
+      SizedBox(key: UniqueKey(), width: 150.0, height: 50.0),
+    ];
+    const Color indicatorColor = Color(0xFF00FF00);
+    const double padTop = 10.0;
+    const double padBottom = 12.0;
+    const double padStart = 8.0;
+    const double padEnd = 4.0;
+    const Decoration indicator = BoxDecoration(color: indicatorColor);
+    const double indicatorWeight = 2.0; // the default
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.rtl,
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            indicator: indicator,
+            indicatorPadding: const EdgeInsetsDirectional.fromSTEB(
+              padStart, padTop, padEnd, padBottom),
+            isScrollable: true,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox =
+    tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    const double tabBarHeight = 50.0 + indicatorWeight; // 50 = max tab height
+    expect(tabBarBox.size.height, tabBarHeight);
+
+    // Tab2 width = 150, height = 50
+    double tabLeft = kTabLabelPadding.left;
+    double tabRight = tabLeft + 150.0;
+    double tabTop = (tabBarHeight - indicatorWeight - 50.0) / 2.0;
+    double tabBottom = tabTop + 50.0;
+    Rect tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[2].key!)), tabRect);
+
+    // Tab1 width = 140, height = 40
+    tabLeft = tabRight + kTabLabelPadding.right + kTabLabelPadding.left;
+    tabRight = tabLeft + 140.0;
+    tabTop = (tabBarHeight - indicatorWeight - 40.0) / 2.0;
+    tabBottom = tabTop + 40.0;
+    tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[1].key!)), tabRect);
+
+    // Tab0 width = 130, height = 30
+    tabLeft = tabRight + kTabLabelPadding.right + kTabLabelPadding.left;
+    tabRight = tabLeft + 130.0;
+    tabTop = (tabBarHeight - indicatorWeight - 30.0) / 2.0;
+    tabBottom = tabTop + 30.0;
+    tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[0].key!)), tabRect);
+
+    // Tab 0 selected, indicator padding resolves to left: 4.0, right: 8.0
+    final double indicatorLeft = tabLeft - kTabLabelPadding.left + padEnd;
+    final double indicatorRight = tabRight + kTabLabelPadding.left - padStart;
+    const double indicatorTop = padTop;
+    const double indicatorBottom = tabBarHeight - padBottom;
+
+    expect(tabBarBox, paints..rect(
+      rect: Rect.fromLTRB(
+        indicatorLeft,
+        indicatorTop,
+        indicatorRight,
+        indicatorBottom,
+      ),
+      color: indicatorColor,
+    ));
+  });
+
   testWidgets('TabBar with labelPadding', (WidgetTester tester) async {
     const double indicatorWeight = 2.0; // default indicator weight
     const EdgeInsets labelPadding = EdgeInsets.only(left: 3.0, right: 7.0);
