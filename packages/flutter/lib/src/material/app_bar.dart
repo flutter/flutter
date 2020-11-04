@@ -547,7 +547,7 @@ class _AppBarState extends State<AppBar> {
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
@@ -575,10 +575,10 @@ class _AppBarState extends State<AppBar> {
       ?? overallIconTheme;
     TextStyle? centerStyle = widget.textTheme?.headline6
       ?? appBarTheme.textTheme?.headline6
-      ?? theme.textTheme.headline6?.copyWith(color: foregroundColor);
+      ?? theme.primaryTextTheme.headline6?.copyWith(color: foregroundColor);
     TextStyle? sideStyle = widget.textTheme?.bodyText2
       ?? appBarTheme.textTheme?.bodyText2
-      ?? theme.textTheme.bodyText2?.copyWith(color: foregroundColor);
+      ?? theme.primaryTextTheme.bodyText2?.copyWith(color: foregroundColor);
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
