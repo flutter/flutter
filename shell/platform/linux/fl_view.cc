@@ -257,6 +257,16 @@ static void fl_view_size_allocate(GtkWidget* widget,
   fl_view_geometry_changed(self);
 }
 
+// Implements GtkWidget::draw.
+static gboolean fl_view_draw(GtkWidget* widget, cairo_t* cr) {
+  FlView* self = FL_VIEW(widget);
+  // The engine doesn't support exposure events, so instead, force redraw by
+  // sending a window metrics event of the same geometry. Since the geometry
+  // didn't change, only a frame will be scheduled.
+  fl_view_geometry_changed(self);
+  return TRUE;
+}
+
 // Implements GtkWidget::button_press_event.
 static gboolean fl_view_button_press_event(GtkWidget* widget,
                                            GdkEventButton* event) {
@@ -363,6 +373,7 @@ static void fl_view_class_init(FlViewClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_view_dispose;
   GTK_WIDGET_CLASS(klass)->realize = fl_view_realize;
   GTK_WIDGET_CLASS(klass)->size_allocate = fl_view_size_allocate;
+  GTK_WIDGET_CLASS(klass)->draw = fl_view_draw;
   GTK_WIDGET_CLASS(klass)->button_press_event = fl_view_button_press_event;
   GTK_WIDGET_CLASS(klass)->button_release_event = fl_view_button_release_event;
   GTK_WIDGET_CLASS(klass)->scroll_event = fl_view_scroll_event;
