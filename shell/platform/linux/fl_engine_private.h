@@ -56,6 +56,16 @@ typedef gboolean (*FlEnginePlatformMessageHandler)(
 FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer);
 
 /**
+ * fl_engine_get_embedder_api:
+ * @engine: an #FlEngine.
+ *
+ * Gets the embedder API proc table, allowing modificiations for unit testing.
+ *
+ * Returns: a mutable pointer to the embedder API proc table.
+ */
+FlutterEngineProcTable* fl_engine_get_embedder_api(FlEngine* engine);
+
+/**
  * fl_engine_set_platform_message_handler:
  * @engine: an #FlEngine.
  * @handler: function to call when a platform message is received.
