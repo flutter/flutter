@@ -92,9 +92,7 @@ class BundleBuilder {
     String manifestPath = defaultManifestPath,
     String applicationKernelFilePath,
     String depfilePath,
-    String privateKeyPath = defaultPrivateKeyPath,
     String assetDirPath,
-    String packagesPath,
     bool precompiledSnapshot = false,
     bool reportLicensedPackages = false,
     bool trackWidgetCreation = false,
@@ -107,7 +105,6 @@ class BundleBuilder {
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= globals.fs.path.absolute('.packages');
     final FlutterProject flutterProject = FlutterProject.current();
     await buildWithAssemble(
       buildMode: buildInfo.mode,

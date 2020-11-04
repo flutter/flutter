@@ -23,7 +23,9 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .file('.dart_tool/package_config.json')
+      .writeAsStringSync('{"configVersion":2,"packages":[]}');
   });
 
   group('FlutterPlatform', () {
@@ -82,7 +84,7 @@ void main() {
               '--enable-dart-profiling',
               '--non-interactive',
               '--use-test-fonts',
-              '--packages=.packages',
+              '--packages=.dart_tool/package_config.json',
               'example.dill'
             ],
             stdout: 'success',

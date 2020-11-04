@@ -171,6 +171,7 @@ class TestCommand extends FlutterCommand {
     final List<String> plainNames = stringsArg('plain-name');
     final String tags = stringArg('tags');
     final String excludeTags = stringArg('exclude-tags');
+    final BuildInfo buildInfo = getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
       await _buildTestAsset();
@@ -225,6 +226,7 @@ class TestCommand extends FlutterCommand {
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
+        packagesPath: buildInfo.packagesPath,
       );
     }
 
@@ -236,7 +238,6 @@ class TestCommand extends FlutterCommand {
     }
 
     final bool disableServiceAuthCodes = boolArg('disable-service-auth-codes');
-    final BuildInfo buildInfo = getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     final int result = await testRunner.runTests(
       testWrapper,
