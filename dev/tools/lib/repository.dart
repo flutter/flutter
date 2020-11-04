@@ -230,7 +230,16 @@ class Repository {
   @visibleForTesting
   String authorEmptyCommit([String message = 'An empty commit']) {
     git.run(
-      <String>['commit', '--allow-empty', '-m', '\'$message\''],
+      <String>[
+        '-c',
+        'user.name=Conductor',
+        '-c',
+        'user.email=conductor@flutter.dev',
+        'commit',
+        '--allow-empty',
+        '-m',
+        '\'$message\'',
+      ],
       'create an empty commit',
       workingDirectory: checkoutDirectory.path,
     );
