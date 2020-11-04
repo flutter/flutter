@@ -46,7 +46,7 @@ class MaterialSlice extends MergeableMaterialItem {
 
   /// The contents of this slice.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
@@ -536,7 +536,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         widgets.add(
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context)!.cardColor,
+              color: Theme.of(context).cardColor,
               borderRadius: _borderRadius(i - 1, widgets.isEmpty, false),
               shape: BoxShape.rectangle,
             ),
@@ -606,7 +606,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       widgets.add(
         Container(
           decoration: BoxDecoration(
-            color: Theme.of(context)!.cardColor,
+            color: Theme.of(context).cardColor,
             borderRadius: _borderRadius(i - 1, widgets.isEmpty, true),
             shape: BoxShape.rectangle,
           ),

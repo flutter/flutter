@@ -425,7 +425,7 @@ class Shortcuts extends StatefulWidget {
 
   /// The child widget for this [Shortcuts] widget.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The debug label that is printed for this node when logged.

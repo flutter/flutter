@@ -27,7 +27,6 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '^0.2.0',
   'mockito': '4.1.1',  // Prevent mockito from upgrading to the source gen version.
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
-  'video_player': '0.10.6', // 0.10.7 fails a gallery smoke test for toString.
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
   'shelf': '0.7.5',
   // Dart team owned nnbd deps
@@ -64,7 +63,11 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // https://github.com/dart-lang/build/issues/2772
   'build_runner_core': '5.2.0',
   'build_modules': '2.10.1',
-  'path_provider': '1.6.14'
+  'path_provider': '1.6.14',
+  'video_player': '2.0.0-nullsafety.1',
+  'url_launcher': '6.0.0-nullsafety',
+  'connectivity': '3.0.0-nullsafety',
+  'device_info': '2.0.0-nullsafety',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {

@@ -444,7 +444,7 @@ class SwitchListTile extends StatelessWidget {
   /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform].
   final ListTileControlAffinity controlAffinity;
 
-  /// {@macro flutter.material.ListTile.shape}
+  /// {@macro flutter.material.ListTileTheme.shape}
   final ShapeBorder? shape;
 
   /// If non-null, defines the background color when [SwitchListTile.selected] is true.
@@ -499,7 +499,7 @@ class SwitchListTile extends StatelessWidget {
 
     return MergeSemantics(
       child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context)!.accentColor,
+        selectedColor: activeColor ?? Theme.of(context).accentColor,
         child: ListTile(
           leading: leading,
           title: title,

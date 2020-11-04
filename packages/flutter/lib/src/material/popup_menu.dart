@@ -306,7 +306,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subtitle1!;
 
@@ -522,7 +522,7 @@ class _PopupMenu<T> extends StatelessWidget {
       Widget item = route.items[i];
       if (route.initialValue != null && route.items[i].represents(route.initialValue)) {
         item = Container(
-          color: Theme.of(context)!.highlightColor,
+          color: Theme.of(context).highlightColor,
           child: item,
         );
       }
@@ -831,7 +831,7 @@ Future<T?> showMenu<T>({
   assert(items != null && items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  switch (Theme.of(context)!.platform) {
+  switch (Theme.of(context).platform) {
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
       break;
@@ -1122,7 +1122,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       );
 
     return IconButton(
-      icon: widget.icon ?? _getIcon(Theme.of(context)!.platform),
+      icon: widget.icon ?? _getIcon(Theme.of(context).platform),
       padding: widget.padding,
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,

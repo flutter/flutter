@@ -160,13 +160,13 @@
          "name": "Mac build_ios_framework_module_test",
          "repo": "flutter",
          "task_name": "mac_build_ios_framework_module_test",
-         "flaky": false
+         "flaky": true
       },
       {
          "name": "Mac build_tests",
          "repo": "flutter",
          "task_name": "mac_build_tests",
-         "flaky": false
+         "flaky": true
       },
       {
          "name": "Mac build_gallery",
