@@ -194,7 +194,10 @@ abstract class SearchDelegate<T> {
   /// so it can be used to configure any of its components with the appropriate
   /// theme properties.
   ///
-  /// By default, a white theme is used.
+  /// Unless overridden, the default theme will configure the AppBar containing
+  /// the search input text field with a white background and black text on light
+  /// themes. For dark themes the default is a dark grey background with light
+  /// color text.
   ///
   /// See also:
   ///
