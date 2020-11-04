@@ -43,8 +43,8 @@ class AppBarTheme with Diagnosticable {
     this.titleSpacing,
   });
 
-  /// AppBar uses this value to determine the default [color] and [backgroundColor]
-  /// as well as the app bar's [SystemUiOverlayStyle].
+  /// AppBar uses this value to determine the default (background) [color] and
+  /// [foregroundColor] as well as the app bar's [SystemUiOverlayStyle].
   ///
   /// For [Brightness.dark], [SystemUiOverlayStyle.light] is used and for
   /// [Brightness.light], [SystemUiOverlayStyle.dark] is used.
