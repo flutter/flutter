@@ -1536,7 +1536,7 @@ void main() {
     ));
   });
 
-  testWidgets('TabBar indicatorPadding(LTR) with LTRB padding', (WidgetTester tester) async {
+  testWidgets('TabBar with custom indicator and indicatorPadding(LTR)', (WidgetTester tester) async {
     const Color indicatorColor = Color(0xFF00FF00);
     const double padTop = 10.0;
     const double padBottom = 12.0;
@@ -1606,7 +1606,7 @@ void main() {
     ));
   });
 
-  testWidgets('TabBar indicatorPadding (RTL) with LTRB padding', (WidgetTester tester) async {
+  testWidgets('TabBar with custom indicator and indicatorPadding (RTL)', (WidgetTester tester) async {
     const Color indicatorColor = Color(0xFF00FF00);
     const double padTop = 10.0;
     const double padBottom = 12.0;
@@ -1676,7 +1676,7 @@ void main() {
     ));
   });
 
-  testWidgets('TabBar - directional indicatorPadding (LTR) with STEB padding', (WidgetTester tester) async {
+  testWidgets('TabBar with custom indicator - directional indicatorPadding (LTR)', (WidgetTester tester) async {
     final List<Widget > tabs = <Widget>[
       SizedBox(key: UniqueKey(), width: 130.0, height: 30.0),
       SizedBox(key: UniqueKey(), width: 140.0, height: 40.0),
@@ -1755,7 +1755,7 @@ void main() {
     ));
   });
 
-  testWidgets('TabBar - directional indicatorPadding (RTL) with STEB padding', (WidgetTester tester) async {
+  testWidgets('TabBar with custom indicator - directional indicatorPadding (RTL)', (WidgetTester tester) async {
     final List<Widget> tabs = <Widget>[
       SizedBox(key: UniqueKey(), width: 130.0, height: 30.0),
       SizedBox(key: UniqueKey(), width: 140.0, height: 40.0),
