@@ -335,9 +335,94 @@ class EngineParagraph implements ui.Paragraph {
     }
   }
 
+  bool get hasArbitraryPaint => _geometricStyle.ellipsis != null;
+
+  void paint(BitmapCanvas canvas, ui.Offset offset) {
+    assert(drawOnCanvas);
+    assert(isLaidOut);
+
+    // Paint the background first.
+    final SurfacePaint? background = _background;
+    if (background != null) {
+      final ui.Rect rect = ui.Rect.fromLTWH(offset.dx, offset.dy, width, height);
+      canvas.drawRect(rect, background.paintData);
+    }
+
+    final List<EngineLineMetrics> lines = _measurementResult!.lines!;
+    canvas.setFontFromParagraphStyle(_geometricStyle);
+
+    // Then paint the text.
+    canvas._setUpPaint(_paint!.paintData, null);
+    double y = offset.dy + alphabeticBaseline;
+    final int len = lines.length;
+    for (int i = 0; i < len; i++) {
+      _paintLine(canvas, lines[i], offset.dx, y);
+      y += _lineHeight;
+    }
+    canvas._tearDownPaint();
+  }
+
+  void _paintLine(
+    BitmapCanvas canvas,
+    EngineLineMetrics line,
+    double x,
+    double y,
+  ) {
+    x += line.left;
+    final double? letterSpacing = _geometricStyle.letterSpacing;
+    if (letterSpacing == null || letterSpacing == 0.0) {
+      canvas.fillText(line.displayText!, x, y);
+    } else {
+      // When letter-spacing is set, we go through a more expensive code path
+      // that renders each character separately with the correct spacing
+      // between them.
+      //
+      // We are drawing letter spacing like the web does it, by adding the
+      // spacing after each letter. This is different from Flutter which puts
+      // the spacing around each letter i.e. for a 10px letter spacing, Flutter
+      // would put 5px before each letter and 5px after it, but on the web, we
+      // put no spacing before the letter and 10px after it. This is how the DOM
+      // does it.
+      //
+      // TODO(mdebbar): Implement letter-spacing on canvas more efficiently:
+      //                https://github.com/flutter/flutter/issues/51234
+      final int len = line.displayText!.length;
+      for (int i = 0; i < len; i++) {
+        final String char = line.displayText![i];
+        canvas.fillText(char, x, y);
+        x += letterSpacing + canvas.measureText(char).width!;
+      }
+    }
+  }
+
+  html.HtmlElement toDomElement() {
+    assert(isLaidOut);
+
+    final html.HtmlElement paragraphElement =
+        _paragraphElement.clone(true) as html.HtmlElement;
+
+    final html.CssStyleDeclaration paragraphStyle = paragraphElement.style;
+    paragraphStyle
+      ..position = 'absolute'
+      ..whiteSpace = 'pre-wrap'
+      ..overflowWrap = 'break-word'
+      ..overflow = 'hidden';
+
+    final ParagraphGeometricStyle style = _geometricStyle;
+
+    // TODO(flutter_web): https://github.com/flutter/flutter/issues/33223
+    if (style.ellipsis != null &&
+        (style.maxLines == null || style.maxLines == 1)) {
+      paragraphStyle
+        ..whiteSpace = 'pre'
+        ..textOverflow = 'ellipsis';
+    }
+    return paragraphElement;
+  }
+
   @override
   List<ui.TextBox> getBoxesForPlaceholders() {
-    assert(_isLaidOut);
+    assert(isLaidOut);
     return _measurementResult!.placeholderBoxes;
   }
 
@@ -351,7 +436,7 @@ class EngineParagraph implements ui.Paragraph {
   /// - Paragraphs that contain decorations.
   /// - Paragraphs that have a non-null word-spacing.
   /// - Paragraphs with a background.
-  bool get _drawOnCanvas {
+  bool get drawOnCanvas {
     if (!_hasLineMetrics) {
       return false;
     }
@@ -370,7 +455,7 @@ class EngineParagraph implements ui.Paragraph {
   }
 
   /// Whether this paragraph has been laid out.
-  bool get _isLaidOut => _measurementResult != null;
+  bool get isLaidOut => _measurementResult != null;
 
   /// Asserts that the properties used to measure paragraph layout are the same
   /// as the properties of this paragraphs root style.
