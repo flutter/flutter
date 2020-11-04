@@ -114,7 +114,7 @@ class _SurfacePathMeasure {
     return true;
   }
 
-  ui.Path? extractPath(int contourIndex, double start, double end,
+  ui.Path extractPath(int contourIndex, double start, double end,
       {bool startWithMoveTo = true}) {
     return _contours[contourIndex].extractPath(start, end, startWithMoveTo);
   }
@@ -196,7 +196,7 @@ class _PathContourMeasure {
     return segment.computeTangent(t);
   }
 
-  ui.Path? extractPath(
+  ui.Path extractPath(
       double startDistance, double stopDistance, bool startWithMoveTo) {
     if (startDistance < 0) {
       startDistance = 0;
@@ -204,14 +204,14 @@ class _PathContourMeasure {
     if (stopDistance > _contourLength) {
       stopDistance = _contourLength;
     }
-    if (startDistance > stopDistance || _segments.isEmpty) {
-      return null;
-    }
     final ui.Path path = ui.Path();
+    if (startDistance > stopDistance || _segments.isEmpty) {
+      return path;
+    }
     int startSegmentIndex = _segmentIndexAtDistance(startDistance);
     int stopSegmentIndex = _segmentIndexAtDistance(stopDistance);
     if (startSegmentIndex == -1 || stopSegmentIndex == -1) {
-      return null;
+      return path;
     }
     int currentSegmentIndex = startSegmentIndex;
     _PathSegment seg = _segments[currentSegmentIndex];
@@ -574,13 +574,11 @@ class SurfacePathMetric implements ui.PathMetric {
     return _measure.getTangentForOffset(contourIndex, distance);
   }
 
-  /// Given a start and stop distance, return the intervening segment(s).
+  /// Given a start and end distance, return the intervening segment(s).
   ///
   /// `start` and `end` are pinned to legal values (0..[length])
-  /// Returns null if the segment is 0 length or `start` > `stop`.
   /// Begin the segment with a moveTo if `startWithMoveTo` is true.
-  ui.Path? extractPath(double start, double end,
-      {bool startWithMoveTo = true}) {
+  ui.Path extractPath(double start, double end, {bool startWithMoveTo = true}) {
     return _measure.extractPath(contourIndex, start, end,
         startWithMoveTo: startWithMoveTo);
   }
