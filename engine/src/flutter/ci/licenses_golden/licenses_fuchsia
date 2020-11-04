@@ -1,4 +1,4 @@
-Signature: 40aaedcfbb44f6d3b5ec36a66961aba9
+Signature: 2828de4f3e9c065048d2d66e73b9e88b
 
 UNUSED LICENSES:
 
@@ -2848,6 +2848,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/frames.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/instance.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/mac.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/session.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/reboot_reason.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/consumer_control.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/device_ids.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/keys.fidl
