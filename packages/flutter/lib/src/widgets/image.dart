@@ -51,7 +51,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? s
   return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
     devicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
-    locale: Localizations.localeOf(context, nullOk: true),
+    locale: Localizations.maybeLocaleOf(context),
     textDirection: Directionality.maybeOf(context),
     size: size,
     platform: defaultTargetPlatform,
