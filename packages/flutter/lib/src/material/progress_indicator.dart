@@ -243,11 +243,9 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// The minimum height of the indicator can be specified using [minHeight].
 /// The indicator can be made taller by wrapping the widget with a [SizedBox].
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// This example shows a [LinearProgressIndicator] with a fixed value.
-///
-/// ![https://flutter.github.io/assets-for-api-docs/assets/material/linear_progress_indicator_fixed_value.png]
+/// This example shows a [LinearProgressIndicator] with a fixed value and color.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -257,36 +255,11 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 ///       children: [
 ///         Text(
-///           'Linear progress indicator with a fixed value',
+///           'Linear progress indicator with a fixed value and color',
 ///           style: const TextStyle(fontSize: 20),
 ///         ),
 ///         LinearProgressIndicator(
 ///           value: 0.5,
-///           semanticsLabel: 'Linear progress indicator',
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
-/// {@end-tool}
-///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-///
-/// This example shows a [LinearProgressIndicator] with a fixed color.
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Padding(
-///     padding: const EdgeInsets.all(20.0),
-///     child: Column(
-///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///       children: [
-///         Text(
-///           'Linear progress indicator with a fixed color',
-///           style: const TextStyle(fontSize: 20),
-///         ),
-///         LinearProgressIndicator(
 ///           valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey),
 ///           semanticsLabel: 'Linear progress indicator',
 ///         ),
@@ -301,8 +274,6 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///
 /// This example shows a [LinearProgressIndicator] with
 /// a fixed color, fixed value and a background color.
-///
-/// ![https://flutter.github.io/assets-for-api-docs/assets/material/linear_progress_indicator_background_color.png]
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -623,11 +594,9 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// The indicator arc is displayed with [valueColor], an animated value. To
 /// specify a constant color use: `AlwaysStoppedAnimation<Color>(color)`.
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// This example shows a [CircularProgressIndicator] with a fixed value.
-///
-/// ![https://flutter.github.io/assets-for-api-docs/assets/material/circular_progress_indicator_fixed_value.png]
+/// This example shows a [CircularProgressIndicator] with a fixed value and color.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -637,36 +606,11 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 ///       children: [
 ///         Text(
-///           'Circular progress indicator with a fixed value',
+///           'Circular progress indicator with a fixed value and color',
 ///           style: const TextStyle(fontSize: 20),
 ///         ),
 ///         CircularProgressIndicator(
 ///           value: 0.5,
-///           semanticsLabel: 'Circular progress indicator',
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
-/// {@end-tool}
-///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-///
-/// This example shows a [CircularProgressIndicator] with a fixed color.
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Padding(
-///     padding: const EdgeInsets.all(20.0),
-///     child: Column(
-///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///       children: [
-///         Text(
-///           'Circular progress indicator with a fixed color',
-///           style: const TextStyle(fontSize: 20),
-///         ),
-///         CircularProgressIndicator(
 ///           valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey),
 ///           semanticsLabel: 'Circular progress indicator',
 ///         ),
@@ -681,8 +625,6 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///
 /// This example shows a [CircularProgressIndicator] with
 /// a fixed color, fixed value and a background color.
-///
-/// ![https://flutter.github.io/assets-for-api-docs/assets/material/circular_progress_indicator_background_color.png]
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
