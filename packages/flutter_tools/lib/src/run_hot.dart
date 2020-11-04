@@ -833,6 +833,8 @@ class HotRunner extends ResidentRunner {
         return result;
       }
       reloadMessage = result.message;
+    } else {
+      _addBenchmarkData('hotReloadVMReloadMilliseconds', 0);
     }
 
     final Stopwatch reassembleTimer = Stopwatch()..start();
