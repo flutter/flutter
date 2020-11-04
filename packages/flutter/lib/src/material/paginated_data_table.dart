@@ -104,16 +104,17 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// The table card's optional header.
   ///
-  /// This is typically a [Text] widget, but can also be a [ButtonBar] with
-  /// [TextButton]s. Suitable defaults are automatically provided for the font,
-  /// button color, button padding, and so forth.
+  /// This is typically a [Text] widget, but can also be a [Row] of
+  /// [TextButton]s. To show icon buttons at the top end side of the table with
+  /// a header, set the [actions] property.
   ///
   /// If items in the table are selectable, then, when the selection is not
-  /// empty, the header is replaced by a count of the selected items.
+  /// empty, the header is replaced by a count of the selected items. The
+  /// [actions] are still visible when items are selected.
   final Widget? header;
 
-  /// Icon buttons to show at the top right of the table. The [header] must not
-  /// be null to show the actions.
+  /// Icon buttons to show at the top end side of the table. The [header] must
+  /// not be null to show the actions.
   ///
   /// Typically, the exact actions included in this list will vary based on
   /// whether any rows are selected or not.
