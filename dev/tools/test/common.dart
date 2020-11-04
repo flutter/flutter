@@ -2,17 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-//import 'dart:convert';
 import 'dart:io';
 
-//import 'package:meta/meta.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 import 'package:test/test.dart' as test_package show TypeMatcher;
 
 import 'package:dev_tools/stdio.dart';
 
 import 'package:args/args.dart';
-//import 'package:process/process.dart';
 
 export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
@@ -140,74 +137,3 @@ class FakeArgResults implements ArgResults {
     return null;
   }
 }
-
-//class FakeCommand {
-//  FakeCommand({
-//    @required this.command,
-//    ProcessResult result,
-//  }) : _result = result ?? ProcessResult(), assert(command != null);
-//
-//  final List<String> command;
-//  final ProcessResult _result;
-//}
-//
-//class FakeProcessManager implements ProcessManager {
-//  final List<FakeCommand> commands = <FakeCommand>[];
-//  void addCommand(FakeCommand command) {
-//    commands.add(command);
-//  }
-//
-//  @override
-//  Future<Process> start(
-//    List<dynamic> command, {
-//    String workingDirectory,
-//    Map<String, String> environment,
-//    bool includeParentEnvironment = true,
-//    bool runInShell = false,
-//    ProcessStartMode mode = ProcessStartMode.normal,
-//  }) {
-//    assert(false, 'method `start` not implemented yet.');
-//    return null;
-//  }
-//
-//  @override
-//  Future<ProcessResult> run(
-//    List<dynamic> command, {
-//    String workingDirectory,
-//    Map<String, String> environment,
-//    bool includeParentEnvironment = true,
-//    bool runInShell = false,
-//    Encoding stdoutEncoding = systemEncoding,
-//    Encoding stderrEncoding = systemEncoding,
-//  }) {
-//    assert(false, 'method `run` not implemented yet.');
-//    return null;
-//  }
-//
-//  @override
-//  ProcessResult runSync(
-//    List<dynamic> command, {
-//    String workingDirectory,
-//    Map<String, String> environment,
-//    bool includeParentEnvironment = true,
-//    bool runInShell = false,
-//    Encoding stdoutEncoding = systemEncoding,
-//    Encoding stderrEncoding = systemEncoding,
-//  }) {
-//    final FakeCommand expectedCommand = commands.removeAt(0);
-//    assert(expectedCommand != null);
-//    return null;
-//  }
-//
-//  @override
-//  bool canRun(dynamic executable, {String workingDirectory}) {
-//    assert(false, 'method `canRun` not implemented yet.');
-//    return null;
-//  }
-//
-//  @override
-//  bool killPid(int pid, [ProcessSignal signal = ProcessSignal.sigterm]) {
-//    assert(false, 'method `killPid` not implemented yet.');
-//    return null;
-//  }
-//}
