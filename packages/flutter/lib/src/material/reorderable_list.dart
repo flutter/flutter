@@ -56,10 +56,10 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 ///
 /// This sample shows by dragging the user can reorder the items of the list.
-/// list of Numbers will be used to display items in listview.
+/// list of Numbers will be used to display items in the list.
 /// [List.generate]it is constructor which  is used to form a list of values.
-/// [onReorder] This parameter is compulsory. It will be called when list child
-/// is moved to a new position.
+/// The [onReorder] parameter is required and will be called when a child 
+/// widget is dragged to a new position.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
@@ -69,24 +69,18 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// Widget build(BuildContext context){
 ///   return ReorderableListView(
 ///     padding : const EdgeInsets.symmetric(horizontal:40),
-///     children: _list.map((String string) => ListTile(
-///       key: Key(_list[_list.indexOf(string)]),
-///       title: Text(string))).toList(),
+///     children:[
+///       for(var i=0 ; i<_list.length ; i++)
+///         ListTile(key:Key('$i'), title: Text(_list[i])),
+///     ],
 ///     onReorder: (oldIndex, newIndex){
-///       String old = _list[oldIndex];
-///       if (oldIndex > newIndex){
-///         for(int i = oldIndex; i> newIndex; i--){
-///           _list[i]= _list[i-1];
-///         }
-///         _list[newIndex]= old;
-///       }
-///       else{
-///         for(int i = oldIndex; i< newIndex-1;i++){
-///           _list[i]= _list[i+1];
-///         }
-///         _list[newIndex -1] = old;
-///       }
-///       setState((){});
+///      setState((){
+///        if(oldIndex < newIndex){
+///          newIndex-=1;
+///        }
+///        final element = _list.removeAt(oldIndex);
+///        _list.insert(newIndex, element);
+///      });
 ///     },
 ///  );
 ///}
