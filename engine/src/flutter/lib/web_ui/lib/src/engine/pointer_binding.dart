@@ -290,6 +290,29 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     );
   }
 
+  void _handleWheelEvent(
+      html.Event e, void Function(Iterable<ui.PointerData>) sink) {
+    assert(e is html.WheelEvent);
+    final html.WheelEvent event = e as html.WheelEvent;
+    if (_debugLogPointerEvents) {
+      print(event.type);
+    }
+    if (event.getModifierState('Control') &&
+        operatingSystem != OperatingSystem.macOs &&
+        operatingSystem != OperatingSystem.iOs) {
+      // Ignore Control+wheel events since the default handler
+      // will change browser zoom level instead of scrolling.
+      // The exception is MacOs where Control+wheel will still scroll and zoom
+      // is not implemented.
+      return;
+    }
+    _callback(_convertWheelEventToPointerData(event));
+    // Prevent default so mouse wheel event doesn't get converted to
+    // a scroll event that semantic nodes would process.
+    //
+    event.preventDefault();
+  }
+
   /// For browsers that report delta line instead of pixels such as FireFox
   /// compute line height using the default font size.
   ///
@@ -514,14 +537,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     });
 
     _addWheelEventListener((html.Event event) {
-      assert(event is html.WheelEvent);
-      if (_debugLogPointerEvents) {
-        print(event.type);
-      }
-      _callback(_convertWheelEventToPointerData(event as html.WheelEvent));
-      // Prevent default so mouse wheel event doesn't get converted to
-      // a scroll event that semantic nodes would process.
-      event.preventDefault();
+      _handleWheelEvent(event, _callback);
     });
   }
 
@@ -793,14 +809,7 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     }, acceptOutsideGlasspane: true);
 
     _addWheelEventListener((html.Event event) {
-      assert(event is html.WheelEvent);
-      if (_debugLogPointerEvents) {
-        print(event.type);
-      }
-      _callback(_convertWheelEventToPointerData(event as html.WheelEvent));
-      // Prevent default so mouse wheel event doesn't get converted to
-      // a scroll event that semantic nodes would process.
-      event.preventDefault();
+      _handleWheelEvent(event, _callback);
     });
   }
 
