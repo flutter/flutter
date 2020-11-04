@@ -355,10 +355,10 @@ class GtkKeyHelper with KeyHelper {
     const int controlRightKeyCode = 0xffe4;
     const int capsLockKeyCode = 0xffe5;
     const int shiftLockKeyCode = 0xffe6;
-    const int metaLeftKeyCode = 0xffeb;
-    const int metaRightKeyCode = 0xffec;
     const int altLeftKeyCode = 0xffe9;
     const int altRightKeyCode = 0xffea;
+    const int metaLeftKeyCode = 0xffeb;
+    const int metaRightKeyCode = 0xffec;
     const int numLockKeyCode = 0xff7f;
 
     // On GTK, the "modifiers" bitfield is the state as it is BEFORE this event
