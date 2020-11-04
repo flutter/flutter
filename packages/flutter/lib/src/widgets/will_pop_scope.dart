@@ -12,52 +12,76 @@ import 'routes.dart';
 /// {@tool snippet --template=stateful_widget}
 ///
 /// Whenever the back button is pressed, you will get a callback at [onWillPop],
-/// which returns a [Future]. If the [Future] returned is true, the screen is
-/// popped and if it is false, the screen is not popped.
+/// which returns a [Future]. If the [Future] returns true, the screen is
+/// popped.
 ///
 /// ```dart
 /// bool shouldPop = true;
+/// // ...
 ///
 /// @override
 /// Widget build(BuildContext) {
 ///   return WillPopScope (
 ///     onWillPop: () async {
-///        return shouldPop;
+///       return shouldPop;
 ///     },
-///     child: Center(),
+///     child: Center(
+///       // ...
+///     ),
 ///   );
 /// }
 /// ```
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_material}
-///
-/// ```dart preamble
-/// bool shouldPop = true;
-/// ```
-///
 /// ```dart
+/// bool shouldPop = true;
 /// @override
 /// Widget build(BuildContext context) {
 ///   return WillPopScope(
-///       onWillPop: () async {
-///         setState(() {
-///           shouldPop = !shouldPop;
-///         });
-///         return shouldPop;
-///       },
-///       child: Scaffold(
-///           appBar: AppBar(
-///             title: Text("Flutter WillPopScope demp"),
-///             leading: BackButton(),
-///           ),
-///         body: Center(
-///           child: Text(
-///               "Current value of shouldPop is $shouldPop. Tap on back button in appbar to toggle"),
+///     onWillPop: () async {
+///       return shouldPop;
+///     },
+///     child: Scaffold(
+///       appBar: AppBar(
+///         title: Text("Flutter WillPopScope demo"),
+///       ),
+///       body: Center(
+///         child: Wrap(
+///           spacing: 20,
+///           direction: Axis.vertical,
+///           crossAxisAlignment: WrapCrossAlignment.center,
+///           children: [
+///             OutlinedButton(
+///               child: Text('Push'),
+///               onPressed: () {
+///                 Navigator.of(context).push(
+///                   MaterialPageRoute(
+///                     builder: (context) {
+///                       return MyStatefulWidget();
+///                     },
+///                   ),
+///                 );
+///               },
+///             ),
+///             OutlinedButton(
+///               child: Text('Pop'),
+///               onPressed: () {
+///                 setState(
+///                   () {
+///                     shouldPop = !shouldPop;
+///                   },
+///                 );
+///               },
+///             ),
+///             Text("Current value of shouldPop is $shouldPop."
+///                 "Push to a new screen and then tap on the back button in appbar to toggle shouldPop"),
+///           ],
 ///         ),
 ///       ),
-///     );
-///   }
+///     ),
+///   );
+/// }
 /// ```
 ///
 /// {@end-tool}
