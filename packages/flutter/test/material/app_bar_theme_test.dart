@@ -175,7 +175,7 @@ void main() {
           builder: (BuildContext context) {
             // This ThemeData has been localized with ThemeData.localize. The
             // appTheme parameter has not, so its textTheme is incomplete.
-            theme = Theme.of(context)!;
+            theme = Theme.of(context);
             return Scaffold(
               appBar: AppBar(
                 actions: <Widget>[
