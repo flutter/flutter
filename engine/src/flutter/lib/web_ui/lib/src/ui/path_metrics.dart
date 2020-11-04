@@ -22,7 +22,7 @@ abstract class PathMetric {
   double get length;
   int get contourIndex;
   Tangent? getTangentForOffset(double distance);
-  Path? extractPath(double start, double end, {bool startWithMoveTo = true});
+  Path extractPath(double start, double end, {bool startWithMoveTo = true});
   bool get isClosed;
 }
 
