@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
+import '../../widgets.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'primary_scroll_controller.dart';
@@ -1367,7 +1368,20 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   @override
   void restoreScrollOffset() {
-    if (coordinator.canScrollBody)
+    // If the children of a NestedScrollView have PageStorageKey, the
+    // ScrollOffset should be restored correctly and not controlled by
+    // coordinator.canScrollBody.
+    // Related issues: https://github.com/flutter/flutter/issues/40740
+    Element? elementWithPageStorageKey;
+    context.storageContext.visitAncestorElements((Element element) {
+      if (element.widget.key is PageStorageKey) {
+        elementWithPageStorageKey = element;
+        return false;
+      }
+      return true;
+    });
+    final NestedScrollViewState? ancestorStateIsNestedScrollViewState = elementWithPageStorageKey?.findAncestorStateOfType<NestedScrollViewState>();
+    if (identical(ancestorStateIsNestedScrollViewState, coordinator._state) || coordinator.canScrollBody)
       super.restoreScrollOffset();
   }
 
