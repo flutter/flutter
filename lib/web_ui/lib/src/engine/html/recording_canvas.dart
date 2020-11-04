@@ -522,13 +522,13 @@ class RecordingCanvas {
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
     assert(!_recordingEnded);
     final EngineParagraph engineParagraph = paragraph as EngineParagraph;
-    if (!engineParagraph._isLaidOut) {
+    if (!engineParagraph.isLaidOut) {
       // Ignore non-laid out paragraphs. This matches Flutter's behavior.
       return;
     }
 
     _didDraw = true;
-    if (engineParagraph._geometricStyle.ellipsis != null) {
+    if (engineParagraph.hasArbitraryPaint) {
       _hasArbitraryPaint = true;
     }
     final double left = offset.dx;
