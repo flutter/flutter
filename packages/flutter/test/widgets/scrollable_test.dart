@@ -374,7 +374,12 @@ void main() {
         MaterialApp(
           home: CustomScrollView(
             physics: canDrag ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
-            slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000))],
+            slivers: <Widget>[SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 2000,
+                  child: GestureDetector(onTap: () {},),
+                ),
+            )],
           ),
         ),
       );
@@ -390,7 +395,7 @@ void main() {
       expect(renderIgnorePointer.ignoring, false);
 
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
-      expect(renderIgnorePointer.ignoring, true);
+      expect(renderIgnorePointer.ignoring, false);
 
       await pumpTestWidget(tester, false);
       expect(renderIgnorePointer.ignoring, false);
@@ -408,14 +413,33 @@ void main() {
       expect(renderIgnorePointer.ignoring, false);
 
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
-      expect(renderIgnorePointer.ignoring, true);
+      expect(renderIgnorePointer.ignoring, false);
 
-      await gesture.moveBy(const Offset(0, 100));
+      await gesture.moveBy(const Offset(0, -100));
+      // Starts ignoring when the drag is recognized.
+      expect(renderIgnorePointer.ignoring, true);
 
       await pumpTestWidget(tester, false);
       expect(renderIgnorePointer.ignoring, false);
 
       await gesture.up();
+      expect(renderIgnorePointer.ignoring, false);
+    });
+
+    testWidgets('ballistic', (WidgetTester tester) async {
+      await pumpTestWidget(tester, true);
+      final RenderIgnorePointer renderIgnorePointer = tester.renderObject<RenderIgnorePointer>(
+        find.descendant(of: find.byType(CustomScrollView), matching: find.byType(IgnorePointer)),
+      );
+      expect(renderIgnorePointer.ignoring, false);
+
+      // Starts ignoring when the drag is recognized.
+      await tester.fling(find.byType(Viewport), const Offset(0, -100), 1000);
+      expect(renderIgnorePointer.ignoring, true);
+      await tester.pump();
+
+      // When the activity ends we should stop ignoring pointers.
+      await tester.pumpAndSettle();
       expect(renderIgnorePointer.ignoring, false);
     });
   });
