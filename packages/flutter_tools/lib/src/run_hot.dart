@@ -953,7 +953,7 @@ class HotRunner extends ResidentRunner {
       fullRestart: false,
       reason: reason,
       overallTimeInMs: reloadInMs,
-      finalLibraryCount: firstReloadDetails['finalLibraryCount'] as int,
+      finalLibraryCount: firstReloadDetails['finalLibraryCount'] as int ?? 0,
       syncedLibraryCount: firstReloadDetails['receivedLibraryCount'] as int ?? 0,
       syncedClassesCount: firstReloadDetails['receivedClassesCount'] as int ?? 0,
       syncedProceduresCount: firstReloadDetails['receivedProceduresCount'] as int ?? 0,
