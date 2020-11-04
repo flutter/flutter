@@ -17,8 +17,6 @@ import 'routes.dart';
 ///
 /// ```dart
 /// bool shouldPop = true;
-/// // ...
-///
 /// @override
 /// Widget build(BuildContext) {
 ///   return WillPopScope (
@@ -26,7 +24,6 @@ import 'routes.dart';
 ///       return shouldPop;
 ///     },
 ///     child: Center(
-///       // ...
 ///     ),
 ///   );
 /// }
