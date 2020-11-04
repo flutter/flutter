@@ -5,12 +5,53 @@
 // Included first as it collides with the X11 headers.
 #include "gtest/gtest.h"
 
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_basic_message_channel.h"
+
+#include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_basic_message_channel.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_message_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_message_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/mock_renderer.h"
+
+// Checks sending a message without a reponse works.
+TEST(FlBasicMessageChannelTest, SendMessageWithoutResponse) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called = false;
+  embedder_api->SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage,
+      ([&called](auto engine, const FlutterPlatformMessage* message) {
+        called = true;
+        EXPECT_STREQ(message->channel, "test");
+        EXPECT_EQ(message->response_handle, nullptr);
+
+        g_autoptr(GBytes) message_bytes =
+            g_bytes_new(message->message, message->message_size);
+        g_autoptr(FlStandardMessageCodec) codec =
+            fl_standard_message_codec_new();
+        FlValue* message_value = fl_message_codec_decode_message(
+            FL_MESSAGE_CODEC(codec), message_bytes, nullptr);
+        EXPECT_EQ(fl_value_get_type(message_value), FL_VALUE_TYPE_STRING);
+        EXPECT_STREQ(fl_value_get_string(message_value), "Hello World!");
+
+        return kSuccess;
+      }));
+
+  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
+  g_autoptr(FlBasicMessageChannel) channel =
+      fl_basic_message_channel_new(messenger, "test", FL_MESSAGE_CODEC(codec));
+  g_autoptr(FlValue) message = fl_value_new_string("Hello World!");
+  fl_basic_message_channel_send(channel, message, nullptr, nullptr, loop);
+
+  EXPECT_TRUE(called);
+}
 
 // Called when the message response is received in the SendMessage test.
 static void echo_response_cb(GObject* object,
@@ -28,8 +69,8 @@ static void echo_response_cb(GObject* object,
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
 }
 
-// Checks sending a message works.
-TEST(FlBasicMessageChannelTest, SendMessage) {
+// Checks sending a message with a response works.
+TEST(FlBasicMessageChannelTest, SendMessageWithResponse) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();

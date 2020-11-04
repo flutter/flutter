@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is a historical legacy, predating the proc table API. It has been
+// updated to continue to work with the proc table, but new tests should not
+// rely on replacements set up here, but instead use test-local replacements
+// for any functions relevant to that test.
+//
+// Over time existing tests should be migrated and this file should be removed.
+
 #include <cstring>
 
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -77,6 +84,8 @@ struct _FlutterTaskRunner {
   }
 };
 
+namespace {
+
 // Send a response from the engine.
 static void send_response(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
@@ -138,31 +147,6 @@ FlutterEngineResult FlutterEngineCollectAOTData(FlutterEngineAOTData data) {
   return kSuccess;
 }
 
-FlutterEngineResult FlutterEngineRun(size_t version,
-                                     const FlutterRendererConfig* config,
-                                     const FlutterProjectArgs* args,
-                                     void* user_data,
-                                     FLUTTER_API_SYMBOL(FlutterEngine) *
-                                         engine_out) {
-  EXPECT_NE(config, nullptr);
-  EXPECT_NE(args, nullptr);
-  EXPECT_NE(user_data, nullptr);
-  EXPECT_NE(engine_out, nullptr);
-
-  FlutterEngineResult result =
-      FlutterEngineInitialize(version, config, args, user_data, engine_out);
-  if (result != kSuccess) {
-    return result;
-  }
-  return FlutterEngineRunInitialized(*engine_out);
-}
-
-FlutterEngineResult FlutterEngineShutdown(FLUTTER_API_SYMBOL(FlutterEngine)
-                                              engine) {
-  delete engine;
-  return kSuccess;
-}
-
 FlutterEngineResult FlutterEngineInitialize(size_t version,
                                             const FlutterRendererConfig* config,
                                             const FlutterProjectArgs* args,
@@ -189,14 +173,39 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   return kSuccess;
 }
 
-FlutterEngineResult FlutterEngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
-                                                  engine) {
-  return kSuccess;
-}
-
 FlutterEngineResult FlutterEngineRunInitialized(
     FLUTTER_API_SYMBOL(FlutterEngine) engine) {
   engine->running = true;
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineRun(size_t version,
+                                     const FlutterRendererConfig* config,
+                                     const FlutterProjectArgs* args,
+                                     void* user_data,
+                                     FLUTTER_API_SYMBOL(FlutterEngine) *
+                                         engine_out) {
+  EXPECT_NE(config, nullptr);
+  EXPECT_NE(args, nullptr);
+  EXPECT_NE(user_data, nullptr);
+  EXPECT_NE(engine_out, nullptr);
+
+  FlutterEngineResult result =
+      FlutterEngineInitialize(version, config, args, user_data, engine_out);
+  if (result != kSuccess) {
+    return result;
+  }
+  return FlutterEngineRunInitialized(*engine_out);
+}
+
+FlutterEngineResult FlutterEngineShutdown(FLUTTER_API_SYMBOL(FlutterEngine)
+                                              engine) {
+  delete engine;
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                  engine) {
   return kSuccess;
 }
 
@@ -399,5 +408,39 @@ FlutterEngineResult FlutterEngineUpdateLocales(FLUTTER_API_SYMBOL(FlutterEngine)
                                                    engine,
                                                const FlutterLocale** locales,
                                                size_t locales_count) {
+  return kSuccess;
+}
+
+}  // namespace
+
+FlutterEngineResult FlutterEngineGetProcAddresses(
+    FlutterEngineProcTable* table) {
+  if (!table) {
+    return kInvalidArguments;
+  }
+
+  FlutterEngineProcTable empty_table = {};
+  *table = empty_table;
+
+  table->CreateAOTData = &FlutterEngineCreateAOTData;
+  table->CollectAOTData = &FlutterEngineCollectAOTData;
+  table->Run = &FlutterEngineRun;
+  table->Shutdown = &FlutterEngineShutdown;
+  table->Initialize = &FlutterEngineInitialize;
+  table->Deinitialize = &FlutterEngineDeinitialize;
+  table->RunInitialized = &FlutterEngineRunInitialized;
+  table->SendWindowMetricsEvent = &FlutterEngineSendWindowMetricsEvent;
+  table->SendPointerEvent = &FlutterEngineSendPointerEvent;
+  table->SendPlatformMessage = &FlutterEngineSendPlatformMessage;
+  table->PlatformMessageCreateResponseHandle =
+      &FlutterPlatformMessageCreateResponseHandle;
+  table->PlatformMessageReleaseResponseHandle =
+      &FlutterPlatformMessageReleaseResponseHandle;
+  table->SendPlatformMessageResponse =
+      &FlutterEngineSendPlatformMessageResponse;
+  table->RunTask = &FlutterEngineRunTask;
+  table->UpdateLocales = &FlutterEngineUpdateLocales;
+  table->RunsAOTCompiledDartCode = &FlutterEngineRunsAOTCompiledDartCode;
+
   return kSuccess;
 }
