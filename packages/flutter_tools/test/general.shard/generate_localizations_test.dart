@@ -1209,6 +1209,7 @@ void main() {
     test('message without placeholders - should generate code comment with description and template message translation', () {
       _standardFlutterDirectoryL10nSetup(fs);
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      final BufferLogger testLogger = BufferLogger.test();
       try {
         generator.initialize(
           inputPathString: defaultL10nPathString,
@@ -1218,7 +1219,7 @@ void main() {
           classNameString: defaultClassNameString,
         );
         generator.loadResources();
-        generator.writeOutputFiles();
+        generator.writeOutputFiles(testLogger);
       } on Exception catch (e) {
         fail('Generating output files should not fail: $e');
       }
@@ -1251,9 +1252,9 @@ void main() {
       l10nDirectory.childFile(esArbFileName)
         .writeAsStringSync(singleEsMessageArbFileString);
 
-
-
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      final BufferLogger testLogger = BufferLogger.test();
+
       try {
         generator.initialize(
           inputPathString: defaultL10nPathString,
@@ -1263,7 +1264,7 @@ void main() {
           classNameString: defaultClassNameString,
         );
         generator.loadResources();
-        generator.writeOutputFiles();
+        generator.writeOutputFiles(testLogger);
       } on Exception catch (e) {
         fail('Generating output files should not fail: $e');
       }
@@ -1306,6 +1307,7 @@ void main() {
 }''');
 
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      final BufferLogger testLogger = BufferLogger.test();
       try {
         generator.initialize(
           inputPathString: defaultL10nPathString,
@@ -1315,7 +1317,7 @@ void main() {
           classNameString: defaultClassNameString,
         );
         generator.loadResources();
-        generator.writeOutputFiles();
+        generator.writeOutputFiles(testLogger);
       } on Exception catch (e) {
         final L10nException exception = e as L10nException;
         print(exception.message);
