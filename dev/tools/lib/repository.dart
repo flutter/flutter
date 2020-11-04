@@ -291,7 +291,7 @@ class Checkouts {
             'Cannot determine path of script!\n${platform.script.path}',
           );
         }
-        filePath = Uri.parse(match.group(1)).path;
+        filePath = Uri.parse(match.group(1)).path.replaceAll(r'%20', ' ');
       } else {
         filePath = platform.script.toFilePath();
       }
