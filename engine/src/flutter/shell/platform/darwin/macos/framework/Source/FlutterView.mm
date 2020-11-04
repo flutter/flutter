@@ -3,17 +3,18 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
+
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/MacOSSwitchableGLContext.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h"
 
 #import <OpenGL/gl.h>
 #import <QuartzCore/QuartzCore.h>
 
 @interface FlutterView () <FlutterResizeSynchronizerDelegate> {
   __weak id<FlutterViewReshapeListener> _reshapeListener;
-  FlutterResizeSynchronizer* resizeSynchronizer;
-  FlutterSurfaceManager* surfaceManager;
+  FlutterResizeSynchronizer* _resizeSynchronizer;
+  FlutterSurfaceManager* _surfaceManager;
 }
 
 @end
@@ -35,9 +36,9 @@
 
     [self setWantsLayer:YES];
 
-    resizeSynchronizer = [[FlutterResizeSynchronizer alloc] initWithDelegate:self];
-    surfaceManager = [[FlutterSurfaceManager alloc] initWithLayer:self.layer
-                                                    openGLContext:self.openGLContext];
+    _resizeSynchronizer = [[FlutterResizeSynchronizer alloc] initWithDelegate:self];
+    _surfaceManager = [[FlutterSurfaceManager alloc] initWithLayer:self.layer
+                                                     openGLContext:self.openGLContext];
 
     _reshapeListener = reshapeListener;
   }
@@ -45,8 +46,7 @@
 }
 
 - (void)resizeSynchronizerFlush:(FlutterResizeSynchronizer*)synchronizer {
-  flutter::GLContextSwitch context_switch(
-      std::make_unique<MacOSSwitchableGLContext>(self.openGLContext));
+  MacOSGLContextSwitch context_switch(self.openGLContext);
   glFlush();
 }
 
@@ -54,29 +54,29 @@
   [CATransaction begin];
   [CATransaction setDisableActions:YES];
 
-  [surfaceManager swapBuffers];
+  [_surfaceManager swapBuffers];
 
   [CATransaction commit];
 }
 
-- (int)getFrameBufferIdForSize:(CGSize)size {
-  if ([resizeSynchronizer shouldEnsureSurfaceForSize:size]) {
-    [surfaceManager ensureSurfaceSize:size];
+- (int)frameBufferIDForSize:(CGSize)size {
+  if ([_resizeSynchronizer shouldEnsureSurfaceForSize:size]) {
+    [_surfaceManager ensureSurfaceSize:size];
   }
-  return [surfaceManager glFrameBufferId];
+  return [_surfaceManager glFrameBufferId];
 }
 
 - (void)present {
-  [resizeSynchronizer requestCommit];
+  [_resizeSynchronizer requestCommit];
 }
 
 - (void)reshaped {
   if (self.synchronousResizing) {
     CGSize scaledSize = [self convertSizeToBacking:self.bounds.size];
-    [resizeSynchronizer beginResize:scaledSize
-                             notify:^{
-                               [_reshapeListener viewDidReshape:self];
-                             }];
+    [_resizeSynchronizer beginResize:scaledSize
+                              notify:^{
+                                [_reshapeListener viewDidReshape:self];
+                              }];
   } else {
     [_reshapeListener viewDidReshape:self];
   }

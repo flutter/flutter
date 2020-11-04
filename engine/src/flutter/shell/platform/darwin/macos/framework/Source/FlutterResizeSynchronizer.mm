@@ -1,103 +1,117 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
 
-#import <mutex>
+#include <mutex>
 
 @interface FlutterResizeSynchronizer () {
-  uint32_t cookie;  // counter to detect stale callbacks
+  // Counter to detect stale callbacks.
+  uint32_t _cookie;
 
-  std::mutex mutex;
-  std::condition_variable condBlockBeginResize;    // used to block [beginResize:]
-  std::condition_variable condBlockRequestCommit;  // used to block [requestCommit]
+  std::mutex _mutex;
 
-  bool acceptingCommit;  // if false, requestCommit calls are ignored until
-                         // shouldEnsureSurfaceForSize is called with proper size
-  bool waiting;          // waiting for resize to finish
-  bool pendingCommit;    // requestCommit was called and [delegate commit:] must be performed on
-                         // platform thread
-  CGSize newSize;        // target size for resizing
+  // Used to block [beginResize:].
+  std::condition_variable _condBlockBeginResize;
+  // Used to block [requestCommit].
+  std::condition_variable _condBlockRequestCommit;
 
-  __weak id<FlutterResizeSynchronizerDelegate> delegate;
+  // If NO, requestCommit calls are ignored until shouldEnsureSurfaceForSize is called with
+  // proper size.
+  BOOL _acceptingCommit;
+
+  // Waiting for resize to finish.
+  BOOL _waiting;
+
+  // RequestCommit was called and [delegate commit:] must be performed on platform thread.
+  BOOL _pendingCommit;
+
+  // Target size for resizing.
+  CGSize _newSize;
+
+  __weak id<FlutterResizeSynchronizerDelegate> _delegate;
 }
 @end
 
 @implementation FlutterResizeSynchronizer
 
-- (instancetype)initWithDelegate:(id<FlutterResizeSynchronizerDelegate>)delegate_ {
+- (instancetype)initWithDelegate:(id<FlutterResizeSynchronizerDelegate>)delegate {
   if (self = [super init]) {
-    acceptingCommit = true;
-    delegate = delegate_;
+    _acceptingCommit = YES;
+    _delegate = delegate;
   }
   return self;
 }
 
 - (void)beginResize:(CGSize)size notify:(dispatch_block_t)notify {
-  std::unique_lock<std::mutex> lock(mutex);
-  if (!delegate) {
+  std::unique_lock<std::mutex> lock(_mutex);
+  if (!_delegate) {
     return;
   }
 
-  ++cookie;
+  ++_cookie;
 
   // from now on, ignore all incoming commits until the block below gets
   // scheduled on raster thread
-  acceptingCommit = false;
+  _acceptingCommit = NO;
 
   // let pending commits finish to unblock the raster thread
-  pendingCommit = false;
-  condBlockBeginResize.notify_all();
+  _pendingCommit = NO;
+  _condBlockBeginResize.notify_all();
 
   // let the engine send resize notification
   notify();
 
-  newSize = size;
+  _newSize = size;
 
-  waiting = true;
+  _waiting = YES;
 
-  condBlockRequestCommit.wait(lock, [&] { return pendingCommit; });
+  _condBlockRequestCommit.wait(lock, [&] { return _pendingCommit; });
 
-  [delegate resizeSynchronizerFlush:self];
-  [delegate resizeSynchronizerCommit:self];
-  pendingCommit = false;
-  condBlockBeginResize.notify_all();
+  [_delegate resizeSynchronizerFlush:self];
+  [_delegate resizeSynchronizerCommit:self];
+  _pendingCommit = NO;
+  _condBlockBeginResize.notify_all();
 
-  waiting = false;
+  _waiting = NO;
 }
 
-- (bool)shouldEnsureSurfaceForSize:(CGSize)size {
-  std::unique_lock<std::mutex> lock(mutex);
-  if (!acceptingCommit) {
-    if (CGSizeEqualToSize(newSize, size)) {
-      acceptingCommit = true;
+- (BOOL)shouldEnsureSurfaceForSize:(CGSize)size {
+  std::unique_lock<std::mutex> lock(_mutex);
+  if (!_acceptingCommit) {
+    if (CGSizeEqualToSize(_newSize, size)) {
+      _acceptingCommit = YES;
     }
   }
-  return acceptingCommit;
+  return _acceptingCommit;
 }
 
 - (void)requestCommit {
-  std::unique_lock<std::mutex> lock(mutex);
-  if (!acceptingCommit) {
+  std::unique_lock<std::mutex> lock(_mutex);
+  if (!_acceptingCommit) {
     return;
   }
 
-  pendingCommit = true;
-  if (waiting) {  // BeginResize is in progress, interrupt it and schedule commit call
-    condBlockRequestCommit.notify_all();
-    condBlockBeginResize.wait(lock, [&]() { return !pendingCommit; });
+  _pendingCommit = YES;
+  if (_waiting) {  // BeginResize is in progress, interrupt it and schedule commit call
+    _condBlockRequestCommit.notify_all();
+    _condBlockBeginResize.wait(lock, [&]() { return !_pendingCommit; });
   } else {
     // No resize, schedule commit on platform thread and wait until either done
     // or interrupted by incoming BeginResize
-    [delegate resizeSynchronizerFlush:self];
-    dispatch_async(dispatch_get_main_queue(), [self, cookie_ = cookie] {
-      std::unique_lock<std::mutex> lock(mutex);
-      if (cookie_ == cookie) {
-        if (delegate) {
-          [delegate resizeSynchronizerCommit:self];
+    [_delegate resizeSynchronizerFlush:self];
+    dispatch_async(dispatch_get_main_queue(), [self, cookie = _cookie] {
+      std::unique_lock<std::mutex> lock(_mutex);
+      if (cookie == _cookie) {
+        if (_delegate) {
+          [_delegate resizeSynchronizerCommit:self];
         }
-        pendingCommit = false;
-        condBlockBeginResize.notify_all();
+        _pendingCommit = NO;
+        _condBlockBeginResize.notify_all();
       }
     });
-    condBlockBeginResize.wait(lock, [&]() { return !pendingCommit; });
+    _condBlockBeginResize.wait(lock, [&]() { return !_pendingCommit; });
   }
 }
 
