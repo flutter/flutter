@@ -369,7 +369,7 @@ void main() {
   });
 
   group('setCanDrag to false with active drag gesture: ', () {
-      Future<void> pumpTestWidget(WidgetTester tester, { required bool canDrag }) {
+    Future<void> pumpTestWidget(WidgetTester tester, { required bool canDrag }) {
       return tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(

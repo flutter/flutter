@@ -498,8 +498,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       return;
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
-      // Cancel active drag/hold activities because the gesture recognizers will
-      // soon be disposed by our RawGestureDetector.
+      // Cancel the active hold/drag (if any) because the gesture recognizers
+      // will soon be disposed by our RawGestureDetector, and we won't be
+      // receiving pointer up events to cancel the hold/drag.
       _handleDragCancel();
     } else {
       switch (widget.axis) {
