@@ -498,15 +498,16 @@ void main() {
         skipTagging: true,
       );
       expect(
-          rollDev(
-            usage: usage,
-            argResults: fakeArgResults,
-            fileSystem: fileSystem,
-            platform: platform,
-            repository: repo,
-            stdio: stdio,
-          ),
-          true);
+        rollDev(
+          usage: usage,
+          argResults: fakeArgResults,
+          fileSystem: fileSystem,
+          platform: platform,
+          repository: repo,
+          stdio: stdio,
+        ),
+        true,
+      );
     });
 
     test('successfully tags and publishes release', () {
@@ -585,7 +586,6 @@ void main() {
           '$commit:dev',
         ]),
       ]);
-      //when(mockGit.getOutput('rev-parse HEAD', any)).thenReturn(commit);
       fakeArgResults = FakeArgResults(
         level: level,
         commit: commit,
