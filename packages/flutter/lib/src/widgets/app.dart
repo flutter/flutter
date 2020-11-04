@@ -19,8 +19,10 @@ import 'media_query.dart';
 import 'navigator.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
+import 'primary_scroll_controller.dart';
 import 'restoration.dart';
 import 'router.dart';
+import 'scroll_controller.dart';
 import 'scrollable.dart';
 import 'semantics_debugger.dart';
 import 'shortcuts.dart';
@@ -1542,6 +1544,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         child: result,
       );
     }
+
+    result = PrimaryScrollController(
+      controller: ScrollController(),
+      child: result,
+    );
 
     PerformanceOverlay? performanceOverlay;
     // We need to push a performance overlay if any of the display or checkerboarding

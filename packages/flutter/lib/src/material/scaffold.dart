@@ -2672,12 +2672,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // On iOS, tapping the status bar scrolls the app's primary scrollable to the
   // top. We implement this by providing a primary scroll controller and
   // scrolling it to the top when tapped.
-
-  final ScrollController _primaryScrollController = ScrollController();
-
+  ScrollController? _primaryScrollController;
   void _handleStatusBarTap() {
-    if (_primaryScrollController.hasClients) {
-      _primaryScrollController.animateTo(
+    if (_primaryScrollController != null && _primaryScrollController!.hasClients) {
+      _primaryScrollController!.animateTo(
         0.0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.linear, // TODO(ianh): Use a more appropriate curve.
@@ -2760,6 +2758,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     // Register with the current ScaffoldMessenger, if there is one.
     _scaffoldMessenger = _currentScaffoldMessenger;
     _scaffoldMessenger?._register(this);
+
+    _primaryScrollController = PrimaryScrollController.of(context);
 
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
     final MediaQueryData mediaQuery = MediaQuery.of(context);
@@ -3160,30 +3160,27 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
-      child: PrimaryScrollController(
-        controller: _primaryScrollController,
-        child: Material(
-          color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-          child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
-            return CustomMultiChildLayout(
-              children: children,
-              delegate: _ScaffoldLayout(
-                extendBody: _extendBody,
-                extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-                minInsets: minInsets,
-                minViewPadding: minViewPadding,
-                currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-                floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
-                floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
-                geometryNotifier: _geometryNotifier,
-                previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
-                textDirection: textDirection,
-                isSnackBarFloating: isSnackBarFloating,
-                snackBarWidth: snackBarWidth,
-              ),
-            );
-          }),
-        ),
+      child: Material(
+        color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
+        child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
+          return CustomMultiChildLayout(
+            children: children,
+            delegate: _ScaffoldLayout(
+              extendBody: _extendBody,
+              extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+              minInsets: minInsets,
+              minViewPadding: minViewPadding,
+              currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
+              floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
+              floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
+              geometryNotifier: _geometryNotifier,
+              previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
+              textDirection: textDirection,
+              isSnackBarFloating: isSnackBarFloating,
+              snackBarWidth: snackBarWidth,
+            ),
+          );
+        }),
       ),
     );
   }

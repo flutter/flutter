@@ -17,6 +17,7 @@ import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
+import 'primary_scroll_controller.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'scroll_configuration.dart';
@@ -963,7 +964,20 @@ class ScrollAction extends Action<ScrollIntent> {
   @override
   bool isEnabled(ScrollIntent intent) {
     final FocusNode? focus = primaryFocus;
-    return focus != null && focus.context != null && Scrollable.of(focus.context!) != null;
+    final bool contextIsValid = focus != null && focus.context != null;
+    if (contextIsValid) {
+      // Check for primary scrollable within the current context
+      if (Scrollable.of(focus!.context!) != null)
+        return true;
+      // Check for fallback scrollable with context from DefaultScrollAction
+      if (PrimaryScrollController.of(focus.context!) != null) {
+        final ScrollController? primaryScrollController = PrimaryScrollController.of(focus.context!);
+        return primaryScrollController != null
+          && primaryScrollController.position.context.notificationContext != null
+          && Scrollable.of(primaryScrollController.position.context.notificationContext!) != null;
+      }
+    }
+    return false;
   }
 
   // Returns the scroll increment for a single scroll request, for use when
@@ -1047,7 +1061,11 @@ class ScrollAction extends Action<ScrollIntent> {
 
   @override
   void invoke(ScrollIntent intent) {
-    final ScrollableState? state = Scrollable.of(primaryFocus!.context!);
+    ScrollableState? state = Scrollable.of(primaryFocus!.context!);
+    if (state == null) {
+      final ScrollController? primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
+      state = Scrollable.of(primaryScrollController!.position.context.notificationContext!);
+    }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
     assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
     assert(state!.position.viewportDimension != null);
