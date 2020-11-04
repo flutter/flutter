@@ -17,7 +17,7 @@
       "name": "meta",
       "rootUri": "../../../../third_party/dart/pkg/meta",
       "packageUri": "lib",
-      "languageVersion": "2.10"
+      "languageVersion": "2.12"
     },
     {
       "name": "args",
