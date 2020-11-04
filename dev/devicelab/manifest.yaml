@@ -228,7 +228,6 @@ tasks:
       with SkSL shader warm-up with e2e.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
-    flaky: true
 
   backdrop_filter_perf__timeline_summary:
     description: >
@@ -756,6 +755,7 @@ tasks:
       Android with e2e.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
+    flaky: true
 
   flutter_gallery__transition_perf_e2e_ios:
     description: >

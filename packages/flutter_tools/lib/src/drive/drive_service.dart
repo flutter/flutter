@@ -5,6 +5,7 @@
 import 'package:dds/dds.dart' as dds;
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
@@ -77,7 +78,8 @@ abstract class DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment, {
+    Map<String, String> environment,
+    PackageConfig packageConfig, {
     bool headless,
     String chromeBinary,
     String browserName,
@@ -191,11 +193,17 @@ class FlutterDriverService extends DriverService {
     DebuggingOptions debuggingOptions,
     bool ipv6,
   ) async {
-    _vmServiceUri = vmServiceUri.toString();
+    Uri uri;
+    if (vmServiceUri.scheme == 'ws') {
+      uri = vmServiceUri.replace(scheme: 'http', path: vmServiceUri.path.replaceFirst('ws/', ''));
+    } else {
+      uri = vmServiceUri;
+    }
+    _vmServiceUri = uri.toString();
     _device = device;
     try {
       await device.dds.startDartDevelopmentService(
-        vmServiceUri,
+        uri,
         debuggingOptions.ddsPort,
         ipv6,
         debuggingOptions.disableServiceAuthCodes,
@@ -206,7 +214,7 @@ class FlutterDriverService extends DriverService {
       // application, DDS will already be running remotely and this call will fail.
       // This can be ignored to continue to use the existing remote DDS instance.
     }
-    _vmService = await _vmServiceConnector(Uri.parse(_vmServiceUri), device: _device);
+    _vmService = await _vmServiceConnector(uri, device: _device);
     final DeviceLogReader logReader = await device.getLogReader(app: _applicationPackage);
     logReader.logLines.listen(_logger.printStatus);
 
@@ -218,7 +226,8 @@ class FlutterDriverService extends DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment, {
+    Map<String, String> environment,
+    PackageConfig packageConfig, {
     bool headless,
     String chromeBinary,
     String browserName,
@@ -226,14 +235,16 @@ class FlutterDriverService extends DriverService {
     int driverPort,
     List<String> browserDimension,
   }) async {
+    // Check if package:test is available. If not, fall back to invoking
+    // the test script directly. `pub run test` is strictly better because
+    // in the even that a socket or something similar is left open, the
+    // test runner will correctly shutdown the VM instead of hanging forever.
     return _processUtils.stream(<String>[
       _dartSdkPath,
-      'pub',
-      'run',
-      'test',
-      ...arguments,
-      testFile,
-      '-rexpanded',
+      if (packageConfig['test'] != null)
+        ...<String>['pub', 'run', 'test', ...arguments, testFile, '-rexpanded']
+      else
+        ...<String>[...arguments, testFile, '-rexpanded'],
     ], environment: <String, String>{
       'VM_SERVICE_URL': _vmServiceUri,
       ...environment,

@@ -1483,13 +1483,6 @@ void main() {
     ));
   }));
 
-  testUsingContext('ResidentRunner does support CanvasKit', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-
-    expect(residentRunner.toggleCanvaskit,
-      throwsA(isA<Exception>()));
-  }));
-
   testUsingContext('ResidentRunner handles writeSkSL returning no data', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
@@ -2524,7 +2517,7 @@ void main() {
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-  });
+  }, skip: true); // TODO(jonahwilliams): null safe autodetection does not work on the web.
 
   testUsingContext('FlutterDevice passes flutter-widget-cache flag when feature is enabled', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);

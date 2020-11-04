@@ -29,6 +29,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
     usesDartDefineOption();
     usesFlavorOption();
+    usesWebRendererOption();
     argParser
       ..addFlag('trace-startup',
         negatable: false,
@@ -204,7 +205,7 @@ class RunCommand extends RunCommandBase {
   RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
-    usesExtraFrontendOptions();
+    usesExtraDartFlagOptions();
     addEnableExperimentation(hide: !verboseHelp);
 
     // By default, the app should to publish the VM service port over mDNS.

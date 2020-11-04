@@ -281,7 +281,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   bool _isDark() {
-    return Theme.of(context)!.brightness == Brightness.dark;
+    return Theme.of(context).brightness == Brightness.dark;
   }
 
   Widget _buildLine(bool visible) {
@@ -321,7 +321,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Color _circleColor(int index) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     if (!_isDark()) {
       return widget.steps[index].isActive ? themeData.primaryColor : Colors.black38;
     } else {
@@ -395,7 +395,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       return widget.controlsBuilder!(context, onStepContinue: widget.onStepContinue, onStepCancel: widget.onStepCancel);
 
     final Color cancelColor;
-    switch (Theme.of(context)!.brightness) {
+    switch (Theme.of(context).brightness) {
       case Brightness.light:
         cancelColor = Colors.black54;
         break;
@@ -404,7 +404,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         break;
     }
 
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final ColorScheme colorScheme = themeData.colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
@@ -453,7 +453,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   TextStyle _titleStyle(int index) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
 
     assert(widget.steps[index].state != null);
@@ -474,7 +474,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   TextStyle _subtitleStyle(int index) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
 
     assert(widget.steps[index].state != null);

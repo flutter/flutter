@@ -61,7 +61,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// The argument is optional and is only used for debug purposes (e.g. in the
   /// [toString] serialization).
   ///
-  /// {@template flutter.gestures.gestureRecognizer.kind}
+  /// {@template flutter.gestures.GestureRecognizer.kind}
   /// It's possible to limit this recognizer to a specific [PointerDeviceKind]
   /// by providing the optional [kind] argument. If [kind] is null,
   /// the recognizer will accept pointer events from all device kinds.
@@ -219,7 +219,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
 abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// Initialize the object.
   ///
-  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.kind}
   OneSequenceGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
@@ -385,7 +385,7 @@ enum GestureRecognizerState {
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
   ///
-  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.kind}
   PrimaryPointerGestureRecognizer({
     this.deadline,
     this.preAcceptSlopTolerance = kTouchSlop,
