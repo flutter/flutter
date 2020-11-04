@@ -169,7 +169,7 @@ class TabControllerFrameState extends State<TabControllerFrame> with SingleTicke
   }
 }
 
-Widget buildLeftRightApp({ required List<String> tabs, required String value }) {
+Widget buildLeftRightApp({required List<String> tabs, required String value, bool automaticIndicatorColorAdjustment = true}) {
   return MaterialApp(
     theme: ThemeData(platform: TargetPlatform.android),
     home: DefaultTabController(
@@ -180,6 +180,7 @@ Widget buildLeftRightApp({ required List<String> tabs, required String value }) 
           title: const Text('tabs'),
           bottom: TabBar(
             tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            automaticIndicatorColorAdjustment: automaticIndicatorColorAdjustment,
           ),
         ),
         body: const TabBarView(
@@ -2213,7 +2214,16 @@ void main() {
     expect(tabBarBox, paints..line(
       color: Colors.white,
     ));
+  });
 
+  testWidgets('Tab indicator color should not be adjusted when disable [automaticIndicatorColorAdjustment]', (WidgetTester tester) async {
+     // Regression test for https://github.com/flutter/flutter/issues/68077
+     final List<String> tabs = <String>['LEFT', 'RIGHT'];
+     await tester.pumpWidget(buildLeftRightApp(tabs: tabs, value: 'LEFT', automaticIndicatorColorAdjustment: false));
+     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+     expect(tabBarBox, paints..line(
+       color: const Color(0xff2196f3),
+     ));
   });
 
   testWidgets('Skipping tabs with global key does not crash', (WidgetTester tester) async {

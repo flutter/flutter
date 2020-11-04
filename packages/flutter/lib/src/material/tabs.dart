@@ -597,6 +597,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.controller,
     this.isScrollable = false,
     this.indicatorColor,
+    this.automaticIndicatorColorAdjustment = true,
     this.indicatorWeight = 2.0,
     this.indicatorPadding = EdgeInsets.zero,
     this.indicator,
@@ -684,6 +685,13 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [TabBarIndicatorSize.label], then the tab's bounds are only as wide as
   /// the tab widget itself.
   final Decoration? indicator;
+
+  /// Whether this tab bar should automatically adjust the [indicatorColor].
+  ///
+  /// If [automaticIndicatorColorAdjustment] is true,
+  /// then the [indicatorColor] will be automatically adjusted to [Colors.white]
+  /// when the [indicatorColor] is same as [Material.color] of the [Material] parent widget.
+  final bool automaticIndicatorColorAdjustment;
 
   /// Defines how the selected tab indicator's size is computed.
   ///
@@ -814,7 +822,11 @@ class _TabBarState extends State<TabBar> {
     //
     // The material's color might be null (if it's a transparency). In that case
     // there's no good way for us to find out what the color is so we don't.
-    if (color.value == Material.of(context)?.color?.value)
+    //
+    // TODO(xu-baolin): Remove automatic adjustment to white color indicator
+    // with a better long-term solution.
+    // https://github.com/flutter/flutter/pull/68171#pullrequestreview-517753917
+    if (widget.automaticIndicatorColorAdjustment && color.value == Material.of(context)?.color?.value)
       color = Colors.white;
 
     return UnderlineTabIndicator(
