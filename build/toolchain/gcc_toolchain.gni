@@ -45,6 +45,9 @@ analyzer_wrapper =
 #      Location of the strip executable. When specified, strip will be run on
 #      all shared libraries and executables as they are built. The pre-stripped
 #      artifacts will be put in lib.stripped/ and exe.stripped/.
+#  - llvm_objcopy
+#      Location of the llvm-objcopy executable. Used as strip instead of strip
+#      when specified.
 template("gcc_toolchain") {
   toolchain(target_name) {
     assert(defined(invoker.cc), "gcc_toolchain() must specify a \"cc\" value")
@@ -169,7 +172,7 @@ template("gcc_toolchain") {
       tocfile = sofile + ".TOC"
       temporary_tocname = sofile + ".tmp"
       link_command = "$ld -shared {{ldflags}} $coverage_flags -o $sofile -Wl,--build-id=sha1 -Wl,-soname=$soname @$rspfile"
-      toc_command = "{ $readelf -d $sofile | grep SONAME ; $nm -gD -f p $sofile | cut -f1-2 -d' '; } > $temporary_tocname"
+      toc_command = "{ $readelf -d $sofile | grep SONAME ; $nm -gD -f posix $sofile | cut -f1-2 -d' '; } > $temporary_tocname"
       replace_command = "if ! cmp -s $temporary_tocname $tocfile; then mv $temporary_tocname $tocfile; fi"
 
       command = "$link_command && $toc_command && $replace_command"
@@ -214,7 +217,7 @@ template("gcc_toolchain") {
       rspfile = "$outfile.rsp"
       unstripped_outfile = outfile
 
-      if (defined(invoker.strip)) {
+      if (defined(invoker.strip) || defined(invoker.llvm_objcopy)) {
         unstripped_outfile = "{{root_out_dir}}/exe.unstripped/$exename"
       }
 
@@ -223,6 +226,10 @@ template("gcc_toolchain") {
         strip = invoker.strip
         strip_command =
             "${strip} --strip-unneeded -o $outfile $unstripped_outfile"
+        command += " && " + strip_command
+      } else if (defined(invoker.llvm_objcopy)) {
+        strip = invoker.llvm_objcopy
+        strip_command = "${strip} --strip-all $unstripped_outfile $outfile"
         command += " && " + strip_command
       }
       if (defined(invoker.postlink)) {
