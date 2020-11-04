@@ -119,7 +119,10 @@ source_set("flutter_linux_sources") {
   ]
 
   # Set flag to stop headers being directly included (library users should not do this)
-  defines = [ "FLUTTER_LINUX_COMPILATION" ]
+  defines = [
+    "FLUTTER_LINUX_COMPILATION",
+    "FLUTTER_ENGINE_NO_PROTOTYPES",
+  ]
 
   deps = [
     "//flutter/shell/platform/common/cpp:common_cpp_input",
@@ -137,6 +140,8 @@ source_set("flutter_linux") {
     "//flutter/shell/platform/linux/config:x11",
     "//third_party/khronos:khronos_headers",
   ]
+
+  defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
 
   public_deps = [ ":flutter_linux_sources" ]
 
@@ -182,14 +187,20 @@ executable("flutter_linux_unittests") {
     "//flutter/shell/platform/linux/config:x11",
   ]
 
-  # Set flag to allow public headers to be directly included (library users should not do this)
-  defines = [ "FLUTTER_LINUX_COMPILATION" ]
+  defines = [
+    "FLUTTER_ENGINE_NO_PROTOTYPES",
+
+    # Set flag to allow public headers to be directly included
+    # (library users should not do this)
+    "FLUTTER_LINUX_COMPILATION",
+  ]
 
   deps = [
     ":flutter_linux_fixtures",
     ":flutter_linux_sources",
     "//flutter/runtime:libdart",
     "//flutter/shell/platform/embedder:embedder_headers",
+    "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",
   ]
 }

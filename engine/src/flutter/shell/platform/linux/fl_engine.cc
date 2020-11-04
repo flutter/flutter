@@ -32,6 +32,7 @@ struct _FlEngine {
   FlBinaryMessenger* binary_messenger;
   FlutterEngineAOTData aot_data;
   FLUTTER_API_SYMBOL(FlutterEngine) engine;
+  FlutterEngineProcTable embedder_api;
 
   // Function to call when a platform message is received.
   FlEnginePlatformMessageHandler platform_message_handler;
@@ -127,7 +128,7 @@ static void setup_locales(FlEngine* self) {
   }
   FlutterLocale** locales =
       reinterpret_cast<FlutterLocale**>(locales_array->pdata);
-  FlutterEngineResult result = FlutterEngineUpdateLocales(
+  FlutterEngineResult result = self->embedder_api.UpdateLocales(
       self->engine, const_cast<const FlutterLocale**>(locales),
       locales_array->len);
   if (result != kSuccess) {
@@ -143,7 +144,7 @@ static gboolean flutter_source_dispatch(GSource* source,
   FlEngine* self = fl_source->engine;
 
   FlutterEngineResult result =
-      FlutterEngineRunTask(self->engine, &fl_source->task);
+      self->embedder_api.RunTask(self->engine, &fl_source->task);
   if (result != kSuccess) {
     g_warning("Failed to run Flutter task\n");
   }
@@ -302,12 +303,12 @@ static void fl_engine_dispose(GObject* object) {
   FlEngine* self = FL_ENGINE(object);
 
   if (self->engine != nullptr) {
-    FlutterEngineShutdown(self->engine);
+    self->embedder_api.Shutdown(self->engine);
     self->engine = nullptr;
   }
 
   if (self->aot_data != nullptr) {
-    FlutterEngineCollectAOTData(self->aot_data);
+    self->embedder_api.CollectAOTData(self->aot_data);
     self->aot_data = nullptr;
   }
 
@@ -331,6 +332,9 @@ static void fl_engine_class_init(FlEngineClass* klass) {
 
 static void fl_engine_init(FlEngine* self) {
   self->thread = g_thread_self();
+
+  self->embedder_api.struct_size = sizeof(FlutterEngineProcTable);
+  FlutterEngineGetProcAddresses(&self->embedder_api);
 
   self->binary_messenger = fl_binary_messenger_new(self);
 }
@@ -400,11 +404,12 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   args.dart_entrypoint_argv =
       reinterpret_cast<const char* const*>(dart_entrypoint_args);
 
-  if (FlutterEngineRunsAOTCompiledDartCode()) {
+  if (self->embedder_api.RunsAOTCompiledDartCode()) {
     FlutterEngineAOTDataSource source = {};
     source.type = kFlutterEngineAOTDataSourceTypeElfPath;
     source.elf_path = fl_dart_project_get_aot_library_path(self->project);
-    if (FlutterEngineCreateAOTData(&source, &self->aot_data) != kSuccess) {
+    if (self->embedder_api.CreateAOTData(&source, &self->aot_data) !=
+        kSuccess) {
       g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
                   "Failed to create AOT data");
       return FALSE;
@@ -412,7 +417,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
     args.aot_data = self->aot_data;
   }
 
-  FlutterEngineResult result = FlutterEngineInitialize(
+  FlutterEngineResult result = self->embedder_api.Initialize(
       FLUTTER_ENGINE_VERSION, &config, &args, self, &self->engine);
   if (result != kSuccess) {
     g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
@@ -420,7 +425,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
     return FALSE;
   }
 
-  result = FlutterEngineRunInitialized(self->engine);
+  result = self->embedder_api.RunInitialized(self->engine);
   if (result != kSuccess) {
     g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
                 "Failed to run Flutter engine");
@@ -430,6 +435,10 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   setup_locales(self);
 
   return TRUE;
+}
+
+FlutterEngineProcTable* fl_engine_get_embedder_api(FlEngine* self) {
+  return &(self->embedder_api);
 }
 
 void fl_engine_set_platform_message_handler(
@@ -470,7 +479,7 @@ gboolean fl_engine_send_platform_message_response(
     data =
         static_cast<const uint8_t*>(g_bytes_get_data(response, &data_length));
   }
-  FlutterEngineResult result = FlutterEngineSendPlatformMessageResponse(
+  FlutterEngineResult result = self->embedder_api.SendPlatformMessageResponse(
       self->engine, handle, data, data_length);
 
   if (result != kSuccess) {
@@ -501,9 +510,10 @@ void fl_engine_send_platform_message(FlEngine* self,
       return;
     }
 
-    FlutterEngineResult result = FlutterPlatformMessageCreateResponseHandle(
-        self->engine, fl_engine_platform_message_response_cb, task,
-        &response_handle);
+    FlutterEngineResult result =
+        self->embedder_api.PlatformMessageCreateResponseHandle(
+            self->engine, fl_engine_platform_message_response_cb, task,
+            &response_handle);
     if (result != kSuccess) {
       g_task_return_new_error(task, fl_engine_error_quark(),
                               FL_ENGINE_ERROR_FAILED,
@@ -525,7 +535,7 @@ void fl_engine_send_platform_message(FlEngine* self,
   fl_message.message_size = message != nullptr ? g_bytes_get_size(message) : 0;
   fl_message.response_handle = response_handle;
   FlutterEngineResult result =
-      FlutterEngineSendPlatformMessage(self->engine, &fl_message);
+      self->embedder_api.SendPlatformMessage(self->engine, &fl_message);
 
   if (result != kSuccess && task != nullptr) {
     g_task_return_new_error(task, fl_engine_error_quark(),
@@ -535,7 +545,8 @@ void fl_engine_send_platform_message(FlEngine* self,
   }
 
   if (response_handle != nullptr) {
-    FlutterPlatformMessageReleaseResponseHandle(self->engine, response_handle);
+    self->embedder_api.PlatformMessageReleaseResponseHandle(self->engine,
+                                                            response_handle);
   }
 }
 
@@ -563,7 +574,7 @@ void fl_engine_send_window_metrics_event(FlEngine* self,
   event.width = width;
   event.height = height;
   event.pixel_ratio = pixel_ratio;
-  FlutterEngineSendWindowMetricsEvent(self->engine, &event);
+  self->embedder_api.SendWindowMetricsEvent(self->engine, &event);
 }
 
 void fl_engine_send_mouse_pointer_event(FlEngine* self,
@@ -593,7 +604,7 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   fl_event.scroll_delta_y = scroll_delta_y;
   fl_event.device_kind = kFlutterPointerDeviceKindMouse;
   fl_event.buttons = buttons;
-  FlutterEngineSendPointerEvent(self->engine, &fl_event, 1);
+  self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
 }
 
 G_MODULE_EXPORT FlBinaryMessenger* fl_engine_get_binary_messenger(
