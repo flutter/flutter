@@ -818,64 +818,23 @@ class HotRunner extends ResidentRunner {
     if (!updatedDevFS.success) {
       return OperationResult(1, 'DevFS synchronization failed');
     }
-    String reloadMessage;
-    final Stopwatch vmReloadTimer = Stopwatch()..start();
-    Map<String, Object> firstReloadDetails;
-    const String entryPath = 'main.dart.incremental.dill';
-    final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
-
-    for (final FlutterDevice device in flutterDevices) {
-      final List<Future<vm_service.ReloadReport>> reportFutures = await _reloadDeviceSources(
-        device,
-        entryPath,
-        pause: pause,
+    String reloadMessage = 'Reloaded 0 libraries';
+    final Map<String, Object> firstReloadDetails = <String, Object>{};
+    if (updatedDevFS.invalidatedSourcesCount > 0) {
+      final OperationResult result = await _reloadSourcesHelper(
+        pause,
+        firstReloadDetails,
+        targetPlatform,
+        sdkName,
+        emulator,
+        reason,
       );
-      allReportsFutures.add(Future.wait(reportFutures).then(
-        (List<vm_service.ReloadReport> reports) async {
-          // TODO(aam): Investigate why we are validating only first reload report,
-          // which seems to be current behavior
-          final vm_service.ReloadReport firstReport = reports.first;
-          // Don't print errors because they will be printed further down when
-          // `validateReloadReport` is called again.
-          await device.updateReloadStatus(
-            validateReloadReport(firstReport, printErrors: false),
-          );
-          return DeviceReloadReport(device, reports);
-        },
-      ));
-    }
-    final List<DeviceReloadReport> reports = await Future.wait(allReportsFutures);
-    for (final DeviceReloadReport report in reports) {
-      final vm_service.ReloadReport reloadReport = report.reports[0];
-      if (!validateReloadReport(reloadReport)) {
-        // Reload failed.
-        HotEvent('reload-reject',
-          targetPlatform: targetPlatform,
-          sdkName: sdkName,
-          emulator: emulator,
-          fullRestart: false,
-          reason: reason,
-          nullSafety: usageNullSafety,
-          fastReassemble: null,
-        ).send();
-        // Reset devFS lastCompileTime to ensure the file will still be marked
-        // as dirty on subsequent reloads.
-        _resetDevFSCompileTime();
-        final ReloadReportContents contents = ReloadReportContents.fromReloadReport(reloadReport);
-        return OperationResult(1, 'Reload rejected: ${contents.notices.join("\n")}');
+      if (result.code != 0) {
+        return result;
       }
-      // Collect stats only from the first device. If/when run -d all is
-      // refactored, we'll probably need to send one hot reload/restart event
-      // per device to analytics.
-      firstReloadDetails ??= castStringKeyedMap(reloadReport.json['details']);
-      final int loadedLibraryCount = reloadReport.json['details']['loadedLibraryCount'] as int;
-      final int finalLibraryCount = reloadReport.json['details']['finalLibraryCount'] as int;
-      globals.printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
-      reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
+      reloadMessage = result.message;
     }
 
-    // Record time it took for the VM to reload the sources.
-    _addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
     final Stopwatch reassembleTimer = Stopwatch()..start();
     await _evictDirtyAssets();
 
@@ -994,10 +953,10 @@ class HotRunner extends ResidentRunner {
       fullRestart: false,
       reason: reason,
       overallTimeInMs: reloadInMs,
-      finalLibraryCount: firstReloadDetails['finalLibraryCount'] as int,
-      syncedLibraryCount: firstReloadDetails['receivedLibraryCount'] as int,
-      syncedClassesCount: firstReloadDetails['receivedClassesCount'] as int,
-      syncedProceduresCount: firstReloadDetails['receivedProceduresCount'] as int,
+      finalLibraryCount: firstReloadDetails['finalLibraryCount'] as int ?? 0,
+      syncedLibraryCount: firstReloadDetails['receivedLibraryCount'] as int ?? 0,
+      syncedClassesCount: firstReloadDetails['receivedClassesCount'] as int ?? 0,
+      syncedProceduresCount: firstReloadDetails['receivedProceduresCount'] as int ?? 0,
       syncedBytes: updatedDevFS.syncedBytes,
       invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
       transferTimeInMs: devFSTimer.elapsed.inMilliseconds,
@@ -1020,6 +979,70 @@ class HotRunner extends ResidentRunner {
       failedReassemble ? 1 : OperationResult.ok.code,
       reloadMessage,
     );
+  }
+
+  Future<OperationResult> _reloadSourcesHelper(
+    bool pause,
+    Map<String, dynamic> firstReloadDetails,
+    String targetPlatform,
+    String sdkName,
+    bool emulator,
+    String reason,
+  ) async {
+    final Stopwatch vmReloadTimer = Stopwatch()..start();
+    const String entryPath = 'main.dart.incremental.dill';
+    final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
+
+    for (final FlutterDevice device in flutterDevices) {
+      final List<Future<vm_service.ReloadReport>> reportFutures = await _reloadDeviceSources(
+        device,
+        entryPath,
+        pause: pause,
+      );
+      allReportsFutures.add(Future.wait(reportFutures).then(
+        (List<vm_service.ReloadReport> reports) async {
+          // TODO(aam): Investigate why we are validating only first reload report,
+          // which seems to be current behavior
+          final vm_service.ReloadReport firstReport = reports.first;
+          // Don't print errors because they will be printed further down when
+          // `validateReloadReport` is called again.
+          await device.updateReloadStatus(
+            validateReloadReport(firstReport, printErrors: false),
+          );
+          return DeviceReloadReport(device, reports);
+        },
+      ));
+    }
+    final List<DeviceReloadReport> reports = await Future.wait(allReportsFutures);
+    final vm_service.ReloadReport reloadReport = reports.first.reports[0];
+    if (!validateReloadReport(reloadReport)) {
+      // Reload failed.
+      HotEvent('reload-reject',
+        targetPlatform: targetPlatform,
+        sdkName: sdkName,
+        emulator: emulator,
+        fullRestart: false,
+        reason: reason,
+        nullSafety: usageNullSafety,
+        fastReassemble: null,
+      ).send();
+      // Reset devFS lastCompileTime to ensure the file will still be marked
+      // as dirty on subsequent reloads.
+      _resetDevFSCompileTime();
+      final ReloadReportContents contents = ReloadReportContents.fromReloadReport(reloadReport);
+      return OperationResult(1, 'Reload rejected: ${contents.notices.join("\n")}');
+    }
+    // Collect stats only from the first device. If/when run -d all is
+    // refactored, we'll probably need to send one hot reload/restart event
+    // per device to analytics.
+    firstReloadDetails.addAll(castStringKeyedMap(reloadReport.json['details']));
+    final int loadedLibraryCount = reloadReport.json['details']['loadedLibraryCount'] as int;
+    final int finalLibraryCount = reloadReport.json['details']['finalLibraryCount'] as int;
+    globals.printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
+    // reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
+    // Record time it took for the VM to reload the sources.
+    _addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
+    return OperationResult(0, 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries');
   }
 
   String _describePausedIsolates(int pausedIsolatesFound, String serviceEventKind) {
