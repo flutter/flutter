@@ -1075,7 +1075,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///             SliverFillRemaining(
 ///               child: Center(
 ///                   child:
-///                       Text("Scroll up and down to see sliver appbar in effect .")),
+///                       Text("Scroll to see SliverAppBar in effect .")),
 ///             ),
 ///           ],
 ///         ),
