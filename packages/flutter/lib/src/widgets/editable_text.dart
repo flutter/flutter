@@ -952,7 +952,7 @@ class EditableText extends StatefulWidget {
   ///               context: context,
   ///               builder: (BuildContext context) {
   ///                 return AlertDialog(
-  ///                   title: const Text('That\'s correct!'),
+  ///                   title: const Text("That's correct!"),
   ///                   content: Text ('13 is the right answer.'),
   ///                   actions: <Widget>[
   ///                     TextButton(
