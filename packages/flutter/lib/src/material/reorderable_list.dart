@@ -58,7 +58,7 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// This sample shows by dragging the user can reorder the items of the list.
 /// list of Numbers will be used to display items in the list.
 /// [List.generate]it is constructor which  is used to form a list of values.
-/// The [onReorder] parameter is required and will be called when a child 
+/// The [onReorder] parameter is required and will be called when a child
 /// widget is dragged to a new position.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
