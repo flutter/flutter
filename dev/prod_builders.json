@@ -136,7 +136,6 @@
          "name": "Linux web_long_running_tests",
          "repo": "flutter",
          "task_name": "linux_web_long_running_tests",
-         "flaky": true
       },
       {
          "name":"Linux web_e2e_test",
@@ -160,13 +159,11 @@
          "name": "Mac build_ios_framework_module_test",
          "repo": "flutter",
          "task_name": "mac_build_ios_framework_module_test",
-         "flaky": true
       },
       {
          "name": "Mac build_tests",
          "repo": "flutter",
          "task_name": "mac_build_tests",
-         "flaky": true
       },
       {
          "name": "Mac build_gallery",

@@ -321,6 +321,7 @@ class _IndicatorPainter extends CustomPainter {
     required this.indicatorSize,
     required this.tabKeys,
     required _IndicatorPainter? old,
+    required this.indicatorPadding,
   }) : assert(controller != null),
        assert(indicator != null),
        super(repaint: controller.animation) {
@@ -331,6 +332,7 @@ class _IndicatorPainter extends CustomPainter {
   final TabController controller;
   final Decoration indicator;
   final TabBarIndicatorSize? indicatorSize;
+  final EdgeInsetsGeometry indicatorPadding;
   final List<GlobalKey> tabKeys;
 
   // _currentTabOffsets and _currentTextDirection are set each time TabBar
@@ -392,7 +394,16 @@ class _IndicatorPainter extends CustomPainter {
       tabRight -= delta;
     }
 
-    return Rect.fromLTWH(tabLeft, 0.0, tabRight - tabLeft, tabBarSize.height);
+    final EdgeInsets insets = indicatorPadding.resolve(_currentTextDirection);
+    final Rect rect = Rect.fromLTWH(tabLeft, 0.0, tabRight - tabLeft, tabBarSize.height);
+
+    if (!(rect.size >= insets.collapsedSize)) {
+      throw FlutterError(
+          'indicatorPadding insets should be less than Tab Size\n'
+          'Rect Size : ${rect.size}, Insets: ${insets.toString()}'
+      );
+    }
+    return insets.deflateRect(rect);
   }
 
   @override
@@ -658,26 +669,22 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// this property is ignored.
   final double indicatorWeight;
 
-  /// The horizontal padding for the line that appears below the selected tab.
+
+  /// Padding for indicator.
+  /// This property will now no longer be ignored even if indicator is declared
+  /// or provided by [TabBarTheme]
   ///
   /// For [isScrollable] tab bars, specifying [kTabLabelPadding] will align
   /// the indicator with the tab's text for [Tab] widgets and all but the
   /// shortest [Tab.text] values.
   ///
-  /// The [EdgeInsets.top] and [EdgeInsets.bottom] values of the
-  /// [indicatorPadding] are ignored.
-  ///
   /// The default value of [indicatorPadding] is [EdgeInsets.zero].
-  ///
-  /// If [indicator] is specified or provided from [TabBarTheme],
-  /// this property is ignored.
   final EdgeInsetsGeometry indicatorPadding;
 
   /// Defines the appearance of the selected tab indicator.
   ///
   /// If [indicator] is specified or provided from [TabBarTheme],
-  /// the [indicatorColor], [indicatorWeight], and [indicatorPadding]
-  /// properties are ignored.
+  /// the [indicatorColor], and [indicatorWeight] properties are ignored.
   ///
   /// The default, underline-style, selected tab indicator can be defined with
   /// [UnderlineTabIndicator].
@@ -857,7 +864,6 @@ class _TabBarState extends State<TabBar> {
       color = Colors.white;
 
     return UnderlineTabIndicator(
-      insets: widget.indicatorPadding,
       borderSide: BorderSide(
         width: widget.indicatorWeight,
         color: color,
@@ -905,6 +911,7 @@ class _TabBarState extends State<TabBar> {
       controller: _controller!,
       indicator: _indicator,
       indicatorSize: widget.indicatorSize ?? TabBarTheme.of(context).indicatorSize,
+      indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
       old: _indicatorPainter,
     );
