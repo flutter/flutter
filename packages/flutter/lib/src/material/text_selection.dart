@@ -259,6 +259,11 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
         ),
     ];
 
+    // If there is no option available, build an empty widget.
+    if (itemDatas.isEmpty) {
+      return const SizedBox(width: 0.0, height: 0.0);
+    }
+
     int childIndex = 0;
     return TextSelectionToolbar(
       anchorAbove: anchorAbove,
@@ -915,6 +920,7 @@ class _TextSelectionToolbarItemsLayoutRenderBox extends RenderBox with Container
   }
 }
 
+// TODO(justinmc): Rename with no Material in name.
 // The Material-styled toolbar outline. Fill it with any widgets you want. No
 // overflow ability.
 class _MaterialTextSelectionToolbarContainer extends StatelessWidget {
