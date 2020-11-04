@@ -1158,8 +1158,8 @@ abstract class RouterDelegate<T> extends Listenable {
 /// getter and notifies listeners, typically the [Router] widget, when a new
 /// route information is available.
 ///
-/// When the router opts for the route information reporting (by overrides the
-/// [RouterDelegate.currentConfiguration] to return non-null), overrides the
+/// When the router opts for route information reporting (by overriding the
+/// [RouterDelegate.currentConfiguration] to return non-null), override the
 /// [routerReportsNewRouteInformation] method to process the route information.
 ///
 /// See also:
