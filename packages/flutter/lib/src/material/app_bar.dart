@@ -464,7 +464,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final double? leadingWidth;
 
   bool _getEffectiveCenterTitle(ThemeData theme) {
-    if (centerTitle != null) return centerTitle!;
+    if (centerTitle != null) {
+      return centerTitle!;
+    }
     if (theme.appBarTheme.centerTitle != null)
       return theme.appBarTheme.centerTitle!;
     assert(theme.platform != null);
@@ -782,7 +784,9 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   }
 
   void _isScrollingListener() {
-    if (_position == null) return;
+    if (_position == null) {
+      return;
+    }
 
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
@@ -1577,7 +1581,9 @@ class _SliverAppBarState extends State<SliverAppBar>
     super.didUpdateWidget(oldWidget);
     if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating)
       _updateSnapConfiguration();
-    if (widget.stretch != oldWidget.stretch) _updateStretchConfiguration();
+    if (widget.stretch != oldWidget.stretch) {
+      _updateStretchConfiguration();
+    }
   }
 
   @override
