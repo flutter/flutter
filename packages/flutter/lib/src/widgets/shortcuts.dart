@@ -425,8 +425,8 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///         autofocus:true,
 ///         child: Column(
 ///           children: <Widget>[
-///             Text('Add to the counter by pressing keyboard Shift and numpad "+"'),
-///             Text('Subtract from the counter by pressing keyboard Shift and numpad "-"'),
+///             Text('Add to the counter by pressing keyboard Shift and keyboard "K"'),
+///             Text('Subtract from the counter by pressing keyboard Shift and keyboard "L"'),
 ///             Text('count: $count'),
 ///           ],
 ///         ),
