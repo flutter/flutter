@@ -377,7 +377,7 @@ class FlutterPlatform extends PlatformPlugin {
     int ourTestCount,
   ) async {
     _packageConfig ??= await loadPackageConfigWithLogging(
-      globals.fs.file(globals.fs.path.join('.dart_tool', 'package_config.json')),
+      globals.fs.file(buildInfo.packagesPath),
       logger: globals.logger,
     );
     globals.printTrace('test $ourTestCount: starting test $testPath');
