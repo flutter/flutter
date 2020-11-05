@@ -25,7 +25,8 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     fileSystem
       .file('.dart_tool/package_config.json')
-      .writeAsStringSync('{"configVersion":2,"packages":[]}');
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion":2,"packages":[]}');
   });
 
   group('FlutterPlatform', () {
