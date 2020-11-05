@@ -131,9 +131,8 @@ class _EventChannelHandler<T> {
   }
 
   Future<ByteData> _listen() async {
-    if (subscription != null) {
-      await subscription!.cancel();
-    }
+    // Cancel any existing subscription.
+    await subscription?.cancel();
     subscription = controller.stream.listen((dynamic event) {
       messenger.send(name, codec.encodeSuccessEnvelope(event));
     }, onError: (dynamic error) {
