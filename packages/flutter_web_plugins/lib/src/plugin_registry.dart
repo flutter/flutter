@@ -8,7 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-// TODO: Why is this _MessageHandler duplicated here?
+// TODO(hterkelsen): Why is this _MessageHandler duplicated here?
 typedef _MessageHandler = Future<ByteData?>? Function(ByteData?);
 
 /// This class registers web platform plugins.

@@ -43,7 +43,8 @@ class PluginEventChannel<T> {
     this.name, [
     this.codec = const StandardMethodCodec(),
     this.binaryMessenger,
-  ]);
+  ]) : assert(name != null), // ignore: unnecessary_null_comparison
+       assert(codec != null); // ignore: unnecessary_null_comparison
 
   /// The logical channel on which communication happens.
   ///
@@ -102,7 +103,12 @@ class PluginEventChannel<T> {
 }
 
 class _EventChannelHandler<T> {
-  _EventChannelHandler(this.name, this.codec, this.controller, this.messenger);
+  _EventChannelHandler(
+    this.name,
+    this.codec,
+    this.controller,
+    this.messenger,
+  ) : assert(messenger != null); // ignore: unnecessary_null_comparison
 
   final String name;
   final MethodCodec codec;
