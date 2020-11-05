@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 
 final String bat = Platform.isWindows ? '.bat' : '';
-final String _flutterBin = '../../bin/flutter$bat';
+final String _flutterBin = path.join(Directory.current.parent.parent.path, 'bin', 'flutter$bat');
 const String _integrationResultsPrefix =
     'IntegrationTestWidgetsFlutterBinding test results:';
 const String _failureExcerpt = r'Expected: <false>\n  Actual: <true>';
