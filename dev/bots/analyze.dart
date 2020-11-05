@@ -73,6 +73,9 @@ Future<void> run(List<String> arguments) async {
   print('$clock Internationalization...');
   await verifyInternationalizations();
 
+  print('$clock LUCI config has valid JSON...');
+  await verifyLuciValidJson();
+
   // Ensure that all package dependencies are in sync.
   print('$clock Package dependencies...');
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
@@ -456,6 +459,31 @@ Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
       else
         '${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset',
       ...errors.map((String paragraph) => '$paragraph\n'),
+    ]);
+  }
+}
+
+Future<void> verifyLuciValidJson() async {
+  try {
+    json.decode(File(path.join(
+      flutterRoot,
+      'dev',
+      'try_builders.json'
+    )).readAsStringSync());
+  json.decode(File(path.join(
+      flutterRoot,
+      'dev',
+      'prod_builders.json'
+    )).readAsStringSync());
+  } on FileSystemException catch (err) {
+    exitWithError(<String>[
+      'Error reading try_builders.json or prod_builders.json',
+      '$err',
+    ]);
+  } on FormatException catch (err) {
+    exitWithError(<String>[
+      'Error parsing try_builders.json or prod_builders.json',
+      '$err',
     ]);
   }
 }
