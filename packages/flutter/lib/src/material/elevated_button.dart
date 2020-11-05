@@ -229,7 +229,7 @@ class ElevatedButton extends ButtonStyleButton {
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
-  /// * `side` - BorderSide.none
+  /// * `side` - null
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor`
   ///   * disabled - SystemMouseCursors.forbidden
@@ -246,6 +246,11 @@ class ElevatedButton extends ButtonStyleButton {
   ///   * `1 < textScaleFactor <= 2` - lerp(start(12) end(16), horizontal(8))
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
+  ///
+  /// The default value for `side`, which defines the appearance of the button's
+  /// outline, is null. That means that the outline is defined by the button
+  /// shape's [OutlinedBorder.side]. Typically the default value of an
+  /// [OutlinedBorder]'s side is [BorderSide.none], so an outline is not drawn.
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -267,7 +272,7 @@ class ElevatedButton extends ButtonStyleButton {
       textStyle: theme.textTheme.button,
       padding: scaledPadding,
       minimumSize: const Size(64, 36),
-      side: BorderSide.none,
+      side: null,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
       enabledMouseCursor: SystemMouseCursors.click,
       disabledMouseCursor: SystemMouseCursors.forbidden,

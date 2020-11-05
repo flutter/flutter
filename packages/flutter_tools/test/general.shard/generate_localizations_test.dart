@@ -1587,7 +1587,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       },
     );
 
-    test('should throw when resource is missing resource attribute', () {
+    test('should throw when resource is missing resource attribute (isResourceAttributeRequired = true)', () {
       const String arbFileWithMissingResourceAttribute = '''
 {
   "title": "Stocks"
@@ -1605,6 +1605,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
+          areResourceAttributesRequired: true,
         );
         generator.loadResources();
         generator.writeOutputFiles();
