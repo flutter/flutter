@@ -18,6 +18,80 @@ enum ListTileStyle {
   drawer,
 }
 
+class _ListTileThemeProperties {
+  _ListTileThemeProperties({
+    this.dense,
+    this.shape,
+    this.style,
+    this.selectedColor,
+    this.iconColor,
+    this.textColor,
+    this.contentPadding,
+    this.tileColor,
+    this.selectedTileColor,
+    this.enableFeedback,
+  });
+
+  final bool? dense;
+  final ShapeBorder? shape;
+  final ListTileStyle? style;
+  final Color? selectedColor;
+  final Color? iconColor;
+  final Color? textColor;
+  final EdgeInsetsGeometry? contentPadding;
+  final Color? tileColor;
+  final Color? selectedTileColor;
+  final bool? enableFeedback;
+}
+
+/// TODO(darrenaustin): doc
+mixin ListTileThemeData {
+  late final _ListTileThemeProperties _data;
+
+  /// If true then [ListTile]s will have the vertically dense layout.
+  bool get dense => _data.dense ?? false;
+
+  /// {@template flutter.material.ListTileTheme.shape}
+  /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
+  /// {@endtemplate}
+  ShapeBorder? get shape => _data.shape;
+
+  /// If specified, [style] defines the font used for [ListTile] titles.
+  ListTileStyle get style => _data.style ?? ListTileStyle.list;
+
+  /// If specified, the color used for icons and text when a [ListTile] is selected.
+  Color? get selectedColor => _data.selectedColor;
+
+  /// If specified, the icon color used for enabled [ListTile]s that are not selected.
+  Color? get iconColor => _data.iconColor;
+
+  /// If specified, the text color used for enabled [ListTile]s that are not selected.
+  Color? get textColor => _data.textColor;
+
+  /// The tile's internal padding.
+  ///
+  /// Insets a [ListTile]'s contents: its [ListTile.leading], [ListTile.title],
+  /// [ListTile.subtitle], and [ListTile.trailing] widgets.
+  EdgeInsetsGeometry? get contentPadding => _data.contentPadding;
+
+  /// If specified, defines the background color for `ListTile` when
+  /// [ListTile.selected] is false.
+  ///
+  /// If [ListTile.tileColor] is provided, [tileColor] is ignored.
+  Color? get tileColor => _data.tileColor;
+
+  /// If specified, defines the background color for `ListTile` when
+  /// [ListTile.selected] is true.
+  ///
+  /// If [ListTile.selectedTileColor] is provided, [selectedTileColor] is ignored.
+  Color? get selectedTileColor => _data.selectedTileColor;
+
+  /// If specified, defines the feedback property for `ListTile`.
+  ///
+  /// If [ListTile.enableFeedback] is provided, [enableFeedback] is ignored.
+  bool? get enableFeedback => _data.enableFeedback;
+}
+
 /// An inherited widget that defines color and style parameters for [ListTile]s
 /// in this widget's subtree.
 ///
@@ -26,23 +100,36 @@ enum ListTileStyle {
 ///
 /// The [Drawer] widget specifies a tile theme for its children which sets
 /// [style] to [ListTileStyle.drawer].
-class ListTileTheme extends InheritedTheme {
+class ListTileTheme extends InheritedTheme with ListTileThemeData {
   /// Creates a list tile theme that controls the color and style parameters for
   /// [ListTile]s.
-  const ListTileTheme({
+  ListTileTheme({
     Key? key,
-    this.dense = false,
-    this.shape,
-    this.style = ListTileStyle.list,
-    this.selectedColor,
-    this.iconColor,
-    this.textColor,
-    this.contentPadding,
-    this.tileColor,
-    this.selectedTileColor,
-    this.enableFeedback,
+    bool dense = false,
+    ShapeBorder? shape,
+    ListTileStyle style = ListTileStyle.list,
+    Color? selectedColor,
+    Color? iconColor,
+    Color? textColor,
+    EdgeInsetsGeometry? contentPadding,
+    Color? tileColor,
+    Color? selectedTileColor,
+    bool? enableFeedback,
     required Widget child,
-  }) : super(key: key, child: child);
+  }) : super(key: key, child: child) {
+    _data = _ListTileThemeProperties(
+      dense: dense,
+      shape: shape,
+      style: style,
+      selectedColor: selectedColor,
+      iconColor: iconColor,
+      textColor: textColor,
+      contentPadding: contentPadding,
+      tileColor: tileColor,
+      selectedTileColor: selectedTileColor,
+      enableFeedback: enableFeedback,
+    );
+  }
 
   /// Creates a list tile theme that controls the color and style parameters for
   /// [ListTile]s, and merges in the current list tile theme, if any.
@@ -65,7 +152,7 @@ class ListTileTheme extends InheritedTheme {
     assert(child != null);
     return Builder(
       builder: (BuildContext context) {
-        final ListTileTheme parent = ListTileTheme.of(context);
+        final ListTileThemeData parent = ListTileTheme.of(context);
         return ListTileTheme(
           key: key,
           dense: dense ?? parent.dense,
@@ -84,49 +171,6 @@ class ListTileTheme extends InheritedTheme {
     );
   }
 
-  /// If true then [ListTile]s will have the vertically dense layout.
-  final bool dense;
-
-  /// {@template flutter.material.ListTileTheme.shape}
-  /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
-  /// {@endtemplate}
-  final ShapeBorder? shape;
-
-  /// If specified, [style] defines the font used for [ListTile] titles.
-  final ListTileStyle style;
-
-  /// If specified, the color used for icons and text when a [ListTile] is selected.
-  final Color? selectedColor;
-
-  /// If specified, the icon color used for enabled [ListTile]s that are not selected.
-  final Color? iconColor;
-
-  /// If specified, the text color used for enabled [ListTile]s that are not selected.
-  final Color? textColor;
-
-  /// The tile's internal padding.
-  ///
-  /// Insets a [ListTile]'s contents: its [ListTile.leading], [ListTile.title],
-  /// [ListTile.subtitle], and [ListTile.trailing] widgets.
-  final EdgeInsetsGeometry? contentPadding;
-
-  /// If specified, defines the background color for `ListTile` when
-  /// [ListTile.selected] is false.
-  ///
-  /// If [ListTile.tileColor] is provided, [tileColor] is ignored.
-  final Color? tileColor;
-
-  /// If specified, defines the background color for `ListTile` when
-  /// [ListTile.selected] is true.
-  ///
-  /// If [ListTile.selectedTileColor] is provided, [selectedTileColor] is ignored.
-  final Color? selectedTileColor;
-
-  /// If specified, defines the feedback property for `ListTile`.
-  ///
-  /// If [ListTile.enableFeedback] is provided, [enableFeedback] is ignored.
-  final bool? enableFeedback;
-
   /// The closest instance of this class that encloses the given context.
   ///
   /// Typical usage is as follows:
@@ -134,9 +178,9 @@ class ListTileTheme extends InheritedTheme {
   /// ```dart
   /// ListTileTheme theme = ListTileTheme.of(context);
   /// ```
-  static ListTileTheme of(BuildContext context) {
+  static ListTileThemeData of(BuildContext context) {
     final ListTileTheme? result = context.dependOnInheritedWidgetOfExactType<ListTileTheme>();
-    return result ?? const ListTileTheme(child: SizedBox());
+    return result ?? ListTileTheme(child: const SizedBox());
   }
 
   @override

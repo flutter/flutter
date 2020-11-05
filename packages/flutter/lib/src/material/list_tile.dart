@@ -789,7 +789,7 @@ class ListTile extends StatelessWidget {
       yield tile;
   }
 
-  Color? _iconColor(ThemeData theme, ListTileTheme? tileTheme) {
+  Color? _iconColor(ThemeData theme, ListTileThemeData? tileTheme) {
     if (!enabled)
       return theme.disabledColor;
 
@@ -807,7 +807,7 @@ class ListTile extends StatelessWidget {
     }
   }
 
-  Color? _textColor(ThemeData theme, ListTileTheme? tileTheme, Color? defaultColor) {
+  Color? _textColor(ThemeData theme, ListTileThemeData? tileTheme, Color? defaultColor) {
     if (!enabled)
       return theme.disabledColor;
 
@@ -828,11 +828,11 @@ class ListTile extends StatelessWidget {
     return defaultColor;
   }
 
-  bool _isDenseLayout(ListTileTheme? tileTheme) {
+  bool _isDenseLayout(ListTileThemeData? tileTheme) {
     return dense ?? tileTheme?.dense ?? false;
   }
 
-  TextStyle _titleTextStyle(ThemeData theme, ListTileTheme? tileTheme) {
+  TextStyle _titleTextStyle(ThemeData theme, ListTileThemeData? tileTheme) {
     final TextStyle style;
     if (tileTheme != null) {
       switch (tileTheme.style) {
@@ -852,7 +852,7 @@ class ListTile extends StatelessWidget {
       : style.copyWith(color: color);
   }
 
-  TextStyle _subtitleTextStyle(ThemeData theme, ListTileTheme? tileTheme) {
+  TextStyle _subtitleTextStyle(ThemeData theme, ListTileThemeData? tileTheme) {
     final TextStyle style = theme.textTheme.bodyText2!;
     final Color? color = _textColor(theme, tileTheme, theme.textTheme.caption!.color);
     return _isDenseLayout(tileTheme)
@@ -860,7 +860,7 @@ class ListTile extends StatelessWidget {
       : style.copyWith(color: color);
   }
 
-  Color _tileBackgroundColor(ListTileTheme? tileTheme) {
+  Color _tileBackgroundColor(ListTileThemeData? tileTheme) {
     if (!selected) {
       if (tileColor != null)
         return tileColor!;
@@ -882,7 +882,7 @@ class ListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
-    final ListTileTheme tileTheme = ListTileTheme.of(context);
+    final ListTileThemeData tileTheme = ListTileTheme.of(context);
 
     IconThemeData? iconThemeData;
     if (leading != null || trailing != null)
