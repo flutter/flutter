@@ -1,3 +1,10 @@
+# CHANGELOG
+
+This changelog was discontinued after version 0.9.2+2, when the package started
+to vend from the Flutter SDK rather than pub.
+
+It is maintained here for historical purposes only.
+
 ## 0.9.2+2
 
 * Broaden the constraint on vm_service.
