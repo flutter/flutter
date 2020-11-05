@@ -57,7 +57,7 @@ const double _monthNavButtonsWidth = 108.0;
 ///    time picker.
 ///
 class CalendarDatePicker extends StatefulWidget {
-  /// Creates a calender date picker.
+  /// Creates a calendar date picker.
   ///
   /// It will display a grid of days for the [initialDate]'s month. The day
   /// indicated by [initialDate] will be selected.
@@ -163,6 +163,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   @override
   void initState() {
     super.initState();
+    _mode = widget.initialCalendarMode;
     _initWidgetState();
   }
 
@@ -178,8 +179,8 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
-    _localizations = MaterialLocalizations.of(context)!;
-    _textDirection = Directionality.of(context)!;
+    _localizations = MaterialLocalizations.of(context);
+    _textDirection = Directionality.of(context);
     if (!_announcedInitialDate) {
       _announcedInitialDate = true;
       SemanticsService.announce(
@@ -190,13 +191,12 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   }
 
   void _initWidgetState() {
-    _mode = widget.initialCalendarMode;
     _currentDisplayedMonthDate = DateTime(widget.initialDate.year, widget.initialDate.month);
     _selectedDate = widget.initialDate;
   }
 
   void _vibrate() {
-    switch (Theme.of(context)!.platform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -369,8 +369,8 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context)!.colorScheme;
-    final TextTheme textTheme = Theme.of(context)!.textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     final Color controlColor = colorScheme.onSurface.withOpacity(0.60);
 
     return Container(
@@ -380,7 +380,7 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
         children: <Widget>[
           Flexible(
             child: Semantics(
-              label: MaterialLocalizations.of(context)!.selectYearSemanticsLabel,
+              label: MaterialLocalizations.of(context).selectYearSemanticsLabel,
               excludeSemantics: true,
               button: true,
               child: Container(
@@ -494,7 +494,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   late DateTime _previousMonthDate;
   PageController? _pageController;
   late MaterialLocalizations _localizations;
-  TextDirection? _textDirection;
+  late TextDirection _textDirection;
   Map<LogicalKeySet, Intent>? _shortcutMap;
   Map<Type, Action<Intent>>? _actionMap;
   FocusNode? _dayGridFocus;
@@ -524,7 +524,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _localizations = MaterialLocalizations.of(context)!;
+    _localizations = MaterialLocalizations.of(context);
     _textDirection = Directionality.of(context);
   }
 
@@ -595,7 +595,7 @@ class _MonthPickerState extends State<_MonthPicker> {
     if (!_isDisplayingLastMonth) {
       SemanticsService.announce(
         _localizations.formatMonthYear(_nextMonthDate),
-        _textDirection!,
+        _textDirection,
       );
       _pageController!.nextPage(
         duration: _monthScrollDuration,
@@ -609,7 +609,7 @@ class _MonthPickerState extends State<_MonthPicker> {
     if (!_isDisplayingFirstMonth) {
       SemanticsService.announce(
         _localizations.formatMonthYear(_previousMonthDate),
-        _textDirection!,
+        _textDirection,
       );
       _pageController!.previousPage(
         duration: _monthScrollDuration,
@@ -709,7 +709,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   }
 
   DateTime? _nextDateInDirection(DateTime date, TraversalDirection direction) {
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     DateTime nextDate = utils.addDaysToDate(date, _dayDirectionOffset(direction, textDirection));
     while (!nextDate.isBefore(widget.firstDate) && !nextDate.isAfter(widget.lastDate)) {
       if (_isSelectable(nextDate)) {
@@ -742,7 +742,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   Widget build(BuildContext context) {
     final String previousTooltipText = '${_localizations.previousMonthTooltip} ${_localizations.formatMonthYear(_previousMonthDate)}';
     final String nextTooltipText = '${_localizations.nextMonthTooltip} ${_localizations.formatMonthYear(_nextMonthDate)}';
-    final Color controlColor = Theme.of(context)!.colorScheme.onSurface.withOpacity(0.60);
+    final Color controlColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.60);
 
     return Semantics(
       child: Column(
@@ -940,9 +940,9 @@ class _DayPickerState extends State<_DayPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context)!.colorScheme;
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
-    final TextTheme textTheme = Theme.of(context)!.textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle? headerStyle = textTheme.caption?.apply(
       color: colorScheme.onSurface.withOpacity(0.60),
     );
@@ -1143,8 +1143,8 @@ class _YearPickerState extends State<_YearPicker> {
   }
 
   Widget _buildYearItem(BuildContext context, int index) {
-    final ColorScheme colorScheme = Theme.of(context)!.colorScheme;
-    final TextTheme textTheme = Theme.of(context)!.textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
     // Backfill the _YearPicker with disabled years if necessary.
     final int offset = _itemCount < minYears ? (minYears - _itemCount) ~/ 2 : 0;

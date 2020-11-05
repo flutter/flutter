@@ -86,7 +86,7 @@ class OnTapPage extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: Container(
           child: Center(
-            child: Text(id, style: Theme.of(context)!.textTheme.headline3),
+            child: Text(id, style: Theme.of(context).textTheme.headline3),
           ),
         ),
       ),
@@ -957,7 +957,7 @@ void main() {
   });
 
   testWidgets('replaceNamed returned value', (WidgetTester tester) async {
-    late Future<String> value;
+    late Future<String?> value;
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
@@ -1001,7 +1001,7 @@ void main() {
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsNothing);
 
-    final String replaceNamedValue = await value; // replaceNamed result was 'B'
+    final String? replaceNamedValue = await value; // replaceNamed result was 'B'
     expect(replaceNamedValue, 'B');
   });
 
@@ -1092,7 +1092,7 @@ void main() {
   });
 
   testWidgets('remove a route whose value is awaited', (WidgetTester tester) async {
-    late Future<String> pageValue;
+    late Future<String?> pageValue;
     final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
       '/':  (BuildContext context) => OnTapPage(id: '/', onTap: () { pageValue = Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context, 'A'); }),
@@ -1113,7 +1113,7 @@ void main() {
 
     await tester.tap(find.text('/')); // pushNamed('/A'), stack becomes /, /A
     await tester.pumpAndSettle();
-    pageValue.then((String value) { assert(false); });
+    pageValue.then((String? value) { assert(false); });
 
     final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
     navigator.removeRoute(routes['/A']!); // stack becomes /, pageValue will not complete
@@ -3189,6 +3189,43 @@ void main() {
         buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
       );
 
+      // It should not crash the app.
+      expect(tester.takeException(), isNull);
+      await tester.pumpAndSettle();
+      expect(find.text('initial'), findsOneWidget);
+    });
+
+    testWidgets('can update pages before a pageless route has finished popping', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/68162.
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      List<Page<dynamic>> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      ];
+      bool onPopPage(Route<dynamic> route, dynamic result) {
+        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        return route.didPop(result);
+      }
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+      );
+      // Pushes a pageless route.
+      showDialog<void>(
+        useRootNavigator: false,
+        context: navigator.currentContext!,
+        builder: (BuildContext context) => const Text('dialog')
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('dialog'), findsOneWidget);
+      // Pops the pageless route.
+      navigator.currentState!.pop();
+      // Before the pop finishes, updates the page list.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+      ];
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+      );
       // It should not crash the app.
       expect(tester.takeException(), isNull);
       await tester.pumpAndSettle();

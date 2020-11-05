@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -28,7 +26,7 @@ void main() {
                 itemBuilder: (BuildContext context, int index) {
                   return Container(
                     height: 100.0,
-                    color: index % 2 == 0 ? Colors.blue : Colors.red,
+                    color: index.isEven ? Colors.blue : Colors.red,
                     child: Text('Tile $index'),
                   );
                 },
@@ -72,7 +70,7 @@ void main() {
                 itemBuilder: (BuildContext context, int index) {
                   return Container(
                     height: 100.0,
-                    color: index % 2 == 0 ? Colors.blue : Colors.red,
+                    color: index.isEven ? Colors.blue : Colors.red,
                     child: Text('Tile $index'),
                   );
                 },
@@ -116,7 +114,7 @@ void main() {
                 itemBuilder: (BuildContext context, int index) {
                   return Container(
                     height: 100.0,
-                    color: index % 2 == 0 ? Colors.blue : Colors.red,
+                    color: index.isEven ? Colors.blue : Colors.red,
                     child: Text('Tile $index'),
                   );
                 },
@@ -158,7 +156,7 @@ void main() {
                 itemBuilder: (BuildContext context, int index) {
                   return Container(
                     height: 100.0,
-                    color: index % 2 == 0 ? Colors.blue : Colors.red,
+                    color: index.isEven ? Colors.blue : Colors.red,
                     child: Text('Tile $index'),
                   );
                 },

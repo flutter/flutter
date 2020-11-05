@@ -1288,4 +1288,48 @@ void main() {
     await tester.pumpWidget(buildFrame(enabled: false));
     await tester.pumpAndSettle();
   });
+
+  testWidgets('InkWell does not attach semantics handler for onTap if it was not provided an onTap handler', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            onLongPress: () { },
+            child: const Text('Foo'),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('Foo')), matchesSemantics(
+      label: 'Foo',
+      hasTapAction: false,
+      hasLongPressAction: true,
+      isFocusable: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    // Add tap handler and confirm addition to semantic actions.
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            onLongPress: () { },
+            onTap: () { },
+            child: const Text('Foo'),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('Foo')), matchesSemantics(
+      label: 'Foo',
+      hasTapAction: true,
+      hasLongPressAction: true,
+      isFocusable: true,
+      textDirection: TextDirection.ltr,
+    ));
+  });
 }

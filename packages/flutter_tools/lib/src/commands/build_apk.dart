@@ -27,12 +27,13 @@ class BuildApkCommand extends BuildSubCommand {
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     usesDartDefineOption();
-    usesExtraFrontendOptions();
+    usesExtraDartFlagOptions();
     addBundleSkSLPathOption(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
+    addAndroidSpecificBuildOptions(hide: !verboseHelp);
     argParser
       ..addFlag('split-per-abi',
         negatable: false,

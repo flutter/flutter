@@ -106,12 +106,12 @@ class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
   @override
   void initState() {
     super.initState();
-    _initialized = widget.controller.value.initialized;
+    _initialized = widget.controller.value.isInitialized;
     widget.controller.addListener(() {
       if (!mounted) {
         return;
       }
-      final bool controllerInitialized = widget.controller.value.initialized;
+      final bool controllerInitialized = widget.controller.value.isInitialized;
       if (_initialized != controllerInitialized) {
         setState(() {
           _initialized = controllerInitialized;
@@ -178,7 +178,7 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
         GestureDetector(
           child: VideoPlayerLoading(controller),
           onTap: () {
-            if (!controller.value.initialized) {
+            if (!controller.value.isInitialized) {
               return;
             }
             if (controller.value.isPlaying) {
@@ -266,12 +266,10 @@ class ConnectivityOverlay extends StatefulWidget {
   const ConnectivityOverlay({
     this.child,
     this.connectedCompleter,
-    this.scaffoldKey,
   });
 
   final Widget child;
   final Completer<void> connectedCompleter;
-  final GlobalKey<ScaffoldState> scaffoldKey;
 
   @override
   _ConnectivityOverlayState createState() => _ConnectivityOverlayState();
@@ -321,7 +319,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
           return;
         }
         if (connectivityResult == ConnectivityResult.none) {
-          widget.scaffoldKey.currentState.showSnackBar(errorSnackBar);
+          ScaffoldMessenger.of(context).showSnackBar(errorSnackBar);
         } else {
           if (!widget.connectedCompleter.isCompleted) {
             widget.connectedCompleter.complete(null);
@@ -368,7 +366,6 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
   static const String beeUri = 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
   final VideoPlayerController beeController = VideoPlayerController.network(beeUri);
 
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final Completer<void> connectedCompleter = Completer<void>();
   bool isSupported = true;
   bool isDisposed = false;
@@ -410,7 +407,6 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: scaffoldKey,
       appBar: AppBar(
         title: const Text('Videos'),
       ),
@@ -433,7 +429,6 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
               ),
             ),
             connectedCompleter: connectedCompleter,
-            scaffoldKey: scaffoldKey,
           )
         : const Center(
             child: Text(

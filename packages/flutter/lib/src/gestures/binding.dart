@@ -74,9 +74,11 @@ class _Resampler {
   //
   // `samplingOffset` is relative to the current frame time, which
   // can be in the past when we're not actively resampling.
+  // `samplingInterval` is used to determine the approximate next
+  // time for resampling.
   // `currentSystemFrameTimeStamp` is used to determine the current
   // frame time.
-  void sample(Duration samplingOffset) {
+  void sample(Duration samplingOffset, Duration samplingInterval) {
     final SchedulerBinding? scheduler = SchedulerBinding.instance;
     assert(scheduler != null);
 
@@ -86,10 +88,14 @@ class _Resampler {
     // resampling events.
     final Duration sampleTime = _frameTime + samplingOffset;
 
+    // Determine next sample time by adding the sampling interval
+    // to the current sample time.
+    final Duration nextSampleTime = sampleTime + samplingInterval;
+
     // Iterate over active resamplers and sample pointer events for
     // current sample time.
     for (final PointerEventResampler resampler in _resamplers.values) {
-      resampler.sample(sampleTime, _handlePointerEvent);
+      resampler.sample(sampleTime, nextSampleTime, _handlePointerEvent);
     }
 
     // Remove inactive resamplers.
@@ -137,6 +143,13 @@ class _Resampler {
 // is 33.334 ms. This however assumes zero latency from the input driver.
 // 4.666 ms margin is added for this.
 const Duration _defaultSamplingOffset = Duration(milliseconds: -38);
+
+// The sampling interval.
+//
+// Sampling interval is used to determine the approximate time for subsequent
+// sampling. This is used to decide if early processing of up and removed events
+// is appropriate. 16667 us for 60hz sampling interval.
+const Duration _samplingInterval = Duration(microseconds: 16667);
 
 /// A binding for the gesture subsystem.
 ///
@@ -257,7 +270,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
     if (resamplingEnabled) {
       _resampler.addOrDispatch(event);
-      _resampler.sample(samplingOffset);
+      _resampler.sample(samplingOffset, _samplingInterval);
       return;
     }
 
@@ -388,7 +401,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handleSampleTimeChanged() {
     if (!locked) {
       if (resamplingEnabled) {
-        _resampler.sample(samplingOffset);
+        _resampler.sample(samplingOffset, _samplingInterval);
       }
       else {
         _resampler.stop();

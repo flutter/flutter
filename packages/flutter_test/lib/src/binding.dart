@@ -1011,17 +1011,19 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     addTime(additionalTime);
 
-    return realAsyncZone.run<Future<T>>(() {
+    return realAsyncZone.run<Future<T?>>(() async {
       _pendingAsyncTasks = Completer<void>();
-      return callback().catchError((Object exception, StackTrace stack) {
+      T? result;
+      try {
+        result = await callback();
+      } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
           library: 'Flutter test framework',
           context: ErrorDescription('while running async test code'),
         ));
-        return null;
-      }).whenComplete(() {
+      } finally {
         // We complete the _pendingAsyncTasks future successfully regardless of
         // whether an exception occurred because in the case of an exception,
         // we already reported the exception to FlutterError. Moreover,
@@ -1029,7 +1031,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         // exception due to zone error boundaries.
         _pendingAsyncTasks!.complete();
         _pendingAsyncTasks = null;
-      });
+      }
+      return result;
     });
   }
 
@@ -1265,7 +1268,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// These values are set on the binding's
 /// [LiveTestWidgetsFlutterBinding.framePolicy] property.
 ///
-/// {@template flutter.flutter_test.frame_policy}
+/// {@template flutter.flutter_test.LiveTestWidgetsFlutterBindingFramePolicy}
 /// The default is [LiveTestWidgetsFlutterBindingFramePolicy.fadePointers].
 /// Setting this to anything other than
 /// [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] results in pumping
@@ -1414,7 +1417,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// system requests during an asynchronous pause (as would normally happen
   /// when running an application with [WidgetsFlutterBinding]).
   ///
-  /// {@macro flutter.flutter_test.frame_policy}
+  /// {@macro flutter.flutter_test.LiveTestWidgetsFlutterBindingFramePolicy}
   ///
   /// See [LiveTestWidgetsFlutterBindingFramePolicy].
   LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;

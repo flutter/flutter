@@ -434,7 +434,8 @@ class RenderParagraph extends RenderBox
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     RenderBox? child = firstChild;
-    while (child != null) {
+    int childIndex = 0;
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
       final TextParentData textParentData = child.parentData! as TextParentData;
       final Matrix4 transform = Matrix4.translationValues(
         textParentData.offset.dx,
@@ -461,6 +462,7 @@ class RenderParagraph extends RenderBox
         return true;
       }
       child = childAfter(child);
+      childIndex += 1;
     }
     return false;
   }
@@ -933,13 +935,19 @@ class RenderParagraph extends RenderBox
         final GestureRecognizer? recognizer = info.recognizer;
         if (recognizer != null) {
           if (recognizer is TapGestureRecognizer) {
-            configuration.onTap = recognizer.onTap;
-            configuration.isLink = true;
+            if (recognizer.onTap != null) {
+              configuration.onTap = recognizer.onTap;
+              configuration.isLink = true;
+            }
           } else if (recognizer is DoubleTapGestureRecognizer) {
-            configuration.onTap = recognizer.onDoubleTap;
-            configuration.isLink = true;
+            if (recognizer.onDoubleTap != null) {
+              configuration.onTap = recognizer.onDoubleTap;
+              configuration.isLink = true;
+            }
           } else if (recognizer is LongPressGestureRecognizer) {
-            configuration.onLongPress = recognizer.onLongPress;
+            if (recognizer.onLongPress != null) {
+              configuration.onLongPress = recognizer.onLongPress;
+            }
           } else {
             assert(false, '${recognizer.runtimeType} is not supported.');
           }

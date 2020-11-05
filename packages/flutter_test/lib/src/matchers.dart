@@ -214,7 +214,7 @@ test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
-/// {@template flutter.flutter_test.moreOrLessEquals.epsilon}
+/// {@template flutter.flutter_test.moreOrLessEquals}
 /// Two values are considered equal if the difference between them is within
 /// [precisionErrorTolerance] of the larger one. This is an arbitrary value
 /// which can be adjusted using the `epsilon` argument. This matcher is intended
@@ -237,7 +237,7 @@ Matcher moreOrLessEquals(double value, { double epsilon = precisionErrorToleranc
 
 /// Asserts that two [Rect]s are equal, within some tolerated error.
 ///
-/// {@macro flutter.flutter_test.moreOrLessEquals.epsilon}
+/// {@macro flutter.flutter_test.moreOrLessEquals}
 ///
 /// See also:
 ///
@@ -251,7 +251,7 @@ Matcher rectMoreOrLessEquals(Rect value, { double epsilon = precisionErrorTolera
 
 /// Asserts that two [Offset]s are equal, within some tolerated error.
 ///
-/// {@macro flutter.flutter_test.moreOrLessEquals.epsilon}
+/// {@macro flutter.flutter_test.moreOrLessEquals}
 ///
 /// See also:
 ///
@@ -449,6 +449,7 @@ Matcher matchesSemantics({
   bool isChecked = false,
   bool isSelected = false,
   bool isButton = false,
+  bool isSlider = false,
   bool isLink = false,
   bool isFocused = false,
   bool isFocusable = false,
@@ -500,6 +501,7 @@ Matcher matchesSemantics({
     if (isChecked) SemanticsFlag.isChecked,
     if (isSelected) SemanticsFlag.isSelected,
     if (isButton) SemanticsFlag.isButton,
+    if (isSlider) SemanticsFlag.isSlider,
     if (isLink) SemanticsFlag.isLink,
     if (isTextField) SemanticsFlag.isTextField,
     if (isReadOnly) SemanticsFlag.isReadOnly,
@@ -519,6 +521,7 @@ Matcher matchesSemantics({
     if (hasToggledState) SemanticsFlag.hasToggledState,
     if (isToggled) SemanticsFlag.isToggled,
     if (hasImplicitScrolling) SemanticsFlag.hasImplicitScrolling,
+    if (isSlider) SemanticsFlag.isSlider
   ];
 
   final List<SemanticsAction> actions = <SemanticsAction>[

@@ -7,7 +7,6 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -88,7 +87,7 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
   final String buildFlag = toTitleCase(buildModeName);
   int result;
   try {
-    result = await processUtils.stream(
+    result = await globals.processUtils.stream(
       <String>[
         'cmake',
         '-G',
@@ -117,7 +116,7 @@ Future<void> _runBuild(Directory buildDir) async {
 
   int result;
   try {
-    result = await processUtils.stream(
+    result = await globals.processUtils.stream(
       <String>[
         'ninja',
         '-C',

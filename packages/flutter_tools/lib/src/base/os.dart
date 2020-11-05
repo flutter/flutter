@@ -303,8 +303,8 @@ class _MacOSUtils extends _PosixUtils {
     if (_hostPlatform == null) {
       final RunResult arm64Check =
           _processUtils.runSync(<String>['sysctl', 'hw.optional.arm64']);
-      // hw.optional.arm64 is unavailable on < macOS 11 and exits with 1, assume x86 on failure.
       // On arm64 stdout is "sysctl hw.optional.arm64: 1"
+      // On x86 hw.optional.arm64 is unavailable and exits with 1.
       if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
         _hostPlatform = HostPlatform.darwin_arm;
       } else {
@@ -347,7 +347,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       // `where` could be missing if system32 is not on the PATH.
       throwToolExit(
         'Cannot find the executable for `where`. This can happen if the System32 '
-        'folder (e.g. C:\\Windows\\System32 ) is removed from the PATH environment '
+        r'folder (e.g. C:\Windows\System32 ) is removed from the PATH environment '
         'variable. Ensure that this is present and then try again after restarting '
         'the terminal and/or IDE.'
       );

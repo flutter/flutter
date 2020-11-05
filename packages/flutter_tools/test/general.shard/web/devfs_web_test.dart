@@ -32,6 +32,7 @@ const List<int> kTransparentImage = <int>[
 void main() {
   Testbed testbed;
   WebAssetServer webAssetServer;
+  ReleaseAssetServer releaseAssetServer;
   Platform linux;
   PackageConfig packages;
   Platform windows;
@@ -55,6 +56,14 @@ void main() {
         null,
         null,
         null,
+      );
+      releaseAssetServer = ReleaseAssetServer(
+        globals.fs.file('main.dart').uri,
+        fileSystem: null,
+        flutterRoot: null,
+        platform: null,
+        webBuildDirectory: null,
+        basePath: null,
       );
     });
   });
@@ -660,6 +669,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       pathToReload: '',
+      dillOutputPath: 'out.dill',
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -678,8 +688,8 @@ void main() {
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
 
     // Toggle CanvasKit
-    expect(webDevFS.webAssetServer.canvasKitRendering, false);
-    webDevFS.webAssetServer.canvasKitRendering = true;
+    expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.html);
+    webDevFS.webAssetServer.webRenderer = WebRendererMode.canvaskit;
 
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'OL');
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
@@ -689,7 +699,7 @@ void main() {
       contains('GENERATED'));
 
     // served on localhost
-    expect(uri, Uri.http('localhost:0', ''));
+    expect(uri.host, 'localhost');
 
     await webDevFS.destroy();
   }, overrides: <Type, Generator>{
@@ -775,6 +785,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       pathToReload: '',
+      dillOutputPath: '',
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -793,7 +804,7 @@ void main() {
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
 
     // Toggle CanvasKit
-    webDevFS.webAssetServer.canvasKitRendering = true;
+    webDevFS.webAssetServer.webRenderer = WebRendererMode.canvaskit;
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'OL');
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
 
@@ -802,7 +813,7 @@ void main() {
       contains('GENERATED'));
 
     // served on localhost
-    expect(uri, Uri.http('localhost:0', ''));
+    expect(uri.host, 'localhost');
 
     await webDevFS.destroy();
   }, overrides: <Type, Generator>{
@@ -848,7 +859,7 @@ void main() {
 
     final Uri uri = await webDevFS.create();
 
-    expect(uri, Uri.http('localhost:0', ''));
+    expect(uri.host, 'localhost');
     await webDevFS.destroy();
   }));
 
@@ -898,7 +909,58 @@ void main() {
 
     await webDevFS.create();
 
-    expect(webDevFS.webAssetServer.canvasKitRendering, true);
+    expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.canvaskit);
+
+    await webDevFS.destroy();
+  }));
+
+  test('Can start web server with auto detect enabled', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
+    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      ..createSync(recursive: true);
+    outputFile.parent.childFile('a.sources').writeAsStringSync('');
+    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+    outputFile.parent.childFile('.packages').writeAsStringSync('\n');
+
+    final ResidentCompiler residentCompiler = MockResidentCompiler();
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+    )).thenAnswer((Invocation invocation) async {
+      return const CompilerOutput('a', 0, <Uri>[]);
+    });
+
+    final WebDevFS webDevFS = WebDevFS(
+      hostname: 'localhost',
+      port: 0,
+      packagesFilePath: '.packages',
+      urlTunneller: null,
+      useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
+      nullAssertions: true,
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        dartDefines: <String>[
+          'FLUTTER_WEB_AUTO_DETECT=true',
+        ]
+      ),
+      enableDwds: false,
+      entrypoint: Uri.base,
+      testMode: true,
+      expressionCompiler: null,
+      chromiumLauncher: null,
+    );
+    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.stackTraceMapper.createSync(recursive: true);
+
+    await webDevFS.create();
+
+    expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.autoDetect);
 
     await webDevFS.destroy();
   }));
@@ -924,6 +986,20 @@ void main() {
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
     await webAssetServer.dispose();
   });
+
+  test('WebAssetServer responds to POST requests with 404 not found', () => testbed.run(() async {
+    final Response response = await webAssetServer.handleRequest(
+      Request('POST', Uri.parse('http://foobar/something')),
+    );
+    expect(response.statusCode, 404);
+  }));
+
+  test('ReleaseAssetServer responds to POST requests with 404 not found', () => testbed.run(() async {
+    final Response response = await releaseAssetServer.handle(
+      Request('POST', Uri.parse('http://foobar/something')),
+    );
+    expect(response.statusCode, 404);
+  }));
 }
 
 class MockHttpServer extends Mock implements HttpServer {}

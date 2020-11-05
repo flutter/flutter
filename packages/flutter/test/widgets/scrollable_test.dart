@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -16,11 +14,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<void> pumpTest(
   WidgetTester tester,
-  TargetPlatform platform, {
+  TargetPlatform? platform, {
   bool scrollable = true,
   bool reverse = false,
-  ScrollController controller,
-  Widget Function(Widget) wrapper,
+  ScrollController? controller,
 }) async {
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
@@ -84,7 +81,7 @@ double getScrollOffset(WidgetTester tester, {bool last = true}) {
 double getScrollVelocity(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
   final ScrollPosition position = viewport.offset as ScrollPosition;
-  return position.activity.velocity;
+  return position.activity!.velocity;
 }
 
 void resetScrollOffset(WidgetTester tester) {
@@ -326,6 +323,39 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
   });
 
+  testWidgets('Holding scroll and Scroll pointer signal will update ScrollDirection.forward / ScrollDirection.reverse', (WidgetTester tester) async {
+    ScrollDirection? lastUserScrollingDirection;
+
+    final ScrollController controller = ScrollController();
+    await pumpTest(tester, TargetPlatform.fuchsia, controller: controller);
+
+    controller.addListener(() {
+      if(controller.position.userScrollDirection != ScrollDirection.idle)
+        lastUserScrollingDirection = controller.position.userScrollDirection;
+    });
+
+    await tester.drag(find.byType(Viewport), const Offset(0.0, -20.0), touchSlopY: 0.0);
+
+    expect(lastUserScrollingDirection, ScrollDirection.reverse);
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+
+    expect(lastUserScrollingDirection, ScrollDirection.reverse);
+
+    await tester.drag(find.byType(Viewport), const Offset(0.0, 20.0), touchSlopY: 0.0);
+
+    expect(lastUserScrollingDirection, ScrollDirection.forward);
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)));
+
+    expect(lastUserScrollingDirection, ScrollDirection.forward);
+  });
+
+
   testWidgets('Scrolls in correct direction when scroll axis is reversed', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.fuchsia, reverse: true);
 
@@ -336,6 +366,82 @@ void main() {
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)));
 
     expect(getScrollOffset(tester), 20.0);
+  });
+
+  group('setCanDrag to false with active drag gesture: ', () {
+    Future<void> pumpTestWidget(WidgetTester tester, { required bool canDrag }) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: CustomScrollView(
+            physics: canDrag ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
+            slivers: <Widget>[SliverToBoxAdapter(
+              child: SizedBox(
+                height: 2000,
+                child: GestureDetector(onTap: () {},),
+              ),
+            )],
+          ),
+        ),
+      );
+    }
+
+    testWidgets('Hold does not disable user interaction', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/66816.
+      await pumpTestWidget(tester, canDrag: true);
+      final RenderIgnorePointer renderIgnorePointer = tester.renderObject<RenderIgnorePointer>(
+        find.descendant(of: find.byType(CustomScrollView), matching: find.byType(IgnorePointer)),
+      );
+
+      expect(renderIgnorePointer.ignoring, false);
+
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+      expect(renderIgnorePointer.ignoring, false);
+
+      await pumpTestWidget(tester, canDrag: false);
+      expect(renderIgnorePointer.ignoring, false);
+
+      await gesture.up();
+      expect(renderIgnorePointer.ignoring, false);
+    });
+
+    testWidgets('Drag disables user interaction when recognized', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/66816.
+      await pumpTestWidget(tester, canDrag: true);
+      final RenderIgnorePointer renderIgnorePointer = tester.renderObject<RenderIgnorePointer>(
+        find.descendant(of: find.byType(CustomScrollView), matching: find.byType(IgnorePointer)),
+      );
+      expect(renderIgnorePointer.ignoring, false);
+
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+      expect(renderIgnorePointer.ignoring, false);
+
+      await gesture.moveBy(const Offset(0, -100));
+      // Starts ignoring when the drag is recognized.
+      expect(renderIgnorePointer.ignoring, true);
+
+      await pumpTestWidget(tester, canDrag: false);
+      expect(renderIgnorePointer.ignoring, false);
+
+      await gesture.up();
+      expect(renderIgnorePointer.ignoring, false);
+    });
+
+    testWidgets('Ballistic disables user interaction until it stops', (WidgetTester tester) async {
+      await pumpTestWidget(tester, canDrag: true);
+      final RenderIgnorePointer renderIgnorePointer = tester.renderObject<RenderIgnorePointer>(
+        find.descendant(of: find.byType(CustomScrollView), matching: find.byType(IgnorePointer)),
+      );
+      expect(renderIgnorePointer.ignoring, false);
+
+      // Starts ignoring when the drag is recognized.
+      await tester.fling(find.byType(Viewport), const Offset(0, -100), 1000);
+      expect(renderIgnorePointer.ignoring, true);
+      await tester.pump();
+
+      // When the activity ends we should stop ignoring pointers.
+      await tester.pumpAndSettle();
+      expect(renderIgnorePointer.ignoring, false);
+    });
   });
 
   testWidgets("Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics", (WidgetTester tester) async {
@@ -742,7 +848,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity.delegate.goBallistic(4000);
+    Scrollable.of(find.byType(SizedBox).evaluate().first)!.position.activity!.delegate.goBallistic(4000);
 
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
@@ -771,7 +877,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)!.position;
     final SuperPessimisticScrollPhysics physics = position.physics as SuperPessimisticScrollPhysics;
 
     expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
@@ -784,7 +890,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    position.activity.delegate.goBallistic(4000);
+    position.activity!.delegate.goBallistic(4000);
 
     await tester.pumpAndSettle();
 
@@ -815,7 +921,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)!.position;
 
     expect(find.byKey(const ValueKey<String>('Cheap box 0')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
@@ -826,7 +932,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    position.activity.delegate.goBallistic(4000);
+    position.activity!.delegate.goBallistic(4000);
 
     await tester.pumpAndSettle();
 
@@ -1010,7 +1116,7 @@ void main() {
 
 // ignore: must_be_immutable
 class SuperPessimisticScrollPhysics extends ScrollPhysics {
-  SuperPessimisticScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+  SuperPessimisticScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   int count = 0;
 
@@ -1021,13 +1127,13 @@ class SuperPessimisticScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  ScrollPhysics applyTo(ScrollPhysics ancestor) {
+  ScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return SuperPessimisticScrollPhysics(parent: buildParent(ancestor));
   }
 }
 
 class ExtraSuperPessimisticScrollPhysics extends ScrollPhysics {
-  const ExtraSuperPessimisticScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+  const ExtraSuperPessimisticScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   @override
   bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
@@ -1035,7 +1141,7 @@ class ExtraSuperPessimisticScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  ScrollPhysics applyTo(ScrollPhysics ancestor) {
+  ScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return ExtraSuperPessimisticScrollPhysics(parent: buildParent(ancestor));
   }
 }
