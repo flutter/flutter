@@ -7,17 +7,11 @@ part of engine;
 
 /// A canvas that renders to DOM elements and CSS properties.
 class DomCanvas extends EngineCanvas with SaveElementStackTracking {
-  @override
-  final html.Element rootElement = html.Element.tag('flt-dom-canvas');
 
-  DomCanvas() {
-    rootElement.style
-      ..position = 'absolute'
-      ..top = '0'
-      ..right = '0'
-      ..bottom = '0'
-      ..left = '0';
-  }
+  @override
+  final html.Element rootElement;
+
+  DomCanvas(this.rootElement);
 
   /// Prepare to reuse this canvas by clearing it's current contents.
   @override
@@ -144,7 +138,7 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
 html.HtmlElement _buildDrawRectElement(ui.Rect rect, SurfacePaintData paint, String tagName,
     Matrix4 transform) {
   assert(paint.shader == null);
-  final html.HtmlElement rectangle = html.Element.tag(tagName) as html.HtmlElement;
+  final html.HtmlElement rectangle = domRenderer.createElement(tagName) as html.HtmlElement;
   assert(() {
     rectangle.setAttribute('flt-rect', '$rect');
     rectangle.setAttribute('flt-paint', '$paint');

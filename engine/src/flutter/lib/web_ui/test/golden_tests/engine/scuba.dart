@@ -121,7 +121,7 @@ void testEachCanvas(String description, CanvasTest body,
     try {
       TextMeasurementService.initialize(rulerCacheCapacity: 2);
       WebExperiments.instance.useCanvasText = false;
-      return body(DomCanvas());
+      return body(DomCanvas(domRenderer.createElement('flt-picture')));
     } finally {
       WebExperiments.instance.useCanvasText = null;
       TextMeasurementService.clearCache();

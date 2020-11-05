@@ -1633,7 +1633,7 @@ void _applyTextStyleToElement({
           _textDecorationToCssString(style._decoration, style._decorationStyle);
       if (textDecoration != null) {
         if (browserEngine == BrowserEngine.webkit) {
-          domRenderer.setElementStyle(
+          DomRenderer.setElementStyle(
               element, '-webkit-text-decoration', textDecoration);
         } else {
           cssStyle.textDecoration = textDecoration;
@@ -1722,7 +1722,7 @@ void _applyTextBackgroundToElement({
 }) {
   final ui.Paint? newBackground = style._background;
   if (newBackground != null) {
-    domRenderer.setElementStyle(
+    DomRenderer.setElementStyle(
         element, 'background-color', colorToCssString(newBackground.color));
   }
 }
