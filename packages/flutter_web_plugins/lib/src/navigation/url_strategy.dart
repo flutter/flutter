@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:ui' as ui;
@@ -15,7 +13,7 @@ import 'utils.dart';
 ///
 /// Setting this to null disables all integration with the browser history.
 void setUrlStrategy(UrlStrategy strategy) {
-  jsSetUrlStrategy(convertToJsUrlStrategy(strategy));
+  jsSetUrlStrategy(convertToJsUrlStrategy(strategy)!);
 }
 
 /// Represents and reads route state from the browser's URL.
@@ -148,7 +146,7 @@ class HashUrlStrategy extends UrlStrategy {
   /// `history.back` transition.
   Future<void> _waitForPopState() {
     final Completer<void> completer = Completer<void>();
-    ui.VoidCallback unsubscribe;
+    late ui.VoidCallback unsubscribe;
     unsubscribe = addPopStateListener((_) {
       unsubscribe();
       completer.complete();
@@ -183,7 +181,7 @@ class PathUrlStrategy extends HashUrlStrategy {
 
   @override
   String getPath() {
-    final String path = _platformLocation.pathname + _platformLocation.search;
+    final String path = _platformLocation.pathname! + _platformLocation.search!;
     if (_basePath.isNotEmpty && path.startsWith(_basePath)) {
       return ensureLeadingSlash(path.substring(_basePath.length));
     }
@@ -223,17 +221,17 @@ abstract class PlatformLocation {
   /// The `pathname` part of the URL in the browser address bar.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/pathname
-  String get pathname;
+  String? get pathname;
 
   /// The `query` part of the URL in the browser address bar.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/search
-  String get search;
+  String? get search;
 
   /// The `hash` part of the URL in the browser address bar.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/hash
-  String get hash;
+  String? get hash;
 
   /// The `state` in the current history entry.
   ///
@@ -266,7 +264,7 @@ abstract class PlatformLocation {
   /// The base href where the Flutter app is being served.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-  String getBaseHref();
+  String? getBaseHref();
 }
 
 /// Delegates to real browser APIs to provide platform location functionality.
@@ -288,10 +286,10 @@ class BrowserPlatformLocation extends PlatformLocation {
   }
 
   @override
-  String get pathname => _location.pathname;
+  String? get pathname => _location.pathname;
 
   @override
-  String get search => _location.search;
+  String? get search => _location.search;
 
   @override
   String get hash => _location.hash;
@@ -315,6 +313,6 @@ class BrowserPlatformLocation extends PlatformLocation {
   }
 
   @override
-  String getBaseHref() => getBaseElementHrefFromDom();
+  String? getBaseHref() => getBaseElementHrefFromDom();
   // String getBaseHref() => html.document.baseUri;
 }

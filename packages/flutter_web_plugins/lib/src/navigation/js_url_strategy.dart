@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @JS()
 library js_location_strategy;
 
@@ -42,7 +40,7 @@ typedef _HistoryMove = Future<void> Function(int count);
 
 /// Given a Dart implementation of URL strategy, converts it to a JavaScript
 /// URL strategy to be passed through JS interop.
-JsUrlStrategy convertToJsUrlStrategy(UrlStrategy strategy) {
+JsUrlStrategy? convertToJsUrlStrategy(UrlStrategy? strategy) {
   if (strategy == null) {
     return null;
   }
