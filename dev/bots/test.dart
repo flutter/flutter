@@ -1095,7 +1095,6 @@ Future<void> _pubRunTest(String workingDirectory, {
   }
 
   final List<String> args = <String>[
-    'run',
     'test',
     if (useFlutterTestFormatter)
       '-rjson'
