@@ -776,8 +776,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
       return;
     }
-    if (key == LogicalKeyboardKey.keyX) {
-      if (!_readOnly && !selection!.isCollapsed) {
+    if (key == LogicalKeyboardKey.keyX && !_readOnly) {
+      if (!selection!.isCollapsed) {
         Clipboard.setData(ClipboardData(text: selection!.textInside(_plainText)));
         textSelectionDelegate.textEditingValue = TextEditingValue(
           text: selection!.textBefore(_plainText)
@@ -787,22 +787,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
       return;
     }
-    if (key == LogicalKeyboardKey.keyV) {
-      if (!_readOnly) {
-        // Snapshot the input before using `await`.
-        // See https://github.com/flutter/flutter/issues/11427
-        final TextEditingValue value = textSelectionDelegate.textEditingValue;
-        final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-        if (data != null) {
-          textSelectionDelegate.textEditingValue = TextEditingValue(
-            text: value.selection.textBefore(value.text)
-                + data.text!
-                + value.selection.textAfter(value.text),
-            selection: TextSelection.collapsed(
-                offset: value.selection.start + data.text!.length
-            ),
-          );
-        }
+    if (key == LogicalKeyboardKey.keyV && !_readOnly) {
+      // Snapshot the input before using `await`.
+      // See https://github.com/flutter/flutter/issues/11427
+      final TextEditingValue value = textSelectionDelegate.textEditingValue;
+      final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
+      if (data != null) {
+        textSelectionDelegate.textEditingValue = TextEditingValue(
+          text: value.selection.textBefore(value.text)
+              + data.text!
+              + value.selection.textAfter(value.text),
+          selection: TextSelection.collapsed(
+              offset: value.selection.start + data.text!.length
+          ),
+        );
       }
       return;
     }
@@ -820,27 +818,28 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void _handleDelete({ required bool forward }) {
     assert(_selection != null);
-    if (!_readOnly) {
-      String textBefore = selection!.textBefore(_plainText);
-      String textAfter = selection!.textAfter(_plainText);
-      int cursorPosition = selection!.start;
-      // If not deleting a selection, delete the next/previous character.
-      if (selection!.isCollapsed) {
-        if (!forward && textBefore.isNotEmpty) {
-          final int characterBoundary = previousCharacter(textBefore.length, textBefore);
-          textBefore = textBefore.substring(0, characterBoundary);
-          cursorPosition = characterBoundary;
-        }
-        if (forward && textAfter.isNotEmpty) {
-          final int deleteCount = nextCharacter(0, textAfter);
-          textAfter = textAfter.substring(deleteCount);
-        }
-      }
-      textSelectionDelegate.textEditingValue = TextEditingValue(
-        text: textBefore + textAfter,
-        selection: TextSelection.collapsed(offset: cursorPosition),
-      );
+    if (_readOnly) {
+      return;
     }
+    String textBefore = selection!.textBefore(_plainText);
+    String textAfter = selection!.textAfter(_plainText);
+    int cursorPosition = selection!.start;
+    // If not deleting a selection, delete the next/previous character.
+    if (selection!.isCollapsed) {
+      if (!forward && textBefore.isNotEmpty) {
+        final int characterBoundary = previousCharacter(textBefore.length, textBefore);
+        textBefore = textBefore.substring(0, characterBoundary);
+        cursorPosition = characterBoundary;
+      }
+      if (forward && textAfter.isNotEmpty) {
+        final int deleteCount = nextCharacter(0, textAfter);
+        textAfter = textAfter.substring(deleteCount);
+      }
+    }
+    textSelectionDelegate.textEditingValue = TextEditingValue(
+      text: textBefore + textAfter,
+      selection: TextSelection.collapsed(offset: cursorPosition),
+    );
   }
 
   /// Marks the render object as needing to be laid out again and have its text

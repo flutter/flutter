@@ -4364,7 +4364,8 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb);
 
-  Future<void> testReadOnlyShortcuts(WidgetTester tester, {required String platform}) async {
+  testWidgets('keyboard shortcuts respect read-only', (WidgetTester tester) async {
+    final String platform = describeEnum(defaultTargetPlatform).toLowerCase();
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -4534,32 +4535,9 @@ void main() {
       reason: 'on $platform',
     );
     expect(controller.text, equals(testText), reason: 'on $platform');
-  }
-
-  testWidgets('keyboard shortcuts respect read-only on android', (WidgetTester tester) async {
-    await testReadOnlyShortcuts(tester, platform: 'android');
-    // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
-
-  testWidgets('keyboard shortcuts respect read-only on fuchsia', (WidgetTester tester) async {
-    await testReadOnlyShortcuts(tester, platform: 'fuchsia');
-    // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
-
-  testWidgets('keyboard shortcuts respect read-only on linux', (WidgetTester tester) async {
-    await testReadOnlyShortcuts(tester, platform: 'linux');
-    // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
-
-  testWidgets('keyboard shortcuts respect read-only on macos', (WidgetTester tester) async {
-    await testReadOnlyShortcuts(tester, platform: 'macos');
-    // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
-
-  testWidgets('keyboard shortcuts respect read-only on windows', (WidgetTester tester) async {
-    await testReadOnlyShortcuts(tester, platform: 'windows');
-    // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
+  },
+  skip: kIsWeb,
+  variant: TargetPlatformVariant.all());
 
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
