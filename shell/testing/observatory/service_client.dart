@@ -8,20 +8,22 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-
 class ServiceClient {
-  Completer<dynamic> isolateStartedId;
-  Completer<dynamic> isolatePausedId;
-  Completer<dynamic> isolateResumeId;
+  Completer<dynamic>? isolateStartedId;
+  Completer<dynamic>? isolatePausedId;
+  Completer<dynamic>? isolateResumeId;
 
-  ServiceClient(this.client, {this.isolateStartedId, this.isolatePausedId,
-      this.isolateResumeId}) {
-    client.listen(_onData,
-                  onError: _onError,
-                  cancelOnError: true);
+  ServiceClient(
+    this.client, {
+    this.isolateStartedId,
+    this.isolatePausedId,
+    this.isolateResumeId,
+  }) {
+    client.listen(_onData, onError: _onError, cancelOnError: true);
   }
 
-  Future<Map<String, dynamic>> invokeRPC(String method, [Map<String, dynamic> params]) async {
+  Future<Map<String, dynamic>> invokeRPC(String method,
+      [Map<String, dynamic>? params]) async {
     final String key = _createKey();
     final String request = json.encode(<String, dynamic>{
       'jsonrpc': '2.0',
@@ -30,7 +32,8 @@ class ServiceClient {
       'id': key,
     });
     client.add(request);
-    final Completer<Map<String, dynamic>> completer = Completer<Map<String, dynamic>>();
+    final Completer<Map<String, dynamic>> completer =
+        Completer<Map<String, dynamic>>();
     _outstandingRequests[key] = completer;
     print('-> $key ($method)');
     return completer.future;
@@ -43,7 +46,8 @@ class ServiceClient {
   }
 
   void _onData(dynamic message) {
-    final Map<String, dynamic> response = json.decode(message);
+    final Map<String, dynamic> response =
+        json.decode(message as String) as Map<String, dynamic>;
     final dynamic key = response['id'];
     if (key != null) {
       print('<- $key');
@@ -60,16 +64,17 @@ class ServiceClient {
       }
     } else {
       if (response['method'] == 'streamNotify') {
-        _onServiceEvent(response['params']);
+        _onServiceEvent(response['params'] as Map<String, dynamic>?);
       }
     }
   }
 
-  void _onServiceEvent(Map<String, dynamic> params) {
+  void _onServiceEvent(Map<String, dynamic>? params) {
     if (params == null) {
       return;
     }
-    final Map<String, dynamic> event = params['event'];
+    final Map<String, dynamic>? event =
+        params['event'] as Map<String, dynamic>?;
     if (event == null || event['type'] != 'Event') {
       return;
     }
@@ -98,6 +103,7 @@ class ServiceClient {
   }
 
   final WebSocket client;
-  final Map<String, Completer<dynamic>> _outstandingRequests = <String, Completer<dynamic>>{};
+  final Map<String, Completer<dynamic>> _outstandingRequests =
+      <String, Completer<dynamic>>{};
   int _id = 1;
 }
