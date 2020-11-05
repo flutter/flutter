@@ -298,13 +298,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   @override
   void initState() {
     super.initState();
-    _extent = _DraggableSheetExtent(
-      minExtent: widget.minChildSize,
-      maxExtent: widget.maxChildSize,
-      initialExtent: widget.initialChildSize,
-      listener: _setExtent,
-    );
-    _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
+    _updateExtent();
   }
 
   @override
@@ -329,16 +323,18 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   @override
   void didUpdateWidget(DraggableScrollableSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.builder != widget.builder) {
-      _child = widget.builder(context, _scrollController);
-    }
+    _child = widget.builder(context, _scrollController);
+    _updateExtent();
+  }
 
+  void _updateExtent() {
     _extent = _DraggableSheetExtent(
       minExtent: widget.minChildSize,
       maxExtent: widget.maxChildSize,
       initialExtent: widget.initialChildSize,
       listener: _setExtent,
     );
+    _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
   }
 
   void _setExtent() {
