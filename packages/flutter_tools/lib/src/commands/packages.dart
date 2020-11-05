@@ -19,9 +19,9 @@ import '../runner/flutter_command.dart';
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
     addSubcommand(PackagesGetCommand('get', false));
+    addSubcommand(PackagesGetCommand('upgrade', true));
     addSubcommand(PackagesTestCommand());
     addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('upgrade', 'Upgrade the current package\'s dependencies to latest versions.', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
@@ -117,7 +117,7 @@ class PackagesGetCommand extends FlutterCommand {
       await pub.get(
         context: PubContext.pubGet,
         directory: directory,
-        upgrade: upgrade ,
+        upgrade: upgrade,
         offline: boolArg('offline'),
         generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
       );
