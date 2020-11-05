@@ -271,4 +271,9 @@ void VulkanSurfaceProducer::SubmitSurface(
   surface_pool_->SubmitSurface(std::move(surface));
 }
 
+sk_sp<SkSurface> VulkanSurfaceProducer::ProduceOffscreenSurface(
+    const SkISize& size) {
+  return surface_pool_->CreateSurface(size)->GetSkiaSurface();
+}
+
 }  // namespace flutter_runner

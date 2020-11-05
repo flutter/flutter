@@ -19,14 +19,18 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/version/version.h"
 #include "flutter/testing/testing.h"
+#include "include/core/SkFont.h"
 #include "include/core/SkPicture.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkSerialProcs.h"
+#include "include/core/SkTextBlob.h"
+
+#if defined(OS_FUCHSIA)
+#include "lib/sys/cpp/component_context.h"
+#include "third_party/skia/include/ports/SkFontMgr_fuchsia.h"
 
 namespace flutter {
 namespace testing {
-
-#if defined(OS_FUCHSIA)
 
 static void WaitForIO(Shell* shell) {
   std::promise<bool> io_task_finished;
@@ -103,8 +107,13 @@ class SkpWarmupTest : public ShellTest {
 
             SkDeserialProcs procs = {0};
             procs.fImageProc = DeserializeImageWithoutData;
+            procs.fTypefaceProc = DeserializeTypefaceWithoutData;
             sk_sp<SkPicture> picture =
                 SkPicture::MakeFromStream(stream.get(), &procs);
+            if (!picture) {
+              FML_LOG(ERROR) << "Failed to deserialize " << filename;
+              return true;
+            }
             pictures.push_back(std::move(picture));
             fd.reset();
           }
@@ -242,7 +251,51 @@ TEST_F(SkpWarmupTest, Image) {
   TestWarmup(draw_size, builder);
 }
 
-#endif
+// Re-enable once https://bugs.chromium.org/p/skia/issues/detail?id=10404
+// is fixed and integrated, or a workaround is found.
+TEST_F(SkpWarmupTest, DISABLED_Text) {
+  auto context = sys::ComponentContext::Create();
+  fuchsia::fonts::ProviderSyncPtr sync_font_provider;
+  context->svc()->Connect(sync_font_provider.NewRequest());
+  auto font_mgr = SkFontMgr_New_Fuchsia(std::move(sync_font_provider));
+  auto raw_typeface =
+      font_mgr->matchFamilyStyle(nullptr, SkFontStyle::Normal());
+  auto typeface = sk_sp<SkTypeface>(raw_typeface);
+
+  SkFont font(typeface, 12);
+  auto text_blob =
+      SkTextBlob::MakeFromString("test", font, SkTextEncoding::kUTF8);
+
+  SkISize draw_size =
+      SkISize::Make(text_blob->bounds().width(), text_blob->bounds().height());
+  // We reuse this builder to draw the same content sever times in this test
+  LayerTreeBuilder builder = [&draw_size, &text_blob,
+                              this](std::shared_ptr<ContainerLayer> root) {
+    SkPictureRecorder recorder;
+
+    auto canvas =
+        recorder.beginRecording(draw_size.width(), draw_size.height());
+
+    auto color_space = SkColorSpace::MakeSRGB();
+    auto paint = SkPaint(SkColors::kWhite, color_space.get());
+    canvas->drawTextBlob(text_blob, draw_size.width() / 2,
+                         draw_size.height() / 2, paint);
+
+    auto picture = recorder.finishRecordingAsPicture();
+
+    fml::RefPtr<SkiaUnrefQueue> queue = fml::MakeRefCounted<SkiaUnrefQueue>(
+        this->GetCurrentTaskRunner(), fml::TimeDelta::FromSeconds(0));
+    auto picture_layer = std::make_shared<PictureLayer>(
+        SkPoint::Make(0, 0), SkiaGPUObject<SkPicture>(picture, queue),
+        /* is_complex */ false,
+        /* will_change */ false);
+    root->Add(picture_layer);
+  };
+
+  TestWarmup(draw_size, builder);
+}
 
 }  // namespace testing
 }  // namespace flutter
+
+#endif  // defined(OS_FUCHSIA)

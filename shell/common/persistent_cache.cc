@@ -391,4 +391,14 @@ void PersistentCache::SetAssetManager(std::shared_ptr<AssetManager> value) {
   asset_manager_ = value;
 }
 
+std::vector<std::unique_ptr<fml::Mapping>>
+PersistentCache::GetSkpsFromAssetManager() const {
+  if (!asset_manager_) {
+    FML_LOG(ERROR)
+        << "PersistentCache::GetSkpsFromAssetManager: Asset manager not set!";
+    return std::vector<std::unique_ptr<fml::Mapping>>();
+  }
+  return asset_manager_->GetAsMappings(".*\\.skp$");
+}
+
 }  // namespace flutter
