@@ -25,7 +25,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
-import io.flutter.embedding.android.AndroidKeyProcessor;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -69,7 +68,6 @@ public class InputConnectionAdaptorTest {
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJni, mock(AssetManager.class)));
     int inputTargetId = 0;
     TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
-    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     Editable mEditable = Editable.Factory.getInstance().newEditable("");
     Editable spyEditable = spy(mEditable);
     EditorInfo outAttrs = new EditorInfo();
@@ -77,7 +75,7 @@ public class InputConnectionAdaptorTest {
 
     InputConnectionAdaptor inputConnectionAdaptor =
         new InputConnectionAdaptor(
-            testView, inputTargetId, textInputChannel, mockKeyProcessor, spyEditable, outAttrs);
+            testView, inputTargetId, textInputChannel, spyEditable, outAttrs);
 
     // Send an enter key and make sure the Editable received it.
     FakeKeyEvent keyEvent = new FakeKeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER);
@@ -158,11 +156,10 @@ public class InputConnectionAdaptorTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
     TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
-    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     Editable editable = sampleEditable(0, 0);
     InputConnectionAdaptor adaptor =
         new InputConnectionAdaptor(
-            testView, client, textInputChannel, mockKeyProcessor, editable, null, mockFlutterJNI);
+            testView, client, textInputChannel, editable, null, mockFlutterJNI);
     adaptor.performPrivateCommand("actionCommand", null);
 
     ArgumentCaptor<String> channelCaptor = ArgumentCaptor.forClass(String.class);
@@ -186,11 +183,10 @@ public class InputConnectionAdaptorTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
     TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
-    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     Editable editable = sampleEditable(0, 0);
     InputConnectionAdaptor adaptor =
         new InputConnectionAdaptor(
-            testView, client, textInputChannel, mockKeyProcessor, editable, null, mockFlutterJNI);
+            testView, client, textInputChannel, editable, null, mockFlutterJNI);
 
     Bundle bundle = new Bundle();
     byte[] buffer = new byte[] {'a', 'b', 'c', 'd'};
@@ -220,11 +216,10 @@ public class InputConnectionAdaptorTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
     TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
-    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     Editable editable = sampleEditable(0, 0);
     InputConnectionAdaptor adaptor =
         new InputConnectionAdaptor(
-            testView, client, textInputChannel, mockKeyProcessor, editable, null, mockFlutterJNI);
+            testView, client, textInputChannel, editable, null, mockFlutterJNI);
 
     Bundle bundle = new Bundle();
     byte b = 3;
@@ -252,11 +247,10 @@ public class InputConnectionAdaptorTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
     TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
-    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     Editable editable = sampleEditable(0, 0);
     InputConnectionAdaptor adaptor =
         new InputConnectionAdaptor(
-            testView, client, textInputChannel, mockKeyProcessor, editable, null, mockFlutterJNI);
+            testView, client, textInputChannel, editable, null, mockFlutterJNI);
 
     Bundle bundle = new Bundle();
     char[] buffer = new char[] {'a', 'b', 'c', 'd'};
@@ -287,11 +281,10 @@ public class InputConnectionAdaptorTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
     TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
-    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     Editable editable = sampleEditable(0, 0);
     InputConnectionAdaptor adaptor =
         new InputConnectionAdaptor(
-            testView, client, textInputChannel, mockKeyProcessor, editable, null, mockFlutterJNI);
+            testView, client, textInputChannel, editable, null, mockFlutterJNI);
 
     Bundle bundle = new Bundle();
     char b = 'a';
@@ -319,11 +312,10 @@ public class InputConnectionAdaptorTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
     TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
-    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     Editable editable = sampleEditable(0, 0);
     InputConnectionAdaptor adaptor =
         new InputConnectionAdaptor(
-            testView, client, textInputChannel, mockKeyProcessor, editable, null, mockFlutterJNI);
+            testView, client, textInputChannel, editable, null, mockFlutterJNI);
 
     Bundle bundle = new Bundle();
     CharSequence charSequence1 = new StringBuffer("abc");
@@ -355,11 +347,10 @@ public class InputConnectionAdaptorTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
     TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
-    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     Editable editable = sampleEditable(0, 0);
     InputConnectionAdaptor adaptor =
         new InputConnectionAdaptor(
-            testView, client, textInputChannel, mockKeyProcessor, editable, null, mockFlutterJNI);
+            testView, client, textInputChannel, editable, null, mockFlutterJNI);
 
     Bundle bundle = new Bundle();
     CharSequence charSequence = new StringBuffer("abc");
@@ -389,11 +380,10 @@ public class InputConnectionAdaptorTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
     TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
-    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     Editable editable = sampleEditable(0, 0);
     InputConnectionAdaptor adaptor =
         new InputConnectionAdaptor(
-            testView, client, textInputChannel, mockKeyProcessor, editable, null, mockFlutterJNI);
+            testView, client, textInputChannel, editable, null, mockFlutterJNI);
 
     Bundle bundle = new Bundle();
     float value = 0.5f;
@@ -421,11 +411,10 @@ public class InputConnectionAdaptorTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
     TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
-    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     Editable editable = sampleEditable(0, 0);
     InputConnectionAdaptor adaptor =
         new InputConnectionAdaptor(
-            testView, client, textInputChannel, mockKeyProcessor, editable, null, mockFlutterJNI);
+            testView, client, textInputChannel, editable, null, mockFlutterJNI);
 
     Bundle bundle = new Bundle();
     float[] value = {0.5f, 0.6f};
@@ -918,7 +907,6 @@ public class InputConnectionAdaptorTest {
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJni, mock(AssetManager.class)));
     int inputTargetId = 0;
     TestTextInputChannel textInputChannel = new TestTextInputChannel(dartExecutor);
-    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     Editable mEditable = Editable.Factory.getInstance().newEditable("");
     Editable spyEditable = spy(mEditable);
     EditorInfo outAttrs = new EditorInfo();
@@ -926,7 +914,7 @@ public class InputConnectionAdaptorTest {
 
     InputConnectionAdaptor inputConnectionAdaptor =
         new InputConnectionAdaptor(
-            testView, inputTargetId, textInputChannel, mockKeyProcessor, spyEditable, outAttrs);
+            testView, inputTargetId, textInputChannel, spyEditable, outAttrs);
 
     inputConnectionAdaptor.beginBatchEdit();
     assertEquals(textInputChannel.updateEditingStateInvocations, 0);
@@ -1171,7 +1159,6 @@ public class InputConnectionAdaptorTest {
     int client = 0;
     TextInputChannel textInputChannel = mock(TextInputChannel.class);
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     when(mockFlutterJNI.nativeFlutterTextUtilsIsEmoji(anyInt()))
         .thenAnswer((invocation) -> Emoji.isEmoji((int) invocation.getArguments()[0]));
     when(mockFlutterJNI.nativeFlutterTextUtilsIsEmojiModifier(anyInt()))
@@ -1188,7 +1175,7 @@ public class InputConnectionAdaptorTest {
         .thenAnswer(
             (invocation) -> Emoji.isRegionalIndicatorSymbol((int) invocation.getArguments()[0]));
     return new InputConnectionAdaptor(
-        testView, client, textInputChannel, mockKeyProcessor, editable, null, mockFlutterJNI);
+        testView, client, textInputChannel, editable, null, mockFlutterJNI);
   }
 
   private class TestTextInputChannel extends TextInputChannel {
