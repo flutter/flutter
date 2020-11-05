@@ -15,10 +15,12 @@ void main() {
           (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
-    final html.ImageElement imageElement = html.querySelector('img') as html.ImageElement;
-    expect(imageElement.naturalWidth, 1.5 * 100);
-    expect(imageElement.naturalHeight, 1.5 * 100);
-    expect(imageElement.width, 100);
-    expect(imageElement.height, 100);
+    final List<html.ImageElement> imageElements = html.querySelectorAll('img');
+    expect(imageElements.length, 2);
+    expect(imageElements[0].naturalWidth, 1.5 * 100);
+    expect(imageElements[0].naturalHeight, 1.5 * 100);
+    expect(imageElements[0].width, 100);
+    expect(imageElements[0].height, 100);
+    expect(imageElements[1].width, isNot(0));
   });
 }
