@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'colors.dart';
 import 'debug.dart';
 import 'list_tile.dart';
+import 'list_tile_theme.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
