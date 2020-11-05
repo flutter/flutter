@@ -185,6 +185,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
     -dTargetFile="${target_path}"                                         \
     -dBuildMode=${build_mode}                                             \
     -dIosArchs="${ARCHS}"                                                 \
+    -dSdkRoot="${SDKROOT}"                                                \
     -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                \
     -dTreeShakeIcons="${TREE_SHAKE_ICONS}"                                \
     -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                      \
