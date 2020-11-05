@@ -521,7 +521,7 @@ class LocalizationsGenerator {
   String _generatedLocalizationsFile;
 
   /// A generated file that will contain the list of messages for each locale
-  /// that has does not have a translation yet.
+  /// that do not have a translation yet.
   File _untranslatedMessagesFile;
 
   /// The file that contains the list of inputs and outputs for generating
