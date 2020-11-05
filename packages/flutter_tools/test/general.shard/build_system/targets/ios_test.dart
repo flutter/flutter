@@ -35,6 +35,7 @@ const List<String> _kSharedConfig = <String>[
   '-install_name',
   '@rpath/App.framework/App',
   '-isysroot',
+  'path/to/sdk',
 ];
 
 void main() {
@@ -70,49 +71,26 @@ void main() {
 
   testUsingContext('DebugUniveralFramework creates expected binary with arm64 only arch', () async {
     environment.defines[kIosArchs] = 'arm64';
-    processManager.addCommands(<FakeCommand>[
-      const FakeCommand(command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path']),
+    environment.defines[kSdkRoot] = 'path/to/sdk';
+    processManager.addCommand(
       FakeCommand(command: <String>[
         'xcrun',
         'clang',
         '-x',
         'c',
-         // iphone only gets 64 bit arch based on kIosArchs
+        // iphone only gets 64 bit arch based on kIosArchs
         '-arch',
         'arm64',
-        fileSystem.path.absolute(fileSystem.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
+        fileSystem.path.absolute(fileSystem.path.join(
+            '.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
         ..._kSharedConfig,
-        '',
         '-o',
-        environment.buildDir.childFile('iphone_framework').path
+        environment.buildDir
+            .childDirectory('App.framework')
+            .childFile('App')
+            .path,
       ]),
-      // Create simulator stub.
-      const FakeCommand(command: <String>['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-path']),
-      FakeCommand(command: <String>[
-        'xcrun',
-        'clang',
-        '-x',
-        'c',
-        // Simulator only as x86_64 arch
-        '-arch',
-        'x86_64',
-        fileSystem.path.absolute(fileSystem.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
-        ..._kSharedConfig,
-        '',
-        '-o',
-        environment.buildDir.childFile('simulator_framework').path
-      ]),
-      // Lipo stubs together.
-      FakeCommand(command: <String>[
-        'xcrun',
-        'lipo',
-        '-create',
-        environment.buildDir.childFile('iphone_framework').path,
-        environment.buildDir.childFile('simulator_framework').path,
-        '-output',
-        environment.buildDir.childDirectory('App.framework').childFile('App').path,
-      ]),
-    ]);
+    );
 
     await const DebugUniversalFramework().build(environment);
   }, overrides: <Type, Generator>{
