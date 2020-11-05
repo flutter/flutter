@@ -14,6 +14,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'basic.dart';
 import 'framework.dart';
+import 'page_storage.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
@@ -25,7 +26,6 @@ import 'scroll_view.dart';
 import 'sliver_fill.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
-import 'page_storage.dart';
 
 // Examples can assume:
 // List<String> _tabs;
