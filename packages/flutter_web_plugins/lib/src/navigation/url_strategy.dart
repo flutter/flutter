@@ -12,8 +12,12 @@ import 'utils.dart';
 /// Change the strategy to use for handling browser URL.
 ///
 /// Setting this to null disables all integration with the browser history.
-void setUrlStrategy(UrlStrategy strategy) {
-  jsSetUrlStrategy(convertToJsUrlStrategy(strategy)!);
+void setUrlStrategy(UrlStrategy? strategy) {
+  JsUrlStrategy? jsUrlStrategy = null;
+  if (strategy != null) {
+    jsUrlStrategy = convertToJsUrlStrategy(strategy);
+  }
+  jsSetUrlStrategy(jsUrlStrategy);
 }
 
 /// Represents and reads route state from the browser's URL.

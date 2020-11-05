@@ -14,7 +14,7 @@ import 'package:meta/meta.dart';
 
 import 'url_strategy.dart';
 
-typedef _JsSetUrlStrategy = void Function(JsUrlStrategy);
+typedef _JsSetUrlStrategy = void Function(JsUrlStrategy?);
 
 /// A JavaScript hook to customize the URL strategy of a Flutter app.
 //
@@ -40,11 +40,7 @@ typedef _HistoryMove = Future<void> Function(int count);
 
 /// Given a Dart implementation of URL strategy, converts it to a JavaScript
 /// URL strategy to be passed through JS interop.
-JsUrlStrategy? convertToJsUrlStrategy(UrlStrategy? strategy) {
-  if (strategy == null) {
-    return null;
-  }
-
+JsUrlStrategy convertToJsUrlStrategy(UrlStrategy strategy) {
   return JsUrlStrategy(
     getPath: allowInterop(strategy.getPath),
     getState: allowInterop(strategy.getState),
