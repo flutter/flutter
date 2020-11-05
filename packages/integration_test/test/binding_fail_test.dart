@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as path;
 
 // Assumes that the flutter command is in `$PATH`.
 const String _flutterBin = 'flutter';
@@ -17,8 +18,7 @@ const String _failureExcerpt = r'Expected: <false>\n  Actual: <true>';
 Future<void> main() async {
   group('Integration binding result', () {
     test('when multiple tests pass', () async {
-      final Map<String, dynamic> results =
-          await _runTest('test/data/pass_test_script.dart');
+      final Map<String, dynamic> results = await _runTest(path.join('test', 'data', 'pass_test_script.dart'));
 
       expect(
           results,
@@ -29,19 +29,15 @@ Future<void> main() async {
     });
 
     test('when multiple tests fail', () async {
-      final Map<String, dynamic> results =
-          await _runTest('test/data/fail_test_script.dart');
+      final Map<String, dynamic> results = await _runTest(path.join('test', 'data', 'fail_test_script.dart'));
 
       expect(results, hasLength(2));
-      expect(
-          results, containsPair('failing test 1', contains(_failureExcerpt)));
-      expect(
-          results, containsPair('failing test 2', contains(_failureExcerpt)));
+      expect(results, containsPair('failing test 1', contains(_failureExcerpt)));
+      expect(results, containsPair('failing test 2', contains(_failureExcerpt)));
     });
 
     test('when one test passes, then another fails', () async {
-      final Map<String, dynamic> results =
-          await _runTest('test/data/pass_then_fail_test_script.dart');
+      final Map<String, dynamic> results = await _runTest(path.join('test', 'data', 'pass_then_fail_test_script.dart'));
 
       expect(results, hasLength(2));
       expect(results, containsPair('passing test', equals('success')));
