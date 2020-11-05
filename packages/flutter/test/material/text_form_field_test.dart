@@ -514,4 +514,21 @@ void main() {
       );
       }, throwsAssertionError);
   });
+
+  testWidgets('textSelectionControls is passed to super', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Scaffold(
+            body: TextFormField(
+              selectionControls: materialTextSelectionControls,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField widget = tester.widget(find.byType(TextField));
+    expect(widget.selectionControls, equals(materialTextSelectionControls));
+  });
 }

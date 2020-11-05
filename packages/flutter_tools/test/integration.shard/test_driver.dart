@@ -451,6 +451,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool singleWidgetReloads = false,
     File pidFile,
     String script,
+    List<String> additionalCommandArgs,
   }) async {
     await _setupProcess(
       <String>[
@@ -471,6 +472,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           'flutter-tester',
         if (structuredErrors)
           '--dart-define=flutter.inspector.structuredErrors=true',
+        ...?additionalCommandArgs,
       ],
       withDebugger: withDebugger,
       startPaused: startPaused,

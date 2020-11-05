@@ -2276,7 +2276,7 @@ void main() {
     await tester.pumpWidget(selectableText);
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    expect(exception.toString(), startsWith('No MediaQuery widget found.\nSelectableText widgets require a MediaQuery widget ancestor.'));
+    expect(exception.toString(), startsWith('No MediaQuery widget ancestor found.\nSelectableText widgets require a MediaQuery widget ancestor.'));
   });
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
@@ -2770,6 +2770,93 @@ void main() {
       expect(find.byType(TextButton), findsNWidgets(2));
     },
   );
+
+  testWidgets(
+    'long press selects word and shows custom toolbar (Android)',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: SelectableText('Atwater Peel Sherbrooke Bonaventure',
+              selectionControls: cupertinoTextSelectionControls,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+      await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
+      await tester.pump();
+
+      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+      final TextEditingController controller = editableTextWidget.controller;
+
+      // The longpressed word is selected.
+      expect(
+        controller.selection,
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 7,
+        ),
+      );
+
+      // Toolbar shows one button.
+      expect(find.byType(CupertinoButton), findsNWidgets(1));
+  }, variant:  TargetPlatformVariant.all());
+
+  testWidgets(
+    'long press selects word and shows custom toolbar (iOS)',
+    (WidgetTester tester) async {
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: SelectableText('Atwater Peel Sherbrooke Bonaventure',
+              selectionControls: materialTextSelectionControls,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+      await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
+      await tester.pump();
+
+      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+      final TextEditingController controller = editableTextWidget.controller;
+
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      // Collapsed toolbar shows 2 buttons: copy, select all
+      expect(find.byType(TextButton), findsNWidgets(2));
+  }, variant: TargetPlatformVariant.all());
+
+ testWidgets('textSelectionControls is passed to EditableText',
+      (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Scaffold(
+              body: SelectableText('Atwater Peel Sherbrooke Bonaventure',
+                selectionControls: materialTextSelectionControls,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableText widget = tester.widget(find.byType(EditableText));
+      expect(widget.selectionControls, equals(materialTextSelectionControls));
+  });
 
   testWidgets(
     'long press tap cannot initiate a double tap',

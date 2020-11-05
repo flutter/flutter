@@ -238,7 +238,7 @@ void main() {
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
-        color: Theme.of(context)!.primaryColor,
+        color: Theme.of(context).primaryColor,
         child: Text('$index', textDirection: TextDirection.ltr),
       );
     };
@@ -509,7 +509,7 @@ void main() {
               itemBuilder: (_, int i) => Container(
                 height: 200.0,
                 width: 200.0,
-                color: i % 2 == 0 ? Colors.black : Colors.red,
+                color: i.isEven ? Colors.black : Colors.red,
               ),
             ),
           ),

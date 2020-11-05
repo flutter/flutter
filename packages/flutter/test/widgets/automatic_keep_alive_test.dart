@@ -515,7 +515,7 @@ void main() {
         addSemanticIndexes: false,
         itemCount: 250,
         itemBuilder: (BuildContext context, int index) {
-          if (index % 2 == 0) {
+          if (index.isEven) {
             return _AlwaysKeepAlive(
               key: GlobalObjectKey<_AlwaysKeepAliveState>(index),
             );

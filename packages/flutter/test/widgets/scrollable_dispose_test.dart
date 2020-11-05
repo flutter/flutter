@@ -49,7 +49,7 @@ void main() {
                   controller: controller,
                   itemBuilder: (BuildContext context, int index) {
                     return Container(
-                      color: index % 2 == 0 ? Colors.red : Colors.green,
+                      color: index.isEven ? Colors.red : Colors.green,
                       height: 200.0,
                       child: Text('Hello $index'),
                     );

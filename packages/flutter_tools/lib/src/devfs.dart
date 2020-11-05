@@ -16,7 +16,6 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
-import 'bundle.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
@@ -296,16 +295,11 @@ class _DevFSHttpWriter implements DevFSWriter {
           _osUtils,
         );
         await request.addStream(contents);
-        // The contents has already been streamed, closing the request should
-        // not take long but we are experiencing hangs with it, see #63869.
-        //
         // Once the bug in Dart is solved we can remove the timeout
-        // (https://github.com/dart-lang/sdk/issues/43525).  The timeout was
-        // chosen to be inflated based on the max observed time when running the
-        // tests in "Google Tests".
+        // (https://github.com/dart-lang/sdk/issues/43525).
         try {
           final HttpClientResponse response = await request.close().timeout(
-            const Duration(milliseconds: 10000));
+            const Duration(seconds: 60));
           response.listen((_) {},
             onError: (dynamic error) {
               _logger.printTrace('error: $error');
@@ -482,12 +476,12 @@ class DevFS {
     @required String pathToReload,
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
+    @required String dillOutputPath,
     DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
-    String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
   }) async {
@@ -513,7 +507,7 @@ class DevFS {
     final Future<CompilerOutput> pendingCompilerOutput = generator.recompile(
       mainUri,
       invalidatedFiles,
-      outputPath: dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
+      outputPath: dillOutputPath,
       packageConfig: packageConfig,
     );
     if (bundle != null) {

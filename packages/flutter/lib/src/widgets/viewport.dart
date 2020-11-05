@@ -118,17 +118,17 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// The [center] must be the key of a child of the viewport.
   final Key? center;
 
-  /// {@macro flutter.rendering.viewport.cacheExtent}
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   ///
   /// See also:
   ///
   ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
   final double? cacheExtent;
 
-  /// {@macro flutter.rendering.viewport.cacheExtentStyle}
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
   final CacheExtentStyle cacheExtentStyle;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
@@ -147,7 +147,7 @@ class Viewport extends MultiChildRenderObjectWidget {
           why: 'to determine the cross-axis direction when the viewport has an \'up\' axisDirection',
           alternative: 'Alternatively, consider specifying the \'crossAxisDirection\' argument on the Viewport.',
         ));
-        return textDirectionToAxisDirection(Directionality.of(context)!);
+        return textDirectionToAxisDirection(Directionality.of(context));
       case AxisDirection.right:
         return AxisDirection.down;
       case AxisDirection.down:
@@ -156,7 +156,7 @@ class Viewport extends MultiChildRenderObjectWidget {
           why: 'to determine the cross-axis direction when the viewport has a \'down\' axisDirection',
           alternative: 'Alternatively, consider specifying the \'crossAxisDirection\' argument on the Viewport.',
         ));
-        return textDirectionToAxisDirection(Directionality.of(context)!);
+        return textDirectionToAxisDirection(Directionality.of(context));
       case AxisDirection.left:
         return AxisDirection.down;
     }
@@ -322,7 +322,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   /// Typically a [ScrollPosition].
   final ViewportOffset offset;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;

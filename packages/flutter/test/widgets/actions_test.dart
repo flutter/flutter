@@ -264,10 +264,7 @@ void main() {
       );
 
       await tester.pump();
-      final ActionDispatcher dispatcher = Actions.of(
-        containerKey.currentContext!,
-        nullOk: true,
-      );
+      final ActionDispatcher dispatcher = Actions.of(containerKey.currentContext!);
       expect(dispatcher, equals(testDispatcher));
     });
     testWidgets('Action can be found with find', (WidgetTester tester) async {
@@ -296,7 +293,7 @@ void main() {
       await tester.pump();
       expect(Actions.find<TestIntent>(containerKey.currentContext!), equals(testAction));
       expect(() => Actions.find<DoNothingIntent>(containerKey.currentContext!), throwsAssertionError);
-      expect(Actions.find<DoNothingIntent>(containerKey.currentContext!, nullOk: true), isNull);
+      expect(Actions.maybeFind<DoNothingIntent>(containerKey.currentContext!), isNull);
 
       await tester.pumpWidget(
         Actions(
@@ -316,7 +313,7 @@ void main() {
       await tester.pump();
       expect(Actions.find<TestIntent>(containerKey.currentContext!), equals(testAction));
       expect(() => Actions.find<DoNothingIntent>(containerKey.currentContext!), throwsAssertionError);
-      expect(Actions.find<DoNothingIntent>(containerKey.currentContext!, nullOk: true), isNull);
+      expect(Actions.maybeFind<DoNothingIntent>(containerKey.currentContext!), isNull);
     });
     testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;

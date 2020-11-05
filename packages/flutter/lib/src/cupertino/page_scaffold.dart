@@ -93,7 +93,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
   Widget build(BuildContext context) {
     Widget paddedContent = widget.child;
 
-    final MediaQueryData existingMediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData existingMediaQuery = MediaQuery.of(context);
     if (widget.navigationBar != null) {
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
@@ -157,7 +157,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: CupertinoDynamicColor.resolve(widget.backgroundColor, context)
+        color: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context)
             ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
       ),
       child: Stack(

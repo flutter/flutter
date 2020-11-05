@@ -21,6 +21,7 @@ void main() {
 
     await inDirectory(complexLayoutPath, () async {
       await flutter('drive', options: <String>[
+        '--no-android-gradle-daemon',
         '-v',
         '--profile',
         '--trace-startup', // Enables "endless" timeline event buffering.

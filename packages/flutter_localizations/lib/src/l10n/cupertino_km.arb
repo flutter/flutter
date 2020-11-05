@@ -20,5 +20,6 @@
   "pasteButtonLabel": "ដាក់​ចូល",
   "selectAllButtonLabel": "ជ្រើសរើស​ទាំងអស់",
   "tabSemanticsLabel": "ផ្ទាំងទី $tabIndex នៃ $tabCount",
-  "modalBarrierDismissLabel": "ច្រាន​ចោល"
+  "modalBarrierDismissLabel": "ច្រាន​ចោល",
+  "searchTextFieldPlaceholerLabel": "Search"
 }

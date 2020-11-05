@@ -483,11 +483,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
       'Launching ${globals.fsUtils.getDisplayPath(target)} '
       'on ${device.device.name} in $modeName mode...',
     );
-    final String effectiveHostname = debuggingOptions.hostname ?? 'localhost';
-    final int hostPort = debuggingOptions.port == null
-        ? await globals.os.findFreePort()
-        : int.tryParse(debuggingOptions.port);
-
     if (device.device is ChromiumDevice) {
       _chromiumLauncher = (device.device as ChromiumDevice).chromeLauncher;
     }
@@ -498,10 +493,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions.webEnableExpressionEvaluation
               ? WebExpressionCompiler(device.generator)
               : null;
-
         device.devFS = WebDevFS(
-          hostname: effectiveHostname,
-          port: hostPort,
+          hostname: debuggingOptions.hostname ?? 'localhost',
+          port: debuggingOptions.port != null
+            ? int.tryParse(debuggingOptions.port)
+            : null,
           packagesFilePath: packagesFilePath,
           urlTunneller: urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
@@ -528,7 +524,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            debuggingOptions.initializePlatform,
             false,
             kNoneWorker,
             true,
@@ -596,7 +591,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
           flutterProject,
           target,
           debuggingOptions.buildInfo,
-          debuggingOptions.initializePlatform,
           false,
           kNoneWorker,
           true,
@@ -657,7 +651,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
 
       final bool hasWebPlugins = (await findPlugins(flutterProject))
         .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-      await injectPlugins(flutterProject, checkProjects: true);
+      await injectPlugins(flutterProject, webPlatform: true);
 
       final Uri generatedUri = globals.fs.currentDirectory
         .childDirectory('lib')
@@ -848,14 +842,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
     }
     await cleanupAtFinish();
     return 0;
-  }
-
-  @override
-  Future<bool> toggleCanvaskit() async {
-    final WebDevFS webDevFS = device.devFS as WebDevFS;
-    webDevFS.webAssetServer.canvasKitRendering = !webDevFS.webAssetServer.canvasKitRendering;
-    await _wipConnection?.sendCommand('Page.reload');
-    return webDevFS.webAssetServer.canvasKitRendering;
   }
 
   @override

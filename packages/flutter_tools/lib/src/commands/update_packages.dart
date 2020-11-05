@@ -27,43 +27,47 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '^0.2.0',
   'mockito': '4.1.1',  // Prevent mockito from upgrading to the source gen version.
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
-  'video_player': '0.10.6', // 0.10.7 fails a gallery smoke test for toString.
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
   'shelf': '0.7.5',
-  // nnbd
-  'async': '2.5.0-nullsafety.1',
-  'boolean_selector': '2.1.0-nullsafety.1',
-  'characters': '1.1.0-nullsafety.3',
-  'charcode': '1.2.0-nullsafety.1',
-  'clock': '1.1.0-nullsafety.1',
-  'collection': '1.15.0-nullsafety.3',
-  'fake_async': '1.2.0-nullsafety.1',
-  'js': '0.6.3-nullsafety.1',
-  'matcher': '0.12.10-nullsafety.1',
-  'meta': '1.3.0-nullsafety.4',
-  'path': '1.8.0-nullsafety.1',
-  'pedantic': '1.10.0-nullsafety.1',
-  'pool': '1.5.0-nullsafety.1',
-  'source_maps': '0.10.10-nullsafety.1',
-  'source_map_stack_trace': '2.1.0-nullsafety.2',
-  'source_span': '1.8.0-nullsafety.2',
-  'stack_trace': '1.10.0-nullsafety.4',
-  'stream_channel': '2.1.0-nullsafety.1',
-  'string_scanner': '1.1.0-nullsafety.1',
-  'term_glyph': '1.2.0-nullsafety.1',
-  'test': '1.16.0-nullsafety.5',
-  'test_api': '0.2.19-nullsafety.2',
-  'test_core': '0.3.12-nullsafety.5',
-  'typed_data': '1.3.0-nullsafety.3',
-  'vector_math': '2.1.0-nullsafety.3',
-  'platform': '3.0.0-nullsafety.2',
-  'file': '6.0.0-nullsafety.2',
-  'process': '4.0.0-nullsafety.2',
-  'process_runner': '4.0.0-nullsafety.1',
+  // Dart team owned nnbd deps
+  'async': '2.5.0-nullsafety.3',
+  'boolean_selector': '2.1.0-nullsafety.3',
+  'characters': '1.1.0-nullsafety.5',
+  'charcode': '1.2.0-nullsafety.3',
+  'clock': '1.1.0-nullsafety.3',
+  'collection': '1.15.0-nullsafety.5',
+  'fake_async': '1.2.0-nullsafety.3',
+  'js': '0.6.3-nullsafety.3',
+  'matcher': '0.12.10-nullsafety.3',
+  'meta': '1.3.0-nullsafety.6',
+  'path': '1.8.0-nullsafety.3',
+  'pedantic': '1.10.0-nullsafety.3',
+  'pool': '1.5.0-nullsafety.3',
+  'source_maps': '0.10.10-nullsafety.3',
+  'source_map_stack_trace': '2.1.0-nullsafety.4',
+  'source_span': '1.8.0-nullsafety.4',
+  'stack_trace': '1.10.0-nullsafety.6',
+  'stream_channel': '2.1.0-nullsafety.3',
+  'string_scanner': '1.1.0-nullsafety.3',
+  'term_glyph': '1.2.0-nullsafety.3',
+  'test': '1.16.0-nullsafety.9',
+  'test_api': '0.2.19-nullsafety.6',
+  'test_core': '0.3.12-nullsafety.9',
+  'typed_data': '1.3.0-nullsafety.5',
+  'vector_math': '2.1.0-nullsafety.5',
+  // Flutter team owned nnbd deps
+  'platform': '3.0.0-nullsafety.4',
+  'file': '6.0.0-nullsafety.4',
+  'process': '4.0.0-nullsafety.4',
+  'process_runner': '4.0.0-nullsafety.5',
   // https://github.com/dart-lang/build/issues/2772
   'build_runner_core': '5.2.0',
   'build_modules': '2.10.1',
-  'path_provider': '1.6.14'
+  'path_provider': '1.6.14',
+  'video_player': '2.0.0-nullsafety.2',
+  'url_launcher': '6.0.0-nullsafety.1',
+  'connectivity': '3.0.0-nullsafety.1',
+  'device_info': '2.0.0-nullsafety.1',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -329,7 +333,6 @@ class UpdatePackagesCommand extends FlutterCommand {
           context: PubContext.updatePackages,
           directory: tempDir.path,
           upgrade: true,
-          checkLastModified: false,
           offline: offline,
           flutterRootOverride: upgrade
             ? temporaryFlutterSdk.path
@@ -412,7 +415,6 @@ class UpdatePackagesCommand extends FlutterCommand {
       await pub.get(
         context: PubContext.updatePackages,
         directory: dir.path,
-        checkLastModified: false,
         offline: offline,
         generateSyntheticPackage: false,
       );

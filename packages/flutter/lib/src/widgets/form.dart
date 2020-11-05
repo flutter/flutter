@@ -113,7 +113,7 @@ class Form extends StatefulWidget {
   ///
   /// This is the root of the widget hierarchy that contains this form.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// Enables the form to veto attempts by the user to dismiss the [ModalRoute]
@@ -137,7 +137,7 @@ class Form extends StatefulWidget {
   /// Used to enable/disable form fields auto validation and update their error
   /// text.
   ///
-  /// {@macro flutter.widgets.form.autovalidateMode}
+  /// {@macro flutter.widgets.FormField.autovalidateMode}
   final AutovalidateMode autovalidateMode;
 
   /// Used to enable/disable form fields auto validation and update their error
@@ -380,7 +380,7 @@ class FormField<T> extends StatefulWidget {
   /// Used to enable/disable this form field auto validation and update its
   /// error text.
   ///
-  /// {@template flutter.widgets.form.autovalidateMode}
+  /// {@template flutter.widgets.FormField.autovalidateMode}
   /// If [AutovalidateMode.onUserInteraction] this form field will only
   /// auto-validate after its content changes, if [AutovalidateMode.always] it
   /// will auto validate even without user interaction and
@@ -484,7 +484,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   /// Sets the value associated with this form field.
   ///
-  /// This method should be only be called by subclasses that need to update
+  /// This method should only be called by subclasses that need to update
   /// the form field value due to state changes identified during the widget
   /// build phase, when calling `setState` is prohibited. In all other cases,
   /// the value should be set by a call to [didChange], which ensures that
