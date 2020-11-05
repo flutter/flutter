@@ -575,7 +575,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMediaQuery(context));
 
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     SliderThemeData sliderTheme = SliderTheme.of(context);
 
     // If the widget has active or inactive colors specified, then we plug them
@@ -720,9 +720,9 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
       state: state,
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
-      platform: Theme.of(context)!.platform,
+      platform: Theme.of(context).platform,
     );
   }
 
@@ -741,9 +741,9 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
-      ..textDirection = Directionality.of(context)!
+      ..textDirection = Directionality.of(context)
       ..semanticFormatterCallback = semanticFormatterCallback
-      ..platform = Theme.of(context)!.platform;
+      ..platform = Theme.of(context).platform;
   }
 }
 

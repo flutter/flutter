@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({ Key? key }) : super(key: key);
@@ -279,7 +280,7 @@ void main() {
               textColor: textColor,
               child: Builder(
                 builder: (BuildContext context) {
-                  theme = Theme.of(context)!;
+                  theme = Theme.of(context);
                   return ListTile(
                     enabled: enabled,
                     selected: selected,
@@ -1173,10 +1174,10 @@ void main() {
     );
     await tester.pump(); // Let the focus take effect.
 
-    final FocusNode? tileNode = Focus.of(childKey.currentContext!);
-    tileNode!.requestFocus();
+    final FocusNode tileNode = Focus.of(childKey.currentContext!);
+    tileNode.requestFocus();
     await tester.pump(); // Let the focus take effect.
-    expect(Focus.of(childKey.currentContext!, nullOk: true)!.hasPrimaryFocus, isTrue);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
 
     expect(tileNode.hasPrimaryFocus, isTrue);
     await tester.pumpWidget(
@@ -1197,7 +1198,7 @@ void main() {
     );
 
     expect(tester.binding.focusManager.primaryFocus, isNot(equals(tileNode)));
-    expect(Focus.of(childKey.currentContext!, nullOk: true)!.hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
   });
 
   testWidgets('ListTile can autofocus unless disabled.', (WidgetTester tester) async {
@@ -1222,7 +1223,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext!, nullOk: true)!.hasPrimaryFocus, isTrue);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1243,7 +1244,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext!, nullOk: true)!.hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
   });
 
   testWidgets('ListTile is focusable and has correct focus color', (WidgetTester tester) async {
@@ -1711,5 +1712,126 @@ void main() {
     final RenderBox renderBox = tester.renderObject(find.byKey(key));
     expect(renderBox.size.width, equals(0.0));
     expect(renderBox.size.height, equals(0.0));
+  });
+
+  group('feedback', () {
+    late FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback.dispose();
+    });
+
+    testWidgets('ListTile with disabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: ListTile(
+              title: const Text('Title'),
+              onTap: () {},
+              enableFeedback: enableFeedback,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(ListTile));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('ListTile with enabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: ListTile(
+              title: const Text('Title'),
+              onTap: () {},
+              enableFeedback: enableFeedback,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(ListTile));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('ListTile with enabled feedback by default', (WidgetTester tester) async {
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: ListTile(
+              title: const Text('Title'),
+              onTap: () {},
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(ListTile));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('ListTile with disabled feedback using ListTileTheme', (WidgetTester tester) async {
+      const bool enableFeedbackTheme = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: ListTileTheme(
+              enableFeedback: enableFeedbackTheme,
+              child: ListTile(
+                title: const Text('Title'),
+                onTap: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(ListTile));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('ListTile.enableFeedback overrides ListTileTheme.enableFeedback', (WidgetTester tester) async {
+      const bool enableFeedbackTheme = false;
+      const bool enableFeedback = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: ListTileTheme(
+              enableFeedback: enableFeedbackTheme,
+              child: ListTile(
+                enableFeedback: enableFeedback,
+                title: const Text('Title'),
+                onTap: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(ListTile));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
   });
 }

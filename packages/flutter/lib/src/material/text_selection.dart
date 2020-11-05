@@ -68,7 +68,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final Color handleColor = TextSelectionTheme.of(context).selectionHandleColor ?? theme.colorScheme.primary;
     final Widget handle = SizedBox(
       width: _kHandleSize,
@@ -1034,7 +1034,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO(hansmuller): Should be colorScheme.onSurface
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final bool isDark = theme.colorScheme.brightness == Brightness.dark;
     final Color primary = isDark ? Colors.white : Colors.black87;
 

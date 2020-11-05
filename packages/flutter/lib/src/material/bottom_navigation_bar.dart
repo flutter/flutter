@@ -823,7 +823,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     assert(localizations != null);
 
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 
     final TextStyle effectiveSelectedLabelStyle =
@@ -940,7 +940,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           child: CustomPaint(
             painter: _RadialPainter(
               circles: _circles.toList(),
-              textDirection: Directionality.of(context)!,
+              textDirection: Directionality.of(context),
             ),
             child: Material( // Splashes.
               type: MaterialType.transparency,

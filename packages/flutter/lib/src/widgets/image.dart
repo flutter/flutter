@@ -51,7 +51,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? s
   return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
     devicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
-    locale: Localizations.localeOf(context, nullOk: true),
+    locale: Localizations.maybeLocaleOf(context),
     textDirection: Directionality.maybeOf(context),
     size: size,
     platform: defaultTargetPlatform,
@@ -726,7 +726,7 @@ class Image extends StatefulWidget {
   /// be passed as the `child` argument to the [loadingBuilder]. For example,
   /// consider the following builders used in conjunction:
   ///
-  /// {@template flutter.widgets.image.chainedBuildersExample}
+  /// {@template flutter.widgets.Image.frameBuilder.chainedBuildersExample}
   /// ```dart
   /// Image(
   ///   ...
@@ -818,7 +818,7 @@ class Image extends StatefulWidget {
   /// builder will contain the _result_ of the [frameBuilder]. For example,
   /// consider the following builders used in conjunction:
   ///
-  /// {@macro flutter.widgets.image.chainedBuildersExample}
+  /// {@macro flutter.widgets.Image.frameBuilder.chainedBuildersExample}
   ///
   /// {@tool dartpad --template=stateless_widget_material}
   ///

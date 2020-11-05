@@ -186,7 +186,10 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
       return <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'chrome',
-        'goog:loggingPrefs': <String, String>{ async_io.LogType.performance: 'ALL'},
+        'goog:loggingPrefs': <String, String>{
+          async_io.LogType.browser: 'INFO',
+          async_io.LogType.performance: 'ALL',
+        },
         'chromeOptions': <String, dynamic>{
           if (chromeBinary != null)
             'binary': chromeBinary,
