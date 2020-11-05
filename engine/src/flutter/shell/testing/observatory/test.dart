@@ -63,7 +63,8 @@ Future<Null> testHttpProtocolRequest(Uri uri) async {
   final HttpClientRequest request = await client.getUrl(uri);
   final HttpClientResponse response = await request.close();
   Expect.equals(response.statusCode, 200);
-  final Map<String, dynamic> responseAsMap = json.decode(await readResponse(response));
+  final Map<String, dynamic> responseAsMap =
+      json.decode(await readResponse(response)) as Map<String, dynamic>;
   Expect.equals(responseAsMap['jsonrpc'], '2.0');
   client.close();
 }
@@ -80,7 +81,7 @@ Future<Null> testWebSocketProtocolRequest(Uri uri) async {
     Expect.notExecuted();
   } catch (e) {
     // Method not found.
-    Expect.equals(e['code'], -32601);
+    Expect.equals((e as Map<String, dynamic>)['code'], -32601);
   }
 }
 
@@ -105,22 +106,26 @@ Future<Null> testStartPaused(Uri uri) async {
       isolateStartedId: isolateStartedId,
       isolatePausedId: isolatePausedId,
       isolateResumeId: isolateResumeId);
-  await serviceClient.invokeRPC('streamListen', <String, String>{ 'streamId': 'Isolate'});
-  await serviceClient.invokeRPC('streamListen', <String, String>{ 'streamId': 'Debug'});
+  await serviceClient
+      .invokeRPC('streamListen', <String, String>{'streamId': 'Isolate'});
+  await serviceClient
+      .invokeRPC('streamListen', <String, String>{'streamId': 'Debug'});
 
   final Map<String, dynamic> response = await serviceClient.invokeRPC('getVM');
   Expect.equals(response['type'], 'VM');
   String isolateId;
-  if (response['isolates'].length > 0) {
-    isolateId = response['isolates'][0]['id'];
+  final List<dynamic> isolates = response['isolates'] as List<dynamic>;
+  if (isolates.isNotEmpty) {
+    isolateId = (isolates[0] as Map<String, String>)['id']!;
   } else {
     // Wait until isolate starts.
-    isolateId = await isolateStartedId.future;
+    isolateId = await isolateStartedId.future as String;
   }
 
   // Grab the isolate.
-  Map<String, dynamic> isolate = await serviceClient.invokeRPC('getIsolate', <String, String>{
-      'isolateId': isolateId,
+  Map<String, dynamic> isolate =
+      await serviceClient.invokeRPC('getIsolate', <String, String>{
+    'isolateId': isolateId,
   });
   Expect.equals(isolate['type'], 'Isolate');
   Expect.isNotNull(isolate['pauseEvent']);
@@ -130,7 +135,7 @@ Future<Null> testStartPaused(Uri uri) async {
     isolate = await serviceClient.invokeRPC('getIsolate', <String, String>{
       'isolateId': isolateId,
     });
-   }
+  }
   // Verify that it is paused at start.
   Expect.equals(isolate['pauseEvent']['kind'], 'PauseStart');
 
@@ -140,8 +145,8 @@ Future<Null> testStartPaused(Uri uri) async {
   });
   // Wait until the isolate has resumed.
   await isolateResumeId.future;
-  final Map<String, dynamic> resumedResponse = await serviceClient.invokeRPC(
-      'getIsolate', <String, String>{'isolateId': isolateId});
+  final Map<String, dynamic> resumedResponse = await serviceClient
+      .invokeRPC('getIsolate', <String, String>{'isolateId': isolateId});
   Expect.equals(resumedResponse['type'], 'Isolate');
   Expect.isNotNull(resumedResponse['pauseEvent']);
   Expect.equals(resumedResponse['pauseEvent']['kind'], 'Resume');
@@ -161,11 +166,14 @@ final List<TestFunction> startPausedTests = <TestFunction>[
 ];
 
 Future<bool> runTests(ShellLauncher launcher, List<TestFunction> tests) async {
-  final ShellProcess process = await launcher.launch();
+  final ShellProcess? process = await launcher.launch();
+  if (process == null) {
+    return false;
+  }
   final Uri uri = await process.waitForObservatory();
   try {
     for (int i = 0; i < tests.length; i++) {
-      print('Executing test ${i+1}/${tests.length}');
+      print('Executing test ${i + 1}/${tests.length}');
       await tests[i](uri);
     }
   } catch (e) {
@@ -179,24 +187,19 @@ Future<bool> runTests(ShellLauncher launcher, List<TestFunction> tests) async {
 Future<Null> main(List<String> args) async {
   if (args.length < 2) {
     print('Usage: dart ${Platform.script} '
-          '<sky_shell_executable> <main_dart> ...');
+        '<sky_shell_executable> <main_dart> ...');
     return;
   }
   final String shellExecutablePath = args[0];
   final String mainDartPath = args[1];
-  final List<String> extraArgs = args.length <= 2 ? <String>[] : args.sublist(2);
+  final List<String> extraArgs =
+      args.length <= 2 ? <String>[] : args.sublist(2);
 
   final ShellLauncher launcher =
-      ShellLauncher(shellExecutablePath,
-                        mainDartPath,
-                        false,
-                        extraArgs);
+      ShellLauncher(shellExecutablePath, mainDartPath, false, extraArgs);
 
   final ShellLauncher startPausedlauncher =
-      ShellLauncher(shellExecutablePath,
-                        mainDartPath,
-                        true,
-                        extraArgs);
+      ShellLauncher(shellExecutablePath, mainDartPath, true, extraArgs);
 
   await runTests(launcher, basicTests);
   await runTests(startPausedlauncher, startPausedTests);

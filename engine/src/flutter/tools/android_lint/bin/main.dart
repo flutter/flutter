@@ -102,7 +102,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
   if (argResults['html']) {
     lintArgs.addAll(<String>['--html', argResults['out']]);
   }
-  final String javaHome = await getJavaHome();
+  final String? javaHome = await getJavaHome();
   final Process lintProcess = await processManager.start(
     lintArgs,
     environment: javaHome != null
@@ -165,7 +165,7 @@ ArgParser setupOptions() {
 /// On macOS, we can try to find Java 1.8.
 ///
 /// Otherwise, default to whatever JAVA_HOME is already.
-Future<String> getJavaHome() async {
+Future<String?> getJavaHome() async {
   if (Platform.isMacOS) {
     final ProcessResult result = await processManager.run(
       <String>['/usr/libexec/java_home', '-v', '1.8', '-F'],
