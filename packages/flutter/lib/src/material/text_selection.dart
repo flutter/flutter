@@ -322,7 +322,7 @@ class TextSelectionToolbar extends StatelessWidget {
 
   // Build the default Android Material text selection menu toolbar.
   static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
-    return _MaterialTextSelectionToolbarContainer(
+    return _TextSelectionToolbarContainer(
       child: child,
     );
   }
@@ -921,11 +921,10 @@ class _TextSelectionToolbarItemsLayoutRenderBox extends RenderBox with Container
   }
 }
 
-// TODO(justinmc): Rename with no Material in name.
 // The Material-styled toolbar outline. Fill it with any widgets you want. No
 // overflow ability.
-class _MaterialTextSelectionToolbarContainer extends StatelessWidget {
-  const _MaterialTextSelectionToolbarContainer({
+class _TextSelectionToolbarContainer extends StatelessWidget {
+  const _TextSelectionToolbarContainer({
     Key? key,
     required this.child,
   }) : super(key: key);
