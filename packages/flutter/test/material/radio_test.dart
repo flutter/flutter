@@ -748,18 +748,27 @@ void main() {
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('Radio active disabled color can be set using stateful color', (WidgetTester tester) async {
-    const Color activeEnabledColor = Color(0xFF000001);
-    const Color activeDisabledColor = Color(0xFF000002);
+  testWidgets('Radio button fill color resolves in enabled/disabled states', (WidgetTester tester) async {
+    const Color activeEnabledFillColor = Color(0xFF000001);
+    const Color activeDisabledFillColor = Color(0xFF000002);
+    const Color inactiveEnabledFillColor = Color(0xFF000003);
+    const Color inactiveDisabledFillColor = Color(0xFF000004);
 
-    Color getActiveColor(Set<MaterialState> states) {
+    Color getFillColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        return activeDisabledColor;
+        if (states.contains(MaterialState.selected)) {
+          return activeDisabledFillColor;
+        }
+        return inactiveDisabledFillColor;
       }
-      return activeEnabledColor;
+      if (states.contains(MaterialState.selected)) {
+        return activeEnabledFillColor;
+      }
+      return inactiveEnabledFillColor;
     }
 
-    final Color activeColor = MaterialStateColor.resolveWith(getActiveColor);
+    final MaterialStateProperty<Color> fillColor =
+      MaterialStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     const Key radioKey = Key('radio');
@@ -775,7 +784,7 @@ void main() {
                 child: Radio<int>(
                   key: radioKey,
                   value: 0,
-                  activeColor: activeColor,
+                  fillColor: fillColor,
                   onChanged: enabled ? (int? newValue) {
                     setState(() {
                       groupValue = newValue;
@@ -800,8 +809,8 @@ void main() {
         ..rect(
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-        ..circle(color: activeEnabledColor)
-        ..circle(color: activeEnabledColor),
+        ..circle(color: activeEnabledFillColor)
+        ..circle(color: activeEnabledFillColor),
     );
 
     // Check when the radio isn't selected.
@@ -814,7 +823,7 @@ void main() {
           ..rect(
               color: const Color(0xffffffff),
               rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-          ..circle(color: const Color(0x8a000000), style: PaintingStyle.stroke, strokeWidth: 2.0)
+          ..circle(color: inactiveEnabledFillColor, style: PaintingStyle.stroke, strokeWidth: 2.0)
     );
 
     // Check when the radio is selected, but disabled.
@@ -827,30 +836,48 @@ void main() {
         ..rect(
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-        ..circle(color: activeDisabledColor)
-        ..circle(color: activeDisabledColor),
+        ..circle(color: activeDisabledFillColor)
+        ..circle(color: activeDisabledFillColor),
+    );
+
+    // Check when the radio is unselected and disabled.
+    groupValue = 1;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byKey(radioKey))),
+      paints
+        ..rect(
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..circle(color: inactiveDisabledFillColor, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
 
 
-  testWidgets('Radio active disabled color can be set using stateful color from theme', (WidgetTester tester) async {
-    const Color activeEnabledColor = Color(0xFF000001);
-    const Color activeDisabledColor = Color(0xFF000002);
+  testWidgets('Checkbox fill color resolves in hovered/focused states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'checkbox');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoveredFillColor = Color(0xFF000001);
+    const Color focusedFillColor = Color(0xFF000002);
 
-    Color getActiveColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return activeDisabledColor;
+    Color getFillColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return hoveredFillColor;
       }
-      return activeEnabledColor;
+      if (states.contains(MaterialState.focused)) {
+        return focusedFillColor;
+      }
+      return Colors.transparent;
     }
 
-    final Color activeColor = MaterialStateColor.resolveWith(getActiveColor);
+    final MaterialStateProperty<Color> fillColor =
+      MaterialStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     const Key radioKey = Key('radio');
-    Widget buildApp({required bool enabled}) {
+    Widget buildApp() {
       return MaterialApp(
-        theme: ThemeData.light().copyWith(toggleableActiveColor: activeColor),
         home: Material(
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -859,13 +886,16 @@ void main() {
                 height: 100,
                 color: Colors.white,
                 child: Radio<int>(
+                  autofocus: true,
+                  focusNode: focusNode,
                   key: radioKey,
                   value: 0,
-                  onChanged: enabled ? (int? newValue) {
+                  fillColor: fillColor,
+                  onChanged: (int? newValue) {
                     setState(() {
                       groupValue = newValue;
                     });
-                  } : null,
+                  },
                   groupValue: groupValue,
                 ),
               );
@@ -875,45 +905,34 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(enabled: true));
-
-    // Selected and enabled.
+    await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byKey(radioKey))),
       paints
         ..rect(
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-        ..circle(color: activeEnabledColor)
-        ..circle(color: activeEnabledColor),
+        ..circle(color: Colors.black12)
+        ..circle(color: focusedFillColor),
     );
 
-    // Check when the radio isn't selected.
-    groupValue = 1;
-    await tester.pumpWidget(buildApp(enabled: true));
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byKey(radioKey)));
     await tester.pumpAndSettle();
-    expect(
-        Material.of(tester.element(find.byKey(radioKey))),
-        paints
-          ..rect(
-              color: const Color(0xffffffff),
-              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-          ..circle(color: const Color(0x8a000000), style: PaintingStyle.stroke, strokeWidth: 2.0)
-    );
 
-    // Check when the radio is selected, but disabled.
-    groupValue = 0;
-    await tester.pumpWidget(buildApp(enabled: false));
-    await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byKey(radioKey))),
       paints
         ..rect(
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-        ..circle(color: activeDisabledColor)
-        ..circle(color: activeDisabledColor),
+        ..circle(color: Colors.black12)
+        ..circle(color: hoveredFillColor),
     );
   });
 }

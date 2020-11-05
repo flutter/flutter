@@ -63,6 +63,7 @@ class Checkbox extends StatefulWidget {
     required this.onChanged,
     this.mouseCursor,
     this.activeColor,
+    this.fillColor,
     this.checkColor,
     this.focusColor,
     this.hoverColor,
@@ -131,16 +132,20 @@ class Checkbox extends StatefulWidget {
   ///
   /// Defaults to [ThemeData.toggleableActiveColor].
   ///
-  /// If [activeColor] is a [MaterialStateColor], it will be resolved in the
-  /// following states:
+  /// If [fillColor] is non-null, this will be ignored.
+  final Color? activeColor;
+
+  /// The color that fills the checkbox when it is checked, in all
+  /// [MaterialState]s.
   ///
+  /// If this is provided, it will be used over [activeColor].
+  ///
+  /// Resolves in the following states:
   ///  * [MaterialState.selected].
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
-  ///
-  /// Note, the [activeColor] is only used when this [Checkbox] is selected.
-  final Color? activeColor;
+  final MaterialStateProperty<Color?>? fillColor;
 
   /// The color to use for the check icon when this checkbox is checked.
   ///
@@ -253,12 +258,25 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     if (widget.value == null || widget.value!) MaterialState.selected,
   };
 
+  MaterialStateProperty<Color> get _widgetFillColor {
+    final ThemeData themeData = Theme.of(context)!;
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return themeData.disabledColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return widget.activeColor ?? themeData.toggleableActiveColor;
+      }
+      return themeData.unselectedWidgetColor;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData? themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context)!;
     Size size;
-    switch (widget.materialTapTargetSize ?? themeData!.materialTapTargetSize) {
+    switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
         break;
@@ -266,17 +284,20 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
         size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
         break;
     }
-    size += (widget.visualDensity ?? themeData!.visualDensity).baseSizeAdjustment;
+    size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       _states,
     );
-    final Color activeColor = widget.activeColor ?? themeData!.toggleableActiveColor;
-    final Color effectiveActiveColor = MaterialStateProperty.resolveAs<Color>(
-      activeColor,
-      _states,
-    );
+    // Colors need to be resolved in selected and non selected states separately
+    // so that they can be lerped between.
+    final Set<MaterialState> activeStates = _states..add(MaterialState.selected);
+    final Set<MaterialState> inactiveStates = _states..remove(MaterialState.selected);
+    final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
+      ?? _widgetFillColor.resolve(activeStates);
+    final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
+      ?? _widgetFillColor.resolve(inactiveStates);
 
     return FocusableActionDetector(
       actions: _actionMap,
@@ -293,8 +314,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             tristate: widget.tristate,
             activeColor: effectiveActiveColor,
             checkColor: widget.checkColor ?? const Color(0xFFFFFFFF),
-            useActiveColorInDisabledState: activeColor is MaterialStateProperty<Color>,
-            inactiveColor: enabled ? themeData!.unselectedWidgetColor : themeData!.disabledColor,
+            inactiveColor: effectiveInactiveColor,
             focusColor: widget.focusColor ?? themeData.focusColor,
             hoverColor: widget.hoverColor ?? themeData.hoverColor,
             splashRadius: widget.splashRadius ?? kRadialReactionRadius,
@@ -326,7 +346,6 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     required this.additionalConstraints,
     required this.hasFocus,
     required this.hovering,
-    required this.useActiveColorInDisabledState,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(activeColor != null),
@@ -347,7 +366,6 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<bool?>? onChanged;
   final TickerProvider vsync;
   final BoxConstraints additionalConstraints;
-  final bool useActiveColorInDisabledState;
 
   @override
   _RenderCheckbox createRenderObject(BuildContext context) => _RenderCheckbox(
@@ -364,7 +382,6 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     additionalConstraints: additionalConstraints,
     hasFocus: hasFocus,
     hovering: hovering,
-    useActiveColorInDisabledState: useActiveColorInDisabledState,
   );
 
   @override
@@ -384,8 +401,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
       ..additionalConstraints = additionalConstraints
       ..vsync = vsync
       ..hasFocus = hasFocus
-      ..hovering = hovering
-      ..useActiveColorInDisabledState = useActiveColorInDisabledState;
+      ..hovering = hovering;
   }
 }
 
@@ -408,7 +424,6 @@ class _RenderCheckbox extends RenderToggleable {
     required bool hasFocus,
     required bool hovering,
     required TickerProvider vsync,
-    required this.useActiveColorInDisabledState,
   }) : _oldValue = value,
        super(
          value: value,
@@ -424,11 +439,6 @@ class _RenderCheckbox extends RenderToggleable {
          hasFocus: hasFocus,
          hovering: hovering,
        );
-
-  /// If the active color is a [MaterialStateProperty<Color>], then we should
-  /// use that in the active state instead of the inactive color (the default),
-  /// since the user may be customizing the active + disabled color.
-  bool useActiveColorInDisabledState;
 
   bool? _oldValue;
   Color checkColor;
@@ -462,9 +472,7 @@ class _RenderCheckbox extends RenderToggleable {
   // value == true or null.
   Color _colorAt(double t) {
     // As t goes from 0.0 to 0.25, animate from the inactiveColor to activeColor.
-    return onChanged == null && !useActiveColorInDisabledState
-      ? inactiveColor
-      : (t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0)!);
+    return t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0)!;
   }
 
   // White stroke used to paint the check and dash.
