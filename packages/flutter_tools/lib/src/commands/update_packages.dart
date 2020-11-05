@@ -45,14 +45,14 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'pool': '1.5.0-nullsafety.3',
   'source_maps': '0.10.10-nullsafety.3',
   'source_map_stack_trace': '2.1.0-nullsafety.4',
-  'source_span': '1.8.0-nullsafety.3',
+  'source_span': '1.8.0-nullsafety.4',
   'stack_trace': '1.10.0-nullsafety.6',
   'stream_channel': '2.1.0-nullsafety.3',
   'string_scanner': '1.1.0-nullsafety.3',
   'term_glyph': '1.2.0-nullsafety.3',
-  'test': '1.16.0-nullsafety.8',
-  'test_api': '0.2.19-nullsafety.5',
-  'test_core': '0.3.12-nullsafety.8',
+  'test': '1.16.0-nullsafety.9',
+  'test_api': '0.2.19-nullsafety.6',
+  'test_core': '0.3.12-nullsafety.9',
   'typed_data': '1.3.0-nullsafety.5',
   'vector_math': '2.1.0-nullsafety.5',
   // Flutter team owned nnbd deps
@@ -64,10 +64,10 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'build_runner_core': '5.2.0',
   'build_modules': '2.10.1',
   'path_provider': '1.6.14',
-  'video_player': '2.0.0-nullsafety.1',
-  'url_launcher': '6.0.0-nullsafety',
-  'connectivity': '3.0.0-nullsafety',
-  'device_info': '2.0.0-nullsafety',
+  'video_player': '2.0.0-nullsafety.2',
+  'url_launcher': '6.0.0-nullsafety.1',
+  'connectivity': '3.0.0-nullsafety.1',
+  'device_info': '2.0.0-nullsafety.1',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
