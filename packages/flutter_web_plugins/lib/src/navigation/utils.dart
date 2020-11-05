@@ -17,20 +17,13 @@ String extractPathname(String url) {
   return (pathname.isEmpty || pathname[0] == '/') ? pathname : '/$pathname';
 }
 
-Element? _baseElement;
+// The <base> element in the document.
+final Element? _baseElement = document.querySelector('base');
 
-/// Finds the <base> element in the document and returns its `href` attribute.
+/// Returns the `href` attribute of the <base> element in the document.
 ///
 /// Returns null if the element isn't found.
-String? getBaseElementHrefFromDom() {
-  if (_baseElement == null) {
-    _baseElement = document.querySelector('base');
-    if (_baseElement == null) {
-      return null;
-    }
-  }
-  return _baseElement!.getAttribute('href');
-}
+String? getBaseElementHrefFromDom() => _baseElement?.getAttribute('href');
 
 /// Checks that [baseHref] is set.
 ///
