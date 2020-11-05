@@ -4,14 +4,25 @@
 
 // @dart = 2.6
 
-// KEEP THIS SYNCHRONIZED WITH ../../lib/web_ui/test/channel_buffers_test.dart
+// This is identical to
+// ../../../testing/dart/channel_buffers_test.dart except for:
+//
+//  * The imports are a bit different.
+//  * The main method has been renamed testMain.
+//  * A new main method here bootstraps the web tests.
 
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
+import 'package:ui/ui.dart' as ui;
+
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+
+void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
 
 ByteData _makeByteData(String str) {
   final Uint8List list = utf8.encode(str) as Uint8List;
@@ -23,7 +34,7 @@ void _resize(ui.ChannelBuffers buffers, String name, int newSize) {
   buffers.handleMessage(_makeByteData('resize\r$name\r$newSize'));
 }
 
-void main() {
+void testMain() {
   test('push drain', () async {
     const String channel = 'foo';
     final ByteData data = _makeByteData('bar');
