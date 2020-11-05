@@ -2119,4 +2119,41 @@ void main() {
     final AssertionError error = exceptions.first as AssertionError;
     expect(error.message, contains('Only one API should be used to manage SnackBars.'));
   });
+
+  testWidgets('Scaffolds can decline SnackBars', (WidgetTester tester) async {
+    const String helloSnackBar = 'Hello SnackBar';
+    const Key tapTarget = Key('tap-target');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        registerWithMessenger: false,
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                // The above Scaffold will not receive a SnackBar from the
+                // ScaffoldMessenger.
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text(helloSnackBar),
+                  duration: Duration(seconds: 2),
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+                key: tapTarget,
+              ),
+            );
+          }
+        ),
+      ),
+    ));
+    expect(find.text(helloSnackBar), findsNothing);
+    await tester.tap(find.byKey(tapTarget));
+    expect(find.text(helloSnackBar), findsNothing);
+    await tester.pump();
+    expect(find.text(helloSnackBar), findsNothing);
+    await tester.pump(const Duration(milliseconds: 750));
+    expect(find.text(helloSnackBar), findsNothing);
+  });
 }

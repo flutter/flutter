@@ -1455,6 +1455,7 @@ class Scaffold extends StatefulWidget {
     this.drawerEdgeDragWidth,
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
+    this.registerWithMessenger =true,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
@@ -1772,6 +1773,12 @@ class Scaffold extends StatefulWidget {
   ///
   /// By default, the drag gesture is enabled.
   final bool endDrawerEnableOpenDragGesture;
+
+  /// Specifies if the Scaffold should register with the enclosing
+  /// [ScaffoldMessenger] to receive [SnackBar]s.
+  ///
+  /// Defaults to true.
+  final bool registerWithMessenger;
 
   /// Finds the [ScaffoldState] from the closest instance of this class that
   /// encloses the given context.
@@ -2749,7 +2756,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   @override
   void didChangeDependencies() {
-    // nullOk is valid here since  both the Scaffold and ScaffoldMessenger are
+    // Null is valid here since  both the Scaffold and ScaffoldMessenger are
     // currently available for managing SnackBars.
     final ScaffoldMessengerState? _currentScaffoldMessenger = ScaffoldMessenger.maybeOf(context);
     // If our ScaffoldMessenger has changed, unregister with the old one first.
@@ -2757,9 +2764,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       (_currentScaffoldMessenger == null || _scaffoldMessenger != _currentScaffoldMessenger)) {
       _scaffoldMessenger?._unregister(this);
     }
-    // Register with the current ScaffoldMessenger, if there is one.
-    _scaffoldMessenger = _currentScaffoldMessenger;
-    _scaffoldMessenger?._register(this);
+
+    if (widget.registerWithMessenger) {
+      // Register with the current ScaffoldMessenger, if there is one.
+      _scaffoldMessenger = _currentScaffoldMessenger;
+      _scaffoldMessenger?._register(this);
+    }
 
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
     final MediaQueryData mediaQuery = MediaQuery.of(context);
