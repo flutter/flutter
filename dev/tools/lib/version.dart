@@ -6,13 +6,27 @@ import 'package:meta/meta.dart';
 
 /// Possible string formats that `flutter --version` can return.
 enum VersionType {
-  // Of the form x.y.z
+  /// A stable flutter release.
+  ///
+  /// Example: '1.2.3'
   stable,
-  // Of the form x.y.z-m.n.pre
+  /// A pre-stable flutter release.
+  ///
+  /// Example: '1.2.3-4.5.pre'
   development,
-  // Of the form x.y.z-m.n.pre.commits
+  /// A master channel flutter version.
+  ///
+  /// Example: '1.2.3-4.0.pre.10'
+  ///
+  /// The last number is the number of commits past the last tagged version.
   latest,
 }
+
+final Map<VersionType, RegExp> versionPatterns = <VersionType, RegExp>{
+  VersionType.stable: RegExp(r'^(\d+)\.(\d+)\.(\d+)$'),
+  VersionType.development: RegExp(r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre$'),
+  VersionType.latest: RegExp(r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre\.(\d+)$'),
+};
 
 class Version {
   Version({
@@ -53,7 +67,7 @@ class Version {
 
     versionString = versionString.trim();
     // stable tag
-    Match match = stablePattern.firstMatch(versionString);
+    Match match = versionPatterns[VersionType.stable].firstMatch(versionString);
     if (match != null) {
       // parse stable
       final List<int> parts =
@@ -66,7 +80,7 @@ class Version {
       );
     }
     // development tag
-    match = developmentPattern.firstMatch(versionString);
+    match = versionPatterns[VersionType.development].firstMatch(versionString);
     if (match != null) {
       // parse development
       final List<int> parts =
@@ -81,7 +95,7 @@ class Version {
       );
     }
     // latest tag
-    match = latestPattern.firstMatch(versionString);
+    match = versionPatterns[VersionType.latest].firstMatch(versionString);
     if (match != null) {
       // parse latest
       final List<int> parts =
@@ -181,25 +195,6 @@ class Version {
   final int commits;
 
   final VersionType type;
-
-  /// Regular expression pattern for Flutter stable release versions.
-  ///
-  /// Example: '1.2.3'
-  static RegExp stablePattern = RegExp(r'^(\d+)\.(\d+)\.(\d+)$');
-
-  /// Regular expression pattern for Flutter pre-stable release versions.
-  ///
-  /// Example: '1.2.3-4.5.pre'
-  static RegExp developmentPattern =
-      RegExp(r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre$');
-
-  /// Regular expression pattern for Flutter master channel versions.
-  ///
-  /// Example: '1.2.3-4.0.pre.10'
-  ///
-  /// The last number is the number of commits past the last tagged version.
-  static RegExp latestPattern =
-      RegExp(r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre\.(\d+)$');
 
   @override
   String toString() {
