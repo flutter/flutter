@@ -240,7 +240,7 @@ class MockHttpServer extends Mock implements HttpServer {}
 // Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterPlatform extends FlutterPlatform {
   TestFlutterPlatform() : super(
-    buildInfo: BuildInfo.debug,
+    buildInfo: const BuildInfo(BuildMode.debug, '', treeShakeIcons: false, packagesPath: '.dart_tool/package_config.json'),
     shellPath: '/',
     precompiledDillPath: 'example.dill',
     host: InternetAddress.loopbackIPv6,
@@ -262,7 +262,7 @@ class TestFlutterPlatform extends FlutterPlatform {
 // Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestObservatoryFlutterPlatform extends FlutterPlatform {
   TestObservatoryFlutterPlatform() : super(
-    buildInfo: BuildInfo.debug,
+    buildInfo: const BuildInfo(BuildMode.debug, '', treeShakeIcons: false, packagesPath: '.dart_tool/package_config.json'),
     shellPath: '/',
     precompiledDillPath: 'example.dill',
     host: InternetAddress.loopbackIPv6,
