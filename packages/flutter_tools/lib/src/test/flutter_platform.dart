@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io; // ignore: dart_io_import;
 
 import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
@@ -125,6 +126,7 @@ String generateTestBootstrap({
   bool updateGoldens = false,
   String languageVersionHeader = '',
   bool nullSafety = false,
+  bool flutterTestDep = true,
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -142,8 +144,13 @@ import 'dart:async';
 import 'dart:convert';  // ignore: dart_convert_import
 import 'dart:io';  // ignore: dart_io_import
 import 'dart:isolate';
-
+''');
+  if (flutterTestDep) {
+    buffer.write('''
 import 'package:flutter_test/flutter_test.dart';
+''');
+  }
+  buffer.write('''
 import 'package:test_api/src/remote_listener.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -186,9 +193,13 @@ void main() {
   String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
   StreamChannel<dynamic> channel = serializeSuite(() {
     catchIsolateErrors();
-    goldenFileComparator = new LocalFileComparator(Uri.parse('$testUrl'));
-    autoUpdateGoldenFiles = $updateGoldens;
 ''');
+  if (flutterTestDep) {
+    buffer.write('''
+goldenFileComparator = LocalFileComparator(Uri.parse('$testUrl'));
+autoUpdateGoldenFiles = $updateGoldens;
+''');
+  }
   if (testConfigFile != null) {
     buffer.write('''
     return () => test_config.testExecutable(test.main);
@@ -289,23 +300,10 @@ class FlutterPlatform extends PlatformPlugin {
     // LoadSuite to emit an error, which will be presented to the user.
     // Except for the Declarer error, which is a specific test incompatibility
     // error we need to catch.
-    try {
-      final StreamChannel<dynamic> channel = loadChannel(path, platform);
-      final RunnerSuiteController controller = deserializeSuite(path, platform,
-        suiteConfig, const PluginEnvironment(), channel, message);
-      return await controller.suite;
-    } on Exception catch (err) {
-      /// Rethrow a less confusing error if it is a test incompatibility.
-      if (err.toString().contains("type 'Declarer' is not a subtype of type 'Declarer'")) {
-        throw UnsupportedError('Package incompatibility between flutter and test packages:\n'
-          '  * flutter is incompatible with test <1.4.0.\n'
-          '  * flutter is incompatible with mockito <4.0.0\n'
-          "To fix this error, update test to at least '^1.4.0' and mockito to at least '^4.0.0'\n"
-        );
-      }
-      // Guess it was a different error.
-      rethrow;
-    }
+    final StreamChannel<dynamic> channel = loadChannel(path, platform);
+    final RunnerSuiteController controller = deserializeSuite(path, platform,
+      suiteConfig, const PluginEnvironment(), channel, message);
+    return controller.suite;
   }
 
   @override
@@ -457,7 +455,7 @@ class FlutterPlatform extends PlatformPlugin {
       finalizers.add(() async {
         if (subprocessActive) {
           globals.printTrace('test $ourTestCount: ensuring end-of-process for shell');
-          process.kill();
+          process.kill(io.ProcessSignal.sigkill);
           final int exitCode = await process.exitCode;
           subprocessActive = false;
           if (!controllerSinkClosed && exitCode != -15) {
@@ -722,6 +720,7 @@ class FlutterPlatform extends PlatformPlugin {
         file,
         _packageConfig[flutterProject?.manifest?.appName],
       ),
+      flutterTestDep: _packageConfig['flutter_test'] != null,
     );
   }
 

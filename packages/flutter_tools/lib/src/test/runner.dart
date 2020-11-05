@@ -50,6 +50,8 @@ abstract class FlutterTestRunner {
     String randomSeed,
     bool nullAssertions = false,
     @required BuildInfo buildInfo,
+    String reporter,
+    String timeout,
   });
 }
 
@@ -84,6 +86,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String randomSeed,
     bool nullAssertions = false,
     @required BuildInfo buildInfo,
+    String reporter,
+    String timeout,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
@@ -100,7 +104,9 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       if (machine)
         ...<String>['-r', 'json']
       else
-        ...<String>['-r', 'compact'],
+        ...<String>['-r', reporter ?? 'compact'],
+      if (timeout != null)
+        ...<String>['--timeout', timeout],
       '--concurrency=$concurrency',
       for (final String name in names)
         ...<String>['--name', name],
