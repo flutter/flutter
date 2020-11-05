@@ -332,17 +332,17 @@ abstract class BaseMouseTracker extends ChangeNotifier {
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> _hitTestResultToAnnotations(HitTestResult result) {
     assert(result != null);
     final LinkedHashMap<MouseTrackerAnnotation, Matrix4> annotations = <MouseTrackerAnnotation, Matrix4>{}
-        as LinkedHashMap<MouseTrackerAnnotation, Matrix4>;
+      as LinkedHashMap<MouseTrackerAnnotation, Matrix4>;
     for (final HitTestEntry entry in result.path) {
       final HitTestTarget target = entry.target;
-      // We should ignore the detached renderObject, otherwise, may trigger using the disposed object.
-      if (target is RenderObject) {
-        if (!target.attached)
-          continue;
+      if (target is MouseTrackerAnnotation) {
+        if (target is RenderObject) {
+          // We should ignore the detached renderObject, otherwise, may trigger using the disposed object.
+          if (!target.attached)
+            continue;
+        }
+        annotations[target as MouseTrackerAnnotation] = entry.transform!;
       }
-
-      if (target is MouseTrackerAnnotation)
-        annotations[entry.target as MouseTrackerAnnotation] = entry.transform!;
     }
     return annotations;
   }
