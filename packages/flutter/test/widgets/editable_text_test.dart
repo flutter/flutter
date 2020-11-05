@@ -4364,6 +4364,203 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb);
 
+  Future<void> testReadOnlyShortcuts(WidgetTester tester, {required String platform}) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: testText.length ~/2,
+      affinity: TextAffinity.upstream,
+    );
+    TextSelection? selection;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            readOnly: true,
+            controller: controller,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
+              selection = newSelection;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    const String clipboardContent = 'read-only';
+    await Clipboard.setData(const ClipboardData(text: clipboardContent));
+
+    // Paste
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyV,
+      ],
+      shortcutModifier: true,
+      platform: platform,
+    );
+
+    expect(selection, isNull, reason: 'on $platform');
+    expect(controller.text, equals(testText), reason: 'on $platform');
+
+    // Select All
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyA,
+      ],
+      shortcutModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection!,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: testText.length,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, equals(testText), reason: 'on $platform');
+
+    // Cut
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyX,
+      ],
+      shortcutModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection!,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: testText.length,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, equals(testText), reason: 'on $platform');
+    expect(
+      (await Clipboard.getData(Clipboard.kTextPlain))!.text,
+      equals(clipboardContent),
+      reason: 'on $platform',
+    );
+
+    // Copy
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyC,
+      ],
+      shortcutModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection!,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: testText.length,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, equals(testText), reason: 'on $platform');
+    expect(
+      (await Clipboard.getData(Clipboard.kTextPlain))!.text,
+      equals(testText),
+      reason: 'on $platform',
+    );
+
+    // Delete
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.delete,
+      ],
+      platform: platform,
+    );
+    expect(
+      selection!,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: testText.length,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, equals(testText), reason: 'on $platform');
+
+    // Backspace
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.backspace,
+      ],
+      platform: platform,
+    );
+    expect(
+      selection!,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: testText.length,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, equals(testText), reason: 'on $platform');
+  }
+
+  testWidgets('keyboard shortcuts respect read-only on android', (WidgetTester tester) async {
+    await testReadOnlyShortcuts(tester, platform: 'android');
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb);
+
+  testWidgets('keyboard shortcuts respect read-only on fuchsia', (WidgetTester tester) async {
+    await testReadOnlyShortcuts(tester, platform: 'fuchsia');
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb);
+
+  testWidgets('keyboard shortcuts respect read-only on linux', (WidgetTester tester) async {
+    await testReadOnlyShortcuts(tester, platform: 'linux');
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb);
+
+  testWidgets('keyboard shortcuts respect read-only on macos', (WidgetTester tester) async {
+    await testReadOnlyShortcuts(tester, platform: 'macos');
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb);
+
+  testWidgets('keyboard shortcuts respect read-only on windows', (WidgetTester tester) async {
+    await testReadOnlyShortcuts(tester, platform: 'windows');
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb);
+
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
     // Text with two separate words to select.
