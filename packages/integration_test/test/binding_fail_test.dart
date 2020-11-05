@@ -9,8 +9,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 
-// Assumes that the flutter command is in `$PATH`.
-const String _flutterBin = 'flutter';
+final String bat = Platform.isWindows ? '.bat' : '';
+final String _flutterBin = '../../bin/flutter$bat';
 const String _integrationResultsPrefix =
     'IntegrationTestWidgetsFlutterBinding test results:';
 const String _failureExcerpt = r'Expected: <false>\n  Actual: <true>';
