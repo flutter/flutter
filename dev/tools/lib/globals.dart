@@ -18,3 +18,9 @@ const List<String> kReleaseChannels = <String>[
   'dev',
   'master',
 ];
+
+/// Cast a dynamic to String and trim.
+String stdoutToString(dynamic input) {
+  final String str = input as String;
+  return str.trim();
+}

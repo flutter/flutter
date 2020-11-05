@@ -51,33 +51,35 @@ class Repository {
   /// Cloning a repository is time-consuming, thus the repository is not cloned
   /// until this getter is called.
   Directory get checkoutDirectory {
-    if (_checkoutDirectory == null) {
-      _checkoutDirectory = parentDirectory.childDirectory(name);
-      if (checkoutDirectory.existsSync() && !useExistingCheckout) {
-        deleteDirectory();
-      }
-      if (!checkoutDirectory.existsSync()) {
-        stdio.printTrace('Cloning $name to ${checkoutDirectory.path}...');
-        git.run(
-          <String>['clone', '--', upstream, checkoutDirectory.path],
-          'Cloning $name repo',
-          workingDirectory: parentDirectory.path,
-        );
-        if (localUpstream) {
-          // These branches must exist locally for the repo that depends on it
-          // to fetch and push to.
-          for (final String channel in globals.kReleaseChannels) {
-            git.run(
-              <String>['checkout', channel, '--'],
-              'check out branch $channel locally',
-              workingDirectory: checkoutDirectory.path,
-            );
-          }
+    if (_checkoutDirectory != null) {
+      return _checkoutDirectory;
+    }
+    _checkoutDirectory = parentDirectory.childDirectory(name);
+    if (checkoutDirectory.existsSync() && !useExistingCheckout) {
+      deleteDirectory();
+    }
+    if (!checkoutDirectory.existsSync()) {
+      stdio.printTrace('Cloning $name to ${checkoutDirectory.path}...');
+      git.run(
+        <String>['clone', '--', upstream, checkoutDirectory.path],
+        'Cloning $name repo',
+        workingDirectory: parentDirectory.path,
+      );
+      if (localUpstream) {
+        // These branches must exist locally for the repo that depends on it
+        // to fetch and push to.
+        for (final String channel in globals.kReleaseChannels) {
+          git.run(
+            <String>['checkout', channel, '--'],
+            'check out branch $channel locally',
+            workingDirectory: checkoutDirectory.path,
+          );
         }
-      } else {
-        stdio.printTrace(
-            'Using existing $name repo at ${checkoutDirectory.path}...');
       }
+    } else {
+      stdio.printTrace(
+        'Using existing $name repo at ${checkoutDirectory.path}...',
+      );
     }
     return _checkoutDirectory;
   }
@@ -148,7 +150,12 @@ class Repository {
   /// Determines if one ref is an ancestor for another.
   bool isAncestor(String possibleAncestor, String possibleDescendant) {
     final int exitcode = git.run(
-      <String>['merge-base', '--is-ancestor', possibleDescendant, possibleAncestor],
+      <String>[
+        'merge-base',
+        '--is-ancestor',
+        possibleDescendant,
+        possibleAncestor
+      ],
       'verify $possibleAncestor is a direct ancestor of $possibleDescendant.',
       allowNonZeroExitCode: true,
       workingDirectory: checkoutDirectory.path,
@@ -221,8 +228,9 @@ class Repository {
       '--version',
       '--machine',
     ]);
-    final Map<String, dynamic> versionJson =
-        jsonDecode((result.stdout as String).trim()) as Map<String, dynamic>;
+    final Map<String, dynamic> versionJson = jsonDecode(
+      globals.stdoutToString(result.stdout),
+    ) as Map<String, dynamic>;
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
 

@@ -7,6 +7,8 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import './globals.dart';
+
 /// A wrapper around git process calls that can be mocked for unit testing.
 class Git {
   Git(this.processManager) : assert(processManager != null);
@@ -20,7 +22,7 @@ class Git {
   }) {
     final ProcessResult result = _run(args, workingDirectory);
     if (result.exitCode == 0) {
-      return (result.stdout as String).trim();
+      return stdoutToString(result.stdout);
     }
     _reportFailureAndExit(args, workingDirectory, result, explanation);
     return null; // for the analyzer's sake
