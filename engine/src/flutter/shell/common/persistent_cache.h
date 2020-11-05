@@ -74,6 +74,9 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   /// Load all the SkSL shader caches in the right directory.
   std::vector<SkSLCache> LoadSkSLs();
 
+  // Return mappings for all skp's accessible through the AssetManager
+  std::vector<std::unique_ptr<fml::Mapping>> GetSkpsFromAssetManager() const;
+
   /// Set the asset manager from which PersistentCache can load SkLSs. A nullptr
   /// can be provided to clear the asset manager.
   static void SetAssetManager(std::shared_ptr<AssetManager> value);

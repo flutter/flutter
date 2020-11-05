@@ -15,6 +15,9 @@ namespace flutter {
 
 sk_sp<SkData> SerializeTypefaceWithoutData(SkTypeface* typeface, void* ctx);
 sk_sp<SkData> SerializeTypefaceWithData(SkTypeface* typeface, void* ctx);
+sk_sp<SkTypeface> DeserializeTypefaceWithoutData(const void* data,
+                                                 size_t length,
+                                                 void* ctx);
 
 // Serializes only the metadata of the image and not the underlying pixel data.
 sk_sp<SkData> SerializeImageWithoutData(SkImage* image, void* ctx);

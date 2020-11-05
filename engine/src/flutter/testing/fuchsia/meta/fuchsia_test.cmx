@@ -19,7 +19,9 @@
       "fuchsia.settings.Intl",
       "fuchsia.sysmem.Allocator",
       "fuchsia.tracing.provider.Registry",
-      "fuchsia.vulkan.loader.Loader"
+      "fuchsia.vulkan.loader.Loader",
+      "fuchsia.intl.PropertyProvider",
+      "fuchsia.fonts.Provider"
     ]
   }
 }

@@ -8,12 +8,17 @@
   "sandbox": {
     "features": [
       "deprecated-ambient-replace-as-executable",
-      "vulkan"
+      "vulkan",
+      "isolated-cache-storage",
+      "isolated-temp"
     ],
     "services": [
       "fuchsia.accessibility.semantics.SemanticsManager",
       "fuchsia.intl.PropertyProvider",
-      "fuchsia.process.Launcher"
+      "fuchsia.process.Launcher",
+      "fuchsia.vulkan.loader.Loader",
+      "fuchsia.logger.LogSink",
+      "fuchsia.sysmem.Allocator"
     ]
   }
 }

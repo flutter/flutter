@@ -26,6 +26,7 @@ class VulkanSurfacePool final {
 
   ~VulkanSurfacePool();
 
+  std::unique_ptr<VulkanSurface> CreateSurface(const SkISize& size);
   std::unique_ptr<VulkanSurface> AcquireSurface(const SkISize& size);
 
   void SubmitSurface(std::unique_ptr<SurfaceProducerSurface> surface);
@@ -48,8 +49,6 @@ class VulkanSurfacePool final {
   size_t trace_surfaces_reused_ = 0;
 
   std::unique_ptr<VulkanSurface> GetCachedOrCreateSurface(const SkISize& size);
-
-  std::unique_ptr<VulkanSurface> CreateSurface(const SkISize& size);
 
   void RecycleSurface(std::unique_ptr<VulkanSurface> surface);
 

@@ -52,6 +52,24 @@ std::unique_ptr<fml::Mapping> AssetManager::GetAsMapping(
 }
 
 // |AssetResolver|
+std::vector<std::unique_ptr<fml::Mapping>> AssetManager::GetAsMappings(
+    const std::string& asset_pattern) const {
+  std::vector<std::unique_ptr<fml::Mapping>> mappings;
+  if (asset_pattern.size() == 0) {
+    return mappings;
+  }
+  TRACE_EVENT1("flutter", "AssetManager::GetAsMappings", "pattern",
+               asset_pattern.c_str());
+  for (const auto& resolver : resolvers_) {
+    auto resolver_mappings = resolver->GetAsMappings(asset_pattern);
+    mappings.insert(mappings.end(),
+                    std::make_move_iterator(resolver_mappings.begin()),
+                    std::make_move_iterator(resolver_mappings.end()));
+  }
+  return mappings;
+}
+
+// |AssetResolver|
 bool AssetManager::IsValid() const {
   return resolvers_.size() > 0;
 }

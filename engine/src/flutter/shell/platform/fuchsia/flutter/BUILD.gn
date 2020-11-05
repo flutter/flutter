@@ -447,6 +447,7 @@ executable("flutter_runner_unittests") {
     "fuchsia_intl_unittest.cc",
     "platform_view_unittest.cc",
     "runner_unittest.cc",
+    "tests/engine_unittests.cc",
     "tests/flutter_runner_product_configuration_unittests.cc",
     "tests/vsync_recorder_unittests.cc",
     "vsync_waiter_unittests.cc",
@@ -458,6 +459,7 @@ executable("flutter_runner_unittests") {
   # The use of these dependencies is temporary and will be moved behind the
   # embedder API.
   flutter_deps = [
+    "//flutter/assets:assets",
     "//flutter/flow",
     "//flutter/lib/ui",
     "//flutter/shell/common",
