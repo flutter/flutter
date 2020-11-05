@@ -30,7 +30,7 @@ void testMain() {
       canvasSize ??= const ui.Rect.fromLTWH(0, 0, 100, 100);
       test(description, () {
         testFn(BitmapCanvas(canvasSize));
-        testFn(DomCanvas());
+        testFn(DomCanvas(domRenderer.createElement('flt-picture')));
         testFn(mockCanvas = MockEngineCanvas());
         if (whenDone != null) {
           whenDone();

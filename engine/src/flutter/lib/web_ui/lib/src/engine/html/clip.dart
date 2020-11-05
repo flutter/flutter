@@ -307,9 +307,9 @@ class PersistedPhysicalShape extends PersistedContainerSurface
     _clipElement =
         html.Element.html(svgClipPath, treeSanitizer: _NullTreeSanitizer());
     domRenderer.append(rootElement!, _clipElement!);
-    domRenderer.setElementStyle(
+    DomRenderer.setElementStyle(
         rootElement!, 'clip-path', 'url(#svgClip$_clipIdCounter)');
-    domRenderer.setElementStyle(
+    DomRenderer.setElementStyle(
         rootElement!, '-webkit-clip-path', 'url(#svgClip$_clipIdCounter)');
     final html.CssStyleDeclaration rootElementStyle = rootElement!.style;
     rootElementStyle
@@ -341,8 +341,8 @@ class PersistedPhysicalShape extends PersistedContainerSurface
       _clipElement = null;
       // Reset style on prior element since we may have switched between
       // rect/rrect and arbitrary path.
-      domRenderer.setElementStyle(rootElement!, 'clip-path', '');
-      domRenderer.setElementStyle(rootElement!, '-webkit-clip-path', '');
+      DomRenderer.setElementStyle(rootElement!, 'clip-path', '');
+      DomRenderer.setElementStyle(rootElement!, '-webkit-clip-path', '');
       _applyShape();
     } else {
       // Reuse clipElement from prior surface.
@@ -416,9 +416,9 @@ String createSvgClipDef(html.HtmlElement element, ui.Path clipPath) {
   final ui.Rect pathBounds = clipPath.getBounds();
   final String svgClipPath = _pathToSvgClipPath(clipPath,
       scaleX: 1.0 / pathBounds.right, scaleY: 1.0 / pathBounds.bottom);
-  domRenderer.setElementStyle(
+  DomRenderer.setElementStyle(
       element, 'clip-path', 'url(#svgClip$_clipIdCounter)');
-  domRenderer.setElementStyle(
+  DomRenderer.setElementStyle(
       element, '-webkit-clip-path', 'url(#svgClip$_clipIdCounter)');
   // We need to set width and height for the clipElement to cover the
   // bounds of the path since browsers such as Safari and Edge

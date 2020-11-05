@@ -172,12 +172,17 @@ class DomRenderer {
     js_util.setProperty(element, name, value);
   }
 
-  void setElementStyle(html.Element element, String name, String? value) {
+  static void setElementStyle(html.Element element, String name, String? value) {
     if (value == null) {
       element.style.removeProperty(name);
     } else {
       element.style.setProperty(name, value);
     }
+  }
+
+  static void setElementTransform(html.Element element, String transformValue) {
+    js_util.setProperty(js_util.getProperty(element, 'style'), 'transform',
+        transformValue);
   }
 
   void setText(html.Element element, String text) {

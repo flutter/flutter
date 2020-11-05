@@ -411,26 +411,40 @@ class Matrix4 {
   }
 
   bool isIdentity() =>
-      _m4storage[0] == 1.0 // col 1
-      &&
+      _m4storage[0] == 1.0 && // col 1
       _m4storage[1] == 0.0 &&
       _m4storage[2] == 0.0 &&
       _m4storage[3] == 0.0 &&
-      _m4storage[4] == 0.0 // col 2
-      &&
+      _m4storage[4] == 0.0 && // col 2
       _m4storage[5] == 1.0 &&
       _m4storage[6] == 0.0 &&
       _m4storage[7] == 0.0 &&
-      _m4storage[8] == 0.0 // col 3
-      &&
+      _m4storage[8] == 0.0 && // col 3
       _m4storage[9] == 0.0 &&
       _m4storage[10] == 1.0 &&
       _m4storage[11] == 0.0 &&
-      _m4storage[12] == 0.0 // col 4
-      &&
+      _m4storage[12] == 0.0 && // col 4
       _m4storage[13] == 0.0 &&
       _m4storage[14] == 0.0 &&
       _m4storage[15] == 1.0;
+
+  /// Whether transform is identity or simple translation using m[12,13,14].
+  ///
+  /// We check for [15] first since that will eliminate bounds checks for rest.
+  bool isIdentityOrTranslation() =>
+      _m4storage[15] == 1.0 &&
+      _m4storage[0] == 1.0 && // col 1
+          _m4storage[1] == 0.0 &&
+          _m4storage[2] == 0.0 &&
+          _m4storage[3] == 0.0 &&
+          _m4storage[4] == 0.0 && // col 2
+          _m4storage[5] == 1.0 &&
+          _m4storage[6] == 0.0 &&
+          _m4storage[7] == 0.0 &&
+          _m4storage[8] == 0.0 && // col 3
+          _m4storage[9] == 0.0 &&
+          _m4storage[10] == 1.0 &&
+          _m4storage[11] == 0.0;
 
   /// Returns the translation vector from this homogeneous transformation matrix.
   Vector3 getTranslation() {

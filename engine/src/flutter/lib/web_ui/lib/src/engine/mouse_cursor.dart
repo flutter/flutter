@@ -66,7 +66,7 @@ class MouseCursor {
   }
 
   void activateSystemCursor(String? kind) {
-    domRenderer.setElementStyle(
+    DomRenderer.setElementStyle(
       domRenderer.glassPaneElement!,
       'cursor',
       _mapKindToCssValue(kind),
