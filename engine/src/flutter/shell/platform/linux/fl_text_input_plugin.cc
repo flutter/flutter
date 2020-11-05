@@ -258,6 +258,11 @@ static FlMethodResponse* set_client(FlTextInputPlugin* self, FlValue* args) {
 
 // Shows the input method.
 static FlMethodResponse* show(FlTextInputPlugin* self) {
+  // Set the top-level window used for system input method windows.
+  GdkWindow* window =
+      gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(self->view)));
+  gtk_im_context_set_client_window(self->im_context, window);
+
   gtk_im_context_focus_in(self->im_context);
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
