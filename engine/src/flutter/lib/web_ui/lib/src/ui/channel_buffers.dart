@@ -3,141 +3,243 @@
 // found in the LICENSE file.
 
 // @dart = 2.10
+
+// This is identical to ../../../../ui/channel_buffers.dart with the
+// following exceptions:
+//
+//  * All comments except this one are removed.
+//  * _invoke2 is replaced with engine.invoke2
+//  * _printDebug is replaced with print in an assert.
+
 part of ui;
 
-class _StoredMessage {
-  _StoredMessage(this._data, this._callback);
-  final ByteData? _data;
-  ByteData? get data => _data;
-  final PlatformMessageResponseCallback _callback;
-  PlatformMessageResponseCallback get callback => _callback;
+typedef DrainChannelCallback = Future<void> Function(ByteData? data, PlatformMessageResponseCallback callback);
+
+typedef ChannelCallback = void Function(ByteData? data, PlatformMessageResponseCallback callback);
+
+class _ChannelCallbackRecord {
+  _ChannelCallbackRecord(this.callback) : zone = Zone.current;
+  final ChannelCallback callback;
+  final Zone zone;
+
+  void invoke(ByteData? dataArg, PlatformMessageResponseCallback callbackArg) {
+    engine.invoke2<ByteData?, PlatformMessageResponseCallback>(callback, zone, dataArg, callbackArg);
+  }
 }
 
-class _RingBuffer<T> {
-  final collection.ListQueue<T> _queue;
+class _StoredMessage {
+  const _StoredMessage(this.data, this.callback);
 
-  _RingBuffer(this._capacity) : _queue = collection.ListQueue<T>(_capacity);
+  final ByteData? data;
+
+  final PlatformMessageResponseCallback callback;
+}
+
+class _Channel {
+  _Channel([ this._capacity = ChannelBuffers.kDefaultBufferSize ])
+    : _queue = collection.ListQueue<_StoredMessage>(_capacity);
+
+  final collection.ListQueue<_StoredMessage> _queue;
+
   int get length => _queue.length;
-  int _capacity;
+
+  bool debugEnableDiscardWarnings = true;
+
   int get capacity => _capacity;
-  bool get isEmpty => _queue.isEmpty;
-  Function(T)? _dropItemCallback;
-  set dropItemCallback(Function(T) callback) {
-    _dropItemCallback = callback;
+  int _capacity;
+  set capacity(int newSize) {
+    _capacity = newSize;
+    _dropOverflowMessages(newSize);
   }
 
-  bool push(T val) {
-    if (_capacity <= 0) {
-      return true;
-    } else {
-      final int overflowCount = _dropOverflowItems(_capacity - 1);
-      _queue.addLast(val);
-      return overflowCount > 0;
+  bool _draining = false;
+
+  bool push(_StoredMessage message) {
+    if (!_draining && _channelCallbackRecord != null) {
+      assert(_queue.isEmpty);
+      _channelCallbackRecord!.invoke(message.data, message.callback);
+      return false;
     }
+    if (_capacity <= 0) {
+      return debugEnableDiscardWarnings;
+    }
+    final bool result = _dropOverflowMessages(_capacity - 1);
+    _queue.addLast(message);
+    return result;
   }
 
-  T? pop() {
-    return _queue.isEmpty ? null : _queue.removeFirst();
-  }
+  _StoredMessage pop() => _queue.removeFirst();
 
-  int _dropOverflowItems(int lengthLimit) {
-    int result = 0;
+  bool _dropOverflowMessages(int lengthLimit) {
+    bool result = false;
     while (_queue.length > lengthLimit) {
-      final T item = _queue.removeFirst();
-      _dropItemCallback?.call(item);
-      result += 1;
+      final _StoredMessage message = _queue.removeFirst();
+      message.callback(null); // send empty reply to the plugin side
+      result = true;
     }
     return result;
   }
 
-  int resize(int newSize) {
-    _capacity = newSize;
-    return _dropOverflowItems(newSize);
+  _ChannelCallbackRecord? _channelCallbackRecord;
+
+  void setListener(ChannelCallback callback) {
+    final bool needDrain = _channelCallbackRecord == null;
+    _channelCallbackRecord = _ChannelCallbackRecord(callback);
+    if (needDrain && !_draining)
+      _drain();
+  }
+
+  void clearListener() {
+    _channelCallbackRecord = null;
+  }
+
+  void _drain() {
+    assert(!_draining);
+    _draining = true;
+    scheduleMicrotask(_drainStep);
+  }
+
+  void _drainStep() {
+    assert(_draining);
+    if (_queue.isNotEmpty && _channelCallbackRecord != null) {
+      final _StoredMessage message = pop();
+      _channelCallbackRecord!.invoke(message.data, message.callback);
+      scheduleMicrotask(_drainStep);
+    } else {
+      _draining = false;
+    }
   }
 }
 
-typedef DrainChannelCallback = Future<void> Function(ByteData?, PlatformMessageResponseCallback);
-
 class ChannelBuffers {
+  ChannelBuffers();
+
   static const int kDefaultBufferSize = 1;
 
   static const String kControlChannelName = 'dev.flutter/channel-buffers';
-  final Map<String, _RingBuffer<_StoredMessage>?> _messages =
-      <String, _RingBuffer<_StoredMessage>?>{};
 
-  _RingBuffer<_StoredMessage> _makeRingBuffer(int size) {
-    final _RingBuffer<_StoredMessage> result = _RingBuffer<_StoredMessage>(size);
-    result.dropItemCallback = _onDropItem;
-    return result;
-  }
+  final Map<String, _Channel> _channels = <String, _Channel>{};
 
-  void _onDropItem(_StoredMessage message) {
-    message.callback(null);
-  }
-
-  bool push(String channel, ByteData? data, PlatformMessageResponseCallback callback) {
-    _RingBuffer<_StoredMessage>? queue = _messages[channel];
-    if (queue == null) {
-      queue = _makeRingBuffer(kDefaultBufferSize);
-      _messages[channel] = queue;
-    }
-    final bool didOverflow = queue.push(_StoredMessage(data, callback));
-    if (didOverflow) {
-      // TODO(aaclarke): Update this message to include instructions on how to resize
-      // the buffer once that is available to users and print in all engine builds
-      // after we verify that dropping messages isn't part of normal execution.
-      _debugPrintWarning('Overflow on channel: $channel.  '
-                  'Messages on this channel are being discarded in FIFO fashion.  '
-                  'The engine may not be running or you need to adjust '
-                  'the buffer size if of the channel.');
-    }
-    return didOverflow;
-  }
-
-  _StoredMessage? _pop(String channel) {
-    final _RingBuffer<_StoredMessage>? queue = _messages[channel];
-    final _StoredMessage? result = queue?.pop();
-    return result;
-  }
-
-  bool _isEmpty(String channel) {
-    final _RingBuffer<_StoredMessage>? queue = _messages[channel];
-    return (queue == null) ? true : queue.isEmpty;
-  }
-
-  void _resize(String channel, int newSize) {
-    _RingBuffer<_StoredMessage>? queue = _messages[channel];
-    if (queue == null) {
-      queue = _makeRingBuffer(newSize);
-      _messages[channel] = queue;
-    } else {
-      final int numberOfDroppedMessages = queue.resize(newSize);
-      if (numberOfDroppedMessages > 0) {
-        _debugPrintWarning('Dropping messages on channel "$channel" as a result of shrinking the buffer size.');
-      }
+  void push(String name, ByteData? data, PlatformMessageResponseCallback callback) {
+    final _Channel channel = _channels.putIfAbsent(name, () => _Channel());
+    if (channel.push(_StoredMessage(data, callback))) {
+      assert(() {
+        print(
+          'A message on the $name channel was discarded before it could be handled.\n'
+          'This happens when a plugin sends messages to the framework side before the '
+          'framework has had an opportunity to register a listener. See the ChannelBuffers '
+          'API documentation for details on how to configure the channel to expect more '
+          'messages, or to expect messages to get discarded:\n'
+          '  https://api.flutter.dev/flutter/dart-ui/ChannelBuffers-class.html'
+        );
+        return true;
+      }());
     }
   }
 
-  Future<void> drain(String channel, DrainChannelCallback callback) async {
-    while (!_isEmpty(channel)) {
-      final _StoredMessage message = _pop(channel)!;
+  void setListener(String name, ChannelCallback callback) {
+    final _Channel channel = _channels.putIfAbsent(name, () => _Channel());
+    channel.setListener(callback);
+  }
+
+  void clearListener(String name) {
+    final _Channel? channel = _channels[name];
+    if (channel != null)
+      channel.clearListener();
+  }
+
+  Future<void> drain(String name, DrainChannelCallback callback) async {
+    final _Channel? channel = _channels[name];
+    while (channel != null && !channel._queue.isEmpty) {
+      final _StoredMessage message = channel.pop();
       await callback(message.data, message.callback);
     }
   }
 
-  String _getString(ByteData data) {
-    final ByteBuffer buffer = data.buffer;
-    final Uint8List list = buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-    return utf8.decode(list);
+  void handleMessage(ByteData data) {
+    final Uint8List bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    if (bytes[0] == 0x07) { // 7 = value code for string
+      final int methodNameLength = bytes[1];
+      if (methodNameLength >= 254) // lengths greater than 253 have more elaborate encoding
+        throw Exception('Unrecognized message sent to $kControlChannelName (method name too long)');
+      int index = 2; // where we are in reading the bytes
+      final String methodName = utf8.decode(bytes.sublist(index, index + methodNameLength));
+      index += methodNameLength;
+      switch (methodName) {
+        case 'resize':
+          if (bytes[index] != 0x0C) // 12 = value code for list
+            throw Exception('Invalid arguments for \'resize\' method sent to $kControlChannelName (arguments must be a two-element list, channel name and new capacity)');
+          index += 1;
+          if (bytes[index] < 0x02) // We ignore extra arguments, in case we need to support them in the future, hence <2 rather than !=2.
+            throw Exception('Invalid arguments for \'resize\' method sent to $kControlChannelName (arguments must be a two-element list, channel name and new capacity)');
+          index += 1;
+          if (bytes[index] != 0x07) // 7 = value code for string
+            throw Exception('Invalid arguments for \'resize\' method sent to $kControlChannelName (first argument must be a string)');
+          index += 1;
+          final int channelNameLength = bytes[index];
+          if (channelNameLength >= 254) // lengths greater than 253 have more elaborate encoding
+            throw Exception('Invalid arguments for \'resize\' method sent to $kControlChannelName (channel name must be less than 254 characters long)');
+          index += 1;
+          final String channelName = utf8.decode(bytes.sublist(index, index + channelNameLength));
+          index += channelNameLength;
+          if (bytes[index] != 0x03) // 3 = value code for uint32
+            throw Exception('Invalid arguments for \'resize\' method sent to $kControlChannelName (second argument must be an integer in the range 0 to 2147483647)');
+          index += 1;
+          resize(channelName, data.getUint32(index, Endian.host));
+          break;
+        case 'overflow':
+          if (bytes[index] != 0x0C) // 12 = value code for list
+            throw Exception('Invalid arguments for \'overflow\' method sent to $kControlChannelName (arguments must be a two-element list, channel name and flag state)');
+          index += 1;
+          if (bytes[index] < 0x02) // We ignore extra arguments, in case we need to support them in the future, hence <2 rather than !=2.
+            throw Exception('Invalid arguments for \'overflow\' method sent to $kControlChannelName (arguments must be a two-element list, channel name and flag state)');
+          index += 1;
+          if (bytes[index] != 0x07) // 7 = value code for string
+            throw Exception('Invalid arguments for \'overflow\' method sent to $kControlChannelName (first argument must be a string)');
+          index += 1;
+          final int channelNameLength = bytes[index];
+          if (channelNameLength >= 254) // lengths greater than 253 have more elaborate encoding
+            throw Exception('Invalid arguments for \'overflow\' method sent to $kControlChannelName (channel name must be less than 254 characters long)');
+          index += 1;
+          final String channelName = utf8.decode(bytes.sublist(index, index + channelNameLength));
+          index += channelNameLength;
+          if (bytes[index] != 0x01 && bytes[index] != 0x02) // 1 = value code for true, 2 = value code for false
+            throw Exception('Invalid arguments for \'overflow\' method sent to $kControlChannelName (second argument must be a boolean)');
+          allowOverflow(channelName, bytes[index] == 0x01);
+          break;
+        default:
+          throw Exception('Unrecognized method \'$methodName\' sent to $kControlChannelName');
+      }
+    } else {
+      final List<String> parts = utf8.decode(bytes).split('\r');
+      if (parts.length == 1 + /*arity=*/2 && parts[0] == 'resize') {
+        resize(parts[1], int.parse(parts[2]));
+      } else {
+        throw Exception('Unrecognized message $parts sent to $kControlChannelName.');
+      }
+    }
   }
 
-  void handleMessage(ByteData data) {
-    final List<String> command = _getString(data).split('\r');
-    if (command.length == /*arity=*/2 + 1 && command[0] == 'resize') {
-      _resize(command[1], int.parse(command[2]));
+  void resize(String name, int newSize) {
+    _Channel? channel = _channels[name];
+    if (channel == null) {
+      channel = _Channel(newSize);
+      _channels[name] = channel;
     } else {
-      throw Exception('Unrecognized command $command sent to $kControlChannelName.');
+      channel.capacity = newSize;
     }
+  }
+
+  void allowOverflow(String name, bool allowed) {
+    assert(() {
+      _Channel? channel = _channels[name];
+      if (channel == null && allowed) {
+        channel = _Channel();
+        _channels[name] = channel;
+      }
+      channel?.debugEnableDiscardWarnings = !allowed;
+      return true;
+    }());
   }
 }
 

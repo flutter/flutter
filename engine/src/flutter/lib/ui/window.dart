@@ -696,6 +696,7 @@ class SingletonFlutterWindow extends FlutterWindow {
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
+  // TODO(ianh): deprecate once framework uses [ChannelBuffers.setListener].
   PlatformMessageCallback? get onPlatformMessage => platformDispatcher.onPlatformMessage;
   set onPlatformMessage(PlatformMessageCallback? callback) {
     platformDispatcher.onPlatformMessage = callback;

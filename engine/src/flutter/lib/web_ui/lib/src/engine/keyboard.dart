@@ -81,10 +81,6 @@ class Keyboard {
 
     final html.KeyboardEvent keyboardEvent = event;
 
-    if (EnginePlatformDispatcher.instance._onPlatformMessage == null) {
-      return;
-    }
-
     if (_shouldPreventDefault(event)) {
       event.preventDefault();
     }
