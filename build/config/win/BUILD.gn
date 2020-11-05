@@ -21,6 +21,10 @@ config("sdk") {
     # This is required for ATL to use XP-safe versions of its functions.
     "_USING_V110_SDK71_",
   ]
+
+  if (target_os == "winuwp") {
+    defines += [ "WINUWP" ]
+  }
 }
 
 # Sets the default Windows build version. This is separated because some
