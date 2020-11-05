@@ -175,6 +175,7 @@ class ToggleButtons extends StatelessWidget {
     this.selectedColor,
     this.disabledColor,
     this.fillColor,
+    this.unselectedFillColor,
     this.focusColor,
     this.highlightColor,
     this.hoverColor,
@@ -280,6 +281,14 @@ class ToggleButtons extends StatelessWidget {
   /// [ToggleButtonsThemeData.fillColor] is also null, then
   /// the fill color is null.
   final Color? fillColor;
+
+  /// The fill color for unselected toggle buttons.
+  ///
+  /// If this property is null, then
+  /// ToggleButtonTheme.of(context).unselectedFillColor is used. If
+  /// [ToggleButtonsThemeData.unselectedFillColor] is also null, then
+  /// the fill color is null.
+  final Color? unselectedFillColor;
 
   /// The color to use for filling the button when the button has input focus.
   ///
@@ -599,6 +608,7 @@ class ToggleButtons extends StatelessWidget {
             selectedColor: selectedColor,
             disabledColor: disabledColor,
             fillColor: fillColor ?? toggleButtonsTheme.fillColor,
+            unselectedFillColor: unselectedFillColor ?? toggleButtonsTheme.unselectedFillColor,
             focusColor: focusColor ?? toggleButtonsTheme.focusColor,
             highlightColor: highlightColor ?? toggleButtonsTheme.highlightColor,
             hoverColor: hoverColor ?? toggleButtonsTheme.hoverColor,
@@ -635,6 +645,7 @@ class ToggleButtons extends StatelessWidget {
     properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
     properties.add(ColorProperty('fillColor', fillColor, defaultValue: null));
+    properties.add(ColorProperty('unselectedFillColor', unselectedFillColor, defaultValue: null));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
     properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: null));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
@@ -668,6 +679,7 @@ class _ToggleButton extends StatelessWidget {
     this.selectedColor,
     this.disabledColor,
     required this.fillColor,
+    required this.unselectedFillColor,
     required this.focusColor,
     required this.highlightColor,
     required this.hoverColor,
@@ -711,8 +723,11 @@ class _ToggleButton extends StatelessWidget {
   /// If [onPressed] is null, this color will be used.
   final Color? disabledColor;
 
-  /// The color of the button's [Material].
+  /// The color of the button's [Material] if the button is selected.
   final Color? fillColor;
+
+  /// The color of the button's [Material] if the button is unselected.
+  final Color? unselectedFillColor;
 
   /// The color for the button's [Material] when it has the input focus.
   final Color? focusColor;
@@ -794,7 +809,8 @@ class _ToggleButton extends StatelessWidget {
       currentColor = color
         ?? toggleButtonsTheme.color
         ?? theme.colorScheme.onSurface.withOpacity(0.87);
-      currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
+      currentFillColor = unselectedFillColor
+        ?? theme.colorScheme.surface.withOpacity(0.0);
       currentFocusColor = focusColor
         ?? toggleButtonsTheme.focusColor
         ?? theme.colorScheme.onSurface.withOpacity(0.12);

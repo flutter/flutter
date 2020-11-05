@@ -35,6 +35,7 @@ class ToggleButtonsThemeData with Diagnosticable {
     this.selectedColor,
     this.disabledColor,
     this.fillColor,
+    this.unselectedFillColor,
     this.focusColor,
     this.highlightColor,
     this.hoverColor,
@@ -72,6 +73,9 @@ class ToggleButtonsThemeData with Diagnosticable {
 
   /// The fill color for selected toggle buttons.
   final Color? fillColor;
+
+  /// The fill color for unselected toggle buttons.
+  final Color? unselectedFillColor;
 
   /// The color to use for filling the button when the button has input focus.
   final Color? focusColor;
@@ -116,6 +120,7 @@ class ToggleButtonsThemeData with Diagnosticable {
     Color? selectedColor,
     Color? disabledColor,
     Color? fillColor,
+    Color? unselectedFillColor,
     Color? focusColor,
     Color? highlightColor,
     Color? hoverColor,
@@ -133,6 +138,7 @@ class ToggleButtonsThemeData with Diagnosticable {
       selectedColor: selectedColor ?? this.selectedColor,
       disabledColor: disabledColor ?? this.disabledColor,
       fillColor: fillColor ?? this.fillColor,
+      unselectedFillColor: unselectedFillColor ?? this.unselectedFillColor,
       focusColor: focusColor ?? this.focusColor,
       highlightColor: highlightColor ?? this.highlightColor,
       hoverColor: hoverColor ?? this.hoverColor,
@@ -157,6 +163,7 @@ class ToggleButtonsThemeData with Diagnosticable {
       selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t),
       disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
       fillColor: Color.lerp(a?.fillColor, b?.fillColor, t),
+      unselectedFillColor: Color.lerp(a?.unselectedFillColor, b?.unselectedFillColor, t),
       focusColor: Color.lerp(a?.focusColor, b?.focusColor, t),
       highlightColor: Color.lerp(a?.highlightColor, b?.highlightColor, t),
       hoverColor: Color.lerp(a?.hoverColor, b?.hoverColor, t),
@@ -178,6 +185,7 @@ class ToggleButtonsThemeData with Diagnosticable {
       selectedColor,
       disabledColor,
       fillColor,
+      unselectedFillColor,
       focusColor,
       highlightColor,
       hoverColor,
@@ -203,6 +211,7 @@ class ToggleButtonsThemeData with Diagnosticable {
         && other.selectedColor == selectedColor
         && other.disabledColor == disabledColor
         && other.fillColor == fillColor
+        && other.unselectedFillColor == unselectedFillColor
         && other.focusColor == focusColor
         && other.highlightColor == highlightColor
         && other.hoverColor == hoverColor
@@ -223,6 +232,7 @@ class ToggleButtonsThemeData with Diagnosticable {
     properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
     properties.add(ColorProperty('fillColor', fillColor, defaultValue: null));
+    properties.add(ColorProperty('unselectedFillColor', unselectedFillColor, defaultValue: null));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
     properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: null));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));

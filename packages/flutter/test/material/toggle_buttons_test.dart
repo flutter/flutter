@@ -662,6 +662,33 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
+  testWidgets('Custom button unselectedFillColor', (WidgetTester tester) async {
+    const Color customFillColor = Colors.green;
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            unselectedFillColor: customFillColor,
+            isSelected: const <bool>[false],
+            onPressed: (int index) {},
+            children: <Widget>[
+              Row(children: const <Widget>[
+                Text('First child'),
+              ]),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(RawMaterialButton),
+      matching: find.byType(Material),
+    ));
+    expect(material.color, customFillColor);
+    expect(material.type, MaterialType.button);
+  });
+
   testWidgets('Default InkWell colors - unselected', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final FocusNode focusNode = FocusNode();

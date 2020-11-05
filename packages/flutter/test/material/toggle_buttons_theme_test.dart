@@ -30,6 +30,7 @@ void main() {
     expect(themeData.selectedColor, null);
     expect(themeData.disabledColor, null);
     expect(themeData.fillColor, null);
+    expect(themeData.unselectedFillColor, null);
     expect(themeData.focusColor, null);
     expect(themeData.highlightColor, null);
     expect(themeData.hoverColor, null);
@@ -47,6 +48,7 @@ void main() {
     expect(theme.data.selectedColor, null);
     expect(theme.data.disabledColor, null);
     expect(theme.data.fillColor, null);
+    expect(theme.data.unselectedFillColor, null);
     expect(theme.data.focusColor, null);
     expect(theme.data.highlightColor, null);
     expect(theme.data.hoverColor, null);
@@ -79,6 +81,7 @@ void main() {
       selectedColor: Color(0xfffffff1),
       disabledColor: Color(0xfffffff2),
       fillColor: Color(0xfffffff3),
+      unselectedFillColor: Color(0xfffffffb),
       focusColor: Color(0xfffffff4),
       highlightColor: Color(0xfffffff5),
       hoverColor: Color(0xfffffff6),
@@ -103,6 +106,7 @@ void main() {
       'selectedColor: Color(0xfffffff1)',
       'disabledColor: Color(0xfffffff2)',
       'fillColor: Color(0xfffffff3)',
+      'unselectedFillColor: Color(0xfffffffb)',
       'focusColor: Color(0xfffffff4)',
       'highlightColor: Color(0xfffffff5)',
       'hoverColor: Color(0xfffffff6)',
@@ -343,6 +347,35 @@ void main() {
             data: const ToggleButtonsThemeData(fillColor: customFillColor),
             child: ToggleButtons(
               isSelected: const <bool>[true],
+              onPressed: (int index) {},
+              children: <Widget>[
+                Row(children: const <Widget>[
+                  Text('First child'),
+                ]),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(RawMaterialButton),
+      matching: find.byType(Material),
+    ));
+    expect(material.color, customFillColor);
+    expect(material.type, MaterialType.button);
+  });
+
+  testWidgets('Theme button unselectedFillColor', (WidgetTester tester) async {
+    const Color customFillColor = Colors.green;
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtonsTheme(
+            data: const ToggleButtonsThemeData(unselectedFillColor: customFillColor),
+            child: ToggleButtons(
+              isSelected: const <bool>[false],
               onPressed: (int index) {},
               children: <Widget>[
                 Row(children: const <Widget>[
