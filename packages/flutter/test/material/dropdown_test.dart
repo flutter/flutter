@@ -2328,7 +2328,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu open animation
     expect(value, equals('one'));
-    expect(Focus.of(tester.element(find.byKey(const ValueKey<String>('one')).last))!.hasPrimaryFocus, isTrue);
+    expect(Focus.of(tester.element(find.byKey(const ValueKey<String>('one')).last)).hasPrimaryFocus, isTrue);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.tab); // Focus 'two'
     await tester.pump();
@@ -2345,7 +2345,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the menu open animation
     expect(value, equals('two'));
     final Element element = tester.element(find.byKey(const ValueKey<String>('two')).last);
-    final FocusNode node = Focus.of(element)!;
+    final FocusNode node = Focus.of(element);
     expect(node.hasFocus, isTrue);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55320
 
@@ -2392,7 +2392,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu open animation
     expect(value, equals(1));
-    expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(1)).last))!.hasPrimaryFocus, isTrue);
+    expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(1)).last)).hasPrimaryFocus, isTrue);
 
     for (int i = 0; i < 41; ++i) {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab); // Move to the next one.
@@ -2408,7 +2408,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the menu open animation
     expect(value, equals(42));
     final Element element = tester.element(find.byKey(const ValueKey<int>(42)).last);
-    final FocusNode node = Focus.of(element)!;
+    final FocusNode node = Focus.of(element);
     expect(node.hasFocus, isTrue);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55320
 
@@ -2454,14 +2454,14 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
     expect(value, equals(1));
-    expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(1)).last))!.hasPrimaryFocus, isTrue);
+    expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(1)).last)).hasPrimaryFocus, isTrue);
 
     // Move to an item very far down the menu.
     for (int i = 0; i < 90; ++i) {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab); // Move to the next one.
       await tester.pumpAndSettle(); // Wait for it to animate the menu.
     }
-    expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(91)).last))!.hasPrimaryFocus, isTrue);
+    expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(91)).last)).hasPrimaryFocus, isTrue);
 
     // Scroll back to the top using touch, and make sure we end up there.
     final Finder menu = find.byWidgetPredicate((Widget widget) {
@@ -2483,7 +2483,7 @@ void main() {
 
     // Scrolling to the top again has removed the one the focus was on from the
     // tree, causing it to lose focus.
-    expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(91)).last))!.hasPrimaryFocus, isFalse);
+    expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(91)).last)).hasPrimaryFocus, isFalse);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55320
 
   testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {

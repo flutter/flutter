@@ -134,9 +134,7 @@ void main() {
           '--args',
           const <String>[
             '--enable-dart-profiling',
-            '--enable-service-port-fallback',
             '--disable-service-auth-codes',
-            '--observatory-port=53781',
           ].join(' ')
         ])
       );
@@ -179,7 +177,7 @@ void main() {
             command: <String>[...kRunReleaseArgs, '-showBuildSettings'],
             duration: Duration(minutes: 5), // this is longer than the timeout of 1 minute.
           ));
-        // The second call succeedes and is made after the first times out.
+        // The second call succeeds and is made after the first times out.
         processManager.addCommand(
           const FakeCommand(
             command: <String>[...kRunReleaseArgs, '-showBuildSettings'],
@@ -197,9 +195,7 @@ void main() {
             '--args',
             const <String>[
               '--enable-dart-profiling',
-              '--enable-service-port-fallback',
               '--disable-service-auth-codes',
-              '--observatory-port=53781',
             ].join(' ')
           ])
         );
@@ -272,9 +268,7 @@ void main() {
           '--args',
           const <String>[
             '--enable-dart-profiling',
-            '--enable-service-port-fallback',
             '--disable-service-auth-codes',
-            '--observatory-port=53781',
           ].join(' ')
         ])
       );
@@ -350,7 +344,6 @@ IOSDevice setUpIOSDevice({
     ),
     cpuArchitecture: DarwinArch.arm64,
     interfaceType: IOSDeviceInterface.usb,
-    vmServiceConnectUri: (String string, {Log log}) async => MockVmService(),
   );
 }
 

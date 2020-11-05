@@ -309,7 +309,7 @@ void main() {
     final Offset helloPosition2 = tester.getCenter(find.text('HELLO'));
     expect(helloPosition1.dx, lessThan(helloPosition2.dx));
     expect(helloPosition1.dy, helloPosition2.dy);
-    expect(Theme.of(tester.element(find.text('HELLO')))!.platform, TargetPlatform.iOS);
+    expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.iOS);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -325,7 +325,7 @@ void main() {
     //     frame in which the theme animation ends.
     //  3. End all the other animations.
     expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
-    expect(Theme.of(tester.element(find.text('HELLO')))!.platform, TargetPlatform.android);
+    expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.android);
     final Offset helloPosition3 = tester.getCenter(find.text('HELLO'));
     expect(helloPosition3, helloPosition2);
     expect(find.text('PUSH'), findsOneWidget);
@@ -365,7 +365,7 @@ void main() {
     final Offset helloPosition6 = tester.getCenter(find.text('HELLO'));
     expect(helloPosition5.dx, lessThan(helloPosition6.dx));
     expect(helloPosition5.dy, helloPosition6.dy);
-    expect(Theme.of(tester.element(find.text('HELLO')))!.platform, TargetPlatform.macOS);
+    expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.macOS);
   });
 
   testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
