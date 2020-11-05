@@ -90,11 +90,17 @@ class Switch extends StatefulWidget {
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
         super(key: key);
 
-  /// Creates a [CupertinoSwitch] if the target platform is iOS, creates a
-  /// material design switch otherwise.
+  /// Creates an adaptive [Switch] based on whether the target platform is iOS
+  /// or macOS, following Material design's
+  /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
   ///
-  /// If a [CupertinoSwitch] is created, the following parameters are
-  /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
+  /// On iOS and macOS, this constructor creates a [CupertinoSwitch], which has
+  /// matching functionality and presentation as Material switches, and are the
+  /// graphics expected on iOS. On other platforms, this creates a Material
+  /// design [Switch].
+  ///
+  /// If a [CupertinoSwitch] is created, the following parameters are ignored:
+  /// [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
   /// [activeThumbImage], [onActiveThumbImageError], [inactiveThumbImage],
   /// [onInactiveThumbImageError], [materialTapTargetSize].
   ///
