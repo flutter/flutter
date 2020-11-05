@@ -318,5 +318,4 @@ class BrowserPlatformLocation extends PlatformLocation {
 
   @override
   String? getBaseHref() => getBaseElementHrefFromDom();
-  // String getBaseHref() => html.document.baseUri;
 }
