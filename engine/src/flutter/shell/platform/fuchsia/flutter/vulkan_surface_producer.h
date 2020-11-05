@@ -35,13 +35,15 @@ class VulkanSurfaceProducer final : public SurfaceProducer,
   std::unique_ptr<SurfaceProducerSurface> ProduceSurface(
       const SkISize& size) override;
 
+  sk_sp<SkSurface> ProduceOffscreenSurface(const SkISize& size);
+
   // |SurfaceProducer|
   void SubmitSurface(std::unique_ptr<SurfaceProducerSurface> surface) override;
 
   void OnSurfacesPresented(
       std::vector<std::unique_ptr<SurfaceProducerSurface>> surfaces);
 
-  GrDirectContext* gr_context() { return context_.get(); }
+  GrDirectContext* gr_context() const { return context_.get(); }
 
  private:
   // VulkanProvider

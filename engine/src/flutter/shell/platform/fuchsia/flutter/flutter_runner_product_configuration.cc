@@ -33,6 +33,11 @@ FlutterRunnerProductConfiguration::FlutterRunnerProductConfiguration(
     if (val.IsBool())
       intercept_all_input_ = val.GetBool();
   }
+  if (document.HasMember("enable_shader_warmup")) {
+    auto& val = document["enable_shader_warmup"];
+    if (val.IsBool())
+      enable_shader_warmup_ = val.GetBool();
+  }
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
   if (document.HasMember("use_legacy_renderer")) {
     auto& val = document["use_legacy_renderer"];

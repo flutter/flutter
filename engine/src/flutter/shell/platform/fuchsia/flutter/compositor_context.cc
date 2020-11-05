@@ -145,7 +145,13 @@ CompositorContext::CompositorContext(
     std::shared_ptr<flutter::SceneUpdateContext> scene_update_context)
     : session_connection_(session_connection),
       surface_producer_(surface_producer),
-      scene_update_context_(scene_update_context) {}
+      scene_update_context_(scene_update_context) {
+  SkISize size = SkISize::Make(1024, 600);
+  skp_warmup_surface_ = surface_producer_.ProduceOffscreenSurface(size);
+  if (!skp_warmup_surface_) {
+    FML_LOG(ERROR) << "SkSurface::MakeRenderTarget returned null";
+  }
+}
 
 CompositorContext::~CompositorContext() = default;
 
@@ -162,6 +168,11 @@ CompositorContext::AcquireFrame(
       *this, gr_context, canvas, view_embedder, root_surface_transformation,
       instrumentation_enabled, surface_supports_readback, raster_thread_merger,
       session_connection_, surface_producer_, scene_update_context_);
+}
+
+void CompositorContext::WarmupSkp(const sk_sp<SkPicture> picture) {
+  skp_warmup_surface_->getCanvas()->drawPicture(picture);
+  surface_producer_.gr_context()->flush();
 }
 
 }  // namespace flutter_runner
