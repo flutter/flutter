@@ -326,6 +326,21 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     _child = widget.builder(context, _scrollController);
   }
 
+  @override
+  void didUpdateWidget(DraggableScrollableSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.builder != widget.builder) {
+      _child = widget.builder(context, _scrollController);
+    }
+
+    _extent = _DraggableSheetExtent(
+      minExtent: widget.minChildSize,
+      maxExtent: widget.maxChildSize,
+      initialExtent: widget.initialChildSize,
+      listener: _setExtent,
+    );
+  }
+
   void _setExtent() {
     setState(() {
       // _extent has been updated when this is called.
