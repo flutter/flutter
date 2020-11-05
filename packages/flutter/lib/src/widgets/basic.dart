@@ -5369,6 +5369,48 @@ class Flow extends MultiChildRenderObjectWidget {
   }
 }
 
+class _SemanticsTagWidget extends SingleChildRenderObjectWidget {
+  const _SemanticsTagWidget({
+    Key? key,
+    required Widget child,
+    required this.index,
+  }) : super(key: key, child: child);
+
+  final int index;
+
+  @override
+  _SemanticsTagRenderObject createRenderObject(BuildContext context) {
+    return _SemanticsTagRenderObject(index);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _SemanticsTagRenderObject renderObject) {
+    super.updateRenderObject(context, renderObject);
+    renderObject.index = index;
+  }
+
+}
+
+class _SemanticsTagRenderObject extends RenderProxyBox {
+  _SemanticsTagRenderObject(int index) : _index = index,
+                                         super();
+
+  int get index => _index;
+  int _index;
+  set index(int value) {
+    if (_index != value) {
+      markNeedsSemanticsUpdate();
+      _index = value;
+    }
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.addTagForChildren(PlaceholderSpanIndexSemanticsTag(index));
+  }
+}
+
 /// A paragraph of rich text.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=rykDVh-QFfw}
@@ -5456,10 +5498,14 @@ class RichText extends MultiChildRenderObjectWidget {
   // Traverses the InlineSpan tree and depth-first collects the list of
   // child widgets that are created in WidgetSpans.
   static List<Widget> _extractChildren(InlineSpan span) {
+    int index = 0;
     final List<Widget> result = <Widget>[];
     span.visitChildren((InlineSpan span) {
       if (span is WidgetSpan) {
-        result.add(span.child);
+        result.add(_SemanticsTagWidget(
+          index: index++,
+          child: span.child,
+        ));
       }
       return true;
     });
