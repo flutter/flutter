@@ -9,13 +9,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../color_scheme.dart';
-import '../divider.dart';
-import '../ink_well.dart';
-import '../material_localizations.dart';
-import '../text_theme.dart';
-import '../theme.dart';
-import 'date_utils.dart' as utils;
+import 'color_scheme.dart';
+import 'date.dart';
+import 'divider.dart';
+import 'ink_well.dart';
+import 'material_localizations.dart';
+import 'text_theme.dart';
+import 'theme.dart';
 
 const Duration _monthScrollDuration = Duration(milliseconds: 200);
 
@@ -43,13 +43,13 @@ class CalendarDateRangePicker extends StatefulWidget {
     DateTime? currentDate,
     required this.onStartDateChanged,
     required this.onEndDateChanged,
-  }) : initialStartDate = initialStartDate != null ? utils.dateOnly(initialStartDate) : null,
-       initialEndDate = initialEndDate != null ? utils.dateOnly(initialEndDate) : null,
+  }) : initialStartDate = initialStartDate != null ? DateUtils.dateOnly(initialStartDate) : null,
+       initialEndDate = initialEndDate != null ? DateUtils.dateOnly(initialEndDate) : null,
        assert(firstDate != null),
        assert(lastDate != null),
-       firstDate = utils.dateOnly(firstDate),
-       lastDate = utils.dateOnly(lastDate),
-       currentDate = utils.dateOnly(currentDate ?? DateTime.now()),
+       firstDate = DateUtils.dateOnly(firstDate),
+       lastDate = DateUtils.dateOnly(lastDate),
+       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()),
        super(key: key) {
     assert(
       this.initialStartDate == null || this.initialEndDate == null || !this.initialStartDate!.isAfter(initialEndDate!),
@@ -108,7 +108,7 @@ class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
     final DateTime initialDate = widget.initialStartDate ?? widget.currentDate;
     if (!initialDate.isBefore(widget.firstDate) &&
         !initialDate.isAfter(widget.lastDate)) {
-      _initialMonthIndex = utils.monthDelta(widget.firstDate, initialDate);
+      _initialMonthIndex = DateUtils.monthDelta(widget.firstDate, initialDate);
     }
 
     _showWeekBottomDivider = _initialMonthIndex != 0;
@@ -132,7 +132,7 @@ class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
     }
   }
 
-  int get _numberOfMonths => utils.monthDelta(widget.firstDate, widget.lastDate) + 1;
+  int get _numberOfMonths => DateUtils.monthDelta(widget.firstDate, widget.lastDate) + 1;
 
   void _vibrate() {
     switch (Theme.of(context).platform) {
@@ -175,7 +175,7 @@ class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
     final int monthIndex = beforeInitialMonth
       ? _initialMonthIndex - index - 1
       : _initialMonthIndex + index;
-    final DateTime month = utils.addMonthsToMonthDate(widget.firstDate, monthIndex);
+    final DateTime month = DateUtils.addMonthsToMonthDate(widget.firstDate, monthIndex);
     return _MonthItem(
       selectedDateStart: _startDate,
       selectedDateEnd: _endDate,
@@ -341,7 +341,7 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
 
   DateTime? _nextDateInDirection(DateTime date, TraversalDirection direction) {
     final TextDirection textDirection = Directionality.of(context);
-    final DateTime nextDate = utils.addDaysToDate(date, _dayDirectionOffset(direction, textDirection));
+    final DateTime nextDate = DateUtils.addDaysToDate(date, _dayDirectionOffset(direction, textDirection));
     if (!nextDate.isBefore(widget.firstDate) && !nextDate.isAfter(widget.lastDate)) {
       return nextDate;
     }
@@ -381,7 +381,7 @@ class _FocusedDate extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_FocusedDate oldWidget) {
-    return !utils.isSameDay(date, oldWidget.date) || scrollDirection != oldWidget.scrollDirection;
+    return !DateUtils.isSameDay(date, oldWidget.date) || scrollDirection != oldWidget.scrollDirection;
   }
 
   static _FocusedDate? of(BuildContext context) {
@@ -650,7 +650,7 @@ class _MonthItemState extends State<_MonthItem> {
   @override
   void initState() {
     super.initState();
-    final int daysInMonth = utils.getDaysInMonth(widget.displayedMonth.year, widget.displayedMonth.month);
+    final int daysInMonth = DateUtils.getDaysInMonth(widget.displayedMonth.year, widget.displayedMonth.month);
     _dayFocusNodes = List<FocusNode>.generate(
         daysInMonth,
         (int index) => FocusNode(skipTraversal: true, debugLabel: 'Day ${index + 1}')
@@ -662,7 +662,7 @@ class _MonthItemState extends State<_MonthItem> {
     super.didChangeDependencies();
     // Check to see if the focused date is in this month, if so focus it.
     final DateTime? focusedDate = _FocusedDate.of(context)?.date;
-    if (focusedDate != null && utils.isSameMonth(widget.displayedMonth, focusedDate)) {
+    if (focusedDate != null && DateUtils.isSameMonth(widget.displayedMonth, focusedDate)) {
       _dayFocusNodes[focusedDate.day - 1].requestFocus();
     }
   }
@@ -753,7 +753,7 @@ class _MonthItemState extends State<_MonthItem> {
       );
     } else if (isDisabled) {
       itemStyle = textTheme.bodyText2?.apply(color: colorScheme.onSurface.withOpacity(0.38));
-    } else if (utils.isSameDay(widget.currentDate, dayToBuild)) {
+    } else if (DateUtils.isSameDay(widget.currentDate, dayToBuild)) {
       // The current day gets a different text color and a circle stroke
       // border.
       itemStyle = textTheme.bodyText2?.apply(color: colorScheme.primary);
@@ -821,8 +821,8 @@ class _MonthItemState extends State<_MonthItem> {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final int year = widget.displayedMonth.year;
     final int month = widget.displayedMonth.month;
-    final int daysInMonth = utils.getDaysInMonth(year, month);
-    final int dayOffset = utils.firstDayOffset(year, month, localizations);
+    final int daysInMonth = DateUtils.getDaysInMonth(year, month);
+    final int dayOffset = DateUtils.firstDayOffset(year, month, localizations);
     final int weeks = ((daysInMonth + dayOffset) / DateTime.daysPerWeek).ceil();
     final double gridHeight =
         weeks * _monthItemRowHeight + (weeks - 1) * _monthItemSpaceBetweenRows;

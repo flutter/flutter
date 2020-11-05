@@ -5,14 +5,12 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../input_border.dart';
-import '../input_decorator.dart';
-import '../material_localizations.dart';
-import '../text_form_field.dart';
-import '../theme.dart';
-
-import 'date_picker_common.dart';
-import 'date_utils.dart' as utils;
+import 'date.dart';
+import 'input_border.dart';
+import 'input_decorator.dart';
+import 'material_localizations.dart';
+import 'text_form_field.dart';
+import 'theme.dart';
 
 /// A [TextFormField] configured to accept and validate a date entered by a user.
 ///
@@ -63,9 +61,9 @@ class InputDatePickerFormField extends StatefulWidget {
   }) : assert(firstDate != null),
        assert(lastDate != null),
        assert(autofocus != null),
-       initialDate = initialDate != null ? utils.dateOnly(initialDate) : null,
-       firstDate = utils.dateOnly(firstDate),
-       lastDate = utils.dateOnly(lastDate),
+       initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
+       firstDate = DateUtils.dateOnly(firstDate),
+       lastDate = DateUtils.dateOnly(lastDate),
        super(key: key) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
