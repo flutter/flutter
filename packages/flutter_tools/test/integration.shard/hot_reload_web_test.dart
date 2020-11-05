@@ -30,7 +30,7 @@ void main() {
   testWithoutContext('hot restart works without error', () async {
     await flutter.run(chrome: true);
     await flutter.hotRestart();
-  }, skip: platform.isMacOS, retry: 1);
+  }, skip: true); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/69804
 
   testWithoutContext('newly added code executes during hot restart', () async {
     final Completer<void> completer = Completer<void>();
@@ -48,7 +48,7 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  }, skip: platform.isMacOS, retry: 1);
+  }, skip: true); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/69804
 
   testWithoutContext('newly added code executes during hot restart - canvaskit', () async {
     final Completer<void> completer = Completer<void>();
@@ -66,5 +66,5 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  }, skip: true, retry: 1); // Currently broken: Expected a value of type 'Future<_RegisteredFont>', but got one of type '_Future<_RegisteredFont?>
+  }, skip: true); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/69804
 }

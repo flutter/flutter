@@ -652,6 +652,72 @@ void main() {
     Usage: () => MockUsage(),
   }));
 
+  testUsingContext('ResidentRunner does not reload sources if no sources changed', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+     listViews,
+      listViews,
+      setAssetBundlePath,
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        method: 'ext.flutter.reassemble',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+      ),
+    ]);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    ));
+    await onAppStart.future;
+    when(mockFlutterDevice.updateDevFS(
+      mainUri: anyNamed('mainUri'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      bundleDirty: anyNamed('bundleDirty'),
+      fullRestart: anyNamed('fullRestart'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      packageConfig: anyNamed('packageConfig'),
+    )).thenAnswer((Invocation _) async {
+      return UpdateFSReport(success: true, invalidatedSourcesCount: 0);
+    });
+
+    final OperationResult result = await residentRunner.restart(fullRestart: false);
+
+    expect(result.code, 0);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
   testUsingContext('ResidentRunner reports error with missing entrypoint file', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
