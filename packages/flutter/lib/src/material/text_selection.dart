@@ -954,6 +954,9 @@ enum _TextSelectionToolbarItemPosition {
 
   /// The last item among multiple in the menu.
   last,
+
+  /// The only item in the menu.
+  only,
 }
 
 /// A button styled like a Material native Android text selection menu button.
@@ -995,9 +998,32 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   ///   [index], which is the index among total where this button appears.
   final int total;
 
+  // These values were eyeballed to match the native text selection menu on a
+  // Pixel 2 running Android 10.
+  static const double _kMiddlePadding = 9.5;
+  static const double _kEndPadding = 14.5;
+
+  static double _getLeftPadding(_TextSelectionToolbarItemPosition position) {
+    if (position == _TextSelectionToolbarItemPosition.first
+        || position == _TextSelectionToolbarItemPosition.only) {
+      return _kEndPadding;
+    }
+    return _kMiddlePadding;
+  }
+
+  static double _getRightPadding(_TextSelectionToolbarItemPosition position) {
+    if (position == _TextSelectionToolbarItemPosition.last
+        || position == _TextSelectionToolbarItemPosition.only) {
+      return _kEndPadding;
+    }
+    return _kMiddlePadding;
+  }
+
   _TextSelectionToolbarItemPosition get _position {
     if (index == 0) {
-      return _TextSelectionToolbarItemPosition.first;
+      return total == 1
+          ? _TextSelectionToolbarItemPosition.only
+          : _TextSelectionToolbarItemPosition.first;
     }
     if (index == total - 1) {
       return _TextSelectionToolbarItemPosition.last;
@@ -1018,10 +1044,8 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
         shape: const RoundedRectangleBorder(),
         minimumSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
         padding: EdgeInsets.only(
-          // These values were eyeballed to match the native text selection menu
-          // on a Pixel 2 running Android 10.
-          left: 9.5 + (_position == _TextSelectionToolbarItemPosition.first ? 5.0 : 0.0),
-          right: 9.5 + (_position == _TextSelectionToolbarItemPosition.last ? 5.0 : 0.0),
+          left: _getLeftPadding(_position),
+          right: _getRightPadding(_position),
         ),
       ),
       onPressed: onPressed,
