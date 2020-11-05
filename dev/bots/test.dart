@@ -671,7 +671,6 @@ Future<void> _runFrameworkTests() async {
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'tools'), tableData: bigqueryApi?.tabledata);
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'benchmarks', 'metrics_center'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
