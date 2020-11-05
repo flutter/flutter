@@ -48,8 +48,8 @@ class Repository {
 
   /// Lazily-loaded directory for the repository checkout.
   ///
-  /// Cloning a repository is time-consuming, thus the actual repository is not
-  /// ensured to exist until this getter is called.
+  /// Cloning a repository is time-consuming, thus the repository is not cloned
+  /// until this getter is called.
   Directory get checkoutDirectory {
     if (_checkoutDirectory == null) {
       _checkoutDirectory = parentDirectory.childDirectory(name);

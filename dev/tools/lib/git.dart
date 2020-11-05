@@ -19,8 +19,9 @@ class Git {
     @required String workingDirectory,
   }) {
     final ProcessResult result = _run(args, workingDirectory);
-    if ((result.stderr as String).isEmpty && result.exitCode == 0)
+    if (result.exitCode == 0) {
       return (result.stdout as String).trim();
+    }
     _reportFailureAndExit(args, workingDirectory, result, explanation);
     return null; // for the analyzer's sake
   }
