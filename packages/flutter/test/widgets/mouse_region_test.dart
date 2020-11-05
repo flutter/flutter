@@ -1728,6 +1728,36 @@ void main() {
     await gesture.moveBy(const Offset(10.0, 10.0));
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
+
+  testWidgets('Handle mouse events should ignore the detached MouseTrackerAnnotation', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Center(
+        child: Draggable<int>(
+          feedback: Container(width: 20, height: 20, color: Colors.blue),
+          childWhenDragging: Container(width: 20, height: 20, color: Colors.yellow),
+          child: RaisedButton(child: const Text('Drag me'), onPressed: (){}),
+        ),
+      ),
+    ));
+
+    // Long press the button with mouse.
+    final Offset textFieldPos = tester.getCenter(find.byType(Text));
+    final TestGesture gesture = await tester.startGesture(
+      textFieldPos,
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+
+    // Drag the Draggable Widget will replace the child with [childWhenDragging].
+    await gesture.moveBy(const Offset(10.0, 10.0));
+    await tester.pump(); // Trigger detach the button.
+
+    // Continue drag mouse should not trigger any assert.
+    await gesture.moveBy(const Offset(10.0, 10.0));
+    expect(tester.takeException(), isNull);
+  });
 }
 
 // Render widget `topLeft` at the top-left corner, stacking on top of the widget
