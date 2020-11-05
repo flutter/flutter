@@ -270,7 +270,7 @@ class TextDimensions {
           style.wordSpacing != null ? '${style.wordSpacing}px' : null;
     final String? decoration = style.decoration;
     if (browserEngine == BrowserEngine.webkit) {
-      domRenderer.setElementStyle(
+      DomRenderer.setElementStyle(
           _element, '-webkit-text-decoration', decoration);
     } else {
       elementStyle.textDecoration = decoration;

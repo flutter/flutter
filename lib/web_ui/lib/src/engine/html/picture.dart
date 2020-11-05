@@ -396,9 +396,8 @@ class PersistedPicture extends PersistedLeafSurface {
 
   void _applyDomPaint(EngineCanvas? oldCanvas) {
     _recycleCanvas(oldCanvas);
-    _canvas = DomCanvas();
+    _canvas = DomCanvas(rootElement!);
     domRenderer.clearDom(rootElement!);
-    rootElement!.append(_canvas!.rootElement);
     picture.recordingCanvas!.apply(_canvas!, _optimalLocalCullRect);
   }
 
@@ -440,7 +439,9 @@ class PersistedPicture extends PersistedLeafSurface {
                 bitmapCanvas.bitmapPixelCount;
           }
           domRenderer.clearDom(rootElement!);
-          rootElement!.append(_canvas!.rootElement);
+          if (_canvas is BitmapCanvas) {
+            rootElement!.append(_canvas!.rootElement);
+          }
           _canvas!.clear();
           picture.recordingCanvas!.apply(_canvas!, _optimalLocalCullRect);
         },
@@ -633,7 +634,7 @@ class PersistedPicture extends PersistedLeafSurface {
 /// Given size of a rectangle and transform, computes pixel density
 /// (scale factor).
 double _computePixelDensity(Matrix4? transform, double width, double height) {
-  if (transform == null || transform.isIdentity()) {
+  if (transform == null || transform.isIdentityOrTranslation()) {
     return 1.0;
   }
   final Float32List m = transform.storage;

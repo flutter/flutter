@@ -35,16 +35,17 @@ class PersistedOpacity extends PersistedContainerSurface
 
   @override
   html.Element createElement() {
-    return defaultCreateElement('flt-opacity')..style.transformOrigin = '0 0 0';
+    html.Element element = domRenderer.createElement('flt-opacity');
+    DomRenderer.setElementStyle(element, 'position', 'absolute');
+    DomRenderer.setElementStyle(element, 'transform-origin', '0 0 0');
+    return element;
   }
 
   @override
   void apply() {
-    // TODO(yjbanov): evaluate using `filter: opacity(X)`. It is a longer string
-    //                but it reportedly has better hardware acceleration, so may
-    //                be worth the trade-off.
-    rootElement!.style.opacity = '${alpha / 255}';
-    rootElement!.style.transform = 'translate(${offset.dx}px, ${offset.dy}px)';
+    html.Element element = rootElement!;
+    DomRenderer.setElementStyle(element, 'opacity', '${alpha / 255}');
+    DomRenderer.setElementTransform(element, 'translate(${offset.dx}px, ${offset.dy}px)');
   }
 
   @override
