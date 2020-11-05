@@ -54,11 +54,11 @@ class TextParentData extends ContainerBoxParentData<RenderBox> {
   }
 }
 
-/// Used by the [RenderParagraph] to map its semantics children to its
-/// rendering children.
+/// Used by the [RenderParagraph] to map its rendering children to their
+/// corresponding semantics nodes.
 ///
-/// The [RichText] uses this tag the relation between its placeholder spans and
-/// their semantics nodes.
+/// The [RichText] uses this to tag the relation between its placeholder spans
+/// and their semantics nodes.
 @immutable
 class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
   /// Creates a semantics tag with the input `index`.
