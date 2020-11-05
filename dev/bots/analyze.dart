@@ -1024,7 +1024,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> legacyBina
   );
   legacyBinaries ??= _legacyBinaries;
   if (!Platform.isWindows) { // TODO(ianh): Port this to Windows
-    final List<File> files = await _gitFiles(workingDirectory);
+    final List<File> files = await _gitFiles(workingDirectory, runSilently: false);
     final List<String> problems = <String>[];
     for (final File file in files) {
       final Uint8List bytes = file.readAsBytesSync();
@@ -1064,10 +1064,11 @@ bool _listEquals<T>(List<T> a, List<T> b) {
   return true;
 }
 
-Future<List<File>> _gitFiles(String workingDirectory) async {
+Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true}) async {
   final EvalResult evalResult = await _evalCommand(
     'git', <String>['ls-files', '-z'],
     workingDirectory: workingDirectory,
+    runSilently: runSilently,
   );
   if (evalResult.exitCode != 0) {
     exitWithError(<String>[
@@ -1155,6 +1156,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   Map<String, String> environment,
   bool skip = false,
   bool allowNonZeroExit = false,
+  bool runSilently = false,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
@@ -1162,7 +1164,10 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
     printProgress('SKIPPING', relativeWorkingDir, commandDescription);
     return null;
   }
-  printProgress('RUNNING', relativeWorkingDir, commandDescription);
+
+  if (!runSilently) {
+    printProgress('RUNNING', relativeWorkingDir, commandDescription);
+  }
 
   final Stopwatch time = Stopwatch()..start();
   final Process process = await Process.start(executable, arguments,
@@ -1179,7 +1184,9 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
     exitCode: exitCode,
   );
 
-  print('$clock ELAPSED TIME: $bold${prettyPrintDuration(time.elapsed)}$reset for $commandDescription in $relativeWorkingDir');
+  if (!runSilently) {
+    print('$clock ELAPSED TIME: $bold${prettyPrintDuration(time.elapsed)}$reset for $commandDescription in $relativeWorkingDir');
+  }
 
   if (exitCode != 0 && !allowNonZeroExit) {
     stderr.write(result.stderr);
