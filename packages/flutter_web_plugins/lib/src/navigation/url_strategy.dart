@@ -103,7 +103,7 @@ class HashUrlStrategy extends UrlStrategy {
   String getPath() {
     // the hash value is always prefixed with a `#`
     // and if it is empty then it will stay empty
-    final String path = _platformLocation.hash ?? '';
+    final String path = _platformLocation.hash;
     assert(path.isEmpty || path.startsWith('#'));
 
     // We don't want to return an empty string as a path. Instead we default to "/".
@@ -185,7 +185,7 @@ class PathUrlStrategy extends HashUrlStrategy {
 
   @override
   String getPath() {
-    final String path = _platformLocation.pathname! + _platformLocation.search!;
+    final String path = _platformLocation.pathname + _platformLocation.search;
     if (_basePath.isNotEmpty && path.startsWith(_basePath)) {
       return ensureLeadingSlash(path.substring(_basePath.length));
     }
@@ -225,17 +225,17 @@ abstract class PlatformLocation {
   /// The `pathname` part of the URL in the browser address bar.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/pathname
-  String? get pathname;
+  String get pathname;
 
   /// The `query` part of the URL in the browser address bar.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/search
-  String? get search;
+  String get search;
 
   /// The `hash` part of the URL in the browser address bar.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/hash
-  String? get hash;
+  String get hash;
 
   /// The `state` in the current history entry.
   ///
@@ -273,6 +273,14 @@ abstract class PlatformLocation {
 
 /// Delegates to real browser APIs to provide platform location functionality.
 class BrowserPlatformLocation extends PlatformLocation {
+  // Default value for [pathname] when it's not set in window.location.
+  // According to MDN this should be ''. Chrome seems to return '/'.
+  static const String _defaultPathname = '';
+
+  // Default value for [search] when it's not set in window.location.
+  // According to both chrome, and the MDN, this is ''.
+  static const String _defaultSearch = '';
+
   /// Default constructor for [BrowserPlatformLocation].
   const BrowserPlatformLocation();
 
@@ -290,10 +298,10 @@ class BrowserPlatformLocation extends PlatformLocation {
   }
 
   @override
-  String? get pathname => _location.pathname;
+  String get pathname => _location.pathname ?? _defaultPathname;
 
   @override
-  String? get search => _location.search;
+  String get search => _location.search ?? _defaultSearch;
 
   @override
   String get hash => _location.hash;
