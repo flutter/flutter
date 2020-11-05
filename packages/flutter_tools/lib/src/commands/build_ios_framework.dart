@@ -74,16 +74,17 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
               'By default, all build configurations are built.'
       )
       ..addFlag('universal',
-        help: 'Produce universal frameworks that include all valid architectures. '
-              'This is true by default.',
-        defaultsTo: true,
-        negatable: true
+        help: '(Deprecated) Produce universal frameworks that include all valid architectures. '
+              'This option will be removed in a future version of Flutter.',
+        negatable: true,
+        hide: true,
       )
       ..addFlag('xcframework',
-        help: 'Produce xcframeworks that include all valid architectures (Xcode 11 or later).',
+        help: 'Produce xcframeworks that include all valid architectures.',
+        defaultsTo: true,
       )
       ..addFlag('cocoapods',
-        help: 'Produce a Flutter.podspec instead of an engine Flutter.framework (recommended if host app uses CocoaPods).',
+        help: 'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
       )
       ..addOption('output',
         abbr: 'o',
@@ -152,10 +153,15 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     }
 
     if (!boolArg('universal') && !boolArg('xcframework')) {
-      throwToolExit('--universal or --xcframework is required.');
+      throwToolExit('--xcframework or --universal is required.');
     }
     if (boolArg('xcframework') && globals.xcode.majorVersion < 11) {
       throwToolExit('--xcframework requires Xcode 11.');
+    }
+    if (boolArg('universal')) {
+      globals.printError('--universal has been deprecated to support Apple '
+          'Silicon ARM simulators and will be removed in a future version of '
+          'Flutter. Use --xcframework instead.');
     }
     if (buildInfos.isEmpty) {
       throwToolExit('At least one of "--debug" or "--profile", or "--release" is required.');
