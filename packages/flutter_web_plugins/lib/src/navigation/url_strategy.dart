@@ -13,7 +13,7 @@ import 'utils.dart';
 ///
 /// Setting this to null disables all integration with the browser history.
 void setUrlStrategy(UrlStrategy? strategy) {
-  JsUrlStrategy? jsUrlStrategy = null;
+  JsUrlStrategy? jsUrlStrategy;
   if (strategy != null) {
     jsUrlStrategy = convertToJsUrlStrategy(strategy);
   }
@@ -273,6 +273,9 @@ abstract class PlatformLocation {
 
 /// Delegates to real browser APIs to provide platform location functionality.
 class BrowserPlatformLocation extends PlatformLocation {
+  /// Default constructor for [BrowserPlatformLocation].
+  const BrowserPlatformLocation();
+
   // Default value for [pathname] when it's not set in window.location.
   // According to MDN this should be ''. Chrome seems to return '/'.
   static const String _defaultPathname = '';
@@ -280,9 +283,6 @@ class BrowserPlatformLocation extends PlatformLocation {
   // Default value for [search] when it's not set in window.location.
   // According to both chrome, and the MDN, this is ''.
   static const String _defaultSearch = '';
-
-  /// Default constructor for [BrowserPlatformLocation].
-  const BrowserPlatformLocation();
 
   html.Location get _location => html.window.location;
   html.History get _history => html.window.history;
