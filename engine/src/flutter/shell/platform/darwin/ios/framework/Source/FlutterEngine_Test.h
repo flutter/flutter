@@ -5,11 +5,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
-@class FlutterBinaryMessengerRelay;
-
 // Category to add test-only visibility.
 @interface FlutterEngine (Test) <FlutterBinaryMessenger>
 - (void)setBinaryMessenger:(FlutterBinaryMessengerRelay*)binaryMessenger;
-- (void)waitForFirstFrame:(NSTimeInterval)timeout callback:(void (^)(BOOL didTimeout))callback;
 - (flutter::IOSRenderingAPI)platformViewsRenderingAPI;
 @end
