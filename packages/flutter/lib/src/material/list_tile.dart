@@ -52,6 +52,7 @@ class ListTileTheme extends InheritedTheme {
     this.contentPadding,
     this.tileColor,
     this.selectedTileColor,
+    this.enableFeedback,
     required Widget child,
   }) : super(key: key, child: child);
 
@@ -70,6 +71,7 @@ class ListTileTheme extends InheritedTheme {
     EdgeInsetsGeometry? contentPadding,
     Color? tileColor,
     Color? selectedTileColor,
+    bool? enableFeedback,
     required Widget child,
   }) {
     assert(child != null);
@@ -87,6 +89,7 @@ class ListTileTheme extends InheritedTheme {
           contentPadding: contentPadding ?? parent.contentPadding,
           tileColor: tileColor ?? parent.tileColor,
           selectedTileColor: selectedTileColor ?? parent.selectedTileColor,
+          enableFeedback: enableFeedback ?? parent.enableFeedback,
           child: child,
         );
       },
@@ -131,6 +134,11 @@ class ListTileTheme extends InheritedTheme {
   /// If [ListTile.selectedTileColor] is provided, [selectedTileColor] is ignored.
   final Color? selectedTileColor;
 
+  /// If specified, defines the feedback property for `ListTile`.
+  ///
+  /// If [ListTile.enableFeedback] is provided, [enableFeedback] is ignored.
+  final bool? enableFeedback;
+
   /// The closest instance of this class that encloses the given context.
   ///
   /// Typical usage is as follows:
@@ -155,6 +163,7 @@ class ListTileTheme extends InheritedTheme {
       contentPadding: contentPadding,
       tileColor: tileColor,
       selectedTileColor: selectedTileColor,
+      enableFeedback: enableFeedback,
       child: child,
     );
   }
@@ -169,7 +178,8 @@ class ListTileTheme extends InheritedTheme {
         || textColor != oldWidget.textColor
         || contentPadding != oldWidget.contentPadding
         || tileColor != oldWidget.tileColor
-        || selectedTileColor != oldWidget.selectedTileColor;
+        || selectedTileColor != oldWidget.selectedTileColor
+        || enableFeedback != oldWidget.enableFeedback;
   }
 }
 
@@ -708,6 +718,7 @@ class ListTile extends StatelessWidget {
     this.autofocus = false,
     this.tileColor,
     this.selectedTileColor,
+    this.enableFeedback,
     this.horizontalTitleGap = 16.0,
     this.minVerticalPadding = 4.0,
     this.minLeadingWidth = 40.0,
@@ -907,6 +918,16 @@ class ListTile extends StatelessWidget {
   /// if it's not null and to [Colors.transparent] if it's null.
   final Color? selectedTileColor;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
+
   /// The horizontal gap between the titles and the leading/trailing widgets.
   final double horizontalTitleGap;
 
@@ -1083,6 +1104,7 @@ class ListTile extends StatelessWidget {
 
     const EdgeInsets _defaultContentPadding = EdgeInsets.symmetric(horizontal: 16.0);
     final TextDirection textDirection = Directionality.of(context);
+    final bool resolvedEnableFeedback = enableFeedback ?? tileTheme.enableFeedback ?? true;
     final EdgeInsets resolvedContentPadding = contentPadding?.resolve(textDirection)
       ?? tileTheme.contentPadding?.resolve(textDirection)
       ?? _defaultContentPadding;
@@ -1105,6 +1127,7 @@ class ListTile extends StatelessWidget {
       focusColor: focusColor,
       hoverColor: hoverColor,
       autofocus: autofocus,
+      enableFeedback: resolvedEnableFeedback,
       child: Semantics(
         selected: selected,
         enabled: enabled,
