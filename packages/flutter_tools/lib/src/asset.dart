@@ -30,18 +30,16 @@ const String kFontManifestJson = 'FontManifest.json';
 ///   fonts:
 ///     - asset: fonts/MaterialIcons-Regular.otf
 ///```
-const Map<String, List<Map<String, Object>>> kMaterialFonts = <String, List<Map<String, Object>>>{
-  'material': <Map<String, Object>>[
-    <String, Object>{
-      'family': 'MaterialIcons',
-      'fonts': <Map<String, Object>>[
-        <String, Object>{
-          'asset': 'fonts/MaterialIcons-Regular.otf',
-        },
-      ],
-    },
-  ],
-};
+const List<Map<String, Object>> kMaterialFonts = <Map<String, Object>>[
+  <String, Object>{
+    'family': 'MaterialIcons',
+    'fonts': <Map<String, Object>>[
+      <String, Object>{
+        'asset': 'fonts/MaterialIcons-Regular.otf',
+      },
+    ],
+  },
+];
 
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
@@ -116,7 +114,6 @@ class ManifestAssetBundle implements AssetBundle {
   DateTime _lastBuildTimestamp;
 
   static const String _kAssetManifestJson = 'AssetManifest.json';
-  static const String _kFontSetMaterial = 'material';
   static const String _kNoticeFile = 'NOTICES';
 
   @override
@@ -302,7 +299,7 @@ class ManifestAssetBundle implements AssetBundle {
     }
     final List<_Asset> materialAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign && includeDefaultFonts)
-        ..._getMaterialAssets(_kFontSetMaterial),
+        ..._getMaterialAssets(),
     ];
     for (final _Asset asset in materialAssets) {
       assert(asset.assetFileExists);
@@ -353,10 +350,9 @@ class ManifestAssetBundle implements AssetBundle {
     }
   }
 
-  List<_Asset> _getMaterialAssets(String fontSet) {
+  List<_Asset> _getMaterialAssets() {
     final List<_Asset> result = <_Asset>[];
-
-    for (final Map<String, Object> family in kMaterialFonts[fontSet]) {
+    for (final Map<String, Object> family in kMaterialFonts) {
       for (final Map<String, Object> font in family['fonts'] as List<Map<String, Object>>) {
         final Uri entryUri = _fileSystem.path.toUri(font['asset'] as String);
         result.add(_Asset(
@@ -380,7 +376,7 @@ class ManifestAssetBundle implements AssetBundle {
   }) {
     return <Map<String, dynamic>>[
       if (primary && manifest.usesMaterialDesign && includeDefaultFonts)
-        ...kMaterialFonts[ManifestAssetBundle._kFontSetMaterial],
+        ...kMaterialFonts,
       if (packageName == null)
         ...manifest.fontsDescriptor
       else
