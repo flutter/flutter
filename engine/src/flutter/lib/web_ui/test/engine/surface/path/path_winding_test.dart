@@ -5,8 +5,8 @@
 // @dart = 2.10
 
 import 'dart:math' as math;
-import 'package:test/bootstrap/browser.dart';
-import 'package:test/test.dart';
+import 'package:test/bootstrap/browser.dart'; // ignore: import_of_legacy_library_into_null_safe
+import 'package:test/test.dart'; // ignore: import_of_legacy_library_into_null_safe
 import 'package:ui/ui.dart' hide window;
 import 'package:ui/src/engine.dart';
 

@@ -6,12 +6,12 @@
 import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 
-import 'package:test/bootstrap/browser.dart';
-import 'package:test/test.dart';
+import 'package:test/bootstrap/browser.dart'; // ignore: import_of_legacy_library_into_null_safe
+import 'package:test/test.dart'; // ignore: import_of_legacy_library_into_null_safe
 import 'package:ui/ui.dart';
 import 'package:ui/src/engine.dart';
 
-import 'package:web_engine_tester/golden_tester.dart';
+import 'package:web_engine_tester/golden_tester.dart'; // ignore: import_of_legacy_library_into_null_safe
 
 final Rect region = Rect.fromLTWH(0, 0, 500, 500);
 
