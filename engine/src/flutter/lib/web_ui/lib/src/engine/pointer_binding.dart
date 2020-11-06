@@ -290,8 +290,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     );
   }
 
-  void _handleWheelEvent(
-      html.Event e, void Function(Iterable<ui.PointerData>) sink) {
+  void _handleWheelEvent(html.Event e) {
     assert(e is html.WheelEvent);
     final html.WheelEvent event = e as html.WheelEvent;
     if (_debugLogPointerEvents) {
@@ -537,7 +536,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     });
 
     _addWheelEventListener((html.Event event) {
-      _handleWheelEvent(event, _callback);
+      _handleWheelEvent(event);
     });
   }
 
@@ -809,7 +808,7 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     }, acceptOutsideGlasspane: true);
 
     _addWheelEventListener((html.Event event) {
-      _handleWheelEvent(event, _callback);
+      _handleWheelEvent(event);
     });
   }
 
