@@ -39,7 +39,7 @@ abstract class UrlStrategy {
   /// The state of the current browser history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/state
-  Object getState();
+  Object? getState();
 
   /// Given a path that's internal to the app, create the external url that
   /// will be used in the browser.
@@ -115,7 +115,7 @@ class HashUrlStrategy extends UrlStrategy {
   }
 
   @override
-  Object getState() => _platformLocation.state;
+  Object? getState() => _platformLocation.state;
 
   @override
   String prepareExternalUrl(String internalUrl) {
@@ -240,7 +240,7 @@ abstract class PlatformLocation {
   /// The `state` in the current history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/state
-  Object get state;
+  Object? get state;
 
   /// Adds a new entry to the browser history stack.
   ///
@@ -307,7 +307,7 @@ class BrowserPlatformLocation extends PlatformLocation {
   String get hash => _location.hash;
 
   @override
-  Object get state => _history.state;
+  Object? get state => _history.state;
 
   @override
   void pushState(Object state, String title, String url) {

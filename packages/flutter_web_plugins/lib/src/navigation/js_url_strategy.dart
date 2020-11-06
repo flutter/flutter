@@ -27,7 +27,7 @@ external _JsSetUrlStrategy get jsSetUrlStrategy;
 
 typedef _PathGetter = String Function();
 
-typedef _StateGetter = Object Function();
+typedef _StateGetter = Object? Function();
 
 typedef _AddPopStateListener = ui.VoidCallback Function(html.EventListener);
 
