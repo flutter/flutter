@@ -35,7 +35,7 @@ void testMain() {
     expect(span, isA<FlatTextSpan>());
     final FlatTextSpan textSpan = span as FlatTextSpan;
     expect(textSpan.text, 'Hello');
-    expect(textSpan.style, EngineTextStyle(fontSize: 13.0));
+    expect(textSpan.style, TextStyle(fontSize: 13.0));
   });
 
   test('Builds a single-span paragraph with complex styles', () {
@@ -57,17 +57,16 @@ void testMain() {
 
     final FlatTextSpan span = paragraph.spans.single as FlatTextSpan;
     expect(span.text, 'Hello');
-    // TODO(mdebbar): Uncomment this once style resolution is implemented.
-    // expect(
-    //   span.style,
-    //   TextStyle(
-    //     height: 1.5,
-    //     fontSize: 9.0,
-    //     fontWeight: FontWeight.bold,
-    //     fontStyle: FontStyle.italic,
-    //     letterSpacing: 2.0,
-    //   ),
-    // );
+    expect(
+      span.style,
+      TextStyle(
+        height: 1.5,
+        fontSize: 9.0,
+        fontWeight: FontWeight.bold,
+        fontStyle: FontStyle.italic,
+        letterSpacing: 2.0,
+      ),
+    );
   });
 
   test('Builds a multi-span paragraph', () {
@@ -86,25 +85,23 @@ void testMain() {
 
     final FlatTextSpan hello = paragraph.spans.first as FlatTextSpan;
     expect(hello.text, 'Hello');
-    // TODO(mdebbar): Uncomment this once style resolution is implemented.
-    // expect(
-    //   hello.style,
-    //   TextStyle(
-    //     fontSize: 13.0,
-    //     fontWeight: FontWeight.bold,
-    //   ),
-    // );
+    expect(
+      hello.style,
+      TextStyle(
+        fontSize: 13.0,
+        fontWeight: FontWeight.bold,
+      ),
+    );
 
     final FlatTextSpan world = paragraph.spans.last as FlatTextSpan;
     expect(world.text, ' world');
-    // TODO(mdebbar): Uncomment this once style resolution is implemented.
-    // expect(
-    //   world.style,
-    //   TextStyle(
-    //     fontSize: 13.0,
-    //     fontStyle: FontStyle.italic,
-    //   ),
-    // );
+    expect(
+      world.style,
+      TextStyle(
+        fontSize: 13.0,
+        fontStyle: FontStyle.italic,
+      ),
+    );
   });
 
   test('Builds a multi-span paragraph with complex styles', () {
@@ -126,34 +123,31 @@ void testMain() {
 
     final FlatTextSpan hello = paragraph.spans[0] as FlatTextSpan;
     expect(hello.text, 'Hello');
-    // TODO(mdebbar): Uncomment this once style resolution is implemented.
-    // expect(
-    //   hello.style,
-    //   TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, height: 2.0),
-    // );
+    expect(
+      hello.style,
+      TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, height: 2.0),
+    );
 
     final FlatTextSpan world = paragraph.spans[1] as FlatTextSpan;
     expect(world.text, ' world');
-    // TODO(mdebbar): Uncomment this once style resolution is implemented.
-    // expect(
-    //   world.style,
-    //   TextStyle(
-    //     fontSize: 13.0,
-    //     fontWeight: FontWeight.bold,
-    //     fontStyle: FontStyle.italic,
-    //   ),
-    // );
+    expect(
+      world.style,
+      TextStyle(
+        fontSize: 13.0,
+        fontWeight: FontWeight.bold,
+        fontStyle: FontStyle.italic,
+      ),
+    );
 
     final FlatTextSpan bang = paragraph.spans[2] as FlatTextSpan;
     expect(bang.text, '!');
-    // TODO(mdebbar): Uncomment this once style resolution is implemented.
-    // expect(
-    //   bang.style,
-    //   TextStyle(
-    //     fontSize: 13.0,
-    //     fontWeight: FontWeight.normal,
-    //     fontStyle: FontStyle.italic,
-    //   ),
-    // );
+    expect(
+      bang.style,
+      TextStyle(
+        fontSize: 13.0,
+        fontWeight: FontWeight.normal,
+        fontStyle: FontStyle.italic,
+      ),
+    );
   });
 }
