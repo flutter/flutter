@@ -125,11 +125,11 @@ class _ListDemoState extends State<ReorderableListDemo> {
     });
   }
 
-  Widget? buildListTile(_ListItem item) {
+  Widget buildListTile(_ListItem item) {
     const Widget secondary = Text(
       'Even more additional list item information appears on line three.',
     );
-    Widget? listTile;
+    late Widget listTile;
     switch (_itemType) {
       case _ReorderableListType.threeLine:
         listTile = CheckboxListTile(
@@ -158,6 +158,9 @@ class _ListDemoState extends State<ReorderableListDemo> {
         );
         break;
       default:
+        listTile = Container(
+          key: Key(item.value),
+        );
         break;
     }
 
@@ -215,7 +218,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
           reverse: _reverse!,
           scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          children: _items.map<Widget?>(buildListTile).toList() as List<Widget>,
+          children: _items.map<Widget>(buildListTile).toList(),
         ),
       ),
     );
