@@ -230,7 +230,7 @@ void main() {
     expect(preferencesFile.readAsStringSync(), '"exit_type":"Normal"');
 
 
-    // validate any Default content is copied 
+    // validate any Default content is copied
     final Directory defaultContentDir = fileSystem
         .directory('.tmp_rand0/flutter_tools_chrome_device.rand0')
         .childDirectory('Default')
