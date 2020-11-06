@@ -337,7 +337,8 @@ abstract class BaseMouseTracker extends ChangeNotifier {
       final HitTestTarget target = entry.target;
       if (target is MouseTrackerAnnotation) {
         if (target is RenderObject) {
-          // We should ignore the detached renderObject, otherwise, may trigger using the disposed object.
+          // It's possible that the renderObject was detached after hitTest, so we should ignore it.
+          // https://github.com/flutter/flutter/issues/67044
           if (!target.attached)
             continue;
         }
