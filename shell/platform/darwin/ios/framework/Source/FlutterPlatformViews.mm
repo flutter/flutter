@@ -342,9 +342,6 @@ int FlutterPlatformViewsController::CountClips(const MutatorsStack& mutators_sta
 
 void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators_stack,
                                                    UIView* embedded_view) {
-  if (flutter_view_ == nullptr) {
-    return;
-  }
   FML_DCHECK(CATransform3DEqualToTransform(embedded_view.layer.transform, CATransform3DIdentity));
   ResetAnchor(embedded_view.layer);
   ChildClippingView* clipView = (ChildClippingView*)embedded_view.superview;
@@ -401,6 +398,7 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
 
 void FlutterPlatformViewsController::CompositeWithParams(int view_id,
                                                          const EmbeddedViewParams& params) {
+  FML_DCHECK(flutter_view_);
   CGRect frame = CGRectMake(0, 0, params.sizePoints().width(), params.sizePoints().height());
   UIView* touchInterceptor = touch_interceptors_[view_id].get();
   touchInterceptor.layer.transform = CATransform3DIdentity;
@@ -421,8 +419,9 @@ void FlutterPlatformViewsController::CompositeWithParams(int view_id,
 }
 
 SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(int view_id) {
-  // Any UIKit related code has to run on main thread.
-  FML_DCHECK([[NSThread currentThread] isMainThread]);
+  FML_DCHECK(flutter_view_);
+  // TODO(amirh): assert that this is running on the platform thread once we support the iOS
+  // embedded views thread configuration.
 
   // Do nothing if the view doesn't need to be composited.
   if (views_to_recomposite_.count(view_id) == 0) {
@@ -470,11 +469,12 @@ SkRect FlutterPlatformViewsController::GetPlatformViewRect(int view_id) {
 bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
                                                  std::shared_ptr<IOSContext> ios_context,
                                                  std::unique_ptr<SurfaceFrame> frame) {
+  FML_DCHECK(flutter_view_);
+
   // Any UIKit related code has to run on main thread.
-  FML_DCHECK([[NSThread currentThread] isMainThread]);
-  if (flutter_view_ == nullptr) {
-    return frame->Submit();
-  }
+  // When on a non-main thread, we only allow the rest of the method to run if there is no
+  // Pending UIView operations.
+  FML_DCHECK([[NSThread currentThread] isMainThread] || !HasPlatformViewThisOrNextFrame());
 
   DisposeViews();
 
@@ -558,6 +558,8 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
   BringLayersIntoView(platform_view_layers);
   // Mark all layers as available, so they can be used in the next frame.
   layer_pool_->RecycleLayers();
+  // Reset the composition order, so next frame starts empty.
+  composition_order_.clear();
 
   did_submit &= frame->Submit();
 
@@ -597,10 +599,7 @@ void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
 
 void FlutterPlatformViewsController::EndFrame(
     bool should_resubmit_frame,
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  // Reset the composition order, so next frame starts empty.
-  composition_order_.clear();
-}
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {}
 
 std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLayer(
     GrDirectContext* gr_context,
