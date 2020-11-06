@@ -8,7 +8,6 @@
 #include <memory>
 #include <optional>
 
-#include "flow/embedded_views.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/compositor_context.h"
@@ -351,16 +350,6 @@ class Rasterizer final : public SnapshotDelegate {
   void SetNextFrameCallback(const fml::closure& callback);
 
   //----------------------------------------------------------------------------
-  /// @brief Set the External View Embedder. This is done on shell
-  ///        initialization. This is non-null on platforms that support
-  ///        embedding externally composited views.
-  ///
-  /// @param[in] view_embedder The external view embedder object.
-  ///
-  void SetExternalViewEmbedder(
-      const std::shared_ptr<ExternalViewEmbedder>& view_embedder);
-
-  //----------------------------------------------------------------------------
   /// @brief      Returns a pointer to the compositor context used by this
   ///             rasterizer. This pointer will never be `nullptr`.
   ///
@@ -448,7 +437,6 @@ class Rasterizer final : public SnapshotDelegate {
   std::optional<size_t> max_cache_bytes_;
   fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
   fml::TaskRunnerAffineWeakPtrFactory<Rasterizer> weak_factory_;
-  std::shared_ptr<ExternalViewEmbedder> external_view_embedder_;
 
   // |SnapshotDelegate|
   sk_sp<SkImage> MakeRasterSnapshot(sk_sp<SkPicture> picture,
