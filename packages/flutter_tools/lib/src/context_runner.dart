@@ -110,7 +110,12 @@ Future<T> runInContext<T>(
         cache: globals.cache,
         platform: globals.platform,
       ),
-      AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
+      AssetBundleFactory: () {
+        return AssetBundleFactory.defaultInstance(
+          logger: globals.logger,
+          fileSystem: globals.fs,
+        );
+      },
       BuildSystem: () => FlutterBuildSystem(
         fileSystem: globals.fs,
         logger: globals.logger,

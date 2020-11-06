@@ -46,7 +46,10 @@ abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
   static AssetBundleFactory get instance => context.get<AssetBundleFactory>();
 
-  static AssetBundleFactory get defaultInstance => _ManifestAssetBundleFactory(logger: globals.logger, fileSystem: globals.fs);
+  static AssetBundleFactory defaultInstance({
+    @required Logger logger,
+    @required FileSystem fileSystem,
+  }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem);
 
   /// Creates a new [AssetBundle].
   AssetBundle createBundle();
