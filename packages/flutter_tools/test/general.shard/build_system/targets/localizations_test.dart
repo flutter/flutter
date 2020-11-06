@@ -66,11 +66,11 @@ void main() {
         useSyntheticPackage: false,
         projectPathString: '/',
         areResourceAttributesRequired: true,
+        untranslatedMessagesFile: 'untranslated',
       ),
     ).called(1);
     verify(mockLocalizationsGenerator.loadResources()).called(1);
-    verify(mockLocalizationsGenerator.writeOutputFiles()).called(1);
-    verify(mockLocalizationsGenerator.outputUnimplementedMessages('untranslated', logger)).called(1);
+    verify(mockLocalizationsGenerator.writeOutputFiles(logger)).called(1);
   });
 
   testUsingContext('generateLocalizations throws exception on missing flutter: generate: true flag', () async {

@@ -203,12 +203,15 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       }
 
       // Build aot, create module.framework and copy.
-      await _produceAppFramework(buildInfo, modeDirectory);
+      final Directory iPhoneBuildOutput =
+          modeDirectory.childDirectory('iphoneos');
+      final Directory simulatorBuildOutput =
+          modeDirectory.childDirectory('iphonesimulator');
+      await _produceAppFramework(
+          buildInfo, modeDirectory, iPhoneBuildOutput, simulatorBuildOutput);
 
       // Build and copy plugins.
       await processPodsIfNeeded(_project.ios, getIosBuildDirectory(), buildInfo.mode);
-      final Directory iPhoneBuildOutput = modeDirectory.childDirectory('iphoneos');
-      final Directory simulatorBuildOutput = modeDirectory.childDirectory('iphonesimulator');
       if (hasPlugins(_project)) {
         await _producePlugins(buildInfo.mode, xcodeBuildConfiguration, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory, outputDirectory);
       }
@@ -348,64 +351,81 @@ end
     await _produceXCFrameworkFromUniversal(buildInfo, fatFlutterFrameworkCopy);
   }
 
-  Future<void> _produceAppFramework(BuildInfo buildInfo, Directory modeDirectory) async {
+  Future<void> _produceAppFramework(
+    BuildInfo buildInfo,
+    Directory outputDirectory,
+    Directory iPhoneBuildOutput,
+    Directory simulatorBuildOutput,
+  ) async {
     const String appFrameworkName = 'App.framework';
 
     final Status status = globals.logger.startProgress(
       ' ├─Building App.framework...',
     );
-    try {
-      Target target;
-      if (buildInfo.isDebug) {
-        target = const DebugIosApplicationBundle();
-      } else if (buildInfo.isProfile) {
-        target = const ProfileIosApplicationBundle();
-      } else {
-        target = const ReleaseIosApplicationBundle();
-      }
+    final List<SdkType> sdkTypes = <SdkType>[SdkType.iPhone];
+    final List<Directory> frameworks = <Directory>[];
+    Target target;
+    if (buildInfo.isDebug) {
+      sdkTypes.add(SdkType.iPhoneSimulator);
+      target = const DebugIosApplicationBundle();
+    } else if (buildInfo.isProfile) {
+      target = const ProfileIosApplicationBundle();
+    } else {
+      target = const ReleaseIosApplicationBundle();
+    }
 
-      final Environment environment = Environment(
-        projectDir: globals.fs.currentDirectory,
-        outputDir: modeDirectory,
-        buildDir: _project.dartTool.childDirectory('flutter_build'),
-        cacheDir: null,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        defines: <String, String>{
-          kTargetFile: targetFile,
-          kBuildMode: getNameForBuildMode(buildInfo.mode),
-          kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
-          kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
-          kDartDefines: jsonEncode(buildInfo.dartDefines),
-          kBitcodeFlag: 'true',
-          if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
-            kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),
-          if (buildInfo?.extraFrontEndOptions?.isNotEmpty ?? false)
-            kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
-          kIosArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64]
-            .map(getNameForDarwinArch).join(' '),
-          kSdkRoot: await globals.xcode.sdkLocation(SdkType.iPhone),
-        },
-        artifacts: globals.artifacts,
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        engineVersion: globals.artifacts.isLocalEngine
-          ? null
-          : globals.flutterVersion.engineRevision,
-      );
-      final BuildResult result = await buildSystem.build(target, environment);
-      if (!result.success) {
-        for (final ExceptionMeasurement measurement in result.exceptions.values) {
-          globals.printError(measurement.exception.toString());
+    try {
+      for (final SdkType sdkType in sdkTypes) {
+        final Directory outputBuildDirectory = sdkType == SdkType.iPhone
+            ? iPhoneBuildOutput
+            : simulatorBuildOutput;
+        frameworks.add(outputBuildDirectory.childDirectory(appFrameworkName));
+        final Environment environment = Environment(
+          projectDir: globals.fs.currentDirectory,
+          outputDir: outputBuildDirectory,
+          buildDir: _project.dartTool.childDirectory('flutter_build'),
+          cacheDir: null,
+          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+          defines: <String, String>{
+            kTargetFile: targetFile,
+            kBuildMode: getNameForBuildMode(buildInfo.mode),
+            kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
+            kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
+            kDartDefines: jsonEncode(buildInfo.dartDefines),
+            kBitcodeFlag: 'true',
+            if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
+              kExtraGenSnapshotOptions:
+                  buildInfo.extraGenSnapshotOptions.join(','),
+            if (buildInfo?.extraFrontEndOptions?.isNotEmpty ?? false)
+              kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
+            kIosArchs: defaultIOSArchsForSdk(sdkType)
+                .map(getNameForDarwinArch)
+                .join(' '),
+            kSdkRoot: await globals.xcode.sdkLocation(sdkType),
+          },
+          artifacts: globals.artifacts,
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          engineVersion: globals.artifacts.isLocalEngine
+              ? null
+              : globals.flutterVersion.engineRevision,
+        );
+        final BuildResult result = await buildSystem.build(target, environment);
+        if (!result.success) {
+          for (final ExceptionMeasurement measurement
+              in result.exceptions.values) {
+            globals.printError(measurement.exception.toString());
+          }
+          throwToolExit('The App.framework build failed.');
         }
-        throwToolExit('The App.framework build failed.');
       }
     } finally {
       status.stop();
     }
 
-    final Directory destinationAppFrameworkDirectory = modeDirectory.childDirectory(appFrameworkName);
-    await _produceXCFrameworkFromUniversal(buildInfo, destinationAppFrameworkDirectory);
+    await _produceUniversalFramework(frameworks, 'App', outputDirectory);
+    await _produceXCFramework(frameworks, 'App', outputDirectory);
   }
 
   Future<void> _producePlugins(
@@ -437,7 +457,6 @@ end
         'iphoneos',
         '-configuration',
         xcodeBuildConfiguration,
-        '-destination generic/platform=iOS',
         'SYMROOT=${iPhoneBuildOutput.path}',
         'BITCODE_GENERATION_MODE=$bitcodeGenerationMode',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
@@ -463,7 +482,6 @@ end
           'iphonesimulator',
           '-configuration',
           xcodeBuildConfiguration,
-          '-destination generic/platform=iOS',
           'SYMROOT=${simulatorBuildOutput.path}',
           'ARCHS=x86_64',
           'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
