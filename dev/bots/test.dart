@@ -320,7 +320,7 @@ Future<void> _runToolTests() async {
     Directory(path.join(toolsPath, kTest))
       .listSync()
       .map<String>((FileSystemEntity entry) => entry.path)
-      .where((String name) => name.endsWith(kDotShard))
+      .where((String name) => name.endsWith(kDotShard) && !name.contains('web'))
       .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
@@ -678,6 +678,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);

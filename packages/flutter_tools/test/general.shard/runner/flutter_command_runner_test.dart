@@ -140,7 +140,7 @@ void main() {
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
         when(processManager.runSync('git tag --points-at HEAD'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync('git describe --match *.*.* --first-parent --long --tags'.split(' '),
+        when(processManager.runSync('git describe --match *.*.* --long --tags'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
         when(processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%ad --date=iso'.split(' ')),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);

@@ -2916,6 +2916,18 @@ void main() {
 
     await tapGesture.up();
   });
+
+  testWidgets('intrinsicHeight implementation meets constraints', (WidgetTester tester) async {
+    // Regression text for https://github.com/flutter/flutter/issues/49478.
+    await tester.pumpWidget(_wrapForChip(
+      child: const Chip(
+        label: Text('text'),
+        padding: EdgeInsets.symmetric(horizontal: 20),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {

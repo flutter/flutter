@@ -217,7 +217,6 @@ class Cache {
   // Initialized by FlutterCommandRunner on startup.
   static String flutterRoot;
 
-
   /// Determine the absolute and normalized path for the root of the current
   /// Flutter checkout.
   ///
