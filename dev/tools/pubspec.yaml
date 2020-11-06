@@ -8,6 +8,8 @@ environment:
 dependencies:
   archive: 2.0.13
   args: 1.6.0
+  flutter_tools:
+    path: '../../packages/flutter_tools'
   http: 0.12.2
   intl: 0.16.1
   meta: 1.3.0-nullsafety.6

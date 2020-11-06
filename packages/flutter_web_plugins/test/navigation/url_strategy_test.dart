@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:html';
 
 @TestOn('chrome') // Uses web-only Flutter SDK
@@ -13,14 +11,10 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 void main() {
   group('$HashUrlStrategy', () {
-    TestPlatformLocation location;
+    late TestPlatformLocation location;
 
     setUp(() {
       location = TestPlatformLocation();
-    });
-
-    tearDown(() {
-      location = null;
     });
 
     test('leading slash is optional', () {
@@ -48,14 +42,10 @@ void main() {
   });
 
   group('$PathUrlStrategy', () {
-    TestPlatformLocation location;
+    late TestPlatformLocation location;
 
     setUp(() {
       location = TestPlatformLocation();
-    });
-
-    tearDown(() {
-      location = null;
     });
 
     test('validates base href', () {
@@ -153,7 +143,7 @@ class TestPlatformLocation extends PlatformLocation {
   String hash = '';
 
   @override
-  dynamic state;
+  Object? Function() state = () => null;
 
   /// Mocks the base href of the document.
   String baseHref = '';

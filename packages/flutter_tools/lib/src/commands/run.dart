@@ -115,7 +115,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         help: 'Filters out all trace events except those that are specified in '
             'this comma separated list of allowed prefixes.',
         valueHelp: 'foo,bar',
-      );
+      )
+      ..addMultiOption('dart-entrypoint-args',
+        abbr: 'a',
+        help: 'Pass a list of arguments to the Dart entrypoint at application '
+              'startup. By default this is main(List<String> args). Specify '
+              'this option multiple times each with one argument to pass '
+              'multiple arguments to the Dart entrypoint. Currently this is '
+              'only supported on desktop platforms.');
     usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
@@ -153,6 +160,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
+        dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
         webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
@@ -167,6 +175,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         startPaused: boolArg('start-paused'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
         disableDds: boolArg('disable-dds'),
+        dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         dartFlags: stringArg('dart-flags') ?? '',
         useTestFonts: argParser.options.containsKey('use-test-fonts') && boolArg('use-test-fonts'),
         enableSoftwareRendering: argParser.options.containsKey('enable-software-rendering') && boolArg('enable-software-rendering'),

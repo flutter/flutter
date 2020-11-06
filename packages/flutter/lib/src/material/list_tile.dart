@@ -719,11 +719,17 @@ class ListTile extends StatelessWidget {
     this.tileColor,
     this.selectedTileColor,
     this.enableFeedback,
+    this.horizontalTitleGap = 16.0,
+    this.minVerticalPadding = 4.0,
+    this.minLeadingWidth = 40.0,
   }) : assert(isThreeLine != null),
        assert(enabled != null),
        assert(selected != null),
        assert(autofocus != null),
        assert(!isThreeLine || subtitle != null),
+       assert(horizontalTitleGap != null),
+       assert(minVerticalPadding != null),
+       assert(minLeadingWidth != null),
        super(key: key);
 
   /// A widget to display before the title.
@@ -921,6 +927,15 @@ class ListTile extends StatelessWidget {
   ///
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
+
+  /// The horizontal gap between the titles and the leading/trailing widgets.
+  final double horizontalTitleGap;
+
+  /// The minimum padding on the top and bottom of the title and subtitle widgets.
+  final double minVerticalPadding;
+
+  /// The minimum leading width.
+  final double minLeadingWidth;
 
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
@@ -1133,6 +1148,9 @@ class ListTile extends StatelessWidget {
               textDirection: textDirection,
               titleBaselineType: titleStyle.textBaseline!,
               subtitleBaselineType: subtitleStyle?.textBaseline,
+              horizontalTitleGap: horizontalTitleGap,
+              minVerticalPadding: minVerticalPadding,
+              minLeadingWidth: minLeadingWidth,
             ),
           ),
         ),
@@ -1161,12 +1179,18 @@ class _ListTile extends RenderObjectWidget {
     required this.visualDensity,
     required this.textDirection,
     required this.titleBaselineType,
+    required this.horizontalTitleGap,
+    required this.minVerticalPadding,
+    required this.minLeadingWidth,
     this.subtitleBaselineType,
   }) : assert(isThreeLine != null),
        assert(isDense != null),
        assert(visualDensity != null),
        assert(textDirection != null),
        assert(titleBaselineType != null),
+       assert(horizontalTitleGap != null),
+       assert(minVerticalPadding != null),
+       assert(minLeadingWidth != null),
        super(key: key);
 
   final Widget? leading;
@@ -1179,6 +1203,9 @@ class _ListTile extends RenderObjectWidget {
   final TextDirection textDirection;
   final TextBaseline titleBaselineType;
   final TextBaseline? subtitleBaselineType;
+  final double horizontalTitleGap;
+  final double minVerticalPadding;
+  final double minLeadingWidth;
 
   @override
   _ListTileElement createElement() => _ListTileElement(this);
@@ -1192,6 +1219,9 @@ class _ListTile extends RenderObjectWidget {
       textDirection: textDirection,
       titleBaselineType: titleBaselineType,
       subtitleBaselineType: subtitleBaselineType,
+      horizontalTitleGap: horizontalTitleGap,
+      minVerticalPadding: minVerticalPadding,
+      minLeadingWidth: minLeadingWidth,
     );
   }
 
@@ -1203,7 +1233,10 @@ class _ListTile extends RenderObjectWidget {
       ..visualDensity = visualDensity
       ..textDirection = textDirection
       ..titleBaselineType = titleBaselineType
-      ..subtitleBaselineType = subtitleBaselineType;
+      ..subtitleBaselineType = subtitleBaselineType
+      ..horizontalTitleGap = horizontalTitleGap
+      ..minLeadingWidth = minLeadingWidth
+      ..minVerticalPadding = minVerticalPadding;
   }
 }
 
@@ -1319,23 +1352,26 @@ class _RenderListTile extends RenderBox {
     required TextDirection textDirection,
     required TextBaseline titleBaselineType,
     TextBaseline? subtitleBaselineType,
+    required double horizontalTitleGap,
+    required double minVerticalPadding,
+    required double minLeadingWidth,
   }) : assert(isDense != null),
        assert(visualDensity != null),
        assert(isThreeLine != null),
        assert(textDirection != null),
        assert(titleBaselineType != null),
+       assert(horizontalTitleGap != null),
+       assert(minVerticalPadding != null),
+       assert(minLeadingWidth != null),
        _isDense = isDense,
        _visualDensity = visualDensity,
        _isThreeLine = isThreeLine,
        _textDirection = textDirection,
        _titleBaselineType = titleBaselineType,
-       _subtitleBaselineType = subtitleBaselineType;
-
-  static const double _minLeadingWidth = 40.0;
-  // The horizontal gap between the titles and the leading/trailing widgets
-  double get _horizontalTitleGap => 16.0 + visualDensity.horizontal * 2.0;
-  // The minimum padding on the top and bottom of the title and subtitle widgets.
-  static const double _minVerticalPadding = 4.0;
+       _subtitleBaselineType = subtitleBaselineType,
+       _horizontalTitleGap = horizontalTitleGap + visualDensity.horizontal * 2.0,
+       _minVerticalPadding = minVerticalPadding,
+       _minLeadingWidth = minLeadingWidth;
 
   final Map<_ListTileSlot, RenderBox> children = <_ListTileSlot, RenderBox>{};
 
@@ -1443,6 +1479,39 @@ class _RenderListTile extends RenderBox {
     if (_subtitleBaselineType == value)
       return;
     _subtitleBaselineType = value;
+    markNeedsLayout();
+  }
+
+  double get horizontalTitleGap => _horizontalTitleGap;
+  double _horizontalTitleGap;
+
+  set horizontalTitleGap(double value) {
+    assert(value != null);
+    if (_horizontalTitleGap == value)
+      return;
+    _horizontalTitleGap = value;
+    markNeedsLayout();
+  }
+
+  double get minVerticalPadding => _minVerticalPadding;
+  double _minVerticalPadding;
+
+  set minVerticalPadding(double value) {
+    assert(value != null);
+    if (_minVerticalPadding == value)
+      return;
+    _minVerticalPadding = value;
+    markNeedsLayout();
+  }
+
+  double get minLeadingWidth => _minLeadingWidth;
+  double _minLeadingWidth;
+
+  set minLeadingWidth(double value) {
+    assert(value != null);
+    if (_minLeadingWidth == value)
+      return;
+    _minLeadingWidth = value;
     markNeedsLayout();
   }
 
