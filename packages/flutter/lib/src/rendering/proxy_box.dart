@@ -3600,7 +3600,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     SemanticsHintOverrides? hintOverrides,
     TextDirection? textDirection,
     SemanticsSortKey? sortKey,
-    Set<SemanticsTag>? tagsForChildren,
+    SemanticsTag? tagForChildren,
     VoidCallback? onTap,
     VoidCallback? onDismiss,
     VoidCallback? onLongPress,
@@ -3656,7 +3656,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _hintOverrides = hintOverrides,
        _textDirection = textDirection,
        _sortKey = sortKey,
-       _tagsForChildren = tagsForChildren,
+       _tagForChildren = tagForChildren,
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onScrollLeft = onScrollLeft,
@@ -4074,15 +4074,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// Adds Semenatics tags to the semantics subtree.
-  Set<SemanticsTag>? get tagsForChildren => _tagsForChildren;
-  Set<SemanticsTag>? _tagsForChildren;
-  set tagsForChildren(Set<SemanticsTag>? value) {
-    if (_tagsForChildren == value)
+  /// Adds a semenatics tag to the semantics subtree.
+  SemanticsTag? get tagForChildren => _tagForChildren;
+  SemanticsTag? _tagForChildren;
+  set tagForChildren(SemanticsTag? value) {
+    if (_tagForChildren == value)
       return;
-    if (!setEquals<SemanticsTag>(_tagsForChildren, value))
-      markNeedsSemanticsUpdate();
-    _tagsForChildren = value;
+    markNeedsSemanticsUpdate();
+    _tagForChildren = value;
   }
 
   /// The handler for [SemanticsAction.tap].
@@ -4562,8 +4561,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.textDirection = textDirection;
     if (sortKey != null)
       config.sortKey = sortKey;
-    if (tagsForChildren != null)
-      tagsForChildren!.forEach(config.addTagForChildren);
+    if (tagForChildren != null)
+      config.addTagForChildren(tagForChildren!);
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.

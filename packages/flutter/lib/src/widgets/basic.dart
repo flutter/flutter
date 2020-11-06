@@ -5461,7 +5461,7 @@ class RichText extends MultiChildRenderObjectWidget {
     span.visitChildren((InlineSpan span) {
       if (span is WidgetSpan) {
         result.add(Semantics(
-          tagsForChildren: <SemanticsTag>{PlaceholderSpanIndexSemanticsTag(index++)},
+          tagForChildren: PlaceholderSpanIndexSemanticsTag(index++),
           child: span.child,
         ));
       }
@@ -6894,7 +6894,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     String? onLongPressHint,
     TextDirection? textDirection,
     SemanticsSortKey? sortKey,
-    Set<SemanticsTag>? tagsForChildren,
+    SemanticsTag? tagForChildren,
     VoidCallback? onTap,
     VoidCallback? onLongPress,
     VoidCallback? onScrollLeft,
@@ -6949,7 +6949,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       hint: hint,
       textDirection: textDirection,
       sortKey: sortKey,
-      tagsForChildren: tagsForChildren,
+      tagForChildren: tagForChildren,
       onTap: onTap,
       onLongPress: onLongPress,
       onScrollLeft: onScrollLeft,
@@ -7066,7 +7066,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       hintOverrides: properties.hintOverrides,
       textDirection: _getTextDirection(context),
       sortKey: properties.sortKey,
-      tagsForChildren: properties.tagsForChildren,
+      tagForChildren: properties.tagForChildren,
       onTap: properties.onTap,
       onLongPress: properties.onLongPress,
       onScrollLeft: properties.onScrollLeft,
@@ -7138,7 +7138,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
       ..sortKey = properties.sortKey
-      ..tagsForChildren = properties.tagsForChildren
+      ..tagForChildren = properties.tagForChildren
       ..onTap = properties.onTap
       ..onLongPress = properties.onLongPress
       ..onScrollLeft = properties.onScrollLeft
