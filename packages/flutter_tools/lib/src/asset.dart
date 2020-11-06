@@ -46,8 +46,7 @@ abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
   static AssetBundleFactory get instance => context.get<AssetBundleFactory>();
 
-  static AssetBundleFactory get defaultInstance => _defaultInstance ??= _ManifestAssetBundleFactory(logger: globals.logger, fileSystem: globals.fs);
-  static AssetBundleFactory _defaultInstance;
+  static AssetBundleFactory get defaultInstance => _ManifestAssetBundleFactory(logger: globals.logger, fileSystem: globals.fs);
 
   /// Creates a new [AssetBundle].
   AssetBundle createBundle();
@@ -380,11 +379,11 @@ class ManifestAssetBundle implements AssetBundle {
       if (packageName == null)
         ...manifest.fontsDescriptor
       else
-        ..._createFontsDescriptor(_parsePackageFonts(
+        for (Font font in _parsePackageFonts(
           manifest,
           packageName,
           packageConfig,
-        )),
+        )) font.descriptor,
     ];
   }
 }
@@ -600,10 +599,6 @@ List<Font> _parsePackageFonts(
     packageFonts.add(Font('packages/$packageName/${font.familyName}', packageFontAssets));
   }
   return packageFonts;
-}
-
-List<Map<String, dynamic>> _createFontsDescriptor(List<Font> fonts) {
-  return fonts.map<Map<String, dynamic>>((Font font) => font.descriptor).toList();
 }
 
 // Given an assets directory like this:
