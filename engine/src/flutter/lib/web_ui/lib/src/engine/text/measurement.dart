@@ -202,7 +202,7 @@ abstract class TextMeasurementService {
     // see: https://github.com/flutter/flutter/issues/36341
     if (!window.physicalSize.isEmpty &&
         WebExperiments.instance!.useCanvasText &&
-        _canUseCanvasMeasurement(paragraph as EngineParagraph)) {
+        _canUseCanvasMeasurement(paragraph as DomParagraph)) {
       return canvasInstance;
     }
     return domInstance;
@@ -214,7 +214,7 @@ abstract class TextMeasurementService {
     rulerManager?._evictAllRulers();
   }
 
-  static bool _canUseCanvasMeasurement(EngineParagraph paragraph) {
+  static bool _canUseCanvasMeasurement(DomParagraph paragraph) {
     // Currently, the canvas-based approach only works on plain text that
     // doesn't have any of the following styles:
     // - decoration
@@ -227,7 +227,7 @@ abstract class TextMeasurementService {
 
   /// Measures the paragraph and returns a [MeasurementResult] object.
   MeasurementResult? measure(
-    EngineParagraph paragraph,
+    DomParagraph paragraph,
     ui.ParagraphConstraints constraints,
   ) {
     assert(rulerManager != null);
@@ -255,16 +255,16 @@ abstract class TextMeasurementService {
 
   /// Measures the width of a substring of the given [paragraph] with no
   /// constraints.
-  double measureSubstringWidth(EngineParagraph paragraph, int start, int end);
+  double measureSubstringWidth(DomParagraph paragraph, int start, int end);
 
   /// Returns text position given a paragraph, constraints and offset.
-  ui.TextPosition getTextPositionForOffset(EngineParagraph paragraph,
+  ui.TextPosition getTextPositionForOffset(DomParagraph paragraph,
       ui.ParagraphConstraints? constraints, ui.Offset offset);
 
   /// Delegates to a [ParagraphRuler] to measure a list of text boxes that
   /// enclose the given range of text.
   List<ui.TextBox> measureBoxesForRange(
-    EngineParagraph paragraph,
+    DomParagraph paragraph,
     ui.ParagraphConstraints constraints, {
     required int start,
     required int end,
@@ -302,7 +302,7 @@ abstract class TextMeasurementService {
   /// paragraph. When that's available, it can be used by a canvas to render
   /// the text line.
   MeasurementResult _doMeasure(
-    EngineParagraph paragraph,
+    DomParagraph paragraph,
     ui.ParagraphConstraints constraints,
     ParagraphRuler ruler,
   );
@@ -325,7 +325,7 @@ class DomTextMeasurementService extends TextMeasurementService {
 
   @override
   MeasurementResult _doMeasure(
-    EngineParagraph paragraph,
+    DomParagraph paragraph,
     ui.ParagraphConstraints constraints,
     ParagraphRuler ruler,
   ) {
@@ -350,7 +350,7 @@ class DomTextMeasurementService extends TextMeasurementService {
   }
 
   @override
-  double measureSubstringWidth(EngineParagraph paragraph, int start, int end) {
+  double measureSubstringWidth(DomParagraph paragraph, int start, int end) {
     assert(paragraph._plainText != null);
     final ParagraphGeometricStyle style = paragraph._geometricStyle;
     final ParagraphRuler ruler =
@@ -359,7 +359,7 @@ class DomTextMeasurementService extends TextMeasurementService {
     final String text = paragraph._plainText!.substring(start, end);
     final ui.Paragraph substringParagraph = paragraph._cloneWithText(text);
 
-    ruler.willMeasure(substringParagraph as EngineParagraph);
+    ruler.willMeasure(substringParagraph as DomParagraph);
     ruler.measureAsSingleLine();
     final TextDimensions dimensions = ruler.singleLineDimensions;
     ruler.didMeasure();
@@ -367,7 +367,7 @@ class DomTextMeasurementService extends TextMeasurementService {
   }
 
   @override
-  ui.TextPosition getTextPositionForOffset(EngineParagraph paragraph,
+  ui.TextPosition getTextPositionForOffset(DomParagraph paragraph,
       ui.ParagraphConstraints? constraints, ui.Offset offset) {
     assert(
       paragraph._measurementResult!.lines == null,
@@ -398,7 +398,7 @@ class DomTextMeasurementService extends TextMeasurementService {
   /// This method still needs to measure `minIntrinsicWidth`.
   MeasurementResult _measureSingleLineParagraph(
     ParagraphRuler ruler,
-    EngineParagraph paragraph,
+    DomParagraph paragraph,
     ui.ParagraphConstraints constraints,
   ) {
     final double width = constraints.width;
@@ -463,7 +463,7 @@ class DomTextMeasurementService extends TextMeasurementService {
   /// and get new values for width, height and alphabetic baseline. We also need
   /// to measure `minIntrinsicWidth`.
   MeasurementResult _measureMultiLineParagraph(ParagraphRuler ruler,
-      EngineParagraph paragraph, ui.ParagraphConstraints constraints) {
+      DomParagraph paragraph, ui.ParagraphConstraints constraints) {
     // If constraint is infinite, we must use _measureSingleLineParagraph
     final double width = constraints.width;
     final double minIntrinsicWidth = ruler.minIntrinsicDimensions.width;
@@ -549,7 +549,7 @@ class CanvasTextMeasurementService extends TextMeasurementService {
 
   @override
   MeasurementResult _doMeasure(
-    EngineParagraph paragraph,
+    DomParagraph paragraph,
     ui.ParagraphConstraints constraints,
     ParagraphRuler ruler,
   ) {
@@ -619,7 +619,7 @@ class CanvasTextMeasurementService extends TextMeasurementService {
   }
 
   @override
-  double measureSubstringWidth(EngineParagraph paragraph, int start, int end) {
+  double measureSubstringWidth(DomParagraph paragraph, int start, int end) {
     assert(paragraph._plainText != null);
     final String text = paragraph._plainText!;
     final ParagraphGeometricStyle style = paragraph._geometricStyle;
@@ -725,7 +725,7 @@ class LinesCalculator {
   LinesCalculator(this._canvasContext, this._paragraph, this._maxWidth);
 
   final html.CanvasRenderingContext2D _canvasContext;
-  final EngineParagraph _paragraph;
+  final DomParagraph _paragraph;
   final double _maxWidth;
 
   String? get _text => _paragraph._plainText;
@@ -997,7 +997,7 @@ class MaxIntrinsicCalculator {
 
 /// Calculates the offset necessary for the given line to be correctly aligned.
 double _calculateAlignOffsetForLine({
-  required EngineParagraph paragraph,
+  required DomParagraph paragraph,
   required double lineWidth,
   required double maxWidth,
 }) {

@@ -178,7 +178,7 @@ class TextDimensions {
   ///
   /// The primary efficiency gain is from rare occurrence of rich text in
   /// typical apps.
-  void updateText(EngineParagraph from, ParagraphGeometricStyle style) {
+  void updateText(DomParagraph from, ParagraphGeometricStyle style) {
     assert(from != null); // ignore: unnecessary_null_comparison
     assert(_element != null); // ignore: unnecessary_null_comparison
     assert(from._debugHasSameRootStyle(style));
@@ -563,12 +563,12 @@ class ParagraphRuler {
   }
 
   /// The paragraph being measured.
-  EngineParagraph? _paragraph;
+  DomParagraph? _paragraph;
 
   /// Prepares this ruler for measuring the given [paragraph].
   ///
   /// This method must be called before calling any of the `measure*` methods.
-  void willMeasure(EngineParagraph paragraph) {
+  void willMeasure(DomParagraph paragraph) {
     assert(paragraph != null); // ignore: unnecessary_null_comparison
     assert(() {
       if (_paragraph != null) {
@@ -855,7 +855,7 @@ class ParagraphRuler {
   // is changing.
   static const int _constraintCacheSize = 8;
 
-  void cacheMeasurement(EngineParagraph paragraph, MeasurementResult? item) {
+  void cacheMeasurement(DomParagraph paragraph, MeasurementResult? item) {
     final String? plainText = paragraph._plainText;
     final List<MeasurementResult?> constraintCache =
         _measurementCache[plainText] ??= <MeasurementResult?>[];
@@ -874,7 +874,7 @@ class ParagraphRuler {
   }
 
   MeasurementResult? cacheLookup(
-      EngineParagraph paragraph, ui.ParagraphConstraints constraints) {
+      DomParagraph paragraph, ui.ParagraphConstraints constraints) {
     final String? plainText = paragraph._plainText;
     if (plainText == null) {
       // Multi span paragraph, do not use cache item.
