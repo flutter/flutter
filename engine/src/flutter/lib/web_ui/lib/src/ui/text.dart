@@ -588,7 +588,7 @@ abstract class ParagraphBuilder {
     if (engine.useCanvasKit) {
       return engine.CkParagraphBuilder(style);
     } else {
-      return engine.EngineParagraphBuilder(style as engine.EngineParagraphStyle);
+      return engine.DomParagraphBuilder(style as engine.EngineParagraphStyle);
     }
   }
   void pushStyle(TextStyle style);

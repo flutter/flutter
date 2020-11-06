@@ -64,8 +64,8 @@ void testMain()  async {
     final ui.ParagraphStyle s3 = ui.ParagraphStyle(fontSize: 22.0);
 
     ParagraphGeometricStyle style1, style2, style3;
-    EngineParagraph style1Text1, style1Text2; // two paragraphs sharing style
-    EngineParagraph style2Text1, style3Text3;
+    DomParagraph style1Text1, style1Text2; // two paragraphs sharing style
+    DomParagraph style2Text1, style3Text3;
 
     setUp(() {
       style1Text1 = build(s1, '1');
@@ -481,7 +481,7 @@ void testMain()  async {
     testMeasurements(
       'wraps multi-line text correctly when constraint width is infinite',
       (TextMeasurementService instance) {
-        final EngineParagraph paragraph = build(ahemStyle, '123\n456 789');
+        final DomParagraph paragraph = build(ahemStyle, '123\n456 789');
         final MeasurementResult result =
             instance.measure(paragraph, infiniteConstraints);
 

@@ -162,13 +162,42 @@ class EngineLineMetrics implements ui.LineMetrics {
   }
 }
 
-/// The web implementation of [ui.Paragraph].
-class EngineParagraph implements ui.Paragraph {
+/// Common interface for all the implementations of [ui.Paragraph] in the web
+/// engine.
+abstract class EngineParagraph implements ui.Paragraph {
+  /// Whether this paragraph has been laid out or not.
+  bool get isLaidOut;
+
+  /// Whether this paragraph can be drawn on a bitmap canvas.
+  bool get drawOnCanvas;
+
+  /// Whether this paragraph is doing arbitrary paint operations that require
+  /// a bitmap canvas, and can't be expressed in a DOM canvas.
+  bool get hasArbitraryPaint;
+
+  void paint(BitmapCanvas canvas, ui.Offset offset);
+
+  /// Generates a flat string computed from all the spans of the paragraph.
+  String toPlainText();
+
+  /// Returns a DOM element that represents the entire paragraph and its
+  /// children.
+  ///
+  /// Generates a new DOM element on every invocation.
+  html.HtmlElement toDomElement();
+}
+
+/// Uses the DOM and hierarchical <span> elements to represent the span of the
+/// paragraph.
+///
+/// This implementation will go away once the new [CanvasParagraph] is
+/// complete and turned on by default.
+class DomParagraph implements EngineParagraph {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
   ///
-  /// To create a [ui.Paragraph] object, use a [ui.ParagraphBuilder].
-  EngineParagraph({
+  /// To create a [DomParagraph] object, use a [DomParagraphBuilder].
+  DomParagraph({
     required html.HtmlElement paragraphElement,
     required ParagraphGeometricStyle geometricStyle,
     required String? plainText,
@@ -216,6 +245,7 @@ class EngineParagraph implements ui.Paragraph {
 
   bool get _hasLineMetrics => _measurementResult?.lines != null;
 
+  // Defaulting to -1 for non-laid-out paragraphs like the native engine does.
   @override
   double get width => _measurementResult?.width ?? -1;
 
@@ -337,6 +367,7 @@ class EngineParagraph implements ui.Paragraph {
 
   bool get hasArbitraryPaint => _geometricStyle.ellipsis != null;
 
+  @override
   void paint(BitmapCanvas canvas, ui.Offset offset) {
     assert(drawOnCanvas);
     assert(isLaidOut);
@@ -395,6 +426,13 @@ class EngineParagraph implements ui.Paragraph {
     }
   }
 
+  @override
+  String toPlainText() {
+    return _plainText ??
+        js_util.getProperty(_paragraphElement, 'textContent') as String;
+  }
+
+  @override
   html.HtmlElement toDomElement() {
     assert(isLaidOut);
 
@@ -565,7 +603,7 @@ class EngineParagraph implements ui.Paragraph {
   }
 
   ui.Paragraph _cloneWithText(String plainText) {
-    return EngineParagraph(
+    return DomParagraph(
       plainText: plainText,
       paragraphElement: _paragraphElement.clone(true) as html.HtmlElement,
       geometricStyle: _geometricStyle,
@@ -902,6 +940,15 @@ class EngineTextStyle implements ui.TextStyle {
         _foreground = foreground,
         _shadows = shadows;
 
+  factory EngineTextStyle.fromParagraphStyle(EngineParagraphStyle paragraphStyle) => EngineTextStyle(
+    fontWeight: paragraphStyle._fontWeight,
+    fontStyle: paragraphStyle._fontStyle,
+    fontFamily: paragraphStyle._fontFamily,
+    fontSize: paragraphStyle._fontSize,
+    height: paragraphStyle._height,
+    locale: paragraphStyle._locale,
+  );
+
   final ui.Color? _color;
   final ui.TextDecoration? _decoration;
   final ui.Color? _decorationColor;
@@ -1114,7 +1161,7 @@ class EngineStrutStyle implements ui.StrutStyle {
 }
 
 /// The web implementation of [ui.ParagraphBuilder].
-class EngineParagraphBuilder implements ui.ParagraphBuilder {
+class DomParagraphBuilder implements ui.ParagraphBuilder {
   /// Marks a call to the [pop] method in the [_ops] list.
   static final Object _paragraphBuilderPop = Object();
 
@@ -1122,9 +1169,9 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
   final EngineParagraphStyle _paragraphStyle;
   final List<dynamic> _ops = <dynamic>[];
 
-  /// Creates an [EngineParagraphBuilder] object, which is used to create a
-  /// [EngineParagraph].
-  EngineParagraphBuilder(EngineParagraphStyle style) : _paragraphStyle = style {
+  /// Creates a [DomParagraphBuilder] object, which is used to create a
+  /// [DomParagraph].
+  DomParagraphBuilder(EngineParagraphStyle style) : _paragraphStyle = style {
     // TODO(b/128317744): Implement support for strut font families.
     List<String?> strutFontFamilies;
     if (style._strutStyle != null) {
@@ -1337,7 +1384,7 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
       // Empty paragraph.
       _applyTextStyleToElement(
           element: _paragraphElement, style: cumulativeStyle);
-      return EngineParagraph(
+      return DomParagraph(
         paragraphElement: _paragraphElement,
         geometricStyle: ParagraphGeometricStyle(
           textDirection: _paragraphStyle._effectiveTextDirection,
@@ -1394,7 +1441,7 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
       _applyTextBackgroundToElement(
           element: _paragraphElement, style: cumulativeStyle);
     }
-    return EngineParagraph(
+    return DomParagraph(
       paragraphElement: _paragraphElement,
       geometricStyle: ParagraphGeometricStyle(
         textDirection: _paragraphStyle._effectiveTextDirection,
@@ -1450,7 +1497,7 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
       }
     }
 
-    return EngineParagraph(
+    return DomParagraph(
       paragraphElement: _paragraphElement,
       geometricStyle: ParagraphGeometricStyle(
         textDirection: _paragraphStyle._effectiveTextDirection,
@@ -1476,7 +1523,7 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
 /// Holds information for a placeholder in a paragraph.
 ///
 /// [width], [height] and [baselineOffset] are expected to be already scaled.
-class ParagraphPlaceholder {
+class ParagraphPlaceholder extends ParagraphSpan {
   ParagraphPlaceholder(
     this.width,
     this.height,
