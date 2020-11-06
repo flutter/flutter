@@ -6,7 +6,6 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -96,13 +95,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addOption('packages',
         hide: !showPackagesCommand,
         help: 'Path to your ".packages" file.\n$packagesHelp');
-
-    argParser.addOption('flutter-root',
-        hide: !verboseHelp,
-        help: 'The root directory of the Flutter repository.\n'
-              'Defaults to \$$kFlutterRootEnvironmentVariableName if set, otherwise uses the parent '
-              'of the directory that the "flutter" script itself is in.');
-
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
     }
@@ -112,8 +104,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         help: 'Path to your engine src directory, if you are building Flutter locally.\n'
               'Defaults to \$$kFlutterEngineEnvironmentVariableName if set, otherwise defaults to '
               'the path given in your pubspec.yaml dependency_overrides for $kFlutterEnginePackageName, '
-              'if any, or, failing that, tries to guess at the location based on the value of the '
-              '--flutter-root option.');
+              'if any.');
 
     argParser.addOption('local-engine',
         hide: !verboseHelp,
@@ -225,15 +216,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
       FlutterTesterDevices.showFlutterTesterDevice = true;
     }
 
-    // We must set Cache.flutterRoot early because other features use it (e.g.
-    // enginePath's initializer uses it).
-    final String flutterRoot = topLevelResults['flutter-root'] as String ?? Cache.defaultFlutterRoot(
-      platform: globals.platform,
-      fileSystem: globals.fs,
-      userMessages: globals.userMessages,
-    );
-    Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(flutterRoot));
-
     // Set up the tooling configuration.
     final EngineBuildPaths engineBuildPaths = await globals.localEngineLocator.findEnginePath(
       topLevelResults['local-engine-src-path'] as String,
@@ -301,15 +283,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
         await super.runCommand(topLevelResults);
       },
-    );
-  }
-
-  @visibleForTesting
-  static void initFlutterRoot() {
-    Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-      platform: globals.platform,
-      fileSystem: globals.fs,
-      userMessages: globals.userMessages,
     );
   }
 
