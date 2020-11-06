@@ -5369,48 +5369,6 @@ class Flow extends MultiChildRenderObjectWidget {
   }
 }
 
-class _SemanticsTagWidget extends SingleChildRenderObjectWidget {
-  const _SemanticsTagWidget({
-    Key? key,
-    required Widget child,
-    required this.index,
-  }) : super(key: key, child: child);
-
-  final int index;
-
-  @override
-  _SemanticsTagRenderObject createRenderObject(BuildContext context) {
-    return _SemanticsTagRenderObject(index);
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, _SemanticsTagRenderObject renderObject) {
-    super.updateRenderObject(context, renderObject);
-    renderObject.index = index;
-  }
-
-}
-
-class _SemanticsTagRenderObject extends RenderProxyBox {
-  _SemanticsTagRenderObject(int index) : _index = index,
-                                         super();
-
-  int get index => _index;
-  int _index;
-  set index(int value) {
-    if (_index != value) {
-      markNeedsSemanticsUpdate();
-      _index = value;
-    }
-  }
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    config.addTagForChildren(PlaceholderSpanIndexSemanticsTag(index));
-  }
-}
-
 /// A paragraph of rich text.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=rykDVh-QFfw}
@@ -5502,8 +5460,8 @@ class RichText extends MultiChildRenderObjectWidget {
     final List<Widget> result = <Widget>[];
     span.visitChildren((InlineSpan span) {
       if (span is WidgetSpan) {
-        result.add(_SemanticsTagWidget(
-          index: index++,
+        result.add(Semantics(
+          tagsForChildren: <SemanticsTag>{PlaceholderSpanIndexSemanticsTag(index++)},
           child: span.child,
         ));
       }
@@ -6936,6 +6894,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     String? onLongPressHint,
     TextDirection? textDirection,
     SemanticsSortKey? sortKey,
+    Set<SemanticsTag>? tagsForChildren,
     VoidCallback? onTap,
     VoidCallback? onLongPress,
     VoidCallback? onScrollLeft,
@@ -6990,6 +6949,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       hint: hint,
       textDirection: textDirection,
       sortKey: sortKey,
+      tagsForChildren: tagsForChildren,
       onTap: onTap,
       onLongPress: onLongPress,
       onScrollLeft: onScrollLeft,
@@ -7106,6 +7066,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       hintOverrides: properties.hintOverrides,
       textDirection: _getTextDirection(context),
       sortKey: properties.sortKey,
+      tagsForChildren: properties.tagsForChildren,
       onTap: properties.onTap,
       onLongPress: properties.onLongPress,
       onScrollLeft: properties.onScrollLeft,
@@ -7177,6 +7138,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
       ..sortKey = properties.sortKey
+      ..tagsForChildren = properties.tagsForChildren
       ..onTap = properties.onTap
       ..onLongPress = properties.onLongPress
       ..onScrollLeft = properties.onScrollLeft

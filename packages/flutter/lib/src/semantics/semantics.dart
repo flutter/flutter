@@ -610,6 +610,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.hintOverrides,
     this.textDirection,
     this.sortKey,
+    this.tagsForChildren,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -912,6 +913,12 @@ class SemanticsProperties extends DiagnosticableTree {
   /// traversed by the accessibility services on the platform (e.g. VoiceOver
   /// on iOS and TalkBack on Android).
   final SemanticsSortKey? sortKey;
+
+  /// Adds additional information onto the semantics subtree.
+  ///
+  /// This property provides a way for rendering objects to annotate their
+  /// semantics children without directly access them.
+  final Set<SemanticsTag>? tagsForChildren;
 
   /// The handler for [SemanticsAction.tap].
   ///

@@ -942,9 +942,10 @@ class RenderParagraph extends RenderBox
       );
 
       if (info.isPlaceholder) {
-        // A placeholder span may not have a semantics node, we skip this
-        // placeholder semantics info if the tag does not match.
-        if (children.length > childIndex && children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
+        // A placeholder span may have 0 to multple semantics nodes, we need
+        // to annotate all of the semantics nodes belong to this span.
+        while (children.length > childIndex &&
+               children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           final SemanticsNode childNode = children.elementAt(childIndex);
           final TextParentData parentData = child!.parentData! as TextParentData;
           childNode.rect = Rect.fromLTWH(
@@ -987,7 +988,7 @@ class RenderParagraph extends RenderBox
         newChildren.add(newChild);
       }
     }
-    // Makes sure we exhausted the list.
+    // Makes sure we annotated all of the semantics children.
     assert(childIndex == children.length);
     assert(child == null);
 

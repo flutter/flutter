@@ -1043,7 +1043,6 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 2', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    // Without the fix for this bug the pump widget will throw a RangeError.
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1090,12 +1089,69 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 3', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    // Without the fix for this bug the pump widget will throw a RangeError.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
+          text: TextSpan(children: <InlineSpan>[
+            const WidgetSpan(child: SizedBox.shrink()),
+            WidgetSpan(
+              child: Row(
+                children: <Widget>[
+                  Semantics(
+                    container: true,
+                    child: const Text('foo'),
+                  ),
+                  Semantics(
+                    container: true,
+                    child: const Text('bar'),
+                  ),
+                ],
+              ),
+            ),
+            TextSpan(
+              text: 'HELLO',
+              style: const TextStyle(color: Colors.black),
+              recognizer: TapGestureRecognizer()..onTap = () {},
+            ),
+          ]),
+        ),
+      )
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(label: 'foo'),
+            TestSemantics(label: 'bar'),
+            TestSemantics(
+              label: 'HELLO',
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isLink,
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+    ignoreId: true,
+    ignoreRect: true,
+    ignoreTransform: true,
+    ));
+  }, semanticsEnabled: true, skip: isBrowser); // Browser does not support widget span.
+
+  // Regression test for https://github.com/flutter/flutter/issues/69787
+  testWidgets('WidgetSpans with no semantic information are elided from semantics - case 4', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: ClipRect(           // If you remove the clip, the crash goes away
+          child: ClipRect(
             child: Container(
               color: Colors.green,
               height: 100,
