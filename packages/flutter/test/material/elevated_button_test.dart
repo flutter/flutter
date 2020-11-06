@@ -1011,6 +1011,31 @@ void main() {
     expect(physicalShape().elevation, 0);
     expect(physicalShape().color, disabledBackgroundColor);
   });
+
+  testWidgets('By default, ElevatedButton shape outline is defined by shape.side', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/69544
+
+    const Color borderColor = Color(0xff4caf50);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        home: Center(
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(width: 4, color: borderColor),
+              ),
+            ),
+            onPressed: () { },
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(ElevatedButton), paints ..path(strokeWidth: 4) ..drrect(color: borderColor));
+  });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {

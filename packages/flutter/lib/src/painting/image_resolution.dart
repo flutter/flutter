@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
@@ -14,6 +13,11 @@ import 'package:flutter/services.dart';
 import 'image_provider.dart';
 
 const String _kAssetManifestFileName = 'AssetManifest.json';
+
+/// A screen with a device-pixel ratio strictly less than this value is
+/// considered a low-resolution screen (typically entry-level to mid-range
+/// laptops, desktop screens up to QHD, low-end tablets such as Kindle Fire).
+const double _kLowDprLimit = 2.0;
 
 /// Fetches an image from an [AssetBundle], having determined the exact image to
 /// use based on the context.
@@ -34,18 +38,52 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 ///
 /// For example, suppose an application wants to use an icon named
 /// "heart.png". This icon has representations at 1.0 (the main icon), as well
-/// as 1.5 and 2.0 pixel ratios (variants). The asset bundle should then contain
-/// the following assets:
+/// as 2.0 and 4.0 pixel ratios (variants). The asset bundle should then
+/// contain the following assets:
 ///
 /// ```
 /// heart.png
-/// 1.5x/heart.png
 /// 2.0x/heart.png
+/// 4.0x/heart.png
 /// ```
 ///
 /// On a device with a 1.0 device pixel ratio, the image chosen would be
-/// heart.png; on a device with a 1.3 device pixel ratio, the image chosen
-/// would be 1.5x/heart.png.
+/// heart.png; on a device with a 2.0 device pixel ratio, the image chosen
+/// would be 2.0x/heart.png; on a device with a 4.0 device pixel ratio, the
+/// image chosen would be 4.0x/heart.png.
+///
+/// On a device with a device pixel ratio that does not exactly match an
+/// available asset the "best match" is chosen. Which asset is the best depends
+/// on the screen. Low-resolution screens (those with device pixel ratio
+/// strictly less than 2.0) use a different matching algorithm from the
+/// high-resolution screen. Because in low-resolution screens the physical
+/// pixels are visible to the user upscaling artifacts (e.g. blurred edges) are
+/// more pronounced. Therefore, a higher resolution asset is chosen, if
+/// available. For higher-resolution screens, where individual physical pixels
+/// are not visible to the user, the asset variant with the pixel ratio that's
+/// the closest to the screen's device pixel ratio is chosen.
+///
+/// For example, for a screen with device pixel ratio 1.25 the image chosen
+/// would be 2.0x/heart.png, even though heart.png (i.e. 1.0) is closer. This
+/// is because the screen is considered low-resolution. For a screen with
+/// device pixel ratio of 2.25 the image chosen would also be 2.0x/heart.png.
+/// This is because the screen is considered to be a high-resolution screen,
+/// and therefore upscaling a 2.0x image to 2.25 won't result in visible
+/// upscaling artifacts. However, for a screen with device-pixel ratio 3.25 the
+/// image chosen would be 4.0x/heart.png because it's closer to 4.0 than it is
+/// to 2.0.
+///
+/// Choosing a higher-resolution image than necessary may waste significantly
+/// more memory if the difference between the screen device pixel ratio and
+/// the device pixel ratio of the image is high. To reduce memory usage,
+/// consider providing more variants of the image. In the example above adding
+/// a 3.0x/heart.png variant would improve memory usage for screens with device
+/// pixel ratios between 3.0 and 3.5.
+///
+/// [ImageConfiguration] can be used to customize the selection of the image
+/// variant by setting [ImageConfiguration.devicePixelRatio] to value different
+/// from the default. The default value is derived from
+/// [MediaQueryData.devicePixelRatio] by [createLocalImageConfiguration].
 ///
 /// The directory level of the asset does not matter as long as the variants are
 /// at the equivalent level; that is, the following is also a valid bundle
@@ -240,11 +278,22 @@ class AssetImage extends AssetBundleImageProvider {
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
     // docs)
-    return _findNearest(mapping, config.devicePixelRatio!);
+    return _findBestVariant(mapping, config.devicePixelRatio!);
   }
 
-  // Return the value for the key in a [SplayTreeMap] nearest the provided key.
-  String? _findNearest(SplayTreeMap<double, String> candidates, double value) {
+  // Returns the "best" asset variant amongst the availabe `candidates`.
+  //
+  // The best variant is chosen as follows:
+  // - Choose a variant whose key matches `value` exactly, if available.
+  // - If `value` is less than the lowest key, choose the variant with the
+  //   lowest key.
+  // - If `value` is greater than the highest key, choose the variant with
+  //   the highest key.
+  // - If the screen has low device pixel ratio, chosse the variant with the
+  //   lowest key higher than `value`.
+  // - If the screen has high device pixel ratio, choose the variant with the
+  //   key nearest to `value`.
+  String? _findBestVariant(SplayTreeMap<double, String> candidates, double value) {
     if (candidates.containsKey(value))
       return candidates[value]!;
     final double? lower = candidates.lastKeyBefore(value);
@@ -253,7 +302,12 @@ class AssetImage extends AssetBundleImageProvider {
       return candidates[upper];
     if (upper == null)
       return candidates[lower];
-    if (value > (lower + upper) / 2)
+
+    // On screens with low device-pixel ratios the artifacts from upscaling
+    // images are more visible than on screens with a higher device-pixel
+    // ratios because the physical pixels are larger. Choose the higher
+    // resolution image in that case instead of the nearest one.
+    if (value < _kLowDprLimit || value > (lower + upper) / 2)
       return candidates[upper];
     else
       return candidates[lower];

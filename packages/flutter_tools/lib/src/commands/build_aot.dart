@@ -28,7 +28,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       ..addFlag('quiet', defaultsTo: false)
       ..addMultiOption('ios-arch',
         splitCommas: true,
-        defaultsTo: defaultIOSArchs.map<String>(getNameForDarwinArch),
+        defaultsTo: <String>[getNameForDarwinArch(DarwinArch.arm64)],
         allowed: DarwinArch.values.map<String>(getNameForDarwinArch),
         help: 'iOS architectures to build.',
       )

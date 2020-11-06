@@ -284,10 +284,14 @@ class SwitchListTile extends StatelessWidget {
        assert(autofocus != null),
        super(key: key);
 
-  /// Creates the wrapped switch with [Switch.adaptive].
+  /// Creates a Material [ListTile] with an adaptive [Switch], following
+  /// Material design's
+  /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
   ///
-  /// Creates a [CupertinoSwitch] if the target platform is iOS, creates a
-  /// material design switch otherwise.
+  /// This widget uses [Switch.adaptive] to change the graphics of the switch
+  /// component based on the ambient [ThemeData.platform]. On iOS and macOS, a
+  /// [CupertinoSwitch] will be used. On other platforms a Material design
+  /// [Switch] will be used.
   ///
   /// If a [CupertinoSwitch] is created, the following parameters are
   /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],

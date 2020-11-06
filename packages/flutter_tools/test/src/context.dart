@@ -414,6 +414,9 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
       BufferLogger.test(),
     );
   }
+
+  @override
+  List<String> xcrunCommand() => <String>['xcrun'];
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {
