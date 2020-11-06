@@ -108,13 +108,13 @@ TEST(RasterizerTest, drawWithExternalViewEmbedder) {
   EXPECT_CALL(delegate, OnFrameRasterized(_));
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<MockSurface>();
-  MockExternalViewEmbedder external_view_embedder;
-  EXPECT_CALL(*surface, GetExternalViewEmbedder())
-      .WillRepeatedly(Return(&external_view_embedder));
-  EXPECT_CALL(external_view_embedder,
+  std::shared_ptr<MockExternalViewEmbedder> external_view_embedder =
+      std::make_shared<MockExternalViewEmbedder>();
+  rasterizer->SetExternalViewEmbedder(external_view_embedder);
+  EXPECT_CALL(*external_view_embedder,
               BeginFrame(SkISize(), nullptr, 2.0,
                          fml::RefPtr<fml::RasterThreadMerger>(nullptr)));
-  EXPECT_CALL(external_view_embedder,
+  EXPECT_CALL(*external_view_embedder,
               EndFrame(false, fml::RefPtr<fml::RasterThreadMerger>(nullptr)));
   rasterizer->Setup(std::move(surface));
   fml::AutoResetWaitableEvent latch;
