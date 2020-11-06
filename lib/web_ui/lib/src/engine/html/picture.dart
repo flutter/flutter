@@ -51,6 +51,7 @@ class _PaintRequest {
 List<_PaintRequest> _paintQueue = <_PaintRequest>[];
 
 void _recycleCanvas(EngineCanvas? canvas) {
+  assert(canvas == null || !_recycledCanvases.contains(canvas));
   if (canvas is BitmapCanvas) {
     canvas.setElementCache(null);
     if (canvas.isReusable()) {
@@ -316,7 +317,7 @@ class PersistedPicture extends PersistedLeafSurface {
       if (rootElement != null) {
         domRenderer.clearDom(rootElement!);
       }
-      if (_canvas != null) {
+      if (_canvas != null && _canvas != oldCanvas) {
         _recycleCanvas(_canvas);
       }
       _canvas = null;
@@ -395,7 +396,7 @@ class PersistedPicture extends PersistedLeafSurface {
   }
 
   void _applyDomPaint(EngineCanvas? oldCanvas) {
-    _recycleCanvas(oldCanvas);
+    _recycleCanvas(_canvas);
     _canvas = DomCanvas(rootElement!);
     domRenderer.clearDom(rootElement!);
     picture.recordingCanvas!.apply(_canvas!, _optimalLocalCullRect);
@@ -439,9 +440,7 @@ class PersistedPicture extends PersistedLeafSurface {
                 bitmapCanvas.bitmapPixelCount;
           }
           domRenderer.clearDom(rootElement!);
-          if (_canvas is BitmapCanvas) {
-            rootElement!.append(_canvas!.rootElement);
-          }
+          rootElement!.append(_canvas!.rootElement);
           _canvas!.clear();
           picture.recordingCanvas!.apply(_canvas!, _optimalLocalCullRect);
         },
@@ -590,6 +589,7 @@ class PersistedPicture extends PersistedLeafSurface {
   @override
   void discard() {
     _recycleCanvas(_canvas);
+    _canvas = null;
     super.discard();
   }
 
