@@ -1,4 +1,4 @@
-Signature: 4ea43c822be6214efdb299275308cc58
+Signature: 786fa74b8298e6fff44712d264c8946f
 
 UNUSED LICENSES:
 
@@ -1476,6 +1476,7 @@ FILE: ../../../third_party/skia/src/sksl/generated/sksl_geom.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_interp.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_pipeline.dehydrated.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_public.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_vert.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
 FILE: ../../../third_party/skia/src/sksl/sksl_fp_raw.sksl
@@ -1484,6 +1485,7 @@ FILE: ../../../third_party/skia/src/sksl/sksl_geom.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_gpu.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_interp.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_pipeline.sksl
+FILE: ../../../third_party/skia/src/sksl/sksl_public.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.sksl
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2011 Google Inc. All rights reserved.
@@ -4137,10 +4139,12 @@ FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_coretext.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode.h
 FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode_icu.cpp
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFe.h
+FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeColorMatrix.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeTurbulence.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFilter.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFilterContext.h
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFe.cpp
+FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeColorMatrix.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeTurbulence.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilter.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilterContext.cpp
