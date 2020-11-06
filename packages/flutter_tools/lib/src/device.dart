@@ -835,7 +835,7 @@ class DebuggingOptions {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
     this.disableDds = false,
-    this.dartEntrypointArgs,
+    this.dartEntrypointArgs = const <String>[],
     this.dartFlags = '',
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
@@ -866,7 +866,7 @@ class DebuggingOptions {
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
-      this.dartEntrypointArgs,
+      this.dartEntrypointArgs = const <String>[],
       this.port,
       this.hostname,
       this.webEnableExposeUrl,

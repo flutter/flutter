@@ -119,8 +119,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       ..addMultiOption('dart-entrypoint-args',
         abbr: 'a',
         help: 'Pass a list of arguments to the Dart entrypoint at application '
-              'startup. Specify this option multiple times each with one argument '
-              'to pass multiple arguments to the Dart entrypoint.');
+              'startup. By default this is main(List<String> args). Specify '
+              'this option multiple times each with one argument to pass '
+              'multiple arguments to the Dart entrypoint. Currently this is '
+              'only supported on desktop platforms.');
     usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
