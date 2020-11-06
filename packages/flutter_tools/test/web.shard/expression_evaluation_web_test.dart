@@ -4,14 +4,13 @@
 
 import 'package:file/file.dart';
 import 'package:matcher/matcher.dart';
-
 import 'package:vm_service/vm_service.dart';
 
+import '../integration.shard/test_data/basic_project.dart';
+import '../integration.shard/test_data/tests_project.dart';
+import '../integration.shard/test_driver.dart';
+import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
-import 'test_data/basic_project.dart';
-import 'test_data/tests_project.dart';
-import 'test_driver.dart';
-import 'test_utils.dart';
 
 void batch1() {
   final BasicProject _project = BasicProject();
@@ -57,7 +56,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await failToEvaluateExpression(_flutter);
     await cleanProject();
-  }, skip: 'Cannot run on non-web-bot'); // Issue: https://github.com/flutter/flutter/issues/69711
+  });
 
  testWithoutContext('flutter run expression evaluation - no native javascript objects in static scope', () async {
     await initProject();
@@ -65,7 +64,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await checkStaticScope(_flutter);
     await cleanProject();
-  }, skip: 'Cannot run on non-web-bot'); // Issue: https://github.com/flutter/flutter/issues/69711
+  });
 
   testWithoutContext('flutter run expression evaluation - can handle compilation errors', () async {
     await initProject();
@@ -73,7 +72,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await evaluateErrorExpressions(_flutter);
     await cleanProject();
-  }, skip: 'Cannot run on non-web-bot'); // Issue: https://github.com/flutter/flutter/issues/69711
+  });
 
   testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in top level function', () async {
     await initProject();
@@ -81,7 +80,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
-  }, skip: 'Cannot run on non-web-bot'); // Issue: https://github.com/flutter/flutter/issues/69711
+  });
 
   testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in build method', () async {
     await initProject();
@@ -89,7 +88,7 @@ void batch1() {
     await breakInBuildMethod(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
-  }, skip: 'Cannot run on non-web-bot'); // Issue: https://github.com/flutter/flutter/issues/69711
+  });
 
   testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in top level function', () async {
     await initProject();
@@ -97,7 +96,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  }, skip: 'Cannot run on non-web-bot'); // Issue: https://github.com/flutter/flutter/issues/69711
+  });
 
   testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in build method', () async {
     await initProject();
@@ -105,7 +104,7 @@ void batch1() {
     await breakInBuildMethod(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  }, skip: 'Cannot run on non-web-bot'); // Issue: https://github.com/flutter/flutter/issues/69711
+  });
 }
 
 void batch2() {
@@ -149,7 +148,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await failToEvaluateExpression(_flutter);
     await cleanProject();
-  }, skip: 'Cannot run on non-web-bot'); // Issue: https://github.com/flutter/flutter/issues/69711
+  });
 
   testWithoutContext('flutter test expression evaluation - can evaluate trivial expressions in a test', () async {
     await initProject();
@@ -157,7 +156,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
-  }, skip: 'Cannot run on non-web-bot'); // Issue: https://github.com/flutter/flutter/issues/69711
+  });
 
   testWithoutContext('flutter test expression evaluation - can evaluate complex expressions in a test', () async {
     await initProject();
@@ -165,7 +164,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  }, skip: 'Cannot run on non-web-bot'); // Issue: https://github.com/flutter/flutter/issues/69711
+  });
 }
 
 Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {

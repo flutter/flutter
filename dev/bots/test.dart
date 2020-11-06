@@ -320,7 +320,7 @@ Future<void> _runToolTests() async {
     Directory(path.join(toolsPath, kTest))
       .listSync()
       .map<String>((FileSystemEntity entry) => entry.path)
-      .where((String name) => name.endsWith(kDotShard))
+      .where((String name) => name.endsWith(kDotShard) && !name.contains('web'))
       .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
