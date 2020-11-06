@@ -520,6 +520,10 @@ class LocalizationsGenerator {
   /// classes.
   String _generatedLocalizationsFile;
 
+  /// A generated file that will contain the list of messages for each locale
+  /// that do not have a translation yet.
+  File _untranslatedMessagesFile;
+
   /// The file that contains the list of inputs and outputs for generating
   /// localizations.
   File _inputsAndOutputsListFile;
@@ -554,6 +558,7 @@ class LocalizationsGenerator {
     bool useSyntheticPackage = true,
     String projectPathString,
     bool areResourceAttributesRequired = false,
+    String untranslatedMessagesFile,
   }) {
     _useSyntheticPackage = useSyntheticPackage;
     setProjectDir(projectPathString);
@@ -564,6 +569,7 @@ class LocalizationsGenerator {
     setPreferredSupportedLocales(preferredSupportedLocale);
     _setHeader(headerString, headerFile);
     _setUseDeferredLoading(useDeferredLoading);
+    _setUntranslatedMessagesFile(untranslatedMessagesFile);
     className = classNameString;
     _setInputsAndOutputsListFile(inputsAndOutputsListPath);
     _areResourceAttributesRequired = areResourceAttributesRequired;
@@ -761,6 +767,16 @@ class LocalizationsGenerator {
       throw L10nException('useDeferredLoading argument cannot be null.');
     }
     _useDeferredLoading = useDeferredLoading;
+  }
+
+  void _setUntranslatedMessagesFile(String untranslatedMessagesFileString) {
+    if (untranslatedMessagesFileString == null || untranslatedMessagesFileString.isEmpty) {
+      return;
+    }
+
+    _untranslatedMessagesFile = _fs.file(
+      globals.fs.path.join(untranslatedMessagesFileString),
+    );
   }
 
   void _setInputsAndOutputsListFile(String inputsAndOutputsListPath) {
@@ -1017,7 +1033,7 @@ class LocalizationsGenerator {
       .replaceAll('@(delegateClass)', delegateClass);
   }
 
-  void writeOutputFiles() {
+  void writeOutputFiles(Logger logger) {
     // First, generate the string contents of all necessary files.
     _generateCode();
 
@@ -1054,6 +1070,20 @@ class LocalizationsGenerator {
     });
 
     baseOutputFile.writeAsStringSync(_generatedLocalizationsFile);
+
+    if (_untranslatedMessagesFile != null) {
+      _generateUntranslatedMessagesFile(logger);
+    } else if (_unimplementedMessages.isNotEmpty) {
+      _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
+        logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
+      });
+      logger.printStatus(
+        'To see a detailed report, use the --untranslated-messages-file \n'
+        'option in the tool to generate a JSON format file containing \n'
+        'all messages that need to be translated.'
+      );
+    }
+
     if (_inputsAndOutputsListFile != null) {
       _outputFileList.add(baseOutputFile.absolute.path);
 
@@ -1071,33 +1101,20 @@ class LocalizationsGenerator {
     }
   }
 
-  void outputUnimplementedMessages(String untranslatedMessagesFile, Logger logger) {
+  void _generateUntranslatedMessagesFile(Logger logger) {
     if (logger == null) {
       throw L10nException(
         'Logger must be defined when generating untranslated messages file.'
       );
     }
 
-    if (untranslatedMessagesFile == null || untranslatedMessagesFile == '') {
-      _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
-        logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
-      });
-      logger.printStatus(
-        'To see a detailed report, use the --untranslated-messages-file \n'
-        'option in the tool to generate a JSON format file containing \n'
-        'all messages that need to be translated.'
-      );
-    } else {
-      _writeUnimplementedMessagesFile(untranslatedMessagesFile);
-    }
-  }
-
-  void _writeUnimplementedMessagesFile(String untranslatedMessagesFile) {
     if (_unimplementedMessages.isEmpty) {
+      _untranslatedMessagesFile.writeAsStringSync('{}');
+      if (_inputsAndOutputsListFile != null) {
+        _outputFileList.add(_untranslatedMessagesFile.absolute.path);
+      }
       return;
     }
-
-    final File unimplementedMessageTranslationsFile = _fs.file(untranslatedMessagesFile);
 
     String resultingFile = '{\n';
     int count = 0;
@@ -1122,6 +1139,9 @@ class LocalizationsGenerator {
     });
 
     resultingFile += '}\n';
-    unimplementedMessageTranslationsFile.writeAsStringSync(resultingFile);
+    _untranslatedMessagesFile.writeAsStringSync(resultingFile);
+    if (_inputsAndOutputsListFile != null) {
+      _outputFileList.add(_untranslatedMessagesFile.absolute.path);
+    }
   }
 }
