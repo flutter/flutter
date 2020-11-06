@@ -320,7 +320,7 @@ Future<void> _runToolTests() async {
     Directory(path.join(toolsPath, kTest))
       .listSync()
       .map<String>((FileSystemEntity entry) => entry.path)
-      .where((String name) => name.endsWith(kDotShard) && !name.contains('web'))
+      .where((String name) => name.endsWith(kDotShard))
       .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
@@ -337,6 +337,10 @@ Future<void> _runToolTests() async {
       );
     },
   );
+  // Prevent web tests from running if not explicitly requested.
+  if (Platform.environment[CIRRUS_TASK_NAME] == null) {
+    subshards.remove('web');
+  }
 
   await selectSubshard(subshards);
 }
