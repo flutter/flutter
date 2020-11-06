@@ -6,19 +6,22 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
+class SingleTapUpTextIntent extends Intent {
+  const SingleTapUpTextIntent();
+}
+
 // TODO(justinmc): Should handle all actions from
 // TextSelectionGestureDetectorBuilder and from
 // _TextFieldSelectionGestureDetectorBuilder.
 /// Links every user-facing action that can happen in text editing to its
 /// result.
-class TextEditingBehavior extends InheritedWidget {
+class TextEditingBehavior {
   TextEditingBehavior({
-    Key? key,
     //required this.delegate,
     required this.editableTextState,
     //required this.platform,
     this.platform = TargetPlatform.iOS,
-  }) : super(key: key);
+  });
 
   //final TextSelectionGestureDetectorBuilderDelegate delegate;
   final EditableTextState editableTextState;
@@ -61,7 +64,7 @@ class TextEditingBehavior extends InheritedWidget {
       || kind == PointerDeviceKind.stylus;
   }
 
-  onSingleTapUp(TapUpDetails details) {
+  void onSingleTapUp(TapUpDetails details) {
     editableTextState.hideToolbar();
     if (editableTextState.widget.selectionEnabled) {
       switch (platform) {
