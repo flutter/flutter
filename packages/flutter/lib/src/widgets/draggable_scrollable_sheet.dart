@@ -288,11 +288,11 @@ class _DraggableSheetExtent {
 class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   late _DraggableScrollableSheetScrollController _scrollController;
   late _DraggableSheetExtent _extent;
-  // The child only gets rebuilt when dependencies change. Otherwise, excessive
-  // rebuilds of the child are triggered every time the scroll extent changes,
-  // which is very expensive and does not provide any helpful information to the
-  // child. If the child needs to rebuild whenever the scroll position changes,
-  // they can always subscribe to it.
+  // The child only gets rebuilt when dependencies or the widget change.
+  // Otherwise, excessive rebuilds of the child are triggered every time the
+  // scroll extent changes, which is very expensive and does not provide any
+  // helpful information to the child. If the child needs to rebuild whenever
+  // the scroll position changes, they can always subscribe to it.
   Widget? _child;
 
   @override
@@ -323,8 +323,11 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   @override
   void didUpdateWidget(DraggableScrollableSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _child = widget.builder(context, _scrollController);
     _updateExtent();
+    // Call this unconditionally - the closure may not change even though it
+    // refers to things outside of its identity, e.g. a tearoff from state that
+    // has an `if (stateVariable)`.
+    _child = widget.builder(context, _scrollController);
   }
 
   void _updateExtent() {
