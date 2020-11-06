@@ -20,9 +20,9 @@ class BenchPageViewScrollLineThrough extends WidgetRecorder {
 
   @override
   Widget createWidget() => const MaterialApp(
-    title: 'PageView Scroll LineThrough Benchmark',
-    home: _MyScrollContainer(),
-  );
+        title: 'PageView Scroll LineThrough Benchmark',
+        home: _MyScrollContainer(),
+      );
 }
 
 class _MyScrollContainer extends StatefulWidget {
@@ -48,30 +48,30 @@ class _MyScrollContainerState extends State<_MyScrollContainer> {
     Timer.run(() async {
       while (pageNumber < 25) {
         await pageController.animateToPage(pageNumber % 5,
-            duration: stepDuration,
-            curve: Curves.easeInOut);
+            duration: stepDuration, curve: Curves.easeInOut);
         pageNumber++;
       }
     });
   }
 
-  @override void dispose() {
+  @override
+  void dispose() {
     super.dispose();
     pageController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return PageView.builder(controller: pageController,
+    return PageView.builder(
+        controller: pageController,
         itemBuilder: (BuildContext context, int position) {
-      return CustomPaint(
-        painter: _CustomPainter('aa'),
-        size: const Size(300, 500),
-      );
-    });
+          return CustomPaint(
+            painter: _CustomPainter('aa'),
+            size: const Size(300, 500),
+          );
+        });
   }
 }
-
 
 class _CustomPainter extends CustomPainter {
   _CustomPainter(this.text);
