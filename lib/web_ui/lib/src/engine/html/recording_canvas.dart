@@ -1185,7 +1185,7 @@ class PaintDrawParagraph extends DrawCommand {
   @override
   String toString() {
     if (assertionsEnabled) {
-      return 'DrawParagraph(${paragraph._plainText}, $offset)';
+      return 'DrawParagraph(${paragraph.toPlainText()}, $offset)';
     } else {
       return super.toString();
     }
