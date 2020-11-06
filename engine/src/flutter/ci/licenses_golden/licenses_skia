@@ -1,4 +1,4 @@
-Signature: 68ee25fdd281242c6f0043e942a176be
+Signature: 38110e50584642e92c2d1e8fb5a27e14
 
 UNUSED LICENSES:
 
@@ -1476,6 +1476,7 @@ FILE: ../../../third_party/skia/src/sksl/generated/sksl_geom.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_interp.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_pipeline.dehydrated.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_public.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_vert.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
 FILE: ../../../third_party/skia/src/sksl/sksl_fp_raw.sksl
@@ -1484,6 +1485,7 @@ FILE: ../../../third_party/skia/src/sksl/sksl_geom.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_gpu.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_interp.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_pipeline.sksl
+FILE: ../../../third_party/skia/src/sksl/sksl_public.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.sksl
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2011 Google Inc. All rights reserved.
