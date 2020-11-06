@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "flow/embedded_views.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/surface.h"
 #include "flutter/flow/texture.h"
@@ -592,6 +593,8 @@ class PlatformView {
   // Unlike all other methods on the platform view, this is called on the
   // GPU task runner.
   virtual std::unique_ptr<Surface> CreateRenderingSurface();
+
+  virtual std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder();
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformView);

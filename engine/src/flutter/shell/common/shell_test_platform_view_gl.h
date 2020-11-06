@@ -41,6 +41,9 @@ class ShellTestPlatformViewGL : public ShellTestPlatformView,
   std::unique_ptr<Surface> CreateRenderingSurface() override;
 
   // |PlatformView|
+  std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder() override;
+
+  // |PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
   // |PlatformView|

@@ -141,6 +141,11 @@ std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
 }
 
 // |PlatformView|
+std::shared_ptr<ExternalViewEmbedder> PlatformViewIOS::CreateExternalViewEmbedder() {
+  return ios_surface_factory_->GetExternalViewEmbedder();
+}
+
+// |PlatformView|
 sk_sp<GrDirectContext> PlatformViewIOS::CreateResourceContext() const {
   return ios_context_->CreateResourceContext();
 }
