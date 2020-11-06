@@ -383,7 +383,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
   final String examplePath = exampleDirectory.path;
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
   final List<String> additionalArgs = hasNullSafety
-    ? <String>['--enable-experiment', 'non-nullable', '--no-sound-null-safety']
+    ? <String>['--no-sound-null-safety']
     : <String>[];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
     await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -589,8 +589,8 @@ Future<void> _runAddToAppLifeCycleTests() async {
 
 Future<void> _runFrameworkTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
-  final List<String> soundNullSafetyOptions     = <String>['--enable-experiment=non-nullable', '--null-assertions', '--sound-null-safety'];
-  final List<String> mixedModeNullSafetyOptions = <String>['--enable-experiment=non-nullable', '--null-assertions', '--no-sound-null-safety'];
+  final List<String> soundNullSafetyOptions     = <String>['--null-assertions', '--sound-null-safety'];
+  final List<String> mixedModeNullSafetyOptions = <String>['--null-assertions', '--no-sound-null-safety'];
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
@@ -634,7 +634,6 @@ Future<void> _runFrameworkTests() async {
   Future<void> runPrivateTests() async {
     final List<String> args = <String>[
       'run',
-      '--enable-experiment=non-nullable',
       '--sound-null-safety',
       'test_private.dart',
     ];
@@ -938,13 +937,9 @@ Future<void> _runWebIntegrationTests() async {
     ]
   );
   await _runWebDebugTest('lib/sound_mode.dart', additionalArguments: <String>[
-    '--enable-experiment',
-    'non-nullable',
     '--sound-null-safety',
   ]);
   await _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
-    '--enable-experiment',
-    'non-nullable',
     '--sound-null-safety',
   ]);
 }
@@ -1049,8 +1044,6 @@ Future<void> _runWebDebugTest(String target, {
       '--debug',
       if (enableNullSafety)
         ...<String>[
-          '--enable-experiment',
-          'non-nullable',
           '--no-sound-null-safety',
           '--null-assertions',
         ],
