@@ -1834,4 +1834,161 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
   });
+
+  testWidgets('ListTile horizontalTitleGap = 0.0', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection) {
+      return MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          textScaleFactor: 1.0,
+        ),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: const ListTile(
+                horizontalTitleGap: 0.0,
+                leading: Text('L'),
+                title: Text('title'),
+                trailing: Text('T'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+    double right(String text) => tester.getTopRight(find.text(text)).dx;
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 56.0); // horizontalTitleGap: 0
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl));
+
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 744.0); // horizontalTitleGap: 0
+  });
+
+  testWidgets('ListTile horizontalTitleGap = (default) && ListTile minLeadingWidth = (default)', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection) {
+      return MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          textScaleFactor: 1.0,
+        ),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: const ListTile(
+                leading: Text('L'),
+                title: Text('title'),
+                trailing: Text('T'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+    double right(String text) => tester.getTopRight(find.text(text)).dx;
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    // horizontalTitleGap: ListTileDefaultValue.horizontalTitleGap (16.0)
+    expect(left('title'), 72.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl));
+
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    // horizontalTitleGap: ListTileDefaultValue.horizontalTitleGap (16.0)
+    expect(right('title'), 728.0);
+  });
+
+  testWidgets('ListTile minVerticalPadding = 80.0', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection) {
+      return MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          textScaleFactor: 1.0,
+        ),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: const ListTile(
+                minVerticalPadding: 80.0,
+                leading: Text('L'),
+                title: Text('title'),
+                trailing: Text('T'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+
+    // minVerticalPadding: 80.0
+    // 80 + 80 + 16(Title) = 176
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl));
+
+    // minVerticalPadding: 80.0
+    // 80 + 80 + 16(Title) = 176
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+  });
+
+  testWidgets('ListTile minLeadingWidth = 60.0', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection) {
+      return MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          textScaleFactor: 1.0,
+        ),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: const ListTile(
+                minLeadingWidth: 60.0,
+                leading: Text('L'),
+                title: Text('title'),
+                trailing: Text('T'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+    double right(String text) => tester.getTopRight(find.text(text)).dx;
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    // minLeadingWidth: 60.0
+    // 92.0 = 16.0(Default contentPadding) + 16.0(Default horizontalTitleGap) + 60.0
+    expect(left('title'), 92.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl));
+
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    // minLeadingWidth: 60.0
+    // 708.0 = 800.0 - (16.0(Default contentPadding) + 16.0(Default horizontalTitleGap) + 60.0)
+    expect(right('title'), 708.0);
+  });
 }
