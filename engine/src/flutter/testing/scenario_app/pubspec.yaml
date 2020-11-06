@@ -1,5 +1,8 @@
 name: scenario_app
 publish_to: none
+environment:
+  sdk: '>=2.12.0-0 <3.0.0'
+
 
 # These are for convenience during local development. Changing them will not
 # impact the build.
