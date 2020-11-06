@@ -894,7 +894,38 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
 
 /// The web implementation of [ui.TextStyle].
 class EngineTextStyle implements ui.TextStyle {
-  EngineTextStyle({
+  /// Constructs an [EngineTextStyle] with all properties being required.
+  ///
+  /// This is good for call sites that need to be updated whenever a new
+  /// property is added to [EngineTextStyle]. Non-updated call sites will fail
+  /// the build otherwise.
+  factory EngineTextStyle({
+    required ui.Color? color,
+    required ui.TextDecoration? decoration,
+    required ui.Color? decorationColor,
+    required ui.TextDecorationStyle? decorationStyle,
+    required double? decorationThickness,
+    required ui.FontWeight? fontWeight,
+    required ui.FontStyle? fontStyle,
+    required ui.TextBaseline? textBaseline,
+    required String? fontFamily,
+    required List<String>? fontFamilyFallback,
+    required double? fontSize,
+    required double? letterSpacing,
+    required double? wordSpacing,
+    required double? height,
+    required ui.Locale? locale,
+    required ui.Paint? background,
+    required ui.Paint? foreground,
+    required List<ui.Shadow>? shadows,
+    required List<ui.FontFeature>? fontFeatures,
+  }) = EngineTextStyle.only;
+
+  /// Constructs an [EngineTextStyle] with only the given properties.
+  ///
+  /// This constructor should be used sparingly in tests, for example. Or when
+  /// we know for sure that not all properties are needed.
+  EngineTextStyle.only({
     ui.Color? color,
     ui.TextDecoration? decoration,
     ui.Color? decorationColor,
@@ -940,14 +971,20 @@ class EngineTextStyle implements ui.TextStyle {
         _foreground = foreground,
         _shadows = shadows;
 
-  factory EngineTextStyle.fromParagraphStyle(EngineParagraphStyle paragraphStyle) => EngineTextStyle(
-    fontWeight: paragraphStyle._fontWeight,
-    fontStyle: paragraphStyle._fontStyle,
-    fontFamily: paragraphStyle._fontFamily,
-    fontSize: paragraphStyle._fontSize,
-    height: paragraphStyle._height,
-    locale: paragraphStyle._locale,
-  );
+  /// Constructs an [EngineTextStyle] by reading properties from an
+  /// [EngineParagraphStyle].
+  factory EngineTextStyle.fromParagraphStyle(
+    EngineParagraphStyle paragraphStyle,
+  ) {
+    return EngineTextStyle.only(
+      fontWeight: paragraphStyle._fontWeight,
+      fontStyle: paragraphStyle._fontStyle,
+      fontFamily: paragraphStyle._fontFamily,
+      fontSize: paragraphStyle._fontSize,
+      height: paragraphStyle._height,
+      locale: paragraphStyle._locale,
+    );
+  }
 
   final ui.Color? _color;
   final ui.TextDecoration? _decoration;
@@ -1281,10 +1318,13 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
     ui.TextDecoration? decoration;
     ui.Color? decorationColor;
     ui.TextDecorationStyle? decorationStyle;
+    double? decorationThickness;
     ui.FontWeight? fontWeight = _paragraphStyle._fontWeight;
     ui.FontStyle? fontStyle = _paragraphStyle._fontStyle;
     ui.TextBaseline? textBaseline;
     String fontFamily = _paragraphStyle._fontFamily ?? DomRenderer.defaultFontFamily;
+    List<String>? fontFamilyFallback;
+    List<ui.FontFeature>? fontFeatures;
     double fontSize = _paragraphStyle._fontSize ?? DomRenderer.defaultFontSize;
     final ui.TextAlign textAlign = _paragraphStyle._effectiveTextAlign;
     final ui.TextDirection textDirection = _paragraphStyle._effectiveTextDirection;
@@ -1316,6 +1356,9 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
       if (style._decorationStyle != null) {
         decorationStyle = style._decorationStyle;
       }
+      if (style._decorationThickness != null) {
+        decorationThickness = style._decorationThickness;
+      }
       if (style._fontWeight != null) {
         fontWeight = style._fontWeight;
       }
@@ -1326,6 +1369,12 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
         textBaseline = style._textBaseline;
       }
       fontFamily = style._fontFamily;
+      if (style._fontFamilyFallback != null) {
+        fontFamilyFallback = style._fontFamilyFallback;
+      }
+      if (style._fontFeatures != null) {
+        fontFeatures = style._fontFeatures;
+      }
       if (style._fontSize != null) {
         fontSize = style._fontSize!;
       }
@@ -1358,10 +1407,13 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
       decoration: decoration,
       decorationColor: decorationColor,
       decorationStyle: decorationStyle,
+      decorationThickness: decorationThickness,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       textBaseline: textBaseline,
       fontFamily: fontFamily,
+      fontFamilyFallback: fontFamilyFallback,
+      fontFeatures: fontFeatures,
       fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,

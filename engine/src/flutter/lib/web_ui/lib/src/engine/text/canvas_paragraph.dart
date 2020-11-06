@@ -300,6 +300,26 @@ abstract class StyleNode {
   /// The resolved text style is equivalent to the entire ascendent chain of
   /// parent style nodes.
   EngineTextStyle resolveStyle();
+
+  ui.Color? get _color;
+  ui.TextDecoration? get _decoration;
+  ui.Color? get _decorationColor;
+  ui.TextDecorationStyle? get _decorationStyle;
+  double? get _decorationThickness;
+  ui.FontWeight? get _fontWeight;
+  ui.FontStyle? get _fontStyle;
+  ui.TextBaseline? get _textBaseline;
+  String? get _fontFamily;
+  List<String>? get _fontFamilyFallback;
+  List<ui.FontFeature>? get _fontFeatures;
+  double? get _fontSize;
+  double? get _letterSpacing;
+  double? get _wordSpacing;
+  double? get _height;
+  ui.Locale? get _locale;
+  ui.Paint? get _background;
+  ui.Paint? get _foreground;
+  List<ui.Shadow>? get _shadows;
 }
 
 /// Represents a non-root [StyleNode].
@@ -315,9 +335,91 @@ class ChildStyleNode extends StyleNode {
 
   @override
   EngineTextStyle resolveStyle() {
-    // TODO(mdebbar): combine all styles from the parent hierarchy.
-    return style;
+    return EngineTextStyle(
+      color: _color,
+      decoration: _decoration,
+      decorationColor: _decorationColor,
+      decorationStyle: _decorationStyle,
+      decorationThickness: _decorationThickness,
+      fontWeight: _fontWeight,
+      fontStyle: _fontStyle,
+      textBaseline: _textBaseline,
+      fontFamily: _fontFamily,
+      fontFamilyFallback: _fontFamilyFallback,
+      fontFeatures: _fontFeatures,
+      fontSize: _fontSize,
+      letterSpacing: _letterSpacing,
+      wordSpacing: _wordSpacing,
+      height: _height,
+      locale: _locale,
+      background: _background,
+      foreground: _foreground,
+      shadows: _shadows,
+    );
   }
+
+  // Read these properties from the TextStyle associated with this node. If the
+  // property isn't defined, go to the parent node.
+
+  @override
+  ui.Color? get _color => style._color ?? parent._color;
+
+  @override
+  ui.TextDecoration? get _decoration => style._decoration ?? parent._decoration;
+
+  @override
+  ui.Color? get _decorationColor => style._decorationColor ?? parent._decorationColor;
+
+  @override
+  ui.TextDecorationStyle? get _decorationStyle => style._decorationStyle ?? parent._decorationStyle;
+
+  @override
+  double? get _decorationThickness => style._decorationThickness ?? parent._decorationThickness;
+
+  @override
+  ui.FontWeight? get _fontWeight => style._fontWeight ?? parent._fontWeight;
+
+  @override
+  ui.FontStyle? get _fontStyle => style._fontStyle ?? parent._fontStyle;
+
+  @override
+  ui.TextBaseline? get _textBaseline => style._textBaseline ?? parent._textBaseline;
+
+  @override
+  List<String>? get _fontFamilyFallback => style._fontFamilyFallback ?? parent._fontFamilyFallback;
+
+  @override
+  List<ui.FontFeature>? get _fontFeatures => style._fontFeatures ?? parent._fontFeatures;
+
+  @override
+  double? get _fontSize => style._fontSize ?? parent._fontSize;
+
+  @override
+  double? get _letterSpacing => style._letterSpacing ?? parent._letterSpacing;
+
+  @override
+  double? get _wordSpacing => style._wordSpacing ?? parent._wordSpacing;
+
+  @override
+  double? get _height => style._height ?? parent._height;
+
+  @override
+  ui.Locale? get _locale => style._locale ?? parent._locale;
+
+  @override
+  ui.Paint? get _background => style._background ?? parent._background;
+
+  @override
+  ui.Paint? get _foreground => style._foreground ?? parent._foreground;
+
+  @override
+  List<ui.Shadow>? get _shadows => style._shadows ?? parent._shadows;
+
+  // Font family is slightly different from the other properties above. It's
+  // never null on the TextStyle object, so we use `_isFontFamilyProvided` to
+  // check if font family is defined or not.
+  @override
+  String? get _fontFamily => style._isFontFamilyProvided ? style._fontFamily : parent._fontFamily;
 }
 
 /// The root style node for the paragraph.
@@ -342,6 +444,62 @@ class RootStyleNode extends StyleNode {
     }
     return style;
   }
+
+  @override
+  ui.Color? get _color => null;
+
+  @override
+  ui.TextDecoration? get _decoration => null;
+
+  @override
+  ui.Color? get _decorationColor => null;
+
+  @override
+  ui.TextDecorationStyle? get _decorationStyle => null;
+
+  @override
+  double? get _decorationThickness => null;
+
+  @override
+  ui.FontWeight? get _fontWeight => paragraphStyle._fontWeight;
+  @override
+  ui.FontStyle? get _fontStyle => paragraphStyle._fontStyle;
+
+  @override
+  ui.TextBaseline? get _textBaseline => null;
+
+  @override
+  String? get _fontFamily => paragraphStyle._fontFamily;
+
+  @override
+  List<String>? get _fontFamilyFallback => null;
+
+  @override
+  List<ui.FontFeature>? get _fontFeatures => null;
+
+  @override
+  double? get _fontSize => paragraphStyle._fontSize;
+
+  @override
+  double? get _letterSpacing => null;
+
+  @override
+  double? get _wordSpacing => null;
+
+  @override
+  double? get _height => paragraphStyle._height;
+
+  @override
+  ui.Locale? get _locale => paragraphStyle._locale;
+
+  @override
+  ui.Paint? get _background => null;
+
+  @override
+  ui.Paint? get _foreground => null;
+
+  @override
+  List<ui.Shadow>? get _shadows => null;
 }
 
 /// Builds a [CanvasParagraph] containing text with the given styling
