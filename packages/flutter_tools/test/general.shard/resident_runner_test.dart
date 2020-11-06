@@ -1444,7 +1444,7 @@ void main() {
     await residentRunner.runSourceGenerators();
 
     expect(testLogger.errorText, isEmpty);
-    expect(testLogger.statusText, contains('use the --untranslated-messages-file'));
+    expect(testLogger.statusText, isEmpty);
   }));
 
   testUsingContext('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
