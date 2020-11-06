@@ -17,8 +17,8 @@ import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:js/js.dart';
-import 'package:meta/meta.dart';
+import 'package:js/js.dart'; // ignore: import_of_legacy_library_into_null_safe
+import 'package:meta/meta.dart'; // ignore: import_of_legacy_library_into_null_safe
 
 import '../ui.dart' as ui;
 
