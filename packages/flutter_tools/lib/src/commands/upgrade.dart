@@ -113,8 +113,8 @@ class UpgradeCommandRunner {
       return;
     } else if (verifyOnly) {
       globals.printStatus('A new version of Flutter is available on channel ${flutterVersion.channel}\n');
-      globals.printStatus('The latest version: ${upstreamVersion.frameworkVersion}(revision ${upstreamVersion.frameworkRevisionShort})', emphasis: true);
-      globals.printStatus('Your current version: ${flutterVersion.frameworkVersion}(revision ${flutterVersion.frameworkRevisionShort})\n');
+      globals.printStatus('The latest version: ${upstreamVersion.frameworkVersion} (revision ${upstreamVersion.frameworkRevisionShort})', emphasis: true);
+      globals.printStatus('Your current version: ${flutterVersion.frameworkVersion} (revision ${flutterVersion.frameworkRevisionShort})\n');
       globals.printStatus('To upgrade now, run "flutter upgrade".');
       if (flutterVersion.channel == 'stable') {
         globals.printStatus('\nSee the announcement and release notes:');
