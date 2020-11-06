@@ -93,7 +93,6 @@ void main() {
         processManager: processManager,
         logger: logger,
         terminal: terminal,
-        experiments: <String>[],
       );
 
       int errorCount = 0;
@@ -132,7 +131,6 @@ void main() {
         processManager: processManager,
         logger: logger,
         terminal: terminal,
-        experiments: <String>[],
       );
 
     int errorCount = 0;
@@ -158,7 +156,6 @@ void main() {
       processManager: processManager,
       logger: logger,
       terminal: terminal,
-      experiments: <String>[],
     );
 
     int errorCount = 0;
@@ -169,42 +166,6 @@ void main() {
     await server.start();
     await onDone;
     expect(errorCount, 0);
-  });
-
-  testWithoutContext('Can forward null-safety experiments to the AnalysisServer', () async {
-    final Completer<void> completer = Completer<void>();
-    final StreamController<List<int>> stdin = StreamController<List<int>>();
-    const String fakeSdkPath = 'dart-sdk';
-    final FakeCommand fakeCommand = FakeCommand(
-      command: const <String>[
-        'dart-sdk/bin/dart',
-        '--disable-dart-dev',
-        'dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
-        '--enable-experiment',
-        'non-nullable',
-        '--disable-server-feature-completion',
-        '--disable-server-feature-search',
-        '--sdk',
-        'dart-sdk',
-      ],
-      completer: completer,
-      stdin: IOSink(stdin.sink),
-    );
-
-    server = AnalysisServer(fakeSdkPath, <String>[''],
-      fileSystem: MemoryFileSystem.test(),
-      platform: FakePlatform(),
-      processManager: FakeProcessManager.list(<FakeCommand>[
-        fakeCommand,
-      ]),
-      logger: BufferLogger.test(),
-      terminal: Terminal.test(),
-      experiments: <String>[
-        'non-nullable'
-      ],
-    );
-
-    await server.start();
   });
 
   testUsingContext('Can run AnalysisService with customized cache location', () async {
