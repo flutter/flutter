@@ -300,6 +300,10 @@ class ChromiumLauncher {
   // other session data.
   String get _chromeDefaultPath => _fileSystem.path.join('Default');
 
+  // This is a JSON file which contains configuration from the browser session,
+  // such as window position. It is located under the Chrome data-dir folder.
+  String get _preferencesPath => _fileSystem.path.join('Default', 'preferences');
+
   /// Copy Chrome user information from a Chrome session into a per-project
   /// cache.
   ///
@@ -318,6 +322,17 @@ class ChromiumLauncher {
         // one possible example is a file lock due to multiple running chrome instances.
         _logger.printError('Failed to save Chrome preferences: $err');
       }
+    }
+
+    final File targetPreferencesFile = _fileSystem.file(_fileSystem.path.join(cacheDir?.path ?? '', _preferencesPath));
+    final File sourcePreferencesFile = _fileSystem.file(_fileSystem.path.join(userDataDir.path, _preferencesPath));
+
+    if (sourcePreferencesFile.existsSync()) {	
+       targetPreferencesFile.parent.createSync(recursive: true);	
+       // If the file contains a crash string, remove it to hide the popup on next run.	
+       final String contents = sourcePreferencesFile.readAsStringSync();	
+       targetPreferencesFile.writeAsStringSync(contents	
+           .replaceFirst('"exit_type":"Crashed"', '"exit_type":"Normal"'));	
     }
   }
 
