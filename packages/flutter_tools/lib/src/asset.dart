@@ -4,11 +4,10 @@
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:yaml/yaml.dart';
 
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/utils.dart';
+import 'base/logger.dart';
 import 'build_info.dart';
 import 'cache.dart';
 import 'convert.dart';
@@ -18,18 +17,39 @@ import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 
-const AssetBundleFactory _kManifestFactory = _ManifestAssetBundleFactory();
-
 const String defaultManifestPath = 'pubspec.yaml';
 
 const String kFontManifestJson = 'FontManifest.json';
+
+/// The effect of adding `uses-material-design: true` to the pubspec is to insert
+/// the following snippet into the asset manifest:
+///
+///```yaml
+/// material:
+/// - family: MaterialIcons
+///   fonts:
+///     - asset: fonts/MaterialIcons-Regular.otf
+///```
+const Map<String, List<Map<String, Object>>> kMaterialFonts = <String, List<Map<String, Object>>>{
+  'material': <Map<String, Object>>[
+    <String, Object>{
+      'family': 'MaterialIcons',
+      'fonts': <Map<String, Object>>[
+        <String, Object>{
+          'asset': 'fonts/MaterialIcons-Regular.otf',
+        },
+      ],
+    },
+  ],
+};
 
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
   static AssetBundleFactory get instance => context.get<AssetBundleFactory>();
 
-  static AssetBundleFactory get defaultInstance => _kManifestFactory;
+  static AssetBundleFactory get defaultInstance => _defaultInstance ??= _ManifestAssetBundleFactory(logger: globals.logger, fileSystem: globals.fs);
+  static AssetBundleFactory _defaultInstance;
 
   /// Creates a new [AssetBundle].
   AssetBundle createBundle();
@@ -57,17 +77,33 @@ abstract class AssetBundle {
 }
 
 class _ManifestAssetBundleFactory implements AssetBundleFactory {
-  const _ManifestAssetBundleFactory();
+  _ManifestAssetBundleFactory({
+    @required Logger logger,
+    @required FileSystem fileSystem,
+  }) : _logger = logger,
+       _fileSystem = fileSystem;
+
+  final Logger _logger;
+  final FileSystem _fileSystem;
 
   @override
-  AssetBundle createBundle() => ManifestAssetBundle();
+  AssetBundle createBundle() => ManifestAssetBundle(logger: _logger, fileSystem: _fileSystem);
 }
 
 /// An asset bundle based on a pubspec.yaml file.
 class ManifestAssetBundle implements AssetBundle {
   /// Constructs an [ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
-  ManifestAssetBundle();
+  ManifestAssetBundle({
+    @required Logger logger,
+    @required FileSystem fileSystem,
+  }) : _logger = logger,
+       _fileSystem = fileSystem,
+       _licenseCollector = LicenseCollector(fileSystem: fileSystem);
+
+  final Logger _logger;
+  final FileSystem _fileSystem;
+  final LicenseCollector _licenseCollector;
 
   @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
@@ -76,8 +112,6 @@ class ManifestAssetBundle implements AssetBundle {
   // updated without changes to the manifest. These are only tracked for
   // the current project.
   final Map<Uri, Directory> _wildcardDirectories = <Uri, Directory>{};
-
-  final LicenseCollector licenseCollector = LicenseCollector(fileSystem: globals.fs);
 
   DateTime _lastBuildTimestamp;
 
@@ -94,7 +128,7 @@ class ManifestAssetBundle implements AssetBundle {
       return true;
     }
 
-    final FileStat stat = globals.fs.file(manifestPath).statSync();
+    final FileStat stat = _fileSystem.file(manifestPath).statSync();
     if (stat.type == FileSystemEntityType.notFound) {
       return true;
     }
@@ -128,10 +162,10 @@ class ManifestAssetBundle implements AssetBundle {
     assetDirPath ??= getAssetBuildDirectory();
     FlutterProject flutterProject;
     try {
-      flutterProject = FlutterProject.fromDirectory(globals.fs.file(manifestPath).parent);
+      flutterProject = FlutterProject.fromDirectory(_fileSystem.file(manifestPath).parent);
     } on Exception catch (e) {
-      globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
-      globals.printError('$e');
+      _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+      _logger.printError('$e');
       return 1;
     }
     if (flutterProject == null) {
@@ -147,10 +181,10 @@ class ManifestAssetBundle implements AssetBundle {
       return 0;
     }
 
-    final String assetBasePath = globals.fs.path.dirname(globals.fs.path.absolute(manifestPath));
+    final String assetBasePath = _fileSystem.path.dirname(_fileSystem.path.absolute(manifestPath));
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(packagesPath),
-      logger: globals.logger,
+      _fileSystem.file(packagesPath),
+      logger: _logger,
     );
     final List<Uri> wildcardDirectories = <Uri>[];
 
@@ -193,11 +227,11 @@ class ManifestAssetBundle implements AssetBundle {
     for (final Package package in packageConfig.packages) {
       final Uri packageUri = package.packageUriRoot;
       if (packageUri != null && packageUri.scheme == 'file') {
-        final String packageManifestPath = globals.fs.path.fromUri(packageUri.resolve('../pubspec.yaml'));
+        final String packageManifestPath = _fileSystem.path.fromUri(packageUri.resolve('../pubspec.yaml'));
         final FlutterManifest packageFlutterManifest = FlutterManifest.createFromPath(
           packageManifestPath,
-          logger: globals.logger,
-          fileSystem: globals.fs,
+          logger: _logger,
+          fileSystem: _fileSystem,
         );
         if (packageFlutterManifest == null) {
           continue;
@@ -206,7 +240,7 @@ class ManifestAssetBundle implements AssetBundle {
         if (packageFlutterManifest.appName == flutterManifest.appName) {
           continue;
         }
-        final String packageBasePath = globals.fs.path.dirname(packageManifestPath);
+        final String packageBasePath = _fileSystem.path.dirname(packageManifestPath);
 
         final Map<_Asset, List<_Asset>> packageAssets = _parseAssets(
           packageConfig,
@@ -223,7 +257,7 @@ class ManifestAssetBundle implements AssetBundle {
         }
         assetVariants.addAll(packageAssets);
         if (!includesMaterialFonts && packageFlutterManifest.usesMaterialDesign) {
-          globals.printError(
+          _logger.printError(
             'package:${package.name} has `uses-material-design: true` set but '
             'the primary pubspec contains `uses-material-design: false`. '
             'If the application needs material icons, then `uses-material-design` '
@@ -244,10 +278,10 @@ class ManifestAssetBundle implements AssetBundle {
     // asset in entries.
     for (final _Asset asset in assetVariants.keys) {
       if (!asset.assetFileExists && assetVariants[asset].isEmpty) {
-        globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
-        globals.printError('No file or variants found for $asset.\n');
+        _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+        _logger.printError('No file or variants found for $asset.\n');
         if (asset.package != null) {
-          globals.printError('This asset was included from package ${asset.package.name}.');
+          _logger.printError('This asset was included from package ${asset.package.name}.');
         }
         return 1;
       }
@@ -277,12 +311,12 @@ class ManifestAssetBundle implements AssetBundle {
 
     // Update wildcard directories we we can detect changes in them.
     for (final Uri uri in wildcardDirectories) {
-      _wildcardDirectories[uri] ??= globals.fs.directory(uri);
+      _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
     }
 
     final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
-    final LicenseResult licenseResult = licenseCollector.obtainLicenses(packageConfig);
+    final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig);
     final DevFSStringContent licenses = DevFSStringContent(licenseResult.combinedLicenses);
     additionalDependencies = licenseResult.dependencies;
 
@@ -290,13 +324,13 @@ class ManifestAssetBundle implements AssetBundle {
       // Force the depfile to contain missing files so that Gradle does not skip
       // the task. Wildcard directories are not compatible with full incremental
       // builds. For more context see https://github.com/flutter/flutter/issues/56466 .
-      globals.printTrace(
+      _logger.printTrace(
         'Manifest contained wildcard assets. Inserting missing file into '
         'build graph to force rerun. for more information see #56466.'
       );
       final int suffix = Object().hashCode;
       additionalDependencies.add(
-        globals.fs.file('DOES_NOT_EXIST_RERUN_FOR_WILDCARD$suffix').absolute);
+        _fileSystem.file('DOES_NOT_EXIST_RERUN_FOR_WILDCARD$suffix').absolute);
     }
 
     _setIfChanged(_kAssetManifestJson, assetManifest);
@@ -317,6 +351,45 @@ class ManifestAssetBundle implements AssetBundle {
     if (oldContent.string != content.string) {
       entries[key] = content;
     }
+  }
+
+  List<_Asset> _getMaterialAssets(String fontSet) {
+    final List<_Asset> result = <_Asset>[];
+
+    for (final Map<String, Object> family in kMaterialFonts[fontSet]) {
+      for (final Map<String, Object> font in family['fonts'] as List<Map<String, Object>>) {
+        final Uri entryUri = _fileSystem.path.toUri(font['asset'] as String);
+        result.add(_Asset(
+          baseDir: _fileSystem.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
+          relativeUri: Uri(path: entryUri.pathSegments.last),
+          entryUri: entryUri,
+          package: null,
+        ));
+      }
+    }
+
+    return result;
+  }
+
+  List<Map<String, dynamic>> _parseFonts(
+    FlutterManifest manifest,
+    bool includeDefaultFonts,
+    PackageConfig packageConfig, {
+    String packageName,
+    @required bool primary,
+  }) {
+    return <Map<String, dynamic>>[
+      if (primary && manifest.usesMaterialDesign && includeDefaultFonts)
+        ...kMaterialFonts[ManifestAssetBundle._kFontSetMaterial],
+      if (packageName == null)
+        ...manifest.fontsDescriptor
+      else
+        ..._createFontsDescriptor(_parsePackageFonts(
+          manifest,
+          packageName,
+          packageConfig,
+        )),
+    ];
   }
 }
 
@@ -375,39 +448,6 @@ class _Asset {
         ^ entryUri.hashCode;
   }
 }
-
-Map<String, dynamic> _readMaterialFontsManifest() {
-  final String fontsPath = globals.fs.path.join(globals.fs.path.absolute(Cache.flutterRoot),
-      'packages', 'flutter_tools', 'schema', 'material_fonts.yaml');
-
-  return castStringKeyedMap(loadYaml(globals.fs.file(fontsPath).readAsStringSync()));
-}
-
-final Map<String, dynamic> _materialFontsManifest = _readMaterialFontsManifest();
-
-List<Map<String, dynamic>> _getMaterialFonts(String fontSet) {
-  final List<dynamic> fontsList = _materialFontsManifest[fontSet] as List<dynamic>;
-  return fontsList?.map<Map<String, dynamic>>(castStringKeyedMap)?.toList();
-}
-
-List<_Asset> _getMaterialAssets(String fontSet) {
-  final List<_Asset> result = <_Asset>[];
-
-  for (final Map<String, dynamic> family in _getMaterialFonts(fontSet)) {
-    for (final Map<dynamic, dynamic> font in (family['fonts'] as List<dynamic>).cast<Map<dynamic, dynamic>>()) {
-      final Uri entryUri = globals.fs.path.toUri(font['asset'] as String);
-      result.add(_Asset(
-        baseDir: globals.fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
-        relativeUri: Uri(path: entryUri.pathSegments.last),
-        entryUri: entryUri,
-        package: null,
-      ));
-    }
-  }
-
-  return result;
-}
-
 
 /// Processes dependencies into a string representing the NOTICES file.
 ///
@@ -532,26 +572,6 @@ DevFSStringContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants)
   return DevFSStringContent(json.encode(jsonObject));
 }
 
-List<Map<String, dynamic>> _parseFonts(
-  FlutterManifest manifest,
-  bool includeDefaultFonts,
-  PackageConfig packageConfig, {
-  String packageName,
-  @required bool primary,
-}) {
-  return <Map<String, dynamic>>[
-    if (primary && manifest.usesMaterialDesign && includeDefaultFonts)
-      ..._getMaterialFonts(ManifestAssetBundle._kFontSetMaterial),
-    if (packageName == null)
-      ...manifest.fontsDescriptor
-    else
-      ..._createFontsDescriptor(_parsePackageFonts(
-        manifest,
-        packageName,
-        packageConfig,
-      )),
-  ];
-}
 
 /// Prefixes family names and asset paths of fonts included from packages with
 /// 'packages/<package_name>'
@@ -668,7 +688,6 @@ class _AssetDirectoryCache {
 ///   ],
 /// }
 /// ```
-
 Map<_Asset, List<_Asset>> _parseAssets(
   PackageConfig packageConfig,
   FlutterManifest flutterManifest,
