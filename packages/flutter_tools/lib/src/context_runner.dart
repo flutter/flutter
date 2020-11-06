@@ -120,6 +120,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        osUtils: globals.os,
       ),
       CocoaPods: () => CocoaPods(
         fileSystem: globals.fs,
