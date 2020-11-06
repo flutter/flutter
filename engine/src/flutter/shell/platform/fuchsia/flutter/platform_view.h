@@ -122,6 +122,10 @@ class PlatformView final : public flutter::PlatformView,
   std::unique_ptr<flutter::Surface> CreateRenderingSurface() override;
 
   // |flutter::PlatformView|
+  std::shared_ptr<flutter::ExternalViewEmbedder> CreateExternalViewEmbedder()
+      override;
+
+  // |flutter::PlatformView|
   void HandlePlatformMessage(
       fml::RefPtr<flutter::PlatformMessage> message) override;
 

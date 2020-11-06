@@ -40,6 +40,12 @@ std::unique_ptr<Surface> ShellTestPlatformViewVulkan::CreateRenderingSurface() {
 }
 
 // |PlatformView|
+std::shared_ptr<ExternalViewEmbedder>
+ShellTestPlatformViewVulkan::CreateExternalViewEmbedder() {
+  return shell_test_external_view_embedder_;
+}
+
+// |PlatformView|
 PointerDataDispatcherMaker ShellTestPlatformViewVulkan::GetDispatcherMaker() {
   return [](DefaultPointerDataDispatcher::Delegate& delegate) {
     return std::make_unique<SmoothPointerDataDispatcher>(delegate);

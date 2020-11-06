@@ -38,6 +38,12 @@ std::unique_ptr<Surface> ShellTestPlatformViewGL::CreateRenderingSurface() {
 }
 
 // |PlatformView|
+std::shared_ptr<ExternalViewEmbedder>
+ShellTestPlatformViewGL::CreateExternalViewEmbedder() {
+  return shell_test_external_view_embedder_;
+}
+
+// |PlatformView|
 PointerDataDispatcherMaker ShellTestPlatformViewGL::GetDispatcherMaker() {
   return [](DefaultPointerDataDispatcher::Delegate& delegate) {
     return std::make_unique<SmoothPointerDataDispatcher>(delegate);
