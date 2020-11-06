@@ -51,7 +51,7 @@ public class AndroidKeyProcessorTest {
     AndroidKeyProcessor processor =
         new AndroidKeyProcessor(fakeView, fakeKeyEventChannel, mock(TextInputPlugin.class));
 
-    boolean result = processor.onKeyDown(new FakeKeyEvent(KeyEvent.ACTION_DOWN, 65));
+    boolean result = processor.onKeyEvent(new FakeKeyEvent(KeyEvent.ACTION_DOWN, 65));
     assertEquals(true, result);
     verify(fakeKeyEventChannel, times(1)).keyDown(any(KeyEventChannel.FlutterKeyEvent.class));
     verify(fakeKeyEventChannel, times(0)).keyUp(any(KeyEventChannel.FlutterKeyEvent.class));
@@ -97,7 +97,7 @@ public class AndroidKeyProcessorTest {
         ArgumentCaptor.forClass(KeyEventChannel.FlutterKeyEvent.class);
     FakeKeyEvent fakeKeyEvent = new FakeKeyEvent(KeyEvent.ACTION_DOWN, 65);
 
-    boolean result = processor.onKeyDown(fakeKeyEvent);
+    boolean result = processor.onKeyEvent(fakeKeyEvent);
     assertEquals(true, result);
 
     // Capture the FlutterKeyEvent so we can find out its event ID to use when
@@ -111,7 +111,7 @@ public class AndroidKeyProcessorTest {
               public Boolean answer(InvocationOnMock invocation) throws Throwable {
                 KeyEvent event = (KeyEvent) invocation.getArguments()[0];
                 assertEquals(fakeKeyEvent, event);
-                dispatchResult[0] = processor.onKeyDown(event);
+                dispatchResult[0] = processor.onKeyEvent(event);
                 return dispatchResult[0];
               }
             });
@@ -147,7 +147,7 @@ public class AndroidKeyProcessorTest {
         ArgumentCaptor.forClass(KeyEventChannel.FlutterKeyEvent.class);
     FakeKeyEvent fakeKeyEvent = new FakeKeyEvent(KeyEvent.ACTION_UP, 65);
 
-    boolean result = processor.onKeyUp(fakeKeyEvent);
+    boolean result = processor.onKeyEvent(fakeKeyEvent);
     assertEquals(true, result);
 
     // Capture the FlutterKeyEvent so we can find out its event ID to use when
@@ -161,7 +161,7 @@ public class AndroidKeyProcessorTest {
               public Boolean answer(InvocationOnMock invocation) throws Throwable {
                 KeyEvent event = (KeyEvent) invocation.getArguments()[0];
                 assertEquals(fakeKeyEvent, event);
-                dispatchResult[0] = processor.onKeyUp(event);
+                dispatchResult[0] = processor.onKeyEvent(event);
                 return dispatchResult[0];
               }
             });
