@@ -71,7 +71,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final int minor = version?.minor;
     String presetPluginsPath;
     if (pathsSelectorValue != null) {
-      if (major >= 4 && minor >= 1) {
+      if (major != null && major >= 4 && minor != null && minor >= 1) {
         presetPluginsPath = globals.fs.path.join(
           globals.fsUtils.homeDirPath,
           'Library',
@@ -142,7 +142,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final int minor = version?.minor;
     if (globals.platform.isMacOS) {
       /// plugin path of Android Studio has been changed after version 4.1.
-      if (major >= 4 && minor >= 1) {
+      if (major != null && major >= 4 && minor != null && minor >= 1) {
         return globals.fs.path.join(
           globals.fsUtils.homeDirPath,
           'Library',
