@@ -154,9 +154,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// [TextEditingController]; however, one should not also set [selection]
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
-  set text(String? newText) {
+  set text(String newText) {
     value = value.copyWith(
-      text: newText ?? '',
+      text: newText,
       selection: const TextSelection.collapsed(offset: -1),
       composing: TextRange.empty,
     );
