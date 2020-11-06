@@ -250,7 +250,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               OutlinedButton.icon(
                 icon: const Icon(Icons.add, size: 18.0),
                 label: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 6'),
-                onPressed: () {},
+                onPressed: null,
               ),
             ],
           ),

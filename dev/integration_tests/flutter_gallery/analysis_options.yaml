@@ -6,5 +6,3 @@ include: ../../../analysis_options.yaml
 analyzer:
   exclude:
     - build/**
-  enable-experiment:
-    - non-nullable
