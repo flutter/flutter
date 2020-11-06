@@ -587,6 +587,12 @@ std::unique_ptr<flutter::Surface> PlatformView::CreateRenderingSurface() {
 }
 
 // |flutter::PlatformView|
+std::shared_ptr<flutter::ExternalViewEmbedder>
+PlatformView::CreateExternalViewEmbedder() {
+  return external_view_embedder_;
+}
+
+// |flutter::PlatformView|
 void PlatformView::HandlePlatformMessage(
     fml::RefPtr<flutter::PlatformMessage> message) {
   if (!message) {
