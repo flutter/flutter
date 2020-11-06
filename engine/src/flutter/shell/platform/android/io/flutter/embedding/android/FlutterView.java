@@ -721,27 +721,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   }
 
   /**
-   * Invoked when key is released.
-   *
-   * <p>This method is typically invoked in response to the release of a physical keyboard key or a
-   * D-pad button. It is generally not invoked when a virtual software keyboard is used, though a
-   * software keyboard may choose to invoke this method in some situations.
-   *
-   * <p>{@link KeyEvent}s are sent from Android to Flutter. {@link AndroidKeyProcessor} may do some
-   * additional work with the given {@link KeyEvent}, e.g., combine this {@code keyCode} with the
-   * previous {@code keyCode} to generate a unicode combined character.
-   */
-  @Override
-  public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
-    if (!isAttachedToFlutterEngine()) {
-      return super.onKeyUp(keyCode, event);
-    }
-
-    return androidKeyProcessor.onKeyUp(event) || super.onKeyUp(keyCode, event);
-  }
-
-  /**
-   * Invoked when key is pressed.
+   * Invoked when a hardware key is pressed or released.
    *
    * <p>This method is typically invoked in response to the press of a physical keyboard key or a
    * D-pad button. It is generally not invoked when a virtual software keyboard is used, though a
@@ -752,12 +732,25 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
    * previous {@code keyCode} to generate a unicode combined character.
    */
   @Override
-  public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
-    if (!isAttachedToFlutterEngine()) {
-      return super.onKeyDown(keyCode, event);
+  public boolean dispatchKeyEvent(KeyEvent event) {
+    if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+      // Tell Android to start tracking this event.
+      getKeyDispatcherState().startTracking(event, this);
+    } else if (event.getAction() == KeyEvent.ACTION_UP) {
+      // Stop tracking the event.
+      getKeyDispatcherState().handleUpEvent(event);
+      if (!event.isTracking() || event.isCanceled()) {
+        // Don't send the event to the key processor if it was canceled, or no
+        // longer being tracked.
+        return super.dispatchKeyEvent(event);
+      }
     }
-
-    return androidKeyProcessor.onKeyDown(event) || super.onKeyDown(keyCode, event);
+    // If the key processor doesn't handle it, then send it on to the
+    // superclass. The key processor will typically handle all events except
+    // those where it has re-dispatched the event after receiving a reply from
+    // the framework that the framework did not handle it.
+    return (isAttachedToFlutterEngine() && androidKeyProcessor.onKeyEvent(event))
+        || super.dispatchKeyEvent(event);
   }
 
   /**
