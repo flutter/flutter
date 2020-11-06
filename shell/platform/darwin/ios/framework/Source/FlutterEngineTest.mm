@@ -102,19 +102,6 @@ FLUTTER_ASSERT_ARC
                                        message:encodedSetInitialRouteMethod]);
 }
 
-- (void)testWaitForFirstFrameTimeout {
-  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
-  [engine run];
-  XCTestExpectation* timeoutFirstFrame = [self expectationWithDescription:@"timeoutFirstFrame"];
-  [engine waitForFirstFrame:0.1
-                   callback:^(BOOL didTimeout) {
-                     if (timeoutFirstFrame) {
-                       [timeoutFirstFrame fulfill];
-                     }
-                   }];
-  [self waitForExpectationsWithTimeout:1 handler:nil];
-}
-
 - (void)testPlatformViewsControllerRenderingMetalBackend {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine run];
@@ -133,5 +120,4 @@ FLUTTER_ASSERT_ARC
 
   XCTAssertEqual(renderingApi, flutter::IOSRenderingAPI::kSoftware);
 }
-
 @end
