@@ -8,4 +8,4 @@ dependencies:
     path:
       ../sky_services
 environment:
-  sdk: '>=1.8.0 <3.0.0'
+  sdk: ">=2.12.0-0 <3.0.0"
