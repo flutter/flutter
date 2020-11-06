@@ -327,12 +327,12 @@ class ChromiumLauncher {
     final File targetPreferencesFile = _fileSystem.file(_fileSystem.path.join(cacheDir?.path ?? '', _preferencesPath));
     final File sourcePreferencesFile = _fileSystem.file(_fileSystem.path.join(userDataDir.path, _preferencesPath));
 
-    if (sourcePreferencesFile.existsSync()) {	
-       targetPreferencesFile.parent.createSync(recursive: true);	
-       // If the file contains a crash string, remove it to hide the popup on next run.	
-       final String contents = sourcePreferencesFile.readAsStringSync();	
-       targetPreferencesFile.writeAsStringSync(contents	
-           .replaceFirst('"exit_type":"Crashed"', '"exit_type":"Normal"'));	
+    if (sourcePreferencesFile.existsSync()) {
+       targetPreferencesFile.parent.createSync(recursive: true);
+       // If the file contains a crash string, remove it to hide the popup on next run.
+       final String contents = sourcePreferencesFile.readAsStringSync();
+       targetPreferencesFile.writeAsStringSync(contents
+           .replaceFirst('"exit_type":"Crashed"', '"exit_type":"Normal"'));
     }
   }
 
