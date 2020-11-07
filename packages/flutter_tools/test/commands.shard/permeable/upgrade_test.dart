@@ -103,6 +103,7 @@ void main() {
       const String revision = 'abc123';
       const String upstreamRevision = 'def456';
       when(flutterVersion.frameworkRevision).thenReturn(revision);
+      when(flutterVersion.frameworkRevisionShort).thenReturn(revision);
       fakeCommandRunner.alreadyUpToDate = false;
       fakeCommandRunner.remoteRevision = upstreamRevision;
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
@@ -115,15 +116,15 @@ void main() {
       );
       expect(await result, FlutterCommandResult.success());
       expect(testLogger.statusText, contains('A new version of Flutter is available'));
-      expect(testLogger.statusText, contains('The latest version: ${gitTagVersion.frameworkVersionFor(fakeCommandRunner.remoteRevision)}'));
-      expect(testLogger.statusText, contains('Your current version: ${flutterVersion.frameworkVersion}'));
+      expect(testLogger.statusText, contains('The latest version: null (revision def456)'));
+      expect(testLogger.statusText, contains('Your current version: null (revision abc123)'));
       expect(processManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
     });
 
-    testUsingContext('fetchRemoteRevision returns revision if git succeeds', () async {
+    testUsingContext('fetchLatestVersion returns version if git succeeds', () async {
       const String revision = 'abc123';
 
       processManager.addCommands(<FakeCommand>[
@@ -136,14 +137,14 @@ void main() {
         stdout: revision),
       ]);
 
-      expect(await realCommandRunner.fetchRemoteRevision(), revision);
+      expect(await realCommandRunner.fetchLatestVersion()..frameworkRevision, revision);
       expect(processManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
     });
 
-    testUsingContext('fetchRemoteRevision throws toolExit if HEAD is detached', () async {
+    testUsingContext('fetchLatestVersion throws toolExit if HEAD is detached', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
@@ -161,7 +162,7 @@ void main() {
       ]);
 
       await expectLater(
-            () async => await realCommandRunner.fetchRemoteRevision(),
+            () async => await realCommandRunner.fetchLatestVersion(),
         throwsToolExit(message: 'You are not currently on a release branch.'),
       );
       expect(processManager.hasRemainingExpectations, isFalse);
@@ -188,7 +189,7 @@ void main() {
       ]);
 
       await expectLater(
-            () async => await realCommandRunner.fetchRemoteRevision(),
+            () async => await realCommandRunner.fetchLatestVersion(),
         throwsToolExit(
           message: 'Unable to upgrade Flutter: no origin repository configured.',
         ),
@@ -343,7 +344,7 @@ void main() {
             ),
             const FakeCommand(
               command: <String>[
-                'git', 'describe', '--match', '*.*.*', '--long', '--tags',
+                'git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD',
               ],
               stdout: 'v1.12.16-19-gb45b676af',
             ),
@@ -394,7 +395,7 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   String remoteRevision = '';
 
   @override
-  Future<String> fetchRemoteRevision() async => remoteRevision;
+  Future<FlutterVersion> fetchLatestVersion() async => MockFlutterVersion(revision: remoteRevision);
 
   @override
   Future<bool> hasUncommittedChanges() async => willHaveUncommittedChanges;
