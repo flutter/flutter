@@ -13,7 +13,7 @@ dependencies:
   connectivity: 3.0.0-nullsafety.1
   string_scanner: 1.1.0-nullsafety.3
   url_launcher: 6.0.0-nullsafety.1
-  cupertino_icons: 1.0.0
+  cupertino_icons: 1.0.1
   video_player: 2.0.0-nullsafety.2
   scoped_model: 1.1.0
   shrine_images: 1.1.2
@@ -273,4 +273,4 @@ flutter:
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Regular.ttf
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Light.ttf
 
-# PUBSPEC CHECKSUM: b589
+# PUBSPEC CHECKSUM: 178a
