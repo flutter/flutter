@@ -1,4 +1,8 @@
 name: engine_tests
+
+environment:
+  sdk: '>=2.8.0 <3.0.0'
+
 dependencies:
   test: 1.3.0
   path: 1.6.2
