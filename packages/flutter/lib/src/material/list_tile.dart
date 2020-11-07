@@ -53,6 +53,9 @@ class ListTileTheme extends InheritedTheme {
     this.tileColor,
     this.selectedTileColor,
     this.enableFeedback,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
     required Widget child,
   }) : super(key: key, child: child);
 
@@ -72,6 +75,9 @@ class ListTileTheme extends InheritedTheme {
     Color? tileColor,
     Color? selectedTileColor,
     bool? enableFeedback,
+    double? horizontalTitleGap,
+    double? minVerticalPadding,
+    double? minLeadingWidth,
     required Widget child,
   }) {
     assert(child != null);
@@ -90,6 +96,9 @@ class ListTileTheme extends InheritedTheme {
           tileColor: tileColor ?? parent.tileColor,
           selectedTileColor: selectedTileColor ?? parent.selectedTileColor,
           enableFeedback: enableFeedback ?? parent.enableFeedback,
+          horizontalTitleGap: horizontalTitleGap ?? parent.horizontalTitleGap,
+          minVerticalPadding: minVerticalPadding ?? parent.minVerticalPadding,
+          minLeadingWidth: minLeadingWidth ?? parent.minLeadingWidth,
           child: child,
         );
       },
@@ -134,6 +143,21 @@ class ListTileTheme extends InheritedTheme {
   /// If [ListTile.selectedTileColor] is provided, [selectedTileColor] is ignored.
   final Color? selectedTileColor;
 
+  /// The horizontal gap between the titles and the leading/trailing widgets.
+  ///
+  /// If specified, overrides the default value of [ListTile.horizontalTitleGap].
+  final double? horizontalTitleGap;
+
+  /// The minimum padding on the top and bottom of the title and subtitle widgets.
+  ///
+  /// If specified, overrides the default value of [ListTile.minVerticalPadding].
+  final double? minVerticalPadding;
+
+  /// The minimum width allocated for the [ListTile.leading] widget.
+  ///
+  /// If specified, overrides the default value of [ListTile.minLeadingWidth].
+  final double? minLeadingWidth;
+
   /// If specified, defines the feedback property for `ListTile`.
   ///
   /// If [ListTile.enableFeedback] is provided, [enableFeedback] is ignored.
@@ -164,6 +188,9 @@ class ListTileTheme extends InheritedTheme {
       tileColor: tileColor,
       selectedTileColor: selectedTileColor,
       enableFeedback: enableFeedback,
+      horizontalTitleGap: horizontalTitleGap,
+      minVerticalPadding: minVerticalPadding,
+      minLeadingWidth: minLeadingWidth,
       child: child,
     );
   }
@@ -179,7 +206,10 @@ class ListTileTheme extends InheritedTheme {
         || contentPadding != oldWidget.contentPadding
         || tileColor != oldWidget.tileColor
         || selectedTileColor != oldWidget.selectedTileColor
-        || enableFeedback != oldWidget.enableFeedback;
+        || enableFeedback != oldWidget.enableFeedback
+        || horizontalTitleGap != oldWidget.horizontalTitleGap
+        || minVerticalPadding != oldWidget.minVerticalPadding
+        || minLeadingWidth != oldWidget.minLeadingWidth;
   }
 }
 
@@ -719,17 +749,14 @@ class ListTile extends StatelessWidget {
     this.tileColor,
     this.selectedTileColor,
     this.enableFeedback,
-    this.horizontalTitleGap = 16.0,
-    this.minVerticalPadding = 4.0,
-    this.minLeadingWidth = 40.0,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
   }) : assert(isThreeLine != null),
        assert(enabled != null),
        assert(selected != null),
        assert(autofocus != null),
        assert(!isThreeLine || subtitle != null),
-       assert(horizontalTitleGap != null),
-       assert(minVerticalPadding != null),
-       assert(minLeadingWidth != null),
        super(key: key);
 
   /// A widget to display before the title.
@@ -929,13 +956,22 @@ class ListTile extends StatelessWidget {
   final bool? enableFeedback;
 
   /// The horizontal gap between the titles and the leading/trailing widgets.
-  final double horizontalTitleGap;
+  ///
+  /// If null, then the value of [ListTileTheme.horizontalTitleGap] is used. If
+  /// that is also null, then a default value of 16 is used.
+  final double? horizontalTitleGap;
 
   /// The minimum padding on the top and bottom of the title and subtitle widgets.
-  final double minVerticalPadding;
+  ///
+  /// If null, then the value of [ListTileTheme.minVerticalPadding] is used. If
+  /// that is also null, then a default value of 4 is used.
+  final double? minVerticalPadding;
 
-  /// The minimum leading width.
-  final double minLeadingWidth;
+  /// The minimum width allocated for the [ListTile.leading] widget.
+  ///
+  /// If null, then the value of [ListTileTheme.minLeadingWidth] is used. If
+  /// that is also null, then a default value of 40 is used.
+  final double? minLeadingWidth;
 
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
@@ -1104,12 +1140,11 @@ class ListTile extends StatelessWidget {
 
     const EdgeInsets _defaultContentPadding = EdgeInsets.symmetric(horizontal: 16.0);
     final TextDirection textDirection = Directionality.of(context);
-    final bool resolvedEnableFeedback = enableFeedback ?? tileTheme.enableFeedback ?? true;
     final EdgeInsets resolvedContentPadding = contentPadding?.resolve(textDirection)
       ?? tileTheme.contentPadding?.resolve(textDirection)
       ?? _defaultContentPadding;
 
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+    final MouseCursor resolvedMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
         if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
@@ -1121,13 +1156,13 @@ class ListTile extends StatelessWidget {
       customBorder: shape ?? tileTheme.shape,
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
-      mouseCursor: effectiveMouseCursor,
+      mouseCursor: resolvedMouseCursor,
       canRequestFocus: enabled,
       focusNode: focusNode,
       focusColor: focusColor,
       hoverColor: hoverColor,
       autofocus: autofocus,
-      enableFeedback: resolvedEnableFeedback,
+      enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
       child: Semantics(
         selected: selected,
         enabled: enabled,
@@ -1148,9 +1183,9 @@ class ListTile extends StatelessWidget {
               textDirection: textDirection,
               titleBaselineType: titleStyle.textBaseline!,
               subtitleBaselineType: subtitleStyle?.textBaseline,
-              horizontalTitleGap: horizontalTitleGap,
-              minVerticalPadding: minVerticalPadding,
-              minLeadingWidth: minLeadingWidth,
+              horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
+              minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? 4,
+              minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? 40,
             ),
           ),
         ),

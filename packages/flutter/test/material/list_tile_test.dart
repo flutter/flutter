@@ -1836,7 +1836,7 @@ void main() {
   });
 
   testWidgets('ListTile horizontalTitleGap = 0.0', (WidgetTester tester) async {
-    Widget buildFrame(TextDirection textDirection) {
+    Widget buildFrame(TextDirection textDirection, { double? themeHorizontalTitleGap, double? widgetHorizontalTitleGap }) {
       return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
@@ -1845,13 +1845,16 @@ void main() {
         child: Directionality(
           textDirection: textDirection,
           child: Material(
-            child: Container(
-              alignment: Alignment.topLeft,
-              child: const ListTile(
-                horizontalTitleGap: 0.0,
-                leading: Text('L'),
-                title: Text('title'),
-                trailing: Text('T'),
+            child: ListTileTheme(
+              horizontalTitleGap: themeHorizontalTitleGap,
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: ListTile(
+                  horizontalTitleGap: widgetHorizontalTitleGap,
+                  leading: const Text('L'),
+                  title: const Text('title'),
+                  trailing: const Text('T'),
+                ),
               ),
             ),
           ),
@@ -1862,15 +1865,29 @@ void main() {
     double left(String text) => tester.getTopLeft(find.text(text)).dx;
     double right(String text) => tester.getTopRight(find.text(text)).dx;
 
-    await tester.pumpWidget(buildFrame(TextDirection.ltr));
-
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetHorizontalTitleGap: 0));
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
-    expect(left('title'), 56.0); // horizontalTitleGap: 0
+    expect(left('title'), 56.0);
 
-    await tester.pumpWidget(buildFrame(TextDirection.rtl));
-
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeHorizontalTitleGap: 0));
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
-    expect(right('title'), 744.0); // horizontalTitleGap: 0
+    expect(left('title'), 56.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeHorizontalTitleGap: 10, widgetHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 56.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 744.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 744.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeHorizontalTitleGap: 10, widgetHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 744.0);
   });
 
   testWidgets('ListTile horizontalTitleGap = (default) && ListTile minLeadingWidth = (default)', (WidgetTester tester) async {
@@ -1913,7 +1930,7 @@ void main() {
   });
 
   testWidgets('ListTile minVerticalPadding = 80.0', (WidgetTester tester) async {
-    Widget buildFrame(TextDirection textDirection) {
+    Widget buildFrame(TextDirection textDirection, { double? themeMinVerticalPadding, double? widgetMinVerticalPadding }) {
       return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
@@ -1922,13 +1939,16 @@ void main() {
         child: Directionality(
           textDirection: textDirection,
           child: Material(
-            child: Container(
-              alignment: Alignment.topLeft,
-              child: const ListTile(
-                minVerticalPadding: 80.0,
-                leading: Text('L'),
-                title: Text('title'),
-                trailing: Text('T'),
+            child: ListTileTheme(
+              minVerticalPadding: themeMinVerticalPadding,
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: ListTile(
+                  minVerticalPadding: widgetMinVerticalPadding,
+                  leading: const Text('L'),
+                  title: const Text('title'),
+                  trailing: const Text('T'),
+                ),
               ),
             ),
           ),
@@ -1937,21 +1957,29 @@ void main() {
     }
 
 
-    await tester.pumpWidget(buildFrame(TextDirection.ltr));
-
-    // minVerticalPadding: 80.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetMinVerticalPadding: 80));
     // 80 + 80 + 16(Title) = 176
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
 
-    await tester.pumpWidget(buildFrame(TextDirection.rtl));
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
 
-    // minVerticalPadding: 80.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinVerticalPadding: 0, widgetMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetMinVerticalPadding: 80));
     // 80 + 80 + 16(Title) = 176
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinVerticalPadding: 0, widgetMinVerticalPadding: 80));
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
   });
 
   testWidgets('ListTile minLeadingWidth = 60.0', (WidgetTester tester) async {
-    Widget buildFrame(TextDirection textDirection) {
+    Widget buildFrame(TextDirection textDirection, { double? themeMinLeadingWidth, double? widgetMinLeadingWidth }) {
       return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
@@ -1960,13 +1988,16 @@ void main() {
         child: Directionality(
           textDirection: textDirection,
           child: Material(
-            child: Container(
-              alignment: Alignment.topLeft,
-              child: const ListTile(
-                minLeadingWidth: 60.0,
-                leading: Text('L'),
-                title: Text('title'),
-                trailing: Text('T'),
+            child: ListTileTheme(
+              minLeadingWidth: themeMinLeadingWidth,
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: ListTile(
+                  minLeadingWidth: widgetMinLeadingWidth,
+                  leading: const Text('L'),
+                  title: const Text('title'),
+                  trailing: const Text('T'),
+                ),
               ),
             ),
           ),
@@ -1977,18 +2008,31 @@ void main() {
     double left(String text) => tester.getTopLeft(find.text(text)).dx;
     double right(String text) => tester.getTopRight(find.text(text)).dx;
 
-    await tester.pumpWidget(buildFrame(TextDirection.ltr));
-
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetMinLeadingWidth: 60));
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
-    // minLeadingWidth: 60.0
     // 92.0 = 16.0(Default contentPadding) + 16.0(Default horizontalTitleGap) + 60.0
     expect(left('title'), 92.0);
 
-    await tester.pumpWidget(buildFrame(TextDirection.rtl));
-
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinLeadingWidth: 60));
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
-    // minLeadingWidth: 60.0
+    expect(left('title'), 92.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinLeadingWidth: 0, widgetMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 92.0);
+
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
     // 708.0 = 800.0 - (16.0(Default contentPadding) + 16.0(Default horizontalTitleGap) + 60.0)
+    expect(right('title'), 708.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 708.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinLeadingWidth: 0, widgetMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
     expect(right('title'), 708.0);
   });
 }
