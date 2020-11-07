@@ -1178,13 +1178,6 @@ void Shell::SetNeedsReportTimings(bool value) {
 // |Engine::Delegate|
 std::unique_ptr<std::vector<std::string>> Shell::ComputePlatformResolvedLocale(
     const std::vector<std::string>& supported_locale_data) {
-  return ComputePlatformViewResolvedLocale(supported_locale_data);
-}
-
-// |PlatformView::Delegate|
-std::unique_ptr<std::vector<std::string>>
-Shell::ComputePlatformViewResolvedLocale(
-    const std::vector<std::string>& supported_locale_data) {
   return platform_view_->ComputePlatformResolvedLocales(supported_locale_data);
 }
 
