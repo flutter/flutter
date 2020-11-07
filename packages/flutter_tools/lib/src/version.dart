@@ -745,7 +745,7 @@ class GitTagVersion {
       }
     }
     final List<String> tags = _runGit(
-      'git tag --points-at $gitRef, processUtils, workingDirectory).trim().split('\n');
+      'git tag --points-at $gitRef', processUtils, workingDirectory).trim().split('\n');
 
     // Check first for a stable tag
     final RegExp stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
