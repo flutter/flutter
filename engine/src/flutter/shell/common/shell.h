@@ -507,10 +507,6 @@ class Shell final : public PlatformView::Delegate,
   // |PlatformView::Delegate|
   void OnPlatformViewSetNextFrameCallback(const fml::closure& closure) override;
 
-  // |PlatformView::Delegate|
-  std::unique_ptr<std::vector<std::string>> ComputePlatformViewResolvedLocale(
-      const std::vector<std::string>& supported_locale_data) override;
-
   // |Animator::Delegate|
   void OnAnimatorBeginFrame(fml::TimePoint frame_target_time) override;
 
