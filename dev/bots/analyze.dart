@@ -1102,9 +1102,8 @@ Stream<File> _allFiles(String workingDirectory, String extension, { @required in
     if (path.extension(entity.path) == '.tmpl')
       continue;
     if (entity is File) {
-      if (!gitFileNamesSet.contains(entity.absolute.path)) {
+      if (!gitFileNamesSet.contains(entity.absolute.path))
         continue;
-      }
       if (_isGeneratedPluginRegistrant(entity))
         continue;
       if (path.basename(entity.path) == 'flutter_export_environment.sh')
