@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class GalleryTextScaleValue {
   const GalleryTextScaleValue(this.scale, this.label);
 
-  final double? scale;
+  final double scale;
   final String label;
 
   @override

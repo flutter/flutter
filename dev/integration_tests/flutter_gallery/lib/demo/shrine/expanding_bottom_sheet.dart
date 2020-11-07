@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import 'package:flutter_gallery/demo/shrine/colors.dart';
@@ -25,16 +26,19 @@ const double _kCornerRadius = 24.0;
 const double _kWidthForCartIcon = 64.0;
 
 class ExpandingBottomSheet extends StatefulWidget {
-  const ExpandingBottomSheet({Key? key, required this.hideController})
-      : super(key: key);
+  const ExpandingBottomSheet({Key key, @required this.hideController})
+      : assert(hideController != null),
+        super(key: key);
 
   final AnimationController hideController;
 
   @override
   _ExpandingBottomSheetState createState() => _ExpandingBottomSheetState();
 
-  static _ExpandingBottomSheetState? of(BuildContext context, {bool isNullOk = false}) {
-    final _ExpandingBottomSheetState? result = context.findAncestorStateOfType<_ExpandingBottomSheetState>();
+  static _ExpandingBottomSheetState of(BuildContext context, {bool isNullOk = false}) {
+    assert(isNullOk != null);
+    assert(context != null);
+    final _ExpandingBottomSheetState result = context.findAncestorStateOfType<_ExpandingBottomSheetState>();
     if (isNullOk || result != null) {
       return result;
     }
@@ -49,11 +53,11 @@ class ExpandingBottomSheet extends StatefulWidget {
 // curve formula. It's quintic, not cubic. But it _can_ be expressed as one
 // curve followed by another, which we do here.
 Animation<T> _getEmphasizedEasingAnimation<T>({
-  required T begin,
-  required T peak,
-  required T end,
-  required bool isForward,
-  required Animation<double> parent,
+  @required T begin,
+  @required T peak,
+  @required T end,
+  @required bool isForward,
+  @required Animation<double> parent,
 }) {
   Curve firstCurve;
   Curve secondCurve;
@@ -94,7 +98,7 @@ Animation<T> _getEmphasizedEasingAnimation<T>({
 
 // Calculates the value where two double Animations should be joined. Used by
 // callers of _getEmphasisedEasing<double>().
-double _getPeakPoint({required double begin, required double end}) {
+double _getPeakPoint({double begin, double end}) {
   return begin + (end - begin) * _kPeakVelocityProgress;
 }
 
@@ -107,15 +111,15 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
   double _width = _kWidthForCartIcon;
 
   // Controller for the opening and closing of the ExpandingBottomSheet
-  late AnimationController _controller;
+  AnimationController _controller;
 
   // Animations for the opening and closing of the ExpandingBottomSheet
-  late Animation<double> _widthAnimation;
-  late Animation<double> _heightAnimation;
-  late Animation<double> _thumbnailOpacityAnimation;
-  late Animation<double> _cartOpacityAnimation;
-  late Animation<double> _shapeAnimation;
-  late Animation<Offset> _slideAnimation;
+  Animation<double> _widthAnimation;
+  Animation<double> _heightAnimation;
+  Animation<double> _thumbnailOpacityAnimation;
+  Animation<double> _cartOpacityAnimation;
+  Animation<double> _shapeAnimation;
+  Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -304,7 +308,7 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
     );
   }
 
-  Widget _buildCart(BuildContext context, Widget? child) {
+  Widget _buildCart(BuildContext context, Widget child) {
     // numProducts is the number of different products in the cart (does not
     // include multiples of the same product).
     final AppStateModel model = ScopedModel.of<AppStateModel>(context);
@@ -345,7 +349,7 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
   }
 
   // Builder for the hide and reveal animation when the backdrop opens and closes
-  Widget _buildSlideAnimation(BuildContext context, Widget? child) {
+  Widget _buildSlideAnimation(BuildContext context, Widget child) {
     _slideAnimation = _getEmphasizedEasingAnimation(
       begin: const Offset(1.0, 0.0),
       peak: const Offset(_kPeakVelocityProgress, 0.0),
@@ -389,7 +393,7 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
             behavior: HitTestBehavior.opaque,
             onTap: open,
             child: ScopedModelDescendant<AppStateModel>(
-              builder: (BuildContext context, Widget? child, AppStateModel model) {
+              builder: (BuildContext context, Widget child, AppStateModel model) {
                 return AnimatedBuilder(
                   builder: _buildCart,
                   animation: _controller,
@@ -413,10 +417,10 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
 
   // _list represents what's currently on screen. If _internalList updates,
   // it will need to be updated to match it.
-  late _ListModel _list;
+  _ListModel _list;
 
   // _internalList represents the list as it is updated by the AppStateModel.
-  late List<int> _internalList;
+  List<int> _internalList;
 
   @override
   void initState() {
@@ -432,6 +436,7 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
   Product _productWithId(int productId) {
     final AppStateModel model = ScopedModel.of<AppStateModel>(context);
     final Product product = model.getProductById(productId);
+    assert(product != null);
     return product;
   }
 
@@ -505,7 +510,7 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
   Widget build(BuildContext context) {
     _updateLists();
     return ScopedModelDescendant<AppStateModel>(
-      builder: (BuildContext context, Widget? child, AppStateModel model) => _buildAnimatedList(),
+      builder: (BuildContext context, Widget child, AppStateModel model) => _buildAnimatedList(),
     );
   }
 }
@@ -524,7 +529,7 @@ class ExtraProductsNumber extends StatelessWidget {
     final int numProducts = products.length;
     if (numProducts > 3) {
       for (int i = 3; i < numProducts; i++) {
-        overflow += productMap[products[i]]!;
+        overflow += productMap[products[i]];
       }
     }
     return overflow;
@@ -548,7 +553,7 @@ class ExtraProductsNumber extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<AppStateModel>(
-      builder: (BuildContext builder, Widget? child, AppStateModel model) => _buildOverflow(model, context),
+      builder: (BuildContext builder, Widget child, AppStateModel model) => _buildOverflow(model, context),
     );
   }
 }
@@ -589,16 +594,18 @@ class ProductThumbnail extends StatelessWidget {
 // _ListModel manipulates an internal list and an AnimatedList
 class _ListModel {
   _ListModel({
-    required this.listKey,
-    required this.removedItemBuilder,
-    Iterable<int>? initialItems,
-  }) : _items = initialItems?.toList() ?? <int>[];
+    @required this.listKey,
+    @required this.removedItemBuilder,
+    Iterable<int> initialItems,
+  }) : assert(listKey != null),
+       assert(removedItemBuilder != null),
+       _items = initialItems?.toList() ?? <int>[];
 
   final GlobalKey<AnimatedListState> listKey;
   final Widget Function(int item, BuildContext context, Animation<double> animation) removedItemBuilder;
   final List<int> _items;
 
-  AnimatedListState? get _animatedList => listKey.currentState;
+  AnimatedListState get _animatedList => listKey.currentState;
 
   void add(int product) {
     _insert(_items.length, product);
@@ -606,7 +613,7 @@ class _ListModel {
 
   void _insert(int index, int item) {
     _items.insert(index, item);
-    _animatedList!.insertItem(index, duration: const Duration(milliseconds: 225));
+    _animatedList.insertItem(index, duration: const Duration(milliseconds: 225));
   }
 
   void remove(int product) {
@@ -618,9 +625,11 @@ class _ListModel {
 
   void _removeAt(int index) {
     final int removedItem = _items.removeAt(index);
-    _animatedList!.removeItem(index, (BuildContext context, Animation<double> animation) {
-      return removedItemBuilder(removedItem, context, animation);
-    });
+    if (removedItem != null) {
+      _animatedList.removeItem(index, (BuildContext context, Animation<double> animation) {
+        return removedItemBuilder(removedItem, context, animation);
+      });
+    }
   }
 
   int get length => _items.length;

@@ -10,8 +10,8 @@ import 'icons.dart';
 @immutable
 class GalleryDemoCategory {
   const GalleryDemoCategory._({
-    required this.name,
-    required this.icon,
+    @required this.name,
+    @required this.icon,
   });
 
   final String name;
@@ -64,22 +64,25 @@ const GalleryDemoCategory _kMedia = GalleryDemoCategory._(
 
 class GalleryDemo {
   const GalleryDemo({
-    required this.title,
-    required this.icon,
+    @required this.title,
+    @required this.icon,
     this.subtitle,
-    required this.category,
-    required this.routeName,
+    @required this.category,
+    @required this.routeName,
     this.documentationUrl,
-    required this.buildRoute,
-  });
+    @required this.buildRoute,
+  }) : assert(title != null),
+       assert(category != null),
+       assert(routeName != null),
+       assert(buildRoute != null);
 
   final String title;
   final IconData icon;
-  final String? subtitle;
+  final String subtitle;
   final GalleryDemoCategory category;
   final String routeName;
   final WidgetBuilder buildRoute;
-  final String? documentationUrl;
+  final String documentationUrl;
 
   @override
   String toString() {
@@ -578,7 +581,7 @@ final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
     },
   );
 
-final Map<String, String?> kDemoDocumentationUrl = <String, String?>{
+final Map<String, String> kDemoDocumentationUrl = <String, String>{
   for (final GalleryDemo demo in kAllGalleryDemos)
     if (demo.documentationUrl != null) demo.routeName: demo.documentationUrl,
 };

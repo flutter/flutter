@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'animation/home.dart';
 
 class AnimationDemo extends StatelessWidget {
-  const AnimationDemo({Key? key}) : super(key: key);
+  const AnimationDemo({Key key}) : super(key: key);
 
   static const String routeName = '/animation';
 

@@ -42,7 +42,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: 0.17.0-nullsafety.2
+  intl: 0.16.1
 ''';
 
   @override

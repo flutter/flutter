@@ -21,7 +21,7 @@ enum _MaterialListType {
 }
 
 class ListDemo extends StatefulWidget {
-  const ListDemo({ Key? key }) : super(key: key);
+  const ListDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/material/list';
 
@@ -32,26 +32,26 @@ class ListDemo extends StatefulWidget {
 class _ListDemoState extends State<ListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  PersistentBottomSheetController<void>? _bottomSheet;
-  _MaterialListType? _itemType = _MaterialListType.threeLine;
-  bool? _dense = false;
-  bool? _showAvatars = true;
-  bool? _showIcons = false;
-  bool? _showDividers = false;
+  PersistentBottomSheetController<void> _bottomSheet;
+  _MaterialListType _itemType = _MaterialListType.threeLine;
+  bool _dense = false;
+  bool _showAvatars = true;
+  bool _showIcons = false;
+  bool _showDividers = false;
   bool _reverseSort = false;
   List<String> items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
   ];
 
-  void changeItemType(_MaterialListType? type) {
+  void changeItemType(_MaterialListType type) {
     setState(() {
       _itemType = type;
     });
-    _bottomSheet?.setState!(() { });
+    _bottomSheet?.setState(() { });
   }
 
   void _showConfigurationSheet() {
-    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((BuildContext bottomSheetContext) {
+    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((BuildContext bottomSheetContext) {
       return Container(
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: Colors.black26)),
@@ -65,7 +65,7 @@ class _ListDemoState extends State<ListDemo> {
                 dense: true,
                 title: const Text('One-line'),
                 trailing: Radio<_MaterialListType>(
-                  value: _showAvatars! ? _MaterialListType.oneLineWithAvatar : _MaterialListType.oneLine,
+                  value: _showAvatars ? _MaterialListType.oneLineWithAvatar : _MaterialListType.oneLine,
                   groupValue: _itemType,
                   onChanged: changeItemType,
                 ),
@@ -99,14 +99,11 @@ class _ListDemoState extends State<ListDemo> {
                 title: const Text('Show avatar'),
                 trailing: Checkbox(
                   value: _showAvatars,
-                  onChanged: (bool? value) {
+                  onChanged: (bool value) {
                     setState(() {
                       _showAvatars = value;
                     });
-                    final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
-                    if (bottomSheetSetState != null) {
-                      bottomSheetSetState(() { });
-                    }
+                    _bottomSheet?.setState(() { });
                   },
                 ),
               ),
@@ -117,14 +114,11 @@ class _ListDemoState extends State<ListDemo> {
                 title: const Text('Show icon'),
                 trailing: Checkbox(
                   value: _showIcons,
-                  onChanged: (bool? value) {
+                  onChanged: (bool value) {
                     setState(() {
                       _showIcons = value;
                     });
-                    final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
-                    if (bottomSheetSetState != null) {
-                      bottomSheetSetState(() { });
-                    }
+                    _bottomSheet?.setState(() { });
                   },
                 ),
               ),
@@ -135,14 +129,11 @@ class _ListDemoState extends State<ListDemo> {
                 title: const Text('Show dividers'),
                 trailing: Checkbox(
                   value: _showDividers,
-                  onChanged: (bool? value) {
+                  onChanged: (bool value) {
                     setState(() {
                       _showDividers = value;
                     });
-                    final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
-                    if (bottomSheetSetState != null) {
-                      bottomSheetSetState(() { });
-                    }
+                    _bottomSheet?.setState(() { });
                   },
                 ),
               ),
@@ -153,14 +144,11 @@ class _ListDemoState extends State<ListDemo> {
                 title: const Text('Dense layout'),
                 trailing: Checkbox(
                   value: _dense,
-                  onChanged: (bool? value) {
+                  onChanged: (bool value) {
                     setState(() {
                       _dense = value;
                     });
-                    final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
-                    if (bottomSheetSetState != null) {
-                      bottomSheetSetState(() { });
-                    }
+                    _bottomSheet?.setState(() { });
                   },
                 ),
               ),
@@ -174,7 +162,7 @@ class _ListDemoState extends State<ListDemo> {
       _bottomSheet = bottomSheet;
     });
 
-    _bottomSheet?.closed.whenComplete(() {
+    _bottomSheet.closed.whenComplete(() {
       if (mounted) {
         setState(() {
           _bottomSheet = null;
@@ -184,7 +172,7 @@ class _ListDemoState extends State<ListDemo> {
   }
 
   Widget buildListTile(BuildContext context, String item) {
-    Widget? secondary;
+    Widget secondary;
     if (_itemType == _MaterialListType.twoLine) {
       secondary = const Text('Additional item information.');
     } else if (_itemType == _MaterialListType.threeLine) {
@@ -196,18 +184,18 @@ class _ListDemoState extends State<ListDemo> {
       child: ListTile(
         isThreeLine: _itemType == _MaterialListType.threeLine,
         dense: _dense,
-        leading: _showAvatars != null ? ExcludeSemantics(child: CircleAvatar(child: Text(item))) : null,
+        leading: _showAvatars ? ExcludeSemantics(child: CircleAvatar(child: Text(item))) : null,
         title: Text('This item represents $item.'),
         subtitle: secondary,
-        trailing: _showIcons != null ? Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
+        trailing: _showIcons ? Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final String layoutText = _dense != null ? ' \u2013 Dense' : '';
-    String? itemTypeText;
+    final String layoutText = _dense ? ' \u2013 Dense' : '';
+    String itemTypeText;
     switch (_itemType) {
       case _MaterialListType.oneLine:
       case _MaterialListType.oneLineWithAvatar:
@@ -219,12 +207,10 @@ class _ListDemoState extends State<ListDemo> {
       case _MaterialListType.threeLine:
         itemTypeText = 'Three-line';
         break;
-      default:
-        break;
     }
 
     Iterable<Widget> listTiles = items.map<Widget>((String item) => buildListTile(context, item));
-    if (_showDividers != null)
+    if (_showDividers)
       listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
 
     return Scaffold(
@@ -256,7 +242,7 @@ class _ListDemoState extends State<ListDemo> {
       ),
       body: Scrollbar(
         child: ListView(
-          padding: EdgeInsets.symmetric(vertical: _dense != null ? 4.0 : 8.0),
+          padding: EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
           children: listTiles.toList(),
         ),
       ),
