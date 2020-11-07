@@ -236,7 +236,7 @@ class TestCommand extends Command<bool> with ArgUtils {
     }
 
     // Separate HTML targets from CanvasKit targets because the two use
-    // different dart2js options (and different build.*.yaml files).
+    // different dart2js options.
     final List<FilePath> htmlTargets = <FilePath>[];
     final List<FilePath> canvasKitTargets = <FilePath>[];
     final String canvasKitTestDirectory =

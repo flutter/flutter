@@ -4,9 +4,9 @@ environment:
   sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
-  js: 0.6.1+1
-  stream_channel: 2.0.0
-  test: 1.14.3
+  js: 0.6.3-nullsafety.3
+  stream_channel: 2.1.0-nullsafety.3
+  test: 1.16.0-nullsafety.9
   webkit_inspection_protocol: 0.5.0
   ui:
     path: ../../lib/web_ui

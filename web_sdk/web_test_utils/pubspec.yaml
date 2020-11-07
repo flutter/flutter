@@ -6,5 +6,5 @@ environment:
 dependencies:
   path: 1.8.0-nullsafety.3
   image: 2.1.13
-  js: 0.6.1+1
+  js: 0.6.3-nullsafety.3
   yaml: 2.2.1
