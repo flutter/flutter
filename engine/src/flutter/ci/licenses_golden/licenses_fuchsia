@@ -1,4 +1,4 @@
-Signature: 31d11cbc15d66ebd5137f021a4e122a0
+Signature: 71b4f8b03b121b3b86b5d539204fcf56
 
 UNUSED LICENSES:
 
@@ -3216,6 +3216,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/fdio.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/io.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/vfs.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/watcher.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/thread_checker.h
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/include/lib/media/cpp/timeline_function.h
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/include/lib/media/cpp/timeline_rate.h
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/timeline_function.cc
