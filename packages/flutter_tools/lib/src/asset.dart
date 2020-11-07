@@ -26,9 +26,9 @@ const String kFontManifestJson = 'FontManifest.json';
 ///
 ///```yaml
 /// material:
-/// - family: MaterialIcons
-///   fonts:
-///     - asset: fonts/MaterialIcons-Regular.otf
+///   - family: MaterialIcons
+///     fonts:
+///       - asset: fonts/MaterialIcons-Regular.otf
 ///```
 const List<Map<String, Object>> kMaterialFonts = <Map<String, Object>>[
   <String, Object>{
