@@ -6,10 +6,10 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 
+import '../integration.shard/test_data/stepping_project.dart';
+import '../integration.shard/test_driver.dart';
+import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
-import 'test_data/stepping_project.dart';
-import 'test_driver.dart';
-import 'test_utils.dart';
 
 void main() {
   Directory tempDirectory;
