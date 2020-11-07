@@ -23,7 +23,9 @@ void main() {
 
     // Close the connection to the driver after the tests have completed.
     tearDownAll(() async {
-      driver?.close();
+      if (driver != null) {
+        driver.close();
+      }
     });
 
     test('title is correct', () async {
