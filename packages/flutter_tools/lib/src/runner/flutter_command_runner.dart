@@ -223,7 +223,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
     );
     if (engineBuildPaths != null) {
       contextOverrides.addAll(<Type, dynamic>{
-        Artifacts: Artifacts.getLocalEngine(engineBuildPaths),
+        Artifacts: LocalEngineArtifacts(
+          engineBuildPaths.targetEngine,
+          engineBuildPaths.hostEngine,
+          fileSystem: globals.fs,
+          cache: globals.cache,
+          platform: globals.platform,
+          processManager: globals.processManager,
+        ),
       });
     }
 
