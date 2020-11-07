@@ -6,10 +6,10 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 
+import '../integration.shard/test_data/hot_reload_project.dart';
+import '../integration.shard/test_driver.dart';
+import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
-import 'test_data/hot_reload_project.dart';
-import 'test_driver.dart';
-import 'test_utils.dart';
 
 void main() {
   Directory tempDir;
@@ -30,7 +30,7 @@ void main() {
   testWithoutContext('hot restart works without error', () async {
     await flutter.run(chrome: true);
     await flutter.hotRestart();
-  }, skip: true); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/69804
+  });
 
   testWithoutContext('newly added code executes during hot restart', () async {
     final Completer<void> completer = Completer<void>();
@@ -48,7 +48,7 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  }, skip: true); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/69804
+  });
 
   testWithoutContext('newly added code executes during hot restart - canvaskit', () async {
     final Completer<void> completer = Completer<void>();
@@ -66,5 +66,5 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  }, skip: true); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/69804
+  });
 }

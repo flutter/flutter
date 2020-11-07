@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-typedef _MessageHandler = Future<ByteData> Function(ByteData);
+// TODO(hterkelsen): Why is this _MessageHandler duplicated here?
+typedef _MessageHandler = Future<ByteData?>? Function(ByteData?);
 
 /// This class registers web platform plugins.
 ///
@@ -97,12 +96,12 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
   @override
   Future<void> handlePlatformMessage(
     String channel,
-    ByteData data,
-    ui.PlatformMessageResponseCallback callback,
+    ByteData? data,
+    ui.PlatformMessageResponseCallback? callback,
   ) async {
-    ByteData response;
+    ByteData? response;
     try {
-      final MessageHandler handler = _handlers[channel];
+      final MessageHandler? handler = _handlers[channel];
       if (handler != null) {
         response = await handler(data);
       }
@@ -122,9 +121,9 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
 
   /// Sends a platform message from the platform side back to the framework.
   @override
-  Future<ByteData> send(String channel, ByteData message) {
+  Future<ByteData> send(String channel, ByteData? message) {
     final Completer<ByteData> completer = Completer<ByteData>();
-    ui.window.onPlatformMessage(channel, message, (ByteData reply) {
+    ui.window.onPlatformMessage!(channel, message, (ByteData? reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {
@@ -140,7 +139,7 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  void setMessageHandler(String channel, MessageHandler handler) {
+  void setMessageHandler(String channel, MessageHandler? handler) {
     if (handler == null)
       _handlers.remove(channel);
     else
@@ -148,12 +147,12 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  bool checkMessageHandler(String channel, MessageHandler handler) => _handlers[channel] == handler;
+  bool checkMessageHandler(String channel, MessageHandler? handler) => _handlers[channel] == handler;
 
   @override
   void setMockMessageHandler(
     String channel,
-    Future<ByteData> Function(ByteData message) handler,
+    MessageHandler? handler,
   ) {
     throw FlutterError(
       'Setting mock handlers is not supported on the platform side.',
@@ -161,7 +160,7 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  bool checkMockMessageHandler(String channel, MessageHandler handler) {
+  bool checkMockMessageHandler(String channel, MessageHandler? handler) {
     throw FlutterError(
       'Setting mock handlers is not supported on the platform side.',
     );

@@ -270,6 +270,7 @@ const Set<String> _exemptTestImports = <String>{
   'package:flutter_test/flutter_test.dart',
   'hit_test.dart',
   'package:test_api/src/backend/live_test.dart',
+  'package:integration_test/integration_test.dart',
 };
 
 Future<void> verifyNoTestImports(String workingDirectory) async {

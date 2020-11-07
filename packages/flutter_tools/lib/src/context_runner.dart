@@ -72,7 +72,17 @@ Future<T> runInContext<T>(
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
-      AndroidLicenseValidator: () => AndroidLicenseValidator(),
+      AndroidLicenseValidator: () => AndroidLicenseValidator(
+        operatingSystemUtils: globals.os,
+        platform: globals.platform,
+        userMessages: globals.userMessages,
+        processManager: globals.processManager,
+        androidStudio: globals.androidStudio,
+        androidSdk: globals.androidSdk,
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        stdio: globals.stdio,
+      ),
       AndroidSdk: AndroidSdk.locateAndroidSdk,
       AndroidStudio: AndroidStudio.latestValid,
       AndroidValidator: () => AndroidValidator(
@@ -110,6 +120,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        osUtils: globals.os,
       ),
       CocoaPods: () => CocoaPods(
         fileSystem: globals.fs,
