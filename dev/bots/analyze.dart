@@ -1091,7 +1091,7 @@ Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true})
 
 Stream<File> _allFiles(String workingDirectory, String extension, { @required int minimumMatches }) async* {
   final Set<String> gitFileNamesSet = <String>{};
-  gitFileNamesSet.addAll((await _gitFiles(workingDirectory)).map((File f) => f.absolute.path));
+  gitFileNamesSet.addAll((await _gitFiles(workingDirectory)).map((File f) => path.canonicalize(f.absolute.path)));
 
   assert(extension == null || !extension.startsWith('.'), 'Extension argument should not start with a period.');
   final Set<FileSystemEntity> pending = <FileSystemEntity>{ Directory(workingDirectory) };
@@ -1102,7 +1102,7 @@ Stream<File> _allFiles(String workingDirectory, String extension, { @required in
     if (path.extension(entity.path) == '.tmpl')
       continue;
     if (entity is File) {
-      if (!gitFileNamesSet.contains(entity.absolute.path))
+      if (!gitFileNamesSet.contains(path.canonicalize(entity.absolute.path)))
         continue;
       if (_isGeneratedPluginRegistrant(entity))
         continue;
