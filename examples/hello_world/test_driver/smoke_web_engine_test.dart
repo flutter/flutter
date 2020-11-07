@@ -14,7 +14,7 @@ void main() {
   group('Hello World App', () {
     final SerializableFinder titleFinder = find.byValueKey('title');
 
-    late FlutterDriver driver;
+    FlutterDriver driver;
 
     // Connect to the Flutter driver before running any tests.
     setUpAll(() async {
@@ -23,7 +23,7 @@ void main() {
 
     // Close the connection to the driver after the tests have completed.
     tearDownAll(() async {
-      driver.close();
+      driver?.close();
     });
 
     test('title is correct', () async {
