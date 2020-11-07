@@ -38,5 +38,6 @@ void main() {
       matchesGoldenFile('cupertino_navigation_demo.screen.2.png'),
     );
   },
+  // TODO(egarciad): https://github.com/flutter/flutter/issues/69994
   skip: true);
 }
