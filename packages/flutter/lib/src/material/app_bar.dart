@@ -370,8 +370,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   ///  * [foregroundColor], which specifies the color for icons and text within
   ///    the app bar.
-  ///  * [brightness], which overrides the overall theme's brightness for
-  ///    this app bar.
   ///  * [Theme.of], which returns the current overall Material theme as
   ///    a [ThemeData].
   ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
@@ -388,14 +386,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [Brightness.light], and [ColorScheme.onSurface] if the overall
   /// theme's [brightness] is [Brightness.dark].
   ///
-  /// This color is used to configure [DefaultTextStyle] and [IconTheme]
-  /// widgets.
+  /// This color is used to configure [DefaultTextStyle] that contains
+  /// the app bar's children, and the default [IconTheme] widgets that
+  /// are created if [iconTheme] and [actionsIconTheme] are null.
   ///
   /// See also:
   ///
   ///  * [backgroundColor], which specifies the app bar's background color.
-  ///  * [brightness], which overrides the overall theme's brightness for
-  ///    this app bar.
   ///  * [Theme.of], which returns the current overall Material theme as
   ///    a [ThemeData].
   ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
@@ -404,16 +401,20 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///    is light or dark.
   final Color? foregroundColor;
 
-  /// AppBar uses this value to determine the default [foregroundColor] and
-  /// [backgroundColor] as well as the app bar's [SystemUiOverlayStyle].
-  ///
-  /// For [Brightness.dark], [SystemUiOverlayStyle.light] is used and for
+  /// Determines the brightness of the [SystemUiOverlayStyle]: for
+  /// [Brightness.dark], [SystemUiOverlayStyle.light] is used and fo
   /// [Brightness.light], [SystemUiOverlayStyle.dark] is used.
+  ///
+  /// If this value is null then [AppBarTheme.brightness] is used
+  /// and if that's null then overall theme's brightness is used.
+  ///
+  /// The AppBar is built within a `AnnotatedRegion<SystemUiOverlayStyle>`
+  /// which causes [SystemChrome.setSystemUIOverlayStyle] to be called
+  /// automatically.  Apps should not enclose the AppBar with
+  /// their own [AnnotatedRegion].
   ///
   /// See also:
   ///
-  ///  * [AppBar.brightness], which overrides the this value and the overall
-  ///    theme's [ColorScheme.brightness].
   ///  * [Theme.of], which returns the current overall Material theme as
   ///    a [ThemeData].
   ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
