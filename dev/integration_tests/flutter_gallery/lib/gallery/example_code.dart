@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 
 class ButtonsDemo {
   void setState(VoidCallback callback) { }
-  late BuildContext context;
+  BuildContext context;
 
   void buttons() {
 
@@ -90,12 +90,12 @@ const TextButton(
 
 // START buttons_dropdown
 // Member variable holding value.
-String? dropdownValue;
+String dropdownValue;
 
 // Dropdown button with string values.
 DropdownButton<String>(
   value: dropdownValue,
-  onChanged: (String? newValue) {
+  onChanged: (String newValue) {
     // null indicates the user didn't select a
     // new value.
     setState(() {
@@ -116,7 +116,7 @@ DropdownButton<String>(
 
 // START buttons_icon
 // Member variable holding toggle value.
-late bool value;
+bool value;
 
 // Toggleable icon button.
 IconButton(
@@ -152,12 +152,12 @@ class SelectionControls {
 
 // START selectioncontrols_checkbox
 // Member variable holding the checkbox's value.
-bool? checkboxValue = false;
+bool checkboxValue = false;
 
 // Create a checkbox.
 Checkbox(
   value: checkboxValue,
-  onChanged: (bool? value) {
+  onChanged: (bool value) {
     setState(() {
       checkboxValue = value;
     });
@@ -168,7 +168,7 @@ Checkbox(
 Checkbox(
   tristate: true,
   value: checkboxValue,
-  onChanged: (bool? value) {
+  onChanged: (bool value) {
     setState(() {
       checkboxValue = value;
     });
@@ -184,10 +184,10 @@ const Checkbox(value: false, onChanged: null);
 
 // START selectioncontrols_radio
 // Member variable holding value.
-int? radioValue = 0;
+int radioValue = 0;
 
 // Method setting value.
-void handleRadioValueChanged(int? value) {
+void handleRadioValueChanged(int value) {
   setState(() {
     radioValue = value;
   });

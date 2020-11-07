@@ -9,17 +9,17 @@ import '../../gallery/demo.dart';
 class _PageSelector extends StatelessWidget {
   const _PageSelector({ this.icons });
 
-  final List<Icon>? icons;
+  final List<Icon> icons;
 
   void _handleArrowButtonPress(BuildContext context, int delta) {
-    final TabController controller = DefaultTabController.of(context)!;
+    final TabController controller = DefaultTabController.of(context);
     if (!controller.indexIsChanging)
-      controller.animateTo((controller.index + delta).clamp(0, icons!.length - 1));
+      controller.animateTo((controller.index + delta).clamp(0, icons.length - 1) as int);
   }
 
   @override
   Widget build(BuildContext context) {
-    final TabController? controller = DefaultTabController.of(context);
+    final TabController controller = DefaultTabController.of(context);
     final Color color = Theme.of(context).accentColor;
     return SafeArea(
       top: false,
@@ -54,7 +54,7 @@ class _PageSelector extends StatelessWidget {
                 color: color,
               ),
               child: TabBarView(
-                children: icons!.map<Widget>((Icon icon) {
+                children: icons.map<Widget>((Icon icon) {
                   return Container(
                     padding: const EdgeInsets.all(12.0),
                     child: Card(

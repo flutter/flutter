@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 // @dart = 2.9
-
 import 'dart:convert' show JsonEncoder, json;
 
 import 'package:file/file.dart';

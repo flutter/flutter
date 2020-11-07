@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class MenuDemo extends StatefulWidget {
-  const MenuDemo({ Key? key }) : super(key: key);
+  const MenuDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/material/menu';
 
@@ -20,13 +20,13 @@ class MenuDemoState extends State<MenuDemo> {
   final String _simpleValue1 = 'Menu item value one';
   final String _simpleValue2 = 'Menu item value two';
   final String _simpleValue3 = 'Menu item value three';
-  String? _simpleValue;
+  String _simpleValue;
 
   final String _checkedValue1 = 'One';
   final String _checkedValue2 = 'Two';
   final String _checkedValue3 = 'Free';
   final String _checkedValue4 = 'Four';
-  late List<String> _checkedValues;
+  List<String> _checkedValues;
 
   @override
   void initState() {
@@ -165,7 +165,7 @@ class MenuDemoState extends State<MenuDemo> {
               onSelected: showMenuSelection,
               child: ListTile(
                 title: const Text('An item with a simple menu'),
-                subtitle: Text(_simpleValue!),
+                subtitle: Text(_simpleValue),
               ),
               itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                 PopupMenuItem<String>(

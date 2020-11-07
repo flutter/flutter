@@ -20,10 +20,10 @@ class SectionDetail {
     this.imageAsset,
     this.imageAssetPackage,
   });
-  final String? title;
-  final String? subtitle;
-  final String? imageAsset;
-  final String? imageAssetPackage;
+  final String title;
+  final String subtitle;
+  final String imageAsset;
+  final String imageAssetPackage;
 }
 
 @immutable
@@ -36,12 +36,12 @@ class Section {
     this.rightColor,
     this.details,
   });
-  final String? title;
-  final String? backgroundAsset;
-  final String? backgroundAssetPackage;
-  final Color? leftColor;
-  final Color? rightColor;
-  final List<SectionDetail>? details;
+  final String title;
+  final String backgroundAsset;
+  final String backgroundAssetPackage;
+  final Color leftColor;
+  final Color rightColor;
+  final List<SectionDetail> details;
 
   @override
   bool operator==(Object other) {

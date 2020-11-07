@@ -12,8 +12,8 @@ import 'package:flutter/material.dart';
 
 class Category {
   const Category({ this.title, this.assets });
-  final String? title;
-  final List<String>? assets;
+  final String title;
+  final List<String> assets;
   @override
   String toString() => '$runtimeType("$title")';
 }
@@ -95,21 +95,21 @@ const List<Category> allCategories = <Category>[
 ];
 
 class CategoryView extends StatelessWidget {
-  const CategoryView({ Key? key, this.category }) : super(key: key);
+  const CategoryView({ Key key, this.category }) : super(key: key);
 
-  final Category? category;
+  final Category category;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scrollbar(
       child: ListView(
-        key: PageStorageKey<Category?>(category),
+        key: PageStorageKey<Category>(category),
         padding: const EdgeInsets.symmetric(
           vertical: 16.0,
           horizontal: 64.0,
         ),
-        children: category!.assets!.map<Widget>((String asset) {
+        children: category.assets.map<Widget>((String asset) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
@@ -149,7 +149,7 @@ class CategoryView extends StatelessWidget {
 // BackdropDemo.
 class BackdropPanel extends StatelessWidget {
   const BackdropPanel({
-    Key? key,
+    Key key,
     this.onTap,
     this.onVerticalDragUpdate,
     this.onVerticalDragEnd,
@@ -157,11 +157,11 @@ class BackdropPanel extends StatelessWidget {
     this.child,
   }) : super(key: key);
 
-  final VoidCallback? onTap;
-  final GestureDragUpdateCallback? onVerticalDragUpdate;
-  final GestureDragEndCallback? onVerticalDragEnd;
-  final Widget? title;
-  final Widget? child;
+  final VoidCallback onTap;
+  final GestureDragUpdateCallback onVerticalDragUpdate;
+  final GestureDragEndCallback onVerticalDragEnd;
+  final Widget title;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +185,7 @@ class BackdropPanel extends StatelessWidget {
               padding: const EdgeInsetsDirectional.only(start: 16.0),
               alignment: AlignmentDirectional.centerStart,
               child: DefaultTextStyle(
-                style: theme.textTheme.subtitle1!,
+                style: theme.textTheme.subtitle1,
                 child: Tooltip(
                   message: 'Tap to dismiss',
                   child: title,
@@ -194,7 +194,7 @@ class BackdropPanel extends StatelessWidget {
             ),
           ),
           const Divider(height: 1.0),
-          Expanded(child: child!),
+          Expanded(child: child),
         ],
       ),
     );
@@ -204,15 +204,15 @@ class BackdropPanel extends StatelessWidget {
 // Cross fades between 'Select a Category' and 'Asset Viewer'.
 class BackdropTitle extends AnimatedWidget {
   const BackdropTitle({
-    Key? key,
-    required Animation<double> listenable,
+    Key key,
+    Animation<double> listenable,
   }) : super(key: key, listenable: listenable);
 
   @override
   Widget build(BuildContext context) {
     final Animation<double> animation = listenable as Animation<double>;
     return DefaultTextStyle(
-      style: Theme.of(context).primaryTextTheme.headline6!,
+      style: Theme.of(context).primaryTextTheme.headline6,
       softWrap: false,
       overflow: TextOverflow.ellipsis,
       child: Stack(
@@ -247,7 +247,7 @@ class BackdropDemo extends StatefulWidget {
 
 class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderStateMixin {
   final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
-  late AnimationController _controller;
+  AnimationController _controller;
   Category _category = allCategories[0];
 
   @override
@@ -283,7 +283,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   }
 
   double get _backdropHeight {
-    final RenderBox renderBox = _backdropKey.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox renderBox = _backdropKey.currentContext.findRenderObject() as RenderBox;
     return renderBox.size.height;
   }
 
@@ -294,7 +294,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     if (_controller.isAnimating || _controller.status == AnimationStatus.completed)
       return;
 
-    _controller.value -= details.primaryDelta! / _backdropHeight;
+    _controller.value -= details.primaryDelta / (_backdropHeight ?? details.primaryDelta);
   }
 
   void _handleDragEnd(DragEndDetails details) {
@@ -343,7 +343,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
           ? Colors.white.withOpacity(0.25)
           : Colors.transparent,
         child: ListTile(
-          title: Text(category.title!),
+          title: Text(category.title),
           selected: selected,
           onTap: () {
             _changeCategory(category);
@@ -359,8 +359,8 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
         children: <Widget>[
           ListTileTheme(
             iconColor: theme.primaryIconTheme.color,
-            textColor: theme.primaryTextTheme.headline6!.color!.withOpacity(0.6),
-            selectedColor: theme.primaryTextTheme.headline6!.color,
+            textColor: theme.primaryTextTheme.headline6.color.withOpacity(0.6),
+            selectedColor: theme.primaryTextTheme.headline6.color,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
@@ -375,7 +375,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
               onTap: _toggleBackdropPanelVisibility,
               onVerticalDragUpdate: _handleDragUpdate,
               onVerticalDragEnd: _handleDragEnd,
-              title: Text(_category.title!),
+              title: Text(_category.title),
               child: CategoryView(category: _category),
             ),
           ),

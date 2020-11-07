@@ -8,11 +8,11 @@ import '../../gallery/demo.dart';
 
 class NavigationIconView {
   NavigationIconView({
-    required Widget icon,
-    Widget? activeIcon,
-    String? title,
-    Color? color,
-    required TickerProvider vsync,
+    Widget icon,
+    Widget activeIcon,
+    String title,
+    Color color,
+    TickerProvider vsync,
   }) : _icon = icon,
        _color = color,
        _title = title,
@@ -32,14 +32,14 @@ class NavigationIconView {
   }
 
   final Widget _icon;
-  final Color? _color;
-  final String? _title;
+  final Color _color;
+  final String _title;
   final BottomNavigationBarItem item;
   final AnimationController controller;
-  late Animation<double> _animation;
+  Animation<double> _animation;
 
   FadeTransition transition(BottomNavigationBarType type, BuildContext context) {
-    Color? iconColor;
+    Color iconColor;
     if (type == BottomNavigationBarType.shifting) {
       iconColor = _color;
     } else {
@@ -79,8 +79,8 @@ class CustomIcon extends StatelessWidget {
     final IconThemeData iconTheme = IconTheme.of(context);
     return Container(
       margin: const EdgeInsets.all(4.0),
-      width: iconTheme.size! - 8.0,
-      height: iconTheme.size! - 8.0,
+      width: iconTheme.size - 8.0,
+      height: iconTheme.size - 8.0,
       color: iconTheme.color,
     );
   }
@@ -92,10 +92,10 @@ class CustomInactiveIcon extends StatelessWidget {
     final IconThemeData iconTheme = IconTheme.of(context);
     return Container(
       margin: const EdgeInsets.all(4.0),
-      width: iconTheme.size! - 8.0,
-      height: iconTheme.size! - 8.0,
+      width: iconTheme.size - 8.0,
+      height: iconTheme.size - 8.0,
       decoration: BoxDecoration(
-        border: Border.all(color: iconTheme.color!, width: 2.0),
+        border: Border.all(color: iconTheme.color, width: 2.0),
       ),
     );
   }
@@ -112,7 +112,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
     with TickerProviderStateMixin {
   int _currentIndex = 0;
   BottomNavigationBarType _type = BottomNavigationBarType.shifting;
-  late List<NavigationIconView> _navigationViews;
+  List<NavigationIconView> _navigationViews;
 
   @override
   void initState() {

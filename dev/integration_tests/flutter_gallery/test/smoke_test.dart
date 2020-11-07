@@ -77,9 +77,9 @@ Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
 
   // Verify that the dumps are pretty.
   final String routeName = demo.routeName;
-  verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance!.renderViewElement!.toStringDeep());
-  verifyToStringOutput('debugDumpRenderTree', routeName, RendererBinding.instance?.renderView.toStringDeep() ?? '');
-  verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance?.renderView.debugLayer?.toStringDeep() ?? '');
+  verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance.renderViewElement.toStringDeep());
+  verifyToStringOutput('debugDumpRenderTree', routeName, RendererBinding.instance?.renderView?.toStringDeep());
+  verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
 
   // Scroll the demo around a bit more.
   await tester.flingFrom(const Offset(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
@@ -161,7 +161,7 @@ Future<void> smokeGallery(WidgetTester tester) async {
     await Scrollable.ensureVisible(tester.element(find.text(category.name)), alignment: 0.5);
     await tester.tap(find.text(category.name));
     await tester.pumpAndSettle();
-    for (final GalleryDemo demo in kGalleryCategoryToDemos[category]!) {
+    for (final GalleryDemo demo in kGalleryCategoryToDemos[category]) {
       await Scrollable.ensureVisible(tester.element(find.text(demo.title)), alignment: 0.0);
       await smokeDemo(tester, demo);
       tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after running $demo');
@@ -179,8 +179,8 @@ void main() {
   testWidgets('Flutter Gallery app smoke test', smokeGallery);
 
   testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
-    RendererBinding.instance!.setSemanticsEnabled(true);
+    RendererBinding.instance.setSemanticsEnabled(true);
     await smokeGallery(tester);
-    RendererBinding.instance!.setSemanticsEnabled(false);
+    RendererBinding.instance.setSemanticsEnabled(false);
   });
 }

@@ -33,7 +33,7 @@ class FortnightlyDemo extends StatelessWidget {
 class ShortAppBar extends StatelessWidget {
   const ShortAppBar({ this.onBackPressed });
 
-  final VoidCallback? onBackPressed;
+  final VoidCallback onBackPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +118,7 @@ over water meant for the whole central valley of California? The story will shoc
                         Text(
                           ' ¬ ',
                           // TODO(larche): Replace textTheme.headline2.color with a ColorScheme value when known.
-                          style: textTheme.overline!.apply(color: textTheme.headline2!.color),
+                          style: textTheme.overline.apply(color: textTheme.headline2.color),
                         ),
                         Text(
                           'CULTURE',
@@ -196,7 +196,7 @@ TextTheme _buildTextTheme(TextTheme base) {
   theme = theme.apply(displayColor: Colors.black);
 
   theme = theme.copyWith(
-    headline4: base.headline4!.copyWith(
+    headline4: base.headline4.copyWith(
       fontFamily: 'Merriweather',
       fontStyle: FontStyle.italic,
       fontSize: 28,
@@ -204,21 +204,21 @@ TextTheme _buildTextTheme(TextTheme base) {
       color: Colors.black,
       height: .88,
     ),
-    headline2: base.headline2!.copyWith(
+    headline2: base.headline2.copyWith(
       fontFamily: 'LibreFranklin',
       fontSize: 18,
       fontWeight: FontWeight.w500,
       color: Colors.black.withAlpha(153),
     ),
-    headline5: base.headline5!.copyWith(fontWeight: FontWeight.w500),
-    bodyText2: base.bodyText2!.copyWith(
+    headline5: base.headline5.copyWith(fontWeight: FontWeight.w500),
+    bodyText2: base.bodyText2.copyWith(
       fontFamily: 'Merriweather',
       fontSize: 14,
       fontWeight: FontWeight.w300,
       color: const Color(0xFF666666),
       height: 1.11,
     ),
-    bodyText1: base.bodyText1!.copyWith(
+    bodyText1: base.bodyText1.copyWith(
       fontFamily: 'Merriweather',
       fontSize: 16,
       fontWeight: FontWeight.w300,

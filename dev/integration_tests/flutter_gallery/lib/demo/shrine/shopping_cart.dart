@@ -41,7 +41,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
       body: SafeArea(
         child: Container(
           child: ScopedModelDescendant<AppStateModel>(
-            builder: (BuildContext context, Widget? child, AppStateModel model) {
+            builder: (BuildContext context, Widget child, AppStateModel model) {
               return Stack(
                 children: <Widget>[
                   ListView(
@@ -52,12 +52,12 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                             width: _leftColumnWidth,
                             child: IconButton(
                               icon: const Icon(Icons.keyboard_arrow_down),
-                              onPressed: () => ExpandingBottomSheet.of(context)!.close(),
+                              onPressed: () => ExpandingBottomSheet.of(context).close(),
                             ),
                           ),
                           Text(
                             'CART',
-                            style: localTheme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.w600),
+                            style: localTheme.textTheme.subtitle1.copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(width: 16.0),
                           Text('${model.totalCartQuantity} ITEMS'),
@@ -88,7 +88,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                       ),
                       onPressed: () {
                         model.clearCart();
-                        ExpandingBottomSheet.of(context)!.close();
+                        ExpandingBottomSheet.of(context).close();
                       },
                     ),
                   ),
@@ -105,12 +105,12 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 class ShoppingCartSummary extends StatelessWidget {
   const ShoppingCartSummary({this.model});
 
-  final AppStateModel? model;
+  final AppStateModel model;
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle smallAmountStyle = Theme.of(context).textTheme.bodyText2!.copyWith(color: kShrineBrown600);
-    final TextStyle? largeAmountStyle = Theme.of(context).textTheme.headline4;
+    final TextStyle smallAmountStyle = Theme.of(context).textTheme.bodyText2.copyWith(color: kShrineBrown600);
+    final TextStyle largeAmountStyle = Theme.of(context).textTheme.headline4;
     final NumberFormat formatter = NumberFormat.simpleCurrency(
       decimalDigits: 2,
       locale: Localizations.localeOf(context).toString(),
@@ -131,7 +131,7 @@ class ShoppingCartSummary extends StatelessWidget {
                       child: Text('TOTAL'),
                     ),
                     Text(
-                      formatter.format(model!.totalCost),
+                      formatter.format(model.totalCost),
                       style: largeAmountStyle,
                     ),
                   ],
@@ -143,7 +143,7 @@ class ShoppingCartSummary extends StatelessWidget {
                       child: Text('Subtotal:'),
                     ),
                     Text(
-                      formatter.format(model!.subtotalCost),
+                      formatter.format(model.subtotalCost),
                       style: smallAmountStyle,
                     ),
                   ],
@@ -155,7 +155,7 @@ class ShoppingCartSummary extends StatelessWidget {
                       child: Text('Shipping:'),
                     ),
                     Text(
-                      formatter.format(model!.shippingCost),
+                      formatter.format(model.shippingCost),
                       style: smallAmountStyle,
                     ),
                   ],
@@ -167,7 +167,7 @@ class ShoppingCartSummary extends StatelessWidget {
                       child: Text('Tax:'),
                     ),
                     Text(
-                      formatter.format(model!.tax),
+                      formatter.format(model.tax),
                       style: smallAmountStyle,
                     ),
                   ],
@@ -183,14 +183,14 @@ class ShoppingCartSummary extends StatelessWidget {
 
 class ShoppingCartRow extends StatelessWidget {
   const ShoppingCartRow({
-    required this.product,
-    required this.quantity,
+    @required this.product,
+    @required this.quantity,
     this.onPressed,
   });
 
   final Product product;
-  final int? quantity;
-  final VoidCallback? onPressed;
+  final int quantity;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -243,7 +243,7 @@ class ShoppingCartRow extends StatelessWidget {
                             ),
                             Text(
                               product.name,
-                              style: localTheme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.w600),
+                              style: localTheme.textTheme.subtitle1.copyWith(fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),

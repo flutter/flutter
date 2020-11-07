@@ -12,7 +12,7 @@ double _shippingCostPerItem = 7.0;
 
 class AppStateModel extends Model {
   // All the available products.
-  List<Product>? _availableProducts;
+  List<Product> _availableProducts;
 
   // The currently selected category of products.
   Category _selectedCategory = Category.all;
@@ -30,7 +30,7 @@ class AppStateModel extends Model {
   // Totaled prices of the items in the cart.
   double get subtotalCost {
     return _productsInCart.keys
-      .map((int id) => _availableProducts![id].price * _productsInCart[id]!)
+      .map((int id) => _availableProducts[id].price * _productsInCart[id])
       .fold(0.0, (double sum, int e) => sum + e);
   }
 
@@ -52,9 +52,9 @@ class AppStateModel extends Model {
     }
 
     if (_selectedCategory == Category.all) {
-      return List<Product>.from(_availableProducts!);
+      return List<Product>.from(_availableProducts);
     } else {
-      return _availableProducts!
+      return _availableProducts
         .where((Product p) => p.category == _selectedCategory)
         .toList();
     }
@@ -62,11 +62,10 @@ class AppStateModel extends Model {
 
   // Adds a product to the cart.
   void addProductToCart(int productId) {
-    final int? value = _productsInCart[productId];
-    if (value == null) {
+    if (!_productsInCart.containsKey(productId)) {
       _productsInCart[productId] = 1;
     } else {
-      _productsInCart[productId] = value+1;
+      _productsInCart[productId]++;
     }
 
     notifyListeners();
@@ -74,13 +73,11 @@ class AppStateModel extends Model {
 
   // Removes an item from the cart.
   void removeItemFromCart(int productId) {
-    final int? value = _productsInCart[productId];
-
-    if (value != null) {
+    if (_productsInCart.containsKey(productId)) {
       if (_productsInCart[productId] == 1) {
         _productsInCart.remove(productId);
       } else {
-        _productsInCart[productId] = value - 1;
+        _productsInCart[productId]--;
       }
     }
 
@@ -89,7 +86,7 @@ class AppStateModel extends Model {
 
   // Returns the Product instance matching the provided id.
   Product getProductById(int id) {
-    return _availableProducts!.firstWhere((Product p) => p.id == id);
+    return _availableProducts.firstWhere((Product p) => p.id == id);
   }
 
   // Removes everything from the cart.

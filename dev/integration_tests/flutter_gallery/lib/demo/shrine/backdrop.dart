@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 
 import 'package:flutter_gallery/demo/shrine/login.dart';
 
@@ -14,37 +15,37 @@ const double _kPeakVelocityProgress = 0.379146;
 class _TappableWhileStatusIs extends StatefulWidget {
   const _TappableWhileStatusIs(
       this.status, {
-        Key? key,
+        Key key,
         this.controller,
         this.child,
       }) : super(key: key);
 
-  final AnimationController? controller;
+  final AnimationController controller;
   final AnimationStatus status;
-  final Widget? child;
+  final Widget child;
 
   @override
   _TappableWhileStatusIsState createState() => _TappableWhileStatusIsState();
 }
 
 class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
-  bool? _active;
+  bool _active;
 
   @override
   void initState() {
     super.initState();
-    widget.controller!.addStatusListener(_handleStatusChange);
-    _active = widget.controller!.status == widget.status;
+    widget.controller.addStatusListener(_handleStatusChange);
+    _active = widget.controller.status == widget.status;
   }
 
   @override
   void dispose() {
-    widget.controller!.removeStatusListener(_handleStatusChange);
+    widget.controller.removeStatusListener(_handleStatusChange);
     super.dispose();
   }
 
   void _handleStatusChange(AnimationStatus status) {
-    final bool value = widget.controller!.status == widget.status;
+    final bool value = widget.controller.status == widget.status;
     if (_active != value) {
       setState(() {
         _active = value;
@@ -55,11 +56,11 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
   @override
   Widget build(BuildContext context) {
     Widget child = AbsorbPointer(
-      absorbing: !_active!,
+      absorbing: !_active,
       child: widget.child,
     );
 
-    if (!_active!) {
+    if (!_active) {
       child = FocusScope(
         canRequestFocus: false,
         debugLabel: '$_TappableWhileStatusIs',
@@ -72,13 +73,13 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
 
 class _FrontLayer extends StatelessWidget {
   const _FrontLayer({
-    Key? key,
+    Key key,
     this.onTap,
     this.child,
   }) : super(key: key);
 
-  final VoidCallback? onTap;
-  final Widget? child;
+  final VoidCallback onTap;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +100,7 @@ class _FrontLayer extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: child!,
+            child: child,
           ),
         ],
       ),
@@ -109,14 +110,16 @@ class _FrontLayer extends StatelessWidget {
 
 class _BackdropTitle extends AnimatedWidget {
   const _BackdropTitle({
-    Key? key,
-    required Animation<double> listenable,
+    Key key,
+    Animation<double> listenable,
     this.onPress,
-    required this.frontTitle,
-    required this.backTitle,
-  }) : super(key: key, listenable: listenable);
+    @required this.frontTitle,
+    @required this.backTitle,
+  }) : assert(frontTitle != null),
+       assert(backTitle != null),
+       super(key: key, listenable: listenable);
 
-  final void Function()? onPress;
+  final void Function() onPress;
   final Widget frontTitle;
   final Widget backTitle;
 
@@ -128,7 +131,7 @@ class _BackdropTitle extends AnimatedWidget {
     );
 
     return DefaultTextStyle(
-      style: Theme.of(context).primaryTextTheme.headline6!,
+      style: Theme.of(context).primaryTextTheme.headline6,
       softWrap: false,
       overflow: TextOverflow.ellipsis,
       child: Row(children: <Widget>[
@@ -198,12 +201,16 @@ class _BackdropTitle extends AnimatedWidget {
 /// front or back layer is showing.
 class Backdrop extends StatefulWidget {
   const Backdrop({
-    required this.frontLayer,
-    required this.backLayer,
-    required this.frontTitle,
-    required this.backTitle,
-    required this.controller,
-  });
+    @required this.frontLayer,
+    @required this.backLayer,
+    @required this.frontTitle,
+    @required this.backTitle,
+    @required this.controller,
+  }) : assert(frontLayer != null),
+       assert(backLayer != null),
+       assert(frontTitle != null),
+       assert(backTitle != null),
+       assert(controller != null);
 
   final Widget frontLayer;
   final Widget backLayer;
@@ -217,8 +224,8 @@ class Backdrop extends StatefulWidget {
 
 class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin {
   final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
-  AnimationController? _controller;
-  late Animation<RelativeRect> _layerAnimation;
+  AnimationController _controller;
+  Animation<RelativeRect> _layerAnimation;
 
   @override
   void initState() {
@@ -228,19 +235,19 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
 
   @override
   void dispose() {
-    _controller!.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   bool get _frontLayerVisible {
-    final AnimationStatus status = _controller!.status;
+    final AnimationStatus status = _controller.status;
     return status == AnimationStatus.completed || status == AnimationStatus.forward;
   }
 
   void _toggleBackdropLayerVisibility() {
     // Call setState here to update layerAnimation if that's necessary
     setState(() {
-      _frontLayerVisible ? _controller!.reverse() : _controller!.forward();
+      _frontLayerVisible ? _controller.reverse() : _controller.forward();
     });
   }
 
@@ -260,7 +267,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       firstWeight = _kPeakVelocityTime;
       secondWeight = 1.0 - _kPeakVelocityTime;
       animation = CurvedAnimation(
-        parent: _controller!.view,
+        parent: _controller.view,
         curve: const Interval(0.0, 0.78),
       );
     } else {
@@ -269,7 +276,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       secondCurve = _kAccelerateCurve.flipped;
       firstWeight = 1.0 - _kPeakVelocityTime;
       secondWeight = _kPeakVelocityTime;
-      animation = _controller!.view;
+      animation = _controller.view;
     }
 
     return TweenSequence<RelativeRect>(
@@ -344,7 +351,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       elevation: 0.0,
       titleSpacing: 0.0,
       title: _BackdropTitle(
-        listenable: _controller!.view,
+        listenable: _controller.view,
         onPress: _toggleBackdropLayerVisibility,
         frontTitle: widget.frontTitle,
         backTitle: widget.backTitle,

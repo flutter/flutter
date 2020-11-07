@@ -9,12 +9,12 @@ const double kColorItemHeight = 48.0;
 class Palette {
   Palette({ this.name, this.primary, this.accent, this.threshold = 900});
 
-  final String? name;
-  final MaterialColor? primary;
-  final MaterialAccentColor? accent;
+  final String name;
+  final MaterialColor primary;
+  final MaterialAccentColor accent;
   final int threshold; // titles for indices > threshold are white, otherwise black
 
-  bool get isValid => name != null && primary != null;
+  bool get isValid => name != null && primary != null && threshold != null;
 }
 
 final List<Palette> allPalettes = <Palette>[
@@ -42,11 +42,14 @@ final List<Palette> allPalettes = <Palette>[
 
 class ColorItem extends StatelessWidget {
   const ColorItem({
-    Key? key,
-    required this.index,
-    required this.color,
+    Key key,
+    @required this.index,
+    @required this.color,
     this.prefix = '',
-  }) : super(key: key);
+  }) : assert(index != null),
+       assert(color != null),
+       assert(prefix != null),
+       super(key: key);
 
   final int index;
   final Color color;
@@ -81,9 +84,9 @@ class ColorItem extends StatelessWidget {
 
 class PaletteTabView extends StatelessWidget {
   PaletteTabView({
-    Key? key,
-    required this.colors,
-  }) : assert(colors.isValid),
+    Key key,
+    @required this.colors,
+  }) : assert(colors != null && colors.isValid),
        super(key: key);
 
   final Palette colors;
@@ -94,8 +97,8 @@ class PaletteTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final TextStyle whiteTextStyle = textTheme.bodyText2!.copyWith(color: Colors.white);
-    final TextStyle blackTextStyle = textTheme.bodyText2!.copyWith(color: Colors.black);
+    final TextStyle whiteTextStyle = textTheme.bodyText2.copyWith(color: Colors.white);
+    final TextStyle blackTextStyle = textTheme.bodyText2.copyWith(color: Colors.black);
     return Scrollbar(
       child: ListView(
         itemExtent: kColorItemHeight,
@@ -103,14 +106,14 @@ class PaletteTabView extends StatelessWidget {
           ...primaryKeys.map<Widget>((int index) {
             return DefaultTextStyle(
               style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
-              child: ColorItem(index: index, color: colors.primary![index]!),
+              child: ColorItem(index: index, color: colors.primary[index]),
             );
           }),
           if (colors.accent != null)
             ...accentKeys.map<Widget>((int index) {
               return DefaultTextStyle(
                 style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
-                child: ColorItem(index: index, color: colors.accent![index]!, prefix: 'A'),
+                child: ColorItem(index: index, color: colors.accent[index], prefix: 'A'),
               );
             }),
         ],

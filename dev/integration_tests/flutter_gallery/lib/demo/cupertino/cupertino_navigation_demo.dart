@@ -44,7 +44,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
 
   final List<Color> colorItems;
   final List<String> colorNameItems;
-  final int? randomSeed;
+  final int randomSeed;
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +71,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
             ],
           ),
           tabBuilder: (BuildContext context, int index) {
+            assert(index >= 0 && index <= 2);
             switch (index) {
               case 0:
                 return CupertinoTabView(
@@ -83,19 +84,21 @@ class CupertinoNavigationDemo extends StatelessWidget {
                   },
                   defaultTitle: 'Colors',
                 );
+                break;
               case 1:
                 return CupertinoTabView(
                   builder: (BuildContext context) => CupertinoDemoTab2(),
                   defaultTitle: 'Support Chat',
                 );
+                break;
               case 2:
                 return CupertinoTabView(
                   builder: (BuildContext context) => CupertinoDemoTab3(),
                   defaultTitle: 'Account',
                 );
+                break;
             }
-            assert(false);
-            return const CupertinoTabView();
+            return null;
           },
         ),
       ),
@@ -117,7 +120,7 @@ class ExitButton extends StatelessWidget {
       ),
       onPressed: () {
         // The demo is on the root navigator.
-        Navigator.of(context, rootNavigator: true)!.pop();
+        Navigator.of(context, rootNavigator: true).pop();
       },
     );
   }
@@ -139,9 +142,9 @@ class CupertinoDemoTab1 extends StatelessWidget {
     this.randomSeed,
   });
 
-  final List<Color>? colorItems;
-  final List<String>? colorNameItems;
-  final int? randomSeed;
+  final List<Color> colorItems;
+  final List<String> colorNameItems;
+  final int randomSeed;
 
   @override
   Widget build(BuildContext context) {
@@ -167,8 +170,8 @@ class CupertinoDemoTab1 extends StatelessWidget {
                   return Tab1RowItem(
                     index: index,
                     lastItem: index == _kChildCount - 1,
-                    color: colorItems![index],
-                    colorName: colorNameItems![index],
+                    color: colorItems[index],
+                    colorName: colorNameItems[index],
                     randomSeed: randomSeed,
                   );
                 },
@@ -191,18 +194,18 @@ class Tab1RowItem extends StatelessWidget {
     this.randomSeed,
   });
 
-  final int? index;
-  final bool? lastItem;
-  final Color? color;
-  final String? colorName;
-  final int? randomSeed;
+  final int index;
+  final bool lastItem;
+  final Color color;
+  final String colorName;
+  final int randomSeed;
 
   @override
   Widget build(BuildContext context) {
     final Widget row = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        Navigator.of(context)!.push(CupertinoPageRoute<void>(
+        Navigator.of(context).push(CupertinoPageRoute<void>(
           title: colorName,
           builder: (BuildContext context) => Tab1ItemPage(
             color: color,
@@ -235,7 +238,7 @@ class Tab1RowItem extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(colorName!),
+                        Text(colorName),
                         const Padding(padding: EdgeInsets.only(top: 8.0)),
                         Text(
                           'Buy this cool color',
@@ -270,7 +273,7 @@ class Tab1RowItem extends StatelessWidget {
       ),
     );
 
-    if (lastItem!) {
+    if (lastItem) {
       return row;
     }
 
@@ -289,10 +292,10 @@ class Tab1RowItem extends StatelessWidget {
 class Tab1ItemPage extends StatefulWidget {
   const Tab1ItemPage({this.color, this.colorName, this.index, this.randomSeed});
 
-  final Color? color;
-  final String? colorName;
-  final int? index;
-  final int? randomSeed;
+  final Color color;
+  final String colorName;
+  final int index;
+  final int randomSeed;
 
   @override
   State<StatefulWidget> createState() => Tab1ItemPageState();
@@ -306,14 +309,14 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
       final math.Random random = math.Random(widget.randomSeed);
       return Color.fromARGB(
         255,
-        (widget.color!.red + random.nextInt(100) - 50).clamp(0, 255),
-        (widget.color!.green + random.nextInt(100) - 50).clamp(0, 255),
-        (widget.color!.blue + random.nextInt(100) - 50).clamp(0, 255),
+        (widget.color.red + random.nextInt(100) - 50).clamp(0, 255) as int,
+        (widget.color.green + random.nextInt(100) - 50).clamp(0, 255) as int,
+        (widget.color.blue + random.nextInt(100) - 50).clamp(0, 255) as int,
       );
     });
   }
 
-  late List<Color> relatedColors;
+  List<Color> relatedColors;
 
   @override
   Widget build(BuildContext context) {
@@ -347,7 +350,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Text(
-                          widget.colorName!,
+                          widget.colorName,
                           style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
                         ),
                         const Padding(padding: EdgeInsets.only(top: 6.0)),
@@ -591,13 +594,13 @@ enum Tab2ConversationBubbleColor {
 class Tab2ConversationBubble extends StatelessWidget {
   const Tab2ConversationBubble({this.text, this.color});
 
-  final String? text;
-  final Tab2ConversationBubbleColor? color;
+  final String text;
+  final Tab2ConversationBubbleColor color;
 
   @override
   Widget build(BuildContext context) {
-    Color? backgroundColor;
-    Color? foregroundColor;
+    Color backgroundColor;
+    Color foregroundColor;
 
     switch (color) {
       case Tab2ConversationBubbleColor.gray:
@@ -607,8 +610,6 @@ class Tab2ConversationBubble extends StatelessWidget {
       case Tab2ConversationBubbleColor.blue:
         backgroundColor = CupertinoTheme.of(context).primaryColor;
         foregroundColor = CupertinoColors.white;
-        break;
-      default:
         break;
     }
 
@@ -620,7 +621,7 @@ class Tab2ConversationBubble extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
       child: Text(
-        text!,
+        text,
         style: TextStyle(
           color: foregroundColor,
           letterSpacing: -0.4,
@@ -635,8 +636,8 @@ class Tab2ConversationBubble extends StatelessWidget {
 class Tab2ConversationAvatar extends StatelessWidget {
   const Tab2ConversationAvatar({this.text, this.color});
 
-  final String? text;
-  final Color? color;
+  final String text;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -647,20 +648,20 @@ class Tab2ConversationAvatar extends StatelessWidget {
           begin: FractionalOffset.topCenter,
           end: FractionalOffset.bottomCenter,
           colors: <Color>[
-            color!,
+            color,
             Color.fromARGB(
-              color!.alpha,
-              (color!.red - 60).clamp(0, 255),
-              (color!.green - 60).clamp(0, 255),
-              (color!.blue - 60).clamp(0, 255),
+              color.alpha,
+              (color.red - 60).clamp(0, 255) as int,
+              (color.green - 60).clamp(0, 255) as int,
+              (color.blue - 60).clamp(0, 255) as int,
             ),
-          ]
+          ],
         ),
       ),
       margin: const EdgeInsets.only(left: 8.0, bottom: 8.0),
       padding: const EdgeInsets.all(12.0),
       child: Text(
-        text!,
+        text,
         style: const TextStyle(
           color: CupertinoColors.white,
           fontSize: 13.0,
@@ -674,8 +675,8 @@ class Tab2ConversationAvatar extends StatelessWidget {
 class Tab2ConversationRow extends StatelessWidget {
   const Tab2ConversationRow({this.avatar, this.text});
 
-  final Tab2ConversationAvatar? avatar;
-  final String? text;
+  final Tab2ConversationAvatar avatar;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -686,8 +687,7 @@ class Tab2ConversationRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: isSelf ? CrossAxisAlignment.center : CrossAxisAlignment.end,
         children: <Widget>[
-          if (avatar != null)
-            avatar!,
+          if (avatar != null) avatar,
           CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Tab2ConversationBubble(
@@ -752,7 +752,7 @@ class CupertinoDemoTab3 extends StatelessWidget {
           const Padding(padding: EdgeInsets.only(top: 32.0)),
           GestureDetector(
             onTap: () {
-              Navigator.of(context, rootNavigator: true)!.push(
+              Navigator.of(context, rootNavigator: true).push(
                 CupertinoPageRoute<bool>(
                   fullscreenDialog: true,
                   builder: (BuildContext context) => Tab3Dialog(),
@@ -800,7 +800,7 @@ class Tab3Dialog extends StatelessWidget {
           child: const Text('Cancel'),
           padding: EdgeInsets.zero,
           onPressed: () {
-            Navigator.of(context)!.pop(false);
+            Navigator.of(context).pop(false);
           },
         ),
       ),

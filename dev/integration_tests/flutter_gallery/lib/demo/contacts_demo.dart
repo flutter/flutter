@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class _ContactCategory extends StatelessWidget {
-  const _ContactCategory({ Key? key, this.icon, this.children }) : super(key: key);
+  const _ContactCategory({ Key key, this.icon, this.children }) : super(key: key);
 
-  final IconData? icon;
-  final List<Widget>? children;
+  final IconData icon;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class _ContactCategory extends StatelessWidget {
         border: Border(bottom: BorderSide(color: themeData.dividerColor))
       ),
       child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.subtitle1!,
+        style: Theme.of(context).textTheme.subtitle1,
         child: SafeArea(
           top: false,
           bottom: false,
@@ -32,7 +32,7 @@ class _ContactCategory extends StatelessWidget {
                 width: 72.0,
                 child: Icon(icon, color: themeData.primaryColor),
               ),
-              Expanded(child: Column(children: children!)),
+              Expanded(child: Column(children: children)),
             ],
           ),
         ),
@@ -42,14 +42,14 @@ class _ContactCategory extends StatelessWidget {
 }
 
 class _ContactItem extends StatelessWidget {
-  const _ContactItem({ Key? key, this.icon, required this.lines, this.tooltip, this.onPressed })
+  const _ContactItem({ Key key, this.icon, this.lines, this.tooltip, this.onPressed })
     : assert(lines.length > 1),
       super(key: key);
 
-  final IconData? icon;
+  final IconData icon;
   final List<String> lines;
-  final String? tooltip;
-  final VoidCallback? onPressed;
+  final String tooltip;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {

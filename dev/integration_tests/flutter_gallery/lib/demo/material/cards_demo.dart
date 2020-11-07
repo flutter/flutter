@@ -17,14 +17,19 @@ enum CardDemoType {
 
 class TravelDestination {
   const TravelDestination({
-    required this.assetName,
-    required this.assetPackage,
-    required this.title,
-    required this.description,
-    required this.city,
-    required this.location,
+    @required this.assetName,
+    @required this.assetPackage,
+    @required this.title,
+    @required this.description,
+    @required this.city,
+    @required this.location,
     this.type = CardDemoType.standard,
-  });
+  }) : assert(assetName != null),
+       assert(assetPackage != null),
+       assert(title != null),
+       assert(description != null),
+       assert(city != null),
+       assert(location != null);
 
   final String assetName;
   final String assetPackage;
@@ -65,13 +70,14 @@ const List<TravelDestination> destinations = <TravelDestination>[
 ];
 
 class TravelDestinationItem extends StatelessWidget {
-  const TravelDestinationItem({ Key? key, required this.destination, this.shape })
-    : super(key: key);
+  const TravelDestinationItem({ Key key, @required this.destination, this.shape })
+    : assert(destination != null),
+      super(key: key);
 
   // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 338.0;
   final TravelDestination destination;
-  final ShapeBorder? shape;
+  final ShapeBorder shape;
 
   @override
   Widget build(BuildContext context) {
@@ -100,13 +106,14 @@ class TravelDestinationItem extends StatelessWidget {
 }
 
 class TappableTravelDestinationItem extends StatelessWidget {
-  const TappableTravelDestinationItem({ Key? key, required this.destination, this.shape })
-    : super(key: key);
+  const TappableTravelDestinationItem({ Key key, @required this.destination, this.shape })
+    : assert(destination != null),
+      super(key: key);
 
   // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 298.0;
   final TravelDestination destination;
-  final ShapeBorder? shape;
+  final ShapeBorder shape;
 
   @override
   Widget build(BuildContext context) {
@@ -144,11 +151,12 @@ class TappableTravelDestinationItem extends StatelessWidget {
 }
 
 class SelectableTravelDestinationItem extends StatefulWidget {
-  const SelectableTravelDestinationItem({ Key? key, required this.destination, this.shape })
-    : super(key: key);
+  const SelectableTravelDestinationItem({ Key key, @required this.destination, this.shape })
+    : assert(destination != null),
+      super(key: key);
 
   final TravelDestination destination;
-  final ShapeBorder? shape;
+  final ShapeBorder shape;
 
   @override
   _SelectableTravelDestinationItemState createState() => _SelectableTravelDestinationItemState();
@@ -223,11 +231,11 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
 
 class SectionTitle extends StatelessWidget {
   const SectionTitle({
-    Key? key,
+    Key key,
     this.title,
   }) : super(key: key);
 
-  final String? title;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -235,23 +243,24 @@ class SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 12.0),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text(title!, style: Theme.of(context).textTheme.subtitle1),
+        child: Text(title, style: Theme.of(context).textTheme.subtitle1),
       ),
     );
   }
 }
 
 class TravelDestinationContent extends StatelessWidget {
-  const TravelDestinationContent({ Key? key, required this.destination })
-    : super(key: key);
+  const TravelDestinationContent({ Key key, @required this.destination })
+    : assert(destination != null),
+      super(key: key);
 
   final TravelDestination destination;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle titleStyle = theme.textTheme.headline5!.copyWith(color: Colors.white);
-    final TextStyle descriptionStyle = theme.textTheme.subtitle1!;
+    final TextStyle titleStyle = theme.textTheme.headline5.copyWith(color: Colors.white);
+    final TextStyle descriptionStyle = theme.textTheme.subtitle1;
     final ButtonStyle textButtonStyle = TextButton.styleFrom(primary: Colors.amber.shade500);
 
     return Column(
@@ -343,7 +352,7 @@ class CardsDemo extends StatefulWidget {
 }
 
 class _CardsDemoState extends State<CardsDemo> {
-  ShapeBorder? _shape;
+  ShapeBorder _shape;
 
   @override
   Widget build(BuildContext context) {
@@ -376,7 +385,7 @@ class _CardsDemoState extends State<CardsDemo> {
         child: ListView(
           padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
           children: destinations.map<Widget>((TravelDestination destination) {
-            Widget? child;
+            Widget child;
             switch (destination.type) {
               case CardDemoType.standard:
                 child = TravelDestinationItem(destination: destination, shape: _shape);

@@ -11,7 +11,7 @@ import '../../gallery/demo.dart';
 enum IndicatorType { overscroll, refresh }
 
 class OverscrollDemo extends StatefulWidget {
-  const OverscrollDemo({ Key? key }) : super(key: key);
+  const OverscrollDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/material/overscroll';
 
@@ -28,13 +28,13 @@ class OverscrollDemoState extends State<OverscrollDemo> {
   Future<void> _handleRefresh() {
     final Completer<void> completer = Completer<void>();
     Timer(const Duration(seconds: 3), () { completer.complete(); });
-    return completer.future.then((_) {
+    return completer.future.then<void>((_) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text('Refresh complete'),
         action: SnackBarAction(
           label: 'RETRY',
           onPressed: () {
-            _refreshIndicatorKey.currentState!.show();
+            _refreshIndicatorKey.currentState.show();
           },
         ),
       ));
@@ -52,7 +52,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',
             onPressed: () {
-              _refreshIndicatorKey.currentState!.show();
+              _refreshIndicatorKey.currentState.show();
             },
           ),
         ],
