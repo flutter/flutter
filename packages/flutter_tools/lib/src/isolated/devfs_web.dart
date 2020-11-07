@@ -723,7 +723,6 @@ class WebDevFS implements DevFS {
   WebDevFS({
     @required this.hostname,
     @required int port,
-    @required this.packagesFilePath,
     @required this.urlTunneller,
     @required this.useSseForDebugProxy,
     @required this.useSseForDebugBackend,
@@ -738,7 +737,6 @@ class WebDevFS implements DevFS {
 
   final Uri entrypoint;
   final String hostname;
-  final String packagesFilePath;
   final UrlTunneller urlTunneller;
   final bool useSseForDebugProxy;
   final bool useSseForDebugBackend;

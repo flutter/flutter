@@ -613,7 +613,6 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
-      packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
@@ -729,7 +728,6 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
-      packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
@@ -842,7 +840,6 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'any',
       port: 0,
-      packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
@@ -885,7 +882,6 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
-      packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
@@ -936,7 +932,6 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
-      packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,

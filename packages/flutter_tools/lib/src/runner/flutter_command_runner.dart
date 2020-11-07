@@ -219,7 +219,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // Set up the tooling configuration.
     final EngineBuildPaths engineBuildPaths = await globals.localEngineLocator.findEnginePath(
       topLevelResults['local-engine-src-path'] as String,
-      topLevelResults['local-engine'] as String
+      topLevelResults['local-engine'] as String,
+      topLevelResults['packages'] as String,
     );
     if (engineBuildPaths != null) {
       contextOverrides.addAll(<Type, dynamic>{
@@ -252,10 +253,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
         final bool machineFlag = topLevelResults['machine'] as bool;
         if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
           await globals.flutterVersion.checkFlutterVersionFreshness();
-        }
-
-        if (topLevelResults.wasParsed('packages')) {
-          globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(topLevelResults['packages'] as String));
         }
 
         // See if the user specified a specific device.

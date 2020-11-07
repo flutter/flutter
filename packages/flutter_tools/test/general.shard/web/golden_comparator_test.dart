@@ -61,6 +61,7 @@ void main() {
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
         () => mockCompiler,
+        '.packages',
       );
 
       final String result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
@@ -84,6 +85,7 @@ void main() {
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
         () => mockCompiler,
+        '.packages',
       );
 
       final String result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
@@ -111,6 +113,7 @@ void main() {
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
         () => mockCompiler,
+        '.packages',
       );
 
       final String result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
@@ -141,6 +144,7 @@ void main() {
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
         () => mockCompiler,
+        '.packages'
       );
 
       final String result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
@@ -167,6 +171,7 @@ void main() {
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
         () => mockCompiler,
+        '.packages',
       );
 
       final String result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);

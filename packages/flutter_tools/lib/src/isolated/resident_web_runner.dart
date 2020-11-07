@@ -498,7 +498,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
           port: debuggingOptions.port != null
             ? int.tryParse(debuggingOptions.port)
             : null,
-          packagesFilePath: packagesFilePath,
           urlTunneller: urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
           useSseForDebugBackend: debuggingOptions.webUseSseForDebugBackend,
@@ -717,7 +716,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
       lastCompiled: device.devFS.lastCompiled,
       urisToMonitor: device.devFS.sources,
-      packagesPath: packagesFilePath,
+      packagesPath: debuggingOptions.buildInfo.packagesPath,
       packageConfig: device.devFS.lastPackageConfig,
     );
     final Status devFSStatus = globals.logger.startProgress(

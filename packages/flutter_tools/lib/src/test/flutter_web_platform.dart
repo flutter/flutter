@@ -38,11 +38,14 @@ import 'test_compiler.dart';
 import 'test_config.dart';
 
 class FlutterWebPlatform extends PlatformPlugin {
-  FlutterWebPlatform._(this._server, this._config, this._root, {
+  FlutterWebPlatform._(this._server, this._config, this._root, this._packagesPath, {
     FlutterProject flutterProject,
     String shellPath,
     this.updateGoldens,
-  }) {
+  }) : _packagesFuture = loadPackageConfigWithLogging(
+    globals.fs.file(_packagesPath),
+    logger: globals.logger,
+  ) {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(packagesDirHandler())
@@ -68,11 +71,13 @@ class FlutterWebPlatform extends PlatformPlugin {
     _testGoldenComparator = TestGoldenComparator(
       shellPath,
       () => TestCompiler(BuildInfo.debug, flutterProject),
+      _packagesPath,
     );
   }
 
   static Future<FlutterWebPlatform> start(String root, {
     FlutterProject flutterProject,
+    @required BuildInfo buildInfo,
     String shellPath,
     bool updateGoldens = false,
     bool pauseAfterLoad = false,
@@ -83,16 +88,14 @@ class FlutterWebPlatform extends PlatformPlugin {
       server,
       Configuration.current.change(pauseAfterLoad: pauseAfterLoad),
       root,
+      buildInfo.packagesPath,
       flutterProject: flutterProject,
       shellPath: shellPath,
       updateGoldens: updateGoldens,
     );
   }
 
-  final Future<PackageConfig> _packagesFuture = loadPackageConfigWithLogging(
-    globals.fs.file(globalPackagesPath),
-    logger: globals.logger,
-  );
+  final Future<PackageConfig> _packagesFuture;
 
   final Future<PackageConfig> _flutterToolsPackageMap = loadPackageConfigWithLogging(
     globals.fs.file(globals.fs.path.join(
@@ -109,6 +112,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The test runner configuration.
   final Configuration _config;
+  final String _packagesPath;
 
   @visibleForTesting
   Configuration get config => _config;
@@ -819,9 +823,10 @@ class _BrowserEnvironment implements Environment {
 /// of golden files.
 class TestGoldenComparator {
   /// Creates a [TestGoldenComparator] instance.
-  TestGoldenComparator(this.shellPath, this.compilerFactory)
+  TestGoldenComparator(this.shellPath, this.compilerFactory, this.packagesFilePath)
       : tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_web_platform.');
 
+  final String packagesFilePath;
   final String shellPath;
   final Directory tempDir;
   final TestCompiler Function() compilerFactory;
@@ -864,7 +869,7 @@ class TestGoldenComparator {
       shellPath,
       '--disable-observatory',
       '--non-interactive',
-      '--packages=$globalPackagesPath',
+      '--packages=$packagesFilePath',
       output,
     ];
 

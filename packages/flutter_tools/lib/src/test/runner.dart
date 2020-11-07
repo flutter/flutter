@@ -9,7 +9,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../build_info.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/compile.dart';
@@ -143,6 +142,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             shellPath: shellPath,
             flutterProject: flutterProject,
             pauseAfterLoad: startPaused,
+            buildInfo: buildInfo,
           );
         },
       );
@@ -180,9 +180,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
     // Make the global packages path absolute.
     // (Makes sure it still works after we change the current directory.)
-    globalPackagesPath =
-        globals.fs.path.normalize(globals.fs.path.absolute(globalPackagesPath));
-
     // Call package:test's main method in the appropriate directory.
     final Directory saved = globals.fs.currentDirectory;
     try {

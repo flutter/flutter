@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
@@ -108,13 +107,12 @@ Future<void> run(List<String> args) async {
     // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
     globals.fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
 
-    globalPackagesPath =
-        globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String));
-
     Directory testDirectory;
     CoverageCollector collector;
     if (argResults['coverage'] as bool) {
       collector = CoverageCollector(
+        packagesFilePath: globals.fs.path.normalize(
+          globals.fs.path.absolute(argResults[_kOptionPackages] as String)),
         libraryPredicate: (String libraryName) {
           // If we have a specified coverage directory then accept all libraries.
           if (coverageDirectory != null) {

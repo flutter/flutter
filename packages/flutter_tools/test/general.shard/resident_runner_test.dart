@@ -194,7 +194,7 @@ void main() {
       compileExpression: anyNamed('compileExpression'),
       getSkSLMethod: anyNamed('getSkSLMethod'),
     )).thenAnswer((Invocation invocation) async { });
-    when(mockFlutterDevice.setupDevFS(any, any, packagesFilePath: anyNamed('packagesFilePath')))
+    when(mockFlutterDevice.setupDevFS(any, any))
       .thenAnswer((Invocation invocation) async {
         return testUri;
       });

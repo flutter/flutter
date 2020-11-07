@@ -349,9 +349,8 @@ class FlutterDevice {
 
   Future<Uri> setupDevFS(
     String fsName,
-    Directory rootDirectory, {
-    String packagesFilePath,
-  }) {
+    Directory rootDirectory,
+  ) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
       vmService,
@@ -726,7 +725,6 @@ abstract class ResidentRunner {
     String dillOutputPath,
     this.machine = false,
   }) : mainPath = findMainDartFile(target),
-       packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
        _dillOutputPath = dillOutputPath,
        artifactDirectory = dillOutputPath == null
@@ -755,7 +753,6 @@ abstract class ResidentRunner {
   final String _dillOutputPath;
   /// The parent location of the incremental artifacts.
   final Directory artifactDirectory;
-  final String packagesFilePath;
   final String projectRootPath;
   final String mainPath;
   final AssetBundle assetBundle;
