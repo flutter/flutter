@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -1506,9 +1506,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   AutofillScope? get currentAutofillScope => _currentAutofillScope;
 
-  // TODO(justinmc): Better way to instantiate this. I was having trouble
-  // getting the platform in initState.
-  TextEditingBehavior? textEditingBehavior;
+  final ActionDispatcher _actionDispatcher = const ActionDispatcher();
 
   // Is this field in the current autofill context.
   bool _isInAutofillContext = false;
@@ -2567,31 +2565,44 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _focusAttachment!.reparent();
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
-    // TODO(justinmc): The TextField shouldn't be able to interact with the
-    // state that TEB is able to manipulate. So shouldn't be manipulating state
-    // through `this` delegate.
-    textEditingBehavior ??= TextEditingBehavior(
+    final TextSelectionControls? controls = widget.selectionControls;
+
+    // TODO(justinmc): Think through how this class should be set up...
+    // Is the way I'm passing things like renderEditable, editableTextState etc.
+    // ok? Are we separating concerns and preventing widgets from making changes?
+    // Also, is it possible to partially override this in CupertinoTextField?
+    final TextEditingActionsMap map = TextEditingActionsMap(
       editableTextState: this,
       platform: defaultTargetPlatform,
     );
 
-    final TextSelectionControls? controls = widget.selectionControls;
     // TODO(justinmc): Are there any actions that TEB should respond to that are
     // not coming from this gesture detector? What are they?
     return Actions(
-      actions: <Type, Action<Intent>>{
-        SingleTapUpTextIntent: CallbackAction<SingleTapUpTextIntent>(
-          onInvoke: (SingleTapUpTextIntent intent) {
-            print('justin SingleTapUpTextIntent was invoked');
-          },
-        ),
-      },
+      actions: map.map,
+      dispatcher: _actionDispatcher,
       child: TextSelectionGestureDetector(
         behavior: HitTestBehavior.translucent,
-        onTapDown: textEditingBehavior!.onTapDown,
+        onTapDown: (TapDownDetails details) {
+          _actionDispatcher.invokeAction(
+            map.tapDownTextAction,
+            TapDownTextIntent(
+              details: details,
+              renderEditable: renderEditable,
+            ),
+          );
+        },
         //onForcePressStart: delegate.forcePressEnabled ? onForcePressStart : null,
         //onForcePressEnd: delegate.forcePressEnabled ? onForcePressEnd : null,
-        onSingleTapUp: textEditingBehavior!.onSingleTapUp,
+        onSingleTapUp: (TapUpDetails details) {
+          _actionDispatcher.invokeAction(
+            map.singleTapUpTextAction,
+            SingleTapUpTextIntent(
+              details: details,
+              renderEditable: renderEditable,
+            ),
+          );
+        },
         //onSingleTapCancel: onSingleTapCancel,
         //onSingleLongTapStart: onSingleLongTapStart,
         //onSingleLongTapMoveUpdate: onSingleLongTapMoveUpdate,
