@@ -24,6 +24,10 @@ static void {{pluginClassSnakeCase}}_handle_method_call(
 
   const gchar* method = fl_method_call_get_name(method_call);
 
+  // Replace "getPlatformVersion" check with your plugin's method.
+  // See:
+  // https://github.com/flutter/engine/tree/master/shell/platform/linux/public/flutter_linux
+  // for the relevant Flutter APIs.
   if (strcmp(method, "getPlatformVersion") == 0) {
     struct utsname uname_data = {};
     uname(&uname_data);
