@@ -146,7 +146,7 @@ final RegExp _legacyDeprecation = RegExp(r' // ignore: flutter_deprecation_synta
 
 Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 2000 }) async {
   final List<String> errors = <String>[];
-  for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
     int lineNumber = 0;
     final List<String> lines = file.readAsLinesSync();
     final List<int> linesWithDeprecations = <int>[];
@@ -245,7 +245,7 @@ Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String
   assert(!license.endsWith('\n'));
   final String licensePattern = license + '\n' + (trailingBlank ? '\n' : '');
   final List<String> errors = <String>[];
-  for (final File file in _allFiles(workingDirectory, extension, minimumMatches: minimumMatches)) {
+  await for (final File file in _allFiles(workingDirectory, extension, minimumMatches: minimumMatches)) {
     final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
     if (contents.isEmpty)
       continue; // let's not go down the /bin/true rabbit hole
@@ -276,7 +276,7 @@ const Set<String> _exemptTestImports = <String>{
 Future<void> verifyNoTestImports(String workingDirectory) async {
   final List<String> errors = <String>[];
   assert("// foo\nimport 'binding_test.dart' as binding;\n'".contains(_testImportPattern));
-  final List<File> dartFiles = _allFiles(path.join(workingDirectory, 'packages'), 'dart', minimumMatches: 1500).toList();
+  final List<File> dartFiles = await _allFiles(path.join(workingDirectory, 'packages'), 'dart', minimumMatches: 1500).toList();
   for (final File file in dartFiles) {
     for (final String line in file.readAsLinesSync()) {
       final Match match = _testImportPattern.firstMatch(line);
@@ -297,7 +297,7 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
 Future<void> verifyNoTestPackageImports(String workingDirectory) async {
   // TODO(ianh): Remove this whole test once https://github.com/dart-lang/matcher/issues/98 is fixed.
   final List<String> shims = <String>[];
-  final List<String> errors = _allFiles(workingDirectory, 'dart', minimumMatches: 2000)
+  final List<String> errors = (await _allFiles(workingDirectory, 'dart', minimumMatches: 2000).toList())
     .map<String>((File file) {
       final String name = Uri.file(path.relative(file.path,
           from: workingDirectory)).toFilePath(windows: false);
@@ -392,7 +392,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   // Verify that the imports are well-ordered.
   final Map<String, Set<String>> dependencyMap = <String, Set<String>>{};
   for (final String directory in directories) {
-    dependencyMap[directory] = _findFlutterDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation');
+    dependencyMap[directory] = await _findFlutterDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation');
   }
   assert(dependencyMap['material'].contains('widgets') &&
          dependencyMap['widgets'].contains('rendering') &&
@@ -443,7 +443,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
 
 Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   final List<String> errors = <String>[];
-  final List<File> files = _allFiles(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'), 'dart', minimumMatches: 200).toList();
+  final List<File> files = await _allFiles(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'), 'dart', minimumMatches: 200).toList();
   for (final File file in files) {
     if (file.readAsStringSync().contains('package:flutter_tools/')) {
       errors.add('$yellow${file.path}$reset imports flutter_tools.');
@@ -515,7 +515,7 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
   final Set<String> excludedFiles = <String>{
     path.join(flutterLib, 'src', 'foundation', 'object.dart'), // Calls this from within an assert.
   };
-  final List<File> files = _allFiles(flutterLib, 'dart', minimumMatches: 400)
+  final List<File> files = await _allFiles(flutterLib, 'dart', minimumMatches: 400)
       .where((File file) => !excludedFiles.contains(file.path))
       .toList();
   final RegExp toStringRegExp = RegExp(r'^\s+String\s+to(.+?)?String(.+?)?\(\)\s+(\{|=>)');
@@ -563,7 +563,7 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
 }
 
 Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatches = 4000 }) async {
-  final List<File> files = _allFiles(workingDirectory, null, minimumMatches: minimumMatches)
+  final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: minimumMatches)
     .where((File file) => path.basename(file.path) != 'serviceaccount.enc')
     .where((File file) => path.basename(file.path) != 'Ahem.ttf')
     .where((File file) => path.extension(file.path) != '.snapshot')
@@ -1025,27 +1025,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> legacyBina
   );
   legacyBinaries ??= _legacyBinaries;
   if (!Platform.isWindows) { // TODO(ianh): Port this to Windows
-    final EvalResult evalResult = await _evalCommand(
-      'git', <String>['ls-files', '-z'],
-      workingDirectory: workingDirectory,
-    );
-    if (evalResult.exitCode != 0) {
-      exitWithError(<String>[
-        'git ls-filese failed with exit code ${evalResult.exitCode}',
-        '${bold}stdout:$reset',
-        evalResult.stdout,
-        '${bold}stderr:$reset',
-        evalResult.stderr,
-      ]);
-    }
-    final List<String> filenames = evalResult
-      .stdout
-      .split('\x00');
-    assert(filenames.last.isEmpty); // git ls-files gives a trailing blank 0x00
-    filenames.removeLast();
-    final List<File> files = filenames
-      .map<File>((String filename) => File(path.join(workingDirectory, filename)))
-      .toList();
+    final List<File> files = await _gitFiles(workingDirectory, runSilently: false);
     final List<String> problems = <String>[];
     for (final File file in files) {
       final Uint8List bytes = file.readAsBytesSync();
@@ -1085,7 +1065,35 @@ bool _listEquals<T>(List<T> a, List<T> b) {
   return true;
 }
 
-Iterable<File> _allFiles(String workingDirectory, String extension, { @required int minimumMatches }) sync* {
+Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true}) async {
+  final EvalResult evalResult = await _evalCommand(
+    'git', <String>['ls-files', '-z'],
+    workingDirectory: workingDirectory,
+    runSilently: runSilently,
+  );
+  if (evalResult.exitCode != 0) {
+    exitWithError(<String>[
+      'git ls-filese failed with exit code ${evalResult.exitCode}',
+      '${bold}stdout:$reset',
+      evalResult.stdout,
+      '${bold}stderr:$reset',
+      evalResult.stderr,
+    ]);
+  }
+  final List<String> filenames = evalResult
+      .stdout
+      .split('\x00');
+  assert(filenames.last.isEmpty); // git ls-files gives a trailing blank 0x00
+  filenames.removeLast();
+  return filenames
+      .map<File>((String filename) => File(path.join(workingDirectory, filename)))
+      .toList();
+}
+
+Stream<File> _allFiles(String workingDirectory, String extension, { @required int minimumMatches }) async* {
+  final Set<String> gitFileNamesSet = <String>{};
+  gitFileNamesSet.addAll((await _gitFiles(workingDirectory)).map((File f) => path.canonicalize(f.absolute.path)));
+
   assert(extension == null || !extension.startsWith('.'), 'Extension argument should not start with a period.');
   final Set<FileSystemEntity> pending = <FileSystemEntity>{ Directory(workingDirectory) };
   int matches = 0;
@@ -1095,6 +1103,8 @@ Iterable<File> _allFiles(String workingDirectory, String extension, { @required 
     if (path.extension(entity.path) == '.tmpl')
       continue;
     if (entity is File) {
+      if (!gitFileNamesSet.contains(path.canonicalize(entity.absolute.path)))
+        continue;
       if (_isGeneratedPluginRegistrant(entity))
         continue;
       if (path.basename(entity.path) == 'flutter_export_environment.sh')
@@ -1146,6 +1156,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   Map<String, String> environment,
   bool skip = false,
   bool allowNonZeroExit = false,
+  bool runSilently = false,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
@@ -1153,7 +1164,10 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
     printProgress('SKIPPING', relativeWorkingDir, commandDescription);
     return null;
   }
-  printProgress('RUNNING', relativeWorkingDir, commandDescription);
+
+  if (!runSilently) {
+    printProgress('RUNNING', relativeWorkingDir, commandDescription);
+  }
 
   final Stopwatch time = Stopwatch()..start();
   final Process process = await Process.start(executable, arguments,
@@ -1170,7 +1184,9 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
     exitCode: exitCode,
   );
 
-  print('$clock ELAPSED TIME: $bold${prettyPrintDuration(time.elapsed)}$reset for $commandDescription in $relativeWorkingDir');
+  if (!runSilently) {
+    print('$clock ELAPSED TIME: $bold${prettyPrintDuration(time.elapsed)}$reset for $commandDescription in $relativeWorkingDir');
+  }
 
   if (exitCode != 0 && !allowNonZeroExit) {
     stderr.write(result.stderr);
@@ -1197,8 +1213,8 @@ Future<void> _runFlutterAnalyze(String workingDirectory, {
 final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');
 final RegExp _importMetaPattern = RegExp(r'''^\s*import (['"])package:meta/meta\.dart\1''');
 
-Set<String> _findFlutterDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) {
-  return _allFiles(srcPath, 'dart', minimumMatches: 1)
+Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) async {
+  return await _allFiles(srcPath, 'dart', minimumMatches: 1)
     .map<Set<String>>((File file) {
       final Set<String> result = <String>{};
       for (final String line in file.readAsLinesSync()) {
