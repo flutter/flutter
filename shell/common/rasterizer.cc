@@ -190,8 +190,7 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline,
     consume_result = PipelineConsumeResult::MoreAvailable;
   }
 
-  // Merging the thread as we know the next `Draw` should be run on the platform
-  // thread.
+  // EndFrame should perform cleanups for the external_view_embedder.
   if (surface_ != nullptr && surface_->GetExternalViewEmbedder() != nullptr) {
     surface_->GetExternalViewEmbedder()->EndFrame(should_resubmit_frame,
                                                   raster_thread_merger_);
@@ -469,7 +468,8 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
         raster_status == RasterStatus::kSkipAndRetry) {
       return raster_status;
     }
-    if (external_view_embedder != nullptr) {
+    if (external_view_embedder != nullptr &&
+        (!raster_thread_merger_ || raster_thread_merger_->IsMerged())) {
       FML_DCHECK(!frame->IsSubmitted());
       external_view_embedder->SubmitFrame(surface_->GetContext(),
                                           std::move(frame));
