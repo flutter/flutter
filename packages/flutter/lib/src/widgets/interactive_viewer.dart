@@ -682,8 +682,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // that doesn't intersect to each other, and move the points on top of each
     // other.
     final OffsetTuple closestPoints = invalidSide.findClosestPointsRect(_boundaryRect);
-    final Offset difference = closestPoints.b - closestPoints.a;
-    print('justin closest point onrect ${closestPoints.a}, online ${closestPoints.b}, so move by $difference');
+    final Offset difference = closestPoints.a - closestPoints.b;
+    print('justin for rect $_boundaryRect and invalidSide $invalidSide, closest point onside: ${closestPoints.a}, onrect: ${closestPoints.b}, so move by $difference');
 
     final Matrix4 correctedMatrix = matrix.clone()
         ..translate(difference.dx, difference.dy);
@@ -712,7 +712,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         || !correctedViewportSide12.intersectsRect(_boundaryRect)
         || !correctedViewportSide23.intersectsRect(_boundaryRect)
         || !correctedViewportSide30.intersectsRect(_boundaryRect)) {
-      /*
       final LineSegment? correctedInvalidSide = <LineSegment?>[
         correctedViewportSide01,
         correctedViewportSide12,
@@ -721,11 +720,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       ].firstWhere((LineSegment? side) {
         return !side!.intersectsRect(_boundaryRect);
       }, orElse: () => null);
-      print('justin still invalid after correction! $correctedInvalidSide doesnt intersect $_boundaryRect... or does it? ${correctedInvalidSide!.intersectsRect(_boundaryRect)}');
-      */
+      print('justin still invalid after correction! $correctedInvalidSide doesnt intersect $_boundaryRect');
       return Matrix4.identity();
     }
 
+    print('justin corrected it successfully!');
     return correctedMatrix;
 
     /*
@@ -1373,6 +1372,30 @@ class LineSegment {
   /// indefinitely.
   double get lineYIntercept => p0.dy - slope * p0.dx;
 
+  // True iff the Rect contains the Offset inclusively for all of its sides with
+  // some tolerance for error. Rect.contains only considers the top and left
+  // sides inclusively.
+  static bool _rectContainsInclusive(Rect rect, Offset offset) {
+    // TODO(justinmc): This tolerance.
+    const int tolerance = 1000000000000;
+    final Rect rRect = Rect.fromLTRB(
+      (rect.top * tolerance).round() / tolerance,
+      (rect.left * tolerance).round() / tolerance,
+      (rect.right * tolerance).round() / tolerance,
+      (rect.bottom * tolerance).round() / tolerance,
+    );
+    final Offset rOffset = Offset(
+      (offset.dx * tolerance).round() / tolerance,
+      (offset.dy * tolerance).round() / tolerance,
+    );
+    if (!(rOffset.dx >= rRect.left && rOffset.dx <= rRect.right
+        && rOffset.dy >= rRect.top && rOffset.dy <= rRect.bottom)) {
+      print('justin not contained :( $rRect, $rOffset');
+    }
+    return rOffset.dx >= rRect.left && rOffset.dx <= rRect.right
+        && rOffset.dy >= rRect.top && rOffset.dy <= rRect.bottom;
+  }
+
   /// A subcase of the linesIntersectAt method.
   static Offset _isVerticalAndInterceptsNonVerticalLineAt(LineSegment vertical, LineSegment nonVertical) {
     // Assert that vertical is indeed vertical.
@@ -1387,6 +1410,10 @@ class LineSegment {
   static bool _isVerticalAndInterceptsNonVertical(LineSegment vertical, LineSegment nonVertical) {
     final Offset intersection = _isVerticalAndInterceptsNonVerticalLineAt(vertical, nonVertical);
     return vertical.contains(intersection) && nonVertical.contains(intersection);
+  }
+
+  static double _distanceBetweenPoints(Offset a, Offset b) {
+    return math.sqrt(math.pow(b.dx - a.dx, 2) + math.pow(b.dy - a.dy, 2));
   }
 
   /// True iff the line containing this line segment also contains the given
@@ -1475,8 +1502,9 @@ class LineSegment {
 
   /// Returns true iff this line segment intersects the given rect, inclusively.
   bool intersectsRect(Rect rect) {
-    // Intersects if either point, or both, is inside of the rectangle.
-    if (rect.contains(p0) || rect.contains(p1)) {
+    // Intersects if either point, or both, is inside of the rectangle,
+    // inclusively.
+    if (_rectContainsInclusive(rect, p0) || _rectContainsInclusive(rect, p1)) {
       return true;
     }
 
@@ -1487,10 +1515,6 @@ class LineSegment {
     final LineSegment left = LineSegment(rect.bottomLeft, rect.topLeft);
     return intersects(top) || intersects(right)
         || intersects(bottom) || intersects(left);
-  }
-
-  static double _distanceBetweenPoints(Offset a, Offset b) {
-    return math.sqrt(math.pow(b.dx - a.dx, 2) + math.pow(b.dy - a.dy, 2));
   }
 
   /// Assuming that the given point is on the extended line of this line segment,
@@ -1506,6 +1530,8 @@ class LineSegment {
     return d0.abs() <= d1.abs() ? p0 : p1;
   }
 
+  // TODO(justinmc): FYI a is on this linesegment, b is the other. May need to
+  // change the OffsetTuple type to be specific...
   /// Returns the closest point on each line segment to the other line segment.
   @visibleForTesting
   OffsetTuple findClosestPointsLineSegment(LineSegment lineSegment) {
@@ -1529,6 +1555,8 @@ class LineSegment {
     );
   }
 
+  // TODO(justinmc): FYI a is on line segment, b is on rect. Specify in
+  // OffsetTuple.
   /// Returns the points on the LineSegment and Rect closest to each other.
   /// Assumes that they do not intersect.
   OffsetTuple findClosestPointsRect(Rect rect) {
@@ -1537,12 +1565,11 @@ class LineSegment {
     final LineSegment top = LineSegment(rect.topLeft, rect.topRight);
     final OffsetTuple toTop = findClosestPointsLineSegment(top);
     final LineSegment right = LineSegment(rect.topRight, rect.bottomRight);
-    final OffsetTuple toRight = findClosestPointsLineSegment(top);
-    final LineSegment bottom = LineSegment(rect.bottomRight, rect.bottomLeft);
-    final OffsetTuple toBottom = findClosestPointsLineSegment(top);
-    final LineSegment left = LineSegment(rect.bottomLeft, rect.topLeft);
-    final OffsetTuple toLeft = findClosestPointsLineSegment(top);
-
+    final OffsetTuple toRight = findClosestPointsLineSegment(right);
+    final LineSegment bottom = LineSegment(rect.bottomLeft, rect.bottomRight);
+    final OffsetTuple toBottom = findClosestPointsLineSegment(bottom);
+    final LineSegment left = LineSegment(rect.topLeft, rect.bottomLeft);
+    final OffsetTuple toLeft = findClosestPointsLineSegment(left);
 
     // TODO(justinmc): Find distance between two closestpoints for each side,
     // and return the closest.
@@ -1607,4 +1634,9 @@ class OffsetTuple {
   final Offset a;
   /// The second Offset;
   final Offset b;
+
+  @override
+  String toString() {
+    return '$a, $b';
+  }
 }

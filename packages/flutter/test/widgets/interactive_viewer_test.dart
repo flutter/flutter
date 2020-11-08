@@ -1665,6 +1665,52 @@ void main() {
       });
     });
 
+    group('findClosestPointsRect', () {
+      test('vertical and horizontal', () {
+        const LineSegment vertical = LineSegment(
+          Offset(310.0, 0.0),
+          Offset(310.0, 100.0),
+        );
+        const LineSegment horizontal = LineSegment(
+          Offset(0.0, 310.0),
+          Offset(100.0, 310.0),
+        );
+        const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 300.0);
+
+        final OffsetTuple closestPointsVertical = vertical.findClosestPointsRect(rect);
+        expect(closestPointsVertical.a, const Offset(310.0, 0.0));
+        expect(closestPointsVertical.b, const Offset(300.0, 0.0));
+
+        final OffsetTuple closestPointsHorizontal = horizontal.findClosestPointsRect(rect);
+        expect(closestPointsHorizontal.a, const Offset(0.0, 310.0));
+        expect(closestPointsHorizontal.b, const Offset(0.0, 300.0));
+      });
+
+      test('at an angle, middle of line segment nearset to a corner', () {
+        const LineSegment a = LineSegment(
+          Offset(-30.0, 280.0),
+          Offset(10.0, 320.0),
+        );
+        const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 300.0);
+
+        final OffsetTuple closestPoints = a.findClosestPointsRect(rect);
+        expect(closestPoints.a, const Offset(-10.0, 300.0));
+        expect(closestPoints.b, const Offset(0.0, 300.0));
+      });
+
+      test('horizontal, real example', () {
+        const LineSegment a = LineSegment(
+          Offset(306.7, 26.0),
+          Offset(497.1, 26.0),
+        );
+        const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 300.0);
+
+        final OffsetTuple closestPoints = a.findClosestPointsRect(rect);
+        expect(closestPoints.a, const Offset(306.7, 26.0));
+        expect(closestPoints.b, const Offset(300.0, 26.0));
+      });
+    });
+
     group('intersectsRect', () {
       test('contained in rect', () {
         const LineSegment lineSegment = LineSegment(
@@ -1686,10 +1732,30 @@ void main() {
         expect(lineSegment.intersectsRect(rect), isTrue);
       });
 
-      test('just touches rect, real example', () {
+      test('just touches rect, real example horizontal', () {
         const LineSegment lineSegment = LineSegment(
           Offset(-18.7, 300.0),
           Offset(281.3, 300.0),
+        );
+        const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 300.0);
+
+        expect(lineSegment.intersectsRect(rect), isTrue);
+      });
+
+      test('just touches rect, real example vertical', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(300.0, 84.7),
+          Offset(300.0, 165.8),
+        );
+        const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 300.0);
+
+        expect(lineSegment.intersectsRect(rect), isTrue);
+      });
+
+      test('just touches rect, tolerance', () {
+        const LineSegment lineSegment = LineSegment(
+          Offset(300.00000000000006, 84.7),
+          Offset(300.00000000000006, 165.8),
         );
         const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 300.0);
 
