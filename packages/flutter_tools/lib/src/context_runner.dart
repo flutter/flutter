@@ -185,7 +185,7 @@ Future<T> runInContext<T>(
         androidWorkflow: androidWorkflow,
       ),
       FeatureFlags: () => const FlutterFeatureFlags(),
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),

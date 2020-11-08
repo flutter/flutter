@@ -242,13 +242,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           globals.flutterUsage.suppressAnalytics = true;
         }
 
-        try {
-          await globals.flutterVersion.ensureVersionFile();
-        } on FileSystemException catch (e) {
-          globals.printError('Failed to write the version file to the artifact cache: "$e".');
-          globals.printError('Please ensure you have permissions in the artifact cache directory.');
-          throwToolExit('Failed to write the version file');
-        }
+        globals.flutterVersion.ensureVersionFile();
         final bool machineFlag = topLevelResults['machine'] as bool;
         if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
           await globals.flutterVersion.checkFlutterVersionFreshness();

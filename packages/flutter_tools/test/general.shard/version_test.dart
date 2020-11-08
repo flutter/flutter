@@ -119,7 +119,7 @@ void main() {
         _expectVersionMessage('');
         expect(processManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => processManager,
         Cache: () => mockCache,
       });
@@ -143,7 +143,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage('');
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -165,7 +165,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -191,7 +191,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage('');
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -222,7 +222,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage('');
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -246,7 +246,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -266,7 +266,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage('');
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -286,7 +286,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(getChannelOutOfDateVersion())));
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -320,7 +320,7 @@ void main() {
           workingDirectory: anyNamed('workingDirectory'),
         ));
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
       });
     });
@@ -336,7 +336,7 @@ void main() {
         fakeData(mockProcessManager, mockCache, channel: channel);
         _expectDefault(await VersionCheckStamp.load());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -345,7 +345,7 @@ void main() {
         fakeData(mockProcessManager, mockCache, stampJson: '<', channel: channel);
         _expectDefault(await VersionCheckStamp.load());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -359,7 +359,7 @@ void main() {
         );
         _expectDefault(await VersionCheckStamp.load());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -383,7 +383,7 @@ void main() {
         expect(stamp.lastTimeVersionWasChecked, _testClock.ago(const Duration(days: 2)));
         expect(stamp.lastTimeWarningWasPrinted, _testClock.now());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -410,7 +410,7 @@ void main() {
         expect(storedStamp.lastTimeVersionWasChecked, _testClock.ago(const Duration(days: 2)));
         expect(storedStamp.lastTimeWarningWasPrinted, _testClock.now());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -441,7 +441,7 @@ void main() {
         expect(storedStamp.lastTimeVersionWasChecked, _testClock.ago(const Duration(days: 2)));
         expect(storedStamp.lastTimeWarningWasPrinted, _testClock.now());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });

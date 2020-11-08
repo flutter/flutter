@@ -87,7 +87,7 @@ class DowngradeCommand extends FlutterCommand {
     String workingDirectory = Cache.flutterRoot;
     if (argResults.wasParsed('working-directory')) {
       workingDirectory = stringArg('working-directory');
-      _flutterVersion = FlutterVersion(const SystemClock(), workingDirectory);
+      _flutterVersion = FlutterVersion(clock: const SystemClock(), workingDirectory: workingDirectory);
     }
 
     final String currentChannel = _flutterVersion.channel;
