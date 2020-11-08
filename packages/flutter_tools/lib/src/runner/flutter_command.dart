@@ -1061,6 +1061,7 @@ abstract class FlutterCommand extends Command<void> {
       await pub.get(
         context: PubContext.getVerifyContext(name),
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,
+        check: true,
       );
       await project.regeneratePlatformSpecificTooling();
     }
