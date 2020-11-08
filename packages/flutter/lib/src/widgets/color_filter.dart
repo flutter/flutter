@@ -12,6 +12,43 @@ import 'framework.dart';
 /// Applies a [ColorFilter] to its child.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=F7Cll22Dno8}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// The sample shows how to filter images with selected color
+/// and blending them with different modes
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///    return  Column(
+///      children:[
+///        ColorFiltered(
+///          colorFilter: ColorFilter.mode(
+///            Colors.red,
+///            BlendMode.modulate,
+///          ),
+///         child:Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+///        ),
+///        ColorFiltered(
+///          colorFilter: ColorFilter.mode(
+///            Colors.grey,
+///            BlendMode.saturation,
+///          ),
+///          child:Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+///        ),
+///      ],
+///    );
+///  }
+/// ```
+///{@end-tool}
+///
+/// See Also:
+///
+/// *[ColorFilter.mode], a source color and destination color rendered.
+/// *[Blendmode enum],blending a source image with destination image.
+/// *[Image Class],ways to import image.
+/// *[Colors Class],color palette class.
+///
 @immutable
 class ColorFiltered extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies a [ColorFilter] to its child.
