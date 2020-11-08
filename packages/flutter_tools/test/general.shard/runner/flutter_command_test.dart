@@ -474,6 +474,15 @@ void main() {
       }
     });
   });
+
+  testUsingContext('Sets FlutterCommand on usage', () async {
+    final DummyFlutterCommand command = DummyFlutterCommand();
+    await command.run();
+
+    expect(globals.flutterUsage.currentCommand, command);
+  }, overrides: <Type, Generator>{
+    Usage: () => FakeUsage(),
+  });
 }
 
 class FakeDeprecatedCommand extends FlutterCommand {

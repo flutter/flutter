@@ -161,9 +161,7 @@ class BuildEvent extends UsageEvent {
     // category
     'build',
     // parameter
-    FlutterCommand.current == null
-      ? 'unspecified'
-      : FlutterCommand.current.name,
+    flutterUsage.currentCommand?.name ?? 'unspecified',
     label: label,
     flutterUsage: flutterUsage,
   );

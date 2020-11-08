@@ -316,6 +316,9 @@ class CrashingUsage implements Usage {
 
   @override
   void printWelcome() => _impl.printWelcome();
+
+  @override
+  FlutterCommand currentCommand;
 }
 
 class CustomBugInstructions extends UserMessages {

@@ -30,6 +30,7 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
@@ -373,6 +374,9 @@ class FakeUsage implements Usage {
 
   @override
   void printWelcome() { }
+
+  @override
+  FlutterCommand currentCommand;
 }
 
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {

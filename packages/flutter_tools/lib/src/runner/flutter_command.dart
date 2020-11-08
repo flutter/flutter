@@ -9,10 +9,10 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/io.dart' as io;
 import '../base/signals.dart';
 import '../base/terminal.dart';
+import '../base/time.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -117,11 +117,19 @@ class FlutterOptions {
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
 }
 
+/// The base class for all flutter command options.
+///
+/// Flutter command flags or options that are shared across more than one
+/// command should be defined here and re-used.
 abstract class FlutterCommand extends Command<void> {
-  /// The currently executing command (or sub-command).
-  ///
-  /// Will be `null` until the top-most command has begun execution.
-  static FlutterCommand get current => context.get<FlutterCommand>();
+  FlutterCommand({
+    SystemClock systemClock,
+    Usage flutterUsage,
+  }) : _systemClock = systemClock ?? globals.systemClock,
+       _flutterUsage = flutterUsage ?? globals.flutterUsage;
+
+  final SystemClock _systemClock;
+  final Usage _flutterUsage;
 
   /// The option name for a custom observatory port.
   static const String observatoryPortOption = 'observatory-port';
@@ -914,28 +922,22 @@ abstract class FlutterCommand extends Command<void> {
   /// and [runCommand] to execute the command
   /// so that this method can record and report the overall time to analytics.
   @override
-  Future<void> run() {
-    final DateTime startTime = globals.systemClock.now();
+  Future<void> run() async {
+    _flutterUsage.currentCommand = this;
+    final DateTime startTime = _systemClock.now();
 
-    return context.run<void>(
-      name: 'command',
-      overrides: <Type, Generator>{FlutterCommand: () => this},
-      body: () async {
-        // Prints the welcome message if needed.
-        globals.flutterUsage.printWelcome();
-        _printDeprecationWarning();
-        final String commandPath = await usagePath;
-        _registerSignalHandlers(commandPath, startTime);
-        FlutterCommandResult commandResult = FlutterCommandResult.fail();
-        try {
-          commandResult = await verifyThenRunCommand(commandPath);
-        } finally {
-          final DateTime endTime = globals.systemClock.now();
-          globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
-          _sendPostUsage(commandPath, commandResult, startTime, endTime);
-        }
-      },
-    );
+    _flutterUsage.printWelcome();
+    _printDeprecationWarning();
+    final String commandPath = await usagePath;
+    _registerSignalHandlers(commandPath, startTime);
+    FlutterCommandResult commandResult = FlutterCommandResult.fail();
+    try {
+      commandResult = await verifyThenRunCommand(commandPath);
+    } finally {
+      final DateTime endTime = _systemClock.now();
+      globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
+      _sendPostUsage(commandPath, commandResult, startTime, endTime);
+    }
   }
 
   void _printDeprecationWarning() {
@@ -967,7 +969,7 @@ abstract class FlutterCommand extends Command<void> {
         commandPath,
         const FlutterCommandResult(ExitStatus.killed),
         startTime,
-        globals.systemClock.now(),
+        _systemClock.now(),
       );
     };
     globals.signals.addHandler(io.ProcessSignal.SIGTERM, handler);
@@ -999,10 +1001,8 @@ abstract class FlutterCommand extends Command<void> {
         ...commandResult.timingLabelParts,
     ];
 
-    final String label = labels
-        .where((String label) => !_isBlank(label))
-        .join('-');
-    globals.flutterUsage.sendTiming(
+    final String label = labels.where(_isNotBlank).join('-');
+    _flutterUsage.sendTiming(
       'flutter',
       name,
       // If the command provides its own end time, use it. Otherwise report
@@ -1077,7 +1077,7 @@ abstract class FlutterCommand extends Command<void> {
       Usage.command(commandPath, parameters: additionalUsageValues);
     }
 
-    return await runCommand();
+    return runCommand();
   }
 
   /// The set of development artifacts required for this command.
@@ -1320,4 +1320,4 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 }
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
-bool _isBlank(String s) => s == null || s.trim().isEmpty;
+bool _isNotBlank(String s) => s != null && s.trim().isNotEmpty;

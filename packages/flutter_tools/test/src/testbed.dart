@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
@@ -198,6 +199,9 @@ class NoOpUsage implements Usage {
 
   @override
   void sendTiming(String category, String variableName, Duration duration, { String label }) {}
+
+  @override
+  FlutterCommand currentCommand;
 }
 
 class FakeHttpClient implements HttpClient {

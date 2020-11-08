@@ -49,4 +49,7 @@ class DisabledUsage implements Usage {
 
   @override
   void printWelcome() { }
+
+  @override
+  FlutterCommand currentCommand;
 }

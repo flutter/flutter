@@ -156,6 +156,11 @@ abstract class Usage {
   /// Prints a welcome message that informs the tool user about the collection
   /// of anonymous usage information.
   void printWelcome();
+
+  /// The currently executing command (or sub-command).
+  ///
+  /// Will be `null` until the top-most command has begun execution.
+  FlutterCommand currentCommand;
 }
 
 typedef AnalyticsFactory = Analytics Function(
@@ -430,6 +435,9 @@ class _DefaultUsage implements Usage {
       globals.persistentToolState.redisplayWelcomeMessage = false;
     }
   }
+
+  @override
+  FlutterCommand currentCommand;
 }
 
 // An Analytics mock that logs to file. Unimplemented methods goes to stdout.
