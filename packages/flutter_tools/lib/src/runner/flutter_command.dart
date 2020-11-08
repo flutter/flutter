@@ -962,7 +962,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
     final SignalHandler handler = (io.ProcessSignal s) {
-      Cache.releaseLock();
+      globals.cache.releaseLock();
       _sendPostUsage(
         commandPath,
         const FlutterCommandResult(ExitStatus.killed),
@@ -1035,7 +1035,7 @@ abstract class FlutterCommand extends Command<void> {
       await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
       await globals.cache.updateAll(await requiredArtifacts);
     }
-    Cache.releaseLock();
+    globals.cache.releaseLock();
 
     await validateCommand();
 

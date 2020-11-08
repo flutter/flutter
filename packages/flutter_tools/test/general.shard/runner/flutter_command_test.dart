@@ -57,7 +57,7 @@ void main() {
     testUsingContext('honors shouldUpdateCache false', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: false);
       await flutterCommand.run();
-      verifyZeroInteractions(cache);
+      verifyNever(cache.updateAll(any));
       expect(flutterCommand.deprecated, isFalse);
       expect(flutterCommand.hidden, isFalse);
     },
@@ -352,7 +352,7 @@ void main() {
         final Completer<void> checkLockCompleter = Completer<void>();
         final DummyFlutterCommand flutterCommand =
             DummyFlutterCommand(commandFunction: () async {
-          await Cache.lock();
+          await globals.cache.lock();
           checkLockCompleter.complete();
           final Completer<void> c = Completer<void>();
           await c.future;
@@ -362,13 +362,13 @@ void main() {
         unawaited(flutterCommand.run());
         await checkLockCompleter.future;
 
-        Cache.checkLockAcquired();
+        globals.cache.checkLockAcquired();
 
         signalController.add(mockSignal);
         await completer.future;
 
-        await Cache.lock();
-        Cache.releaseLock();
+        await globals.cache.lock();
+        globals.cache.releaseLock();
       }, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
         Signals: () => FakeSignals(
