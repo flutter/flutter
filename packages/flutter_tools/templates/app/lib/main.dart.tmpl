@@ -7,6 +7,10 @@ import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart';
 {{/withPluginHook}}
 
 void main() {
+  FlutterError.onError = (FlutterErrorDetails details) {
+    // Add your error logging for unhandled errors here.
+    print(details.exception.toString());
+  };
   runApp(MyApp());
 }
 
@@ -30,6 +34,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
+      builder: (BuildContext context, Widget widget) {
+        // The built widget will be shown in case of an unhandled error.
+        ErrorWidget.builder = (FlutterErrorDetails errorDetails) =>
+            Scaffold(body: Center(child: Text('Unexpected error.')));
+        return widget;
+      },
     );
   }
 }
