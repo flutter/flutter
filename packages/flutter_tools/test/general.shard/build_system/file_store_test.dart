@@ -4,7 +4,6 @@
 
 import 'dart:typed_data';
 
-import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -193,9 +192,7 @@ void main() {
 
     fileCache.diffFileList(<File>[file]);
 
-    // Validate that chunked hash is the same as non-chunked.
-    expect(fileCache.currentAssetKeys['foo.dart'],
-      md5.convert(file.readAsBytesSync()).toString());
+    expect(fileCache.currentAssetKeys['foo.dart'], '7236aff9140ef993d67d93b4b10171f2');
   });
 }
 
