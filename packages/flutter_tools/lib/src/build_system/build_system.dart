@@ -802,11 +802,11 @@ class _BuildInstance {
       // If we were missing the depfile, resolve input files after executing the
       // target so that all file hashes are up to date on the next run.
       if (node.missingDepfile) {
-        await fileCache.diffFileList(node.inputs);
+        fileCache.diffFileList(node.inputs);
       }
 
       // Always update hashes for output files.
-      await fileCache.diffFileList(node.outputs);
+      fileCache.diffFileList(node.outputs);
       node.target._writeStamp(node.inputs, node.outputs, environment);
       updateGraph();
 
@@ -1075,7 +1075,7 @@ class Node {
     // If we have files to diff, compute them asynchronously and then
     // update the result.
     if (sourcesToDiff.isNotEmpty) {
-      final List<File> dirty = await fileStore.diffFileList(sourcesToDiff);
+      final List<File> dirty = fileStore.diffFileList(sourcesToDiff);
       if (dirty.isNotEmpty) {
         invalidatedReasons.add(InvalidatedReason.inputChanged);
         _dirty = true;
