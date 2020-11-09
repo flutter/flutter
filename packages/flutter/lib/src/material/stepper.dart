@@ -124,7 +124,7 @@ class Step {
 ///
 /// {@tool sample --template=stateful_widget_scaffold_center}
 ///
-///```dart
+/// ```dart
 /// int _index = 0;
 /// Widget build(BuildContext context) {
 ///   return Container(
@@ -133,7 +133,7 @@ class Step {
 ///     child: Stepper(
 ///       currentStep: _index,
 ///       onStepCancel: () {
-///         if (_index <= 0 ) {
+///         if (_index <= 0) {
 ///          return null;
 ///         }
 ///         setState(() {
@@ -141,7 +141,7 @@ class Step {
 ///         });
 ///       },
 ///       onStepContinue: () {
-///         if(_index >= 1) {
+///         if (_index >= 1) {
 ///          return null;
 ///         }
 ///         setState(() {
@@ -169,7 +169,7 @@ class Step {
 ///     ),
 ///   );
 /// }
-///```
+/// ```
 ///
 /// {@end-tool}
 ///
