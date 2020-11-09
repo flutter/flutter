@@ -7,15 +7,17 @@ import 'dart:convert';
 import 'package:integration_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> main() async {
-  final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized() as IntegrationTestWidgetsFlutterBinding;
+void main() {
+  final IntegrationTestWidgetsFlutterBinding binding =
+      IntegrationTestWidgetsFlutterBinding.ensureInitialized()
+          as IntegrationTestWidgetsFlutterBinding;
 
-  testWidgets('passing test', (WidgetTester tester) async {
-    expect(true, true);
+  testWidgets('Failing test 1', (WidgetTester tester) async {
+    expect(false, true);
   });
 
-  testWidgets('failing test', (WidgetTester tester) async {
-    expect(true, false);
+  testWidgets('Failing test 2', (WidgetTester tester) async {
+    expect(false, true);
   });
 
   tearDownAll(() {
