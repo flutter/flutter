@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file uses Dart 2.12 semantics. This is needed as we can't upgrade
+// the SDK constraint to `>=2.12.0-0` before the deps are ready.
+// @dart=2.12
+
 import 'dart:convert';
 import 'dart:io';
 
