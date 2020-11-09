@@ -320,7 +320,7 @@ Future<void> _runWebToolTests() async {
     toolsPath,
     forceSingleCore: true,
     testPaths: <String>[path.join(kTest, 'web$kDotShard')],
-    enableFlutterToolAsserts: subshard != 'general',
+    enableFlutterToolAsserts: false,
   );
 }
 
