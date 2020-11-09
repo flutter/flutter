@@ -131,6 +131,11 @@ class DriveCommand extends RunCommandBase {
           'Dart VM running The test script.');
   }
 
+  // `pub` must always be run due to the test script running from source,
+  // even if an application binary is used.
+  @override
+  bool get shouldRunPub => true;
+
   FlutterDriverFactory _flutterDriverFactory;
   final FileSystem _fileSystem;
   final Logger _logger;
