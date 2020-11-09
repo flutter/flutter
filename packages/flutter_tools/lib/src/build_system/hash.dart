@@ -45,7 +45,7 @@ class Md5Hash {
 
   /// The current hash digest.
   final Uint32List _digest = Uint32List(4);
-  static final Uint8List _scratchSpace = Uint8List(512);
+  final Uint8List _scratchSpace = Uint8List(512);
   static const int _signatureBytes = 8;
   int _remainingLength;
   int _contentLength = 0;
