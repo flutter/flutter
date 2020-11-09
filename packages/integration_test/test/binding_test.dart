@@ -87,6 +87,19 @@ Future<void> main() async {
         json.encode(_kTimelines),
       );
     });
+
+    group('defaultTestTimeout', () {
+      final originalTimeout = integrationBinding.defaultTestTimeout;
+      tearDown(() {
+        integrationBinding.defaultTestTimeout = originalTimeout;
+      });
+
+      test('can be configured', () {
+        final newTimeout = Timeout(Duration(seconds: 17));
+        integrationBinding.defaultTestTimeout = newTimeout;
+        expect(integrationBinding.defaultTestTimeout, newTimeout);
+      });
+    });
   });
 
   tearDownAll(() async {
