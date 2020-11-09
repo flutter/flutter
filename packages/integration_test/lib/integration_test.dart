@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -163,13 +163,9 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     callbackManager.cleanup();
   }
 
-  // TODO(dnfield): Remove the ignore once we bump the minimum Flutter version
-  // ignore: override_on_non_overriding_member
   @override
   bool get overrideHttpClient => false;
 
-  // TODO(dnfield): Remove the ignore once we bump the minimum Flutter version
-  // ignore: override_on_non_overriding_member
   @override
   bool get registerTestTextInput => false;
 
