@@ -630,6 +630,7 @@ class WebAssetServer implements AssetReader {
     return webSdkFile;
   }
 
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/70121
   static const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> _dartSdkJsArtifactMap =
     <WebRendererMode, Map<NullSafetyMode, Artifact>> {
       WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
@@ -649,6 +650,7 @@ class WebAssetServer implements AssetReader {
       },
     };
 
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/70121
   static const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> _dartSdkJsMapArtifactMap =
     <WebRendererMode, Map<NullSafetyMode, Artifact>> {
       WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
