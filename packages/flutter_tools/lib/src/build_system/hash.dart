@@ -54,12 +54,11 @@ class Md5Hash {
     assert(_remainingLength == null);
     stop ??= data.length;
     int i = 0;
-    for (; i < stop; i += 512) {
+    for (; i <= stop - 512; i += 512) {
       final Uint32List view = Uint32List.view(data.buffer, i, 16);
       _writeChunk(view);
     }
     if (i != stop) {
-      i -= 512;
       // The data must be copied so that the provided buffer can be reused.
       int j = 0;
       for (; i < stop; i += 1) {
