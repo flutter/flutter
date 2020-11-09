@@ -45,7 +45,6 @@ class TestCompiler {
         'test_cache',
         getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
-          nullSafetyMode: buildInfo.nullSafetyMode,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         )) {
