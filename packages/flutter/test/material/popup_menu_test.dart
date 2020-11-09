@@ -1781,34 +1781,30 @@ void main() {
   });
 
   testWidgets('iconSize parameter tests', (WidgetTester tester) async {
-    final PopupMenuItemBuilder<PopupMenuItem<String>> itemBuilder = (BuildContext _) {
-      return <PopupMenuEntry<PopupMenuItem<String>>>[];
-    };
-
-    Widget builder({required bool provideIconSize, double iconSize = 34}) {
-      final PopupMenuButton<PopupMenuItem<String>> popupMenuButton =
-        !provideIconSize
-          ? PopupMenuButton<PopupMenuItem<String>>(itemBuilder: itemBuilder)
-            : PopupMenuButton<PopupMenuItem<String>>(
-                itemBuilder: itemBuilder,
+    Future<void> buildFrame({double? iconSize}) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: PopupMenuButton<String>(
                 iconSize: iconSize,
-              );
-
-      return MaterialApp(
-        home: Scaffold(
-          body: Material(
-            child: popupMenuButton,
+                itemBuilder: (_) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'value',
+                    child: Text('child'),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       );
     }
 
-    // iconSize is not provided so it should have its default values
-    await tester.pumpWidget(builder(provideIconSize: false));
+    await buildFrame();
     expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 24);
 
-    // When provided, iconSize has the provided value
-    await tester.pumpWidget(builder(provideIconSize: true, iconSize: 50));
+    await buildFrame(iconSize: 50);
     expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 50);
   });
 }

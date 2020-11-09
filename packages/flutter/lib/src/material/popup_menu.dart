@@ -941,7 +941,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.padding = const EdgeInsets.all(8.0),
     this.child,
     this.icon,
-    this.iconSize = 24.0,
+    this.iconSize,
     this.offset = Offset.zero,
     this.enabled = true,
     this.shape,
@@ -1031,7 +1031,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   final Color? color;
 
   /// Change the default icon size.
-  final double iconSize;
+  final double? iconSize;
 
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
@@ -1128,7 +1128,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     return IconButton(
       icon: widget.icon ?? _getIcon(Theme.of(context).platform),
       padding: widget.padding,
-      iconSize: widget.iconSize,
+      iconSize: widget.iconSize ?? 24.0,
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
     );
