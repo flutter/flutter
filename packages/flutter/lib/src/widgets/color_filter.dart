@@ -45,8 +45,8 @@ import 'framework.dart';
 /// See Also:
 ///
 /// *[Blendmode], blending a source image with destination image.
-/// *[Image.network], for obtaining an image from a URL.
-/// *[Color], constants which represent Material design's [color palette]<https://material.io/design/color/>.
+/// *[Image], for obtaining an image object.
+/// *[Colors], constants which represent Material design's [color palette]<https://material.io/design/color/>.
 ///
 @immutable
 class ColorFiltered extends SingleChildRenderObjectWidget {
