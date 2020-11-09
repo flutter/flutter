@@ -98,7 +98,8 @@ class TestSemantics {
   /// set to the appropriate values for direct children of the root node.
   ///
   /// The [transform] is set to a 3.0 scale (to account for the
-  /// [Window.devicePixelRatio] being 3.0 on the test pseudo-device).
+  /// [dart:ui.FlutterView.devicePixelRatio] being 3.0 on the test
+  /// pseudo-device).
   ///
   /// The [rect] field is required and has no default. The
   /// [TestSemantics.fullScreen] property may be useful as a value; it describes
