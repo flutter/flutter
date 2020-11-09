@@ -1054,12 +1054,12 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///   bool _snap = false;
 ///   bool _floating = false;
 ///
+///   // SliverAppBar is declared in Scaffold.body, in slivers of a
+///   // CustomScrollView.
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
 ///       home: Scaffold(
-///       // SliverAppBar is declared in Scaffold.body, in slivers of a
-///       // CustomScrollView.
 ///         body: CustomScrollView(
 ///           slivers: <Widget>[
 ///             SliverAppBar(
