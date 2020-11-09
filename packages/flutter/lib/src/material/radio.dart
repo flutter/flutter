@@ -357,7 +357,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
   };
 
   MaterialStateProperty<Color> get _widgetFillColor {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return themeData.disabledColor;
