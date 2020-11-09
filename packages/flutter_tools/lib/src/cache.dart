@@ -103,44 +103,37 @@ class Cache {
   Cache({
     @protected Directory rootOverride,
     @protected List<ArtifactSet> artifacts,
-    // TODO(jonahwilliams): make required once migrated to context-free.
-    Logger logger,
-    FileSystem fileSystem,
-    Platform platform,
-    OperatingSystemUtils osUtils,
+    @required Logger logger,
+    @required FileSystem fileSystem,
+    @required Platform platform,
+    @required OperatingSystemUtils osUtils,
   }) : _rootOverride = rootOverride,
-       _logger = logger ?? globals.logger,
-       _fileSystem = fileSystem ?? globals.fs,
-       _platform = platform ?? globals.platform,
-       _osUtils = osUtils ?? globals.os {
-    // TODO(zra): Move to initializer list once logger and platform parameters
-    // are required.
-    _net = Net(logger: _logger, platform: _platform);
-    _fsUtils = FileSystemUtils(fileSystem: _fileSystem, platform: _platform);
+       _logger = logger,
+       _fileSystem = fileSystem,
+       _platform = platform,
+       _osUtils = osUtils,
+      _net = Net(logger: logger, platform: platform),
+      _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform) {
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
-
       _artifacts.add(GradleWrapper(this));
-      _artifacts.add(AndroidMavenArtifacts(this));
-      _artifacts.add(AndroidGenSnapshotArtifacts(this));
+      _artifacts.add(AndroidGenSnapshotArtifacts(this, platform: _platform));
       _artifacts.add(AndroidInternalBuildArtifacts(this));
-
-      _artifacts.add(IOSEngineArtifacts(this));
+      _artifacts.add(IOSEngineArtifacts(this, platform: _platform));
       _artifacts.add(FlutterWebSdk(this, platform: _platform));
-      _artifacts.add(FlutterSdk(this));
+      _artifacts.add(FlutterSdk(this, platform: _platform));
       _artifacts.add(WindowsEngineArtifacts(this, platform: _platform));
-      _artifacts.add(MacOSEngineArtifacts(this));
+      _artifacts.add(MacOSEngineArtifacts(this, platform: _platform));
       _artifacts.add(LinuxEngineArtifacts(this, platform: _platform));
-      _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
-      _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
-      _artifacts.add(FlutterRunnerSDKArtifacts(this));
+      _artifacts.add(LinuxFuchsiaSDKArtifacts(this, platform: _platform));
+      _artifacts.add(MacOSFuchsiaSDKArtifacts(this, platform: _platform));
+      _artifacts.add(FlutterRunnerSDKArtifacts(this, platform: _platform));
       _artifacts.add(FlutterRunnerDebugSymbols(this, platform: _platform));
       for (final String artifactName in IosUsbArtifacts.artifactNames) {
-        _artifacts.add(IosUsbArtifacts(artifactName, this));
+        _artifacts.add(IosUsbArtifacts(artifactName, this, platform: _platform));
       }
-      _artifacts.add(FontSubsetArtifacts(this));
+      _artifacts.add(FontSubsetArtifacts(this, platform: _platform));
       _artifacts.add(PubDependencies(
-        fileSystem: _fileSystem,
         logger: _logger,
         // flutter root and pub must be lazily initialized to avoid accessing
         // before the version is determined.
@@ -324,19 +317,18 @@ class Cache {
   /// (see [FlutterCommandRunner.runCommand]).
   ///
   /// This uses normal POSIX flock semantics.
-  static Future<void> lock() async {
+  Future<void> lock() async {
     if (!_lockEnabled) {
       return;
     }
     assert(_lock == null);
     final File lockFile =
-        globals.fs.file(globals.fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile'));
+      _fileSystem.file(_fileSystem.path.join(flutterRoot, 'bin', 'cache', 'lockfile'));
     try {
       _lock = lockFile.openSync(mode: FileMode.write);
     } on FileSystemException catch (e) {
-      globals.printError('Failed to open or create the artifact cache lockfile: "$e"');
-      globals.printError('Please ensure you have permissions to create or open '
-                 '${lockFile.path}');
+      _logger.printError('Failed to open or create the artifact cache lockfile: "$e"');
+      _logger.printError('Please ensure you have permissions to create or open ${lockFile.path}');
       throwToolExit('Failed to open or create the lockfile');
     }
     bool locked = false;
@@ -347,8 +339,8 @@ class Cache {
         locked = true;
       } on FileSystemException {
         if (!printed) {
-          globals.printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock.path}');
-          globals.printStatus('Waiting for another flutter command to release the startup lock...');
+          _logger.printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock.path}');
+          _logger.printStatus('Waiting for another flutter command to release the startup lock...');
           printed = true;
         }
         await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -360,7 +352,7 @@ class Cache {
   ///
   /// This happens automatically on startup (see [FlutterCommand.verifyThenRunCommand])
   /// after the command's required artifacts are updated.
-  static void releaseLock() {
+  void releaseLock() {
     if (!_lockEnabled || _lock == null) {
       return;
     }
@@ -370,16 +362,15 @@ class Cache {
 
   /// Checks if the current process owns the lock for the cache directory at
   /// this very moment; throws a [StateError] if it doesn't.
-  static void checkLockAcquired([Platform platform]) {
-    if (_lockEnabled && _lock == null && (platform ?? globals.platform).environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
+  void checkLockAcquired() {
+    if (_lockEnabled && _lock == null && _platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
       throw StateError(
         'The current process does not own the lock for the cache directory. This is a bug in Flutter CLI tools.',
       );
     }
   }
 
-  String _dartSdkVersion;
-
+  /// The current version of Dart used to build Flutter and run the tool.
   String get dartSdkVersion {
     if (_dartSdkVersion == null) {
       // Make the version string more customer-friendly.
@@ -392,6 +383,7 @@ class Cache {
     }
     return _dartSdkVersion;
   }
+  String _dartSdkVersion;
 
   /// The current version of the Flutter engine the flutter tool will download.
   String get engineRevision {
@@ -547,7 +539,7 @@ class Cache {
 
   Future<bool> isUpToDate() async {
     for (final ArtifactSet artifact in _artifacts) {
-      if (!await artifact.isUpToDate()) {
+      if (!await artifact.isUpToDate(_fileSystem)) {
         return false;
       }
     }
@@ -564,11 +556,11 @@ class Cache {
         _logger.printTrace('Artifact $artifact is not required, skipping update.');
         continue;
       }
-      if (await artifact.isUpToDate()) {
+      if (await artifact.isUpToDate(_fileSystem)) {
         continue;
       }
       try {
-        await artifact.update(_artifactUpdater);
+        await artifact.update(_artifactUpdater, _logger, _fileSystem, _osUtils);
       } on SocketException catch (e) {
         if (_hostsBlockedInChina.contains(e.address?.host)) {
           _logger.printError(
@@ -588,15 +580,15 @@ class Cache {
     bool includeAllPlatforms = true,
   }) async {
     final bool includeAllPlatformsState = this.includeAllPlatforms;
-    bool allAvailible = true;
+    bool allAvailable = true;
     this.includeAllPlatforms = includeAllPlatforms;
     for (final ArtifactSet cachedArtifact in _artifacts) {
       if (cachedArtifact is EngineCachedArtifact) {
-        allAvailible &= await cachedArtifact.checkForArtifacts(engineVersion);
+        allAvailable &= await cachedArtifact.checkForArtifacts(engineVersion);
       }
     }
     this.includeAllPlatforms = includeAllPlatformsState;
-    return allAvailible;
+    return allAvailable;
   }
 
   Future<bool> doesRemoteExist(String message, Uri url) async {
@@ -621,7 +613,7 @@ abstract class ArtifactSet {
   final DevelopmentArtifact developmentArtifact;
 
   /// [true] if the artifact is up to date.
-  Future<bool> isUpToDate();
+  Future<bool> isUpToDate(FileSystem fileSystem);
 
   /// The environment variables (if any) required to consume the artifacts.
   Map<String, String> get environment {
@@ -629,7 +621,12 @@ abstract class ArtifactSet {
   }
 
   /// Updates the artifact.
-  Future<void> update(ArtifactUpdater artifactUpdater);
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  );
 
   /// The canonical name of the artifact.
   String get name;
@@ -665,34 +662,39 @@ abstract class CachedArtifact extends ArtifactSet {
   }
 
   @override
-  Future<bool> isUpToDate() async {
+  Future<bool> isUpToDate(FileSystem fileSystem) async {
     if (!location.existsSync()) {
       return false;
     }
     if (version != cache.getStampFor(stampName)) {
       return false;
     }
-    return isUpToDateInner();
+    return isUpToDateInner(fileSystem);
   }
 
   @override
-  Future<void> update(ArtifactUpdater artifactUpdater) async {
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
     if (!location.existsSync()) {
       try {
         location.createSync(recursive: true);
       } on FileSystemException catch (err) {
-        globals.printError(err.toString());
+        logger.printError(err.toString());
         throwToolExit(
           'Failed to create directory for flutter cache at ${location.path}. '
           'Flutter may be missing permissions in its cache directory.'
         );
       }
     }
-    await updateInner(artifactUpdater);
+    await updateInner(artifactUpdater, fileSystem, operatingSystemUtils);
     try {
       cache.setStampFor(stampName, version);
     } on FileSystemException catch (err) {
-      globals.printError(
+      logger.printError(
         'The new artifact "$name" was downloaded, but Flutter failed to update '
         'its stamp file, receiving the error "$err". '
         'Flutter can continue, but the artifact may be re-downloaded on '
@@ -703,10 +705,13 @@ abstract class CachedArtifact extends ArtifactSet {
   }
 
   /// Hook method for extra checks for being up-to-date.
-  bool isUpToDateInner() => true;
+  bool isUpToDateInner(FileSystem fileSystem) => true;
 
-  /// Template method to perform artifact update.
-  Future<void> updateInner(ArtifactUpdater artifactUpdater);
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  );
 
   Uri _toStorageUri(String path) => Uri.parse('${cache.storageBaseUrl}/$path');
 }
@@ -720,24 +725,23 @@ class PubDependencies extends ArtifactSet {
   PubDependencies({
     // Needs to be lazy to avoid reading from the cache before the root is initialized.
     @required String Function() flutterRoot,
-    @required FileSystem fileSystem,
     @required Logger logger,
     @required Pub Function() pub,
   }) : _logger = logger,
-       _fileSystem = fileSystem,
        _flutterRoot = flutterRoot,
        _pub = pub,
        super(DevelopmentArtifact.universal);
 
   final String Function() _flutterRoot;
-  final FileSystem _fileSystem;
   final Logger _logger;
   final Pub Function() _pub;
 
   @override
-  Future<bool> isUpToDate() async {
-    final File toolPackageConfig = _fileSystem.file(
-      _fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools', kPackagesFileName),
+  Future<bool> isUpToDate(
+    FileSystem fileSystem,
+  ) async {
+    final File toolPackageConfig = fileSystem.file(
+      fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools', kPackagesFileName),
     );
     if (!toolPackageConfig.existsSync()) {
       return false;
@@ -751,7 +755,7 @@ class PubDependencies extends ArtifactSet {
       return false;
     }
     for (final Package package in packageConfig.packages) {
-      if (!_fileSystem.directory(package.packageUriRoot).existsSync()) {
+      if (!fileSystem.directory(package.packageUriRoot).existsSync()) {
         return false;
       }
     }
@@ -762,10 +766,15 @@ class PubDependencies extends ArtifactSet {
   String get name => 'pub_dependencies';
 
   @override
-  Future<void> update(ArtifactUpdater artifactUpdater) async {
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
     await _pub().get(
       context: PubContext.pubGet,
-      directory: _fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
+      directory: fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
       generateSyntheticPackage: false,
     );
   }
@@ -780,7 +789,11 @@ class MaterialFonts extends CachedArtifact {
   );
 
   @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater) {
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) {
     final Uri archiveUri = _toStorageUri(version);
     return artifactUpdater.downloadZipArchive('Downloading Material fonts...', archiveUri, location);
   }
@@ -791,8 +804,8 @@ class MaterialFonts extends CachedArtifact {
 ///
 /// This SDK references code within the regular Dart sdk to reduce download size.
 class FlutterWebSdk extends CachedArtifact {
-  FlutterWebSdk(Cache cache, {Platform platform})
-   : _platform = platform ?? globals.platform,
+  FlutterWebSdk(Cache cache, {@required Platform platform})
+   : _platform = platform,
      super(
       'flutter_web_sdk',
       cache,
@@ -808,7 +821,11 @@ class FlutterWebSdk extends CachedArtifact {
   String get version => cache.getVersionFor('engine');
 
   @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater) async {
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
     String platformName = 'flutter-web-sdk-';
     if (_platform.isMacOS) {
       platformName += 'darwin-x64';
@@ -859,24 +876,24 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   List<String> getPackageDirs();
 
   @override
-  bool isUpToDateInner() {
+  bool isUpToDateInner(FileSystem fileSystem) {
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (final String pkgName in getPackageDirs()) {
-      final String pkgPath = globals.fs.path.join(pkgDir.path, pkgName);
-      if (!globals.fs.directory(pkgPath).existsSync()) {
+      final String pkgPath = fileSystem.path.join(pkgDir.path, pkgName);
+      if (!fileSystem.directory(pkgPath).existsSync()) {
         return false;
       }
     }
 
     for (final List<String> toolsDir in getBinaryDirs()) {
-      final Directory dir = globals.fs.directory(globals.fs.path.join(location.path, toolsDir[0]));
+      final Directory dir = fileSystem.directory(fileSystem.path.join(location.path, toolsDir[0]));
       if (!dir.existsSync()) {
         return false;
       }
     }
 
     for (final String licenseDir in getLicenseDirs()) {
-      final File file = globals.fs.file(globals.fs.path.join(location.path, licenseDir, 'LICENSE'));
+      final File file = fileSystem.file(fileSystem.path.join(location.path, licenseDir, 'LICENSE'));
       if (!file.existsSync()) {
         return false;
       }
@@ -885,7 +902,11 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   }
 
   @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater) async {
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
     final String url = '${cache.storageBaseUrl}/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
@@ -896,28 +917,28 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     for (final List<String> toolsDir in getBinaryDirs()) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
-      final Directory dir = globals.fs.directory(globals.fs.path.join(location.path, cacheDir));
+      final Directory dir = fileSystem.directory(fileSystem.path.join(location.path, cacheDir));
 
       // Avoid printing things like 'Downloading linux-x64 tools...' multiple times.
       final String friendlyName = urlPath.replaceAll('/artifacts.zip', '').replaceAll('.zip', '');
       await artifactUpdater.downloadZipArchive('Downloading $friendlyName tools...', Uri.parse(url + urlPath), dir);
 
-      _makeFilesExecutable(dir);
+      _makeFilesExecutable(dir, operatingSystemUtils);
 
       const List<String> frameworkNames = <String>['Flutter', 'FlutterMacOS'];
       for (final String frameworkName in frameworkNames) {
-        final File frameworkZip = globals.fs.file(globals.fs.path.join(dir.path, '$frameworkName.framework.zip'));
+        final File frameworkZip = fileSystem.file(fileSystem.path.join(dir.path, '$frameworkName.framework.zip'));
         if (frameworkZip.existsSync()) {
-          final Directory framework = globals.fs.directory(globals.fs.path.join(dir.path, '$frameworkName.framework'));
+          final Directory framework = fileSystem.directory(fileSystem.path.join(dir.path, '$frameworkName.framework'));
           framework.createSync();
-          globals.os.unzip(frameworkZip, framework);
+          operatingSystemUtils.unzip(frameworkZip, framework);
         }
       }
     }
 
     final File licenseSource = cache.getLicenseFile();
     for (final String licenseDir in getLicenseDirs()) {
-      final String licenseDestinationPath = globals.fs.path.join(location.path, licenseDir, 'LICENSE');
+      final String licenseDestinationPath = fileSystem.path.join(location.path, licenseDir, 'LICENSE');
       await licenseSource.copy(licenseDestinationPath);
     }
   }
@@ -928,8 +949,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     bool exists = false;
     for (final String pkgName in getPackageDirs()) {
-      exists = await cache.doesRemoteExist('Checking package $pkgName is available...',
-          Uri.parse(url + pkgName + '.zip'));
+      exists = await cache.doesRemoteExist('Checking package $pkgName is available...', Uri.parse(url + pkgName + '.zip'));
       if (!exists) {
         return false;
       }
@@ -947,16 +967,14 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     return true;
   }
 
-  void _makeFilesExecutable(Directory dir) {
-    globals.os.chmod(dir, 'a+r,a+x');
-    for (final FileSystemEntity entity in dir.listSync(recursive: true)) {
-      if (entity is File) {
-        final FileStat stat = entity.statSync();
-        final bool isUserExecutable = ((stat.mode >> 6) & 0x1) == 1;
-        if (entity.basename == 'flutter_tester' || isUserExecutable) {
-          // Make the file readable and executable by all users.
-          globals.os.chmod(entity, 'a+r,a+x');
-        }
+  void _makeFilesExecutable(Directory dir, OperatingSystemUtils operatingSystemUtils) {
+    operatingSystemUtils.chmod(dir, 'a+r,a+x');
+    for (final File file in dir.listSync(recursive: true).whereType<File>()) {
+      final FileStat stat = file.statSync();
+      final bool isUserExecutable = ((stat.mode >> 6) & 0x1) == 1;
+      if (file.basename == 'flutter_tester' || isUserExecutable) {
+        // Make the file readable and executable by all users.
+        operatingSystemUtils.chmod(file, 'a+r,a+x');
       }
     }
   }
@@ -964,11 +982,16 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
 /// A cached artifact containing the dart:ui source code.
 class FlutterSdk extends EngineCachedArtifact {
-  FlutterSdk(Cache cache) : super(
-    'flutter_sdk',
-    cache,
-    DevelopmentArtifact.universal,
-  );
+  FlutterSdk(Cache cache, {
+    @required Platform platform,
+  }) : _platform = platform,
+      super(
+        'flutter_sdk',
+        cache,
+        DevelopmentArtifact.universal,
+      );
+
+  final Platform _platform;
 
   @override
   List<String> getPackageDirs() => const <String>['sky_engine'];
@@ -983,11 +1006,11 @@ class FlutterSdk extends EngineCachedArtifact {
         <String>['linux-x64', 'linux-x64/artifacts.zip'],
         <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
       ]
-      else if (globals.platform.isWindows)
+      else if (_platform.isWindows)
         <String>['windows-x64', 'windows-x64/artifacts.zip']
-      else if (globals.platform.isMacOS)
+      else if (_platform.isMacOS)
         <String>['darwin-x64', 'darwin-x64/artifacts.zip']
-      else if (globals.platform.isLinux)
+      else if (_platform.isLinux)
         <String>['linux-x64', 'linux-x64/artifacts.zip'],
     ];
   }
@@ -997,18 +1020,23 @@ class FlutterSdk extends EngineCachedArtifact {
 }
 
 class MacOSEngineArtifacts extends EngineCachedArtifact {
-  MacOSEngineArtifacts(Cache cache) : super(
-    'macos-sdk',
-    cache,
-    DevelopmentArtifact.macOS,
-  );
+  MacOSEngineArtifacts(Cache cache, {
+    @required Platform platform,
+  }) : _platform = platform,
+        super(
+        'macos-sdk',
+        cache,
+        DevelopmentArtifact.macOS,
+      );
+
+  final Platform _platform;
 
   @override
   List<String> getPackageDirs() => const <String>[];
 
   @override
   List<List<String>> getBinaryDirs() {
-    if (globals.platform.isMacOS || ignorePlatformFiltering) {
+    if (_platform.isMacOS || ignorePlatformFiltering) {
       return _macOSDesktopBinaryDirs;
     }
     return const <List<String>>[];
@@ -1076,11 +1104,16 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
 
 /// The artifact used to generate snapshots for Android builds.
 class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
-  AndroidGenSnapshotArtifacts(Cache cache) : super(
-    'android-sdk',
-    cache,
-    DevelopmentArtifact.androidGenSnapshot,
-  );
+  AndroidGenSnapshotArtifacts(Cache cache, {
+    @required Platform platform,
+  }) : _platform = platform,
+        super(
+        'android-sdk',
+        cache,
+        DevelopmentArtifact.androidGenSnapshot,
+      );
+
+  final Platform _platform;
 
   @override
   List<String> getPackageDirs() => const <String>[];
@@ -1093,17 +1126,75 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
         ..._linuxBinaryDirs,
         ..._windowsBinaryDirs,
         ..._dartSdks,
-      ] else if (globals.platform.isWindows)
+      ] else if (_platform.isWindows)
         ..._windowsBinaryDirs
-      else if (globals.platform.isMacOS)
+      else if (_platform.isMacOS)
         ..._osxBinaryDirs
-      else if (globals.platform.isLinux)
+      else if (_platform.isLinux)
         ..._linuxBinaryDirs,
     ];
   }
 
   @override
   List<String> getLicenseDirs() { return <String>[]; }
+}
+
+/// A cached artifact containing the Maven dependencies used to build Android projects.
+class AndroidMavenArtifacts extends ArtifactSet {
+  AndroidMavenArtifacts(this.cache, {
+    @required Platform platform,
+  }) : _platform = platform,
+       super(DevelopmentArtifact.androidMaven);
+
+  final Platform _platform;
+  final Cache cache;
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
+    final Directory tempDir = cache.getRoot().createTempSync(
+      'flutter_gradle_wrapper.',
+    );
+    gradleUtils.injectGradleWrapperIfNeeded(tempDir);
+
+    final Status status = logger.startProgress('Downloading Android Maven dependencies...');
+    final File gradle = tempDir.childFile(
+      _platform.isWindows ? 'gradlew.bat' : 'gradlew',
+    );
+    try {
+      final String gradleExecutable = gradle.absolute.path;
+      final String flutterSdk = globals.fsUtils.escapePath(Cache.flutterRoot);
+      final RunResult processResult = await globals.processUtils.run(
+        <String>[
+          gradleExecutable,
+          '-b', globals.fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),
+          '--project-cache-dir', tempDir.path,
+          'resolveDependencies',
+        ],
+        environment: gradleEnvironment);
+      if (processResult.exitCode != 0) {
+        logger.printError('Failed to download the Android dependencies');
+      }
+    } finally {
+      status.stop();
+      tempDir.deleteSync(recursive: true);
+    }
+  }
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async {
+    // The dependencies are downloaded and cached by Gradle.
+    // The tool doesn't know if the dependencies are already cached at this point.
+    // Therefore, call Gradle to figure this out.
+    return false;
+  }
+
+  @override
+  String get name => 'android-maven-artifacts';
 }
 
 /// Artifacts used for internal builds. The flutter tool builds Android projects
@@ -1127,73 +1218,29 @@ class AndroidInternalBuildArtifacts extends EngineCachedArtifact {
   List<String> getLicenseDirs() { return <String>[]; }
 }
 
-/// A cached artifact containing the Maven dependencies used to build Android projects.
-class AndroidMavenArtifacts extends ArtifactSet {
-  AndroidMavenArtifacts(this.cache) : super(DevelopmentArtifact.androidMaven);
-
-  final Cache cache;
-
-  @override
-  Future<void> update(ArtifactUpdater artifactUpdater) async {
-    final Directory tempDir = cache.getRoot().createTempSync(
-      'flutter_gradle_wrapper.',
-    );
-    gradleUtils.injectGradleWrapperIfNeeded(tempDir);
-
-    final Status status = globals.logger.startProgress('Downloading Android Maven dependencies...');
-    final File gradle = tempDir.childFile(
-        globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
-      );
-    try {
-      final String gradleExecutable = gradle.absolute.path;
-      final String flutterSdk = globals.fsUtils.escapePath(Cache.flutterRoot);
-      final RunResult processResult = await globals.processUtils.run(
-        <String>[
-          gradleExecutable,
-          '-b', globals.fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),
-          '--project-cache-dir', tempDir.path,
-          'resolveDependencies',
-        ],
-        environment: gradleEnvironment);
-      if (processResult.exitCode != 0) {
-        globals.printError('Failed to download the Android dependencies');
-      }
-    } finally {
-      status.stop();
-      tempDir.deleteSync(recursive: true);
-    }
-  }
-
-  @override
-  Future<bool> isUpToDate() async {
-    // The dependencies are downloaded and cached by Gradle.
-    // The tool doesn't know if the dependencies are already cached at this point.
-    // Therefore, call Gradle to figure this out.
-    return false;
-  }
-
-  @override
-  String get name => 'android-maven-artifacts';
-}
-
 class IOSEngineArtifacts extends EngineCachedArtifact {
-  IOSEngineArtifacts(Cache cache) : super(
-    'ios-sdk',
-    cache,
-    DevelopmentArtifact.iOS,
-  );
+  IOSEngineArtifacts(Cache cache, {
+    @required Platform platform,
+  }) : _platform = platform,
+        super(
+        'ios-sdk',
+        cache,
+        DevelopmentArtifact.iOS,
+      );
+
+  final Platform _platform;
 
   @override
   List<List<String>> getBinaryDirs() {
     return <List<String>>[
-      if (globals.platform.isMacOS || ignorePlatformFiltering)
+      if (_platform.isMacOS || ignorePlatformFiltering)
         ..._iosBinaryDirs,
     ];
   }
 
   @override
   List<String> getLicenseDirs() {
-    if (globals.platform.isMacOS || ignorePlatformFiltering) {
+    if (_platform.isMacOS || ignorePlatformFiltering) {
       return const <String>['ios', 'ios-profile', 'ios-release'];
     }
     return const <String>[];
@@ -1218,32 +1265,36 @@ class GradleWrapper extends CachedArtifact {
 
   List<String> get _gradleScripts => <String>['gradlew', 'gradlew.bat'];
 
-  String get _gradleWrapper => globals.fs.path.join('gradle', 'wrapper', 'gradle-wrapper.jar');
-
   @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater) {
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
     final Uri archiveUri = _toStorageUri(version);
-    return artifactUpdater.downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<void>((_) {
-      // Delete property file, allowing templates to provide it.
-      globals.fs.file(globals.fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
-      // Remove NOTICE file. Should not be part of the template.
-      globals.fs.file(globals.fs.path.join(location.path, 'NOTICE')).deleteSync();
-    });
+    await  artifactUpdater.downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location);
+    // Delete property file, allowing templates to provide it.
+    fileSystem.file(fileSystem.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
+    // Remove NOTICE file. Should not be part of the template.
+    fileSystem.file(fileSystem.path.join(location.path, 'NOTICE')).deleteSync();
   }
 
   @override
-  bool isUpToDateInner() {
-    final Directory wrapperDir = cache.getCacheDir(globals.fs.path.join('artifacts', 'gradle_wrapper'));
-    if (!globals.fs.directory(wrapperDir).existsSync()) {
+  bool isUpToDateInner(
+    FileSystem fileSystem,
+  ) {
+    final String gradleWrapper = fileSystem.path.join('gradle', 'wrapper', 'gradle-wrapper.jar');
+    final Directory wrapperDir = cache.getCacheDir(fileSystem.path.join('artifacts', 'gradle_wrapper'));
+    if (!fileSystem.directory(wrapperDir).existsSync()) {
       return false;
     }
     for (final String scriptName in _gradleScripts) {
-      final File scriptFile = globals.fs.file(globals.fs.path.join(wrapperDir.path, scriptName));
+      final File scriptFile = fileSystem.file(fileSystem.path.join(wrapperDir.path, scriptName));
       if (!scriptFile.existsSync()) {
         return false;
       }
     }
-    final File gradleWrapperJar = globals.fs.file(globals.fs.path.join(wrapperDir.path, _gradleWrapper));
+    final File gradleWrapperJar = fileSystem.file(fileSystem.path.join(wrapperDir.path, gradleWrapper));
     if (!gradleWrapperJar.existsSync()) {
       return false;
     }
@@ -1251,8 +1302,7 @@ class GradleWrapper extends CachedArtifact {
   }
 }
 
- const String _cipdBaseUrl =
-    'https://chrome-infra-packages.appspot.com/dl';
+const String _cipdBaseUrl = 'https://chrome-infra-packages.appspot.com/dl';
 
 /// Common functionality for pulling Fuchsia SDKs.
 abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
@@ -1278,11 +1328,16 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
 
 /// The pre-built flutter runner for Fuchsia development.
 class FlutterRunnerSDKArtifacts extends CachedArtifact {
-  FlutterRunnerSDKArtifacts(Cache cache) : super(
-    'flutter_runner',
-    cache,
-    DevelopmentArtifact.flutterRunner,
-  );
+  FlutterRunnerSDKArtifacts(Cache cache, {
+    @required Platform platform,
+  }) : _platform = platform,
+        super(
+        'flutter_runner',
+        cache,
+        DevelopmentArtifact.flutterRunner,
+      );
+
+  final Platform _platform;
 
   @override
   Directory get location => cache.getArtifactDirectory('flutter_runner');
@@ -1291,13 +1346,16 @@ class FlutterRunnerSDKArtifacts extends CachedArtifact {
   String get version => cache.getVersionFor('engine');
 
   @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater) async {
-    if (!globals.platform.isLinux && !globals.platform.isMacOS) {
-      return Future<void>.value();
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
+    if (!_platform.isLinux && !_platform.isMacOS) {
+      return;
     }
     final String url = '$_cipdBaseUrl/flutter/fuchsia/+/git_revision:$version';
-    await artifactUpdater.downloadZipArchive('Downloading package flutter runner...',
-        Uri.parse(url), location);
+    await artifactUpdater.downloadZipArchive('Downloading package flutter runner...', Uri.parse(url), location);
   }
 }
 
@@ -1349,7 +1407,11 @@ class FlutterRunnerDebugSymbols extends CachedArtifact {
   }
 
   @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater) async {
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
     if (!_platform.isLinux && !_platform.isMacOS) {
       return;
     }
@@ -1360,12 +1422,21 @@ class FlutterRunnerDebugSymbols extends CachedArtifact {
 
 /// The Fuchsia core SDK for Linux.
 class LinuxFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
-  LinuxFuchsiaSDKArtifacts(Cache cache) : super(cache, 'linux');
+  LinuxFuchsiaSDKArtifacts(Cache cache, {
+    @required Platform platform,
+  }) : _platform = platform,
+       super(cache, 'linux');
+
+  final Platform _platform;
 
   @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater) {
-    if (!globals.platform.isLinux) {
-      return Future<void>.value();
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
+    if (!_platform.isLinux) {
+      return;
     }
     return _doUpdate(artifactUpdater);
   }
@@ -1373,12 +1444,21 @@ class LinuxFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
 
 /// The Fuchsia core SDK for MacOS.
 class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
-  MacOSFuchsiaSDKArtifacts(Cache cache) : super(cache, 'mac');
+  MacOSFuchsiaSDKArtifacts(Cache cache, {
+    @required Platform platform,
+  }) : _platform = platform,
+       super(cache, 'mac');
+
+  final Platform _platform;
 
   @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater) async {
-    if (!globals.platform.isMacOS) {
-      return Future<void>.value();
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
+    if (!_platform.isMacOS) {
+      return;
     }
     return _doUpdate(artifactUpdater);
   }
@@ -1386,7 +1466,12 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
 
 /// Cached artifacts for font subsetting.
 class FontSubsetArtifacts extends EngineCachedArtifact {
-  FontSubsetArtifacts(Cache cache) : super(artifactName, cache, DevelopmentArtifact.universal);
+  FontSubsetArtifacts(Cache cache, {
+    @required Platform platform,
+  }) : _platform = platform,
+       super(artifactName, cache, DevelopmentArtifact.universal);
+
+  final Platform _platform;
 
   static const String artifactName = 'font-subset';
 
@@ -1400,9 +1485,9 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
     if (cache.includeAllPlatforms) {
       return artifacts.values.toList();
     } else {
-      final List<String> binaryDirs = artifacts[globals.platform.operatingSystem];
+      final List<String> binaryDirs = artifacts[_platform.operatingSystem];
       if (binaryDirs == null) {
-        throwToolExit('Unsupported operating system: ${globals.platform.operatingSystem}');
+        throwToolExit('Unsupported operating system: ${_platform.operatingSystem}');
       }
       return <List<String>>[binaryDirs];
     }
@@ -1417,12 +1502,16 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
 
 /// Cached iOS/USB binary artifacts.
 class IosUsbArtifacts extends CachedArtifact {
-  IosUsbArtifacts(String name, Cache cache) : super(
-    name,
-    cache,
-    // This is universal to ensure every command checks for them first
-    DevelopmentArtifact.universal,
-  );
+  IosUsbArtifacts(String name, Cache cache, {
+    @required Platform platform,
+  }) : _platform = platform,
+       super(
+        name,
+        cache,
+        DevelopmentArtifact.universal,
+      );
+
+  final Platform _platform;
 
   static const List<String> artifactNames = <String>[
     'libimobiledevice',
@@ -1454,7 +1543,7 @@ class IosUsbArtifacts extends CachedArtifact {
   }
 
   @override
-  bool isUpToDateInner() {
+  bool isUpToDateInner(FileSystem fileSystem) {
     final List<String> executables =_kExecutables[name];
     if (executables == null) {
       return true;
@@ -1468,14 +1557,18 @@ class IosUsbArtifacts extends CachedArtifact {
   }
 
   @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater) {
-    if (!globals.platform.isMacOS && !ignorePlatformFiltering) {
-      return Future<void>.value();
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
+    if (!_platform.isMacOS && !ignorePlatformFiltering) {
+      return;
     }
     if (location.existsSync()) {
       location.deleteSync(recursive: true);
     }
-    return artifactUpdater.downloadZipArchive('Downloading $name...', archiveUri, location);
+    await artifactUpdater.downloadZipArchive('Downloading $name...', archiveUri, location);
   }
 
   @visibleForTesting
@@ -1808,7 +1901,7 @@ class ArtifactUpdater {
       try {
         file.deleteSync();
       } on FileSystemException catch (e) {
-        globals.printError('Failed to delete "${file.path}". Please delete manually. $e');
+        _logger.printError('Failed to delete "${file.path}". Please delete manually. $e');
         continue;
       }
       for (Directory directory = file.parent; directory.absolute.path != _tempStorage.absolute.path; directory = directory.parent) {

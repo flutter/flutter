@@ -235,7 +235,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         globals.logger.quiet = topLevelResults['quiet'] as bool;
 
         if (globals.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
-          await Cache.lock();
+          await globals.cache.lock();
         }
 
         if (topLevelResults['suppress-analytics'] as bool) {

@@ -319,4 +319,13 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     reportData ??= <String, dynamic>{};
     reportData[reportKey] = frameTimes.summary;
   }
+
+  @override
+  Timeout get defaultTestTimeout => _defaultTestTimeout ?? super.defaultTestTimeout;
+
+  /// Configures the default timeout for [testWidgets].
+  ///
+  /// See [TestWidgetsFlutterBinding.defaultTestTimeout] for more details.
+  set defaultTestTimeout(Timeout timeout) => _defaultTestTimeout = timeout;
+  Timeout _defaultTestTimeout;
 }
