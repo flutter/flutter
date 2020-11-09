@@ -44,10 +44,9 @@ import 'framework.dart';
 ///
 /// See Also:
 ///
-/// *[ColorFilter.mode], a source color and destination color rendered.
-/// *[Blendmode enum],blending a source image with destination image.
-/// *[Image Class],ways to import image.
-/// *[Colors Class],color palette class.
+/// *[Blendmode], blending a source image with destination image.
+/// *[Image.network], for obtaining an image from a URL.
+/// *[Color], constants which represent Material design's [color palette]<https://material.io/design/color/>.
 ///
 @immutable
 class ColorFiltered extends SingleChildRenderObjectWidget {
