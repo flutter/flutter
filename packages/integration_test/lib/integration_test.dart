@@ -25,12 +25,11 @@ import 'common.dart';
 import 'src/constants.dart';
 import 'src/reporter.dart';
 
-/// Toggle the legacy reporting mechansim where results are only collected
-/// through [testWidgets].
+/// Toggles the legacy reporting mechansim where results are only collected
+/// for [testWidgets].
 ///
-/// This method is deprecated and purely to facilite migrations, do not use.
-@Deprecated('For incremental migration to the new reporter, do not use.')
-bool isUsingLegacyReporting = true;
+/// If [run] is called, this will be disabled.
+bool _isUsingLegacyReporting = true;
 
 /// Executes a block that contains tests.
 ///
@@ -48,15 +47,13 @@ bool isUsingLegacyReporting = true;
 /// }
 /// ```
 ///
-/// The returned future will complete with the test results of the running
-/// [testMain]. These results will also be sent to native over the platform
-/// channel, unless [reportResultsToNative] is set to false.
+/// If not explicitly passed, the default [reporter] will send results over the
+/// platform channel to native.
 Future<void> run(
   FutureOr<void> Function() testMain, {
   Reporter reporter = const _ReporterImpl(),
 }) async {
-  // ignore: deprecated_member_use_from_same_package
-  isUsingLegacyReporting = false;
+  _isUsingLegacyReporting = false;
   final IntegrationTestWidgetsFlutterBinding binding =
       IntegrationTestWidgetsFlutterBinding.ensureInitialized()
           as IntegrationTestWidgetsFlutterBinding;
@@ -87,7 +84,6 @@ abstract class Reporter {
   ///
   /// This method will be called at the end of [run] with the [results] of
   /// running the test suite.
-  // TODO(jiahaog): Have stronger types for the returned success / failure result.
   Future<void> report(Map<String, Object> results);
 }
 
@@ -131,8 +127,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// This functionality is deprecated – clients are expected to use [run] to
   /// execute their tests instead.
   IntegrationTestWidgetsFlutterBinding() {
-    // ignore: deprecated_member_use_from_same_package
-    if (!isUsingLegacyReporting) {
+    if (!_isUsingLegacyReporting) {
       // TODO(jiahaog): Point users to use the CLI https://github.com/flutter/flutter/issues/66264.
       print('Using the legacy test result reporter, which will not catch all '
           'errors thrown in declared tests. Consider wrapping tests with [run] '
@@ -225,7 +220,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
 
   /// Test results that will be populated after the tests have completed.
   ///
-  /// Keys are the test descriptions, and values are either [_success] or
+  /// Keys are the test descriptions, and values are either [success] or
   /// a [Failure].
   @visibleForTesting
   Map<String, Object> results = <String, Object>{};
