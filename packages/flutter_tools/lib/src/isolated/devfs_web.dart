@@ -635,17 +635,17 @@ class WebAssetServer implements AssetReader {
       WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdk,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSdk,
       },
       WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdk,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdk,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSoundSdk,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSdk,
       },
       WebRendererMode.html: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledSoundSdk,
         NullSafetyMode.unsound: Artifact.webPrecompiledSdk,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledSoundSdk,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledSdk,
       },
     };
 
@@ -654,17 +654,17 @@ class WebAssetServer implements AssetReader {
       WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
       },
       WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdkSourcemaps,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSdkSourcemaps,
       },
       WebRendererMode.html: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledSoundSdkSourcemaps,
         NullSafetyMode.unsound: Artifact.webPrecompiledSdkSourcemaps,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledSoundSdkSourcemaps,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledSdkSourcemaps,
       },
     };
 
