@@ -894,8 +894,8 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
-      listViews,
       setAssetBundlePath,
+      listViews,
       FakeVmServiceRequest(
         method: 'getVM',
         jsonResponse: vm_service.VM.parse(<String, Object>{
@@ -948,6 +948,7 @@ void main() {
       appStartedCompleter: onAppStart,
       connectionInfoCompleter: onConnectionInfo,
     ));
+    await onAppStart.future;
 
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, false);
@@ -969,12 +970,12 @@ void main() {
         jsonResponse: fakeVM.toJson(),
       ),
       listViews,
+      setAssetBundlePath,
       listViews,
       FakeVmServiceRequest(
         method: 'getVM',
         jsonResponse: fakeVM.toJson(),
       ),
-      setAssetBundlePath,
       const FakeVmServiceRequest(
         method: 'reloadSources',
         args: <String, Object>{
@@ -1057,6 +1058,7 @@ void main() {
       connectionInfoCompleter: onConnectionInfo,
     ));
 
+    await onAppStart.future;
     final OperationResult result = await residentRunner.restart(fullRestart: false);
 
     expect(result.fatal, false);
