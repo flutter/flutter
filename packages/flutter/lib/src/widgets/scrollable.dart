@@ -498,6 +498,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       return;
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
+      // Cancel the active hold/drag (if any) because the gesture recognizers
+      // will soon be disposed by our RawGestureDetector, and we won't be
+      // receiving pointer up events to cancel the hold/drag.
+      _handleDragCancel();
     } else {
       switch (widget.axis) {
         case Axis.vertical:
@@ -878,7 +882,7 @@ typedef ScrollIncrementCalculator = double Function(ScrollIncrementDetails detai
 /// This is used to configure a [ScrollIncrementDetails] object to pass to a
 /// [ScrollIncrementCalculator] function on a [Scrollable].
 ///
-/// {@template flutter.widgets.scrollable.scroll_increment_type.intent}
+/// {@template flutter.widgets.ScrollIncrementType.intent}
 /// This indicates the *intent* of the scroll, not necessarily the size. Not all
 /// scrollable areas will have the concept of a "line" or "page", but they can
 /// respond to the different standard key bindings that cause scrolling, which
@@ -922,7 +926,7 @@ class ScrollIncrementDetails {
 
   /// The type of scroll this is (e.g. line, page, etc.).
   ///
-  /// {@macro flutter.widgets.scrollable.scroll_increment_type.intent}
+  /// {@macro flutter.widgets.ScrollIncrementType.intent}
   final ScrollIncrementType type;
 
   /// The current metrics of the scrollable that is being scrolled.

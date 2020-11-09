@@ -13,7 +13,7 @@ import 'package:path/path.dart' as path;
 // See README.md for more information.
 
 final Directory flutterRoot =
-    Directory(path.fromUri(Platform.script)).absolute.parent.parent.parent.parent.parent;
+  Directory(path.fromUri(Platform.script)).absolute.parent.parent.parent.parent.parent;
 final Directory flutterPackageDir = Directory(path.join(flutterRoot.path, 'packages', 'flutter'));
 final Directory testPrivateDir = Directory(path.join(flutterPackageDir.path, 'test_private'));
 final Directory privateTestsDir = Directory(path.join(testPrivateDir.path, 'test'));
@@ -207,7 +207,7 @@ class TestCase {
       printOutputDefault: true,
     );
     final ProcessRunnerResult result = await runner.runProcess(
-      <String>[flutter, 'analyze', '--current-package', '--enable-experiment=non-nullable', '--pub', '--congratulate', '.'],
+      <String>[flutter, 'analyze', '--current-package', '--pub', '--congratulate', '.'],
       failOk: true,
     );
     if (result.exitCode != 0) {

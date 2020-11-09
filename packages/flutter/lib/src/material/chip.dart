@@ -128,7 +128,7 @@ abstract class ChipAttributes {
   ///  * [MaterialState.pressed].
   OutlinedBorder? get shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   Clip get clipBehavior;
@@ -2488,7 +2488,7 @@ class _RenderChip extends RenderBox {
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double overallPadding = theme.padding.vertical +
+    final double overallPadding = theme.padding.horizontal +
         theme.labelPadding.horizontal;
     return overallPadding +
         _maxWidth(avatar, height) +

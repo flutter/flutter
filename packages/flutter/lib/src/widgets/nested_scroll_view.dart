@@ -452,7 +452,7 @@ class NestedScrollView extends StatefulWidget {
   /// is expected to float. This cannot be null.
   final bool floatHeaderSlivers;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;

@@ -158,6 +158,69 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// A SnackBar with an action will not time out when TalkBack or VoiceOver are
 /// enabled. This is controlled by [AccessibilityFeatures.accessibleNavigation].
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// Here is an example of a [SnackBar] with an [action] button implemented using
+/// [SnackBarAction].
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return ElevatedButton(
+///     child: Text("Show Snackbar"),
+///     onPressed: () {
+///       ScaffoldMessenger.of(context).showSnackBar(
+///         SnackBar(
+///           content: Text("Awesome Snackbar!"),
+///           action: SnackBarAction(
+///             label: "Action",
+///             onPressed: () {
+///               // Code to execute.
+///             },
+///           ),
+///         ),
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// Here is an example of a customized [SnackBar]. It utilizes
+/// [behavior], [shape], [padding], [width], and [duration] to customize the
+/// location, appearance, and the duration for which the [SnackBar] is visible.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return ElevatedButton(
+///     child: Text("Show Snackbar"),
+///     onPressed: () {
+///       ScaffoldMessenger.of(context).showSnackBar(
+///         SnackBar(
+///           action: SnackBarAction(
+///             label: "Action",
+///             onPressed: () {
+///               // Code to execute.
+///             },
+///           ),
+///           content: Text("Awesome SnackBar!"),
+///           duration: Duration(milliseconds: 1500),
+///           width: 280.0, // Width of the SnackBar.
+///           padding: EdgeInsets.symmetric(
+///             horizontal: 8.0), // Inner padding for SnackBar content.
+///           behavior: SnackBarBehavior.floating,
+///           shape: RoundedRectangleBorder(
+///             borderRadius: BorderRadius.circular(10.0),
+///           ),
+///         ),
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ScaffoldMessenger.of], to obtain the current [ScaffoldMessengerState],

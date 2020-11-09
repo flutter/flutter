@@ -51,7 +51,7 @@ class DataTableThemeData with Diagnosticable {
   final Decoration? decoration;
 
   /// {@macro flutter.material.dataTable.dataRowColor}
-  /// {@macro flutter.material.dataTable.dataRowColorCode}
+  /// {@macro flutter.material.DataTable.dataRowColor}
   final MaterialStateProperty<Color?>? dataRowColor;
 
   /// {@macro flutter.material.dataTable.dataRowHeight}
@@ -61,7 +61,7 @@ class DataTableThemeData with Diagnosticable {
   final TextStyle? dataTextStyle;
 
   /// {@macro flutter.material.dataTable.headingRowColor}
-  /// {@macro flutter.material.dataTable.headingRowColorCode}
+  /// {@macro flutter.material.DataTable.headingRowColor}
   final MaterialStateProperty<Color?>? headingRowColor;
 
   /// {@macro flutter.material.dataTable.headingRowHeight}

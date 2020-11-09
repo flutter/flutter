@@ -39,14 +39,16 @@ void main() {
 
     group('Xcode', () {
       Xcode xcode;
+      MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
 
       setUp(() {
+        mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
         xcode = Xcode(
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
           fileSystem: MemoryFileSystem.test(),
           processManager: processManager,
-          xcodeProjectInterpreter: MockXcodeProjectInterpreter(),
+          xcodeProjectInterpreter: mockXcodeProjectInterpreter,
         );
       });
 
@@ -61,6 +63,8 @@ void main() {
       });
 
       testWithoutContext('eulaSigned is false when clang is not installed', () {
+        when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
+
         when(processManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
             .thenReturn(ProcessResult(123, 1, '', ''));
         when(processManager.runSync(<String>['xcrun', 'clang']))
@@ -140,6 +144,7 @@ void main() {
 
         setUp(() {
           mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+          when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
           platform = FakePlatform(operatingSystem: 'macos');
           xcode = Xcode(
             logger: logger,
@@ -252,25 +257,6 @@ void main() {
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         });
 
-        testWithoutContext('xcrun runs natively on arm64', () {
-          fakeProcessManager.addCommands(const <FakeCommand>[
-            FakeCommand(
-              command: <String>[
-                'sysctl',
-                'hw.optional.arm64',
-              ],
-              stdout: 'hw.optional.arm64: 1',
-            ),
-          ]);
-
-          expect(xcode.xcrunCommand(), <String>[
-            '/usr/bin/arch',
-            '-arm64e',
-            'xcrun',
-          ]);
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
-        });
-
         testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
           fakeProcessManager.addCommand(const FakeCommand(
             command: <String>['/usr/bin/xcode-select', '--print-path'],
@@ -288,13 +274,6 @@ void main() {
         testWithoutContext('eulaSigned is false when clang output indicates EULA not yet accepted', () {
           fakeProcessManager.addCommands(const <FakeCommand>[
             FakeCommand(
-              command: <String>[
-                'sysctl',
-                'hw.optional.arm64',
-              ],
-              exitCode: 1,
-            ),
-            FakeCommand(
               command: <String>['xcrun', 'clang'],
               exitCode: 1,
               stderr:
@@ -309,13 +288,6 @@ void main() {
         testWithoutContext('eulaSigned is true when clang output indicates EULA has been accepted', () {
           fakeProcessManager.addCommands(
             const <FakeCommand>[
-              FakeCommand(
-                command: <String>[
-                  'sysctl',
-                  'hw.optional.arm64',
-                ],
-                exitCode: 1,
-              ),
               FakeCommand(
                 command: <String>['xcrun', 'clang'],
                 exitCode: 1,
@@ -334,18 +306,6 @@ void main() {
         });
 
         group('SDK location', () {
-          setUp(() {
-            fakeProcessManager.addCommand(
-              const FakeCommand(
-                command: <String>[
-                  'sysctl',
-                  'hw.optional.arm64',
-                ],
-                exitCode: 1,
-              ),
-            );
-          });
-
           const String sdkroot = 'Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.2.sdk';
 
           testWithoutContext('--show-sdk-path iphoneos', () async {

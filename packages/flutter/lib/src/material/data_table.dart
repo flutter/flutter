@@ -216,7 +216,7 @@ class DataCell {
   /// text should be provided instead, and [placeholder] should be set
   /// to true.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// Whether the [child] is actually a placeholder.
@@ -499,7 +499,7 @@ class DataTable extends StatelessWidget {
   /// translucent color. To set a different color for individual rows, see
   /// [DataRow.color].
   ///
-  /// {@template flutter.material.dataTable.dataRowColorCode}
+  /// {@template flutter.material.DataTable.dataRowColor}
   /// ```dart
   /// DataTable(
   ///   dataRowColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
@@ -547,7 +547,7 @@ class DataTable extends StatelessWidget {
   ///
   /// If null, [DataTableThemeData.headingRowColor] is used.
   ///
-  /// {@template flutter.material.dataTable.headingRowColorCode}
+  /// {@template flutter.material.DataTable.headingRowColor}
   /// ```dart
   /// DataTable(
   ///   headingRowColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
