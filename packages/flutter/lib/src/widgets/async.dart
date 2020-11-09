@@ -266,9 +266,11 @@ class AsyncSnapshot<T> {
 
   /// The latest stack trace object received by the asynchronous computation.
   ///
-  /// If this is non-null, [hasStackTrace] will be true.
+  /// This will not be null iff [error] is not null. Consequently, [stackTrace]
+  /// will be non-null when [hasError] is true.
   ///
-  /// This will not be null iff [error] is not null.
+  /// However, even when not null, [stackTrace] might be empty. The stack trace
+  /// is empty when there is an error but no stack trace has been provided.
   final StackTrace? stackTrace;
 
   /// Returns a snapshot like this one, but in the specified [state].
@@ -290,14 +292,6 @@ class AsyncSnapshot<T> {
   /// This is always true if the asynchronous computation's last result was
   /// failure.
   bool get hasError => error != null;
-
-  /// Returns whether this snapshot contains a non-null [stackTrace] value.
-  ///
-  /// This is always true if the asynchronous computation's last result was
-  /// failure.
-  ///
-  /// Consequently, [hasStackTrace] is always true if [hasError] is true.
-  bool get hasStackTrace => stackTrace != null;
 
   @override
   String toString() => '${objectRuntimeType(this, 'AsyncSnapshot')}($connectionState, $data, $error, $stackTrace)';
