@@ -94,7 +94,6 @@ abstract class Pub {
     bool offline = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
-    bool checkUpToDate = false,
   });
 
   /// Runs pub in 'batch' mode.
@@ -118,6 +117,7 @@ abstract class Pub {
     @required bool retry,
     bool showTraceForErrors,
   });
+
 
   /// Runs pub in 'interactive' mode.
   ///
@@ -164,33 +164,12 @@ class _DefaultPub implements Pub {
     bool offline = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
-    bool checkUpToDate = false,
   }) async {
     directory ??= _fileSystem.currentDirectory.path;
     final File packageConfigFile = _fileSystem.file(
       _fileSystem.path.join(directory, '.dart_tool', 'package_config.json'));
     final Directory generatedDirectory = _fileSystem.directory(
       _fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
-    final File lastVersion = _fileSystem.file(
-      _fileSystem.path.join(directory, '.dart_tool', 'version'));
-    final File currentVersion = _fileSystem.file(
-      _fileSystem.path.join(Cache.flutterRoot, 'version'));
-    final File pubspecYaml = _fileSystem.file(
-      _fileSystem.path.join(directory, 'pubspec.yaml'));
-
-    // If the pubspec.yaml is older than the package config file and the last
-    // flutter version used is the same as the current version skip pub get.
-    // This will incorrectly skip pub on the master branch if dependencies
-    // are being added/removed from the flutter framework packages, but this
-    // can be worked around by manually running pub.
-    if (checkUpToDate &&
-        packageConfigFile.existsSync() &&
-        pubspecYaml.lastModifiedSync().isBefore(packageConfigFile.lastModifiedSync()) &&
-        lastVersion.existsSync() &&
-        lastVersion.readAsStringSync() == currentVersion.readAsStringSync()) {
-      _logger.printTrace('Skipping pub get: version match.');
-      return;
-    }
 
     final String command = upgrade ? 'upgrade' : 'get';
     final Status status = _logger.startProgress(
@@ -228,7 +207,6 @@ class _DefaultPub implements Pub {
     if (!packageConfigFile.existsSync()) {
       throwToolExit('$directory: pub did not create .dart_tools/package_config.json file.');
     }
-    lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
     await _updatePackageConfig(
       packageConfigFile,
       generatedDirectory,
