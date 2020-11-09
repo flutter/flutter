@@ -283,7 +283,7 @@ class ManifestAssetBundle implements AssetBundle {
     // Save the contents of each image, image variant, and font
     // asset in entries.
     for (final _Asset asset in assetVariants.keys) {
-      final File assetFile = asset.createAssetFile(_fileSystem);
+      final File assetFile = asset.lookupAssetFile(_fileSystem);
       if (!assetFile.existsSync() && assetVariants[asset].isEmpty) {
         _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
         _logger.printError('No file or variants found for $asset.\n');
@@ -303,7 +303,7 @@ class ManifestAssetBundle implements AssetBundle {
         assetVariants[asset].insert(0, asset);
       }
       for (final _Asset variant in assetVariants[asset]) {
-        final File variantFile = variant.createAssetFile(_fileSystem);
+        final File variantFile = variant.lookupAssetFile(_fileSystem);
         assert(variantFile.existsSync());
         entries[variant.entryUri.path] ??= DevFSFileContent(variantFile);
       }
@@ -313,7 +313,7 @@ class ManifestAssetBundle implements AssetBundle {
         ..._getMaterialAssets(),
     ];
     for (final _Asset asset in materialAssets) {
-      final File assetFile = asset.createAssetFile(_fileSystem);
+      final File assetFile = asset.lookupAssetFile(_fileSystem);
       assert(assetFile.existsSync());
       entries[asset.entryUri.path] ??= DevFSFileContent(assetFile);
     }
@@ -522,7 +522,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName,
           attributedPackage,
         );
-        final File baseAssetFile = baseAsset.createAssetFile(_fileSystem);
+        final File baseAssetFile = baseAsset.lookupAssetFile(_fileSystem);
         if (!baseAssetFile.existsSync()) {
           _logger.printError('Error: unable to locate asset entry in pubspec.yaml: "${fontAsset.assetUri}".');
           return null;
@@ -592,7 +592,7 @@ class ManifestAssetBundle implements AssetBundle {
       attributedPackage,
     );
     final List<_Asset> variants = <_Asset>[];
-    final File assetFile = asset.createAssetFile(_fileSystem);
+    final File assetFile = asset.lookupAssetFile(_fileSystem);
     for (final String path in cache.variantsFor(assetFile.path)) {
       final String relativePath = _fileSystem.path.relative(path, from: asset.baseDir);
       final Uri relativeUri = _fileSystem.path.toUri(relativePath);
@@ -689,11 +689,9 @@ class _Asset {
   /// A platform-independent URL representing the entry for the asset manifest.
   final Uri entryUri;
 
-  File createAssetFile(FileSystem fileSystem) {
+  File lookupAssetFile(FileSystem fileSystem) {
     return fileSystem.file(fileSystem.path.join(baseDir, fileSystem.path.fromUri(relativeUri)));
   }
-
-  // bool get assetFileExists => assetFile.existsSync();
 
   /// The delta between what the entryUri is and the relativeUri (e.g.,
   /// packages/flutter_gallery).
