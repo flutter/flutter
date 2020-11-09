@@ -125,6 +125,7 @@ Future<void> main(List<String> args) async {
       'framework_tests': _runFrameworkTests,
       'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
+      'web_tool_tests': _runWebToolTests,
       'web_tests': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
       'web_long_running_tests': _runWebLongRunningTests,
@@ -308,6 +309,18 @@ Future<void> _runToolCoverage() async {
     ],
     workingDirectory: toolRoot,
     outputMode: OutputMode.capture,
+  );
+}
+
+Future<void> _runWebToolTests() async {
+  const String kDotShard = '.shard';
+  const String kTest = 'test';
+  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
+  await _pubRunTest(
+    toolsPath,
+    forceSingleCore: true,
+    testPaths: <String>[path.join(kTest, 'web$kDotShard')],
+    enableFlutterToolAsserts: subshard != 'general',
   );
 }
 
