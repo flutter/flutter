@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.9
 import 'dart:convert' show JsonEncoder;
 
 import 'package:flutter_driver/driver_extension.dart';
@@ -46,7 +47,7 @@ class _MessageHandler {
 }
 
 void main() {
-  enableFlutterDriverExtension(handler: _MessageHandler());
+  enableFlutterDriverExtension(handler: _MessageHandler().call);
   // As in lib/main.dart: overriding https://github.com/flutter/flutter/issues/13736
   // for better visual effect at the cost of performance.
   runApp(const GalleryApp(testMode: true));

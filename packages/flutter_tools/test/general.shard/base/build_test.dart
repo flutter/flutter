@@ -24,15 +24,6 @@ const FakeCommand kARMCheckCommand = FakeCommand(
   exitCode: 1,
 );
 
-const FakeCommand kSdkPathCommand = FakeCommand(
-  command: <String>[
-    'xcrun',
-    '--sdk',
-    'iphoneos',
-    '--show-sdk-path'
-  ]
-);
-
 const List<String> kDefaultClang = <String>[
   '-miphoneos-version-min=8.0',
   '-dynamiclib',
@@ -47,7 +38,7 @@ const List<String> kDefaultClang = <String>[
   '-install_name',
   '@rpath/App.framework/App',
   '-isysroot',
-  '',
+  'path/to/sdk',
   '-o',
   'build/foo/App.framework/App',
   'build/foo/snapshot_assembly.o',
@@ -68,7 +59,7 @@ const List<String> kBitcodeClang = <String>[
   '@rpath/App.framework/App',
   '-fembed-bitcode',
   '-isysroot',
-  '',
+  'path/to/sdk',
   '-o',
   'build/foo/App.framework/App',
   'build/foo/snapshot_assembly.o',
@@ -223,6 +214,7 @@ void main() {
       expect(await snapshotter.build(
         platform: TargetPlatform.ios,
         darwinArch: DarwinArch.arm64,
+        sdkRoot: 'path/to/sdk',
         buildMode: BuildMode.debug,
         mainPath: 'main.dill',
         outputPath: outputPath,
@@ -278,7 +270,6 @@ void main() {
         ]
       ));
       processManager.addCommand(kARMCheckCommand);
-      processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
           'xcrun',
@@ -286,7 +277,7 @@ void main() {
           '-arch',
           'armv7',
           '-isysroot',
-          '',
+          'path/to/sdk',
           '-fembed-bitcode',
           '-c',
           'build/foo/snapshot_assembly.S',
@@ -310,6 +301,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
+        sdkRoot: 'path/to/sdk',
         bitcode: true,
         splitDebugInfo: null,
         dartObfuscation: false,
@@ -340,7 +332,6 @@ void main() {
         ]
       ));
       processManager.addCommand(kARMCheckCommand);
-      processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
           'xcrun',
@@ -348,7 +339,7 @@ void main() {
           '-arch',
           'armv7',
           '-isysroot',
-          '',
+          'path/to/sdk',
           '-c',
           'build/foo/snapshot_assembly.S',
           '-o',
@@ -371,6 +362,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
+        sdkRoot: 'path/to/sdk',
         bitcode: false,
         splitDebugInfo: 'foo',
         dartObfuscation: false,
@@ -399,7 +391,6 @@ void main() {
         ]
       ));
       processManager.addCommand(kARMCheckCommand);
-      processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
           'xcrun',
@@ -407,7 +398,7 @@ void main() {
           '-arch',
           'armv7',
           '-isysroot',
-          '',
+          'path/to/sdk',
           '-c',
           'build/foo/snapshot_assembly.S',
           '-o',
@@ -430,6 +421,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
+        sdkRoot: 'path/to/sdk',
         bitcode: false,
         splitDebugInfo: null,
         dartObfuscation: true,
@@ -457,7 +449,6 @@ void main() {
         ]
       ));
       processManager.addCommand(kARMCheckCommand);
-      processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
           'xcrun',
@@ -465,7 +456,7 @@ void main() {
           '-arch',
           'armv7',
           '-isysroot',
-          '',
+          'path/to/sdk',
           '-c',
           'build/foo/snapshot_assembly.S',
           '-o',
@@ -488,6 +479,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
+        sdkRoot: 'path/to/sdk',
         bitcode: false,
         splitDebugInfo: null,
         dartObfuscation: false,
@@ -512,7 +504,6 @@ void main() {
         ]
       ));
       processManager.addCommand(kARMCheckCommand);
-      processManager.addCommand(kSdkPathCommand);
       processManager.addCommand(const FakeCommand(
         command: <String>[
           'xcrun',
@@ -520,7 +511,7 @@ void main() {
           '-arch',
           'arm64',
           '-isysroot',
-          '',
+          'path/to/sdk',
           '-c',
           'build/foo/snapshot_assembly.S',
           '-o',
@@ -543,6 +534,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
+        sdkRoot: 'path/to/sdk',
         bitcode: false,
         splitDebugInfo: null,
         dartObfuscation: false,

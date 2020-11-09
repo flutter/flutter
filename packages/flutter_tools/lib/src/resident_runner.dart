@@ -97,12 +97,17 @@ class FlutterDevice {
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
         platformDillArtifact = Artifact.webPlatformKernelDill;
         extraFrontEndOptions = buildInfo.extraFrontEndOptions;
-      } else {
+      } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
         platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-        extraFrontEndOptions = <String>[
-          ...?buildInfo?.extraFrontEndOptions,
-          if (!(buildInfo?.extraFrontEndOptions?.contains('--sound-null-safety') ?? false))
-            '--sound-null-safety'
+        extraFrontEndOptions =  buildInfo.extraFrontEndOptions;
+      } else {
+        // TODO(jonahwilliams): null-safe auto detection does not currently
+        // work on the web. Always opt out of null safety if it was not
+        // specifically requested.
+        platformDillArtifact = Artifact.webPlatformKernelDill;
+        extraFrontEndOptions =  <String>[
+          ...?buildInfo.extraFrontEndOptions,
+          '--no-sound-null-safety',
         ];
       }
 
@@ -118,7 +123,6 @@ class FlutterDevice {
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
-          nullSafetyMode: buildInfo.nullSafetyMode,
         ),
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
@@ -160,7 +164,6 @@ class FlutterDevice {
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
-          nullSafetyMode: buildInfo.nullSafetyMode,
         ),
         packagesPath: buildInfo.packagesPath,
         artifacts: globals.artifacts,
@@ -1176,7 +1179,6 @@ abstract class ResidentRunner {
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
-        nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
       );
       globals.fs
           .file(copyPath)

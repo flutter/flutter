@@ -11,13 +11,13 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 // The entire state of the hex board and abstraction to get information about
 // it. Iterable so that all BoardPoints on the board can be iterated over.
 @immutable
-class Board extends Object with IterableMixin<BoardPoint> {
+class Board extends Object with IterableMixin<BoardPoint?> {
   Board({
-    @required this.boardRadius,
-    @required this.hexagonRadius,
-    @required this.hexagonMargin,
+    required this.boardRadius,
+    required this.hexagonRadius,
+    required this.hexagonMargin,
     this.selected,
-    List<BoardPoint> boardPoints,
+    List<BoardPoint>? boardPoints,
   }) : assert(boardRadius > 0),
        assert(hexagonRadius > 0),
        assert(hexagonMargin >= 0) {
@@ -43,7 +43,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
       _boardPoints.addAll(boardPoints);
     } else {
       // Generate boardPoints for a fresh board.
-      BoardPoint boardPoint = _getNextBoardPoint(null);
+      BoardPoint? boardPoint = _getNextBoardPoint(null);
       while (boardPoint != null) {
         _boardPoints.add(boardPoint);
         boardPoint = _getNextBoardPoint(boardPoint);
@@ -55,11 +55,11 @@ class Board extends Object with IterableMixin<BoardPoint> {
   final double hexagonRadius; // Pixel radius of a hexagon (center to vertex).
   final double hexagonMargin; // Margin between hexagons.
   final List<Offset> positionsForHexagonAtOrigin = <Offset>[];
-  final BoardPoint selected;
+  final BoardPoint? selected;
   final List<BoardPoint> _boardPoints = <BoardPoint>[];
 
   @override
-  Iterator<BoardPoint> get iterator => _BoardIterator(_boardPoints);
+  Iterator<BoardPoint?> get iterator => _BoardIterator(_boardPoints);
 
   // For a given q axial coordinate, get the range of possible r values
   // See the definition of BoardPoint for more information about hex grids and
@@ -81,7 +81,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
   // Get the BoardPoint that comes after the given BoardPoint. If given null,
   // returns the origin BoardPoint. If given BoardPoint is the last, returns
   // null.
-  BoardPoint _getNextBoardPoint (BoardPoint boardPoint) {
+  BoardPoint? _getNextBoardPoint (BoardPoint? boardPoint) {
     // If before the first element.
     if (boardPoint == null) {
       return BoardPoint(-boardRadius, 0);
@@ -121,7 +121,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
   // Return the q,r BoardPoint for a point in the scene, where the origin is in
   // the center of the board in both coordinate systems. If no BoardPoint at the
   // location, return null.
-  BoardPoint pointToBoardPoint(Offset point) {
+  BoardPoint? pointToBoardPoint(Offset point) {
     final BoardPoint boardPoint = BoardPoint(
       ((sqrt(3) / 3 * point.dx - 1 / 3 * point.dy) / hexagonRadius).round(),
       ((2 / 3 * point.dy) / hexagonRadius).round(),
@@ -160,7 +160,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
   }
 
   // Return a new board with the given BoardPoint selected.
-  Board copyWithSelected(BoardPoint boardPoint) {
+  Board copyWithSelected(BoardPoint? boardPoint) {
     if (selected == boardPoint) {
       return this;
     }
@@ -187,7 +187,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
 
     final List<BoardPoint> nextBoardPoints = List<BoardPoint>.from(_boardPoints);
     nextBoardPoints[boardPointIndex] = nextBoardPoint;
-    final BoardPoint selectedBoardPoint = boardPoint == selected
+    final BoardPoint? selectedBoardPoint = boardPoint == selected
       ? nextBoardPoint
       : selected;
     return Board(
@@ -200,29 +200,30 @@ class Board extends Object with IterableMixin<BoardPoint> {
   }
 }
 
-class _BoardIterator extends Iterator<BoardPoint> {
+class _BoardIterator extends Iterator<BoardPoint?> {
   _BoardIterator(this.boardPoints);
 
   final List<BoardPoint> boardPoints;
-  int currentIndex;
+  int? currentIndex;
 
   @override
-  BoardPoint current;
+  BoardPoint? current;
 
   @override
   bool moveNext() {
-    if (currentIndex == null) {
+    final int? index = currentIndex;
+    if (index == null) {
       currentIndex = 0;
     } else {
-      currentIndex++;
+      currentIndex = index + 1;
     }
 
-    if (currentIndex >= boardPoints.length) {
+    if (currentIndex! >= boardPoints.length) {
       current = null;
       return false;
     }
 
-    current = boardPoints[currentIndex];
+    current = boardPoints[currentIndex!];
     return true;
   }
 }
@@ -231,9 +232,7 @@ class _BoardIterator extends Iterator<BoardPoint> {
 @immutable
 class _Range {
   const _Range(this.min, this.max)
-    : assert(min != null),
-      assert(max != null),
-      assert(min <= max);
+    : assert(min <= max);
 
   final int min;
   final int max;

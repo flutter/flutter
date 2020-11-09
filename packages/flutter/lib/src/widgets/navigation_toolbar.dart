@@ -61,7 +61,7 @@ class NavigationToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     return CustomMultiChildLayout(
       delegate: _ToolbarLayout(
         centerMiddle: centerMiddle,

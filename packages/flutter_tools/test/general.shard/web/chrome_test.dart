@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -201,13 +200,10 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('"exit_type":"Crashed"');
 
-    final Directory localStorageContentsDirectory = dataDir
+    final Directory defaultContentDirectory = dataDir
         .childDirectory('Default')
-        .childDirectory('Local Storage')
-        .childDirectory('leveldb');
-    localStorageContentsDirectory.createSync(recursive: true);
-    localStorageContentsDirectory.childFile('LOCK').writeAsBytesSync(<int>[]);
-    localStorageContentsDirectory.childFile('LOG').writeAsStringSync('contents');
+        .childDirectory('Foo');
+        defaultContentDirectory.createSync(recursive: true);
 
     processManager.addCommand(FakeCommand(
       command: const <String>[
@@ -233,20 +229,14 @@ void main() {
     // writes non-crash back to dart_tool
     expect(preferencesFile.readAsStringSync(), '"exit_type":"Normal"');
 
-    // validate local storage
-    final Directory storageDir = fileSystem
+
+    // validate any Default content is copied
+    final Directory defaultContentDir = fileSystem
         .directory('.tmp_rand0/flutter_tools_chrome_device.rand0')
         .childDirectory('Default')
-        .childDirectory('Local Storage')
-        .childDirectory('leveldb');
+        .childDirectory('Foo');
 
-    expect(storageDir.existsSync(), true);
-
-    expect(storageDir.childFile('LOCK'), exists);
-    expect(storageDir.childFile('LOCK').readAsBytesSync(), hasLength(0));
-
-    expect(storageDir.childFile('LOG'), exists);
-    expect(storageDir.childFile('LOG').readAsStringSync(), 'contents');
+    expect(defaultContentDir.existsSync(), true);
   });
 
   testWithoutContext('can retry launch when glibc bug happens', () async {

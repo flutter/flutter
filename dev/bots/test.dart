@@ -255,20 +255,6 @@ Future<void> _runSmokeTests() async {
     ],
   );
 
-  // The flutter-tester device cannot be run concurrently in the same project directory.
-  await runCommand(flutter,
-    <String>['drive', '--show-test-device', '-d', 'flutter-tester', '-t', path.join('test_driver', 'success.dart')],
-    workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-    expectNonZeroExit: false,
-    outputMode: OutputMode.capture,
-  );
-  await runCommand(flutter,
-    <String>['drive', '--show-test-device', '-d', 'flutter-tester', '-t', path.join('test_driver', 'failure.dart')],
-    workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-    expectNonZeroExit: true,
-    outputMode: OutputMode.capture,
-  );
-
   // Verify that we correctly generated the version file.
   final String versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
   if (versionError != null)
@@ -351,6 +337,10 @@ Future<void> _runToolTests() async {
       );
     },
   );
+  // Prevent web tests from running if not explicitly requested.
+  if (Platform.environment[CIRRUS_TASK_NAME] == null) {
+    subshards.remove('web');
+  }
 
   await selectSubshard(subshards);
 }
@@ -397,7 +387,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
   final String examplePath = exampleDirectory.path;
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
   final List<String> additionalArgs = hasNullSafety
-    ? <String>['--enable-experiment', 'non-nullable', '--no-sound-null-safety']
+    ? <String>['--no-sound-null-safety']
     : <String>[];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
     await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -603,8 +593,8 @@ Future<void> _runAddToAppLifeCycleTests() async {
 
 Future<void> _runFrameworkTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
-  final List<String> soundNullSafetyOptions     = <String>['--enable-experiment=non-nullable', '--null-assertions', '--sound-null-safety'];
-  final List<String> mixedModeNullSafetyOptions = <String>['--enable-experiment=non-nullable', '--null-assertions', '--no-sound-null-safety'];
+  final List<String> soundNullSafetyOptions     = <String>['--null-assertions', '--sound-null-safety'];
+  final List<String> mixedModeNullSafetyOptions = <String>['--null-assertions', '--no-sound-null-safety'];
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
@@ -648,7 +638,6 @@ Future<void> _runFrameworkTests() async {
   Future<void> runPrivateTests() async {
     final List<String> args = <String>[
       'run',
-      '--enable-experiment=non-nullable',
       '--sound-null-safety',
       'test_private.dart',
     ];
@@ -685,6 +674,7 @@ Future<void> _runFrameworkTests() async {
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'tools'), tableData: bigqueryApi?.tabledata);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'benchmarks', 'metrics_center'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
@@ -692,6 +682,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
@@ -830,8 +821,10 @@ Future<void> _runWebLongRunningTests() async {
     () => _runGalleryE2eWebTest('profile', canvasKit: true),
     () => _runGalleryE2eWebTest('release'),
     () => _runGalleryE2eWebTest('release', canvasKit: true),
-  ].map(_withChromeDriver).toList();
+  ];
+  await _ensureChromeDriverIsRunning();
   await _selectIndexedSubshard(tests, kWebLongRunningTestShardCount);
+  await _stopChromeDriver();
 }
 
 // The `chromedriver` process created by this test.
@@ -840,22 +833,11 @@ Future<void> _runWebLongRunningTests() async {
 // process is reused and this variable remains null.
 Command _chromeDriver;
 
-/// Creates a shard runner that runs the given [originalRunner] with ChromeDriver
-/// enabled.
-ShardRunner _withChromeDriver(ShardRunner originalRunner) {
-  return () async {
-    try {
-      await _ensureChromeDriverIsRunning();
-      await originalRunner();
-    } finally {
-      await _stopChromeDriver();
-    }
-  };
-}
-
 Future<bool> _isChromeDriverRunning() async {
   try {
-    (await Socket.connect('localhost', 4444)).destroy();
+    final RawSocket socket = await RawSocket.connect('localhost', 4444);
+    socket.shutdown(SocketDirection.both);
+    await socket.close();
     return true;
   } on SocketException {
     return false;
@@ -893,11 +875,8 @@ Future<void> _stopChromeDriver() async {
   if (_chromeDriver == null) {
     return;
   }
+  print('Stopping chromedriver');
   _chromeDriver.process.kill();
-  while (await _isChromeDriverRunning()) {
-    await Future<void>.delayed(const Duration(milliseconds: 100));
-    print('Waiting for chromedriver to stop.');
-  }
 }
 
 /// Exercises the old gallery in a browser for a long period of time, looking
@@ -926,6 +905,7 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
       '--driver=test_driver/transitions_perf_e2e_test.dart',
       '--target=test_driver/transitions_perf_e2e.dart',
       '--browser-name=chrome',
+      '--no-sound-null-safety',
       '-d',
       'web-server',
       '--$buildMode',
@@ -962,13 +942,9 @@ Future<void> _runWebIntegrationTests() async {
     ]
   );
   await _runWebDebugTest('lib/sound_mode.dart', additionalArguments: <String>[
-    '--enable-experiment',
-    'non-nullable',
     '--sound-null-safety',
   ]);
   await _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
-    '--enable-experiment',
-    'non-nullable',
     '--sound-null-safety',
   ]);
 }
@@ -1073,8 +1049,6 @@ Future<void> _runWebDebugTest(String target, {
       '--debug',
       if (enableNullSafety)
         ...<String>[
-          '--enable-experiment',
-          'non-nullable',
           '--no-sound-null-safety',
           '--null-assertions',
         ],

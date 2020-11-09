@@ -52,6 +52,10 @@ class ListTileTheme extends InheritedTheme {
     this.contentPadding,
     this.tileColor,
     this.selectedTileColor,
+    this.enableFeedback,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
     required Widget child,
   }) : super(key: key, child: child);
 
@@ -70,6 +74,10 @@ class ListTileTheme extends InheritedTheme {
     EdgeInsetsGeometry? contentPadding,
     Color? tileColor,
     Color? selectedTileColor,
+    bool? enableFeedback,
+    double? horizontalTitleGap,
+    double? minVerticalPadding,
+    double? minLeadingWidth,
     required Widget child,
   }) {
     assert(child != null);
@@ -87,6 +95,10 @@ class ListTileTheme extends InheritedTheme {
           contentPadding: contentPadding ?? parent.contentPadding,
           tileColor: tileColor ?? parent.tileColor,
           selectedTileColor: selectedTileColor ?? parent.selectedTileColor,
+          enableFeedback: enableFeedback ?? parent.enableFeedback,
+          horizontalTitleGap: horizontalTitleGap ?? parent.horizontalTitleGap,
+          minVerticalPadding: minVerticalPadding ?? parent.minVerticalPadding,
+          minLeadingWidth: minLeadingWidth ?? parent.minLeadingWidth,
           child: child,
         );
       },
@@ -96,7 +108,7 @@ class ListTileTheme extends InheritedTheme {
   /// If true then [ListTile]s will have the vertically dense layout.
   final bool dense;
 
-  /// {@template flutter.material.ListTile.shape}
+  /// {@template flutter.material.ListTileTheme.shape}
   /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
   /// {@endtemplate}
   final ShapeBorder? shape;
@@ -131,6 +143,26 @@ class ListTileTheme extends InheritedTheme {
   /// If [ListTile.selectedTileColor] is provided, [selectedTileColor] is ignored.
   final Color? selectedTileColor;
 
+  /// The horizontal gap between the titles and the leading/trailing widgets.
+  ///
+  /// If specified, overrides the default value of [ListTile.horizontalTitleGap].
+  final double? horizontalTitleGap;
+
+  /// The minimum padding on the top and bottom of the title and subtitle widgets.
+  ///
+  /// If specified, overrides the default value of [ListTile.minVerticalPadding].
+  final double? minVerticalPadding;
+
+  /// The minimum width allocated for the [ListTile.leading] widget.
+  ///
+  /// If specified, overrides the default value of [ListTile.minLeadingWidth].
+  final double? minLeadingWidth;
+
+  /// If specified, defines the feedback property for `ListTile`.
+  ///
+  /// If [ListTile.enableFeedback] is provided, [enableFeedback] is ignored.
+  final bool? enableFeedback;
+
   /// The closest instance of this class that encloses the given context.
   ///
   /// Typical usage is as follows:
@@ -155,6 +187,10 @@ class ListTileTheme extends InheritedTheme {
       contentPadding: contentPadding,
       tileColor: tileColor,
       selectedTileColor: selectedTileColor,
+      enableFeedback: enableFeedback,
+      horizontalTitleGap: horizontalTitleGap,
+      minVerticalPadding: minVerticalPadding,
+      minLeadingWidth: minLeadingWidth,
       child: child,
     );
   }
@@ -169,7 +205,11 @@ class ListTileTheme extends InheritedTheme {
         || textColor != oldWidget.textColor
         || contentPadding != oldWidget.contentPadding
         || tileColor != oldWidget.tileColor
-        || selectedTileColor != oldWidget.selectedTileColor;
+        || selectedTileColor != oldWidget.selectedTileColor
+        || enableFeedback != oldWidget.enableFeedback
+        || horizontalTitleGap != oldWidget.horizontalTitleGap
+        || minVerticalPadding != oldWidget.minVerticalPadding
+        || minLeadingWidth != oldWidget.minLeadingWidth;
   }
 }
 
@@ -378,7 +418,7 @@ enum ListTileControlAffinity {
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// Here is an example of a custom list item that resembles a Youtube related
+/// Here is an example of a custom list item that resembles a YouTube-related
 /// video list item created with [Expanded] and [Container] widgets.
 ///
 /// ![Custom list item a](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_a.png)
@@ -708,6 +748,10 @@ class ListTile extends StatelessWidget {
     this.autofocus = false,
     this.tileColor,
     this.selectedTileColor,
+    this.enableFeedback,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
   }) : assert(isThreeLine != null),
        assert(enabled != null),
        assert(selected != null),
@@ -901,6 +945,34 @@ class ListTile extends StatelessWidget {
   /// if it's not null and to [Colors.transparent] if it's null.
   final Color? selectedTileColor;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
+
+  /// The horizontal gap between the titles and the leading/trailing widgets.
+  ///
+  /// If null, then the value of [ListTileTheme.horizontalTitleGap] is used. If
+  /// that is also null, then a default value of 16 is used.
+  final double? horizontalTitleGap;
+
+  /// The minimum padding on the top and bottom of the title and subtitle widgets.
+  ///
+  /// If null, then the value of [ListTileTheme.minVerticalPadding] is used. If
+  /// that is also null, then a default value of 4 is used.
+  final double? minVerticalPadding;
+
+  /// The minimum width allocated for the [ListTile.leading] widget.
+  ///
+  /// If null, then the value of [ListTileTheme.minLeadingWidth] is used. If
+  /// that is also null, then a default value of 40 is used.
+  final double? minLeadingWidth;
+
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
   ///
@@ -1025,7 +1097,7 @@ class ListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ListTileTheme tileTheme = ListTileTheme.of(context);
 
     IconThemeData? iconThemeData;
@@ -1067,12 +1139,12 @@ class ListTile extends StatelessWidget {
     }
 
     const EdgeInsets _defaultContentPadding = EdgeInsets.symmetric(horizontal: 16.0);
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     final EdgeInsets resolvedContentPadding = contentPadding?.resolve(textDirection)
       ?? tileTheme.contentPadding?.resolve(textDirection)
       ?? _defaultContentPadding;
 
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+    final MouseCursor resolvedMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
         if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
@@ -1084,12 +1156,13 @@ class ListTile extends StatelessWidget {
       customBorder: shape ?? tileTheme.shape,
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
-      mouseCursor: effectiveMouseCursor,
+      mouseCursor: resolvedMouseCursor,
       canRequestFocus: enabled,
       focusNode: focusNode,
       focusColor: focusColor,
       hoverColor: hoverColor,
       autofocus: autofocus,
+      enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
       child: Semantics(
         selected: selected,
         enabled: enabled,
@@ -1110,6 +1183,9 @@ class ListTile extends StatelessWidget {
               textDirection: textDirection,
               titleBaselineType: titleStyle.textBaseline!,
               subtitleBaselineType: subtitleStyle?.textBaseline,
+              horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
+              minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? 4,
+              minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? 40,
             ),
           ),
         ),
@@ -1138,12 +1214,18 @@ class _ListTile extends RenderObjectWidget {
     required this.visualDensity,
     required this.textDirection,
     required this.titleBaselineType,
+    required this.horizontalTitleGap,
+    required this.minVerticalPadding,
+    required this.minLeadingWidth,
     this.subtitleBaselineType,
   }) : assert(isThreeLine != null),
        assert(isDense != null),
        assert(visualDensity != null),
        assert(textDirection != null),
        assert(titleBaselineType != null),
+       assert(horizontalTitleGap != null),
+       assert(minVerticalPadding != null),
+       assert(minLeadingWidth != null),
        super(key: key);
 
   final Widget? leading;
@@ -1156,6 +1238,9 @@ class _ListTile extends RenderObjectWidget {
   final TextDirection textDirection;
   final TextBaseline titleBaselineType;
   final TextBaseline? subtitleBaselineType;
+  final double horizontalTitleGap;
+  final double minVerticalPadding;
+  final double minLeadingWidth;
 
   @override
   _ListTileElement createElement() => _ListTileElement(this);
@@ -1169,6 +1254,9 @@ class _ListTile extends RenderObjectWidget {
       textDirection: textDirection,
       titleBaselineType: titleBaselineType,
       subtitleBaselineType: subtitleBaselineType,
+      horizontalTitleGap: horizontalTitleGap,
+      minVerticalPadding: minVerticalPadding,
+      minLeadingWidth: minLeadingWidth,
     );
   }
 
@@ -1180,7 +1268,10 @@ class _ListTile extends RenderObjectWidget {
       ..visualDensity = visualDensity
       ..textDirection = textDirection
       ..titleBaselineType = titleBaselineType
-      ..subtitleBaselineType = subtitleBaselineType;
+      ..subtitleBaselineType = subtitleBaselineType
+      ..horizontalTitleGap = horizontalTitleGap
+      ..minLeadingWidth = minLeadingWidth
+      ..minVerticalPadding = minVerticalPadding;
   }
 }
 
@@ -1296,23 +1387,26 @@ class _RenderListTile extends RenderBox {
     required TextDirection textDirection,
     required TextBaseline titleBaselineType,
     TextBaseline? subtitleBaselineType,
+    required double horizontalTitleGap,
+    required double minVerticalPadding,
+    required double minLeadingWidth,
   }) : assert(isDense != null),
        assert(visualDensity != null),
        assert(isThreeLine != null),
        assert(textDirection != null),
        assert(titleBaselineType != null),
+       assert(horizontalTitleGap != null),
+       assert(minVerticalPadding != null),
+       assert(minLeadingWidth != null),
        _isDense = isDense,
        _visualDensity = visualDensity,
        _isThreeLine = isThreeLine,
        _textDirection = textDirection,
        _titleBaselineType = titleBaselineType,
-       _subtitleBaselineType = subtitleBaselineType;
-
-  static const double _minLeadingWidth = 40.0;
-  // The horizontal gap between the titles and the leading/trailing widgets
-  double get _horizontalTitleGap => 16.0 + visualDensity.horizontal * 2.0;
-  // The minimum padding on the top and bottom of the title and subtitle widgets.
-  static const double _minVerticalPadding = 4.0;
+       _subtitleBaselineType = subtitleBaselineType,
+       _horizontalTitleGap = horizontalTitleGap + visualDensity.horizontal * 2.0,
+       _minVerticalPadding = minVerticalPadding,
+       _minLeadingWidth = minLeadingWidth;
 
   final Map<_ListTileSlot, RenderBox> children = <_ListTileSlot, RenderBox>{};
 
@@ -1420,6 +1514,39 @@ class _RenderListTile extends RenderBox {
     if (_subtitleBaselineType == value)
       return;
     _subtitleBaselineType = value;
+    markNeedsLayout();
+  }
+
+  double get horizontalTitleGap => _horizontalTitleGap;
+  double _horizontalTitleGap;
+
+  set horizontalTitleGap(double value) {
+    assert(value != null);
+    if (_horizontalTitleGap == value)
+      return;
+    _horizontalTitleGap = value;
+    markNeedsLayout();
+  }
+
+  double get minVerticalPadding => _minVerticalPadding;
+  double _minVerticalPadding;
+
+  set minVerticalPadding(double value) {
+    assert(value != null);
+    if (_minVerticalPadding == value)
+      return;
+    _minVerticalPadding = value;
+    markNeedsLayout();
+  }
+
+  double get minLeadingWidth => _minLeadingWidth;
+  double _minLeadingWidth;
+
+  set minLeadingWidth(double value) {
+    assert(value != null);
+    if (_minLeadingWidth == value)
+      return;
+    _minLeadingWidth = value;
     markNeedsLayout();
   }
 

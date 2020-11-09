@@ -531,7 +531,7 @@ class MaterialApp extends StatefulWidget {
   /// This callback is passed along to the [WidgetsApp] built by this widget.
   final LocaleListResolutionCallback? localeListResolutionCallback;
 
-  /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
+  /// {@macro flutter.widgets.LocaleResolutionCallback}
   ///
   /// This callback is passed along to the [WidgetsApp] built by this widget.
   final LocaleResolutionCallback? localeResolutionCallback;
@@ -662,7 +662,7 @@ class MaterialApp extends StatefulWidget {
 class _MaterialScrollBehavior extends ScrollBehavior {
   @override
   TargetPlatform getPlatform(BuildContext context) {
-    return Theme.of(context)!.platform;
+    return Theme.of(context).platform;
   }
 
   @override
@@ -680,7 +680,7 @@ class _MaterialScrollBehavior extends ScrollBehavior {
         return GlowingOverscrollIndicator(
           child: child,
           axisDirection: axisDirection,
-          color: Theme.of(context)!.accentColor,
+          color: Theme.of(context).accentColor,
         );
     }
   }

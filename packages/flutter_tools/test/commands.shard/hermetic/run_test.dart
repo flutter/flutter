@@ -238,6 +238,8 @@ void main() {
         when(mockDevice.id).thenReturn('mock-id');
         when(mockDevice.name).thenReturn('mock-name');
         when(mockDevice.platformType).thenReturn(PlatformType.android);
+        when(mockDevice.targetPlatformDisplayName)
+            .thenAnswer((Invocation invocation) async => 'mock-platform');
         when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) => Future<String>.value('api-14'));
 
         when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
@@ -384,74 +386,6 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => mockProcessManager,
         Usage: () => usage,
-      });
-    });
-
-    group('dart-flags option', () {
-      RunCommand command;
-      List<String> args;
-      MockDeviceManager mockDeviceManager;
-
-      setUp(() {
-        command = TestRunCommand();
-        args = <String> [
-          'run',
-          '--dart-flags', '"--observe"',
-          '--no-hot',
-          '--no-pub',
-        ];
-        mockDeviceManager = MockDeviceManager();
-        final FakeDevice fakeDevice = FakeDevice();
-        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-          return Future<List<Device>>.value(<Device>[fakeDevice]);
-        });
-        when(mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout'))).thenAnswer(
-          (Invocation invocation) => Future<List<Device>>.value(<Device>[fakeDevice])
-        );
-      });
-
-      testUsingContext('is populated in debug mode', () async {
-        // FakeDevice.startApp checks that --dart-flags doesn't get dropped and
-        // throws ToolExit with FakeDevice.kSuccess if the flag is populated.
-        try {
-          await createTestCommandRunner(command).run(args);
-          fail('Expect exception');
-        } on ToolExit catch (e) {
-          expect(e.exitCode, FakeDevice.kSuccess);
-        }
-      }, overrides: <Type, Generator>{
-        DeviceManager: () => mockDeviceManager,
-      });
-
-      testUsingContext('is populated in profile mode', () async {
-        args.add('--profile');
-
-        // FakeDevice.startApp checks that --dart-flags doesn't get dropped and
-        // throws ToolExit with FakeDevice.kSuccess if the flag is populated.
-        try {
-          await createTestCommandRunner(command).run(args);
-          fail('Expect exception');
-        } on ToolExit catch (e) {
-          expect(e.exitCode, FakeDevice.kSuccess);
-        }
-      }, overrides: <Type, Generator>{
-        DeviceManager: () => mockDeviceManager,
-      });
-
-      testUsingContext('is not populated in release mode', () async {
-        args.add('--release');
-
-        // FakeDevice.startApp checks that --dart-flags *does* get dropped and
-        // throws ToolExit with FakeDevice.kSuccess if the flag is set to the
-        // empty string.
-        try {
-          await createTestCommandRunner(command).run(args);
-          fail('Expect exception');
-        } on ToolExit catch (e) {
-          expect(e.exitCode, FakeDevice.kSuccess);
-        }
-      }, overrides: <Type, Generator>{
-        DeviceManager: () => mockDeviceManager,
       });
     });
 

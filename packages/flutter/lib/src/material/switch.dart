@@ -100,11 +100,17 @@ class Switch extends StatefulWidget {
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
         super(key: key);
 
-  /// Creates a [CupertinoSwitch] if the target platform is iOS, creates a
-  /// material design switch otherwise.
+  /// Creates an adaptive [Switch] based on whether the target platform is iOS
+  /// or macOS, following Material design's
+  /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
   ///
-  /// If a [CupertinoSwitch] is created, the following parameters are
-  /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
+  /// On iOS and macOS, this constructor creates a [CupertinoSwitch], which has
+  /// matching functionality and presentation as Material switches, and are the
+  /// graphics expected on iOS. On other platforms, this creates a Material
+  /// design [Switch].
+  ///
+  /// If a [CupertinoSwitch] is created, the following parameters are ignored:
+  /// [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
   /// [activeThumbImage], [onActiveThumbImageError], [inactiveThumbImage],
   /// [onInactiveThumbImageError], [materialTapTargetSize].
   ///
@@ -261,7 +267,7 @@ class Switch extends StatefulWidget {
 
   final _SwitchType _switchType;
 
-  /// {@macro flutter.cupertino.switch.dragStartBehavior}
+  /// {@macro flutter.cupertino.CupertinoSwitch.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
@@ -364,7 +370,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
   };
 
   MaterialStateProperty<Color> get _widgetThumbColor {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
 
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -379,7 +385,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
   }
 
   MaterialStateProperty<Color> get _widgetTrackColor {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
     const Color black32 = Color(0x52000000); // Black with 32% opacity
 
@@ -398,7 +404,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
 
   Widget buildMaterialSwitch(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
 
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
@@ -459,7 +465,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
   }
 
   Widget buildCupertinoSwitch(BuildContext context) {
-    final Size size = getSwitchSize(Theme.of(context)!);
+    final Size size = getSwitchSize(Theme.of(context));
     return Focus(
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
@@ -485,7 +491,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
         return buildMaterialSwitch(context);
 
       case _SwitchType.adaptive: {
-        final ThemeData theme = Theme.of(context)!;
+        final ThemeData theme = Theme.of(context);
         assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.android:

@@ -96,7 +96,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   @protected
   Widget buildContent(BuildContext context);
 
-  /// {@template flutter.cupertino.cupertinoRouteTransitionMixin.title}
+  /// {@template flutter.cupertino.CupertinoRouteTransitionMixin.title}
   /// A title string for this route.
   ///
   /// Used to auto-populate [CupertinoNavigationBar] and
@@ -433,13 +433,13 @@ class CupertinoPage<T> extends Page<T> {
   /// The content to be shown in the [Route] created by this page.
   final Widget child;
 
-  /// {@macro flutter.cupertino.cupertinoRouteTransitionMixin.title}
+  /// {@macro flutter.cupertino.CupertinoRouteTransitionMixin.title}
   final String? title;
 
-  /// {@macro flutter.widgets.modalRoute.maintainState}
+  /// {@macro flutter.widgets.ModalRoute.maintainState}
   final bool maintainState;
 
-  /// {@macro flutter.widgets.pageRoute.fullscreenDialog}
+  /// {@macro flutter.widgets.PageRoute.fullscreenDialog}
   final bool fullscreenDialog;
 
   @override
@@ -514,7 +514,7 @@ class CupertinoPageTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection textDirection = Directionality.of(context);
     return SlideTransition(
       position: _secondaryPositionAnimation,
       textDirection: textDirection,
@@ -578,7 +578,7 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection textDirection = Directionality.of(context);
     return SlideTransition(
       position: _secondaryPositionAnimation,
       textDirection: textDirection,
@@ -677,7 +677,7 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   }
 
   double _convertToLogical(double value) {
-    switch (Directionality.of(context)!) {
+    switch (Directionality.of(context)) {
       case TextDirection.rtl:
         return -value;
       case TextDirection.ltr:
@@ -1145,7 +1145,7 @@ Future<T?> showCupertinoDialog<T>({
     context: context,
     barrierDismissible: barrierDismissible,
     barrierLabel: CupertinoLocalizations.of(context).modalBarrierDismissLabel,
-    barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context)!,
+    barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
     // This transition duration was eyeballed comparing with iOS
     transitionDuration: const Duration(milliseconds: 250),
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {

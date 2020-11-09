@@ -147,7 +147,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// leaks, use of the [ActionListener] widget to register and unregister your
   /// listener appropriately is highly recommended.
   ///
-  /// {@template flutter.widgets.actions.multipleAdds}
+  /// {@template flutter.widgets.Action.addActionListener}
   /// If a listener had been added twice, and is removed once during an
   /// iteration (i.e. in response to a notification), it will still be called
   /// again. If, on the other hand, it is removed as many times as it was
@@ -174,7 +174,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// memory leaks, use of the [ActionListener] widget to register and
   /// unregister your listener appropriately is highly recommended.
   ///
-  /// {@macro flutter.widgets.actions.multipleAdds}
+  /// {@macro flutter.widgets.Action.addActionListener}
   @mustCallSuper
   void removeActionListener(ActionListenerCallback listener) => _listeners.remove(listener);
 
@@ -266,7 +266,7 @@ class ActionListener extends StatefulWidget {
   /// Must not be null.
   final Action<Intent> action;
 
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
@@ -464,7 +464,7 @@ class Actions extends StatefulWidget {
   /// {@endtemplate}
   final Map<Type, Action<Intent>> actions;
 
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   // Visits the Actions widget ancestors of the given element using
@@ -999,7 +999,7 @@ class FocusableActionDetector extends StatefulWidget {
 
   /// The child widget for this [FocusableActionDetector] widget.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override

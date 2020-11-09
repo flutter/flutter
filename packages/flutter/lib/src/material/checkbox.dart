@@ -259,7 +259,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   };
 
   MaterialStateProperty<Color> get _widgetFillColor {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return themeData.disabledColor;
@@ -274,7 +274,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     Size size;
     switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:

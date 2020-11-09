@@ -106,7 +106,7 @@ class _ScrollbarState extends State<Scrollbar> with SingleTickerProviderStateMix
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -122,7 +122,7 @@ class _ScrollbarState extends State<Scrollbar> with SingleTickerProviderStateMix
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         _themeColor = theme.highlightColor.withOpacity(1.0);
-        _textDirection = Directionality.of(context)!;
+        _textDirection = Directionality.of(context);
         _materialPainter = _buildMaterialScrollbarPainter();
         _useCupertinoScrollbar = false;
         _triggerScrollbar();
