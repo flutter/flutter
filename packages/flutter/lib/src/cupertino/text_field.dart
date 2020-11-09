@@ -5,6 +5,7 @@
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -85,6 +86,7 @@ enum OverlayVisibilityMode {
   always,
 }
 
+// TODO(justinmc): remove this and replace it with one in EditableText.
 class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _CupertinoTextFieldSelectionGestureDetectorBuilder({
     required _CupertinoTextFieldState state,
@@ -93,9 +95,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 
   final _CupertinoTextFieldState _state;
 
-  // TODO(justinmc): Here's something that still needs to happen here! How?
-  // I need to be able to stop the handling of this altogether if it's on the
-  // clear button...
+  /*
   @override
   void onSingleTapUp(TapUpDetails details) {
     // Because TextSelectionGestureDetector listens to taps that happen on
@@ -114,6 +114,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
     if (_state.widget.onTap != null)
       _state.widget.onTap!();
   }
+  */
 
   @override
   void onDragSelectionEnd(DragEndDetails details) {
@@ -997,23 +998,47 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       ),
     );
 
-    return Semantics(
-      enabled: enabled,
-      onTap: !enabled ? null : () {
-        if (!controller.selection.isValid) {
-          controller.selection = TextSelection.collapsed(offset: controller.text.length);
+    return TextSelectionGestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onSingleTapUp: (TapUpDetails details) {
+        // TODO(justimc): This is called after the action handler is called (via
+        // the gesturedetector on editable text). How can I intercept that?
+        /*
+        // Because TextSelectionGestureDetector listens to taps that happen on
+        // widgets in front of it, tapping the clear button will also trigger
+        // this handler. If the clear button widget recognizes the up event,
+        // then do not handle it.
+        if (_state._clearGlobalKey.currentContext != null) {
+          final RenderBox renderBox = _state._clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
+          final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
+          if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
+            return;
+          }
         }
-        _requestKeyboard();
+        super.onSingleTapUp(details);
+        _state._requestKeyboard();
+        if (_state.widget.onTap != null)
+          _state.widget.onTap!();
+          */
       },
-      child: IgnorePointer(
-        ignoring: !enabled,
-        child: Container(
-          decoration: effectiveDecoration,
-          child: Align(
-            alignment: Alignment(-1.0, _textAlignVertical.y),
-            widthFactor: 1.0,
-            heightFactor: 1.0,
-            child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+      child: Semantics(
+        enabled: enabled,
+        onTap: !enabled ? null : () {
+          if (!controller.selection.isValid) {
+            controller.selection = TextSelection.collapsed(offset: controller.text.length);
+          }
+          _requestKeyboard();
+        },
+        child: IgnorePointer(
+          ignoring: !enabled,
+          child: Container(
+            decoration: effectiveDecoration,
+            child: Align(
+              alignment: Alignment(-1.0, _textAlignVertical.y),
+              widthFactor: 1.0,
+              heightFactor: 1.0,
+              child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+            ),
           ),
         ),
       ),

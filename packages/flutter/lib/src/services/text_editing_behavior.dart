@@ -7,10 +7,12 @@ import 'package:flutter/gestures.dart';
 class SingleTapUpTextIntent extends Intent {
   const SingleTapUpTextIntent({
     required this.details,
+    required this.editableTextState,
     required this.renderEditable,
   });
 
   final TapUpDetails details;
+  final EditableTextState editableTextState;
   final RenderEditable renderEditable;
 }
 
@@ -30,17 +32,17 @@ class TapDownTextIntent extends Intent {
 // Rename and move file.
 class TextEditingActionsMap {
   TextEditingActionsMap({
-    required this.editableTextState,
     required this.platform,
   });
 
-  final EditableTextState editableTextState;
+  // TODO(justinmc): Can I just import foundation here to get this?
   final TargetPlatform platform;
 
   Map<Type, Action<Intent>>? _map;
   Map<Type, Action<Intent>> get map {
     _map ??= <Type, Action<Intent>>{
       SingleTapUpTextIntent: singleTapUpTextAction,
+      TapDownTextIntent: tapDownTextAction,
     };
     return _map!;
   }
@@ -49,8 +51,8 @@ class TextEditingActionsMap {
   CallbackAction<SingleTapUpTextIntent> get singleTapUpTextAction {
     _singleTapUpTextAction ??= CallbackAction<SingleTapUpTextIntent>(
       onInvoke: (SingleTapUpTextIntent intent) {
-        editableTextState.hideToolbar();
-        if (editableTextState.widget.selectionEnabled) {
+        intent.editableTextState.hideToolbar();
+        if (intent.editableTextState.widget.selectionEnabled) {
           switch (platform) {
             case TargetPlatform.iOS:
             case TargetPlatform.macOS:

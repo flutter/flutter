@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart' show TextEditingActionsMap;
 import 'package:flutter/widgets.dart';
 
 import 'arc.dart';
@@ -687,6 +688,7 @@ class _MaterialScrollBehavior extends ScrollBehavior {
 }
 
 class _MaterialAppState extends State<MaterialApp> {
+  final ActionDispatcher _actionDispatcher = ActionDispatcher();
   late HeroController _heroController;
 
   bool get _usesRouter => widget.routerDelegate != null;
@@ -852,12 +854,21 @@ class _MaterialAppState extends State<MaterialApp> {
       return true;
     }());
 
-    return ScrollConfiguration(
-      behavior: _MaterialScrollBehavior(),
-      child: HeroControllerScope(
-        controller: _heroController,
-        child: result,
-      )
+    final TextEditingActionsMap map = TextEditingActionsMap(
+      platform: defaultTargetPlatform,
+    );
+
+    // TODO(justinmc): Put this in CupertinoApp too. Or is there a better place?
+    return Actions(
+      actions: map.map,
+      dispatcher: _actionDispatcher,
+      child: ScrollConfiguration(
+        behavior: _MaterialScrollBehavior(),
+        child: HeroControllerScope(
+          controller: _heroController,
+          child: result,
+        )
+      ),
     );
   }
 }
