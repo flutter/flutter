@@ -39,6 +39,7 @@ void main() {
     final FileStore fileCache = FileStore(
       cacheFile: cacheFile,
       logger: BufferLogger.test(),
+      strategy: FileStoreStrategy.timestamp,
     );
     fileCache.initialize();
     final File file = fileSystem.file('test')..createSync();
@@ -56,7 +57,7 @@ void main() {
     fileCache.persistIncremental();
 
     // modify the time stamp.
-    file.writeAsStringSync('foo');
+    file.setLastModifiedSync(DateTime(1991));
 
     // verify the file is marked as dirty again.
     expect(fileCache.diffFileList(<File>[file]), hasLength(1));
@@ -192,7 +193,7 @@ void main() {
 
     fileCache.diffFileList(<File>[file]);
 
-    expect(fileCache.currentAssetKeys['foo.dart'], '7236aff9140ef993d67d93b4b10171f2');
+    expect(fileCache.currentAssetKeys['foo.dart'], '48948bcc9a00807df35a9b341ca384c2');
   });
 }
 
