@@ -10,7 +10,7 @@ final RegExp _declarationEnd = RegExp('(import)|(library)|(part)');
 const String _blockCommentStart = '/*';
 const String _blockCommentEnd = '*/';
 
-/// The first language version where null safety was available by default
+/// The first language version where null safety was available by default.
 final LanguageVersion nullSafeVersion = LanguageVersion(2, 12);
 
 /// Attempts to read the language version of a dart [file].
