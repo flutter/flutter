@@ -119,7 +119,7 @@ class FlutterDevice {
             '--sound-null-safety',
           ];
         } else {
-         platformDillArtifact = Artifact.webPlatformKernelDill;
+          platformDillArtifact = Artifact.webPlatformKernelDill;
           extraFrontEndOptions =  <String>[
             ...?buildInfo.extraFrontEndOptions,
             '--no-sound-null-safety',
