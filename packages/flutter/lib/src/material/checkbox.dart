@@ -71,6 +71,7 @@ class Checkbox extends StatefulWidget {
     this.visualDensity,
     this.focusNode,
     this.autofocus = false,
+    this.borderRadius = 1.0,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(autofocus != null),
@@ -185,6 +186,9 @@ class Checkbox extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// The Border Radius of the checkbox.
+  final double borderRadius;
+
   /// The width of a checkbox widget.
   static const double width = 18.0;
 
@@ -285,6 +289,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             vsync: this,
             hasFocus: _focused,
             hovering: _hovering,
+            borderRadius: widget.borderRadius,
           );
         },
       ),
@@ -308,6 +313,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     required this.additionalConstraints,
     required this.hasFocus,
     required this.hovering,
+    required this.borderRadius,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(activeColor != null),
@@ -328,6 +334,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<bool?>? onChanged;
   final TickerProvider vsync;
   final BoxConstraints additionalConstraints;
+  final double borderRadius;
 
   @override
   _RenderCheckbox createRenderObject(BuildContext context) => _RenderCheckbox(
@@ -344,6 +351,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     additionalConstraints: additionalConstraints,
     hasFocus: hasFocus,
     hovering: hovering,
+    borderRadius: borderRadius,
   );
 
   @override
@@ -363,12 +371,12 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
       ..additionalConstraints = additionalConstraints
       ..vsync = vsync
       ..hasFocus = hasFocus
-      ..hovering = hovering;
+      ..hovering = hovering
+      ..borderRadius = borderRadius;
   }
 }
 
 const double _kEdgeSize = Checkbox.width;
-const Radius _kEdgeRadius = Radius.circular(1.0);
 const double _kStrokeWidth = 2.0;
 
 class _RenderCheckbox extends RenderToggleable {
@@ -385,6 +393,7 @@ class _RenderCheckbox extends RenderToggleable {
     ValueChanged<bool?>? onChanged,
     required bool hasFocus,
     required bool hovering,
+    required this.borderRadius,
     required TickerProvider vsync,
   }) : _oldValue = value,
        super(
@@ -404,6 +413,7 @@ class _RenderCheckbox extends RenderToggleable {
 
   bool? _oldValue;
   Color checkColor;
+  double borderRadius;
 
   @override
   set value(bool? newValue) {
@@ -425,9 +435,10 @@ class _RenderCheckbox extends RenderToggleable {
   // At t == 1.0, .. is _kEdgeSize
   RRect _outerRectAt(Offset origin, double t) {
     final double inset = 1.0 - (t - 0.5).abs() * 2.0;
+    final Radius kEdgeRadius = Radius.circular(borderRadius);
     final double size = _kEdgeSize - inset * _kStrokeWidth;
     final Rect rect = Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
-    return RRect.fromRectAndRadius(rect, _kEdgeRadius);
+    return RRect.fromRectAndRadius(rect, kEdgeRadius);
   }
 
   // The checkbox's border color if value == false, or its fill color when
