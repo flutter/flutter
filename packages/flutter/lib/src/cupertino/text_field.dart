@@ -1041,11 +1041,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
           ignoring: !enabled,
           child: Container(
             decoration: effectiveDecoration,
-            child: Align(
-              alignment: Alignment(-1.0, _textAlignVertical.y),
-              widthFactor: 1.0,
-              heightFactor: 1.0,
-              child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+            child: TextEditingGestureDetector(
+              editableTextKey: editableTextKey,
+              child: Align(
+                alignment: Alignment(-1.0, _textAlignVertical.y),
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+              ),
             ),
           ),
         ),
