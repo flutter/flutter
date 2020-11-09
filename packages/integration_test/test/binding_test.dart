@@ -89,13 +89,13 @@ Future<void> main() async {
     });
 
     group('defaultTestTimeout', () {
-      final originalTimeout = integrationBinding.defaultTestTimeout;
+      final Timeout originalTimeout = integrationBinding.defaultTestTimeout;
       tearDown(() {
         integrationBinding.defaultTestTimeout = originalTimeout;
       });
 
       test('can be configured', () {
-        final newTimeout = Timeout(Duration(seconds: 17));
+        const Timeout newTimeout = Timeout(Duration(seconds: 17));
         integrationBinding.defaultTestTimeout = newTimeout;
         expect(integrationBinding.defaultTestTimeout, newTimeout);
       });
