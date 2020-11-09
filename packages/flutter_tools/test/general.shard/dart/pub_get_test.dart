@@ -54,7 +54,7 @@ void main() {
 
     await pub.get(
       context: PubContext.pubGet,
-      check: true,
+      checkUpToDate: true,
     );
 
     expect(logger.traceText, contains('Skipping pub get: version match.'));
@@ -91,7 +91,7 @@ void main() {
 
     await pub.get(
       context: PubContext.pubGet,
-      check: true,
+      checkUpToDate: true,
     );
 
     expect(processManager.hasRemainingExpectations, false);
@@ -128,7 +128,7 @@ void main() {
 
     await pub.get(
       context: PubContext.pubGet,
-      check: true,
+      checkUpToDate: true,
     );
 
     expect(processManager.hasRemainingExpectations, false);
@@ -165,7 +165,7 @@ void main() {
 
     await pub.get(
       context: PubContext.pubGet,
-      check: true,
+      checkUpToDate: true,
     );
 
     expect(processManager.hasRemainingExpectations, false);
@@ -204,7 +204,7 @@ void main() {
 
     await pub.get(
       context: PubContext.pubGet,
-      check: true,
+      checkUpToDate: true,
     );
 
     expect(processManager.hasRemainingExpectations, false);

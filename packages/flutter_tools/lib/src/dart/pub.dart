@@ -94,7 +94,7 @@ abstract class Pub {
     bool offline = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
-    bool check = false,
+    bool checkUpToDate = false,
   });
 
   /// Runs pub in 'batch' mode.
@@ -118,7 +118,6 @@ abstract class Pub {
     @required bool retry,
     bool showTraceForErrors,
   });
-
 
   /// Runs pub in 'interactive' mode.
   ///
@@ -165,7 +164,7 @@ class _DefaultPub implements Pub {
     bool offline = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
-    bool check = false,
+    bool checkUpToDate = false,
   }) async {
     directory ??= _fileSystem.currentDirectory.path;
     final File packageConfigFile = _fileSystem.file(
@@ -180,10 +179,11 @@ class _DefaultPub implements Pub {
       _fileSystem.path.join(directory, 'pubspec.yaml'));
 
     // If the pubspec.yaml is older than the package config file and the last
-    // flutter version used is the same as the current version. This will incorrectly
-    // skip pub on the master branch if dependencies are being added/removed from the
-    // flutter framework packages.
-    if (check &&
+    // flutter version used is the same as the current version skip pub get.
+    // This will incorrectly skip pub on the master branch if dependencies
+    // are being added/removed from the flutter framework packages, but this
+    // can be worked around by manually running pub.
+    if (checkUpToDate &&
         packageConfigFile.existsSync() &&
         pubspecYaml.lastModifiedSync().isBefore(packageConfigFile.lastModifiedSync()) &&
         lastVersion.existsSync() &&

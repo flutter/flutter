@@ -30,7 +30,7 @@ class ThrowingPub implements Pub {
     bool skipPubspecYamlCheck = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
-    bool check = false,
+    bool checkUpToDate = false,
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }
