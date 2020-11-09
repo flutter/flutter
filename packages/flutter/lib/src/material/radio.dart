@@ -121,6 +121,10 @@ class Radio<T> extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   }) : assert(autofocus != null),
+       assert(
+         fillColor == null || activeColor == null,
+         'Either use fillColor resolved in all states, or activeColor',
+       ),
        assert(toggleable != null),
        super(key: key);
 

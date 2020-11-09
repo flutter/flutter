@@ -74,6 +74,10 @@ class Checkbox extends StatefulWidget {
     this.autofocus = false,
   }) : assert(tristate != null),
        assert(tristate || value != null),
+       assert(
+         fillColor == null || activeColor == null,
+         'Either use fillColor resolved in all states, or activeColor',
+       ),
        assert(autofocus != null),
        super(key: key);
 
