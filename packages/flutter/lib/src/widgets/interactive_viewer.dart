@@ -666,24 +666,38 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       nextViewport.point3,
       nextViewport.point0,
     );
-    final LineSegment? invalidSide = <LineSegment?>[
+    final List<LineSegment> invalidSides = <LineSegment>[
       viewportSide01,
       viewportSide12,
       viewportSide23,
       viewportSide30,
-    ].firstWhere((LineSegment? side) {
-      return !side!.intersectsRect(_boundaryRect);
-    }, orElse: () => null);
-    if (invalidSide == null) {
+    ].where((LineSegment side) => !side.intersectsRect(_boundaryRect)).toList();
+    if (invalidSides.isEmpty) {
       return matrix;
     }
 
-    // Invalid. Find the nearest points on boundaryRect and the viewportSide
-    // that doesn't intersect to each other, and move the points on top of each
-    // other.
+    // Invalid. Find the side that is farthest from being in a valid position.
+    final LineSegment invalidSide = (invalidSides
+      ..sort((LineSegment a, LineSegment b) {
+        final OffsetTuple closestPointsA = a.findClosestPointsRect(_boundaryRect);
+        final double distanceA = _distanceBetweenPoints(
+          closestPointsA.a,
+          closestPointsA.b,
+        ).abs();
+        final OffsetTuple closestPointsB = b.findClosestPointsRect(_boundaryRect);
+        final double distanceB = _distanceBetweenPoints(
+          closestPointsB.a,
+          closestPointsB.b,
+        ).abs();
+        return distanceB.compareTo(distanceA);
+      })).first;
+    //print('justin out of ${invalidSides.length} invalid sides: $invalidSides, worst was $invalidSide');
+
+    // Find the nearest points on boundaryRect and the viewportSide that doesn't
+    // intersect to each other, and move the points on top of each other.
     final OffsetTuple closestPoints = invalidSide.findClosestPointsRect(_boundaryRect);
     final Offset difference = closestPoints.a - closestPoints.b;
-    print('justin for rect $_boundaryRect and invalidSide $invalidSide, closest point onside: ${closestPoints.a}, onrect: ${closestPoints.b}, so move by $difference');
+    //print('justin for rect $_boundaryRect and invalidSide $invalidSide, closest point onside: ${closestPoints.a}, onrect: ${closestPoints.b}, so move by $difference');
 
     final Matrix4 correctedMatrix = matrix.clone()
         ..translate(difference.dx, difference.dy);
@@ -706,12 +720,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       correctedNextViewport.point0,
     );
 
-    // TODO(justinmc): Instead of identity matrix, return the original matrix?
-    // If the corrected matrix is still invalid, return the identity matrix.
     if (!correctedViewportSide01.intersectsRect(_boundaryRect)
         || !correctedViewportSide12.intersectsRect(_boundaryRect)
         || !correctedViewportSide23.intersectsRect(_boundaryRect)
         || !correctedViewportSide30.intersectsRect(_boundaryRect)) {
+      /*
       final LineSegment? correctedInvalidSide = <LineSegment?>[
         correctedViewportSide01,
         correctedViewportSide12,
@@ -720,11 +733,20 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       ].firstWhere((LineSegment? side) {
         return !side!.intersectsRect(_boundaryRect);
       }, orElse: () => null);
-      print('justin still invalid after correction! $correctedInvalidSide doesnt intersect $_boundaryRect');
+      */
+      // TODO(justinmc): It's currently possible to hit this case when panning
+      // into the corner after a rotation. Makes me think that the correction
+      // translation isn't right due to the rotation. However, it does seem to
+      // work in places other than corners.
+      // Corners are a tough case. 2 or even 3 sides will go invalid at the same
+      // time for a corner. It needs to translate such that both become valid.
+      //print('justin still invalid after correction! $correctedInvalidSide doesnt intersect $_boundaryRect for sides $correctedViewportSide01, $correctedViewportSide12, $correctedViewportSide23, $correctedViewportSide30');
       return Matrix4.identity();
     }
 
-    print('justin corrected it successfully!');
+    //print('justin corrected it successfully!');
+    // TODO(justinmc): Instead of identity matrix, return the original matrix?
+    // If the corrected matrix is still invalid, return the identity matrix.
     return correctedMatrix;
 
     /*
@@ -1333,12 +1355,17 @@ Axis? _getPanAxis(Offset point1, Offset point2) {
   return x.abs() > y.abs() ? Axis.horizontal : Axis.vertical;
 }
 
-// Returns the point located at the given distance and angle from the start.
-// Direction is in radians. A direction of zero points to the right of start.
+/// Returns the point located at the given distance and angle from the start.
+/// Direction is in radians. A direction of zero points to the right of start.
 @visibleForTesting
 Offset pointAt(Offset start, double direction, double distance) {
   final Offset fromOrigin = Offset.fromDirection(direction, distance);
   return fromOrigin + start;
+}
+
+// Simple 2D distance formula.
+double _distanceBetweenPoints(Offset a, Offset b) {
+  return math.sqrt(math.pow(b.dx - a.dx, 2) + math.pow(b.dy - a.dy, 2));
 }
 
 /// Represents a line segment between the two given points.
@@ -1390,7 +1417,6 @@ class LineSegment {
     );
     if (!(rOffset.dx >= rRect.left && rOffset.dx <= rRect.right
         && rOffset.dy >= rRect.top && rOffset.dy <= rRect.bottom)) {
-      print('justin not contained :( $rRect, $rOffset');
     }
     return rOffset.dx >= rRect.left && rOffset.dx <= rRect.right
         && rOffset.dy >= rRect.top && rOffset.dy <= rRect.bottom;
@@ -1403,6 +1429,8 @@ class LineSegment {
 
     final double x = vertical.p0.dx;
     final double intersectionY = nonVertical.slope * x + nonVertical.lineYIntercept;
+    assert(x.isFinite);
+    assert(intersectionY.isFinite);
     return Offset(x, intersectionY);
   }
 
@@ -1410,10 +1438,6 @@ class LineSegment {
   static bool _isVerticalAndInterceptsNonVertical(LineSegment vertical, LineSegment nonVertical) {
     final Offset intersection = _isVerticalAndInterceptsNonVerticalLineAt(vertical, nonVertical);
     return vertical.contains(intersection) && nonVertical.contains(intersection);
-  }
-
-  static double _distanceBetweenPoints(Offset a, Offset b) {
-    return math.sqrt(math.pow(b.dx - a.dx, 2) + math.pow(b.dy - a.dy, 2));
   }
 
   /// True iff the line containing this line segment also contains the given
@@ -1424,7 +1448,7 @@ class LineSegment {
       return offset.dx == p0.dx;
     }
     // Use the line formula with a tolerance.
-    return (offset.dy - (slope * offset.dx + lineYIntercept)).abs() <= 0.0000000000001;
+    return (offset.dy - (slope * offset.dx + lineYIntercept)).abs() <= 0.000000000001;
   }
 
   /// True iff the offset lies on the line segment, inclusively.
@@ -1440,9 +1464,10 @@ class LineSegment {
 
   /// For the infintely long lines represented by these line segments, return
   /// the point at which they intersect, or null if parallel.
+  @visibleForTesting
   Offset? linesIntersectAt(LineSegment lineSegment) {
     // Return null if the lines are parallel, even if they overlap.
-    if (slope == lineSegment.slope) {
+    if (lineSegment.slope == slope || (lineSegment.slope.isInfinite && slope.isInfinite)) {
       return null;
     }
 
@@ -1471,7 +1496,7 @@ class LineSegment {
   /// True iff the given line segment intersects this one, inclusively.
   bool intersects(LineSegment lineSegment) {
     // If the slopes are the same, they intersect if they overlap.
-    if (lineSegment.slope == slope) {
+    if (lineSegment.slope == slope || (lineSegment.slope.isInfinite && slope.isInfinite)) {
       return contains(lineSegment.p0) || contains(lineSegment.p1);
     }
 

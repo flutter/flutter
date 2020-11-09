@@ -2,17 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
-
-import 'gesture_utils.dart';
+import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
 
 void main() {
   // Helper function for comparing all dimensions of a Vector3 with some
@@ -1061,15 +1057,15 @@ void main() {
   group('pointAt', () {
     test('origin and 90 degrees', () {
       const double d = 10.0;
-      expectCloseToOffset(pointAt(Offset.zero, 0.0, d), Offset(d, 0.0));
-      expectCloseToOffset(pointAt(Offset.zero, math.pi/2, d), Offset(0.0, d));
-      expectCloseToOffset(pointAt(Offset.zero, math.pi, d), Offset(-d, 0.0));
-      expectCloseToOffset(pointAt(Offset.zero, 3*math.pi/2, d), Offset(0.0, -d));
-      expectCloseToOffset(pointAt(Offset.zero, 2*math.pi, d), Offset(d, 0.0));
-      expectCloseToOffset(pointAt(Offset.zero, 5*math.pi/2, d), Offset(0.0, d));
-      expectCloseToOffset(pointAt(Offset.zero, 3*math.pi, d), Offset(-d, 0.0));
-      expectCloseToOffset(pointAt(Offset.zero, 7*math.pi/2, d), Offset(0.0, -d));
-      expectCloseToOffset(pointAt(Offset.zero, 4*math.pi, d), Offset(d, 0.0));
+      expectCloseToOffset(pointAt(Offset.zero, 0.0, d), const Offset(d, 0.0));
+      expectCloseToOffset(pointAt(Offset.zero, math.pi/2, d), const Offset(0.0, d));
+      expectCloseToOffset(pointAt(Offset.zero, math.pi, d), const Offset(-d, 0.0));
+      expectCloseToOffset(pointAt(Offset.zero, 3*math.pi/2, d), const Offset(0.0, -d));
+      expectCloseToOffset(pointAt(Offset.zero, 2*math.pi, d), const Offset(d, 0.0));
+      expectCloseToOffset(pointAt(Offset.zero, 5*math.pi/2, d), const Offset(0.0, d));
+      expectCloseToOffset(pointAt(Offset.zero, 3*math.pi, d), const Offset(-d, 0.0));
+      expectCloseToOffset(pointAt(Offset.zero, 7*math.pi/2, d), const Offset(0.0, -d));
+      expectCloseToOffset(pointAt(Offset.zero, 4*math.pi, d), const Offset(d, 0.0));
     });
 
     test('origin and 45 degrees', () {
@@ -1663,6 +1659,21 @@ void main() {
         expect(pair.b.dx, moreOrLessEquals(109.1, epsilon: 0.1));
         expect(pair.b.dy, moreOrLessEquals(109.1, epsilon: 0.1));
       });
+
+      test('real vertical example', () {
+        const LineSegment a = LineSegment(
+          Offset(307.0, 157.1),
+          Offset(307.0, 90.2),
+        );
+        const LineSegment b = LineSegment(
+          Offset(300.0, 0.0),
+          Offset(300.0, 300.0),
+        );
+
+        final OffsetTuple pair = a.findClosestPointsLineSegment(b);
+        expect(pair.a, const Offset(307.0, 157.1));
+        expect(pair.b, const Offset(300.0, 157.1));
+      });
     });
 
     group('findClosestPointsRect', () {
@@ -1760,6 +1771,22 @@ void main() {
         const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 300.0);
 
         expect(lineSegment.intersectsRect(rect), isTrue);
+      });
+    });
+
+    group('linesIntersectAt', () {
+      test('returns null for line segments with Infinity and -Infinity slopes', () {
+        const LineSegment a = LineSegment(
+          Offset(307.0, 157.1),
+          Offset(307.0, 90.2),
+        );
+        const LineSegment b = LineSegment(
+          Offset(300.0, 0.0),
+          Offset(300.0, 300.0),
+        );
+
+        final Offset? lineIntersection = a.linesIntersectAt(b);
+        expect(lineIntersection, null);
       });
     });
   });
