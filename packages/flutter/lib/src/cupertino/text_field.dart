@@ -634,6 +634,7 @@ class CupertinoTextField extends StatefulWidget {
 class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate {
   final GlobalKey _clearGlobalKey = GlobalKey();
 
+  final ActionDispatcher _actionDispatcher = ActionDispatcher();
   RestorableTextEditingController? _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
@@ -998,29 +999,36 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       ),
     );
 
-    return TextSelectionGestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onSingleTapUp: (TapUpDetails details) {
-        // TODO(justimc): This is called after the action handler is called (via
-        // the gesturedetector on editable text). How can I intercept that?
-        /*
-        // Because TextSelectionGestureDetector listens to taps that happen on
-        // widgets in front of it, tapping the clear button will also trigger
-        // this handler. If the clear button widget recognizes the up event,
-        // then do not handle it.
-        if (_state._clearGlobalKey.currentContext != null) {
-          final RenderBox renderBox = _state._clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
-          final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
-          if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
-            return;
-          }
-        }
-        super.onSingleTapUp(details);
-        _state._requestKeyboard();
-        if (_state.widget.onTap != null)
-          _state.widget.onTap!();
-          */
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        SingleTapUpTextIntent: CallbackAction<SingleTapUpTextIntent>(
+          onInvoke: (SingleTapUpTextIntent intent) {
+            print('justin Cupertino\'s SingleTapUpTextIntent action was invoked');
+            // Because TextSelectionGestureDetector listens to taps that happen on
+            // widgets in front of it, tapping the clear button will also trigger
+            // this handler. If the clear button widget recognizes the up event,
+            // then do not handle it.
+            if (_clearGlobalKey.currentContext != null) {
+              final RenderBox renderBox = _clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
+              final Offset localOffset = renderBox.globalToLocal(intent.details.globalPosition);
+              if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
+                return;
+              }
+            }
+            Actions.invoke<SingleTapUpTextIntent>(context, intent);
+            // TODO(justinmc): I'm still figuring out how we'll handle
+            // requesting the keyboard and the onTap param.
+            /*
+            _requestKeyboard();
+            if (widget.onTap != null)
+              widget.onTap!();
+            */
+          },
+        ),
       },
+      // TODO(justinmc): Should I be looking this up, or is just creating a new
+      // one like this ok?
+      dispatcher: _actionDispatcher,
       child: Semantics(
         enabled: enabled,
         onTap: !enabled ? null : () {

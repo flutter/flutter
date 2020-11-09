@@ -51,6 +51,7 @@ class TextEditingActionsMap {
   CallbackAction<SingleTapUpTextIntent> get singleTapUpTextAction {
     _singleTapUpTextAction ??= CallbackAction<SingleTapUpTextIntent>(
       onInvoke: (SingleTapUpTextIntent intent) {
+        print('justin TEB singleTapUp action invoked');
         intent.editableTextState.hideToolbar();
         if (intent.editableTextState.widget.selectionEnabled) {
           switch (platform) {
