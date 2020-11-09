@@ -37,6 +37,7 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
     fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('pubspec.lock').createSync();
     fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
     fileSystem.file('.dart_tool/version').writeAsStringSync('a');
     fileSystem.file('version').writeAsStringSync('a');
@@ -74,6 +75,7 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
     fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('pubspec.lock').createSync();
     fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
     fileSystem.file('.dart_tool/version').writeAsStringSync('a');
     fileSystem.file('version').writeAsStringSync('b');
@@ -112,6 +114,7 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
     fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('pubspec.lock').createSync();
     fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
     fileSystem.file('version').writeAsStringSync('b');
 
@@ -150,6 +153,7 @@ void main() {
     final BufferLogger logger = BufferLogger.test();
 
     fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('pubspec.lock').createSync();
     fileSystem.file('version').writeAsStringSync('b');
 
     final Pub pub = Pub(
@@ -172,6 +176,42 @@ void main() {
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
+  testWithoutContext('checkUpToDate does not skip pub get if the pubspec.lock does not exist', () async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>[
+        'bin/cache/dart-sdk/bin/pub',
+        '--verbosity=warning',
+        'get',
+        '--no-precompile',
+      ]),
+    ]);
+    final BufferLogger logger = BufferLogger.test();
+
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('version').writeAsStringSync('b');
+    fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
+    fileSystem.file('.dart_tool/version').writeAsStringSync('b');
+
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      usage: MockUsage(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
+      botDetector: const BotDetectorAlwaysNo(),
+    );
+
+    await pub.get(
+      context: PubContext.pubGet,
+      checkUpToDate: true,
+    );
+
+    expect(processManager.hasRemainingExpectations, false);
+    expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
+  });
 
   testWithoutContext('checkUpToDate does not skip pub get if the package config is older that the pubspec', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
@@ -186,10 +226,52 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
     fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('pubspec.lock').createSync();
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..setLastModifiedSync(DateTime(1991));
     fileSystem.file('version').writeAsStringSync('b');
+
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      usage: MockUsage(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
+      botDetector: const BotDetectorAlwaysNo(),
+    );
+
+    await pub.get(
+      context: PubContext.pubGet,
+      checkUpToDate: true,
+    );
+
+    expect(processManager.hasRemainingExpectations, false);
+    expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
+  });
+
+  testWithoutContext('checkUpToDate does not skip pub get if the pubspec.lock is older that the pubspec', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>[
+        'bin/cache/dart-sdk/bin/pub',
+        '--verbosity=warning',
+        'get',
+        '--no-precompile',
+      ])
+    ]);
+    final BufferLogger logger = BufferLogger.test();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('pubspec.lock')
+      ..createSync()
+      ..setLastModifiedSync(DateTime(1991));
+    fileSystem.file('.dart_tool/package_config.json')
+      .createSync(recursive: true);
+    fileSystem.file('version').writeAsStringSync('b');
+    fileSystem.file('.dart_tool/version').writeAsStringSync('b');
 
     final Pub pub = Pub(
       fileSystem: fileSystem,

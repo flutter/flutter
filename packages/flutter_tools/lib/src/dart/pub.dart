@@ -177,6 +177,9 @@ class _DefaultPub implements Pub {
       _fileSystem.path.join(Cache.flutterRoot, 'version'));
     final File pubspecYaml = _fileSystem.file(
       _fileSystem.path.join(directory, 'pubspec.yaml'));
+    final File pubLockFile = _fileSystem.file(
+      _fileSystem.path.join(directory, 'pubspec.lock')
+    );
 
     // If the pubspec.yaml is older than the package config file and the last
     // flutter version used is the same as the current version skip pub get.
@@ -185,6 +188,8 @@ class _DefaultPub implements Pub {
     // can be worked around by manually running pub.
     if (checkUpToDate &&
         packageConfigFile.existsSync() &&
+        pubLockFile.existsSync() &&
+        pubspecYaml.lastModifiedSync().isBefore(pubLockFile.lastModifiedSync()) &&
         pubspecYaml.lastModifiedSync().isBefore(packageConfigFile.lastModifiedSync()) &&
         lastVersion.existsSync() &&
         lastVersion.readAsStringSync() == currentVersion.readAsStringSync()) {
