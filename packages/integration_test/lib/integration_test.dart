@@ -323,7 +323,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   @override
   Timeout get defaultTestTimeout => _defaultTestTimeout ?? super.defaultTestTimeout;
 
-  /// Override the default timeout for [testWidgets].
+  /// Configures the default timeout for [testWidgets].
   ///
   /// See [TestWidgetsFlutterBinding.defaultTestTimeout] for more details.
   set defaultTestTimeout(Timeout timeout) => _defaultTestTimeout = timeout;
