@@ -2850,6 +2850,24 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   }
 
   @override
+  bool valid = true;
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    valid = true;
+  }
+
+  @override
+  void detach() {
+    // It's possible that the renderObject be detached during mouse events
+    // dispatching, set the [MouseTrackerAnnotation.valid] false to prevent
+    // the callbacks from being called.
+    valid = false;
+    super.detach();
+  }
+
+  @override
   void performResize() {
     size = constraints.biggest;
   }

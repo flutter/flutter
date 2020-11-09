@@ -88,7 +88,7 @@ void main() {
       equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: [enter, exit])'),
     );
 
-    const MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation();
+    final MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation();
     expect(
       annotation2.toString(),
       equals('MouseTrackerAnnotation#${shortHash(annotation2)}(callbacks: <none>)'),
@@ -101,6 +101,15 @@ void main() {
     expect(
       annotation3.toString(),
       equals('MouseTrackerAnnotation#${shortHash(annotation3)}(callbacks: [enter], cursor: SystemMouseCursor(grab))'),
+    );
+
+    final MouseTrackerAnnotation annotation4 = MouseTrackerAnnotation(
+      onEnter: (_) {},
+      valid: false,
+    );
+    expect(
+      annotation4.toString(),
+      equals('MouseTrackerAnnotation#${shortHash(annotation4)}(callbacks: [enter], valid: false)'),
     );
   });
 

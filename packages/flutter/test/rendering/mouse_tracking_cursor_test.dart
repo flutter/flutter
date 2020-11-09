@@ -68,7 +68,7 @@ void main() {
   });
 
   test('Should work on platforms that does not support mouse cursor', () async {
-    const TestAnnotationTarget annotation = TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
+    final TestAnnotationTarget annotation = TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
 
     _setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[annotation],
@@ -104,7 +104,7 @@ void main() {
     logCursors.clear();
 
     // Pointer moves into the annotation
-    annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
+    annotation = TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(5.0, 0.0)),
     ]));
@@ -115,7 +115,7 @@ void main() {
     logCursors.clear();
 
     // Pointer moves within the annotation
-    annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
+    annotation = TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(10.0, 0.0)),
     ]));
@@ -153,7 +153,7 @@ void main() {
     );
 
     // Pointer is added in the annotation.
-    annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
+    annotation = TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
     ]));
@@ -185,7 +185,7 @@ void main() {
     logCursors.clear();
 
     // Pointer moves back into the annotation
-    annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
+    annotation = TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 0.0)),
     ]));
@@ -223,7 +223,7 @@ void main() {
     logCursors.clear();
 
     // Synthesize a new frame while changing annotation
-    annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
+    annotation = TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
     _binding.scheduleMouseTrackerPostFrameCheck();
     _binding.flushPostFrameCallbacks(Duration.zero);
 
@@ -233,7 +233,7 @@ void main() {
     logCursors.clear();
 
     // Synthesize a new frame without changing annotation
-    annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
+    annotation = TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
     _binding.scheduleMouseTrackerPostFrameCheck();
 
     expect(logCursors, <_CursorUpdateDetails>[
@@ -258,9 +258,9 @@ void main() {
     );
 
     annotations = <TestAnnotationTarget>[
-      const TestAnnotationTarget(cursor: MouseCursor.defer),
-      const TestAnnotationTarget(cursor: SystemMouseCursors.click),
-      const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing),
+      TestAnnotationTarget(cursor: MouseCursor.defer),
+      TestAnnotationTarget(cursor: SystemMouseCursors.click),
+      TestAnnotationTarget(cursor: SystemMouseCursors.grabbing),
     ];
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
@@ -286,9 +286,9 @@ void main() {
     );
 
     annotations = <TestAnnotationTarget>[
-      const TestAnnotationTarget(cursor: MouseCursor.defer),
-      const TestAnnotationTarget(cursor: MouseCursor.defer),
-      const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing),
+      TestAnnotationTarget(cursor: MouseCursor.defer),
+      TestAnnotationTarget(cursor: MouseCursor.defer),
+      TestAnnotationTarget(cursor: SystemMouseCursors.grabbing),
     ];
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
@@ -324,7 +324,7 @@ void main() {
     logCursors.clear();
 
     // Pointer moved to an annotation specified with the default cursor
-    annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.basic);
+    annotation = TestAnnotationTarget(cursor: SystemMouseCursors.basic);
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(5.0, 0.0)),
     ]));
@@ -358,7 +358,7 @@ void main() {
     );
 
     // Pointer is added to the annotation, then removed
-    annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.click);
+    annotation = TestAnnotationTarget(cursor: SystemMouseCursors.click);
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
       _pointerData(PointerChange.hover, const Offset(5.0, 0.0)),
@@ -385,9 +385,9 @@ void main() {
     _setUpMouseTracker(
       annotationFinder: (Offset position) sync* {
         if (position.dx > 200) {
-          yield const TestAnnotationTarget(cursor: SystemMouseCursors.forbidden);
+          yield TestAnnotationTarget(cursor: SystemMouseCursors.forbidden);
         } else if (position.dx > 100) {
-          yield const TestAnnotationTarget(cursor: SystemMouseCursors.click);
+          yield TestAnnotationTarget(cursor: SystemMouseCursors.click);
         } else {}
       },
       logCursors: logCursors,

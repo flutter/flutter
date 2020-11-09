@@ -51,14 +51,15 @@ class MouseTrackerAnnotation with Diagnosticable {
   /// Creates an immutable [MouseTrackerAnnotation].
   ///
   /// All arguments are optional. The [cursor] must not be null.
-  const MouseTrackerAnnotation({
+  MouseTrackerAnnotation({
     this.onEnter,
     this.onExit,
     this.cursor = MouseCursor.defer,
+    this.valid = true,
   }) : assert(cursor != null);
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
-  /// entered the region.
+  /// entered the region and [valid] is true.
   ///
   /// This callback is triggered when the pointer has started to be contained by
   /// the region, either due to a pointer event, or due to the movement or
@@ -72,7 +73,7 @@ class MouseTrackerAnnotation with Diagnosticable {
   final PointerEnterEventListener? onEnter;
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
-  /// exited the region.
+  /// exited the region and [valid] is true.
   ///
   /// This callback is triggered when the pointer has stopped being contained
   /// by the region, either due to a pointer event, or due to the movement or
@@ -100,6 +101,9 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///  * [MouseRegion.cursor], which provide values to this field.
   final MouseCursor cursor;
 
+  /// Indicates that this annotation is valid for use when dispatching the mouse events.
+  bool valid;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -112,6 +116,7 @@ class MouseTrackerAnnotation with Diagnosticable {
       ifEmpty: '<none>',
     ));
     properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: MouseCursor.defer));
+    properties.add(DiagnosticsProperty<bool>('valid', valid, defaultValue: true));
   }
 }
 
@@ -332,17 +337,10 @@ abstract class BaseMouseTracker extends ChangeNotifier {
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> _hitTestResultToAnnotations(HitTestResult result) {
     assert(result != null);
     final LinkedHashMap<MouseTrackerAnnotation, Matrix4> annotations = <MouseTrackerAnnotation, Matrix4>{}
-      as LinkedHashMap<MouseTrackerAnnotation, Matrix4>;
+        as LinkedHashMap<MouseTrackerAnnotation, Matrix4>;
     for (final HitTestEntry entry in result.path) {
-      final HitTestTarget target = entry.target;
-      if (target is MouseTrackerAnnotation) {
-        if (target is RenderObject) {
-          // It's possible that the renderObject was detached after hitTest, so we should ignore it.
-          // https://github.com/flutter/flutter/issues/67044
-          if (!target.attached)
-            continue;
-        }
-        annotations[target as MouseTrackerAnnotation] = entry.transform!;
+      if (entry.target is MouseTrackerAnnotation) {
+        annotations[entry.target as MouseTrackerAnnotation] = entry.transform!;
       }
     }
     return annotations;
@@ -494,7 +492,7 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
     final PointerExitEvent baseExitEvent = PointerExitEvent.fromMouseEvent(latestEvent);
     lastAnnotations.forEach((MouseTrackerAnnotation annotation, Matrix4 transform) {
       if (!nextAnnotations.containsKey(annotation))
-        if (annotation.onExit != null)
+        if (annotation.valid && annotation.onExit != null)
           annotation.onExit!(baseExitEvent.transformed(lastAnnotations[annotation]));
     });
 
@@ -505,7 +503,7 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
     ).toList();
     final PointerEnterEvent baseEnterEvent = PointerEnterEvent.fromMouseEvent(latestEvent);
     for (final MouseTrackerAnnotation annotation in enteringAnnotations.reversed) {
-      if (annotation.onEnter != null)
+      if (annotation.valid && annotation.onEnter != null)
         annotation.onEnter!(baseEnterEvent.transformed(nextAnnotations[annotation]));
     }
   }

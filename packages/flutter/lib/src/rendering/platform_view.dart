@@ -733,6 +733,9 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   MouseCursor get cursor => MouseCursor.uncontrolled;
 
   @override
+  bool valid = true;
+
+  @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     if (event is PointerDownEvent) {
       _gestureRecognizer!.addPointer(event);
