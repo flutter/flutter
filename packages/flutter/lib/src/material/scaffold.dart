@@ -274,21 +274,20 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   }
 
   void _register(ScaffoldState newScaffold) {
-    // bool nestedScaffoldsDetected = false;
-    // Check to see if this Scaffold is a child of any _scaffolds the messenger
-    // is currently managing.
-    final ScaffoldState? parent = Scaffold.maybeOf(newScaffold.context);
-    // if (_scaffolds.contains(parent))
-      // nestedScaffoldsDetected = true;
-    // // Check if the registering Scaffold is a parent of any _scaffolds
-    // for (final ScaffoldState registeredScaffold in _scaffolds) {
-    //   final ScaffoldState? parent = Scaffold.maybeOf(registeredScaffold.context);
-    //   if (newScaffold == parent)
-    //     nestedScaffoldsDetected = true;
-    // }
+    bool nestedScaffoldsDetected = false;
+    // Check to see if any of _scaffolds are a parent of newScaffold.
+    final ScaffoldState? parent = newScaffold.context.findAncestorStateOfType<ScaffoldState>();
+    if (_scaffolds.contains(parent))
+      nestedScaffoldsDetected = true;
+    // Check if newScaffold is a parent of any _scaffolds
+    for (final ScaffoldState registeredScaffold in _scaffolds) {
+      final ScaffoldState? parent = registeredScaffold.context.findAncestorStateOfType<ScaffoldState>();
+      if (newScaffold == parent)
+        nestedScaffoldsDetected = true;
+    }
 
     assert(() {
-      if (_scaffolds.contains(parent)) {
+      if (nestedScaffoldsDetected) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Nested Scaffolds have registered with the ScaffoldMessenger.'),
           ErrorDescription(
@@ -485,6 +484,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   @override
   void dispose() {
+    print('ScaffoldMessenger.dispose');
     _snackBarController?.dispose();
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
@@ -2813,6 +2813,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    print('Scaffold.dispose');
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
     _snackBarController?.dispose();
     _snackBarTimer?.cancel();

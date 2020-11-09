@@ -2144,7 +2144,7 @@ void main() {
     ));
   });
 
-  testWidgets('ScaffoldMessenger asserts', (WidgetTester tester) async {
+  testWidgets('ScaffoldMessenger asserts when nested Scaffolds register for SnackBars', (WidgetTester tester) async {
     final List<dynamic> exceptions = <dynamic>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
@@ -2165,13 +2165,13 @@ void main() {
     expect(error.diagnostics[2].level, DiagnosticLevel.hint);
     expect(error.toStringDeep(),
       'FlutterError\n'
-        '   Nested Scaffolds have registered with the ScaffoldMessenger.\n'
-        '   If nested Scaffolds were to share the same ScaffoldMessenger,\n'
-        '   then all would receive a SnackBar at the same time, resulting in\n'
-        '   multiple SnackBars in your UI.\n'
-        '   This is typically resolved by putting a ScaffoldMessenger in\n'
-        '   between the levels of nested Scaffolds. Doing so will set a\n'
-        '   separate SnackBar scope for these Scaffolds.\n'
+      '   Nested Scaffolds have registered with the ScaffoldMessenger.\n'
+      '   If nested Scaffolds were to share the same ScaffoldMessenger,\n'
+      '   then all would receive a SnackBar at the same time, resulting in\n'
+      '   multiple SnackBars in your UI.\n'
+      '   This is typically resolved by putting a ScaffoldMessenger in\n'
+      '   between the levels of nested Scaffolds. Doing so will set a\n'
+      '   separate SnackBar scope for these Scaffolds.\n'
     );
   });
 }
