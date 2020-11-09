@@ -379,7 +379,8 @@ void main() {
                     ..onTapUp = (_) {logs.add('tapUp');}
                     ..onTapDown = (_) {logs.add('tapDown');}
                     ..onTapCancel = () {logs.add('WRONG');}
-                    ..onSecondaryTapDown = (_) {logs.add('WRONG');};
+                    ..onSecondaryTapDown = (_) {logs.add('WRONG');}
+                    ..onTertiaryTapDown = (_) {logs.add('WRONG');};
                 },
               ),
               child: Container(),

@@ -53,19 +53,19 @@ void main() {
     return _testFile('trivial', missingDependencyTests, missingDependencyTests);
   });
 
-  testUsingContext('flutter test should report which user created widget caused the error', () async {
+  testUsingContext('flutter test should report which user-created widget caused the error', () async {
     Cache.flutterRoot = '../..';
     return _testFile('print_user_created_ancestor', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--track-widget-creation']);
   });
 
-  testUsingContext('flutter test should report which user created widget caused the error - no flag', () async {
+  testUsingContext('flutter test should report which user-created widget caused the error - no flag', () async {
     Cache.flutterRoot = '../..';
     return _testFile('print_user_created_ancestor_no_flag', automatedTestsDirectory, flutterTestDirectory,
        extraArguments: const <String>['--no-track-widget-creation']);
   });
 
-  testUsingContext('flutter test should report correct created widget caused the error', () async {
+  testUsingContext('flutter test should report the correct user-created widget that caused the error', () async {
     Cache.flutterRoot = '../..';
     return _testFile('print_correct_local_widget', automatedTestsDirectory, flutterTestDirectory,
       extraArguments: const <String>['--track-widget-creation']);

@@ -1,0 +1,37 @@
+/// Flutter code sample for {{element}}
+
+{{description}}
+
+import 'package:flutter/widgets.dart';
+
+{{code-imports}}
+
+void main() => runApp(new MyApp());
+
+/// This is the main application widget.
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return WidgetsApp(
+      title: 'Flutter Code Sample',
+      home: MyStatefulWidget(),
+      color: const Color(0xffffffff),
+    );
+  }
+}
+
+{{code-preamble}}
+
+/// This is the stateful widget that the main application instantiates.
+class MyStatefulWidget extends StatefulWidget {
+  MyStatefulWidget({Key key}) : super(key: key);
+
+  @override
+  _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
+}
+
+/// This is the private State class that goes with MyStatefulWidget.
+/// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
+class _MyStatefulWidgetState extends State<MyStatefulWidget> with TickerProviderStateMixin {
+  {{code}}
+}

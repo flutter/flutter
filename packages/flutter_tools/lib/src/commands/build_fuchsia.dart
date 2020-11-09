@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../features.dart';
 import '../fuchsia/fuchsia_build.dart';
 import '../fuchsia/fuchsia_pm.dart';
 import '../globals.dart' as globals;
@@ -59,6 +60,12 @@ class BuildFuchsiaCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (!featureFlags.isFuchsiaEnabled) {
+      throwToolExit(
+        '"build fuchsia" is currently disabled. See "flutter config" for more '
+        'information.'
+      );
+    }
     final BuildInfo buildInfo = getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!globals.platform.isLinux && !globals.platform.isMacOS) {

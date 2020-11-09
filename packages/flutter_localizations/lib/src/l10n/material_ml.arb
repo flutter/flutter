@@ -70,14 +70,14 @@
   "dateRangePickerHelpText": "ശ്രേണി തിരഞ്ഞെടുക്കുക",
   "calendarModeButtonLabel": "കലണ്ടറിലേക്ക് മാറുക",
   "inputDateModeButtonLabel": "ഇൻപുട്ടിലേക്ക് മാറുക",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "timePickerDialHelpText": "സമയം തിരഞ്ഞെടുക്കുക",
+  "timePickerInputHelpText": "സമയം നൽകുക",
+  "timePickerHourLabel": "മണിക്കൂർ",
+  "timePickerMinuteLabel": "മിനിറ്റ്",
+  "invalidTimeLabel": "സാധുവായ സമയം നൽകുക",
+  "dialModeButtonLabel": "ഡയൽ പിക്കർ മോഡിലേക്ക് മാറുക",
+  "inputTimeModeButtonLabel": "ടെക്‌സ്‌റ്റ് ഇൻപുട്ട് മോഡിലേക്ക് മാറുക",
   "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "licensesPackageDetailTextOne": "ഒരു ലൈസൻസ്",
+  "licensesPackageDetailTextOther": "$licenseCount ലൈസൻസുകൾ"
 }

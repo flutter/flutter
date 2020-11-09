@@ -4,11 +4,13 @@
 
 // @dart = 2.8
 
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../painting/mocks_for_image_cache.dart';
+import '../../painting/image_data.dart';
 
 List<int> selectedTabs;
 
@@ -287,7 +289,7 @@ void main() {
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: const ImageIcon(TestImageProvider(24, 23)), title: Text('$i')),
+                  (int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), title: Text('$i')),
                 ),
               ),
               tabBuilder: (BuildContext context, int index) => const Text('content'),
@@ -322,14 +324,14 @@ void main() {
 
 CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
   return CupertinoTabBar(
-    items: const <BottomNavigationBarItem>[
+    items: <BottomNavigationBarItem>[
       BottomNavigationBarItem(
-        icon: ImageIcon(TestImageProvider(24, 24)),
-        title: Text('Tab 1'),
+        icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+        title: const Text('Tab 1'),
       ),
       BottomNavigationBarItem(
-        icon: ImageIcon(TestImageProvider(24, 24)),
-        title: Text('Tab 2'),
+        icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+        title: const Text('Tab 2'),
       ),
     ],
     currentIndex: selectedTab,

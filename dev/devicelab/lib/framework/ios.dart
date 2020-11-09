@@ -5,7 +5,11 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:path/path.dart' as path;
+
 import 'utils.dart';
+
+typedef SimulatorFunction = Future<void> Function(String deviceId);
 
 void _checkExitCode(int code) {
   if (code != 0) {
@@ -98,4 +102,125 @@ Future<bool> containsBitcode(String pathToBinary) async {
     }
   });
   return !emptyBitcodeMarkerFound;
+}
+
+Future<bool> dartObservatoryBonjourServiceFound(String appBundlePath) async =>
+  (await eval(
+    'plutil',
+    <String>[
+      '-extract',
+      'NSBonjourServices',
+      'xml1',
+      '-o',
+      '-',
+      path.join(
+        appBundlePath,
+        'Info.plist',
+      ),
+    ],
+    canFail: true,
+  )).contains('_dartobservatory._tcp');
+
+Future<bool> localNetworkUsageFound(String appBundlePath) async =>
+  await exec(
+    'plutil',
+    <String>[
+      '-extract',
+      'NSLocalNetworkUsageDescription',
+      'xml1',
+      '-o',
+      '-',
+      path.join(
+        appBundlePath,
+        'Info.plist',
+      ),
+    ],
+    canFail: true,
+  ) == 0;
+
+/// Creates and boots a new simulator, passes the new simulator's identifier to
+/// `testFunction`.
+///
+/// Remember to call removeIOSimulator in the test teardown.
+Future<void> testWithNewIOSSimulator(
+  String deviceName,
+  SimulatorFunction testFunction, {
+  String deviceTypeId = 'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
+}) async {
+  // Xcode 11.4 simctl create makes the runtime argument optional, and defaults to latest.
+  // TODO(jmagman): Remove runtime parsing when devicelab upgrades to Xcode 11.4 https://github.com/flutter/flutter/issues/54889
+  final String availableRuntimes = await eval(
+    'xcrun',
+    <String>[
+      'simctl',
+      'list',
+      'runtimes',
+    ],
+    workingDirectory: flutterDirectory.path,
+  );
+
+  String iOSSimRuntime;
+
+  final RegExp iOSRuntimePattern = RegExp(r'iOS .*\) - (.*)');
+
+  for (final String runtime in LineSplitter.split(availableRuntimes)) {
+    // These seem to be in order, so allow matching multiple lines so it grabs
+    // the last (hopefully latest) one.
+    final RegExpMatch iOSRuntimeMatch = iOSRuntimePattern.firstMatch(runtime);
+    if (iOSRuntimeMatch != null) {
+      iOSSimRuntime = iOSRuntimeMatch.group(1).trim();
+      continue;
+    }
+  }
+  if (iOSSimRuntime == null) {
+    throw 'No iOS simulator runtime found. Available runtimes:\n$availableRuntimes';
+  }
+
+  final String deviceId = await eval(
+    'xcrun',
+    <String>[
+      'simctl',
+      'create',
+      deviceName,
+      deviceTypeId,
+      iOSSimRuntime,
+    ],
+    workingDirectory: flutterDirectory.path,
+  );
+  await eval(
+    'xcrun',
+    <String>[
+      'simctl',
+      'boot',
+      deviceId,
+    ],
+    workingDirectory: flutterDirectory.path,
+  );
+
+  await testFunction(deviceId);
+}
+
+/// Shuts down and deletes simulator with deviceId.
+Future<void> removeIOSimulator(String deviceId) async {
+  if (deviceId != null && deviceId != '') {
+    await eval(
+      'xcrun',
+      <String>[
+        'simctl',
+        'shutdown',
+        deviceId
+      ],
+      canFail: true,
+      workingDirectory: flutterDirectory.path,
+    );
+    await eval(
+      'xcrun',
+      <String>[
+        'simctl',
+        'delete',
+        deviceId],
+      canFail: true,
+      workingDirectory: flutterDirectory.path,
+    );
+  }
 }

@@ -65,21 +65,25 @@ void main() {
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
+    final File metadata = globals.fs.file('metadata')
+      ..writeAsStringSync('{}');
 
     // Missing ending offset.
     final File manifestMissingOffset = globals.fs.file('manifestA')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0],
         'sourcemap': <int>[0],
+        'metadata': <int>[0],
       }}));
     final File manifestOutOfBounds = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, 100],
         'sourcemap': <int>[0],
+        'metadata': <int>[0],
       }}));
 
-    expect(webAssetServer.write(source, manifestMissingOffset, sourcemap), isEmpty);
-    expect(webAssetServer.write(source, manifestOutOfBounds, sourcemap), isEmpty);
+    expect(webAssetServer.write(source, manifestMissingOffset, sourcemap, metadata), isEmpty);
+    expect(webAssetServer.write(source, manifestOutOfBounds, sourcemap, metadata), isEmpty);
   }));
 
   test('serves JavaScript files from in memory cache', () => testbed.run(() async {
@@ -87,12 +91,15 @@ void main() {
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
+    final File metadata = globals.fs.file('metadata')
+      ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
+        'metadata':  <int>[0, 2],
       }}));
-    webAssetServer.write(source, manifest, sourcemap);
+    webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js')));
@@ -103,6 +110,31 @@ void main() {
       containsPair(HttpHeaders.etagHeader, isNotNull)
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
+  }, overrides: <Type, Generator>{
+    Platform: () => linux,
+  }));
+
+  test('serves metadata files from in memory cache', () => testbed.run(() async {
+    const String metadataContents = '{"name":"foo"}';
+    final File source = globals.fs.file('source')
+      ..writeAsStringSync('main() {}');
+    final File sourcemap = globals.fs.file('sourcemap')
+      ..writeAsStringSync('{}');
+    final File metadata = globals.fs.file('metadata')
+      ..writeAsStringSync(metadataContents);
+    final File manifest = globals.fs.file('manifest')
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
+        'code': <int>[0, source.lengthSync()],
+        'sourcemap': <int>[0, sourcemap.lengthSync()],
+        'metadata':  <int>[0, metadata.lengthSync()],
+      }}));
+    webAssetServer.write(source, manifest, sourcemap, metadata);
+
+    final String merged = await webAssetServer.metadataContents('main_module.ddc_merged_metadata');
+    expect(merged, equals(metadataContents));
+
+    final String single = await webAssetServer.metadataContents('foo.js.metadata');
+    expect(single, equals(metadataContents));
   }, overrides: <Type, Generator>{
     Platform: () => linux,
   }));
@@ -164,12 +196,15 @@ void main() {
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
+    final File metadata = globals.fs.file('metadata')
+      ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
+        'metadata': <int>[0, 2],
       }}));
-    webAssetServer.write(source, manifest, sourcemap);
+    webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/bar.js')));
@@ -191,12 +226,15 @@ void main() {
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
+    final File metadata = globals.fs.file('metadata')
+      ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.dart.lib.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
+        'metadata': <int>[0, 2],
       }}));
-    webAssetServer.write(source, manifest, sourcemap);
+    webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.dart.js')));
@@ -209,12 +247,15 @@ void main() {
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
+    final File metadata = globals.fs.file('metadata')
+      ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
+        'metadata': <int>[0, 2],
       }}));
-    webAssetServer.write(source, manifest, sourcemap);
+    webAssetServer.write(source, manifest, sourcemap, metadata);
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://localhost/foo.js')));
 
@@ -401,6 +442,7 @@ void main() {
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+    outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
     outputFile.parent.childFile('.packages').writeAsStringSync('\n');
 
     final ResidentCompiler residentCompiler = MockResidentCompiler();
@@ -419,6 +461,8 @@ void main() {
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
+      nullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -511,6 +555,7 @@ void main() {
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+    outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
     outputFile.parent.childFile('.packages').writeAsStringSync('\n');
 
     final ResidentCompiler residentCompiler = MockResidentCompiler();
@@ -529,6 +574,8 @@ void main() {
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
+      nullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -637,12 +684,14 @@ void main() {
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
       chromiumLauncher: null,
+      nullAssertions: true,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -678,6 +727,8 @@ void main() {
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
+      nullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -701,6 +752,28 @@ void main() {
 
     await webDevFS.destroy();
   }));
+
+  test('allows frame embedding', () async {
+    final WebAssetServer webAssetServer = await WebAssetServer.start(
+      null,
+      'localhost',
+      0,
+      null,
+      true,
+      true,
+      const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+      ),
+      false,
+      Uri.base,
+      null,
+      testMode: true);
+
+    expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
+    await webAssetServer.dispose();
+  });
 }
 
 class MockHttpServer extends Mock implements HttpServer {}

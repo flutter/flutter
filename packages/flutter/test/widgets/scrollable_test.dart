@@ -182,8 +182,7 @@ void main() {
     await tester.pump();
     // The only applied velocity to the scrollable is the second fling that was in the
     // opposite direction.
-    expect(getScrollVelocity(tester), greaterThan(-1000.0));
-    expect(getScrollVelocity(tester), lessThan(0.0));
+    expect(getScrollVelocity(tester), -1000.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('No iOS/macOS momentum kept on hold gestures', (WidgetTester tester) async {
@@ -269,7 +268,7 @@ void main() {
     expect(getScrollOffset(tester), 30.0);
     await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 20));
     expect(getScrollOffset(tester), 30.5);
-    await gesture.moveBy(Offset.zero);
+    await gesture.moveBy(Offset.zero, timeStamp: const Duration(milliseconds: 21));
     // Stationary too long, threshold reset.
     await gesture.moveBy(Offset.zero, timeStamp: const Duration(milliseconds: 120));
     await gesture.moveBy(const Offset(0.0, -1.0), timeStamp: const Duration(milliseconds: 140));
@@ -389,11 +388,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
-
-    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
-    // of Platform.isMacOS, don't skip this on web anymore.
-    // https://github.com/flutter/flutter/issues/31366
-  }, skip: kIsWeb);
+  });
 
   testWidgets('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -438,11 +433,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
-
-    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
-    // of Platform.isMacOS, don't skip this on web anymore.
-    // https://github.com/flutter/flutter/issues/31366
-  }, skip: kIsWeb);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/43694
 
   testWidgets('Horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -482,11 +473,7 @@ void main() {
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)));
-
-    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
-    // of Platform.isMacOS, don't skip this on web anymore.
-    // https://github.com/flutter/flutter/issues/31366
-  }, skip: kIsWeb);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/43694
 
   testWidgets('Horizontal scrollables are scrolled the correct direction in RTL locales.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -529,11 +516,7 @@ void main() {
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)));
-
-    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
-    // of Platform.isMacOS, don't skip this on web anymore.
-    // https://github.com/flutter/flutter/issues/31366
-  }, skip: kIsWeb);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/43694
 
   testWidgets('Reversed vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -581,11 +564,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
-
-    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
-    // of Platform.isMacOS, don't skip this on web anymore.
-    // https://github.com/flutter/flutter/issues/31366
-  }, skip: kIsWeb);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/43694
 
   testWidgets('Reversed horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -627,11 +606,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
-
-    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
-    // of Platform.isMacOS, don't skip this on web anymore.
-    // https://github.com/flutter/flutter/issues/31366
-  }, skip: kIsWeb);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/43694
 
   testWidgets('Custom scrollables with a center sliver are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -685,11 +660,7 @@ void main() {
     // Goes up two past "center" where it started, so negative.
     expect(controller.position.pixels, equals(-100.0));
     expect(tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0)));
-
-    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
-    // of Platform.isMacOS, don't skip this on web anymore.
-    // https://github.com/flutter/flutter/issues/31366
-  }, skip: kIsWeb);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/43694
 
   testWidgets('Can recommendDeferredLoadingForContext - animation', (WidgetTester tester) async {
     final List<String> widgetTracker = <String>[];

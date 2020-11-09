@@ -1945,7 +1945,8 @@
       ],
       "gtk": [
         "Return",
-        "Enter"
+        "Enter",
+        "ISO_Enter"
       ],
       "windows": [
         "RETURN"
@@ -1969,7 +1970,8 @@
         257
       ],
       "gtk": [
-        65293
+        65293,
+        65076
       ],
       "windows": [
         13
@@ -2075,7 +2077,8 @@
       ],
       "gtk": [
         "Tab",
-        "KP_Tab"
+        "KP_Tab",
+        "ISO_Left_Tab"
       ],
       "windows": [
         "TAB"
@@ -2100,7 +2103,8 @@
       ],
       "gtk": [
         65289,
-        65417
+        65417,
+        65056
       ],
       "windows": [
         9

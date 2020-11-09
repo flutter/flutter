@@ -11,7 +11,7 @@ import 'dart:ui' as ui show Image, ImageByteFormat, ColorFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:quiver/testing/async.dart';
+import 'package:fake_async/fake_async.dart';
 
 import '../flutter_test_alternative.dart';
 import '../painting/mocks_for_image_cache.dart';
@@ -124,6 +124,21 @@ void main() {
 
     c = Decoration.lerp(a, b, 1.0) as BoxDecoration;
     expect(c.color, equals(b.color));
+  });
+
+  test('Decoration equality', () {
+    const BoxDecoration a = BoxDecoration(
+      color: Color(0xFFFFFFFF),
+      boxShadow: <BoxShadow>[BoxShadow()],
+    );
+
+    const BoxDecoration b = BoxDecoration(
+      color: Color(0xFFFFFFFF),
+      boxShadow: <BoxShadow>[BoxShadow()],
+    );
+
+    expect(a.hashCode, equals(b.hashCode));
+    expect(a, equals(b));
   });
 
   test('BoxDecorationImageListenerSync', () {

@@ -220,8 +220,10 @@ class TabController extends ChangeNotifier {
       _animationController
         .animateTo(_index.toDouble(), duration: duration, curve: curve)
         .whenCompleteOrCancel(() {
-          _indexIsChangingCount -= 1;
-          notifyListeners();
+          if (_animationController != null) { // don't notify if we've been disposed
+            _indexIsChangingCount -= 1;
+            notifyListeners();
+          }
         });
     } else {
       _indexIsChangingCount += 1;
@@ -315,6 +317,8 @@ class _TabControllerScope extends InheritedWidget {
 
 /// The [TabController] for descendant widgets that don't specify one
 /// explicitly.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=POtoEH-5l40}
 ///
 /// [DefaultTabController] is an inherited widget that is used to share a
 /// [TabController] with a [TabBar] or a [TabBarView]. It's used when sharing an

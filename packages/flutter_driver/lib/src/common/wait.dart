@@ -135,9 +135,9 @@ class SerializationException implements Exception {
 ///
 /// This class is sent from the driver script running on the host to the driver
 /// extension on device to perform waiting on a given condition. In the extension,
-/// it will be converted to a [WaitCondition] that actually defines the wait logic.
+/// it will be converted to a `WaitCondition` that actually defines the wait logic.
 ///
-/// If you subclass this, you also need to implement a [WaitCondition] in the extension.
+/// If you subclass this, you also need to implement a `WaitCondition` in the extension.
 abstract class SerializableWaitCondition {
   /// A const constructor to allow subclasses to be const.
   const SerializableWaitCondition();

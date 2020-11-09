@@ -12,17 +12,16 @@ import 'package:flutter/widgets.dart';
 
 import '../app_bar.dart';
 import '../back_button.dart';
-import '../button_bar.dart';
 import '../button_theme.dart';
 import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
 import '../dialog_theme.dart';
-import '../flat_button.dart';
 import '../icon_button.dart';
 import '../icons.dart';
 import '../material_localizations.dart';
 import '../scaffold.dart';
+import '../text_button.dart';
 import '../text_theme.dart';
 import '../theme.dart';
 
@@ -512,7 +511,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
             if (orientation == Orientation.landscape) entryModeIcon,
             ButtonTheme(
               minWidth: 64,
-              child: FlatButton(
+              child: TextButton(
                 onPressed: onConfirm,
                 child: Text(confirmText, style: saveButtonStyle),
               ),
@@ -655,19 +654,23 @@ class _InputDateRangePickerDialog extends StatelessWidget {
       onIconPressed: onToggleEntryMode,
     );
 
-    final Widget actions = ButtonBar(
-      buttonTextTheme: ButtonTextTheme.primary,
-      layoutBehavior: ButtonBarLayoutBehavior.constrained,
-      children: <Widget>[
-        FlatButton(
-          child: Text(cancelText ?? localizations.cancelButtonLabel),
-          onPressed: onCancel,
-        ),
-        FlatButton(
-          child: Text(confirmText ?? localizations.okButtonLabel),
-          onPressed: onConfirm,
-        ),
-      ],
+    final Widget actions = Container(
+      alignment: AlignmentDirectional.centerEnd,
+      constraints: const BoxConstraints(minHeight: 52.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: OverflowBar(
+        spacing: 8,
+        children: <Widget>[
+          TextButton(
+            child: Text(cancelText ?? localizations.cancelButtonLabel),
+            onPressed: onCancel,
+          ),
+          TextButton(
+            child: Text(confirmText ?? localizations.okButtonLabel),
+            onPressed: onConfirm,
+          ),
+        ],
+      ),
     );
 
     switch (orientation) {

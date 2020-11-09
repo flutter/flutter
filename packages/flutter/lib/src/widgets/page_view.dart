@@ -44,7 +44,7 @@ import 'viewport.dart';
 /// {@tool snippet}
 ///
 /// This widget introduces a [MaterialApp], [Scaffold] and [PageView] with two pages
-/// using the default constructor. Both pages contain a [RaisedButton] allowing you
+/// using the default constructor. Both pages contain an [ElevatedButton] allowing you
 /// to animate the [PageView] using a [PageController].
 ///
 /// ```dart
@@ -79,8 +79,7 @@ import 'viewport.dart';
 ///             Container(
 ///               color: Colors.red,
 ///               child: Center(
-///                 child: RaisedButton(
-///                   color: Colors.white,
+///                 child: ElevatedButton(
 ///                   onPressed: () {
 ///                     if (_pageController.hasClients) {
 ///                       _pageController.animateToPage(
@@ -97,8 +96,7 @@ import 'viewport.dart';
 ///             Container(
 ///               color: Colors.blue,
 ///               child: Center(
-///                 child: RaisedButton(
-///                   color: Colors.white,
+///                 child: ElevatedButton(
 ///                   onPressed: () {
 ///                     if (_pageController.hasClients) {
 ///                       _pageController.animateToPage(
@@ -393,8 +391,27 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   @override
+  void saveOffset() {
+    context.saveOffset(getPageFromPixels(pixels, viewportDimension));
+  }
+
+  @override
+  void restoreOffset(double offset, {bool initialRestore = false}) {
+    assert(initialRestore != null);
+    assert(offset != null);
+    if (initialRestore) {
+      _pageToUseOnStartup = offset;
+    } else {
+      jumpTo(getPixelsFromPage(offset));
+    }
+  }
+
+  @override
   bool applyViewportDimension(double viewportDimension) {
     final double oldViewportDimensions = this.viewportDimension;
+    if (viewportDimension == oldViewportDimensions) {
+      return true;
+    }
     final bool result = super.applyViewportDimension(viewportDimension);
     final double oldPixels = pixels;
     final double page = (oldPixels == null || oldViewportDimensions == 0.0) ? _pageToUseOnStartup : getPageFromPixels(oldPixels, oldViewportDimensions);
@@ -569,7 +586,10 @@ class PageView extends StatefulWidget {
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
+    this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(allowImplicitScrolling != null),
+       assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildListDelegate(children),
        super(key: key);
@@ -604,7 +624,10 @@ class PageView extends StatefulWidget {
     int itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
+    this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(allowImplicitScrolling != null),
+       assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
        super(key: key);
@@ -657,7 +680,7 @@ class PageView extends StatefulWidget {
   ///         child: Row(
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
-  ///             FlatButton(
+  ///             TextButton(
   ///               onPressed: () => _reverse(),
   ///               child: Text('Reverse items'),
   ///             ),
@@ -702,8 +725,11 @@ class PageView extends StatefulWidget {
     @required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
+    this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(childrenDelegate != null),
        assert(allowImplicitScrolling != null),
+       assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
        super(key: key);
 
@@ -719,6 +745,9 @@ class PageView extends StatefulWidget {
   /// the current page and user attempts to move it to the next element, focus
   /// will traverse to the next page in the page view.
   final bool allowImplicitScrolling;
+
+  /// {@macro flutter.widgets.scrollable.restorationId}
+  final String restorationId;
 
   /// The axis along which the page view scrolls.
   ///
@@ -770,6 +799,11 @@ class PageView extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
 
   @override
   _PageViewState createState() => _PageViewState();
@@ -823,6 +857,7 @@ class _PageViewState extends State<PageView> {
         axisDirection: axisDirection,
         controller: widget.controller,
         physics: physics,
+        restorationId: widget.restorationId,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return Viewport(
             // TODO(dnfield): we should provide a way to set cacheExtent
@@ -832,6 +867,7 @@ class _PageViewState extends State<PageView> {
             cacheExtentStyle: CacheExtentStyle.viewport,
             axisDirection: axisDirection,
             offset: position,
+            clipBehavior: widget.clipBehavior,
             slivers: <Widget>[
               SliverFillViewport(
                 viewportFraction: widget.controller.viewportFraction,

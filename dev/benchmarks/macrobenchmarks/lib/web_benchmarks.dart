@@ -41,7 +41,8 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchCardInfiniteScroll.benchmarkName: () => BenchCardInfiniteScroll.forward(),
   BenchCardInfiniteScroll.benchmarkNameBackward: () => BenchCardInfiniteScroll.backward(),
   BenchClippedOutPictures.benchmarkName: () => BenchClippedOutPictures(),
-  BenchDrawRect.benchmarkName: () => BenchDrawRect(),
+  BenchDrawRect.benchmarkName: () => BenchDrawRect.staticPaint(),
+  BenchDrawRect.variablePaintBenchmarkName: () => BenchDrawRect.variablePaint(),
   BenchPathRecording.benchmarkName: () => BenchPathRecording(),
   BenchTextOutOfPictureBounds.benchmarkName: () => BenchTextOutOfPictureBounds(),
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
@@ -70,6 +71,18 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
     '${_galleryBenchmarkPrefix}_studies_perf': () => GalleryRecorder(
       benchmarkName: '${_galleryBenchmarkPrefix}_studies_perf',
       shouldRunPredicate: (String demo) => typeOfDemo(demo) == DemoType.study,
+    ),
+    '${_galleryBenchmarkPrefix}_unanimated_perf': () => GalleryRecorder(
+      benchmarkName: '${_galleryBenchmarkPrefix}_unanimated_perf',
+      shouldRunPredicate: (String demo) => typeOfDemo(demo) == DemoType.unanimatedWidget,
+    ),
+    '${_galleryBenchmarkPrefix}_animated_perf': () => GalleryRecorder(
+      benchmarkName: '${_galleryBenchmarkPrefix}_animated_perf',
+      shouldRunPredicate: (String demo) => typeOfDemo(demo) == DemoType.animatedWidget,
+    ),
+    '${_galleryBenchmarkPrefix}_scroll_perf': () => GalleryRecorder(
+      benchmarkName: '${_galleryBenchmarkPrefix}_scroll_perf',
+      testScrollsOnly: true,
     ),
   },
 };

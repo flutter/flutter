@@ -290,7 +290,7 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// If a [CupertinoSwitch] is created, the following parameters are
   /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
-  /// [activeThumbImage], [inactiveThumbImage], [materialTapTargetSize].
+  /// [activeThumbImage], [inactiveThumbImage].
   const SwitchListTile.adaptive({
     Key key,
     @required this.value,

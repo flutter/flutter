@@ -4,7 +4,9 @@
 
 import 'package:meta/meta.dart';
 
+import 'base/config.dart';
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
@@ -31,6 +33,7 @@ class BuildInfo {
     this.performanceMeasurementFile,
     this.packagesPath = '.packages',
     this.nullSafetyMode = NullSafetyMode.autodetect,
+    this.codeSizeDirectory,
   });
 
   final BuildMode mode;
@@ -79,7 +82,7 @@ class BuildInfo {
   /// A "x.y.z" string used as the version number shown to users.
   /// For each new version of your app, you will provide a version number to differentiate it from previous versions.
   /// On Android it is used as versionName.
-  /// On Xcode builds it is used as CFBundleShortVersionString,
+  /// On Xcode builds it is used as CFBundleShortVersionString.
   final String buildName;
 
   /// An optional directory path to save debugging information from dwarf stack
@@ -90,7 +93,7 @@ class BuildInfo {
   /// Whether to apply dart source code obfuscation.
   final bool dartObfuscation;
 
-  /// An optional path to a JSON containing object SkSL shaders
+  /// An optional path to a JSON containing object SkSL shaders.
   ///
   /// Currently this is only supported for Android builds.
   final String bundleSkSLPath;
@@ -110,6 +113,10 @@ class BuildInfo {
   /// This is not considered a build input and will not force assemble to
   /// rerun tasks.
   final String performanceMeasurementFile;
+
+  /// If provided, an output directory where one or more v8-style heapsnapshots
+  /// will be written for code size profiling.
+  final String codeSizeDirectory;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -171,6 +178,8 @@ class BuildInfo {
         'BUNDLE_SKSL_PATH': bundleSkSLPath,
       if (packagesPath != null)
         'PACKAGE_CONFIG': packagesPath,
+      if (codeSizeDirectory != null)
+        'CODE_SIZE_DIRECTORY': codeSizeDirectory,
     };
   }
 }
@@ -612,15 +621,20 @@ HostPlatform getCurrentHostPlatform() {
 }
 
 /// Returns the top-level build output directory.
-String getBuildDirectory() {
+String getBuildDirectory([Config config, FileSystem fileSystem]) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null || globals.config == null) {
+  if (context == null) {
+    return 'build';
+  }
+  final Config localConfig = config ?? globals.config;
+  final FileSystem localFilesystem = fileSystem ?? globals.fs;
+  if (localConfig == null) {
     return 'build';
   }
 
-  final String buildDir = globals.config.getValue('build-dir') as String ?? 'build';
-  if (globals.fs.path.isAbsolute(buildDir)) {
+  final String buildDir = localConfig.getValue('build-dir') as String ?? 'build';
+  if (localFilesystem.path.isAbsolute(buildDir)) {
     throw Exception(
         'build-dir config setting in ${globals.config.configPath} must be relative');
   }
@@ -686,7 +700,7 @@ String encodeDartDefines(List<String> defines) {
 /// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
 List<String> decodeDartDefines(Map<String, String> environmentDefines, String key) {
   if (!environmentDefines.containsKey(key) || environmentDefines[key].isEmpty) {
-    return const <String>[];
+    return <String>[];
   }
   return environmentDefines[key]
     .split(',')

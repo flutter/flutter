@@ -59,7 +59,7 @@ class GlobalWidgetsLocalizations implements WidgetsLocalizations {
   /// A [LocalizationsDelegate] that uses [GlobalWidgetsLocalizations.load]
   /// to create an instance of this class.
   ///
-  /// [WidgetsApp] automatically adds this value to [WidgetApp.localizationsDelegates].
+  /// [WidgetsApp] automatically adds this value to [WidgetsApp.localizationsDelegates].
   static const LocalizationsDelegate<WidgetsLocalizations> delegate = _WidgetsLocalizationsDelegate();
 }
 

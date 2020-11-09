@@ -34,7 +34,7 @@ import 'ticker_provider.dart';
 /// follows the user's finger across the screen after the drag begins. Using the
 /// overlay to display the drag avatar lets the avatar float over the other
 /// widgets in the app. As the user's finger moves, draggable calls
-/// [markNeedsBuild] on the overlay entry to cause it to rebuild. It its build,
+/// [markNeedsBuild] on the overlay entry to cause it to rebuild. In its build,
 /// the entry includes a [Positioned] with its top and left property set to
 /// position the drag avatar near the user's finger. When the drag is over,
 /// [Draggable] removes the entry from the overlay to remove the drag avatar
@@ -209,7 +209,7 @@ class Overlay extends StatefulWidget {
   /// [OverlayState] is initialized.
   ///
   /// Rather than creating an overlay, consider using the overlay that is
-  /// created by the [WidgetsApp] or the [MaterialApp] for the application.
+  /// created by the [Navigator] in a [WidgetsApp] or a [MaterialApp] for the application.
   const Overlay({
     Key key,
     this.initialEntries = const <OverlayEntry>[],
@@ -308,18 +308,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   ///
   /// It is an error to specify both `above` and `below`.
   void insert(OverlayEntry entry, { OverlayEntry below, OverlayEntry above }) {
-    assert(
-      above == null || below == null,
-      'Only one of `above` and `below` may be specified.',
-    );
-    assert(
-      above == null || (above._overlay == this && _entries.contains(above)),
-      'The provided entry for `above` is not present in the Overlay.',
-    );
-    assert(
-      below == null || (below._overlay == this && _entries.contains(below)),
-      'The provided entry for `below` is not present in the Overlay.',
-    );
+    assert(_debugVerifyInsertPosition(above, below));
     assert(!_entries.contains(entry), 'The specified entry is already present in the Overlay.');
     assert(entry._overlay == null, 'The specified entry is already present in another Overlay.');
     entry._overlay = this;
@@ -336,18 +325,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   ///
   /// It is an error to specify both `above` and `below`.
   void insertAll(Iterable<OverlayEntry> entries, { OverlayEntry below, OverlayEntry above }) {
-    assert(
-      above == null || below == null,
-      'Only one of `above` and `below` may be specified.',
-    );
-    assert(
-      above == null || (above._overlay == this && _entries.contains(above)),
-      'The provided entry for `above` is not present in the Overlay.',
-    );
-    assert(
-      below == null || (below._overlay == this && _entries.contains(below)),
-      'The provided entry for `below` is not present in the Overlay.',
-    );
+    assert(_debugVerifyInsertPosition(above, below));
     assert(
       entries.every((OverlayEntry entry) => !_entries.contains(entry)),
       'One or more of the specified entries are already present in the Overlay.'
@@ -365,6 +343,22 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     setState(() {
       _entries.insertAll(_insertionIndex(below, above), entries);
     });
+  }
+
+  bool _debugVerifyInsertPosition(OverlayEntry above, OverlayEntry below, { Iterable<OverlayEntry> newEntries }) {
+    assert(
+      above == null || below == null,
+      'Only one of `above` and `below` may be specified.',
+    );
+    assert(
+      above == null || (above._overlay == this && _entries.contains(above) && (newEntries?.contains(above) ?? true)),
+      'The provided entry used for `above` must be present in the Overlay${newEntries != null ? ' and in the `newEntriesList`' : ''}.',
+    );
+    assert(
+      below == null || (below._overlay == this && _entries.contains(below) && (newEntries?.contains(below) ?? true)),
+      'The provided entry used for `below` must be present in the Overlay${newEntries != null ? ' and in the `newEntriesList`' : ''}.',
+    );
+    return true;
   }
 
   /// Remove all the entries listed in the given iterable, then reinsert them
@@ -386,18 +380,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   /// It is an error to specify both `above` and `below`.
   void rearrange(Iterable<OverlayEntry> newEntries, { OverlayEntry below, OverlayEntry above }) {
     final List<OverlayEntry> newEntriesList = newEntries is List<OverlayEntry> ? newEntries : newEntries.toList(growable: false);
-    assert(
-      above == null || below == null,
-      'Only one of `above` and `below` may be specified.',
-    );
-    assert(
-      above == null || (above._overlay == this && _entries.contains(above) && newEntriesList.contains(above)),
-      'The entry used for `above` must be in the Overlay and in the `newEntriesList`.'
-    );
-    assert(
-      below == null || (below._overlay == this && _entries.contains(below) && newEntriesList.contains(below)),
-      'The entry used for `below` must be in the Overlay and in the `newEntriesList`.'
-    );
+    assert(_debugVerifyInsertPosition(above, below, newEntries: newEntriesList));
     assert(
       newEntriesList.every((OverlayEntry entry) => entry._overlay == null || entry._overlay == this),
       'One or more of the specified entries are already present in another Overlay.'

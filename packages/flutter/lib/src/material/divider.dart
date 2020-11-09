@@ -21,6 +21,8 @@ import 'theme.dart';
 /// To create a divider between [ListTile] items, consider using
 /// [ListTile.divideTiles], which is optimized for this case.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=_liUC641Nmk}
+///
 /// The box's total height is controlled by [height]. The appropriate
 /// padding is automatically computed from the height.
 ///
@@ -105,7 +107,7 @@ class Divider extends StatelessWidget {
   /// A divider with a [thickness] of 0.0 is always drawn as a line with a
   /// height of exactly one device pixel.
   ///
-  /// If this is null, then the [DividerThemeData.dividerThickness] is used. If
+  /// If this is null, then the [DividerThemeData.thickness] is used. If
   /// that is also null, then this defaults to 0.0.
   final double thickness;
 
@@ -136,7 +138,7 @@ class Divider extends StatelessWidget {
   /// {@end-tool}
   final Color color;
 
-  /// Computes the [BorderSide] that represents a divider..
+  /// Computes the [BorderSide] that represents a divider.
   ///
   /// If [color] is null, then [DividerThemeData.color] is used. If that is also
   /// null, then [ThemeData.dividerColor] is used.

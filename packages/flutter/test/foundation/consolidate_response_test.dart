@@ -11,43 +11,24 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:mockito/mockito.dart';
 
 import '../flutter_test_alternative.dart';
 
+final Uint8List chunkOne = Uint8List.fromList(<int>[0, 1, 2, 3, 4, 5]);
+final Uint8List chunkTwo = Uint8List.fromList(<int>[6, 7, 8, 9, 10]);
 void main() {
   group(consolidateHttpClientResponseBytes, () {
-    final Uint8List chunkOne = Uint8List.fromList(<int>[0, 1, 2, 3, 4, 5]);
-    final Uint8List chunkTwo = Uint8List.fromList(<int>[6, 7, 8, 9, 10]);
     MockHttpClientResponse response;
 
     setUp(() {
-      response = MockHttpClientResponse();
-      when(response.compressionState).thenReturn(HttpClientResponseCompressionState.notCompressed);
-      when(response.listen(
-         any,
-         onDone: anyNamed('onDone'),
-         onError: anyNamed('onError'),
-         cancelOnError: anyNamed('cancelOnError'),
-      )).thenAnswer((Invocation invocation) {
-        final void Function(List<int>) onData = invocation.positionalArguments[0] as void Function(List<int>);
-        final void Function(Object) onError = invocation.namedArguments[#onError] as void Function(Object);
-        final VoidCallback onDone = invocation.namedArguments[#onDone] as VoidCallback;
-        final bool cancelOnError = invocation.namedArguments[#cancelOnError] as bool;
-
-        return Stream<Uint8List>.fromIterable(
-            <Uint8List>[chunkOne, chunkTwo]).listen(
-          onData,
-          onDone: onDone,
-          onError: onError,
-          cancelOnError: cancelOnError,
-        );
-      });
+      response = MockHttpClientResponse(
+        chunkOne: chunkOne,
+        chunkTwo: chunkTwo,
+      );
     });
 
     test('Converts an HttpClientResponse with contentLength to bytes', () async {
-      when(response.contentLength)
-          .thenReturn(chunkOne.length + chunkTwo.length);
+      response.contentLength = chunkOne.length + chunkTwo.length;
       final List<int> bytes =
           await consolidateHttpClientResponseBytes(response);
 
@@ -55,7 +36,7 @@ void main() {
     });
 
     test('Converts a compressed HttpClientResponse with contentLength to bytes', () async {
-      when(response.contentLength).thenReturn(chunkOne.length);
+      response.contentLength = chunkOne.length;
       final List<int> bytes =
           await consolidateHttpClientResponseBytes(response);
 
@@ -63,7 +44,7 @@ void main() {
     });
 
     test('Converts an HttpClientResponse without contentLength to bytes', () async {
-      when(response.contentLength).thenReturn(-1);
+      response.contentLength = -1;
       final List<int> bytes =
           await consolidateHttpClientResponseBytes(response);
 
@@ -72,7 +53,7 @@ void main() {
 
     test('Notifies onBytesReceived for every chunk of bytes', () async {
       final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
-      when(response.contentLength).thenReturn(syntheticTotal);
+      response.contentLength = syntheticTotal;
       final List<int> records = <int>[];
       await consolidateHttpClientResponseBytes(
         response,
@@ -90,33 +71,14 @@ void main() {
     });
 
     test('forwards errors from HttpClientResponse', () async {
-      when(response.listen(
-        any,
-        onDone: anyNamed('onDone'),
-        onError: anyNamed('onError'),
-        cancelOnError: anyNamed('cancelOnError'),
-      )).thenAnswer((Invocation invocation) {
-        final void Function(List<int>) onData = invocation.positionalArguments[0] as void Function(List<int>);
-        final void Function(Object) onError = invocation.namedArguments[#onError] as void Function(Object);
-        final VoidCallback onDone = invocation.namedArguments[#onDone] as VoidCallback;
-        final bool cancelOnError = invocation.namedArguments[#cancelOnError] as bool;
-
-        return Stream<Uint8List>.fromFuture(
-                Future<Uint8List>.error(Exception('Test Error')))
-            .listen(
-          onData,
-          onDone: onDone,
-          onError: onError,
-          cancelOnError: cancelOnError,
-        );
-      });
-      when(response.contentLength).thenReturn(-1);
+      response = MockHttpClientResponse(error: Exception('Test Error'));
+      response.contentLength = -1;
 
       expect(consolidateHttpClientResponseBytes(response), throwsException);
     });
 
     test('Propagates error to Future return value if onBytesReceived throws', () async {
-      when(response.contentLength).thenReturn(-1);
+      response.contentLength = -1;
       final Future<List<int>> result = consolidateHttpClientResponseBytes(
         response,
         onBytesReceived: (int cumulative, int total) {
@@ -133,45 +95,24 @@ void main() {
       final List<int> gzippedChunkTwo = gzipped.sublist(gzipped.length ~/ 2);
 
       setUp(() {
-        when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
-        when(response.listen(
-          any,
-          onDone: anyNamed('onDone'),
-          onError: anyNamed('onError'),
-          cancelOnError: anyNamed('cancelOnError'),
-        )).thenAnswer((Invocation invocation) {
-          final void Function(List<int>) onData = invocation.positionalArguments[0] as void Function(List<int>);
-          final void Function(Object) onError = invocation.namedArguments[#onError] as void Function(Object);
-          final VoidCallback onDone = invocation.namedArguments[#onDone] as VoidCallback;
-          final bool cancelOnError = invocation.namedArguments[#cancelOnError] as bool;
-
-          return Stream<List<int>>.fromIterable(
-              <List<int>>[gzippedChunkOne, gzippedChunkTwo]).listen(
-            onData,
-            onDone: onDone,
-            onError: onError,
-            cancelOnError: cancelOnError,
-          );
-        });
+        response = MockHttpClientResponse(chunkOne: gzippedChunkOne, chunkTwo: gzippedChunkTwo);
+        response.compressionState = HttpClientResponseCompressionState.compressed;
       });
 
       test('Uncompresses GZIP bytes if autoUncompress is true and response.compressionState is compressed', () async {
-        when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
-        when(response.contentLength).thenReturn(gzipped.length);
+        response.contentLength = gzipped.length;
         final List<int> bytes = await consolidateHttpClientResponseBytes(response);
         expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
       });
 
       test('returns gzipped bytes if autoUncompress is false and response.compressionState is compressed', () async {
-        when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
-        when(response.contentLength).thenReturn(gzipped.length);
+        response.contentLength = gzipped.length;
         final List<int> bytes = await consolidateHttpClientResponseBytes(response, autoUncompress: false);
         expect(bytes, gzipped);
       });
 
       test('Notifies onBytesReceived with gzipped numbers', () async {
-        when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
-        when(response.contentLength).thenReturn(gzipped.length);
+        response.contentLength = gzipped.length;
         final List<int> records = <int>[];
         await consolidateHttpClientResponseBytes(
           response,
@@ -190,8 +131,8 @@ void main() {
 
       test('Notifies onBytesReceived with expectedContentLength of -1 if response.compressionState is decompressed', () async {
         final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
-        when(response.compressionState).thenReturn(HttpClientResponseCompressionState.decompressed);
-        when(response.contentLength).thenReturn(syntheticTotal);
+        response.compressionState = HttpClientResponseCompressionState.decompressed;
+        response.contentLength = syntheticTotal;
         final List<int> records = <int>[];
         await consolidateHttpClientResponseBytes(
           response,
@@ -211,4 +152,36 @@ void main() {
   });
 }
 
-class MockHttpClientResponse extends Mock implements HttpClientResponse {}
+class MockHttpClientResponse extends Fake implements HttpClientResponse {
+  MockHttpClientResponse({this.error, this.chunkOne, this.chunkTwo});
+
+  final dynamic error;
+  final List<int> chunkOne;
+  final List<int> chunkTwo;
+
+  @override
+  int contentLength = 0;
+
+  @override
+  HttpClientResponseCompressionState compressionState = HttpClientResponseCompressionState.notCompressed;
+
+  @override
+  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, {Function onError, void Function() onDone, bool cancelOnError}) {
+    if (error != null) {
+      return Stream<List<int>>.fromFuture(
+        Future<List<int>>.error(error)).listen(
+          onData,
+          onDone: onDone,
+          onError: onError,
+          cancelOnError: cancelOnError,
+        );
+    }
+    return Stream<List<int>>.fromIterable(
+        <List<int>>[chunkOne, chunkTwo]).listen(
+      onData,
+      onDone: onDone,
+      onError: onError,
+      cancelOnError: cancelOnError,
+    );
+  }
+}

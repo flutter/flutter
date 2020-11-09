@@ -7,18 +7,21 @@ import 'dart:async';
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:path/path.dart' as path; // ignore: package_path_import
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:test_api/test_api.dart' as test_package show TypeMatcher, test; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
 // ignore: deprecated_member_use
@@ -47,8 +50,9 @@ void tryToDelete(Directory directory) {
 /// environment variable is set, it will be returned. Otherwise, this will
 /// deduce the path from `platform.script`.
 String getFlutterRoot() {
-  if (globals.platform.environment.containsKey('FLUTTER_ROOT')) {
-    return globals.platform.environment['FLUTTER_ROOT'];
+  const Platform platform = LocalPlatform();
+  if (platform.environment.containsKey('FLUTTER_ROOT')) {
+    return platform.environment['FLUTTER_ROOT'];
   }
 
   Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.');
@@ -70,13 +74,13 @@ String getFlutterRoot() {
       throw invalidScript();
   }
 
-  final List<String> parts = globals.fs.path.split(globals.fs.path.fromUri(scriptUri));
+  final List<String> parts = path.split(globals.fs.path.fromUri(scriptUri));
   final int toolsIndex = parts.indexOf('flutter_tools');
   if (toolsIndex == -1) {
     throw invalidScript();
   }
-  final String toolsPath = globals.fs.path.joinAll(parts.sublist(0, toolsIndex + 1));
-  return globals.fs.path.normalize(globals.fs.path.join(toolsPath, '..', '..'));
+  final String toolsPath = path.joinAll(parts.sublist(0, toolsIndex + 1));
+  return path.normalize(path.join(toolsPath, '..', '..'));
 }
 
 CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
@@ -105,15 +109,17 @@ Matcher throwsToolExit({ int exitCode, Pattern message }) {
 /// Matcher for [ToolExit]s.
 final test_package.TypeMatcher<ToolExit> isToolExit = isA<ToolExit>();
 
-/// Matcher for functions that throw [ProcessExit].
-Matcher throwsProcessExit([ dynamic exitCode ]) {
-  return exitCode == null
-      ? throwsA(isProcessExit)
-      : throwsA(allOf(isProcessExit, (ProcessExit e) => e.exitCode == exitCode));
+/// Matcher for functions that throw [ProcessException].
+Matcher throwsProcessException({ Pattern message }) {
+  Matcher matcher = isProcessException;
+  if (message != null) {
+    matcher = allOf(matcher, (ProcessException e) => e.message?.contains(message));
+  }
+  return throwsA(matcher);
 }
 
-/// Matcher for [ProcessExit]s.
-final test_package.TypeMatcher<ProcessExit> isProcessExit = isA<ProcessExit>();
+/// Matcher for [ProcessException]s.
+final test_package.TypeMatcher<ProcessException> isProcessException = isA<ProcessException>();
 
 /// Creates a flutter project in the [temp] directory using the
 /// [arguments] list if specified, or `--no-pub` if not.
@@ -209,6 +215,21 @@ void testWithoutContext(String description, FutureOr<void> body(), {
     retry: retry,
     testOn: testOn,
   );
+}
+
+/// Runs a callback using FakeAsync.run while continually pumping the
+/// microtask queue. This avoids a deadlock when tests `await` a Future
+/// which queues a microtask that will not be processed unless the queue
+/// is flushed.
+Future<T> runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
+  return FakeAsync().run((FakeAsync time) async {
+    bool pump = true;
+    final Future<T> future = f(time).whenComplete(() => pump = false);
+    while (pump) {
+      time.flushMicrotasks();
+    }
+    return future;
+  });
 }
 
 /// An implementation of [AppContext] that throws if context.get is called in the test.
@@ -369,5 +390,26 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
       }),
       body: () => super.runCommand(topLevelResults),
     );
+  }
+}
+
+/// A file system that allows preconfiguring certain entities.
+///
+/// This is useful for inserting mocks/entities which throw errors or
+/// have other behavior that is not easily configured through the
+/// filesystem interface.
+class ConfiguredFileSystem extends ForwardingFileSystem {
+  ConfiguredFileSystem(FileSystem delegate, {@required this.entities}) : super(delegate);
+
+  final Map<String, FileSystemEntity> entities;
+
+  @override
+  File file(dynamic path) {
+    return (entities[path] as File) ?? super.file(path);
+  }
+
+  @override
+  Directory directory(dynamic path) {
+    return (entities[path] as Directory) ?? super.directory(path);
   }
 }

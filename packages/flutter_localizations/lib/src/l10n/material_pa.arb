@@ -70,14 +70,14 @@
   "dateRangePickerHelpText": "ਰੇਂਜ ਚੁਣੋ",
   "calendarModeButtonLabel": "ਕੈਲੰਡਰ 'ਤੇ ਜਾਓ",
   "inputDateModeButtonLabel": "ਇਨਪੁੱਟ 'ਤੇ ਜਾਓ",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "timePickerDialHelpText": "ਸਮਾਂ ਚੁਣੋ",
+  "timePickerInputHelpText": "ਸਮਾਂ ਦਾਖਲ ਕਰੋ",
+  "timePickerHourLabel": "ਘੰਟਾ",
+  "timePickerMinuteLabel": "ਮਿੰਟ",
+  "invalidTimeLabel": "ਵੈਧ ਸਮਾਂ ਦਾਖਲ ਕਰੋ",
+  "dialModeButtonLabel": "ਡਾਇਲ ਚੋਣਕਾਰ ਮੋਡ 'ਤੇ ਜਾਓ",
+  "inputTimeModeButtonLabel": "ਲਿਖਤ ਇਨਪੁੱਟ ਮੋਡ 'ਤੇ ਜਾਓ",
   "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "licensesPackageDetailTextOne": "1 ਲਾਇਸੰਸ",
+  "licensesPackageDetailTextOther": "$licenseCount ਲਾਇਸੰਸ"
 }

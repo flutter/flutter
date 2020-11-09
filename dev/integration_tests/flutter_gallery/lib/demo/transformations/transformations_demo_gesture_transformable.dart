@@ -226,6 +226,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
       },
       onTapUp: widget.onTapUp == null ? null : (TapUpDetails details) {
         widget.onTapUp(TapUpDetails(
+          kind: details.kind,
           globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
         ));
       },

@@ -251,6 +251,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///  * [Border], which has a sample which uses [Container] heavily.
 ///  * [Ink], which paints a [Decoration] on a [Material], allowing
 ///    [InkResponse] and [InkWell] splashes to paint over them.
+///  * Cookbook: [Animate the properties of a container](https://flutter.dev/docs/cookbook/animation/animated-container)
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
@@ -280,6 +281,7 @@ class Container extends StatelessWidget {
        assert(decoration == null || decoration.debugAssertIsValid()),
        assert(constraints == null || constraints.debugAssertIsValid()),
        assert(clipBehavior != null),
+       assert(decoration != null || clipBehavior == Clip.none),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
          'To provide both, use "decoration: BoxDecoration(color: color)".'
@@ -360,9 +362,14 @@ class Container extends StatelessWidget {
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
 
-  /// The clip behavior when [Container.decoration] has a clipPath.
+  /// The clip behavior when [Container.decoration] is not null.
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.none]. Must be [Clip.none] if [decoration] is null.
+  ///
+  /// If a clip is to be applied, the [Decoration.getClipPath] method
+  /// for the provided decoration must return a clip path. (This is not
+  /// supported by all decorations; the default implementation of that
+  /// method throws an [UnsupportedError].)
   final Clip clipBehavior;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
@@ -396,6 +403,18 @@ class Container extends StatelessWidget {
     if (color != null)
       current = ColoredBox(color: color, child: current);
 
+    if (clipBehavior != Clip.none) {
+      assert(decoration != null);
+      current = ClipPath(
+        clipper: _DecorationClipper(
+          textDirection: Directionality.of(context),
+          decoration: decoration
+        ),
+        clipBehavior: clipBehavior,
+        child: current,
+      );
+    }
+
     if (decoration != null)
       current = DecoratedBox(decoration: decoration, child: current);
 
@@ -415,17 +434,6 @@ class Container extends StatelessWidget {
 
     if (transform != null)
       current = Transform(transform: transform, child: current);
-
-    if (clipBehavior != Clip.none) {
-      current = ClipPath(
-        clipper: _DecorationClipper(
-          textDirection: Directionality.of(context),
-          decoration: decoration
-        ),
-        clipBehavior: clipBehavior,
-        child: current,
-      );
-    }
 
     return current;
   }
@@ -452,7 +460,7 @@ class _DecorationClipper extends CustomClipper<Path> {
   _DecorationClipper({
     TextDirection textDirection,
     @required this.decoration
-  }) : assert (decoration != null),
+  }) : assert(decoration != null),
        textDirection = textDirection ?? TextDirection.ltr;
 
   final TextDirection textDirection;

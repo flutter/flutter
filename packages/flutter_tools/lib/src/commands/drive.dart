@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:dds/dds.dart' as dds;
 import 'package:vm_service/vm_service_io.dart' as vm_service;
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:meta/meta.dart';
@@ -17,6 +18,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -145,7 +147,7 @@ class DriveCommand extends RunCommandBase {
   @override
   Future<void> validateCommand() async {
     if (userIdentifier != null) {
-      final Device device = await findTargetDevice();
+      final Device device = await findTargetDevice(timeout: deviceDiscoveryTimeout);
       if (device is! AndroidDevice) {
         throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
       }
@@ -160,7 +162,7 @@ class DriveCommand extends RunCommandBase {
       throwToolExit(null);
     }
 
-    _device = await findTargetDevice();
+    _device = await findTargetDevice(timeout: deviceDiscoveryTimeout);
     if (device == null) {
       throwToolExit(null);
     }
@@ -184,17 +186,6 @@ class DriveCommand extends RunCommandBase {
           '\n'
           'Use --profile mode for testing application performance.\n'
           'Use --debug (default) mode for testing correctness (with assertions).'
-        );
-      }
-
-      if (isWebPlatform && buildInfo.isDebug) {
-        // TODO(angjieli): remove this once running against
-        // target under test_driver in debug mode is supported
-        throwToolExit(
-          'Flutter Driver web does not support running in debug mode.\n'
-          '\n'
-          'Use --profile mode for testing application performance.\n'
-          'Use --release mode for testing correctness (with assertions).'
         );
       }
 
@@ -244,6 +235,17 @@ class DriveCommand extends RunCommandBase {
         throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
       }
       observatoryUri = result.observatoryUri.toString();
+      // TODO(bkonyi): add web support (https://github.com/flutter/flutter/issues/61259)
+      if (!isWebPlatform) {
+        try {
+          // If there's another flutter_tools instance still connected to the target
+          // application, DDS will already be running remotely and this call will fail.
+          // We can ignore this and continue to use the remote DDS instance.
+          await device.dds.startDartDevelopmentService(Uri.parse(observatoryUri), ipv6);
+        } on dds.DartDevelopmentServiceException catch(_) {
+          globals.printTrace('Note: DDS is already connected to $observatoryUri.');
+        }
+      }
     } else {
       globals.printStatus('Will connect to already running application instance.');
       observatoryUri = stringArg('use-existing-app');
@@ -305,6 +307,7 @@ $ex
         'DRIVER_SESSION_ID': driver.id,
         'DRIVER_SESSION_URI': driver.uri.toString(),
         'DRIVER_SESSION_SPEC': driver.spec.toString(),
+        'DRIVER_SESSION_CAPABILITIES': json.encode(driver.capabilities),
         'SUPPORT_TIMELINE_ACTION': (browser == Browser.chrome).toString(),
         'FLUTTER_WEB_TEST': 'true',
         'ANDROID_CHROME_ON_EMULATOR': (isAndroidChrome && useEmulator).toString(),
@@ -387,8 +390,9 @@ $ex
   }
 }
 
-Future<Device> findTargetDevice() async {
-  final List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
+Future<Device> findTargetDevice({ @required Duration timeout }) async {
+  final DeviceManager deviceManager = globals.deviceManager;
+  final List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current(), timeout: timeout);
 
   if (deviceManager.hasSpecifiedDeviceId) {
     if (devices.isEmpty) {
@@ -480,6 +484,7 @@ Future<LaunchResult> _startApp(
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,
       dumpSkpOnShaderCompilation: command.dumpSkpOnShaderCompilation,
+      purgePersistentCache: command.purgePersistentCache,
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,
@@ -538,7 +543,7 @@ Future<bool> _stopApp(DriveCommand command) async {
   return stopped;
 }
 
-/// A list of supported browsers
+/// A list of supported browsers.
 @visibleForTesting
 enum Browser {
   /// Chrome on Android: https://developer.chrome.com/multidevice/android/overview

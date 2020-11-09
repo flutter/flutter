@@ -361,8 +361,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     ).replaceFirst(r'$second', _decimalFormat.format(second));
   }
 
-  /// A [LocalizationsDelegate] that uses [GlobalCupertinoLocalizations.load]
-  /// to create an instance of this class.
+  /// A [LocalizationsDelegate] for [CupertinoLocalizations].
   ///
   /// Most internationalized apps will use [GlobalCupertinoLocalizations.delegates]
   /// as the value of [CupertinoApp.localizationsDelegates] to include

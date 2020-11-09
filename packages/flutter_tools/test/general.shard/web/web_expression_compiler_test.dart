@@ -82,7 +82,7 @@ void expectResult(ExpressionCompilationResult result, bool isError, String value
   expect(result,
     const TypeMatcher<ExpressionCompilationResult>()
       .having((ExpressionCompilationResult instance) => instance.isError, 'isError', isError)
-      .having((ExpressionCompilationResult instance) =>instance.result, 'result', value));
+      .having((ExpressionCompilationResult instance) => instance.result, 'result', value));
 }
 
 class MockResidentCompiler extends Mock implements ResidentCompiler {}

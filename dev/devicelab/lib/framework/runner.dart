@@ -35,6 +35,7 @@ Future<Map<String, dynamic>> runTask(
   final Process runner = await startProcess(
     dartBin,
     <String>[
+      '--disable-dart-dev',
       '--enable-vm-service=0', // zero causes the system to choose a free port
       '--no-pause-isolates-on-exit',
       if (localEngine != null) '-DlocalEngine=$localEngine',
@@ -156,4 +157,9 @@ Future<void> cleanupSystem() async {
   } else {
     print('Could not determine JAVA_HOME; not shutting down Gradle.');
   }
+  // Removes the .gradle directory because sometimes gradle fails in downloading
+  // a new version and leaves a corrupted zip archive, which could cause the
+  // next devicelab task to fail.
+  // https://github.com/flutter/flutter/issues/65277
+  rmTree(dir('${Platform.environment['HOME']}/.gradle'));
 }

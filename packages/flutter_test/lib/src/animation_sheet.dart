@@ -29,7 +29,7 @@ import 'package:flutter_test/flutter_test.dart';
 ///    animation sheet, and can be matched against the golden test.
 ///
 /// {@tool snippet}
-/// The following example shows how to record an animation sheet of an [Inkwell]
+/// The following example shows how to record an animation sheet of an [InkWell]
 /// being pressed then released.
 ///
 /// ```dart

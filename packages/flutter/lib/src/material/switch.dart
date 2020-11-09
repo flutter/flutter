@@ -96,7 +96,7 @@ class Switch extends StatefulWidget {
   /// If a [CupertinoSwitch] is created, the following parameters are
   /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
   /// [activeThumbImage], [onActiveThumbImageError], [inactiveThumbImage],
-  /// [onInactiveImageThumbError], [materialTapTargetSize].
+  /// [onInactiveThumbImageError], [materialTapTargetSize].
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Switch.adaptive({

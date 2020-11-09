@@ -555,5 +555,5 @@ void main() {
       find.byWidget(display),
       matchesGoldenFile('material.circular_progress_indicator.indeterminate.png'),
     );
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
 }

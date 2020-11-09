@@ -18,7 +18,7 @@ More detailed logs should be in `build/cull_opacity_perf.timeline.json`.
 
 ### Cubic bezier benchmark
 
-To run the cubic bezier benchmark on a device:
+To run the cubic-bezier benchmark on a device:
 
 ```
 flutter drive --profile test_driver/cubic_bezier_perf.dart
@@ -31,30 +31,50 @@ More detailed logs should be in `build/cubic_bezier_perf.timeline.json`.
 ### Backdrop filter benchmark
 
 To run the backdrop filter benchmark on a device:
+To run a mobile benchmark on a device:
 
-```
-flutter drive --profile test_driver/backdrop_filter_perf.dart
-```
-
-Results should be in the file `build/backdrop_filter_perf.timeline_summary.json`.
-
-More detailed logs should be in `build/backdrop_filter_perf.timeline.json`.
-
-### Post Backdrop filter benchmark
-
-To run the post-backdrop filter benchmark on a device:
-
-```
-flutter drive --profile test_driver/post_backdrop_filter_perf.dart
+```bash
+flutter drive --profile -t test_driver/run_app.dart --driver test_driver/[test_name]_test.dart
 ```
 
-Results should be in the file `build/post_backdrop_filter_perf.timeline_summary.json`.
+Results should be in the file `build/[test_name].timeline_summary.json`.
 
-More detailed logs should be in `build/post_backdrop_filter_perf.timeline.json`.
+More detailed logs should be in `build/[test_name].timeline.json`.
+
+The key `[test_name]` can be:
+
+- `animated_placeholder_perf`
+- `backdrop_filter_perf`
+- `color_filter_and_fade_perf`
+- `cubic_bezier_perf`
+- `cull_opacity_perf`
+- `fading_child_animation_perf`
+- `imagefiltered_transform_animation_perf`
+- `multi_widget_construction_perf`
+- `picture_cache_perf`
+- `post_backdrop_filter_perf`
+- `simple_animation_perf`
+- `textfield_perf`
+
+### E2E benchmarks
+
+(On-going work)
+
+[E2E](https://pub.dev/packages/e2e)-based tests are driven independent of the
+host machine. The following tests are E2E:
+
+- `cull_opacity_perf.dart`
+- `multi_widget_construction_perf`
+
+These tests should be run by:
+
+```bash
+flutter drive --profile -t test/[test_name]_e2e.dart --driver test_driver/e2e_test.dart
+```
 
 ## Web benchmarks
 
-Web benchmarks are compiled from the same entrypoint in `lib/web_benchmarks.dart`.
+Web benchmarks are compiled from the same entry point in `lib/web_benchmarks.dart`.
 
 ### How to write a web benchmark
 
@@ -63,13 +83,13 @@ as an example.
 
 Choose one of the two benchmark types:
 
-* A "raw benchmark" records performance metrics from direct interactions with
+- A "raw benchmark" records performance metrics from direct interactions with
   `dart:ui` with no framework. This kind of benchmark is good for benchmarking
   low-level engine primitives, such as layer, picture, and semantics performance.
-* A "widget benchmark" records performance metrics using a widget. This kind of
+- A "widget benchmark" records performance metrics using a widget. This kind of
   benchmark is good for measuring the performance of widgets, often together with
   engine work that widget-under-test incurs.
-* A "widget build benchmark" records the cost of building a widget from nothing.
+- A "widget build benchmark" records the cost of building a widget from nothing.
   This is different from the "widget benchmark" because typically the latter
   only performs incremental UI updates, such as an animation. In contrast, this
   benchmark pumps an empty frame to clear all previously built widgets and
@@ -107,7 +127,7 @@ flutter run --profile -d web-server lib/web_benchmarks.dart
 flutter run --dart-define=FLUTTER_WEB_USE_SKIA=true --profile -d web-server lib/web_benchmarks.dart
 ```
 
-You can also run all benchmarks exactly like the devicelab runs them:
+You can also run all benchmarks exactly as the devicelab runs them:
 
 ```
 cd dev/devicelab
@@ -118,3 +138,10 @@ cd dev/devicelab
 # Runs using the CanvasKit renderer
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -t bin/tasks/web_benchmarks_canvaskit.dart
 ```
+
+## Frame policy test
+
+File `test/frame_policy.dart` and its driving script `test_driver/frame_policy_test.dart`
+are used for testing [`fullyLive`](https://api.flutter.dev/flutter/flutter_test/LiveTestWidgetsFlutterBindingFramePolicy-class.html)
+and [`benchmarkLive`](https://api.flutter.dev/flutter/flutter_test/LiveTestWidgetsFlutterBindingFramePolicy-class.html)
+policies in terms of its effect on [`WidgetTester.handlePointerEventRecord`](https://master-api.flutter.dev/flutter/flutter_test/WidgetTester/handlePointerEventRecord.html).

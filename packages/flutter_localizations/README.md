@@ -33,7 +33,7 @@ and `WidgetsLocalizations`, with appropriate name substitutions):
    ```
    dart dev/tools/localization/bin/gen_missing_localizations.dart
    ```
-   Which will copy the english strings into the other locales as placeholders
+   Which will copy the English strings into the other locales as placeholders
    until they can be translated.
 
    Finally you need to re-generate lib/src/l10n/localizations.dart by running:

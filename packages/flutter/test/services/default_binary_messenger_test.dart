@@ -26,7 +26,6 @@ void main() {
     ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         channel, _makeByteData('bar'), (ByteData message) async {
       count += 1;
-      return null;
     });
     expect(count, equals(0));
     await ui.channelBuffers.drain(channel,

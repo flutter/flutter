@@ -6,7 +6,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1683,7 +1682,7 @@ void main() {
       expect(Focus.of(lowerLeftKey.currentContext).hasPrimaryFocus, isTrue);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
-    }, skip: kIsWeb);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Focus traversal inside a vertical scrollable scrolls to stay visible.', (WidgetTester tester) async {
       final List<int> items = List<int>.generate(11, (int index) => index).toList();
@@ -1781,7 +1780,7 @@ void main() {
       await tester.pump();
       expect(topNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
-    }, skip: kIsWeb);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Focus traversal inside a horizontal scrollable scrolls to stay visible.', (WidgetTester tester) async {
       final List<int> items = List<int>.generate(11, (int index) => index).toList();
@@ -1879,7 +1878,7 @@ void main() {
       await tester.pump();
       expect(leftNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
-    }, skip: kIsWeb);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Arrow focus traversal actions can be re-enabled for text fields.', (WidgetTester tester) async {
       final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');

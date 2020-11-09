@@ -30,11 +30,17 @@ BuildContext _getParent(BuildContext context) {
   return parent;
 }
 
-/// A class representing a particular configuration of an action.
+/// A class representing a particular configuration of an [Action].
 ///
-/// This class is what a key map in a [ShortcutMap] has as values, and is used
+/// This class is what the [Shortcuts.shortcuts] map has as values, and is used
 /// by an [ActionDispatcher] to look up an action and invoke it, giving it this
 /// object to extract configuration information from.
+///
+/// See also:
+///
+///  * [Actions.invoke], which invokes the action associated with a specified
+///    [Intent] using the [Actions] widget that most tightly encloses the given
+///    [BuildContext].
 @immutable
 class Intent with Diagnosticable {
   /// A const constructor for an [Intent].
@@ -95,7 +101,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// [ActionDispatcher.invokeAction] directly.
   ///
   /// This method is only meant to be invoked by an [ActionDispatcher], or by
-  /// its subclasses, and only when [enabled] is true.
+  /// its subclasses, and only when [isEnabled] is true.
   ///
   /// When overriding this method, the returned value can be any Object, but
   /// changing the return type of the override to match the type of the returned
@@ -294,10 +300,10 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// [ActionDispatcher.invokeAction] directly.
   ///
   /// This method is only meant to be invoked by an [ActionDispatcher], or by
-  /// its subclasses, and only when [enabled] is true.
+  /// its subclasses, and only when [isEnabled] is true.
   ///
   /// The optional `context` parameter is the context of the invocation of the
-  /// action, and in the case of an action invoked by a [ShortcutsManager], via
+  /// action, and in the case of an action invoked by a [ShortcutManager], via
   /// a [Shortcuts] widget, will be the context of the [Shortcuts] widget.
   ///
   /// When overriding this method, the returned value can be any Object, but
@@ -448,7 +454,7 @@ class Actions extends StatefulWidget {
   // getElementForInheritedWidgetOfExactType. Returns true if the visitor found
   // what it was looking for.
   static bool _visitActionsAncestors(BuildContext context, bool visitor(InheritedElement element)) {
-    InheritedElement actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
+    InheritedElement actionsElement = context?.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
     while (actionsElement != null) {
       if (visitor(actionsElement) == true) {
         break;
@@ -457,7 +463,7 @@ class Actions extends StatefulWidget {
       // context.getElementForInheritedWidgetOfExactType will return itself if it
       // happens to be of the correct type.
       final BuildContext parent = _getParent(actionsElement);
-      actionsElement = parent.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
+      actionsElement = parent?.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
     }
     return actionsElement != null;
   }
@@ -581,7 +587,13 @@ class Actions extends StatefulWidget {
   /// that are found.
   ///
   /// Setting `nullOk` to true means that if no ambient [Actions] widget is
-  /// found, then this method will return false instead of throwing.
+  /// found, then this method will return null instead of throwing.
+  ///
+  /// Returns the result of invoking the action's [Action.invoke] method. If
+  /// no action mapping was found for the specified intent, or if the action
+  /// that was found was disabled, then this returns null. Callers can detect
+  /// whether or not the action is available (found, and not disabled) using
+  /// [Actions.find] with its `nullOk` argument set to true.
   static Object invoke<T extends Intent>(
     BuildContext context,
     T intent, {
@@ -624,7 +636,7 @@ class Actions extends StatefulWidget {
     }());
     // Invoke the action we found using the relevant dispatcher from the Actions
     // Element we found.
-    return actionElement != null ? _findDispatcher(actionElement).invokeAction(action, intent, context) != null : null;
+    return actionElement != null ? _findDispatcher(actionElement).invokeAction(action, intent, context) : null;
   }
 
   @override
@@ -851,7 +863,7 @@ class _ActionsMarker extends InheritedWidget {
 ///         children: <Widget>[
 ///           Padding(
 ///             padding: const EdgeInsets.all(8.0),
-///             child: FlatButton(onPressed: () {}, child: Text('Press Me')),
+///             child: TextButton(onPressed: () {}, child: Text('Press Me')),
 ///           ),
 ///           Padding(
 ///             padding: const EdgeInsets.all(8.0),
@@ -931,7 +943,7 @@ class FocusableActionDetector extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// The [cursor] defaults to [MouseCursor.defer], deferring the choice of
+  /// The [mouseCursor] defaults to [MouseCursor.defer], deferring the choice of
   /// cursor to the next region behind it in hit-test order.
   final MouseCursor mouseCursor;
 
@@ -1078,9 +1090,17 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     return null;
   }
 
+  // This global key is needed to keep only the necessary widgets in the tree
+  // while maintaining the subtree's state.
+  //
+  // See https://github.com/flutter/flutter/issues/64058 for an explanation of
+  // why using a global key over keeping the shape of the tree.
+  final GlobalKey _mouseRegionKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     Widget child = MouseRegion(
+      key: _mouseRegionKey,
       onEnter: _handleMouseEnter,
       onExit: _handleMouseExit,
       cursor: widget.mouseCursor,

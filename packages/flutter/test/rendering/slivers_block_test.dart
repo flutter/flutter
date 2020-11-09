@@ -343,8 +343,6 @@ void main() {
     expect(candidate.keepAlive, isFalse);
     expect(candidate.index, isNull);
     expect(candidate.toString(), 'index=null; layoutOffset=None');
-    candidate.keepAlive = null;
-    expect(candidate.toString(), 'index=null; layoutOffset=None');
     candidate.keepAlive = true;
     expect(candidate.toString(), 'index=null; keepAlive; layoutOffset=None');
     candidate.keepAlive = false;

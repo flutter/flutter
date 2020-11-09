@@ -84,6 +84,7 @@ void main() {
     const Material(
       type: MaterialType.canvas,
       color: Color(0xFFFFFFFF),
+      shadowColor: Color(0xffff0000),
       textStyle: TextStyle(color: Color(0xff00ff00)),
       borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
     ).debugFillProperties(builder);
@@ -96,6 +97,7 @@ void main() {
     expect(description, <String>[
       'type: canvas',
       'color: Color(0xffffffff)',
+      'shadowColor: Color(0xffff0000)',
       'textStyle.inherit: true',
       'textStyle.color: Color(0xff00ff00)',
       'borderRadius: BorderRadiusDirectional.circular(10.0)',
@@ -183,11 +185,11 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 1));
     final RenderPhysicalShape modelC = getModel(tester);
-    expect(modelC.elevation, closeTo(0.0, 0.001));
+    expect(modelC.elevation, moreOrLessEquals(0.0, epsilon: 0.001));
 
     await tester.pump(kThemeChangeDuration ~/ 2);
     final RenderPhysicalShape modelD = getModel(tester);
-    expect(modelD.elevation, isNot(closeTo(0.0, 0.001)));
+    expect(modelD.elevation, isNot(moreOrLessEquals(0.0, epsilon: 0.001)));
 
     await tester.pump(kThemeChangeDuration);
     final RenderPhysicalShape modelE = getModel(tester);
@@ -217,6 +219,36 @@ void main() {
     await tester.pump(kThemeChangeDuration);
     final RenderPhysicalShape modelE = getModel(tester);
     expect(modelE.shadowColor, equals(const Color(0xFFFF0000)));
+  });
+
+  testWidgets('Transparent material widget does not absorb hit test', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/58665.
+    bool pressed = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Stack(
+            children: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  pressed = true;
+                },
+                child: null,
+              ),
+              Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  width: 400.0,
+                  height: 500.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(ElevatedButton));
+    expect(pressed, isTrue);
   });
 
   group('Elevation Overlay', () {

@@ -115,4 +115,21 @@ Future<void> main() async {
       ],
     );
   });
+
+  test('ShapeDecoration equality', () {
+    const ShapeDecoration a = ShapeDecoration(
+      color: Color(0xFFFFFFFF),
+      shadows: <BoxShadow>[BoxShadow()],
+      shape: Border(),
+    );
+
+    const ShapeDecoration b = ShapeDecoration(
+      color: Color(0xFFFFFFFF),
+      shadows: <BoxShadow>[BoxShadow()],
+      shape: Border(),
+    );
+
+    expect(a.hashCode, equals(b.hashCode));
+    expect(a, equals(b));
+  });
 }

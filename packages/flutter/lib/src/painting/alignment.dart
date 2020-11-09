@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:ui' as ui show lerpDouble;
 
@@ -88,12 +87,12 @@ abstract class AlignmentGeometry {
   /// into a concrete [Alignment] using [resolve].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static AlignmentGeometry lerp(AlignmentGeometry a, AlignmentGeometry b, double t) {
+  static AlignmentGeometry? lerp(AlignmentGeometry? a, AlignmentGeometry? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return b * t;
+      return b! * t;
     if (b == null)
       return a * (1.0 - t);
     if (a is Alignment && b is Alignment)
@@ -101,9 +100,9 @@ abstract class AlignmentGeometry {
     if (a is AlignmentDirectional && b is AlignmentDirectional)
       return AlignmentDirectional.lerp(a, b, t);
     return _MixedAlignment(
-      ui.lerpDouble(a._x, b._x, t),
-      ui.lerpDouble(a._start, b._start, t),
-      ui.lerpDouble(a._y, b._y, t),
+      ui.lerpDouble(a._x, b._x, t)!,
+      ui.lerpDouble(a._start, b._start, t)!,
+      ui.lerpDouble(a._y, b._y, t)!,
     );
   }
 
@@ -116,7 +115,7 @@ abstract class AlignmentGeometry {
   ///  * [Alignment], for which this is a no-op (returns itself).
   ///  * [AlignmentDirectional], which flips the horizontal direction
   ///    based on the `direction` argument.
-  Alignment resolve(TextDirection direction);
+  Alignment resolve(TextDirection? direction);
 
   @override
   String toString() {
@@ -333,19 +332,19 @@ class Alignment extends AlignmentGeometry {
   /// If either is null, this function interpolates from [Alignment.center].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static Alignment lerp(Alignment a, Alignment b, double t) {
+  static Alignment? lerp(Alignment? a, Alignment? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return Alignment(ui.lerpDouble(0.0, b.x, t), ui.lerpDouble(0.0, b.y, t));
+      return Alignment(ui.lerpDouble(0.0, b!.x, t)!, ui.lerpDouble(0.0, b.y, t)!);
     if (b == null)
-      return Alignment(ui.lerpDouble(a.x, 0.0, t), ui.lerpDouble(a.y, 0.0, t));
-    return Alignment(ui.lerpDouble(a.x, b.x, t), ui.lerpDouble(a.y, b.y, t));
+      return Alignment(ui.lerpDouble(a.x, 0.0, t)!, ui.lerpDouble(a.y, 0.0, t)!);
+    return Alignment(ui.lerpDouble(a.x, b.x, t)!, ui.lerpDouble(a.y, b.y, t)!);
   }
 
   @override
-  Alignment resolve(TextDirection direction) => this;
+  Alignment resolve(TextDirection? direction) => this;
 
   static String _stringify(double x, double y) {
     if (x == -1.0 && y == -1.0)
@@ -514,27 +513,26 @@ class AlignmentDirectional extends AlignmentGeometry {
   /// If either is null, this function interpolates from [AlignmentDirectional.center].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static AlignmentDirectional lerp(AlignmentDirectional a, AlignmentDirectional b, double t) {
+  static AlignmentDirectional? lerp(AlignmentDirectional? a, AlignmentDirectional? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return AlignmentDirectional(ui.lerpDouble(0.0, b.start, t), ui.lerpDouble(0.0, b.y, t));
+      return AlignmentDirectional(ui.lerpDouble(0.0, b!.start, t)!, ui.lerpDouble(0.0, b.y, t)!);
     if (b == null)
-      return AlignmentDirectional(ui.lerpDouble(a.start, 0.0, t), ui.lerpDouble(a.y, 0.0, t));
-    return AlignmentDirectional(ui.lerpDouble(a.start, b.start, t), ui.lerpDouble(a.y, b.y, t));
+      return AlignmentDirectional(ui.lerpDouble(a.start, 0.0, t)!, ui.lerpDouble(a.y, 0.0, t)!);
+    return AlignmentDirectional(ui.lerpDouble(a.start, b.start, t)!, ui.lerpDouble(a.y, b.y, t)!);
   }
 
   @override
-  Alignment resolve(TextDirection direction) {
+  Alignment resolve(TextDirection? direction) {
     assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
-    switch (direction) {
+    switch (direction!) {
       case TextDirection.rtl:
         return Alignment(-start, y);
       case TextDirection.ltr:
         return Alignment(start, y);
     }
-    return null;
   }
 
   static String _stringify(double start, double y) {
@@ -622,15 +620,14 @@ class _MixedAlignment extends AlignmentGeometry {
   }
 
   @override
-  Alignment resolve(TextDirection direction) {
+  Alignment resolve(TextDirection? direction) {
     assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
-    switch (direction) {
+    switch (direction!) {
       case TextDirection.rtl:
         return Alignment(_x - _start, _y);
       case TextDirection.ltr:
         return Alignment(_x + _start, _y);
     }
-    return null;
   }
 }
 
@@ -652,7 +649,7 @@ class _MixedAlignment extends AlignmentGeometry {
 class TextAlignVertical {
   /// Creates a TextAlignVertical from any y value between -1.0 and 1.0.
   const TextAlignVertical({
-    @required this.y,
+    required this.y,
   }) : assert(y != null),
        assert(y >= -1.0 && y <= 1.0);
 

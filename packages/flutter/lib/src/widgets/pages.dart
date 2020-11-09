@@ -48,10 +48,6 @@ Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animat
 ///
 /// Callers must define the [pageBuilder] function which creates the route's
 /// primary contents. To add transitions define the [transitionsBuilder] function.
-///
-/// See also:
-///
-///  * [TransitionBuilderPage], which is a [Page] of this class.
 class PageRouteBuilder<T> extends PageRoute<T> {
   /// Creates a route that delegates to builder callbacks.
   ///
@@ -62,6 +58,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     @required this.pageBuilder,
     this.transitionsBuilder = _defaultTransitionsBuilder,
     this.transitionDuration = const Duration(milliseconds: 300),
+    this.reverseTransitionDuration = const Duration(milliseconds: 300),
     this.opaque = true,
     this.barrierDismissible = false,
     this.barrierColor,
@@ -94,6 +91,9 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   final Duration transitionDuration;
 
   @override
+  final Duration reverseTransitionDuration;
+
+  @override
   final bool opaque;
 
   @override
@@ -116,109 +116,5 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return transitionsBuilder(context, animation, secondaryAnimation, child);
-  }
-}
-
-/// A page that creates a [PageRoute] with customizable transition.
-///
-/// Similar to the [PageRouteBuilder], callers must define the [pageBuilder]
-/// function which creates the route's primary contents. To add transitions
-/// define the [transitionsBuilder] function.
-///
-/// See also:
-///
-///  * [PageRouteBuilder], which is a [PageRoute] version of this class.
-class TransitionBuilderPage<T> extends Page<T> {
-  /// Creates a [TransitionBuilderPage].
-  const TransitionBuilderPage({
-    @required this.pageBuilder,
-    this.transitionsBuilder = _defaultTransitionsBuilder,
-    this.transitionDuration = const Duration(milliseconds: 300),
-    this.opaque = true,
-    this.barrierDismissible = false,
-    this.barrierColor,
-    this.barrierLabel,
-    this.maintainState = true,
-    this.fullscreenDialog = false,
-    LocalKey key,
-    String name,
-    Object arguments,
-  }) : assert(pageBuilder != null),
-       assert(transitionsBuilder != null),
-       assert(opaque != null),
-       assert(barrierDismissible != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null),
-       super(key: key, name: name, arguments: arguments);
-
-  /// {@macro flutter.widgets.pageRouteBuilder.pageBuilder}
-  final RoutePageBuilder pageBuilder;
-
-  /// {@macro flutter.widgets.pageRouteBuilder.transitionsBuilder}
-  final RouteTransitionsBuilder transitionsBuilder;
-
-  /// {@macro flutter.widgets.transitionRoute.transitionDuration}
-  final Duration transitionDuration;
-
-  /// {@macro flutter.widgets.transitionRoute.opaque}
-  final bool opaque;
-
-  /// {@macro flutter.widgets.modalRoute.barrierDismissible}
-  final bool barrierDismissible;
-
-  /// {@macro flutter.widgets.modalRoute.barrierColor}
-  final Color barrierColor;
-
-  /// {@macro flutter.widgets.modalRoute.barrierLabel}
-  final String barrierLabel;
-
-  /// {@macro flutter.widgets.modalRoute.maintainState}
-  final bool maintainState;
-
-  /// {@macro flutter.widgets.pageRoute.fullscreenDialog}
-  final bool fullscreenDialog;
-
-  @override
-  Route<T> createRoute(BuildContext context) => _PageBasedPageRouteBuilder<T>(this);
-}
-
-// A page-based version of the [PageRouteBuilder].
-//
-// This class gets its builder and settings directly from the [TransitionBuilderPage],
-// so that its content updates accordingly to the [TransitionBuilderPage].
-class _PageBasedPageRouteBuilder<T> extends PageRoute<T>{
-  _PageBasedPageRouteBuilder(
-    TransitionBuilderPage<T> page,
-  ) : assert(page != null),
-       super(settings: page, fullscreenDialog: page.fullscreenDialog);
-
-  TransitionBuilderPage<T> get _page => settings as TransitionBuilderPage<T>;
-
-  @override
-  Duration get transitionDuration => _page.transitionDuration;
-
-  @override
-  bool get opaque => _page.opaque;
-
-  @override
-  bool get barrierDismissible => _page.barrierDismissible;
-
-  @override
-  Color get barrierColor => _page.barrierColor;
-
-  @override
-  String get barrierLabel => _page.barrierLabel;
-
-  @override
-  bool get maintainState => _page.maintainState;
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return _page.pageBuilder(context, animation, secondaryAnimation);
-  }
-
-  @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    return _page.transitionsBuilder(context, animation, secondaryAnimation, child);
   }
 }

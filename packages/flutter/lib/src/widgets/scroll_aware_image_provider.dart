@@ -44,7 +44,7 @@ import 'scrollable.dart';
 /// only be visible for a very brief period.
 @optionalTypeArgs
 class ScrollAwareImageProvider<T> extends ImageProvider<T> {
-  /// Creates a [ScrollingAwareImageProvider].
+  /// Creates a [ScrollAwareImageProvider].
   ///
   /// The [context] object is the [BuildContext] of the [State] using this
   /// provider. It is used to determine scrolling velocity during [resolve]. It

@@ -84,7 +84,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: FlatButton(
+                child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
@@ -138,7 +138,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: FlatButton(
+                child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute<void>(
@@ -183,7 +183,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: FlatButton(
+                child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute<void>(
@@ -236,11 +236,11 @@ void main() {
         builder: (BuildContext context) {
           return AlertDialog(
             actions: <Widget> [
-              FlatButton(
+              TextButton(
                 child: const Text('YES'),
                 onPressed: () { Navigator.of(context).pop(true); },
               ),
-              FlatButton(
+              TextButton(
                 child: const Text('NO'),
                 onPressed: () { Navigator.of(context).pop(false); },
               ),
@@ -257,7 +257,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: FlatButton(
+                child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute<void>(
@@ -343,7 +343,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: FlatButton(
+                child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(route);

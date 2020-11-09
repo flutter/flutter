@@ -10,8 +10,6 @@ import 'package:platform_views_layout/main.dart' as app;
 void main() {
   enableFlutterDriverExtension();
   runApp(
-    const app.PlatformViewApp(
-      enableHybridCompositionOnAndroid: true,
-    )
+    const app.PlatformViewApp()
   );
 }

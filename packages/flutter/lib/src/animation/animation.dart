@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 
 import 'package:flutter/foundation.dart';
 
@@ -12,18 +10,18 @@ import 'tween.dart';
 // Examples can assume:
 // AnimationController _controller;
 
-/// The status of an animation
+/// The status of an animation.
 enum AnimationStatus {
-  /// The animation is stopped at the beginning
+  /// The animation is stopped at the beginning.
   dismissed,
 
-  /// The animation is running from beginning to end
+  /// The animation is running from beginning to end.
   forward,
 
-  /// The animation is running backwards, from end to beginning
+  /// The animation is running backwards, from end to beginning.
   reverse,
 
-  /// The animation is stopped at the end
+  /// The animation is stopped at the end.
   completed,
 }
 

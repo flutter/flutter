@@ -500,7 +500,9 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
   @override
   double get value {
     assert(!controller.indexIsChanging);
-    return (controller.animation.value - index.toDouble()).abs().clamp(0.0, 1.0) as double;
+    final double controllerMaxValue = (controller.length - 1).toDouble();
+    final double controllerValue = controller.animation.value.clamp(0.0, controllerMaxValue) as double;
+    return (controllerValue - index.toDouble()).abs().clamp(0.0, 1.0) as double;
   }
 }
 
@@ -568,6 +570,8 @@ class _TabBarScrollController extends ScrollController {
 /// Typically created as the [AppBar.bottom] part of an [AppBar] and in
 /// conjunction with a [TabBarView].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=POtoEH-5l40}
+///
 /// If a [TabController] is not provided, then a [DefaultTabController] ancestor
 /// must be provided instead. The tab controller's [TabController.length] must
 /// equal the length of the [tabs] list and the length of the
@@ -595,8 +599,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero], and must not be null.
   ///
-  /// If [indicator] is not null, then [indicatorWeight], [indicatorPadding], and
-  /// [indicatorColor] are ignored.
+  /// If [indicator] is not null or provided from [TabBarTheme],
+  /// then [indicatorWeight], [indicatorPadding], and [indicatorColor] are ignored.
   const TabBar({
     Key key,
     @required this.tabs,
@@ -647,7 +651,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this parameter is null, then the value of the Theme's indicatorColor
   /// property is used.
   ///
-  /// If [indicator] is specified, this property is ignored.
+  /// If [indicator] is specified or provided from [TabBarTheme],
+  /// this property is ignored.
   final Color indicatorColor;
 
   /// The thickness of the line that appears below the selected tab.
@@ -655,7 +660,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The value of this parameter must be greater than zero and its default
   /// value is 2.0.
   ///
-  /// If [indicator] is specified, this property is ignored.
+  /// If [indicator] is specified or provided from [TabBarTheme],
+  /// this property is ignored.
   final double indicatorWeight;
 
   /// The horizontal padding for the line that appears below the selected tab.
@@ -669,13 +675,15 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The default value of [indicatorPadding] is [EdgeInsets.zero].
   ///
-  /// If [indicator] is specified, this property is ignored.
+  /// If [indicator] is specified or provided from [TabBarTheme],
+  /// this property is ignored.
   final EdgeInsetsGeometry indicatorPadding;
 
   /// Defines the appearance of the selected tab indicator.
   ///
-  /// If [indicator] is specified, the [indicatorColor], [indicatorWeight],
-  /// and [indicatorPadding] properties are ignored.
+  /// If [indicator] is specified or provided from [TabBarTheme],
+  /// the [indicatorColor], [indicatorWeight], and [indicatorPadding]
+  /// properties are ignored.
   ///
   /// The default, underline-style, selected tab indicator can be defined with
   /// [UnderlineTabIndicator].
@@ -728,7 +736,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this property is null, then kTabLabelPadding is used.
   final EdgeInsetsGeometry labelPadding;
 
-  /// The text style of the unselected tab labels
+  /// The text style of the unselected tab labels.
   ///
   /// If this property is null, then the [labelStyle] value is used. If [labelStyle]
   /// is null, then the text style of the [ThemeData.primaryTextTheme]'s
@@ -1140,6 +1148,8 @@ class _TabBarState extends State<TabBar> {
 ///
 /// This widget is typically used in conjunction with a [TabBar].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=POtoEH-5l40}
+///
 /// If a [TabController] is not provided, then there must be a [DefaultTabController]
 /// ancestor.
 ///
@@ -1190,8 +1200,6 @@ class TabBarView extends StatefulWidget {
   @override
   _TabBarViewState createState() => _TabBarViewState();
 }
-
-const PageScrollPhysics _kTabBarViewPhysics = PageScrollPhysics();
 
 class _TabBarViewState extends State<TabBarView> {
   TabController _controller;
@@ -1339,6 +1347,8 @@ class _TabBarViewState extends State<TabBarView> {
     } else if (notification is ScrollEndNotification) {
       _controller.index = _pageController.page.round();
       _currentIndex = _controller.index;
+      if (!_controller.indexIsChanging)
+        _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0) as double;
     }
     _warpUnderwayCount -= 1;
 
@@ -1362,8 +1372,8 @@ class _TabBarViewState extends State<TabBarView> {
         dragStartBehavior: widget.dragStartBehavior,
         controller: _pageController,
         physics: widget.physics == null
-          ? _kTabBarViewPhysics.applyTo(const ClampingScrollPhysics())
-          : _kTabBarViewPhysics.applyTo(widget.physics),
+          ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())
+          : const PageScrollPhysics().applyTo(widget.physics),
         children: _childrenWithKey,
       ),
     );

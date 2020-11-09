@@ -37,7 +37,7 @@ class DriverTestAppState extends State<DriverTestApp> {
                 Expanded(
                   child: Text(present ? 'present' : 'absent'),
                 ),
-                RaisedButton(
+                ElevatedButton(
                   child: const Text(
                     'toggle',
                     key: ValueKey<String>('togglePresent'),

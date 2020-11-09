@@ -23,6 +23,7 @@ import 'package:vector_math/vector_math_64.dart';
 import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
 import 'goldens.dart';
 import 'platform.dart';
+import 'restoration.dart';
 import 'stack_manipulation.dart';
 import 'test_async_utils.dart';
 import 'test_exception_reporter.dart';
@@ -187,6 +188,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   TestWindow get window => _window;
   final TestWindow _window;
 
+  @override
+  TestRestorationManager get restorationManager => _restorationManager;
+  TestRestorationManager _restorationManager;
+
+  /// Called by the test framework at the beginning of a widget test to
+  /// prepare the binding for the next test.
+  void reset() {
+    _restorationManager = createRestorationManager();
+  }
+
+  @override
+  TestRestorationManager createRestorationManager() {
+    return TestRestorationManager();
+  }
+
   /// The value to set [debugPrint] to while tests are running.
   ///
   /// This can be used to redirect console output from the framework, or to
@@ -236,10 +252,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// This method has no effect on the timeout specified via `timeout` on
   /// [testWidgets]. That timeout is implemented by the `test` package.
   ///
-  /// By default, each [pump] and [pumpWidget] call increases the timeout by a
-  /// hundred milliseconds, and each [matchesGoldenFile] expectation increases
-  /// it by a minute. If there is no timeout in the first place, this has no
-  /// effect.
+  /// By default, each [pump] and [WidgetTester.pumpWidget] call increases the
+  /// timeout by a hundred milliseconds, and each [matchesGoldenFile]
+  /// expectation increases it by a minute. If there is no timeout in the first
+  /// place, this has no effect.
   ///
   /// The granularity of timeouts is coarse: the time is checked once per
   /// second, and only when the test is not executing. It is therefore possible
@@ -255,6 +271,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///    (That timeout is implemented by the `test` package.)
   // See AutomatedTestWidgetsFlutterBinding.addTime for an actual implementation.
   void addTime(Duration duration);
+
+  /// Delay for `duration` of time.
+  ///
+  /// In the automated test environment ([AutomatedTestWidgetsFlutterBinding],
+  /// typically used in `flutter test`), this advances the fake [clock] for the
+  /// period and also increases timeout (see [addTime]).
+  ///
+  /// In the live test environemnt ([LiveTestWidgetsFlutterBinding], typically
+  /// used for `flutter run` and for [e2e](https://pub.dev/packages/e2e)), it is
+  /// equivalent as [Future.delayed].
+  Future<void> delayed(Duration duration);
 
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
@@ -467,6 +494,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     HitTestResult hitTestResult, {
     TestBindingEventSource source = TestBindingEventSource.device,
   }) {
+    // This override disables calling this method from base class
+    // [GestureBinding] when the runtime type is [TestWidgetsFlutterBinding],
+    // while enables sub class [LiveTestWidgetsFlutterBinding] to override
+    // this behavior and use this argument to determine the souce of the event
+    // especially when the test app is running on a device.
     assert(source == TestBindingEventSource.test);
     super.dispatchEvent(event, hitTestResult);
   }
@@ -1105,6 +1137,14 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
+  Future<void> delayed(Duration duration) {
+    assert(_currentFakeAsync != null);
+    addTime(duration);
+    _currentFakeAsync.elapse(duration);
+    return Future<void>.value();
+  }
+
+  @override
   Future<void> runTest(
     Future<void> testBody(),
     VoidCallback invariantTester, {
@@ -1196,23 +1236,49 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     _timeoutStopwatch = null;
     _timeout = null;
   }
-
 }
 
 /// Available policies for how a [LiveTestWidgetsFlutterBinding] should paint
 /// frames.
 ///
 /// These values are set on the binding's
-/// [LiveTestWidgetsFlutterBinding.framePolicy] property. The default is
-/// [fadePointers].
+/// [LiveTestWidgetsFlutterBinding.framePolicy] property.
+///
+/// {@template flutter.flutter_test.frame_policy}
+/// The default is [LiveTestWidgetsFlutterBindingFramePolicy.fadePointers].
+/// Setting this to anything other than
+/// [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] results in pumping
+/// extra frames, which might involve calling builders more, or calling paint
+/// callbacks more, etc, and might interfere with the test. If you know that
+/// your test won't be affected by this, you can set the policy to
+/// [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive] or
+/// [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] in that particular
+/// file.
+///
+/// To set a value while still allowing the test file to work as a normal test,
+/// add the following code to your test file at the top of your
+/// `void main() { }` function, before calls to [testWidgets]:
+///
+/// ```dart
+/// TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+/// if (binding is LiveTestWidgetsFlutterBinding) {
+///   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.[thePolicy];
+/// }
+/// ```
+/// {@endtemplate}
 enum LiveTestWidgetsFlutterBindingFramePolicy {
-  /// Strictly show only frames that are explicitly pumped. This most closely
-  /// matches the behavior of tests when run under `flutter test`.
+  /// Strictly show only frames that are explicitly pumped.
+  ///
+  /// This most closely matches the [AutomatedTestWidgetsFlutterBinding]
+  /// (the defualt binding for `flutter test`) behavior.
   onlyPumps,
 
   /// Show pumped frames, and additionally schedule and run frames to fade
   /// out the pointer crosshairs and other debugging information shown by
   /// the binding.
+  ///
+  /// This will schedule frames when pumped or when there has been some
+  /// activity with [TestPointer]s.
   ///
   /// This can result in additional frames being pumped beyond those that
   /// the test itself requests, which can cause differences in behavior.
@@ -1220,6 +1286,9 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
 
   /// Show every frame that the framework requests, even if the frames are not
   /// explicitly pumped.
+  ///
+  /// The major difference between [fullyLive] and [benchmarkLive] is the latter
+  /// ignores frame requests by [WidgetTester.pump].
   ///
   /// This can help with orienting the developer when looking at
   /// heavily-animated situations, and will almost certainly result in
@@ -1235,12 +1304,34 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// directly to run (either by using [WidgetTester.pumpBenchmark] or invoking
   /// [Window.onBeginFrame] and [Window.onDrawFrame]).
   ///
+  /// This allows all frame requests from the engine to be serviced, and allows
+  /// all frame requests that are artificially triggered to be serviced, but
+  /// ignores [SchedulerBinding.scheduleFrame] requests from the framework.
+  /// Therefore animation won't run for this mode because the framework
+  /// generates an animation by requesting new frames.
+  ///
   /// The [SchedulerBinding.hasScheduledFrame] property will never be true in
   /// this mode. This can cause unexpected effects. For instance,
   /// [WidgetTester.pumpAndSettle] does not function in this mode, as it relies
   /// on the [SchedulerBinding.hasScheduledFrame] property to determine when the
   /// application has "settled".
   benchmark,
+
+  /// Ignore any request from pump but respect other requests to schedule a
+  /// frame.
+  ///
+  /// This is used for running the test on a device, where scheduling of new
+  /// frames respects what the engine and the device needed.
+  ///
+  /// Compared to [fullyLive] this policy ignores the frame requests from
+  /// [WidgetTester.pump] so that frame scheduling mimics that of the real
+  /// environment, and avoids waiting for an artificially pumped frame. (For
+  /// example, when driving the test in methods like
+  /// [WidgetTester.handlePointerEventRecord] or [WidgetTester.fling].)
+  ///
+  /// This policy differs from [benchmark] in that it can be used for capturing
+  /// animation frames requested by the framework.
+  benchmarkLive,
 }
 
 /// A variant of [TestWidgetsFlutterBinding] for executing tests in
@@ -1294,59 +1385,28 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   bool _viewNeedsPaint = false;
   bool _runningAsyncTasks = false;
 
-  /// Whether to have [pump] with a duration only pump a single frame
+  /// The strategy for [pump]ing and requesting new frames.
+  ///
+  /// The policy decides whether [pump] (with a duration) pumps a single frame
   /// (as would happen in a normal test environment using
-  /// [AutomatedTestWidgetsFlutterBinding]), or whether to instead
-  /// pump every frame that the system requests during any
-  /// asynchronous pause in the test (as would normally happen when
-  /// running an application with [WidgetsFlutterBinding]).
+  /// [AutomatedTestWidgetsFlutterBinding]), or pumps every frame that the
+  /// system requests during an asynchronous pause (as would normally happen
+  /// when running an application with [WidgetsFlutterBinding]).
   ///
-  /// * [LiveTestWidgetsFlutterBindingFramePolicy.fadePointers] is the default
-  ///   behavior, which is to only pump once, except when there has been some
-  ///   activity with [TestPointer]s, in which case those are shown and may pump
-  ///   additional frames.
+  /// {@macro flutter.flutter_test.frame_policy}
   ///
-  /// * [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] is the strictest
-  ///   behavior, which is to only pump once. This most closely matches the
-  ///   [AutomatedTestWidgetsFlutterBinding] (`flutter test`) behavior.
-  ///
-  /// * [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive] allows all frame
-  ///   requests from the engine to be serviced, even those the test did not
-  ///   explicitly pump.
-  ///
-  /// * [LiveTestWidgetsFlutterBindingFramePolicy.benchmark] allows all frame
-  ///   requests from the engine to be serviced, and allows all frame requests
-  ///   that are artificially triggered to be serviced, but prevents the
-  ///   framework from requesting any frames from the engine itself. The
-  ///   [SchedulerBinding.hasScheduledFrame] property will never be true in this
-  ///   mode. This can cause unexpected effects. For instance,
-  ///   [WidgetTester.pumpAndSettle] does not function in this mode, as it
-  ///   relies on the [SchedulerBinding.hasScheduledFrame] property to determine
-  ///   when the application has "settled".
-  ///
-  /// Setting this to anything other than
-  /// [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] means pumping extra
-  /// frames, which might involve calling builders more, or calling paint
-  /// callbacks more, etc, which might interfere with the test. If you know your
-  /// test file wouldn't be affected by this, you can set it to
-  /// [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive] persistently in that
-  /// particular test file. To set this to
-  /// [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive] while still allowing
-  /// the test file to work as a normal test, add the following code to your
-  /// test file at the top of your `void main() { }` function, before calls to
-  /// [testWidgets]:
-  ///
-  /// ```dart
-  /// TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  /// if (binding is LiveTestWidgetsFlutterBinding)
-  ///   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
-  /// ```
+  /// See [LiveTestWidgetsFlutterBindingFramePolicy].
   LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
 
   @override
   void addTime(Duration duration) {
     // We don't support timeouts on the LiveTestWidgetsFlutterBinding.
     // See runTest().
+  }
+
+  @override
+  Future<void> delayed(Duration duration) {
+    return Future<void>.delayed(duration);
   }
 
   @override
@@ -1370,6 +1430,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
+        (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fadePointers && _viewNeedsPaint)) {
       _doDrawThisFrame = true;
@@ -1424,6 +1485,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// Events dispatched by [TestGesture] are not affected by this.
   HitTestDispatcher deviceEventDispatcher;
 
+
+  /// Dispatch an event to a hit test result's path.
+  ///
+  /// Apart from forwarding the event to [GestureBinding.dispatchEvent],
+  /// This also paint all events that's down on the screen.
   @override
   void dispatchEvent(
     PointerEvent event,
@@ -1432,15 +1498,19 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }) {
     switch (source) {
       case TestBindingEventSource.test:
-        if (!renderView._pointers.containsKey(event.pointer)) {
-          assert(event.down);
-          renderView._pointers[event.pointer] = _LiveTestPointerRecord(event.pointer, event.position);
-        } else {
+        if (renderView._pointers.containsKey(event.pointer)) {
           renderView._pointers[event.pointer].position = event.position;
           if (!event.down)
             renderView._pointers[event.pointer].decay = _kPointerDecay;
+          _handleViewNeedsPaint();
+        } else if (event.down) {
+          assert(event is PointerDownEvent);
+          renderView._pointers[event.pointer] = _LiveTestPointerRecord(
+            event.pointer,
+            event.position,
+          );
+          _handleViewNeedsPaint();
         }
-        _handleViewNeedsPaint();
         super.dispatchEvent(event, hitTestResult, source: source);
         break;
       case TestBindingEventSource.device:
@@ -1456,6 +1526,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(inTest);
     assert(!_expectingFrame);
     assert(_pendingFrame == null);
+    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive) {
+      // Ignore all pumps and just wait.
+      return delayed(duration ?? Duration.zero);
+    }
     return TestAsyncUtils.guard<void>(() {
       if (duration != null) {
         Timer(duration, () {

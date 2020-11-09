@@ -24,10 +24,6 @@ const Color _kScrollbarColor = CupertinoDynamicColor.withBrightness(
   color: Color(0x59000000),
   darkColor: Color(0x80FFFFFF),
 );
-const double _kScrollbarThickness = 3;
-const double _kScrollbarThicknessDragging = 8.0;
-const Radius _kScrollbarRadius = Radius.circular(1.5);
-const Radius _kScrollbarRadiusDragging = Radius.circular(4.0);
 
 // This is the amount of space from the top of a vertical scrollbar to the
 // top edge of the scrollable, measured when the vertical scrollbar overscrolls
@@ -63,9 +59,31 @@ class CupertinoScrollbar extends StatefulWidget {
     Key key,
     this.controller,
     this.isAlwaysShown = false,
+    this.thickness = defaultThickness,
+    this.thicknessWhileDragging = defaultThicknessWhileDragging,
+    this.radius = defaultRadius,
+    this.radiusWhileDragging = defaultRadiusWhileDragging,
     @required this.child,
-  }) : assert(!isAlwaysShown || controller != null, 'When isAlwaysShown is true, must pass a controller that is attached to a scroll view'),
+  }) : assert(thickness != null),
+       assert(thickness < double.infinity),
+       assert(thicknessWhileDragging != null),
+       assert(thicknessWhileDragging < double.infinity),
+       assert(radius != null),
+       assert(radiusWhileDragging != null),
+       assert(!isAlwaysShown || controller != null, 'When isAlwaysShown is true, must pass a controller that is attached to a scroll view'),
        super(key: key);
+
+  /// Default value for [thickness] if it's not specified in [new CupertinoScrollbar].
+  static const double defaultThickness = 3;
+
+  /// Default value for [thicknessWhileDragging] if it's not specified in [new CupertinoScrollbar].
+  static const double defaultThicknessWhileDragging = 8.0;
+
+  /// Default value for [radius] if it's not specified in [new CupertinoScrollbar].
+  static const Radius defaultRadius = Radius.circular(1.5);
+
+  /// Default value for [radiusWhileDragging] if it's not specified in [new CupertinoScrollbar].
+  static const Radius defaultRadiusWhileDragging = Radius.circular(4.0);
 
   /// The subtree to place inside the [CupertinoScrollbar].
   ///
@@ -183,6 +201,36 @@ class CupertinoScrollbar extends StatefulWidget {
   /// {@endtemplate}
   final bool isAlwaysShown;
 
+  /// The thickness of the scrollbar when it's not being dragged by the user.
+  ///
+  /// When the user starts dragging the scrollbar, the thickness will animate
+  /// to [thicknessWhileDragging], then animate back when the user stops
+  /// dragging the scrollbar.
+  final double thickness;
+
+  /// The thickness of the scrollbar when it's being dragged by the user.
+  ///
+  /// When the user starts dragging the scrollbar, the thickness will animate
+  /// from [thickness] to this value, then animate back when the user stops
+  /// dragging the scrollbar.
+  final double thicknessWhileDragging;
+
+  /// The radius of the scrollbar edges when the scrollbar is not being dragged
+  /// by the user.
+  ///
+  /// When the user starts dragging the scrollbar, the radius will animate
+  /// to [radiusWhileDragging], then animate back when the user stops dragging
+  /// the scrollbar.
+  final Radius radius;
+
+  /// The radius of the scrollbar edges when the scrollbar is being dragged by
+  /// the user.
+  ///
+  /// When the user starts dragging the scrollbar, the radius will animate
+  /// from [radius] to this value, then animate back when the user stops
+  /// dragging the scrollbar.
+  final Radius radiusWhileDragging;
+
   @override
   _CupertinoScrollbarState createState() => _CupertinoScrollbarState();
 }
@@ -199,11 +247,11 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   Drag _drag;
 
   double get _thickness {
-    return _kScrollbarThickness + _thicknessAnimationController.value * (_kScrollbarThicknessDragging - _kScrollbarThickness);
+    return widget.thickness + _thicknessAnimationController.value * (widget.thicknessWhileDragging - widget.thickness);
   }
 
   Radius get _radius {
-    return Radius.lerp(_kScrollbarRadius, _kScrollbarRadiusDragging, _thicknessAnimationController.value);
+    return Radius.lerp(widget.radius, widget.radiusWhileDragging, _thicknessAnimationController.value);
   }
 
   ScrollController _currentController;
@@ -247,6 +295,8 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   @override
   void didUpdateWidget(CupertinoScrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
+    assert(_painter != null);
+    _painter.updateThickness(_thickness, _radius);
     if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
       if (widget.isAlwaysShown == true) {
         _triggerScrollbar();

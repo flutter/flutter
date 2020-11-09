@@ -108,7 +108,7 @@ void main() {
         () {
           unawaited(runner.run(
             <String>['crash'],
-            <FlutterCommand>[
+            () => <FlutterCommand>[
               CrashingFlutterCommand(asyncCrash: true, completer: commandCompleter),
             ],
             // This flutterVersion disables crash reporting.

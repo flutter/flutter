@@ -24,7 +24,7 @@ void main() {
       flutterUsage: usage,
     );
 
-    expect(() => doctorResultEvent.send(), returnsNormally);
+    expect(doctorResultEvent.send, returnsNormally);
 
     verify(usage.sendEvent('doctor-result', any, label: anyNamed('label'))).called(3);
   });
@@ -46,7 +46,7 @@ void main() {
       flutterUsage: usage,
     );
 
-    expect(() => doctorResultEvent.send(), returnsNormally);
+    expect(doctorResultEvent.send, returnsNormally);
 
     verify(usage.sendEvent('doctor-result', any, label: anyNamed('label'))).called(1);
   });

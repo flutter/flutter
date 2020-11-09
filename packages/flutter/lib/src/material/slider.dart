@@ -6,7 +6,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -27,13 +26,6 @@ import 'theme.dart';
 // int _dollars = 0;
 // int _duelCommandment = 1;
 // void setState(VoidCallback fn) { }
-
-/// A callback that formats a numeric value from a [Slider] widget.
-///
-/// See also:
-///
-///  * [Slider.semanticFormatterCallback], which shows an example use case.
-typedef SemanticFormatterCallback = String Function(double value);
 
 /// [Slider] uses this callback to paint the value indicator on the overlay.
 ///
@@ -346,10 +338,10 @@ class Slider extends StatefulWidget {
   /// It is used to display the value of a discrete slider, and it is displayed
   /// as part of the value indicator shape.
   ///
-  /// The label is rendered using the active [ThemeData]'s
-  /// [ThemeData.textTheme.bodyText1] text style, with the
-  /// theme data's [ThemeData.colorScheme.onPrimaryColor]. The label's text style
-  /// can be overridden with [SliderThemeData.valueIndicatorTextStyle].
+  /// The label is rendered using the active [ThemeData]'s [TextTheme.bodyText1]
+  /// text style, with the theme data's [ColorScheme.onPrimary] color. The
+  /// label's text style can be overridden with
+  /// [SliderThemeData.valueIndicatorTextStyle].
   ///
   /// If null, then the value indicator will not be displayed.
   ///
@@ -366,7 +358,8 @@ class Slider extends StatefulWidget {
   /// The "active" side of the slider is the side between the thumb and the
   /// minimum value.
   ///
-  /// Defaults to [SliderTheme.activeTrackColor] of the current [SliderTheme].
+  /// Defaults to [SliderThemeData.activeTrackColor] of the current
+  /// [SliderTheme].
   ///
   /// Using a [SliderTheme] gives much more fine-grained control over the
   /// appearance of various components of the slider.
@@ -377,7 +370,7 @@ class Slider extends StatefulWidget {
   /// The "inactive" side of the slider is the side between the thumb and the
   /// maximum value.
   ///
-  /// Defaults to the [SliderTheme.inactiveTrackColor] of the current
+  /// Defaults to the [SliderThemeData.inactiveTrackColor] of the current
   /// [SliderTheme].
   ///
   /// Using a [SliderTheme] gives much more fine-grained control over the
@@ -1347,10 +1340,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   double computeMaxIntrinsicWidth(double height) => _minPreferredTrackWidth + _maxSliderPartWidth;
 
   @override
-  double computeMinIntrinsicHeight(double width) => max(_minPreferredTrackHeight, _maxSliderPartHeight);
+  double computeMinIntrinsicHeight(double width) => math.max(_minPreferredTrackHeight, _maxSliderPartHeight);
 
   @override
-  double computeMaxIntrinsicHeight(double width) => max(_minPreferredTrackHeight, _maxSliderPartHeight);
+  double computeMaxIntrinsicHeight(double width) => math.max(_minPreferredTrackHeight, _maxSliderPartHeight);
 
   @override
   bool get sizedByParent => true;
@@ -1359,7 +1352,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void performResize() {
     size = Size(
       constraints.hasBoundedWidth ? constraints.maxWidth : _minPreferredTrackWidth + _maxSliderPartWidth,
-      constraints.hasBoundedHeight ? constraints.maxHeight : max(_minPreferredTrackHeight, _maxSliderPartHeight),
+      constraints.hasBoundedHeight ? constraints.maxHeight : math.max(_minPreferredTrackHeight, _maxSliderPartHeight),
     );
   }
 

@@ -160,7 +160,7 @@ abstract class FloatingActionButtonLocation {
   /// Centered [FloatingActionButton], floating at the bottom of the screen.
   ///
   /// To position a mini floating action button, use [miniCenterFloat] and
-  /// set [FloatingActionButtonLocation.mini] to true.
+  /// set [FloatingActionButton.mini] to true.
   static const FloatingActionButtonLocation centerFloat = _CenterFloatFabLocation();
 
   /// Centered [FloatingActionButton], floating at the bottom of the screen,
@@ -416,7 +416,7 @@ abstract class StandardFabLocation extends FloatingActionButtonLocation {
 /// Mixin for a "top" floating action button location, such as
 /// [FloatingActionButtonLocation.startTop].
 ///
-/// The [adjustment], typically [kMiniButtonOffsetAdjustment], is ignored in the
+/// The `adjustment`, typically [kMiniButtonOffsetAdjustment], is ignored in the
 /// Y axis of "top" positions. For "top" positions, the X offset is adjusted to
 /// move closer to the edge of the screen. This is so that a minified floating
 /// action button appears to align with [CircleAvatar]s in the
@@ -443,12 +443,13 @@ mixin FabFloatOffsetY on StandardFabLocation {
   @override
   double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
     final double contentBottom = scaffoldGeometry.contentBottom;
+    final double bottomContentHeight = scaffoldGeometry.scaffoldSize.height - contentBottom;
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
     final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
     final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
     final double safeMargin = math.max(
       kFloatingActionButtonMargin,
-      scaffoldGeometry.minViewPadding.bottom,
+      scaffoldGeometry.minViewPadding.bottom - bottomContentHeight,
     );
 
     double fabY = contentBottom - fabHeight - safeMargin;

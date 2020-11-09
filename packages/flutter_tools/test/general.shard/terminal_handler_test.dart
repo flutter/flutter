@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
@@ -122,32 +121,37 @@ void main() {
       verify(mockResidentRunner.toggleCanvaskit()).called(1);
     });
 
-    testUsingContext('i, I - debugToggleWidgetInspector with service protocol', () async {
+    testUsingContext('i - debugToggleWidgetInspector with service protocol', () async {
       await terminalHandler.processTerminalInput('i');
-      await terminalHandler.processTerminalInput('I');
 
-      verify(mockResidentRunner.debugToggleWidgetInspector()).called(2);
+      verify(mockResidentRunner.debugToggleWidgetInspector()).called(1);
     });
 
-    testUsingContext('i, I - debugToggleWidgetInspector without service protocol', () async {
+    testUsingContext('i - debugToggleWidgetInspector without service protocol', () async {
       when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
       await terminalHandler.processTerminalInput('i');
-      await terminalHandler.processTerminalInput('I');
 
       verifyNever(mockResidentRunner.debugToggleWidgetInspector());
     });
 
-    testUsingContext('l - list flutter views', () async {
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
+    testUsingContext('I - debugToggleInvertOversizedImages with service protocol/debug', () async {
       when(mockResidentRunner.isRunningDebug).thenReturn(true);
-      when(mockResidentRunner.flutterDevices).thenReturn(<FlutterDevice>[mockFlutterDevice]);
-      when(mockResidentRunner.listFlutterViews()).thenAnswer((Invocation invocation) async {
-        return <FlutterView>[];
-      });
+      await terminalHandler.processTerminalInput('I');
 
-      await terminalHandler.processTerminalInput('l');
+      verify(mockResidentRunner.debugToggleInvertOversizedImages()).called(1);
+    });
 
-      expect(testLogger.statusText, contains('Connected views:\n'));
+    testUsingContext('I - debugToggleInvertOversizedImages with service protocol/ndebug', () async {
+      when(mockResidentRunner.isRunningDebug).thenReturn(false);
+      await terminalHandler.processTerminalInput('I');
+
+      verifyNever(mockResidentRunner.debugToggleInvertOversizedImages());
+    });
+
+    testUsingContext('I - debugToggleInvertOversizedImages without service protocol', () async {
+      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
+      await terminalHandler.processTerminalInput('I');
+
     });
 
     testUsingContext('L - debugDumpLayerTree with service protocol', () async {

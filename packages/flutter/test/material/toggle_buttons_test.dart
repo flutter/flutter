@@ -1310,8 +1310,8 @@ void main() {
     final double textDy = tester.getBottomLeft(find.text('Text')).dy;
 
     expect(firstToggleButtonDy, secondToggleButtonDy);
-    expect(firstToggleButtonDy, closeTo(materialButtonDy - 2.0, 0.001));
-    expect(firstToggleButtonDy, closeTo(textDy - 4.0, 0.001));
+    expect(firstToggleButtonDy, moreOrLessEquals(materialButtonDy - 2.0, epsilon: 0.001));
+    expect(firstToggleButtonDy, moreOrLessEquals(textDy - 4.0, epsilon: 0.001));
   });
 
   testWidgets('Directionality test', (WidgetTester tester) async {

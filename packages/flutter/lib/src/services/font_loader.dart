@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 import 'dart:typed_data';
@@ -34,7 +33,7 @@ class FontLoader {
   /// Registers a font asset to be loaded by this font loader.
   ///
   /// The [bytes] argument specifies the actual font asset bytes. Currently,
-  /// only TrueType (TTF) fonts are supported.
+  /// only OpenType (OTF) and TrueType (TTF) fonts are supported.
   void addFont(Future<ByteData> bytes) {
     if (_loaded)
       throw StateError('FontLoader is already loaded');
@@ -64,7 +63,7 @@ class FontLoader {
             (Uint8List list) => loadFont(list, family)
         )
     );
-    return Future.wait(loadFutures.toList());
+    await Future.wait(loadFutures.toList());
   }
 
   /// Hook called to load a font asset into the engine.

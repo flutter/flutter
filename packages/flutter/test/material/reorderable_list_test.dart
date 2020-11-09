@@ -253,6 +253,35 @@ void main() {
         expect(findState(const Key('A')).checked, true);
       });
 
+      testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
+        const Key firstBox = Key('key');
+        Widget build() {
+          return MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: ReorderableListView(
+                  scrollDirection: Axis.vertical,
+                  children: const <Widget>[
+                    SizedBox(key: firstBox, width: 10, height: 10),
+                  ],
+                  onReorder: (_, __) {},
+                ),
+              ),
+            ),
+          );
+        }
+
+        // When the widget is rebuilt, the state of child should be consistent.
+        await tester.pumpWidget(build());
+        final Element e0 = tester.element(find.byKey(firstBox));
+        await tester.pumpWidget(build());
+        final Element e1 = tester.element(find.byKey(firstBox));
+        expect(e0, equals(e1));
+      });
+
       testWidgets('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
         final ScrollController primary = ScrollController();
         final Widget reorderableList = ReorderableListView(
@@ -769,6 +798,35 @@ void main() {
         expect(findState(const Key('B')).checked, false);
         expect(findState(const Key('C')).checked, false);
         expect(findState(const Key('A')).checked, true);
+      });
+
+      testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
+        const Key firstBox = Key('key');
+        Widget build() {
+          return MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: ReorderableListView(
+                  scrollDirection: Axis.horizontal,
+                  children: const <Widget>[
+                    SizedBox(key: firstBox, width: 10, height: 10),
+                  ],
+                  onReorder: (_, __) {},
+                ),
+              ),
+            ),
+          );
+        }
+
+        // When the widget is rebuilt, the state of child should be consistent.
+        await tester.pumpWidget(build());
+        final Element e0 = tester.element(find.byKey(firstBox));
+        await tester.pumpWidget(build());
+        final Element e1 = tester.element(find.byKey(firstBox));
+        expect(e0, equals(e1));
       });
 
       group('Accessibility (a11y/Semantics)', () {

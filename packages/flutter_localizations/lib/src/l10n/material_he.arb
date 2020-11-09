@@ -1,4 +1,6 @@
 {
+  "licensesPackageDetailTextTwo": "$licenseCount רישיונות",
+  "licensesPackageDetailTextMany": "$licenseCount רישיונות",
   "remainingTextFieldCharacterCountTwo": "נותרו $remainingCount תווים",
   "remainingTextFieldCharacterCountMany": "נותרו $remainingCount תווים",
   "scriptCategory": "English-like",
@@ -75,14 +77,14 @@
   "dateRangePickerHelpText": "בחירת טווח",
   "calendarModeButtonLabel": "מעבר למצב היומן",
   "inputDateModeButtonLabel": "מעבר למצב הקלט",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "timePickerDialHelpText": "בחירת שעה",
+  "timePickerInputHelpText": "הזנת שעה",
+  "timePickerHourLabel": "שעה",
+  "timePickerMinuteLabel": "דקות",
+  "invalidTimeLabel": "יש להזין שעה תקינה",
+  "dialModeButtonLabel": "מעבר לבחירה באמצעות חוגה",
+  "inputTimeModeButtonLabel": "מעבר להזנת טקסט",
   "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "licensesPackageDetailTextOne": "רישיון אחד",
+  "licensesPackageDetailTextOther": "$licenseCount רישיונות"
 }

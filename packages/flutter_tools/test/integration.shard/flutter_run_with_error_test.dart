@@ -5,7 +5,9 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service_io.dart';
 
 import '../src/common.dart';
 import 'test_data/project_with_early_error.dart';
@@ -25,44 +27,92 @@ void main() {
   });
 
   tearDown(() async {
-    await _flutter.stop();
     tryToDelete(tempDir);
   });
 
-  test('flutter run reports an early error in an application', () async {
+  testWithoutContext('flutter run in non-machine mode reports an early error in an application', () async {
+    final String flutterBin = fileSystem.path.join(
+      getFlutterRoot(),
+      'bin',
+      'flutter',
+    );
+
     final StringBuffer stdout = StringBuffer();
 
-    await _flutter.run(startPaused: true, withDebugger: true, structuredErrors: true);
-    await _flutter.resume();
+    final Process process = await processManager.start(<String>[
+      flutterBin,
+      'run',
+      '--disable-service-auth-codes',
+      '--show-test-device',
+      '-dflutter-tester',
+      '--start-paused',
+      '--dart-define=flutter.inspector.structuredErrors=true',
+    ], workingDirectory: tempDir.path);
 
-    final Completer<void> completer = Completer<void>();
-    bool lineFound = false;
+    transformToLines(process.stdout).listen((String line) async {
+      stdout.writeln(line);
 
-    await Future<void>(() async {
-      _flutter.stdout.listen((String line) {
-        stdout.writeln(line);
-        if (line.startsWith('Another exception was thrown') && !lineFound) {
-          lineFound = true;
-          completer.complete();
+      if (line.startsWith('An Observatory debugger')) {
+        final RegExp exp = RegExp(r'http://127.0.0.1:(\d+)/');
+        final RegExpMatch match = exp.firstMatch(line);
+        final String port = match.group(1);
+        if (port != null) {
+          final VmService vmService =
+              await vmServiceConnectUri('ws://localhost:$port/ws');
+          final VM vm = await vmService.getVM();
+          for (final IsolateRef isolate in vm.isolates) {
+            await vmService.resume(isolate.id);
+          }
         }
-      });
-      await completer.future;
-    }).timeout(const Duration(seconds: 15), onTimeout: () {
-      // Complete anyway in case we don't see the 'Another exception' line.
-      completer.complete();
+      }
+
+      if (line.startsWith('Another exception was thrown')) {
+        process.kill();
+      }
     });
 
-    await _flutter.stop();
+    await process.exitCode;
 
     expect(stdout.toString(), contains(_exceptionStart));
   });
 
-  test('flutter run for web reports an early error in an application', () async {
+  testWithoutContext('flutter run in machine mode does not print an error', () async {
     final StringBuffer stdout = StringBuffer();
 
-    await _flutter.run(startPaused: true, withDebugger: true, structuredErrors: true, chrome: true);
+    await _flutter.run(
+      startPaused: true,
+      withDebugger: true,
+      structuredErrors: true,
+    );
     await _flutter.resume();
 
+    final Completer<void> completer = Completer<void>();
+
+    await Future<void>(() async {
+      _flutter.stdout.listen((String line) {
+        stdout.writeln(line);
+      });
+      await completer.future;
+    }).timeout(const Duration(seconds: 5), onTimeout: () {
+      // We don't expect to see any output but want to write to stdout anyway.
+      completer.complete();
+    });
+    await _flutter.stop();
+
+    expect(stdout.toString(), isNot(contains(_exceptionStart)));
+  });
+
+  testWithoutContext('flutter run for web reports an early error in an application', () async {
+    final StringBuffer stdout = StringBuffer();
+
+    await _flutter.run(
+      startPaused: true,
+      withDebugger: true,
+      structuredErrors: true,
+      chrome: true,
+      machine: false,
+    );
+    await _flutter.resume();
     final Completer<void> completer = Completer<void>();
     bool lineFound = false;
 

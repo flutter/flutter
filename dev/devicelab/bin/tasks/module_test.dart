@@ -14,8 +14,6 @@ final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
 
-final bool useAndroidEmbeddingV2 = Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] == 'true';
-
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
 Future<void> main() async {
@@ -44,7 +42,8 @@ Future<void> main() async {
 
       final File readonlyTxtAssetFile = await File(path.join(
         projectDir.path,
-        'assets/read-only.txt'
+        'assets',
+        'read-only.txt'
       ))
       .create(recursive: true);
 
@@ -177,7 +176,7 @@ Future<void> main() async {
             flutterDirectory.path,
             'dev',
             'integration_tests',
-            useAndroidEmbeddingV2 ? 'android_host_app_v2_embedding' : 'android_host_app',
+            'android_host_app_v2_embedding',
           ),
         ),
         hostApp,
@@ -255,7 +254,7 @@ Future<void> main() async {
 
       section('Check file access modes for read-only asset from Flutter module');
 
-      final String readonlyDebugAssetFilePath = path.join(
+      final String readonlyDebugAssetFilePath = path.joinAll(<String>[
         hostApp.path,
         'app',
         'build',
@@ -263,8 +262,10 @@ Future<void> main() async {
         'merged_assets',
         'debug',
         'out',
-        'flutter_assets/assets/read-only.txt',
-      );
+        'flutter_assets',
+        'assets',
+        'read-only.txt',
+      ]);
       final File readonlyDebugAssetFile = File(readonlyDebugAssetFilePath);
       if (!exists(readonlyDebugAssetFile)) {
         return TaskResult.failure('Failed to copy read-only asset file');
@@ -325,7 +326,7 @@ Future<void> main() async {
 
       section('Check file access modes for read-only asset from Flutter module');
 
-      final String readonlyReleaseAssetFilePath = path.join(
+      final String readonlyReleaseAssetFilePath = path.joinAll(<String>[
         hostApp.path,
         'app',
         'build',
@@ -333,8 +334,10 @@ Future<void> main() async {
         'merged_assets',
         'release',
         'out',
-        'flutter_assets/assets/read-only.txt',
-      );
+        'flutter_assets',
+        'assets',
+        'read-only.txt',
+      ]);
       final File readonlyReleaseAssetFile = File(readonlyReleaseAssetFilePath);
       if (!exists(readonlyReleaseAssetFile)) {
         return TaskResult.failure('Failed to copy read-only asset file');

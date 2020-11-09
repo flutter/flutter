@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '_platform_io.dart'
   if (dart.library.html) '_platform_web.dart' as _platform;
 
@@ -25,9 +23,12 @@ import '_platform_io.dart'
 /// adaptations for iOS later). Tests can check iOS behavior by using the
 /// platform override APIs (such as [ThemeData.platform] in the material
 /// library) or by setting [debugDefaultTargetPlatformOverride].
+///
+/// Tests can also create specific platform tests by and adding a `variant:`
+/// argument to the test and using a [TargetPlatformVariant].
 //
-// When adding support for a new platform (e.g. Windows Phone, macOS), first
-// create a new value on the [TargetPlatform] enum, then add a rule for
+// When adding support for a new platform (e.g. Windows Phone, Rasberry Pi),
+// first create a new value on the [TargetPlatform] enum, then add a rule for
 // selecting that platform here.
 //
 // It would be incorrect to make a platform that isn't supported by
@@ -44,7 +45,7 @@ enum TargetPlatform {
   /// Android: <https://www.android.com/>
   android,
 
-  /// Fuchsia: <https://fuchsia.googlesource.com/>
+  /// Fuchsia: <https://fuchsia.dev/fuchsia-src/concepts>
   fuchsia,
 
   /// iOS: <https://www.apple.com/ios/>
@@ -79,4 +80,4 @@ enum TargetPlatform {
 /// button, which will make those widgets unusable since iOS has no such button.
 ///
 /// In general, therefore, this property should not be used in release builds.
-TargetPlatform debugDefaultTargetPlatformOverride;
+TargetPlatform? debugDefaultTargetPlatformOverride;

@@ -72,14 +72,14 @@
   "dateRangePickerHelpText": "श्रेणी निवडा",
   "calendarModeButtonLabel": "कॅलेंडरवर स्विच करा",
   "inputDateModeButtonLabel": "इनपुटवर स्विच करा",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "timePickerDialHelpText": "वेळ निवडा",
+  "timePickerInputHelpText": "वेळ एंटर करा",
+  "timePickerHourLabel": "तास",
+  "timePickerMinuteLabel": "मिनिट",
+  "invalidTimeLabel": "योग्य वेळ एंटर करा",
+  "dialModeButtonLabel": "डायल पिकर मोडवर स्विच करा",
+  "inputTimeModeButtonLabel": "मजकूर इनपुट मोडवर स्विच करा",
   "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "licensesPackageDetailTextOne": "एक परवाना",
+  "licensesPackageDetailTextOther": "$licenseCount परवाने"
 }

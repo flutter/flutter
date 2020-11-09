@@ -8,7 +8,7 @@
   "index": "index.html",
   "icon32x32": "flutter/static-assets/favicon.png",
   "allowJS": true,
-  "ExternalURL": "https://docs.flutter.io",
+  "ExternalURL": "https://api.flutter.dev",
   "selectors": {
     "#exceptions span.name a": {
       "type": "Exception"

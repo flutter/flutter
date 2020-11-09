@@ -88,6 +88,8 @@ abstract class Notification {
 
 /// A widget that listens for [Notification]s bubbling up the tree.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=cAnFbFoGM50}
+///
 /// Notifications will trigger the [onNotification] callback only if their
 /// [runtimeType] is a subtype of `T`.
 ///

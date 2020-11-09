@@ -27,6 +27,8 @@ const Duration _kDefaultHighlightFadeDuration = Duration(milliseconds: 200);
 ///  * [Material], which is the widget on which the ink highlight is painted.
 ///  * [InkSplash], which is an ink feature that shows a reaction to user input
 ///    on a [Material].
+///  * [Ink], a convenience widget for drawing images and other decorations on
+///    Material widgets.
 class InkHighlight extends InteractiveInkFeature {
   /// Begin a highlight animation.
   ///

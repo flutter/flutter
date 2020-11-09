@@ -218,11 +218,11 @@ void main() {
 
       Scrollable.ensureVisible(findContext(0));
       await tester.pump();
-      expect(tester.getBottomRight(findKey(0)).dy, closeTo(100.0, 0.1));
+      expect(tester.getBottomRight(findKey(0)).dy, moreOrLessEquals(100.0, epsilon: 0.1));
 
       Scrollable.ensureVisible(findContext(0), alignment: 1.0);
       await tester.pump();
-      expect(tester.getTopLeft(findKey(0)).dy, closeTo(500.0, 0.1));
+      expect(tester.getTopLeft(findKey(0)).dy, moreOrLessEquals(500.0, epsilon: 0.1));
     });
   });
 
@@ -428,7 +428,7 @@ void main() {
       Scrollable.ensureVisible(findContext(2));
       await tester.pump();
       expect(getOffset(), equals(-400.0));
-    }, skip: true);
+    }, skip: true); // https://github.com/flutter/flutter/issues/7919
 
     testWidgets('ListView ensureVisible rotated child', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
@@ -474,11 +474,11 @@ void main() {
       await prepare(321.0);
       Scrollable.ensureVisible(findContext(0));
       await tester.pump();
-      expect(tester.getBottomRight(findKey(0)).dy, closeTo(100.0, 0.1));
+      expect(tester.getBottomRight(findKey(0)).dy, moreOrLessEquals(100.0, epsilon: 0.1));
 
       Scrollable.ensureVisible(findContext(0), alignment: 1.0);
       await tester.pump();
-      expect(tester.getTopLeft(findKey(0)).dy, closeTo(500.0, 0.1));
+      expect(tester.getTopLeft(findKey(0)).dy, moreOrLessEquals(500.0, epsilon: 0.1));
     });
   });
 

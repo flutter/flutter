@@ -31,6 +31,9 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// The [builder] function is _not_ called during layout if the parent passes
 /// the same constraints repeatedly.
 /// {@endtemplate}
+///
+/// Subclasses must return a [RenderObject] that mixes in
+/// [RenderConstrainedLayoutBuilder].
 abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   ///
@@ -153,7 +156,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderObject child, dynamic slot) {
     final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject;
     assert(slot == null);
     assert(renderObject.debugValidateChild(child));
@@ -162,12 +165,12 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slot) {
+  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
     assert(false);
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, dynamic slot) {
     final RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> renderObject = this.renderObject;
     assert(renderObject.child == child);
     renderObject.child = null;
@@ -243,6 +246,59 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 /// If the child should be smaller than the parent, consider wrapping the child
 /// in an [Align] widget. If the child might want to be bigger, consider
 /// wrapping it in a [SingleChildScrollView] or [OverflowBox].
+///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// This example uses a [LayoutBuilder] to build a different widget depending on the available width. Resize the
+/// DartPad window to see [LayoutBuilder] in action!
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(title: Text("LayoutBuilder Example")),
+///     body: LayoutBuilder(
+///       builder: (context, constraints) {
+///         if (constraints.maxWidth > 600) {
+///           return _buildWideContainers();
+///         } else {
+///           return _buildNormalContainer();
+///         }
+///       },
+///     ),
+///   );
+/// }
+///
+/// Widget _buildNormalContainer() {
+///   return Center(
+///     child: Container(
+///       height: 100.0,
+///       width: 100.0,
+///       color: Colors.red,
+///     ),
+///   );
+/// }
+///
+/// Widget _buildWideContainers() {
+///   return Center(
+///     child: Row(
+///       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///       children: <Widget>[
+///         Container(
+///           height: 100.0,
+///           width: 100.0,
+///           color: Colors.red,
+///         ),
+///         Container(
+///           height: 100.0,
+///           width: 100.0,
+///           color: Colors.yellow,
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

@@ -74,18 +74,36 @@ class HotRunner extends ResidentRunner {
     String dillOutputPath,
     bool stayResident = true,
     bool ipv6 = false,
-  }) : super(devices,
-             target: target,
-             debuggingOptions: debuggingOptions,
-             projectRootPath: projectRootPath,
-             stayResident: stayResident,
-             hotMode: true,
-             dillOutputPath: dillOutputPath,
-             ipv6: ipv6);
+    bool machine = false,
+  }) : super(
+          devices,
+          target: target,
+          debuggingOptions: debuggingOptions,
+          projectRootPath: projectRootPath,
+          stayResident: stayResident,
+          hotMode: true,
+          dillOutputPath: dillOutputPath,
+          ipv6: ipv6,
+          machine: machine,
+        );
 
   final bool benchmarkMode;
   final File applicationBinary;
   final bool hostIsIde;
+
+  /// When performing a hot restart, the tool needs to upload a new main.dart.dill to
+  /// each attached device's devfs. Replacing the existing file is not safe and does
+  /// not work at all on the windows embedder, because the old dill file will still be
+  /// memory-mapped by the embedder. To work around this issue, the tool will alternate
+  /// names for the uploaded dill, sometimes inserting `.swap`. Since the active dill will
+  /// never be replaced, there is no risk of writing the file while the embedder is attempting
+  /// to read from it. This also avoids filling up the devfs, if a incrementing counter was
+  /// used instead.
+  ///
+  /// This is only used for hot restart, incremental dills uploaded as part of the hot
+  /// reload process do not have this issue.
+  bool _swap = false;
+
   bool _didAttach = false;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
@@ -150,62 +168,15 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<OperationResult> reloadMethod({ String libraryId, String classId }) async {
-    final Stopwatch stopwatch = Stopwatch()..start();
-    final UpdateFSReport results = UpdateFSReport(success: true);
-    final List<Uri> invalidated =  <Uri>[Uri.parse(libraryId)];
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(debuggingOptions.buildInfo.packagesPath),
-      logger: globals.logger,
-    );
-    for (final FlutterDevice device in flutterDevices) {
-      results.incorporateResults(await device.updateDevFS(
-        mainUri: globals.fs.file(mainPath).absolute.uri,
-        target: target,
-        bundle: assetBundle,
-        firstBuildTime: firstBuildTime,
-        bundleFirstUpload: false,
-        bundleDirty: false,
-        fullRestart: false,
-        projectRootPath: projectRootPath,
-        pathToReload: getReloadPath(fullRestart: false),
-        invalidatedFiles: invalidated,
-        packageConfig: packageConfig,
-        dillOutputPath: dillOutputPath,
-      ));
-    }
-    if (!results.success) {
-      return OperationResult(1, 'Failed to compile');
-    }
-    try {
-      final String entryPath = globals.fs.path.relative(
-        getReloadPath(fullRestart: false),
-        from: projectRootPath,
+    final OperationResult result = await restart(pause: false);
+    if (!result.isOk) {
+      throw vm_service.RPCError(
+        'Unable to reload sources',
+        RPCErrorCodes.kInternalError,
+        '',
       );
-      for (final FlutterDevice device in flutterDevices) {
-        final List<Future<vm_service.ReloadReport>> reportFutures = await device.reloadSources(
-          entryPath, pause: false,
-        );
-        final List<vm_service.ReloadReport> reports = await Future.wait(reportFutures);
-        final vm_service.ReloadReport firstReport = reports.first;
-        await device.updateReloadStatus(validateReloadReport(firstReport.json, printErrors: false));
-      }
-    } on Exception catch (error) {
-      return OperationResult(1, error.toString());
     }
-
-    for (final FlutterDevice device in flutterDevices) {
-      final List<FlutterView> views = await device.vmService.getFlutterViews();
-      for (final FlutterView view in views) {
-        await device.vmService.flutterFastReassemble(
-          classId,
-          isolateId: view.uiIsolate.id,
-        );
-      }
-    }
-
-    globals.printStatus('reloadMethod took ${stopwatch.elapsedMilliseconds}');
-    globals.flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
-    return OperationResult.ok;
+    return result;
   }
 
   // Returns the exit code of the flutter tool process, like [run].
@@ -419,10 +390,19 @@ class HotRunner extends ResidentRunner {
       asyncScanning: hotRunnerConfig.asyncScanning,
       packageConfig: flutterDevices[0].devFS.lastPackageConfig,
     );
+    final File entrypointFile = globals.fs.file(mainPath);
+    if (!entrypointFile.existsSync()) {
+      globals.printError(
+        'The entrypoint file (i.e. the file with main()) ${entrypointFile.path} '
+        'cannot be found. Moving or renaming this file will prevent changes to '
+        'its contents from being discovered during hot reload/restart until '
+        'flutter is restarted or the file is restored.'
+      );
+    }
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (final FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
-        mainUri: globals.fs.file(mainPath).absolute.uri,
+        mainUri: entrypointFile.absolute.uri,
         target: target,
         bundle: assetBundle,
         firstBuildTime: firstBuildTime,
@@ -430,7 +410,7 @@ class HotRunner extends ResidentRunner {
         bundleDirty: !isFirstUpload && rebuildBundle,
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
-        pathToReload: getReloadPath(fullRestart: fullRestart),
+        pathToReload: getReloadPath(fullRestart: fullRestart, swap: _swap),
         invalidatedFiles: invalidationResult.uris,
         packageConfig: invalidationResult.packageConfig,
         dillOutputPath: dillOutputPath,
@@ -543,7 +523,19 @@ class HotRunner extends ResidentRunner {
           .getIsolateOrNull(view.uiIsolate.id);
         operations.add(reloadIsolate.then((vm_service.Isolate isolate) async {
           if ((isolate != null) && isPauseEvent(isolate.pauseEvent.kind)) {
-            // Resume the isolate so that it can be killed by the embedder.
+            // The embedder requires that the isolate is unpaused, because the
+            // runInView method requires interaction with dart engine APIs that
+            // are not thread-safe, and thus must be run on the same thread that
+            // would be blocked by the pause. Simply unpausing is not sufficient,
+            // because this does not prevent the isolate from immediately hitting
+            // a breakpoint, for example if the breakpoint was placed in a loop
+            // or in a frequently called method. Instead, all breakpoints are first
+            // disabled and then the isolate resumed.
+            final List<Future<void>> breakpointRemoval = <Future<void>>[
+              for (final vm_service.Breakpoint breakpoint in isolate.breakpoints)
+                device.vmService.removeBreakpoint(isolate.id, breakpoint.id)
+            ];
+            await Future.wait(breakpointRemoval);
             await device.vmService.resume(view.uiIsolate.id);
           }
         }));
@@ -566,7 +558,7 @@ class HotRunner extends ResidentRunner {
     }
     await Future.wait(operations);
 
-    await _launchFromDevFS(mainPath + '.dill');
+    await _launchFromDevFS('$mainPath${_swap ? '.swap' : ''}.dill');
     restartTimer.stop();
     globals.printTrace('Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
     _addBenchmarkData('hotRestartMillisecondsToFrame',
@@ -592,6 +584,9 @@ class HotRunner extends ResidentRunner {
       }
       await Future.wait(isolateNotifications);
     }
+    // Toggle the main dill name after successfully uploading.
+    _swap =! _swap;
+
     return OperationResult.ok;
   }
 
@@ -831,7 +826,7 @@ class HotRunner extends ResidentRunner {
     Map<String, dynamic> firstReloadDetails;
     try {
       final String entryPath = globals.fs.path.relative(
-        getReloadPath(fullRestart: false),
+        getReloadPath(fullRestart: false, swap: _swap),
         from: projectRootPath,
       );
       final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
@@ -938,9 +933,19 @@ class HotRunner extends ResidentRunner {
           }
         } else {
           reassembleViews[view] = device.vmService;
-          reassembleFutures.add(device.vmService.flutterReassemble(
-            isolateId: view.uiIsolate.id,
-          ).catchError((dynamic error) {
+          // If the tool identified a change in a single widget, do a fast instead
+          // of a full reassemble.
+          Future<void> reassembleWork;
+          if (updatedDevFS.fastReassemble == true) {
+            reassembleWork = device.vmService.flutterFastReassemble(
+              isolateId: view.uiIsolate.id,
+            );
+          } else {
+            reassembleWork = device.vmService.flutterReassemble(
+              isolateId: view.uiIsolate.id,
+            );
+          }
+          reassembleFutures.add(reassembleWork.catchError((dynamic error) {
             failedReassemble = true;
             globals.printError('Reassembling ${view.uiIsolate.name} failed: $error');
           }, test: (dynamic error) => error is Exception));

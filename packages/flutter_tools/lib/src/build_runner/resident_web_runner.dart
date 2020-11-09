@@ -21,8 +21,8 @@ import '../base/net.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/targets/web.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../dart/language_version.dart';
 import '../dart/pub.dart';
 import '../devfs.dart';
@@ -53,6 +53,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     @required UrlTunneller urlTunneller,
+    bool machine = false,
   }) {
     return _ResidentWebRunner(
       device,
@@ -62,6 +63,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       ipv6: ipv6,
       stayResident: stayResident,
       urlTunneller: urlTunneller,
+      machine: machine,
     );
   }
 }
@@ -79,12 +81,14 @@ abstract class ResidentWebRunner extends ResidentRunner {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
+    bool machine = false,
   }) : super(
           <FlutterDevice>[device],
           target: target ?? globals.fs.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
+          machine: machine,
         );
 
   FlutterDevice get device => flutterDevices.first;
@@ -189,12 +193,9 @@ abstract class ResidentWebRunner extends ResidentRunner {
     globals.printStatus('');
     globals.printStatus(message);
     const String quitMessage = 'To quit, press "q".';
-    globals.printStatus('For a more detailed help message, press "h". $quitMessage');
-  }
-
-  @override
-  Future<List<FlutterView>> listFlutterViews() async {
-    return <FlutterView>[];
+    if (device.device is! WebServerDevice) {
+      globals.printStatus('For a more detailed help message, press "h". $quitMessage');
+    }
   }
 
   @override
@@ -355,6 +356,18 @@ abstract class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
+  Future<void> debugToggleInvertOversizedImages() async {
+    try {
+      await _vmService
+        ?.flutterToggleInvertOversizedImages(
+          isolateId: null,
+        );
+    } on vmservice.RPCError {
+      return;
+    }
+  }
+
+  @override
   Future<void> debugToggleProfileWidgetBuilds() async {
     try {
       await _vmService
@@ -376,6 +389,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
     @required this.urlTunneller,
+    bool machine = false,
   }) : super(
           device,
           flutterProject: flutterProject,
@@ -383,6 +397,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
+          machine: machine,
         );
 
   final UrlTunneller urlTunneller;
@@ -434,7 +449,8 @@ class _ResidentWebRunner extends ResidentWebRunner {
         // This will result in a NoSuchMethodError thrown by injected_handler.darts
         await pub.get(
           context: PubContext.pubGet,
-          directory: globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools')
+          directory: globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
+          generateSyntheticPackage: false,
         );
 
         final ExpressionCompiler expressionCompiler =
@@ -448,11 +464,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
           packagesFilePath: packagesFilePath,
           urlTunneller: urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
+          useSseForDebugBackend: debuggingOptions.webUseSseForDebugBackend,
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: _enableDwds,
           entrypoint: globals.fs.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
+          nullAssertions: debuggingOptions.nullAssertions,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -471,6 +489,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             debuggingOptions.buildInfo,
             debuggingOptions.initializePlatform,
             false,
+            kNoneWorker,
           );
         }
         await device.device.startApp(
@@ -540,6 +559,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions.buildInfo,
           debuggingOptions.initializePlatform,
           false,
+          kNoneWorker,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -623,6 +643,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         '// Flutter web bootstrap script for $importedEntrypoint.',
         '',
         "import 'dart:ui' as ui;",
+        "import 'dart:async';",
         '',
         "import '$importedEntrypoint' as entrypoint;",
         if (hasWebPlugins)
@@ -630,11 +651,16 @@ class _ResidentWebRunner extends ResidentWebRunner {
         if (hasWebPlugins)
           "import '$generatedImport';",
         '',
+        'typedef _UnaryFunction = dynamic Function(List<String> args);',
+        'typedef _NullaryFunction = dynamic Function();',
         'Future<void> main() async {',
         if (hasWebPlugins)
           '  registerPlugins(webPluginRegistry);',
         '  await ui.webOnlyInitializePlatform();',
-        '  entrypoint.main();',
+        '  if (entrypoint.main is _UnaryFunction) {',
+        '    return (entrypoint.main as _UnaryFunction)(<String>[]);',
+        '  }',
+        '  return (entrypoint.main as _NullaryFunction)();',
         '}',
         '',
       ].join('\n');
@@ -676,7 +702,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       fullRestart: fullRestart,
       dillOutputPath: dillOutputPath,
       projectRootPath: projectRootPath,
-      pathToReload: getReloadPath(fullRestart: fullRestart),
+      pathToReload: getReloadPath(fullRestart: fullRestart, swap: false),
       invalidatedFiles: invalidationResult.uris,
       packageConfig: invalidationResult.packageConfig,
       trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
@@ -708,14 +734,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
       _connectionResult = await webDevFS.connect(useDebugExtension);
       unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
 
-      _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
-        final String message = utf8.decode(base64.decode(log.bytes));
-        globals.printStatus(message, newline: false);
-      });
-      _stdErrSub = _vmService.onStderrEvent.listen((vmservice.Event log) {
-        final String message = utf8.decode(base64.decode(log.bytes));
-        globals.printStatus(message, newline: false);
-      });
+      void onLogEvent(vmservice.Event event)  {
+        final String message = processVmServiceMessage(event);
+        globals.printStatus(message);
+      }
+
+      _stdOutSub = _vmService.onStdoutEvent.listen(onLogEvent);
+      _stdErrSub = _vmService.onStderrEvent.listen(onLogEvent);
       _extensionEventSub =
           _vmService.onExtensionEvent.listen(printStructuredErrorLog);
       try {

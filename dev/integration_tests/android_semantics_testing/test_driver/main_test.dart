@@ -435,7 +435,7 @@ void main() {
             expect(
                 await getSemantics(find.byValueKey('$popupKeyValue.$item')),
                 hasAndroidSemantics(
-                  className: AndroidClassName.view,
+                  className: AndroidClassName.button,
                   isChecked: false,
                   isCheckable: false,
                   isEnabled: true,
@@ -459,7 +459,7 @@ void main() {
             expect(
                 await getSemantics(find.byValueKey('$popupKeyValue.$item')),
                 hasAndroidSemantics(
-                  className: AndroidClassName.view,
+                  className: AndroidClassName.button,
                   isChecked: false,
                   isCheckable: false,
                   isEnabled: true,

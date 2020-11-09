@@ -4,10 +4,13 @@
 
 // @dart = 2.8
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../rendering/rendering_tester.dart';
 
 class TestSliverChildListDelegate extends SliverChildListDelegate {
   TestSliverChildListDelegate(List<Widget> children) : super(children);
@@ -536,5 +539,127 @@ void main() {
       ],
     ));
     handle.dispose();
+  });
+
+  testWidgets('Updates viewport dimensions when scroll direction changes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/43380.
+    final ScrollController controller = ScrollController();
+
+    Widget buildListView({@required Axis scrollDirection}) {
+      assert(scrollDirection != null);
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 100.0,
+            child: ListView(
+              controller: controller,
+              scrollDirection: scrollDirection,
+              itemExtent: 50.0,
+              children: <Widget>[
+                Container(
+                  height: 50.0,
+                  width: 50.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildListView(scrollDirection: Axis.horizontal));
+    expect(controller.position.viewportDimension, 100.0);
+
+    await tester.pumpWidget(buildListView(scrollDirection: Axis.vertical));
+    expect(controller.position.viewportDimension, 200.0);
+
+    await tester.pumpWidget(buildListView(scrollDirection: Axis.horizontal));
+    expect(controller.position.viewportDimension, 100.0);
+  });
+
+  testWidgets('ListView respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          children: <Widget>[Container(height: 2000.0)],
+        ),
+      ),
+    );
+
+    // 1st, check that the render object has received the default clip behavior.
+    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    // 2nd, check that the painting context has received the default clip behavior.
+    final TestClipPaintingContext context = TestClipPaintingContext();
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.hardEdge));
+
+    // 3rd, pump a new widget to check that the render object can update its clip behavior.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          children: <Widget>[Container(height: 2000.0)],
+          clipBehavior: Clip.antiAlias,
+        ),
+      ),
+    );
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+
+    // 4th, check that a non-default clip behavior can be sent to the painting context.
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('ListView.builder respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          itemCount: 10,
+          itemBuilder: (BuildContext _, int __) => Container(height: 2000.0),
+          clipBehavior: Clip.antiAlias,
+        ),
+      ),
+    );
+    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('ListView.custom respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.custom(
+          childrenDelegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) => Container(height: 2000.0),
+            childCount: 1,
+          ),
+          clipBehavior: Clip.antiAlias,
+        ),
+      ),
+    );
+    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('ListView.separated respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.separated(
+          itemCount: 10,
+          itemBuilder: (BuildContext _, int __) => Container(height: 2000.0),
+          separatorBuilder: (BuildContext _, int __) => const Divider(),
+          clipBehavior: Clip.antiAlias,
+        ),
+      ),
+    );
+    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 }

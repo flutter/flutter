@@ -104,6 +104,15 @@ void main() {
     expect(tester.getSemantics(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_CheckboxRenderObjectWidget')), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
+      // isFocusable is delayed by 1 frame.
+      isFocusable: true,
+    ));
+
+    await tester.pump();
+    // isFocusable should be false now after the 1 frame delay.
+    expect(tester.getSemantics(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_CheckboxRenderObjectWidget')), matchesSemantics(
+      hasCheckedState: true,
+      hasEnabledState: true,
     ));
 
     await tester.pumpWidget(const Material(

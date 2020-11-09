@@ -135,7 +135,7 @@ void main() {
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      expect(() => portDiscovery.query(), throwsToolExit());
+      expect(portDiscovery.query, throwsToolExit());
     });
 
     testUsingContext('Multiple ports available, with appId', () async {

@@ -154,8 +154,9 @@ class BottomSheet extends StatefulWidget {
   /// a bottom sheet with rounded corners and an edge-to-edge [Image] at the
   /// top.
   ///
-  /// If this property is null then [ThemeData.bottomSheetTheme.clipBehavior] is
-  /// used. If that's null then the behavior will be [Clip.none].
+  /// If this property is null then [BottomSheetThemeData.clipBehavior] of
+  /// [ThemeData.bottomSheetTheme] is used. If that's null then the behavior
+  /// will be [Clip.none].
   final Clip clipBehavior;
 
   @override
@@ -583,6 +584,10 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// parameters can be passed in to customize the appearance and behavior of
 /// modal bottom sheets.
 ///
+/// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
+/// sheet. This is particularly useful in the case that a user wants to observe
+/// [PopupRoute]s within a [NavigatorObserver].
+///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
@@ -596,7 +601,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Center(
-///     child: RaisedButton(
+///     child: ElevatedButton(
 ///       child: const Text('showModalBottomSheet'),
 ///       onPressed: () {
 ///         showModalBottomSheet<void>(
@@ -611,7 +616,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///                   mainAxisSize: MainAxisSize.min,
 ///                   children: <Widget>[
 ///                     const Text('Modal BottomSheet'),
-///                     RaisedButton(
+///                     ElevatedButton(
 ///                       child: const Text('Close BottomSheet'),
 ///                       onPressed: () => Navigator.pop(context),
 ///                     )
@@ -648,6 +653,7 @@ Future<T> showModalBottomSheet<T>({
   bool useRootNavigator = false,
   bool isDismissible = true,
   bool enableDrag = true,
+  RouteSettings routeSettings,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -670,6 +676,7 @@ Future<T> showModalBottomSheet<T>({
     isDismissible: isDismissible,
     modalBarrierColor: barrierColor,
     enableDrag: enableDrag,
+    settings: routeSettings,
   ));
 }
 

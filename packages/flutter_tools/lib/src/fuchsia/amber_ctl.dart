@@ -58,25 +58,30 @@ class FuchsiaAmberCtl {
   /// Teaches the amber instance running on [device] about the Fuchsia package
   /// server accessible via [configUrl].
   Future<bool> addSrc(FuchsiaDevice device, FuchsiaPackageServer server) async {
-    final String configUrl = '${server.interfaceStrippedUrl}/config.json';
-    final RunResult result =
-        await device.shell('amber_ctl add_src -x -f $configUrl');
+    final String localIp = await device.hostAddress;
+    final String configUrl = 'http://[$localIp]:${server.port}/config.json';
+    final RunResult result = await device.shell(
+      'amber_ctl add_src -x -f $configUrl',
+    );
     return result.exitCode == 0;
   }
 
   /// Instructs the amber instance running on [device] to forget about the
   /// Fuchsia package server that it was accessing via [serverUrl].
   Future<bool> rmSrc(FuchsiaDevice device, FuchsiaPackageServer server) async {
-    final RunResult result =
-        await device.shell('amber_ctl rm_src -n ${server.interfaceStrippedUrl}');
+    final String localIp = await device.hostAddress;
+    final RunResult result = await device.shell(
+      'amber_ctl rm_src -n http://[$localIp]:${server.port}/',
+    );
     return result.exitCode == 0;
   }
 
   /// Instructs the amber instance running on [device] to prefetch the package
   /// [packageName].
   Future<bool> getUp(FuchsiaDevice device, String packageName) async {
-    final RunResult result =
-        await device.shell('amber_ctl get_up -n $packageName');
+    final RunResult result = await device.shell(
+      'amber_ctl get_up -n $packageName',
+    );
     return result.exitCode == 0;
   }
 
@@ -84,15 +89,21 @@ class FuchsiaAmberCtl {
   /// pkg_resolver repo config, and teaches the pkg_resolver instance running
   /// on [device] about the [FuchsiaPackageServer].
   Future<bool> addRepoCfg(FuchsiaDevice device, FuchsiaPackageServer server) async {
-    final String configUrl = '${server.interfaceStrippedUrl}/config.json';
-    final RunResult result =
-        await device.shell('amber_ctl add_repo_cfg -n ${server.name} -f $configUrl');
+    final String localIp = await device.hostAddress;
+    final String configUrl = 'http://[$localIp]:${server.port}/config.json';
+    final RunResult result = await device.shell(
+      'amber_ctl add_repo_cfg -n ${server.name} -f $configUrl',
+    );
     return result.exitCode == 0;
   }
 
   /// Instructs the pkg_resolver instance running on [device] to prefetch the
   /// package [packageName].
-  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server, String packageName) async {
+  Future<bool> pkgCtlResolve(
+    FuchsiaDevice device,
+    FuchsiaPackageServer server,
+    String packageName,
+  ) async {
     final String packageUrl = 'fuchsia-pkg://${server.name}/$packageName';
     final RunResult result = await device.shell('pkgctl resolve $packageUrl');
     return result.exitCode == 0;
@@ -100,7 +111,10 @@ class FuchsiaAmberCtl {
 
   /// Instructs the pkg_resolver instance running on [device] to forget about
   /// the Fuchsia package server that it was accessing via [serverUrl].
-  Future<bool> pkgCtlRepoRemove(FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> pkgCtlRepoRemove(
+    FuchsiaDevice device,
+    FuchsiaPackageServer server,
+  ) async {
     final String repoUrl = 'fuchsia-pkg://${server.name}';
     final RunResult result = await device.shell('pkgctl repo rm $repoUrl');
     return result.exitCode == 0;

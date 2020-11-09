@@ -77,5 +77,5 @@ void main() {
       '   Unable to load asset: key\n'
       '   HTTP status code: 404\n',
     );
-  }, skip: true);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }

@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -1059,6 +1060,52 @@ void main() {
     });
     element.removeChild(childElement.renderObject as RenderBox);
     element.createChild(0, after: null);
+  });
+
+  testWidgets('GlobalKey - re-attach child to new parents, and the old parent is deactivated(unmounted)', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/62055
+    const Key key1 = GlobalObjectKey('key1');
+    const Key key2 = GlobalObjectKey('key2');
+    StateSetter setState;
+    int tabBarViewCnt = 2;
+    TabController tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync(),);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          return TabBarView(
+            controller: tabController,
+            children: <Widget>[
+              if (tabBarViewCnt > 0) const Text('key1', key: key1,),
+              if (tabBarViewCnt > 1) const Text('key2', key: key2,),
+            ],
+          );
+        },
+      ),
+    ));
+
+    expect(tabController.index, 0);
+
+    // switch tabs 0 -> 1
+    setState((){
+      tabController.index = 1;
+    });
+
+    await tester.pump(const Duration(seconds: 1)); // finish the animation
+
+    expect(tabController.index, 1);
+
+    // rebuild TabBarView that only have the 1st page with GlobalKey 'key1'
+    setState((){
+      tabBarViewCnt = 1;
+      tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync(),);
+    });
+
+    await tester.pump(const Duration(seconds: 1)); // finish the animation
+
+    expect(tabController.index, 0);
   });
 
   testWidgets('Defunct setState throws exception', (WidgetTester tester) async {

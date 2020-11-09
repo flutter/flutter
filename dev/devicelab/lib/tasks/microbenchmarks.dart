@@ -54,14 +54,14 @@ TaskFunction createMicrobenchmarkTask() {
       ...await _runMicrobench('lib/stocks/animation_bench.dart'),
       ...await _runMicrobench('lib/language/sync_star_bench.dart'),
       ...await _runMicrobench('lib/language/sync_star_semantics_bench.dart'),
-    };
+      ...await _runMicrobench('lib/foundation/change_notifier_bench.dart'),
+ };
 
     return TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
   };
 }
 
 Future<Process> _startFlutter({
-  String command = 'run',
   List<String> options = const <String>[],
   bool canFail = false,
   Map<String, String> environment,

@@ -31,7 +31,9 @@ class TestImageInfo implements ImageInfo {
 }
 
 class TestImageProvider extends ImageProvider<int> {
-  const TestImageProvider(this.key, this.imageValue, { this.image });
+  const TestImageProvider(this.key, this.imageValue, { this.image = const TestImage() })
+      : assert(image != null);
+
   final int key;
   final int imageValue;
   final ui.Image image;

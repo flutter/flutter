@@ -180,47 +180,9 @@ void test(
 /// of any tests or sub-groups it contains. [setUp] and [tearDown] are also scoped
 /// to the containing group.
 ///
-/// If [testOn] is passed, it's parsed as a [platform selector][]; the test will
-/// only be run on matching platforms.
-///
-/// [platform selector]: https://github.com/dart-lang/test/tree/master/pkgs/test#platform-selectors
-///
-/// If [timeout] is passed, it's used to modify or replace the default timeout
-/// of 30 seconds. Timeout modifications take precedence in suite-group-test
-/// order, so [timeout] will also modify any timeouts set on the suite, and will
-/// be modified by any timeouts set on individual tests.
-///
-/// If [skip] is a String or `true`, the group is skipped. If it's a String, it
+/// If `skip` is a String or `true`, the group is skipped. If it's a String, it
 /// should explain why the group is skipped; this reason will be printed instead
 /// of running the group's tests.
-///
-/// If [tags] is passed, it declares user-defined tags that are applied to the
-/// test. These tags can be used to select or skip the test on the command line,
-/// or to do bulk test configuration. All tags should be declared in the
-/// [package configuration file][configuring tags]. The parameter can be an
-/// [Iterable] of tag names, or a [String] representing a single tag.
-///
-/// [configuring tags]: https://github.com/dart-lang/test/blob/44d6cb196f34a93a975ed5f3cb76afcc3a7b39b0/doc/package_config.md#configuring-tags
-///
-/// [onPlatform] allows groups to be configured on a platform-by-platform
-/// basis. It's a map from strings that are parsed as [PlatformSelector]s to
-/// annotation classes: [Timeout], [Skip], or lists of those. These
-/// annotations apply only on the given platforms. For example:
-///
-///     group('potentially slow tests', () {
-///       // ...
-///     }, onPlatform: {
-///       // These tests are especially slow on Windows.
-///       'windows': new Timeout.factor(2),
-///       'browser': [
-///         new Skip('TODO: add browser support'),
-///         // They'll be slow on browsers once it works on them.
-///         new Timeout.factor(2)
-///       ]
-///     });
-///
-/// If multiple platforms match, the annotations apply in order as through
-/// they were in nested groups.
 @isTestGroup
 void group(Object description, void Function() body, { dynamic skip }) {
   _declarer.group(description.toString(), body, skip: skip);
@@ -228,11 +190,11 @@ void group(Object description, void Function() body, { dynamic skip }) {
 
 /// Registers a function to be run before tests.
 ///
-/// This function will be called before each test is run. [callback] may be
+/// This function will be called before each test is run. The `body` may be
 /// asynchronous; if so, it must return a [Future].
 ///
 /// If this is called within a test group, it applies only to tests in that
-/// group. [callback] will be run after any set-up callbacks in parent groups or
+/// group. The `body` will be run after any set-up callbacks in parent groups or
 /// at the top level.
 ///
 /// Each callback at the top level or in a given group will be run in the order
@@ -243,11 +205,11 @@ void setUp(dynamic Function() body) {
 
 /// Registers a function to be run after tests.
 ///
-/// This function will be called after each test is run. [callback] may be
+/// This function will be called after each test is run. The `body` may be
 /// asynchronous; if so, it must return a [Future].
 ///
 /// If this is called within a test group, it applies only to tests in that
-/// group. [callback] will be run before any tear-down callbacks in parent
+/// group. The `body` will be run before any tear-down callbacks in parent
 /// groups or at the top level.
 ///
 /// Each callback at the top level or in a given group will be run in the
@@ -260,9 +222,9 @@ void tearDown(dynamic Function() body) {
 
 /// Registers a function to be run once before all tests.
 ///
-/// [callback] may be asynchronous; if so, it must return a [Future].
+/// The `body` may be asynchronous; if so, it must return a [Future].
 ///
-/// If this is called within a test group, [callback] will run before all tests
+/// If this is called within a test group, The `body` will run before all tests
 /// in that group. It will be run after any [setUpAll] callbacks in parent
 /// groups or at the top level. It won't be run if none of the tests in the
 /// group are run.
@@ -277,7 +239,7 @@ void setUpAll(dynamic Function() body) {
 
 /// Registers a function to be run once after all tests.
 ///
-/// If this is called within a test group, [callback] will run after all tests
+/// If this is called within a test group, `body` will run after all tests
 /// in that group. It will be run before any [tearDownAll] callbacks in parent
 /// groups or at the top level. It won't be run if none of the tests in the
 /// group are run.

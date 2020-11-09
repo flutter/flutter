@@ -10,7 +10,7 @@ import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/config.dart';
 import 'base/context.dart';
-import 'base/error_handling_file_system.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -24,6 +24,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'device.dart';
 import 'doctor.dart';
 import 'fuchsia/fuchsia_sdk.dart';
 import 'ios/ios_workflow.dart';
@@ -49,6 +50,7 @@ OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 PersistentToolState get persistentToolState => PersistentToolState.instance;
 Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 Usage get flutterUsage => context.get<Usage>();
+DeviceManager get deviceManager => context.get<DeviceManager>();
 
 FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ?? FlutterProjectFactory(
@@ -189,5 +191,5 @@ PlistParser get plistParser => context.get<PlistParser>() ?? (
 ));
 PlistParser _plistInstance;
 
-/// The global template renderer
+/// The global template renderer.
 TemplateRenderer get templateRenderer => context.get<TemplateRenderer>();

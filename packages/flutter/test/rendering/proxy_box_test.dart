@@ -30,7 +30,7 @@ void main() {
     expect(transform, Matrix4.zero());
 
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
-    expect(fittedBox.hitTestChildren(hitTestResult), isFalse);
+    expect(fittedBox.hitTestChildren(hitTestResult, position: Offset.zero), isFalse);
   });
 
   test('RenderFittedBox does not paint with empty sizes', () {
@@ -260,7 +260,7 @@ void main() {
     expect(getPixel(20, 20), equals(0x00000080));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
     expect(getPixel(image.width - 1, 20), equals(0xffffffff));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
 
   test('RenderOpacity does not composite if it is transparent', () {
     final RenderOpacity renderOpacity = RenderOpacity(
@@ -490,10 +490,6 @@ void main() {
   });
 
   test('RenderMouseRegion can change properties when detached', () {
-    renderer.initMouseTracker(MouseTracker(
-      renderer.pointerRouter,
-      (_) => <MouseTrackerAnnotation>[],
-    ));
     final RenderMouseRegion object = RenderMouseRegion();
     object
       ..opaque = false

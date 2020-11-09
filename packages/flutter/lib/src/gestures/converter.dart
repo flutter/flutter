@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:ui' as ui show PointerData, PointerChange, PointerSignalKind;
 
@@ -49,6 +48,7 @@ class PointerEventConverter {
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) sync* {
     for (final ui.PointerData datum in data) {
       final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
+      assert(position != null);
       final Offset delta = Offset(datum.physicalDeltaX, datum.physicalDeltaY) / devicePixelRatio;
       final double radiusMinor = _toLogicalPixels(datum.radiusMinor, devicePixelRatio);
       final double radiusMajor = _toLogicalPixels(datum.radiusMajor, devicePixelRatio);
@@ -214,7 +214,7 @@ class PointerEventConverter {
             break;
         }
       } else {
-        switch (datum.signalKind) {
+        switch (datum.signalKind!) {
           case ui.PointerSignalKind.scroll:
             final Offset scrollDelta =
                 Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
@@ -238,6 +238,5 @@ class PointerEventConverter {
     }
   }
 
-  static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) =>
-      physicalPixels == null ? null : physicalPixels / devicePixelRatio;
+  static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) => physicalPixels / devicePixelRatio;
 }

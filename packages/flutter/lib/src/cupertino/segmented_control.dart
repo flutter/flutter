@@ -184,7 +184,7 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
   /// Defaults to the selectedColor at 20% opacity if null.
   final Color pressedColor;
 
-  /// The CupertinoSegmentedControl will be placed inside this padding
+  /// The CupertinoSegmentedControl will be placed inside this padding.
   ///
   /// Defaults to EdgeInsets.symmetric(horizontal: 16.0)
   final EdgeInsetsGeometry padding;

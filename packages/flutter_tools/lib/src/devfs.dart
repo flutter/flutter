@@ -229,7 +229,11 @@ class _DevFSHttpWriter {
   final String fsName;
   final Uri httpAddress;
 
-  static const int kMaxInFlight = 6;
+  // 3 was chosen to try to limit the varience in the time it takes to execute
+  // `await request.close()` since there is a known bug in Dart where it doesn't
+  // always return a status code in response to a PUT request:
+  // https://github.com/dart-lang/sdk/issues/43525.
+  static const int kMaxInFlight = 3;
 
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
@@ -270,13 +274,29 @@ class _DevFSHttpWriter {
           _osUtils,
         );
         await request.addStream(contents);
-        final HttpClientResponse response = await request.close();
-        response.listen((_) => null,
-          onError: (dynamic error) {
-            _logger.printTrace('error: $error');
-          },
-          cancelOnError: true,
-        );
+        // The contents has already been streamed, closing the request should
+        // not take long but we are experiencing hangs with it, see #63869.
+        //
+        // Once the bug in Dart is solved we can remove the timeout
+        // (https://github.com/dart-lang/sdk/issues/43525).  The timeout was
+        // chosen to be inflated based on the max observed time when running the
+        // tests in "Google Tests".
+        try {
+          final HttpClientResponse response = await request.close().timeout(
+            const Duration(milliseconds: 10000));
+          response.listen((_) {},
+            onError: (dynamic error) {
+              _logger.printTrace('error: $error');
+            },
+            cancelOnError: true,
+          );
+        } on TimeoutException {
+          request.abort();
+          // This should throw "HttpException: Request has been aborted".
+          await request.done;
+          // Just to be safe we rethrow the TimeoutException.
+          rethrow;
+        }
         break;
       } on Exception catch (error, trace) {
         if (!_completer.isCompleted) {
@@ -302,34 +322,32 @@ class UpdateFSReport {
     bool success = false,
     int invalidatedSourcesCount = 0,
     int syncedBytes = 0,
-  }) {
-    _success = success;
-    _invalidatedSourcesCount = invalidatedSourcesCount;
-    _syncedBytes = syncedBytes;
-  }
+    this.fastReassemble,
+  }) : _success = success,
+       _invalidatedSourcesCount = invalidatedSourcesCount,
+       _syncedBytes = syncedBytes;
 
   bool get success => _success;
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
   int get syncedBytes => _syncedBytes;
 
-  /// JavaScript modules produced by the incremental compiler in `dartdevc`
-  /// mode.
-  ///
-  /// Only used for JavaScript compilation.
-  List<String> invalidatedModules;
+  bool _success;
+  bool fastReassemble;
+  int _invalidatedSourcesCount;
+  int _syncedBytes;
 
   void incorporateResults(UpdateFSReport report) {
     if (!report._success) {
       _success = false;
     }
+    if (report.fastReassemble != null && fastReassemble != null) {
+      fastReassemble &= report.fastReassemble;
+    } else if (report.fastReassemble != null) {
+      fastReassemble = report.fastReassemble;
+    }
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
-    invalidatedModules ??= report.invalidatedModules;
   }
-
-  bool _success;
-  int _invalidatedSourcesCount;
-  int _syncedBytes;
 }
 
 class DevFS {

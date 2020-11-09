@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget buildSliverAppBarApp({
@@ -1103,6 +1104,48 @@ void main() {
     expect(find.byIcon(Icons.menu), findsNothing);
   });
 
+  testWidgets('AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/58665
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: AppBar(
+            title: const Text('Abc'),
+            actions: <Widget>[
+              IconButton(
+                key: key,
+                icon: const Icon(Icons.add_circle),
+                tooltip: 'First button',
+                onPressed: () {},
+              ),
+            ],
+            flexibleSpace: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: const Alignment(0.0, -1.0),
+                  end: const Alignment(-0.04, 1.0),
+                  colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderObject painter = tester.renderObject(
+      find.descendant(
+        of: find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byType(Stack),
+        ),
+        matching: find.byType(Material)
+      )
+    );
+    await tester.tap(find.byKey(key));
+    expect(painter, paints..save()..translate()..save()..translate()..circle(x: 24.0, y: 28.0));
+  });
+
   testWidgets('AppBar handles loose children 0', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
@@ -1604,7 +1647,6 @@ void main() {
                       TestSemantics(
                         children: <TestSemantics>[
                           TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                             children: <TestSemantics>[
                               TestSemantics(
                                 children: <TestSemantics>[
@@ -1618,7 +1660,88 @@ void main() {
                                   ),
                                 ],
                               ),
+                              TestSemantics(),
                             ],
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+      ignoreId: true,
+    ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('SliverAppBar with flexable space has correct semantics order', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/64922.
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              leading: Text('Leading'),
+              flexibleSpace: Text('Flexible space'),
+              actions: <Widget>[Text('Action 1')],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                children: <TestSemantics>[
+                  TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    label: 'Leading',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    label: 'Action 1',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
+                              ),
+                              TestSemantics(
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    flags: <SemanticsFlag>[SemanticsFlag.isHeader],
+                                    label: 'Flexible space',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           ),
                         ],
                       ),
@@ -1688,7 +1811,7 @@ void main() {
                     floating: true,
                     snap: snap,
                     actions: <Widget>[
-                      FlatButton(
+                      TextButton(
                         child: const Text('snap=false'),
                         onPressed: () {
                           setState(() {
@@ -1934,6 +2057,41 @@ void main() {
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
   });
 
+  testWidgets('SliverAppBar configures the delegate properly', (WidgetTester tester) async {
+    Future<void> buildAndVerifyDelegate({ bool pinned, bool floating, bool snap }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                title: const Text('Jumbo'),
+                pinned: pinned,
+                floating: floating,
+                snap: snap,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final SliverPersistentHeaderDelegate delegate = tester
+        .widget<SliverPersistentHeader>(find.byType(SliverPersistentHeader))
+        .delegate;
+
+      // Ensure we have a non-null vsync when it's needed.
+      if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null))
+        expect(delegate.vsync, isNotNull);
+
+      expect(delegate.showOnScreenConfiguration != null, snap && floating);
+    }
+
+    await buildAndVerifyDelegate(pinned: false, floating: true, snap: false);
+    await buildAndVerifyDelegate(pinned: false, floating: true, snap: true);
+
+    await buildAndVerifyDelegate(pinned: true, floating: true, snap: false);
+    await buildAndVerifyDelegate(pinned: true, floating: true, snap: true);
+  });
+
   testWidgets('AppBar respects toolbarHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -2001,5 +2159,39 @@ void main() {
       expect(error.toString(), contains('toolbarHeight != null'));
       expect(error.toString(), contains('is not true'));
     }
+  });
+
+  testWidgets('AppBar respects leadingWidth', (WidgetTester tester) async {
+    const Key key = Key('leading');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          leading: const Placeholder(key: key),
+          leadingWidth: 100,
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    // By default toolbarHeight is 56.0.
+    expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
+  });
+
+  testWidgets('SliverAppBar respects leadingWidth', (WidgetTester tester) async {
+    const Key key = Key('leading');
+    await tester.pumpWidget( const MaterialApp(
+      home: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            leading: Placeholder(key: key),
+            leadingWidth: 100,
+            title: Text('Title'),
+          ),
+        ],
+      )
+    ));
+
+    // By default toolbarHeight is 56.0.
+    expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
   });
 }

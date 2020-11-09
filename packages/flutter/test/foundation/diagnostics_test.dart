@@ -903,6 +903,14 @@ void main() {
     expect(describeEnum(ExampleEnum.hello), equals('hello'));
     expect(describeEnum(ExampleEnum.world), equals('world'));
     expect(describeEnum(ExampleEnum.deferToChild), equals('deferToChild'));
+    expect(
+      () => describeEnum('Hello World'),
+      throwsA(isAssertionError.having(
+        (AssertionError e) => e.message,
+        'message',
+        'The provided object "Hello World" is not an enum.'),
+      ),
+    );
   });
 
   test('string property test', () {

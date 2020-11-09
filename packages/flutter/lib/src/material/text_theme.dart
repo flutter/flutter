@@ -231,7 +231,7 @@ class TextTheme with Diagnosticable {
   /// Used for auxiliary text associated with images.
   final TextStyle caption;
 
-  /// Used for text on [RaisedButton] and [FlatButton].
+  /// Used for text on [ElevatedButton], [TextButton] and [OutlinedButton].
   final TextStyle button;
 
   /// The smallest style.
@@ -685,7 +685,7 @@ class TextTheme with Diagnosticable {
 
   /// Linearly interpolate between two text themes.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static TextTheme lerp(TextTheme a, TextTheme b, double t) {
     assert(t != null);
     return TextTheme(

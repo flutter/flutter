@@ -7,6 +7,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'container.dart';
@@ -103,6 +104,8 @@ class ModalBarrier extends StatelessWidget {
           onDismiss: () {
             if (dismissible)
               Navigator.maybePop(context);
+            else
+              SystemSound.play(SystemSoundType.alert);
           },
           child: Semantics(
             label: semanticsDismissible ? semanticsLabel : null,

@@ -11,7 +11,6 @@ import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../codegen.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart' as globals;
@@ -110,12 +109,6 @@ class TestCompiler {
       packagesPath: globalPackagesPath,
       extraFrontEndOptions: extraFrontEndOptions,
     );
-    if (flutterProject.hasBuilders) {
-      return CodeGeneratingResidentCompiler.create(
-        residentCompiler: residentCompiler,
-        flutterProject: flutterProject,
-      );
-    }
     return residentCompiler;
   }
 

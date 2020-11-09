@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:developer' as developer;
 import 'dart:ui' as ui show Image;
@@ -44,7 +43,7 @@ class DecorationImage {
   /// The [image], [alignment], [repeat], and [matchTextDirection] arguments
   /// must not be null.
   const DecorationImage({
-    @required this.image,
+    required this.image,
     this.onError,
     this.colorFilter,
     this.fit,
@@ -66,10 +65,10 @@ class DecorationImage {
   final ImageProvider image;
 
   /// An optional error callback for errors emitted when loading [image].
-  final ImageErrorListener onError;
+  final ImageErrorListener? onError;
 
   /// A color filter to apply to the image before painting it.
-  final ColorFilter colorFilter;
+  final ColorFilter? colorFilter;
 
   /// How the image should be inscribed into the box.
   ///
@@ -77,7 +76,7 @@ class DecorationImage {
   /// [BoxFit.fill] if [centerSlice] is not null.
   ///
   /// See the discussion at [paintImage] for more details.
-  final BoxFit fit;
+  final BoxFit? fit;
 
   /// How to align the image within its bounds.
   ///
@@ -121,7 +120,7 @@ class DecorationImage {
   /// destination image size will result in [centerSlice] having no effect
   /// (since the nine regions of the image will be rendered with the same
   /// scaling, as if it wasn't specified).
-  final Rect centerSlice;
+  final Rect? centerSlice;
 
   /// How to paint any portions of the box that would not otherwise be covered
   /// by the image.
@@ -212,8 +211,8 @@ class DecorationImagePainter {
   final DecorationImage _details;
   final VoidCallback _onChanged;
 
-  ImageStream _imageStream;
-  ImageInfo _image;
+  ImageStream? _imageStream;
+  ImageInfo? _image;
 
   /// Draw the image onto the given canvas.
   ///
@@ -229,7 +228,7 @@ class DecorationImagePainter {
   /// because it had not yet been loaded the first time this method was called,
   /// then the `onChanged` callback passed to [DecorationImage.createPainter]
   /// will be called.
-  void paint(Canvas canvas, Rect rect, Path clipPath, ImageConfiguration configuration) {
+  void paint(Canvas canvas, Rect rect, Path? clipPath, ImageConfiguration configuration) {
     assert(canvas != null);
     assert(rect != null);
     assert(configuration != null);
@@ -264,7 +263,7 @@ class DecorationImagePainter {
       );
       _imageStream?.removeListener(listener);
       _imageStream = newImageStream;
-      _imageStream.addListener(listener);
+      _imageStream!.addListener(listener);
     }
     if (_image == null)
       return;
@@ -277,9 +276,9 @@ class DecorationImagePainter {
     paintImage(
       canvas: canvas,
       rect: rect,
-      image: _image.image,
-      debugImageLabel: _image.debugLabel,
-      scale: _details.scale * _image.scale,
+      image: _image!.image,
+      debugImageLabel: _image!.debugLabel,
+      scale: _details.scale * _image!.scale,
       colorFilter: _details.colorFilter,
       fit: _details.fit,
       alignment: _details.alignment.resolve(configuration.textDirection),
@@ -409,15 +408,15 @@ void debugFlushLastFrameImageSizeInfo() {
 ///  * [DecorationImage], which holds a configuration for calling this function.
 ///  * [BoxDecoration], which uses this function to paint a [DecorationImage].
 void paintImage({
-  @required Canvas canvas,
-  @required Rect rect,
-  @required ui.Image image,
-  String debugImageLabel,
+  required Canvas canvas,
+  required Rect rect,
+  required ui.Image image,
+  String? debugImageLabel,
   double scale = 1.0,
-  ColorFilter colorFilter,
-  BoxFit fit,
+  ColorFilter? colorFilter,
+  BoxFit? fit,
   Alignment alignment = Alignment.center,
-  Rect centerSlice,
+  Rect? centerSlice,
   ImageRepeat repeat = ImageRepeat.noRepeat,
   bool flipHorizontally = false,
   bool invertColors = false,
@@ -434,7 +433,7 @@ void paintImage({
     return;
   Size outputSize = rect.size;
   Size inputSize = Size(image.width.toDouble(), image.height.toDouble());
-  Offset sliceBorder;
+  Offset? sliceBorder;
   if (centerSlice != null) {
     sliceBorder = Offset(
       centerSlice.left + inputSize.width - centerSlice.right,
@@ -449,47 +448,11 @@ void paintImage({
   final Size sourceSize = fittedSizes.source * scale;
   Size destinationSize = fittedSizes.destination;
   if (centerSlice != null) {
-    outputSize += sliceBorder;
+    outputSize += sliceBorder!;
     destinationSize += sliceBorder;
     // We don't have the ability to draw a subset of the image at the same time
     // as we apply a nine-patch stretch.
     assert(sourceSize == inputSize, 'centerSlice was used with a BoxFit that does not guarantee that the image is fully visible.');
-  }
-
-  // Output size is fully calculated.
-  if (!kReleaseMode) {
-    final ImageSizeInfo sizeInfo = ImageSizeInfo(
-      // Some ImageProvider implementations may not have given this.
-      source: debugImageLabel ?? '<Unknown Image(${image.width}×${image.height})>',
-      imageSize: Size(image.width.toDouble(), image.height.toDouble()),
-      displaySize: outputSize,
-    );
-    // Avoid emitting events that are the same as those emitted in the last frame.
-    if (!_lastFrameImageSizeInfo.contains(sizeInfo)) {
-      final ImageSizeInfo existingSizeInfo = _pendingImageSizeInfo[sizeInfo.source];
-      if (existingSizeInfo == null || existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
-        _pendingImageSizeInfo[sizeInfo.source] = sizeInfo;
-      }
-      // _pendingImageSizeInfo.add(sizeInfo);
-      if (debugOnPaintImage != null) {
-        debugOnPaintImage(sizeInfo);
-      }
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-        _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();
-        if (_pendingImageSizeInfo.isEmpty) {
-          return;
-        }
-        developer.postEvent(
-          'Flutter.ImageSizesForFrame',
-          <Object, Object>{
-            for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
-              imageSizeInfo.source: imageSizeInfo.toJson()
-          },
-        );
-        _pendingImageSizeInfo = <String, ImageSizeInfo>{};
-      });
-
-    }
   }
 
   if (repeat != ImageRepeat.noRepeat && destinationSize == outputSize) {
@@ -510,6 +473,79 @@ void paintImage({
   final double dy = halfHeightDelta + alignment.y * halfHeightDelta;
   final Offset destinationPosition = rect.topLeft.translate(dx, dy);
   final Rect destinationRect = destinationPosition & destinationSize;
+
+  // Set to true if we added a saveLayer to the canvas to invert/flip the image.
+  bool invertedCanvas = false;
+  // Output size and destination rect are fully calculated.
+  if (!kReleaseMode) {
+    final ImageSizeInfo sizeInfo = ImageSizeInfo(
+      // Some ImageProvider implementations may not have given this.
+      source: debugImageLabel ?? '<Unknown Image(${image.width}×${image.height})>',
+      imageSize: Size(image.width.toDouble(), image.height.toDouble()),
+      displaySize: outputSize,
+    );
+    assert(() {
+      if (debugInvertOversizedImages &&
+          sizeInfo.decodedSizeInBytes > sizeInfo.displaySizeInBytes + debugImageOverheadAllowance) {
+        final int overheadInKilobytes = (sizeInfo.decodedSizeInBytes - sizeInfo.displaySizeInBytes) ~/ 1024;
+        final int outputWidth = outputSize.width.toInt();
+        final int outputHeight = outputSize.height.toInt();
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: 'Image $debugImageLabel has a display size of '
+            '$outputWidth×$outputHeight but a decode size of '
+            '${image.width}×${image.height}, which uses an additional '
+            '${overheadInKilobytes}kb.\n\n'
+            'Consider resizing the asset ahead of time, supplying a cacheWidth '
+            'parameter of $outputWidth, a cacheHeight parameter of '
+            '$outputHeight, or using a ResizeImage.',
+          library: 'painting library',
+          context: ErrorDescription('while painting an image'),
+        ));
+        // Invert the colors of the canvas.
+        canvas.saveLayer(
+          destinationRect,
+          Paint()..colorFilter = const ColorFilter.matrix(<double>[
+            -1,  0,  0, 0, 255,
+             0, -1,  0, 0, 255,
+             0,  0, -1, 0, 255,
+             0,  0,  0, 1,   0,
+          ]),
+        );
+        // Flip the canvas vertically.
+        final double dy = -(rect.top + rect.height / 2.0);
+        canvas.translate(0.0, -dy);
+        canvas.scale(1.0, -1.0);
+        canvas.translate(0.0, dy);
+        invertedCanvas = true;
+      }
+      return true;
+    }());
+    // Avoid emitting events that are the same as those emitted in the last frame.
+    if (!_lastFrameImageSizeInfo.contains(sizeInfo)) {
+      final ImageSizeInfo? existingSizeInfo = _pendingImageSizeInfo[sizeInfo.source];
+      if (existingSizeInfo == null || existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
+        _pendingImageSizeInfo[sizeInfo.source!] = sizeInfo;
+      }
+      if (debugOnPaintImage != null) {
+        debugOnPaintImage!(sizeInfo);
+      }
+      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+        _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();
+        if (_pendingImageSizeInfo.isEmpty) {
+          return;
+        }
+        developer.postEvent(
+          'Flutter.ImageSizesForFrame',
+          <String, Object>{
+            for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
+              imageSizeInfo.source!: imageSizeInfo.toJson()
+          },
+        );
+        _pendingImageSizeInfo = <String, ImageSizeInfo>{};
+      });
+    }
+  }
+
   final bool needSave = repeat != ImageRepeat.noRepeat || flipHorizontally;
   if (needSave)
     canvas.save();
@@ -541,6 +577,10 @@ void paintImage({
   }
   if (needSave)
     canvas.restore();
+
+  if (invertedCanvas) {
+    canvas.restore();
+  }
 }
 
 Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) sync* {

@@ -1817,6 +1817,97 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
     });
   });
+
+  group('Correctly handles 0 velocity inner ballistic scroll activity:', () {
+    // Regression tests for https://github.com/flutter/flutter/issues/17096
+    Widget _buildBallisticTest(ScrollController controller) {
+      return MaterialApp(
+        home: Scaffold(
+          body: NestedScrollView(
+            controller: controller,
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                const SliverAppBar(
+                  pinned: true,
+                  expandedHeight: 200.0,
+                ),
+              ];
+            },
+            body: ListView.builder(
+              itemCount: 50,
+              itemBuilder: (BuildContext context, int index) {
+                return Container(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Item $index'),
+                  )
+                );
+              }
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('overscroll, hold for 0 velocity, and release', (WidgetTester tester) async {
+      // Dragging into an overscroll and holding so that when released, the
+      // ballistic scroll activity has a 0 velocity.
+      final ScrollController controller = ScrollController();
+      await tester.pumpWidget(_buildBallisticTest(controller));
+      // Last item of the inner scroll view.
+      expect(find.text('Item 49'), findsNothing);
+
+      // Scroll to bottom
+      await tester.fling(find.text('Item 3'), const Offset(0.0, -50.0), 10000.0);
+      await tester.pumpAndSettle();
+
+      // End of list
+      expect(find.text('Item 49'), findsOneWidget);
+      expect(tester.getCenter(find.text('Item 49')).dy, equals(585.0));
+
+      // Overscroll, dragging like this will release with 0 velocity.
+      await tester.drag(find.text('Item 49'), const Offset(0.0, -50.0));
+      await tester.pump();
+      // If handled correctly, the last item should still be visible and
+      // progressing  back down to the bottom edge, instead of jumping further
+      // up the list and out of view.
+      expect(find.text('Item 49'), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(tester.getCenter(find.text('Item 49')).dy, equals(585.0));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+    testWidgets('overscroll, release, and tap', (WidgetTester tester) async {
+      // Tapping while an inner ballistic scroll activity is in progress will
+      // trigger a secondary ballistic scroll activity with a 0 velocity.
+      final ScrollController controller = ScrollController();
+      await tester.pumpWidget(_buildBallisticTest(controller));
+      // Last item of the inner scroll view.
+      expect(find.text('Item 49'), findsNothing);
+
+      // Scroll to bottom
+      await tester.fling(find.text('Item 3'), const Offset(0.0, -50.0), 10000.0);
+      await tester.pumpAndSettle();
+
+      // End of list
+      expect(find.text('Item 49'), findsOneWidget);
+      expect(tester.getCenter(find.text('Item 49')).dy, equals(585.0));
+
+      // Fling again to trigger first ballistic activity.
+      await tester.fling(find.text('Item 48'), const Offset(0.0, -50.0), 10000.0);
+      await tester.pump();
+
+      // Tap after releasing the overscroll to trigger secondary inner ballistic
+      // scroll activity with 0 velocity.
+      await tester.tap(find.text('Item 49'));
+      await tester.pumpAndSettle();
+
+      // If handled correctly, the ballistic scroll activity should finish
+      // closing out the overscrolled area, with the last item visible at the
+      // bottom.
+      expect(find.text('Item 49'), findsOneWidget);
+      expect(tester.getCenter(find.text('Item 49')).dy, equals(585.0));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  });
 }
 
 class TestHeader extends SliverPersistentHeaderDelegate {

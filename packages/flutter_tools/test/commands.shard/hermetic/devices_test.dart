@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -53,7 +54,7 @@ void main() {
 
     testUsingContext('get devices\' platform types', () async {
       final List<String> platformTypes = Device.devicesPlatformTypes(
-        await deviceManager.getAllConnectedDevices(),
+        await globals.deviceManager.getAllConnectedDevices(),
       );
       expect(platformTypes, <String>['android', 'web']);
     }, overrides: <Type, Generator>{
@@ -176,6 +177,9 @@ class _FakeDeviceManager extends DeviceManager {
   Future<List<String>> getDeviceDiagnostics() => Future<List<String>>.value(
     <String>['Cannot connect to device ABC']
   );
+
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 }
 
 class NoDevicesManager extends DeviceManager {
@@ -185,6 +189,9 @@ class NoDevicesManager extends DeviceManager {
   @override
   Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
     getAllConnectedDevices();
+
+@override
+  List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 }
 
 class MockCache extends Mock implements Cache {}

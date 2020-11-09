@@ -20,7 +20,7 @@ void main() {
     final double dyDelta2 = thirdPosition.dy - secondPosition.dy;
 
     // If the animation were linear, these two values would be the same.
-    expect(dyDelta1, isNot(closeTo(dyDelta2, 0.1)));
+    expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
   testWidgets('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) async {
@@ -433,7 +433,7 @@ void main() {
             height: 200.0,
             child: Builder(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   child: const Text('showModalBottomSheet'),
                   onPressed: () {
                     showModalBottomSheet<void>(

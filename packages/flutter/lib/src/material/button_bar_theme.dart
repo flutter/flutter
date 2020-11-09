@@ -54,7 +54,7 @@ class ButtonBarThemeData with Diagnosticable {
   /// Defines a [ButtonBar] button's base colors, and the defaults for
   /// the button's minimum size, internal padding, and shape.
   ///
-  /// This will override the surrounding [ButtonTheme.textTheme] setting
+  /// This will override the surrounding [ButtonThemeData.textTheme] setting
   /// for buttons contained in the [ButtonBar].
   ///
   /// Despite the name, this property is not a [TextTheme], its value is not a
@@ -63,22 +63,22 @@ class ButtonBarThemeData with Diagnosticable {
 
   /// The minimum width for [ButtonBar] buttons.
   ///
-  /// This will override the surrounding [ButtonTheme.minWidth] setting
+  /// This will override the surrounding [ButtonThemeData.minWidth] setting
   /// for buttons contained in the [ButtonBar].
   ///
   /// The actual horizontal space allocated for a button's child is
-  /// at least this value less the theme's horizontal [padding].
+  /// at least this value less the theme's horizontal [ButtonThemeData.padding].
   final double buttonMinWidth;
 
   /// The minimum height for [ButtonBar] buttons.
   ///
-  /// This will override the surrounding [ButtonTheme.height] setting
+  /// This will override the surrounding [ButtonThemeData.height] setting
   /// for buttons contained in the [ButtonBar].
   final double buttonHeight;
 
   /// Padding for a [ButtonBar] button's child (typically the button's label).
   ///
-  /// This will override the surrounding [ButtonTheme.padding] setting
+  /// This will override the surrounding [ButtonThemeData.padding] setting
   /// for buttons contained in the [ButtonBar].
   final EdgeInsetsGeometry buttonPadding;
 
@@ -90,7 +90,7 @@ class ButtonBarThemeData with Diagnosticable {
   /// edge of the menu's value with the leading edge of the values
   /// displayed by the menu items.
   ///
-  /// This will override the surrounding [ButtonTheme.alignedDropdown] setting
+  /// This will override the surrounding [ButtonThemeData.alignedDropdown] setting
   /// for buttons contained in the [ButtonBar].
   ///
   /// This property only affects [DropdownButton] contained in a [ButtonBar]

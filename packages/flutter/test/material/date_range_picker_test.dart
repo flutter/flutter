@@ -60,7 +60,7 @@ void main() {
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
-            return RaisedButton(
+            return ElevatedButton(
               onPressed: () {
                 buttonContext = context;
               },
@@ -205,6 +205,62 @@ void main() {
         end: DateTime(2016, DateTime.january, 14),
       ));
     });
+  });
+
+  testWidgets('OK Cancel button layout', (WidgetTester tester) async {
+     Widget buildFrame(TextDirection textDirection) {
+       return MaterialApp(
+         home: Material(
+           child: Center(
+             child: Builder(
+               builder: (BuildContext context) {
+                 return ElevatedButton(
+                   child: const Text('X'),
+                   onPressed: () {
+                     showDateRangePicker(
+                       context: context,
+                       firstDate:DateTime(2001, DateTime.january, 1),
+                       lastDate: DateTime(2031, DateTime.december, 31),
+                       builder: (BuildContext context, Widget child) {
+                         return Directionality(
+                           textDirection: textDirection,
+                           child: child,
+                         );
+                       },
+                     );
+                   },
+                 );
+               },
+             ),
+           ),
+         ),
+       );
+     }
+
+    Future<void> showOkCancelDialog(TextDirection textDirection) async {
+      await tester.pumpWidget(buildFrame(textDirection));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.edit));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> dismissOkCancelDialog() async {
+      await tester.tap(find.text('CANCEL'));
+      await tester.pumpAndSettle();
+    }
+
+    await showOkCancelDialog(TextDirection.ltr);
+    expect(tester.getBottomRight(find.text('OK')).dx, 622);
+    expect(tester.getBottomLeft(find.text('OK')).dx, 594);
+    expect(tester.getBottomRight(find.text('CANCEL')).dx, 560);
+    await dismissOkCancelDialog();
+
+    await showOkCancelDialog(TextDirection.rtl);
+    expect(tester.getBottomRight(find.text('OK')).dx, 206);
+    expect(tester.getBottomLeft(find.text('OK')).dx, 178);
+    expect(tester.getBottomRight(find.text('CANCEL')).dx, 324);
+    await dismissOkCancelDialog();
   });
 
   group('Haptic feedback', () {
@@ -629,7 +685,7 @@ void main() {
         home: Material(
           child: Builder(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   buttonContext = context;
                 },

@@ -97,6 +97,8 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
 ///  * [Material], which is the widget on which the ink splash is painted.
 ///  * [InkHighlight], which is an ink feature that emphasizes a part of a
 ///    [Material].
+///  * [Ink], a convenience widget for drawing images and other decorations on
+///    Material widgets.
 class InkSplash extends InteractiveInkFeature {
   /// Begin a splash, centered at position relative to [referenceBox].
   ///

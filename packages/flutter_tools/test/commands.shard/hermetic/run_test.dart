@@ -178,7 +178,7 @@ void main() {
         when(mockDeviceManager.getDevices()).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(noDevices)
         );
-        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+        when(mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout'))).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(noDevices)
         );
 
@@ -208,17 +208,17 @@ void main() {
         globals.fs.file('.packages').writeAsStringSync('\n');
         globals.fs.file('lib/main.dart').createSync(recursive: true);
         final FakeDevice device = FakeDevice(isLocalEmulator: true);
-        when(deviceManager.getAllConnectedDevices()).thenAnswer((Invocation invocation) async {
+        when(mockDeviceManager.getAllConnectedDevices()).thenAnswer((Invocation invocation) async {
           return <Device>[device];
         });
-        when(deviceManager.getDevices()).thenAnswer((Invocation invocation) async {
+        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) async {
           return <Device>[device];
         });
-        when(deviceManager.findTargetDevices(any)).thenAnswer((Invocation invocation) async {
+        when(mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout'))).thenAnswer((Invocation invocation) async {
           return <Device>[device];
         });
-        when(deviceManager.hasSpecifiedAllDevices).thenReturn(false);
-        when(deviceManager.deviceDiscoverers).thenReturn(<DeviceDiscovery>[]);
+        when(mockDeviceManager.hasSpecifiedAllDevices).thenReturn(false);
+        when(mockDeviceManager.deviceDiscoverers).thenReturn(<DeviceDiscovery>[]);
 
         final RunCommand command = RunCommand();
         applyMocksToCommand(command);
@@ -231,7 +231,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => MockDeviceManager(),
+        DeviceManager: () => mockDeviceManager,
         Stdio: () => MockStdio(),
       });
 
@@ -254,7 +254,7 @@ void main() {
           ]);
         });
 
-        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+        when(mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout'))).thenAnswer(
             (Invocation invocation) => Future<List<Device>>.value(<Device>[]),
         );
 
@@ -301,7 +301,8 @@ void main() {
         );
         // No devices are attached, we just want to verify update the cache
         // BEFORE checking for devices
-        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+        const Duration timeout = Duration(seconds: 10);
+        when(mockDeviceManager.findTargetDevices(any, timeout: timeout)).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[])
         );
 
@@ -309,6 +310,8 @@ void main() {
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
+            '--device-timeout',
+            '10',
           ]);
           fail('Exception expected');
         } on ToolExit catch (e) {
@@ -324,7 +327,7 @@ void main() {
           // as part of gathering `requiredArtifacts`
           mockDeviceManager.getDevices(),
           // in validateCommand()
-          mockDeviceManager.findTargetDevices(any),
+          mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout')),
         ]);
       }, overrides: <Type, Generator>{
         ApplicationPackageFactory: () => mockApplicationPackageFactory,
@@ -365,7 +368,7 @@ void main() {
           (Invocation invocation) => Future<List<Device>>.value(<Device>[mockDevice])
         );
 
-        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+        when(mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout'))).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[mockDevice])
         );
 
@@ -434,7 +437,7 @@ void main() {
         when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
           return Future<List<Device>>.value(<Device>[fakeDevice]);
         });
-        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+        when(mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout'))).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[fakeDevice])
         );
       });
@@ -557,7 +560,7 @@ class TestRunCommand extends RunCommand {
   @override
   // ignore: must_call_super
   Future<void> validateCommand() async {
-    devices = await deviceManager.getDevices();
+    devices = await globals.deviceManager.getDevices();
   }
 }
 

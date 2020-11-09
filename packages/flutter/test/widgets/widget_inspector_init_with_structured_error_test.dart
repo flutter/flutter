@@ -47,7 +47,7 @@ class StructuredErrorTestService extends TestWidgetInspectorService {
       expect(flutterErrorEvents, hasLength(0));
 
       // Create an error.
-      FlutterError.reportError(FlutterErrorDetailsForRendering(
+      FlutterError.reportError(FlutterErrorDetails(
         library: 'rendering library',
         context: ErrorDescription('during layout'),
         exception: StackTrace.current,

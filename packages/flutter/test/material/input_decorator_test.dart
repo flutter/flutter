@@ -1353,10 +1353,10 @@ void main() {
     //   12 - bottom padding
 
     expect(tester.getSize(find.byType(InputDecorator)).width, 800.0);
-    expect(tester.getSize(find.byType(InputDecorator)).height, closeTo(128.0, .0001));
+    expect(tester.getSize(find.byType(InputDecorator)).height, moreOrLessEquals(128.0, epsilon: .0001));
     expect(tester.getSize(find.text('text')).height, 20.0);
     expect(tester.getSize(find.byKey(pKey)).height, 100.0);
-    expect(tester.getTopLeft(find.text('text')).dy, closeTo(96, .0001)); // 12 + 100 - 16
+    expect(tester.getTopLeft(find.text('text')).dy, moreOrLessEquals(96, epsilon: .0001)); // 12 + 100 - 16
     expect(tester.getTopLeft(find.byKey(pKey)).dy, 12.0);
 
     // layout is a row: [prefix text suffix]
@@ -1403,10 +1403,10 @@ void main() {
     // positioned at 19, and the text is at 19+100-16=103.
 
     expect(tester.getSize(find.byType(InputDecorator)).width, 800.0);
-    expect(tester.getSize(find.byType(InputDecorator)).height, closeTo(144, .0001));
+    expect(tester.getSize(find.byType(InputDecorator)).height, moreOrLessEquals(144, epsilon: .0001));
     expect(tester.getSize(find.text('text')).height, 20.0);
     expect(tester.getSize(find.byKey(pKey)).height, 100.0);
-    expect(tester.getTopLeft(find.text('text')).dy, closeTo(103, .0001));
+    expect(tester.getTopLeft(find.text('text')).dy, moreOrLessEquals(103, epsilon: .0001));
     expect(tester.getTopLeft(find.byKey(pKey)).dy, 19.0);
 
     // layout is a row: [prefix text suffix]
@@ -1745,7 +1745,7 @@ void main() {
         );
 
         // Same as the default case above.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(12.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(12.0, epsilon: .0001));
       });
 
       testWidgets('align center', (WidgetTester tester) async {
@@ -1768,7 +1768,7 @@ void main() {
         );
 
         // Below the top aligned case.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(290.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(290.0, epsilon: .0001));
       });
 
       testWidgets('align bottom', (WidgetTester tester) async {
@@ -1791,7 +1791,7 @@ void main() {
         );
 
         // Below the center aligned case.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(568.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(568.0, epsilon: .0001));
       });
 
       testWidgets('align as a double', (WidgetTester tester) async {
@@ -1814,7 +1814,7 @@ void main() {
         );
 
         // In between the center and bottom aligned cases.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(498.5, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(498.5, epsilon: .0001));
       });
     });
 
@@ -1841,7 +1841,7 @@ void main() {
 
         // Similar to the case without a border, but with a little extra room at
         // the top to make room for the border.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(24.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(24.0, epsilon: .0001));
       });
 
       testWidgets('align center (default)', (WidgetTester tester) async {
@@ -1865,7 +1865,7 @@ void main() {
         );
 
         // Below the top aligned case.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(289.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(289.0, epsilon: .0001));
       });
 
       testWidgets('align bottom', (WidgetTester tester) async {
@@ -1889,7 +1889,7 @@ void main() {
         );
 
         // Below the center aligned case.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(564.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(564.0, epsilon: .0001));
       });
     });
 
@@ -1919,7 +1919,7 @@ void main() {
         );
 
         // Same as the default case above.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(96, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(96, epsilon: .0001));
         expect(tester.getTopLeft(find.byKey(pKey)).dy, 12.0);
       });
 
@@ -1948,7 +1948,7 @@ void main() {
         );
 
         // Same as the default case above.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(96.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(96.0, epsilon: .0001));
         expect(tester.getTopLeft(find.byKey(pKey)).dy, 12.0);
       });
 
@@ -1977,7 +1977,7 @@ void main() {
         );
 
         // Top of the input + 100 prefix height - overlap
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(96.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(96.0, epsilon: .0001));
         expect(tester.getTopLeft(find.byKey(pKey)).dy, 12.0);
       });
     });
@@ -2010,8 +2010,8 @@ void main() {
         );
 
         // In the middle of the expanded InputDecorator.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(331.0, .0001));
-        expect(tester.getTopLeft(find.byKey(pKey)).dy, closeTo(247.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(331.0, epsilon: .0001));
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, moreOrLessEquals(247.0, epsilon: .0001));
       });
 
       testWidgets('InputDecorator tall prefix with border align top', (WidgetTester tester) async {
@@ -2041,7 +2041,7 @@ void main() {
         );
 
         // Above the center example.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(108.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(108.0, epsilon: .0001));
         // The prefix is positioned at the top of the input, so this value is
         // the same as the top aligned test without a prefix.
         expect(tester.getTopLeft(find.byKey(pKey)).dy, 24.0);
@@ -2074,8 +2074,8 @@ void main() {
         );
 
         // Below the center example.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(564.0, .0001));
-        expect(tester.getTopLeft(find.byKey(pKey)).dy, closeTo(480.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(564.0, epsilon: .0001));
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, moreOrLessEquals(480.0, epsilon: .0001));
       });
 
       testWidgets('InputDecorator tall prefix with border align double', (WidgetTester tester) async {
@@ -2105,8 +2105,8 @@ void main() {
         );
 
         // Between the top and center examples.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(354.3, .0001));
-        expect(tester.getTopLeft(find.byKey(pKey)).dy, closeTo(270.3, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(354.3, epsilon: .0001));
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, moreOrLessEquals(270.3, epsilon: .0001));
       });
     });
 
@@ -2133,7 +2133,7 @@ void main() {
 
         // The label causes the text to start slightly lower than it would
         // otherwise.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(28.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(28.0, epsilon: .0001));
       });
 
       testWidgets('align center', (WidgetTester tester) async {
@@ -2158,7 +2158,7 @@ void main() {
 
         // The label reduces the amount of space available for text, so the
         // center is slightly lower.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(298.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(298.0, epsilon: .0001));
       });
 
       testWidgets('align bottom', (WidgetTester tester) async {
@@ -2183,7 +2183,7 @@ void main() {
 
         // The label reduces the amount of space available for text, but the
         // bottom line is still in the same place.
-        expect(tester.getTopLeft(find.text(text)).dy, closeTo(568.0, .0001));
+        expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(568.0, epsilon: .0001));
       });
     });
   });

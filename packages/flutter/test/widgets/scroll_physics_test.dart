@@ -97,6 +97,26 @@ void main() {
     );
   });
 
+  test('ScrollPhysics scrolling subclasses - Creating the simulation doesn\'t alter the velocity for time 0', () {
+    final ScrollMetrics position = FixedScrollMetrics(
+      minScrollExtent: 0.0,
+      maxScrollExtent: 100.0,
+      pixels: 20.0,
+      viewportDimension: 500.0,
+      axisDirection: AxisDirection.down,
+    );
+
+    const BouncingScrollPhysics bounce = BouncingScrollPhysics();
+    const ClampingScrollPhysics clamp = ClampingScrollPhysics();
+    const PageScrollPhysics page = PageScrollPhysics();
+
+    // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
+    // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
+    expect(bounce.createBallisticSimulation(position, 1000).dx(0), moreOrLessEquals(1000));
+    expect(clamp.createBallisticSimulation(position, 1000).dx(0), moreOrLessEquals(1000));
+    expect(page.createBallisticSimulation(position, 1000).dx(0), moreOrLessEquals(1000));
+  });
+
   group('BouncingScrollPhysics test', () {
     BouncingScrollPhysics physicsUnderTest;
 
