@@ -139,7 +139,7 @@ Future<void> main() async {
 ''';
     } else {
       contents = '''
-$languageVersion
+// @dart=${languageVersion.major}.${languageVersion.minor}
 
 import 'dart:ui' as ui;
 
