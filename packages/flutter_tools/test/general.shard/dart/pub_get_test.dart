@@ -30,7 +30,7 @@ void main() {
     MockDirectory.findCache = false;
   });
 
-  testWithoutContext('check skips pub get if the package config is newer than the pubspec '
+  testWithoutContext('checkUpToDate skips pub get if the package config is newer than the pubspec '
     'and the current framework version is the same as the last version', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
     final BufferLogger logger = BufferLogger.test();
@@ -60,7 +60,7 @@ void main() {
     expect(logger.traceText, contains('Skipping pub get: version match.'));
   });
 
-  testWithoutContext('check does not skip pub get if the package config is newer than the pubspec '
+  testWithoutContext('checkUpToDate does not skip pub get if the package config is newer than the pubspec '
     'but the current framework version is not the same as the last version', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
@@ -98,7 +98,7 @@ void main() {
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
-  testWithoutContext('check does not skip pub get if the package config is newer than the pubspec '
+  testWithoutContext('checkUpToDate does not skip pub get if the package config is newer than the pubspec '
     'but the current framework version does not exist yet', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
@@ -135,7 +135,7 @@ void main() {
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
   });
 
-  testWithoutContext('check does not skip pub get if the package config does not exist', () async {
+  testWithoutContext('checkUpToDate does not skip pub get if the package config does not exist', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: const <String>[
@@ -173,7 +173,7 @@ void main() {
   });
 
 
-  testWithoutContext('check does not skip pub get if the package config is older that the pubspec', () async {
+  testWithoutContext('checkUpToDate does not skip pub get if the package config is older that the pubspec', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
         'bin/cache/dart-sdk/bin/pub',
