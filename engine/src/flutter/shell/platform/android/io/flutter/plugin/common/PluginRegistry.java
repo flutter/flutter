@@ -16,25 +16,25 @@ import io.flutter.view.FlutterView;
 import io.flutter.view.TextureRegistry;
 
 /**
- * Registry used by plugins to set up interaction with Android APIs.
+ * Container class for Android API listeners used by {@link ActivityPluginBinding}.
  *
- * <p>Flutter applications by default include an auto-generated and auto-updated plugin registrant
- * class (GeneratedPluginRegistrant) that makes use of a {@link PluginRegistry} to register
- * contributions from each plugin mentioned in the application's pubspec file. The generated
- * registrant class is, again by default, called from the application's main {@link Activity}, which
- * defaults to an instance of {@link io.flutter.app.FlutterActivity}, itself a {@link
- * PluginRegistry}.
+ * <p>This class also contains deprecated v1 embedding APIs used for plugin registration.
  *
- * @deprecated See https://flutter.dev/go/android-project-migration for migration details.
+ * <p>In v1 Android applications, an auto-generated and auto-updated plugin registrant class
+ * (GeneratedPluginRegistrant) makes use of a {@link PluginRegistry} to register contributions from
+ * each plugin mentioned in the application's pubspec file. The generated registrant class is, again
+ * by default, called from the application's main {@link Activity}, which defaults to an instance of
+ * {@link io.flutter.app.FlutterActivity}, itself a {@link PluginRegistry}.
  */
-@Deprecated
 public interface PluginRegistry {
   /**
    * Returns a {@link Registrar} for receiving the registrations pertaining to the specified plugin.
    *
    * @param pluginKey a unique String identifying the plugin; typically the fully qualified name of
    *     the plugin's main class.
+   * @deprecated See https://flutter.dev/go/android-project-migration for migration details.
    */
+  @Deprecated
   Registrar registrarFor(String pluginKey);
 
   /**
@@ -43,7 +43,9 @@ public interface PluginRegistry {
    * @param pluginKey a unique String identifying the plugin; typically the fully qualified name of
    *     the plugin's main class.
    * @return true if this registry has handed out a registrar for the specified plugin.
+   * @deprecated See https://flutter.dev/go/android-project-migration for migration details.
    */
+  @Deprecated
   boolean hasPlugin(String pluginKey);
 
   /**
@@ -56,15 +58,19 @@ public interface PluginRegistry {
    * @param pluginKey a unique String identifying the plugin; typically the fully qualified name of
    *     the plugin's main class.
    * @return the published value, possibly null.
+   * @deprecated See https://flutter.dev/go/android-project-migration for migration details.
    */
+  @Deprecated
   <T> T valuePublishedByPlugin(String pluginKey);
 
   /**
    * Receiver of registrations from a single plugin.
    *
-   * <p>This registrar is for Flutter's v1 embedding. For instructions on migrating a plugin from
-   * Flutter's v1 Android embedding to v2, visit http://flutter.dev/go/android-plugin-migration
+   * @deprecated This registrar is for Flutter's v1 embedding. For instructions on migrating a
+   *     plugin from Flutter's v1 Android embedding to v2, visit
+   *     http://flutter.dev/go/android-plugin-migration
    */
+  @Deprecated
   interface Registrar {
     /**
      * Returns the {@link Activity} that forms the plugin's operating context.
@@ -336,7 +342,10 @@ public interface PluginRegistry {
    * Delegate interface for handling an {@link Activity}'s onDestroy method being called. A plugin
    * that implements this interface can adopt the FlutterNativeView by retaining a reference and
    * returning true.
+   *
+   * @deprecated See https://flutter.dev/go/android-project-migration for migration details.
    */
+  @Deprecated
   interface ViewDestroyListener {
     boolean onViewDestroy(FlutterNativeView view);
   }
@@ -346,7 +355,10 @@ public interface PluginRegistry {
    *
    * <p>For example, an Application may use this callback interface to provide a background service
    * with a callback for calling its GeneratedPluginRegistrant.registerWith method.
+   *
+   * @deprecated See https://flutter.dev/go/android-project-migration for migration details.
    */
+  @Deprecated
   interface PluginRegistrantCallback {
     void registerWith(PluginRegistry registry);
   }
