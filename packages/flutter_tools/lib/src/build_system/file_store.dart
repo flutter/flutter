@@ -229,8 +229,9 @@ class FileStore {
     }
     final int fileBytes = file.lengthSync();
     final Md5Hash hash = Md5Hash();
+    RandomAccessFile openFile;
     try {
-      final RandomAccessFile openFile = file.openSync(mode: FileMode.read);
+      openFile = file.openSync(mode: FileMode.read);
       int bytes = 0;
       while (bytes < fileBytes) {
         final int bytesRead = openFile.readIntoSync(_readBuffer);
@@ -238,7 +239,7 @@ class FileStore {
         bytes += bytesRead;
       }
     } finally {
-      openFile.closeSync();
+      openFile?.closeSync();
     }
     final Digest digest = Digest(hash.finalize().buffer.asUint8List());
     final String currentHash = digest.toString();
