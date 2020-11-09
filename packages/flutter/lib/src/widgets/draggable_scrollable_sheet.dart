@@ -288,17 +288,17 @@ class _DraggableSheetExtent {
 class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   late _DraggableScrollableSheetScrollController _scrollController;
   late _DraggableSheetExtent _extent;
+  // The child only gets rebuilt when dependencies or the widget change.
+  // Otherwise, excessive rebuilds of the child are triggered every time the
+  // scroll extent changes, which is very expensive and does not provide any
+  // helpful information to the child. If the child needs to rebuild whenever
+  // the scroll position changes, they can always subscribe to it.
+  Widget? _child;
 
   @override
   void initState() {
     super.initState();
-    _extent = _DraggableSheetExtent(
-      minExtent: widget.minChildSize,
-      maxExtent: widget.maxChildSize,
-      initialExtent: widget.initialChildSize,
-      listener: _setExtent,
-    );
-    _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
+    _updateExtent();
   }
 
   @override
@@ -317,13 +317,33 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       }
       _extent._currentExtent.value = _extent.initialExtent;
     }
+    _child = widget.builder(context, _scrollController);
+  }
+
+  @override
+  void didUpdateWidget(DraggableScrollableSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateExtent();
+    // Call this unconditionally - the closure may not change even though it
+    // refers to things outside of its identity, e.g. a tearoff from state that
+    // has an `if (stateVariable)`.
+    _child = widget.builder(context, _scrollController);
+  }
+
+  void _updateExtent() {
+    _extent = _DraggableSheetExtent(
+      minExtent: widget.minChildSize,
+      maxExtent: widget.maxChildSize,
+      initialExtent: widget.initialChildSize,
+      listener: _setExtent,
+    );
+    _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
   }
 
   void _setExtent() {
     setState(() {
       // _extent has been updated when this is called.
     });
-
   }
 
   @override
@@ -333,7 +353,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
         _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
         final Widget sheet = FractionallySizedBox(
           heightFactor: _extent.currentExtent,
-          child: widget.builder(context, _scrollController),
+          child: _child,
           alignment: Alignment.bottomCenter,
         );
         return widget.expand ? SizedBox.expand(child: sheet) : sheet;
@@ -344,6 +364,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _child = null;
     super.dispose();
   }
 }
