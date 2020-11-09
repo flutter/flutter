@@ -414,7 +414,6 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
       <String>['Runner'],
       <String>['Debug', 'Release'],
       <String>['Runner'],
-      BufferLogger.test(),
     );
   }
 }

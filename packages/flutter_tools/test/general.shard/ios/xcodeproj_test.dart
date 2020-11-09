@@ -379,7 +379,7 @@ Information about project "Runner":
         Runner
 
 ''';
-    final XcodeProjectInfo info = XcodeProjectInfo.fromXcodeBuildOutput(output, logger);
+    final XcodeProjectInfo info = XcodeProjectInfo.fromXcodeBuildOutput(output);
     expect(info.targets, <String>['Runner']);
     expect(info.schemes, <String>['Runner']);
     expect(info.buildConfigurations, <String>['Debug', 'Release']);
@@ -404,7 +404,7 @@ Information about project "Runner":
         Paid
 
 ''';
-    final XcodeProjectInfo info = XcodeProjectInfo.fromXcodeBuildOutput(output, logger);
+    final XcodeProjectInfo info = XcodeProjectInfo.fromXcodeBuildOutput(output);
     expect(info.targets, <String>['Runner']);
     expect(info.schemes, <String>['Free', 'Paid']);
     expect(info.buildConfigurations, <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)']);
@@ -434,7 +434,7 @@ Information about project "Runner":
   });
 
   testWithoutContext('scheme for default project is Runner', () {
-    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner'], logger);
+    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner']);
 
     expect(info.schemeFor(BuildInfo.debug), 'Runner');
     expect(info.schemeFor(BuildInfo.profile), 'Runner');
@@ -443,7 +443,7 @@ Information about project "Runner":
   });
 
   testWithoutContext('build configuration for default project is matched against BuildMode', () {
-    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Profile', 'Release'], <String>['Runner'], logger);
+    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Profile', 'Release'], <String>['Runner']);
 
     expect(info.buildConfigurationFor(BuildInfo.debug, 'Runner'), 'Debug');
     expect(info.buildConfigurationFor(BuildInfo.profile, 'Runner'), 'Profile');
@@ -455,7 +455,6 @@ Information about project "Runner":
       <String>['Runner'],
       <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)'],
       <String>['Free', 'Paid'],
-      logger,
     );
 
     expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false)), 'Free');
@@ -465,44 +464,11 @@ Information about project "Runner":
     expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false)), isNull);
   });
 
-  testWithoutContext('reports default scheme error and exit', () {
-    final XcodeProjectInfo defaultInfo = XcodeProjectInfo(
-      <String>[],
-      <String>[],
-      <String>['Runner'],
-      logger,
-    );
-
-    expect(
-      () => defaultInfo.reportFlavorNotFoundAndExit(),
-      throwsToolExit(
-        message: 'The Xcode project does not define custom schemes. You cannot use the --flavor option.'
-      ),
-    );
-  });
-
-  testWithoutContext('reports custom scheme error and exit', () {
-    final XcodeProjectInfo info = XcodeProjectInfo(
-      <String>[],
-      <String>[],
-      <String>['Free', 'Paid'],
-      logger,
-    );
-
-    expect(
-     () => info.reportFlavorNotFoundAndExit(),
-      throwsToolExit(
-        message: 'You must specify a --flavor option to select one of the available schemes.'
-      ),
-    );
-  });
-
   testWithoutContext('build configuration for project with custom schemes is matched against BuildMode and flavor', () {
     final XcodeProjectInfo info = XcodeProjectInfo(
       <String>['Runner'],
       <String>['debug (free)', 'Debug paid', 'profile - Free', 'Profile-Paid', 'release - Free', 'Release-Paid'],
       <String>['Free', 'Paid'],
-      logger,
     );
 
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false), 'Free'), 'debug (free)');
@@ -516,7 +482,6 @@ Information about project "Runner":
       <String>['Runner'],
       <String>['Debug-F', 'Dbg Paid', 'Rel Free', 'Release Full'],
       <String>['Free', 'Paid'],
-      logger,
     );
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Free', treeShakeIcons: false), 'Free'), null);
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false), 'Free'), null);

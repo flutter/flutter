@@ -14,6 +14,7 @@ import '../text_field.dart';
 import '../theme.dart';
 
 import 'date_utils.dart' as utils;
+import 'input_date_picker.dart' show DateTextInputFormatter;
 
 /// Provides a pair of text fields that allow the user to enter the start and
 /// end dates that represent a range of dates.
@@ -123,6 +124,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
   String _startErrorText;
   String _endErrorText;
   bool _autoSelected = false;
+  List<TextInputFormatter> _inputFormatters;
 
   @override
   void initState() {
@@ -144,6 +146,9 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    _inputFormatters = <TextInputFormatter>[
+      DateTextInputFormatter(localizations.dateSeparator),
+    ];
     if (_startDate != null) {
       _startInputText = localizations.formatCompactDate(_startDate);
       final bool selectText = widget.autofocus && !_autoSelected;
@@ -242,6 +247,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
               labelText: widget.fieldStartLabelText ?? localizations.dateRangeStartLabel,
               errorText: _startErrorText,
             ),
+            inputFormatters: _inputFormatters,
             keyboardType: TextInputType.datetime,
             onChanged: _handleStartChanged,
             autofocus: widget.autofocus,
@@ -258,6 +264,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
               labelText: widget.fieldEndLabelText ?? localizations.dateRangeEndLabel,
               errorText: _endErrorText,
             ),
+            inputFormatters: _inputFormatters,
             keyboardType: TextInputType.datetime,
             onChanged: _handleEndChanged,
           ),

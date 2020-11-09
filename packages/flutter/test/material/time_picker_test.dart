@@ -751,7 +751,7 @@ void _testsInput() {
 
     // Invalid minute.
     await tester.enterText(find.byType(TextField).first, '8');
-    await tester.enterText(find.byType(TextField).last, '95');
+    await tester.enterText(find.byType(TextField).last, '150');
     await finishPicker(tester);
     expect(result, null);
 

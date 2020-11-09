@@ -229,16 +229,6 @@ Future<void> main() async {
         return TaskResult.failure('Failed to build editable host .app');
       }
 
-      section('Clean and pub get module');
-
-      await inDirectory(projectDir, () async {
-        await flutter('clean');
-      });
-
-      await inDirectory(projectDir, () async {
-        await flutter('pub', options: <String>['get']);
-      });
-
       section('Add to existing iOS Objective-C app');
 
       final Directory objectiveCHostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
@@ -288,23 +278,6 @@ Future<void> main() async {
       if (!existingAppBuilt) {
         return TaskResult.failure('Failed to build existing Objective-C app .app');
       }
-
-      checkFileExists(path.join(
-        objectiveCBuildDirectory.path,
-        'Host.app',
-        'Frameworks',
-        'Flutter.framework',
-        'Flutter',
-      ));
-
-      checkFileExists(path.join(
-        objectiveCBuildDirectory.path,
-        'Host.app',
-        'Frameworks',
-        'App.framework',
-        'flutter_assets',
-        'isolate_snapshot_data',
-      ));
 
       final String objectiveCAnalyticsOutput = objectiveCAnalyticsOutputFile.readAsStringSync();
       if (!objectiveCAnalyticsOutput.contains('cd24: ios')

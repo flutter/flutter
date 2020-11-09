@@ -87,7 +87,6 @@ void main() {
             <String>['Runner'],
             <String>['Debug', 'Release'],
             <String>['Runner'],
-            logger,
           ));
         }
       );
