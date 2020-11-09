@@ -210,8 +210,8 @@ class FlutterPlatformViewsController {
   std::map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>> factories_;
   std::map<int64_t, fml::scoped_nsobject<NSObject<FlutterPlatformView>>> views_;
   std::map<int64_t, fml::scoped_nsobject<FlutterTouchInterceptingView>> touch_interceptors_;
-  // Mapping a platform view ID to the top most parent view (root_view) who is a direct child to
-  // the `flutter_view_`.
+  // Mapping a platform view ID to the top most parent view (root_view) of a platform view. In
+  // |SubmitFrame|, root_views_ are added to flutter_view_ as child views.
   //
   // The platform view with the view ID is a child of the root view; If the platform view is not
   // clipped, and no clipping view is added, the root view will be the intercepting view.
