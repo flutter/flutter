@@ -229,14 +229,17 @@ class FileStore {
     }
     final int fileBytes = file.lengthSync();
     final Md5Hash hash = Md5Hash();
-    final RandomAccessFile openFile = file.openSync(mode: FileMode.read);
-    int bytes = 0;
-    while (bytes < fileBytes) {
-      final int bytesRead = openFile.readIntoSync(_readBuffer);
-      hash.addChunk(_readBuffer, bytesRead);
-      bytes += bytesRead;
+    try {
+      final RandomAccessFile openFile = file.openSync(mode: FileMode.read);
+      int bytes = 0;
+      while (bytes < fileBytes) {
+        final int bytesRead = openFile.readIntoSync(_readBuffer);
+        hash.addChunk(_readBuffer, bytesRead);
+        bytes += bytesRead;
+      }
+    } finally {
+      openFile.closeSync();
     }
-    openFile.closeSync();
     final Digest digest = Digest(hash.finalize().buffer.asUint8List());
     final String currentHash = digest.toString();
     if (currentHash != previousHash) {
