@@ -669,19 +669,122 @@ void main() {
     expect(renderModel.color, equals(darkTheme.colorScheme.onSurface));
   });
 
-  testWidgets('SnackBar should inherit some theme date from its ancestor.', (WidgetTester tester) async {
-    final ThemeData darkTheme = ThemeData.dark();
+  testWidgets('SnackBar should inherit theme date from its ancestor.', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
+      primaryColor: Colors.black,
+      primaryColorDark: Colors.black,
+      primaryColorLight: Colors.black,
+      valueIndicatorTextStyle: const TextStyle(color: Colors.black),
+    );
+
+    final ChipThemeData chipTheme = ChipThemeData.fromDefaults(
+      primaryColor: Colors.black,
+      secondaryColor: Colors.white,
+      labelStyle: const TextStyle(color: Colors.black),
+    );
+
+    const PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
+      builders: <TargetPlatform, PageTransitionsBuilder>{
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+      },
+    );
+
+    final ThemeData theme = ThemeData.raw(
+      visualDensity: const VisualDensity(),
+      primaryColor: Colors.black,
+      primaryColorBrightness: Brightness.dark,
+      primaryColorLight: Colors.black,
+      primaryColorDark: Colors.black,
+      accentColor: Colors.black,
+      accentColorBrightness: Brightness.dark,
+      canvasColor: Colors.black,
+      shadowColor: Colors.black,
+      scaffoldBackgroundColor: Colors.black,
+      bottomAppBarColor: Colors.black,
+      cardColor: Colors.black,
+      dividerColor: Colors.black,
+      focusColor: Colors.black,
+      hoverColor: Colors.black,
+      highlightColor: Colors.black,
+      splashColor: Colors.black,
+      splashFactory: InkRipple.splashFactory,
+      selectedRowColor: Colors.black,
+      unselectedWidgetColor: Colors.black,
+      disabledColor: Colors.black,
+      buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
+      toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
+      buttonColor: Colors.black,
+      secondaryHeaderColor: Colors.black,
+      textSelectionColor: Colors.black,
+      cursorColor: Colors.black,
+      textSelectionHandleColor: Colors.black,
+      backgroundColor: Colors.black,
+      dialogBackgroundColor: Colors.black,
+      indicatorColor: Colors.black,
+      hintColor: Colors.black,
+      errorColor: Colors.black,
+      toggleableActiveColor: Colors.black,
+      textTheme: ThemeData.dark().textTheme,
+      primaryTextTheme: ThemeData.dark().textTheme,
+      accentTextTheme: ThemeData.dark().textTheme,
+      inputDecorationTheme: ThemeData.dark().inputDecorationTheme.copyWith(border: const OutlineInputBorder()),
+      iconTheme: ThemeData.dark().iconTheme,
+      primaryIconTheme: ThemeData.dark().iconTheme,
+      accentIconTheme: ThemeData.dark().iconTheme,
+      sliderTheme: sliderTheme,
+      tabBarTheme: const TabBarTheme(labelColor: Colors.black),
+      tooltipTheme: const TooltipThemeData(height: 100),
+      cardTheme: const CardTheme(color: Colors.black),
+      chipTheme: chipTheme,
+      platform: TargetPlatform.iOS,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      applyElevationOverlayColor: false,
+      pageTransitionsTheme: pageTransitionTheme,
+      appBarTheme: const AppBarTheme(color: Colors.black),
+      bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
+      colorScheme: const ColorScheme.light(),
+      dialogTheme: const DialogTheme(backgroundColor: Colors.black),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
+      navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
+      typography: Typography.material2018(platform: TargetPlatform.android),
+      cupertinoOverrideTheme: null,
+      snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
+      bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),
+      popupMenuTheme: const PopupMenuThemeData(color: Colors.black),
+      bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
+      dividerTheme: const DividerThemeData(color: Colors.black),
+      buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.fixed),
+      timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
+      textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colors.red)),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.green)),
+      outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(primary: Colors.blue)),
+      textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
+      dataTableTheme: const DataTableThemeData(),
+      fixTextFieldOutlineLabel: false,
+      useTextSelectionTheme: false,
+    );
+
+    ThemeData? themeBeforeSnackBar;
+    ThemeData? themeAfterSnackBar;
     await tester.pumpWidget(
       MaterialApp(
-        theme: darkTheme,
+        theme: theme,
         home: Scaffold(
           body: Builder(
               builder: (BuildContext context) {
+                themeBeforeSnackBar = Theme.of(context);
                 return GestureDetector(
                   onTap: () {
                     Scaffold.of(context).showSnackBar(
                       SnackBar(
-                        content: const Text('I am a snack bar.'),
+                        content: Builder(
+                          builder: (BuildContext context) {
+                            themeAfterSnackBar = Theme.of(context);
+                            return const Text('I am a snack bar.');
+                          },
+                        ),
                         duration: const Duration(seconds: 2),
                         action: SnackBarAction(
                           label: 'ACTION',
@@ -702,10 +805,13 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
 
-    final RenderPhysicalModel renderModel = tester.renderObject(
-        find.widgetWithText(Material, 'I am a snack bar.').first
-    );
-    expect(renderModel.color, equals(darkTheme.colorScheme.onSurface));
+    final ThemeData comparedTheme = themeBeforeSnackBar!.copyWith(
+      brightness: themeAfterSnackBar!.brightness,
+      backgroundColor: themeAfterSnackBar!.backgroundColor,
+      colorScheme: themeAfterSnackBar!.colorScheme,
+    ); // Fields replaced by SnackBar.
+
+    expect(comparedTheme == themeAfterSnackBar, true);
   });
 
   testWidgets('Snackbar margin can be customized', (WidgetTester tester) async {

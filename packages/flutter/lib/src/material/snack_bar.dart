@@ -480,7 +480,6 @@ class _SnackBarState extends State<SnackBar> {
         onError: colorScheme.error,
         brightness: brightness,
       ),
-      snackBarTheme: snackBarTheme,
     );
 
     final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? ThemeData(brightness: brightness,).textTheme.subtitle1;
