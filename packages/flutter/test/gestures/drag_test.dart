@@ -1151,4 +1151,75 @@ void main() {
       logs.clear();
     },
   );
+
+  testGesture(
+    'On multiple pointers, the last tracking pointer can be rejected by [resolvePointer] when the '
+    'other pointer already accepted the VerticalDragGestureRecognizer',
+    (GestureTester tester) {
+      // Regressing test for https://github.com/flutter/flutter/issues/68373
+      final List<String> logs = <String>[];
+      final VerticalDragGestureRecognizer drag = VerticalDragGestureRecognizer()
+        ..onDown = (DragDownDetails details) { logs.add('downD'); }
+        ..onStart = (DragStartDetails details) { logs.add('startD'); }
+        ..onUpdate = (DragUpdateDetails details) { logs.add('updateD'); }
+        ..onEnd = (DragEndDetails details) { logs.add('endD'); }
+        ..onCancel = () { logs.add('cancelD'); };
+      // Competitor
+      final TapGestureRecognizer tap = TapGestureRecognizer()
+        ..onTapDown = (TapDownDetails details) { logs.add('downT'); }
+        ..onTapUp = (TapUpDetails details) { logs.add('upT'); }
+        ..onTapCancel = () {};
+      addTearDown(tap.dispose);
+      addTearDown(drag.dispose);
+
+      final TestPointer pointer1 = TestPointer(1, PointerDeviceKind.touch);
+      final TestPointer pointer2 = TestPointer(2, PointerDeviceKind.touch);
+      final TestPointer pointer3 = TestPointer(3, PointerDeviceKind.touch);
+      final TestPointer pointer4 = TestPointer(4, PointerDeviceKind.touch);
+
+      final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
+      final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 11.0));
+      final PointerDownEvent down3 = pointer3.down(const Offset(12.0, 12.0));
+      final PointerDownEvent down4 = pointer4.down(const Offset(13.0, 13.0));
+
+      tap.addPointer(down1);
+      drag.addPointer(down1);
+      tester.closeArena(pointer1.pointer);
+      tester.route(down1);
+      expect(logs, <String>['downD']);
+      logs.clear();
+
+      tap.addPointer(down2);
+      drag.addPointer(down2);
+      tester.closeArena(pointer2.pointer);
+      tester.route(down2);
+      expect(logs, <String>[]);
+
+      tap.addPointer(down3);
+      drag.addPointer(down3);
+      tester.closeArena(pointer3.pointer);
+      tester.route(down3);
+      expect(logs, <String>[]);
+
+      drag.addPointer(down4);
+      tester.closeArena(pointer4.pointer);
+      tester.route(down4);
+      expect(logs, <String>['startD']);
+      logs.clear();
+
+      tester.route(pointer2.up());
+      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      expect(logs, <String>[]);
+
+      tester.route(pointer4.cancel());
+      expect(logs, <String>[]);
+
+      tester.route(pointer3.cancel());
+      expect(logs, <String>[]);
+
+      tester.route(pointer1.cancel());
+      expect(logs, <String>['endD']);
+      logs.clear();
+    },
+  );
 }

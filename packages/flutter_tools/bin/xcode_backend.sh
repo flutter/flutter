@@ -244,7 +244,7 @@ LipoExecutable() {
         all_executables+=("${output}")
       else
         echo "Failed to extract ${arch} for ${executable}. Running lipo -info:"
-        lipo -info "${executable}"
+        RunCommand lipo -info "${executable}"
         exit 1
       fi
     fi
@@ -254,10 +254,10 @@ LipoExecutable() {
   # Skip this step for non-fat executables.
   if [[ ${#all_executables[@]} > 0 ]]; then
     local merged="${executable}_merged"
-    lipo -output "${merged}" -create "${all_executables[@]}"
+    RunCommand lipo -output "${merged}" -create "${all_executables[@]}"
 
-    cp -f -- "${merged}" "${executable}" > /dev/null
-    rm -f -- "${merged}" "${all_executables[@]}"
+    RunCommand cp -f -- "${merged}" "${executable}" > /dev/null
+    RunCommand rm -f -- "${merged}" "${all_executables[@]}"
   fi
 }
 

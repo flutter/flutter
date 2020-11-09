@@ -47,7 +47,7 @@ class _MessageHandler {
 }
 
 void main() {
-  enableFlutterDriverExtension(handler: _MessageHandler());
+  enableFlutterDriverExtension(handler: _MessageHandler().call);
   // As in lib/main.dart: overriding https://github.com/flutter/flutter/issues/13736
   // for better visual effect at the cost of performance.
   runApp(const GalleryApp(testMode: true));

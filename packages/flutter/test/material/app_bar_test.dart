@@ -1769,6 +1769,7 @@ void main() {
     ));
 
     expect(darkTheme.primaryColorBrightness, Brightness.dark);
+    expect(darkTheme.colorScheme.brightness, Brightness.dark);
     expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
       statusBarBrightness: Brightness.dark,
       statusBarIconBrightness: Brightness.light,
@@ -1777,14 +1778,17 @@ void main() {
 
   testWidgets('AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
     final ThemeData lightTheme = ThemeData(primaryColor: Colors.white);
-    await tester.pumpWidget(MaterialApp(
-      theme: lightTheme,
-      home: Scaffold(
-        appBar: AppBar(title: const Text('test')),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: lightTheme,
+        home: Scaffold(
+          appBar: AppBar(title: const Text('test')),
+        ),
       ),
-    ));
+    );
 
     expect(lightTheme.primaryColorBrightness, Brightness.light);
+    expect(lightTheme.colorScheme.brightness, Brightness.light);
     expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
       statusBarBrightness: Brightness.light,
       statusBarIconBrightness: Brightness.dark,

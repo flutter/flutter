@@ -3600,6 +3600,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     SemanticsHintOverrides? hintOverrides,
     TextDirection? textDirection,
     SemanticsSortKey? sortKey,
+    SemanticsTag? tagForChildren,
     VoidCallback? onTap,
     VoidCallback? onDismiss,
     VoidCallback? onLongPress,
@@ -3655,6 +3656,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _hintOverrides = hintOverrides,
        _textDirection = textDirection,
        _sortKey = sortKey,
+       _tagForChildren = tagForChildren,
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onScrollLeft = onScrollLeft,
@@ -4070,6 +4072,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     _sortKey = value;
     markNeedsSemanticsUpdate();
+  }
+
+  /// Adds a semenatics tag to the semantics subtree.
+  SemanticsTag? get tagForChildren => _tagForChildren;
+  SemanticsTag? _tagForChildren;
+  set tagForChildren(SemanticsTag? value) {
+    if (_tagForChildren == value)
+      return;
+    markNeedsSemanticsUpdate();
+    _tagForChildren = value;
   }
 
   /// The handler for [SemanticsAction.tap].
@@ -4549,6 +4561,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.textDirection = textDirection;
     if (sortKey != null)
       config.sortKey = sortKey;
+    if (tagForChildren != null)
+      config.addTagForChildren(tagForChildren!);
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.
