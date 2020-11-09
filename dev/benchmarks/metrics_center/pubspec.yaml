@@ -1,5 +1,8 @@
 name: metrics_center
 
+environment:
+  sdk: '>=2.10.0 <3.0.0'
+
 dependencies:
   args: 1.6.0
   crypto: 2.1.5
