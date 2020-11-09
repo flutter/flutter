@@ -669,7 +669,7 @@ void main() {
     expect(renderModel.color, equals(darkTheme.colorScheme.onSurface));
   });
 
-  testWidgets('SnackBar should inherit theme date from its ancestor.', (WidgetTester tester) async {
+  testWidgets('SnackBar should inherit theme data from its ancestor.', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
