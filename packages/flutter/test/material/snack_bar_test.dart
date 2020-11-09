@@ -669,6 +669,45 @@ void main() {
     expect(renderModel.color, equals(darkTheme.colorScheme.onSurface));
   });
 
+  testWidgets('SnackBar should inherit some theme date from its ancestor.', (WidgetTester tester) async {
+    final ThemeData darkTheme = ThemeData.dark();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: darkTheme,
+        home: Scaffold(
+          body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('I am a snack bar.'),
+                        duration: const Duration(seconds: 2),
+                        action: SnackBarAction(
+                          label: 'ACTION',
+                          onPressed: () { },
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final RenderPhysicalModel renderModel = tester.renderObject(
+        find.widgetWithText(Material, 'I am a snack bar.').first
+    );
+    expect(renderModel.color, equals(darkTheme.colorScheme.onSurface));
+  });
+
   testWidgets('Snackbar margin can be customized', (WidgetTester tester) async {
     const double padding = 20.0;
     await tester.pumpWidget(

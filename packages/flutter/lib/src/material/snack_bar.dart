@@ -460,7 +460,7 @@ class _SnackBarState extends State<SnackBar> {
     final Color themeBackgroundColor = isThemeDark
       ? colorScheme.onSurface
       : Color.alphaBlend(colorScheme.onSurface.withOpacity(0.80), colorScheme.surface);
-    final ThemeData inverseTheme = ThemeData(
+    final ThemeData inverseTheme = theme.copyWith(
       brightness: brightness,
       backgroundColor: themeBackgroundColor,
       colorScheme: ColorScheme(
@@ -483,7 +483,7 @@ class _SnackBarState extends State<SnackBar> {
       snackBarTheme: snackBarTheme,
     );
 
-    final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? inverseTheme.textTheme.subtitle1;
+    final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? ThemeData(brightness: brightness,).textTheme.subtitle1;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
