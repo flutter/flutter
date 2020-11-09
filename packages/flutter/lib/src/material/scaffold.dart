@@ -273,10 +273,42 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     super.didChangeDependencies();
   }
 
-  void _register(ScaffoldState scaffold) {
-    _scaffolds.add(scaffold);
+  void _register(ScaffoldState newScaffold) {
+    // bool nestedScaffoldsDetected = false;
+    // Check to see if this Scaffold is a child of any _scaffolds the messenger
+    // is currently managing.
+    final ScaffoldState? parent = Scaffold.maybeOf(newScaffold.context);
+    // if (_scaffolds.contains(parent))
+      // nestedScaffoldsDetected = true;
+    // // Check if the registering Scaffold is a parent of any _scaffolds
+    // for (final ScaffoldState registeredScaffold in _scaffolds) {
+    //   final ScaffoldState? parent = Scaffold.maybeOf(registeredScaffold.context);
+    //   if (newScaffold == parent)
+    //     nestedScaffoldsDetected = true;
+    // }
+
+    assert(() {
+      if (_scaffolds.contains(parent)) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Nested Scaffolds have registered with the ScaffoldMessenger.'),
+          ErrorDescription(
+            'If nested Scaffolds were to share the same ScaffoldMessenger, then '
+            'all would receive a SnackBar at the same time, resulting in multiple '
+            'SnackBars in your UI.'
+          ),
+          ErrorHint(
+            'This is typically resolved by putting a ScaffoldMessenger in '
+            'between the levels of nested Scaffolds. Doing so will set a separate '
+            'SnackBar scope for these Scaffolds.'
+          ),
+        ]);
+      }
+      return true;
+    }());
+
+    _scaffolds.add(newScaffold);
     if (_snackBars.isNotEmpty) {
-      scaffold._updateSnackBar();
+      newScaffold._updateSnackBar();
     }
   }
 
