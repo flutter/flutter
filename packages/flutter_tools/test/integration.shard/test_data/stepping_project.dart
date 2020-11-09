@@ -8,6 +8,8 @@ class SteppingProject extends Project {
   @override
   final String pubspec = '''
   name: test
+  environment:
+    sdk: '>=2.10.0 <3.0.0'
   dependencies:
     flutter:
       sdk: flutter
