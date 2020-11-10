@@ -566,39 +566,29 @@ class _AppBarState extends State<AppBar> {
 
     final double toolbarHeight = widget.toolbarHeight ?? kToolbarHeight;
 
-<<<<<<< HEAD
-    IconThemeData overallIconTheme =
-        widget.iconTheme ?? appBarTheme.iconTheme ?? theme.primaryIconTheme;
+    final Color backgroundColor = widget.backgroundColor ??
+        appBarTheme.color ??
+        (colorScheme.brightness == Brightness.dark
+            ? colorScheme.surface
+            : colorScheme.primary);
+    final Color foregroundColor = widget.foregroundColor ??
+        appBarTheme.foregroundColor ??
+        (colorScheme.brightness == Brightness.dark
+            ? colorScheme.onSurface
+            : colorScheme.onPrimary);
+
+    IconThemeData overallIconTheme = widget.iconTheme ??
+        appBarTheme.iconTheme ??
+        theme.iconTheme.copyWith(color: foregroundColor);
     IconThemeData actionsIconTheme = widget.actionsIconTheme ??
         appBarTheme.actionsIconTheme ??
         overallIconTheme;
     TextStyle? centerStyle = widget.textTheme?.headline6 ??
         appBarTheme.textTheme?.headline6 ??
-        theme.primaryTextTheme.headline6;
+        theme.primaryTextTheme.headline6?.copyWith(color: foregroundColor);
     TextStyle? sideStyle = widget.textTheme?.bodyText2 ??
         appBarTheme.textTheme?.bodyText2 ??
-        theme.primaryTextTheme.bodyText2;
-=======
-    final Color backgroundColor = widget.backgroundColor
-      ?? appBarTheme.color
-      ?? (colorScheme.brightness == Brightness.dark ? colorScheme.surface : colorScheme.primary);
-    final Color foregroundColor = widget.foregroundColor
-      ?? appBarTheme.foregroundColor
-      ?? (colorScheme.brightness == Brightness.dark ? colorScheme.onSurface : colorScheme.onPrimary);
-
-    IconThemeData overallIconTheme = widget.iconTheme
-      ?? appBarTheme.iconTheme
-      ?? theme.iconTheme.copyWith(color: foregroundColor);
-    IconThemeData actionsIconTheme = widget.actionsIconTheme
-      ?? appBarTheme.actionsIconTheme
-      ?? overallIconTheme;
-    TextStyle? centerStyle = widget.textTheme?.headline6
-      ?? appBarTheme.textTheme?.headline6
-      ?? theme.primaryTextTheme.headline6?.copyWith(color: foregroundColor);
-    TextStyle? sideStyle = widget.textTheme?.bodyText2
-      ?? appBarTheme.textTheme?.bodyText2
-      ?? theme.primaryTextTheme.bodyText2?.copyWith(color: foregroundColor);
->>>>>>> fb6337158920085c6b4c8dc52ef4420514058598
+        theme.primaryTextTheme.bodyText2?.copyWith(color: foregroundColor);
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity =
@@ -611,17 +601,11 @@ class _AppBarState extends State<AppBar> {
         sideStyle =
             sideStyle!.copyWith(color: sideStyle.color!.withOpacity(opacity));
       overallIconTheme = overallIconTheme.copyWith(
-<<<<<<< HEAD
-          opacity: opacity * (overallIconTheme.opacity ?? 1.0));
-      actionsIconTheme = actionsIconTheme.copyWith(
-          opacity: opacity * (actionsIconTheme.opacity ?? 1.0));
-=======
         opacity: opacity * (overallIconTheme.opacity ?? 1.0),
       );
       actionsIconTheme = actionsIconTheme.copyWith(
         opacity: opacity * (actionsIconTheme.opacity ?? 1.0),
       );
->>>>>>> fb6337158920085c6b4c8dc52ef4420514058598
     }
 
     Widget? leading = widget.leading;
@@ -798,45 +782,23 @@ class _AppBarState extends State<AppBar> {
         ],
       );
     }
-<<<<<<< HEAD
-    final Brightness brightness = widget.brightness ??
-        appBarTheme.brightness ??
-        theme.primaryColorBrightness;
+
+    final Brightness brightness =
+        widget.brightness ?? appBarTheme.brightness ?? colorScheme.brightness;
     final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
         ? SystemUiOverlayStyle.light
         : SystemUiOverlayStyle.dark;
-
-=======
-
-    final Brightness brightness = widget.brightness
-      ?? appBarTheme.brightness
-      ?? colorScheme.brightness;
-    final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
-      ? SystemUiOverlayStyle.light
-      : SystemUiOverlayStyle.dark;
->>>>>>> fb6337158920085c6b4c8dc52ef4420514058598
     return Semantics(
       container: true,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
         child: Material(
-<<<<<<< HEAD
-          color:
-              widget.backgroundColor ?? appBarTheme.color ?? theme.primaryColor,
+          color: backgroundColor,
           elevation:
               widget.elevation ?? appBarTheme.elevation ?? _defaultElevation,
           shadowColor: widget.shadowColor ??
               appBarTheme.shadowColor ??
               _defaultShadowColor,
-=======
-          color: backgroundColor,
-          elevation: widget.elevation
-            ?? appBarTheme.elevation
-            ?? _defaultElevation,
-          shadowColor: widget.shadowColor
-            ?? appBarTheme.shadowColor
-            ?? _defaultShadowColor,
->>>>>>> fb6337158920085c6b4c8dc52ef4420514058598
           shape: widget.shape,
           child: Semantics(
             explicitChildNodes: true,
@@ -1148,7 +1110,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///   const MyApp({Key key}) : super(key: key);
 ///
 ///   @override
-/// State<StatefulWidget> createState() => _MyAppState();
+///   State<StatefulWidget> createState() => _MyAppState();
 /// }
 /// class _MyAppState extends State<MyApp> {
 ///   bool _pinned = true;
