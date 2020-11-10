@@ -714,6 +714,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   /// The node this scope will use for its root [FocusScope] widget.
   final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: '$_ModalScopeState Focus Scope');
+  final ScrollController primaryScrollController = ScrollController();
 
   @override
   void initState() {
@@ -795,7 +796,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
             child: Actions(
               actions: _actionMap,
               child: PrimaryScrollController(
-                controller: ScrollController(),
+                controller: primaryScrollController,
                 child: FocusScope(
                   node: focusScopeNode, // immutable
                   child: RepaintBoundary(

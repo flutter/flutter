@@ -20,13 +20,13 @@ import 'scroll_controller.dart';
 /// Another default behavior handled by the PrimaryScrollController is default
 /// [ScrollAction]s. If a ScrollAction is not handled by an otherwise focused
 /// part of the application, the ScrollAction will be evaluated using the scroll
-/// view associated with this ScrollController, for example, when executing
+/// view associated with a PrimaryScrollController, for example, when executing
 /// [Shortcuts] key events like page up and down.
 ///
 /// See also:
 ///   * [ScrollAction], an [Action] that scrolls the [Scrollable] that encloses
-///     the current [primaryFocus] or attached to the PrimaryScrollController.
-///   * [Shortcuts], a widget that establishes an [ShortcutManager] to be used
+///     the current [primaryFocus] or is attached to the PrimaryScrollController.
+///   * [Shortcuts], a widget that establishes a [ShortcutManager] to be used
 ///     by its descendants when invoking an [Action] via a keyboard key
 ///     combination that maps to an [Intent].
 class PrimaryScrollController extends InheritedWidget {

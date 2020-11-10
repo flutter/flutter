@@ -2670,7 +2670,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // iOS FEATURES - status bar tap, back gesture
 
   // On iOS, tapping the status bar scrolls the app's primary scrollable to the
-  // top. We implement this by providing a primary scroll controller and
+  // top. We implement this by looking up the  primary scroll controller and
   // scrolling it to the top when tapped.
   void _handleStatusBarTap() {
     final ScrollController? _primaryScrollController = PrimaryScrollController.of(context);
