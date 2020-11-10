@@ -897,5 +897,14 @@ class FakeCache implements Cache {
   }
 
   @override
-  void clearStampFiles() {}
+  void clearStampFiles() { }
+
+  @override
+  void checkLockAcquired() { }
+
+  @override
+  Future<void> lock() async { }
+
+  @override
+  void releaseLock() { }
 }

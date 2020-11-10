@@ -22,9 +22,6 @@ import 'assets.dart';
 import 'common.dart';
 import 'localizations.dart';
 
-/// Whether web builds should call the platform initialization logic.
-const String kInitializePlatform = 'InitializePlatform';
-
 /// Whether the application has web plugins.
 const String kHasWebPlugins = 'HasWebPlugins';
 
@@ -89,7 +86,6 @@ class WebEntrypointTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final String targetFile = environment.defines[kTargetFile];
-    final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
     // TODO(jonahwilliams): support configuration of this file.
@@ -99,10 +95,10 @@ class WebEntrypointTarget extends Target {
       logger: environment.logger,
     );
     final FlutterProject flutterProject = FlutterProject.current();
-    final String languageVersion = determineLanguageVersion(
+    final LanguageVersion languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
-    ) ?? '';
+    );
 
     // Use the PackageConfig to find the correct package-scheme import path
     // for the user application. If the application has a mix of package-scheme
@@ -126,7 +122,7 @@ class WebEntrypointTarget extends Target {
       final String generatedImport = packageConfig.toPackageUri(generatedUri)?.toString()
         ?? generatedUri.toString();
       contents = '''
-$languageVersion
+// @dart=${languageVersion.major}.${languageVersion.minor}
 
 import 'dart:ui' as ui;
 
@@ -137,24 +133,20 @@ import '$mainImport' as entrypoint;
 
 Future<void> main() async {
   registerPlugins(webPluginRegistry);
-  if ($shouldInitializePlatform) {
-    await ui.webOnlyInitializePlatform();
-  }
+  await ui.webOnlyInitializePlatform();
   entrypoint.main();
 }
 ''';
     } else {
       contents = '''
-$languageVersion
+// @dart=${languageVersion.major}.${languageVersion.minor}
 
 import 'dart:ui' as ui;
 
 import '$mainImport' as entrypoint;
 
 Future<void> main() async {
-  if ($shouldInitializePlatform) {
-    await ui.webOnlyInitializePlatform();
-  }
+  await ui.webOnlyInitializePlatform();
   entrypoint.main();
 }
 ''';
@@ -183,7 +175,7 @@ class Dart2JSTarget extends Target {
     Source.artifact(Artifact.dart2jsSnapshot),
     Source.artifact(Artifact.engineDartBinary),
     Source.pattern('{BUILD_DIR}/main.dart'),
-    Source.pattern('{PROJECT_DIR}/.packages'),
+    Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
   ];
 
   @override

@@ -484,7 +484,7 @@ class FlutterVersion {
   /// Returns null if the cached version is out-of-date or missing, and we are
   /// unable to reach the server to get the latest version.
   Future<DateTime> _getLatestAvailableFlutterDate() async {
-    Cache.checkLockAcquired();
+    globals.cache.checkLockAcquired();
     final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load();
 
     if (versionCheckStamp.lastTimeVersionWasChecked != null) {
@@ -779,7 +779,7 @@ class GitTagVersion {
     // recent tag and number of commits past.
     return parse(
       _runGit(
-        'git describe --match *.*.* --first-parent --long --tags',
+        'git describe --match *.*.* --long --tags',
         processUtils,
         workingDirectory,
       )

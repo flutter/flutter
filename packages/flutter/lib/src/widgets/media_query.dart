@@ -9,6 +9,7 @@ import 'dart:ui' show Brightness;
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 
 /// Whether in portrait or landscape.
@@ -85,7 +86,7 @@ class MediaQueryData {
   /// Creates data for a media query with explicit values.
   ///
   /// Consider using [MediaQueryData.fromWindow] to create data based on a
-  /// [Window].
+  /// [dart:ui.PlatformDispatcher].
   const MediaQueryData({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
@@ -123,8 +124,9 @@ class MediaQueryData {
   /// If you use this, you should ensure that you also register for
   /// notifications so that you can update your [MediaQueryData] when the
   /// window's metrics change. For example, see
-  /// [WidgetsBindingObserver.didChangeMetrics] or [Window.onMetricsChanged].
-  MediaQueryData.fromWindow(ui.Window window)
+  /// [WidgetsBindingObserver.didChangeMetrics] or
+  /// [dart:ui.PlatformDispatcher.onMetricsChanged].
+  MediaQueryData.fromWindow(ui.SingletonFlutterWindow window)
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
@@ -307,7 +309,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.accessibilityFeatures], where the setting originates.
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting originates.
   final bool accessibleNavigation;
 
   /// Whether the device is inverting the colors of the platform.
@@ -316,7 +318,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.accessibilityFeatures], where the setting originates.
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
   final bool invertColors;
 
   /// Whether the user requested a high contrast between foreground and background
@@ -331,7 +334,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.accessibilityFeatures], where the setting originates.
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
   final bool disableAnimations;
 
   /// Whether the platform is requesting that text be drawn with a bold font
@@ -339,7 +343,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.accessibilityFeatures], where the setting originates.
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
   final bool boldText;
 
   /// Describes the navigation mode requested by the platform.
@@ -683,7 +688,7 @@ class MediaQuery extends InheritedWidget {
   }) {
     return MediaQuery(
       key: key,
-      data: MediaQuery.of(context)!.removePadding(
+      data: MediaQuery.of(context).removePadding(
         removeLeft: removeLeft,
         removeTop: removeTop,
         removeRight: removeRight,
@@ -728,7 +733,7 @@ class MediaQuery extends InheritedWidget {
   }) {
     return MediaQuery(
       key: key,
-      data: MediaQuery.of(context)!.removeViewInsets(
+      data: MediaQuery.of(context).removeViewInsets(
         removeLeft: removeLeft,
         removeTop: removeTop,
         removeRight: removeRight,
@@ -772,7 +777,7 @@ class MediaQuery extends InheritedWidget {
   }) {
     return MediaQuery(
       key: key,
-      data: MediaQuery.of(context)!.removeViewPadding(
+      data: MediaQuery.of(context).removeViewPadding(
         removeLeft: removeLeft,
         removeTop: removeTop,
         removeRight: removeRight,
@@ -791,9 +796,10 @@ class MediaQuery extends InheritedWidget {
   /// The data from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// You can use this function to query the size an orientation of the screen.
-  /// When that information changes, your widget will be scheduled to be
-  /// rebuilt, keeping your widget up-to-date.
+  /// You can use this function to query the size and orientation of the screen,
+  /// as well as other media parameters (see [MediaQueryData] for more
+  /// examples). When that information changes, your widget will be scheduled to
+  /// be rebuilt, keeping your widget up-to-date.
   ///
   /// Typical usage is as follows:
   ///
@@ -801,35 +807,56 @@ class MediaQuery extends InheritedWidget {
   /// MediaQueryData media = MediaQuery.of(context);
   /// ```
   ///
-  /// If there is no [MediaQuery] in scope, then this will throw an exception.
-  /// To return null if there is no [MediaQuery], then pass `nullOk: true`.
+  /// If there is no [MediaQuery] in scope, this will throw a [TypeError]
+  /// exception in release builds, and throw a descriptive [FlutterError] in
+  /// debug builds.
   ///
-  /// If you use this from a widget (e.g. in its build function), consider
-  /// calling [debugCheckHasMediaQuery].
-  static MediaQueryData? of(BuildContext context, { bool nullOk = false }) {
+  /// See also:
+  ///
+  ///  * [maybeOf], which doesn't throw or assert if it doesn't find a
+  ///    [MediaQuery] ancestor, it returns null instead.
+  static MediaQueryData of(BuildContext context) {
     assert(context != null);
-    assert(nullOk != null);
-    final MediaQuery? query = context.dependOnInheritedWidgetOfExactType<MediaQuery>();
-    if (query != null)
-      return query.data;
-    if (nullOk)
-      return null;
-    throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary('MediaQuery.of() called with a context that does not contain a MediaQuery.'),
-      ErrorDescription(
-        'No MediaQuery ancestor could be found starting from the context that was passed '
-        'to MediaQuery.of(). This can happen because you do not have a WidgetsApp or '
-        'MaterialApp widget (those widgets introduce a MediaQuery), or it can happen '
-        'if the context you use comes from a widget above those widgets.'
-      ),
-      context.describeElement('The context used was')
-    ]);
+    assert(debugCheckHasMediaQuery(context));
+    return context.dependOnInheritedWidgetOfExactType<MediaQuery>()!.data;
+  }
+
+  /// The data from the closest instance of this class that encloses the given
+  /// context, if any.
+  ///
+  /// Use this function if you want to allow situations where no [MediaQuery] is
+  /// in scope. Prefer using [MediaQuery.of] in situations where a media query
+  /// is always expected to exist.
+  ///
+  /// If there is no [MediaQuery] in scope, then this function will return null.
+  ///
+  /// You can use this function to query the size and orientation of the screen,
+  /// as well as other media parameters (see [MediaQueryData] for more
+  /// examples). When that information changes, your widget will be scheduled to
+  /// be rebuilt, keeping your widget up-to-date.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
+  /// if (mediaQuery == null) {
+  ///   // Do something else instead.
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [of], which will throw if it doesn't find a [MediaQuery] ancestor,
+  ///    instead of returning null.
+  static MediaQueryData? maybeOf(BuildContext context) {
+    assert(context != null);
+    return context.dependOnInheritedWidgetOfExactType<MediaQuery>()?.data;
   }
 
   /// Returns textScaleFactor for the nearest MediaQuery ancestor or 1.0, if
   /// no such ancestor exists.
   static double textScaleFactorOf(BuildContext context) {
-    return MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
+    return MediaQuery.maybeOf(context)?.textScaleFactor ?? 1.0;
   }
 
   /// Returns platformBrightness for the nearest MediaQuery ancestor or
@@ -838,7 +865,7 @@ class MediaQuery extends InheritedWidget {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// any property of the ancestor [MediaQuery] changes.
   static Brightness platformBrightnessOf(BuildContext context) {
-    return MediaQuery.of(context, nullOk: true)?.platformBrightness ?? Brightness.light;
+    return MediaQuery.maybeOf(context)?.platformBrightness ?? Brightness.light;
   }
 
   /// Returns highContrast for the nearest MediaQuery ancestor or false, if no
@@ -849,13 +876,13 @@ class MediaQuery extends InheritedWidget {
   ///  * [MediaQueryData.highContrast], which indicates the platform's
   ///    desire to increase contrast.
   static bool highContrastOf(BuildContext context) {
-    return MediaQuery.of(context, nullOk: true)?.highContrast ?? false;
+    return MediaQuery.maybeOf(context)?.highContrast ?? false;
   }
 
   /// Returns the boldText accessibility setting for the nearest MediaQuery
   /// ancestor, or false if no such ancestor exists.
   static bool boldTextOverride(BuildContext context) {
-    return MediaQuery.of(context, nullOk: true)?.boldText ?? false;
+    return MediaQuery.maybeOf(context)?.boldText ?? false;
   }
 
   @override

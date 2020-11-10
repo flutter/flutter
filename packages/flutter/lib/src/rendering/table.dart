@@ -14,6 +14,8 @@ import 'table_border.dart';
 /// Parent data used by [RenderTable] for its children.
 class TableCellParentData extends BoxParentData {
   /// Where this cell should be placed vertically.
+  ///
+  /// When using [TableCellVerticalAlignment.baseline], the text baseline must be set as well.
   TableCellVerticalAlignment? verticalAlignment;
 
   /// The column that the child was in the last time it was laid out.
@@ -390,7 +392,7 @@ class RenderTable extends RenderBox {
        _textBaseline = textBaseline,
        _defaultVerticalAlignment = defaultVerticalAlignment,
        _configuration = configuration {
-    _children = <RenderBox>[]..length = _columns * _rows;
+    _children = <RenderBox?>[]..length = _columns * _rows;
     this.rowDecorations = rowDecorations; // must use setter to initialize box painters array
     children?.forEach(addRow);
   }
@@ -645,7 +647,7 @@ class RenderTable extends RenderBox {
     // update our internal values
     _columns = columns;
     _rows = cells.length ~/ columns;
-    _children = cells.toList();
+    _children = List<RenderBox?>.from(cells);
     assert(_children.length == rows * columns);
     markNeedsLayout();
   }
@@ -1049,7 +1051,7 @@ class RenderTable extends RenderBox {
           childParentData.y = y;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
-              assert(textBaseline != null);
+              assert(textBaseline != null, 'An explicit textBaseline is required when using baseline alignment.');
               child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
               final double? childBaseline = child.getDistanceToBaseline(textBaseline!, onlyReal: true);
               if (childBaseline != null) {

@@ -230,14 +230,14 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// Set the [value] to empty.
   ///
   /// After calling this function, [text] will be the empty string and the
-  /// selection will be invalid.
+  /// selection will be collapsed at zero offset.
   ///
   /// Calling this will notify all the listeners of this [TextEditingController]
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   void clear() {
-    value = TextEditingValue.empty;
+    value = const TextEditingValue(selection: TextSelection.collapsed(offset: 0));
   }
 
   /// Set the composing region to an empty range.
@@ -610,13 +610,13 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool autocorrect;
 
-  /// {@macro flutter.services.textInput.smartDashesType}
+  /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
   final SmartDashesType smartDashesType;
 
-  /// {@macro flutter.services.textInput.smartQuotesType}
+  /// {@macro flutter.services.TextInputConfiguration.smartQuotesType}
   final SmartQuotesType smartQuotesType;
 
-  /// {@macro flutter.services.textInput.enableSuggestions}
+  /// {@macro flutter.services.TextInputConfiguration.enableSuggestions}
   final bool enableSuggestions;
 
   /// The text style to use for the editable text.
@@ -875,6 +875,7 @@ class EditableText extends StatefulWidget {
   /// value is set to the ambient [ThemeData.textSelectionColor].
   final Color? selectionColor;
 
+  /// {@template flutter.widgets.editableText.selectionControls}
   /// Optional delegate for building the text selection handles and toolbar.
   ///
   /// The [EditableText] widget used on its own will not trigger the display
@@ -889,6 +890,7 @@ class EditableText extends StatefulWidget {
   ///  * [TextField], a Material Design themed wrapper of [EditableText], which
   ///    shows the selection toolbar upon appropriate user events based on the
   ///    user's platform set in [ThemeData.platform].
+  /// {@endtemplate}
   final TextSelectionControls? selectionControls;
 
   /// {@template flutter.widgets.editableText.keyboardType}
@@ -972,7 +974,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// ## Handling emojis and other complex characters
-  /// {@template flutter.widgets.editableText.complexCharacters}
+  /// {@template flutter.widgets.EditableText.onChanged}
   /// It's important to always use
   /// [characters](https://pub.dev/packages/characters) when dealing with user
   /// input text that may contain complex characters. This will ensure that
@@ -1019,67 +1021,24 @@ class EditableText extends StatefulWidget {
   /// Called when the user indicates that they are done editing the text in the
   /// field.
   /// {@endtemplate}
-  ///
-  /// {@tool dartpad --template=stateful_widget_material}
-  /// When a non-completion action is pressed, such as "next" or "previous", it
-  /// is often desirable to move the focus to the next or previous field.  To do
-  /// this, handle it as in this example, by calling [FocusNode.nextFocus] in
-  /// the `onFieldSubmitted` callback of [TextFormField]. ([TextFormField] wraps
-  /// [EditableText] internally, and uses the value of `onFieldSubmitted` as its
-  /// [onSubmitted]).
-  ///
-  /// ```dart
-  /// FocusScopeNode _focusScopeNode = FocusScopeNode();
-  /// final _controller1 = TextEditingController();
-  /// final _controller2 = TextEditingController();
-  ///
-  /// void dispose() {
-  ///   _focusScopeNode.dispose();
-  ///   _controller1.dispose();
-  ///   _controller2.dispose();
-  ///   super.dispose();
-  /// }
-  ///
-  /// void _handleSubmitted(String value) {
-  ///   _focusScopeNode.nextFocus();
-  /// }
-  ///
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     body: FocusScope(
-  ///       node: _focusScopeNode,
-  ///       child: Column(
-  ///         mainAxisAlignment: MainAxisAlignment.center,
-  ///         children: <Widget>[
-  ///           Padding(
-  ///             padding: const EdgeInsets.all(8.0),
-  ///             child: TextFormField(
-  ///               textInputAction: TextInputAction.next,
-  ///               onFieldSubmitted: _handleSubmitted,
-  ///               controller: _controller1,
-  ///               decoration: InputDecoration(border: OutlineInputBorder()),
-  ///             ),
-  ///           ),
-  ///           Padding(
-  ///             padding: const EdgeInsets.all(8.0),
-  ///             child: TextFormField(
-  ///               textInputAction: TextInputAction.next,
-  ///               onFieldSubmitted: _handleSubmitted,
-  ///               controller: _controller2,
-  ///               decoration: InputDecoration(border: OutlineInputBorder()),
-  ///             ),
-  ///           ),
-  ///         ],
-  ///       ),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  /// {@end-tool}
   final ValueChanged<String>? onSubmitted;
 
   /// {@template flutter.widgets.editableText.onAppPrivateCommand}
-  /// Called when the result of an app private command is received.
+  /// This is used to receive a private command from the input method.
+  ///
+  /// Called when the result of [TextInputClient.performPrivateCommand] is
+  /// received.
+  ///
+  /// This can be used to provide domain-specific features that are only known
+  /// between certain input methods and their clients.
+  ///
+  /// See also:
+  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputConnection#performPrivateCommand(java.lang.String,%20android.os.Bundle)],
+  ///     which is the Android documentation for performPrivateCommand, used to
+  ///     send a command from the input method.
+  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#sendAppPrivateCommand],
+  ///     which is the Android documentation for sendAppPrivateCommand, used to
+  ///     send a command to the input method.
   /// {@endtemplate}
   final AppPrivateCommandCallback? onAppPrivateCommand;
 
@@ -1089,7 +1048,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final SelectionChangedCallback? onSelectionChanged;
 
-  /// {@macro flutter.widgets.textSelection.onSelectionHandleTapped}
+  /// {@macro flutter.widgets.TextSelectionOverlay.onSelectionHandleTapped}
   final VoidCallback? onSelectionHandleTapped;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
@@ -1152,10 +1111,10 @@ class EditableText extends StatefulWidget {
   /// animate on Android platforms.
   final bool cursorOpacityAnimates;
 
-  ///{@macro flutter.rendering.editable.cursorOffset}
+  ///{@macro flutter.rendering.RenderEditable.cursorOffset}
   final Offset? cursorOffset;
 
-  ///{@macro flutter.rendering.editable.paintCursorOnTop}
+  ///{@macro flutter.rendering.RenderEditable.paintCursorAboveText}
   final bool paintCursorAboveText;
 
   /// Controls how tall the selection highlight boxes are computed to be.
@@ -1266,10 +1225,10 @@ class EditableText extends StatefulWidget {
   ///   compatible [keyboardType]. Empirically, [TextInputType.name] works well
   ///   with many autofill hints that are predefined on iOS.
   /// {@endtemplate}
-  /// {@macro flutter.services.autofill.autofillHints}
+  /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
@@ -1284,7 +1243,7 @@ class EditableText extends StatefulWidget {
   /// the surrounding [RestorationScope] using the provided restoration ID.
   ///
   /// Persisting and restoring the content of the [EditableText] is the
-  /// responsibilility of the owner of the [controller], who may use a
+  /// responsibility of the owner of the [controller], who may use a
   /// [RestorableTextEditingController] for that purpose.
   ///
   /// See also:
@@ -1895,7 +1854,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Begins a new batch edit, within which new updates made to the text editing
   /// value will not be sent to the platform text input plugin.
   ///
-  /// Batch edits nest. When the outmost batch edit finishes, [endBatchEdit]
+  /// Batch edits nest. When the outermost batch edit finishes, [endBatchEdit]
   /// will attempt to send [currentTextEditingValue] to the text input plugin if
   /// it detected a change.
   void beginBatchEdit() {
@@ -2413,9 +2372,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   TextDirection get _textDirection {
-    final TextDirection? result = widget.textDirection ?? Directionality.of(context);
+    final TextDirection result = widget.textDirection ?? Directionality.of(context);
     assert(result != null, '$runtimeType created without a textDirection and with no ambient Directionality.');
-    return result!;
+    return result;
   }
 
   /// The renderer for this widget's descendant.
@@ -2427,7 +2386,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   TextEditingValue get textEditingValue => _value;
 
-  double get _devicePixelRatio => MediaQuery.of(context)?.devicePixelRatio ?? 1.0;
+  double get _devicePixelRatio => MediaQuery.of(context).devicePixelRatio;
 
   @override
   set textEditingValue(TextEditingValue value) {
@@ -2763,7 +2722,7 @@ class _Editable extends LeafRenderObjectWidget {
       textScaleFactor: textScaleFactor,
       textAlign: textAlign,
       textDirection: textDirection,
-      locale: locale ?? Localizations.localeOf(context, nullOk: true),
+      locale: locale ?? Localizations.maybeLocaleOf(context),
       selection: value.selection,
       offset: offset,
       onSelectionChanged: onSelectionChanged,
@@ -2808,7 +2767,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..textScaleFactor = textScaleFactor
       ..textAlign = textAlign
       ..textDirection = textDirection
-      ..locale = locale ?? Localizations.localeOf(context, nullOk: true)
+      ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..selection = value.selection
       ..offset = offset
       ..onSelectionChanged = onSelectionChanged

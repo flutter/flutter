@@ -20,7 +20,7 @@ void main() {
   setUp(() {
     cache = MockCache();
     // Release lock between test cases.
-    Cache.releaseLock();
+    cache.releaseLock();
 
     when(cache.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(false));
     when(cache.updateAll(any)).thenAnswer((Invocation invocation) {
@@ -39,9 +39,8 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache']);
 
-    expect(Cache.isLocked(), isTrue);
     // Do not throw StateError, lock is acquired.
-    expect(() => Cache.checkLockAcquired(platform), returnsNormally);
+    expect(() => cache.checkLockAcquired(), returnsNormally);
   });
 
   testUsingContext('precache should not re-entrantly acquire lock', () async {
@@ -62,7 +61,7 @@ void main() {
 
     expect(Cache.isLocked(), isFalse);
     // Do not throw StateError, acquired reentrantly with FLUTTER_ALREADY_LOCKED.
-    expect(() => Cache.checkLockAcquired(platform), returnsNormally);
+    expect(() => cache.checkLockAcquired(), returnsNormally);
   });
 
   testUsingContext('precache downloads web artifacts on dev branch when feature is enabled.', () async {

@@ -27,7 +27,9 @@ const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
 String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 
-String getDefaultApplicationKernelPath({ @required bool trackWidgetCreation }) {
+String getDefaultApplicationKernelPath({
+  @required bool trackWidgetCreation,
+}) {
   return getKernelPathForTransformerOptions(
     globals.fs.path.join(getBuildDirectory(), 'app.dill'),
     trackWidgetCreation: trackWidgetCreation,

@@ -32,7 +32,7 @@ Widget buildInputDecorator({
       child: Builder(
         builder: (BuildContext context) {
           return Theme(
-            data: Theme.of(context)!.copyWith(
+            data: Theme.of(context).copyWith(
               inputDecorationTheme: inputDecorationTheme,
               visualDensity: visualDensity,
               fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
@@ -4204,7 +4204,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Theme(
-                data: Theme.of(context)!,
+                data: Theme.of(context),
                 child: Align(
                   alignment: Alignment.topLeft,
                   child: TextField(
@@ -4253,21 +4253,21 @@ void main() {
     expect(getOpacity(tester, prefixText), 1.0);
   });
 
-  testWidgets('OutlineInputBorder with InputDecorator long label, width should ignore icon width', (WidgetTester tester) async {
-    // Related issue: https://github.com/flutter/flutter/issues/64427
+  // Related issue: https://github.com/flutter/flutter/issues/64427
+  testWidgets('OutlineInputBorder and InputDecorator long labels and in Floating, the width should ignore the icon width', (WidgetTester tester) async {
     const String labelText = 'Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.';
 
-    Widget getLabeledInputDecorator(bool useOutlineBorder) => MaterialApp(
+    Widget getLabeledInputDecorator(FloatingLabelBehavior floatingLabelBehavior) => MaterialApp(
         home: Material(
           child: Container(
             width: 300,
             child: TextField(
               decoration: InputDecoration(
-                border: useOutlineBorder ? const OutlineInputBorder(
+                border: const OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.greenAccent, width: 1.0),
-                ) : null,
+                ),
                 suffixIcon: const Icon(Icons.arrow_drop_down),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
+                floatingLabelBehavior: floatingLabelBehavior,
                 labelText: labelText,
               ),
             ),
@@ -4275,16 +4275,34 @@ void main() {
         ),
       );
 
-    // Build with no OutlineInputBorder.
-    await tester.pumpWidget(getLabeledInputDecorator(false));
+    await tester.pumpWidget(getLabeledInputDecorator(FloatingLabelBehavior.never));
 
-    // Get the width of the label when there is no OutlineInputBorder.
-    final double labelWidth = tester.getSize(find.text(labelText)).width;
+    final double labelWidth = getLabelRect(tester).width;
 
-    // Build with a OutlineInputBorder.
-    await tester.pumpWidget(getLabeledInputDecorator(true));
+    await tester.pumpWidget(getLabeledInputDecorator(FloatingLabelBehavior.always));
+    await tester.pumpAndSettle();
 
-    expect(tester.getSize(find.text(labelText)).width > labelWidth, isTrue);
+    final double floatedLabelWidth = getLabelRect(tester).width;
+
+    expect(floatedLabelWidth > labelWidth, isTrue);
+
+    final Widget target = getLabeledInputDecorator(FloatingLabelBehavior.auto);
+    await tester.pumpWidget(target);
+    await tester.pumpAndSettle();
+
+    expect(getLabelRect(tester).width, labelWidth);
+
+    // Click for Focus.
+    await tester.tap(find.byType(TextField));
+    // Default animation duration is 200 millisecond.
+    await tester.pumpFrames(target, const Duration(milliseconds: 100));
+
+    expect(getLabelRect(tester).width > labelWidth, isTrue);
+    expect(getLabelRect(tester).width < floatedLabelWidth, isTrue);
+
+    await tester.pumpAndSettle();
+
+    expect(getLabelRect(tester).width, floatedLabelWidth);
   });
 
   testWidgets('given enough space, constrained and unconstrained heights result in the same size widget', (WidgetTester tester) async {
@@ -4298,7 +4316,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Theme(
-                data: Theme.of(context)!.copyWith(visualDensity: visualDensity),
+                data: Theme.of(context).copyWith(visualDensity: visualDensity),
                 child: Center(
                   child: Row(
                     children: <Widget>[
@@ -4371,7 +4389,7 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context)!.copyWith(visualDensity: VisualDensity.compact),
+              data: Theme.of(context).copyWith(visualDensity: VisualDensity.compact),
               child: Center(
                 child: Row(
                   children: <Widget>[

@@ -56,6 +56,8 @@ Future<void> main(List<String> arguments) async {
   buf.writeln('homepage: https://flutter.dev');
   // TODO(dnfield): Re-factor for proper versioning, https://github.com/flutter/flutter/issues/55409
   buf.writeln('version: 0.0.0');
+  buf.writeln('environment:');
+  buf.writeln("  sdk: '>=2.10.0 <3.0.0'");
   buf.writeln('dependencies:');
   for (final String package in findPackageNames()) {
     buf.writeln('  $package:');
@@ -139,7 +141,6 @@ Future<void> main(List<String> arguments) async {
   final List<String> dartdocArgs = <String>[
     ...dartdocBaseArgs,
     '--allow-tools',
-    '--enable-experiment=non-nullable',
     if (args['json'] as bool) '--json',
     if (args['validate-links'] as bool) '--validate-links' else '--no-validate-links',
     '--link-to-source-excludes', '../../bin/cache',

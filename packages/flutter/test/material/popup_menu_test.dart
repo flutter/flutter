@@ -138,7 +138,7 @@ void main() {
       return MaterialApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(
+            data: MediaQuery.of(context).copyWith(
               navigationMode: NavigationMode.directional,
             ),
             child: Material(
@@ -189,7 +189,7 @@ void main() {
     await tester.pumpWidget(buildApp(directional: true));
 
     // Try to bring up the popup menu and select the first item from it
-    Focus.of(popupButtonKey.currentContext!)!.requestFocus();
+    Focus.of(popupButtonKey.currentContext!).requestFocus();
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
@@ -238,10 +238,10 @@ void main() {
         ),
       ),
     );
-    Focus.of(childKey.currentContext!)!.requestFocus();
+    Focus.of(childKey.currentContext!).requestFocus();
     await tester.pump();
 
-    expect(Focus.of(childKey.currentContext!)!.hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
     expect(itemBuilderCalled, isFalse);
     expect(onSelectedCalled, isFalse);
   });
@@ -254,7 +254,7 @@ void main() {
       MaterialApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(
+            data: MediaQuery.of(context).copyWith(
               navigationMode: NavigationMode.directional,
             ),
             child: Material(
@@ -281,10 +281,10 @@ void main() {
         }),
       ),
     );
-    Focus.of(childKey.currentContext!)!.requestFocus();
+    Focus.of(childKey.currentContext!).requestFocus();
     await tester.pump();
 
-    expect(Focus.of(childKey.currentContext!)!.hasPrimaryFocus, isTrue);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
   });
 
   testWidgets('PopupMenuItem is only focusable when enabled', (WidgetTester tester) async {
@@ -319,7 +319,7 @@ void main() {
     // Open the popup to build and show the menu contents.
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
-    final FocusNode childNode = Focus.of(childKey.currentContext!)!;
+    final FocusNode childNode = Focus.of(childKey.currentContext!);
     // Now that the contents are shown, request focus on the child text.
     childNode.requestFocus();
     await tester.pumpAndSettle();
@@ -362,7 +362,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(itemBuilderCalled, isTrue);
-    expect(Focus.of(childKey.currentContext!)!.hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
   });
 
   testWidgets('PopupMenuButton is horizontal on iOS', (WidgetTester tester) async {
@@ -465,7 +465,7 @@ void main() {
     final WidgetPredicate popupMenu = (Widget widget) {
       final String widgetType = widget.runtimeType.toString();
       // TODO(mraleph): Remove the old case below.
-      return widgetType == '_PopupMenu<int>' // normal case
+      return widgetType == '_PopupMenu<int?>' // normal case
           || widgetType == '_PopupMenu'; // for old versions of Dart that don't reify method type arguments
     };
 
@@ -755,14 +755,12 @@ void main() {
 
     await tester.pump();
 
-    expect(MediaQuery.of(popupContext)!.padding, EdgeInsets.zero);
+    expect(MediaQuery.of(popupContext).padding, EdgeInsets.zero);
   });
 
   testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
-    const Offset offset = Offset(100.0, 100.0);
-
-    final PopupMenuButton<int> popupMenuButton =
-      PopupMenuButton<int>(
+    PopupMenuButton<int> buildMenuButton({Offset offset = const Offset(0.0, 0.0)}) {
+      return  PopupMenuButton<int>(
         offset: offset,
         itemBuilder: (BuildContext context) {
           return <PopupMenuItem<int>>[
@@ -777,14 +775,36 @@ void main() {
           ];
         },
       );
+    }
 
+    // Popup a menu without any offset.
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Center(
-            child: Material(
-              child: popupMenuButton,
-            ),
+          body: Material(
+            child: buildMenuButton(),
+          ),
+        ),
+      ),
+    );
+
+    // Popup the menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    // Initial state, the menu start at Offset(8.0, 8.0), the 8 pixels is edge padding when offset.dx < 8.0.
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 8.0));
+
+    // Collapse the menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    // Popup a new menu with Offset(50.0, 50.0).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: buildMenuButton(offset: const Offset(50.0, 50.0)),
           ),
         ),
       ),
@@ -793,8 +813,8 @@ void main() {
     await tester.tap(find.byType(IconButton));
     await tester.pumpAndSettle();
 
-    // The position is different than the offset because the default position isn't at the origin.
-    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int>')), const Offset(364.0, 324.0));
+    // This time the menu should start at Offset(50.0, 50.0), the padding only added when offset.dx < 8.0.
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(50.0, 50.0));
   });
 
   testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {
@@ -1270,7 +1290,7 @@ void main() {
             textDirection: textDirection,
             child: PopupMenuTheme(
               data: PopupMenuTheme.of(context).copyWith(
-                textStyle: Theme.of(context)!.textTheme.subtitle1!.copyWith(fontSize: fontSize),
+                textStyle: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: fontSize),
               ),
               child: child!,
             ),

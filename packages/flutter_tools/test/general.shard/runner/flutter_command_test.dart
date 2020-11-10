@@ -57,7 +57,7 @@ void main() {
     testUsingContext('honors shouldUpdateCache false', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: false);
       await flutterCommand.run();
-      verifyZeroInteractions(cache);
+      verifyNever(cache.updateAll(any));
       expect(flutterCommand.deprecated, isFalse);
       expect(flutterCommand.hidden, isFalse);
     },
@@ -94,30 +94,6 @@ void main() {
             'of Flutter.'));
       expect(flutterCommand.deprecated, isTrue);
       expect(flutterCommand.hidden, isTrue);
-    });
-
-    testUsingContext('null-safety is surfaced in command usage analytics', () async {
-      final FakeNullSafeCommand fake = FakeNullSafeCommand();
-      final CommandRunner<void> commandRunner = createTestCommandRunner(fake);
-
-      await commandRunner.run(<String>['safety', '--enable-experiment=non-nullable']);
-
-      final VerificationResult resultA = verify(usage.sendCommand(
-        'safety',
-        parameters: captureAnyNamed('parameters'),
-      ));
-      expect(resultA.captured.first, containsPair('cd47', 'true'));
-      reset(usage);
-
-      await commandRunner.run(<String>['safety', '--enable-experiment=foo']);
-
-      final VerificationResult resultB = verify(usage.sendCommand(
-        'safety',
-        parameters: captureAnyNamed('parameters'),
-      ));
-      expect(resultB.captured.first, containsPair('cd47', 'false'));
-    }, overrides: <Type, Generator>{
-      Usage: () => usage,
     });
 
     testUsingContext('uses the error handling file system', () async {
@@ -352,7 +328,7 @@ void main() {
         final Completer<void> checkLockCompleter = Completer<void>();
         final DummyFlutterCommand flutterCommand =
             DummyFlutterCommand(commandFunction: () async {
-          await Cache.lock();
+          await globals.cache.lock();
           checkLockCompleter.complete();
           final Completer<void> c = Completer<void>();
           await c.future;
@@ -362,13 +338,13 @@ void main() {
         unawaited(flutterCommand.run());
         await checkLockCompleter.future;
 
-        Cache.checkLockAcquired();
+        globals.cache.checkLockAcquired();
 
         signalController.add(mockSignal);
         await completer.future;
 
-        await Cache.lock();
-        Cache.releaseLock();
+        await globals.cache.lock();
+        globals.cache.releaseLock();
       }, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
         Signals: () => FakeSignals(

@@ -575,7 +575,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMediaQuery(context));
 
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     SliderThemeData sliderTheme = SliderTheme.of(context);
 
     // If the widget has active or inactive colors specified, then we plug them
@@ -637,7 +637,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // This size is used as the max bounds for the painting of the value
     // indicators. It must be kept in sync with the function with the same name
     // in slider.dart.
-    Size _screenSize() => MediaQuery.of(context)!.size;
+    Size _screenSize() => MediaQuery.of(context).size;
 
     return CompositedTransformTarget(
       link: _layerLink,
@@ -646,7 +646,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         divisions: widget.divisions,
         labels: widget.labels,
         sliderTheme: sliderTheme,
-        textScaleFactor: MediaQuery.of(context)!.textScaleFactor,
+        textScaleFactor: MediaQuery.of(context).textScaleFactor,
         screenSize: _screenSize(),
         onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
         onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
@@ -720,9 +720,9 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
       state: state,
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
-      platform: Theme.of(context)!.platform,
+      platform: Theme.of(context).platform,
     );
   }
 
@@ -741,9 +741,9 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
-      ..textDirection = Directionality.of(context)!
+      ..textDirection = Directionality.of(context)
       ..semanticFormatterCallback = semanticFormatterCallback
-      ..platform = Theme.of(context)!.platform;
+      ..platform = Theme.of(context).platform;
   }
 }
 

@@ -6,14 +6,12 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:vm_service/vm_service_io.dart' as vm_service_io;
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -67,18 +65,11 @@ class Xcode {
   })  : _platform = platform,
         _fileSystem = fileSystem,
         _xcodeProjectInterpreter = xcodeProjectInterpreter,
-        _operatingSystemUtils = OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        ),
         _processUtils =
             ProcessUtils(logger: logger, processManager: processManager);
 
   final Platform _platform;
   final ProcessUtils _processUtils;
-  final OperatingSystemUtils _operatingSystemUtils;
   final FileSystem _fileSystem;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
 
@@ -170,24 +161,8 @@ class Xcode {
     return false;
   }
 
-  /// The `xcrun` Xcode command to run or locate development
-  /// tools and properties.
-  ///
-  /// Returns `xcrun` on x86 macOS.
-  /// Returns `/usr/bin/arch -arm64 xcrun` on ARM macOS to force Xcode commands
-  /// to run outside the x86 Rosetta translation, which may cause crashes.
-  List<String> xcrunCommand() {
-    final List<String> xcrunCommand = <String>[];
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
-      // Force Xcode commands to run outside Rosetta.
-      xcrunCommand.addAll(<String>[
-        '/usr/bin/arch',
-        '-arm64',
-      ]);
-    }
-    xcrunCommand.add('xcrun');
-    return xcrunCommand;
-  }
+  /// See [XcodeProjectInterpreter.xcrunCommand].
+  List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
 
   Future<RunResult> cc(List<String> args) {
     return _processUtils.run(
@@ -519,7 +494,6 @@ class XCDevice {
         iosDeploy: _iosDeploy,
         iMobileDevice: _iMobileDevice,
         platform: globals.platform,
-        vmServiceConnectUri: vm_service_io.vmServiceConnectUri,
       ));
     }
     return devices;
@@ -588,7 +562,7 @@ class XCDevice {
         if (architecture.startsWith('armv7')) {
           cpuArchitecture = DarwinArch.armv7;
         } else {
-          cpuArchitecture = defaultIOSArchs.first;
+          cpuArchitecture = DarwinArch.arm64;
         }
         _logger.printError(
           'Unknown architecture $architecture, defaulting to '

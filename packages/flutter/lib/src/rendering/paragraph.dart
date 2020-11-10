@@ -54,6 +54,32 @@ class TextParentData extends ContainerBoxParentData<RenderBox> {
   }
 }
 
+/// Used by the [RenderParagraph] to map its rendering children to their
+/// corresponding semantics nodes.
+///
+/// The [RichText] uses this to tag the relation between its placeholder spans
+/// and their semantics nodes.
+@immutable
+class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
+  /// Creates a semantics tag with the input `index`.
+  ///
+  /// Different [PlaceholderSpanIndexSemanticsTag]s with the same `index` are
+  /// consider the same.
+  const PlaceholderSpanIndexSemanticsTag(this.index) : super('PlaceholderSpanIndexSemanticsTag($index)');
+
+  /// The index of this tag.
+  final int index;
+
+  @override
+  bool operator ==(Object other) {
+    return other is PlaceholderSpanIndexSemanticsTag
+        && other.index == index;
+  }
+
+  @override
+  int get hashCode => hashValues(PlaceholderSpanIndexSemanticsTag, index);
+}
+
 /// A render object that displays a paragraph of text.
 class RenderParagraph extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, TextParentData>,
@@ -446,7 +472,8 @@ class RenderParagraph extends RenderBox
 
     // Hit test render object children
     RenderBox? child = firstChild;
-    while (child != null) {
+    int childIndex = 0;
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
       final TextParentData textParentData = child.parentData! as TextParentData;
       final Matrix4 transform = Matrix4.translationValues(
         textParentData.offset.dx,
@@ -473,6 +500,7 @@ class RenderParagraph extends RenderBox
         return true;
       }
       child = childAfter(child);
+      childIndex += 1;
     }
     return hitText;
   }
@@ -871,6 +899,7 @@ class RenderParagraph extends RenderBox
     double ordinal = 0.0;
     int start = 0;
     int placeholderIndex = 0;
+    int childIndex = 0;
     RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
     for (final InlineSpanSemanticsInformation info in _combineSemanticsInfo()) {
@@ -908,8 +937,11 @@ class RenderParagraph extends RenderBox
       );
 
       if (info.isPlaceholder) {
-        if (children.isNotEmpty) {
-          final SemanticsNode childNode = children.elementAt(placeholderIndex++);
+        // A placeholder span may have 0 to multple semantics nodes, we need
+        // to annotate all of the semantics nodes belong to this span.
+        while (children.length > childIndex &&
+               children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
+          final SemanticsNode childNode = children.elementAt(childIndex);
           final TextParentData parentData = child!.parentData! as TextParentData;
           childNode.rect = Rect.fromLTWH(
             childNode.rect.left,
@@ -918,8 +950,10 @@ class RenderParagraph extends RenderBox
             childNode.rect.height * parentData.scale!,
           );
           newChildren.add(childNode);
-          child = childAfter(child);
+          childIndex += 1;
         }
+        child = childAfter(child!);
+        placeholderIndex += 1;
       } else {
         final SemanticsConfiguration configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)
@@ -928,13 +962,19 @@ class RenderParagraph extends RenderBox
         final GestureRecognizer? recognizer = info.recognizer;
         if (recognizer != null) {
           if (recognizer is TapGestureRecognizer) {
-            configuration.onTap = recognizer.onTap;
-            configuration.isLink = true;
+            if (recognizer.onTap != null) {
+              configuration.onTap = recognizer.onTap;
+              configuration.isLink = true;
+            }
           } else if (recognizer is DoubleTapGestureRecognizer) {
-            configuration.onTap = recognizer.onDoubleTap;
-            configuration.isLink = true;
+            if (recognizer.onDoubleTap != null) {
+              configuration.onTap = recognizer.onDoubleTap;
+              configuration.isLink = true;
+            }
           } else if (recognizer is LongPressGestureRecognizer) {
-            configuration.onLongPress = recognizer.onLongPress;
+            if (recognizer.onLongPress != null) {
+              configuration.onLongPress = recognizer.onLongPress;
+            }
           } else {
             assert(false, '${recognizer.runtimeType} is not supported.');
           }
@@ -949,6 +989,10 @@ class RenderParagraph extends RenderBox
         newChildren.add(newChild);
       }
     }
+    // Makes sure we annotated all of the semantics children.
+    assert(childIndex == children.length);
+    assert(child == null);
+
     _cachedChildNodes = newChildCache;
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
   }
