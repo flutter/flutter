@@ -1217,7 +1217,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
               child: child,
             );
           },
-          child: child,
+          child: TextEditingGestureDetector(
+            editableTextKey: editableTextKey,
+            child: child,
+          ),
         ),
       ),
     );
