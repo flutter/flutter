@@ -9,7 +9,8 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine.dart' hide window;
+import 'package:ui/ui.dart' as ui;
 
 import 'engine/history_test.dart';
 import 'matchers.dart';
@@ -23,8 +24,16 @@ void main() {
 }
 
 void testMain() {
+  EngineSingletonFlutterWindow window;
+
+  setUp(() {
+    ui.webOnlyInitializeEngine();
+    window = EngineSingletonFlutterWindow(0, EnginePlatformDispatcher.instance);
+  });
+
   tearDown(() async {
     await window.debugResetHistory();
+    window = null;
   });
 
   test('window.defaultRouteName should not change', () async {
