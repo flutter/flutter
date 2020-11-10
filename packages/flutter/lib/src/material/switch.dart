@@ -87,14 +87,6 @@ class Switch extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   })  : _switchType = _SwitchType.material,
-        assert(
-          thumbColor == null || (activeColor == null && inactiveThumbColor == null),
-          'Either use thumbColor resolved in all states, or use activeColor/inactiveThumbColor',
-        ),
-        assert(
-          trackColor == null || (activeTrackColor == null && activeTrackColor == null),
-          'Either use trackColor resolved in all states, or use activeTrackColor/inactiveTrackColor',
-        ),
         assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
