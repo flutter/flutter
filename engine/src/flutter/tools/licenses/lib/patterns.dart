@@ -161,8 +161,8 @@ final List<RegExp> licenseFragments = <RegExp>[
   RegExp(r'License & terms of use'),
 ];
 
-const String _linebreak      = r' *(?:(?:\*/ *|[*#])?(?:\n\1 *(?:\*/ *)?)*\n\1\2 *)?';
-const String _linebreakLoose = r' *(?:(?:\*/ *|[*#])?\n(?:-|;|#|<|!|/|\*| |REM)*)*';
+const String _linebreak      = r' *(?:(?:\*/ *|[*#])?(?:\r?\n\1 *(?:\*/ *)?)*\r?\n\1\2 *)?';
+const String _linebreakLoose = r' *(?:(?:\*/ *|[*#])?\r?\n(?:-|;|#|<|!|/|\*| |REM)*)*';
 
 // LICENSE RECOGNIZERS
 
@@ -675,6 +675,19 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
 
   // used with _tryReferenceByUrl
 
+  // SPDX
+  MultipleVersionedLicenseReferencePattern(
+    firstPrefixIndex: 1,
+    indentPrefixIndex: 2,
+    licenseIndices: const <int>[3],
+    checkLocalFirst: false,
+    pattern: RegExp(
+      kIndent + r'SPDX-License-Identifier: (.*)',
+      multiLine: true,
+      caseSensitive: false,
+    )
+  ),
+
   // AFL
   MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
@@ -728,11 +741,11 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
       r'^(?:(?:\1\2? *)? *\n)*'
       r'^\1\2 *(https?://www\.apache\.org/licenses/LICENSE-2\.0) *\n'
       r'^(?:(?:\1\2? *)? *\n)*'
-      r'^\1\2Unless required by applicable law or agreed to in writing, software *\n'
-      r'^\1\2distributed under the License is distributed on an "AS IS" BASIS, *\n'
-      r'^\1\2WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied\. *\n'
-      r'^\1\2See the License for the specific language governing permissions and *\n'
-      r'^\1\2limitations under the License\.',
+      r'^\1\2 *Unless required by applicable law or agreed to in writing, software *\n'
+      r'^\1\2 *distributed under the License is distributed on an "AS IS" BASIS, *\n'
+      r'^\1\2 *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied\. *\n'
+      r'^\1\2 *See the License for the specific language governing permissions and *\n'
+      r'^\1\2 *limitations under the License\.',
       multiLine: true,
       caseSensitive: false,
     )
@@ -1559,7 +1572,8 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // MIT-DERIVED LICENSES
 
-  // Seen in Mesa
+  // Seen in Mesa, among others.
+  // A version with "// -------" between sections seen in ffx_spd.
   RegExp(
     kIndent +
     (
@@ -1575,7 +1589,7 @@ final List<RegExp> csLicenses = <RegExp>[
     r'(?:'
     +
     (
-      r'(?:(?:\1\2? *)? *\n)*'
+      r'(?:(?:\1\2?(?: *| -*))? *\r?\n)*'
 
       +
 
