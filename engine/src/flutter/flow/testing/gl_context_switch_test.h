@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_RENDERER_CONTEXT_TEST_H_
 #define FLUTTER_SHELL_RENDERER_CONTEXT_TEST_H_
 
-#include "flutter/flow/gl_context_switch.h"
+#include "flutter/common/graphics/gl_context_switch.h"
 #include "gtest/gtest.h"
 
 namespace flutter {

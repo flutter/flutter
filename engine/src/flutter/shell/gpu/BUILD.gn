@@ -7,6 +7,7 @@ import("//flutter/shell/config.gni")
 
 gpu_common_deps = [
   "//flutter/common",
+  "//flutter/common/graphics",
   "//flutter/flow",
   "//flutter/fml",
   "//flutter/shell/common",

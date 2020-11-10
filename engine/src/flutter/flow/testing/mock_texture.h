@@ -5,7 +5,7 @@
 #include <ostream>
 #include <vector>
 
-#include "flutter/flow/texture.h"
+#include "flutter/common/graphics/texture.h"
 #include "flutter/testing/assertions_skia.h"
 
 namespace flutter {

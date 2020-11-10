@@ -4,7 +4,7 @@
 
 #include "flutter/flow/layers/texture_layer.h"
 
-#include "flutter/flow/texture.h"
+#include "flutter/common/graphics/texture.h"
 
 namespace flutter {
 

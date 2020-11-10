@@ -104,6 +104,7 @@ template("runner_sources") {
     # The use of these dependencies is temporary and will be moved behind the
     # embedder API.
     flutter_public_deps = [
+      "//flutter/common/graphics",
       "//flutter/flow",
       "//flutter/lib/ui",
       "//flutter/runtime",
@@ -460,6 +461,7 @@ executable("flutter_runner_unittests") {
   # embedder API.
   flutter_deps = [
     "//flutter/assets:assets",
+    "//flutter/common/graphics",
     "//flutter/flow",
     "//flutter/lib/ui",
     "//flutter/shell/common",

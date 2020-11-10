@@ -55,6 +55,7 @@ shared_library("flutter_shell_native") {
     ":icudtl_object",
     "//flutter/assets",
     "//flutter/common",
+    "//flutter/common/graphics",
     "//flutter/flow",
     "//flutter/fml",
     "//flutter/lib/ui",

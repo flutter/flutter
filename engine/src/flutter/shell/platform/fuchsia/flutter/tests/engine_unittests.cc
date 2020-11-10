@@ -9,10 +9,10 @@
 #include <lib/sys/cpp/component_context.h>
 
 #include "assets/directory_asset_bundle.h"
+#include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/task_runner.h"
-#include "flutter/shell/common/persistent_cache.h"
 #include "flutter/shell/common/serialization_callbacks.h"
 #include "flutter/shell/platform/fuchsia/flutter/logging.h"
 #include "flutter/shell/platform/fuchsia/flutter/runner.h"

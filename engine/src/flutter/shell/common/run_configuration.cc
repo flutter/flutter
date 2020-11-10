@@ -7,10 +7,10 @@
 #include <sstream>
 
 #include "flutter/assets/directory_asset_bundle.h"
+#include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/unique_fd.h"
 #include "flutter/runtime/dart_vm.h"
-#include "flutter/shell/common/persistent_cache.h"
 
 namespace flutter {
 

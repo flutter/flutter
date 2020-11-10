@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FLOW_GL_CONTEXT_SWITCH_H_
-#define FLUTTER_FLOW_GL_CONTEXT_SWITCH_H_
+#ifndef FLUTTER_COMMON_GRAPHICS_GL_CONTEXT_SWITCH_H_
+#define FLUTTER_COMMON_GRAPHICS_GL_CONTEXT_SWITCH_H_
 
 #include <functional>
 #include <memory>
@@ -111,4 +111,4 @@ class GLContextSwitch final : public GLContextResult {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_FLOW_GL_CONTEXT_SWITCH_H_
+#endif  // FLUTTER_COMMON_GRAPHICS_GL_CONTEXT_SWITCH_H_

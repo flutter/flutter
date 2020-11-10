@@ -7,8 +7,8 @@
 
 #include <memory>
 
-#include "flutter/flow/gl_context_switch.h"
-#include "flutter/flow/texture.h"
+#include "flutter/common/graphics/gl_context_switch.h"
+#include "flutter/common/graphics/texture.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"

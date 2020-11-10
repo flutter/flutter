@@ -5,8 +5,8 @@
 #ifndef FLUTTER_SHELL_GPU_GPU_SURFACE_GL_DELEGATE_H_
 #define FLUTTER_SHELL_GPU_GPU_SURFACE_GL_DELEGATE_H_
 
+#include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/flow/embedded_views.h"
-#include "flutter/flow/gl_context_switch.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/gpu/gpu_surface_delegate.h"
 #include "third_party/skia/include/core/SkMatrix.h"
