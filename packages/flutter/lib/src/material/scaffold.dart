@@ -93,7 +93,7 @@ enum _ScaffoldSlot {
 /// The [ScaffoldMessenger] will assert if nested Scaffolds register for [SnackBar]s.
 /// This prevents duplicate [SnackBar]s from being shown when multiple [Scaffold]s
 /// are visible and nested inside one another. In order to control the scope of
-/// [Snackbar]s in this case, a [ScaffoldMessenger] should be placed in between
+/// [SnackBar]s in this case, a [ScaffoldMessenger] should be placed in between
 /// nested [Scaffold]s. For more guidance on managing nested Scaffolds, see
 /// Troubleshooting under [Scaffold].
 ///
