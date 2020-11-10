@@ -16,6 +16,7 @@ if (is_win) {
   import("//build/config/win/visual_studio_version.gni")
 }
 
+import("//build/config/c++/c++.gni")
 import("//build/config/profiler.gni")
 import("//build/config/sanitizers/sanitizers.gni")
 import("//build/toolchain/ccache.gni")
