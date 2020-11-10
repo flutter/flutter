@@ -1,4 +1,4 @@
-Signature: d352df59abd2c064db49e584ef72a4fd
+Signature: 587377e713bc47a8592978e9a0398cac
 
 UNUSED LICENSES:
 
@@ -480,6 +480,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.namedplace/meta.json
@@ -1346,6 +1347,24 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/tree.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/property_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/connection-info.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/connection-options.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/connector.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/debuglog.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/deprecated.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/directory-entry.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/directory-iterator.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/directory-watcher.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/directory.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/file.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/io2.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/memory.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/node-attributes.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/node.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/pipe.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/posix-socket.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/rights-abilities.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.namedplace/meta.json
@@ -2146,6 +2165,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.namedplace/meta.json
@@ -2857,6 +2877,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/reboot
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/consumer_control.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/device_ids.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/keys.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/locking.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/event.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/metrics_recorder.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.position/position.fidl
