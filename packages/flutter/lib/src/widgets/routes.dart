@@ -651,8 +651,12 @@ mixin LocalHistoryRoute<T> on Route<T> {
 
 class _DismissModalAction extends DismissAction {
   @override
-  Object invoke(DismissIntent intent) {
-    return Navigator.of(primaryFocus!.context!)!.maybePop();
+  Object? invoke(DismissIntent intent) {
+    final BuildContext context = primaryFocus!.context!;
+    final ModalRoute<dynamic> route = ModalRoute.of<dynamic>(context)!;
+    if (route.barrierDismissible) {
+      return Navigator.of(context)!.maybePop();
+    }
   }
 }
 
