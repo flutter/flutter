@@ -4,6 +4,8 @@
 
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
+
 /// Data from a non-linear mathematical function that functions as
 /// reproducible noise.
 final Uint32List _noise = Uint32List.fromList(<int>[
@@ -43,10 +45,12 @@ class Md5Hash {
     _digest[3] = 0x10325476;
   }
 
+  // 64 bytes is 512 bits.
+  static const int _kChunkSize = 64;
+
   /// The current hash digest.
   final Uint32List _digest = Uint32List(4);
-  final Uint8List _scratchSpace = Uint8List(512);
-  static const int _signatureBytes = 8;
+  final Uint8List _scratchSpace = Uint8List(_kChunkSize);
   int _remainingLength;
   int _contentLength = 0;
 
@@ -54,7 +58,7 @@ class Md5Hash {
     assert(_remainingLength == null);
     stop ??= data.length;
     int i = 0;
-    for (; i <= stop - 512; i += 512) {
+    for (; i <= stop - _kChunkSize; i += _kChunkSize) {
       final Uint32List view = Uint32List.view(data.buffer, i, 16);
       _writeChunk(view);
     }
@@ -135,29 +139,19 @@ class Md5Hash {
 
   Uint32List finalize() {
     _remainingLength ??= 0;
-    // Pad out the data with 0x80, eight or sixteen 0s, and as many more 0s
-    // as we need to land cleanly on a chunk boundary. This zero should always
-    // be safe to write as _scratchSpace will only be written if there are 15
-    // elements remaining.
     _scratchSpace[_remainingLength] = 0x80;
     _remainingLength += 1;
 
-    final int contentsLength = _contentLength + 1 + _signatureBytes;
-    int zeroesRemaining = _roundUp(contentsLength, _remainingLength) - contentsLength;
-    while (zeroesRemaining > 0) {
-      for (int i = _remainingLength; i < 16; i += 1, zeroesRemaining -= 1) {
-        _scratchSpace[i] = 0;
-      }
-      final Uint32List view = Uint32List.view(_scratchSpace.buffer, 0, 16);
-      _writeChunk(view);
-      _remainingLength = 0;
+    final int zeroes = 56 - _remainingLength;
+    for (int i = _remainingLength; i < zeroes; i += 1) {
+      _scratchSpace[i] = 0;
     }
+    final int bitLength = _contentLength * 8;
+    _scratchSpace.buffer.asByteData().setUint64(56, bitLength);
+
+    _writeChunk(Uint32List.view(_scratchSpace.buffer, 0, 16));
     return _digest;
   }
-
-  /// Rounds [val] up to the next multiple of [n], as long as [n] is a power of
-  /// two.
-  int _roundUp(int val, int n) => (val + n - 1) & -n;
 
   /// Adds [x] and [y] with 32-bit overflow semantics.
   int _add32(int x, int y) => (x + y) & _mask32;
