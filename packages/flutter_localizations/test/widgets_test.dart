@@ -576,7 +576,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 final Locale locale = Localizations.localeOf(context)!;
-                final TextDirection direction = WidgetsLocalizations.of(context)!.textDirection;
+                final TextDirection direction = WidgetsLocalizations.of(context).textDirection;
                 return Text('$locale $direction');
               },
             ),
@@ -617,7 +617,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 final Locale locale = Localizations.localeOf(context)!;
-                final TextDirection direction = WidgetsLocalizations.of(context)!.textDirection;
+                final TextDirection direction = WidgetsLocalizations.of(context).textDirection;
                 return Text('$locale $direction');
               },
             ),
@@ -653,7 +653,7 @@ void main() {
         ],
         buildContent: (BuildContext context) {
           final Locale locale = Localizations.localeOf(context)!;
-          final TextDirection direction = WidgetsLocalizations.of(context)!.textDirection;
+          final TextDirection direction = WidgetsLocalizations.of(context).textDirection;
           return Text('$locale $direction');
         },
       )
