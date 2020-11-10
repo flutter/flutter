@@ -2488,7 +2488,7 @@ class _RenderChip extends RenderBox {
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double overallPadding = theme.padding.vertical +
+    final double overallPadding = theme.padding.horizontal +
         theme.labelPadding.horizontal;
     return overallPadding +
         _maxWidth(avatar, height) +

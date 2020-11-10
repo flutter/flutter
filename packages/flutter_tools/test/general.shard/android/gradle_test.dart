@@ -1024,7 +1024,7 @@ plugin1=${plugin1.path}
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
 
       final Directory rootDirectory = fileSystem.currentDirectory;
-      cache = Cache(
+      cache = Cache.test(
         rootOverride: rootDirectory,
         fileSystem: fileSystem,
       );

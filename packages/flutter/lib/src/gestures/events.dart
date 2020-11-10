@@ -229,7 +229,8 @@ bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == 
 ///
 /// See also:
 ///
-///  * [Window.devicePixelRatio], which defines the device's current resolution.
+///  * [dart:ui.FlutterView.devicePixelRatio], which defines the device's
+///    current resolution.
 ///  * [Listener], a widget that calls callbacks in response to common pointer
 ///    events.
 @immutable

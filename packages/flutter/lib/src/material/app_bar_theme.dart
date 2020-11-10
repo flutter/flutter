@@ -33,6 +33,7 @@ class AppBarTheme with Diagnosticable {
   const AppBarTheme({
     this.brightness,
     this.color,
+    this.foregroundColor,
     this.elevation,
     this.shadowColor,
     this.iconTheme,
@@ -42,15 +43,65 @@ class AppBarTheme with Diagnosticable {
     this.titleSpacing,
   });
 
-  /// Default value for [AppBar.brightness].
+  /// AppBar uses this value to determine the default (background) [color] and
+  /// [foregroundColor] as well as the app bar's [SystemUiOverlayStyle].
   ///
-  /// If null, [AppBar] uses [ThemeData.primaryColorBrightness].
+  /// For [Brightness.dark], [SystemUiOverlayStyle.light] is used and for
+  /// [Brightness.light], [SystemUiOverlayStyle.dark] is used.
+  ///
+  /// See also:
+  ///
+  ///  * [AppBar.brightness], which overrides the this value and the overall
+  ///    theme's [ColorScheme.brightness].
+  ///  * [Theme.of], which returns the current overall Material theme as
+  ///    a [ThemeData].
+  ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
+  ///    default colors are based on.
+  ///  * [ColorScheme.brightness], which indicates if the overall [Theme]
+  ///    is light or dark.
   final Brightness? brightness;
 
-  /// Default value for [AppBar.backgroundColor].
+  /// The app bar's background color.
   ///
-  /// If null, [AppBar] uses [ThemeData.primaryColor].
+  /// If null, [AppBar] uses the overall theme's [ColorScheme.primary] if the
+  /// overall theme's brightness is [Brightness.light], and [ColorScheme.surface]
+  /// if the overall theme's [brightness] is [Brightness.dark].
+  ///
+  /// See also:
+  ///
+  ///  * [AppBar.backgroundColor], which specifies the AppBar's background color
+  ///    and overrides the background color defined by this theme.
+  ///  * [foregroundColor], which specifies the color for icons and text within
+  ///    the app bar.
+  ///  * [Theme.of], which returns the current overall Material theme as
+  ///    a [ThemeData].
+  ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
+  ///    default colors are based on.
+  ///  * [ColorScheme.brightness], which indicates if the overall [Theme]
+  ///    is light or dark.
   final Color? color;
+
+  /// The default color for [Text] and [Icon]s within the app bar.
+  ///
+  /// If null, [AppBar] uses the overall theme's [ColorScheme.onPrimary] if the
+  /// overall theme's brightness is [Brightness.light], and [ColorScheme.onSurface]
+  /// if the overall theme's [brightness] is [Brightness.dark].
+  ///
+  /// This color is used to configure [DefaultTextStyle] and [IconTheme]
+  /// widgets.
+  ///
+  /// See also:
+  ///
+  ///  * [AppBar.foregroundColor], which specifies the app bar's text and icon
+  ///    colors and overrides the foreground color defined by this theme.
+  ///  * [color], which specifies the app bar's background color.
+  ///  * [Theme.of], which returns the current overall Material theme as
+  ///    a [ThemeData].
+  ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
+  ///    default colors are based on.
+  ///  * [ColorScheme.brightness], which indicates if the overall [Theme]
+  ///    is light or dark.
+  final Color? foregroundColor;
 
   /// Default value for [AppBar.elevation].
   ///
@@ -93,6 +144,7 @@ class AppBarTheme with Diagnosticable {
     IconThemeData? actionsIconTheme,
     Brightness? brightness,
     Color? color,
+    Color? foregroundColor,
     double? elevation,
     Color? shadowColor,
     IconThemeData? iconTheme,
@@ -103,6 +155,7 @@ class AppBarTheme with Diagnosticable {
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
       color: color ?? this.color,
+      foregroundColor: foregroundColor ?? this.foregroundColor,
       elevation: elevation ?? this.elevation,
       shadowColor: shadowColor ?? this.shadowColor,
       iconTheme: iconTheme ?? this.iconTheme,
@@ -128,6 +181,7 @@ class AppBarTheme with Diagnosticable {
     return AppBarTheme(
       brightness: t < 0.5 ? a?.brightness : b?.brightness,
       color: Color.lerp(a?.color, b?.color, t),
+      foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
@@ -143,6 +197,7 @@ class AppBarTheme with Diagnosticable {
     return hashValues(
       brightness,
       color,
+      foregroundColor,
       elevation,
       shadowColor,
       iconTheme,
@@ -162,6 +217,7 @@ class AppBarTheme with Diagnosticable {
     return other is AppBarTheme
         && other.brightness == brightness
         && other.color == color
+        && other.foregroundColor == foregroundColor
         && other.elevation == elevation
         && other.shadowColor == shadowColor
         && other.iconTheme == iconTheme
@@ -176,6 +232,7 @@ class AppBarTheme with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));

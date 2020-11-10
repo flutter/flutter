@@ -11,6 +11,7 @@ import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'globals.dart' as globals;
+import 'macos/xcode.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
@@ -472,9 +473,23 @@ enum AndroidArch {
 }
 
 /// The default set of iOS device architectures to build for.
-const List<DarwinArch> defaultIOSArchs = <DarwinArch>[
-  DarwinArch.arm64,
-];
+List<DarwinArch> defaultIOSArchsForSdk(SdkType sdkType) {
+  switch (sdkType) {
+    case SdkType.iPhone:
+      return <DarwinArch>[
+        DarwinArch.armv7,
+        DarwinArch.arm64,
+      ];
+    case SdkType.iPhoneSimulator:
+      return <DarwinArch>[
+        // Apple Silicon ARM simulators not yet supported.
+        DarwinArch.x86_64,
+      ];
+    default:
+      assert(false, 'Unknown SDK type $sdkType');
+      return null;
+  }
+}
 
 String getNameForDarwinArch(DarwinArch arch) {
   switch (arch) {

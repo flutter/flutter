@@ -12,12 +12,11 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/user_messages.dart';
+import '../base/user_messages.dart' hide userMessages;
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
@@ -252,7 +251,36 @@ class AndroidValidator extends DoctorValidator {
 /// A subvalidator that checks if the licenses within the detected Android
 /// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
-  AndroidLicenseValidator() : super('Android license subvalidator',);
+  AndroidLicenseValidator({
+    @required AndroidSdk androidSdk,
+    @required Platform platform,
+    @required OperatingSystemUtils operatingSystemUtils,
+    @required FileSystem fileSystem,
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required AndroidStudio androidStudio,
+    @required Stdio stdio,
+    @required UserMessages userMessages,
+  }) : _androidSdk = androidSdk,
+       _platform = platform,
+       _operatingSystemUtils = operatingSystemUtils,
+       _fileSystem = fileSystem,
+       _processManager = processManager,
+       _logger = logger,
+       _androidStudio = androidStudio,
+       _stdio = stdio,
+       _userMessages = userMessages,
+       super('Android license subvalidator');
+
+  final AndroidSdk _androidSdk;
+  final AndroidStudio _androidStudio;
+  final Stdio _stdio;
+  final OperatingSystemUtils _operatingSystemUtils;
+  final Platform _platform;
+  final FileSystem _fileSystem;
+  final ProcessManager _processManager;
+  final Logger _logger;
+  final UserMessages _userMessages;
 
   @override
   String get slowWarning => 'Checking Android licenses is taking an unexpectedly long time...';
@@ -262,27 +290,27 @@ class AndroidLicenseValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     // Match pre-existing early termination behavior
-    if (globals.androidSdk == null || globals.androidSdk.latestVersion == null ||
-        globals.androidSdk.validateSdkWellFormed().isNotEmpty ||
+    if (_androidSdk == null || _androidSdk.latestVersion == null ||
+        _androidSdk.validateSdkWellFormed().isNotEmpty ||
         ! await _checkJavaVersionNoOutput()) {
       return ValidationResult(ValidationType.missing, messages);
     }
 
-    final String sdkVersionText = userMessages.androidStatusInfo(globals.androidSdk.latestVersion.buildToolsVersionName);
+    final String sdkVersionText = _userMessages.androidStatusInfo(_androidSdk.latestVersion.buildToolsVersionName);
 
     // Check for licenses.
     switch (await licensesAccepted) {
       case LicensesAccepted.all:
-        messages.add(ValidationMessage(userMessages.androidLicensesAll));
+        messages.add(ValidationMessage(_userMessages.androidLicensesAll));
         break;
       case LicensesAccepted.some:
-        messages.add(ValidationMessage.hint(userMessages.androidLicensesSome));
+        messages.add(ValidationMessage.hint(_userMessages.androidLicensesSome));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
       case LicensesAccepted.none:
-        messages.add(ValidationMessage.error(userMessages.androidLicensesNone));
+        messages.add(ValidationMessage.error(_userMessages.androidLicensesNone));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
       case LicensesAccepted.unknown:
-        messages.add(ValidationMessage.error(userMessages.androidLicensesUnknown(globals.platform)));
+        messages.add(ValidationMessage.error(_userMessages.androidLicensesUnknown(_platform)));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
     return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
@@ -290,26 +318,26 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   Future<bool> _checkJavaVersionNoOutput() async {
     final String javaBinary = AndroidSdk.findJavaBinary(
-      androidStudio: globals.androidStudio,
-      fileSystem: globals.fs,
-      operatingSystemUtils: globals.os,
-      platform: globals.platform,
+      androidStudio: _androidStudio,
+      fileSystem: _fileSystem,
+      operatingSystemUtils: _operatingSystemUtils,
+      platform: _platform,
     );
     if (javaBinary == null) {
       return false;
     }
-    if (!globals.processManager.canRun(javaBinary)) {
+    if (!_processManager.canRun(javaBinary)) {
       return false;
     }
     String javaVersion;
     try {
-      final ProcessResult result = await globals.processManager.run(<String>[javaBinary, '-version']);
+      final ProcessResult result = await _processManager.run(<String>[javaBinary, '-version']);
       if (result.exitCode == 0) {
         final List<String> versionLines = (result.stderr as String).split('\n');
         javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
       }
     } on Exception catch (error) {
-      globals.printTrace(error.toString());
+      _logger.printTrace(error.toString());
     }
     if (javaVersion == null) {
       // Could not determine the java version.
@@ -344,9 +372,9 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     try {
-      final Process process = await globals.processUtils.start(
-        <String>[globals.androidSdk.sdkManagerPath, '--licenses'],
-        environment: globals.androidSdk.sdkManagerEnv,
+      final Process process = await _processManager.start(
+        <String>[_androidSdk.sdkManagerPath, '--licenses'],
+        environment: _androidSdk.sdkManagerEnv,
       );
       process.stdin.write('n\n');
       // We expect logcat streams to occasionally contain invalid utf-8,
@@ -364,36 +392,36 @@ class AndroidLicenseValidator extends DoctorValidator {
       await Future.wait<void>(<Future<void>>[output, errors]);
       return status ?? LicensesAccepted.unknown;
     } on ProcessException catch (e) {
-      globals.printTrace('Failed to run Android sdk manager: $e');
+      _logger.printTrace('Failed to run Android sdk manager: $e');
       return LicensesAccepted.unknown;
     }
   }
 
   /// Run the Android SDK manager tool in order to accept SDK licenses.
-  static Future<bool> runLicenseManager() async {
-    if (globals.androidSdk == null) {
-      globals.printStatus(userMessages.androidSdkShort);
+  Future<bool> runLicenseManager() async {
+    if (_androidSdk == null) {
+      _logger.printStatus(_userMessages.androidSdkShort);
       return false;
     }
 
     if (!_canRunSdkManager()) {
-      throwToolExit(userMessages.androidMissingSdkManager(globals.androidSdk.sdkManagerPath, globals.platform));
+      throwToolExit(_userMessages.androidMissingSdkManager(_androidSdk.sdkManagerPath, _platform));
     }
 
     try {
-      final Process process = await globals.processUtils.start(
-        <String>[globals.androidSdk.sdkManagerPath, '--licenses'],
-        environment: globals.androidSdk.sdkManagerEnv,
+      final Process process = await _processManager.start(
+        <String>[_androidSdk.sdkManagerPath, '--licenses'],
+        environment: _androidSdk.sdkManagerEnv,
       );
 
       // The real stdin will never finish streaming. Pipe until the child process
       // finishes.
-      unawaited(process.stdin.addStream(globals.stdio.stdin)
+      unawaited(process.stdin.addStream(_stdio.stdin)
         // If the process exits unexpectedly with an error, that will be
         // handled by the caller.
         .catchError((dynamic err, StackTrace stack) {
-          globals.printTrace('Echoing stdin to the licenses subprocess failed:');
-          globals.printTrace('$err\n$stack');
+          _logger.printTrace('Echoing stdin to the licenses subprocess failed:');
+          _logger.printTrace('$err\n$stack');
         }
       ));
 
@@ -401,29 +429,28 @@ class AndroidLicenseValidator extends DoctorValidator {
       // may complete first.
       try {
         await Future.wait<void>(<Future<void>>[
-          globals.stdio.addStdoutStream(process.stdout),
-          globals.stdio.addStderrStream(process.stderr),
+          _stdio.addStdoutStream(process.stdout),
+          _stdio.addStderrStream(process.stderr),
         ]);
       } on Exception catch (err, stack) {
-        globals.printTrace('Echoing stdout or stderr from the license subprocess failed:');
-        globals.printTrace('$err\n$stack');
+        _logger.printTrace('Echoing stdout or stderr from the license subprocess failed:');
+        _logger.printTrace('$err\n$stack');
       }
 
       final int exitCode = await process.exitCode;
       return exitCode == 0;
     } on ProcessException catch (e) {
-      throwToolExit(userMessages.androidCannotRunSdkManager(
-        globals.androidSdk.sdkManagerPath,
+      throwToolExit(_userMessages.androidCannotRunSdkManager(
+        _androidSdk.sdkManagerPath,
         e.toString(),
-        globals.platform,
+        _platform,
       ));
       return false;
     }
   }
 
-  static bool _canRunSdkManager() {
-    assert(globals.androidSdk != null);
-    final String sdkManagerPath = globals.androidSdk.sdkManagerPath;
-    return globals.processManager.canRun(sdkManagerPath);
+  bool _canRunSdkManager() {
+    final String sdkManagerPath = _androidSdk.sdkManagerPath;
+    return _processManager.canRun(sdkManagerPath);
   }
 }

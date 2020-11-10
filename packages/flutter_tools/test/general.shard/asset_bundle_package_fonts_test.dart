@@ -10,7 +10,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
@@ -46,12 +45,6 @@ dependencies:
     sdk: flutter
 $fontsSection
 ''');
-  }
-
-  void establishFlutterRoot() {
-    // Setting flutterRoot here so that it picks up the MemoryFileSystem's
-    // path separator.
-    Cache.flutterRoot = getFlutterRoot();
   }
 
   void writePackagesFile(String packages) {
@@ -113,7 +106,6 @@ $fontsSection
     });
 
     testUsingContext('App includes neither font manifest nor fonts when no defines fonts', () async {
-      establishFlutterRoot();
       writeEmptySchemaFile(globals.fs);
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -130,7 +122,6 @@ $fontsSection
     });
 
     testUsingContext('App font uses font file from package', () async {
-      establishFlutterRoot();
       writeEmptySchemaFile(globals.fs);
 
       const String fontsSection = '''
@@ -159,7 +150,6 @@ $fontsSection
     });
 
     testUsingContext('App font uses local font file and package font file', () async {
-      establishFlutterRoot();
       writeEmptySchemaFile(globals.fs);
 
       const String fontsSection = '''
@@ -192,7 +182,6 @@ $fontsSection
     });
 
     testUsingContext('App uses package font with own font file', () async {
-      establishFlutterRoot();
       writeEmptySchemaFile(globals.fs);
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -226,7 +215,6 @@ $fontsSection
     });
 
     testUsingContext('App uses package font with font file from another package', () async {
-      establishFlutterRoot();
       writeEmptySchemaFile(globals.fs);
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -261,7 +249,6 @@ $fontsSection
     });
 
     testUsingContext('App uses package font with properties and own font file', () async {
-      establishFlutterRoot();
       writeEmptySchemaFile(globals.fs);
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -297,7 +284,6 @@ $fontsSection
     });
 
     testUsingContext('App uses local font and package font with own font file.', () async {
-      establishFlutterRoot();
       writeEmptySchemaFile(globals.fs);
 
       const String fontsSection = '''
