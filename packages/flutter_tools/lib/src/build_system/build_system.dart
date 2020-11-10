@@ -772,7 +772,7 @@ class _BuildInstance {
       // If we're missing a depfile, wait until after evaluating the target to
       // compute changes.
       final bool canSkip = !node.missingDepfile &&
-        await node.computeChanges(environment, fileCache, fileSystem, logger);
+        node.computeChanges(environment, fileCache, fileSystem, logger);
 
       if (canSkip) {
         skipped = true;
@@ -1001,12 +1001,12 @@ class Node {
   /// Collect hashes for all inputs to determine if any have changed.
   ///
   /// Returns whether this target can be skipped.
-  Future<bool> computeChanges(
+  bool computeChanges(
     Environment environment,
     FileStore fileStore,
     FileSystem fileSystem,
     Logger logger,
-  ) async {
+  ) {
     final Set<String> currentOutputPaths = <String>{
       for (final File file in outputs) file.path,
     };
