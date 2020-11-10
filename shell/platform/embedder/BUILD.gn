@@ -76,6 +76,7 @@ template("embedder_source_set") {
       ":embedder_gpu_configuration",
       "//flutter/assets",
       "//flutter/common",
+      "//flutter/common/graphics",
       "//flutter/flow",
       "//flutter/fml",
       "//flutter/lib/ui",

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/flow/gl_context_switch.h"
+#include "flutter/common/graphics/gl_context_switch.h"
 
 namespace flutter {
 

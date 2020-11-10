@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "flutter/flow/gl_context_switch.h"
+#include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"

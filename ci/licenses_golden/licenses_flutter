@@ -21,6 +21,12 @@ FILE: ../../../flutter/benchmarking/benchmarking.cc
 FILE: ../../../flutter/benchmarking/benchmarking.h
 FILE: ../../../flutter/common/constants.h
 FILE: ../../../flutter/common/exported_symbols.sym
+FILE: ../../../flutter/common/graphics/gl_context_switch.cc
+FILE: ../../../flutter/common/graphics/gl_context_switch.h
+FILE: ../../../flutter/common/graphics/persistent_cache.cc
+FILE: ../../../flutter/common/graphics/persistent_cache.h
+FILE: ../../../flutter/common/graphics/texture.cc
+FILE: ../../../flutter/common/graphics/texture.h
 FILE: ../../../flutter/common/settings.cc
 FILE: ../../../flutter/common/settings.h
 FILE: ../../../flutter/common/task_runners.cc
@@ -33,8 +39,6 @@ FILE: ../../../flutter/flow/embedded_views.h
 FILE: ../../../flutter/flow/flow_run_all_unittests.cc
 FILE: ../../../flutter/flow/flow_test_utils.cc
 FILE: ../../../flutter/flow/flow_test_utils.h
-FILE: ../../../flutter/flow/gl_context_switch.cc
-FILE: ../../../flutter/flow/gl_context_switch.h
 FILE: ../../../flutter/flow/gl_context_switch_unittests.cc
 FILE: ../../../flutter/flow/instrumentation.cc
 FILE: ../../../flutter/flow/instrumentation.h
@@ -115,8 +119,6 @@ FILE: ../../../flutter/flow/surface.cc
 FILE: ../../../flutter/flow/surface.h
 FILE: ../../../flutter/flow/surface_frame.cc
 FILE: ../../../flutter/flow/surface_frame.h
-FILE: ../../../flutter/flow/texture.cc
-FILE: ../../../flutter/flow/texture.h
 FILE: ../../../flutter/flow/texture_unittests.cc
 FILE: ../../../flutter/flow/view_holder.cc
 FILE: ../../../flutter/flow/view_holder.h
@@ -620,8 +622,6 @@ FILE: ../../../flutter/shell/common/engine_unittests.cc
 FILE: ../../../flutter/shell/common/fixtures/shell_test.dart
 FILE: ../../../flutter/shell/common/fixtures/shelltest_screenshot.png
 FILE: ../../../flutter/shell/common/input_events_unittests.cc
-FILE: ../../../flutter/shell/common/persistent_cache.cc
-FILE: ../../../flutter/shell/common/persistent_cache.h
 FILE: ../../../flutter/shell/common/persistent_cache_unittests.cc
 FILE: ../../../flutter/shell/common/pipeline.cc
 FILE: ../../../flutter/shell/common/pipeline.h
