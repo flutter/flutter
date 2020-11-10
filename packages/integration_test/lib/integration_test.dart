@@ -54,22 +54,18 @@ Future<void> run(
   Reporter reporter = const _ReporterImpl(),
 }) async {
   _isUsingLegacyReporting = false;
-  final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized()
-          as IntegrationTestWidgetsFlutterBinding;
+  final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized() as IntegrationTestWidgetsFlutterBinding;
 
   // Pipe detailed exceptions within [testWidgets] to `package:test`.
   reportTestException = (FlutterErrorDetails details, String testDescription) {
     registerException('Test $testDescription failed: $details');
   };
 
-  final Completer<Map<String, Object>> resultsCompleter =
-      Completer<Map<String, Object>>();
+  final Completer<Map<String, Object>> resultsCompleter = Completer<Map<String, Object>>();
 
   await directRunTests(
     testMain,
-    reporterFactory: (Engine engine) =>
-        ResultReporter(engine, resultsCompleter),
+    reporterFactory: (Engine engine) => ResultReporter(engine, resultsCompleter),
   );
 
   final Map<String, Object> results = await resultsCompleter.future;
@@ -114,8 +110,7 @@ class _ReporterImpl implements Reporter {
   }
 }
 
-String _formatFailureForPlatform(Failure failure) =>
-    '${failure.error} ${failure.details}';
+String _formatFailureForPlatform(Failure failure) => '${failure.error} ${failure.details}';
 
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
 /// on a channel to adapt them to native instrumentation test format.
@@ -130,8 +125,8 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     if (!_isUsingLegacyReporting) {
       // TODO(jiahaog): Point users to use the CLI https://github.com/flutter/flutter/issues/66264.
       print('Using the legacy test result reporter, which will not catch all '
-          'errors thrown in declared tests. Consider wrapping tests with [run] '
-          'instead.');
+          'errors thrown in declared tests. Consider wrapping tests with '
+          'https://api.flutter.dev/flutter/integration_test/run.html instead.');
       return;
     }
 
@@ -141,10 +136,12 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     });
 
     final TestExceptionReporter oldTestExceptionReporter = reportTestException;
-    reportTestException =
-        (FlutterErrorDetails details, String testDescription) {
-      results[testDescription] = Failure(testDescription, details.toString(),
-          error: details.exception);
+    reportTestException = (FlutterErrorDetails details, String testDescription) {
+      results[testDescription] = Failure(
+        testDescription,
+        details.toString(),
+        error: details.exception,
+      );
       oldTestExceptionReporter(details, testDescription);
     };
   }
@@ -153,8 +150,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     this.results = results;
     print('Test execution completed: $results');
 
-    _allTestsPassed
-        .complete(!results.values.any((Object val) => val is Failure));
+    _allTestsPassed.complete(!results.values.any((Object val) => val is Failure));
     callbackManager.cleanup();
   }
 

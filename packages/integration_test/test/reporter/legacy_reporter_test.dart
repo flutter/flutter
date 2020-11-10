@@ -12,13 +12,11 @@ import 'utils.dart';
 
 // Assumes that the flutter command is in `$PATH`.
 const String _flutterBin = 'flutter';
-const String _integrationResultsPrefix =
-    'IntegrationTestWidgetsFlutterBinding test results:';
+const String _integrationResultsPrefix = 'IntegrationTestWidgetsFlutterBinding test results:';
 
 Future<void> main() async {
   test('When multiple tests pass', () async {
-    final Map<String, dynamic> results =
-        await _runTest('test/reporter/data/pass_test_script.dart');
+    final Map<String, dynamic> results = await _runTest('test/reporter/data/pass_test_script.dart');
 
     expect(results, hasLength(2));
     expect(results, containsPair('Passing test 1', isSuccess));
@@ -26,8 +24,7 @@ Future<void> main() async {
   });
 
   test('When multiple tests fail', () async {
-    final Map<String, dynamic> results =
-        await _runTest('test/reporter/data/fail_test_script.dart');
+    final Map<String, dynamic> results = await _runTest('test/reporter/data/fail_test_script.dart');
 
     expect(results, hasLength(2));
     expect(results, containsPair('Failing test 1', isSerializedFailure));
@@ -35,8 +32,7 @@ Future<void> main() async {
   });
 
   test('When one test passes, then another fails', () async {
-    final Map<String, dynamic> results =
-        await _runTest('test/reporter/data/pass_then_fail_test_script.dart');
+    final Map<String, dynamic> results = await _runTest('test/reporter/data/pass_then_fail_test_script.dart');
 
     expect(results, hasLength(2));
     expect(results, containsPair('Passing test', isSuccess));
@@ -48,8 +44,7 @@ Future<void> main() async {
 ///
 /// [scriptPath] is relative to the package root.
 Future<Map<String, dynamic>> _runTest(String scriptPath) async {
-  final Process process =
-      await Process.start(_flutterBin, <String>['test', '--machine', scriptPath]);
+  final Process process = await Process.start(_flutterBin, <String>['test', '--machine', scriptPath]);
 
   /// In the test [tearDownAll] block, the test results are encoded into JSON and
   /// are printed with the [_integrationResultsPrefix] prefix.

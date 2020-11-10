@@ -33,8 +33,10 @@ class ResultReporter implements Reporter {
         liveTest.test.name: liveTest.state.result.name == success
             ? success
             : Failure(
-                liveTest.test.name, liveTest.errors.first.stackTrace.toString(),
-                error: liveTest.errors.first.error)
+                liveTest.test.name,
+                liveTest.errors.first.stackTrace.toString(),
+                error: liveTest.errors.first.error,
+              )
     };
     _resultsCompleter.complete(results);
   }

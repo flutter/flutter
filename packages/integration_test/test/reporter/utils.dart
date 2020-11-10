@@ -32,11 +32,9 @@ Future<Map<String, Object>> runAndCollectResults(
 }
 
 class _TestReporter implements Reporter {
-  final Completer<Map<String, Object>> _resultsCompleter =
-      Completer<Map<String, Object>>();
+  final Completer<Map<String, Object>> _resultsCompleter = Completer<Map<String, Object>>();
   Future<Map<String, Object>> get results => _resultsCompleter.future;
 
   @override
-  Future<void> report(Map<String, Object> results) async =>
-      _resultsCompleter.complete(results);
+  Future<void> report(Map<String, Object> results) async => _resultsCompleter.complete(results);
 }
