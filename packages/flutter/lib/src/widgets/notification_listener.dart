@@ -37,7 +37,7 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 ///       body: NotificationListener<ScrollNotification>(
 ///         onNotification: (scrollNotification) {
 ///           if (scrollNotification is ScrollStartNotification) {
-///             print('Scrolling has Started');
+///             print('Scrolling has started');
 ///           } else if (scrollNotification is ScrollEndNotification) {
 ///             print("Scrolling has ended");
 ///           }
