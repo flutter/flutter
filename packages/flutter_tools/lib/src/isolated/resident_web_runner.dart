@@ -669,12 +669,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
           path: '/' + mainUri.pathSegments.last,
         );
       }
+      final LanguageVersion languageVersion =  determineLanguageVersion(
+        globals.fs.file(mainUri),
+        packageConfig[flutterProject.manifest.appName],
+      );
 
       final String entrypoint = <String>[
-        determineLanguageVersion(
-          globals.fs.file(mainUri),
-          packageConfig[flutterProject.manifest.appName],
-        ),
+        '// @dart=${languageVersion.major}.${languageVersion.minor}',
         '// Flutter web bootstrap script for $importedEntrypoint.',
         '',
         "import 'dart:ui' as ui;",

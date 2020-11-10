@@ -88,13 +88,13 @@ const Map<String, Set<String>> _materialActions = <String, Set<String>>{
 
 class _ChipsTile extends StatelessWidget {
   const _ChipsTile({
-    Key key,
+    Key? key,
     this.label,
     this.children,
   }) : super(key: key);
 
-  final String label;
-  final List<Widget> children;
+  final String? label;
+  final List<Widget>? children;
 
   // Wraps a list of chips into a ListTile for display as a section in the demo.
   @override
@@ -107,11 +107,11 @@ class _ChipsTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.only(top: 16.0, bottom: 4.0),
             alignment: Alignment.center,
-            child: Text(label, textAlign: TextAlign.start),
+            child: Text(label!, textAlign: TextAlign.start),
           ),
-          if (children.isNotEmpty)
+          if (children!.isNotEmpty)
             Wrap(
-              children: children.map<Widget>((Widget chip) {
+              children: children!.map<Widget>((Widget chip) {
                 return Padding(
                   padding: const EdgeInsets.all(2.0),
                   child: chip,
@@ -125,7 +125,7 @@ class _ChipsTile extends StatelessWidget {
                 alignment: Alignment.center,
                 constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
                 padding: const EdgeInsets.all(8.0),
-                child: Text('None', style: Theme.of(context).textTheme.caption.copyWith(fontStyle: FontStyle.italic)),
+                child: Text('None', style: Theme.of(context).textTheme.caption!.copyWith(fontStyle: FontStyle.italic)),
               ),
             ),
         ],
@@ -188,7 +188,7 @@ class _ChipDemoState extends State<ChipDemo> {
   }
 
   String _capitalize(String name) {
-    assert(name != null && name.isNotEmpty);
+    assert(name.isNotEmpty);
     return name.substring(0, 1).toUpperCase() + name.substring(1);
   }
 
@@ -209,7 +209,7 @@ class _ChipDemoState extends State<ChipDemo> {
   AssetImage _nameToAvatar(String name) {
     assert(_avatars.containsKey(name));
     return AssetImage(
-      _avatars[name],
+      _avatars[name]!,
       package: 'flutter_gallery_assets',
     );
   }
@@ -218,7 +218,7 @@ class _ChipDemoState extends State<ChipDemo> {
     if (_selectedAction.isEmpty) {
       return '';
     }
-    return _capitalize(_results[_selectedAction]) + '!';
+    return _capitalize(_results[_selectedAction]!) + '!';
   }
 
   @override
@@ -285,11 +285,11 @@ class _ChipDemoState extends State<ChipDemo> {
     }).toList();
 
     Set<String> allowedActions = <String>{};
-    if (_selectedMaterial != null && _selectedMaterial.isNotEmpty) {
+    if (_selectedMaterial.isNotEmpty) {
       for (final String tool in _selectedTools) {
-        allowedActions.addAll(_toolActions[tool]);
+        allowedActions.addAll(_toolActions[tool]!);
       }
-      allowedActions = allowedActions.intersection(_materialActions[_selectedMaterial]);
+      allowedActions = allowedActions.intersection(_materialActions[_selectedMaterial]!);
     }
 
     final List<Widget> actionChips = allowedActions.map<Widget>((String name) {

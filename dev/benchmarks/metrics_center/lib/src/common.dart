@@ -5,8 +5,8 @@
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
-import 'package:equatable/equatable.dart';
+import 'package:crypto/crypto.dart'; // ignore: import_of_legacy_library_into_null_safe
+import 'package:equatable/equatable.dart'; // ignore: import_of_legacy_library_into_null_safe
 
 /// Common format of a metric data point.
 class MetricPoint extends Equatable {

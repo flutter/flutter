@@ -330,7 +330,6 @@ class HotRunner extends ResidentRunner {
             outputPath: dillOutputPath ??
               getDefaultApplicationKernelPath(
                 trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
-                nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
               ),
             packageConfig: packageConfig,
           ).then((CompilerOutput output) => output?.errorCount == 0)
