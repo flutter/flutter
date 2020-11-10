@@ -12,9 +12,7 @@ void main() {
   test('We are in a directory with a space in it', () async {
     // The Flutter SDK should be in a directory with a space in it, to make sure
     // our tools support that.
-    final String expectedName = Platform.environment['SDK_CHECKOUT_PATH'];
-    expect(expectedName, 'flutter sdk');
-    expect(expectedName, contains(' '));
+    const String expectedName = 'flutter sdk';
     final List<String> parts = path.split(Directory.current.absolute.path);
     expect(parts.reversed.take(3), <String>['bots', 'dev', expectedName]);
   });
