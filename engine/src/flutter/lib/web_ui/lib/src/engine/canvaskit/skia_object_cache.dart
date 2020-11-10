@@ -316,8 +316,7 @@ class SkiaObjectBox {
     assert(removed);
     _isDeleted = true;
     if (_refs.isEmpty) {
-      _skObjectDeleteQueue.add(skObject);
-      _skObjectCollector ??= _scheduleSkObjectCollection();
+      _scheduleSkObjectCollection(skObject);
     }
   }
 }
