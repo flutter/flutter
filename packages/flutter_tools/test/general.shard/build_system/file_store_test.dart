@@ -193,7 +193,7 @@ void main() {
 
     fileCache.diffFileList(<File>[file]);
 
-    expect(fileCache.currentAssetKeys['foo.dart'], '48948bcc9a00807df35a9b341ca384c2');
+    expect(fileCache.currentAssetKeys['foo.dart'], '5d41402abc4b2a76b9719d911017c592');
   });
 }
 
