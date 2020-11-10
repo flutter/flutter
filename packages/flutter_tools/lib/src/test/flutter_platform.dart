@@ -713,18 +713,18 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     assert(testUrl.scheme == 'file');
     final File file = globals.fs.file(testUrl);
+    final LanguageVersion languageVersion = determineLanguageVersion(
+      file,
+      _packageConfig[flutterProject?.manifest?.appName],
+    );
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
-      languageVersionHeader: determineLanguageVersion(
-        file,
-        _packageConfig[flutterProject?.manifest?.appName],
-      ),
+      languageVersionHeader: '// @dart=${languageVersion.major}.${languageVersion.minor}'
     );
   }
-
 
   File _cachedFontConfig;
 

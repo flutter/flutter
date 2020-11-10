@@ -27,6 +27,8 @@ import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
+import 'dart/language_version.dart';
+import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
@@ -101,14 +103,28 @@ class FlutterDevice {
         platformDillArtifact = Artifact.webPlatformSoundKernelDill;
         extraFrontEndOptions =  buildInfo.extraFrontEndOptions;
       } else {
-        // TODO(jonahwilliams): null-safe auto detection does not currently
-        // work on the web. Always opt out of null safety if it was not
-        // specifically requested.
-        platformDillArtifact = Artifact.webPlatformKernelDill;
-        extraFrontEndOptions =  <String>[
-          ...?buildInfo.extraFrontEndOptions,
-          '--no-sound-null-safety',
-        ];
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          globals.fs.file(buildInfo.packagesPath),
+          logger: globals.logger,
+        );
+        final File entrypointFile = globals.fs.file(target);
+        final LanguageVersion languageVersion = determineLanguageVersion(
+          entrypointFile,
+          packageConfig.packageOf(entrypointFile.absolute.uri),
+        );
+        if (languageVersion.major >= nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor) {
+          platformDillArtifact = Artifact.webPlatformSoundKernelDill;
+          extraFrontEndOptions =  <String>[
+            ...?buildInfo.extraFrontEndOptions,
+            '--sound-null-safety',
+          ];
+        } else {
+          platformDillArtifact = Artifact.webPlatformKernelDill;
+          extraFrontEndOptions =  <String>[
+            ...?buildInfo.extraFrontEndOptions,
+            '--no-sound-null-safety',
+          ];
+        }
       }
 
       generator = ResidentCompiler(
