@@ -366,7 +366,6 @@ class HotRunner extends ResidentRunner {
         await device.setupDevFS(
           fsName,
           globals.fs.directory(projectRootPath),
-          packagesFilePath: packagesFilePath,
         ),
     ];
   }

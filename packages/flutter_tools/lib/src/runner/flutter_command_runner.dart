@@ -16,7 +16,6 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
 
@@ -82,19 +81,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('suppress-analytics',
         negatable: false,
         help: 'Suppress analytics reporting when this command runs.');
-
-    String packagesHelp;
-    bool showPackagesCommand;
-    if (globals.fs.isFileSync(kPackagesFileName)) {
-      packagesHelp = '(defaults to "$kPackagesFileName")';
-      showPackagesCommand = verboseHelp;
-    } else {
-      packagesHelp = '(required, since the current directory does not contain a "$kPackagesFileName" file)';
-      showPackagesCommand = true;
-    }
     argParser.addOption('packages',
-        hide: !showPackagesCommand,
-        help: 'Path to your ".packages" file.\n$packagesHelp');
+        hide: !verboseHelp,
+        help: 'Path to your "package_config.json" file.');
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
     }
@@ -219,7 +208,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // Set up the tooling configuration.
     final EngineBuildPaths engineBuildPaths = await globals.localEngineLocator.findEnginePath(
       topLevelResults['local-engine-src-path'] as String,
-      topLevelResults['local-engine'] as String
+      topLevelResults['local-engine'] as String,
+      topLevelResults['packages'] as String,
     );
     if (engineBuildPaths != null) {
       contextOverrides.addAll(<Type, dynamic>{
@@ -252,10 +242,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
         final bool machineFlag = topLevelResults['machine'] as bool;
         if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
           await globals.flutterVersion.checkFlutterVersionFreshness();
-        }
-
-        if (topLevelResults.wasParsed('packages')) {
-          globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(topLevelResults['packages'] as String));
         }
 
         // See if the user specified a specific device.
