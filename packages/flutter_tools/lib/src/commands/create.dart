@@ -249,7 +249,8 @@ class CreateCommand extends CreateBase {
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
-    if (!projectDir.existsSync() || projectDir.listSync().isEmpty) {
+    final bool creatingNewProject = !projectDir.existsSync() || projectDir.listSync().isEmpty;
+    if (creatingNewProject) {
       globals.printStatus('Creating project $relativeDirPath...');
     } else {
       if (sampleCode != null && !overwrite) {
@@ -281,6 +282,7 @@ class CreateCommand extends CreateBase {
     globals.printStatus('Wrote $generatedFileCount files.');
     globals.printStatus('\nAll done!');
     final String application = sampleCode != null ? 'sample application' : 'application';
+    final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
     if (generatePackage) {
       final String relativeMainPath = globals.fs.path.normalize(globals.fs.path.join(
         relativeDirPath,
@@ -301,7 +303,6 @@ class CreateCommand extends CreateBase {
       final FlutterProject app = project.hasExampleApp ? project.example : project;
       final String relativeAppPath = globals.fs.path.normalize(globals.fs.path.relative(app.directory.path));
       final String relativeAppMain = globals.fs.path.join(relativeAppPath, 'lib', 'main.dart');
-      final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
       final String relativePluginMain = globals.fs.path.join(relativePluginPath, 'lib', '$projectName.dart');
 
       // Let them know a summary of the state of their tooling.
@@ -322,6 +323,23 @@ Your plugin code is in $relativePluginMain.
 Host platform code is in the $platformsString directories under $relativePluginPath.
 To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
 ''');
+      }
+    }
+    if (generatePlugin) {
+      if (!creatingNewProject && argResults.wasParsed('platforms')) {
+        _printUpdatePluginPubspecMessage(platforms, templateContext);
+      } else {
+        final List<String> platforms = _getSupportedPlatformsInPlugin(projectDir);
+        if (platforms.isEmpty) {
+          globals.printError('''
+Must specify at least one platform using --platforms.
+
+Run `flutter create -t plugin --platforms <platforms> .` under the $relativePluginPath/ directory.
+You can also find detailed instructions on how to add platforms in the `$relativePluginPath/pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
+
+To find out which platforms are supported, run `flutter create -h`.
+''');
+        }
       }
     }
     return FlutterCommandResult.success();
@@ -378,19 +396,13 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       templateContext['linux'] = false;
       templateContext['macos'] = false;
       templateContext['windows'] = false;
-      globals.printError(_kNoPlatformsErrorMessage);
     }
     final List<String> platformsToAdd = _getSupportedPlatformsFromTemplateContext(templateContext);
 
-    final String pubspecPath = globals.fs.path.join(directory.absolute.path, 'pubspec.yaml');
-    final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
-    List<String> existingPlatforms = <String>[];
-    if (manifest.supportedPlatforms != null) {
-      existingPlatforms = manifest.supportedPlatforms.keys.toList();
-      for (final String existingPlatform in existingPlatforms) {
-        // re-generate files for existing platforms
-        templateContext[existingPlatform] = true;
-      }
+    final List<String> existingPlatforms = _getSupportedPlatformsInPlugin(directory);
+    for (final String existingPlatform in existingPlatforms) {
+      // re-generate files for existing platforms
+      templateContext[existingPlatform] = true;
     }
 
     final bool willAddPlatforms = platformsToAdd.isNotEmpty;
@@ -409,35 +421,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         offline: boolArg('offline'),
         generateSyntheticPackage: false,
       );
-    }
-
-    final bool addPlatformsToExistingPlugin = willAddPlatforms && existingPlatforms.isNotEmpty;
-
-    if (addPlatformsToExistingPlugin) {
-      // If adding new platforms to an existing plugin project, prints
-      // a help message containing the platforms maps need to be added to the `platforms` key in the pubspec.
-      platformsToAdd.removeWhere(existingPlatforms.contains);
-      final YamlMap platformsMapToPrint = Plugin.createPlatformsYamlMap(platformsToAdd, templateContext['pluginClass'] as String, templateContext['androidIdentifier'] as String);
-      if (platformsMapToPrint.isNotEmpty) {
-        String prettyYaml = '';
-        for (final String platform in platformsMapToPrint.keys.toList().cast<String>()) {
-          prettyYaml += '$platform:\n';
-          for (final String key in (platformsMapToPrint[platform] as YamlMap).keys.toList().cast<String>()) {
-            prettyYaml += ' $key: ${platformsMapToPrint[platform][key] as String}\n';
-          }
-        }
-        globals.printStatus('''
-The `pubspec.yaml` under the project directory must be updated to support ${platformsToAdd.join(', ')},
-Add below lines to under the `platform:` key:
-''', emphasis: true);
-      globals.printStatus(prettyYaml, emphasis: true, color: TerminalColor.blue);
-      globals.printStatus('''
-If the `platforms` key does not exist in the `pubspec.yaml`, it might because that the plugin project does not
-use the multi-platforms plugin format. We highly recommend a migration to the multi-platforms plugin format.
-For detailed instructions on how to format the pubspec.yaml to support platforms using the multi-platforms format, see:
-https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
-''', emphasis: true);
-      }
     }
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
@@ -492,5 +475,47 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       if (templateContext['macos'] == true)
         'macos',
     ];
+  }
+}
+
+
+// Determine what platforms are supported based on generated files.
+List<String> _getSupportedPlatformsInPlugin(Directory projectDir) {
+  final String pubspecPath = globals.fs.path.join(projectDir.absolute.path, 'pubspec.yaml');
+  final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
+  final List<String> platforms = manifest.validSupportedPlatforms == null
+                                ? <String>[]
+                                : manifest.validSupportedPlatforms.keys.toList();
+  return platforms;
+}
+
+void _printUpdatePluginPubspecMessage(List<String> platformsToAdd, Map<String, dynamic> templateContext) {
+  if (platformsToAdd.isEmpty) {
+    return;
+  }
+
+  // If adding new platforms to an existing plugin project, prints
+  // a help message containing the platforms maps need to be added to the `platforms` key in the pubspec.
+  final YamlMap platformsMapToPrint = Plugin.createPlatformsYamlMap(platformsToAdd, templateContext['pluginClass'] as String, templateContext['androidIdentifier'] as String);
+  if (platformsMapToPrint.isNotEmpty) {
+    String prettyYaml = '';
+    for (final String platform in platformsMapToPrint.keys.toList().cast<String>()) {
+      prettyYaml += '$platform:\n';
+      for (final String key in (platformsMapToPrint[platform] as YamlMap).keys.toList().cast<String>()) {
+        prettyYaml += ' $key: ${platformsMapToPrint[platform][key] as String}\n';
+      }
+    }
+    globals.printStatus('''
+
+The `pubspec.yaml` under the project directory must be updated to support ${platformsToAdd.join(', ')},
+Add below lines to under the `platform:` key:
+''', emphasis: true);
+    globals.printStatus(prettyYaml, emphasis: true, color: TerminalColor.blue);
+    globals.printStatus('''
+If the `platforms` key does not exist in the `pubspec.yaml`, it might because that the plugin project does not
+use the multi-platforms plugin format. We highly recommend a migration to the multi-platforms plugin format.
+For detailed instructions on how to format the pubspec.yaml to support platforms using the multi-platforms format, see:
+https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
+''', emphasis: true);
   }
 }
