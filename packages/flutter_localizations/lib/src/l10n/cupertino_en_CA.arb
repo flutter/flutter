@@ -1,4 +1,5 @@
 {
+  "searchTextFieldPlaceholerLabel": "Search",
   "tabSemanticsLabel": "Tab $tabIndex of $tabCount",
   "datePickerHourSemanticsLabelOne": "$hour o'clock",
   "datePickerHourSemanticsLabelOther": "$hour o'clock",
