@@ -39,7 +39,6 @@ class HotEvent extends UsageEvent {
     @required this.sdkName,
     @required this.emulator,
     @required this.fullRestart,
-    @required this.nullSafety,
     @required this.fastReassemble,
     this.reason,
     this.finalLibraryCount,
@@ -57,7 +56,6 @@ class HotEvent extends UsageEvent {
   final String sdkName;
   final bool emulator;
   final bool fullRestart;
-  final bool nullSafety;
   final bool fastReassemble;
   final int finalLibraryCount;
   final int syncedLibraryCount;
@@ -93,8 +91,6 @@ class HotEvent extends UsageEvent {
         CustomDimensions.hotEventTransferTimeInMs: transferTimeInMs.toString(),
       if (overallTimeInMs != null)
         CustomDimensions.hotEventOverallTimeInMs: overallTimeInMs.toString(),
-      if (nullSafety != null)
-        CustomDimensions.nullSafety: nullSafety.toString(),
       if (fastReassemble != null)
         CustomDimensions.fastReassemble: fastReassemble.toString(),
     });
