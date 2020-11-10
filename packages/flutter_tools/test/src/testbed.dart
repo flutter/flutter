@@ -708,7 +708,7 @@ class FakeFlutterVersion implements FlutterVersion {
   String getVersionString({bool redactUnknownBranches = false}) {
     return 'v0.0.0';
   }
-  
+
   @override
   String get repositoryUrl => null;
 
