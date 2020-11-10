@@ -56,8 +56,6 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 ///
 /// This sample shows by dragging the user can reorder the items of the list.
-/// list of Numbers will be used to display items in the list.
-/// [List.generate]it is constructor which  is used to form a list of values.
 /// The [onReorder] parameter is required and will be called when a child
 /// widget is dragged to a new position.
 ///
@@ -71,20 +69,25 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 ///     padding : const EdgeInsets.symmetric(horizontal:40),
 ///     children:[
 ///       for(var i=0 ; i<_list.length ; i++)
-///         ListTile(key:Key('$i'), title: Text(_list[i])),
+///         ListTile(
+///              key:Key('$i'),
+///              title: Text(_list[i]),
+///         ),
 ///     ],
 ///     onReorder: (oldIndex, newIndex){
-///      setState((){
-///        if(oldIndex < newIndex){
-///          newIndex-=1;
-///        }
-///        final element = _list.removeAt(oldIndex);
-///        _list.insert(newIndex, element);
-///      });
+///       setState((){
+///         if(oldIndex < newIndex){
+///           newIndex-=1;
+///         }
+///         final element = _list.removeAt(oldIndex);
+///         _list.insert(newIndex, element);
+///       });
 ///     },
-///  );
-///}
+///   );
+/// }
+///
 /// ```
+///
 ///{@end-tool}
 ///
 class ReorderableListView extends StatefulWidget {
