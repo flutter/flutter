@@ -48,6 +48,7 @@ class FlutterDevice {
     TargetPlatform targetPlatform,
     ResidentCompiler generator,
     this.userIdentifier,
+    this.nullSafetyMode = NullSafetyMode.autodetect,
   }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts.getArtifactPath(
@@ -83,6 +84,7 @@ class FlutterDevice {
     String userIdentifier,
   }) async {
     ResidentCompiler generator;
+    NullSafetyMode nullSafetyMode = buildInfo.nullSafetyMode;
     final TargetPlatform targetPlatform = await device.targetPlatform;
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
@@ -118,12 +120,14 @@ class FlutterDevice {
             ...?buildInfo.extraFrontEndOptions,
             '--sound-null-safety',
           ];
+          nullSafetyMode = NullSafetyMode.sound;
         } else {
           platformDillArtifact = Artifact.webPlatformKernelDill;
           extraFrontEndOptions =  <String>[
             ...?buildInfo.extraFrontEndOptions,
             '--no-sound-null-safety',
           ];
+          nullSafetyMode = NullSafetyMode.unsound;
         }
       }
 
@@ -198,6 +202,7 @@ class FlutterDevice {
       generator: generator,
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
+      nullSafetyMode: nullSafetyMode,
     );
   }
 
@@ -205,6 +210,7 @@ class FlutterDevice {
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
+  final NullSafetyMode nullSafetyMode;
 
   DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;
