@@ -128,8 +128,8 @@ abstract class FlutterCommand extends Command<void> {
   }) : _systemClock = systemClock ?? globals.systemClock,
        _flutterUsage = flutterUsage ?? globals.flutterUsage;
 
-  final SystemClock _systemClock;
-  final Usage _flutterUsage;
+  SystemClock _systemClock;
+  Usage _flutterUsage;
 
   /// The option name for a custom observatory port.
   static const String observatoryPortOption = 'observatory-port';
@@ -923,6 +923,8 @@ abstract class FlutterCommand extends Command<void> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<void> run() async {
+    _systemClock ??= globals.systemClock,
+    _flutterUsage ??= globals.flutterUsage;
     _flutterUsage.currentCommand = this;
     final DateTime startTime = _systemClock.now();
 
