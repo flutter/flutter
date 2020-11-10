@@ -376,7 +376,7 @@ void main() {
         );
         // Allow any CustomDimensions.localTime (cd33) timestamp.
         final RegExp usageRegexp = RegExp(
-          'screenView {cd3: false, cd4: ios, cd22: iOS 13, cd23: debug, cd18: false, cd15: swift, cd31: false, cd47: false, cd33: .*, viewName: run'
+          'screenView {cd3: false, cd4: ios, cd22: iOS 13, cd23: debug, cd18: false, cd15: swift, cd31: false, cd33: .*, viewName: run'
         );
         expect(buffer.toString(), matches(usageRegexp));
       }, overrides: <Type, Generator>{

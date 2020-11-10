@@ -633,7 +633,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         fullRestart: true,
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
-        nullSafety: usageNullSafety,
         fastReassemble: null,
       ).send();
     }

@@ -525,7 +525,6 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      cdKey(CustomDimensions.nullSafety): 'false',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -580,7 +579,6 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      cdKey(CustomDimensions.nullSafety): 'false',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -645,7 +643,6 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      cdKey(CustomDimensions.nullSafety): 'true',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -1398,7 +1395,6 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'true',
-      cdKey(CustomDimensions.nullSafety): 'false',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
