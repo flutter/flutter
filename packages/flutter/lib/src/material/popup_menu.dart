@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show window;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -591,12 +593,10 @@ class _PopupMenu<T> extends StatelessWidget {
 
 // Positioning of the menu on the screen.
 class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
-  _PopupMenuRouteLayout(this.position, this.overlaySize, this.itemSizes, this.selectedItemIndex, this.textDirection);
+  _PopupMenuRouteLayout(this.position, this.itemSizes, this.selectedItemIndex, this.textDirection, this.topPadding, this.bottomPadding);
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
   final RelativeRect position;
-
-  final Size? overlaySize;
 
   // The sizes of each item are computed when the menu is laid out, and before
   // the route is laid out.
@@ -608,6 +608,11 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
   // Whether to prefer going to the left or to the right.
   final TextDirection textDirection;
+
+  // Top padding of unsafe area.
+  final double topPadding;
+  // Bottom padding of unsafe area.
+  final double bottomPadding;
 
   // We put the child wherever position specifies, so long as it will fit within
   // the specified parent size padded (inset) by 8. If necessary, we adjust the
@@ -627,17 +632,14 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     // size: The safe area size of the overlay.
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
-    final Size _overlaySize = overlaySize ?? size;
-    print('_overlaySize[$_overlaySize]');
 
-    final double unsafeHeight = _overlaySize.height - size.height;
-    final double buttonHeight = _overlaySize.height - position.top - position.bottom;
-
-    print('size[$size] overlaySize[$overlaySize] unsafeHeight[$unsafeHeight] buttonHeight[$buttonHeight]');
-    print('position[$position]');
+    // The safe area size has removed padding, so we should add those back
+    // to compute button size from [position].
+    final double buttonHeight = size.height + topPadding + bottomPadding - position.top - position.bottom;
 
     // Find the ideal vertical position.
-    double y = position.top - unsafeHeight + buttonHeight;
+    // Default vertical position is below the element that generates it.
+    double y = position.top - topPadding + buttonHeight;
     if (selectedItemIndex != null && itemSizes != null) {
       double selectedItemOffset = _kMenuVerticalPadding;
       for (int index = 0; index < selectedItemIndex!; index += 1)
@@ -688,7 +690,6 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     assert(itemSizes.length == oldDelegate.itemSizes.length);
 
     return position != oldDelegate.position
-      || overlaySize != oldDelegate.overlaySize
       || selectedItemIndex != oldDelegate.selectedItemIndex
       || textDirection != oldDelegate.textDirection
       || !listEquals(itemSizes, oldDelegate.itemSizes);
@@ -698,7 +699,6 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 class _PopupMenuRoute<T> extends PopupRoute<T> {
   _PopupMenuRoute({
     required this.position,
-    required this.overlaySize,
     required this.items,
     this.initialValue,
     this.elevation,
@@ -710,7 +710,6 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   }) : itemSizes = List<Size?>.filled(items.length, null);
 
   final RelativeRect position;
-  final Size? overlaySize;
   final List<PopupMenuEntry<T>> items;
   final List<Size?> itemSizes;
   final T? initialValue;
@@ -757,13 +756,15 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     return SafeArea(
       child: Builder(
         builder: (BuildContext context) {
+          final MediaQueryData mediaQuery = MediaQueryData.fromWindow(ui.window);
           return CustomSingleChildLayout(
             delegate: _PopupMenuRouteLayout(
               position,
-              overlaySize,
               itemSizes,
               selectedItemIndex,
               Directionality.of(context),
+              mediaQuery.padding.top,
+              mediaQuery.padding.bottom,
             ),
             child: capturedThemes.wrap(menu),
           );
@@ -831,7 +832,6 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 Future<T?> showMenu<T>({
   required BuildContext context,
   required RelativeRect position,
-  Size?  overlaySize,
   required List<PopupMenuEntry<T>> items,
   T? initialValue,
   double? elevation,
@@ -860,7 +860,6 @@ Future<T?> showMenu<T>({
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator)!;
   return navigator.push(_PopupMenuRoute<T>(
     position: position,
-    overlaySize: overlaySize,
     items: items,
     initialValue: initialValue,
     elevation: elevation,
@@ -1083,7 +1082,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         items: items,
         initialValue: widget.initialValue,
         position: position,
-        overlaySize: overlay.size,
         shape: widget.shape ?? popupMenuTheme.shape,
         color: widget.color ?? popupMenuTheme.color,
       )
