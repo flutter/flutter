@@ -235,16 +235,9 @@ class FlutterDriverService extends DriverService {
     int driverPort,
     List<String> browserDimension,
   }) async {
-    // Check if package:test is available. If not, fall back to invoking
-    // the test script directly. `pub run test` is strictly better because
-    // in the even that a socket or something similar is left open, the
-    // test runner will correctly shutdown the VM instead of hanging forever.
     return _processUtils.stream(<String>[
       _dartSdkPath,
-      if (packageConfig['test'] != null)
-        ...<String>['pub', 'run', 'test', ...arguments, testFile, '-rexpanded']
-      else
-        ...<String>[...arguments, testFile, '-rexpanded'],
+      ...<String>[...arguments, testFile, '-rexpanded'],
     ], environment: <String, String>{
       'VM_SERVICE_URL': _vmServiceUri,
       ...environment,
