@@ -325,7 +325,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// {@end-tool}
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
     assert(() {
-      if (SchedulerBinding?.instance!.schedulerPhase.index >= SchedulerPhase.persistentCallbacks.index) {
+      if (SchedulerBinding?.instance!.schedulerPhase.index == SchedulerPhase.persistentCallbacks.index) {
         // Build/layout has begun, we should not call setState right now.
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
@@ -2210,7 +2210,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   )
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
     assert(() {
-      if (SchedulerBinding?.instance!.schedulerPhase.index >= SchedulerPhase.persistentCallbacks.index) {
+      if (SchedulerBinding?.instance!.schedulerPhase.index == SchedulerPhase.persistentCallbacks.index) {
         // Build/layout has begun, we should not call setState right now.
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
