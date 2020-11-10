@@ -923,7 +923,7 @@ abstract class FlutterCommand extends Command<void> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<void> run() async {
-    _systemClock ??= globals.systemClock,
+    _systemClock ??= globals.systemClock;
     _flutterUsage ??= globals.flutterUsage;
     _flutterUsage.currentCommand = this;
     final DateTime startTime = _systemClock.now();
