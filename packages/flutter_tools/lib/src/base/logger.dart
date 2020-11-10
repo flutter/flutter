@@ -334,7 +334,7 @@ class StdoutLogger extends Logger {
   void writeToStdErr(String message) => _stdio.stderrWrite(message);
 
   @override
-  void printTrace(String message) { }// => _stdio.stdoutWrite('TRACE: $message');
+  void printTrace(String message) { }
 
   @override
   Status startProgress(
