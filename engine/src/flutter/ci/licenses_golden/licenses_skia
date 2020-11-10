@@ -1,4 +1,4 @@
-Signature: ae8573c733912229252dfcea056538b0
+Signature: 5e7ecd2b5a45b7357322b994c0030c01
 
 UNUSED LICENSES:
 
@@ -4141,11 +4141,13 @@ FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode.h
 FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode_icu.cpp
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFe.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeColorMatrix.h
+FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeComposite.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeTurbulence.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFilter.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFilterContext.h
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFe.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeColorMatrix.cpp
+FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeComposite.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeTurbulence.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilter.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilterContext.cpp
