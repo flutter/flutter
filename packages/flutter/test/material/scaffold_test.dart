@@ -2143,37 +2143,6 @@ void main() {
       '   MaterialApp at the top of your application widget tree.\n'
     ));
   });
-
-  testWidgets('ScaffoldMessenger asserts when nested Scaffolds register for SnackBars', (WidgetTester tester) async {
-    final List<dynamic> exceptions = <dynamic>[];
-    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      exceptions.add(details.exception);
-    };
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
-        body: Scaffold(),
-      ),
-    ));
-
-    FlutterError.onError = oldHandler;
-
-    expect(exceptions.length, 1);
-    expect(exceptions.single.runtimeType, FlutterError);
-    final FlutterError error = exceptions.first as FlutterError;
-    expect(error.diagnostics.length, 3);
-    expect(error.diagnostics[2].level, DiagnosticLevel.hint);
-    expect(error.toStringDeep(),
-      'FlutterError\n'
-      '   Nested Scaffolds have registered with the ScaffoldMessenger.\n'
-      '   If nested Scaffolds were to share the same ScaffoldMessenger,\n'
-      '   then all would receive a SnackBar at the same time, resulting in\n'
-      '   multiple SnackBars in your UI.\n'
-      '   This is typically resolved by putting a ScaffoldMessenger in\n'
-      '   between the levels of nested Scaffolds. Doing so will set a\n'
-      '   separate SnackBar scope for these Scaffolds.\n'
-    );
-  });
 }
 
 class _GeometryListener extends StatefulWidget {

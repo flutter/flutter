@@ -88,6 +88,15 @@ enum _ScaffoldSlot {
 /// ```
 /// {@end-tool}
 ///
+/// ## Nested Scaffolds
+///
+/// The [ScaffoldMessenger] will assert if nested Scaffolds register for [SnackBar]s.
+/// This prevents duplicate [SnackBar]s from being shown when multiple [Scaffold]s
+/// are visible and nested inside one another. In order to control the scope of
+/// [Snackbar]s in this case, a [ScaffoldMessenger] should be placed in between
+/// nested [Scaffold]s. For more guidance on managing nested Scaffolds, see
+/// Troubleshooting under [Scaffold].
+///
 /// See also:
 ///
 ///  * [SnackBar], which is a temporary notification typically shown near the
@@ -274,37 +283,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   }
 
   void _register(ScaffoldState newScaffold) {
-    bool nestedScaffoldsDetected = false;
-    // Check to see if any of _scaffolds are a parent of newScaffold.
-    final ScaffoldState? parent = newScaffold.context.findAncestorStateOfType<ScaffoldState>();
-    if (_scaffolds.contains(parent))
-      nestedScaffoldsDetected = true;
-    // Check if newScaffold is a parent of any _scaffolds
-    for (final ScaffoldState registeredScaffold in _scaffolds) {
-      final ScaffoldState? parent = registeredScaffold.context.findAncestorStateOfType<ScaffoldState>();
-      if (newScaffold == parent)
-        nestedScaffoldsDetected = true;
-    }
-
-    assert(() {
-      if (nestedScaffoldsDetected) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Nested Scaffolds have registered with the ScaffoldMessenger.'),
-          ErrorDescription(
-            'If nested Scaffolds were to share the same ScaffoldMessenger, then '
-            'all would receive a SnackBar at the same time, resulting in multiple '
-            'SnackBars in your UI.'
-          ),
-          ErrorHint(
-            'This is typically resolved by putting a ScaffoldMessenger in '
-            'between the levels of nested Scaffolds. Doing so will set a separate '
-            'SnackBar scope for these Scaffolds.'
-          ),
-        ]);
-      }
-      return true;
-    }());
-
     _scaffolds.add(newScaffold);
     if (_snackBars.isNotEmpty) {
       newScaffold._updateSnackBar();
@@ -315,6 +293,34 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     final bool removed = _scaffolds.remove(scaffold);
     // ScaffoldStates should only be removed once.
     assert(removed);
+  }
+
+  // Nested Scaffolds should not all register with the ScaffoldMessenger. Doing
+  // so would result in duplicate SnackBars being presented at the same time.
+  bool _debugCheckForNestedScaffolds() {
+    assert(() {
+      for (final ScaffoldState registeredScaffold in _scaffolds) {
+        final ScaffoldState? parent = registeredScaffold.context.findAncestorStateOfType<ScaffoldState>();
+        if (parent != null && _scaffolds.contains(parent)) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary(
+              'Nested Scaffolds have registered with the ScaffoldMessenger.'),
+            ErrorDescription(
+              'If nested Scaffolds were to share the same ScaffoldMessenger, then '
+              'all would receive a SnackBar at the same time, resulting in multiple '
+              'SnackBars in your UI.'
+            ),
+            ErrorHint(
+              'This is typically resolved by putting a ScaffoldMessenger in '
+              'between the levels of nested Scaffolds. Doing so will set a separate '
+              'SnackBar scope for these Scaffolds.'
+            ),
+          ]);
+        }
+      }
+      return true;
+    }());
+    return true;
   }
 
   /// Shows  a [SnackBar] across all registered [Scaffold]s.
@@ -354,6 +360,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// ```
   /// {@end-tool}
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
+    assert(_debugCheckForNestedScaffolds());
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleStatusChanged);
     if (_snackBars.isEmpty) {
@@ -484,7 +491,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   @override
   void dispose() {
-    print('ScaffoldMessenger.dispose');
     _snackBarController?.dispose();
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
@@ -1417,9 +1423,15 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// It is typically not necessary to nest Scaffolds. For example, in a
 /// tabbed UI, where the [bottomNavigationBar] is a [TabBar]
 /// and the body is a [TabBarView], you might be tempted to make each tab bar
-/// view a scaffold with a differently titled AppBar. Rather, it would be
+/// view a scaffold with a differently titled [AppBar]. Rather, it would be
 /// better to add a listener to the [TabController] that updates the
-/// AppBar
+/// [AppBar].
+///
+/// When using nested Scaffolds with the [ScaffoldMessenger], an assertion error
+/// will be thrown if a ScaffoldMessenger has not been placed in between to
+/// manage the scope of [SnackBar]s. Without a controlled scope, a
+/// ScaffoldMessenger could deliver the same SnackBar to multiple nested
+/// Scaffolds, resulting in duplicate SnackBars shown in your UI.
 ///
 /// {@tool snippet}
 /// Add a listener to the app's tab controller so that the [AppBar] title of the
@@ -2813,7 +2825,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    print('Scaffold.dispose');
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
     _snackBarController?.dispose();
     _snackBarTimer?.cancel();

@@ -2119,4 +2119,32 @@ void main() {
     final AssertionError error = exceptions.first as AssertionError;
     expect(error.message, contains('Only one API should be used to manage SnackBars.'));
   });
+
+  testWidgets('ScaffoldMessenger asserts before presenting SnackBars to nested Scaffolds', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        body: Scaffold(),
+      ),
+    ));
+
+    try {
+      final ScaffoldMessengerState scaffoldMessengerState = tester.state(
+        find.byType(ScaffoldMessenger));
+      scaffoldMessengerState.showSnackBar(SnackBar(
+        content: const Text('ScaffoldMessenger'),
+        duration: const Duration(seconds: 2),
+        action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+        behavior: SnackBarBehavior.floating,
+      ));
+    } on FlutterError catch (error) {
+      expect(
+        error.message,
+        'Nested Scaffolds have registered with the ScaffoldMessenger.\n'
+        'If nested Scaffolds were to share the same ScaffoldMessenger, then all would receive a '
+        'SnackBar at the same time, resulting in multiple SnackBars in your UI.\n'
+        'This is typically resolved by putting a ScaffoldMessenger in between the levels of '
+        'nested Scaffolds. Doing so will set a separate SnackBar scope for these Scaffolds.'
+      );
+    }
+  });
 }
