@@ -508,6 +508,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
+          nullSafetyMode: device.nullSafetyMode,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {

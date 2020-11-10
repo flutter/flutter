@@ -124,7 +124,7 @@ class WebAssetServer implements AssetReader {
     this.internetAddress,
     this._modules,
     this._digests,
-    this._buildInfo,
+    this._nullSafetyMode,
   ) : basePath = _parseBasePathFromIndexHtml(globals.fs.currentDirectory
             .childDirectory('web')
             .childFile('index.html'));
@@ -169,7 +169,8 @@ class WebAssetServer implements AssetReader {
     BuildInfo buildInfo,
     bool enableDwds,
     Uri entrypoint,
-    ExpressionCompiler expressionCompiler, {
+    ExpressionCompiler expressionCompiler,
+    NullSafetyMode nullSafetyMode, {
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
   }) async {
@@ -209,7 +210,7 @@ class WebAssetServer implements AssetReader {
       address,
       modules,
       digests,
-      buildInfo,
+      nullSafetyMode,
     );
     if (testMode) {
       return server;
@@ -293,7 +294,7 @@ class WebAssetServer implements AssetReader {
     return server;
   }
 
-  final BuildInfo _buildInfo;
+  final NullSafetyMode _nullSafetyMode;
   final HttpServer _httpServer;
   // If holding these in memory is too much overhead, this can be switched to a
   // RandomAccessFile and read on demand.
@@ -672,12 +673,12 @@ class WebAssetServer implements AssetReader {
 
   File get _resolveDartSdkJsFile =>
       globals.fs.file(globals.artifacts.getArtifactPath(
-          _dartSdkJsArtifactMap[webRenderer][_buildInfo.nullSafetyMode]
+          _dartSdkJsArtifactMap[webRenderer][_nullSafetyMode]
       ));
 
   File get _resolveDartSdkJsMapFile =>
     globals.fs.file(globals.artifacts.getArtifactPath(
-        _dartSdkJsMapArtifactMap[webRenderer][_buildInfo.nullSafetyMode]
+        _dartSdkJsMapArtifactMap[webRenderer][_nullSafetyMode]
     ));
 
   @override
@@ -735,6 +736,7 @@ class WebDevFS implements DevFS {
     @required this.expressionCompiler,
     @required this.chromiumLauncher,
     @required this.nullAssertions,
+    @required this.nullSafetyMode,
     this.testMode = false,
   }) : _port = port;
 
@@ -751,6 +753,7 @@ class WebDevFS implements DevFS {
   final ChromiumLauncher chromiumLauncher;
   final bool nullAssertions;
   final int _port;
+  final NullSafetyMode nullSafetyMode;
 
   WebAssetServer webAssetServer;
 
@@ -823,6 +826,7 @@ class WebDevFS implements DevFS {
       enableDwds,
       entrypoint,
       expressionCompiler,
+      nullSafetyMode,
       testMode: testMode,
     );
     final int selectedPort = webAssetServer.selectedPort;
