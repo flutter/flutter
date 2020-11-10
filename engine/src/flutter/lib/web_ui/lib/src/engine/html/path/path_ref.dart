@@ -156,7 +156,16 @@ class PathRef {
   int get isRRect => fIsRRect ? fRRectOrOvalStartIdx : -1;
   int get isRect => fIsRect ? fRRectOrOvalStartIdx : -1;
   ui.RRect? getRRect() => fIsRRect ? _getRRect() : null;
-  ui.Rect? getRect() => fIsRect ? _getRect() : null;
+  ui.Rect? getRect() {
+    /// Use _detectRect() for detection if explicity addRect was used (fIsRect) or
+    /// it is a potential due to moveTo + 3 lineTo verbs.
+    if (fIsRect) {
+      return ui.Rect.fromLTRB(
+          atPoint(0).dx, atPoint(0).dy, atPoint(1).dx, atPoint(2).dy);
+    } else {
+      return _fVerbsLength == 4 ? _detectRect() : null;
+    }
+  }
   bool get isRectCCW => fRRectOrOvalIsCCW;
 
   bool get hasComputedBounds => !fBoundsIsDirty;
@@ -173,9 +182,49 @@ class PathRef {
   }
 
   /// Reconstructs Rect from path commands.
-  ui.Rect _getRect() {
-    return ui.Rect.fromLTRB(
-        atPoint(0).dx, atPoint(0).dy, atPoint(1).dx, atPoint(2).dy);
+  ///
+  /// Detects clockwise starting with horizontal line.
+  ui.Rect? _detectRect() {
+    assert(_fVerbs[0] == SPath.kMoveVerb);
+    final double x0 = atPoint(0).dx;
+    final double y0 = atPoint(0).dy;
+    final double x1 = atPoint(1).dx;
+    final double y1 = atPoint(1).dy;
+    if (_fVerbs[1] != SPath.kLineVerb || y1 != y0) {
+      return null;
+    }
+    final double width = x1 - x0;
+    final double x2 = atPoint(2).dx;
+    final double y2 = atPoint(2).dy;
+    if (_fVerbs[2] != SPath.kLineVerb || x2 != x1) {
+      return null;
+    }
+    final double height = y2 - y1;
+    final double x3 = atPoint(3).dx;
+    final double y3 = atPoint(3).dy;
+    if (_fVerbs[3] != SPath.kLineVerb || y3 != y2) {
+      return null;
+    }
+    if ((x2 - x3) != width || (y3 - y0) != height) {
+      return null;
+    }
+    return ui.Rect.fromLTWH(x0, y0, width, height);
+  }
+
+  /// Returns horizontal/vertical line bounds or null if not a line.
+  ui.Rect? getStraightLine() {
+    if (_fVerbsLength != 2 || _fVerbs[0] != SPath.kMoveVerb ||
+        _fVerbs[1] != SPath.kLineVerb) {
+      return null;
+    }
+    final double x0 = _fPoints[0];
+    final double y0 = _fPoints[1];
+    final double x1 = _fPoints[2];
+    final double y1 = _fPoints[3];
+    if (y0 == y1 || x0 == x1) {
+      return ui.Rect.fromLTRB(x0, y0, x1, y1);
+    }
+    return null;
   }
 
   /// Reconstructs RRect from path commands.
