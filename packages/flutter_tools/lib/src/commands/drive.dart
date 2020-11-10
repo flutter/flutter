@@ -155,6 +155,9 @@ class DriveCommand extends RunCommandBase {
   bool get startPausedDefault => true;
 
   @override
+  bool get cachePubGet => false;
+
+  @override
   Future<void> validateCommand() async {
     if (userIdentifier != null) {
       final Device device = await findTargetDevice();

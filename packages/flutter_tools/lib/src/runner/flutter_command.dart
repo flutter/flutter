@@ -467,6 +467,9 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  /// Whether it is safe for this command to use a cached pub invocation.
+  bool get cachePubGet => true;
+
   Duration get deviceDiscoveryTimeout {
     if (_deviceDiscoveryTimeout == null
         && argResults.options.contains(FlutterOptions.kDeviceTimeout)
@@ -1057,6 +1060,7 @@ abstract class FlutterCommand extends Command<void> {
       await pub.get(
         context: PubContext.getVerifyContext(name),
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,
+        checkUpToDate: cachePubGet,
       );
       await project.regeneratePlatformSpecificTooling();
     }
