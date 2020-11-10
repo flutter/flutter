@@ -282,10 +282,10 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     super.didChangeDependencies();
   }
 
-  void _register(ScaffoldState newScaffold) {
-    _scaffolds.add(newScaffold);
+  void _register(ScaffoldState scaffold) {
+    _scaffolds.add(scaffold);
     if (_snackBars.isNotEmpty) {
-      newScaffold._updateSnackBar();
+      scaffold._updateSnackBar();
     }
   }
 
