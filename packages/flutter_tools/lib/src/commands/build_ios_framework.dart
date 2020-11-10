@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -192,6 +193,15 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         modeDirectory.deleteSync(recursive: true);
       }
 
+      if (boolArg('cocoapods')) {
+        // FlutterVersion.instance kicks off git processing which can sometimes fail, so don't try it until needed.
+        _flutterVersion ??= globals.flutterVersion;
+        produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
+      } else {
+        // Copy Flutter.framework.
+        await _produceFlutterFramework(buildInfo, modeDirectory);
+      }
+
       // Build aot, create module.framework and copy.
       final Directory iPhoneBuildOutput =
           modeDirectory.childDirectory('iphoneos');
@@ -199,15 +209,6 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
           modeDirectory.childDirectory('iphonesimulator');
       await _produceAppFramework(
           buildInfo, modeDirectory, iPhoneBuildOutput, simulatorBuildOutput);
-
-      if (boolArg('cocoapods')) {
-        // FlutterVersion.instance kicks off git processing which can sometimes fail, so don't try it until needed.
-        _flutterVersion ??= globals.flutterVersion;
-        produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
-      } else {
-        // Copy Flutter.framework.
-        await _produceFlutterFramework(buildInfo, modeDirectory, iPhoneBuildOutput, simulatorBuildOutput);
-      }
 
       // Build and copy plugins.
       await processPodsIfNeeded(_project.ios, getIosBuildDirectory(), buildInfo.mode);
@@ -295,25 +296,27 @@ end
 
   Future<void> _produceFlutterFramework(
     BuildInfo buildInfo,
-    Directory outputDirectory,
-    Directory iPhoneBuildOutput,
-    Directory simulatorBuildOutput,
+    Directory modeDirectory,
   ) async {
     final Status status = globals.logger.startProgress(
       ' ├─Populating Flutter.framework...',
     );
-    const String flutterFrameworkFileName = 'Flutter.framework';
-    final Directory fatFlutterFrameworkCopy =
-        outputDirectory.childDirectory(flutterFrameworkFileName);
+    final String engineCacheFlutterFrameworkDirectory = globals.artifacts.getArtifactPath(
+      Artifact.flutterFramework,
+      platform: TargetPlatform.ios,
+      mode: buildInfo.mode,
+    );
+    final String flutterFrameworkFileName = globals.fs.path.basename(
+      engineCacheFlutterFrameworkDirectory,
+    );
+    final Directory fatFlutterFrameworkCopy = modeDirectory.childDirectory(
+      flutterFrameworkFileName,
+    );
 
     try {
-      // Copy universal engine cache framework to output directory.
+      // Copy universal engine cache framework to mode directory.
       globals.fsUtils.copyDirectorySync(
-        iPhoneBuildOutput.childDirectory(flutterFrameworkFileName),
-        fatFlutterFrameworkCopy,
-      );
-      globals.fsUtils.copyDirectorySync(
-        simulatorBuildOutput.childDirectory(flutterFrameworkFileName),
+        globals.fs.directory(engineCacheFlutterFrameworkDirectory),
         fatFlutterFrameworkCopy,
       );
 
@@ -437,6 +440,12 @@ end
       ' ├─Building plugins...'
     );
     try {
+      // Regardless of the last "flutter build" build mode,
+      // copy the corresponding engine.
+      // A plugin framework built with bitcode must link against the bitcode version
+      // of Flutter.framework (Release).
+      _project.ios.copyEngineArtifactToProject(mode);
+
       final String bitcodeGenerationMode = mode == BuildMode.release ?
           'bitcode' : 'marker'; // In release, force bitcode embedding without archiving.
 
