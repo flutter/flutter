@@ -25,7 +25,9 @@ void main() {
 
     flutter = FlutterRunTestDriver(tempDirectory);
 
-    await flutter.run(withDebugger: true, startPaused: true, chrome: true);
+    await flutter.run(
+      withDebugger: true, startPaused: true, chrome: true,
+      additionalCommandArgs: <String>['--verbose']);
     await flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine);
     await flutter.resume();
     await flutter.waitForPause(); // Now we should be on the breakpoint.
