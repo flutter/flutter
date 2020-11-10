@@ -8,6 +8,20 @@ part of engine;
 /// When set to true, all platform messages will be printed to the console.
 const bool/*!*/ _debugPrintPlatformMessages = false;
 
+/// Whether [_customUrlStrategy] has been set or not.
+///
+/// It is valid to set [_customUrlStrategy] to null, so we can't use a null
+/// check to determine whether it was set or not. We need an extra boolean.
+bool _isUrlStrategySet = false;
+
+/// A custom URL strategy set by the app before running.
+UrlStrategy? _customUrlStrategy;
+set customUrlStrategy(UrlStrategy? strategy) {
+  assert(!_isUrlStrategySet, 'Cannot set URL strategy more than once.');
+  _isUrlStrategySet = true;
+  _customUrlStrategy = strategy;
+}
+
 /// The Web implementation of [ui.Window].
 // TODO(gspencergoog): Once the framework no longer uses ui.Window, make this extend
 // ui.SingletonFlutterWindow instead.
@@ -16,33 +30,26 @@ class EngineFlutterWindow extends ui.Window {
     final EnginePlatformDispatcher engineDispatcher = platformDispatcher as EnginePlatformDispatcher;
     engineDispatcher._windows[_windowId] = this;
     engineDispatcher._windowConfigurations[_windowId] = ui.ViewConfiguration();
-    _addUrlStrategyListener();
+    if (_isUrlStrategySet) {
+      _browserHistory =
+          MultiEntriesBrowserHistory(urlStrategy: _customUrlStrategy);
+    }
   }
 
   final Object _windowId;
   final ui.PlatformDispatcher platformDispatcher;
 
-  void _addUrlStrategyListener() {
-    _jsSetUrlStrategy = allowInterop((JsUrlStrategy? jsStrategy) {
-      assert(
-        _browserHistory == null,
-        'Cannot set URL strategy more than once.',
-      );
-      final UrlStrategy? strategy =
-          jsStrategy == null ? null : CustomUrlStrategy.fromJs(jsStrategy);
-      _browserHistory = MultiEntriesBrowserHistory(urlStrategy: strategy);
-    });
-    registerHotRestartListener(() {
-      _jsSetUrlStrategy = null;
-    });
-  }
-
   /// Handles the browser history integration to allow users to use the back
   /// button, etc.
   @visibleForTesting
   BrowserHistory get browserHistory {
+    final UrlStrategy? urlStrategy = _isUrlStrategySet
+        ? _customUrlStrategy
+        : _createDefaultUrlStrategy();
+    // Prevent any further customization of URL strategy.
+    _isUrlStrategySet = true;
     return _browserHistory ??=
-        MultiEntriesBrowserHistory(urlStrategy: _createDefaultUrlStrategy());
+        MultiEntriesBrowserHistory(urlStrategy: urlStrategy);
   }
 
   BrowserHistory? _browserHistory;
@@ -58,9 +65,12 @@ class EngineFlutterWindow extends ui.Window {
 
   @visibleForTesting
   Future<void> debugInitializeHistory(
-      UrlStrategy? strategy, {
-        required bool useSingle,
-      }) async {
+    UrlStrategy? strategy, {
+    required bool useSingle,
+  }) async {
+    // Prevent any further customization of URL strategy.
+    _isUrlStrategySet = true;
+
     await _browserHistory?.tearDown();
     if (useSingle) {
       _browserHistory = SingleEntryBrowserHistory(urlStrategy: strategy);
@@ -73,6 +83,10 @@ class EngineFlutterWindow extends ui.Window {
   Future<void> debugResetHistory() async {
     await _browserHistory?.tearDown();
     _browserHistory = null;
+
+    // Reset the globals too.
+    _isUrlStrategySet = false;
+    _customUrlStrategy = null;
   }
 
   Future<bool> handleNavigationMessage(
