@@ -133,6 +133,7 @@ source_set("flutter_framework_source") {
   deps = [
     ":ios_gpu_configuration",
     "//flutter/common",
+    "//flutter/common/graphics",
     "//flutter/flow",
     "//flutter/fml",
     "//flutter/lib/ui",

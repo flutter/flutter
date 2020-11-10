@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/flow/texture.h"
+#include "flutter/common/graphics/texture.h"
 
 namespace flutter {
 

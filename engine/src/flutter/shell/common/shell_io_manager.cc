@@ -4,9 +4,9 @@
 
 #include "flutter/shell/common/shell_io_manager.h"
 
+#include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/message_loop.h"
-#include "flutter/shell/common/persistent_cache.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
 namespace flutter {

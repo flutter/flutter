@@ -6,9 +6,9 @@
 
 #include <utility>
 
+#include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
-#include "flutter/shell/common/persistent_cache.h"
 #include "flutter/shell/common/serialization_callbacks.h"
 #include "third_party/skia/include/core/SkEncodedImageFormat.h"
 #include "third_party/skia/include/core/SkImageEncoder.h"
