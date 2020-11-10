@@ -22,7 +22,7 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 /// This example shows a [NotificationListener] widget
 /// that listens for [ScrollNotification] notifications. When a scroll
 /// event occurs in the [NestedScrollView],
-/// We want to be notified the current scroll position whether
+/// this widget is notified. The events could be either a
 /// it's [ScrollStartNotification]or[ScrollEndNotification].
 ///
 /// ```dart
