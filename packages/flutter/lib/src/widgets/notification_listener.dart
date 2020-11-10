@@ -23,7 +23,7 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 /// that listens for [ScrollNotification] notifications. When a scroll
 /// event occurs in the [NestedScrollView],
 /// this widget is notified. The events could be either a
-/// it's [ScrollStartNotification]or[ScrollEndNotification].
+/// [ScrollStartNotification]or[ScrollEndNotification].
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
