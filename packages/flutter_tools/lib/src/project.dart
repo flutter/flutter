@@ -8,7 +8,6 @@ import 'package:yaml/yaml.dart';
 
 import '../src/convert.dart';
 import 'android/gradle_utils.dart' as gradle;
-import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -648,32 +647,6 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
           ephemeralDirectory,
         );
       }
-      copyEngineArtifactToProject(BuildMode.debug);
-    }
-  }
-
-  void copyEngineArtifactToProject(BuildMode mode) {
-    // Copy podspec and framework from engine cache. The actual build mode
-    // doesn't actually matter as it will be overwritten by xcode_backend.sh.
-    // However, cocoapods will run before that script and requires something
-    // to be in this location.
-    final Directory framework = globals.fs.directory(
-      globals.artifacts.getArtifactPath(
-        Artifact.flutterFramework,
-        platform: TargetPlatform.ios,
-        mode: mode,
-      )
-    );
-    if (framework.existsSync()) {
-      final Directory engineDest = ephemeralDirectory
-          .childDirectory('Flutter')
-          .childDirectory('engine');
-      final File podspec = framework.parent.childFile('Flutter.podspec');
-      globals.fsUtils.copyDirectorySync(
-        framework,
-        engineDest.childDirectory('Flutter.framework'),
-      );
-      podspec.copySync(engineDest.childFile('Flutter.podspec').path);
     }
   }
 
