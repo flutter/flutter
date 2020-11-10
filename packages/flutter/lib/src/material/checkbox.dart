@@ -74,10 +74,6 @@ class Checkbox extends StatefulWidget {
     this.autofocus = false,
   }) : assert(tristate != null),
        assert(tristate || value != null),
-       assert(
-         fillColor == null || activeColor == null,
-         'Either use fillColor resolved in all states, or activeColor',
-       ),
        assert(autofocus != null),
        super(key: key);
 
@@ -136,7 +132,8 @@ class Checkbox extends StatefulWidget {
   ///
   /// Defaults to [ThemeData.toggleableActiveColor].
   ///
-  /// If [fillColor] is non-null, this will be ignored.
+  /// If [fillColor] returns a non-null color in the [MaterialState.selected]
+  /// state, it will be used over this.
   final Color? activeColor;
 
   /// The color that fills the checkbox when it is checked, in all
@@ -262,14 +259,26 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     if (widget.value == null || widget.value!) MaterialState.selected,
   };
 
-  MaterialStateProperty<Color> get _widgetFillColor {
+  MaterialStateProperty<Color?> get _widgetFillColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return widget.activeColor;
+      }
+      return null;
+    });
+  }
+
+  MaterialStateProperty<Color> get _defaultFillColor {
     final ThemeData themeData = Theme.of(context);
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return themeData.disabledColor;
       }
       if (states.contains(MaterialState.selected)) {
-        return widget.activeColor ?? themeData.toggleableActiveColor;
+        return themeData.toggleableActiveColor;
       }
       return themeData.unselectedWidgetColor;
     });
@@ -299,9 +308,11 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     final Set<MaterialState> activeStates = _states..add(MaterialState.selected);
     final Set<MaterialState> inactiveStates = _states..remove(MaterialState.selected);
     final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
-      ?? _widgetFillColor.resolve(activeStates);
+      ?? _widgetFillColor.resolve(activeStates)
+      ?? _defaultFillColor.resolve(activeStates);
     final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
-      ?? _widgetFillColor.resolve(inactiveStates);
+      ?? _widgetFillColor.resolve(inactiveStates)
+      ?? _defaultFillColor.resolve(inactiveStates);
 
     return FocusableActionDetector(
       actions: _actionMap,

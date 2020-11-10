@@ -138,14 +138,6 @@ class Switch extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   })  : assert(autofocus != null),
-        assert(
-          thumbColor == null || (activeColor == null && inactiveThumbColor == null),
-          'Either use thumbColor resolved in all states, or use activeColor/inactiveThumbColor',
-        ),
-        assert(
-          trackColor == null || (activeTrackColor == null && activeTrackColor == null),
-          'Either use trackColor resolved in all states, or use activeTrackColor/inactiveTrackColor',
-        ),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
         _switchType = _SwitchType.adaptive,
@@ -184,7 +176,8 @@ class Switch extends StatefulWidget {
   ///
   /// Defaults to [ThemeData.toggleableActiveColor].
   ///
-  /// If [thumbColor] is non-null, this will be ignored.
+  /// If [thumbColor] returns a non-null color in the [MaterialState.selected]
+  /// state, it will be used over this.
   final Color? activeColor;
 
   /// The color to use on the track when this switch is on.
@@ -193,7 +186,8 @@ class Switch extends StatefulWidget {
   ///
   /// Ignored if this switch is created with [Switch.adaptive].
   ///
-  /// If [trackColor] is non-null, this will be ignored.
+  /// If [trackColor] returns a non-null color in the [MaterialState.selected]
+  /// state, it will be used over this.
   final Color? activeTrackColor;
 
   /// The color to use on the thumb when this switch is off.
@@ -202,7 +196,8 @@ class Switch extends StatefulWidget {
   ///
   /// Ignored if this switch is created with [Switch.adaptive].
   ///
-  /// If [thumbColor] is non-null, this will be ignored.
+  /// If [thumbColor] returns a non-null color in the default state, it will be
+  /// used over this.
   final Color? inactiveThumbColor;
 
   /// The color to use on the track when this switch is off.
@@ -211,7 +206,8 @@ class Switch extends StatefulWidget {
   ///
   /// Ignored if this switch is created with [Switch.adaptive].
   ///
-  /// If [trackColor] is non-null, this will be ignored.
+  /// If [trackColor] returns a non-null color in the default state, it will be
+  /// used over this.
   final Color? inactiveTrackColor;
 
   /// An image to use on the thumb of this switch when the switch is on.
@@ -369,35 +365,60 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     if (widget.value) MaterialState.selected,
   };
 
-  MaterialStateProperty<Color> get _widgetThumbColor {
+  MaterialStateProperty<Color?> get _widgetThumbColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return widget.inactiveThumbColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return widget.activeColor;
+      }
+      return widget.inactiveThumbColor;
+    });
+  }
+
+  MaterialStateProperty<Color> get _defaultThumbColor {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
 
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        return widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade800 : Colors.grey.shade400);
+        return isDark ? Colors.grey.shade800 : Colors.grey.shade400;
       }
       if (states.contains(MaterialState.selected)) {
-        return widget.activeColor ?? theme.toggleableActiveColor;
+        return theme.toggleableActiveColor;
       }
-      return widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade400 : Colors.grey.shade50);
+      return isDark ? Colors.grey.shade400 : Colors.grey.shade50;
     });
   }
 
-  MaterialStateProperty<Color> get _widgetTrackColor {
+  MaterialStateProperty<Color?> get _widgetTrackColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return widget.inactiveTrackColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return widget.activeTrackColor;
+      }
+      return widget.inactiveTrackColor;
+    });
+  }
+
+  MaterialStateProperty<Color> get _defaultTrackColor {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
     const Color black32 = Color(0x52000000); // Black with 32% opacity
 
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        return widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
+        return isDark ? Colors.white10 : Colors.black12;
       }
       if (states.contains(MaterialState.selected)) {
-        final Color activeColor = _widgetThumbColor.resolve(states..add(MaterialState.selected));
-        return widget.activeTrackColor ?? activeColor.withAlpha(0x80);
+        final Set<MaterialState> activeState = states..add(MaterialState.selected);
+        final Color activeColor = _widgetThumbColor.resolve(activeState) ?? _defaultThumbColor.resolve(activeState);
+        return activeColor.withAlpha(0x80);
       }
-      return widget.inactiveTrackColor ?? (isDark ? Colors.white30 : black32);
+      return isDark ? Colors.white30 : black32;
     });
   }
 
@@ -411,13 +432,17 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     final Set<MaterialState> activeStates = _states..add(MaterialState.selected);
     final Set<MaterialState> inactiveStates = _states..remove(MaterialState.selected);
     final Color effectiveActiveThumbColor = widget.thumbColor?.resolve(activeStates)
-        ?? _widgetThumbColor.resolve(activeStates);
+      ?? _widgetThumbColor.resolve(activeStates)
+      ?? _defaultThumbColor.resolve(activeStates);
     final Color effectiveInactiveThumbColor = widget.thumbColor?.resolve(inactiveStates)
-        ?? _widgetThumbColor.resolve(inactiveStates);
+      ?? _widgetThumbColor.resolve(inactiveStates)
+      ?? _defaultThumbColor.resolve(inactiveStates);
     final Color effectiveActiveTrackColor = widget.trackColor?.resolve(activeStates)
-        ?? _widgetTrackColor.resolve(activeStates);
+      ?? _widgetTrackColor.resolve(activeStates)
+      ?? _defaultTrackColor.resolve(activeStates);
     final Color effectiveInactiveTrackColor = widget.trackColor?.resolve(inactiveStates)
-        ?? _widgetTrackColor.resolve(inactiveStates);
+      ?? _widgetTrackColor.resolve(inactiveStates)
+      ?? _defaultTrackColor.resolve(inactiveStates);
 
     final Color hoverColor = widget.hoverColor ?? theme.hoverColor;
     final Color focusColor = widget.focusColor ?? theme.focusColor;
