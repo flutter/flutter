@@ -4,8 +4,6 @@
 
 import 'dart:typed_data';
 
-import 'package:crypto/crypto.dart';
-
 /// Data from a non-linear mathematical function that functions as
 /// reproducible noise.
 final Uint32List _noise = Uint32List.fromList(<int>[
@@ -33,10 +31,7 @@ const List<int> _shiftAmounts = <int>[
 /// A bitmask that limits an integer to 32 bits.
 const int _mask32 = 0xFFFFFFFF;
 
-/// An incremental hash computation that approximates md5.
-///
-/// The byte finalization required for a true md5 is not implemented so the
-/// computations will not match up with other md5 packages.
+/// An incremental hash computation of md5.
 class Md5Hash {
   Md5Hash() {
     _digest[0] = 0x67452301;
@@ -141,6 +136,9 @@ class Md5Hash {
   }
 
   Uint32List finalize() {
+    // help dart remove bounds checks
+    // ignore: unnecessary_statements
+    _scratchSpace[63];
     _remainingLength ??= 0;
     _scratchSpace[_remainingLength] = 0x80;
     _remainingLength += 1;
@@ -150,8 +148,7 @@ class Md5Hash {
       _scratchSpace[i] = 0;
     }
     final int bitLength = _contentLength * 8;
-    _scratchSpace.buffer.asByteData().setUint64(56, bitLength);
-
+    _scratchSpace.buffer.asByteData().setUint64(56, bitLength, Endian.little);
     _writeChunk(Uint32List.view(_scratchSpace.buffer, 0, 16));
     return _digest;
   }
