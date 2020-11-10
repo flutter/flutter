@@ -203,6 +203,8 @@ class Home extends StatelessWidget {
               '${localizations.singleQuotePlural(2)}',
               '${localizations.doubleQuote}',
               '${localizations.doubleQuotePlural(2)}',
+              '${localizations.helloDecimalPattern(1200000)}',
+              '${localizations.helloPercentagePattern(1200000)}',
             ]);
           },
         ),
@@ -492,6 +494,24 @@ void main() {
     "description": "A plural message with double quotes.",
     "placeholders": {
       "count": {}
+    }
+  },
+
+  "helloDecimalPattern": "Number = {number}",
+  "@helloDecimalPattern": {
+    "description": "A message with a decimal number",
+    "placeholder": {
+      "type": "double",
+      "format": "decimalPattern"
+    }
+  },
+
+  "helloPercentagePattern": "Percent = {number}",
+  "@helloPercentagePattern": {
+    "description": "A message with a percentage",
+    "placeholder": {
+      "type": "double",
+      "format": "percentPattern"
     }
   }
 }
