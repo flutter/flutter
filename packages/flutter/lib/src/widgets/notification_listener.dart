@@ -33,7 +33,7 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 ///   return DefaultTabController(
 ///     length: _tabs.length,
 ///     child: Scaffold(
-///       //Listens the scroll events and returns the current position.
+///       // Listens to the scroll events and returns the current position.
 ///       body: NotificationListener<ScrollNotification>(
 ///         onNotification: (scrollNotification) {
 ///           if (scrollNotification is ScrollStartNotification) {
