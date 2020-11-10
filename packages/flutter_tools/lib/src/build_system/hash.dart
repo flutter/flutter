@@ -71,8 +71,13 @@ class Md5Hash {
 
   void _writeChunk(Uint32List chunk) {
     // help dart remove bounds checks
-   // ignore: unnecessary_statements
+    // ignore: unnecessary_statements
     chunk[15];
+    // ignore: unnecessary_statements
+    _shiftAmounts[63];
+    // ignore: unnecessary_statements
+    _noise[63];
+
     int d = _digest[3];
     int c = _digest[2];
     int b = _digest[1];
