@@ -1,4 +1,4 @@
-Signature: 5e7ecd2b5a45b7357322b994c0030c01
+Signature: 5ff9dfaa6e904046f3e0da4be18819a5
 
 UNUSED LICENSES:
 
@@ -4183,6 +4183,7 @@ FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDitherEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDitherEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrHighContrastFilterEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrHighContrastFilterEffect.h
+FILE: ../../../third_party/skia/src/gpu/mock/GrMockOpTarget.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSmallPathAtlasMgr.cpp
