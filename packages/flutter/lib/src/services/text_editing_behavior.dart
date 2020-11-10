@@ -226,7 +226,7 @@ class _TextEditingGestureDetectorState extends State<TextEditingGestureDetector>
     Actions.invoke<TapDownTextIntent>(context, TapDownTextIntent(
       details: details,
       renderEditable: _editableTextState.renderEditable,
-    ));
+    ), nullOk: true);
     // This isn't detected as a double tap gesture in the gesture recognizer
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
@@ -234,7 +234,7 @@ class _TextEditingGestureDetectorState extends State<TextEditingGestureDetector>
     if (_doubleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
       // If there was already a previous tap, the second down hold/tap is a
       // double tap down.
-      Actions.invoke<DoubleTapDownTextIntent>(context, DoubleTapDownTextIntent());
+      Actions.invoke<DoubleTapDownTextIntent>(context, DoubleTapDownTextIntent(), nullOk: true);
 
       _doubleTapTimer!.cancel();
       _doubleTapTimeout();
@@ -247,7 +247,7 @@ class _TextEditingGestureDetectorState extends State<TextEditingGestureDetector>
       Actions.invoke<SingleTapUpTextIntent>(context, SingleTapUpTextIntent(
         details: details,
         editableTextState: _editableTextState,
-      ));
+      ), nullOk: true);
       _lastTapOffset = details.globalPosition;
       _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
     }
@@ -255,7 +255,7 @@ class _TextEditingGestureDetectorState extends State<TextEditingGestureDetector>
   }
 
   void _handleTapCancel() {
-    Actions.invoke<SingleTapCancelTextIntent>(context, SingleTapCancelTextIntent());
+    Actions.invoke<SingleTapCancelTextIntent>(context, SingleTapCancelTextIntent(), nullOk: true);
   }
 
   DragStartDetails? _lastDragStartDetails;
@@ -265,7 +265,7 @@ class _TextEditingGestureDetectorState extends State<TextEditingGestureDetector>
   void _handleDragStart(DragStartDetails details) {
     assert(_lastDragStartDetails == null);
     _lastDragStartDetails = details;
-    Actions.invoke<DragSelectionStartTextIntent>(context, DragSelectionStartTextIntent());
+    Actions.invoke<DragSelectionStartTextIntent>(context, DragSelectionStartTextIntent(), nullOk: true);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -283,7 +283,7 @@ class _TextEditingGestureDetectorState extends State<TextEditingGestureDetector>
   void _handleDragUpdateThrottled() {
     assert(_lastDragStartDetails != null);
     assert(_lastDragUpdateDetails != null);
-    Actions.invoke<DragSelectionUpdateTextIntent>(context, DragSelectionUpdateTextIntent());
+    Actions.invoke<DragSelectionUpdateTextIntent>(context, DragSelectionUpdateTextIntent(), nullOk: true);
     _dragUpdateThrottleTimer = null;
     _lastDragUpdateDetails = null;
   }
@@ -296,7 +296,7 @@ class _TextEditingGestureDetectorState extends State<TextEditingGestureDetector>
       _dragUpdateThrottleTimer!.cancel();
       _handleDragUpdateThrottled();
     }
-    Actions.invoke<DragSelectionEndTextIntent>(context, DragSelectionEndTextIntent());
+    Actions.invoke<DragSelectionEndTextIntent>(context, DragSelectionEndTextIntent(), nullOk: true);
     _dragUpdateThrottleTimer = null;
     _lastDragStartDetails = null;
     _lastDragUpdateDetails = null;
@@ -305,28 +305,28 @@ class _TextEditingGestureDetectorState extends State<TextEditingGestureDetector>
   void _forcePressStarted(ForcePressDetails details) {
     _doubleTapTimer?.cancel();
     _doubleTapTimer = null;
-    Actions.invoke<ForcePressStartTextIntent>(context, ForcePressStartTextIntent());
+    Actions.invoke<ForcePressStartTextIntent>(context, ForcePressStartTextIntent(), nullOk: true);
   }
 
   void _forcePressEnded(ForcePressDetails details) {
-    Actions.invoke<ForcePressEndTextIntent>(context, ForcePressEndTextIntent());
+    Actions.invoke<ForcePressEndTextIntent>(context, ForcePressEndTextIntent(), nullOk: true);
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
     if (!_isDoubleTap) {
-      Actions.invoke<SingleLongTapStartTextIntent>(context, SingleLongTapStartTextIntent());
+      Actions.invoke<SingleLongTapStartTextIntent>(context, SingleLongTapStartTextIntent(), nullOk: true);
     }
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
     if (!_isDoubleTap) {
-      Actions.invoke<SingleLongTapMoveUpdateTextIntent>(context, SingleLongTapMoveUpdateTextIntent());
+      Actions.invoke<SingleLongTapMoveUpdateTextIntent>(context, SingleLongTapMoveUpdateTextIntent(), nullOk: true);
     }
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
     if (!_isDoubleTap) {
-      Actions.invoke<SingleLongTapEndTextIntent>(context, SingleLongTapEndTextIntent());
+      Actions.invoke<SingleLongTapEndTextIntent>(context, SingleLongTapEndTextIntent(), nullOk: true);
     }
     _isDoubleTap = false;
   }

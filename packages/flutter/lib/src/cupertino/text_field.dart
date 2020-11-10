@@ -95,27 +95,6 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 
   final _CupertinoTextFieldState _state;
 
-  /*
-  @override
-  void onSingleTapUp(TapUpDetails details) {
-    // Because TextSelectionGestureDetector listens to taps that happen on
-    // widgets in front of it, tapping the clear button will also trigger
-    // this handler. If the clear button widget recognizes the up event,
-    // then do not handle it.
-    if (_state._clearGlobalKey.currentContext != null) {
-      final RenderBox renderBox = _state._clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
-      final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
-      if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
-        return;
-      }
-    }
-    super.onSingleTapUp(details);
-    _state._requestKeyboard();
-    if (_state.widget.onTap != null)
-      _state.widget.onTap!();
-  }
-  */
-
   @override
   void onDragSelectionEnd(DragEndDetails details) {
     _state._requestKeyboard();
@@ -1018,11 +997,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             Actions.invoke<SingleTapUpTextIntent>(context, intent);
             // TODO(justinmc): I'm still figuring out how we'll handle
             // requesting the keyboard and the onTap param.
-            /*
             _requestKeyboard();
             if (widget.onTap != null)
               widget.onTap!();
-            */
           },
         ),
       },
