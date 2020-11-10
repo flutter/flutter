@@ -134,7 +134,7 @@ class Step {
 ///       currentStep: _index,
 ///       onStepCancel: () {
 ///         if (_index <= 0) {
-///          return null;
+///          return;
 ///         }
 ///         setState(() {
 ///           _index--;
@@ -142,7 +142,7 @@ class Step {
 ///       },
 ///       onStepContinue: () {
 ///         if (_index >= 1) {
-///          return null;
+///          return;
 ///         }
 ///         setState(() {
 ///           _index++;
