@@ -358,6 +358,7 @@ class Draggable<T extends Object> extends StatefulWidget {
 }
 
 /// Makes its child draggable starting from long press.
+///
 /// See also:
 ///
 ///  * [Draggable]
