@@ -27,7 +27,6 @@ void main() {
   group('FlutterCommandRunner', () {
     MemoryFileSystem fs;
     Platform platform;
-    FlutterCommandRunner runner;
     ProcessManager processManager;
 
     setUpAll(() {
@@ -47,13 +46,13 @@ void main() {
         version: '1 2 3 4 5',
       );
 
-      runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
       processManager = MockProcessManager();
     });
 
     group('run', () {
       testUsingContext('checks that Flutter installation is up-to-date', () async {
         final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand());
         bool versionChecked = false;
         when(version.checkFlutterVersionFreshness()).thenAnswer((_) async {
           versionChecked = true;
@@ -70,6 +69,7 @@ void main() {
 
       testUsingContext('does not check that Flutter installation is up-to-date with --machine flag', () async {
         final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand());
         bool versionChecked = false;
         when(version.checkFlutterVersionFreshness()).thenAnswer((_) async {
           versionChecked = true;
@@ -86,6 +86,7 @@ void main() {
 
       testUsingContext('Fetches tags when --version is used', () async {
         final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand());
 
         await runner.run(<String>['--version']);
 
@@ -98,6 +99,7 @@ void main() {
 
       testUsingContext('throw tool exit if the version file cannot be written', () async {
         final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand());
         when(version.ensureVersionFile()).thenThrow(const FileSystemException());
 
         expect(() async => await runner.run(<String>['dummy']), throwsToolExit());
@@ -109,6 +111,7 @@ void main() {
       }, initializeFlutterRoot: false);
 
     testUsingContext('Doesnt crash on invalid .packages file', () async {
+      final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand());
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages')
         ..createSync()
@@ -180,6 +183,7 @@ void main() {
       });
 
       testUsingContext('', () {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand());
         final List<String> packagePaths = runner.getRepoPackages()
             .map((Directory d) => d.path).toList();
         expect(packagePaths, <String>[
@@ -195,6 +199,7 @@ void main() {
 
     group('wrapping', () {
       testUsingContext('checks that output wrapping is turned on when writing to a terminal', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand());
         final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
         runner.addCommand(fakeCommand);
         await runner.run(<String>['fake']);
@@ -206,6 +211,7 @@ void main() {
       }, initializeFlutterRoot: false);
 
       testUsingContext('checks that output wrapping is turned off when not writing to a terminal', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand());
         final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
         runner.addCommand(fakeCommand);
         await runner.run(<String>['fake']);
@@ -217,6 +223,7 @@ void main() {
       }, initializeFlutterRoot: false);
 
       testUsingContext('checks that output wrapping is turned off when set on the command line and writing to a terminal', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand());
         final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
         runner.addCommand(fakeCommand);
         await runner.run(<String>['--no-wrap', 'fake']);
@@ -228,6 +235,7 @@ void main() {
       }, initializeFlutterRoot: false);
 
       testUsingContext('checks that output wrapping is turned on when set on the command line, but not writing to a terminal', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand());
         final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
         runner.addCommand(fakeCommand);
         await runner.run(<String>['--wrap', 'fake']);

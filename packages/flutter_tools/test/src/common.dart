@@ -86,7 +86,7 @@ String getFlutterRoot() {
   return path.normalize(path.join(toolsPath, '..', '..'));
 }
 
-CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
+FlutterCommandRunner createTestCommandRunner([ FlutterCommand command ]) {
   final FlutterCommandRunner runner = TestFlutterCommandRunner();
   if (command != null) {
     runner.addCommand(command);
