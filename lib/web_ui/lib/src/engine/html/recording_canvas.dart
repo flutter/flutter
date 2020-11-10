@@ -466,12 +466,12 @@ class RecordingCanvas {
       // For Rect/RoundedRect paths use drawRect/drawRRect code paths for
       // DomCanvas optimization.
       SurfacePath sPath = path as SurfacePath;
-      final ui.Rect? rect = sPath.webOnlyPathAsRect;
+      final ui.Rect? rect = sPath.toRect();
       if (rect != null) {
         drawRect(rect, paint);
         return;
       }
-      final ui.RRect? rrect = sPath.webOnlyPathAsRoundedRect;
+      final ui.RRect? rrect = sPath.toRoundedRect();
       if (rrect != null) {
         drawRRect(rrect, paint);
         return;

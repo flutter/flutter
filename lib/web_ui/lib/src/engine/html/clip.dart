@@ -195,11 +195,11 @@ class PersistedPhysicalShape extends PersistedContainerSurface
   void recomputeTransformAndClip() {
     _transform = parent!._transform;
 
-    final ui.RRect? roundRect = path.webOnlyPathAsRoundedRect;
+    final ui.RRect? roundRect = path.toRoundedRect();
     if (roundRect != null) {
       _localClipBounds = roundRect.outerRect;
     } else {
-      final ui.Rect? rect = path.webOnlyPathAsRect;
+      final ui.Rect? rect = path.toRect();
       if (rect != null) {
         _localClipBounds = rect;
       } else {
@@ -233,7 +233,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
   void _applyShape() {
     // Handle special case of round rect physical shape mapping to
     // rounded div.
-    final ui.RRect? roundRect = path.webOnlyPathAsRoundedRect;
+    final ui.RRect? roundRect = path.toRoundedRect();
     if (roundRect != null) {
       final String borderRadius =
           '${roundRect.tlRadiusX}px ${roundRect.trRadiusX}px '
@@ -253,7 +253,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
       }
       return;
     } else {
-      final ui.Rect? rect = path.webOnlyPathAsRect;
+      final ui.Rect? rect = path.toRect();
       if (rect != null) {
         final html.CssStyleDeclaration style = rootElement!.style;
         style
@@ -270,7 +270,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
         }
         return;
       } else {
-        final ui.Rect? ovalRect = path.webOnlyPathAsCircle;
+        final ui.Rect? ovalRect = path.toCircle();
         if (ovalRect != null) {
           final double rx = ovalRect.width / 2.0;
           final double ry = ovalRect.height / 2.0;
