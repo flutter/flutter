@@ -49,7 +49,7 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 ///               (BuildContext context, bool innerBoxIsScrolled) {
 ///             return <Widget>[
 ///               SliverAppBar(
-///                 title: const Text("World"),
+///                 title: const Text("Flutter Code Sample"),
 ///                 pinned: true,
 ///                 floating: true,
 ///                 bottom: TabBar(
