@@ -1011,7 +1011,7 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// The offset applied to the Popup Menu Button.
   ///
-  /// When not set, the Popup Menu Button will be positioned directly next to
+  /// When not set, the Popup Menu Button will be positioned directly below
   /// the button that was used to create it.
   final Offset offset;
 
@@ -1055,7 +1055,7 @@ class PopupMenuButton<T> extends StatefulWidget {
 class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   final GlobalKey _menuButtonKey = GlobalKey();
   /// A method to show a popup menu with the items supplied to
-  /// [PopupMenuButton.itemBuilder] at the position of your [PopupMenuButton].
+  /// [PopupMenuButton.itemBuilder] at the position below your [PopupMenuButton].
   ///
   /// By default, it is called when the user taps the button and [PopupMenuButton.enabled]
   /// is set to `true`. Moreover, you can open the button by calling the method manually.
