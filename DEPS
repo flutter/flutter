@@ -105,7 +105,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '89b49b10fda43496353e0839964919d688fa5594',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '0fb1675e1ad6c1bcfab527e65c1307c3edd6476d',
 
    # Fuchsia compatibility
    #
@@ -391,7 +391,13 @@ deps = {
    Var('swiftshader_git') + '/SwiftShader.git' + '@' + '5d1e8540407c138f47028d64684f3da599430aa4',
 
    'src/third_party/angle':
-   Var('github_git') + '/google/angle.git' + '@' + 'f4e6ae915edaca2dd3b0efc555c1dbbb6b8abac4',
+   Var('github_git') + '/google/angle.git' + '@' + 'ed90c9917b1b7fc6def319184b10609c11b2bd84',
+
+   'src/third_party/angle/third_party/vulkan-headers/src':
+   Var('fuchsia_git') + '/third_party/Vulkan-Headers.git' + '@' + '5de4e8fab88ef0bd6994d9ddbcc864e3179b9e79',
+
+   'src/third_party/abseil-cpp':
+   Var('chromium_git') + '/chromium/src/third_party/abseil-cpp.git' + '@' + '2d8c1340f0350828f1287c4eaeebefcf317bcfc9',
 
   'src/third_party/pkg/when':
    Var('dart_git') + '/when.git' + '@' + '0.2.0',
