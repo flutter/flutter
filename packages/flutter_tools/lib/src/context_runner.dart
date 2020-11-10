@@ -114,6 +114,7 @@ Future<T> runInContext<T>(
         return AssetBundleFactory.defaultInstance(
           logger: globals.logger,
           fileSystem: globals.fs,
+          platform: globals.platform,
         );
       },
       BuildSystem: () => FlutterBuildSystem(
