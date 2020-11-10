@@ -226,7 +226,8 @@ class TestCommand extends FlutterCommand {
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
-        packagesPath: buildInfo.packagesPath,
+        // TODO(jonahwilliams): file bug for incorrect URI handling on windws
+        packagesPath: globals.fs.path.absolute('.packages'),
       );
     }
 
