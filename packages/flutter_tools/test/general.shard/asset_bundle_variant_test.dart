@@ -10,7 +10,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
@@ -41,7 +40,6 @@ void main() {
     testUsingContext('main asset and variants', () async {
       // Setting flutterRoot here so that it picks up the MemoryFileSystem's
       // path separator.
-      Cache.flutterRoot = getFlutterRoot();
       writeEmptySchemaFile(globals.fs);
 
       globals.fs.file('pubspec.yaml')
