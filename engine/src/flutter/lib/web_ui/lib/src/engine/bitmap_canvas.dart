@@ -331,17 +331,12 @@ class BitmapCanvas extends EngineCanvas {
   /// - Pictures typically have large rect/rounded rectangles as background
   ///   prefer DOM if canvas has not been allocated yet.
   ///
-  /// Future optimization: The check below can be used to prevent excessive
-  /// canvas sandwiching (switching between dom and multiple canvas(s)).
-  /// Once RecordingCanvas is updated to detect switch count, this can be
-  /// enabled.
-  /// (_canvasPool._canvas == null &&
-  ///           paint.maskFilter == null &&
-  ///           paint.shader == null &&
-  ///           paint.style != ui.PaintingStyle.stroke)
-  ///
   bool _useDomForRendering(SurfacePaintData paint) =>
-      _preserveImageData == false && _contains3dTransform;
+      (_preserveImageData == false && _contains3dTransform) ||
+      (_childOverdraw && _canvasPool._canvas == null &&
+          paint.maskFilter == null &&
+          paint.shader == null &&
+          paint.style != ui.PaintingStyle.stroke);
 
   @override
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
@@ -495,6 +490,26 @@ class BitmapCanvas extends EngineCanvas {
     if (_useDomForRendering(paint)) {
       final Matrix4 transform = _canvasPool._currentTransform;
       final SurfacePath surfacePath = path as SurfacePath;
+      final ui.Rect? pathAsLine = surfacePath.toStraightLine();
+      if (pathAsLine != null) {
+        final ui.Rect rect = (pathAsLine.top == pathAsLine.bottom) ?
+          ui.Rect.fromLTWH(pathAsLine.left, pathAsLine.top, pathAsLine.width, 1)
+          : ui.Rect.fromLTWH(pathAsLine.left, pathAsLine.top, 1, pathAsLine.height);
+
+        html.HtmlElement element = _buildDrawRectElement(
+            rect, paint, 'draw-rect', _canvasPool._currentTransform);
+        _drawElement(
+            element,
+            ui.Offset(
+                math.min(rect.left, rect.right), math.min(rect.top, rect.bottom)),
+            paint);
+        return;
+      }
+      final ui.Rect? pathAsRect = surfacePath.toRect();
+      if (pathAsRect != null) {
+        drawRect(pathAsRect, paint);
+        return;
+      }
       final ui.Rect pathBounds = surfacePath.getBounds();
       html.Element svgElm = _pathToSvgElement(
           surfacePath, paint, '${pathBounds.right}', '${pathBounds.bottom}');

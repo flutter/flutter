@@ -83,12 +83,32 @@ void testMain() {
     test('Should detect rectangular path', () {
       final SurfacePath path = SurfacePath();
       path.addRect(const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0));
-      expect(path.webOnlyPathAsRect, const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0));
+      expect(path.toRect(), const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0));
+    });
+
+    test('Should detect horizontal line path', () {
+      SurfacePath path = SurfacePath();
+      path.moveTo(10, 20);
+      path.lineTo(100, 0);
+      expect(path.toStraightLine(), null);
+      path = SurfacePath();
+      path.moveTo(10, 20);
+      path.lineTo(200, 20);
+      Rect r = path.toStraightLine()!;
+      expect(r, equals(Rect.fromLTRB(10, 20, 200, 20)));
+    });
+
+    test('Should detect vertical line path', () {
+      final SurfacePath path = SurfacePath();
+      path.moveTo(10, 20);
+      path.lineTo(10, 200);
+      Rect r = path.toStraightLine()!;
+      expect(r, equals(Rect.fromLTRB(10, 20, 10, 200)));
     });
 
     test('Should detect non rectangular path if empty', () {
       final SurfacePath path = SurfacePath();
-      expect(path.webOnlyPathAsRect, null);
+      expect(path.toRect(), null);
     });
 
     test('Should detect non rectangular path if there are multiple subpaths',
@@ -96,7 +116,7 @@ void testMain() {
       final SurfacePath path = SurfacePath();
       path.addRect(const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0));
       path.addRect(const Rect.fromLTWH(5.0, 6.0, 7.0, 8.0));
-      expect(path.webOnlyPathAsRect, null);
+      expect(path.toRect(), null);
     });
 
     test('Should detect rounded rectangular path', () {
@@ -105,20 +125,20 @@ void testMain() {
           const Rect.fromLTRB(1.0, 2.0, 30.0, 40.0),
           const Radius.circular(2.0)));
       expect(
-          path.webOnlyPathAsRoundedRect,
+          path.toRoundedRect(),
           RRect.fromRectAndRadius(const Rect.fromLTRB(1.0, 2.0, 30.0, 40.0),
               const Radius.circular(2.0)));
     });
 
     test('Should detect non rounded rectangular path if empty', () {
       final SurfacePath path = SurfacePath();
-      expect(path.webOnlyPathAsRoundedRect, null);
+      expect(path.toRoundedRect(), null);
     });
 
     test('Should detect rectangular path is not round', () {
       final SurfacePath path = SurfacePath();
       path.addRect(const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0));
-      expect(path.webOnlyPathAsRoundedRect, null);
+      expect(path.toRoundedRect(), null);
     });
 
     test(
@@ -129,7 +149,7 @@ void testMain() {
           const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0), const Radius.circular(2.0)));
       path.addRRect(RRect.fromRectAndRadius(
           const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0), const Radius.circular(2.0)));
-      expect(path.webOnlyPathAsRoundedRect, null);
+      expect(path.toRoundedRect(), null);
     });
 
     test('Should compute bounds as empty for empty and moveTo only path', () {
@@ -161,7 +181,7 @@ void testMain() {
           bottomRight: Radius.elliptical(7, 8));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
-      expect(path.webOnlyPathAsRoundedRect, rrect);
+      expect(path.toRoundedRect(), rrect);
       path = SurfacePath();
       rrect = RRect.fromRectAndCorners(bounds,
           topLeft: Radius.elliptical(0, 2),
@@ -170,7 +190,7 @@ void testMain() {
           bottomRight: Radius.elliptical(7, 8));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
-      expect(path.webOnlyPathAsRoundedRect, rrect);
+      expect(path.toRoundedRect(), rrect);
       path = SurfacePath();
       rrect = RRect.fromRectAndCorners(bounds,
           topLeft: Radius.elliptical(0, 0),
@@ -179,7 +199,7 @@ void testMain() {
           bottomRight: Radius.elliptical(7, 8));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
-      expect(path.webOnlyPathAsRoundedRect, rrect);
+      expect(path.toRoundedRect(), rrect);
       path = SurfacePath();
       rrect = RRect.fromRectAndCorners(bounds,
           topLeft: Radius.elliptical(1, 2),
@@ -188,7 +208,7 @@ void testMain() {
           bottomRight: Radius.elliptical(7, 8));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
-      expect(path.webOnlyPathAsRoundedRect, rrect);
+      expect(path.toRoundedRect(), rrect);
       path = SurfacePath();
       rrect = RRect.fromRectAndCorners(bounds,
           topLeft: Radius.elliptical(1, 2),
@@ -197,7 +217,7 @@ void testMain() {
           bottomRight: Radius.elliptical(7, 8));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
-      expect(path.webOnlyPathAsRoundedRect, rrect);
+      expect(path.toRoundedRect(), rrect);
       path = SurfacePath();
       rrect = RRect.fromRectAndCorners(bounds,
           topLeft: Radius.elliptical(1, 2),
@@ -206,7 +226,7 @@ void testMain() {
           bottomRight: Radius.elliptical(0, 0));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
-      expect(path.webOnlyPathAsRoundedRect, rrect);
+      expect(path.toRoundedRect(), rrect);
     });
 
     test('Should compute bounds for lines', () {

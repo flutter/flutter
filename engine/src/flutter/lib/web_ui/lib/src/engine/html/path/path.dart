@@ -1524,24 +1524,38 @@ class SurfacePath implements ui.Path {
     return SurfacePathMetrics._(this, forceClosed);
   }
 
-  /// Detects if path is rounded rectangle and returns rounded rectangle or
-  /// null.
+  /// Detects if path is rounded rectangle.
+  ///
+  /// Returns rounded rectangle or null.
   ///
   /// Used for web optimization of physical shape represented as
   /// a persistent div.
-  ui.RRect? get webOnlyPathAsRoundedRect => pathRef.getRRect();
+  ui.RRect? toRoundedRect() => pathRef.getRRect();
 
-  /// Detects if path is simple rectangle and returns rectangle or null.
+  /// Detects if path is simple rectangle.
+  ///
+  /// Returns rectangle or null.
   ///
   /// Used for web optimization of physical shape represented as
-  /// a persistent div.
-  ui.Rect? get webOnlyPathAsRect => pathRef.getRect();
+  /// a persistent div. !Warning it does not detect if closed, don't use this
+  /// for optimizing strokes.
+  ui.Rect? toRect() => pathRef.getRect();
 
-  /// Detects if path is simple oval and returns bounding rectangle or null.
+  /// Detects if path is a vertical or horizontal line.
+  ///
+  /// Returns LTRB or null.
   ///
   /// Used for web optimization of physical shape represented as
   /// a persistent div.
-  ui.Rect? get webOnlyPathAsCircle =>
+  ui.Rect? toStraightLine() => pathRef.getStraightLine();
+
+  /// Detects if path is simple oval.
+  ///
+  /// Returns bounding rectangle or null.
+  ///
+  /// Used for web optimization of physical shape represented as
+  /// a persistent div.
+  ui.Rect? toCircle() =>
       pathRef.isOval == -1 ? null : pathRef.getBounds();
 
   /// Returns if Path is empty.
