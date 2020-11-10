@@ -18,13 +18,12 @@ import 'routes.dart';
 /// ```dart
 /// bool shouldPop = true;
 /// @override
-/// Widget build(BuildContext) {
+/// Widget build(BuildContext context) {
 ///   return WillPopScope (
 ///     onWillPop: () async {
 ///       return shouldPop;
 ///     },
-///     child: Center(
-///     ),
+///     child: Text('WillPopScope sample'),
 ///   );
 /// }
 /// ```
@@ -44,10 +43,8 @@ import 'routes.dart';
 ///         title: Text("Flutter WillPopScope demo"),
 ///       ),
 ///       body: Center(
-///         child: Wrap(
-///           spacing: 20,
-///           direction: Axis.vertical,
-///           crossAxisAlignment: WrapCrossAlignment.center,
+///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: [
 ///             OutlinedButton(
 ///               child: Text('Push'),
@@ -62,7 +59,7 @@ import 'routes.dart';
 ///               },
 ///             ),
 ///             OutlinedButton(
-///               child: Text('Pop'),
+///               child: Text('shouldPop: $shouldPop'),
 ///               onPressed: () {
 ///                 setState(
 ///                   () {
@@ -71,8 +68,10 @@ import 'routes.dart';
 ///                 );
 ///               },
 ///             ),
-///             Text("Current value of shouldPop is $shouldPop."
-///                 "Push to a new screen and then tap on the back button in appbar to toggle shouldPop"),
+///             Text("Push to a new screen, then tap on shouldPop "
+///                 "button to toggle its value. Press the back "
+///                 "button in the appBar to check its behaviour "
+///                 "for different values of shouldPop"),
 ///           ],
 ///         ),
 ///       ),
