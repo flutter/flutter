@@ -197,7 +197,7 @@ abstract class SearchDelegate<T> {
 
   /// Widget to display across the bottom of the [AppBar].
   ///
-  /// Returns null if no widget is set.
+  /// Returns null by default, i.e. a bottom widget is not included.
   ///
   /// See also:
   ///
