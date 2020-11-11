@@ -54,7 +54,7 @@
   "remainingTextFieldCharacterCountOther": "$remainingCount таңба қалды.",
   "refreshIndicatorSemanticLabel": "Жаңарту",
   "moreButtonTooltip": "Жаю",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "ай/күн/жыл",
   "selectYearSemanticsLabel": "Жылды таңдау",
   "unspecifiedDate": "Күн",

@@ -96,30 +96,6 @@ void main() {
       expect(flutterCommand.hidden, isTrue);
     });
 
-    testUsingContext('null-safety is surfaced in command usage analytics', () async {
-      final FakeNullSafeCommand fake = FakeNullSafeCommand();
-      final CommandRunner<void> commandRunner = createTestCommandRunner(fake);
-
-      await commandRunner.run(<String>['safety', '--enable-experiment=non-nullable']);
-
-      final VerificationResult resultA = verify(usage.sendCommand(
-        'safety',
-        parameters: captureAnyNamed('parameters'),
-      ));
-      expect(resultA.captured.first, containsPair('cd47', 'true'));
-      reset(usage);
-
-      await commandRunner.run(<String>['safety', '--enable-experiment=foo']);
-
-      final VerificationResult resultB = verify(usage.sendCommand(
-        'safety',
-        parameters: captureAnyNamed('parameters'),
-      ));
-      expect(resultB.captured.first, containsPair('cd47', 'false'));
-    }, overrides: <Type, Generator>{
-      Usage: () => usage,
-    });
-
     testUsingContext('uses the error handling file system', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {

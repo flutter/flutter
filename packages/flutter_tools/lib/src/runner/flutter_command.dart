@@ -467,6 +467,9 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  /// Whether it is safe for this command to use a cached pub invocation.
+  bool get cachePubGet => true;
+
   Duration get deviceDiscoveryTimeout {
     if (_deviceDiscoveryTimeout == null
         && argResults.options.contains(FlutterOptions.kDeviceTimeout)
@@ -1014,10 +1017,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  List<String> get _enabledExperiments => argParser.options.containsKey(FlutterOptions.kEnableExperiment)
-    ? stringsArg(FlutterOptions.kEnableExperiment)
-    : <String>[];
-
   /// Perform validation then call [runCommand] to execute the command.
   /// Return a [Future] that completes with an exit code
   /// indicating whether execution was successful.
@@ -1061,6 +1060,7 @@ abstract class FlutterCommand extends Command<void> {
       await pub.get(
         context: PubContext.getVerifyContext(name),
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,
+        checkUpToDate: cachePubGet,
       );
       await project.regeneratePlatformSpecificTooling();
     }
@@ -1072,7 +1072,6 @@ abstract class FlutterCommand extends Command<void> {
         <CustomDimensions, Object>{
           ...?await usageValues,
           CustomDimensions.commandHasTerminal: globals.stdio.hasTerminal,
-          CustomDimensions.nullSafety: _enabledExperiments.contains('non-nullable'),
         };
       Usage.command(commandPath, parameters: additionalUsageValues);
     }
