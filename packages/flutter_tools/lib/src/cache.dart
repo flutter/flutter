@@ -741,7 +741,7 @@ class PubDependencies extends ArtifactSet {
     FileSystem fileSystem,
   ) async {
     final File toolPackageConfig = fileSystem.file(
-      fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools', kPackagesFileName),
+      fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools', '.dart_tool', 'package_config.json'),
     );
     if (!toolPackageConfig.existsSync()) {
       return false;
