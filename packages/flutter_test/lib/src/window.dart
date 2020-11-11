@@ -154,12 +154,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  ui.Locale? get locale {
-    if (_localeTestValue !=null) {
-      return _localeTestValue!;
-    }
-    return platformDispatcher.locale;
-  }
+  ui.Locale? get locale => _localeTestValue ?? platformDispatcher.locale;
 
   ui.Locale? _localeTestValue;
   /// Hides the real locale and reports the given [localeTestValue] instead.
@@ -174,13 +169,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  List<ui.Locale>? get locales {
-    if (_localesTestValue !=null) {
-      return _localesTestValue!;
-    } else {
-      return platformDispatcher.locales;
-    }
-  }
+  List<ui.Locale>? get locales => _localesTestValue ?? platformDispatcher.locales;
 
   List<ui.Locale>? _localesTestValue;
   /// Hides the real locales and reports the given [localesTestValue] instead.
