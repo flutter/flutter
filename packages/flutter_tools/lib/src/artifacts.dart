@@ -10,7 +10,6 @@ import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
-import 'globals.dart' as globals;
 
 enum Artifact {
   /// The tool which compiles a dart kernel file into native code.
@@ -196,17 +195,6 @@ abstract class Artifacts {
   /// all artifacts.
   @visibleForTesting
   factory Artifacts.test() = _TestArtifacts;
-
-  static LocalEngineArtifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
-    return LocalEngineArtifacts(
-      engineBuildPaths.targetEngine,
-      engineBuildPaths.hostEngine,
-      cache: globals.cache,
-      fileSystem: globals.fs,
-      processManager: globals.processManager,
-      platform: globals.platform,
-    );
-  }
 
   // Returns the requested [artifact] for the [platform] and [mode] combination.
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode });
@@ -526,7 +514,7 @@ class LocalEngineArtifacts implements Artifacts {
        _processManager = processManager,
        _platform = platform;
 
-  final String engineOutPath; // TODO(goderbauer): This should be private.
+  final String engineOutPath;
   final String _hostEngineOutPath;
   final FileSystem _fileSystem;
   final Cache _cache;
