@@ -245,7 +245,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from
   /// [dart:ui.PlatformDispatcher.onLocaleChanged].
-  void didChangeLocales(List<Locale>? locale) { }
+  void didChangeLocales(List<Locale>? locales) { }
 
   /// Called when the system puts the app in the background or returns
   /// the app to the foreground.
