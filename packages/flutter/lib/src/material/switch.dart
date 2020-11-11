@@ -230,6 +230,19 @@ class Switch extends StatefulWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// Switch(
+  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///     if (states.contains(MaterialState.disabled)) {
+  ///       return Colors.orange.withOpacity(.48);
+  ///     }
+  ///     return Colors.orange;
+  ///   }),
+  /// )
+  /// ```
   final MaterialStateProperty<Color?>? thumbColor;
 
   /// The color of this [Switch]'s track.
@@ -242,6 +255,19 @@ class Switch extends StatefulWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// Switch(
+  ///   trackColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///     if (states.contains(MaterialState.disabled)) {
+  ///       return Colors.orange.withOpacity(.32);
+  ///     }
+  ///     return Colors.orange;
+  ///   }),
+  /// )
+  /// ```
   final MaterialStateProperty<Color?>? trackColor;
 
   /// Configures the minimum size of the tap target.

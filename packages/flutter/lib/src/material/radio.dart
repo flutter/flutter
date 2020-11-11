@@ -256,6 +256,19 @@ class Radio<T> extends StatefulWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// Radio<int>(
+  ///   fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///     if (states.contains(MaterialState.disabled)) {
+  ///       return Colors.orange.withOpacity(.32);
+  ///     }
+  ///     return Colors.orange;
+  ///   }),
+  /// )
+  /// ```
   final MaterialStateProperty<Color?>? fillColor;
 
   /// Configures the minimum size of the tap target.
