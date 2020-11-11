@@ -155,13 +155,11 @@ void _tests() {
     });
   });
 
-
   group(SkiaObjectBox, () {
     test('Records stack traces and respects refcounts', () async {
-      TestOneShotSkiaObject.deleteCount = 0;
-      final TestOneShotSkiaObject skObject = TestOneShotSkiaObject();
+      TestSkDeletable.deleteCount = 0;
       final Object wrapper = Object();
-      final SkiaObjectBox box = SkiaObjectBox(wrapper, skObject);
+      final SkiaObjectBox<TestSkDeletable> box = SkiaObjectBox<TestSkDeletable>(wrapper, TestSkDeletable());
 
       expect(box.debugGetStackTraces().length, 1);
 
@@ -178,7 +176,7 @@ void _tests() {
 
       // Let any timers elapse.
       await Future<void>.delayed(Duration.zero);
-      expect(TestOneShotSkiaObject.deleteCount, 0);
+      expect(TestSkDeletable.deleteCount, 0);
 
       expect(clone.debugGetStackTraces().length, 1);
       expect(box.debugGetStackTraces().length, 1);
@@ -188,12 +186,21 @@ void _tests() {
 
       // Let any timers elapse.
       await Future<void>.delayed(Duration.zero);
-      expect(TestOneShotSkiaObject.deleteCount, 1);
+      expect(TestSkDeletable.deleteCount, 1);
 
       expect(clone.debugGetStackTraces().length, 0);
       expect(box.debugGetStackTraces().length, 0);
     });
   });
+}
+
+class TestSkDeletable implements SkDeletable {
+  static int deleteCount = 0;
+
+  @override
+  void delete() {
+    deleteCount++;
+  }
 }
 
 class TestOneShotSkiaObject extends OneShotSkiaObject<SkPaint> implements SkDeletable {

@@ -46,22 +46,18 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
 
 /// A wrapper for `SkAnimatedImage`.
 class CkAnimatedImage implements ui.Image {
-  final SkAnimatedImage _skAnimatedImage;
-
   // Use a box because `SkImage` may be deleted either due to this object
   // being garbage-collected, or by an explicit call to [delete].
-  late final SkiaObjectBox box;
+  late final SkiaObjectBox<SkAnimatedImage> box;
 
-  CkAnimatedImage(SkAnimatedImage skAnimatedImage)
-      : this._(skAnimatedImage, null);
+  SkAnimatedImage get _skAnimatedImage => box.skObject;
 
-  CkAnimatedImage._(this._skAnimatedImage, SkiaObjectBox? boxToClone) {
-    if (boxToClone != null) {
-      assert(boxToClone.skObject == _skAnimatedImage);
-      box = boxToClone.clone(this);
-    } else {
-      box = SkiaObjectBox(this, _skAnimatedImage as SkDeletable);
-    }
+  CkAnimatedImage(SkAnimatedImage skAnimatedImage) {
+    box = SkiaObjectBox<SkAnimatedImage>(this, skAnimatedImage);
+  }
+
+  CkAnimatedImage.cloneOf(SkiaObjectBox<SkAnimatedImage> boxToClone) {
+    box = boxToClone.clone(this);
   }
 
   bool _disposed = false;
@@ -80,7 +76,7 @@ class CkAnimatedImage implements ui.Image {
         'Image.debugDisposed is only available when asserts are enabled.');
   }
 
-  ui.Image clone() => CkAnimatedImage._(_skAnimatedImage, box);
+  ui.Image clone() => CkAnimatedImage.cloneOf(box);
 
   @override
   bool isCloneOf(ui.Image other) {
@@ -143,21 +139,18 @@ class CkAnimatedImage implements ui.Image {
 
 /// A [ui.Image] backed by an `SkImage` from Skia.
 class CkImage implements ui.Image {
-  final SkImage skImage;
-
   // Use a box because `SkImage` may be deleted either due to this object
   // being garbage-collected, or by an explicit call to [delete].
-  late final SkiaObjectBox box;
+  late final SkiaObjectBox<SkImage> box;
 
-  CkImage(SkImage skImage) : this._(skImage, null);
+  SkImage get skImage => box.skObject;
 
-  CkImage._(this.skImage, SkiaObjectBox? boxToClone) {
-    if (boxToClone != null) {
-      assert(boxToClone.skObject == skImage);
-      box = boxToClone.clone(this);
-    } else {
-      box = SkiaObjectBox(this, skImage as SkDeletable);
-    }
+  CkImage(SkImage skImage) {
+    box = SkiaObjectBox<SkImage>(this, skImage);
+  }
+
+  CkImage.cloneOf(SkiaObjectBox<SkImage> boxToClone) {
+    box = boxToClone.clone(this);
   }
 
   bool _disposed = false;
@@ -180,7 +173,7 @@ class CkImage implements ui.Image {
   }
 
   @override
-  ui.Image clone() => CkImage._(skImage, box);
+  ui.Image clone() => CkImage.cloneOf(box);
 
   @override
   bool isCloneOf(ui.Image other) {

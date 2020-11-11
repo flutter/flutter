@@ -250,11 +250,11 @@ abstract class OneShotSkiaObject<T extends Object> extends SkiaObject<T> {
 ///
 /// The [delete] method may be called any number of times. The box
 /// will only delete the object once.
-class SkiaObjectBox {
-  SkiaObjectBox(Object wrapper, SkDeletable skObject)
-      : this._(wrapper, skObject, <SkiaObjectBox>{});
+class SkiaObjectBox<T> {
+  SkiaObjectBox(Object wrapper, T skObject)
+      : this._(wrapper, skObject, skObject as SkDeletable, <SkiaObjectBox>{});
 
-  SkiaObjectBox._(Object wrapper, this.skObject, this._refs) {
+  SkiaObjectBox._(Object wrapper, this.skObject, this._skDeletable, this._refs) {
     if (assertionsEnabled) {
       _debugStackTrace = StackTrace.current;
     }
@@ -280,7 +280,8 @@ class SkiaObjectBox {
   }
 
   /// The Skia object whose lifecycle is being managed.
-  final SkDeletable skObject;
+  final T skObject;
+  final SkDeletable _skDeletable;
 
   /// Whether this object has been deleted.
   bool get isDeleted => _isDeleted;
@@ -295,10 +296,10 @@ class SkiaObjectBox {
   /// Returns a clone of this object, which increases its reference count.
   ///
   /// Clones must be [dispose]d when finished.
-  SkiaObjectBox clone(Object wrapper) {
+  SkiaObjectBox<T> clone(Object wrapper) {
     assert(!_isDeleted, 'Cannot clone from a deleted handle.');
     assert(_refs.isNotEmpty);
-    return SkiaObjectBox._(wrapper, skObject, _refs);
+    return SkiaObjectBox<T>._(wrapper, skObject, _skDeletable, _refs);
   }
 
   /// Decrements the reference count for the [skObject].
@@ -316,7 +317,7 @@ class SkiaObjectBox {
     assert(removed);
     _isDeleted = true;
     if (_refs.isEmpty) {
-      _scheduleSkObjectCollection(skObject);
+      _scheduleSkObjectCollection(_skDeletable);
     }
   }
 }
