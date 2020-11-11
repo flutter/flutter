@@ -793,9 +793,11 @@ class DropdownButton<T> extends StatefulWidget {
   /// The [items] must have distinct values. If [value] isn't null then it
   /// must be equal to one of the [DropdownMenuItem] values. If [items] or
   /// [onChanged] is null, the button will be disabled, the down arrow
-  /// will be greyed out, and the [disabledHint] will be shown (if provided).
-  /// If [disabledHint] is null and [hint] is non-null, [hint] will instead be
-  /// shown.
+  /// will be greyed out.
+  ///
+  /// If [value] is null, [hint] or [disabledHint] is non-null, depends on the
+  /// dropdown button enabled or disabled status, the [hint] or [disabledHint] widget
+  /// is displayed as a placeholder for the dropdown button's value.
   ///
   /// The [elevation] and [iconSize] arguments must not be null (they both have
   /// defaults, so do not need to be specified). The boolean [isDense] and
@@ -852,29 +854,32 @@ class DropdownButton<T> extends StatefulWidget {
   ///
   /// If the [onChanged] callback is null or the list of items is null
   /// then the dropdown button will be disabled, i.e. its arrow will be
-  /// displayed in grey and it will not respond to input. A disabled button
-  /// will display the [disabledHint] widget if it is non-null. If
-  /// [disabledHint] is also null but [hint] is non-null, [hint] will instead
-  /// be displayed.
+  /// displayed in grey and it will not respond to input.
   final List<DropdownMenuItem<T>>? items;
 
   /// The value of the currently selected [DropdownMenuItem].
   ///
-  /// If [value] is null and [hint] is non-null, the [hint] widget is
-  /// displayed as a placeholder for the dropdown button's value.
+  /// If [value] is null, [hint] or [disabledHint] is non-null, depends on the
+  /// dropdown enabled or disabled status, the [hint] or [disabledHint] widget
+  /// is displayed as a placeholder for the dropdown button's value.
   final T? value;
 
   /// A placeholder widget that is displayed by the dropdown button.
   ///
-  /// If [value] is null, this widget is displayed as a placeholder for
-  /// the dropdown button's value. This widget is also displayed if the button
-  /// is disabled ([items] or [onChanged] is null) and [disabledHint] is null.
+  /// If [value] is null, the dropdown is enabled ([items] and [onChanged] are non-null),
+  /// this widget is displayed as a placeholder for the dropdown button's value.
+  ///
+  /// If [value] is null, the dropdown is disabled and [disabledHint] is null,
+  /// This widget is displayed.
+  ///
+  /// If [value] is null, the dropdown is disabled and [disabledHint] is non-null,
+  /// [disabledHint] widget is displayed.
   final Widget? hint;
 
-  /// A message to show when the dropdown is disabled.
+  /// A preferred placeholder widget that is displayed when the dropdown is disabled.
   ///
-  /// Displayed if [items] or [onChanged] is null. If [hint] is non-null and
-  /// [disabledHint] is null, the [hint] widget will be displayed instead.
+  /// If [value] is null, the dropdown is disabled ([items] or [onChanged] is null),
+  /// this widget is displayed as a placeholder for the dropdown button's value.
   final Widget? disabledHint;
 
   /// {@template flutter.material.dropdownButton.onChanged}
@@ -1160,13 +1165,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 
   void _updateSelectedIndex() {
-    if (!_enabled) {
+    if (widget.value == null || widget.items == null || widget.items!.isEmpty) {
+      _selectedIndex = null;
       return;
     }
 
-    assert(widget.value == null ||
-      widget.items!.where((DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
-    _selectedIndex = null;
+    assert(widget.items!.where((DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
     for (int itemIndex = 0; itemIndex < widget.items!.length; itemIndex++) {
       if (widget.items![itemIndex].value == widget.value) {
         _selectedIndex = itemIndex;
@@ -1307,7 +1311,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // otherwise, no explicit type adding items maybe trigger a crash/failure
     // when hint and selectedItemBuilder are provided.
     final List<Widget> items = widget.selectedItemBuilder == null
-      ? (_enabled ? List<Widget>.from(widget.items!) : <Widget>[])
+      ? (widget.items != null ? List<Widget>.from(widget.items!) : <Widget>[])
       : List<Widget>.from(widget.selectedItemBuilder!(context));
 
     int? hintIndex;
@@ -1330,15 +1334,14 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       ? _kAlignedButtonPadding
       : _kUnalignedButtonPadding;
 
-    // If value is null (then _selectedIndex is null) or if disabled then we
+    // If value is null (then _selectedIndex is null) then we
     // display the hint or nothing at all.
-    final int? index = _enabled ? (_selectedIndex ?? hintIndex) : hintIndex;
     final Widget innerItemsWidget;
     if (items.isEmpty) {
       innerItemsWidget = Container();
     } else {
       innerItemsWidget = IndexedStack(
-        index: index,
+        index: _selectedIndex ?? hintIndex,
         alignment: AlignmentDirectional.centerStart,
         children: widget.isDense ? items : items.map((Widget item) {
           return widget.itemHeight != null
