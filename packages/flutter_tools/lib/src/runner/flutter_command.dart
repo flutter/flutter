@@ -328,6 +328,10 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       'disable-dds',
       hide: !verboseHelp,
+      // This is disabled because it currently breaks the --host-vmservice-port/--observatory-port
+      // options in the tool.
+      // https://github.com/flutter/flutter/issues/69722
+      defaultsTo: true,
       help: 'Disable the Dart Developer Service (DDS). This flag should only be provided'
             ' when attaching to an application with an existing DDS instance (e.g.,'
             ' attaching to an application currently connected to by "flutter run") or'

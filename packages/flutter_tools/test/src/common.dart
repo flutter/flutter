@@ -77,7 +77,7 @@ String getFlutterRoot() {
       throw invalidScript();
   }
 
-  final List<String> parts = path.split(globals.fs.path.fromUri(scriptUri));
+  final List<String> parts = path.split(path.fromUri(scriptUri));
   final int toolsIndex = parts.indexOf('flutter_tools');
   if (toolsIndex == -1) {
     throw invalidScript();
