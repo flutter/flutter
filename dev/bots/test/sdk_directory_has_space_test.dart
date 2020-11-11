@@ -14,6 +14,10 @@ void main() {
     // our tools support that.
     const String expectedName = 'flutter sdk';
     final List<String> parts = path.split(Directory.current.absolute.path);
-    expect(parts.reversed.take(3), <String>['bots', 'dev', expectedName]);
+    expect(
+      parts,
+      contains(expectedName),
+      reason: 'CI tests should run in a directory with a space',
+    );
   });
 }
