@@ -359,6 +359,11 @@ public class FlutterAndroidComponentTest {
     }
 
     @Override
+    public boolean shouldHandleDeeplinking() {
+      return false;
+    }
+
+    @Override
     public boolean shouldRestoreAndSaveState() {
       return true;
     }

@@ -16,7 +16,8 @@ public class FlutterActivityLaunchConfigs {
       "io.flutter.embedding.android.SplashScreenDrawable";
   /* package */ static final String NORMAL_THEME_META_DATA_KEY =
       "io.flutter.embedding.android.NormalTheme";
-
+  /* package */ static final String HANDLE_DEEPLINKING_META_DATA_KEY =
+      "flutter_deeplinking_enabled";
   // Intent extra arguments.
   /* package */ static final String EXTRA_INITIAL_ROUTE = "route";
   /* package */ static final String EXTRA_BACKGROUND_MODE = "background_mode";
