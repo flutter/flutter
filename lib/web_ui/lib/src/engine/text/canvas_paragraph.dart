@@ -18,6 +18,7 @@ class CanvasParagraph implements EngineParagraph {
   CanvasParagraph(
     this.spans, {
     required this.paragraphStyle,
+    required this.plainText,
     required this.placeholderCount,
   });
 
@@ -26,6 +27,9 @@ class CanvasParagraph implements EngineParagraph {
 
   /// General styling information for this paragraph.
   final EngineParagraphStyle paragraphStyle;
+
+  /// The full textual content of the paragraph.
+  final String plainText;
 
   /// The number of placeholders in this paragraph.
   final int placeholderCount;
@@ -108,26 +112,8 @@ class CanvasParagraph implements EngineParagraph {
     // 3. Paint the text.
   }
 
-  String? _cachedPlainText;
-
   @override
-  String toPlainText() {
-    final String? plainText = _cachedPlainText;
-    if (plainText == null) {
-      return _cachedPlainText ??= _computePlainText();
-    }
-    return plainText;
-  }
-
-  String _computePlainText() {
-    final StringBuffer buffer = StringBuffer();
-    for (final ParagraphSpan span in spans) {
-      if (span is FlatTextSpan) {
-        buffer.write(span.text);
-      }
-    }
-    return buffer.toString();
-  }
+  String toPlainText() => plainText;
 
   html.HtmlElement? _cachedDomElement;
 
@@ -269,14 +255,28 @@ abstract class ParagraphSpan {
 /// does, we flatten the structure and resolve/merge all the styles from parent
 /// nodes.
 class FlatTextSpan extends ParagraphSpan {
-  /// Creates a [FlatTextSpan] with the given [text] and [style].
-  const FlatTextSpan({required this.text, required this.style});
-
-  /// The textual content of the span.
-  final String text;
+  /// Creates a [FlatTextSpan] with the given [style], representing the span of
+  /// text in the range between [start] and [end].
+  FlatTextSpan({
+    required this.style,
+    required this.start,
+    required this.end,
+  });
 
   /// The resolved style of the span.
   final EngineTextStyle style;
+
+  /// The index of the beginning of the range of text represented by this span.
+  final int start;
+
+  /// The index of the end of the range of text represented by this span.
+  final int end;
+
+  String textOf(CanvasParagraph paragraph) {
+    final String text = paragraph.toPlainText();
+    assert(end <= text.length);
+    return text.substring(start, end);
+  }
 }
 
 /// Represents a node in the tree of text styles pushed to [ui.ParagraphBuilder].
@@ -511,6 +511,7 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
       : _paragraphStyle = style,
         _rootStyleNode = RootStyleNode(style);
 
+  final StringBuffer _plainTextBuffer = StringBuffer();
   final EngineParagraphStyle _paragraphStyle;
 
   final List<ParagraphSpan> _spans = <ParagraphSpan>[];
@@ -573,8 +574,12 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void addText(String text) {
-    _spans
-        .add(FlatTextSpan(text: text, style: _currentStyleNode.resolveStyle()));
+    final EngineTextStyle style = _currentStyleNode.resolveStyle();
+    final int start = _plainTextBuffer.length;
+    _plainTextBuffer.write(text);
+    final int end = _plainTextBuffer.length;
+
+    _spans.add(FlatTextSpan(style: style, start: start, end: end));
   }
 
   @override
@@ -582,6 +587,7 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
     return CanvasParagraph(
       _spans,
       paragraphStyle: _paragraphStyle,
+      plainText: _plainTextBuffer.toString(),
       placeholderCount: _placeholderCount,
     );
   }

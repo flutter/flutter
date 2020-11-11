@@ -34,7 +34,7 @@ void testMain() {
     final ParagraphSpan span = paragraph.spans.single;
     expect(span, isA<FlatTextSpan>());
     final FlatTextSpan textSpan = span as FlatTextSpan;
-    expect(textSpan.text, 'Hello');
+    expect(textSpan.textOf(paragraph), 'Hello');
     expect(textSpan.style, TextStyle(fontSize: 13.0));
   });
 
@@ -56,7 +56,7 @@ void testMain() {
     expect(paragraph.spans, hasLength(1));
 
     final FlatTextSpan span = paragraph.spans.single as FlatTextSpan;
-    expect(span.text, 'Hello');
+    expect(span.textOf(paragraph), 'Hello');
     expect(
       span.style,
       TextStyle(
@@ -84,7 +84,7 @@ void testMain() {
     expect(paragraph.spans, hasLength(2));
 
     final FlatTextSpan hello = paragraph.spans.first as FlatTextSpan;
-    expect(hello.text, 'Hello');
+    expect(hello.textOf(paragraph), 'Hello');
     expect(
       hello.style,
       TextStyle(
@@ -94,7 +94,7 @@ void testMain() {
     );
 
     final FlatTextSpan world = paragraph.spans.last as FlatTextSpan;
-    expect(world.text, ' world');
+    expect(world.textOf(paragraph), ' world');
     expect(
       world.style,
       TextStyle(
@@ -122,14 +122,14 @@ void testMain() {
     expect(paragraph.spans, hasLength(3));
 
     final FlatTextSpan hello = paragraph.spans[0] as FlatTextSpan;
-    expect(hello.text, 'Hello');
+    expect(hello.textOf(paragraph), 'Hello');
     expect(
       hello.style,
       TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, height: 2.0),
     );
 
     final FlatTextSpan world = paragraph.spans[1] as FlatTextSpan;
-    expect(world.text, ' world');
+    expect(world.textOf(paragraph), ' world');
     expect(
       world.style,
       TextStyle(
@@ -140,7 +140,7 @@ void testMain() {
     );
 
     final FlatTextSpan bang = paragraph.spans[2] as FlatTextSpan;
-    expect(bang.text, '!');
+    expect(bang.textOf(paragraph), '!');
     expect(
       bang.style,
       TextStyle(
