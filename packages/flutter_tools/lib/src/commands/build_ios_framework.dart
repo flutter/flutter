@@ -318,7 +318,7 @@ end
 
         // Remove simulator architecture in profile and release mode.
         final List<String> lipoCommand = <String>[
-          'xcrun',
+          ...globals.xcode.xcrunCommand(),
           'lipo',
           fatFlutterFrameworkBinary.path,
           '-remove',
@@ -425,7 +425,7 @@ end
           'bitcode' : 'marker'; // In release, force bitcode embedding without archiving.
 
       List<String> pluginsBuildCommand = <String>[
-        'xcrun',
+        ...globals.xcode.xcrunCommand(),
         'xcodebuild',
         '-alltargets',
         '-sdk',
@@ -451,7 +451,7 @@ end
 
       if (mode == BuildMode.debug) {
         pluginsBuildCommand = <String>[
-          'xcrun',
+          ...globals.xcode.xcrunCommand(),
           'xcodebuild',
           '-alltargets',
           '-sdk',
@@ -503,7 +503,7 @@ end
               modeDirectory.childDirectory(podFrameworkName),
             );
             final List<String> lipoCommand = <String>[
-              'xcrun',
+              ...globals.xcode.xcrunCommand(),
               'lipo',
               '-create',
               globals.fs.path.join(podProduct.path, binaryName),
@@ -532,7 +532,7 @@ end
 
           if (boolArg('xcframework')) {
             final List<String> xcframeworkCommand = <String>[
-              'xcrun',
+              ...globals.xcode.xcrunCommand(),
               'xcodebuild',
               '-create-xcframework',
               '-framework',
@@ -616,7 +616,7 @@ end
 
       // Create iOS framework.
       List<String> lipoCommand = <String>[
-        'xcrun',
+        ...globals.xcode.xcrunCommand(),
         'lipo',
         fatFlutterFrameworkBinary.path,
         '-remove',
@@ -642,7 +642,7 @@ end
       globals.fsUtils.copyDirectorySync(fatFramework, simulatorFlutterFrameworkDirectory);
 
       lipoCommand = <String>[
-        'xcrun',
+        ...globals.xcode.xcrunCommand(),
         'lipo',
         fatFlutterFrameworkBinary.path,
         '-thin',
@@ -663,7 +663,7 @@ end
 
       // Create XCFramework from iOS and simulator frameworks.
       final List<String> xcframeworkCommand = <String>[
-        'xcrun',
+        ...globals.xcode.xcrunCommand(),
         'xcodebuild',
         '-create-xcframework',
         '-framework', armFlutterFrameworkDirectory.path,
@@ -696,7 +696,7 @@ end
     // Simulator is only supported in Debug mode.
     // "Fat" framework here must only contain arm.
     final List<String> xcframeworkCommand = <String>[
-      'xcrun',
+      ...globals.xcode.xcrunCommand(),
       'xcodebuild',
       '-create-xcframework',
       '-framework', fatFramework.path,
