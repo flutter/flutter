@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_device.dart';
@@ -13,6 +12,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import  '../build_info.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../device.dart';
