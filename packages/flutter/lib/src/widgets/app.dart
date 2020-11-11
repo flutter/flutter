@@ -433,8 +433,8 @@ class WidgetsApp extends StatefulWidget {
   /// This object will be used by the underlying [Router].
   ///
   /// If this is not provided, the widgets app will create a
-  /// [PlatformRouteInformationProvider] with initial route name equals to
-  /// the [Window.defaultRouteName] by default.
+  /// [PlatformRouteInformationProvider] with initial route name equal to the
+  /// [dart:ui.PlatformDispatcher.defaultRouteName] by default.
   ///
   /// See also:
   ///
@@ -525,8 +525,8 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.initialRoute}
   /// The name of the first route to show, if a [Navigator] is built.
   ///
-  /// Defaults to [Window.defaultRouteName], which may be overridden by the code
-  /// that launched the application.
+  /// Defaults to [dart:ui.PlatformDispatcher.defaultRouteName], which may be
+  /// overridden by the code that launched the application.
   ///
   /// If the route name starts with a slash, then it is treated as a "deep link",
   /// and before this route is pushed, the routes leading to this one are pushed
@@ -1113,15 +1113,15 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // If window.defaultRouteName isn't '/', we should assume it was set
   // intentionally via `setInitialRoute`, and should override whatever is in
   // [widget.initialRoute].
-  String get _initialRouteName => WidgetsBinding.instance!.window.defaultRouteName != Navigator.defaultRouteName
-    ? WidgetsBinding.instance!.window.defaultRouteName
-    : widget.initialRoute ?? WidgetsBinding.instance!.window.defaultRouteName;
+  String get _initialRouteName => WidgetsBinding.instance!.platformDispatcher.defaultRouteName != Navigator.defaultRouteName
+    ? WidgetsBinding.instance!.platformDispatcher.defaultRouteName
+    : widget.initialRoute ?? WidgetsBinding.instance!.platformDispatcher.defaultRouteName;
 
   @override
   void initState() {
     super.initState();
     _updateRouting();
-    _locale = _resolveLocales(WidgetsBinding.instance!.window.locales, widget.supportedLocales);
+    _locale = _resolveLocales(WidgetsBinding.instance!.platformDispatcher.locales, widget.supportedLocales);
     WidgetsBinding.instance!.addObserver(this);
   }
 

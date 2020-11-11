@@ -525,7 +525,6 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      cdKey(CustomDimensions.nullSafety): 'false',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -580,7 +579,6 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      cdKey(CustomDimensions.nullSafety): 'false',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -645,7 +643,6 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      cdKey(CustomDimensions.nullSafety): 'true',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -1398,7 +1395,6 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'true',
-      cdKey(CustomDimensions.nullSafety): 'false',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -2396,40 +2392,6 @@ void main() {
 
     expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill.track.dill')).readAsString(), 'ABC');
   }));
-
-  testUsingContext('HotRunner copies compiled app.dill to cache during startup with --sound-null-safety', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      listViews,
-      listViews,
-      setAssetBundlePath,
-    ]);
-    setWsAddress(testUri, fakeVmServiceHost.vmService);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = HotRunner(
-      <FlutterDevice>[
-        mockFlutterDevice,
-      ],
-      stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-        trackWidgetCreation: true,
-        nullSafetyMode: NullSafetyMode.sound,
-      )),
-    );
-    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
-    when(mockFlutterDevice.runHot(
-      hotRunner: anyNamed('hotRunner'),
-      route: anyNamed('route'),
-    )).thenAnswer((Invocation invocation) async {
-      return 0;
-    });
-    await residentRunner.run();
-
-    expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill.sound.track.dill')).readAsString(), 'ABC');
-  }));
-
 
   testUsingContext('HotRunner unforwards device ports', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[

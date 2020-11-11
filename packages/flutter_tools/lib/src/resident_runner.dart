@@ -27,6 +27,8 @@ import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
+import 'dart/language_version.dart';
+import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
@@ -46,6 +48,7 @@ class FlutterDevice {
     TargetPlatform targetPlatform,
     ResidentCompiler generator,
     this.userIdentifier,
+    this.nullSafetyMode = NullSafetyMode.autodetect,
   }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts.getArtifactPath(
@@ -81,6 +84,7 @@ class FlutterDevice {
     String userIdentifier,
   }) async {
     ResidentCompiler generator;
+    NullSafetyMode nullSafetyMode = buildInfo.nullSafetyMode;
     final TargetPlatform targetPlatform = await device.targetPlatform;
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
@@ -101,14 +105,30 @@ class FlutterDevice {
         platformDillArtifact = Artifact.webPlatformSoundKernelDill;
         extraFrontEndOptions =  buildInfo.extraFrontEndOptions;
       } else {
-        // TODO(jonahwilliams): null-safe auto detection does not currently
-        // work on the web. Always opt out of null safety if it was not
-        // specifically requested.
-        platformDillArtifact = Artifact.webPlatformKernelDill;
-        extraFrontEndOptions =  <String>[
-          ...?buildInfo.extraFrontEndOptions,
-          '--no-sound-null-safety',
-        ];
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          globals.fs.file(buildInfo.packagesPath),
+          logger: globals.logger,
+        );
+        final File entrypointFile = globals.fs.file(target);
+        final LanguageVersion languageVersion = determineLanguageVersion(
+          entrypointFile,
+          packageConfig.packageOf(entrypointFile.absolute.uri),
+        );
+        if (languageVersion.major >= nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor) {
+          platformDillArtifact = Artifact.webPlatformSoundKernelDill;
+          extraFrontEndOptions =  <String>[
+            ...?buildInfo.extraFrontEndOptions,
+            '--sound-null-safety',
+          ];
+          nullSafetyMode = NullSafetyMode.sound;
+        } else {
+          platformDillArtifact = Artifact.webPlatformKernelDill;
+          extraFrontEndOptions =  <String>[
+            ...?buildInfo.extraFrontEndOptions,
+            '--no-sound-null-safety',
+          ];
+          nullSafetyMode = NullSafetyMode.unsound;
+        }
       }
 
       generator = ResidentCompiler(
@@ -123,7 +143,6 @@ class FlutterDevice {
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
-          nullSafetyMode: buildInfo.nullSafetyMode,
         ),
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
@@ -165,7 +184,6 @@ class FlutterDevice {
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
-          nullSafetyMode: buildInfo.nullSafetyMode,
         ),
         packagesPath: buildInfo.packagesPath,
         artifacts: globals.artifacts,
@@ -184,6 +202,7 @@ class FlutterDevice {
       generator: generator,
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
+      nullSafetyMode: nullSafetyMode,
     );
   }
 
@@ -191,6 +210,7 @@ class FlutterDevice {
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
+  final NullSafetyMode nullSafetyMode;
 
   DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;
@@ -769,11 +789,6 @@ abstract class ResidentRunner {
   Completer<int> _finished = Completer<int>();
   bool hotMode;
 
-  /// Whether the compiler was instructed to run with null-safety enabled.
-  @protected
-  bool get usageNullSafety => debuggingOptions?.buildInfo
-    ?.extraFrontEndOptions?.any((String option) => option.contains('non-nullable')) ?? false;
-
   /// Returns true if every device is streaming observatory URIs.
   bool get isWaitingForObservatory {
     return flutterDevices.every((FlutterDevice device) {
@@ -1181,7 +1196,6 @@ abstract class ResidentRunner {
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
-        nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
       );
       globals.fs
           .file(copyPath)

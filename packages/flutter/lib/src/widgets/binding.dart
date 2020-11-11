@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback;
+import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -124,7 +124,8 @@ abstract class WidgetsBindingObserver {
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
   ///
-  /// This method exposes notifications from [Window.onMetricsChanged].
+  /// This method exposes notifications from
+  /// [dart:ui.PlatformDispatcher.onMetricsChanged].
   ///
   /// {@tool snippet}
   ///
@@ -185,7 +186,8 @@ abstract class WidgetsBindingObserver {
   /// preferences, and it should affect all of the text sizes in the
   /// application.
   ///
-  /// This method exposes notifications from [Window.onTextScaleFactorChanged].
+  /// This method exposes notifications from
+  /// [dart:ui.PlatformDispatcher.onTextScaleFactorChanged].
   ///
   /// {@tool snippet}
   ///
@@ -233,14 +235,16 @@ abstract class WidgetsBindingObserver {
 
   /// Called when the platform brightness changes.
   ///
-  /// This method exposes notifications from [Window.onPlatformBrightnessChanged].
+  /// This method exposes notifications from
+  /// [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged].
   void didChangePlatformBrightness() { }
 
   /// Called when the system tells the app that the user's locale has
   /// changed. For example, if the user changes the system language
   /// settings.
   ///
-  /// This method exposes notifications from [Window.onLocaleChanged].
+  /// This method exposes notifications from
+  /// [dart:ui.PlatformDispatcher.onLocaleChanged].
   void didChangeLocales(List<Locale>? locale) { }
 
   /// Called when the system puts the app in the background or returns
@@ -261,7 +265,8 @@ abstract class WidgetsBindingObserver {
   /// Called when the system changes the set of currently active accessibility
   /// features.
   ///
-  /// This method exposes notifications from [Window.onAccessibilityFeaturesChanged].
+  /// This method exposes notifications from
+  /// [dart:ui.PlatformDispatcher.onAccessibilityFeaturesChanged].
   void didChangeAccessibilityFeatures() { }
 }
 
@@ -282,8 +287,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     // properly setup the [defaultBinaryMessenger] instance.
     _buildOwner = BuildOwner();
     buildOwner!.onBuildScheduled = _handleBuildScheduled;
-    window.onLocaleChanged = handleLocaleChanged;
-    window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
+    platformDispatcher.onLocaleChanged = handleLocaleChanged;
+    platformDispatcher.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
   }
@@ -577,19 +582,19 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// Calls [dispatchLocalesChanged] to notify the binding observers.
   ///
-  /// See [Window.onLocaleChanged].
+  /// See [dart:ui.PlatformDispatcher.onLocaleChanged].
   @protected
   @mustCallSuper
   void handleLocaleChanged() {
-    dispatchLocalesChanged(window.locales);
+    dispatchLocalesChanged(platformDispatcher.locales);
   }
 
   /// Notify all the observers that the locale has changed (using
   /// [WidgetsBindingObserver.didChangeLocales]), giving them the
   /// `locales` argument.
   ///
-  /// This is called by [handleLocaleChanged] when the [Window.onLocaleChanged]
-  /// notification is received.
+  /// This is called by [handleLocaleChanged] when the
+  /// [PlatformDispatcher.onLocaleChanged] notification is received.
   @protected
   @mustCallSuper
   void dispatchLocalesChanged(List<Locale>? locales) {
@@ -602,7 +607,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// giving them the `features` argument.
   ///
   /// This is called by [handleAccessibilityFeaturesChanged] when the
-  /// [Window.onAccessibilityFeaturesChanged] notification is received.
+  /// [PlatformDispatcher.onAccessibilityFeaturesChanged] notification is received.
   @protected
   @mustCallSuper
   void dispatchAccessibilityFeaturesChanged() {
@@ -806,11 +811,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Each frame consists of the following phases:
   ///
   /// 1. The animation phase: The [handleBeginFrame] method, which is registered
-  /// with [Window.onBeginFrame], invokes all the transient frame callbacks
-  /// registered with [scheduleFrameCallback], in
-  /// registration order. This includes all the [Ticker] instances that are
-  /// driving [AnimationController] objects, which means all of the active
-  /// [Animation] objects tick at this point.
+  /// with [PlatformDispatcher.onBeginFrame], invokes all the transient frame
+  /// callbacks registered with [scheduleFrameCallback], in registration order.
+  /// This includes all the [Ticker] instances that are driving
+  /// [AnimationController] objects, which means all of the active [Animation]
+  /// objects tick at this point.
   ///
   /// 2. Microtasks: After [handleBeginFrame] returns, any microtasks that got
   /// scheduled by transient frame callbacks get to run. This typically includes
@@ -818,9 +823,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// completed this frame.
   ///
   /// After [handleBeginFrame], [handleDrawFrame], which is registered with
-  /// [Window.onDrawFrame], is called, which invokes all the persistent frame
-  /// callbacks, of which the most notable is this method, [drawFrame], which
-  /// proceeds as follows:
+  /// [PlatformDispatcher.onDrawFrame], is called, which invokes all the
+  /// persistent frame callbacks, of which the most notable is this method,
+  /// [drawFrame], which proceeds as follows:
   ///
   /// 3. The build phase: All the dirty [Element]s in the widget tree are
   /// rebuilt (see [State.build]). See [State.setState] for further details on
@@ -883,9 +888,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         firstFrameCallback = null;
         _firstFrameCompleter.complete();
       };
-      // Callback is only invoked when [Window.render] is called. When
-      // [sendFramesToEngine] is set to false during the frame, it will not
-      // be called and we need to remove the callback (see below).
+      // Callback is only invoked when FlutterView.render is called. When
+      // sendFramesToEngine is set to false during the frame, it will not be
+      // called and we need to remove the callback (see below).
       SchedulerBinding.instance!.addTimingsCallback(firstFrameCallback!);
     }
 
@@ -1011,7 +1016,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// method again with the matched locale of the first call omitted from
   /// `supportedLocales`.
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
-    return window.computePlatformResolvedLocale(supportedLocales);
+    return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
   }
 }
 

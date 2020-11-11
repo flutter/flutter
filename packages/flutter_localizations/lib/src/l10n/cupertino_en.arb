@@ -90,9 +90,9 @@
     "description": "The label for select-all buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
   },
 
-  "searchTextFieldPlaceholerLabel": "Search",
-  "@searchTextFieldPlaceholerLabel": {
-    "description": "The default placeholder used in [CupertinoSearchTextField]."
+  "searchTextFieldPlaceholderLabel": "Search",
+  "@searchTextFieldPlaceholderLabel": {
+    "description": "The default placeholder label used in an iOS styled search bar."
   },
 
   "modalBarrierDismissLabel": "Dismiss",

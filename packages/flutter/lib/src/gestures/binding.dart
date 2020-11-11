@@ -158,7 +158,7 @@ const Duration _samplingInterval = Duration(microseconds: 16667);
 /// ### [PointerDownEvent]
 ///
 /// When a [PointerDownEvent] is received by the [GestureBinding] (from
-/// [Window.onPointerDataPacket], as interpreted by the
+/// [dart:ui.PlatformDispatcher.onPointerDataPacket], as interpreted by the
 /// [PointerEventConverter]), a [hitTest] is performed to determine which
 /// [HitTestTarget] nodes are affected. (Other bindings are expected to
 /// implement [hitTest] to defer to [HitTestable] objects. For example, the
@@ -198,7 +198,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void initInstances() {
     super.initInstances();
     _instance = this;
-    window.onPointerDataPacket = _handlePointerDataPacket;
+    platformDispatcher.onPointerDataPacket = _handlePointerDataPacket;
   }
 
   @override

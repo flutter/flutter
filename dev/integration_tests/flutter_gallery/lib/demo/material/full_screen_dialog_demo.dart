@@ -15,9 +15,8 @@ enum DismissDialogAction {
 }
 
 class DateTimeItem extends StatelessWidget {
-  DateTimeItem({ Key key, DateTime dateTime, @required this.onChanged })
-    : assert(onChanged != null),
-      date = DateTime(dateTime.year, dateTime.month, dateTime.day),
+  DateTimeItem({ Key? key, required DateTime dateTime, required this.onChanged })
+    : date = DateTime(dateTime.year, dateTime.month, dateTime.day),
       time = TimeOfDay(hour: dateTime.hour, minute: dateTime.minute),
       super(key: key);
 
@@ -30,7 +29,7 @@ class DateTimeItem extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return DefaultTextStyle(
-      style: theme.textTheme.subtitle1,
+      style: theme.textTheme.subtitle1!,
       child: Row(
         children: <Widget>[
           Expanded(
@@ -47,7 +46,7 @@ class DateTimeItem extends StatelessWidget {
                     firstDate: date.subtract(const Duration(days: 30)),
                     lastDate: date.add(const Duration(days: 30)),
                   )
-                  .then<void>((DateTime value) {
+                  .then((DateTime? value) {
                     if (value != null)
                       onChanged(DateTime(value.year, value.month, value.day, time.hour, time.minute));
                   });
@@ -74,7 +73,7 @@ class DateTimeItem extends StatelessWidget {
                   context: context,
                   initialTime: time,
                 )
-                .then<void>((TimeOfDay value) {
+                .then((TimeOfDay? value) {
                   if (value != null)
                     onChanged(DateTime(date.year, date.month, date.day, value.hour, value.minute));
                 });
@@ -101,11 +100,11 @@ class FullScreenDialogDemo extends StatefulWidget {
 class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
   DateTime _fromDateTime = DateTime.now();
   DateTime _toDateTime = DateTime.now();
-  bool _allDayValue = false;
+  bool? _allDayValue = false;
   bool _saveNeeded = false;
   bool _hasLocation = false;
   bool _hasName = false;
-  String _eventName;
+  late String _eventName;
 
   Future<bool> _onWillPop() async {
     _saveNeeded = _hasLocation || _hasName || _saveNeeded;
@@ -113,9 +112,9 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
       return true;
 
     final ThemeData theme = Theme.of(context);
-    final TextStyle dialogTextStyle = theme.textTheme.subtitle1.copyWith(color: theme.textTheme.caption.color);
+    final TextStyle dialogTextStyle = theme.textTheme.subtitle1!.copyWith(color: theme.textTheme.caption!.color);
 
-    return await showDialog<bool>(
+    return await (showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -127,19 +126,19 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
             TextButton(
               child: const Text('CANCEL'),
               onPressed: () {
-                Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
+                Navigator.of(context)!.pop(false); // Pops the confirmation dialog but not the page.
               },
             ),
             TextButton(
               child: const Text('DISCARD'),
               onPressed: () {
-                Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
+                Navigator.of(context)!.pop(true); // Returning true to _onWillPop will pop again.
               },
             ),
           ],
         );
       },
-    ) ?? false;
+    ) as Future<bool>);
   }
 
   @override
@@ -151,7 +150,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         title: Text(_hasName ? _eventName : 'Event Name TBD'),
         actions: <Widget> [
           TextButton(
-            child: Text('SAVE', style: theme.textTheme.bodyText2.copyWith(color: Colors.white)),
+            child: Text('SAVE', style: theme.textTheme.bodyText2!.copyWith(color: Colors.white)),
             onPressed: () {
               Navigator.pop(context, DismissDialogAction.save);
             },
@@ -238,7 +237,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                   children: <Widget> [
                     Checkbox(
                       value: _allDayValue,
-                      onChanged: (bool value) {
+                      onChanged: (bool? value) {
                         setState(() {
                           _allDayValue = value;
                           _saveNeeded = true;

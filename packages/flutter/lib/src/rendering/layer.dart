@@ -86,7 +86,7 @@ class AnnotationResult<T> {
 /// To composite the tree, create a [SceneBuilder] object, pass it to the
 /// root [Layer] object's [addToScene] method, and then call
 /// [SceneBuilder.build] to obtain a [Scene]. A [Scene] can then be painted
-/// using [Window.render].
+/// using [dart:ui.FlutterView.render].
 ///
 /// See also:
 ///
@@ -1179,9 +1179,9 @@ class OffsetLayer extends ContainerLayer {
   ///
   /// The [pixelRatio] describes the scale between the logical pixels and the
   /// size of the output image. It is independent of the
-  /// [Window.devicePixelRatio] for the device, so specifying 1.0 (the default)
-  /// will give you a 1:1 mapping between logical pixels and the output pixels
-  /// in the image.
+  /// [dart:ui.FlutterView.devicePixelRatio] for the device, so specifying 1.0
+  /// (the default) will give you a 1:1 mapping between logical pixels and the
+  /// output pixels in the image.
   ///
   /// See also:
   ///

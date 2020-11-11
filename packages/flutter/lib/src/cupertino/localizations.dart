@@ -234,7 +234,7 @@ abstract class CupertinoLocalizations {
 
   /// The default placeholder used in [CupertinoSearchTextField].
   // The global version uses the translated string from the arb file.
-  String get searchTextFieldPlaceholerLabel;
+  String get searchTextFieldPlaceholderLabel;
 
   /// Label read out by accessibility tools (VoiceOver) for a modal
   /// barrier to indicate that a tap dismisses the barrier.
@@ -428,7 +428,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get selectAllButtonLabel => 'Select All';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Search';
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';
