@@ -112,9 +112,11 @@ abstract class SearchDelegate<T> {
   ///   Widget buildLeading(BuildContext context) => Text("leading");
   ///
   ///   @override
-  ///   PreferredSizeWidget buildBottom(BuildContext context) => PreferredSize(
+  ///   PreferredSizeWidget buildBottom(BuildContext context) {
+  ///     return PreferredSize(
   ///        preferredSize: Size.fromHeight(56.0),
   ///        child: Text("bottom"));
+  ///   }
   ///
   ///   @override
   ///   Widget buildSuggestions(BuildContext context) => Text("suggestions");
@@ -192,9 +194,12 @@ abstract class SearchDelegate<T> {
 
   /// Widget to display across the bottom of the [AppBar].
   ///
+  /// Returns null if no widget should be shown.
+  ///
   /// See also:
   ///
   ///  * [AppBar.bottom], the intended use for the return value of this method.
+  /// 
   PreferredSizeWidget buildBottom(BuildContext context);
 
   /// The theme used to style the [AppBar].
