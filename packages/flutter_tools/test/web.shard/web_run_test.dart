@@ -4,10 +4,11 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+
+import '../integration.shard/test_data/basic_project.dart';
+import '../integration.shard/test_driver.dart';
+import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
-import 'test_data/basic_project.dart';
-import 'test_driver.dart';
-import 'test_utils.dart';
 
 void main() {
   Directory tempDir;
@@ -26,6 +27,6 @@ void main() {
   });
 
   testWithoutContext('flutter run works on web devices with a unary main function', () async {
-    await flutter.run(chrome: true);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
   }, skip: platform.isMacOS);
 }
