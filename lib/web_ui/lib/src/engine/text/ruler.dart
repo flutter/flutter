@@ -5,6 +5,41 @@
 // @dart = 2.10
 part of engine;
 
+String _buildCssFontString({
+  required ui.FontStyle? fontStyle,
+  required ui.FontWeight? fontWeight,
+  required double? fontSize,
+  required String? fontFamily,
+}) {
+  final StringBuffer result = StringBuffer();
+
+  // Font style
+  if (fontStyle != null) {
+    result.write(fontStyle == ui.FontStyle.normal ? 'normal' : 'italic');
+  } else {
+    result.write(DomRenderer.defaultFontStyle);
+  }
+  result.write(' ');
+
+  // Font weight.
+  if (fontWeight != null) {
+    result.write(fontWeightToCss(fontWeight));
+  } else {
+    result.write(DomRenderer.defaultFontWeight);
+  }
+  result.write(' ');
+
+  if (fontSize != null) {
+    result.write(fontSize.floor());
+  } else {
+    result.write(DomRenderer.defaultFontSize);
+  }
+  result.write('px ');
+  result.write(canonicalizeFontFamily(fontFamily));
+
+  return result.toString();
+}
+
 /// Contains the subset of [ui.ParagraphStyle] properties that affect layout.
 class ParagraphGeometricStyle {
   ParagraphGeometricStyle({
@@ -65,36 +100,13 @@ class ParagraphGeometricStyle {
   /// Cached font string that can be used in CSS.
   ///
   /// See <https://developer.mozilla.org/en-US/docs/Web/CSS/font>.
-  String get cssFontString => _cssFontString ??= _buildCssFontString();
-
-  String _buildCssFontString() {
-    final StringBuffer result = StringBuffer();
-
-    // Font style
-    if (fontStyle != null) {
-      result.write(fontStyle == ui.FontStyle.normal ? 'normal' : 'italic');
-    } else {
-      result.write(DomRenderer.defaultFontStyle);
-    }
-    result.write(' ');
-
-    // Font weight.
-    if (fontWeight != null) {
-      result.write(fontWeightToCss(fontWeight));
-    } else {
-      result.write(DomRenderer.defaultFontWeight);
-    }
-    result.write(' ');
-
-    if (fontSize != null) {
-      result.write(fontSize!.floor());
-    } else {
-      result.write(DomRenderer.defaultFontSize);
-    }
-    result.write('px ');
-    result.write(canonicalizeFontFamily(effectiveFontFamily));
-
-    return result.toString();
+  String get cssFontString {
+    return _cssFontString ??= _buildCssFontString(
+      fontStyle: fontStyle,
+      fontWeight: fontWeight,
+      fontSize: fontSize,
+      fontFamily: effectiveFontFamily,
+    );
   }
 
   @override
