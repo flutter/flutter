@@ -750,7 +750,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// each other.
-  BuildInfo getBuildInfo({ BuildMode forcedBuildMode }) {
+  Future<BuildInfo> getBuildInfo({ BuildMode forcedBuildMode }) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 

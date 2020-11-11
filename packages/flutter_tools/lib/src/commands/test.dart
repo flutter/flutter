@@ -171,7 +171,7 @@ class TestCommand extends FlutterCommand {
     final List<String> plainNames = stringsArg('plain-name');
     final String tags = stringArg('tags');
     final String excludeTags = stringArg('exclude-tags');
-    final BuildInfo buildInfo = getBuildInfo(forcedBuildMode: BuildMode.debug);
+    final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
       await _buildTestAsset();
@@ -226,7 +226,7 @@ class TestCommand extends FlutterCommand {
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
-        // TODO(jonahwilliams): file bug for incorrect URI handling on windws
+        // TODO(jonahwilliams): file bug for incorrect URI handling on windows
         packagesPath: globals.fs.path.absolute('.packages'),
       );
     }
