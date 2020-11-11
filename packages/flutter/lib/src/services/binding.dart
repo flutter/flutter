@@ -28,7 +28,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _instance = this;
     _defaultBinaryMessenger = createBinaryMessenger();
     _restorationManager = createRestorationManager();
-    platformDispatcher.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
+    window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     initLicenses();
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);

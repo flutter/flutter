@@ -287,8 +287,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     // properly setup the [defaultBinaryMessenger] instance.
     _buildOwner = BuildOwner();
     buildOwner!.onBuildScheduled = _handleBuildScheduled;
-    platformDispatcher.onLocaleChanged = handleLocaleChanged;
-    platformDispatcher.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
+    window.onLocaleChanged = handleLocaleChanged;
+    window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
   }
@@ -586,7 +586,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   void handleLocaleChanged() {
-    dispatchLocalesChanged(platformDispatcher.locales);
+    dispatchLocalesChanged(window.locales);
   }
 
   /// Notify all the observers that the locale has changed (using
@@ -1016,7 +1016,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// method again with the matched locale of the first call omitted from
   /// `supportedLocales`.
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
-    return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
+    return window.computePlatformResolvedLocale(supportedLocales);
   }
 }
 
