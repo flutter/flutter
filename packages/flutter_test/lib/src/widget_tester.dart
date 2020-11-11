@@ -129,7 +129,7 @@ void testWidgets(
   dynamic tags,
 }) {
   assert(variant != null);
-  assert(variant.values.isNotEmpty, 'There must be at least on value to test in the testing variant');
+  assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   final WidgetTester tester = WidgetTester._(binding);
   for (final dynamic value in variant.values) {
@@ -147,7 +147,7 @@ void testWidgets(
         test_package.addTearDown(binding.postTest);
         return binding.runTest(
           () async {
-            binding.reset();
+            binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
             debugResetSemanticsIdCounter();
             Object? memento;
             try {
@@ -917,10 +917,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Acts as if the application went idle.
   ///
   /// Runs all remaining microtasks, including those scheduled as a result of
-  /// running them, until there are no more microtasks scheduled.
+  /// running them, until there are no more microtasks scheduled. Then, runs any
+  /// previously scheduled timers with zero time, and completes the returned future.
   ///
-  /// Does not run timers. May result in an infinite loop or run out of memory
-  /// if microtasks continue to recursively schedule new microtasks.
+  /// May result in an infinite loop or run out of memory if microtasks continue
+  /// to recursively schedule new microtasks. Will not run any timers scheduled
+  /// after this method was invoked, even if they are zero-time timers.
   Future<void> idle() {
     return TestAsyncUtils.guard<void>(() => binding.idle());
   }

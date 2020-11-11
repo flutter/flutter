@@ -21,7 +21,8 @@ class TestServiceExtensionsBinding extends BindingBase
        PaintingBinding,
        SemanticsBinding,
        RendererBinding,
-       WidgetsBinding {
+       WidgetsBinding,
+       TestDefaultBinaryMessengerBinding {
 
   final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
 

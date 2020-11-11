@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -637,21 +638,20 @@ class KeyEventSimulator {
       assert(_osIsSupported(platform!), 'Platform $platform not supported for key simulation');
 
       final Map<String, dynamic> data = getKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey);
-      bool result = false;
+      final Completer<bool> result = Completer<bool>();
       await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {
           if (data == null) {
+            result.complete(false);
             return;
           }
           final Map<String, dynamic> decoded = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
-          if (decoded['handled'] as bool) {
-            result = true;
-          }
+          result.complete(decoded['handled'] as bool);
         }
       );
-      return result;
+      return result.future;
     });
   }
 

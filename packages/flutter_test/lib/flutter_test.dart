@@ -61,6 +61,7 @@ export 'src/all_elements.dart';
 export 'src/animation_sheet.dart';
 export 'src/binding.dart';
 export 'src/controller.dart';
+export 'src/deprecated.dart';
 export 'src/event_simulation.dart';
 export 'src/finders.dart';
 export 'src/frame_timing_summarizer.dart';

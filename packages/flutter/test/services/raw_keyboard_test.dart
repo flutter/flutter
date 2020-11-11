@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -665,12 +664,6 @@ void main() {
     });
 
     testWidgets('RawKeyboard asserts if no keys are in keysPressed after receiving a key down event', (WidgetTester tester) async {
-      FlutterErrorDetails? errorDetails;
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-      FlutterError.onError = (FlutterErrorDetails details) {
-        errorDetails = details;
-      };
-
       final Map<String, dynamic> keyEventMessage;
       if (kIsWeb) {
         keyEventMessage = const <String, dynamic>{
@@ -692,19 +685,15 @@ void main() {
       }
 
       try {
-        await ServicesBinding.instance!.defaultBinaryMessenger
-            .handlePlatformMessage(
+        await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
           SystemChannels.keyEvent.name,
           SystemChannels.keyEvent.codec.encodeMessage(keyEventMessage),
-              (ByteData? data) {},
+          (ByteData? data) { },
         );
-      } finally {
-        FlutterError.onError = oldHandler;
+        fail('Expected an exception, but did not get one.');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains('Attempted to send a key down event when no keys are in keysPressed'));
       }
-      expect(errorDetails, isNotNull);
-      expect(errorDetails!.stack, isNotNull);
-      final String fullErrorMessage = errorDetails.toString().replaceAll('\n', ' ');
-      expect(fullErrorMessage, contains('Attempted to send a key down event when no keys are in keysPressed'));
     });
   });
 

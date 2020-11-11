@@ -2360,11 +2360,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _cursorWaitForStart(Timer timer) {
     assert(_kCursorBlinkHalfPeriod > _fadeDuration);
+    assert(!EditableText.debugDeterministicCursor);
     _cursorTimer?.cancel();
     _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
   }
 
   void _startCursorTimer() {
+    assert(_cursorTimer == null);
     _targetCursorVisibility = true;
     _cursorBlinkOpacityController.value = 1.0;
     if (EditableText.debugDeterministicCursor)
