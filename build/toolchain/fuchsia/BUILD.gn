@@ -14,7 +14,7 @@ if (use_goma) {
 toolchain("fuchsia") {
   assert(target_cpu == "x64" || target_cpu == "arm64",
          "We currently only support 'x64' and 'arm64' targets for fuchsia.")
-  toolchain_bin = rebase_path("//fuchsia/toolchain/$host_os/bin/", root_out_dir)
+  toolchain_bin = rebase_path("//fuchsia/toolchain/$host_os/bin", root_out_dir)
   fuchsia_sdk = rebase_path("//fuchsia/sdk/$host_os", root_out_dir)
 
   # We can't do string interpolation ($ in strings) on things with dots in
