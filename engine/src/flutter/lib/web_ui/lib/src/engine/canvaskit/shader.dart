@@ -162,15 +162,15 @@ class CkGradientConical extends CkShader implements ui.Gradient {
 class CkImageShader extends CkShader implements ui.ImageShader {
   CkImageShader(
       ui.Image image, this.tileModeX, this.tileModeY, this.matrix4)
-      : _skImage = image as CkImage;
+      : _image = image as CkImage;
 
   final ui.TileMode tileModeX;
   final ui.TileMode tileModeY;
   final Float64List matrix4;
-  final CkImage _skImage;
+  final CkImage _image;
 
   @override
-  SkShader createDefault() => _skImage.skImage.makeShader(
+  SkShader createDefault() => _image.skImage.makeShader(
     toSkTileMode(tileModeX),
     toSkTileMode(tileModeY),
     toSkMatrixFromFloat64(matrix4),
