@@ -29,8 +29,6 @@ class Surface {
 
   virtual GrDirectContext* GetContext() = 0;
 
-  virtual flutter::ExternalViewEmbedder* GetExternalViewEmbedder();
-
   virtual std::unique_ptr<GLContextResult> MakeRenderContextCurrent();
 
   virtual bool ClearRenderContext();

@@ -39,9 +39,6 @@ class IOSSurfaceSoftware final : public IOSSurface, public GPUSurfaceSoftwareDel
   // |GPUSurfaceSoftwareDelegate|
   bool PresentBackingStore(sk_sp<SkSurface> backing_store) override;
 
-  // |GPUSurfaceSoftwareDelegate|
-  ExternalViewEmbedder* GetExternalViewEmbedder() override;
-
  private:
   fml::scoped_nsobject<CALayer> layer_;
   sk_sp<SkSurface> sk_surface_;

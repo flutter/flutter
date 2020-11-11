@@ -10,7 +10,6 @@
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
-#include "flutter/shell/gpu/gpu_surface_delegate.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/mtl/GrMtlTypes.h"
 
@@ -20,16 +19,14 @@ namespace flutter {
 
 class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetal : public Surface {
  public:
-  GPUSurfaceMetal(GPUSurfaceDelegate* delegate,
-                  fml::scoped_nsobject<CAMetalLayer> layer,
+  GPUSurfaceMetal(fml::scoped_nsobject<CAMetalLayer> layer,
                   sk_sp<GrDirectContext> context,
                   fml::scoped_nsprotocol<id<MTLCommandQueue>> command_queue);
 
   // |Surface|
-  ~GPUSurfaceMetal() override;
+  ~GPUSurfaceMetal();
 
  private:
-  GPUSurfaceDelegate* delegate_;
   fml::scoped_nsobject<CAMetalLayer> layer_;
   sk_sp<GrDirectContext> context_;
   fml::scoped_nsprotocol<id<MTLCommandQueue>> command_queue_;
@@ -46,9 +43,6 @@ class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetal : public Surface {
 
   // |Surface|
   GrDirectContext* GetContext() override;
-
-  // |Surface|
-  flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
   // |Surface|
   std::unique_ptr<GLContextResult> MakeRenderContextCurrent() override;
