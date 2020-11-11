@@ -243,7 +243,7 @@ class Radio<T> extends StatefulWidget {
   /// Defaults to [ThemeData.toggleableActiveColor].
   ///
   /// If [fillColor] returns a non-null color in the [MaterialState.selected]
-  /// state, it will be used over this.
+  /// state, it will be used instead of this color.
   final Color? activeColor;
 
   /// The color that fills the checkbox when it is checked, in all

@@ -169,7 +169,7 @@ class Switch extends StatefulWidget {
   /// Defaults to [ThemeData.toggleableActiveColor].
   ///
   /// If [thumbColor] returns a non-null color in the [MaterialState.selected]
-  /// state, it will be used over this.
+  /// state, it will be used instead of this color.
   final Color? activeColor;
 
   /// The color to use on the track when this switch is on.
@@ -179,7 +179,7 @@ class Switch extends StatefulWidget {
   /// Ignored if this switch is created with [Switch.adaptive].
   ///
   /// If [trackColor] returns a non-null color in the [MaterialState.selected]
-  /// state, it will be used over this.
+  /// state, it will be used instead of this color.
   final Color? activeTrackColor;
 
   /// The color to use on the thumb when this switch is off.
@@ -189,7 +189,7 @@ class Switch extends StatefulWidget {
   /// Ignored if this switch is created with [Switch.adaptive].
   ///
   /// If [thumbColor] returns a non-null color in the default state, it will be
-  /// used over this.
+  /// used instead of this color.
   final Color? inactiveThumbColor;
 
   /// The color to use on the track when this switch is off.
@@ -199,7 +199,7 @@ class Switch extends StatefulWidget {
   /// Ignored if this switch is created with [Switch.adaptive].
   ///
   /// If [trackColor] returns a non-null color in the default state, it will be
-  /// used over this.
+  /// used instead of this color.
   final Color? inactiveTrackColor;
 
   /// An image to use on the thumb of this switch when the switch is on.
