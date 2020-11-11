@@ -68,9 +68,6 @@ class EmbedderSurfaceGL final : public EmbedderSurface,
   SkMatrix GLContextSurfaceTransformation() const override;
 
   // |GPUSurfaceGLDelegate|
-  ExternalViewEmbedder* GetExternalViewEmbedder() override;
-
-  // |GPUSurfaceGLDelegate|
   GLProcResolver GetGLProcResolver() const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurfaceGL);

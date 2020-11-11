@@ -82,9 +82,4 @@ bool IOSSurfaceGL::GLContextPresent(uint32_t fbo_id) {
   return IsValid() && render_target_->PresentRenderBuffer();
 }
 
-// |GPUSurfaceGLDelegate|
-ExternalViewEmbedder* IOSSurfaceGL::GetExternalViewEmbedder() {
-  return GetSurfaceExternalViewEmbedder().get();
-}
-
 }  // namespace flutter

@@ -334,11 +334,6 @@ GrDirectContext* GPUSurfaceGL::GetContext() {
 }
 
 // |Surface|
-flutter::ExternalViewEmbedder* GPUSurfaceGL::GetExternalViewEmbedder() {
-  return delegate_->GetExternalViewEmbedder();
-}
-
-// |Surface|
 std::unique_ptr<GLContextResult> GPUSurfaceGL::MakeRenderContextCurrent() {
   return delegate_->GLContextMakeCurrent();
 }
