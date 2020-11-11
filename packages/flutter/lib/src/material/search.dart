@@ -114,7 +114,6 @@ abstract class SearchDelegate<T> {
   ///   @override
   ///   Widget buildLeading(BuildContext context) => Text("leading");
   ///
-  ///   @override
   ///   PreferredSizeWidget buildBottom(BuildContext context) {
   ///     return PreferredSize(
   ///        preferredSize: Size.fromHeight(56.0),
@@ -198,13 +197,13 @@ abstract class SearchDelegate<T> {
 
   /// Widget to display across the bottom of the [AppBar].
   ///
-  /// Returns null if no widget should be shown.
+  /// Returns null if no widget is set.
   ///
   /// See also:
   ///
   ///  * [AppBar.bottom], the intended use for the return value of this method.
   ///
-  PreferredSizeWidget buildBottom(BuildContext context);
+  PreferredSizeWidget? buildBottom(BuildContext context) => null;
 
   /// The theme used to configure the search page.
   ///
@@ -578,18 +577,13 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
               decoration: InputDecoration(hintText: searchFieldLabel),
             ),
             actions: widget.delegate.buildActions(context),
+            bottom: widget.delegate.buildBottom(context),
           ),
           body: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: body,
           ),
-          bottom: widget.delegate.buildBottom(context),
-          actions: widget.delegate.buildActions(context),
-        ),
-        body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: body,
-        ),
+        )
       ),
     );
   }
