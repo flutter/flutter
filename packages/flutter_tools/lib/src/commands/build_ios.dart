@@ -108,7 +108,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
             '"$exportOptionsPlist" is not a file. See "xcodebuild -h" for available keys.');
       }
     }
-    final BuildInfo buildInfo = await getBuildInfo();
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
     final BuildInfo buildInfo = await getBuildInfo();
 
