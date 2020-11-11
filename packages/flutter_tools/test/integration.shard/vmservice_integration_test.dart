@@ -43,7 +43,7 @@ void main() {
       for (final Protocol protocol in protocolList.protocols) {
         expect(protocol.protocolName, anyOf('VM Service', 'DDS'));
       }
-    });
+    }, skip: true); // DDS is disabled due to https://github.com/flutter/flutter/issues/69722
 
     testWithoutContext('flutterVersion can be called', () async {
       final Response response =
