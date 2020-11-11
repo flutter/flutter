@@ -31,5 +31,5 @@
   "selectAllButtonLabel": "Wybierz wszystkie",
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Zamknij",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "searchTextFieldPlaceholderLabel": "Szukaj"
 }
