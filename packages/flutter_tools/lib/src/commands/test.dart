@@ -171,6 +171,7 @@ class TestCommand extends FlutterCommand {
     final List<String> plainNames = stringsArg('plain-name');
     final String tags = stringArg('tags');
     final String excludeTags = stringArg('exclude-tags');
+    final BuildInfo buildInfo = getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
       await _buildTestAsset();
@@ -225,6 +226,8 @@ class TestCommand extends FlutterCommand {
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
+        // TODO(jonahwilliams): file bug for incorrect URI handling on windws
+        packagesPath: globals.fs.path.absolute('.packages'),
       );
     }
 
@@ -236,7 +239,6 @@ class TestCommand extends FlutterCommand {
     }
 
     final bool disableServiceAuthCodes = boolArg('disable-service-auth-codes');
-    final BuildInfo buildInfo = getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     final int result = await testRunner.runTests(
       testWrapper,

@@ -32,7 +32,7 @@ class BuildInfo {
     this.dartExperiments = const <String>[],
     @required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.packagesPath = '.packages',
+    this.packagesPath = '.packages', // TODO(jonahwilliams): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.autodetect,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
