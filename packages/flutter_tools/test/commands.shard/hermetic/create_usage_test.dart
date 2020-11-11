@@ -20,6 +20,7 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
+      Cache.flutterRoot = 'flutter';
     });
 
     setUp(() {
@@ -56,16 +57,16 @@ void main() {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=module', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=module', 'testy']);
       expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'module'));
 
-      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
       expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'app'));
 
-      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=package', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=package', 'testy']);
       expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'package'));
 
-      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=plugin', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy']);
       expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'plugin'));
     }));
 
@@ -74,13 +75,12 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
-        'create', '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
+        'create', '--no-pub', '--template=app', 'testy']);
       expect(await command.usageValues,
              containsPair(CustomDimensions.commandCreateIosLanguage, 'swift'));
 
       await runner.run(<String>[
         'create',
-        '--flutter-root=flutter',
         '--no-pub',
         '--template=app',
         '--ios-language=objc',
@@ -95,13 +95,12 @@ void main() {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
       expect(await command.usageValues,
              containsPair(CustomDimensions.commandCreateAndroidLanguage, 'kotlin'));
 
       await runner.run(<String>[
         'create',
-        '--flutter-root=flutter',
         '--no-pub',
         '--template=app',
         '--android-language=java',

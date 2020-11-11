@@ -78,13 +78,6 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  uncaught_image_error_linux:
-    description: >
-      Ensures that an error thrown into the zone can be caught by the ImageStream
-      completer
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
   flutter_gallery_android__compile:
     description: >
       Collects various performance metrics of compiling the Flutter
@@ -423,12 +416,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  android_enable_twc:
-    description: >
-      Verifies that track-widget-creation can be enabled and disabled.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
   android_defines_test:
     description: >
       Builds an APK with a --dart-define and verifies it can be used as a constant
@@ -564,7 +551,6 @@ tasks:
       Measures the runtime performance of animations after a backdrop filter is removed on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >
@@ -642,12 +628,6 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  ios_enable_twc:
-    description: >
-      Verifies that track-widget-creation can be enabled and disabled.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   macos_chrome_dev_mode:
     description: >
       Run flutter web on the devicelab and hot restart.
@@ -665,12 +645,14 @@ tasks:
       A smoke test that runs on macOS Catalina, which is a clone of the Gallery startup latency test.
     stage: devicelab_ios
     required_agent_capabilities: ["mac-catalina/ios"]
+    flaky: true
 
   smoke_catalina_hot_mode_dev_cycle_ios__benchmark:
     description: >
       A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
     stage: devicelab_ios
     required_agent_capabilities: ["mac-catalina/ios"]
+    flaky: true
 
   smoke_catalina_start_up:
     description: >
@@ -775,6 +757,7 @@ tasks:
       Android with e2e.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
+    flaky: true
 
   flutter_gallery__transition_perf_e2e_ios:
     description: >
@@ -907,12 +890,6 @@ tasks:
       Runs Web benchmarks on Chrome on a Linux machine using the CanvasKit rendering backend.
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
-
-  web_enable_twc:
-     description: >
-       Verifies that track-widget-creation can be enabled and disabled.
-     stage: devicelab
-     required_agent_capabilities: ["linux-vm"]
 
   # android_splash_screen_integration_test:
   #   description: >

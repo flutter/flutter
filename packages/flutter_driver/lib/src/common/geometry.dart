@@ -31,7 +31,7 @@ EnumIndex<OffsetType> _offsetTypeIndex = EnumIndex<OffsetType>(OffsetType.values
 /// identified by [finder].
 ///
 /// The requested offset is returned in logical pixels, which can be translated
-/// to device pixels via [Window.devicePixelRatio].
+/// to device pixels via [dart:ui.FlutterView.devicePixelRatio].
 class GetOffset extends CommandWithTarget {
   /// The `finder` looks for an element to get its rect.
   GetOffset(SerializableFinder finder,  this.offsetType, { Duration? timeout }) : super(finder, timeout: timeout);
@@ -56,7 +56,7 @@ class GetOffset extends CommandWithTarget {
 /// The result of the [GetOffset] command.
 ///
 /// The offset is provided in logical pixels, which can be translated
-/// to device pixels via [Window.devicePixelRatio].
+/// to device pixels via [dart:ui.FlutterView.devicePixelRatio].
 class GetOffsetResult extends Result {
   /// Creates a result with the offset defined by [dx] and [dy].
   const GetOffsetResult({ this.dx = 0.0, this.dy = 0.0});
@@ -64,13 +64,13 @@ class GetOffsetResult extends Result {
   /// The x component of the offset in logical pixels.
   ///
   /// The value can be translated to device pixels via
-  /// [Window.devicePixelRatio].
+  /// [dart:ui.FlutterView.devicePixelRatio].
   final double dx;
 
   /// The y component of the offset in logical pixels.
   ///
   /// The value can be translated to device pixels via
-  /// [Window.devicePixelRatio].
+  /// [dart:ui.FlutterView.devicePixelRatio].
   final double dy;
 
   /// Deserializes the result from JSON.

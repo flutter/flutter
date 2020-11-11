@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Ngjit",
   "selectAllButtonLabel": "Zgjidhi të gjitha",
   "tabSemanticsLabel": "Skeda $tabIndex nga $tabCount",
-  "modalBarrierDismissLabel": "Hiq"
+  "modalBarrierDismissLabel": "Hiq",
+  "searchTextFieldPlaceholderLabel": "Kërko"
 }

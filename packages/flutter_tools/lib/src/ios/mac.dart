@@ -438,7 +438,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
       }
     } else {
-      outputDir = '${globals.fs.path.absolute(app.archiveBundlePath)}.xcarchive';
+      outputDir = globals.fs.path.absolute(app.archiveBundleOutputPath);
       if (!globals.fs.isDirectorySync(outputDir)) {
         globals.printError('Archive succeeded but the expected xcarchive at $outputDir not found');
       }
@@ -539,7 +539,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
     logger.printError('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
     logger.printError('');
     logger.printError('You can temporarily work around this issue by running:');
-    logger.printError('  rm -rf ios/Flutter/App.framework');
+    logger.printError('  flutter clean');
     return;
   }
 

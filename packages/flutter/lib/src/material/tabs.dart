@@ -4,6 +4,7 @@
 
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -15,6 +16,7 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'tab_bar_theme.dart';
 import 'tab_controller.dart';
 import 'tab_indicator.dart';
@@ -162,7 +164,7 @@ class _TabStyle extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
     final Animation<double> animation = listenable as Animation<double>;
 
@@ -319,6 +321,7 @@ class _IndicatorPainter extends CustomPainter {
     required this.indicatorSize,
     required this.tabKeys,
     required _IndicatorPainter? old,
+    required this.indicatorPadding,
   }) : assert(controller != null),
        assert(indicator != null),
        super(repaint: controller.animation) {
@@ -329,10 +332,15 @@ class _IndicatorPainter extends CustomPainter {
   final TabController controller;
   final Decoration indicator;
   final TabBarIndicatorSize? indicatorSize;
+  final EdgeInsetsGeometry indicatorPadding;
   final List<GlobalKey> tabKeys;
 
-  late List<double> _currentTabOffsets;
-  late TextDirection _currentTextDirection;
+  // _currentTabOffsets and _currentTextDirection are set each time TabBar
+  // layout is completed. These values can be null when TabBar contains no
+  // tabs, since there are nothing to lay out.
+  List<double>? _currentTabOffsets;
+  TextDirection? _currentTextDirection;
+
   Rect? _currentRect;
   BoxPainter? _painter;
   bool _needsPaint = false;
@@ -344,38 +352,38 @@ class _IndicatorPainter extends CustomPainter {
     _painter?.dispose();
   }
 
-  void saveTabOffsets(List<double> tabOffsets, TextDirection textDirection) {
+  void saveTabOffsets(List<double>? tabOffsets, TextDirection? textDirection) {
     _currentTabOffsets = tabOffsets;
     _currentTextDirection = textDirection;
   }
 
   // _currentTabOffsets[index] is the offset of the start edge of the tab at index, and
   // _currentTabOffsets[_currentTabOffsets.length] is the end edge of the last tab.
-  int get maxTabIndex => _currentTabOffsets.length - 2;
+  int get maxTabIndex => _currentTabOffsets!.length - 2;
 
   double centerOf(int tabIndex) {
     assert(_currentTabOffsets != null);
-    assert(_currentTabOffsets.isNotEmpty);
+    assert(_currentTabOffsets!.isNotEmpty);
     assert(tabIndex >= 0);
     assert(tabIndex <= maxTabIndex);
-    return (_currentTabOffsets[tabIndex] + _currentTabOffsets[tabIndex + 1]) / 2.0;
+    return (_currentTabOffsets![tabIndex] + _currentTabOffsets![tabIndex + 1]) / 2.0;
   }
 
   Rect indicatorRect(Size tabBarSize, int tabIndex) {
     assert(_currentTabOffsets != null);
     assert(_currentTextDirection != null);
-    assert(_currentTabOffsets.isNotEmpty);
+    assert(_currentTabOffsets!.isNotEmpty);
     assert(tabIndex >= 0);
     assert(tabIndex <= maxTabIndex);
     double tabLeft, tabRight;
-    switch (_currentTextDirection) {
+    switch (_currentTextDirection!) {
       case TextDirection.rtl:
-        tabLeft = _currentTabOffsets[tabIndex + 1];
-        tabRight = _currentTabOffsets[tabIndex];
+        tabLeft = _currentTabOffsets![tabIndex + 1];
+        tabRight = _currentTabOffsets![tabIndex];
         break;
       case TextDirection.ltr:
-        tabLeft = _currentTabOffsets[tabIndex];
-        tabRight = _currentTabOffsets[tabIndex + 1];
+        tabLeft = _currentTabOffsets![tabIndex];
+        tabRight = _currentTabOffsets![tabIndex + 1];
         break;
     }
 
@@ -386,7 +394,16 @@ class _IndicatorPainter extends CustomPainter {
       tabRight -= delta;
     }
 
-    return Rect.fromLTWH(tabLeft, 0.0, tabRight - tabLeft, tabBarSize.height);
+    final EdgeInsets insets = indicatorPadding.resolve(_currentTextDirection);
+    final Rect rect = Rect.fromLTWH(tabLeft, 0.0, tabRight - tabLeft, tabBarSize.height);
+
+    if (!(rect.size >= insets.collapsedSize)) {
+      throw FlutterError(
+          'indicatorPadding insets should be less than Tab Size\n'
+          'Rect Size : ${rect.size}, Insets: ${insets.toString()}'
+      );
+    }
+    return insets.deflateRect(rect);
   }
 
   @override
@@ -426,25 +443,13 @@ class _IndicatorPainter extends CustomPainter {
     _painter!.paint(canvas, _currentRect!.topLeft, configuration);
   }
 
-  static bool _tabOffsetsEqual(List<double> a, List<double> b) {
-    // TODO(shihaohong): The following null check should be replaced when a fix
-    // for https://github.com/flutter/flutter/issues/40014 is available.
-    if (a == null || b == null || a.length != b.length)
-      return false;
-    for (int i = 0; i < a.length; i += 1) {
-      if (a[i] != b[i])
-        return false;
-    }
-    return true;
-  }
-
   @override
   bool shouldRepaint(_IndicatorPainter old) {
     return _needsPaint
         || controller != old.controller
         || indicator != old.indicator
         || tabKeys.length != old.tabKeys.length
-        || (!_tabOffsetsEqual(_currentTabOffsets, old._currentTabOffsets))
+        || (!listEquals(_currentTabOffsets, old._currentTabOffsets))
         || _currentTextDirection != old._currentTextDirection;
   }
 }
@@ -604,6 +609,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.controller,
     this.isScrollable = false,
     this.indicatorColor,
+    this.automaticIndicatorColorAdjustment = true,
     this.indicatorWeight = 2.0,
     this.indicatorPadding = EdgeInsets.zero,
     this.indicator,
@@ -614,7 +620,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.overlayColor,
     this.mouseCursor,
+    this.enableFeedback,
     this.onTap,
     this.physics,
   }) : assert(tabs != null),
@@ -661,26 +669,22 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// this property is ignored.
   final double indicatorWeight;
 
-  /// The horizontal padding for the line that appears below the selected tab.
+
+  /// Padding for indicator.
+  /// This property will now no longer be ignored even if indicator is declared
+  /// or provided by [TabBarTheme]
   ///
   /// For [isScrollable] tab bars, specifying [kTabLabelPadding] will align
   /// the indicator with the tab's text for [Tab] widgets and all but the
   /// shortest [Tab.text] values.
   ///
-  /// The [EdgeInsets.top] and [EdgeInsets.bottom] values of the
-  /// [indicatorPadding] are ignored.
-  ///
   /// The default value of [indicatorPadding] is [EdgeInsets.zero].
-  ///
-  /// If [indicator] is specified or provided from [TabBarTheme],
-  /// this property is ignored.
   final EdgeInsetsGeometry indicatorPadding;
 
   /// Defines the appearance of the selected tab indicator.
   ///
   /// If [indicator] is specified or provided from [TabBarTheme],
-  /// the [indicatorColor], [indicatorWeight], and [indicatorPadding]
-  /// properties are ignored.
+  /// the [indicatorColor], and [indicatorWeight] properties are ignored.
   ///
   /// The default, underline-style, selected tab indicator can be defined with
   /// [UnderlineTabIndicator].
@@ -691,6 +695,13 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [TabBarIndicatorSize.label], then the tab's bounds are only as wide as
   /// the tab widget itself.
   final Decoration? indicator;
+
+  /// Whether this tab bar should automatically adjust the [indicatorColor].
+  ///
+  /// If [automaticIndicatorColorAdjustment] is true,
+  /// then the [indicatorColor] will be automatically adjusted to [Colors.white]
+  /// when the [indicatorColor] is same as [Material.color] of the [Material] parent widget.
+  final bool automaticIndicatorColorAdjustment;
 
   /// Defines how the selected tab indicator's size is computed.
   ///
@@ -740,6 +751,22 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// bodyText1 definition is used.
   final TextStyle? unselectedLabelStyle;
 
+  /// Defines the ink response focus, hover, and splash colors.
+  ///
+  /// If non-null, it is resolved against one of [MaterialState.focused],
+  /// [MaterialState.hovered], and [MaterialState.pressed].
+  ///
+  /// [MaterialState.pressed] triggers a ripple (an ink splash), per
+  /// the current Material Design spec. The [overlayColor] doesn't map
+  /// a state to [InkResponse.highlightColor] because a separate highlight
+  /// is not used by the current design guidelines. See
+  /// https://material.io/design/interaction/states.html#pressed
+  ///
+  /// If the overlay color is null or resolves to null, then the default values
+  /// for [InkResponse.focusColor], [InkResponse.hoverColor], [InkResponse.splashColor]
+  /// will be used instead.
+  final MaterialStateProperty<Color?>? overlayColor;
+
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
@@ -748,6 +775,14 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If this property is null, [SystemMouseCursors.click] will be used.
   final MouseCursor? mouseCursor;
+
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a long-press
+  /// will produce a short vibration, when feedback is enabled.
+  ///
+  /// Defaults to true.
+  final bool? enableFeedback;
 
   /// An optional callback that's called when the [TabBar] is tapped.
   ///
@@ -810,7 +845,7 @@ class _TabBarState extends State<TabBar> {
     if (tabBarTheme.indicator != null)
       return tabBarTheme.indicator!;
 
-    Color color = widget.indicatorColor ?? Theme.of(context)!.indicatorColor;
+    Color color = widget.indicatorColor ?? Theme.of(context).indicatorColor;
     // ThemeData tries to avoid this by having indicatorColor avoid being the
     // primaryColor. However, it's possible that the tab bar is on a
     // Material that isn't the primaryColor. In that case, if the indicator
@@ -821,11 +856,14 @@ class _TabBarState extends State<TabBar> {
     //
     // The material's color might be null (if it's a transparency). In that case
     // there's no good way for us to find out what the color is so we don't.
-    if (color.value == Material.of(context)?.color?.value)
+    //
+    // TODO(xu-baolin): Remove automatic adjustment to white color indicator
+    // with a better long-term solution.
+    // https://github.com/flutter/flutter/pull/68171#pullrequestreview-517753917
+    if (widget.automaticIndicatorColorAdjustment && color.value == Material.of(context)?.color?.value)
       color = Colors.white;
 
     return UnderlineTabIndicator(
-      insets: widget.indicatorPadding,
       borderSide: BorderSide(
         width: widget.indicatorWeight,
         color: color,
@@ -873,6 +911,7 @@ class _TabBarState extends State<TabBar> {
       controller: _controller!,
       indicator: _indicator,
       indicatorSize: widget.indicatorSize ?? TabBarTheme.of(context).indicatorSize,
+      indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
       old: _indicatorPainter,
     );
@@ -925,7 +964,7 @@ class _TabBarState extends State<TabBar> {
     if (!widget.isScrollable)
       return 0.0;
     double tabCenter = _indicatorPainter!.centerOf(index);
-    switch (Directionality.of(context)!) {
+    switch (Directionality.of(context)) {
       case TextDirection.rtl:
         tabCenter = _tabStripWidth - tabCenter;
         break;
@@ -1030,7 +1069,7 @@ class _TabBarState extends State<TabBar> {
       }
       return true;
     }());
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller!.length == 0) {
       return Container(
         height: _kTabHeight + widget.indicatorWeight,
@@ -1091,6 +1130,8 @@ class _TabBarState extends State<TabBar> {
       wrappedTabs[index] = InkWell(
         mouseCursor: widget.mouseCursor ?? SystemMouseCursors.click,
         onTap: () { _handleTap(index); },
+        enableFeedback: widget.enableFeedback ?? true,
+        overlayColor: widget.overlayColor,
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
           child: Stack(
@@ -1496,7 +1537,7 @@ class TabPageSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color fixColor = color ?? Colors.transparent;
-    final Color fixSelectedColor = selectedColor ?? Theme.of(context)!.accentColor;
+    final Color fixSelectedColor = selectedColor ?? Theme.of(context).accentColor;
     final ColorTween selectedColorTween = ColorTween(begin: fixColor, end: fixSelectedColor);
     final ColorTween previousColorTween = ColorTween(begin: fixSelectedColor, end: fixColor);
     final TabController? tabController = controller ?? DefaultTabController.of(context);

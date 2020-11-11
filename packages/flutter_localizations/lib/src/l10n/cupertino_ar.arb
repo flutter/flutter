@@ -40,5 +40,6 @@
   "pasteButtonLabel": "لصق",
   "selectAllButtonLabel": "اختيار الكل",
   "tabSemanticsLabel": "علامة التبويب $tabIndex من $tabCount",
-  "modalBarrierDismissLabel": "رفض"
+  "modalBarrierDismissLabel": "رفض",
+  "searchTextFieldPlaceholderLabel": "بحث"
 }

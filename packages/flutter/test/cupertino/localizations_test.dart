@@ -31,5 +31,30 @@ void main() {
     expect(localizations.timerPickerSecondLabel(0), isNotNull);
 
     expect(localizations.modalBarrierDismissLabel, isNotNull);
+    expect(localizations.searchTextFieldPlaceholderLabel, isNotNull);
+  });
+
+  testWidgets('CupertinoLocalizations.of throws', (WidgetTester tester) async {
+    final GlobalKey noLocalizationsAvailable = GlobalKey();
+    final GlobalKey localizationsAvailable = GlobalKey();
+
+    await tester.pumpWidget(
+      Container(
+        key: noLocalizationsAvailable,
+        child: CupertinoApp(
+          home: Container(
+            key: localizationsAvailable,
+          ),
+        ),
+      ),
+    );
+
+    expect(() => CupertinoLocalizations.of(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
+      (AssertionError e) => e.message,
+      'message',
+      contains('No CupertinoLocalizations found'),
+    )));
+
+    expect(CupertinoLocalizations.of(localizationsAvailable.currentContext!), isA<CupertinoLocalizations>());
   });
 }

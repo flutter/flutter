@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'date_picker.dart';
+import 'debug.dart';
 
 /// Determines the order of the columns inside [CupertinoDatePicker] in
 /// time and date time mode.
@@ -232,6 +232,10 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get selectAllButtonLabel;
 
+  /// The default placeholder used in [CupertinoSearchTextField].
+  // The global version uses the translated string from the arb file.
+  String get searchTextFieldPlaceholderLabel;
+
   /// Label read out by accessibility tools (VoiceOver) for a modal
   /// barrier to indicate that a tap dismisses the barrier.
   ///
@@ -242,8 +246,11 @@ abstract class CupertinoLocalizations {
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
+  /// If no [CupertinoLocalizations] are available in the given `context`, this
+  /// method throws an exception.
+  ///
   /// This method is just a convenient shorthand for:
-  /// `Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)`.
+  /// `Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)!`.
   ///
   /// References to the localized resources defined by this class are typically
   /// written in terms of this method. For example:
@@ -251,8 +258,9 @@ abstract class CupertinoLocalizations {
   /// ```dart
   /// CupertinoLocalizations.of(context).anteMeridiemAbbreviation;
   /// ```
-  static CupertinoLocalizations? of(BuildContext context) {
-    return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations);
+  static CupertinoLocalizations of(BuildContext context) {
+    assert(debugCheckHasCupertinoLocalizations(context));
+    return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)!;
   }
 }
 
@@ -418,6 +426,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Select All';
+
+  @override
+  String get searchTextFieldPlaceholderLabel => 'Search';
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';

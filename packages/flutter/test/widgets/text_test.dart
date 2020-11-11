@@ -161,6 +161,42 @@ void main() {
     expect(tester.takeException(), null);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
 
+  testWidgets('inline widgets hitTest works with ellipsis', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/68559
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      Text.rich(
+        TextSpan(
+          children: <InlineSpan>[
+            const TextSpan(
+              text: 'a very very very very very very very very very very long line',
+            ),
+            WidgetSpan(
+              child: SizedBox(
+                width: 20,
+                height: 40,
+                child: Card(
+                  child: RichText(
+                    text: const TextSpan(text: 'widget should be truncated'),
+                    textDirection: TextDirection.rtl,
+                  ),
+                ),
+              ),
+            ),
+          ],
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+
+    await tester.tap(find.byType(Text));
+
+    expect(tester.takeException(), null);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+
   testWidgets('inline widgets works with textScaleFactor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59316
     final UniqueKey key = UniqueKey();
@@ -1003,6 +1039,176 @@ void main() {
       ],
     )));
   }, semanticsEnabled: true, skip: isBrowser); // Browser semantics have different sizes.
+
+  // Regression test for https://github.com/flutter/flutter/issues/69787
+  testWidgets('WidgetSpans with no semantic information are elided from semantics - case 2', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
+          text: TextSpan(children: <InlineSpan>[
+            const WidgetSpan(child: SizedBox.shrink()),
+            const WidgetSpan(child: Text('included')),
+            TextSpan(
+              text: 'HELLO',
+              style: const TextStyle(color: Colors.black),
+              recognizer: TapGestureRecognizer()..onTap = () {},
+            ),
+            const WidgetSpan(child: Text('included2')),
+          ]),
+        ),
+      )
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(label: 'included'),
+            TestSemantics(
+              label: 'HELLO',
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isLink,
+              ],
+            ),
+            TestSemantics(label: 'included2'),
+          ],
+        ),
+      ],
+    ),
+    ignoreId: true,
+    ignoreRect: true,
+    ignoreTransform: true,
+    ));
+  }, semanticsEnabled: true, skip: isBrowser); // Browser does not support widget span.
+
+  // Regression test for https://github.com/flutter/flutter/issues/69787
+  testWidgets('WidgetSpans with no semantic information are elided from semantics - case 3', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
+          text: TextSpan(children: <InlineSpan>[
+            const WidgetSpan(child: SizedBox.shrink()),
+            WidgetSpan(
+              child: Row(
+                children: <Widget>[
+                  Semantics(
+                    container: true,
+                    child: const Text('foo'),
+                  ),
+                  Semantics(
+                    container: true,
+                    child: const Text('bar'),
+                  ),
+                ],
+              ),
+            ),
+            TextSpan(
+              text: 'HELLO',
+              style: const TextStyle(color: Colors.black),
+              recognizer: TapGestureRecognizer()..onTap = () {},
+            ),
+          ]),
+        ),
+      )
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(label: 'foo'),
+            TestSemantics(label: 'bar'),
+            TestSemantics(
+              label: 'HELLO',
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isLink,
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+    ignoreId: true,
+    ignoreRect: true,
+    ignoreTransform: true,
+    ));
+  }, semanticsEnabled: true, skip: isBrowser); // Browser does not support widget span.
+
+  // Regression test for https://github.com/flutter/flutter/issues/69787
+  testWidgets('WidgetSpans with no semantic information are elided from semantics - case 4', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: ClipRect(
+            child: Container(
+              color: Colors.green,
+              height: 100,
+              width: 100,
+              child: OverflowBox(
+                alignment: Alignment.topLeft,
+                maxWidth: double.infinity,
+                child: RichText(
+                  text: TextSpan(
+                    children: <InlineSpan>[
+                      const WidgetSpan(
+                        child: Icon(
+                          Icons.edit,
+                          size: 16,
+                          semanticLabel: 'not clipped',
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'next WS is clipped',
+                        recognizer: TapGestureRecognizer()..onTap = () { },
+                      ),
+                      const WidgetSpan(
+                        child: Icon(
+                          Icons.edit,
+                          size: 16,
+                          semanticLabel: 'clipped',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(label: 'not clipped'),
+            TestSemantics(
+              label: 'next WS is clipped',
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+            ),
+          ],
+        ),
+      ],
+    ),
+    ignoreId: true,
+    ignoreRect: true,
+    ignoreTransform: true,
+    ));
+  }, semanticsEnabled: true, skip: isBrowser); // Browser does not support widget span
 }
 
 Future<void> _pumpTextWidget({

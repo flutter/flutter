@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:ui' as ui;
@@ -14,8 +12,12 @@ import 'utils.dart';
 /// Change the strategy to use for handling browser URL.
 ///
 /// Setting this to null disables all integration with the browser history.
-void setUrlStrategy(UrlStrategy strategy) {
-  jsSetUrlStrategy(convertToJsUrlStrategy(strategy));
+void setUrlStrategy(UrlStrategy? strategy) {
+  JsUrlStrategy? jsUrlStrategy;
+  if (strategy != null) {
+    jsUrlStrategy = convertToJsUrlStrategy(strategy);
+  }
+  jsSetUrlStrategy(jsUrlStrategy);
 }
 
 /// Represents and reads route state from the browser's URL.
@@ -37,7 +39,7 @@ abstract class UrlStrategy {
   /// The state of the current browser history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/state
-  Object getState();
+  Object? getState();
 
   /// Given a path that's internal to the app, create the external url that
   /// will be used in the browser.
@@ -101,7 +103,7 @@ class HashUrlStrategy extends UrlStrategy {
   String getPath() {
     // the hash value is always prefixed with a `#`
     // and if it is empty then it will stay empty
-    final String path = _platformLocation.hash ?? '';
+    final String path = _platformLocation.hash;
     assert(path.isEmpty || path.startsWith('#'));
 
     // We don't want to return an empty string as a path. Instead we default to "/".
@@ -113,7 +115,7 @@ class HashUrlStrategy extends UrlStrategy {
   }
 
   @override
-  Object getState() => _platformLocation.state;
+  Object? getState() => _platformLocation.state;
 
   @override
   String prepareExternalUrl(String internalUrl) {
@@ -148,7 +150,7 @@ class HashUrlStrategy extends UrlStrategy {
   /// `history.back` transition.
   Future<void> _waitForPopState() {
     final Completer<void> completer = Completer<void>();
-    ui.VoidCallback unsubscribe;
+    late ui.VoidCallback unsubscribe;
     unsubscribe = addPopStateListener((_) {
       unsubscribe();
       completer.complete();
@@ -238,7 +240,7 @@ abstract class PlatformLocation {
   /// The `state` in the current history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/state
-  Object get state;
+  Object? get state;
 
   /// Adds a new entry to the browser history stack.
   ///
@@ -266,13 +268,21 @@ abstract class PlatformLocation {
   /// The base href where the Flutter app is being served.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-  String getBaseHref();
+  String? getBaseHref();
 }
 
 /// Delegates to real browser APIs to provide platform location functionality.
 class BrowserPlatformLocation extends PlatformLocation {
   /// Default constructor for [BrowserPlatformLocation].
   const BrowserPlatformLocation();
+
+  // Default value for [pathname] when it's not set in window.location.
+  // According to MDN this should be ''. Chrome seems to return '/'.
+  static const String _defaultPathname = '';
+
+  // Default value for [search] when it's not set in window.location.
+  // According to both chrome, and the MDN, this is ''.
+  static const String _defaultSearch = '';
 
   html.Location get _location => html.window.location;
   html.History get _history => html.window.history;
@@ -288,16 +298,16 @@ class BrowserPlatformLocation extends PlatformLocation {
   }
 
   @override
-  String get pathname => _location.pathname;
+  String get pathname => _location.pathname ?? _defaultPathname;
 
   @override
-  String get search => _location.search;
+  String get search => _location.search ?? _defaultSearch;
 
   @override
   String get hash => _location.hash;
 
   @override
-  Object get state => _history.state;
+  Object? get state => _history.state;
 
   @override
   void pushState(Object state, String title, String url) {
@@ -315,6 +325,5 @@ class BrowserPlatformLocation extends PlatformLocation {
   }
 
   @override
-  String getBaseHref() => getBaseElementHrefFromDom();
-  // String getBaseHref() => html.document.baseUri;
+  String? getBaseHref() => getBaseElementHrefFromDom();
 }

@@ -6,7 +6,6 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -96,13 +95,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addOption('packages',
         hide: !showPackagesCommand,
         help: 'Path to your ".packages" file.\n$packagesHelp');
-
-    argParser.addOption('flutter-root',
-        hide: !verboseHelp,
-        help: 'The root directory of the Flutter repository.\n'
-              'Defaults to \$$kFlutterRootEnvironmentVariableName if set, otherwise uses the parent '
-              'of the directory that the "flutter" script itself is in.');
-
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
     }
@@ -112,8 +104,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         help: 'Path to your engine src directory, if you are building Flutter locally.\n'
               'Defaults to \$$kFlutterEngineEnvironmentVariableName if set, otherwise defaults to '
               'the path given in your pubspec.yaml dependency_overrides for $kFlutterEnginePackageName, '
-              'if any, or, failing that, tries to guess at the location based on the value of the '
-              '--flutter-root option.');
+              'if any.');
 
     argParser.addOption('local-engine',
         hide: !verboseHelp,
@@ -154,43 +145,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
       columnWidth: globals.outputPreferences.wrapColumn,
     );
     return '$prefix\n\n$usageWithoutDescription';
-  }
-
-  static String get defaultFlutterRoot {
-    if (globals.platform.environment.containsKey(kFlutterRootEnvironmentVariableName)) {
-      return globals.platform.environment[kFlutterRootEnvironmentVariableName];
-    }
-    try {
-      if (globals.platform.script.scheme == 'data') {
-        return '../..'; // we're running as a test
-      }
-
-      if (globals.platform.script.scheme == 'package') {
-        final String packageConfigPath = Uri.parse(globals.platform.packageConfig).toFilePath();
-        return globals.fs.path.dirname(globals.fs.path.dirname(globals.fs.path.dirname(packageConfigPath)));
-      }
-
-      final String script = globals.platform.script.toFilePath();
-      if (globals.fs.path.basename(script) == kSnapshotFileName) {
-        return globals.fs.path.dirname(globals.fs.path.dirname(globals.fs.path.dirname(script)));
-      }
-      if (globals.fs.path.basename(script) == kFlutterToolsScriptFileName) {
-        return globals.fs.path.dirname(globals.fs.path.dirname(globals.fs.path.dirname(globals.fs.path.dirname(script))));
-      }
-
-      // If run from a bare script within the repo.
-      if (script.contains('flutter/packages/')) {
-        return script.substring(0, script.indexOf('flutter/packages/') + 8);
-      }
-      if (script.contains('flutter/examples/')) {
-        return script.substring(0, script.indexOf('flutter/examples/') + 8);
-      }
-    } on Exception catch (error) {
-      // we don't have a logger at the time this is run
-      // (which is why we don't use printTrace here)
-      print(userMessages.runnerNoRoot('$error'));
-    }
-    return '.';
   }
 
   @override
@@ -262,11 +216,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
       FlutterTesterDevices.showFlutterTesterDevice = true;
     }
 
-    // We must set Cache.flutterRoot early because other features use it (e.g.
-    // enginePath's initializer uses it).
-    final String flutterRoot = topLevelResults['flutter-root'] as String ?? defaultFlutterRoot;
-    Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(flutterRoot));
-
     // Set up the tooling configuration.
     final EngineBuildPaths engineBuildPaths = await globals.localEngineLocator.findEnginePath(
       topLevelResults['local-engine-src-path'] as String,
@@ -286,7 +235,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         globals.logger.quiet = topLevelResults['quiet'] as bool;
 
         if (globals.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
-          await Cache.lock();
+          await globals.cache.lock();
         }
 
         if (topLevelResults['suppress-analytics'] as bool) {
@@ -335,11 +284,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
         await super.runCommand(topLevelResults);
       },
     );
-  }
-
-  @visibleForTesting
-  static void initFlutterRoot() {
-    Cache.flutterRoot ??= defaultFlutterRoot;
   }
 
   /// Get the root directories of the repo - the directories containing Dart packages.

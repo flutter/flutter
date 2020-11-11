@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Залепи",
   "selectAllButtonLabel": "Избери ги сите",
   "tabSemanticsLabel": "Картичка $tabIndex од $tabCount",
-  "modalBarrierDismissLabel": "Отфрли"
+  "modalBarrierDismissLabel": "Отфрли",
+  "searchTextFieldPlaceholderLabel": "Пребарувајте"
 }

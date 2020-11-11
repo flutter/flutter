@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Επικόλληση",
   "selectAllButtonLabel": "Επιλογή όλων",
   "tabSemanticsLabel": "Καρτέλα $tabIndex από $tabCount",
-  "modalBarrierDismissLabel": "Παράβλεψη"
+  "modalBarrierDismissLabel": "Παράβλεψη",
+  "searchTextFieldPlaceholderLabel": "Αναζήτηση"
 }

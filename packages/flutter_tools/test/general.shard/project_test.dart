@@ -771,7 +771,12 @@ void _testInMemory(String description, Future<void> testMethod()) {
   testFileSystem.file('.packages').writeAsStringSync('\n');
   // Transfer needed parts of the Flutter installation folder
   // to the in-memory file system used during testing.
-  transfer(Cache().getArtifactDirectory('gradle_wrapper'), testFileSystem);
+  transfer(Cache(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    osUtils: globals.os,
+    platform: globals.platform,
+  ).getArtifactDirectory('gradle_wrapper'), testFileSystem);
   transfer(globals.fs.directory(Cache.flutterRoot)
       .childDirectory('packages')
       .childDirectory('flutter_tools')
@@ -801,7 +806,12 @@ void _testInMemory(String description, Future<void> testMethod()) {
     overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Cache: () => Cache(),
+      Cache: () => Cache(
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        osUtils: globals.os,
+        platform: globals.platform,
+      ),
       FlutterProjectFactory: () => flutterProjectFactory,
     },
   );

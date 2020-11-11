@@ -274,12 +274,12 @@ class CupertinoActionSheet extends StatelessWidget {
       if (cancelButton != null) _buildCancelButton(),
     ];
 
-    final Orientation orientation = MediaQuery.of(context)!.orientation;
+    final Orientation orientation = MediaQuery.of(context).orientation;
     final double actionSheetWidth;
     if (orientation == Orientation.portrait) {
-      actionSheetWidth = MediaQuery.of(context)!.size.width - (_kEdgeHorizontalPadding * 2);
+      actionSheetWidth = MediaQuery.of(context).size.width - (_kEdgeHorizontalPadding * 2);
     } else {
-      actionSheetWidth = MediaQuery.of(context)!.size.height - (_kEdgeHorizontalPadding * 2);
+      actionSheetWidth = MediaQuery.of(context).size.height - (_kEdgeHorizontalPadding * 2);
     }
 
     return SafeArea(
@@ -449,15 +449,15 @@ class _CupertinoAlertRenderWidget extends RenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     return _RenderCupertinoAlert(
-      dividerThickness: _kDividerThickness / MediaQuery.of(context)!.devicePixelRatio,
-      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!,
+      dividerThickness: _kDividerThickness / MediaQuery.of(context).devicePixelRatio,
+      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context),
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoAlert renderObject) {
     super.updateRenderObject(context, renderObject);
-    renderObject.dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!;
+    renderObject.dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context);
   }
 
   @override
@@ -944,7 +944,7 @@ class _CupertinoAlertActionSection extends StatefulWidget {
 class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSection> {
   @override
   Widget build(BuildContext context) {
-    final double devicePixelRatio = MediaQuery.of(context)!.devicePixelRatio;
+    final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     final List<Widget> interactiveButtons = <Widget>[];
     for (int i = 0; i < widget.children.length; i += 1) {
@@ -1071,10 +1071,10 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoAlertActions(
       dividerThickness: _dividerThickness,
-      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!,
+      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context),
       hasCancelButton: _hasCancelButton,
-      backgroundColor: CupertinoDynamicColor.resolve(_kBackgroundColor, context)!,
-      pressedColor: CupertinoDynamicColor.resolve(_kPressedColor, context)!,
+      backgroundColor: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+      pressedColor: CupertinoDynamicColor.resolve(_kPressedColor, context),
     );
   }
 
@@ -1082,10 +1082,10 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderCupertinoAlertActions renderObject) {
     renderObject
       ..dividerThickness = _dividerThickness
-      ..dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!
+      ..dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context)
       ..hasCancelButton = _hasCancelButton
-      ..backgroundColor = CupertinoDynamicColor.resolve(_kBackgroundColor, context)!
-      ..pressedColor = CupertinoDynamicColor.resolve(_kPressedColor, context)!;
+      ..backgroundColor = CupertinoDynamicColor.resolve(_kBackgroundColor, context)
+      ..pressedColor = CupertinoDynamicColor.resolve(_kPressedColor, context);
   }
 }
 

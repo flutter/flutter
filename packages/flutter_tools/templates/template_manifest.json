@@ -21,6 +21,7 @@
         "templates/app/android.tmpl/app/src/debug/AndroidManifest.xml.tmpl",
         "templates/app/android.tmpl/app/src/main/AndroidManifest.xml.tmpl",
         "templates/app/android.tmpl/app/src/main/res/drawable/launch_background.xml",
+        "templates/app/android.tmpl/app/src/main/res/drawable-v21/launch_background.xml",
         "templates/app/android.tmpl/app/src/main/res/mipmap-hdpi/ic_launcher.png",
         "templates/app/android.tmpl/app/src/main/res/mipmap-mdpi/ic_launcher.png",
         "templates/app/android.tmpl/app/src/main/res/mipmap-xhdpi/ic_launcher.png",

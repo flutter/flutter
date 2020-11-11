@@ -149,7 +149,7 @@ class BottomSheet extends StatefulWidget {
   /// Defaults to null and falls back to [Material]'s default.
   final ShapeBorder? shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defines the bottom sheet's [Material.clipBehavior].
   ///
@@ -248,7 +248,7 @@ class _BottomSheetState extends State<BottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final BottomSheetThemeData bottomSheetTheme = Theme.of(context)!.bottomSheetTheme;
+    final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
     final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor;
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape;
@@ -340,7 +340,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   ParametricCurve<double> animationCurve = _modalBottomSheetCurve;
 
   String _getRouteLabel(MaterialLocalizations localizations) {
-    switch (Theme.of(context)!.platform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         return '';
@@ -369,8 +369,8 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
-    final MediaQueryData? mediaQuery = MediaQuery.of(context);
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String routeLabel = _getRouteLabel(localizations);
 
     return AnimatedBuilder(
@@ -395,7 +395,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         // Disable the initial animation when accessible navigation is on so
         // that the semantics are added to the tree at the correct time.
         final double animationValue = animationCurve.transform(
-            mediaQuery!.accessibleNavigation ? 1.0 : widget.route!.animation!.value
+            mediaQuery.accessibleNavigation ? 1.0 : widget.route!.animation!.value
         );
         return Semantics(
           scopesRoute: true,
@@ -417,7 +417,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   _ModalBottomSheetRoute({
     this.builder,
-    this.theme,
+    required this.capturedThemes,
     this.barrierLabel,
     this.backgroundColor,
     this.elevation,
@@ -434,7 +434,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
        super(settings: settings);
 
   final WidgetBuilder? builder;
-  final ThemeData? theme;
+  final CapturedThemes capturedThemes;
   final bool isScrollControlled;
   final Color? backgroundColor;
   final double? elevation;
@@ -470,25 +470,32 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final BottomSheetThemeData sheetTheme = theme?.bottomSheetTheme ?? Theme.of(context)!.bottomSheetTheme;
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
     Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: _ModalBottomSheet<T>(
-        route: this,
-        backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
-        elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
-        shape: shape,
-        clipBehavior: clipBehavior,
-        isScrollControlled: isScrollControlled,
-        enableDrag: enableDrag,
+      child: Builder(
+        builder: (BuildContext context) {
+          final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
+          return _ModalBottomSheet<T>(
+            route: this,
+            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
+            elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
+            shape: shape,
+            clipBehavior: clipBehavior,
+            isScrollControlled: isScrollControlled,
+            enableDrag: enableDrag,
+          );
+        },
       ),
     );
-    if (theme != null)
-      bottomSheet = Theme(data: theme!, child: bottomSheet);
-    return bottomSheet;
+    if (isScrollControlled)
+      bottomSheet = Padding(
+        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        child: bottomSheet
+      );
+    return capturedThemes.wrap(bottomSheet);
   }
 }
 
@@ -570,7 +577,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
 /// to have a bottom sheet that has a scrollable child such as a [ListView] or
 /// a [GridView] and have the bottom sheet be draggable, you should set this
-/// parameter to true.
+/// parameter to true. When this parameter is set to true the top of [BottomSheet] will be padded
+/// such that it avoids any system top padding given by the [MediaQuery]
 ///
 /// The `useRootNavigator` parameter ensures that the root navigator is used to
 /// display the [BottomSheet] when set to `true`. This is useful in the case
@@ -667,11 +675,12 @@ Future<T?> showModalBottomSheet<T>({
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
-  return Navigator.of(context, rootNavigator: useRootNavigator)!.push(_ModalBottomSheetRoute<T>(
+  final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator)!;
+  return navigator.push(_ModalBottomSheetRoute<T>(
     builder: builder,
-    theme: Theme.of(context, shadowThemeOnly: true),
+    capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     isScrollControlled: isScrollControlled,
-    barrierLabel: MaterialLocalizations.of(context)!.modalBarrierDismissLabel,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     backgroundColor: backgroundColor,
     elevation: elevation,
     shape: shape,
@@ -734,7 +743,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   assert(builder != null);
   assert(debugCheckHasScaffold(context));
 
-  return Scaffold.of(context)!.showBottomSheet<T>(
+  return Scaffold.of(context).showBottomSheet<T>(
     builder,
     backgroundColor: backgroundColor,
     elevation: elevation,

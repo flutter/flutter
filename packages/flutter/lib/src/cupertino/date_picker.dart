@@ -623,7 +623,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     super.didChangeDependencies();
 
     textDirectionFactor = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
-    localizations = CupertinoLocalizations.of(context)!;
+    localizations = CupertinoLocalizations.of(context);
 
     alignCenterLeft = textDirectionFactor == 1 ? Alignment.centerLeft : Alignment.centerRight;
     alignCenterRight = textDirectionFactor == 1 ? Alignment.centerRight : Alignment.centerLeft;
@@ -1032,7 +1032,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     }
 
     return MediaQuery(
-      data: MediaQuery.of(context)!.copyWith(textScaleFactor: 1.0),
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: CustomMultiChildLayout(
@@ -1113,7 +1113,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     super.didChangeDependencies();
 
     textDirectionFactor = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
-    localizations = CupertinoLocalizations.of(context)!;
+    localizations = CupertinoLocalizations.of(context);
 
     alignCenterLeft = textDirectionFactor == 1 ? Alignment.centerLeft : Alignment.centerRight;
     alignCenterRight = textDirectionFactor == 1 ? Alignment.centerRight : Alignment.centerLeft;
@@ -1403,7 +1403,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     }
 
     return MediaQuery(
-      data: MediaQuery.of(context)!.copyWith(textScaleFactor: 1.0),
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: CustomMultiChildLayout(
@@ -1620,8 +1620,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    textDirection = Directionality.of(context)!;
-    localizations = CupertinoLocalizations.of(context)!;
+    textDirection = Directionality.of(context);
+    localizations = CupertinoLocalizations.of(context);
 
     _measureLabelMetrics();
   }
@@ -2077,7 +2077,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         return MediaQuery(
           // The native iOS picker's text scaling is fixed, so we will also fix it
           // as well in our picker.
-          data: MediaQuery.of(context)!.copyWith(textScaleFactor: 1.0),
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
           child: CupertinoTheme(
             data: themeData.copyWith(
               textTheme: themeData.textTheme.copyWith(
@@ -2087,7 +2087,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             child: Align(
               alignment: widget.alignment,
               child: Container(
-                color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
+                color: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context),
                 width: totalWidth,
                 height: _kPickerHeight,
                 child: DefaultTextStyle(

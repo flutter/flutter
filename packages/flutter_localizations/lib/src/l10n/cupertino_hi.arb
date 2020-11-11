@@ -20,5 +20,6 @@
   "pasteButtonLabel": "चिपकाएं",
   "selectAllButtonLabel": "सभी चुनें",
   "tabSemanticsLabel": "$tabCount का टैब $tabIndex",
-  "modalBarrierDismissLabel": "खारिज करें"
+  "modalBarrierDismissLabel": "खारिज करें",
+  "searchTextFieldPlaceholderLabel": "खोजें"
 }
