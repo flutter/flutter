@@ -113,7 +113,7 @@ class BuildBundleCommand extends BuildSubCommand {
         break;
     }
 
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
 
     await bundleBuilder.build(
       platform: platform,

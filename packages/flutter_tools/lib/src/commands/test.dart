@@ -236,7 +236,7 @@ class TestCommand extends FlutterCommand {
     }
 
     final bool disableServiceAuthCodes = boolArg('disable-service-auth-codes');
-    final BuildInfo buildInfo = getBuildInfo(forcedBuildMode: BuildMode.debug);
+    final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     final int result = await testRunner.runTests(
       testWrapper,

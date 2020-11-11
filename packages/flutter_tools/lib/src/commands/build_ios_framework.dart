@@ -124,17 +124,17 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
   FlutterProject _project;
 
-  List<BuildInfo> get buildInfos {
+  Future<List<BuildInfo>> get buildInfos async {
     final List<BuildInfo> buildInfos = <BuildInfo>[];
 
     if (boolArg('debug')) {
-      buildInfos.add(getBuildInfo(forcedBuildMode: BuildMode.debug));
+      buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.debug));
     }
     if (boolArg('profile')) {
-      buildInfos.add(getBuildInfo(forcedBuildMode: BuildMode.profile));
+      buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.profile));
     }
     if (boolArg('release')) {
-      buildInfos.add(getBuildInfo(forcedBuildMode: BuildMode.release));
+      buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.release));
     }
 
     return buildInfos;
@@ -163,7 +163,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
           'Silicon ARM simulators and will be removed in a future version of '
           'Flutter. Use --xcframework instead.');
     }
-    if (buildInfos.isEmpty) {
+    if ((await buildInfos).isEmpty) {
       throwToolExit('At least one of "--debug" or "--profile", or "--release" is required.');
     }
   }
@@ -183,7 +183,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
     final Directory outputDirectory = globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
 
-    for (final BuildInfo buildInfo in buildInfos) {
+    for (final BuildInfo buildInfo in await buildInfos) {
       final String productBundleIdentifier = await _project.ios.productBundleIdentifier(buildInfo);
       globals.printStatus('Building frameworks for $productBundleIdentifier in ${getNameForBuildMode(buildInfo.mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(buildInfo.mode));
