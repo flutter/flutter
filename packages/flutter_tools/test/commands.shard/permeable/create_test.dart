@@ -567,8 +567,6 @@ void main() {
       'pubspec.yaml',
       'README.md',
       'test/widget_test.dart',
-      'integration_test/app_test.dart',
-      'integration_test/driver.dart',
     ], unexpectedPaths: <String>[
       'android/',
       'ios/',
@@ -983,8 +981,6 @@ void main() {
 
     expectExists('lib/main.dart');
     expectExists('test/widget_test.dart');
-    expectExists('integration_test/app_test.dart');
-    expectExists('integration_test/driver.dart');
 
     final String actualContents = await globals.fs.file(projectDir.path + '/test/widget_test.dart').readAsString();
 
