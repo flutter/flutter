@@ -49,29 +49,30 @@ class Md5Hash {
   int _remainingLength;
   int _contentLength = 0;
 
-  void addChunk(Uint8List data, [int end]) {
+  void addChunk(Uint8List data, [int stop]) {
     assert(_remainingLength == null);
-    end ??= data.length;
+    stop ??= data.length;
     int i = 0;
-    for (; i <= end - _kChunkSize; i += _kChunkSize) {
-      _writeChunk(data, i);
+    for (; i <= stop - _kChunkSize; i += _kChunkSize) {
+      final Uint32List view = Uint32List.view(data.buffer, i, 16);
+      _writeChunk(view);
     }
-    if (i != end) {
+    if (i != stop) {
       // The data must be copied so that the provided buffer can be reused.
       int j = 0;
-      for (; i < end; i += 1) {
+      for (; i < stop; i += 1) {
         _scratchSpace[j] = data[i];
         j += 1;
       }
       _remainingLength = j;
     }
-    _contentLength += end;
+    _contentLength += stop;
   }
 
-  void _writeChunk(Uint8List chunk, int start) {
+  void _writeChunk(Uint32List chunk) {
     // help dart remove bounds checks
     // ignore: unnecessary_statements
-    chunk[63];
+    chunk[15];
     // ignore: unnecessary_statements
     _shiftAmounts[63];
     // ignore: unnecessary_statements
@@ -86,53 +87,49 @@ class Md5Hash {
     int i = 0;
     for (; i < 16; i += 1) {
       e = (b & c) | ((~b & _mask32) & d);
-      f = i * 4 + start;
+      f = i;
       final int temp = d;
-      final int chunkValue = chunk[f+3] << 24 | chunk[f+2] << 16 | chunk[f+1] << 8 | chunk[f];
       d = c;
       c = b;
       b = _add32(
           b,
-          _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunkValue)),
+          _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunk[f])),
               _shiftAmounts[i]));
       a = temp;
     }
     for (; i < 32; i += 1) {
       e = (d & b) | ((~d & _mask32) & c);
-      f = ((((5 * i) + 1) % 16) * 4) + start;
+      f = ((5 * i) + 1) % 16;
       final int temp = d;
-      final int chunkValue = chunk[f+3] << 24 | chunk[f+2] << 16 | chunk[f+1] << 8 | chunk[f];
       d = c;
       c = b;
       b = _add32(
           b,
-          _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunkValue)),
+          _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunk[f])),
               _shiftAmounts[i]));
       a = temp;
     }
     for (; i < 48; i += 1) {
       e = b ^ c ^ d;
-      f = ((((3 * i) + 5) % 16) * 4) + start;
+      f = ((3 * i) + 5) % 16;
       final int temp = d;
-      final int chunkValue = chunk[f+3] << 24 | chunk[f+2] << 16 | chunk[f+1] << 8 | chunk[f];
       d = c;
       c = b;
       b = _add32(
           b,
-          _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunkValue)),
+          _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunk[f])),
               _shiftAmounts[i]));
       a = temp;
     }
     for (; i < 64; i+= 1) {
       e = c ^ (b | (~d & _mask32));
-      f = (((7 * i) % 16) * 4) + start;
+      f = (7 * i) % 16;
       final int temp = d;
-      final int chunkValue = chunk[f+3] << 24 | chunk[f+2] << 16 | chunk[f+1] << 8 | chunk[f];
       d = c;
       c = b;
       b = _add32(
           b,
-          _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunkValue)),
+          _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunk[f])),
               _shiftAmounts[i]));
       a = temp;
     }
@@ -157,7 +154,7 @@ class Md5Hash {
     }
     final int bitLength = _contentLength * 8;
     _scratchSpace.buffer.asByteData().setUint64(56, bitLength, Endian.little);
-    _writeChunk(_scratchSpace, 0);
+    _writeChunk(Uint32List.view(_scratchSpace.buffer, 0, 16));
     return _digest;
   }
 
