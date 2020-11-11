@@ -27,6 +27,7 @@ public class FlutterFragmentTest {
     assertEquals("/", fragment.getInitialRoute());
     assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
     assertTrue(fragment.shouldAttachEngineToActivity());
+    assertFalse(fragment.shouldHandleDeeplinking());
     assertNull(fragment.getCachedEngineId());
     assertTrue(fragment.shouldDestroyEngineWithHost());
     assertEquals(RenderMode.surface, fragment.getRenderMode());
@@ -40,6 +41,7 @@ public class FlutterFragmentTest {
             .dartEntrypoint("custom_entrypoint")
             .initialRoute("/custom/route")
             .shouldAttachEngineToActivity(false)
+            .handleDeeplinking(true)
             .renderMode(RenderMode.texture)
             .transparencyMode(TransparencyMode.opaque)
             .build();
@@ -49,6 +51,7 @@ public class FlutterFragmentTest {
     assertEquals("/custom/route", fragment.getInitialRoute());
     assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
     assertFalse(fragment.shouldAttachEngineToActivity());
+    assertTrue(fragment.shouldHandleDeeplinking());
     assertNull(fragment.getCachedEngineId());
     assertTrue(fragment.shouldDestroyEngineWithHost());
     assertEquals(RenderMode.texture, fragment.getRenderMode());
