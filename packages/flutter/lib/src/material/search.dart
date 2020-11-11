@@ -203,7 +203,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBar.bottom], the intended use for the return value of this method.
-  /// 
+  ///
   PreferredSizeWidget buildBottom(BuildContext context);
 
   /// The theme used to configure the search page.
