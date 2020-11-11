@@ -10,7 +10,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
-import '../base/time.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
