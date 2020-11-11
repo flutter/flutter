@@ -111,6 +111,7 @@ class Checkbox extends StatefulWidget {
   /// ```
   final ValueChanged<bool?>? onChanged;
 
+  /// {@template flutter.material.checkbox.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
@@ -121,36 +122,46 @@ class Checkbox extends StatefulWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  /// {@endtemplate}
   ///
   /// When [value] is null and [tristate] is true, [MaterialState.selected] is
   /// included as a state.
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If null, then the value of [CheckboxThemeData.mouseCursor] is used. If
+  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The color to use when this checkbox is checked.
   ///
   /// Defaults to [ThemeData.toggleableActiveColor].
   ///
-  /// If [fillColor] returns a non-null color in the [MaterialState.selected]
-  /// state, it will be used instead of this color.
+  /// If [fillColor] or [CheckboxThemeData.fillColor] returns a non-null color
+  /// in the [MaterialState.selected] state, it will be used instead of this
+  /// color.
   final Color? activeColor;
 
+  /// {@template flutter.material.checkbox.fillColor}
   /// The color that fills the checkbox when it is checked, in all
   /// [MaterialState]s.
-  ///
-  /// If this is provided, it will be used over [activeColor].
   ///
   /// Resolves in the following states:
   ///  * [MaterialState.selected].
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  /// {@endtemplate}
+  ///
+  /// If null, then the value of [CheckboxThemeData.fillColor] is used. If that
+  /// is also null, then the value of [activeColor] is used in the selected
+  /// state.
   final MaterialStateProperty<Color?>? fillColor;
 
+  /// {@template flutter.material.checkbox.checkColor}
   /// The color to use for the check icon when this checkbox is checked.
+  /// {@endtemplate}
   ///
-  /// Defaults to Color(0xFFFFFFFF)
+  /// If null, then the value of [CheckboxThemeData.checkColor] is used. If
+  /// that is also null, then Color(0xFFFFFFFF) is used.
   final Color? checkColor;
 
   /// If true the checkbox's [value] can be true, false, or null.
@@ -165,18 +176,27 @@ class Checkbox extends StatefulWidget {
   /// If tristate is false (the default), [value] must not be null.
   final bool tristate;
 
+  /// {@template flutter.material.checkbox.materialTapTargetSize}
   /// Configures the minimum size of the tap target.
+  /// {@endtemplate}
   ///
-  /// Defaults to [ThemeData.materialTapTargetSize].
+  /// If null, then the value of [CheckboxThemeData.materialTapTargetSize] is
+  /// used. If that is also null, then the value of
+  /// [ThemeData.materialTapTargetSize] is used.
   ///
   /// See also:
   ///
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize? materialTapTargetSize;
 
+  /// {@template flutter.material.checkbox.visualDensity}
   /// Defines how compact the checkbox's layout will be.
+  /// {@endtemplate}
   ///
   /// {@macro flutter.material.themedata.visualDensity}
+  ///
+  /// If null, then the value of [CheckboxThemeData.visualDensity] is used. If
+  /// that is also null, then the value of [ThemeData.visualDensity] is used.
   ///
   /// See also:
   ///
@@ -184,15 +204,28 @@ class Checkbox extends StatefulWidget {
   ///    widgets within a [Theme].
   final VisualDensity? visualDensity;
 
+  /// {@template flutter.material.checkbox.focusColor}
   /// The color for the checkbox's [Material] when it has the input focus.
+  /// {@endtemplate}
+  ///
+  /// If null, then the value of [CheckboxThemeData.focusColor] is used. If that
+  /// is also null, then the value of [ThemeData.focusColor] is used.
   final Color? focusColor;
 
+  /// {@template flutter.material.checkbox.hoverColor}
   /// The color for the checkbox's [Material] when a pointer is hovering over it.
+  /// {@endtemplate}
+  ///
+  /// If null, then the value of [CheckboxThemeData.hoverColor] is used. If that
+  /// is also null, then the value of [ThemeData.hoverColor] is used.
   final Color? hoverColor;
 
+  /// {@template flutter.material.checkbox.splashRadius}
   /// The splash radius of the circular [Material] ink response.
+  /// {@endtemplate}
   ///
-  /// If null, then [kRadialReactionRadius] is used.
+  /// If null, then the value of [CheckboxThemeData.splashRadius] is used. If
+  /// that is also null, then [kRadialReactionRadius] is used.
   final double? splashRadius;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -288,8 +321,14 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
+    final MaterialTapTargetSize effectiveMaterialTapTargetSize = widget.materialTapTargetSize
+      ?? themeData.checkboxTheme.materialTapTargetSize
+      ?? themeData.materialTapTargetSize;
+    final VisualDensity effectiveVisualDensity = widget.visualDensity
+      ?? themeData.checkboxTheme.visualDensity
+      ?? themeData.visualDensity;
     Size size;
-    switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
+    switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
         break;
@@ -297,20 +336,21 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
         size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
         break;
     }
-    size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
+    size += effectiveVisualDensity.baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
-      _states,
-    );
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, _states)
+      ?? MaterialStateProperty.resolveAs<MouseCursor?>(themeData.checkboxTheme.mouseCursor, _states)
+      ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, _states);
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
     final Set<MaterialState> activeStates = _states..add(MaterialState.selected);
     final Set<MaterialState> inactiveStates = _states..remove(MaterialState.selected);
     final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
+      ?? themeData.checkboxTheme.fillColor?.resolve(activeStates)
       ?? _widgetFillColor.resolve(activeStates)
       ?? _defaultFillColor.resolve(activeStates);
     final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
+      ?? themeData.checkboxTheme.fillColor?.resolve(inactiveStates)
       ?? _widgetFillColor.resolve(inactiveStates)
       ?? _defaultFillColor.resolve(inactiveStates);
 
@@ -328,11 +368,11 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             value: widget.value,
             tristate: widget.tristate,
             activeColor: effectiveActiveColor,
-            checkColor: widget.checkColor ?? const Color(0xFFFFFFFF),
+            checkColor: widget.checkColor ?? themeData.checkboxTheme.checkColor ?? const Color(0xFFFFFFFF),
             inactiveColor: effectiveInactiveColor,
-            focusColor: widget.focusColor ?? themeData.focusColor,
-            hoverColor: widget.hoverColor ?? themeData.hoverColor,
-            splashRadius: widget.splashRadius ?? kRadialReactionRadius,
+            focusColor: widget.focusColor ?? themeData.checkboxTheme.focusColor ?? themeData.focusColor,
+            hoverColor: widget.hoverColor ?? themeData.checkboxTheme.hoverColor ?? themeData.hoverColor,
+            splashRadius: widget.splashRadius ?? themeData.checkboxTheme.splashRadius ?? kRadialReactionRadius,
             onChanged: widget.onChanged,
             additionalConstraints: additionalConstraints,
             vsync: this,

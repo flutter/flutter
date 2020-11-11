@@ -312,6 +312,9 @@ void main() {
       outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(primary: Colors.blue)),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
       dataTableTheme: const DataTableThemeData(),
+      checkboxTheme: const CheckboxThemeData(),
+      radioTheme: const RadioThemeData(),
+      switchTheme: const SwitchThemeData(),
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
     );
@@ -401,6 +404,9 @@ void main() {
       outlinedButtonTheme: const OutlinedButtonThemeData(),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
       dataTableTheme: const DataTableThemeData(),
+      checkboxTheme: const CheckboxThemeData(),
+      radioTheme: const RadioThemeData(),
+      switchTheme: const SwitchThemeData(),
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
     );
