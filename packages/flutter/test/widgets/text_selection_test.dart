@@ -19,15 +19,15 @@ class MockClipboard {
     'text': null,
   };
 
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
+  Future<Object?> handleMethodCall(MethodCall methodCall) async {
     switch (methodCall.method) {
       case 'Clipboard.getData':
-        if (getDataThrows) {
+        if (getDataThrows)
           throw Exception();
-        }
         return _clipboardData;
       case 'Clipboard.setData':
         _clipboardData = methodCall.arguments;
+        break;
     }
   }
 }

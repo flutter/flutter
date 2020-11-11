@@ -249,16 +249,6 @@ void main() {
       }
     });
 
-    test('can check the handler', () {
-      Future<dynamic> handler(MethodCall call) => Future<dynamic>.value(null);
-
-      const MethodChannel channel = MethodChannel('test_handler');
-      expect(channel.checkMethodCallHandler(null), true);
-      expect(channel.checkMethodCallHandler(handler), false);
-      channel.setMethodCallHandler(handler);
-      expect(channel.checkMethodCallHandler(handler), true);
-    });
-
     test('can check the mock handler', () {
       Future<dynamic> handler(MethodCall call) => Future<dynamic>.value(null);
 
