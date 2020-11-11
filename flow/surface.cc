@@ -10,10 +10,6 @@ Surface::Surface() = default;
 
 Surface::~Surface() = default;
 
-flutter::ExternalViewEmbedder* Surface::GetExternalViewEmbedder() {
-  return nullptr;
-}
-
 std::unique_ptr<GLContextResult> Surface::MakeRenderContextCurrent() {
   return std::make_unique<GLContextDefaultResult>(true);
 }
