@@ -110,6 +110,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
     final BuildInfo buildInfo = await getBuildInfo();
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
+    final BuildInfo buildInfo = await getBuildInfo();
 
     if (exportOptionsPlist == null) {
       return xcarchiveResult;
