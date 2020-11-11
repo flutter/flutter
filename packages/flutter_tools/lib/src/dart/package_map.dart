@@ -10,6 +10,7 @@ import 'package:package_config/package_config.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../convert.dart';
 
 const String kPackagesFileName = '.packages';
 
@@ -64,4 +65,46 @@ Future<PackageConfig> loadPackageConfigWithLogging(File file, {
     throwToolExit(null);
   }
   return result;
+}
+
+/// Parses a [PackageConfig] from the given package file.
+///
+/// If parsing fails, returns an empty package config unless `fatal` is true.
+PackageConfig createPackageConfig(File file, {bool fatal = false}) {
+  try {
+    final Uri baseLocation = file.absolute.uri;
+    final Map<String, Object> rawData = json.decode(file.readAsStringSync()) as Map<String, Object>;
+    final List<Object> rawPackages = rawData['packages'] as List<Object>;
+    final List<Package> packages = <Package>[];
+    for (final Object rawPackage in rawPackages) {
+      final Map<String, Object> packageData = rawPackage as Map<String, Object>;
+      final String name = packageData['name'] as String;
+      Uri rootUri = Uri.parse(packageData['rootUri'] as String);
+      final Uri packageUri = Uri.parse(packageData['packageUri'] as String);
+      rootUri = baseLocation.resolveUri(rootUri);
+      if (!rootUri.path.endsWith('/')) {
+        rootUri = rootUri.replace(path: rootUri.path + '/');
+      }
+      Uri packageRoot = rootUri;
+      if (packageUri != null) {
+        packageRoot = rootUri.resolveUri(packageUri);
+      }
+      if (!packageRoot.path.endsWith('/')) {
+        packageRoot = packageRoot.replace(path: packageRoot.path + '/');
+      }
+      final LanguageVersion languageVersion = LanguageVersion.parse(packageData['languageVersion'] as String);
+      packages.add(Package(
+        name,
+        rootUri,
+        packageUriRoot: packageUri,
+        languageVersion: languageVersion,
+      ));
+    }
+    return PackageConfig(packages);
+  } on Exception {
+    if (fatal) {
+      rethrow;
+    }
+    return PackageConfig.empty;
+  }
 }
