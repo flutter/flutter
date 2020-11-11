@@ -46,11 +46,11 @@ class Md5Hash {
   /// The current hash digest.
   final Uint32List _digest = Uint32List(4);
   final Uint8List _scratchSpace = Uint8List(_kChunkSize);
-  int _remainingLength;
+  int _remainingLength = 0;
   int _contentLength = 0;
 
   void addChunk(Uint8List data, [int stop]) {
-    assert(_remainingLength == null);
+    assert(_remainingLength == 0);
     stop ??= data.length;
     int i = 0;
     for (; i <= stop - _kChunkSize; i += _kChunkSize) {
@@ -144,7 +144,6 @@ class Md5Hash {
     // help dart remove bounds checks
     // ignore: unnecessary_statements
     _scratchSpace[63];
-    _remainingLength ??= 0;
     _scratchSpace[_remainingLength] = 0x80;
     _remainingLength += 1;
 
