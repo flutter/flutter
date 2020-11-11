@@ -176,7 +176,6 @@ def BuildBucket(runtime_mode, arch, optimized, product):
   CopyVulkanDepsToBucket(out_dir, deps_dir, arch)
   CopyIcuDepsToBucket(out_dir, deps_dir)
 
-
 def CheckCIPDPackageExists(package_name, tag):
   '''Check to see if the current package/tag combo has been published'''
   command = [
@@ -193,30 +192,7 @@ def CheckCIPDPackageExists(package_name, tag):
   else:
     return True
 
-
-def ProcessCIPDPackage(upload, engine_version):
-  # Copy the CIPD YAML template from the source directory to be next to the bucket
-  # we are about to package.
-  cipd_yaml = os.path.join(_script_dir, 'fuchsia.cipd.yaml')
-  CopyFiles(cipd_yaml, os.path.join(_bucket_directory, 'fuchsia.cipd.yaml'))
-
-  tag = 'git_revision:%s' % engine_version
-  already_exists = CheckCIPDPackageExists('flutter/fuchsia', tag)
-  if already_exists:
-    print('CIPD package flutter/fuchsia tag %s already exists!' % tag)
-
-  if upload and IsLinux() and not already_exists:
-    command = [
-        'cipd', 'create', '-pkg-def', 'fuchsia.cipd.yaml', '-ref', 'latest',
-        '-tag',
-        tag,
-    ]
-  else:
-    command = [
-        'cipd', 'pkg-build', '-pkg-def', 'fuchsia.cipd.yaml', '-out',
-        os.path.join(_bucket_directory, 'fuchsia.cipd')
-    ]
-
+def RunCIPDCommandWithRetries(command):
   # Retry up to three times.  We've seen CIPD fail on verification in some
   # instances. Normally verification takes slightly more than 1 minute when
   # it succeeds.
@@ -229,6 +205,55 @@ def ProcessCIPDPackage(upload, engine_version):
       print('Failed %s times' % tries + 1)
       if tries == num_tries - 1:
         raise
+
+def ProcessCIPDPackage(upload, engine_version):
+  # Copy the CIPD YAML template from the source directory to be next to the bucket
+  # we are about to package.
+  cipd_yaml = os.path.join(_script_dir, 'fuchsia.cipd.yaml')
+  CopyFiles(cipd_yaml, os.path.join(_bucket_directory, 'fuchsia.cipd.yaml'))
+
+  # Copy the license files from the source directory to be next to the bucket we
+  # are about to package.
+  bucket_root = os.path.join(_bucket_directory, 'flutter')
+  licenses_root = os.path.join(_src_root_dir, 'flutter/ci/licenses_golden')
+  license_files = [
+    'licenses_flutter',
+    'licenses_fuchsia',
+    'licenses_gpu',
+    'licenses_skia',
+    'licenses_third_party'
+  ]
+  for license in license_files:
+    src_path = os.path.join(licenses_root, license)
+    dst_path = os.path.join(bucket_root, license)
+    CopyPath(src_path, dst_path)
+
+  if not upload or not IsLinux():
+    RunCIPDCommandWithRetries([
+        'cipd', 'pkg-build', '-pkg-def', 'fuchsia.cipd.yaml', '-out',
+        os.path.join(_bucket_directory, 'fuchsia.cipd')
+    ])
+    return
+
+  # Everything after this point will only run iff `upload==true` and
+  # `IsLinux() == true`
+  assert(upload)
+  assert(IsLinux())
+  if engine_version is None:
+      print('--upload requires --engine-version to be specified.')
+      return
+
+  tag = 'git_revision:%s' % engine_version
+  already_exists = CheckCIPDPackageExists('flutter/fuchsia', tag)
+  if already_exists:
+    print('CIPD package flutter/fuchsia tag %s already exists!' % tag)
+    return
+
+  RunCIPDCommandWithRetries([
+      'cipd', 'create', '-pkg-def', 'fuchsia.cipd.yaml', '-ref', 'latest',
+      '-tag',
+      tag,
+  ])
 
 def BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy,
                 asan, dart_version_git_info, additional_targets=[]):
@@ -262,6 +287,12 @@ def BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy,
 
 def main():
   parser = argparse.ArgumentParser()
+
+  parser.add_argument(
+      '--cipd-dry-run',
+      default=False,
+      action='store_true',
+      help='If set, creates the CIPD package but does not upload it.')
 
   parser.add_argument(
       '--upload',
@@ -337,6 +368,7 @@ def main():
   enable_lto = not args.no_lto
   enable_legacy = not args.no_legacy
 
+  # Build buckets
   for arch in archs:
     for i in range(3):
       runtime_mode = runtime_modes[i]
@@ -348,11 +380,10 @@ def main():
                       args.targets.split(","))
         BuildBucket(runtime_mode, arch, optimized, product)
 
-  if args.upload:
-    if args.engine_version is None:
-      print('--upload requires --engine-version to be specified.')
-      return 1
+  # Create and optionally upload CIPD package
+  if args.cipd_dry_run or args.upload:
     ProcessCIPDPackage(args.upload, args.engine_version)
+
   return 0
 
 
