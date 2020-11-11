@@ -626,10 +626,10 @@ class CanvasTextMeasurementService extends TextMeasurementService {
     _canvasContext.font = style.cssFontString;
     return _measureSubstring(
       _canvasContext,
-      paragraph._geometricStyle,
       text,
       start,
       end,
+      letterSpacing: paragraph._geometricStyle.letterSpacing,
     );
   }
 
@@ -648,7 +648,7 @@ class CanvasTextMeasurementService extends TextMeasurementService {
 int _lastStart = -1;
 int _lastEnd = -1;
 String _lastText = '';
-ParagraphGeometricStyle? _lastStyle;
+String _lastCssFont = '';
 double _lastWidth = -1;
 
 /// Measures the width of the substring of [text] starting from the index
@@ -658,11 +658,11 @@ double _lastWidth = -1;
 /// [_canvasContext].
 double _measureSubstring(
   html.CanvasRenderingContext2D _canvasContext,
-  ParagraphGeometricStyle style,
   String text,
   int start,
-  int end,
-) {
+  int end, {
+  double? letterSpacing,
+}) {
   assert(0 <= start);
   assert(start <= end);
   assert(end <= text.length);
@@ -671,29 +671,41 @@ double _measureSubstring(
     return 0;
   }
 
+  final String cssFont = _canvasContext.font;
+  double width;
+
+  // TODO(mdebbar): Explore caching all widths in a map, not only the last one.
   if (start == _lastStart &&
       end == _lastEnd &&
       text == _lastText &&
-      _lastStyle == style) {
-    // TODO(mdebbar): Explore caching all widths in a map, not only the last one.
-    return _lastWidth;
+      cssFont == _lastCssFont) {
+    // Reuse the previously calculated width if all factors that affect width
+    // are unchanged. The only exception is letter-spacing. We always add
+    // letter-spacing to the width later below.
+    width = _lastWidth;
+  } else {
+    final String sub =
+      start == 0 && end == text.length ? text : text.substring(start, end);
+    width = _canvasContext.measureText(sub).width!.toDouble();
   }
+
   _lastStart = start;
   _lastEnd = end;
   _lastText = text;
-  _lastStyle = style;
+  _lastCssFont = cssFont;
+  _lastWidth = width;
 
-  final double letterSpacing = style.letterSpacing ?? 0.0;
-  final String sub =
-      start == 0 && end == text.length ? text : text.substring(start, end);
-  final double width = _canvasContext.measureText(sub).width!.toDouble() +
-      letterSpacing * sub.length;
+  // Now add letter spacing to the width.
+  letterSpacing ??= 0.0;
+  if (letterSpacing != 0.0) {
+    width += letterSpacing * (end - start);
+  }
 
   // What we are doing here is we are rounding to the nearest 2nd decimal
   // point. So 39.999423 becomes 40, and 11.243982 becomes 11.24.
   // The reason we are doing this is because we noticed that canvas API has a
   // ±0.001 error margin.
-  return _lastWidth = _roundWidth(width);
+  return _roundWidth(width);
 }
 
 double _roundWidth(double width) {
@@ -887,7 +899,13 @@ class LinesCalculator {
   /// This method uses [_text], [_style] and [_canvasContext] to perform the
   /// measurement.
   double measureSubstring(int start, int end) {
-    return _measureSubstring(_canvasContext, _style, _text!, start, end);
+    return _measureSubstring(
+      _canvasContext,
+      _text!,
+      start,
+      end,
+      letterSpacing: _style.letterSpacing,
+    );
   }
 
   /// In a continuous block of text, finds the point where text can be broken to
@@ -946,10 +964,10 @@ class MinIntrinsicCalculator {
     final int chunkEnd = brk.index;
     final double width = _measureSubstring(
       _canvasContext,
-      _style,
       _text,
       _lastChunkEnd,
       brk.indexWithoutTrailingSpaces,
+      letterSpacing: _style.letterSpacing,
     );
     if (width > value) {
       value = width;
@@ -983,10 +1001,10 @@ class MaxIntrinsicCalculator {
 
     final double lineWidth = _measureSubstring(
       _canvasContext,
-      _style,
       _text,
       _lastHardLineEnd,
       brk.indexWithoutTrailingNewlines,
+      letterSpacing: _style.letterSpacing,
     );
     if (lineWidth > value) {
       value = lineWidth;
