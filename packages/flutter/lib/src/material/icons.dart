@@ -7,8 +7,6 @@ import 'package:flutter/widgets.dart';
 
 // ignore_for_file: non_constant_identifier_names
 class _PlatformAdaptiveIcons {
-  static final bool isCupertino = _isCupertino();
-
   static bool _isCupertino() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -27,55 +25,55 @@ class _PlatformAdaptiveIcons {
   // BEGIN GENERATED PLATFORM ADAPTIVE ICONS
 
   /// Platform-adaptive icon for <i class="material-icons md-36">arrow_back</i> &#x2014; material icon named "arrow back" and <i class="material-icons md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios".;
-  IconData get arrow_back => !isCupertino ? Icons.arrow_back : Icons.arrow_back_ios;
+  IconData get arrow_back => !_isCupertino() ? Icons.arrow_back : Icons.arrow_back_ios;
 
   /// Platform-adaptive icon for <i class="material-icons-outlined md-36">arrow_back</i> &#x2014; material icon named "arrow back outlined" and <i class="material-icons-outlined md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios outlined".;
-  IconData get arrow_back_outlined => !isCupertino ? Icons.arrow_back_outlined : Icons.arrow_back_ios_outlined;
+  IconData get arrow_back_outlined => !_isCupertino() ? Icons.arrow_back_outlined : Icons.arrow_back_ios_outlined;
 
   /// Platform-adaptive icon for <i class="material-icons-round md-36">arrow_back</i> &#x2014; material icon named "arrow back rounded" and <i class="material-icons-round md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios rounded".;
-  IconData get arrow_back_rounded => !isCupertino ? Icons.arrow_back_rounded : Icons.arrow_back_ios_rounded;
+  IconData get arrow_back_rounded => !_isCupertino() ? Icons.arrow_back_rounded : Icons.arrow_back_ios_rounded;
 
   /// Platform-adaptive icon for <i class="material-icons-sharp md-36">arrow_back</i> &#x2014; material icon named "arrow back sharp" and <i class="material-icons-sharp md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios sharp".;
-  IconData get arrow_back_sharp => !isCupertino ? Icons.arrow_back_sharp : Icons.arrow_back_ios_sharp;
+  IconData get arrow_back_sharp => !_isCupertino() ? Icons.arrow_back_sharp : Icons.arrow_back_ios_sharp;
 
   /// Platform-adaptive icon for <i class="material-icons md-36">arrow_forward</i> &#x2014; material icon named "arrow forward" and <i class="material-icons md-36">arrow_forward_ios</i> &#x2014; material icon named "arrow forward ios".;
-  IconData get arrow_forward => !isCupertino ? Icons.arrow_forward : Icons.arrow_forward_ios;
+  IconData get arrow_forward => !_isCupertino() ? Icons.arrow_forward : Icons.arrow_forward_ios;
 
   /// Platform-adaptive icon for <i class="material-icons-outlined md-36">arrow_forward</i> &#x2014; material icon named "arrow forward outlined" and <i class="material-icons-outlined md-36">arrow_forward_ios</i> &#x2014; material icon named "arrow forward ios outlined".;
-  IconData get arrow_forward_outlined => !isCupertino ? Icons.arrow_forward_outlined : Icons.arrow_forward_ios_outlined;
+  IconData get arrow_forward_outlined => !_isCupertino() ? Icons.arrow_forward_outlined : Icons.arrow_forward_ios_outlined;
 
   /// Platform-adaptive icon for <i class="material-icons-round md-36">arrow_forward</i> &#x2014; material icon named "arrow forward rounded" and <i class="material-icons-round md-36">arrow_forward_ios</i> &#x2014; material icon named "arrow forward ios rounded".;
-  IconData get arrow_forward_rounded => !isCupertino ? Icons.arrow_forward_rounded : Icons.arrow_forward_ios_rounded;
+  IconData get arrow_forward_rounded => !_isCupertino() ? Icons.arrow_forward_rounded : Icons.arrow_forward_ios_rounded;
 
   /// Platform-adaptive icon for <i class="material-icons-sharp md-36">arrow_forward</i> &#x2014; material icon named "arrow forward sharp" and <i class="material-icons-sharp md-36">arrow_forward_ios</i> &#x2014; material icon named "arrow forward ios sharp".;
-  IconData get arrow_forward_sharp => !isCupertino ? Icons.arrow_forward_sharp : Icons.arrow_forward_ios_sharp;
+  IconData get arrow_forward_sharp => !_isCupertino() ? Icons.arrow_forward_sharp : Icons.arrow_forward_ios_sharp;
 
   /// Platform-adaptive icon for <i class="material-icons md-36">flip_camera_android</i> &#x2014; material icon named "flip camera android" and <i class="material-icons md-36">flip_camera_ios</i> &#x2014; material icon named "flip camera ios".;
-  IconData get flip_camera => !isCupertino ? Icons.flip_camera_android : Icons.flip_camera_ios;
+  IconData get flip_camera => !_isCupertino() ? Icons.flip_camera_android : Icons.flip_camera_ios;
 
   /// Platform-adaptive icon for <i class="material-icons-outlined md-36">flip_camera_android</i> &#x2014; material icon named "flip camera android outlined" and <i class="material-icons-outlined md-36">flip_camera_ios</i> &#x2014; material icon named "flip camera ios outlined".;
-  IconData get flip_camera_outlined => !isCupertino ? Icons.flip_camera_android_outlined : Icons.flip_camera_ios_outlined;
+  IconData get flip_camera_outlined => !_isCupertino() ? Icons.flip_camera_android_outlined : Icons.flip_camera_ios_outlined;
 
   /// Platform-adaptive icon for <i class="material-icons-round md-36">flip_camera_android</i> &#x2014; material icon named "flip camera android rounded" and <i class="material-icons-round md-36">flip_camera_ios</i> &#x2014; material icon named "flip camera ios rounded".;
-  IconData get flip_camera_rounded => !isCupertino ? Icons.flip_camera_android_rounded : Icons.flip_camera_ios_rounded;
+  IconData get flip_camera_rounded => !_isCupertino() ? Icons.flip_camera_android_rounded : Icons.flip_camera_ios_rounded;
 
   /// Platform-adaptive icon for <i class="material-icons-sharp md-36">flip_camera_android</i> &#x2014; material icon named "flip camera android sharp" and <i class="material-icons-sharp md-36">flip_camera_ios</i> &#x2014; material icon named "flip camera ios sharp".;
-  IconData get flip_camera_sharp => !isCupertino ? Icons.flip_camera_android_sharp : Icons.flip_camera_ios_sharp;
+  IconData get flip_camera_sharp => !_isCupertino() ? Icons.flip_camera_android_sharp : Icons.flip_camera_ios_sharp;
 
   /// Platform-adaptive icon for <i class="material-icons md-36">more_vert</i> &#x2014; material icon named "more vert" and <i class="material-icons md-36">more_horiz</i> &#x2014; material icon named "more horiz".;
-  IconData get more => !isCupertino ? Icons.more_vert : Icons.more_horiz;
+  IconData get more => !_isCupertino() ? Icons.more_vert : Icons.more_horiz;
 
   /// Platform-adaptive icon for <i class="material-icons-outlined md-36">more_vert</i> &#x2014; material icon named "more vert outlined" and <i class="material-icons-outlined md-36">more_horiz</i> &#x2014; material icon named "more horiz outlined".;
-  IconData get more_outlined => !isCupertino ? Icons.more_vert_outlined : Icons.more_horiz_outlined;
+  IconData get more_outlined => !_isCupertino() ? Icons.more_vert_outlined : Icons.more_horiz_outlined;
 
   /// Platform-adaptive icon for <i class="material-icons-round md-36">more_vert</i> &#x2014; material icon named "more vert rounded" and <i class="material-icons-round md-36">more_horiz</i> &#x2014; material icon named "more horiz rounded".;
-  IconData get more_rounded => !isCupertino ? Icons.more_vert_rounded : Icons.more_horiz_rounded;
+  IconData get more_rounded => !_isCupertino() ? Icons.more_vert_rounded : Icons.more_horiz_rounded;
 
   /// Platform-adaptive icon for <i class="material-icons-sharp md-36">more_vert</i> &#x2014; material icon named "more vert sharp" and <i class="material-icons-sharp md-36">more_horiz</i> &#x2014; material icon named "more horiz sharp".;
-  IconData get more_sharp => !isCupertino ? Icons.more_vert_sharp : Icons.more_horiz_sharp;
+  IconData get more_sharp => !_isCupertino() ? Icons.more_vert_sharp : Icons.more_horiz_sharp;
 
   /// Platform-adaptive icon for <i class="material-icons md-36">share</i> &#x2014; material icon named "share" and <i class="material-icons md-36">ios_share</i> &#x2014; material icon named "ios share".;
-  IconData get share => !isCupertino ? Icons.share : Icons.ios_share;
+  IconData get share => !_isCupertino() ? Icons.share : Icons.ios_share;
   // END GENERATED PLATFORM ADAPTIVE ICONS
 }
 
