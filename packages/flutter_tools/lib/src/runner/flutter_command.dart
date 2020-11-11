@@ -5,7 +5,10 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/dart/language_version.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -758,6 +761,10 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg('build-number')
       : null;
 
+    final File packagesFile = globals.fs.file(
+      globalResults['packages'] as String ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(packagesFile, logger: globals.logger);
+
     final List<String> experiments =
       argParser.options.containsKey(FlutterOptions.kEnableExperiment)
         ? stringsArg(FlutterOptions.kEnableExperiment).toList()
@@ -792,10 +799,21 @@ abstract class FlutterCommand extends Command<void> {
     NullSafetyMode nullSafetyMode = NullSafetyMode.unsound;
     if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
       // Explicitly check for `true` and `false` so that `null` results in not
-      // passing a flag. This will use the automatically detected null-safety
-      // value based on the entrypoint
+      // passing a flag. Examine the entrypoint file to determine if it
+      // is opted in or out.
       if (!argResults.wasParsed(FlutterOptions.kNullSafety)) {
-        nullSafetyMode = NullSafetyMode.autodetect;
+        final File entrypointFile = globals.fs.file(targetFile);
+        final LanguageVersion languageVersion = determineLanguageVersion(
+          entrypointFile,
+          packageConfig.packageOf(entrypointFile.absolute.uri),
+        );
+        if (languageVersion.major >= nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor) {
+          nullSafetyMode = NullSafetyMode.sound;
+          extraFrontEndOptions.add('--sound-null-safety');
+        } else {
+          nullSafetyMode = NullSafetyMode.unsound;
+          extraFrontEndOptions.add('--no-sound-null-safety');
+        }
       } else if (boolArg(FlutterOptions.kNullSafety)) {
         nullSafetyMode = NullSafetyMode.sound;
         extraFrontEndOptions.add('--sound-null-safety');
@@ -886,6 +904,7 @@ abstract class FlutterCommand extends Command<void> {
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
+      packageConfig: packageConfig,
     );
   }
 

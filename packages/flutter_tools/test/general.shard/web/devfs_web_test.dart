@@ -739,14 +739,14 @@ void main() {
         BuildMode.debug,
         '',
         treeShakeIcons: false,
-        nullSafetyMode: NullSafetyMode.autodetect,
+        nullSafetyMode: NullSafetyMode.sound,
       ),
       enableDwds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
       chromiumLauncher: null,
-      nullSafetyMode: NullSafetyMode.autodetect,
+      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);

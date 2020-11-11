@@ -27,8 +27,6 @@ import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
-import 'dart/language_version.dart';
-import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
@@ -48,7 +46,6 @@ class FlutterDevice {
     TargetPlatform targetPlatform,
     ResidentCompiler generator,
     this.userIdentifier,
-    this.nullSafetyMode = NullSafetyMode.autodetect,
   }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts.getArtifactPath(
@@ -84,7 +81,6 @@ class FlutterDevice {
     String userIdentifier,
   }) async {
     ResidentCompiler generator;
-    NullSafetyMode nullSafetyMode = buildInfo.nullSafetyMode;
     final TargetPlatform targetPlatform = await device.targetPlatform;
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
@@ -97,38 +93,12 @@ class FlutterDevice {
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       Artifact platformDillArtifact;
-      List<String> extraFrontEndOptions;
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
         platformDillArtifact = Artifact.webPlatformKernelDill;
-        extraFrontEndOptions = buildInfo.extraFrontEndOptions;
       } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
         platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-        extraFrontEndOptions =  buildInfo.extraFrontEndOptions;
       } else {
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          globals.fs.file(buildInfo.packagesPath),
-          logger: globals.logger,
-        );
-        final File entrypointFile = globals.fs.file(target);
-        final LanguageVersion languageVersion = determineLanguageVersion(
-          entrypointFile,
-          packageConfig.packageOf(entrypointFile.absolute.uri),
-        );
-        if (languageVersion.major >= nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor) {
-          platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-          extraFrontEndOptions =  <String>[
-            ...?buildInfo.extraFrontEndOptions,
-            '--sound-null-safety',
-          ];
-          nullSafetyMode = NullSafetyMode.sound;
-        } else {
-          platformDillArtifact = Artifact.webPlatformKernelDill;
-          extraFrontEndOptions =  <String>[
-            ...?buildInfo.extraFrontEndOptions,
-            '--no-sound-null-safety',
-          ];
-          nullSafetyMode = NullSafetyMode.unsound;
-        }
+        assert(false);
       }
 
       generator = ResidentCompiler(
@@ -142,10 +112,10 @@ class FlutterDevice {
         initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
-          extraFrontEndOptions: extraFrontEndOptions,
+          extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         ),
         targetModel: TargetModel.dartdevc,
-        extraFrontEndOptions: extraFrontEndOptions,
+        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         platformDill: globals.fs.file(globals.artifacts
           .getArtifactPath(platformDillArtifact, mode: buildInfo.mode))
           .absolute.uri.toString(),
@@ -202,7 +172,6 @@ class FlutterDevice {
       generator: generator,
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
-      nullSafetyMode: nullSafetyMode,
     );
   }
 
@@ -210,7 +179,6 @@ class FlutterDevice {
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
-  final NullSafetyMode nullSafetyMode;
 
   DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;

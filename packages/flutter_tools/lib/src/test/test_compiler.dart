@@ -128,10 +128,7 @@ class TestCompiler {
       return;
     }
     if (_packageConfig == null) {
-      _packageConfig ??= await loadPackageConfigWithLogging(
-        globals.fs.file(buildInfo.packagesPath),
-        logger: globals.logger,
-      );
+      _packageConfig ??= buildInfo.packageConfig;
       // Compilation will fail if there is no flutter_test dependency, since
       // this library is imported by the generated entrypoint script.
       if (_packageConfig['flutter_test'] == null) {

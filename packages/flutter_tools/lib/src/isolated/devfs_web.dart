@@ -631,43 +631,35 @@ class WebAssetServer implements AssetReader {
     return webSdkFile;
   }
 
-  // TODO(yjbanov): https://github.com/flutter/flutter/issues/70121
   static const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> _dartSdkJsArtifactMap =
     <WebRendererMode, Map<NullSafetyMode, Artifact>> {
       WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdk,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSdk,
       },
       WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdk,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdk,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSdk,
       },
       WebRendererMode.html: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledSoundSdk,
         NullSafetyMode.unsound: Artifact.webPrecompiledSdk,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledSdk,
       },
     };
 
-  // TODO(yjbanov): https://github.com/flutter/flutter/issues/70121
   static const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> _dartSdkJsMapArtifactMap =
     <WebRendererMode, Map<NullSafetyMode, Artifact>> {
       WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
       },
       WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdkSourcemaps,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSdkSourcemaps,
       },
       WebRendererMode.html: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledSoundSdkSourcemaps,
         NullSafetyMode.unsound: Artifact.webPrecompiledSdkSourcemaps,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledSdkSourcemaps,
       },
     };
 
