@@ -88,6 +88,8 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   protected static final String ARG_DART_ENTRYPOINT = "dart_entrypoint";
   /** Initial Flutter route that is rendered in a Navigator widget. */
   protected static final String ARG_INITIAL_ROUTE = "initial_route";
+  /** Whether the activity delegate should handle the deeplinking request. */
+  protected static final String ARG_HANDLE_DEEPLINKING = "handle_deeplinking";
   /** Path to Flutter's Dart code. */
   protected static final String ARG_APP_BUNDLE_PATH = "app_bundle_path";
   /** Flutter shell arguments. */
@@ -185,6 +187,7 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     private final Class<? extends FlutterFragment> fragmentClass;
     private String dartEntrypoint = "main";
     private String initialRoute = "/";
+    private boolean handleDeeplinking = false;
     private String appBundlePath = null;
     private FlutterShellArgs shellArgs = null;
     private RenderMode renderMode = RenderMode.surface;
@@ -221,6 +224,16 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     @NonNull
     public NewEngineFragmentBuilder initialRoute(@NonNull String initialRoute) {
       this.initialRoute = initialRoute;
+      return this;
+    }
+
+    /**
+     * Whether to handle the deeplinking from the {@code Intent} automatically if the {@code
+     * getInitialRoute} returns null.
+     */
+    @NonNull
+    public NewEngineFragmentBuilder handleDeeplinking(@NonNull Boolean handleDeeplinking) {
+      this.handleDeeplinking = handleDeeplinking;
       return this;
     }
 
@@ -316,6 +329,7 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     protected Bundle createArgs() {
       Bundle args = new Bundle();
       args.putString(ARG_INITIAL_ROUTE, initialRoute);
+      args.putBoolean(ARG_HANDLE_DEEPLINKING, handleDeeplinking);
       args.putString(ARG_APP_BUNDLE_PATH, appBundlePath);
       args.putString(ARG_DART_ENTRYPOINT, dartEntrypoint);
       // TODO(mattcarroll): determine if we should have an explicit FlutterTestFragment instead of
@@ -409,6 +423,7 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     private final Class<? extends FlutterFragment> fragmentClass;
     private final String engineId;
     private boolean destroyEngineWithFragment = false;
+    private boolean handleDeeplinking = false;
     private RenderMode renderMode = RenderMode.surface;
     private TransparencyMode transparencyMode = TransparencyMode.transparent;
     private boolean shouldAttachEngineToActivity = true;
@@ -457,6 +472,16 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     public CachedEngineFragmentBuilder transparencyMode(
         @NonNull TransparencyMode transparencyMode) {
       this.transparencyMode = transparencyMode;
+      return this;
+    }
+
+    /**
+     * Whether to handle the deeplinking from the {@code Intent} automatically if the {@code
+     * getInitialRoute} returns null.
+     */
+    @NonNull
+    public CachedEngineFragmentBuilder handleDeeplinking(@NonNull Boolean handleDeeplinking) {
+      this.handleDeeplinking = handleDeeplinking;
       return this;
     }
 
@@ -512,6 +537,7 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
       Bundle args = new Bundle();
       args.putString(ARG_CACHED_ENGINE_ID, engineId);
       args.putBoolean(ARG_DESTROY_ENGINE_WITH_FRAGMENT, destroyEngineWithFragment);
+      args.putBoolean(ARG_HANDLE_DEEPLINKING, handleDeeplinking);
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
           renderMode != null ? renderMode.name() : RenderMode.surface.name());
@@ -1014,6 +1040,15 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   @Override
   public boolean shouldAttachEngineToActivity() {
     return getArguments().getBoolean(ARG_SHOULD_ATTACH_ENGINE_TO_ACTIVITY);
+  }
+
+  /**
+   * Whether to handle the deeplinking from the {@code Intent} automatically if the {@code
+   * getInitialRoute} returns null.
+   */
+  @Override
+  public boolean shouldHandleDeeplinking() {
+    return getArguments().getBoolean(ARG_HANDLE_DEEPLINKING);
   }
 
   @Override

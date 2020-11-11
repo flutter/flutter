@@ -1,12 +1,17 @@
 package io.flutter.embedding.android;
 
+import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
@@ -82,6 +87,46 @@ public class FlutterFragmentActivityTest {
     assertEquals(activity.getFlutterEngine(), registeredEngines.get(0));
   }
 
+  @Test
+  public void itReturnsValueFromMetaDataWhenCallsShouldHandleDeepLinkingCase1()
+      throws PackageManager.NameNotFoundException {
+    FlutterFragmentActivity activity =
+        Robolectric.buildActivity(FlutterFragmentActivityWithProvidedEngine.class).get();
+    assertTrue(GeneratedPluginRegistrant.getRegisteredEngines().isEmpty());
+    Bundle bundle = new Bundle();
+    bundle.putBoolean(HANDLE_DEEPLINKING_META_DATA_KEY, true);
+    FlutterFragmentActivity spyFlutterActivity = spy(activity);
+    when(spyFlutterActivity.getMetaData()).thenReturn(bundle);
+    assertTrue(spyFlutterActivity.shouldHandleDeeplinking());
+  }
+
+  @Test
+  public void itReturnsValueFromMetaDataWhenCallsShouldHandleDeepLinkingCase2()
+      throws PackageManager.NameNotFoundException {
+    FlutterFragmentActivity activity =
+        Robolectric.buildActivity(FlutterFragmentActivityWithProvidedEngine.class).get();
+    assertTrue(GeneratedPluginRegistrant.getRegisteredEngines().isEmpty());
+    Bundle bundle = new Bundle();
+    bundle.putBoolean(HANDLE_DEEPLINKING_META_DATA_KEY, false);
+    FlutterFragmentActivity spyFlutterActivity = spy(activity);
+    when(spyFlutterActivity.getMetaData()).thenReturn(bundle);
+    assertFalse(spyFlutterActivity.shouldHandleDeeplinking());
+  }
+
+  @Test
+  public void itReturnsValueFromMetaDataWhenCallsShouldHandleDeepLinkingCase3()
+      throws PackageManager.NameNotFoundException {
+    FlutterFragmentActivity activity =
+        Robolectric.buildActivity(FlutterFragmentActivityWithProvidedEngine.class).get();
+    assertTrue(GeneratedPluginRegistrant.getRegisteredEngines().isEmpty());
+    // Creates an empty bundle.
+    Bundle bundle = new Bundle();
+    FlutterFragmentActivity spyFlutterActivity = spy(activity);
+    when(spyFlutterActivity.getMetaData()).thenReturn(bundle);
+    // Empty bundle should return false.
+    assertFalse(spyFlutterActivity.shouldHandleDeeplinking());
+  }
+
   static class FlutterFragmentActivityWithProvidedEngine extends FlutterFragmentActivity {
     @Override
     protected FlutterFragment createFlutterFragment() {
@@ -118,6 +163,11 @@ public class FlutterFragmentActivityTest {
     @Override
     protected String getAppBundlePath() {
       return "";
+    }
+
+    @Override
+    protected boolean shouldHandleDeeplinking() {
+      return false;
     }
   }
 

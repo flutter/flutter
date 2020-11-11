@@ -1,5 +1,6 @@
 package io.flutter.embedding.android;
 
+import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -7,12 +8,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -114,6 +117,58 @@ public class FlutterActivityTest {
     assertEquals(BackgroundMode.transparent, flutterActivity.getBackgroundMode());
     assertEquals(RenderMode.texture, flutterActivity.getRenderMode());
     assertEquals(TransparencyMode.transparent, flutterActivity.getTransparencyMode());
+  }
+
+  @Test
+  public void itReturnsValueFromMetaDataWhenCallsShouldHandleDeepLinkingCase1()
+      throws PackageManager.NameNotFoundException {
+    Intent intent =
+        FlutterActivity.withNewEngine()
+            .backgroundMode(BackgroundMode.transparent)
+            .build(RuntimeEnvironment.application);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+    Bundle bundle = new Bundle();
+    bundle.putBoolean(HANDLE_DEEPLINKING_META_DATA_KEY, true);
+    FlutterActivity spyFlutterActivity = spy(flutterActivity);
+    when(spyFlutterActivity.getMetaData()).thenReturn(bundle);
+    assertTrue(spyFlutterActivity.shouldHandleDeeplinking());
+  }
+
+  @Test
+  public void itReturnsValueFromMetaDataWhenCallsShouldHandleDeepLinkingCase2()
+      throws PackageManager.NameNotFoundException {
+    Intent intent =
+        FlutterActivity.withNewEngine()
+            .backgroundMode(BackgroundMode.transparent)
+            .build(RuntimeEnvironment.application);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+    Bundle bundle = new Bundle();
+    bundle.putBoolean(HANDLE_DEEPLINKING_META_DATA_KEY, false);
+    FlutterActivity spyFlutterActivity = spy(flutterActivity);
+    when(spyFlutterActivity.getMetaData()).thenReturn(bundle);
+    assertFalse(spyFlutterActivity.shouldHandleDeeplinking());
+  }
+
+  @Test
+  public void itReturnsValueFromMetaDataWhenCallsShouldHandleDeepLinkingCase3()
+      throws PackageManager.NameNotFoundException {
+    Intent intent =
+        FlutterActivity.withNewEngine()
+            .backgroundMode(BackgroundMode.transparent)
+            .build(RuntimeEnvironment.application);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+    // Creates an empty bundle.
+    Bundle bundle = new Bundle();
+    FlutterActivity spyFlutterActivity = spy(flutterActivity);
+    when(spyFlutterActivity.getMetaData()).thenReturn(bundle);
+    // Empty bundle should return false.
+    assertFalse(spyFlutterActivity.shouldHandleDeeplinking());
   }
 
   @Test

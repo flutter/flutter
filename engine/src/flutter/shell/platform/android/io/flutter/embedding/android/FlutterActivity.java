@@ -13,6 +13,7 @@ import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_CA
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_DESTROY_ENGINE_WITH_ACTIVITY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_ENABLE_STATE_RESTORATION;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE;
+import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.NORMAL_THEME_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.SPLASH_SCREEN_META_DATA_KEY;
@@ -446,10 +447,9 @@ public class FlutterActivity extends Activity
    */
   private void switchLaunchThemeForNormalTheme() {
     try {
-      ActivityInfo activityInfo =
-          getPackageManager().getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
-      if (activityInfo.metaData != null) {
-        int normalThemeRID = activityInfo.metaData.getInt(NORMAL_THEME_META_DATA_KEY, -1);
+      Bundle metaData = getMetaData();
+      if (metaData != null) {
+        int normalThemeRID = metaData.getInt(NORMAL_THEME_META_DATA_KEY, -1);
         if (normalThemeRID != -1) {
           setTheme(normalThemeRID);
         }
@@ -485,10 +485,8 @@ public class FlutterActivity extends Activity
   @SuppressWarnings("deprecation")
   private Drawable getSplashScreenFromManifest() {
     try {
-      ActivityInfo activityInfo =
-          getPackageManager().getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
-      Bundle metadata = activityInfo.metaData;
-      int splashScreenId = metadata != null ? metadata.getInt(SPLASH_SCREEN_META_DATA_KEY) : 0;
+      Bundle metaData = getMetaData();
+      int splashScreenId = metaData != null ? metaData.getInt(SPLASH_SCREEN_META_DATA_KEY) : 0;
       return splashScreenId != 0
           ? Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP
               ? getResources().getDrawable(splashScreenId, getTheme())
@@ -748,11 +746,9 @@ public class FlutterActivity extends Activity
   @NonNull
   public String getDartEntrypointFunctionName() {
     try {
-      ActivityInfo activityInfo =
-          getPackageManager().getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
-      Bundle metadata = activityInfo.metaData;
+      Bundle metaData = getMetaData();
       String desiredDartEntrypoint =
-          metadata != null ? metadata.getString(DART_ENTRYPOINT_META_DATA_KEY) : null;
+          metaData != null ? metaData.getString(DART_ENTRYPOINT_META_DATA_KEY) : null;
       return desiredDartEntrypoint != null ? desiredDartEntrypoint : DEFAULT_DART_ENTRYPOINT;
     } catch (PackageManager.NameNotFoundException e) {
       return DEFAULT_DART_ENTRYPOINT;
@@ -779,22 +775,22 @@ public class FlutterActivity extends Activity
    * have control over the incoming {@code Intent}.
    *
    * <p>Subclasses may override this method to directly control the initial route.
+   *
+   * <p>If this method returns null and the {@code shouldHandleDeeplinking} returns true, the
+   * initial route is derived from the {@code Intent} through the Intent.getData() instead.
    */
-  @NonNull
   public String getInitialRoute() {
     if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE)) {
       return getIntent().getStringExtra(EXTRA_INITIAL_ROUTE);
     }
 
     try {
-      ActivityInfo activityInfo =
-          getPackageManager().getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
-      Bundle metadata = activityInfo.metaData;
+      Bundle metaData = getMetaData();
       String desiredInitialRoute =
-          metadata != null ? metadata.getString(INITIAL_ROUTE_META_DATA_KEY) : null;
-      return desiredInitialRoute != null ? desiredInitialRoute : DEFAULT_INITIAL_ROUTE;
+          metaData != null ? metaData.getString(INITIAL_ROUTE_META_DATA_KEY) : null;
+      return desiredInitialRoute;
     } catch (PackageManager.NameNotFoundException e) {
-      return DEFAULT_INITIAL_ROUTE;
+      return null;
     }
   }
 
@@ -894,6 +890,14 @@ public class FlutterActivity extends Activity
     return delegate.getFlutterEngine();
   }
 
+  /** Retrieves the meta data specified in the AndroidManifest.xml. */
+  @Nullable
+  protected Bundle getMetaData() throws PackageManager.NameNotFoundException {
+    ActivityInfo activityInfo =
+        getPackageManager().getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
+    return activityInfo.metaData;
+  }
+
   @Nullable
   @Override
   public PlatformPlugin providePlatformPlugin(
@@ -968,6 +972,26 @@ public class FlutterActivity extends Activity
   @Override
   public boolean shouldAttachEngineToActivity() {
     return true;
+  }
+
+  /**
+   * Whether to handle the deeplinking from the {@code Intent} automatically if the {@code
+   * getInitialRoute} returns null.
+   *
+   * <p>The default implementation looks {@code <meta-data>} called {@link
+   * FlutterActivityLaunchConfigs#HANDLE_DEEPLINKING_META_DATA_KEY} within the Android manifest
+   * definition for this {@code FlutterActivity}.
+   */
+  @Override
+  public boolean shouldHandleDeeplinking() {
+    try {
+      Bundle metaData = getMetaData();
+      boolean shouldHandleDeeplinking =
+          metaData != null ? metaData.getBoolean(HANDLE_DEEPLINKING_META_DATA_KEY) : false;
+      return shouldHandleDeeplinking;
+    } catch (PackageManager.NameNotFoundException e) {
+      return false;
+    }
   }
 
   @Override
