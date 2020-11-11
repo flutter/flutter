@@ -133,13 +133,6 @@
          "run_if":["dev/", "packages/flutter_tools/", "bin/"]
       },
       {
-         "name":"Linux web_tool_tests",
-         "repo":"flutter",
-         "task_name":"linux_web_tool_tests",
-         "enabled":true,
-         "run_if":["dev/", "packages/flutter_tools/", "bin/"]
-      },
-      {
          "name":"Linux web_benchmarks_html",
          "repo":"flutter",
          "task_name":"linux_web_benchmarks_html",
@@ -298,13 +291,6 @@
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
-         "name":"Mac web_tool_tests",
-         "repo":"flutter",
-         "task_name":"mac_web_tool_tests",
-         "enabled":true,
-         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
-      },
-      {
          "name": "Windows build_aar_module_test",
          "repo": "flutter",
          "task_name": "win_build_aar_module_test",
@@ -384,12 +370,6 @@
         "repo": "flutter",
         "task_name": "win_tool_tests",
         "enabled":true
-      },
-      {
-         "name": "Windows web_tool_tests",
-         "repo": "flutter",
-         "task_name": "win_web_tool_tests",
-         "enabled":true
-       }
+      }
    ]
 }
