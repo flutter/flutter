@@ -112,6 +112,7 @@ class Radio<T> extends StatefulWidget {
     this.mouseCursor,
     this.toggleable = false,
     this.activeColor,
+    this.fillColor,
     this.focusColor,
     this.hoverColor,
     this.splashRadius,
@@ -240,7 +241,22 @@ class Radio<T> extends StatefulWidget {
   /// The color to use when this radio button is selected.
   ///
   /// Defaults to [ThemeData.toggleableActiveColor].
+  ///
+  /// If [fillColor] returns a non-null color in the [MaterialState.selected]
+  /// state, it will be used instead of this color.
   final Color? activeColor;
+
+  /// The color that fills the checkbox when it is checked, in all
+  /// [MaterialState]s.
+  ///
+  /// If this is provided, it will be used over [activeColor].
+  ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  final MaterialStateProperty<Color?>? fillColor;
 
   /// Configures the minimum size of the tap target.
   ///
@@ -318,10 +334,6 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     }
   }
 
-  Color _getInactiveColor(ThemeData themeData) {
-    return enabled ? themeData.unselectedWidgetColor : themeData.disabledColor;
-  }
-
   void _handleChanged(bool? selected) {
     if (selected == null) {
       widget.onChanged!(null);
@@ -330,6 +342,40 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     if (selected) {
       widget.onChanged!(widget.value);
     }
+  }
+
+  bool get _selected => widget.value == widget.groupValue;
+
+  Set<MaterialState> get _states => <MaterialState>{
+    if (!enabled) MaterialState.disabled,
+    if (_hovering) MaterialState.hovered,
+    if (_focused) MaterialState.focused,
+    if (_selected) MaterialState.selected,
+  };
+
+  MaterialStateProperty<Color?> get _widgetFillColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return widget.activeColor;
+      }
+      return null;
+    });
+  }
+
+  MaterialStateProperty<Color> get _defaultFillColor {
+    final ThemeData themeData = Theme.of(context);
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return themeData.disabledColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return themeData.toggleableActiveColor;
+      }
+      return themeData.unselectedWidgetColor;
+    });
   }
 
   @override
@@ -347,16 +393,20 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     }
     size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
-    final bool selected = widget.value == widget.groupValue;
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
-      <MaterialState>{
-        if (!enabled) MaterialState.disabled,
-        if (_hovering) MaterialState.hovered,
-        if (_focused) MaterialState.focused,
-        if (selected) MaterialState.selected,
-      },
+      _states,
     );
+    // Colors need to be resolved in selected and non selected states separately
+    // so that they can be lerped between.
+    final Set<MaterialState> activeStates = _states..add(MaterialState.selected);
+    final Set<MaterialState> inactiveStates = _states..remove(MaterialState.selected);
+    final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
+      ?? _widgetFillColor.resolve(activeStates)
+      ?? _defaultFillColor.resolve(activeStates);
+    final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
+      ?? _widgetFillColor.resolve(inactiveStates)
+      ?? _defaultFillColor.resolve(inactiveStates);
 
     return FocusableActionDetector(
       actions: _actionMap,
@@ -369,9 +419,9 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
       child: Builder(
         builder: (BuildContext context) {
           return _RadioRenderObjectWidget(
-            selected: selected,
-            activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
-            inactiveColor: _getInactiveColor(themeData),
+            selected: _selected,
+            activeColor: effectiveActiveColor,
+            inactiveColor: effectiveInactiveColor,
             focusColor: widget.focusColor ?? themeData.focusColor,
             hoverColor: widget.hoverColor ?? themeData.hoverColor,
             splashRadius: widget.splashRadius ?? kRadialReactionRadius,
@@ -493,11 +543,10 @@ class _RenderRadio extends RenderToggleable {
     paintRadialReaction(canvas, offset, size.center(Offset.zero));
 
     final Offset center = (offset & size).center;
-    final Color radioColor = onChanged != null ? activeColor : inactiveColor;
 
     // Outer circle
     final Paint paint = Paint()
-      ..color = Color.lerp(inactiveColor, radioColor, position.value)!
+      ..color = Color.lerp(inactiveColor, activeColor, position.value)!
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawCircle(center, _kOuterRadius, paint);
