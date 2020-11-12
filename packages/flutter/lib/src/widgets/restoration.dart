@@ -301,7 +301,9 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
 
   @override
   void dispose() {
-    ServicesBinding.instance!.restorationManager.removeListener(_replaceRootBucket);
+    if (_rootBucketValid) {
+      ServicesBinding.instance!.restorationManager.removeListener(_replaceRootBucket);
+    }
     super.dispose();
   }
 
