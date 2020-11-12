@@ -167,5 +167,5 @@ class Feedback {
     };
   }
 
-  static TargetPlatform _platform(BuildContext context) => Theme.of(context)!.platform;
+  static TargetPlatform _platform(BuildContext context) => Theme.of(context).platform;
 }

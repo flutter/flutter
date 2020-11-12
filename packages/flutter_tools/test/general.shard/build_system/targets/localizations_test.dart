@@ -39,6 +39,7 @@ void main() {
       templateArbFile: Uri.file('example.arb'),
       untranslatedMessagesFile: Uri.file('untranslated'),
       useSyntheticPackage: false,
+      areResourceAttributesRequired: true,
     );
 
     final LocalizationsGenerator mockLocalizationsGenerator = MockLocalizationsGenerator();
@@ -52,23 +53,24 @@ void main() {
 
     verify(
       mockLocalizationsGenerator.initialize(
-      inputPathString: 'arb',
-      outputPathString: null,
-      templateArbFileName: 'example.arb',
-      outputFileString: 'bar',
-      classNameString: 'Foo',
-      preferredSupportedLocale: <String>['en_US'],
-      headerString: 'HEADER',
-      headerFile: 'header',
-      useDeferredLoading: true,
-      inputsAndOutputsListPath: '/',
-      useSyntheticPackage: false,
-      projectPathString: '/',
+        inputPathString: 'arb',
+        outputPathString: null,
+        templateArbFileName: 'example.arb',
+        outputFileString: 'bar',
+        classNameString: 'Foo',
+        preferredSupportedLocale: <String>['en_US'],
+        headerString: 'HEADER',
+        headerFile: 'header',
+        useDeferredLoading: true,
+        inputsAndOutputsListPath: '/',
+        useSyntheticPackage: false,
+        projectPathString: '/',
+        areResourceAttributesRequired: true,
+        untranslatedMessagesFile: 'untranslated',
       ),
     ).called(1);
     verify(mockLocalizationsGenerator.loadResources()).called(1);
-    verify(mockLocalizationsGenerator.writeOutputFiles()).called(1);
-    verify(mockLocalizationsGenerator.outputUnimplementedMessages('untranslated', logger)).called(1);
+    verify(mockLocalizationsGenerator.writeOutputFiles(logger)).called(1);
   });
 
   testUsingContext('generateLocalizations throws exception on missing flutter: generate: true flag', () async {

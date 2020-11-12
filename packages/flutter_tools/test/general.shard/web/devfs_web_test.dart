@@ -756,24 +756,24 @@ void main() {
       .childFile('web_entrypoint.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
-    final String webPrecompiledSoundSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSoundSdk);
-    final String webPrecompiledSoundSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSoundSdkSourcemaps);
-    final String webPrecompiledCanvaskitSoundSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdk);
-    final String webPrecompiledCanvaskitSoundSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps);
-    globals.fs.file(webPrecompiledSoundSdk)
+    final String webPrecompiledSdk = globals.artifacts
+      .getArtifactPath(Artifact.webPrecompiledSdk);
+    final String webPrecompiledSdkSourcemaps = globals.artifacts
+      .getArtifactPath(Artifact.webPrecompiledSdkSourcemaps);
+    final String webPrecompiledCanvaskitSdk = globals.artifacts
+      .getArtifactPath(Artifact.webPrecompiledCanvaskitSdk);
+    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
+      .getArtifactPath(Artifact.webPrecompiledCanvaskitSdkSourcemaps);
+    globals.fs.file(webPrecompiledSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
-    globals.fs.file(webPrecompiledSoundSdkSourcemaps)
+    globals.fs.file(webPrecompiledSdkSourcemaps)
       ..createSync(recursive: true)
       ..writeAsStringSync('THERE');
-    globals.fs.file(webPrecompiledCanvaskitSoundSdk)
+    globals.fs.file(webPrecompiledCanvaskitSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('OL');
-    globals.fs.file(webPrecompiledCanvaskitSoundSdkSourcemaps)
+    globals.fs.file(webPrecompiledCanvaskitSdkSourcemaps)
       ..createSync(recursive: true)
       ..writeAsStringSync('CHUM');
 
@@ -798,7 +798,7 @@ void main() {
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
 
     // Update to the SDK.
-    globals.fs.file(webPrecompiledSoundSdk).writeAsStringSync('BELLOW');
+    globals.fs.file(webPrecompiledSdk).writeAsStringSync('BELLOW');
 
     // New SDK should be visible..
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');

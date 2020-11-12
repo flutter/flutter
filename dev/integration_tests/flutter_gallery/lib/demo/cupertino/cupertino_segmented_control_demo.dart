@@ -43,9 +43,9 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
     ),
   };
 
-  int currentSegment = 0;
+  int? currentSegment = 0;
 
-  void onValueChanged(int newValue) {
+  void onValueChanged(int? newValue) {
     setState(() {
       currentSegment = newValue;
     });
@@ -126,7 +126,7 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
                               ),
                             ],
                           ),
-                          child: icons[currentSegment],
+                          child: icons[currentSegment!],
                         );
                       },
                     ),
