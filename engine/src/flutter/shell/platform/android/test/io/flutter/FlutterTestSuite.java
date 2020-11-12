@@ -30,6 +30,7 @@ import io.flutter.external.FlutterLaunchTests;
 import io.flutter.plugin.common.StandardMessageCodecTest;
 import io.flutter.plugin.common.StandardMethodCodecTest;
 import io.flutter.plugin.editing.InputConnectionAdaptorTest;
+import io.flutter.plugin.editing.ListenableEditingStateTest;
 import io.flutter.plugin.editing.TextInputPluginTest;
 import io.flutter.plugin.mouse.MouseCursorPluginTest;
 import io.flutter.plugin.platform.PlatformPluginTest;
@@ -70,6 +71,7 @@ import test.io.flutter.embedding.engine.PluginComponentTest;
   FlutterViewTest.class,
   InputConnectionAdaptorTest.class,
   KeyEventChannelTest.class,
+  ListenableEditingStateTest.class,
   LocalizationPluginTest.class,
   MouseCursorPluginTest.class,
   PlatformChannelTest.class,

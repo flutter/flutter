@@ -809,6 +809,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StringCod
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/FlutterTextUtils.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/ImeSyncDeferringInsetsCallback.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/InputConnectionAdaptor.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/ListenableEditingState.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/TextInputPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/localization/LocalizationPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/mouse/MouseCursorPlugin.java
