@@ -813,10 +813,8 @@ abstract class FlutterCommand extends Command<void> {
         // requested.
         if (languageVersion.major >= nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor) {
           nullSafetyMode = NullSafetyMode.sound;
-          extraFrontEndOptions.add('--sound-null-safety');
         } else {
           nullSafetyMode = NullSafetyMode.unsound;
-          extraFrontEndOptions.add('--no-sound-null-safety');
         }
       } else if (!wasNullSafetyFlagParsed) {
         // This mode is only used for commands which do not build a single target like
