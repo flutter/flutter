@@ -33,7 +33,8 @@ void batch1() {
     // No need to start paused as all breakpoint would be eventually reached.
     return  _flutter.run(
       withDebugger: true, chrome: true,
-      expressionEvaluation: expressionEvaluation);
+      expressionEvaluation: expressionEvaluation,
+      additionalCommandArgs: <String>['--verbose']);
   }
 
   Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
@@ -139,7 +140,8 @@ void batch2() {
     return  _flutter.run(
       withDebugger: true, chrome: true,
       expressionEvaluation: expressionEvaluation,
-      startPaused: true, script: _project.testFilePath);
+      startPaused: true, script: _project.testFilePath,
+      additionalCommandArgs: <String>['--verbose']);
   }
 
   testWithoutContext('flutter test expression evaluation - error if expression evaluation disabled', () async {
