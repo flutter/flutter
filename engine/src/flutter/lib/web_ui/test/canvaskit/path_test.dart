@@ -87,5 +87,17 @@ void testMain() {
       expect(path.fillType, ui.PathFillType.nonZero);
       expect(path.contains(const ui.Offset(5, 5)), isFalse);
     });
-  }, skip: isIosSafari); // TODO: https://github.com/flutter/flutter/issues/60040
+
+    test('CkPath resurrection', () {
+      const ui.Rect rect = ui.Rect.fromLTRB(0, 0, 10, 10);
+      final CkPath path = CkPath();
+      path.addRect(rect);
+      path.delete();
+
+      final SkPath resurrectedCopy = path.resurrect();
+      expect(fromSkRect(resurrectedCopy.getBounds()), rect);
+    });
+  },
+      skip:
+          isIosSafari); // TODO: https://github.com/flutter/flutter/issues/60040
 }

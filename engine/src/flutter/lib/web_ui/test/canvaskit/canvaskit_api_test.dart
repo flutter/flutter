@@ -821,6 +821,22 @@ void _pathTests() {
     final SkContourMeasure measure2 = iter.next();
     expect(measure2, isNull);
   });
+
+  test('SkPath.toCmds and CanvasKit.MakePathFromCmds', () {
+    const ui.Rect rect = ui.Rect.fromLTRB(0, 0, 10, 10);
+    final SkPath path = SkPath();
+    path.addRect(toSkRect(rect));
+    expect(path.toCmds(), <List<num>>[
+      <num>[0, 0, 0], // moveTo
+      <num>[1, 10, 0], // lineTo
+      <num>[1, 10, 10], // lineTo
+      <num>[1, 0, 10], // lineTo
+      <num>[5], // close
+    ]);
+
+    final SkPath copy = canvasKit.MakePathFromCmds(path.toCmds());
+    expect(fromSkRect(copy.getBounds()), rect);
+  });
 }
 
 SkVertices _testVertices() {
