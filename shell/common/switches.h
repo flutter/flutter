@@ -199,6 +199,9 @@ DEF_SWITCH(
     "Uses separate threads for the platform, UI, GPU and IO task runners. "
     "By default, a single thread is used for all task runners. Only available "
     "in the flutter_tester.")
+DEF_SWITCH(OldGenHeapSize,
+           "old-gen-heap-size",
+           "The size limit in megabytes for the Dart VM old gen heap space.")
 
 DEF_SWITCHES_END
 

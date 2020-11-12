@@ -32,11 +32,13 @@ public class PluginComponentTest {
   @Test
   public void pluginsCanAccessFlutterAssetPaths() {
     // Setup test.
-    FlutterInjector.setInstance(new FlutterInjector.Builder().setShouldLoadNative(false).build());
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterInjector.setInstance(
+        new FlutterInjector.Builder().setFlutterLoader(new FlutterLoader(mockFlutterJNI)).build());
     FlutterJNI flutterJNI = mock(FlutterJNI.class);
     when(flutterJNI.isAttached()).thenReturn(true);
 
-    FlutterLoader flutterLoader = new FlutterLoader();
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
 
     // Execute behavior under test.
     FlutterEngine flutterEngine =

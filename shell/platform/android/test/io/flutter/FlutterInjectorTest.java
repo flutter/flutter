@@ -7,7 +7,6 @@ package io.flutter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import org.junit.Before;
@@ -35,7 +34,6 @@ public class FlutterInjectorTest {
     // Implicitly builds when first accessed.
     FlutterInjector injector = FlutterInjector.instance();
     assertNotNull(injector.flutterLoader());
-    assertTrue(injector.shouldLoadNative());
   }
 
   @Test
@@ -44,7 +42,6 @@ public class FlutterInjectorTest {
         new FlutterInjector.Builder().setFlutterLoader(mockFlutterLoader).build());
     FlutterInjector injector = FlutterInjector.instance();
     assertEquals(injector.flutterLoader(), mockFlutterLoader);
-    assertTrue(injector.shouldLoadNative());
   }
 
   @Test()
