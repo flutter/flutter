@@ -90,6 +90,8 @@ class TestCommand extends Command<bool> with ArgUtils {
 
     SupportedBrowsers.instance.argParsers
         .forEach((t) => t.populateOptions(argParser));
+    GeneralTestsArgumentParser.instance.populateOptions(argParser);
+    IntegrationTestsArgumentParser.instance.populateOptions(argParser);
   }
 
   @override
@@ -133,6 +135,7 @@ class TestCommand extends Command<bool> with ArgUtils {
   Future<bool> run() async {
     SupportedBrowsers.instance
       ..argParsers.forEach((t) => t.parseOptions(argResults));
+    GeneralTestsArgumentParser.instance.parseOptions(argResults);
 
     // Check the flags to see what type of integration tests are requested.
     testTypesRequested = findTestType();
@@ -165,6 +168,8 @@ class TestCommand extends Command<bool> with ArgUtils {
   }
 
   Future<bool> runIntegrationTests() async {
+    // Parse additional arguments specific for integration testing.
+    IntegrationTestsArgumentParser.instance.parseOptions(argResults);
     if(!_testPreparationReady) {
       await _prepare();
     }
@@ -204,7 +209,9 @@ class TestCommand extends Command<bool> with ArgUtils {
 
     // If screenshot tests are available, fetch the screenshot goldens.
     if (isScreenshotTestsAvailable) {
-      print('screenshot tests available');
+      if (isVerboseLoggingEnabled) {
+        print('INFO: Screenshot tests available');
+      }
       final GoldensRepoFetcher goldensRepoFetcher = GoldensRepoFetcher(
           environment.webUiGoldensRepositoryDirectory,
           path.join(environment.webUiDevDir.path, 'goldens_lock.yaml'));
