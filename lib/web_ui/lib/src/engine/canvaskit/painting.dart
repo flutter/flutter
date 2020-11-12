@@ -165,20 +165,22 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
   ui.FilterQuality _filterQuality = ui.FilterQuality.none;
 
   @override
-  ui.ColorFilter? get colorFilter => _colorFilter;
+  ui.ColorFilter? get colorFilter => _managedColorFilter?.ckColorFilter;
   @override
   set colorFilter(ui.ColorFilter? value) {
-    if (_colorFilter == value) {
+    if (colorFilter == value) {
       return;
     }
-    final EngineColorFilter? engineValue = value as EngineColorFilter?;
-    _colorFilter = engineValue;
-    _ckColorFilter = engineValue?._toCkColorFilter();
-    skiaObject.setColorFilter(_ckColorFilter?.skiaObject);
+
+    if (value == null) {
+      _managedColorFilter = null;
+    } else {
+      _managedColorFilter = _ManagedSkColorFilter(value as CkColorFilter);
+    }
+    skiaObject.setColorFilter(_managedColorFilter?.skiaObject);
   }
 
-  EngineColorFilter? _colorFilter;
-  CkColorFilter? _ckColorFilter;
+  _ManagedSkColorFilter? _managedColorFilter;
 
   @override
   double get strokeMiterLimit => _strokeMiterLimit;
@@ -200,11 +202,14 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
     if (_imageFilter == value) {
       return;
     }
-    _imageFilter = value as CkImageFilter?;
-    skiaObject.setImageFilter(_imageFilter?.skiaObject);
+
+    _imageFilter = value as _CkManagedSkImageFilterConvertible?;
+    _managedImageFilter = _imageFilter?._imageFilter;
+    skiaObject.setImageFilter(_managedImageFilter?.skiaObject);
   }
 
-  CkImageFilter? _imageFilter;
+  _CkManagedSkImageFilterConvertible? _imageFilter;
+  ManagedSkiaObject<SkImageFilter>? _managedImageFilter;
 
   @override
   SkPaint createDefault() {
@@ -224,8 +229,8 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
     paint.setColorInt(_color.value);
     paint.setShader(_shader?.skiaObject);
     paint.setMaskFilter(_ckMaskFilter?.skiaObject);
-    paint.setColorFilter(_ckColorFilter?.skiaObject);
-    paint.setImageFilter(_imageFilter?.skiaObject);
+    paint.setColorFilter(_managedColorFilter?.skiaObject);
+    paint.setImageFilter(_managedImageFilter?.skiaObject);
     paint.setFilterQuality(toSkFilterQuality(_filterQuality));
     paint.setStrokeCap(toSkStrokeCap(_strokeCap));
     paint.setStrokeJoin(toSkStrokeJoin(_strokeJoin));

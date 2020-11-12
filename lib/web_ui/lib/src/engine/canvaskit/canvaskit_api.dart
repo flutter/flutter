@@ -823,6 +823,16 @@ class SkImageFilterNamespace {
     SkFilterQuality filterQuality,
     Null input, // we don't use this yet
   );
+
+  external SkImageFilter MakeColorFilter(
+    SkColorFilter colorFilter,
+    Null input, // we don't use this yet
+  );
+
+  external SkImageFilter MakeCompose(
+    SkImageFilter outer,
+    SkImageFilter inner,
+  );
 }
 
 @JS()
