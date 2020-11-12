@@ -486,14 +486,79 @@ class _RawScrollbarState extends State<RawScrollbar> {
 
   void _handleDragStart(DragStartDetails details) {
     print('drag start: $details');
+    assert(widget.controller != null);
+    final Axis direction = widget.controller!.position.axis;
+    switch (direction) {
+      case Axis.vertical:
+        _dragScrollbar(details.localPosition.dy);
+        break;
+      case Axis.horizontal:
+        _dragScrollbar(details.localPosition.dx);
+        break;
+    }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     print('drag update: $details');
+    assert(widget.controller != null);
+    final Axis direction = widget.controller!.position.axis;
+    switch(direction) {
+      case Axis.vertical:
+        _dragScrollbar(details.localPosition.dy);
+        break;
+      case Axis.horizontal:
+        _dragScrollbar(details.localPosition.dx);
+        break;
+    }
   }
 
   void _handleDragEnd(DragEndDetails details) {
     print('drag end: $details');
+    assert(widget.controller != null);
+    final Axis direction = widget.controller!.position.axis;
+    final double scrollVelocity = 0.0; // get from thumb position
+    // _drag?.end(DragEndDetails(
+    //   primaryVelocity: -scrollVelocity,
+    //   velocity: Velocity(
+    //     pixelsPerSecond: direction == Axis.vertical
+    //       ? Offset(0.0, -scrollVelocity)
+    //       : Offset(-scrollVelocity, 0.0),
+    //   ),
+    // ));
+    // _drag = null;
+  }
+
+  void _dragScrollbar(double primaryDelta) {
+    print('dragScrollbar, primaryDelta: $primaryDelta');
+    assert(widget.controller != null);
+
+    // Convert primaryDelta, the amount that the scrollbar moved since the last
+    // time _dragScrollbar was called, into the coordinate space of the scroll
+    // position, and create/update the drag event with that position.
+    final double scrollOffsetLocal = 0.0;// get from thumb;
+    final double scrollOffsetGlobal = scrollOffsetLocal + widget.controller!.position.pixels;
+    final Axis direction = widget.controller!.position.axis;
+
+    // if (_drag == null) {
+    //   _drag = widget.controller!.position.drag(
+    //     DragStartDetails(
+    //       globalPosition: direction == Axis.vertical
+    //         ? Offset(0.0, scrollOffsetGlobal)
+    //         : Offset(scrollOffsetGlobal, 0.0),
+    //     ),
+    //       () {},
+    //   );
+    // } else {
+    //   _drag!.update(DragUpdateDetails(
+    //     globalPosition: direction == Axis.vertical
+    //       ? Offset(0.0, scrollOffsetGlobal)
+    //       : Offset(scrollOffsetGlobal, 0.0),
+    //     delta: direction == Axis.vertical
+    //       ? Offset(0.0, -scrollOffsetLocal)
+    //       : Offset(-scrollOffsetLocal, 0.0),
+    //     primaryDelta: -scrollOffsetLocal,
+    //   ));
+    // }
   }
 
   @override
@@ -534,8 +599,14 @@ class _RawScrollbarState extends State<RawScrollbar> {
           //  handle different gestures?
           LayoutId(
             id: _ScrollbarSlot.thumb,
-            child: DragGestureDetector(
+            child: GestureDetector(
               child: widget.thumb,
+              onHorizontalDragStart: _handleDragStart,
+              onHorizontalDragUpdate: _handleDragUpdate,
+              onHorizontalDragEnd: _handleDragEnd,
+              onVerticalDragStart: _handleDragStart,
+              onVerticalDragUpdate: _handleDragUpdate,
+              onVerticalDragEnd: _handleDragEnd,
             ),
           ),
           // Any gestures in the trailing widget are handled by the user
