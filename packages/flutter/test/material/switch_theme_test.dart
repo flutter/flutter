@@ -274,6 +274,78 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getSwitchMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
+
+  testWidgets('Switch active and inactive properties are taken over the theme values', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    const Color themeDefaultThumbColor = Color(0xfffffff0);
+    const Color themeSelectedThumbColor = Color(0xfffffff1);
+    const Color themeDefaultTrackColor = Color(0xfffffff2);
+    const Color themeSelectedTrackColor = Color(0xfffffff3);
+
+    const Color defaultThumbColor = Color(0xffffff0f);
+    const Color selectedThumbColor = Color(0xffffff1f);
+    const Color defaultTrackColor = Color(0xffffff2f);
+    const Color selectedTrackColor = Color(0xffffff3f);
+
+    Widget buildSwitch({bool selected = false, bool autofocus = false}) {
+      return MaterialApp(
+        theme: ThemeData(
+          switchTheme: SwitchThemeData(
+            thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return themeSelectedThumbColor;
+              }
+              return themeDefaultThumbColor;
+            }),
+            trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return themeSelectedTrackColor;
+              }
+              return themeDefaultTrackColor;
+            }),
+          ),
+        ),
+        home: Scaffold(
+          body: Switch(
+            value: selected,
+            onChanged: (bool value) {},
+            autofocus: autofocus,
+            activeColor: selectedThumbColor,
+            inactiveThumbColor: defaultThumbColor,
+            activeTrackColor: selectedTrackColor,
+            inactiveTrackColor: defaultTrackColor,
+          ),
+        ),
+      );
+    }
+
+    // Unselected switch.
+    await tester.pumpWidget(buildSwitch());
+    await tester.pumpAndSettle();
+    expect(
+      _getSwitchMaterial(tester),
+      paints
+        ..rrect(color: defaultTrackColor)
+        ..circle()
+        ..circle()
+        ..circle()
+        ..circle(color: defaultThumbColor),
+    );
+
+    // Selected switch.
+    await tester.pumpWidget(buildSwitch(selected: true));
+    await tester.pumpAndSettle();
+    expect(
+      _getSwitchMaterial(tester),
+      paints
+        ..rrect(color: selectedTrackColor)
+        ..circle()
+        ..circle()
+        ..circle()
+        ..circle(color: selectedThumbColor),
+    );
+  });
 }
 
 Future<void> _pointGestureToSwitch(WidgetTester tester) async {

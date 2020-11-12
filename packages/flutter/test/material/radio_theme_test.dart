@@ -225,6 +225,47 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getRadioMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
+
+  testWidgets('Radio activeColor property is taken over the theme', (WidgetTester tester) async {
+    const Color themeDefaultFillColor = Color(0xfffffff0);
+    const Color themeSelectedFillColor = Color(0xfffffff1);
+
+    const Color selectedFillColor = Color(0xfffffff1);
+
+    Widget buildRadio({bool selected = false, bool autofocus = false}) {
+      return MaterialApp(
+        theme: ThemeData(
+          radioTheme: RadioThemeData(
+            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return themeSelectedFillColor;
+              }
+              return themeDefaultFillColor;
+            }),
+          ),
+        ),
+        home: Scaffold(
+          body: Radio<int>(
+            onChanged: (int? int) {},
+            value: selected ? 0 : 1,
+            groupValue: 0,
+            autofocus: autofocus,
+            activeColor: selectedFillColor,
+          ),
+        ),
+      );
+    }
+
+    // Radio.
+    await tester.pumpWidget(buildRadio());
+    await tester.pumpAndSettle();
+    expect(_getRadioMaterial(tester), paints..circle(color: themeDefaultFillColor));
+
+    // Selected radio.
+    await tester.pumpWidget(buildRadio(selected: true));
+    await tester.pumpAndSettle();
+    expect(_getRadioMaterial(tester), paints..circle(color: selectedFillColor));
+  });
 }
 
 Finder _findRadio() {

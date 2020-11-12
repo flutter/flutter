@@ -235,6 +235,44 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getCheckboxMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
+
+  testWidgets('Checkbox activeColor property is taken over the theme', (WidgetTester tester) async {
+    const Color themeSelectedFillColor = Color(0xfffffff1);
+    const Color themeDefaultFillColor = Color(0xfffffff0);
+    const Color selectedFillColor = Color(0xfffffff6);
+
+    Widget buildCheckbox({bool selected = false}) {
+        return MaterialApp(
+          theme: ThemeData(
+            checkboxTheme: CheckboxThemeData(
+              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                if (states.contains(MaterialState.selected)) {
+                  return themeSelectedFillColor;
+                }
+                return themeDefaultFillColor;
+              }),
+            ),
+          ),
+          home: Scaffold(
+            body: Checkbox(
+              onChanged: (bool? value) { },
+              value: selected,
+              activeColor: selectedFillColor,
+            ),
+          ),
+        );
+    }
+
+    // Unselected checkbox.
+    await tester.pumpWidget(buildCheckbox());
+    await tester.pumpAndSettle();
+    expect(_getCheckboxMaterial(tester), paints..drrect(color: themeDefaultFillColor));
+
+    // Selected checkbox.
+    await tester.pumpWidget(buildCheckbox(selected: true));
+    await tester.pumpAndSettle();
+    expect(_getCheckboxMaterial(tester), paints..rrect(color: selectedFillColor));
+  });
 }
 
 Future<void> _pointGestureToCheckbox(WidgetTester tester) async {
