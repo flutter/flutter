@@ -83,7 +83,7 @@ void main() {
 
     // Plugins
     expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
-    expect(generated, contains('registerPlugins(webPluginRegistry);'));
+    expect(generated, contains('registerPlugins(webPluginRegistrar);'));
 
     // Main
     expect(generated, contains('entrypoint.main();'));
@@ -185,7 +185,7 @@ void main() {
 
     // Plugins
     expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
-    expect(generated, contains('registerPlugins(webPluginRegistry);'));
+    expect(generated, contains('registerPlugins(webPluginRegistrar);'));
 
     // Main
     expect(generated, contains('entrypoint.main();'));
@@ -208,7 +208,7 @@ void main() {
 
     // Plugins
     expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
-    expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
+    expect(generated, isNot(contains('registerPlugins(webPluginRegistrar);')));
     // Main
     expect(generated, contains('entrypoint.main();'));
   }));
@@ -253,7 +253,7 @@ void main() {
 
     // Plugins
     expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
-    expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
+    expect(generated, isNot(contains('registerPlugins(webPluginRegistrar);')));
 
     // Main
     expect(generated, contains('entrypoint.main();'));
