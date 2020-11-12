@@ -19,6 +19,7 @@
 #include "FontLanguageListCache.h"
 
 #include <unicode/uloc.h>
+#include <unicode/umachine.h>
 #include <unordered_set>
 
 #include <log/log.h>
