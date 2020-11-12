@@ -675,60 +675,17 @@ public class TextInputChannel {
       return new TextEditState(
           textEditState.getString("text"),
           textEditState.getInt("selectionBase"),
-          textEditState.getInt("selectionExtent"),
-          textEditState.getInt("composingBase"),
-          textEditState.getInt("composingExtent"));
+          textEditState.getInt("selectionExtent"));
     }
 
     @NonNull public final String text;
     public final int selectionStart;
     public final int selectionEnd;
-    public final int composingStart;
-    public final int composingEnd;
 
-    public TextEditState(
-        @NonNull String text,
-        int selectionStart,
-        int selectionEnd,
-        int composingStart,
-        int composingEnd)
-        throws IndexOutOfBoundsException {
-
-      if ((selectionStart != -1 || selectionEnd != -1)
-          && (selectionStart < 0 || selectionStart > selectionEnd)) {
-        throw new IndexOutOfBoundsException(
-            "invalid selection: ("
-                + String.valueOf(selectionStart)
-                + ", "
-                + String.valueOf(selectionEnd)
-                + ")");
-      }
-
-      if ((composingStart != -1 || composingEnd != -1)
-          && (composingStart < 0 || composingStart >= composingEnd)) {
-        throw new IndexOutOfBoundsException(
-            "invalid composing range: ("
-                + String.valueOf(composingStart)
-                + ", "
-                + String.valueOf(composingEnd)
-                + ")");
-      }
-
-      if (composingStart > text.length()) {
-        throw new IndexOutOfBoundsException(
-            "invalid composing start: " + String.valueOf(composingStart));
-      }
-
-      if (selectionStart > text.length()) {
-        throw new IndexOutOfBoundsException(
-            "invalid selection start: " + String.valueOf(selectionStart));
-      }
-
+    public TextEditState(@NonNull String text, int selectionStart, int selectionEnd) {
       this.text = text;
       this.selectionStart = selectionStart;
       this.selectionEnd = selectionEnd;
-      this.composingStart = composingStart;
-      this.composingEnd = composingEnd;
     }
   }
 }
