@@ -900,6 +900,28 @@ void main() {
 
     expect(getCheckboxRenderer(), paints..rrect(color: hoveredFillColor));
   });
+
+  testWidgets('Checkbox respects borderRadius', (WidgetTester tester) async {
+    Widget buildApp() {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Checkbox(
+                value: false,
+                onChanged: (bool? newValue) {},
+                borderRadius: 2.0,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).borderRadius, 2.0);
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
