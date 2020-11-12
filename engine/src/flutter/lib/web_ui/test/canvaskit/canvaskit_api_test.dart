@@ -786,7 +786,7 @@ void _pathTests() {
 
   test('SkContourMeasureIter/SkContourMeasure', () {
     final SkContourMeasureIter iter =
-        SkContourMeasureIter(_testClosedSkPath(), false, 0);
+        SkContourMeasureIter(_testClosedSkPath(), false, 1.0);
     final SkContourMeasure measure1 = iter.next();
     expect(measure1.length(), 40);
     expect(measure1.getPosTan(5), Float32List.fromList(<double>[15, 10, 1, 0]));
