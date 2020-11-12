@@ -531,34 +531,29 @@ class _RawScrollbarState extends State<RawScrollbar> {
   void _dragScrollbar(double primaryDelta) {
     print('dragScrollbar, primaryDelta: $primaryDelta');
     assert(widget.controller != null);
-
-    // Convert primaryDelta, the amount that the scrollbar moved since the last
-    // time _dragScrollbar was called, into the coordinate space of the scroll
-    // position, and create/update the drag event with that position.
-    final double scrollOffsetLocal = 0.0;// get from thumb;
-    final double scrollOffsetGlobal = scrollOffsetLocal + widget.controller!.position.pixels;
+    final double scrollDelta = _scrollbarLayoutDelegate.localDeltaToScrollDelta(primaryDelta)
     final Axis direction = widget.controller!.position.axis;
 
-    // if (_drag == null) {
-    //   _drag = widget.controller!.position.drag(
-    //     DragStartDetails(
-    //       globalPosition: direction == Axis.vertical
-    //         ? Offset(0.0, scrollOffsetGlobal)
-    //         : Offset(scrollOffsetGlobal, 0.0),
-    //     ),
-    //       () {},
-    //   );
-    // } else {
-    //   _drag!.update(DragUpdateDetails(
-    //     globalPosition: direction == Axis.vertical
-    //       ? Offset(0.0, scrollOffsetGlobal)
-    //       : Offset(scrollOffsetGlobal, 0.0),
-    //     delta: direction == Axis.vertical
-    //       ? Offset(0.0, -scrollOffsetLocal)
-    //       : Offset(-scrollOffsetLocal, 0.0),
-    //     primaryDelta: -scrollOffsetLocal,
-    //   ));
-    // }
+    if (_drag == null) {
+      _drag = widget.controller!.position.drag(
+        DragStartDetails(
+          globalPosition: direction == Axis.vertical
+            ? Offset(0.0, scrollDelta)
+            : Offset(scrollDelta, 0.0),
+        ),
+          () {},
+      );
+    } else {
+      _drag!.update(DragUpdateDetails(
+        globalPosition: direction == Axis.vertical
+          ? Offset(0.0, scrollDelta)
+          : Offset(scrollDelta, 0.0),
+        // delta: direction == Axis.vertical
+        //   ? Offset(0.0, -scrollOffsetLocal)
+        //   : Offset(-scrollOffsetLocal, 0.0),
+        // primaryDelta: -scrollOffsetLocal,
+      ));
+    }
   }
 
   @override
@@ -648,6 +643,7 @@ class _ScrollbarLayout extends MultiChildLayoutDelegate {
   final ScrollMetrics? metrics;
   final TextDirection textDirection;
   late double _thumbLocalPosition;
+  late double _trackLength;
   
   int getTrackIncrementCorrection(Offset localPosition) {
     final AxisDirection direction = controller?.position.axisDirection ?? metrics!.axisDirection;
@@ -669,6 +665,20 @@ class _ScrollbarLayout extends MultiChildLayoutDelegate {
           return -1;
         return 1;
     }
+  }
+
+  double localDeltaToScrollDelta(double localDelta) {
+    print('thumbPosition: $_thumbLocalPosition');
+    print('trackLegnth: $_trackLength');
+    double newPosition = _thumbLocalPosition + localDelta;
+    if (newPosition < 0.0)
+      newPosition = 0.0;
+    else if (newPosition > _trackLength)
+      newPosition = _trackLength;
+    // Convert local track position to scroll position
+    final double maxScrollExtent = controller!.position.maxScrollExtent ?? metrics!.maxScrollExtent;
+    final double newScrollPosition = (newPosition / _trackLength) * maxScrollExtent;
+    return controller!.position.pixels - newScrollPosition;
   }
 
   @override
@@ -792,24 +802,25 @@ class _ScrollbarLayout extends MultiChildLayoutDelegate {
       ? 0.0
       : (scrollOffset / maxScrollExtent).clamp(0.0, 1.0);
     double x, y;
+    _trackLength = size.height - trackPadding - thumbSize.height;
     switch (direction) {
       case AxisDirection.down:
         x = textDirection == TextDirection.rtl ? 0.0 : size.width - thumbSize.width;
-        _thumbLocalPosition = (size.height - trackPadding - thumbSize.height) * fractionalOffset;
+        _thumbLocalPosition = _trackLength * fractionalOffset;
         y = _thumbLocalPosition + leadingSize.height;
         break;
       case AxisDirection.up:
         x = textDirection == TextDirection.rtl ? 0.0 : size.width - thumbSize.width;
-        _thumbLocalPosition = (size.height - trackPadding - thumbSize.height) * (1 - fractionalOffset);
+        _thumbLocalPosition = _trackLength * (1 - fractionalOffset);
         y = _thumbLocalPosition + leadingSize.height;
         break;
       case AxisDirection.left:
-        _thumbLocalPosition = (size.width - trackPadding - thumbSize.width) * (1 - fractionalOffset);
+        _thumbLocalPosition = _trackLength * (1 - fractionalOffset);
         x = _thumbLocalPosition + leadingSize.width;
         y = size.height - thumbSize.height;
         break;
       case AxisDirection.right:
-        _thumbLocalPosition = (size.width - trackPadding - thumbSize.width) * fractionalOffset;
+        _thumbLocalPosition = _trackLength * fractionalOffset;
         x = _thumbLocalPosition + leadingSize.width;
         y = size.height - thumbSize.height;
         break;
