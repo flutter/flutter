@@ -16,19 +16,6 @@ import 'scroll_controller.dart';
 /// This mechanism can be used to provide default behavior for scroll views in a
 /// subtree. For example, the [Scaffold] uses this mechanism to implement the
 /// scroll-to-top gesture on iOS.
-///
-/// Another default behavior handled by the PrimaryScrollController is default
-/// [ScrollAction]s. If a ScrollAction is not handled by an otherwise focused
-/// part of the application, the ScrollAction will be evaluated using the scroll
-/// view associated with a PrimaryScrollController, for example, when executing
-/// [Shortcuts] key events like page up and down.
-///
-/// See also:
-///   * [ScrollAction], an [Action] that scrolls the [Scrollable] that encloses
-///     the current [primaryFocus] or is attached to the PrimaryScrollController.
-///   * [Shortcuts], a widget that establishes a [ShortcutManager] to be used
-///     by its descendants when invoking an [Action] via a keyboard key
-///     combination that maps to an [Intent].
 class PrimaryScrollController extends InheritedWidget {
   /// Creates a widget that associates a [ScrollController] with a subtree.
   const PrimaryScrollController({

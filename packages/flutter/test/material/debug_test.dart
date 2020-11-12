@@ -135,7 +135,6 @@ void main() {
       '     _FocusMarker\n'
       '     Semantics\n'
       '     FocusScope\n'
-      '     PrimaryScrollController\n'
       '     _ActionsMarker\n'
       '     Actions\n'
       '     PageStorage\n'
