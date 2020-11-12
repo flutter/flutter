@@ -464,9 +464,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final double? leadingWidth;
 
   bool _getEffectiveCenterTitle(ThemeData theme) {
-    if (centerTitle != null) {
-      return centerTitle!;
-    }
+    if (centerTitle != null) return centerTitle!;
     if (theme.appBarTheme.centerTitle != null)
       return theme.appBarTheme.centerTitle!;
     assert(theme.platform != null);
@@ -515,44 +513,17 @@ class _AppBarState extends State<AppBar> {
 
     final double toolbarHeight = widget.toolbarHeight ?? kToolbarHeight;
 
-<<<<<<< HEAD
-    final Color backgroundColor = widget.backgroundColor ??
-        appBarTheme.color ??
-        (colorScheme.brightness == Brightness.dark
-            ? colorScheme.surface
-            : colorScheme.primary);
-    final Color foregroundColor = widget.foregroundColor ??
-        appBarTheme.foregroundColor ??
-        (colorScheme.brightness == Brightness.dark
-            ? colorScheme.onSurface
-            : colorScheme.onPrimary);
-
-    IconThemeData overallIconTheme = widget.iconTheme ??
-        appBarTheme.iconTheme ??
-        theme.iconTheme.copyWith(color: foregroundColor);
+    IconThemeData overallIconTheme =
+        widget.iconTheme ?? appBarTheme.iconTheme ?? theme.primaryIconTheme;
     IconThemeData actionsIconTheme = widget.actionsIconTheme ??
         appBarTheme.actionsIconTheme ??
         overallIconTheme;
     TextStyle? centerStyle = widget.textTheme?.headline6 ??
         appBarTheme.textTheme?.headline6 ??
-        theme.primaryTextTheme.headline6?.copyWith(color: foregroundColor);
+        theme.primaryTextTheme.headline6;
     TextStyle? sideStyle = widget.textTheme?.bodyText2 ??
         appBarTheme.textTheme?.bodyText2 ??
-        theme.primaryTextTheme.bodyText2?.copyWith(color: foregroundColor);
-=======
-    IconThemeData overallIconTheme = widget.iconTheme
-      ?? appBarTheme.iconTheme
-      ?? theme.primaryIconTheme;
-    IconThemeData actionsIconTheme = widget.actionsIconTheme
-      ?? appBarTheme.actionsIconTheme
-      ?? overallIconTheme;
-    TextStyle? centerStyle = widget.textTheme?.headline6
-      ?? appBarTheme.textTheme?.headline6
-      ?? theme.primaryTextTheme.headline6;
-    TextStyle? sideStyle = widget.textTheme?.bodyText2
-      ?? appBarTheme.textTheme?.bodyText2
-      ?? theme.primaryTextTheme.bodyText2;
->>>>>>> 15d2d8a8750c2733871f7f8ae558c268efd32fc0
+        theme.primaryTextTheme.bodyText2;
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity =
@@ -565,11 +536,9 @@ class _AppBarState extends State<AppBar> {
         sideStyle =
             sideStyle!.copyWith(color: sideStyle.color!.withOpacity(opacity));
       overallIconTheme = overallIconTheme.copyWith(
-        opacity: opacity * (overallIconTheme.opacity ?? 1.0)
-      );
+          opacity: opacity * (overallIconTheme.opacity ?? 1.0));
       actionsIconTheme = actionsIconTheme.copyWith(
-        opacity: opacity * (actionsIconTheme.opacity ?? 1.0)
-      );
+          opacity: opacity * (actionsIconTheme.opacity ?? 1.0));
     }
 
     Widget? leading = widget.leading;
@@ -746,45 +715,25 @@ class _AppBarState extends State<AppBar> {
         ],
       );
     }
-<<<<<<< HEAD
-
-    final Brightness brightness =
-        widget.brightness ?? appBarTheme.brightness ?? colorScheme.brightness;
+    final Brightness brightness = widget.brightness ??
+        appBarTheme.brightness ??
+        theme.primaryColorBrightness;
     final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
         ? SystemUiOverlayStyle.light
         : SystemUiOverlayStyle.dark;
-=======
-    final Brightness brightness = widget.brightness
-      ?? appBarTheme.brightness
-      ?? theme.primaryColorBrightness;
-    final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
-      ? SystemUiOverlayStyle.light
-      : SystemUiOverlayStyle.dark;
 
->>>>>>> 15d2d8a8750c2733871f7f8ae558c268efd32fc0
     return Semantics(
       container: true,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
         child: Material(
-<<<<<<< HEAD
-          color: backgroundColor,
+          color:
+              widget.backgroundColor ?? appBarTheme.color ?? theme.primaryColor,
           elevation:
               widget.elevation ?? appBarTheme.elevation ?? _defaultElevation,
           shadowColor: widget.shadowColor ??
               appBarTheme.shadowColor ??
               _defaultShadowColor,
-=======
-          color: widget.backgroundColor
-            ?? appBarTheme.color
-            ?? theme.primaryColor,
-          elevation: widget.elevation
-            ?? appBarTheme.elevation
-            ?? _defaultElevation,
-          shadowColor: widget.shadowColor
-            ?? appBarTheme.shadowColor
-            ?? _defaultShadowColor,
->>>>>>> 15d2d8a8750c2733871f7f8ae558c268efd32fc0
           shape: widget.shape,
           child: Semantics(
             explicitChildNodes: true,
@@ -833,9 +782,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   }
 
   void _isScrollingListener() {
-    if (_position == null) {
-      return;
-    }
+    if (_position == null) return;
 
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
@@ -1630,9 +1577,7 @@ class _SliverAppBarState extends State<SliverAppBar>
     super.didUpdateWidget(oldWidget);
     if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating)
       _updateSnapConfiguration();
-    if (widget.stretch != oldWidget.stretch) {
-      _updateStretchConfiguration();
-    }
+    if (widget.stretch != oldWidget.stretch) _updateStretchConfiguration();
   }
 
   @override
