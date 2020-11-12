@@ -536,10 +536,10 @@ class LocalEngineArtifacts implements Artifacts {
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
     platform ??= _currentHostPlatform(_platform);
-    final String artifactFileName = 
-    (artifact == Artifact.flutterWebSdk || artifact == Artifact.flutterPatchedSdkPath)
-      ? null 
-      : _artifactToFileName(artifact, platform, mode);
+    final String artifactFileName =
+      (artifact == Artifact.flutterWebSdk || artifact == Artifact.flutterPatchedSdkPath)
+        ? null
+        : _artifactToFileName(artifact, platform, mode);
     switch (artifact) {
       case Artifact.genSnapshot:
         return _genSnapshotPath();
