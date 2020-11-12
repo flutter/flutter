@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -1209,6 +1210,47 @@ void main() {
     ignoreTransform: true,
     ));
   }, semanticsEnabled: true, skip: isBrowser); // Browser does not support widget span
+
+  testWidgets('RenderParagraph intrinsic width', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 100,
+            child: IntrinsicWidth(
+              child: RichText(
+                text: TextSpan(
+                  style: const TextStyle(fontSize: 16, height: 1),
+                  children: <InlineSpan>[
+                    const TextSpan(text: 'S '),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.top,
+                      child: Wrap(
+                        direction: Axis.vertical,
+                        children: <Widget>[
+                          Container(width: 200, height: 100),
+                          Container(width: 200, height: 30),
+                        ],
+                      ),
+                    ),
+                    const TextSpan(text: ' E'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(RichText)).width, 200 + 4 * 16.0);
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.byType(RichText));
+    // The inline spans are rendered on one (horizontal) line, the sum of the widths is the max intrinsic width.
+    expect(paragraph.getMaxIntrinsicWidth(0.0), 200 + 4 * 16.0);
+    // The inline spans are rendered in one vertical run, the widest one determines the min intrinsic width.
+    expect(paragraph.getMinIntrinsicWidth(0.0), 200, skip: 'https://github.com/flutter/flutter/issues/70230');
+  });
 }
 
 Future<void> _pumpTextWidget({
