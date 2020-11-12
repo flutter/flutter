@@ -49,6 +49,9 @@ class AndroidSurfaceMock final : public GPUSurfaceGLDelegate,
 
   // |GPUSurfaceGLDelegate|
   intptr_t GLContextFBO(GLFrameInfo frame_info) const override;
+
+  // |GPUSurfaceGLDelegate|
+  ExternalViewEmbedder* GetExternalViewEmbedder() override;
 };
 
 }  // namespace flutter

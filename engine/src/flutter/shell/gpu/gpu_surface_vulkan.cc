@@ -13,6 +13,7 @@ GPUSurfaceVulkan::GPUSurfaceVulkan(
     std::unique_ptr<vulkan::VulkanNativeSurface> native_surface,
     bool render_to_surface)
     : window_(delegate->vk(), std::move(native_surface), render_to_surface),
+      delegate_(delegate),
       render_to_surface_(render_to_surface),
       weak_factory_(this) {}
 
@@ -64,6 +65,10 @@ SkMatrix GPUSurfaceVulkan::GetRootTransformation() const {
 
 GrDirectContext* GPUSurfaceVulkan::GetContext() {
   return window_.GetSkiaGrContext();
+}
+
+flutter::ExternalViewEmbedder* GPUSurfaceVulkan::GetExternalViewEmbedder() {
+  return delegate_->GetExternalViewEmbedder();
 }
 
 }  // namespace flutter

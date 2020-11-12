@@ -47,10 +47,16 @@ void IOSSurfaceMetal::UpdateStorageSizeIfNecessary() {
 std::unique_ptr<Surface> IOSSurfaceMetal::CreateGPUSurface(GrDirectContext* /* unused */) {
   auto metal_context = CastToMetalContext(GetContext());
 
-  return std::make_unique<GPUSurfaceMetal>(layer_,                               // layer
+  return std::make_unique<GPUSurfaceMetal>(this,    // Metal surface delegate
+                                           layer_,  // layer
                                            metal_context->GetMainContext(),      // context
                                            metal_context->GetMainCommandQueue()  // command queue
   );
+}
+
+// |GPUSurfaceDelegate|
+ExternalViewEmbedder* IOSSurfaceMetal::GetExternalViewEmbedder() {
+  return GetSurfaceExternalViewEmbedder().get();
 }
 
 }  // namespace flutter

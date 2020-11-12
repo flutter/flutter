@@ -39,6 +39,9 @@ class Surface final : public flutter::Surface {
   // |flutter::Surface|
   SkMatrix GetRootTransformation() const override;
 
+  // |flutter::Surface|
+  flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(Surface);
 };
 

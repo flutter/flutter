@@ -51,6 +51,9 @@ class AndroidSurfaceVulkan : public AndroidSurface,
   bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
 
   // |GPUSurfaceVulkanDelegate|
+  ExternalViewEmbedder* GetExternalViewEmbedder() override;
+
+  // |GPUSurfaceVulkanDelegate|
   fml::RefPtr<vulkan::VulkanProcTable> vk() override;
 
  private:

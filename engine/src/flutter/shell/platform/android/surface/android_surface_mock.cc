@@ -22,4 +22,8 @@ intptr_t AndroidSurfaceMock::GLContextFBO(GLFrameInfo frame_info) const {
   return 0;
 }
 
+ExternalViewEmbedder* AndroidSurfaceMock::GetExternalViewEmbedder() {
+  return nullptr;
+}
+
 }  // namespace flutter

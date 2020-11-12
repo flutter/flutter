@@ -133,6 +133,11 @@ intptr_t AndroidSurfaceGL::GLContextFBO(GLFrameInfo frame_info) const {
 }
 
 // |GPUSurfaceGLDelegate|
+ExternalViewEmbedder* AndroidSurfaceGL::GetExternalViewEmbedder() {
+  return external_view_embedder_.get();
+}
+
+// |GPUSurfaceGLDelegate|
 sk_sp<const GrGLInterface> AndroidSurfaceGL::GetGLInterface() const {
   // This is a workaround for a bug in the Android emulator EGL/GLES
   // implementation.  Some versions of the emulator will not update the

@@ -43,6 +43,9 @@ class GPUSurfaceGL : public Surface {
   GrDirectContext* GetContext() override;
 
   // |Surface|
+  flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
+
+  // |Surface|
   std::unique_ptr<GLContextResult> MakeRenderContextCurrent() override;
 
   // |Surface|

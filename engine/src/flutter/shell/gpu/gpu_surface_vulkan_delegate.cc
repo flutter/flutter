@@ -8,4 +8,8 @@ namespace flutter {
 
 GPUSurfaceVulkanDelegate::~GPUSurfaceVulkanDelegate() = default;
 
+ExternalViewEmbedder* GPUSurfaceVulkanDelegate::GetExternalViewEmbedder() {
+  return nullptr;
+}
+
 }  // namespace flutter
