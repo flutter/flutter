@@ -12,6 +12,12 @@ import 'theme.dart';
 /// The scaffold lays out the navigation bar on top and the content between or
 /// behind the navigation bar.
 ///
+/// When tapping a status bar at the top of the CupertinoPageScaffold, an
+/// animation will complete for the current primary [ScrollView], scrolling to
+/// the beginning. This is done using the [PrimaryScrollController] that
+/// encloses the [ScrollView]. The [ScrollView.primary] flag is used to connect
+/// a [ScrollView] to the enclosing [PrimaryScrollController].
+///
 /// See also:
 ///
 ///  * [CupertinoTabScaffold], a similar widget for tabbed applications.
@@ -75,11 +81,11 @@ class CupertinoPageScaffold extends StatefulWidget {
 }
 
 class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
-  final ScrollController _primaryScrollController = ScrollController();
 
   void _handleStatusBarTap() {
+    final ScrollController? _primaryScrollController = PrimaryScrollController.of(context);
     // Only act on the scroll controller if it has any attached scroll positions.
-    if (_primaryScrollController.hasClients) {
+    if (_primaryScrollController != null && _primaryScrollController.hasClients) {
       _primaryScrollController.animateTo(
         0.0,
         // Eyeballed from iOS.
@@ -163,10 +169,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
       child: Stack(
         children: <Widget>[
           // The main content being at the bottom is added to the stack first.
-          PrimaryScrollController(
-            controller: _primaryScrollController,
-            child: paddedContent,
-          ),
+          paddedContent,
           if (widget.navigationBar != null)
             Positioned(
               top: 0.0,
