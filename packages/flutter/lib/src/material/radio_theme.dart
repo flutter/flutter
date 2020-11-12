@@ -34,35 +34,24 @@ import 'theme_data.dart';
 class RadioThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.radioTheme].
   const RadioThemeData({
-    this.fillColor,
     this.mouseCursor,
-    this.materialTapTargetSize,
-    this.visualDensity,
+    this.fillColor,
     this.focusColor,
     this.hoverColor,
     this.splashRadius,
+    this.materialTapTargetSize,
+    this.visualDensity,
   });
-
-  /// {@macro flutter.material.radio.fillColor}
-  ///
-  /// If specified, overrides the default value of [Radio.fillColor].
-  final MaterialStateProperty<Color?>? fillColor;
 
   /// {@macro flutter.material.radio.mouseCursor}
   ///
   /// If specified, overrides the default value of [Radio.mouseCursor].
   final MouseCursor? mouseCursor;
 
-  /// {@macro flutter.material.radio.materialTapTargetSize}
+  /// {@macro flutter.material.radio.fillColor}
   ///
-  /// If specified, overrides the default value of
-  /// [Radio.materialTapTargetSize].
-  final MaterialTapTargetSize? materialTapTargetSize;
-
-  /// {@macro flutter.material.radio.visualDensity}
-  ///
-  /// If specified, overrides the default value of [Radio.visualDensity].
-  final VisualDensity? visualDensity;
+  /// If specified, overrides the default value of [Radio.fillColor].
+  final MaterialStateProperty<Color?>? fillColor;
 
   /// {@macro flutter.material.radio.focusColor}
   ///
@@ -79,25 +68,36 @@ class RadioThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Radio.splashRadius].
   final double? splashRadius;
 
+  /// {@macro flutter.material.radio.materialTapTargetSize}
+  ///
+  /// If specified, overrides the default value of
+  /// [Radio.materialTapTargetSize].
+  final MaterialTapTargetSize? materialTapTargetSize;
+
+  /// {@macro flutter.material.radio.visualDensity}
+  ///
+  /// If specified, overrides the default value of [Radio.visualDensity].
+  final VisualDensity? visualDensity;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   RadioThemeData copyWith({
-    MaterialStateProperty<Color?>? fillColor,
     MouseCursor? mouseCursor,
-    MaterialTapTargetSize? materialTapTargetSize,
-    VisualDensity? visualDensity,
+    MaterialStateProperty<Color?>? fillColor,
     Color? focusColor,
     Color? hoverColor,
     double? splashRadius,
+    MaterialTapTargetSize? materialTapTargetSize,
+    VisualDensity? visualDensity,
   }) {
     return RadioThemeData(
-      fillColor: fillColor ?? this.fillColor,
       mouseCursor: mouseCursor ?? this.mouseCursor,
-      materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
-      visualDensity: visualDensity ?? this.visualDensity,
+      fillColor: fillColor ?? this.fillColor,
       focusColor: focusColor ?? this.focusColor,
       hoverColor: hoverColor ?? this.hoverColor,
       splashRadius: splashRadius ?? this.splashRadius,
+      materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
+      visualDensity: visualDensity ?? this.visualDensity,
     );
   }
 
@@ -106,26 +106,26 @@ class RadioThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static RadioThemeData lerp(RadioThemeData? a, RadioThemeData? b, double t) {
     return RadioThemeData(
-      fillColor: _lerpProperties<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
+      fillColor: _lerpProperties<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
-      visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       focusColor: Color.lerp(a?.focusColor, b?.focusColor, t),
       hoverColor: Color.lerp(a?.hoverColor, b?.hoverColor, t),
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
+      visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
     );
   }
 
   @override
   int get hashCode {
     return hashValues(
-      fillColor,
       mouseCursor,
-      materialTapTargetSize,
-      visualDensity,
+      fillColor,
       focusColor,
       hoverColor,
       splashRadius,
+      materialTapTargetSize,
+      visualDensity,
     );
   }
 
@@ -136,25 +136,25 @@ class RadioThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     return other is RadioThemeData
-      && other.fillColor == fillColor
       && other.mouseCursor == mouseCursor
-      && other.materialTapTargetSize == materialTapTargetSize
-      && other.visualDensity == visualDensity
+      && other.fillColor == fillColor
       && other.focusColor == focusColor
       && other.hoverColor == hoverColor
-      && other.splashRadius == splashRadius;
+      && other.splashRadius == splashRadius
+      && other.materialTapTargetSize == materialTapTargetSize
+      && other.visualDensity == visualDensity;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('fillColor', fillColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', mouseCursor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('fillColor', fillColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
   }
 
   static MaterialStateProperty<T>? _lerpProperties<T>(

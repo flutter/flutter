@@ -17,22 +17,22 @@ void main() {
 
   test('RadioThemeData defaults', () {
     const RadioThemeData themeData = RadioThemeData();
-    expect(themeData.fillColor, null);
     expect(themeData.mouseCursor, null);
-    expect(themeData.materialTapTargetSize, null);
-    expect(themeData.visualDensity, null);
+    expect(themeData.fillColor, null);
     expect(themeData.focusColor, null);
     expect(themeData.hoverColor, null);
     expect(themeData.splashRadius, null);
+    expect(themeData.materialTapTargetSize, null);
+    expect(themeData.visualDensity, null);
 
     const RadioTheme theme = RadioTheme(data: RadioThemeData(), child: SizedBox());
-    expect(theme.data.fillColor, null);
     expect(theme.data.mouseCursor, null);
-    expect(theme.data.materialTapTargetSize, null);
-    expect(theme.data.visualDensity, null);
+    expect(theme.data.fillColor, null);
     expect(theme.data.focusColor, null);
     expect(theme.data.hoverColor, null);
     expect(theme.data.splashRadius, null);
+    expect(theme.data.materialTapTargetSize, null);
+    expect(theme.data.visualDensity, null);
   });
 
   testWidgets('Default RadioThemeData debugFillProperties', (WidgetTester tester) async {
@@ -50,13 +50,13 @@ void main() {
   testWidgets('RadioThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     RadioThemeData(
-      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
       mouseCursor: MouseCursor.defer,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      visualDensity: VisualDensity.standard,
+      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
       focusColor: const Color(0xfffffff2),
       hoverColor: const Color(0xfffffff2),
       splashRadius: 1.0,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.standard,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -64,43 +64,43 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description[0], 'fillColor: MaterialStateProperty.all(Color(0xfffffff0))');
-    expect(description[1], 'mouseCursor: defer');
-    expect(description[2], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
-    expect(description[3], 'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)');
-    expect(description[4], 'focusColor: Color(0xfffffff2)');
-    expect(description[5], 'hoverColor: Color(0xfffffff2)');
-    expect(description[6], 'splashRadius: 1.0');
+    expect(description[0], 'mouseCursor: defer');
+    expect(description[1], 'fillColor: MaterialStateProperty.all(Color(0xfffffff0))');
+    expect(description[2], 'focusColor: Color(0xfffffff2)');
+    expect(description[3], 'hoverColor: Color(0xfffffff2)');
+    expect(description[4], 'splashRadius: 1.0');
+    expect(description[5], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
+    expect(description[6], 'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)');
   });
 
   testWidgets('Radio is themeable', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
+    const MouseCursor mouseCursor = SystemMouseCursors.text;
     const Color defaultFillColor = Color(0xfffffff0);
     const Color selectedFillColor = Color(0xfffffff1);
-    const MouseCursor mouseCursor = SystemMouseCursors.text;
-    const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const VisualDensity visualDensity = VisualDensity(horizontal: 1, vertical: 1);
     const Color focusColor = Color(0xfffffff2);
     const Color hoverColor = Color(0xfffffff3);
     const double splashRadius = 1.0;
+    const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
+    const VisualDensity visualDensity = VisualDensity(horizontal: 1, vertical: 1);
 
     Widget buildRadio({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
+            mouseCursor: mouseCursor,
             fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedFillColor;
               }
               return defaultFillColor;
             }),
-            mouseCursor: mouseCursor,
-            materialTapTargetSize: materialTapTargetSize,
-            visualDensity: visualDensity,
             focusColor: focusColor,
             hoverColor: hoverColor,
             splashRadius: splashRadius,
+            materialTapTargetSize: materialTapTargetSize,
+            visualDensity: visualDensity,
           ),
         ),
         home: Scaffold(
@@ -142,40 +142,40 @@ void main() {
   testWidgets('Radio properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
+    const MouseCursor themeMouseCursor = SystemMouseCursors.click;
     const Color themeDefaultFillColor = Color(0xfffffff0);
     const Color themeSelectedFillColor = Color(0xfffffff1);
-    const MouseCursor themeMouseCursor = SystemMouseCursors.click;
-    const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
-    const VisualDensity themeVisualDensity = VisualDensity.standard;
     const Color themeFocusColor = Color(0xfffffff2);
     const Color themeHoverColor = Color(0xfffffff3);
     const double themeSplashRadius = 1.0;
+    const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
+    const VisualDensity themeVisualDensity = VisualDensity.standard;
 
+    const MouseCursor mouseCursor = SystemMouseCursors.text;
     const Color defaultFillColor = Color(0xfffffff0);
     const Color selectedFillColor = Color(0xfffffff1);
-    const MouseCursor mouseCursor = SystemMouseCursors.text;
-    const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const VisualDensity visualDensity = VisualDensity(horizontal: 1, vertical: 1);
     const Color focusColor = Color(0xfffffff2);
     const Color hoverColor = Color(0xfffffff3);
     const double splashRadius = 2.0;
+    const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
+    const VisualDensity visualDensity = VisualDensity(horizontal: 1, vertical: 1);
 
     Widget buildRadio({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
+            mouseCursor: themeMouseCursor,
             fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return themeSelectedFillColor;
               }
               return themeDefaultFillColor;
             }),
-            mouseCursor: themeMouseCursor,
-            materialTapTargetSize: themeMaterialTapTargetSize,
-            visualDensity: themeVisualDensity,
             focusColor: themeFocusColor,
             hoverColor: themeHoverColor,
             splashRadius: themeSplashRadius,
+            materialTapTargetSize: themeMaterialTapTargetSize,
+            visualDensity: themeVisualDensity,
           ),
         ),
         home: Scaffold(
@@ -184,18 +184,18 @@ void main() {
             value: selected ? 0 : 1,
             groupValue: 0,
             autofocus: autofocus,
+            mouseCursor: mouseCursor,
             fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedFillColor;
               }
               return defaultFillColor;
             }),
-            mouseCursor: mouseCursor,
-            materialTapTargetSize: materialTapTargetSize,
-            visualDensity: visualDensity,
             focusColor: focusColor,
             hoverColor: hoverColor,
             splashRadius: splashRadius,
+            materialTapTargetSize: materialTapTargetSize,
+            visualDensity: visualDensity,
           ),
         ),
       );
