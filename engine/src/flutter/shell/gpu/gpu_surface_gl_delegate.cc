@@ -99,4 +99,8 @@ GPUSurfaceGLDelegate::GetDefaultPlatformGLInterface() {
   return CreateGLInterface(nullptr);
 }
 
+ExternalViewEmbedder* GPUSurfaceGLDelegate::GetExternalViewEmbedder() {
+  return nullptr;
+}
+
 }  // namespace flutter

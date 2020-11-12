@@ -87,4 +87,9 @@ GrDirectContext* GPUSurfaceSoftware::GetContext() {
   return nullptr;
 }
 
+// |Surface|
+flutter::ExternalViewEmbedder* GPUSurfaceSoftware::GetExternalViewEmbedder() {
+  return delegate_->GetExternalViewEmbedder();
+}
+
 }  // namespace flutter

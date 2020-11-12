@@ -51,4 +51,9 @@ SkMatrix Surface::GetRootTransformation() const {
   return matrix;
 }
 
+// |flutter::GetViewEmbedder|
+flutter::ExternalViewEmbedder* Surface::GetExternalViewEmbedder() {
+  return view_embedder_.get();
+}
+
 }  // namespace flutter_runner

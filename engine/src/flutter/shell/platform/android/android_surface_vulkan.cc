@@ -77,6 +77,10 @@ bool AndroidSurfaceVulkan::SetNativeWindow(
   return native_window_ && native_window_->IsValid();
 }
 
+ExternalViewEmbedder* AndroidSurfaceVulkan::GetExternalViewEmbedder() {
+  return external_view_embedder_.get();
+}
+
 fml::RefPtr<vulkan::VulkanProcTable> AndroidSurfaceVulkan::vk() {
   return proc_table_;
 }
