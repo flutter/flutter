@@ -2601,8 +2601,8 @@ TEST_F(EmbedderTest, ComplexClipsAreCorrectlyCalculated) {
 
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
-  event.width = 400;
-  event.height = 300;
+  event.width = 1024;
+  event.height = 600;
   event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
