@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,6 +12,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/test_api.dart' as test_package;
 
 void main() {
+  test('Can access restoration manager without crashing', () {
+    final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
+    expect(binding.restorationManager, isA<RestorationManager>());
+  });
+
   group(TestViewConfiguration, () {
     test('is initialized with top-level window if one is not provided', () {
       // The code below will throw without the default.
