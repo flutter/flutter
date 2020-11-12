@@ -6,7 +6,6 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_METAL_H_
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/gpu/gpu_surface_delegate.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 #include "third_party/skia/include/gpu/mtl/GrMtlTypes.h"
 
@@ -14,15 +13,14 @@
 
 namespace flutter {
 
-class SK_API_AVAILABLE_CA_METAL_LAYER IOSSurfaceMetal final : public IOSSurface,
-                                                              public GPUSurfaceDelegate {
+class SK_API_AVAILABLE_CA_METAL_LAYER IOSSurfaceMetal final : public IOSSurface {
  public:
   IOSSurfaceMetal(fml::scoped_nsobject<CAMetalLayer> layer,
                   std::shared_ptr<IOSContext> context,
                   const std::shared_ptr<IOSExternalViewEmbedder>& external_view_embedder);
 
   // |IOSSurface|
-  ~IOSSurfaceMetal() override;
+  ~IOSSurfaceMetal();
 
  private:
   fml::scoped_nsobject<CAMetalLayer> layer_;
@@ -36,9 +34,6 @@ class SK_API_AVAILABLE_CA_METAL_LAYER IOSSurfaceMetal final : public IOSSurface,
 
   // |IOSSurface|
   std::unique_ptr<Surface> CreateGPUSurface(GrDirectContext* gr_context) override;
-
-  // |GPUSurfaceDelegate|
-  ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceMetal);
 };

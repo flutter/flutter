@@ -53,9 +53,6 @@ class AndroidSurfaceSoftware final : public AndroidSurface,
   // |GPUSurfaceSoftwareDelegate|
   bool PresentBackingStore(sk_sp<SkSurface> backing_store) override;
 
-  // |GPUSurfaceSoftwareDelegate|
-  ExternalViewEmbedder* GetExternalViewEmbedder() override;
-
  private:
   const std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder_;
 
