@@ -12,7 +12,6 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 

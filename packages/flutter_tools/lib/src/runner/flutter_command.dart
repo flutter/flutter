@@ -763,7 +763,8 @@ abstract class FlutterCommand extends Command<void> {
 
     final File packagesFile = globals.fs.file(
       globalResults['packages'] as String ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(packagesFile, logger: globals.logger);
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+        packagesFile, logger: globals.logger, throwOnError: false);
 
     final List<String> experiments =
       argParser.options.containsKey(FlutterOptions.kEnableExperiment)
