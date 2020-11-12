@@ -361,8 +361,8 @@ class Draggable<T extends Object> extends StatefulWidget {
 ///
 /// See also:
 ///
-///  * [Draggable]
-///  * [DragTarget], a widget that receives data when the [LongPressDraggable] is dragged.
+///  * [Draggable], similar to the [LongPressDraggable] widget but happens immediately.
+///  * [DragTarget], a widget that receives drags.
 class LongPressDraggable<T extends Object> extends Draggable<T> {
   /// Creates a widget that can be dragged starting from long press.
   ///
