@@ -2,7 +2,7 @@ name: regular_integration_tests
 publish_to: none
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: ">=2.11.0-0 <3.0.0"
 
 dependencies:
   flutter:

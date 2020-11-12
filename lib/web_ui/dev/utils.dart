@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -184,6 +185,37 @@ mixin ArgUtils<T> on Command<T> {
     return value;
   }
 }
+
+/// Parses additional options that can be used for all tests.
+class GeneralTestsArgumentParser {
+  static final GeneralTestsArgumentParser _singletonInstance =
+      GeneralTestsArgumentParser._();
+
+  /// The [GeneralTestsArgumentParser] singleton.
+  static GeneralTestsArgumentParser get instance => _singletonInstance;
+
+  GeneralTestsArgumentParser._();
+
+  /// If target name is provided integration tests can run that one test
+  /// instead of running all the tests.
+  bool verbose = false;
+
+  void populateOptions(ArgParser argParser) {
+    argParser
+      ..addFlag(
+        'verbose',
+        defaultsTo: false,
+        help: 'Flag to indicate extra logs should also be printed.',
+      );
+  }
+
+  /// Populate results of the arguments passed.
+  void parseOptions(ArgResults argResults) {
+    verbose = argResults['verbose'] as bool;
+  }
+}
+
+bool get isVerboseLoggingEnabled => GeneralTestsArgumentParser.instance.verbose;
 
 /// There might be proccesses started during the tests.
 ///

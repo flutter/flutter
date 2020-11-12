@@ -28,7 +28,7 @@ void main() async {
     await tester.tap(find.byKey(const Key('input')));
     // Focus in input, otherwise clipboard will fail with
     // 'document is not focused' platform exception.
-    html.document.querySelector('input').focus();
+    html.document.querySelector('input')?.focus();
     await Clipboard.setData(const ClipboardData(text: 'sample text'));
   }, skip: true); // https://github.com/flutter/flutter/issues/54296
 
@@ -36,7 +36,7 @@ void main() async {
       (WidgetTester tester) async {
     int viewInstanceCount = 0;
 
-    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    platformViewsRegistry.getNextPlatformViewId();
     // ignore: undefined_prefixed_name
     ui.platformViewRegistry.registerViewFactory('MyView', (int viewId) {
       ++viewInstanceCount;
@@ -46,14 +46,11 @@ void main() async {
     app.main();
     await tester.pumpAndSettle();
     final Map<String, dynamic> createArgs = <String, dynamic>{
-      'id': '567',
+      'id': 567,
       'viewType': 'MyView',
     };
     await SystemChannels.platform_views.invokeMethod<void>('create', createArgs);
-    final Map<String, dynamic> disposeArgs = <String, dynamic>{
-      'id': '567',
-    };
-    await SystemChannels.platform_views.invokeMethod<void>('dispose', disposeArgs);
+    await SystemChannels.platform_views.invokeMethod<void>('dispose', 567);
     expect(viewInstanceCount, 1);
   });
 }

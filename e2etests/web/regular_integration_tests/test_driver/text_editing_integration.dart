@@ -13,7 +13,9 @@ import 'package:flutter/material.dart';
 import 'package:integration_test/integration_test.dart';
 
 void main() {
-  final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized() as IntegrationTestWidgetsFlutterBinding;
+  final IntegrationTestWidgetsFlutterBinding binding =
+      IntegrationTestWidgetsFlutterBinding.ensureInitialized()
+          as IntegrationTestWidgetsFlutterBinding;
 
   testWidgets('Focused text field creates a native input element',
       (WidgetTester tester) async {
@@ -38,7 +40,7 @@ void main() {
 
     // Change the value of the TextFormField.
     final TextFormField textFormField = tester.widget(finder);
-    textFormField.controller.text = 'New Value';
+    textFormField.controller?.text = 'New Value';
     // DOM element's value also changes.
     expect(input.value, 'New Value');
 
@@ -68,7 +70,7 @@ void main() {
 
     // Change the value of the TextFormField.
     final TextFormField textFormField = tester.widget(finder);
-    textFormField.controller.text = 'New Value';
+    textFormField.controller?.text = 'New Value';
     // DOM element's value also changes.
     expect(input.value, 'New Value');
   });
@@ -145,9 +147,9 @@ void main() {
     expect(input2.value, 'Text2');
   });
 
-  testWidgets('Jump between TextFormFields with tab key after CapsLock is'
-      'activated',
-          (WidgetTester tester) async {
+  testWidgets(
+      'Jump between TextFormFields with tab key after CapsLock is'
+      'activated', (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
 
@@ -163,7 +165,7 @@ void main() {
     final List<Node> nodeList = document.getElementsByTagName('input');
     expect(nodeList.length, equals(1));
     final InputElement input =
-    document.getElementsByTagName('input')[0] as InputElement;
+        document.getElementsByTagName('input')[0] as InputElement;
 
     // Press and release CapsLock.
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
@@ -207,7 +209,7 @@ void main() {
     // A native input element for the next TextField should be attached to the
     // DOM.
     final InputElement input2 =
-    document.getElementsByTagName('input')[0] as InputElement;
+        document.getElementsByTagName('input')[0] as InputElement;
     expect(input2.value, 'Text2');
   });
 
@@ -243,8 +245,8 @@ void main() {
     expect(input.hasAttribute('readonly'), isTrue);
 
     // Make sure the entire text is selected.
-    TextRange range =
-        TextRange(start: input.selectionStart, end: input.selectionEnd);
+    TextRange range = TextRange(
+        start: input.selectionStart ?? 0, end: input.selectionEnd ?? 0);
     expect(range.textInside(text), text);
 
     // Double tap to select the first word.
@@ -257,7 +259,8 @@ void main() {
     await gesture.up();
     await gesture.down(firstWordOffset);
     await gesture.up();
-    range = TextRange(start: input.selectionStart, end: input.selectionEnd);
+    range = TextRange(
+        start: input.selectionStart ?? 0, end: input.selectionEnd ?? 0);
     expect(range.textInside(text), 'Lorem');
 
     // Double tap to select the last word.
@@ -270,7 +273,8 @@ void main() {
     await gesture.up();
     await gesture.down(lastWordOffset);
     await gesture.up();
-    range = TextRange(start: input.selectionStart, end: input.selectionEnd);
+    range = TextRange(
+        start: input.selectionStart ?? 0, end: input.selectionEnd ?? 0);
     expect(range.textInside(text), 'amet');
   });
 }
