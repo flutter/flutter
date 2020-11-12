@@ -47,6 +47,9 @@ class EmbedderSurfaceSoftware final : public EmbedderSurface,
   // |GPUSurfaceSoftwareDelegate|
   bool PresentBackingStore(sk_sp<SkSurface> backing_store) override;
 
+  // |GPUSurfaceSoftwareDelegate|
+  ExternalViewEmbedder* GetExternalViewEmbedder() override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurfaceSoftware);
 };
 

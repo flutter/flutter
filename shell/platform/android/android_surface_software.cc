@@ -141,6 +141,11 @@ bool AndroidSurfaceSoftware::PresentBackingStore(
   return true;
 }
 
+// |GPUSurfaceSoftwareDelegate|
+ExternalViewEmbedder* AndroidSurfaceSoftware::GetExternalViewEmbedder() {
+  return external_view_embedder_.get();
+}
+
 void AndroidSurfaceSoftware::TeardownOnScreenContext() {}
 
 bool AndroidSurfaceSoftware::OnScreenSurfaceResize(const SkISize& size) {

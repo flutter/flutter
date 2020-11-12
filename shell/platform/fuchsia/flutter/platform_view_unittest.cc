@@ -215,8 +215,7 @@ TEST_F(PlatformViewTests, CreateSurfaceTest) {
   RunLoopUntilIdle();
 
   EXPECT_EQ(gr_context.get(), delegate.surface()->GetContext());
-  EXPECT_EQ(view_embedder.get(),
-            platform_view.CreateExternalViewEmbedder().get());
+  EXPECT_EQ(view_embedder.get(), delegate.surface()->GetExternalViewEmbedder());
 }
 
 // This test makes sure that the PlatformView correctly registers Scenic

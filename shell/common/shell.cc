@@ -547,10 +547,6 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   rasterizer_ = std::move(rasterizer);
   io_manager_ = std::move(io_manager);
 
-  // Set the external view embedder for the rasterizer.
-  auto view_embedder = platform_view_->CreateExternalViewEmbedder();
-  rasterizer_->SetExternalViewEmbedder(view_embedder);
-
   // The weak ptr must be generated in the platform thread which owns the unique
   // ptr.
   weak_engine_ = engine_->GetWeakPtr();
