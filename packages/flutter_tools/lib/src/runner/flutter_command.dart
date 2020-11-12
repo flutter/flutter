@@ -5,8 +5,6 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/dart/language_version.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -24,6 +22,8 @@ import '../build_system/targets/icon_tree_shaker.dart' show kIconTreeShakerEnabl
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
+import '../dart/language_version.dart';
+import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
