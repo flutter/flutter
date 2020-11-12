@@ -198,7 +198,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void initInstances() {
     super.initInstances();
     _instance = this;
-    platformDispatcher.onPointerDataPacket = _handlePointerDataPacket;
+    window.onPointerDataPacket = _handlePointerDataPacket;
   }
 
   @override
