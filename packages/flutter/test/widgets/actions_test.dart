@@ -448,6 +448,33 @@ void main() {
       expect(identical(result, sentinel), isTrue);
       expect(invoked, isTrue);
     });
+
+    testWidgets('ContextAction can return null', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      const TestIntent intent = TestIntent();
+      final TestContextAction testAction = TestContextAction();
+
+      await tester.pumpWidget(
+        Actions(
+          dispatcher: TestDispatcher1(postInvoke: collect),
+          actions: <Type, Action<Intent>>{
+            TestIntent: testAction,
+          },
+          child: Container(key: containerKey),
+        ),
+      );
+
+      await tester.pump();
+      final Object? result = Actions.invoke<TestIntent>(
+        containerKey.currentContext!,
+        intent,
+      );
+      expect(result, isNull);
+      expect(invokedIntent, equals(intent));
+      expect(invokedAction, equals(testAction));
+      expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
+      expect(testAction.capturedContexts.single, containerKey.currentContext);
+    });
   });
 
   group('Listening', () {
@@ -833,4 +860,14 @@ void main() {
       expect(description[1], equalsIgnoringHashCodes('actions: {TestIntent: TestAction#00000}'));
     });
   });
+}
+
+class TestContextAction extends ContextAction<TestIntent> {
+  List<BuildContext?> capturedContexts = <BuildContext?>[];
+
+  @override
+  Object? invoke(covariant TestIntent intent, [BuildContext? context]) {
+    capturedContexts.add(context);
+    return null;
+  }
 }

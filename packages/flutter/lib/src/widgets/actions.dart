@@ -342,7 +342,7 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// ```
   @protected
   @override
-  Object invoke(covariant T intent, [BuildContext? context]);
+  Object? invoke(covariant T intent, [BuildContext? context]);
 }
 
 /// The signature of a callback accepted by [CallbackAction].
