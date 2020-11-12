@@ -2086,7 +2086,7 @@ void main() {
         builder: (BuildContext context, StateSetter setState) {
           return MaterialApp(
             builder: (BuildContext context, Widget? child) {
-              mediaQuery = MediaQuery.of(context)!;
+              mediaQuery = MediaQuery.of(context);
               return MediaQuery(
                 data: mediaQuery,
                 child: child!,
@@ -2614,5 +2614,53 @@ void main() {
     // though it was already selected.
     expect(value, equals('two'));
     expect(menuItemTapCounters, <int>[0, 2, 1, 0]);
+  });
+
+  testWidgets('does not crash when option is selected without waiting for opening animation to complete', (WidgetTester tester) async {
+    // Regression test for b/171846624.
+
+    final List<String> options = <String>['first', 'second', 'third'];
+    String? value = options.first;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) => DropdownButton<String>(
+              value: value,
+              items: options.map((String s) => DropdownMenuItem<String>(
+                value: s,
+                child: Text(s),
+              )).toList(),
+              onChanged: (String? v) {
+                setState(() {
+                  value = v;
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('first').hitTestable(), findsOneWidget);
+    expect(find.text('second').hitTestable(), findsNothing);
+    expect(find.text('third').hitTestable(), findsNothing);
+
+    // Open dropdown.
+    await tester.tap(find.text('first').hitTestable());
+    await tester.pump();
+
+    expect(find.text('third').hitTestable(), findsOneWidget);
+    expect(find.text('first').hitTestable(), findsOneWidget);
+    expect(find.text('second').hitTestable(), findsOneWidget);
+
+    // Deliberately not waiting for opening animation to complete!
+
+    // Select an option in dropdown.
+    await tester.tap(find.text('third').hitTestable());
+    await tester.pump();
+    expect(find.text('third').hitTestable(), findsOneWidget);
+    expect(find.text('first').hitTestable(), findsNothing);
+    expect(find.text('second').hitTestable(), findsNothing);
   });
 }

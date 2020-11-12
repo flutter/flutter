@@ -945,6 +945,7 @@ class TestGoldenComparatorProcess {
     final File testConfigFile = findTestConfigFile(globals.fs.file(testUri));
     // Generate comparator process for the file.
     return '''
+// @dart=2.9
 import 'dart:convert'; // ignore: dart_convert_import
 import 'dart:io'; // ignore: dart_io_import
 
