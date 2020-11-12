@@ -28,7 +28,7 @@ final BuildInfo debugBuild = BuildInfo(
   '',
   treeShakeIcons: false,
   packageConfig: PackageConfig(<Package>[
-    Package('flutter_test', Uri.parse('flutter_test/')),
+    Package('flutter_test', Uri.parse('file:///flutter_test/')),
   ])
 );
 

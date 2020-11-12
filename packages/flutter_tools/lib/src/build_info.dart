@@ -20,8 +20,8 @@ class BuildInfo {
     this.mode,
     this.flavor, {
     this.trackWidgetCreation = false,
-    this.extraFrontEndOptions,
-    this.extraGenSnapshotOptions,
+    this.extraFrontEndOptions = const <String>[],
+    this.extraGenSnapshotOptions = const <String>[],
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.buildNumber,
