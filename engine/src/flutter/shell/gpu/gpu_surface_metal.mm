@@ -15,12 +15,10 @@ static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
 
 namespace flutter {
 
-GPUSurfaceMetal::GPUSurfaceMetal(GPUSurfaceDelegate* delegate,
-                                 fml::scoped_nsobject<CAMetalLayer> layer,
+GPUSurfaceMetal::GPUSurfaceMetal(fml::scoped_nsobject<CAMetalLayer> layer,
                                  sk_sp<GrDirectContext> context,
                                  fml::scoped_nsprotocol<id<MTLCommandQueue>> command_queue)
-    : delegate_(delegate),
-      layer_(std::move(layer)),
+    : layer_(std::move(layer)),
       context_(std::move(context)),
       command_queue_(std::move(command_queue)) {
   layer_.get().pixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -119,11 +117,6 @@ SkMatrix GPUSurfaceMetal::GetRootTransformation() const {
 // |Surface|
 GrDirectContext* GPUSurfaceMetal::GetContext() {
   return context_.get();
-}
-
-// |Surface|
-flutter::ExternalViewEmbedder* GPUSurfaceMetal::GetExternalViewEmbedder() {
-  return delegate_->GetExternalViewEmbedder();
 }
 
 // |Surface|
