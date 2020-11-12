@@ -17,24 +17,24 @@ void main() {
 
   test('CheckboxThemeData defaults', () {
     const CheckboxThemeData themeData = CheckboxThemeData();
-    expect(themeData.fillColor, null);
     expect(themeData.mouseCursor, null);
+    expect(themeData.fillColor, null);
     expect(themeData.checkColor, null);
-    expect(themeData.materialTapTargetSize, null);
-    expect(themeData.visualDensity, null);
     expect(themeData.focusColor, null);
     expect(themeData.hoverColor, null);
     expect(themeData.splashRadius, null);
+    expect(themeData.materialTapTargetSize, null);
+    expect(themeData.visualDensity, null);
 
     const CheckboxTheme theme = CheckboxTheme(data: CheckboxThemeData(), child: SizedBox());
-    expect(theme.data.fillColor, null);
     expect(theme.data.mouseCursor, null);
+    expect(theme.data.fillColor, null);
     expect(theme.data.checkColor, null);
-    expect(theme.data.materialTapTargetSize, null);
-    expect(theme.data.visualDensity, null);
     expect(theme.data.focusColor, null);
     expect(theme.data.hoverColor, null);
     expect(theme.data.splashRadius, null);
+    expect(theme.data.materialTapTargetSize, null);
+    expect(theme.data.visualDensity, null);
   });
 
   testWidgets('Default CheckboxThemeData debugFillProperties', (WidgetTester tester) async {
@@ -52,14 +52,14 @@ void main() {
   testWidgets('CheckboxThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     CheckboxThemeData(
-      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
       mouseCursor: MouseCursor.defer,
+      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
       checkColor: const Color(0xfffffff1),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      visualDensity: VisualDensity.standard,
       focusColor: const Color(0xfffffff2),
       hoverColor: const Color(0xfffffff2),
       splashRadius: 1.0,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.standard,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -67,46 +67,46 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description[0], 'fillColor: MaterialStateProperty.all(Color(0xfffffff0))');
-    expect(description[1], 'mouseCursor: defer');
+    expect(description[0], 'mouseCursor: defer');
+    expect(description[1], 'fillColor: MaterialStateProperty.all(Color(0xfffffff0))');
     expect(description[2], 'checkColor: Color(0xfffffff1)');
-    expect(description[3], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
-    expect(description[4], 'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)');
-    expect(description[5], 'focusColor: Color(0xfffffff2)');
-    expect(description[6], 'hoverColor: Color(0xfffffff2)');
-    expect(description[7], 'splashRadius: 1.0');
+    expect(description[3], 'focusColor: Color(0xfffffff2)');
+    expect(description[4], 'hoverColor: Color(0xfffffff2)');
+    expect(description[5], 'splashRadius: 1.0');
+    expect(description[6], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
+    expect(description[7], 'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)');
   });
 
   testWidgets('Checkbox is themeable', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
+    const MouseCursor mouseCursor = SystemMouseCursors.text;
     const Color defaultFillColor = Color(0xfffffff0);
     const Color selectedFillColor = Color(0xfffffff1);
-    const MouseCursor mouseCursor = SystemMouseCursors.text;
     const Color checkColor = Color(0xfffffff2);
-    const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const VisualDensity visualDensity = VisualDensity(vertical: 1.0, horizontal: 1.0);
     const Color focusColor = Color(0xfffffff3);
     const Color hoverColor = Color(0xfffffff4);
     const double splashRadius = 1.0;
+    const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
+    const VisualDensity visualDensity = VisualDensity(vertical: 1.0, horizontal: 1.0);
 
     Widget buildCheckbox({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
+            mouseCursor: mouseCursor,
             fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedFillColor;
               }
               return defaultFillColor;
             }),
-            mouseCursor: mouseCursor,
             checkColor: checkColor,
-            materialTapTargetSize: materialTapTargetSize,
-            visualDensity: visualDensity,
             focusColor: focusColor,
             hoverColor: hoverColor,
             splashRadius: splashRadius,
+            materialTapTargetSize: materialTapTargetSize,
+            visualDensity: visualDensity,
           ),
         ),
         home: Scaffold(
@@ -148,43 +148,43 @@ void main() {
   testWidgets('Checkbox properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
+    const MouseCursor themeMouseCursor = SystemMouseCursors.click;
     const Color themeDefaultFillColor = Color(0xfffffff0);
     const Color themeSelectedFillColor = Color(0xfffffff1);
-    const MouseCursor themeMouseCursor = SystemMouseCursors.click;
     const Color themeCheckColor = Color(0xfffffff2);
-    const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
-    const VisualDensity themeVisualDensity = VisualDensity.standard;
     const Color themeFocusColor = Color(0xfffffff3);
     const Color themeHoverColor = Color(0xfffffff4);
     const double themeSplashRadius = 1.0;
+    const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
+    const VisualDensity themeVisualDensity = VisualDensity.standard;
 
+    const MouseCursor mouseCursor = SystemMouseCursors.text;
     const Color defaultFillColor = Color(0xfffffff5);
     const Color selectedFillColor = Color(0xfffffff6);
-    const MouseCursor mouseCursor = SystemMouseCursors.text;
     const Color checkColor = Color(0xfffffff7);
-    const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const VisualDensity visualDensity = VisualDensity.standard;
     const Color focusColor = Color(0xfffffff8);
     const Color hoverColor = Color(0xfffffff9);
     const double splashRadius = 2.0;
+    const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
+    const VisualDensity visualDensity = VisualDensity.standard;
 
     Widget buildCheckbox({bool selected = false, bool autofocus = false}) {
         return MaterialApp(
           theme: ThemeData(
             checkboxTheme: CheckboxThemeData(
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
-                return themeSelectedFillColor;
-              }
-              return themeDefaultFillColor;
-            }),
               mouseCursor: themeMouseCursor,
+              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                if (states.contains(MaterialState.selected)) {
+                  return themeSelectedFillColor;
+                }
+                return themeDefaultFillColor;
+              }),
               checkColor: themeCheckColor,
-              materialTapTargetSize: themeMaterialTapTargetSize,
-              visualDensity: themeVisualDensity,
               focusColor: themeFocusColor,
               hoverColor: themeHoverColor,
               splashRadius: themeSplashRadius,
+              materialTapTargetSize: themeMaterialTapTargetSize,
+              visualDensity: themeVisualDensity,
             ),
           ),
           home: Scaffold(
@@ -192,19 +192,19 @@ void main() {
               onChanged: (bool? value) { },
               value: selected,
               autofocus: autofocus,
+              mouseCursor: mouseCursor,
               fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return selectedFillColor;
                 }
                 return defaultFillColor;
               }),
-              mouseCursor: mouseCursor,
               checkColor: checkColor,
-              materialTapTargetSize: materialTapTargetSize,
-              visualDensity: visualDensity,
               focusColor: focusColor,
               hoverColor: hoverColor,
               splashRadius: splashRadius,
+              materialTapTargetSize: materialTapTargetSize,
+              visualDensity: visualDensity,
             ),
           ),
         );

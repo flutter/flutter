@@ -34,41 +34,30 @@ import 'theme_data.dart';
 class CheckboxThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.checkboxTheme].
   const CheckboxThemeData({
-    this.fillColor,
     this.mouseCursor,
+    this.fillColor,
     this.checkColor,
-    this.materialTapTargetSize,
-    this.visualDensity,
     this.focusColor,
     this.hoverColor,
     this.splashRadius,
+    this.materialTapTargetSize,
+    this.visualDensity,
   });
-
-  /// {@macro flutter.material.checkbox.fillColor}
-  ///
-  /// If specified, overrides the default value of [Checkbox.fillColor].
-  final MaterialStateProperty<Color?>? fillColor;
 
   /// {@macro flutter.material.checkbox.mouseCursor}
   ///
   /// If specified, overrides the default value of [Checkbox.mouseCursor].
   final MouseCursor? mouseCursor;
 
+  /// {@macro flutter.material.checkbox.fillColor}
+  ///
+  /// If specified, overrides the default value of [Checkbox.fillColor].
+  final MaterialStateProperty<Color?>? fillColor;
+
   /// {@macro flutter.material.checkbox.checkColor}
   ///
   /// If specified, overrides the default value of [Checkbox.checkColor].
   final Color? checkColor;
-
-  /// {@macro flutter.material.checkbox.materialTapTargetSize}
-  ///
-  /// If specified, overrides the default value of
-  /// [Checkbox.materialTapTargetSize].
-  final MaterialTapTargetSize? materialTapTargetSize;
-
-  /// {@macro flutter.material.checkbox.visualDensity}
-  ///
-  /// If specified, overrides the default value of [Checkbox.visualDensity].
-  final VisualDensity? visualDensity;
 
   /// {@macro flutter.material.checkbox.focusColor}
   ///
@@ -85,27 +74,38 @@ class CheckboxThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Checkbox.splashRadius].
   final double? splashRadius;
 
+  /// {@macro flutter.material.checkbox.materialTapTargetSize}
+  ///
+  /// If specified, overrides the default value of
+  /// [Checkbox.materialTapTargetSize].
+  final MaterialTapTargetSize? materialTapTargetSize;
+
+  /// {@macro flutter.material.checkbox.visualDensity}
+  ///
+  /// If specified, overrides the default value of [Checkbox.visualDensity].
+  final VisualDensity? visualDensity;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   CheckboxThemeData copyWith({
-    MaterialStateProperty<Color?>? fillColor,
     MouseCursor? mouseCursor,
+    MaterialStateProperty<Color?>? fillColor,
     Color? checkColor,
-    MaterialTapTargetSize? materialTapTargetSize,
-    VisualDensity? visualDensity,
     Color? focusColor,
     Color? hoverColor,
     double? splashRadius,
+    MaterialTapTargetSize? materialTapTargetSize,
+    VisualDensity? visualDensity,
   }) {
     return CheckboxThemeData(
-      fillColor: fillColor ?? this.fillColor,
       mouseCursor: mouseCursor ?? this.mouseCursor,
+      fillColor: fillColor ?? this.fillColor,
       checkColor: checkColor ?? this.checkColor,
-      materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
-      visualDensity: visualDensity ?? this.visualDensity,
       focusColor: focusColor ?? this.focusColor,
       hoverColor: hoverColor ?? this.hoverColor,
       splashRadius: splashRadius ?? this.splashRadius,
+      materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
+      visualDensity: visualDensity ?? this.visualDensity,
     );
   }
 
@@ -114,28 +114,28 @@ class CheckboxThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static CheckboxThemeData lerp(CheckboxThemeData? a, CheckboxThemeData? b, double t) {
     return CheckboxThemeData(
-      fillColor: _lerpProperties<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
+      fillColor: _lerpProperties<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),
       checkColor: Color.lerp(a?.checkColor, b?.checkColor, t),
-      materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
-      visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       focusColor: Color.lerp(a?.focusColor, b?.focusColor, t),
       hoverColor: Color.lerp(a?.hoverColor, b?.hoverColor, t),
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
+      materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
+      visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
     );
   }
 
   @override
   int get hashCode {
     return hashValues(
-      fillColor,
       mouseCursor,
+      fillColor,
       checkColor,
-      materialTapTargetSize,
-      visualDensity,
       focusColor,
       hoverColor,
       splashRadius,
+      materialTapTargetSize,
+      visualDensity,
     );
   }
 
@@ -146,27 +146,27 @@ class CheckboxThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     return other is CheckboxThemeData
-      && other.fillColor == fillColor
       && other.mouseCursor == mouseCursor
+      && other.fillColor == fillColor
       && other.checkColor == checkColor
-      && other.materialTapTargetSize == materialTapTargetSize
-      && other.visualDensity == visualDensity
       && other.focusColor == focusColor
       && other.hoverColor == hoverColor
-      && other.splashRadius == splashRadius;
+      && other.splashRadius == splashRadius
+      && other.materialTapTargetSize == materialTapTargetSize
+      && other.visualDensity == visualDensity;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('fillColor', fillColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('fillColor', fillColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('checkColor', checkColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
   }
 
   static MaterialStateProperty<T>? _lerpProperties<T>(
