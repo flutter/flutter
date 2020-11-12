@@ -112,7 +112,7 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'nm.';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Soek';
 
   @override
   String get selectAllButtonLabel => 'Kies alles';
@@ -269,7 +269,7 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'ከሰዓት';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'ይፈልጉ';
 
   @override
   String get selectAllButtonLabel => 'ሁሉንም ምረጥ';
@@ -426,7 +426,7 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'م';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'بحث';
 
   @override
   String get selectAllButtonLabel => 'اختيار الكل';
@@ -583,7 +583,7 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'অপৰাহ্ন';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'সন্ধান কৰক';
 
   @override
   String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
@@ -740,7 +740,7 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Axtarış';
 
   @override
   String get selectAllButtonLabel => 'Hamısını seçin';
@@ -897,7 +897,7 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'вечара';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Пошук';
 
   @override
   String get selectAllButtonLabel => 'Выбраць усе';
@@ -1054,7 +1054,7 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Търсете';
 
   @override
   String get selectAllButtonLabel => 'Избиране на всички';
@@ -1211,7 +1211,7 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'খুঁজুন';
 
   @override
   String get selectAllButtonLabel => 'সব বেছে নিন';
@@ -1368,7 +1368,7 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'poslijepodne';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Pretraživanje';
 
   @override
   String get selectAllButtonLabel => 'Odaberi sve';
@@ -1525,7 +1525,7 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Cerca';
 
   @override
   String get selectAllButtonLabel => 'Selecciona-ho tot';
@@ -1682,7 +1682,7 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Hledat';
 
   @override
   String get selectAllButtonLabel => 'Vybrat vše';
@@ -1839,7 +1839,7 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Søg';
 
   @override
   String get selectAllButtonLabel => 'Vælg alle';
@@ -1996,7 +1996,7 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Suche';
 
   @override
   String get selectAllButtonLabel => 'Alles auswählen';
@@ -2184,7 +2184,7 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'μ.μ.';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Αναζήτηση';
 
   @override
   String get selectAllButtonLabel => 'Επιλογή όλων';
@@ -2341,7 +2341,7 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'Select All';
@@ -2770,7 +2770,7 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'p. m.';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Buscar';
 
   @override
   String get selectAllButtonLabel => 'Seleccionar todos';
@@ -3787,7 +3787,7 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Otsige';
 
   @override
   String get selectAllButtonLabel => 'Vali kõik';
@@ -3944,7 +3944,7 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Bilatu';
 
   @override
   String get selectAllButtonLabel => 'Hautatu guztiak';
@@ -4101,7 +4101,7 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'ب.ظ.';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'جستجو';
 
   @override
   String get selectAllButtonLabel => 'انتخاب همه';
@@ -4258,7 +4258,7 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'ip';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Haku';
 
   @override
   String get selectAllButtonLabel => 'Valitse kaikki';
@@ -4415,7 +4415,7 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Maghanap';
 
   @override
   String get selectAllButtonLabel => 'Piliin Lahat';
@@ -4572,7 +4572,7 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Rechercher';
 
   @override
   String get selectAllButtonLabel => 'Tout sélect.';
@@ -4781,7 +4781,7 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'p.m.';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Busca';
 
   @override
   String get selectAllButtonLabel => 'Seleccionar todo';
@@ -4938,7 +4938,7 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Suche';
 
   @override
   String get selectAllButtonLabel => 'Alles auswählen';
@@ -5095,7 +5095,7 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'શોધો';
 
   @override
   String get selectAllButtonLabel => 'બધા પસંદ કરો';
@@ -5252,7 +5252,7 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'חיפוש';
 
   @override
   String get selectAllButtonLabel => 'בחירת הכול';
@@ -5409,7 +5409,7 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'खोजें';
 
   @override
   String get selectAllButtonLabel => 'सभी चुनें';
@@ -5566,7 +5566,7 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'popodne';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Pretraživanje';
 
   @override
   String get selectAllButtonLabel => 'Odaberi sve';
@@ -5723,7 +5723,7 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'du.';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Keresés';
 
   @override
   String get selectAllButtonLabel => 'Összes kijelölése';
@@ -5880,7 +5880,7 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Որոնեք';
 
   @override
   String get selectAllButtonLabel => 'Նշել բոլորը';
@@ -6037,7 +6037,7 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Telusuri';
 
   @override
   String get selectAllButtonLabel => 'Pilih Semua';
@@ -6194,7 +6194,7 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'e.h.';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Leit';
 
   @override
   String get selectAllButtonLabel => 'Velja allt';
@@ -6351,7 +6351,7 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Cerca';
 
   @override
   String get selectAllButtonLabel => 'Seleziona tutto';
@@ -6457,7 +6457,7 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get cutButtonLabel => '切り取り';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => 'ymd';
 
   @override
   String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
@@ -6508,7 +6508,7 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => '検索';
 
   @override
   String get selectAllButtonLabel => 'すべて選択';
@@ -6665,7 +6665,7 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'ძიება';
 
   @override
   String get selectAllButtonLabel => 'ყველას არჩევა';
@@ -6822,7 +6822,7 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'түстен кейін';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Іздеу';
 
   @override
   String get selectAllButtonLabel => 'Барлығын таңдау';
@@ -6979,7 +6979,7 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'ស្វែងរក';
 
   @override
   String get selectAllButtonLabel => 'ជ្រើសរើស​ទាំងអស់';
@@ -7136,7 +7136,7 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => '\u{cb8}\u{c82}\u{c9c}\u{cc6}';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
 
   @override
   String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
@@ -7293,7 +7293,7 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => '오후';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => '검색';
 
   @override
   String get selectAllButtonLabel => '전체 선택';
@@ -7450,7 +7450,7 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'түштөн кийин';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Издөө';
 
   @override
   String get selectAllButtonLabel => 'Баарын тандоо';
@@ -7607,7 +7607,7 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'ຫຼັງທ່ຽງ';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'ຊອກຫາ';
 
   @override
   String get selectAllButtonLabel => 'ເລືອກທັງໝົດ';
@@ -7764,7 +7764,7 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'popiet';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Ieškoti';
 
   @override
   String get selectAllButtonLabel => 'Pasirinkti viską';
@@ -7921,7 +7921,7 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'pēcpusdienā';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Meklēt';
 
   @override
   String get selectAllButtonLabel => 'Atlasīt visu';
@@ -8078,7 +8078,7 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'ПОПЛАДНЕ';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Пребарувајте';
 
   @override
   String get selectAllButtonLabel => 'Избери ги сите';
@@ -8235,7 +8235,7 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'തിരയുക';
 
   @override
   String get selectAllButtonLabel => 'എല്ലാം തിരഞ്ഞെടുക്കുക';
@@ -8392,7 +8392,7 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'ОРОЙ';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Хайх';
 
   @override
   String get selectAllButtonLabel => 'Бүгдийг сонгох';
@@ -8549,7 +8549,7 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'शोधा';
 
   @override
   String get selectAllButtonLabel => 'सर्व निवडा';
@@ -8706,7 +8706,7 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PTG';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Cari';
 
   @override
   String get selectAllButtonLabel => 'Pilih Semua';
@@ -8863,7 +8863,7 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'ရှာရန်';
 
   @override
   String get selectAllButtonLabel => 'အားလုံး ရွေးရန်';
@@ -9020,7 +9020,7 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Søk';
 
   @override
   String get selectAllButtonLabel => 'Velg alle';
@@ -9177,7 +9177,7 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'अपराह्न';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'खोज';
 
   @override
   String get selectAllButtonLabel => 'सबै चयन गर्नुहोस्';
@@ -9334,7 +9334,7 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'pm';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Zoeken';
 
   @override
   String get selectAllButtonLabel => 'Alles selecteren';
@@ -9491,7 +9491,7 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Søk';
 
   @override
   String get selectAllButtonLabel => 'Velg alle';
@@ -9648,7 +9648,7 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'ସନ୍ଧାନ କରନ୍ତୁ';
 
   @override
   String get selectAllButtonLabel => 'ସମସ୍ତ ଚୟନ କରନ୍ତୁ';
@@ -9805,7 +9805,7 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'ਖੋਜੋ';
 
   @override
   String get selectAllButtonLabel => 'ਸਭ ਚੁਣੋ';
@@ -9962,7 +9962,7 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Szukaj';
 
   @override
   String get selectAllButtonLabel => 'Wybierz wszystkie';
@@ -10119,7 +10119,7 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Pesquisar';
 
   @override
   String get selectAllButtonLabel => 'Selecionar Tudo';
@@ -10322,7 +10322,7 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'p.m.';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Căutați';
 
   @override
   String get selectAllButtonLabel => 'Selectați-le pe toate';
@@ -10479,7 +10479,7 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Поиск';
 
   @override
   String get selectAllButtonLabel => 'Выбрать все';
@@ -10636,7 +10636,7 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'ප.ව.';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'සෙවීම';
 
   @override
   String get selectAllButtonLabel => 'සියල්ල තෝරන්න';
@@ -10793,7 +10793,7 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Hľadať';
 
   @override
   String get selectAllButtonLabel => 'Vybrať všetko';
@@ -10950,7 +10950,7 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'POP.';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Iskanje';
 
   @override
   String get selectAllButtonLabel => 'Izberi vse';
@@ -11107,7 +11107,7 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'pasdite';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Kërko';
 
   @override
   String get selectAllButtonLabel => 'Zgjidhi të gjitha';
@@ -11264,7 +11264,7 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'по подне';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Претрага';
 
   @override
   String get selectAllButtonLabel => 'Изабери све';
@@ -11425,6 +11425,9 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   String get postMeridiemAbbreviation => 'po podne';
 
   @override
+  String get searchTextFieldPlaceholderLabel => 'Pretraga';
+
+  @override
   String get selectAllButtonLabel => 'Izaberi sve';
 
   @override
@@ -11552,7 +11555,7 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'EM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Sök';
 
   @override
   String get selectAllButtonLabel => 'Markera alla';
@@ -11709,7 +11712,7 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Tafuta';
 
   @override
   String get selectAllButtonLabel => 'Teua Zote';
@@ -11866,7 +11869,7 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'தேடுக';
 
   @override
   String get selectAllButtonLabel => 'எல்லாம் தேர்ந்தெடு';
@@ -12023,7 +12026,7 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'సెర్చ్ చేయండి';
 
   @override
   String get selectAllButtonLabel => 'అన్నింటినీ ఎంచుకోండి';
@@ -12180,7 +12183,7 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'ค้นหา';
 
   @override
   String get selectAllButtonLabel => 'เลือกทั้งหมด';
@@ -12337,7 +12340,7 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Maghanap';
 
   @override
   String get selectAllButtonLabel => 'Piliin Lahat';
@@ -12494,7 +12497,7 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'ÖS';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Ara';
 
   @override
   String get selectAllButtonLabel => 'Tümünü Seç';
@@ -12651,7 +12654,7 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'пп';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Пошук';
 
   @override
   String get selectAllButtonLabel => 'Вибрати все';
@@ -12808,7 +12811,7 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'تلاش کریں';
 
   @override
   String get selectAllButtonLabel => 'سبھی منتخب کریں';
@@ -12965,7 +12968,7 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Qidiruv';
 
   @override
   String get selectAllButtonLabel => 'Barchasini tanlash';
@@ -13122,7 +13125,7 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'CHIỀU';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Tìm kiếm';
 
   @override
   String get selectAllButtonLabel => 'Chọn tất cả';
@@ -13279,7 +13282,7 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => '下午';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => '搜索';
 
   @override
   String get selectAllButtonLabel => '全选';
@@ -13429,6 +13432,9 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
 
   @override
   String get pasteButtonLabel => '貼上';
+
+  @override
+  String get searchTextFieldPlaceholderLabel => '搜尋';
 
   @override
   String get selectAllButtonLabel => '全選';
@@ -13620,7 +13626,7 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Sesha';
 
   @override
   String get selectAllButtonLabel => 'Khetha konke';

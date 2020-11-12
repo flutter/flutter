@@ -122,6 +122,7 @@ Future<void> main(List<String> args) async {
       'framework_tests': _runFrameworkTests,
       'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
+      'web_tool_tests': _runWebToolTests,
       'web_tests': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
       'web_long_running_tests': _runWebLongRunningTests,
@@ -283,6 +284,7 @@ Future<void> _runToolCoverage() async {
 
 Future<void> _runToolTests() async {
   const String kDotShard = '.shard';
+  const String kWeb = 'web';
   const String kTest = 'test';
   final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
@@ -291,6 +293,7 @@ Future<void> _runToolTests() async {
       .listSync()
       .map<String>((FileSystemEntity entry) => entry.path)
       .where((String name) => name.endsWith(kDotShard))
+      .where((String name) => path.basenameWithoutExtension(name) != kWeb)
       .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
@@ -307,6 +310,27 @@ Future<void> _runToolTests() async {
       );
     },
   );
+
+  await selectSubshard(subshards);
+}
+
+Future<void> _runWebToolTests() async {
+  const String kDotShard = '.shard';
+  const String kWeb = 'web';
+  const String kTest = 'test';
+  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
+
+  final Map<String, ShardRunner> subshards = <String, ShardRunner>{
+      kWeb:
+      () async {
+        await _pubRunTest(
+          toolsPath,
+          forceSingleCore: true,
+          testPaths: <String>[path.join(kTest, '$kWeb$kDotShard', '')],
+          enableFlutterToolAsserts: true,
+        );
+      }
+  };
 
   await selectSubshard(subshards);
 }
@@ -353,7 +377,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
   final String examplePath = exampleDirectory.path;
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
   final List<String> additionalArgs = hasNullSafety
-    ? <String>['--enable-experiment', 'non-nullable', '--no-sound-null-safety']
+    ? <String>['--no-sound-null-safety']
     : <String>[];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
     await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -558,8 +582,8 @@ Future<void> _runAddToAppLifeCycleTests() async {
 }
 
 Future<void> _runFrameworkTests() async {
-  final List<String> soundNullSafetyOptions     = <String>['--enable-experiment=non-nullable', '--null-assertions', '--sound-null-safety'];
-  final List<String> mixedModeNullSafetyOptions = <String>['--enable-experiment=non-nullable', '--null-assertions', '--no-sound-null-safety'];
+  final List<String> soundNullSafetyOptions     = <String>['--null-assertions', '--sound-null-safety'];
+  final List<String> mixedModeNullSafetyOptions = <String>['--null-assertions', '--no-sound-null-safety'];
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
@@ -600,7 +624,6 @@ Future<void> _runFrameworkTests() async {
   Future<void> runPrivateTests() async {
     final List<String> args = <String>[
       'run',
-      '--enable-experiment=non-nullable',
       '--sound-null-safety',
       'test_private.dart',
     ];
@@ -637,6 +660,7 @@ Future<void> _runFrameworkTests() async {
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'));
     await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'));
     await _pubRunTest(path.join(flutterRoot, 'dev', 'tools'));
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'benchmarks', 'metrics_center'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
@@ -644,6 +668,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')]);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: soundNullSafetyOptions);
@@ -901,13 +926,9 @@ Future<void> _runWebIntegrationTests() async {
     ]
   );
   await _runWebDebugTest('lib/sound_mode.dart', additionalArguments: <String>[
-    '--enable-experiment',
-    'non-nullable',
     '--sound-null-safety',
   ]);
   await _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
-    '--enable-experiment',
-    'non-nullable',
     '--sound-null-safety',
   ]);
 }
@@ -1012,8 +1033,6 @@ Future<void> _runWebDebugTest(String target, {
       '--debug',
       if (enableNullSafety)
         ...<String>[
-          '--enable-experiment',
-          'non-nullable',
           '--no-sound-null-safety',
           '--null-assertions',
         ],

@@ -8,6 +8,8 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -401,7 +403,16 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
       overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
         return MapEntry<Type, Generator>(type, () => value);
       }),
-      body: () => super.runCommand(topLevelResults),
+      body: () {
+        Cache.flutterRoot ??= Cache.defaultFlutterRoot(
+          platform: globals.platform,
+          fileSystem: globals.fs,
+          userMessages: UserMessages(),
+        );
+        // For compatibility with tests that set this to a relative path.
+        Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(Cache.flutterRoot));
+        return super.runCommand(topLevelResults);
+      }
     );
   }
 }

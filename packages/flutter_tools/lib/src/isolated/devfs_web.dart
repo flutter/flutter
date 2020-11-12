@@ -124,7 +124,7 @@ class WebAssetServer implements AssetReader {
     this.internetAddress,
     this._modules,
     this._digests,
-    this._buildInfo,
+    this._nullSafetyMode,
   ) : basePath = _parseBasePathFromIndexHtml(globals.fs.currentDirectory
             .childDirectory('web')
             .childFile('index.html'));
@@ -169,7 +169,8 @@ class WebAssetServer implements AssetReader {
     BuildInfo buildInfo,
     bool enableDwds,
     Uri entrypoint,
-    ExpressionCompiler expressionCompiler, {
+    ExpressionCompiler expressionCompiler,
+    NullSafetyMode nullSafetyMode, {
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
   }) async {
@@ -209,7 +210,7 @@ class WebAssetServer implements AssetReader {
       address,
       modules,
       digests,
-      buildInfo,
+      nullSafetyMode,
     );
     if (testMode) {
       return server;
@@ -293,7 +294,7 @@ class WebAssetServer implements AssetReader {
     return server;
   }
 
-  final BuildInfo _buildInfo;
+  final NullSafetyMode _nullSafetyMode;
   final HttpServer _httpServer;
   // If holding these in memory is too much overhead, this can be switched to a
   // RandomAccessFile and read on demand.
@@ -630,52 +631,54 @@ class WebAssetServer implements AssetReader {
     return webSdkFile;
   }
 
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/70121
   static const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> _dartSdkJsArtifactMap =
     <WebRendererMode, Map<NullSafetyMode, Artifact>> {
       WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdk,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSdk,
       },
       WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdk,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdk,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSoundSdk,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSdk,
       },
       WebRendererMode.html: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledSoundSdk,
         NullSafetyMode.unsound: Artifact.webPrecompiledSdk,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledSoundSdk,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledSdk,
       },
     };
 
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/70121
   static const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> _dartSdkJsMapArtifactMap =
     <WebRendererMode, Map<NullSafetyMode, Artifact>> {
       WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
       },
       WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
         NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdkSourcemaps,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledCanvaskitSdkSourcemaps,
       },
       WebRendererMode.html: <NullSafetyMode, Artifact> {
         NullSafetyMode.sound: Artifact.webPrecompiledSoundSdkSourcemaps,
         NullSafetyMode.unsound: Artifact.webPrecompiledSdkSourcemaps,
-        NullSafetyMode.autodetect: Artifact.webPrecompiledSoundSdkSourcemaps,
+        NullSafetyMode.autodetect: Artifact.webPrecompiledSdkSourcemaps,
       },
     };
 
   File get _resolveDartSdkJsFile =>
       globals.fs.file(globals.artifacts.getArtifactPath(
-          _dartSdkJsArtifactMap[webRenderer][_buildInfo.nullSafetyMode]
+          _dartSdkJsArtifactMap[webRenderer][_nullSafetyMode]
       ));
 
   File get _resolveDartSdkJsMapFile =>
     globals.fs.file(globals.artifacts.getArtifactPath(
-        _dartSdkJsMapArtifactMap[webRenderer][_buildInfo.nullSafetyMode]
+        _dartSdkJsMapArtifactMap[webRenderer][_nullSafetyMode]
     ));
 
   @override
@@ -733,6 +736,7 @@ class WebDevFS implements DevFS {
     @required this.expressionCompiler,
     @required this.chromiumLauncher,
     @required this.nullAssertions,
+    @required this.nullSafetyMode,
     this.testMode = false,
   }) : _port = port;
 
@@ -749,6 +753,7 @@ class WebDevFS implements DevFS {
   final ChromiumLauncher chromiumLauncher;
   final bool nullAssertions;
   final int _port;
+  final NullSafetyMode nullSafetyMode;
 
   WebAssetServer webAssetServer;
 
@@ -821,6 +826,7 @@ class WebDevFS implements DevFS {
       enableDwds,
       entrypoint,
       expressionCompiler,
+      nullSafetyMode,
       testMode: testMode,
     );
     final int selectedPort = webAssetServer.selectedPort;
@@ -1086,7 +1092,7 @@ Future<Directory> _loadDwdsDirectory(
   final String toolPackagePath =
       fileSystem.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
   final String packageFilePath =
-      fileSystem.path.join(toolPackagePath, kPackagesFileName);
+      fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
     logger: logger,

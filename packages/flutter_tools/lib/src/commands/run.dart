@@ -115,7 +115,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         help: 'Filters out all trace events except those that are specified in '
             'this comma separated list of allowed prefixes.',
         valueHelp: 'foo,bar',
-      );
+      )
+      ..addMultiOption('dart-entrypoint-args',
+        abbr: 'a',
+        help: 'Pass a list of arguments to the Dart entrypoint at application '
+              'startup. By default this is main(List<String> args). Specify '
+              'this option multiple times each with one argument to pass '
+              'multiple arguments to the Dart entrypoint. Currently this is '
+              'only supported on desktop platforms.');
     usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
@@ -145,14 +152,15 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   String get traceAllowlist => stringArg('trace-allowlist');
 
   /// Create a debugging options instance for the current `run` or `drive` invocation.
-  DebuggingOptions createDebuggingOptions() {
-    final BuildInfo buildInfo = getBuildInfo();
+  Future<DebuggingOptions> createDebuggingOptions() async {
+    final BuildInfo buildInfo = await getBuildInfo();
     final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
       ? int.parse(stringArg('web-browser-debug-port'))
       : null;
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
+        dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
         webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
@@ -167,6 +175,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         startPaused: boolArg('start-paused'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
         disableDds: boolArg('disable-dds'),
+        dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         dartFlags: stringArg('dart-flags') ?? '',
         useTestFonts: argParser.options.containsKey('use-test-fonts') && boolArg('use-test-fonts'),
         enableSoftwareRendering: argParser.options.containsKey('enable-software-rendering') && boolArg('enable-software-rendering'),
@@ -375,7 +384,8 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    final String modeName = getBuildInfo().modeName;
+    final BuildInfo buildInfo = await getBuildInfo();
+    final String modeName = buildInfo.modeName;
     return <CustomDimensions, String>{
       CustomDimensions.commandRunIsEmulator: '$isEmulator',
       CustomDimensions.commandRunTargetName: deviceType,
@@ -398,10 +408,10 @@ class RunCommand extends RunCommandBase {
     return super.shouldRunPub;
   }
 
-  bool shouldUseHotMode() {
+  bool shouldUseHotMode(BuildInfo buildInfo) {
     final bool hotArg = boolArg('hot') ?? false;
     final bool shouldUseHotMode = hotArg && !traceStartup;
-    return getBuildInfo().isDebug && shouldUseHotMode;
+    return buildInfo.isDebug && shouldUseHotMode;
   }
 
   bool get stayResident => boolArg('resident');
@@ -435,7 +445,8 @@ class RunCommand extends RunCommandBase {
   Future<FlutterCommandResult> runCommand() async {
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
-    final bool hotMode = shouldUseHotMode();
+    final BuildInfo buildInfo = await getBuildInfo();
+    final bool hotMode = shouldUseHotMode(buildInfo);
 
     writePidFile(stringArg('pid-file'));
 
@@ -456,7 +467,7 @@ class RunCommand extends RunCommandBase {
         final String applicationBinaryPath = stringArg('use-application-binary');
         app = await daemon.appDomain.startApp(
           devices.first, globals.fs.currentDirectory.path, targetFile, route,
-          createDebuggingOptions(), hotMode,
+          await createDebuggingOptions(), hotMode,
           applicationBinary: applicationBinaryPath == null
               ? null
               : globals.fs.file(applicationBinaryPath),
@@ -525,7 +536,7 @@ class RunCommand extends RunCommandBase {
           fileSystemScheme: stringArg('filesystem-scheme'),
           experimentalFlags: expFlags,
           target: stringArg('target'),
-          buildInfo: getBuildInfo(),
+          buildInfo: buildInfo,
           userIdentifier: userIdentifier,
           platform: globals.platform,
         ),
@@ -542,7 +553,7 @@ class RunCommand extends RunCommandBase {
       runner = HotRunner(
         flutterDevices,
         target: targetFile,
-        debuggingOptions: createDebuggingOptions(),
+        debuggingOptions: await createDebuggingOptions(),
         benchmarkMode: boolArg('benchmark'),
         applicationBinary: applicationBinaryPath == null
             ? null
@@ -558,7 +569,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         flutterProject: flutterProject,
         ipv6: ipv6,
-        debuggingOptions: createDebuggingOptions(),
+        debuggingOptions: await createDebuggingOptions(),
         stayResident: stayResident,
         urlTunneller: null,
       );
@@ -566,7 +577,7 @@ class RunCommand extends RunCommandBase {
       runner = ColdRunner(
         flutterDevices,
         target: targetFile,
-        debuggingOptions: createDebuggingOptions(),
+        debuggingOptions: await createDebuggingOptions(),
         traceStartup: traceStartup,
         awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
         applicationBinary: applicationBinaryPath == null

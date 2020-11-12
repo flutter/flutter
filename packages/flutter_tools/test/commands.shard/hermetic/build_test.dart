@@ -35,7 +35,7 @@ class FakeBuildCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    getBuildInfo();
+    await getBuildInfo();
     return FlutterCommandResult.success();
   }
 }
