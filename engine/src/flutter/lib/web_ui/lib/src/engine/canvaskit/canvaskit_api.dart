@@ -96,6 +96,10 @@ class CanvasKit {
   );
   external SkSurface MakeSWCanvasSurface(html.CanvasElement canvas);
   external void setCurrentContext(int glContext);
+
+  /// Creates an [SkPath] using commands obtained from [SkPath.toCmds].
+  // TODO(yjbanov): switch to CanvasKit.Path.MakeFromCmds when it's available.
+  external SkPath MakePathFromCmds(List<dynamic> pathCommands);
 }
 
 @JS('window.CanvasKitInit')
@@ -1143,6 +1147,13 @@ class SkPath {
     double pers1,
     double pers2,
   );
+
+  /// Serializes the path into a list of commands.
+  ///
+  /// The list can be used to create a new [SkPath] using [CanvasKit.MakePathFromCmds].
+  external List<dynamic> toCmds();
+
+  external void delete();
 }
 
 @JS('window.flutterCanvasKit.SkContourMeasureIter')

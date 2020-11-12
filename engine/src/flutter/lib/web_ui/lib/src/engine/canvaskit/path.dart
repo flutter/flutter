@@ -8,23 +8,17 @@ part of engine;
 /// An implementation of [ui.Path] which is backed by an `SkPath`.
 ///
 /// The `SkPath` is required for `CkCanvas` methods which take a path.
-class CkPath implements ui.Path {
-  final SkPath _skPath;
-
-  CkPath()
-      : _skPath = SkPath(),
-        _fillType = ui.PathFillType.nonZero {
-    _skPath.setFillType(toSkFillType(_fillType));
-  }
+class CkPath extends ManagedSkiaObject<SkPath> implements ui.Path {
+  CkPath() : _fillType = ui.PathFillType.nonZero;
 
   CkPath.from(CkPath other)
-      : _skPath = SkPath(other._skPath),
-        _fillType = other.fillType {
-    _skPath.setFillType(toSkFillType(_fillType));
+      : _fillType = other.fillType,
+        super(SkPath(other.skiaObject)) {
+    skiaObject.setFillType(toSkFillType(_fillType));
   }
 
-  CkPath._fromSkPath(SkPath skPath, this._fillType) : _skPath = skPath {
-    _skPath.setFillType(toSkFillType(_fillType));
+  CkPath._fromSkPath(SkPath skPath, this._fillType) : super(skPath) {
+    skiaObject.setFillType(toSkFillType(_fillType));
   }
 
   ui.PathFillType _fillType;
@@ -38,13 +32,13 @@ class CkPath implements ui.Path {
       return;
     }
     _fillType = newFillType;
-    _skPath.setFillType(toSkFillType(newFillType));
+    skiaObject.setFillType(toSkFillType(newFillType));
   }
 
   @override
   void addArc(ui.Rect oval, double startAngle, double sweepAngle) {
     const double toDegrees = 180.0 / math.pi;
-    _skPath.addArc(
+    skiaObject.addArc(
       toSkRect(oval),
       startAngle * toDegrees,
       sweepAngle * toDegrees,
@@ -53,7 +47,7 @@ class CkPath implements ui.Path {
 
   @override
   void addOval(ui.Rect oval) {
-    _skPath.addOval(toSkRect(oval), false, 1);
+    skiaObject.addOval(toSkRect(oval), false, 1);
   }
 
   @override
@@ -68,8 +62,8 @@ class CkPath implements ui.Path {
       skMatrix[5] += offset.dy;
     }
     final CkPath otherPath = path as CkPath;
-    _skPath.addPath(
-      otherPath._skPath,
+    skiaObject.addPath(
+      otherPath.skiaObject,
       skMatrix[0],
       skMatrix[1],
       skMatrix[2],
@@ -87,13 +81,13 @@ class CkPath implements ui.Path {
   void addPolygon(List<ui.Offset> points, bool close) {
     assert(points != null); // ignore: unnecessary_null_comparison
     final SkFloat32List encodedPoints = toMallocedSkPoints(points);
-    _skPath.addPoly(encodedPoints.toTypedArray(), close);
+    skiaObject.addPoly(encodedPoints.toTypedArray(), close);
     freeFloat32List(encodedPoints);
   }
 
   @override
   void addRRect(ui.RRect rrect) {
-    _skPath.addRRect(
+    skiaObject.addRRect(
       toSkRRect(rrect),
       false,
     );
@@ -101,14 +95,14 @@ class CkPath implements ui.Path {
 
   @override
   void addRect(ui.Rect rect) {
-    _skPath.addRect(toSkRect(rect));
+    skiaObject.addRect(toSkRect(rect));
   }
 
   @override
   void arcTo(
       ui.Rect rect, double startAngle, double sweepAngle, bool forceMoveTo) {
     const double toDegrees = 180.0 / math.pi;
-    _skPath.arcToOval(
+    skiaObject.arcToOval(
       toSkRect(rect),
       startAngle * toDegrees,
       sweepAngle * toDegrees,
@@ -122,7 +116,7 @@ class CkPath implements ui.Path {
       double rotation = 0.0,
       bool largeArc = false,
       bool clockwise = true}) {
-    _skPath.arcToRotated(
+    skiaObject.arcToRotated(
       radius.x,
       radius.y,
       rotation,
@@ -135,7 +129,7 @@ class CkPath implements ui.Path {
 
   @override
   void close() {
-    _skPath.close();
+    skiaObject.close();
   }
 
   @override
@@ -145,18 +139,18 @@ class CkPath implements ui.Path {
 
   @override
   void conicTo(double x1, double y1, double x2, double y2, double w) {
-    _skPath.conicTo(x1, y1, x2, y2, w);
+    skiaObject.conicTo(x1, y1, x2, y2, w);
   }
 
   @override
   bool contains(ui.Offset point) {
-    return _skPath.contains(point.dx, point.dy);
+    return skiaObject.contains(point.dx, point.dy);
   }
 
   @override
   void cubicTo(
       double x1, double y1, double x2, double y2, double x3, double y3) {
-    _skPath.cubicTo(x1, y1, x2, y2, x3, y3);
+    skiaObject.cubicTo(x1, y1, x2, y2, x3, y3);
   }
 
   @override
@@ -171,8 +165,8 @@ class CkPath implements ui.Path {
       skMatrix[5] += offset.dy;
     }
     final CkPath otherPath = path as CkPath;
-    _skPath.addPath(
-      otherPath._skPath,
+    skiaObject.addPath(
+      otherPath.skiaObject,
       skMatrix[0],
       skMatrix[1],
       skMatrix[2],
@@ -187,21 +181,21 @@ class CkPath implements ui.Path {
   }
 
   @override
-  ui.Rect getBounds() => fromSkRect(_skPath.getBounds());
+  ui.Rect getBounds() => fromSkRect(skiaObject.getBounds());
 
   @override
   void lineTo(double x, double y) {
-    _skPath.lineTo(x, y);
+    skiaObject.lineTo(x, y);
   }
 
   @override
   void moveTo(double x, double y) {
-    _skPath.moveTo(x, y);
+    skiaObject.moveTo(x, y);
   }
 
   @override
   void quadraticBezierTo(double x1, double y1, double x2, double y2) {
-    _skPath.quadTo(x1, y1, x2, y2);
+    skiaObject.quadTo(x1, y1, x2, y2);
   }
 
   @override
@@ -210,7 +204,7 @@ class CkPath implements ui.Path {
       double rotation = 0.0,
       bool largeArc = false,
       bool clockwise = true}) {
-    _skPath.rArcTo(
+    skiaObject.rArcTo(
       radius.x,
       radius.y,
       rotation,
@@ -223,28 +217,28 @@ class CkPath implements ui.Path {
 
   @override
   void relativeConicTo(double x1, double y1, double x2, double y2, double w) {
-    _skPath.rConicTo(x1, y1, x2, y2, w);
+    skiaObject.rConicTo(x1, y1, x2, y2, w);
   }
 
   @override
   void relativeCubicTo(
       double x1, double y1, double x2, double y2, double x3, double y3) {
-    _skPath.rCubicTo(x1, y1, x2, y2, x3, y3);
+    skiaObject.rCubicTo(x1, y1, x2, y2, x3, y3);
   }
 
   @override
   void relativeLineTo(double dx, double dy) {
-    _skPath.rLineTo(dx, dy);
+    skiaObject.rLineTo(dx, dy);
   }
 
   @override
   void relativeMoveTo(double dx, double dy) {
-    _skPath.rMoveTo(dx, dy);
+    skiaObject.rMoveTo(dx, dy);
   }
 
   @override
   void relativeQuadraticBezierTo(double x1, double y1, double x2, double y2) {
-    _skPath.rQuadTo(x1, y1, x2, y2);
+    skiaObject.rQuadTo(x1, y1, x2, y2);
   }
 
   @override
@@ -252,14 +246,14 @@ class CkPath implements ui.Path {
     // Only reset the local field. Skia will reset its internal state via
     // SkPath.reset() below.
     _fillType = ui.PathFillType.nonZero;
-    _skPath.reset();
+    skiaObject.reset();
   }
 
   @override
   ui.Path shift(ui.Offset offset) {
     // Since CanvasKit does not expose `SkPath.offset`, create a copy of this
     // path and call `transform` on it.
-    final SkPath newPath = _skPath.copy();
+    final SkPath newPath = skiaObject.copy();
     newPath.transform(1.0, 0.0, offset.dx, 0.0, 1.0, offset.dy, 0.0, 0.0, 0.0);
     return CkPath._fromSkPath(newPath, _fillType);
   }
@@ -272,8 +266,8 @@ class CkPath implements ui.Path {
     final CkPath path1 = uiPath1 as CkPath;
     final CkPath path2 = uiPath2 as CkPath;
     final SkPath newPath = canvasKit.MakePathFromOp(
-      path1._skPath,
-      path2._skPath,
+      path1.skiaObject,
+      path2.skiaObject,
       toSkPathOp(operation),
     );
     return CkPath._fromSkPath(newPath, path1._fillType);
@@ -281,7 +275,7 @@ class CkPath implements ui.Path {
 
   @override
   ui.Path transform(Float64List matrix4) {
-    final SkPath newPath = _skPath.copy();
+    final SkPath newPath = skiaObject.copy();
     final Float32List m = toSkMatrixFromFloat64(matrix4);
     newPath.transform(
       m[0],
@@ -298,11 +292,36 @@ class CkPath implements ui.Path {
   }
 
   String? toSvgString() {
-    return _skPath.toSVGString();
+    return skiaObject.toSVGString();
   }
 
   /// Return `true` if this path contains no segments.
   bool get isEmpty {
-    return _skPath.isEmpty();
+    return skiaObject.isEmpty();
+  }
+
+  @override
+  bool get isResurrectionExpensive => true;
+
+  @override
+  SkPath createDefault() {
+    final SkPath path = SkPath();
+    path.setFillType(toSkFillType(_fillType));
+    return path;
+  }
+
+  List<dynamic>? _cachedCommands;
+
+  @override
+  void delete() {
+    _cachedCommands = skiaObject.toCmds();
+    rawSkiaObject?.delete();
+  }
+
+  @override
+  SkPath resurrect() {
+    final SkPath path = canvasKit.MakePathFromCmds(_cachedCommands!);
+    path.setFillType(toSkFillType(_fillType));
+    return path;
   }
 }

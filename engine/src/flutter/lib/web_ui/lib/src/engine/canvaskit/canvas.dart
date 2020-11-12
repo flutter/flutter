@@ -25,7 +25,7 @@ class CkCanvas {
   void clipPath(ui.Path path, bool doAntiAlias) {
     final CkPath ckPath = path as CkPath;
     skCanvas.clipPath(
-      ckPath._skPath,
+      ckPath.skiaObject,
       _clipOpIntersect,
       doAntiAlias,
     );
@@ -169,7 +169,7 @@ class CkCanvas {
   }
 
   void drawPath(CkPath path, CkPaint paint) {
-    skCanvas.drawPath(path._skPath, paint.skiaObject);
+    skCanvas.drawPath(path.skiaObject, paint.skiaObject);
   }
 
   void drawPicture(CkPicture picture) {

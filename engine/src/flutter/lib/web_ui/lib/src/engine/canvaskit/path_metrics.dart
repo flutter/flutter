@@ -20,7 +20,7 @@ class CkPathMetrics extends IterableBase<ui.PathMetric>
 class CkContourMeasureIter implements Iterator<ui.PathMetric> {
   CkContourMeasureIter(CkPath path, bool forceClosed)
     : _skObject = SkContourMeasureIter(
-        path._skPath,
+        path.skiaObject,
         forceClosed,
         1,
       ),

@@ -63,7 +63,7 @@ void drawSkShadow(
       canvasKit.computeTonalColors(inTonalColors);
 
   skCanvas.drawShadow(
-    path._skPath,
+    path.skiaObject,
     Float32List(3)
       ..[2] = devicePixelRatio * elevation,
     Float32List(3)
