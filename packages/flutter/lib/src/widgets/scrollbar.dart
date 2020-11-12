@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -441,6 +442,7 @@ class RawScrollbar extends StatefulWidget {
 class _RawScrollbarState extends State<RawScrollbar> {
   ScrollMetrics? _lastMetrics;
   late _ScrollbarLayout _scrollbarLayoutDelegate;
+  Drag? _drag;
 
   bool _handleScrollNotification(ScrollNotification notification) {
     setState(() {
@@ -482,6 +484,18 @@ class _RawScrollbarState extends State<RawScrollbar> {
     );
   }
 
+  void _handleDragStart(DragStartDetails details) {
+    print('drag start: $details');
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    print('drag update: $details');
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    print('drag end: $details');
+  }
+
   @override
   Widget build(BuildContext context) {
     _scrollbarLayoutDelegate = _ScrollbarLayout(
@@ -490,6 +504,7 @@ class _RawScrollbarState extends State<RawScrollbar> {
       controller: widget.controller,
       metrics: _lastMetrics,
     );
+
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: CustomMultiChildLayout(
@@ -504,6 +519,7 @@ class _RawScrollbarState extends State<RawScrollbar> {
           if (widget.track != null)
             // TODO(Piinks): Should users implement tap gestures? What if they
             //  want their tracks to have inkwell etc?
+            //  Maybe have this be the default and allow users to override?
             LayoutId(
               id: _ScrollbarSlot.track,
               child: widget.controller != null
@@ -513,10 +529,14 @@ class _RawScrollbarState extends State<RawScrollbar> {
                   )
                 : widget.track!,
             ),
-          // TODO(Piinks): Add drag gestures?
+          // TODO(Piinks): Should users implement drag gestures? What is they
+          //  want different gestures, or if the thumb has buttons that should
+          //  handle different gestures?
           LayoutId(
             id: _ScrollbarSlot.thumb,
-            child: widget.thumb,
+            child: DragGestureDetector(
+              child: widget.thumb,
+            ),
           ),
           // Any gestures in the trailing widget are handled by the user
           if (widget.trailing != null)
@@ -582,11 +602,14 @@ class _ScrollbarLayout extends MultiChildLayoutDelegate {
 
   @override
   void performLayout(Size size) {
+    // TODO(Piinks): Add assertions along the way to ensure we don't run out of
+    //  room
     final BoxConstraints looseConstraints = BoxConstraints.loose(size);
     final AxisDirection direction = controller?.position.axisDirection ?? metrics!.axisDirection;
     final Axis scrollAxis = controller?.position.axis ?? metrics!.axis;
     double trackPadding = 0.0;
 
+    // Child Widget
     if (overlapsChild) {
       // TODO(Piinks): This does not work yet..
       // Scrollbar is laid out on top of the child, does not contribute to
@@ -678,6 +701,10 @@ class _ScrollbarLayout extends MultiChildLayoutDelegate {
     }
 
     // Thumb Widget
+    // TODO(Piinks): Update the constraints given to the thumb here, maybe we
+    //  should enforce the min size and max size (max being relative to the
+    //  scroll view and viewport size)
+    //  Or maybe that should be handled by the user in the thumbBuilder widget..
     final Size thumbSize = layoutChild(_ScrollbarSlot.thumb, trackConstraints);
     late double maxScrollExtent;
     // TODO(Piinks): Handle infinite scroll views
@@ -718,7 +745,7 @@ class _ScrollbarLayout extends MultiChildLayoutDelegate {
     }
     positionChild(_ScrollbarSlot.thumb, Offset(x, y));
 
-    // Child
+    // Child Widget
     if (!overlapsChild) {
       layoutChild(
         _ScrollbarSlot.child,
