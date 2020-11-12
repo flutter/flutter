@@ -198,10 +198,7 @@ class WebAssetServer implements AssetReader {
     // Allow rendering in a iframe.
     httpServer.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
 
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(buildInfo.packagesPath),
-      logger: globals.logger,
-    );
+    final PackageConfig packageConfig = buildInfo.packageConfig;
     final Map<String, String> digests = <String, String>{};
     final Map<String, String> modules = <String, String>{};
     final WebAssetServer server = WebAssetServer(

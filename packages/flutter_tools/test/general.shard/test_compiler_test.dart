@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
 import 'package:mockito/mockito.dart';
+import 'package:package_config/package_config_types.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -22,6 +23,15 @@ final Platform linuxPlatform = FakePlatform(
   environment: <String, String>{},
 );
 
+final BuildInfo debugBuild = BuildInfo(
+  BuildMode.debug,
+  '',
+  treeShakeIcons: false,
+  packageConfig: PackageConfig(<Package>[
+    Package('flutter_test', Uri.parse('flutter_test/')),
+  ])
+);
+
 void main() {
   MockResidentCompiler residentCompiler;
   FileSystem fileSystem;
@@ -29,17 +39,13 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').writeAsStringSync('flutter_test:flutter_test/');
     fileSystem.file('test/foo.dart').createSync(recursive: true);
-    fileSystem.file('.packages')
-      ..createSync()
-      ..writeAsStringSync('flutter_test:flutter_test/');
     residentCompiler = MockResidentCompiler();
   });
 
   testUsingContext('TestCompiler reports a dill file when compile is successful', () async {
     final FakeTestCompiler testCompiler = FakeTestCompiler(
-      BuildInfo.debug,
+      debugBuild,
       FlutterProject.current(),
       residentCompiler,
     );
@@ -64,7 +70,7 @@ void main() {
 
   testUsingContext('TestCompiler reports null when a compile fails', () async {
     final FakeTestCompiler testCompiler = FakeTestCompiler(
-      BuildInfo.debug,
+      debugBuild,
       FlutterProject.current(),
       residentCompiler,
     );
@@ -90,7 +96,7 @@ void main() {
 
   testUsingContext('TestCompiler disposing test compiler shuts down backing compiler', () async {
     final FakeTestCompiler testCompiler = FakeTestCompiler(
-      BuildInfo.debug,
+      debugBuild,
       FlutterProject.current(),
       residentCompiler,
     );
@@ -115,7 +121,6 @@ void main() {
       FlutterProject.current(),
       residentCompiler,
     );
-    fileSystem.file('.packages').writeAsStringSync('\n');
 
     expect(await testCompiler.compile(Uri.parse('test/foo.dart')), null);
     expect(testLogger.errorText, contains('Error: cannot run without a dependency on "package:flutter_test"'));
