@@ -18,7 +18,12 @@ void main() {
 void testMain() {
   group('CkPath', () {
     setUpAll(() async {
+      debugResetBrowserSupportsFinalizationRegistry();
       await ui.webOnlyInitializePlatform();
+    });
+
+    tearDown(() {
+      debugResetBrowserSupportsFinalizationRegistry();
     });
 
     test('Using CanvasKit', () {
@@ -96,6 +101,68 @@ void testMain() {
 
       final SkPath resurrectedCopy = path.resurrect();
       expect(fromSkRect(resurrectedCopy.getBounds()), rect);
+    });
+
+    test('Resurrect CkContourMeasure in the middle of iteration', () {
+      browserSupportsFinalizationRegistry = false;
+      final ui.Path path = ui.Path();
+      expect(path, isA<CkPath>());
+      path.addRect(ui.Rect.fromLTRB(0, 0, 10, 10));
+      path.addRect(ui.Rect.fromLTRB(20, 20, 30, 30));
+      path.addRect(ui.Rect.fromLTRB(40, 40, 50, 50));
+
+      final ui.PathMetrics metrics = path.computeMetrics();
+      final CkContourMeasureIter iterator = metrics.iterator;
+
+      expect(iterator.moveNext(), true);
+      expect(iterator.current.contourIndex, 0);
+      expect(iterator.moveNext(), true);
+      expect(iterator.current.contourIndex, 1);
+
+      // Delete iterator in the middle of iteration
+      iterator.delete();
+      iterator.rawSkiaObject = null;
+
+      // Check that the iterator can continue from the last position.
+      expect(iterator.moveNext(), true);
+      expect(iterator.current.contourIndex, 2);
+      expect(iterator.moveNext(), false);
+    });
+
+    test('Resurrect CkContourMeasure', () {
+      browserSupportsFinalizationRegistry = false;
+      final ui.Path path = ui.Path();
+      expect(path, isA<CkPath>());
+      path.addRect(ui.Rect.fromLTRB(0, 0, 10, 10));
+      path.addRect(ui.Rect.fromLTRB(20, 20, 30, 30));
+      path.addRect(ui.Rect.fromLTRB(40, 40, 50, 50));
+
+      final ui.PathMetrics metrics = path.computeMetrics();
+      final CkContourMeasureIter iterator = metrics.iterator;
+
+      expect(iterator.moveNext(), true);
+      final CkContourMeasure measure0 = iterator.current;
+      expect(measure0.contourIndex, 0);
+      expect(measure0.extractPath(0, 15).getBounds(), ui.Rect.fromLTRB(0, 0, 10, 5));
+
+      expect(iterator.moveNext(), true);
+      final CkContourMeasure measure1 = iterator.current;
+      expect(measure1.contourIndex, 1);
+      expect(measure1.extractPath(0, 15).getBounds(), ui.Rect.fromLTRB(20, 20, 30, 25));
+
+      // Delete iterator and the measure in the middle of iteration
+      iterator.delete();
+      iterator.rawSkiaObject = null;
+      measure0.delete();
+      measure0.rawSkiaObject = null;
+      measure1.delete();
+      measure1.rawSkiaObject = null;
+
+      // Check that the measure is still value after resurrection.
+      expect(measure0.contourIndex, 0);
+      expect(measure0.extractPath(0, 15).getBounds(), ui.Rect.fromLTRB(0, 0, 10, 5));
+      expect(measure1.contourIndex, 1);
+      expect(measure1.extractPath(0, 15).getBounds(), ui.Rect.fromLTRB(20, 20, 30, 25));
     });
   },
       skip:
