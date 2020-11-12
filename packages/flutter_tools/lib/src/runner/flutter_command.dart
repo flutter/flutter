@@ -816,7 +816,7 @@ abstract class FlutterCommand extends Command<void> {
           nullSafetyMode = NullSafetyMode.unsound;
           extraFrontEndOptions.add('--no-sound-null-safety');
         }
-      } else if (wasNullSafetyFlagParsed) {
+      } else if (!wasNullSafetyFlagParsed) {
         // This mode is only used for commands which do not build a single target like
         // 'flutter test'.
         nullSafetyMode = NullSafetyMode.autodetect;
