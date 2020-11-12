@@ -106,9 +106,4 @@ bool EmbedderSurfaceSoftware::PresentBackingStore(
   );
 }
 
-// |GPUSurfaceSoftwareDelegate|
-ExternalViewEmbedder* EmbedderSurfaceSoftware::GetExternalViewEmbedder() {
-  return external_view_embedder_.get();
-}
-
 }  // namespace flutter

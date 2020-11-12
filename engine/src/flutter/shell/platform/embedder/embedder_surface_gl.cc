@@ -71,11 +71,6 @@ SkMatrix EmbedderSurfaceGL::GLContextSurfaceTransformation() const {
 }
 
 // |GPUSurfaceGLDelegate|
-ExternalViewEmbedder* EmbedderSurfaceGL::GetExternalViewEmbedder() {
-  return external_view_embedder_.get();
-}
-
-// |GPUSurfaceGLDelegate|
 EmbedderSurfaceGL::GLProcResolver EmbedderSurfaceGL::GetGLProcResolver() const {
   return gl_dispatch_table_.gl_proc_resolver;
 }

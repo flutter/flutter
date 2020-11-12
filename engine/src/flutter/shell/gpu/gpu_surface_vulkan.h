@@ -36,12 +36,8 @@ class GPUSurfaceVulkan : public Surface {
   // |Surface|
   GrDirectContext* GetContext() override;
 
-  // |Surface|
-  flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
-
  private:
   vulkan::VulkanWindow window_;
-  GPUSurfaceVulkanDelegate* delegate_;
   const bool render_to_surface_;
 
   fml::WeakPtrFactory<GPUSurfaceVulkan> weak_factory_;

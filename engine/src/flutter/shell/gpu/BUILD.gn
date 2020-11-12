@@ -16,7 +16,6 @@ gpu_common_deps = [
 
 source_set("gpu_surface_software") {
   sources = [
-    "gpu_surface_delegate.h",
     "gpu_surface_software.cc",
     "gpu_surface_software.h",
     "gpu_surface_software_delegate.cc",
@@ -28,7 +27,6 @@ source_set("gpu_surface_software") {
 
 source_set("gpu_surface_gl") {
   sources = [
-    "gpu_surface_delegate.h",
     "gpu_surface_gl.cc",
     "gpu_surface_gl.h",
     "gpu_surface_gl_delegate.cc",
@@ -40,7 +38,6 @@ source_set("gpu_surface_gl") {
 
 source_set("gpu_surface_vulkan") {
   sources = [
-    "gpu_surface_delegate.h",
     "gpu_surface_vulkan.cc",
     "gpu_surface_vulkan.h",
     "gpu_surface_vulkan_delegate.cc",
@@ -52,7 +49,6 @@ source_set("gpu_surface_vulkan") {
 
 source_set("gpu_surface_metal") {
   sources = [
-    "gpu_surface_delegate.h",
     "gpu_surface_metal.h",
     "gpu_surface_metal.mm",
   ]

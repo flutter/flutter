@@ -198,10 +198,5 @@ SkMatrix ShellTestPlatformViewVulkan::OffScreenSurface::GetRootTransformation()
   return matrix;
 }
 
-flutter::ExternalViewEmbedder*
-ShellTestPlatformViewVulkan::OffScreenSurface::GetExternalViewEmbedder() {
-  return shell_test_external_view_embedder_.get();
-}
-
 }  // namespace testing
 }  // namespace flutter

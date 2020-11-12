@@ -113,9 +113,9 @@ TEST(RasterizerTest,
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<MockSurface>();
 
-  MockExternalViewEmbedder external_view_embedder;
-  EXPECT_CALL(*surface, GetExternalViewEmbedder())
-      .WillRepeatedly(Return(&external_view_embedder));
+  std::shared_ptr<MockExternalViewEmbedder> external_view_embedder =
+      std::make_shared<MockExternalViewEmbedder>();
+  rasterizer->SetExternalViewEmbedder(external_view_embedder);
 
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, /*supports_readback=*/true,
@@ -123,15 +123,15 @@ TEST(RasterizerTest,
   EXPECT_CALL(*surface, AcquireFrame(SkISize()))
       .WillOnce(Return(ByMove(std::move(surface_frame))));
 
-  EXPECT_CALL(external_view_embedder,
+  EXPECT_CALL(*external_view_embedder,
               BeginFrame(/*frame_size=*/SkISize(), /*context=*/nullptr,
                          /*device_pixel_ratio=*/2.0,
                          /*raster_thread_merger=*/
                          fml::RefPtr<fml::RasterThreadMerger>(nullptr)))
       .Times(1);
-  EXPECT_CALL(external_view_embedder, SubmitFrame).Times(1);
+  EXPECT_CALL(*external_view_embedder, SubmitFrame).Times(1);
   EXPECT_CALL(
-      external_view_embedder,
+      *external_view_embedder,
       EndFrame(/*should_resubmit_frame=*/false,
                /*raster_thread_merger=*/fml::RefPtr<fml::RasterThreadMerger>(
                    nullptr)))
@@ -170,10 +170,10 @@ TEST(
   EXPECT_CALL(delegate, OnFrameRasterized(_));
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<MockSurface>();
-  MockExternalViewEmbedder external_view_embedder;
-  EXPECT_CALL(*surface, GetExternalViewEmbedder())
-      .WillRepeatedly(Return(&external_view_embedder));
-  EXPECT_CALL(external_view_embedder, SupportsDynamicThreadMerging)
+  std::shared_ptr<MockExternalViewEmbedder> external_view_embedder =
+      std::make_shared<MockExternalViewEmbedder>();
+  rasterizer->SetExternalViewEmbedder(external_view_embedder);
+  EXPECT_CALL(*external_view_embedder, SupportsDynamicThreadMerging)
       .WillRepeatedly(Return(true));
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, /*supports_readback=*/true,
@@ -181,14 +181,14 @@ TEST(
   EXPECT_CALL(*surface, AcquireFrame(SkISize()))
       .WillOnce(Return(ByMove(std::move(surface_frame))));
 
-  EXPECT_CALL(external_view_embedder,
+  EXPECT_CALL(*external_view_embedder,
               BeginFrame(/*frame_size=*/SkISize(), /*context=*/nullptr,
                          /*device_pixel_ratio=*/2.0,
                          /*raster_thread_merger=*/_))
       .Times(1);
-  EXPECT_CALL(external_view_embedder, SubmitFrame).Times(0);
-  EXPECT_CALL(external_view_embedder, EndFrame(/*should_resubmit_frame=*/false,
-                                               /*raster_thread_merger=*/_))
+  EXPECT_CALL(*external_view_embedder, SubmitFrame).Times(0);
+  EXPECT_CALL(*external_view_embedder, EndFrame(/*should_resubmit_frame=*/false,
+                                                /*raster_thread_merger=*/_))
       .Times(1);
 
   rasterizer->Setup(std::move(surface));
@@ -229,26 +229,26 @@ TEST(
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<MockSurface>();
 
-  MockExternalViewEmbedder external_view_embedder;
-  EXPECT_CALL(*surface, GetExternalViewEmbedder())
-      .WillRepeatedly(Return(&external_view_embedder));
+  std::shared_ptr<MockExternalViewEmbedder> external_view_embedder =
+      std::make_shared<MockExternalViewEmbedder>();
+  rasterizer->SetExternalViewEmbedder(external_view_embedder);
 
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, /*supports_readback=*/true,
       /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
   EXPECT_CALL(*surface, AcquireFrame(SkISize()))
       .WillOnce(Return(ByMove(std::move(surface_frame))));
-  EXPECT_CALL(external_view_embedder, SupportsDynamicThreadMerging)
+  EXPECT_CALL(*external_view_embedder, SupportsDynamicThreadMerging)
       .WillRepeatedly(Return(true));
 
-  EXPECT_CALL(external_view_embedder,
+  EXPECT_CALL(*external_view_embedder,
               BeginFrame(/*frame_size=*/SkISize(), /*context=*/nullptr,
                          /*device_pixel_ratio=*/2.0,
                          /*raster_thread_merger=*/_))
       .Times(1);
-  EXPECT_CALL(external_view_embedder, SubmitFrame).Times(1);
-  EXPECT_CALL(external_view_embedder, EndFrame(/*should_resubmit_frame=*/false,
-                                               /*raster_thread_merger=*/_))
+  EXPECT_CALL(*external_view_embedder, SubmitFrame).Times(1);
+  EXPECT_CALL(*external_view_embedder, EndFrame(/*should_resubmit_frame=*/false,
+                                                /*raster_thread_merger=*/_))
       .Times(1);
 
   rasterizer->Setup(std::move(surface));
@@ -260,5 +260,41 @@ TEST(
   EXPECT_TRUE(result);
   auto no_discard = [](LayerTree&) { return false; };
   rasterizer->Draw(pipeline, no_discard);
+}
+
+TEST(RasterizerTest, externalViewEmbedderDoesntEndFrameWhenNoSurfaceIsSet) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::Platform | ThreadHost::Type::GPU |
+                             ThreadHost::Type::IO | ThreadHost::Type::UI);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  MockDelegate delegate;
+  EXPECT_CALL(delegate, GetTaskRunners())
+      .WillRepeatedly(ReturnRef(task_runners));
+  auto rasterizer = std::make_unique<Rasterizer>(delegate);
+
+  std::shared_ptr<MockExternalViewEmbedder> external_view_embedder =
+      std::make_shared<MockExternalViewEmbedder>();
+  rasterizer->SetExternalViewEmbedder(external_view_embedder);
+
+  EXPECT_CALL(
+      *external_view_embedder,
+      EndFrame(/*should_resubmit_frame=*/false,
+               /*raster_thread_merger=*/fml::RefPtr<fml::RasterThreadMerger>(
+                   nullptr)))
+      .Times(0);
+
+  fml::AutoResetWaitableEvent latch;
+  thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
+    auto pipeline = fml::AdoptRef(new Pipeline<LayerTree>(/*depth=*/10));
+    auto no_discard = [](LayerTree&) { return false; };
+    rasterizer->Draw(pipeline, no_discard);
+    latch.Signal();
+  });
+  latch.Wait();
 }
 }  // namespace flutter

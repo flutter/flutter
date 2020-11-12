@@ -64,9 +64,6 @@ class ShellTestPlatformViewGL : public ShellTestPlatformView,
   // |GPUSurfaceGLDelegate|
   GLProcResolver GetGLProcResolver() const override;
 
-  // |GPUSurfaceGLDelegate|
-  ExternalViewEmbedder* GetExternalViewEmbedder() override;
-
   FML_DISALLOW_COPY_AND_ASSIGN(ShellTestPlatformViewGL);
 };
 

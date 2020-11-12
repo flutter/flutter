@@ -7,7 +7,6 @@
 
 #include "flutter/flow/embedded_views.h"
 #include "flutter/fml/macros.h"
-#include "flutter/shell/gpu/gpu_surface_delegate.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
@@ -25,12 +24,9 @@ namespace flutter {
 /// @see        |IOSurfaceSoftware|, |AndroidSurfaceSoftware|,
 ///             |EmbedderSurfaceSoftware|.
 ///
-class GPUSurfaceSoftwareDelegate : public GPUSurfaceDelegate {
+class GPUSurfaceSoftwareDelegate {
  public:
-  ~GPUSurfaceSoftwareDelegate() override;
-
-  // |GPUSurfaceDelegate|
-  ExternalViewEmbedder* GetExternalViewEmbedder() override;
+  ~GPUSurfaceSoftwareDelegate();
 
   //----------------------------------------------------------------------------
   /// @brief      Called when the GPU surface needs a new buffer to render a new
