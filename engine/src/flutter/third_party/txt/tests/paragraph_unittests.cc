@@ -1484,6 +1484,36 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(InlinePlaceholderLongestLine)) {
   ASSERT_TRUE(paragraph->longest_line_ >= 50);
 }
 
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(InlinePlaceholderIntrinsicWidth)) {
+  const char* text = "A ";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::PlaceholderRun placeholder_run(50, 50, PlaceholderAlignment::kBaseline,
+                                      TextBaseline::kAlphabetic, 0);
+
+  txt::ParagraphStyle paragraph_style;
+  txt::ParagraphBuilderTxt builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.font_families = std::vector<std::string>(1, "Roboto");
+  text_style.font_size = 20;
+  text_style.decoration_color = SK_ColorBLACK;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+  builder.AddPlaceholder(placeholder_run);
+
+  builder.Pop();
+
+  auto paragraph = BuildParagraph(builder);
+  paragraph->Layout(GetTestCanvasWidth());
+
+  ASSERT_DOUBLE_EQ(paragraph->GetMinIntrinsicWidth(), 50);
+  ASSERT_DOUBLE_EQ(paragraph->GetMaxIntrinsicWidth(), 68);
+}
+
 #if OS_LINUX
 // Tests if manually inserted 0xFFFC characters are replaced to 0xFFFD in order
 // to not interfere with the placeholder box layout.

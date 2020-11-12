@@ -951,7 +951,16 @@ void ParagraphTxt::Layout(double width) {
             }
             grapheme_code_unit_counts.push_back(code_unit_count);
           }
-          float glyph_advance = layout.getCharAdvance(glyph_code_units.start);
+          float glyph_advance;
+          if (run.is_placeholder_run()) {
+            // The placeholder run's layout should yield one glyph representing
+            // the object replacement character.  Replace its width with the
+            // placeholder's width.
+            FML_DCHECK(layout.nGlyphs() == 1);
+            glyph_advance = run.placeholder_run()->width;
+          } else {
+            glyph_advance = layout.getCharAdvance(glyph_code_units.start);
+          }
           float grapheme_advance =
               glyph_advance / grapheme_code_unit_counts.size();
 
@@ -1016,19 +1025,10 @@ void ParagraphTxt::Layout(double width) {
         Range<double> record_x_pos(
             glyph_positions.front().x_pos.start - run_x_offset,
             glyph_positions.back().x_pos.end - run_x_offset);
-        if (run.is_placeholder_run()) {
-          paint_records.emplace_back(
-              run.style(), SkPoint::Make(run_x_offset + justify_x_offset, 0),
-              builder.make(), *metrics, line_number, record_x_pos.start,
-              record_x_pos.start + run.placeholder_run()->width, run.is_ghost(),
-              run.placeholder_run());
-          run_x_offset += run.placeholder_run()->width;
-        } else {
-          paint_records.emplace_back(
-              run.style(), SkPoint::Make(run_x_offset + justify_x_offset, 0),
-              builder.make(), *metrics, line_number, record_x_pos.start,
-              record_x_pos.end, run.is_ghost());
-        }
+        paint_records.emplace_back(
+            run.style(), SkPoint::Make(run_x_offset + justify_x_offset, 0),
+            builder.make(), *metrics, line_number, record_x_pos.start,
+            record_x_pos.end, run.is_ghost(), run.placeholder_run());
         justify_x_offset += justify_x_offset_delta;
 
         line_glyph_positions.insert(line_glyph_positions.end(),
@@ -1043,10 +1043,7 @@ void ParagraphTxt::Layout(double width) {
                   });
 
         double blob_x_pos_start = glyph_positions.front().x_pos.start;
-        double blob_x_pos_end = run.is_placeholder_run()
-                                    ? glyph_positions.back().x_pos.start +
-                                          run.placeholder_run()->width
-                                    : glyph_positions.back().x_pos.end;
+        double blob_x_pos_end = glyph_positions.back().x_pos.end;
         line_code_unit_runs.emplace_back(
             std::move(code_unit_positions),
             Range<size_t>(run.start(), run.end()),
@@ -1064,13 +1061,17 @@ void ParagraphTxt::Layout(double width) {
         }
       }  // for each in glyph_blobs
 
-      // Do not increase x offset for LTR trailing ghost runs as it should not
-      // impact the layout of visible glyphs. RTL tailing ghost runs have the
-      // advance subtracted, so we do add the advance here to reset the
-      // run_x_offset. We do keep the record though so GetRectsForRange() can
-      // find metrics for trailing spaces.
-      if ((!run.is_ghost() || run.is_rtl()) && !run.is_placeholder_run()) {
-        run_x_offset += layout.getAdvance();
+      if (run.is_placeholder_run()) {
+        run_x_offset += run.placeholder_run()->width;
+      } else {
+        // Do not increase x offset for LTR trailing ghost runs as it should not
+        // impact the layout of visible glyphs. RTL tailing ghost runs have the
+        // advance subtracted, so we do add the advance here to reset the
+        // run_x_offset. We do keep the record though so GetRectsForRange() can
+        // find metrics for trailing spaces.
+        if (!run.is_ghost() || run.is_rtl()) {
+          run_x_offset += layout.getAdvance();
+        }
       }
     }  // for each in line_runs
 
