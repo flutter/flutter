@@ -60,74 +60,71 @@ class PersistedColorFilter extends PersistedContainerSurface
       childContainer?.style.visibility = 'visible';
       return;
     }
-    if (engineValue._blendMode == null) {
-      rootElement!.style.backgroundColor =
-          colorToCssString(engineValue._color!);
+
+    if (engineValue is! _CkBlendModeColorFilter) {
       childContainer?.style.visibility = 'visible';
       return;
     }
 
-    ui.Color filterColor = engineValue._color!;
-    ui.BlendMode? colorFilterBlendMode = engineValue._blendMode;
+    ui.Color filterColor = engineValue.color;
+    ui.BlendMode colorFilterBlendMode = engineValue.blendMode;
     html.CssStyleDeclaration style = rootElement!.style;
-    if (colorFilterBlendMode != null) {
-      switch (colorFilterBlendMode) {
-        case ui.BlendMode.clear:
-        case ui.BlendMode.dstOut:
-        case ui.BlendMode.srcOut:
-          childContainer?.style.visibility = 'hidden';
-          return;
-        case ui.BlendMode.dst:
-        case ui.BlendMode.dstIn:
-          // Noop.
-          return;
-        case ui.BlendMode.src:
-        case ui.BlendMode.srcOver:
-          // Uses source filter color.
-          // Since we don't have a size, we can't use background color.
-          // Use svg filter srcIn instead.
-          colorFilterBlendMode = ui.BlendMode.srcIn;
-          break;
-        case ui.BlendMode.dstOver:
-        case ui.BlendMode.srcIn:
-        case ui.BlendMode.srcATop:
-        case ui.BlendMode.dstATop:
-        case ui.BlendMode.xor:
-        case ui.BlendMode.plus:
-        case ui.BlendMode.modulate:
-        case ui.BlendMode.screen:
-        case ui.BlendMode.overlay:
-        case ui.BlendMode.darken:
-        case ui.BlendMode.lighten:
-        case ui.BlendMode.colorDodge:
-        case ui.BlendMode.colorBurn:
-        case ui.BlendMode.hardLight:
-        case ui.BlendMode.softLight:
-        case ui.BlendMode.difference:
-        case ui.BlendMode.exclusion:
-        case ui.BlendMode.multiply:
-        case ui.BlendMode.hue:
-        case ui.BlendMode.saturation:
-        case ui.BlendMode.color:
-        case ui.BlendMode.luminosity:
-          break;
-      }
-
-      // Use SVG filter for blend mode.
-      String? svgFilter =
-          svgFilterFromBlendMode(filterColor, colorFilterBlendMode);
-      if (svgFilter != null) {
-        _filterElement =
-            html.Element.html(svgFilter, treeSanitizer: _NullTreeSanitizer());
-        rootElement!.append(_filterElement!);
-        rootElement!.style.filter = 'url(#_fcf${_filterIdCounter})';
-        if (colorFilterBlendMode == ui.BlendMode.saturation ||
-            colorFilterBlendMode == ui.BlendMode.multiply ||
-            colorFilterBlendMode == ui.BlendMode.modulate) {
-          style.backgroundColor = colorToCssString(filterColor);
-        }
+    switch (colorFilterBlendMode) {
+      case ui.BlendMode.clear:
+      case ui.BlendMode.dstOut:
+      case ui.BlendMode.srcOut:
+        childContainer?.style.visibility = 'hidden';
         return;
+      case ui.BlendMode.dst:
+      case ui.BlendMode.dstIn:
+        // Noop.
+        return;
+      case ui.BlendMode.src:
+      case ui.BlendMode.srcOver:
+        // Uses source filter color.
+        // Since we don't have a size, we can't use background color.
+        // Use svg filter srcIn instead.
+        colorFilterBlendMode = ui.BlendMode.srcIn;
+        break;
+      case ui.BlendMode.dstOver:
+      case ui.BlendMode.srcIn:
+      case ui.BlendMode.srcATop:
+      case ui.BlendMode.dstATop:
+      case ui.BlendMode.xor:
+      case ui.BlendMode.plus:
+      case ui.BlendMode.modulate:
+      case ui.BlendMode.screen:
+      case ui.BlendMode.overlay:
+      case ui.BlendMode.darken:
+      case ui.BlendMode.lighten:
+      case ui.BlendMode.colorDodge:
+      case ui.BlendMode.colorBurn:
+      case ui.BlendMode.hardLight:
+      case ui.BlendMode.softLight:
+      case ui.BlendMode.difference:
+      case ui.BlendMode.exclusion:
+      case ui.BlendMode.multiply:
+      case ui.BlendMode.hue:
+      case ui.BlendMode.saturation:
+      case ui.BlendMode.color:
+      case ui.BlendMode.luminosity:
+        break;
+    }
+
+    // Use SVG filter for blend mode.
+    String? svgFilter =
+        svgFilterFromBlendMode(filterColor, colorFilterBlendMode);
+    if (svgFilter != null) {
+      _filterElement =
+          html.Element.html(svgFilter, treeSanitizer: _NullTreeSanitizer());
+      rootElement!.append(_filterElement!);
+      rootElement!.style.filter = 'url(#_fcf${_filterIdCounter})';
+      if (colorFilterBlendMode == ui.BlendMode.saturation ||
+          colorFilterBlendMode == ui.BlendMode.multiply ||
+          colorFilterBlendMode == ui.BlendMode.modulate) {
+        style.backgroundColor = colorToCssString(filterColor);
       }
+      return;
     }
   }
 

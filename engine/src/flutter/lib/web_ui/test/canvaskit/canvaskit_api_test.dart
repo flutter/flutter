@@ -474,6 +474,26 @@ void _imageFilterTests() {
       isNotNull,
     );
   });
+
+  test('MakeColorFilter', () {
+    expect(
+      canvasKit.SkImageFilter.MakeColorFilter(
+        canvasKit.SkColorFilter.MakeLinearToSRGBGamma(),
+        null,
+      ),
+      isNotNull,
+    );
+  });
+
+  test('MakeCompose', () {
+    expect(
+      canvasKit.SkImageFilter.MakeCompose(
+        canvasKit.SkImageFilter.MakeBlur(1, 2, canvasKit.TileMode.Repeat, null),
+        canvasKit.SkImageFilter.MakeBlur(1, 2, canvasKit.TileMode.Repeat, null),
+      ),
+      isNotNull,
+    );
+  });
 }
 
 void _mallocTests() {

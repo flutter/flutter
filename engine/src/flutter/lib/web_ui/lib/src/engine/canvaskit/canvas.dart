@@ -241,11 +241,11 @@ class CkCanvas {
   }
 
   void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter) {
-    final CkImageFilter skImageFilter = filter as CkImageFilter;
+    final _CkManagedSkImageFilterConvertible convertible = filter as _CkManagedSkImageFilterConvertible;
     return skCanvas.saveLayer(
       null,
       toSkRect(bounds),
-      skImageFilter.skiaObject,
+      convertible._imageFilter.skiaObject,
       0,
     );
   }
