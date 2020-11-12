@@ -48,7 +48,7 @@ import 'framework.dart';
 ///
 /// See Also:
 ///
-///  * [Blendmode], describing how to blend a source image with destination image.
+///  * [BlendMode], describing how to blend a source image with destination image.
 ///  * [Image], the class in the [dart:ui](https://api.flutter.dev/flutter/dart-ui/dart-ui-library.html) library.
 ///  * [Colors], constants which represent Material Design's [color palette](https://material.io/design/color/).
 ///  * Cookbook: [Display images from the internet](https://flutter.dev/docs/cookbook/images/network-image)
