@@ -75,6 +75,9 @@ class AngleSurfaceManager {
   void CleanUp();
 
  private:
+  // Attempts to initialize EGL with a particular ANGLE configuration.
+  bool InitializeEGL(const EGLint* attributes);
+
   // EGL representation of native display.
   EGLDisplay egl_display_;
 

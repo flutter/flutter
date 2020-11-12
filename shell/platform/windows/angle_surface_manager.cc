@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/angle_surface_manager.h"
 
 #include <iostream>
+#include <vector>
 
 namespace flutter {
 
@@ -19,6 +20,31 @@ AngleSurfaceManager::~AngleSurfaceManager() {
   CleanUp();
 }
 
+bool AngleSurfaceManager::InitializeEGL(const EGLint* attributes) {
+  PFNEGLGETPLATFORMDISPLAYEXTPROC eglGetPlatformDisplayEXT =
+      reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(
+          eglGetProcAddress("eglGetPlatformDisplayEXT"));
+  if (!eglGetPlatformDisplayEXT) {
+    std::cerr << "EGL: eglGetPlatformDisplayEXT not available" << std::endl;
+    return false;
+  }
+
+  egl_display_ = eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE,
+                                          EGL_DEFAULT_DISPLAY, attributes);
+
+  if (egl_display_ == EGL_NO_DISPLAY) {
+    std::cerr << "EGL: Failed to get a compatible EGLdisplay" << std::endl;
+    return false;
+  }
+
+  if (eglInitialize(egl_display_, nullptr, nullptr) == EGL_FALSE) {
+    std::cerr << "EGL: Failed to initialize";
+    return false;
+  }
+
+  return true;
+}
+
 bool AngleSurfaceManager::Initialize() {
   const EGLint configAttributes[] = {EGL_RED_SIZE,   8, EGL_GREEN_SIZE,   8,
                                      EGL_BLUE_SIZE,  8, EGL_ALPHA_SIZE,   8,
@@ -28,10 +54,10 @@ bool AngleSurfaceManager::Initialize() {
   const EGLint display_context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
                                                EGL_NONE};
 
-  const EGLint default_display_attributes[] = {
-      // These are prefered display attributes and request ANGLE's D3D11
-      // renderer. eglInitialize will only succeed with these attributes if the
-      // hardware supports D3D11 Feature Level 10_0+.
+  // These are prefered display attributes and request ANGLE's D3D11
+  // renderer. eglInitialize will only succeed with these attributes if the
+  // hardware supports D3D11 Feature Level 10_0+.
+  const EGLint d3d11_display_attributes[] = {
       EGL_PLATFORM_ANGLE_TYPE_ANGLE,
       EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
 
@@ -43,9 +69,9 @@ bool AngleSurfaceManager::Initialize() {
       EGL_NONE,
   };
 
-  const EGLint fl9_3_display_attributes[] = {
-      // These are used to request ANGLE's D3D11 renderer, with D3D11 Feature
-      // Level 9_3.
+  // These are used to request ANGLE's D3D11 renderer, with D3D11 Feature
+  // Level 9_3.
+  const EGLint d3d11_fl_9_3_display_attributes[] = {
       EGL_PLATFORM_ANGLE_TYPE_ANGLE,
       EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
       EGL_PLATFORM_ANGLE_MAX_VERSION_MAJOR_ANGLE,
@@ -57,9 +83,9 @@ bool AngleSurfaceManager::Initialize() {
       EGL_NONE,
   };
 
-  const EGLint warp_display_attributes[] = {
-      // These attributes request D3D11 WARP (software rendering fallback) as a
-      // last resort.
+  // These attributes request D3D11 WARP (software rendering fallback) in case
+  // hardware-backed D3D11 is unavailable.
+  const EGLint d3d11_warp_display_attributes[] = {
       EGL_PLATFORM_ANGLE_TYPE_ANGLE,
       EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
       EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE,
@@ -67,51 +93,27 @@ bool AngleSurfaceManager::Initialize() {
       EGL_NONE,
   };
 
-  PFNEGLGETPLATFORMDISPLAYEXTPROC eglGetPlatformDisplayEXT =
-      reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(
-          eglGetProcAddress("eglGetPlatformDisplayEXT"));
-  if (!eglGetPlatformDisplayEXT) {
-    std::cerr << "EGL: eglGetPlatformDisplayEXT not available" << std::endl;
-    return false;
-  }
+  // These are used to request ANGLE's D3D9 renderer as a fallback if D3D11
+  // is not available.
+  const EGLint d3d9_display_attributes[] = {
+      EGL_PLATFORM_ANGLE_TYPE_ANGLE,
+      EGL_PLATFORM_ANGLE_TYPE_D3D9_ANGLE,
+      EGL_TRUE,
+      EGL_NONE,
+  };
 
-  // Try to initialize EGL to D3D11 Feature Level 10_0+.
-  egl_display_ =
-      eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE, EGL_DEFAULT_DISPLAY,
-                               default_display_attributes);
-  if (egl_display_ == EGL_NO_DISPLAY) {
-    std::cerr << "EGL: Failed to get a compatible EGLdisplay" << std::endl;
-    return false;
-  }
+  std::vector<const EGLint*> display_attributes_configs = {
+      d3d11_display_attributes,
+      d3d11_fl_9_3_display_attributes,
+      d3d11_warp_display_attributes,
+      d3d9_display_attributes,
+  };
 
-  if (eglInitialize(egl_display_, nullptr, nullptr) == EGL_FALSE) {
-    // If above failed, try to initialize EGL to D3D11 Feature Level 9_3, if
-    // 10_0+ is unavailable.
-    egl_display_ =
-        eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE, EGL_DEFAULT_DISPLAY,
-                                 fl9_3_display_attributes);
-    if (egl_display_ == EGL_NO_DISPLAY) {
-      std::cerr << "EGL: Failed to get a compatible 9.3 EGLdisplay"
-                << std::endl;
-      return false;
-    }
-
-    if (eglInitialize(egl_display_, nullptr, nullptr) == EGL_FALSE) {
-      // If all else fails, attempt D3D11 Feature Level 11_0 on WARP as a last
-      // resort
-      egl_display_ = eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE,
-                                              EGL_DEFAULT_DISPLAY,
-                                              warp_display_attributes);
-      if (egl_display_ == EGL_NO_DISPLAY) {
-        std::cerr << "EGL: Failed to get a compatible WARP EGLdisplay"
-                  << std::endl;
-        return false;
-      }
-
-      if (eglInitialize(egl_display_, nullptr, nullptr) == EGL_FALSE) {
-        std::cerr << "EGL: Failed to initialize EGL" << std::endl;
-        return false;
-      }
+  // Attempt to initialize ANGLE's renderer in order of: D3D11, D3D11 Feature
+  // Level 9_3, D3D11 WARP and finally D3D9.
+  for (auto config : display_attributes_configs) {
+    if (InitializeEGL(config)) {
+      break;
     }
   }
 
