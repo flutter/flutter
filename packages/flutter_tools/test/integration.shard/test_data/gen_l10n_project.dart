@@ -47,6 +47,8 @@ dependencies:
 
   @override
   final String main = r'''
+// @dart = 2.8
+// generated localizations do not support null safety.
 import 'package:flutter/material.dart';
 
 import 'l10n/app_localizations.dart';
