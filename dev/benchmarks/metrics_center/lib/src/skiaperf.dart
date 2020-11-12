@@ -183,5 +183,4 @@ const String kSkiaPerfGitHashKey = 'gitHash';
 const String kSkiaPerfResultsKey = 'results';
 const String kSkiaPerfValueKey = 'value';
 const String kSkiaPerfOptionsKey = 'options';
-
 const String kSkiaPerfDefaultConfig = 'default';

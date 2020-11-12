@@ -19,6 +19,9 @@ class GithubHelper {
 
   /// The result is cached in memory so querying the same thing again in the
   /// same process is fast.
+  ///
+  /// Our unit test requires that calling this method 1000 times for the same
+  /// `githubRepo` and `sha` should be done in 1 second.
   Future<DateTime> getCommitDateTime(String githubRepo, String sha) async {
     final String key = '$githubRepo/commit/$sha';
     if (_commitDateTimeCache[key] == null) {
