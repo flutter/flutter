@@ -1092,7 +1092,7 @@ Future<Directory> _loadDwdsDirectory(
   final String toolPackagePath =
       fileSystem.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
   final String packageFilePath =
-      fileSystem.path.join(toolPackagePath, kPackagesFileName);
+      fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
     logger: logger,

@@ -6,10 +6,10 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 
+import '../integration.shard/test_data/stepping_project.dart';
+import '../integration.shard/test_driver.dart';
+import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
-import 'test_data/stepping_project.dart';
-import 'test_driver.dart';
-import 'test_utils.dart';
 
 void main() {
   Directory tempDirectory;
@@ -25,7 +25,9 @@ void main() {
 
     flutter = FlutterRunTestDriver(tempDirectory);
 
-    await flutter.run(withDebugger: true, startPaused: true, chrome: true);
+    await flutter.run(
+      withDebugger: true, startPaused: true, chrome: true,
+      additionalCommandArgs: <String>['--verbose']);
     await flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine);
     await flutter.resume();
     await flutter.waitForPause(); // Now we should be on the breakpoint.

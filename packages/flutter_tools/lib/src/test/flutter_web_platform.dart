@@ -90,7 +90,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   }
 
   final Future<PackageConfig> _packagesFuture = loadPackageConfigWithLogging(
-    globals.fs.file(globalPackagesPath),
+    globals.fs.file(globals.fs.path.join('.dart_tool', 'package_config.json')),
     logger: globals.logger,
   );
 
@@ -864,7 +864,7 @@ class TestGoldenComparator {
       shellPath,
       '--disable-observatory',
       '--non-interactive',
-      '--packages=$globalPackagesPath',
+      '--packages=${globals.fs.path.join('.dart_tool', 'package_config.json')}',
       output,
     ];
 

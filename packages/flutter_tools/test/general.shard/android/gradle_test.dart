@@ -2701,7 +2701,7 @@ plugin1=${plugin1.path}
       legacySettingsDotGradleFiles.readAsStringSync().split(';EOF').map<String>((String body) => body.trim()),
       contains(templateSettingsDotGradle.readAsStringSync().trim()),
     );
-  });
+  }, skip: true); // TODO(jonahwilliams): This is an integration test and should be moved to the integration shard.
 }
 
 /// Generates a fake app bundle at the location [directoryName]/[fileName].
