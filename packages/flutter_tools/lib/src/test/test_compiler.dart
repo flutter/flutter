@@ -130,10 +130,10 @@ class TestCompiler {
       _packageConfig ??= buildInfo.packageConfig;
       // Compilation will fail if there is no flutter_test dependency, since
       // this library is imported by the generated entrypoint script.
-      if (_packageConfig['flutter_test'] == null) {
+      if (_packageConfig['test_api'] == null) {
         globals.printError(
           '\n'
-          'Error: cannot run without a dependency on "package:flutter_test". '
+          'Error: cannot run without a dependency on either "package:flutter_test" or "package:test". '
           'Ensure the following lines are present in your pubspec.yaml:'
           '\n\n'
           'dev_dependencies:\n'

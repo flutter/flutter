@@ -28,7 +28,7 @@ final BuildInfo debugBuild = BuildInfo(
   '',
   treeShakeIcons: false,
   packageConfig: PackageConfig(<Package>[
-    Package('flutter_test', Uri.parse('file:///flutter_test/')),
+    Package('test_api', Uri.parse('file:///test_api/')),
   ])
 );
 
@@ -115,7 +115,7 @@ void main() {
     Logger: () => BufferLogger.test(),
   });
 
-  testUsingContext('TestCompiler reports an error when there is no dependency on flutter_test', () async {
+  testUsingContext('TestCompiler reports an error when there is no dependency on flutter_test or test', () async {
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       BuildInfo.debug,
       FlutterProject.current(),
@@ -123,7 +123,8 @@ void main() {
     );
 
     expect(await testCompiler.compile(Uri.parse('test/foo.dart')), null);
-    expect(testLogger.errorText, contains('Error: cannot run without a dependency on "package:flutter_test"'));
+    expect(testLogger.errorText, contains('Error: cannot run without a dependency on '
+      'either "package:flutter_test" or "package:test'));
     verifyNever(residentCompiler.recompile(
       any,
       <Uri>[Uri.parse('test/foo.dart')],

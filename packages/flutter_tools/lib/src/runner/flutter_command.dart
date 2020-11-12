@@ -884,13 +884,13 @@ abstract class FlutterCommand extends Command<void> {
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions?.isNotEmpty ?? false
         ? extraFrontEndOptions
-        : const <String>[],
+        : null,
       extraGenSnapshotOptions: extraGenSnapshotOptions?.isNotEmpty ?? false
         ? extraGenSnapshotOptions
-        :  const <String>[],
+        : null,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
           ? stringsArg(FlutterOptions.kFileSystemRoot)
-          :  const <String>[],
+          : null,
       fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
           ? stringArg(FlutterOptions.kFileSystemScheme)
           : null,

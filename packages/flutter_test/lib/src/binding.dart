@@ -189,13 +189,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   final TestWindow _window;
 
   @override
-  TestRestorationManager get restorationManager => _restorationManager;
-  late TestRestorationManager _restorationManager;
+  TestRestorationManager get restorationManager {
+    _restorationManager ??= createRestorationManager();
+    return _restorationManager!;
+  }
+  TestRestorationManager? _restorationManager;
 
   /// Called by the test framework at the beginning of a widget test to
   /// prepare the binding for the next test.
   void reset() {
-    _restorationManager = createRestorationManager();
+    _restorationManager = null;
     resetGestureBinding();
   }
 
@@ -1039,8 +1042,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void ensureFrameCallbacksRegistered() {
     // Leave PlatformDispatcher alone, do nothing.
-    assert(platformDispatcher.onDrawFrame == null);
-    assert(platformDispatcher.onBeginFrame == null);
+    assert(window.onDrawFrame == null);
+    assert(window.onBeginFrame == null);
   }
 
   @override

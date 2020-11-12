@@ -14,7 +14,7 @@ class TestsProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.0.0-dev.68.0 <3.0.0"
+    sdk: ">=2.12.0-0 <3.0.0"
 
   dependencies:
     flutter:
@@ -29,7 +29,6 @@ class TestsProject extends Project {
   String get main => '// Unused';
 
   final String testContent = r'''
-  // @dart = 2.8
   import 'package:flutter_test/flutter_test.dart';
 
   void main() {

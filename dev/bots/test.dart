@@ -125,6 +125,7 @@ Future<void> main(List<String> args) async {
       'framework_tests': _runFrameworkTests,
       'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
+      'web_tool_tests': _runWebToolTests,
       'web_tests': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
       'web_long_running_tests': _runWebLongRunningTests,
@@ -313,6 +314,7 @@ Future<void> _runToolCoverage() async {
 
 Future<void> _runToolTests() async {
   const String kDotShard = '.shard';
+  const String kWeb = 'web';
   const String kTest = 'test';
   final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
@@ -321,6 +323,7 @@ Future<void> _runToolTests() async {
       .listSync()
       .map<String>((FileSystemEntity entry) => entry.path)
       .where((String name) => name.endsWith(kDotShard))
+      .where((String name) => path.basenameWithoutExtension(name) != kWeb)
       .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
@@ -337,10 +340,27 @@ Future<void> _runToolTests() async {
       );
     },
   );
-  // Prevent web tests from running if not explicitly requested.
-  if (Platform.environment[CIRRUS_TASK_NAME] == null) {
-    subshards.remove('web');
-  }
+
+  await selectSubshard(subshards);
+}
+
+Future<void> _runWebToolTests() async {
+  const String kDotShard = '.shard';
+  const String kWeb = 'web';
+  const String kTest = 'test';
+  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
+
+  final Map<String, ShardRunner> subshards = <String, ShardRunner>{
+      kWeb:
+      () async {
+        await _pubRunTest(
+          toolsPath,
+          forceSingleCore: true,
+          testPaths: <String>[path.join(kTest, '$kWeb$kDotShard', '')],
+          enableFlutterToolAsserts: true,
+        );
+      }
+  };
 
   await selectSubshard(subshards);
 }

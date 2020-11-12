@@ -369,7 +369,7 @@ abstract class FlutterTestDriver {
       } else if (!ignoreAppStopEvent && json['event'] == 'app.stop') {
         await subscription.cancel();
         final StringBuffer error = StringBuffer();
-        error.write('Received app.stop event while waiting for $interestingOccurrence\n\n');
+        error.write('Received app.stop event while waiting for $interestingOccurrence\n\n$_errorBuffer');
         if (json['params'] != null && json['params']['error'] != null) {
           error.write('${json['params']['error']}\n\n');
         }

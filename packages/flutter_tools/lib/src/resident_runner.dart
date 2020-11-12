@@ -94,7 +94,7 @@ class FlutterDevice {
     if (targetPlatform == TargetPlatform.web_javascript) {
       // TODO(jonahwilliams): consistently provide these flags across platforms.
       Artifact platformDillArtifact;
-      final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
+      final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
         platformDillArtifact = Artifact.webPlatformKernelDill;
         if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
