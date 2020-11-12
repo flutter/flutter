@@ -57,7 +57,7 @@
   "remainingTextFieldCharacterCountOther": "$remainingCount de caractere rămase",
   "refreshIndicatorSemanticLabel": "Actualizați",
   "moreButtonTooltip": "Mai multe",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "zz/ll/aaaa",
   "selectYearSemanticsLabel": "Selectați anul",
   "unspecifiedDate": "Data",

@@ -26,5 +26,5 @@
   "selectAllButtonLabel": "Atlasīt visu",
   "tabSemanticsLabel": "$tabIndex. cilne no $tabCount",
   "modalBarrierDismissLabel": "Nerādīt",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "searchTextFieldPlaceholderLabel": "Meklēt"
 }
