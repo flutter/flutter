@@ -526,6 +526,9 @@ void main() {
             '$devicePort',
             '--observatory-port',
             '$hostPort',
+            // Ensure DDS doesn't use hostPort by binding to a random port.
+            '--dds-port',
+            '0',
           ],
         );
         await completer.future;
@@ -558,6 +561,9 @@ void main() {
             '--observatory-port',
             '$hostPort',
             '--ipv6',
+            // Ensure DDS doesn't use hostPort by binding to a random port.
+            '--dds-port',
+            '0',
           ],
         );
         await completer.future;
