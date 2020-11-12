@@ -22,22 +22,22 @@ class ResultReporter implements Reporter {
     _subscriptions.add(_engine.success.asStream().listen(_onDone));
   }
   final Engine _engine;
-  final Completer<Map<String, Object>> _resultsCompleter;
+  final Completer<List<TestResult>> _resultsCompleter;
 
   final Set<StreamSubscription<Object>> _subscriptions = <StreamSubscription<Object>>{};
 
   void _onDone(bool _) {
     _cancel();
-    final Map<String, Object> results = <String, Object>{
+    final List<TestResult> results = <TestResult>[
       for (final LiveTest liveTest in _engine.liveTests)
-        liveTest.test.name: liveTest.state.result.name == success
-            ? success
+        liveTest.state.result.name == success
+            ? Success(liveTest.test.name)
             : Failure(
                 liveTest.test.name,
-                liveTest.errors.first.stackTrace.toString(),
-                error: liveTest.errors.first.error,
+                null,
+                errors: liveTest.errors,
               )
-    };
+    ];
     _resultsCompleter.complete(results);
   }
 

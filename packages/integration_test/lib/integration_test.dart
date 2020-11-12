@@ -61,16 +61,19 @@ Future<void> run(
     registerException('Test $testDescription failed: $details');
   };
 
-  final Completer<Map<String, Object>> resultsCompleter = Completer<Map<String, Object>>();
+  final Completer<List<TestResult>> resultsCompleter = Completer<List<TestResult>>();
 
   await directRunTests(
     testMain,
     reporterFactory: (Engine engine) => ResultReporter(engine, resultsCompleter),
   );
 
-  final Map<String, Object> results = await resultsCompleter.future;
+  final List<TestResult> results = await resultsCompleter.future;
 
-  binding._updateTestResultState(results);
+  binding._updateTestResultState(<String, TestResult>{
+    for (final TestResult result in results)
+      result.methodName: result,
+  });
   await reporter.report(results);
 }
 
@@ -80,7 +83,7 @@ abstract class Reporter {
   ///
   /// This method will be called at the end of [run] with the [results] of
   /// running the test suite.
-  Future<void> report(Map<String, Object> results);
+  Future<void> report(List<TestResult> results);
 }
 
 /// Default implementation of the reporter that sends results over to the
@@ -90,17 +93,17 @@ class _ReporterImpl implements Reporter {
 
   @override
   Future<void> report(
-    Map<String, Object> results,
+    List<TestResult> results,
   ) async {
     try {
       await IntegrationTestWidgetsFlutterBinding._channel.invokeMethod<void>(
         'allTestsFinished',
         <String, dynamic>{
           'results': <String, String>{
-            for (final MapEntry<String, Object> result in results.entries)
-              result.key: result.value is Failure
-                  ? _formatFailureForPlatform(result.value as Failure)
-                  : result.value as String
+            for (final TestResult result in results)
+              result.methodName: result is Failure
+                  ? _formatFailureForPlatform(result)
+                  : success
           }
         },
       );
@@ -132,7 +135,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
 
     tearDownAll(() async {
       _updateTestResultState(results);
-      await const _ReporterImpl().report(results);
+      await const _ReporterImpl().report(results.values.toList());
     });
 
     final TestExceptionReporter oldTestExceptionReporter = reportTestException;
@@ -146,11 +149,11 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     };
   }
 
-  void _updateTestResultState(Map<String, Object> results) {
+  void _updateTestResultState(Map<String, TestResult> results) {
     this.results = results;
     print('Test execution completed: $results');
 
-    _allTestsPassed.complete(!results.values.any((Object val) => val is Failure));
+    _allTestsPassed.complete(!results.values.any((TestResult result) => result is Failure));
     callbackManager.cleanup();
   }
 
@@ -215,11 +218,8 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
       MethodChannel('plugins.flutter.io/integration_test');
 
   /// Test results that will be populated after the tests have completed.
-  ///
-  /// Keys are the test descriptions, and values are either [success] or
-  /// a [Failure].
   @visibleForTesting
-  Map<String, Object> results = <String, Object>{};
+  Map<String, TestResult> results = <String, TestResult>{};
 
   List<Failure> get _failures => results.values.whereType<Failure>().toList();
 
@@ -275,7 +275,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
       description: description,
       timeout: timeout,
     );
-    results[description] ??= success;
+    results[description] ??= Success(description);
   }
 
   vm.VmService _vmService;

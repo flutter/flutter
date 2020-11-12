@@ -3,27 +3,24 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/common.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:integration_test/src/constants.dart';
 
-const String _failureExcerpt = 'Expected: <true>';
+const String failureExcerpt = 'Expected: <true>';
 
-bool isFailure(Object object) {
-  if (object is! Failure) {
-    return false;
-  }
-  final Failure failure = object as Failure;
-  return failure.error.toString().contains(_failureExcerpt);
-}
+dynamic isSuccess(String methodName) => isA<Success>()
+  .having((Success s) => s.methodName, 'methodName', methodName);
 
-bool isSerializedFailure(dynamic object) =>
-    object.toString().contains(_failureExcerpt);
+dynamic isFailure(String methodName) => isA<Failure>()
+  .having((Failure e) => e.methodName, 'methodName', methodName)
+  .having((Failure e) => e.error.toString(), 'error', contains(failureExcerpt));
 
-bool isSuccess(Object object) => object == success;
 
-Future<Map<String, Object>> runAndCollectResults(
+Future<List<TestResult>> runAndCollectResults(
   FutureOr<void> Function() testMain,
 ) async {
   final _TestReporter reporter = _TestReporter();
@@ -32,9 +29,16 @@ Future<Map<String, Object>> runAndCollectResults(
 }
 
 class _TestReporter implements Reporter {
-  final Completer<Map<String, Object>> _resultsCompleter = Completer<Map<String, Object>>();
-  Future<Map<String, Object>> get results => _resultsCompleter.future;
+  final Completer<List<TestResult>> _resultsCompleter = Completer<List<TestResult>>();
+  Future<List<TestResult>> get results => _resultsCompleter.future;
 
   @override
-  Future<void> report(Map<String, Object> results) async => _resultsCompleter.complete(results);
+  Future<void> report(List<TestResult> results) async => _resultsCompleter.complete(results);
+}
+
+String testResultsToJson(Map<String, TestResult> results) {
+  return jsonEncode(<String, Object>{
+    for (TestResult result in results.values)
+      result.methodName: result is Failure ? result : success
+  });
 }

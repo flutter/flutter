@@ -3,15 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/common.dart';
 
 import 'utils.dart';
 
 void main() {
   test('when one test passes, then another fails', () async {
-    final Map<String, Object> results = await runAndCollectResults(_testMain);
-    expect(results, hasLength(2));
-    expect(results, containsPair('Passing test', isSuccess));
-    expect(results, containsPair('Failing test', isFailure));
+    final List<TestResult> results = await runAndCollectResults(_testMain);
+
+    expect(results, <dynamic>[
+      isSuccess('Passing test'),
+      isFailure('Failing test')
+    ]);
   });
 }
 

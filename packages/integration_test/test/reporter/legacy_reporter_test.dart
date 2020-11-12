@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/src/constants.dart';
 
 import 'utils.dart';
 
@@ -19,24 +20,24 @@ Future<void> main() async {
     final Map<String, dynamic> results = await _runTest('test/reporter/data/pass_test_script.dart');
 
     expect(results, hasLength(2));
-    expect(results, containsPair('Passing test 1', isSuccess));
-    expect(results, containsPair('Passing test 2', isSuccess));
+    expect(results, containsPair('Passing test 1', _isSuccess));
+    expect(results, containsPair('Passing test 2', _isSuccess));
   });
 
   test('When multiple tests fail', () async {
     final Map<String, dynamic> results = await _runTest('test/reporter/data/fail_test_script.dart');
 
     expect(results, hasLength(2));
-    expect(results, containsPair('Failing test 1', isSerializedFailure));
-    expect(results, containsPair('Failing test 2', isSerializedFailure));
+    expect(results, containsPair('Failing test 1', _isSerializedFailure));
+    expect(results, containsPair('Failing test 2', _isSerializedFailure));
   });
 
   test('When one test passes, then another fails', () async {
     final Map<String, dynamic> results = await _runTest('test/reporter/data/pass_then_fail_test_script.dart');
 
     expect(results, hasLength(2));
-    expect(results, containsPair('Passing test', isSuccess));
-    expect(results, containsPair('Failing test', isSerializedFailure));
+    expect(results, containsPair('Passing test', _isSuccess));
+    expect(results, containsPair('Failing test', _isSerializedFailure));
   });
 }
 
@@ -70,3 +71,7 @@ Future<Map<String, dynamic>> _runTest(String scriptPath) async {
 
   return jsonDecode(testResults) as Map<String, dynamic>;
 }
+
+bool _isSuccess(Object object) => object == success;
+
+bool _isSerializedFailure(dynamic object) => object.toString().contains(failureExcerpt);
