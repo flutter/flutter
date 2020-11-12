@@ -15,13 +15,13 @@ String _wrapString(String input) {
   return wrapString(input, prefix: '  /// ');
 }
 
-class _ExplicitKeySpecification {
-  const _ExplicitKeySpecification(this.code, this.name, [this.constantName]);
+// class _ExplicitKeySpecification {
+//   const _ExplicitKeySpecification(this.code, this.name, [this.constantName]);
 
-  final int code;
-  final String name;
-  final String constantName;
-}
+//   final int code;
+//   final String name;
+//   final String constantName;
+// }
 
 /// Generates the keyboard_keys.dart based on the information in the key data
 /// structure given to it.
@@ -48,38 +48,38 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
     return definitions.toString();
   }
 
-  static List<LogicalKeyEntry> _alnumLogicalKeys() {
-    final List<_ExplicitKeySpecification> keys = <_ExplicitKeySpecification>[]
-      ..addAll(List<_ExplicitKeySpecification>.generate(26, (int i) {
-        final int code = i + 'a'.codeUnits[0];
-        final String char = String.fromCharCode(code);
-        return _ExplicitKeySpecification(code, 'lowercase${char.toUpperCase()}', 'lower${char.toUpperCase()}');
-      }))
-      ..addAll(List<_ExplicitKeySpecification>.generate(26, (int i) {
-        final int code = i + 'A'.codeUnits[0];
-        final String char = String.fromCharCode(code);
-        return _ExplicitKeySpecification(code, 'uppercase$char', 'upper$char');
-      }))
-      ..addAll(List<_ExplicitKeySpecification>.generate(10, (int i) {
-        final int code = i + '0'.codeUnits[0];
-        final String char = String.fromCharCode(code);
-        return _ExplicitKeySpecification(code, 'digit$char');
-      }))
-      ..add(_ExplicitKeySpecification(' '.codeUnits[0], 'space'));
+  // static List<LogicalKeyEntry> _alnumLogicalKeys() {
+  //   final List<_ExplicitKeySpecification> keys = <_ExplicitKeySpecification>[]
+  //     ..addAll(List<_ExplicitKeySpecification>.generate(26, (int i) {
+  //       final int code = i + 'a'.codeUnits[0];
+  //       final String char = String.fromCharCode(code);
+  //       return _ExplicitKeySpecification(code, 'lowercase${char.toUpperCase()}', 'lower${char.toUpperCase()}');
+  //     }))
+  //     ..addAll(List<_ExplicitKeySpecification>.generate(26, (int i) {
+  //       final int code = i + 'A'.codeUnits[0];
+  //       final String char = String.fromCharCode(code);
+  //       return _ExplicitKeySpecification(code, 'uppercase$char', 'upper$char');
+  //     }))
+  //     ..addAll(List<_ExplicitKeySpecification>.generate(10, (int i) {
+  //       final int code = i + '0'.codeUnits[0];
+  //       final String char = String.fromCharCode(code);
+  //       return _ExplicitKeySpecification(code, 'digit$char');
+  //     }))
+  //     ..add(_ExplicitKeySpecification(' '.codeUnits[0], 'space'));
 
-    return keys.map((_ExplicitKeySpecification key) {
-      final LogicalKeyEntry result = LogicalKeyEntry(
-        value: key.code,
-        commentName: LogicalKeyEntry.computeCommentName(key.name),
-        constantName: key.constantName ?? LogicalKeyEntry.computeConstantName(key.name),
-        gtkNames: [key.name],
-        gtkValues: [key.code],
-        webNames: [key.name],
-        webValues: [key.code],
-      );
-      return result;
-    }).toList();
-  }
+  //   return keys.map((_ExplicitKeySpecification key) {
+  //     final LogicalKeyEntry result = LogicalKeyEntry(
+  //       value: key.code,
+  //       commentName: LogicalKeyEntry.computeCommentName(key.name),
+  //       constantName: key.constantName ?? LogicalKeyEntry.computeConstantName(key.name),
+  //       gtkNames: [key.name],
+  //       gtkValues: [key.code],
+  //       webNames: [key.name],
+  //       webValues: [key.code],
+  //     );
+  //     return result;
+  //   }).toList();
+  // }
 
   /// Gets the generated definitions of LogicalKeyboardKeys.
   String get _logicalDefinitions {
@@ -95,7 +95,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 ''');
     }
 
-    for (final LogicalKeyEntry entry in _alnumLogicalKeys()..addAll(logicalData.data)) {
+    for (final LogicalKeyEntry entry in logicalData.data.values) {
       printKey(
         entry.value,
         entry.constantName,
@@ -120,12 +120,12 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   String get _logicalSynonyms {
     final StringBuffer synonyms = StringBuffer();
-    for (final String name in PhysicalKeyEntry.synonyms.keys) {
-      for (final String synonym in PhysicalKeyEntry.synonyms[name].cast<String>()) {
-        final String keyName = upperCamelToLowerCamel(synonym);
-        synonyms.writeln('    $keyName: $name,');
-      }
-    }
+    // for (final String name in PhysicalKeyEntry.synonyms.keys) {
+    //   for (final String synonym in PhysicalKeyEntry.synonyms[name].cast<String>()) {
+    //     final String keyName = upperCamelToLowerCamel(synonym);
+    //     synonyms.writeln('    $keyName: $name,');
+    //   }
+    // }
     return synonyms.toString();
   }
 
@@ -141,7 +141,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of Flutter key codes to logical keys.
   String get _predefinedKeyCodeMap {
     final StringBuffer keyCodeMap = StringBuffer();
-    for (final LogicalKeyEntry entry in _alnumLogicalKeys()..addAll(logicalData.data)) {
+    for (final LogicalKeyEntry entry in logicalData.data.values) {
       keyCodeMap.writeln('    ${toHex(entry.value, digits: 10)}: ${entry.constantName},');
     }
     // for (final String entry in PhysicalKeyEntry.synonyms.keys) {

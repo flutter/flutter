@@ -303,265 +303,110 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// HID Usage codes.
   static const int hidPlane = 0x00100000000;
 
-  /// Represents the logical "Lowercase A" key on the keyboard.
+  /// Represents the logical "Backspace" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerA = LogicalKeyboardKey(0x00000000061, debugName: kReleaseMode ? null : 'Lowercase A');
+  static const LogicalKeyboardKey backspace = LogicalKeyboardKey(0x00000000008, debugName: kReleaseMode ? null : 'Backspace');
 
-  /// Represents the logical "Lowercase B" key on the keyboard.
+  /// Represents the logical "Tab" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerB = LogicalKeyboardKey(0x00000000062, debugName: kReleaseMode ? null : 'Lowercase B');
+  static const LogicalKeyboardKey tab = LogicalKeyboardKey(0x00000000009, debugName: kReleaseMode ? null : 'Tab');
 
-  /// Represents the logical "Lowercase C" key on the keyboard.
+  /// Represents the logical "Enter" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerC = LogicalKeyboardKey(0x00000000063, debugName: kReleaseMode ? null : 'Lowercase C');
+  static const LogicalKeyboardKey enter = LogicalKeyboardKey(0x0000000000d, debugName: kReleaseMode ? null : 'Enter');
 
-  /// Represents the logical "Lowercase D" key on the keyboard.
+  /// Represents the logical "Escape" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerD = LogicalKeyboardKey(0x00000000064, debugName: kReleaseMode ? null : 'Lowercase D');
+  static const LogicalKeyboardKey escape = LogicalKeyboardKey(0x0000000001b, debugName: kReleaseMode ? null : 'Escape');
 
-  /// Represents the logical "Lowercase E" key on the keyboard.
+  /// Represents the logical "Delete" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerE = LogicalKeyboardKey(0x00000000065, debugName: kReleaseMode ? null : 'Lowercase E');
+  static const LogicalKeyboardKey delete = LogicalKeyboardKey(0x0000000007f, debugName: kReleaseMode ? null : 'Delete');
 
-  /// Represents the logical "Lowercase F" key on the keyboard.
+  /// Represents the logical "Space" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerF = LogicalKeyboardKey(0x00000000066, debugName: kReleaseMode ? null : 'Lowercase F');
+  static const LogicalKeyboardKey space = LogicalKeyboardKey(0x00000000020, debugName: kReleaseMode ? null : 'Space');
 
-  /// Represents the logical "Lowercase G" key on the keyboard.
+  /// Represents the logical "Exclamation" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerG = LogicalKeyboardKey(0x00000000067, debugName: kReleaseMode ? null : 'Lowercase G');
+  static const LogicalKeyboardKey exclamation = LogicalKeyboardKey(0x00000000021, debugName: kReleaseMode ? null : 'Exclamation');
 
-  /// Represents the logical "Lowercase H" key on the keyboard.
+  /// Represents the logical "Quote Double" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerH = LogicalKeyboardKey(0x00000000068, debugName: kReleaseMode ? null : 'Lowercase H');
+  static const LogicalKeyboardKey quoteDouble = LogicalKeyboardKey(0x00000000022, debugName: kReleaseMode ? null : 'Quote Double');
 
-  /// Represents the logical "Lowercase I" key on the keyboard.
+  /// Represents the logical "Number Sign" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerI = LogicalKeyboardKey(0x00000000069, debugName: kReleaseMode ? null : 'Lowercase I');
+  static const LogicalKeyboardKey numberSign = LogicalKeyboardKey(0x00000000023, debugName: kReleaseMode ? null : 'Number Sign');
 
-  /// Represents the logical "Lowercase J" key on the keyboard.
+  /// Represents the logical "Dollar" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerJ = LogicalKeyboardKey(0x0000000006a, debugName: kReleaseMode ? null : 'Lowercase J');
+  static const LogicalKeyboardKey dollar = LogicalKeyboardKey(0x00000000024, debugName: kReleaseMode ? null : 'Dollar');
 
-  /// Represents the logical "Lowercase K" key on the keyboard.
+  /// Represents the logical "Percent" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerK = LogicalKeyboardKey(0x0000000006b, debugName: kReleaseMode ? null : 'Lowercase K');
+  static const LogicalKeyboardKey percent = LogicalKeyboardKey(0x00000000025, debugName: kReleaseMode ? null : 'Percent');
 
-  /// Represents the logical "Lowercase L" key on the keyboard.
+  /// Represents the logical "Ampersand" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerL = LogicalKeyboardKey(0x0000000006c, debugName: kReleaseMode ? null : 'Lowercase L');
+  static const LogicalKeyboardKey ampersand = LogicalKeyboardKey(0x00000000026, debugName: kReleaseMode ? null : 'Ampersand');
 
-  /// Represents the logical "Lowercase M" key on the keyboard.
+  /// Represents the logical "Quote Single" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerM = LogicalKeyboardKey(0x0000000006d, debugName: kReleaseMode ? null : 'Lowercase M');
+  static const LogicalKeyboardKey quoteSingle = LogicalKeyboardKey(0x00000000027, debugName: kReleaseMode ? null : 'Quote Single');
 
-  /// Represents the logical "Lowercase N" key on the keyboard.
+  /// Represents the logical "Parenthesis Left" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerN = LogicalKeyboardKey(0x0000000006e, debugName: kReleaseMode ? null : 'Lowercase N');
+  static const LogicalKeyboardKey parenthesisLeft = LogicalKeyboardKey(0x00000000028, debugName: kReleaseMode ? null : 'Parenthesis Left');
 
-  /// Represents the logical "Lowercase O" key on the keyboard.
+  /// Represents the logical "Parenthesis Right" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerO = LogicalKeyboardKey(0x0000000006f, debugName: kReleaseMode ? null : 'Lowercase O');
+  static const LogicalKeyboardKey parenthesisRight = LogicalKeyboardKey(0x00000000029, debugName: kReleaseMode ? null : 'Parenthesis Right');
 
-  /// Represents the logical "Lowercase P" key on the keyboard.
+  /// Represents the logical "Asterisk" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerP = LogicalKeyboardKey(0x00000000070, debugName: kReleaseMode ? null : 'Lowercase P');
+  static const LogicalKeyboardKey asterisk = LogicalKeyboardKey(0x0000000002a, debugName: kReleaseMode ? null : 'Asterisk');
 
-  /// Represents the logical "Lowercase Q" key on the keyboard.
+  /// Represents the logical "Plus" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerQ = LogicalKeyboardKey(0x00000000071, debugName: kReleaseMode ? null : 'Lowercase Q');
+  static const LogicalKeyboardKey plus = LogicalKeyboardKey(0x0000000002b, debugName: kReleaseMode ? null : 'Plus');
 
-  /// Represents the logical "Lowercase R" key on the keyboard.
+  /// Represents the logical "Comma" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerR = LogicalKeyboardKey(0x00000000072, debugName: kReleaseMode ? null : 'Lowercase R');
+  static const LogicalKeyboardKey comma = LogicalKeyboardKey(0x0000000002c, debugName: kReleaseMode ? null : 'Comma');
 
-  /// Represents the logical "Lowercase S" key on the keyboard.
+  /// Represents the logical "Minus" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerS = LogicalKeyboardKey(0x00000000073, debugName: kReleaseMode ? null : 'Lowercase S');
+  static const LogicalKeyboardKey minus = LogicalKeyboardKey(0x0000000002d, debugName: kReleaseMode ? null : 'Minus');
 
-  /// Represents the logical "Lowercase T" key on the keyboard.
+  /// Represents the logical "Period" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerT = LogicalKeyboardKey(0x00000000074, debugName: kReleaseMode ? null : 'Lowercase T');
+  static const LogicalKeyboardKey period = LogicalKeyboardKey(0x0000000002e, debugName: kReleaseMode ? null : 'Period');
 
-  /// Represents the logical "Lowercase U" key on the keyboard.
+  /// Represents the logical "Slash" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerU = LogicalKeyboardKey(0x00000000075, debugName: kReleaseMode ? null : 'Lowercase U');
-
-  /// Represents the logical "Lowercase V" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerV = LogicalKeyboardKey(0x00000000076, debugName: kReleaseMode ? null : 'Lowercase V');
-
-  /// Represents the logical "Lowercase W" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerW = LogicalKeyboardKey(0x00000000077, debugName: kReleaseMode ? null : 'Lowercase W');
-
-  /// Represents the logical "Lowercase X" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerX = LogicalKeyboardKey(0x00000000078, debugName: kReleaseMode ? null : 'Lowercase X');
-
-  /// Represents the logical "Lowercase Y" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerY = LogicalKeyboardKey(0x00000000079, debugName: kReleaseMode ? null : 'Lowercase Y');
-
-  /// Represents the logical "Lowercase Z" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerZ = LogicalKeyboardKey(0x0000000007a, debugName: kReleaseMode ? null : 'Lowercase Z');
-
-  /// Represents the logical "Uppercase A" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperA = LogicalKeyboardKey(0x00000000041, debugName: kReleaseMode ? null : 'Uppercase A');
-
-  /// Represents the logical "Uppercase B" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperB = LogicalKeyboardKey(0x00000000042, debugName: kReleaseMode ? null : 'Uppercase B');
-
-  /// Represents the logical "Uppercase C" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperC = LogicalKeyboardKey(0x00000000043, debugName: kReleaseMode ? null : 'Uppercase C');
-
-  /// Represents the logical "Uppercase D" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperD = LogicalKeyboardKey(0x00000000044, debugName: kReleaseMode ? null : 'Uppercase D');
-
-  /// Represents the logical "Uppercase E" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperE = LogicalKeyboardKey(0x00000000045, debugName: kReleaseMode ? null : 'Uppercase E');
-
-  /// Represents the logical "Uppercase F" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperF = LogicalKeyboardKey(0x00000000046, debugName: kReleaseMode ? null : 'Uppercase F');
-
-  /// Represents the logical "Uppercase G" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperG = LogicalKeyboardKey(0x00000000047, debugName: kReleaseMode ? null : 'Uppercase G');
-
-  /// Represents the logical "Uppercase H" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperH = LogicalKeyboardKey(0x00000000048, debugName: kReleaseMode ? null : 'Uppercase H');
-
-  /// Represents the logical "Uppercase I" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperI = LogicalKeyboardKey(0x00000000049, debugName: kReleaseMode ? null : 'Uppercase I');
-
-  /// Represents the logical "Uppercase J" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperJ = LogicalKeyboardKey(0x0000000004a, debugName: kReleaseMode ? null : 'Uppercase J');
-
-  /// Represents the logical "Uppercase K" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperK = LogicalKeyboardKey(0x0000000004b, debugName: kReleaseMode ? null : 'Uppercase K');
-
-  /// Represents the logical "Uppercase L" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperL = LogicalKeyboardKey(0x0000000004c, debugName: kReleaseMode ? null : 'Uppercase L');
-
-  /// Represents the logical "Uppercase M" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperM = LogicalKeyboardKey(0x0000000004d, debugName: kReleaseMode ? null : 'Uppercase M');
-
-  /// Represents the logical "Uppercase N" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperN = LogicalKeyboardKey(0x0000000004e, debugName: kReleaseMode ? null : 'Uppercase N');
-
-  /// Represents the logical "Uppercase O" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperO = LogicalKeyboardKey(0x0000000004f, debugName: kReleaseMode ? null : 'Uppercase O');
-
-  /// Represents the logical "Uppercase P" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperP = LogicalKeyboardKey(0x00000000050, debugName: kReleaseMode ? null : 'Uppercase P');
-
-  /// Represents the logical "Uppercase Q" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperQ = LogicalKeyboardKey(0x00000000051, debugName: kReleaseMode ? null : 'Uppercase Q');
-
-  /// Represents the logical "Uppercase R" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperR = LogicalKeyboardKey(0x00000000052, debugName: kReleaseMode ? null : 'Uppercase R');
-
-  /// Represents the logical "Uppercase S" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperS = LogicalKeyboardKey(0x00000000053, debugName: kReleaseMode ? null : 'Uppercase S');
-
-  /// Represents the logical "Uppercase T" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperT = LogicalKeyboardKey(0x00000000054, debugName: kReleaseMode ? null : 'Uppercase T');
-
-  /// Represents the logical "Uppercase U" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperU = LogicalKeyboardKey(0x00000000055, debugName: kReleaseMode ? null : 'Uppercase U');
-
-  /// Represents the logical "Uppercase V" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperV = LogicalKeyboardKey(0x00000000056, debugName: kReleaseMode ? null : 'Uppercase V');
-
-  /// Represents the logical "Uppercase W" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperW = LogicalKeyboardKey(0x00000000057, debugName: kReleaseMode ? null : 'Uppercase W');
-
-  /// Represents the logical "Uppercase X" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperX = LogicalKeyboardKey(0x00000000058, debugName: kReleaseMode ? null : 'Uppercase X');
-
-  /// Represents the logical "Uppercase Y" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperY = LogicalKeyboardKey(0x00000000059, debugName: kReleaseMode ? null : 'Uppercase Y');
-
-  /// Represents the logical "Uppercase Z" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperZ = LogicalKeyboardKey(0x0000000005a, debugName: kReleaseMode ? null : 'Uppercase Z');
+  static const LogicalKeyboardKey slash = LogicalKeyboardKey(0x0000000002f, debugName: kReleaseMode ? null : 'Slash');
 
   /// Represents the logical "Digit 0" key on the keyboard.
   ///
@@ -613,35 +458,350 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey digit9 = LogicalKeyboardKey(0x00000000039, debugName: kReleaseMode ? null : 'Digit 9');
 
-  /// Represents the logical "Space" key on the keyboard.
+  /// Represents the logical "Colon" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey space = LogicalKeyboardKey(0x00000000020, debugName: kReleaseMode ? null : 'Space');
+  static const LogicalKeyboardKey colon = LogicalKeyboardKey(0x0000000003a, debugName: kReleaseMode ? null : 'Colon');
 
-  /// Represents the logical "Backspace" key on the keyboard.
+  /// Represents the logical "Semicolon" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey backspace = LogicalKeyboardKey(0x00000000008, debugName: kReleaseMode ? null : 'Backspace');
+  static const LogicalKeyboardKey semicolon = LogicalKeyboardKey(0x0000000003b, debugName: kReleaseMode ? null : 'Semicolon');
 
-  /// Represents the logical "Tab" key on the keyboard.
+  /// Represents the logical "Less" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tab = LogicalKeyboardKey(0x00000000009, debugName: kReleaseMode ? null : 'Tab');
+  static const LogicalKeyboardKey less = LogicalKeyboardKey(0x0000000003c, debugName: kReleaseMode ? null : 'Less');
 
-  /// Represents the logical "Enter" key on the keyboard.
+  /// Represents the logical "Equal" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey enter = LogicalKeyboardKey(0x0000000000d, debugName: kReleaseMode ? null : 'Enter');
+  static const LogicalKeyboardKey equal = LogicalKeyboardKey(0x0000000003d, debugName: kReleaseMode ? null : 'Equal');
 
-  /// Represents the logical "Escape" key on the keyboard.
+  /// Represents the logical "Greater" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey escape = LogicalKeyboardKey(0x0000000001b, debugName: kReleaseMode ? null : 'Escape');
+  static const LogicalKeyboardKey greater = LogicalKeyboardKey(0x0000000003e, debugName: kReleaseMode ? null : 'Greater');
 
-  /// Represents the logical "Delete" key on the keyboard.
+  /// Represents the logical "Question" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey delete = LogicalKeyboardKey(0x0000000007f, debugName: kReleaseMode ? null : 'Delete');
+  static const LogicalKeyboardKey question = LogicalKeyboardKey(0x0000000003f, debugName: kReleaseMode ? null : 'Question');
+
+  /// Represents the logical "At" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey at = LogicalKeyboardKey(0x00000000040, debugName: kReleaseMode ? null : 'At');
+
+  /// Represents the logical "Upper A" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperA = LogicalKeyboardKey(0x00000000041, debugName: kReleaseMode ? null : 'Upper A');
+
+  /// Represents the logical "Upper B" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperB = LogicalKeyboardKey(0x00000000042, debugName: kReleaseMode ? null : 'Upper B');
+
+  /// Represents the logical "Upper C" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperC = LogicalKeyboardKey(0x00000000043, debugName: kReleaseMode ? null : 'Upper C');
+
+  /// Represents the logical "Upper D" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperD = LogicalKeyboardKey(0x00000000044, debugName: kReleaseMode ? null : 'Upper D');
+
+  /// Represents the logical "Upper E" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperE = LogicalKeyboardKey(0x00000000045, debugName: kReleaseMode ? null : 'Upper E');
+
+  /// Represents the logical "Upper F" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperF = LogicalKeyboardKey(0x00000000046, debugName: kReleaseMode ? null : 'Upper F');
+
+  /// Represents the logical "Upper G" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperG = LogicalKeyboardKey(0x00000000047, debugName: kReleaseMode ? null : 'Upper G');
+
+  /// Represents the logical "Upper H" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperH = LogicalKeyboardKey(0x00000000048, debugName: kReleaseMode ? null : 'Upper H');
+
+  /// Represents the logical "Upper I" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperI = LogicalKeyboardKey(0x00000000049, debugName: kReleaseMode ? null : 'Upper I');
+
+  /// Represents the logical "Upper J" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperJ = LogicalKeyboardKey(0x0000000004a, debugName: kReleaseMode ? null : 'Upper J');
+
+  /// Represents the logical "Upper K" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperK = LogicalKeyboardKey(0x0000000004b, debugName: kReleaseMode ? null : 'Upper K');
+
+  /// Represents the logical "Upper L" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperL = LogicalKeyboardKey(0x0000000004c, debugName: kReleaseMode ? null : 'Upper L');
+
+  /// Represents the logical "Upper M" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperM = LogicalKeyboardKey(0x0000000004d, debugName: kReleaseMode ? null : 'Upper M');
+
+  /// Represents the logical "Upper N" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperN = LogicalKeyboardKey(0x0000000004e, debugName: kReleaseMode ? null : 'Upper N');
+
+  /// Represents the logical "Upper O" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperO = LogicalKeyboardKey(0x0000000004f, debugName: kReleaseMode ? null : 'Upper O');
+
+  /// Represents the logical "Upper P" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperP = LogicalKeyboardKey(0x00000000050, debugName: kReleaseMode ? null : 'Upper P');
+
+  /// Represents the logical "Upper Q" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperQ = LogicalKeyboardKey(0x00000000051, debugName: kReleaseMode ? null : 'Upper Q');
+
+  /// Represents the logical "Upper R" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperR = LogicalKeyboardKey(0x00000000052, debugName: kReleaseMode ? null : 'Upper R');
+
+  /// Represents the logical "Upper S" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperS = LogicalKeyboardKey(0x00000000053, debugName: kReleaseMode ? null : 'Upper S');
+
+  /// Represents the logical "Upper T" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperT = LogicalKeyboardKey(0x00000000054, debugName: kReleaseMode ? null : 'Upper T');
+
+  /// Represents the logical "Upper U" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperU = LogicalKeyboardKey(0x00000000055, debugName: kReleaseMode ? null : 'Upper U');
+
+  /// Represents the logical "Upper V" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperV = LogicalKeyboardKey(0x00000000056, debugName: kReleaseMode ? null : 'Upper V');
+
+  /// Represents the logical "Upper W" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperW = LogicalKeyboardKey(0x00000000057, debugName: kReleaseMode ? null : 'Upper W');
+
+  /// Represents the logical "Upper X" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperX = LogicalKeyboardKey(0x00000000058, debugName: kReleaseMode ? null : 'Upper X');
+
+  /// Represents the logical "Upper Y" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperY = LogicalKeyboardKey(0x00000000059, debugName: kReleaseMode ? null : 'Upper Y');
+
+  /// Represents the logical "Upper Z" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey upperZ = LogicalKeyboardKey(0x0000000005a, debugName: kReleaseMode ? null : 'Upper Z');
+
+  /// Represents the logical "Bracket Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey bracketLeft = LogicalKeyboardKey(0x0000000005b, debugName: kReleaseMode ? null : 'Bracket Left');
+
+  /// Represents the logical "Backslash" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey backslash = LogicalKeyboardKey(0x0000000005c, debugName: kReleaseMode ? null : 'Backslash');
+
+  /// Represents the logical "Bracket Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey bracketRight = LogicalKeyboardKey(0x0000000005d, debugName: kReleaseMode ? null : 'Bracket Right');
+
+  /// Represents the logical "Caret" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey caret = LogicalKeyboardKey(0x0000000005e, debugName: kReleaseMode ? null : 'Caret');
+
+  /// Represents the logical "Backquote" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey backquote = LogicalKeyboardKey(0x00000000060, debugName: kReleaseMode ? null : 'Backquote');
+
+  /// Represents the logical "Underscore" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey underscore = LogicalKeyboardKey(0x0000000005f, debugName: kReleaseMode ? null : 'Underscore');
+
+  /// Represents the logical "Lower A" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerA = LogicalKeyboardKey(0x00000000061, debugName: kReleaseMode ? null : 'Lower A');
+
+  /// Represents the logical "Lower B" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerB = LogicalKeyboardKey(0x00000000062, debugName: kReleaseMode ? null : 'Lower B');
+
+  /// Represents the logical "Lower C" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerC = LogicalKeyboardKey(0x00000000063, debugName: kReleaseMode ? null : 'Lower C');
+
+  /// Represents the logical "Lower D" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerD = LogicalKeyboardKey(0x00000000064, debugName: kReleaseMode ? null : 'Lower D');
+
+  /// Represents the logical "Lower E" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerE = LogicalKeyboardKey(0x00000000065, debugName: kReleaseMode ? null : 'Lower E');
+
+  /// Represents the logical "Lower F" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerF = LogicalKeyboardKey(0x00000000066, debugName: kReleaseMode ? null : 'Lower F');
+
+  /// Represents the logical "Lower G" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerG = LogicalKeyboardKey(0x00000000067, debugName: kReleaseMode ? null : 'Lower G');
+
+  /// Represents the logical "Lower H" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerH = LogicalKeyboardKey(0x00000000068, debugName: kReleaseMode ? null : 'Lower H');
+
+  /// Represents the logical "Lower I" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerI = LogicalKeyboardKey(0x00000000069, debugName: kReleaseMode ? null : 'Lower I');
+
+  /// Represents the logical "Lower J" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerJ = LogicalKeyboardKey(0x0000000006a, debugName: kReleaseMode ? null : 'Lower J');
+
+  /// Represents the logical "Lower K" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerK = LogicalKeyboardKey(0x0000000006b, debugName: kReleaseMode ? null : 'Lower K');
+
+  /// Represents the logical "Lower L" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerL = LogicalKeyboardKey(0x0000000006c, debugName: kReleaseMode ? null : 'Lower L');
+
+  /// Represents the logical "Lower M" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerM = LogicalKeyboardKey(0x0000000006d, debugName: kReleaseMode ? null : 'Lower M');
+
+  /// Represents the logical "Lower N" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerN = LogicalKeyboardKey(0x0000000006e, debugName: kReleaseMode ? null : 'Lower N');
+
+  /// Represents the logical "Lower O" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerO = LogicalKeyboardKey(0x0000000006f, debugName: kReleaseMode ? null : 'Lower O');
+
+  /// Represents the logical "Lower P" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerP = LogicalKeyboardKey(0x00000000070, debugName: kReleaseMode ? null : 'Lower P');
+
+  /// Represents the logical "Lower Q" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerQ = LogicalKeyboardKey(0x00000000071, debugName: kReleaseMode ? null : 'Lower Q');
+
+  /// Represents the logical "Lower R" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerR = LogicalKeyboardKey(0x00000000072, debugName: kReleaseMode ? null : 'Lower R');
+
+  /// Represents the logical "Lower S" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerS = LogicalKeyboardKey(0x00000000073, debugName: kReleaseMode ? null : 'Lower S');
+
+  /// Represents the logical "Lower T" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerT = LogicalKeyboardKey(0x00000000074, debugName: kReleaseMode ? null : 'Lower T');
+
+  /// Represents the logical "Lower U" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerU = LogicalKeyboardKey(0x00000000075, debugName: kReleaseMode ? null : 'Lower U');
+
+  /// Represents the logical "Lower V" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerV = LogicalKeyboardKey(0x00000000076, debugName: kReleaseMode ? null : 'Lower V');
+
+  /// Represents the logical "Lower W" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerW = LogicalKeyboardKey(0x00000000077, debugName: kReleaseMode ? null : 'Lower W');
+
+  /// Represents the logical "Lower X" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerX = LogicalKeyboardKey(0x00000000078, debugName: kReleaseMode ? null : 'Lower X');
+
+  /// Represents the logical "Lower Y" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerY = LogicalKeyboardKey(0x00000000079, debugName: kReleaseMode ? null : 'Lower Y');
+
+  /// Represents the logical "Lower Z" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lowerZ = LogicalKeyboardKey(0x0000000007a, debugName: kReleaseMode ? null : 'Lower Z');
+
+  /// Represents the logical "Brace Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey braceLeft = LogicalKeyboardKey(0x0000000007b, debugName: kReleaseMode ? null : 'Brace Left');
+
+  /// Represents the logical "Brace Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey braceRight = LogicalKeyboardKey(0x0000000007d, debugName: kReleaseMode ? null : 'Brace Right');
+
+  /// Represents the logical "Tilde" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tilde = LogicalKeyboardKey(0x0000000007e, debugName: kReleaseMode ? null : 'Tilde');
+
+  /// Represents the logical "Bar" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey bar = LogicalKeyboardKey(0x0000000007c, debugName: kReleaseMode ? null : 'Bar');
 
   /// Represents the logical "Unidentified" key on the keyboard.
   ///
@@ -2147,32 +2307,44 @@ class LogicalKeyboardKey extends KeyboardKey {
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
   static const Map<int, LogicalKeyboardKey> _knownLogicalKeys = <int, LogicalKeyboardKey>{
-    0x0000000061: lowerA,
-    0x0000000062: lowerB,
-    0x0000000063: lowerC,
-    0x0000000064: lowerD,
-    0x0000000065: lowerE,
-    0x0000000066: lowerF,
-    0x0000000067: lowerG,
-    0x0000000068: lowerH,
-    0x0000000069: lowerI,
-    0x000000006a: lowerJ,
-    0x000000006b: lowerK,
-    0x000000006c: lowerL,
-    0x000000006d: lowerM,
-    0x000000006e: lowerN,
-    0x000000006f: lowerO,
-    0x0000000070: lowerP,
-    0x0000000071: lowerQ,
-    0x0000000072: lowerR,
-    0x0000000073: lowerS,
-    0x0000000074: lowerT,
-    0x0000000075: lowerU,
-    0x0000000076: lowerV,
-    0x0000000077: lowerW,
-    0x0000000078: lowerX,
-    0x0000000079: lowerY,
-    0x000000007a: lowerZ,
+    0x0000000008: backspace,
+    0x0000000009: tab,
+    0x000000000d: enter,
+    0x000000001b: escape,
+    0x000000007f: delete,
+    0x0000000020: space,
+    0x0000000021: exclamation,
+    0x0000000022: quoteDouble,
+    0x0000000023: numberSign,
+    0x0000000024: dollar,
+    0x0000000025: percent,
+    0x0000000026: ampersand,
+    0x0000000027: quoteSingle,
+    0x0000000028: parenthesisLeft,
+    0x0000000029: parenthesisRight,
+    0x000000002a: asterisk,
+    0x000000002b: plus,
+    0x000000002c: comma,
+    0x000000002d: minus,
+    0x000000002e: period,
+    0x000000002f: slash,
+    0x0000000030: digit0,
+    0x0000000031: digit1,
+    0x0000000032: digit2,
+    0x0000000033: digit3,
+    0x0000000034: digit4,
+    0x0000000035: digit5,
+    0x0000000036: digit6,
+    0x0000000037: digit7,
+    0x0000000038: digit8,
+    0x0000000039: digit9,
+    0x000000003a: colon,
+    0x000000003b: semicolon,
+    0x000000003c: less,
+    0x000000003d: equal,
+    0x000000003e: greater,
+    0x000000003f: question,
+    0x0000000040: at,
     0x0000000041: upperA,
     0x0000000042: upperB,
     0x0000000043: upperC,
@@ -2199,22 +2371,42 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000058: upperX,
     0x0000000059: upperY,
     0x000000005a: upperZ,
-    0x0000000030: digit0,
-    0x0000000031: digit1,
-    0x0000000032: digit2,
-    0x0000000033: digit3,
-    0x0000000034: digit4,
-    0x0000000035: digit5,
-    0x0000000036: digit6,
-    0x0000000037: digit7,
-    0x0000000038: digit8,
-    0x0000000039: digit9,
-    0x0000000020: space,
-    0x0000000008: backspace,
-    0x0000000009: tab,
-    0x000000000d: enter,
-    0x000000001b: escape,
-    0x000000007f: delete,
+    0x000000005b: bracketLeft,
+    0x000000005c: backslash,
+    0x000000005d: bracketRight,
+    0x000000005e: caret,
+    0x0000000060: backquote,
+    0x000000005f: underscore,
+    0x0000000061: lowerA,
+    0x0000000062: lowerB,
+    0x0000000063: lowerC,
+    0x0000000064: lowerD,
+    0x0000000065: lowerE,
+    0x0000000066: lowerF,
+    0x0000000067: lowerG,
+    0x0000000068: lowerH,
+    0x0000000069: lowerI,
+    0x000000006a: lowerJ,
+    0x000000006b: lowerK,
+    0x000000006c: lowerL,
+    0x000000006d: lowerM,
+    0x000000006e: lowerN,
+    0x000000006f: lowerO,
+    0x0000000070: lowerP,
+    0x0000000071: lowerQ,
+    0x0000000072: lowerR,
+    0x0000000073: lowerS,
+    0x0000000074: lowerT,
+    0x0000000075: lowerU,
+    0x0000000076: lowerV,
+    0x0000000077: lowerW,
+    0x0000000078: lowerX,
+    0x0000000079: lowerY,
+    0x000000007a: lowerZ,
+    0x000000007b: braceLeft,
+    0x000000007d: braceRight,
+    0x000000007e: tilde,
+    0x000000007c: bar,
     0x0000000001: unidentified,
     0x0000000101: accel,
     0x0000000102: alt,
@@ -2519,14 +2711,6 @@ class LogicalKeyboardKey extends KeyboardKey {
 
   // A map of keys to the pseudo-key synonym for that key. Used by getSynonyms.
   static final Map<LogicalKeyboardKey, LogicalKeyboardKey> _synonyms = <LogicalKeyboardKey, LogicalKeyboardKey>{
-    shiftLeft: shift,
-    shiftRight: shift,
-    metaLeft: meta,
-    metaRight: meta,
-    altLeft: alt,
-    altRight: alt,
-    controlLeft: control,
-    controlRight: control,
   };
 }
 

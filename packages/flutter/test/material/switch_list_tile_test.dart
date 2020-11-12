@@ -276,7 +276,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext!)!.hasPrimaryFocus, isTrue);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -296,7 +296,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext!)!.hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
   });
 
   testWidgets('SwitchListTile controlAffinity test', (WidgetTester tester) async {

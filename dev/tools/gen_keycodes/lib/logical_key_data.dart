@@ -28,73 +28,67 @@ class LogicalKeyData {
   )   : assert(chromiumKeys != null),
         assert(gtkKeyCodeHeader != null),
         assert(gtkNameMap != null) {
-    data = _readHidEntries(chromiumKeys);
-    _nameToGtkKeyCode = _readGtkKeyCodes(gtkKeyCodeHeader);
+    data = _readPrintables();
+    _readHidEntries(data, chromiumKeys);
     // Cast GTK dom map
     final Map<String, List<dynamic>> dynamicGtkNames = (json.decode(gtkNameMap) as Map<String, dynamic>).cast<String, List<dynamic>>();
-    _nameToGtkName = dynamicGtkNames.map<String, List<String>>((String key, List<dynamic> value) {
+    final Map<String, List<String>> nameToGtkName = dynamicGtkNames.map<String, List<String>>((String key, List<dynamic> value) {
       return MapEntry<String, List<String>>(key, value.cast<String>());
     });
+    _readGtkKeyCodes(data, gtkKeyCodeHeader, nameToGtkName);
   }
 
   /// Parses the given JSON data and populates the data structure from it.
   LogicalKeyData.fromJson(Map<String, dynamic> contentMap) {
-    data = <LogicalKeyEntry>[
-      for (final String key in contentMap.keys) LogicalKeyEntry.fromJsonMapEntry(key, contentMap[key] as Map<String, dynamic>),
-    ];
+    data = Map<String, LogicalKeyEntry>.fromEntries(
+      contentMap.values.map((dynamic value) {
+        final LogicalKeyEntry entry = LogicalKeyEntry.fromJsonMapEntry(value as Map<String, dynamic>);
+        return MapEntry<String, LogicalKeyEntry>(entry.constantName, entry);
+      }),
+    );
   }
 
   /// Converts the data structure into a JSON structure that can be parsed by
   /// [LogicalKeyData.fromJson].
   Map<String, dynamic> toJson() {
-    for (final LogicalKeyEntry entry in data) {
-      // GTK key names
-      entry.gtkNames = _nameToGtkName[entry.constantName]?.cast<String>();
-      if (entry.gtkNames != null && entry.gtkNames.isNotEmpty) {
-        for (final String gtkName in entry.gtkNames) {
-          if (_nameToGtkKeyCode[gtkName] != null) {
-            entry.gtkValues ??= <int>[];
-            entry.gtkValues.add(_nameToGtkKeyCode[gtkName]);
-          }
-        }
-      }
-    }
-
     final Map<String, dynamic> outputMap = <String, dynamic>{};
-    for (final LogicalKeyEntry entry in data) {
+    for (final LogicalKeyEntry entry in data.values) {
       outputMap[entry.constantName] = entry.toJson();
     }
     return outputMap;
   }
 
-  /// The list of keys.
-  List<LogicalKeyEntry> data;
+  /// Keys mapped from their constant names.
+  Map<String, LogicalKeyEntry> data;
 
-  /// The mapping from the Flutter name (e.g. "eject") to the GTK name (e.g.
-  /// "GDK_KEY_Eject").
-  ///
-  /// Only populated if data is parsed from the source files, not if parsed from
-  /// JSON.
-  Map<String, List<String>> _nameToGtkName;
-
-  /// The mapping from GTK name (e.g. "GTK_KEY_comma") to the integer key code
-  /// (logical meaning) of the key.
-  ///
-  /// Only populated if data is parsed from the source files, not if parsed from
-  /// JSON.
-  Map<String, int> _nameToGtkKeyCode;
+  Map<String, LogicalKeyEntry> _readPrintables() {
+    return Map<String, LogicalKeyEntry>.fromEntries(printable.entries.map(
+      (MapEntry<String, String> entry) {
+        final String constantName = LogicalKeyEntry.computeConstantName(entry.key);
+        return MapEntry<String, LogicalKeyEntry>(
+          constantName,
+          LogicalKeyEntry(
+            value: entry.value.codeUnitAt(0),
+            commentName: LogicalKeyEntry.computeCommentName(entry.key),
+            constantName: constantName,
+          ),
+        );
+      }
+    ));
+  }
 
   /// Parses entries from Chromium's key mapping header file.
   ///
-  /// Lines in this file look like either of these (without the ///):
-  ///                Key        Enum      Unicode code point
-  /// DOM_KEY_UNI("Backspace", BACKSPACE, 0x0008),
+  /// Lines in this file look like this (without the ///):
   ///                Key        Enum       Value
   /// DOM_KEY_MAP("Accel",      ACCEL,    0x0101),
-  List<LogicalKeyEntry> _readHidEntries(String input) {
+  ///
+  /// The UNI lines are ignored. Their entries have been included in the
+  /// printable file.
+  void _readHidEntries(Map<String, LogicalKeyEntry> data, String input) {
     final List<LogicalKeyEntry> entries = <LogicalKeyEntry>[];
     final RegExp domKeyRegExp = RegExp(
-        r'DOM_KEY_(?:UNI|MAP)\s*\(\s*"([^\s]+?)",\s*([^\s]+?),\s*0x([a-fA-F0-9]+)\s*\)',
+        r'DOM_KEY_(?:MAP)\s*\(\s*"([^\s]+?)",\s*([^\s]+?),\s*0x([a-fA-F0-9]+)\s*\)',
         multiLine: true);
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
@@ -102,18 +96,18 @@ class LogicalKeyData {
       if (match != null) {
         final String name = match.group(1).replaceAll(RegExp('[^A-Za-z0-9]'), '');
         final int value = getHex(match.group(3));
-        final LogicalKeyEntry newEntry = LogicalKeyEntry(
+        final String constantName = LogicalKeyEntry.computeConstantName(name);
+        final LogicalKeyEntry entry = data.putIfAbsent(constantName, () => LogicalKeyEntry(
           value: value,
           commentName: LogicalKeyEntry.computeCommentName(name),
-          constantName: LogicalKeyEntry.computeConstantName(name),
-          webNames: [name],
-          webValues: [value],
-        );
-        entries.add(newEntry);
+          constantName: constantName,
+        ));
+        entry
+          ..webNames.add(name)
+          ..webValues.add(value);
       }
       return match.group(0);
     });
-    return entries;
   }
 
   /// Parses entries from GTK's gdkkeysyms.h key code data file.
@@ -121,14 +115,51 @@ class LogicalKeyData {
   /// Lines in this file look like this (without the ///):
   ///  /** Space key. */
   ///  #define GDK_KEY_space 0x020
-  Map<String, int> _readGtkKeyCodes(String headerFile) {
+  void _readGtkKeyCodes(Map<String, LogicalKeyEntry> data, String headerFile, Map<String, List<String>> nameToGtkName) {
     final RegExp definedCodes = RegExp(r'#define GDK_KEY_([a-zA-Z0-9_]+)\s*0x([0-9a-f]+),?');
+    final Map<String, String> gtkNameToFlutterName = <String, String>{};
+    nameToGtkName.forEach((String flutterName, List<String> gtkNames) {
+      for (String gtkName in gtkNames) {
+        if (gtkNameToFlutterName.containsKey(gtkName)) {
+          print('Duplicate GTK logical name $gtkName');
+          continue;
+        }
+        gtkNameToFlutterName[gtkName] = flutterName;
+      }
+    });
+
     final Map<String, int> replaced = <String, int>{};
-    for (final Match match in definedCodes.allMatches(headerFile)) {
-      replaced[match.group(1)] = int.parse(match.group(2), radix: 16);
-    }
-    return replaced;
+    headerFile.replaceAllMapped(definedCodes, (Match match) {
+      if (match != null) {
+        final String gtkName = match.group(1);
+        final String name = gtkNameToFlutterName[gtkName];
+        final int value = int.parse(match.group(2), radix: 16);
+        if (name == null)
+          return match.group(0);
+
+        final LogicalKeyEntry entry = data[name];
+        if (entry == null) {
+          print('Invalid logical entry by name $name');
+          return match.group(0);
+        }
+        entry
+          ..gtkNames.add(gtkName)
+          ..gtkValues.add(value);
+      }
+      return match.group(0);
+    });
   }
+
+  /// Returns the static map of printable representations.
+  static Map<String, String> get printable {
+    if (_printable == null) {
+      final String printableKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'printable_logical.json',)).readAsStringSync();
+      final Map<String, dynamic> printable = json.decode(printableKeys) as Map<String, dynamic>;
+      _printable = printable.cast<String, String>();
+    }
+    return _printable;
+  }
+  static Map<String, String> _printable;
 }
 
 /// A single entry in the key data structure.
@@ -141,16 +172,20 @@ class LogicalKeyEntry {
     @required this.value,
     @required this.constantName,
     @required this.commentName,
-    this.webNames,
-    this.webValues,
-    this.gtkNames,
-    this.gtkValues,
+    List<String> webNames,
+    List<int> webValues,
+    List<String> gtkNames,
+    List<int> gtkValues,
   })  : assert(constantName != null),
         assert(commentName != null),
-        assert(value != null);
+        assert(value != null),
+        this.webNames = webNames ?? <String>[],
+        this.webValues = webValues ?? <int>[],
+        this.gtkNames = gtkNames ?? <String>[],
+        this.gtkValues = gtkValues ?? <int>[];
 
   /// Populates the key from a JSON map.
-  factory LogicalKeyEntry.fromJsonMapEntry(String name, Map<String, dynamic> map) {
+  factory LogicalKeyEntry.fromJsonMapEntry(Map<String, dynamic> map) {
     return LogicalKeyEntry(
       value: map['value'] as int,
       constantName: map['constant'] as String,
@@ -172,19 +207,19 @@ class LogicalKeyEntry {
   /// The name of the key, mostly derived from the DomKey name in Chromium,
   /// but where there was no DomKey representation, derived from the Chromium
   /// symbol name.
-  List<String> webNames;
+  final List<String> webNames;
 
   /// The value of the key.
-  List<int> webValues;
+  final List<int> webValues;
 
   /// The list of names that GTK gives to this key (symbol names minus the
   /// prefix).
-  List<String> gtkNames;
+  final List<String> gtkNames;
 
   /// The list of GTK key codes matching this key, created by looking up the
   /// Linux name in the GTK data, and substituting the GTK key code
   /// value.
-  List<int> gtkValues;
+  final List<int> gtkValues;
 
   /// Creates a JSON map from the key data.
   Map<String, dynamic> toJson() {

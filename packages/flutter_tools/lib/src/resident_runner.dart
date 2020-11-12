@@ -97,12 +97,17 @@ class FlutterDevice {
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
         platformDillArtifact = Artifact.webPlatformKernelDill;
         extraFrontEndOptions = buildInfo.extraFrontEndOptions;
-      } else {
+      } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
         platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-        extraFrontEndOptions = <String>[
-          ...?buildInfo?.extraFrontEndOptions,
-          if (!(buildInfo?.extraFrontEndOptions?.contains('--sound-null-safety') ?? false))
-            '--sound-null-safety'
+        extraFrontEndOptions =  buildInfo.extraFrontEndOptions;
+      } else {
+        // TODO(jonahwilliams): null-safe auto detection does not currently
+        // work on the web. Always opt out of null safety if it was not
+        // specifically requested.
+        platformDillArtifact = Artifact.webPlatformKernelDill;
+        extraFrontEndOptions =  <String>[
+          ...?buildInfo.extraFrontEndOptions,
+          '--no-sound-null-safety',
         ];
       }
 

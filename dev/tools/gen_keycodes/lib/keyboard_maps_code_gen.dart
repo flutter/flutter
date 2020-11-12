@@ -201,7 +201,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of iOS key codes to physical keys.
   String get iosScanCodeMap {
     final StringBuffer iosScanCodeMap = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.iosScanCode != null) {
         iosScanCodeMap.writeln('  ${toHex(entry.iosScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
@@ -212,7 +212,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of iOS number pad key codes to logical keys.
   String get iosNumpadMap {
     final StringBuffer iosNumPadMap = StringBuffer();
-    for (final Key entry in numpadKeyData) {
+    for (final PhysicalKeyEntry entry in numpadKeyData) {
       if (entry.iosScanCode != null) {
         iosNumPadMap.writeln('  ${toHex(entry.iosScanCode)}: LogicalKeyboardKey.${entry.constantName},');
       }
