@@ -8,7 +8,14 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import 'basic.dart';
+import 'framework.dart';
+import 'gesture_detector.dart';
+import 'notification_listener.dart';
+import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
+import 'scroll_notification.dart';
+import 'scrollable.dart';
 
 const double _kMinThumbExtent = 18.0;
 const double _kMinInteractiveSize = 48.0;
@@ -385,4 +392,354 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   SemanticsBuilderCallback? get semanticsBuilder => null;
+}
+
+///
+class RawScrollbar extends StatefulWidget {
+  ///
+  const RawScrollbar({
+    Key? key,
+    this.leading,
+    this.track,
+    required this.thumb,
+    this.trailing,
+    required this.child,
+    this.controller,
+    this.overlapsChild = false,
+    this.isAlwaysShown = false,
+    //animateOnHover
+    //hoverAnimationDuration
+    //animateOnScroll
+    //scrollAnimationDuration
+    //animateOnDrag
+    //dragAnimationDuration
+  }) : super(key: key);
+
+  // TODO(Piinks): leading, track, thumb, trailing should all be builders to
+  //  pass animation values, whether drag is active etc.
+  ///
+  final Widget? leading;
+  ///
+  final Widget? track;
+  ///
+  final Widget thumb;
+  ///
+  final Widget? trailing;
+  ///
+  final Widget child;
+  ///
+  final ScrollController? controller;
+  ///
+  final bool overlapsChild;
+  ///
+  final bool isAlwaysShown;
+
+  @override
+  _RawScrollbarState createState() => _RawScrollbarState();
+}
+
+class _RawScrollbarState extends State<RawScrollbar> {
+  ScrollMetrics? _lastMetrics;
+  late _ScrollbarLayout _scrollbarLayoutDelegate;
+
+  bool _handleScrollNotification(ScrollNotification notification) {
+    setState(() {
+      _lastMetrics = notification.metrics;
+    });
+
+    if (_lastMetrics!.maxScrollExtent <= _lastMetrics!.minScrollExtent) {
+      return false;
+    }
+    return false;
+  }
+
+  void _handleTrackTapDown(TapDownDetails details) {
+    // TODO(Piink): There are a lot of different behaviors we could support here,
+    // it's really a matter of how many and how to configure? For now, just paging.
+    assert(widget.controller != null);
+    // Tapping the scrollbar track pages up or down the scroll view.
+    double scrollIncrement = 0.0;
+    // Is an increment calculator available?
+    final ScrollIncrementCalculator? calculator = Scrollable.of(
+      widget.controller!.position.context.notificationContext!
+    )?.widget.incrementCalculator;
+    if (calculator != null) {
+      scrollIncrement = calculator(
+        ScrollIncrementDetails(
+          type: ScrollIncrementType.page,
+          metrics: widget.controller!.position,
+        )
+      );
+    } else {
+      scrollIncrement = 0.8 * widget.controller!.position.viewportDimension;
+    }
+    // Determine direction to scroll in
+    final int incrementCorrection = _scrollbarLayoutDelegate.getTrackIncrementCorrection(details.localPosition);
+    widget.controller!.position.moveTo(
+      widget.controller!.position.pixels + incrementCorrection * scrollIncrement,
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _scrollbarLayoutDelegate = _ScrollbarLayout(
+      textDirection: Directionality.of(context),
+      overlapsChild: widget.overlapsChild,
+      controller: widget.controller,
+      metrics: _lastMetrics,
+    );
+    return NotificationListener<ScrollNotification>(
+      onNotification: _handleScrollNotification,
+      child: CustomMultiChildLayout(
+        delegate: _scrollbarLayoutDelegate,
+        children: <Widget>[
+          // Any gestures in the leading widget are handled by the user
+          if (widget.leading != null)
+            LayoutId(
+              id: _ScrollbarSlot.leading,
+              child: widget.leading!,
+            ),
+          if (widget.track != null)
+            // TODO(Piinks): Should users implement tap gestures? What if they
+            //  want their tracks to have inkwell etc?
+            LayoutId(
+              id: _ScrollbarSlot.track,
+              child: widget.controller != null
+                ? GestureDetector(
+                    onTapDown: _handleTrackTapDown,
+                    child: widget.track!,
+                  )
+                : widget.track!,
+            ),
+          // TODO(Piinks): Add drag gestures?
+          LayoutId(
+            id: _ScrollbarSlot.thumb,
+            child: widget.thumb,
+          ),
+          // Any gestures in the trailing widget are handled by the user
+          if (widget.trailing != null)
+            LayoutId(
+              id: _ScrollbarSlot.trailing,
+              child: widget.trailing!,
+            ),
+          LayoutId(
+            id: _ScrollbarSlot.child,
+            child: widget.child,
+          )
+        ],
+      ),
+    );
+  }
+}
+
+enum _ScrollbarSlot {
+  leading,
+  track,
+  thumb,
+  trailing,
+  child,
+}
+
+class _ScrollbarLayout extends MultiChildLayoutDelegate {
+  _ScrollbarLayout({
+    this.overlapsChild = false,
+    this.controller,
+    this.metrics,
+    required this.textDirection,
+  }) : assert(controller != null || metrics != null),
+       assert(overlapsChild != null);
+
+
+  final bool overlapsChild;
+  final ScrollController? controller;
+  final ScrollMetrics? metrics;
+  final TextDirection textDirection;
+  late double _thumbLocalPosition;
+  
+  int getTrackIncrementCorrection(Offset localPosition) {
+    final AxisDirection direction = controller?.position.axisDirection ?? metrics!.axisDirection;
+    switch (direction) {
+      case AxisDirection.up:
+        if (localPosition.dy > _thumbLocalPosition)
+          return -1;
+        return 1;
+      case AxisDirection.down:
+        if (localPosition.dy > _thumbLocalPosition)
+          return 1;
+        return -1;
+      case AxisDirection.right:
+        if (localPosition.dx > _thumbLocalPosition)
+          return 1;
+        return -1;
+      case AxisDirection.left:
+        if (localPosition.dx > _thumbLocalPosition)
+          return -1;
+        return 1;
+    }
+  }
+
+  @override
+  void performLayout(Size size) {
+    final BoxConstraints looseConstraints = BoxConstraints.loose(size);
+    final AxisDirection direction = controller?.position.axisDirection ?? metrics!.axisDirection;
+    final Axis scrollAxis = controller?.position.axis ?? metrics!.axis;
+    double trackPadding = 0.0;
+
+    if (overlapsChild) {
+      // TODO(Piinks): This does not work yet..
+      // Scrollbar is laid out on top of the child, does not contribute to
+      // padding it.
+      layoutChild(_ScrollbarSlot.child, looseConstraints);
+    }
+
+    // Leading Widget
+    Size leadingSize = Size.zero;
+    if (hasChild(_ScrollbarSlot.leading)) {
+      leadingSize = layoutChild(_ScrollbarSlot.leading, looseConstraints);
+      double x, y;
+      switch (direction) {
+        case AxisDirection.down:
+          x = textDirection == TextDirection.rtl ? 0.0 : size.width - leadingSize.width;
+          y = 0.0;
+          trackPadding += leadingSize.height;
+          break;
+        case AxisDirection.up:
+          x = textDirection == TextDirection.rtl ? 0.0 : size.width - leadingSize.width;
+          y = size.height - leadingSize.height;
+          trackPadding += leadingSize.height;
+          break;
+        case AxisDirection.left:
+          x = size.width - leadingSize.width;
+          y = size.height - leadingSize.height;
+          trackPadding += leadingSize.width;
+          break;
+        case AxisDirection.right:
+          x = 0.0;
+          y = size.height - leadingSize.height;
+          trackPadding += leadingSize.width;
+          break;
+      }
+      positionChild(_ScrollbarSlot.leading, Offset(x, y));
+    }
+
+    // Trailing Widget
+    Size? trailingSize;
+    if (hasChild(_ScrollbarSlot.trailing)) {
+      trailingSize = layoutChild(_ScrollbarSlot.trailing, looseConstraints);
+      double x, y;
+      switch (direction) {
+        case AxisDirection.down:
+          x = textDirection == TextDirection.rtl ? 0.0 : size.width - trailingSize.width;
+          y = size.height - trailingSize.height;
+          trackPadding += trailingSize.height;
+          break;
+        case AxisDirection.up:
+          x = textDirection == TextDirection.rtl ? 0.0 : size.width - trailingSize.width;
+          y = 0.0;
+          trackPadding += trailingSize.height;
+          break;
+        case AxisDirection.left:
+          x = 0.0;
+          y = size.height - trailingSize.height;
+          trackPadding += trailingSize.width;
+          break;
+        case AxisDirection.right:
+          x = size.width - trailingSize.width;
+          y = size.height - trailingSize.height;
+          trackPadding += trailingSize.width;
+          break;
+      }
+      positionChild(_ScrollbarSlot.trailing, Offset(x, y));
+    }
+
+    final BoxConstraints trackConstraints = scrollAxis == Axis.vertical
+      ? BoxConstraints(maxHeight: size.height - trackPadding)
+      : BoxConstraints(maxWidth: size.width - trackPadding);
+    // Track Widget
+    Size? trackSize;
+    if (hasChild(_ScrollbarSlot.track)) {
+      trackSize = layoutChild(_ScrollbarSlot.track, trackConstraints);
+      double x, y;
+      switch (direction) {
+        case AxisDirection.down:
+        case AxisDirection.up:
+          x = textDirection == TextDirection.rtl ? 0.0 : size.width - trackSize.width;
+          y = leadingSize.height;
+          break;
+        case AxisDirection.left:
+        case AxisDirection.right:
+          x = leadingSize.width;
+          y = size.height - trackSize.height;
+          break;
+      }
+      positionChild(_ScrollbarSlot.track, Offset(x, y));
+    }
+
+    // Thumb Widget
+    final Size thumbSize = layoutChild(_ScrollbarSlot.thumb, trackConstraints);
+    late double maxScrollExtent;
+    // TODO(Piinks): Handle infinite scroll views
+    // Assume always [~100 || custom number] of pixels ahead, and add to current offset?
+    // Also check variable sized list items performance.
+    try {
+      maxScrollExtent = controller?.position.maxScrollExtent ?? metrics!.maxScrollExtent;
+    } catch (_) {
+      maxScrollExtent = 0.0;
+    }
+
+    final double scrollOffset = controller?.offset ?? metrics!.pixels;
+    final double fractionalOffset = maxScrollExtent == 0.0
+      ? 0.0
+      : (scrollOffset / maxScrollExtent).clamp(0.0, 1.0);
+    double x, y;
+    switch (direction) {
+      case AxisDirection.down:
+        x = textDirection == TextDirection.rtl ? 0.0 : size.width - thumbSize.width;
+        _thumbLocalPosition = (size.height - trackPadding - thumbSize.height) * fractionalOffset;
+        y = _thumbLocalPosition + leadingSize.height;
+        break;
+      case AxisDirection.up:
+        x = textDirection == TextDirection.rtl ? 0.0 : size.width - thumbSize.width;
+        _thumbLocalPosition = (size.height - trackPadding - thumbSize.height) * (1 - fractionalOffset);
+        y = _thumbLocalPosition + leadingSize.height;
+        break;
+      case AxisDirection.left:
+        _thumbLocalPosition = (size.width - trackPadding - thumbSize.width) * (1 - fractionalOffset);
+        x = _thumbLocalPosition + leadingSize.width;
+        y = size.height - thumbSize.height;
+        break;
+      case AxisDirection.right:
+        _thumbLocalPosition = (size.width - trackPadding - thumbSize.width) * fractionalOffset;
+        x = _thumbLocalPosition + leadingSize.width;
+        y = size.height - thumbSize.height;
+        break;
+    }
+    positionChild(_ScrollbarSlot.thumb, Offset(x, y));
+
+    // Child
+    if (!overlapsChild) {
+      layoutChild(
+        _ScrollbarSlot.child,
+        scrollAxis == Axis.vertical
+          ? BoxConstraints(
+              maxWidth: size.width - thumbSize.width,
+              maxHeight: size.height,
+            )
+          : BoxConstraints(
+              maxHeight: size.height - thumbSize.height,
+              maxWidth: size.width,
+            ),
+      );
+    }
+  }
+
+  @override
+  bool shouldRelayout(_ScrollbarLayout oldDelegate) {
+    return  oldDelegate.textDirection != textDirection
+      || oldDelegate.controller != controller
+      || oldDelegate.metrics != metrics
+      || oldDelegate.overlapsChild != overlapsChild;
+  }
 }
