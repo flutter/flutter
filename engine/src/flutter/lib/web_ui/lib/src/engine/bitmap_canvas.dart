@@ -573,15 +573,10 @@ class BitmapCanvas extends EngineCanvas {
       ui.Image image, ui.Offset p, SurfacePaintData paint) {
     final HtmlImage htmlImage = image as HtmlImage;
     final ui.BlendMode? blendMode = paint.blendMode;
-    final EngineColorFilter? colorFilter =
-        paint.colorFilter as EngineColorFilter?;
-    final ui.BlendMode? colorFilterBlendMode = colorFilter?._blendMode;
+    final EngineColorFilter? colorFilter = paint.colorFilter as EngineColorFilter?;
     html.HtmlElement imgElement;
-    if (colorFilterBlendMode == null) {
-      // No Blending, create an image by cloning original loaded image.
-      imgElement = _reuseOrCreateImage(htmlImage);
-    } else {
-      switch (colorFilterBlendMode) {
+    if (colorFilter is _CkBlendModeColorFilter) {
+      switch (colorFilter.blendMode) {
         case ui.BlendMode.colorBurn:
         case ui.BlendMode.colorDodge:
         case ui.BlendMode.hue:
@@ -595,14 +590,17 @@ class BitmapCanvas extends EngineCanvas {
         case ui.BlendMode.color:
         case ui.BlendMode.luminosity:
         case ui.BlendMode.xor:
-          imgElement = _createImageElementWithSvgFilter(
-              image, colorFilter!._color, colorFilterBlendMode, paint);
+          imgElement = _createImageElementWithSvgFilter(image,
+              colorFilter.color, colorFilter.blendMode, paint);
           break;
         default:
-          imgElement = _createBackgroundImageWithBlend(
-              image, colorFilter!._color, colorFilterBlendMode, paint);
+          imgElement = _createBackgroundImageWithBlend(image,
+              colorFilter.color, colorFilter.blendMode, paint);
           break;
       }
+    } else {
+      // No Blending, create an image by cloning original loaded image.
+      imgElement = _reuseOrCreateImage(htmlImage);
     }
     imgElement.style.mixBlendMode = _stringForBlendMode(blendMode) ?? '';
     if (_canvasPool.isClipped) {

@@ -5,62 +5,147 @@
 // @dart = 2.10
 part of engine;
 
-/// A [ui.ColorFilter] backed by Skia's [CkColorFilter].
-class CkColorFilter extends ManagedSkiaObject<SkColorFilter> {
-  final EngineColorFilter _engineFilter;
+/// A concrete [ManagedSkiaObject] subclass that owns a [SkColorFilter] and
+/// manages its lifecycle.
+///
+/// Seealso:
+///
+/// * [CkPaint.colorFilter], which uses a [_ManagedSkColorFilter] to manage
+///   the lifecycle of its [SkColorFilter].
+class _ManagedSkColorFilter extends ManagedSkiaObject<SkColorFilter> {
+  _ManagedSkColorFilter(CkColorFilter ckColorFilter)
+    : this.ckColorFilter = ckColorFilter;
 
-  CkColorFilter.mode(EngineColorFilter filter) : _engineFilter = filter;
-
-  CkColorFilter.matrix(EngineColorFilter filter) : _engineFilter = filter;
-
-  CkColorFilter.linearToSrgbGamma(EngineColorFilter filter)
-      : _engineFilter = filter;
-
-  CkColorFilter.srgbToLinearGamma(EngineColorFilter filter)
-      : _engineFilter = filter;
-
-  SkColorFilter _createSkiaObjectFromFilter() {
-    SkColorFilter skColorFilter;
-    switch (_engineFilter._type) {
-      case EngineColorFilter._TypeMode:
-        skColorFilter = canvasKit.SkColorFilter.MakeBlend(
-          toSharedSkColor1(_engineFilter._color!),
-          toSkBlendMode(_engineFilter._blendMode!),
-        );
-        break;
-      case EngineColorFilter._TypeMatrix:
-        final Float32List colorMatrix = Float32List(20);
-        final List<double> matrix = _engineFilter._matrix!;
-        for (int i = 0; i < 20; i++) {
-          colorMatrix[i] = matrix[i];
-        }
-        skColorFilter = canvasKit.SkColorFilter.MakeMatrix(colorMatrix);
-        break;
-      case EngineColorFilter._TypeLinearToSrgbGamma:
-        skColorFilter = canvasKit.SkColorFilter.MakeLinearToSRGBGamma();
-        break;
-      case EngineColorFilter._TypeSrgbToLinearGamma:
-        skColorFilter = canvasKit.SkColorFilter.MakeSRGBToLinearGamma();
-        break;
-      default:
-        throw StateError(
-            'Unknown mode ${_engineFilter._type} for ColorFilter.');
-    }
-    return skColorFilter;
-  }
+  final CkColorFilter ckColorFilter;
 
   @override
-  SkColorFilter createDefault() {
-    return _createSkiaObjectFromFilter();
-  }
+  SkColorFilter createDefault() => ckColorFilter._initRawColorFilter();
 
   @override
-  SkColorFilter resurrect() {
-    return _createSkiaObjectFromFilter();
-  }
+  SkColorFilter resurrect() => ckColorFilter._initRawColorFilter();
 
   @override
   void delete() {
     rawSkiaObject?.delete();
   }
+
+  @override
+  int get hashCode => ckColorFilter.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (runtimeType != other.runtimeType)
+      return false;
+    return other is _ManagedSkColorFilter
+        && other.ckColorFilter == ckColorFilter;
+  }
+
+  @override
+  String toString() => ckColorFilter.toString();
+}
+
+/// A [ui.ColorFilter] backed by Skia's [SkColorFilter].
+///
+/// Additionally, this class provides the interface for converting itself to a
+/// [ManagedSkiaObject] that manages a skia image filter.
+abstract class CkColorFilter implements _CkManagedSkImageFilterConvertible<SkImageFilter>, EngineColorFilter {
+  const CkColorFilter();
+
+  /// Called by [ManagedSkiaObject.createDefault] and
+  /// [ManagedSkiaObject.resurrect] to create a new [SKImageFilter], when this
+  /// filter is used as an [ImageFilter].
+  SkImageFilter _initRawImageFilter() => canvasKit.SkImageFilter.MakeColorFilter(_initRawColorFilter(), null);
+
+  /// Called by [ManagedSkiaObject.createDefault] and
+  /// [ManagedSkiaObject.resurrect] to create a new [SKColorFilter], when this
+  /// filter is used as a [ColorFilter].
+  SkColorFilter _initRawColorFilter();
+
+  ManagedSkiaObject<SkImageFilter> get _imageFilter => _CkColorFilterImageFilter(colorFilter: this);
+}
+
+class _CkBlendModeColorFilter extends CkColorFilter {
+  const _CkBlendModeColorFilter(this.color, this.blendMode);
+
+  final ui.Color color;
+  final ui.BlendMode blendMode;
+
+  @override
+  SkColorFilter _initRawColorFilter() {
+    return canvasKit.SkColorFilter.MakeBlend(
+      toSharedSkColor1(color),
+      toSkBlendMode(blendMode),
+    );
+  }
+
+  @override
+  int get hashCode => ui.hashValues(color, blendMode);
+
+  @override
+  bool operator ==(Object other) {
+    if (runtimeType != other.runtimeType)
+      return false;
+    return other is _CkBlendModeColorFilter
+        && other.color == color
+        && other.blendMode == blendMode;
+  }
+
+  @override
+  String toString() => 'ColorFilter.mode($color, $blendMode)';
+}
+
+class _CkMatrixColorFilter extends CkColorFilter {
+  const _CkMatrixColorFilter(this.matrix);
+
+  final List<double> matrix;
+
+  @override
+  SkColorFilter _initRawColorFilter() {
+    assert(this.matrix.length == 20,  'Color Matrix must have 20 entries.');
+    final List<double> matrix = this.matrix;
+    if (matrix is Float32List)
+      return canvasKit.SkColorFilter.MakeMatrix(matrix);
+    final Float32List float32Matrix = Float32List(20);
+    for (int i = 0; i < 20; i++) {
+      float32Matrix[i] = matrix[i];
+    }
+    return canvasKit.SkColorFilter.MakeMatrix(float32Matrix);
+  }
+
+  @override
+  int get hashCode => ui.hashList(matrix);
+
+  @override
+  bool operator ==(Object other) {
+    return runtimeType == other.runtimeType
+      && other is _CkMatrixColorFilter
+      && _listEquals<double>(matrix, other.matrix);
+  }
+
+  @override
+  String toString() => 'ColorFilter.matrix($matrix)';
+}
+
+class _CkLinearToSrgbGammaColorFilter extends CkColorFilter {
+  const _CkLinearToSrgbGammaColorFilter();
+  @override
+  SkColorFilter _initRawColorFilter() => canvasKit.SkColorFilter.MakeLinearToSRGBGamma();
+
+  @override
+  bool operator ==(Object other) => runtimeType == other.runtimeType;
+
+  @override
+  String toString() => 'ColorFilter.linearToSrgbGamma()';
+}
+
+class _CkSrgbToLinearGammaColorFilter extends CkColorFilter {
+  const _CkSrgbToLinearGammaColorFilter();
+  @override
+  SkColorFilter _initRawColorFilter() => canvasKit.SkColorFilter.MakeSRGBToLinearGamma();
+
+  @override
+  bool operator ==(Object other) => runtimeType == other.runtimeType;
+
+  @override
+  String toString() => 'ColorFilter.srgbToLinearGamma()';
 }

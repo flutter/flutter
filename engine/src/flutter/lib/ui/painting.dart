@@ -2900,7 +2900,7 @@ class MaskFilter {
 ///
 /// Instances of this class are used with [Paint.colorFilter] on [Paint]
 /// objects.
-class ColorFilter {
+class ColorFilter implements ImageFilter {
   /// Creates a color filter that applies the blend mode given as the second
   /// argument. The source color is the one given as the first argument, and the
   /// destination color is the one from the layer being composited.
@@ -2912,7 +2912,7 @@ class ColorFilter {
       : _color = color,
         _blendMode = blendMode,
         _matrix = null,
-        _type = _TypeMode;
+        _type = _kTypeMode;
 
   /// Construct a color filter that transforms a color by a 5x5 matrix, where
   /// the fifth row is implicitly added in an identity configuration.
@@ -2978,7 +2978,7 @@ class ColorFilter {
       : _color = null,
         _blendMode = null,
         _matrix = matrix,
-        _type = _TypeMatrix;
+        _type = _kTypeMatrix;
 
   /// Construct a color filter that applies the sRGB gamma curve to the RGB
   /// channels.
@@ -2986,7 +2986,7 @@ class ColorFilter {
       : _color = null,
         _blendMode = null,
         _matrix = null,
-        _type = _TypeLinearToSrgbGamma;
+        _type = _kTypeLinearToSrgbGamma;
 
   /// Creates a color filter that applies the inverse of the sRGB gamma curve
   /// to the RGB channels.
@@ -2994,7 +2994,7 @@ class ColorFilter {
       : _color = null,
         _blendMode = null,
         _matrix = null,
-        _type = _TypeSrgbToLinearGamma;
+        _type = _kTypeSrgbToLinearGamma;
 
   final Color? _color;
   final BlendMode? _blendMode;
@@ -3002,36 +3002,31 @@ class ColorFilter {
   final int _type;
 
   // The type of SkColorFilter class to create for Skia.
-  static const int _TypeMode = 1; // MakeModeFilter
-  static const int _TypeMatrix = 2; // MakeMatrixFilterRowMajor255
-  static const int _TypeLinearToSrgbGamma = 3; // MakeLinearToSRGBGamma
-  static const int _TypeSrgbToLinearGamma = 4; // MakeSRGBToLinearGamma
+  static const int _kTypeMode = 1; // MakeModeFilter
+  static const int _kTypeMatrix = 2; // MakeMatrixFilterRowMajor255
+  static const int _kTypeLinearToSrgbGamma = 3; // MakeLinearToSRGBGamma
+  static const int _kTypeSrgbToLinearGamma = 4; // MakeSRGBToLinearGamma
 
+  // SkImageFilters::ColorFilter
   @override
-  bool operator ==(Object other) {
-    return other is ColorFilter
-        && other._type == _type
-        && _listEquals<double>(other._matrix, _matrix)
-        && other._color == _color
-        && other._blendMode == _blendMode;
-  }
+  _ImageFilter _toNativeImageFilter() => _ImageFilter.fromColorFilter(this);
 
   _ColorFilter? _toNativeColorFilter() {
     switch (_type) {
-      case _TypeMode:
+      case _kTypeMode:
         if (_color == null || _blendMode == null) {
           return null;
         }
         return _ColorFilter.mode(this);
-      case _TypeMatrix:
+      case _kTypeMatrix:
         if (_matrix == null) {
           return null;
         }
         assert(_matrix!.length == 20, 'Color Matrix must have 20 entries.');
         return _ColorFilter.matrix(this);
-      case _TypeLinearToSrgbGamma:
+      case _kTypeLinearToSrgbGamma:
         return _ColorFilter.linearToSrgbGamma(this);
-      case _TypeSrgbToLinearGamma:
+      case _kTypeSrgbToLinearGamma:
         return _ColorFilter.srgbToLinearGamma(this);
       default:
         throw StateError('Unknown mode $_type for ColorFilter.');
@@ -3039,18 +3034,45 @@ class ColorFilter {
   }
 
   @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is ColorFilter
+        && other._type == _type
+        && _listEquals<double>(other._matrix, _matrix)
+        && other._color == _color
+        && other._blendMode == _blendMode;
+  }
+
+  @override
   int get hashCode => hashValues(_color, _blendMode, hashList(_matrix), _type);
+
+  @override
+  String get _shortDescription {
+    switch (_type) {
+      case _kTypeMode:
+        return 'ColorFilter.mode($_color, $_blendMode)';
+      case _kTypeMatrix:
+        return 'ColorFilter.matrix($_matrix)';
+      case _kTypeLinearToSrgbGamma:
+        return 'ColorFilter.linearToSrgbGamma()';
+      case _kTypeSrgbToLinearGamma:
+        return 'ColorFilter.srgbToLinearGamma()';
+      default:
+        return 'unknow ColorFilter';
+    }
+  }
 
   @override
   String toString() {
     switch (_type) {
-      case _TypeMode:
+      case _kTypeMode:
         return 'ColorFilter.mode($_color, $_blendMode)';
-      case _TypeMatrix:
+      case _kTypeMatrix:
         return 'ColorFilter.matrix($_matrix)';
-      case _TypeLinearToSrgbGamma:
+      case _kTypeLinearToSrgbGamma:
         return 'ColorFilter.linearToSrgbGamma()';
-      case _TypeSrgbToLinearGamma:
+      case _kTypeSrgbToLinearGamma:
         return 'ColorFilter.srgbToLinearGamma()';
       default:
         return 'Unknown ColorFilter type. This is an error. If you\'re seeing this, please file an issue at https://github.com/flutter/flutter/issues/new.';
@@ -3067,27 +3089,27 @@ class ColorFilter {
 class _ColorFilter extends NativeFieldWrapperClass2 {
   _ColorFilter.mode(this.creator)
     : assert(creator != null), // ignore: unnecessary_null_comparison
-      assert(creator._type == ColorFilter._TypeMode) {
+      assert(creator._type == ColorFilter._kTypeMode) {
     _constructor();
     _initMode(creator._color!.value, creator._blendMode!.index);
   }
 
   _ColorFilter.matrix(this.creator)
     : assert(creator != null), // ignore: unnecessary_null_comparison
-      assert(creator._type == ColorFilter._TypeMatrix) {
+      assert(creator._type == ColorFilter._kTypeMatrix) {
     _constructor();
     _initMatrix(Float32List.fromList(creator._matrix!));
   }
   _ColorFilter.linearToSrgbGamma(this.creator)
     : assert(creator != null), // ignore: unnecessary_null_comparison
-      assert(creator._type == ColorFilter._TypeLinearToSrgbGamma) {
+      assert(creator._type == ColorFilter._kTypeLinearToSrgbGamma) {
     _constructor();
     _initLinearToSrgbGamma();
   }
 
   _ColorFilter.srgbToLinearGamma(this.creator)
     : assert(creator != null), // ignore: unnecessary_null_comparison
-      assert(creator._type == ColorFilter._TypeSrgbToLinearGamma) {
+      assert(creator._type == ColorFilter._kTypeSrgbToLinearGamma) {
     _constructor();
     _initSrgbToLinearGamma();
   }
@@ -3113,80 +3135,134 @@ class _ColorFilter extends NativeFieldWrapperClass2 {
 ///    this class as a backdrop filter.
 ///  * [SceneBuilder.pushImageFilter], which is the low-level API for using
 ///    this class as a child layer filter.
-class ImageFilter {
+abstract class ImageFilter {
   /// Creates an image filter that applies a Gaussian blur.
-  ImageFilter.blur({ double sigmaX = 0.0, double sigmaY = 0.0 })
-      : assert(sigmaX != null), // ignore: unnecessary_null_comparison
-        assert(sigmaY != null), // ignore: unnecessary_null_comparison
-        _data = _makeList(sigmaX, sigmaY),
-        _filterQuality = null,
-        _type = _kTypeBlur;
+  factory ImageFilter.blur({ double sigmaX = 0.0, double sigmaY = 0.0 }) {
+    assert(sigmaX != null); // ignore: unnecessary_null_comparison
+    assert(sigmaY != null); // ignore: unnecessary_null_comparison
+    return _GaussianBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY);
+  }
 
   /// Creates an image filter that applies a matrix transformation.
   ///
   /// For example, applying a positive scale matrix (see [Matrix4.diagonal3])
   /// when used with [BackdropFilter] would magnify the background image.
-  ImageFilter.matrix(Float64List matrix4,
-                     { FilterQuality filterQuality = FilterQuality.low })
-      : assert(matrix4 != null), // ignore: unnecessary_null_comparison
-        _data = Float64List.fromList(matrix4),
-        _filterQuality = filterQuality,
-        _type = _kTypeMatrix {
+  factory ImageFilter.matrix(Float64List matrix4,
+                     { FilterQuality filterQuality = FilterQuality.low }) {
+    assert(matrix4 != null);       // ignore: unnecessary_null_comparison
+    assert(filterQuality != null); // ignore: unnecessary_null_comparison
     if (matrix4.length != 16)
       throw ArgumentError('"matrix4" must have 16 entries.');
+    return _MatrixImageFilter(data: Float64List.fromList(matrix4), filterQuality: filterQuality);
   }
 
-  static Float64List _makeList(double a, double b) {
-    final Float64List list = Float64List(2);
-    list[0] = a;
-    list[1] = b;
-    return list;
+  /// Composes the `inner` filter with `outer`, to combine their effects.
+  ///
+  /// Creates a single [ImageFilter] that when applied, has the same effect as
+  /// subsequently applying `inner` and `outer`, i.e.,
+  /// result = outer(inner(source)).
+  factory ImageFilter.compose({ required ImageFilter outer, required ImageFilter inner }) {
+    assert (inner != null && outer != null);  // ignore: unnecessary_null_comparison
+    return _ComposeImageFilter(innerFilter: inner, outerFilter: outer);
   }
 
-  final Float64List _data;
-  final FilterQuality? _filterQuality;
-  final int _type;
-  _ImageFilter? _nativeFilter;
+  // Converts this to a native SkImageFilter. See the comments of this method in
+  // subclasses for the exact type of SkImageFilter this method converts to.
+  _ImageFilter _toNativeImageFilter();
 
-  // The type of SkImageFilter class to create for Skia.
-  static const int _kTypeBlur = 0;   // MakeBlurFilter
-  static const int _kTypeMatrix = 1; // MakeMatrixFilterRowMajor255
+  // The description text to show when the filter is part of a composite
+  // [ImageFilter] created using [ImageFilter.compose].
+  String get _shortDescription;
+}
+
+class _MatrixImageFilter implements ImageFilter {
+  _MatrixImageFilter({ required this.data, required this.filterQuality });
+
+  final Float64List data;
+  final FilterQuality filterQuality;
+
+  // MakeMatrixFilterRowMajor255
+  late final _ImageFilter nativeFilter = _ImageFilter.matrix(this);
+  @override
+  _ImageFilter _toNativeImageFilter() => nativeFilter;
+
+  @override
+  String get _shortDescription => 'matrix($data, $filterQuality)';
+
+  @override
+  String toString() => 'ImageFilter.matrix($data, $filterQuality)';
 
   @override
   bool operator ==(Object other) {
-    return other is ImageFilter
-        && other._type == _type
-        && _listEquals<double>(other._data, _data)
-        && other._filterQuality == _filterQuality;
-  }
-
-  _ImageFilter _toNativeImageFilter() => _nativeFilter ??= _makeNativeImageFilter();
-
-  _ImageFilter _makeNativeImageFilter() {
-    switch (_type) {
-      case _kTypeBlur:
-        return _ImageFilter.blur(this);
-      case _kTypeMatrix:
-        return _ImageFilter.matrix(this);
-      default:
-        throw StateError('Unknown mode $_type for ImageFilter.');
-    }
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _MatrixImageFilter
+        && other.filterQuality == filterQuality
+        && _listEquals<double>(other.data, data);
   }
 
   @override
-  int get hashCode => hashValues(_filterQuality, hashList(_data), _type);
+  int get hashCode => hashValues(filterQuality, hashList(data));
+}
+
+class _GaussianBlurImageFilter implements ImageFilter {
+  _GaussianBlurImageFilter({ required this.sigmaX, required this.sigmaY });
+
+  final double sigmaX;
+  final double sigmaY;
+
+  // MakeBlurFilter
+  late final _ImageFilter nativeFilter = _ImageFilter.blur(this);
+  @override
+  _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String toString() {
-    switch (_type) {
-      case _kTypeBlur:
-        return 'ImageFilter.blur(${_data[0]}, ${_data[1]})';
-      case _kTypeMatrix:
-        return 'ImageFilter.matrix($_data, $_filterQuality)';
-      default:
-        return 'Unknown ImageFilter type. This is an error. If you\'re seeing this, please file an issue at https://github.com/flutter/flutter/issues/new.';
-    }
+  String get _shortDescription => 'blur($sigmaX, $sigmaY)';
+
+  @override
+  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY)';
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _GaussianBlurImageFilter
+        && other.sigmaX == sigmaX
+        && other.sigmaY == sigmaY;
   }
+
+  @override
+  int get hashCode => hashValues(sigmaX, sigmaY);
+}
+
+class _ComposeImageFilter implements ImageFilter {
+  _ComposeImageFilter({ required this.innerFilter, required this.outerFilter });
+
+  final ImageFilter innerFilter;
+  final ImageFilter outerFilter;
+
+  // SkImageFilters::Compose
+  late final _ImageFilter nativeFilter = _ImageFilter.composed(this);
+  @override
+  _ImageFilter _toNativeImageFilter() => nativeFilter;
+
+  @override
+  String get _shortDescription => '${innerFilter._shortDescription} -> ${outerFilter._shortDescription}';
+
+  @override
+  String toString() => 'ImageFilter.compose(source -> $_shortDescription -> result)';
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _ComposeImageFilter
+        && other.innerFilter == innerFilter
+        && other.outerFilter == outerFilter;
+  }
+
+  @override
+  int get hashCode => hashValues(innerFilter, outerFilter);
 }
 
 /// An [ImageFilter] that is backed by a native SkImageFilter.
@@ -3198,11 +3274,11 @@ class _ImageFilter extends NativeFieldWrapperClass2 {
   void _constructor() native 'ImageFilter_constructor';
 
   /// Creates an image filter that applies a Gaussian blur.
-  _ImageFilter.blur(this.creator)
-    : assert(creator != null), // ignore: unnecessary_null_comparison
-      assert(creator._type == ImageFilter._kTypeBlur) {
+  _ImageFilter.blur(_GaussianBlurImageFilter filter)
+    : assert(filter != null), // ignore: unnecessary_null_comparison
+      creator = filter {    // ignore: prefer_initializing_formals
     _constructor();
-    _initBlur(creator._data[0], creator._data[1]);
+    _initBlur(filter.sigmaX, filter.sigmaY);
   }
   void _initBlur(double sigmaX, double sigmaY) native 'ImageFilter_initBlur';
 
@@ -3210,16 +3286,36 @@ class _ImageFilter extends NativeFieldWrapperClass2 {
   ///
   /// For example, applying a positive scale matrix (see [Matrix4.diagonal3])
   /// when used with [BackdropFilter] would magnify the background image.
-  _ImageFilter.matrix(this.creator)
-    : assert(creator != null), // ignore: unnecessary_null_comparison
-      assert(creator._type == ImageFilter._kTypeMatrix) {
-    if (creator._data.length != 16)
+  _ImageFilter.matrix(_MatrixImageFilter filter)
+    : assert(filter != null), // ignore: unnecessary_null_comparison
+      creator = filter {    // ignore: prefer_initializing_formals
+    if (filter.data.length != 16)
       throw ArgumentError('"matrix4" must have 16 entries.');
     _constructor();
-    _initMatrix(creator._data, creator._filterQuality!.index);
+    _initMatrix(filter.data, filter.filterQuality.index);
   }
   void _initMatrix(Float64List matrix4, int filterQuality) native 'ImageFilter_initMatrix';
 
+  /// Converts a color filter to an image filter.
+  _ImageFilter.fromColorFilter(ColorFilter filter)
+    : assert(filter != null), // ignore: unnecessary_null_comparison
+      creator = filter {    // ignore: prefer_initializing_formals
+    _constructor();
+    final _ColorFilter? nativeFilter = filter._toNativeColorFilter();
+    _initColorFilter(nativeFilter);
+  }
+  void _initColorFilter(_ColorFilter? colorFilter) native 'ImageFilter_initColorFilter';
+
+  /// Composes `_innerFilter` with `_outerFilter`.
+  _ImageFilter.composed(_ComposeImageFilter filter)
+    : assert(filter != null), // ignore: unnecessary_null_comparison
+      creator = filter {    // ignore: prefer_initializing_formals
+    _constructor();
+    final _ImageFilter nativeFilterInner = filter.innerFilter._toNativeImageFilter();
+    final _ImageFilter nativeFilterOuter = filter.outerFilter._toNativeImageFilter();
+    _initComposed(nativeFilterOuter,  nativeFilterInner);
+  }
+  void _initComposed(_ImageFilter outerFilter, _ImageFilter innerFilter) native 'ImageFilter_initComposeFilter';
   /// The original Dart object that created the native wrapper, which retains
   /// the values used for the filter.
   final ImageFilter creator;

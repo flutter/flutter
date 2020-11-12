@@ -406,6 +406,12 @@ class ImageFilter {
     //    if (matrix4.length != 16)
     //      throw ArgumentError('"matrix4" must have 16 entries.');
   }
+
+  ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) {
+     // TODO(flutter_web): add implementation.
+    throw UnimplementedError(
+        'ImageFilter.compose not implemented for web platform.');
+  }
 }
 
 enum ImageByteFormat {
