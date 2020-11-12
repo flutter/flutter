@@ -14,20 +14,15 @@ class CkPathMetrics extends IterableBase<ui.PathMetric>
 
   /// The [CkPath.isEmpty] case is special-cased to avoid booting the WASM machinery just to find out there are no contours.
   @override
-  Iterator<ui.PathMetric> get iterator => _path.isEmpty ? const CkPathMetricIteratorEmpty._() : CkContourMeasureIter(_path, _forceClosed);
+  Iterator<ui.PathMetric> get iterator => _path.isEmpty
+    ? const CkPathMetricIteratorEmpty._()
+    : CkContourMeasureIter(this);
 }
 
-class CkContourMeasureIter implements Iterator<ui.PathMetric> {
-  CkContourMeasureIter(CkPath path, bool forceClosed)
-    : _skObject = SkContourMeasureIter(
-        path.skiaObject,
-        forceClosed,
-        1,
-      ),
-      _fillType = path._fillType;
+class CkContourMeasureIter extends ManagedSkiaObject<SkContourMeasureIter> implements Iterator<ui.PathMetric> {
+  CkContourMeasureIter(this._metrics);
 
-  final SkContourMeasureIter _skObject;
-  final ui.PathFillType _fillType;
+  final CkPathMetrics _metrics;
 
   /// A monotonically increasing counter used to generate [ui.PathMetric.contourIndex].
   ///
@@ -50,36 +45,66 @@ class CkContourMeasureIter implements Iterator<ui.PathMetric> {
 
   @override
   bool moveNext() {
-    final SkContourMeasure? skContourMeasure = _skObject.next();
+    final SkContourMeasure? skContourMeasure = skiaObject.next();
     if (skContourMeasure == null) {
       _current = null;
       return false;
     }
 
-    _current = CkContourMeasure(_contourIndexCounter, skContourMeasure, _fillType);
+    _current = CkContourMeasure(_metrics, skContourMeasure, _contourIndexCounter);
     _contourIndexCounter += 1;
     return true;
   }
+
+  @override
+  SkContourMeasureIter createDefault() {
+    return SkContourMeasureIter(
+      _metrics._path.skiaObject,
+      _metrics._forceClosed,
+      1.0,
+    );
+  }
+
+  @override
+  SkContourMeasureIter resurrect() {
+    final SkContourMeasureIter iterator = createDefault();
+
+    // When resurrecting we must advance the iterator to the last known
+    // position.
+    for (int i = 0; i < _contourIndexCounter; i++) {
+      iterator.next();
+    }
+
+    return iterator;
+  }
+
+  @override
+  void delete() {
+    rawSkiaObject?.delete();
+  }
 }
 
-class CkContourMeasure implements ui.PathMetric {
-  CkContourMeasure(this.contourIndex, this._skObject, this._fillType);
+class CkContourMeasure extends ManagedSkiaObject<SkContourMeasure> implements ui.PathMetric {
+  CkContourMeasure(this._metrics, SkContourMeasure jsObject, this.contourIndex)
+    : super(jsObject);
 
-  final SkContourMeasure _skObject;
-  final ui.PathFillType _fillType;
+  /// The path metrics used to create this measure.
+  ///
+  /// This is used to resurrect the object if it is deleted prematurely.
+  final CkPathMetrics _metrics;
 
   @override
   final int contourIndex;
 
   @override
   ui.Path extractPath(double start, double end, {bool startWithMoveTo = true}) {
-    final SkPath skPath = _skObject.getSegment(start, end, startWithMoveTo);
-    return CkPath._fromSkPath(skPath, _fillType);
+    final SkPath skPath = skiaObject.getSegment(start, end, startWithMoveTo);
+    return CkPath._fromSkPath(skPath, _metrics._path._fillType);
   }
 
   @override
   ui.Tangent getTangentForOffset(double distance) {
-    final Float32List posTan = _skObject.getPosTan(distance);
+    final Float32List posTan = skiaObject.getPosTan(distance);
     return ui.Tangent(
       ui.Offset(posTan[0], posTan[1]),
       ui.Offset(posTan[2], posTan[3]),
@@ -88,12 +113,45 @@ class CkContourMeasure implements ui.PathMetric {
 
   @override
   bool get isClosed {
-    return _skObject.isClosed();
+    return skiaObject.isClosed();
   }
 
   @override
   double get length {
-    return _skObject.length();
+    return skiaObject.length();
+  }
+
+  @override
+  SkContourMeasure createDefault() {
+    // This method must never be called. The default instance comes from the
+    // iterator's [SkContourMeasureIter.next] method initialized by the
+    // constructor.
+    throw StateError('Unreachable code');
+  }
+
+  @override
+  SkContourMeasure resurrect() {
+    final CkContourMeasureIter iterator = _metrics.iterator as CkContourMeasureIter;
+    final SkContourMeasureIter skIterator = iterator.skiaObject;
+
+    // When resurrecting we must advance the iterator to the last known
+    // position.
+    for (int i = 0; i < contourIndex; i++) {
+      skIterator.next();
+    }
+
+    final SkContourMeasure? result = skIterator.next();
+
+    if (result == null) {
+      throw StateError('Failed to resurrect SkContourMeasure');
+    }
+
+    return result;
+  }
+
+  @override
+  void delete() {
+    rawSkiaObject?.delete();
   }
 }
 
