@@ -20,25 +20,25 @@ import 'framework.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return  SingleChildScrollView(
-///     children:[
-///       ColorFiltered(
-///         colorFilter: ColorFilter.mode(
-///           Colors.red,
-///           BlendMode.modulate,
+///   return SingleChildScrollView(
+///     child :Column(
+///       children:[
+///         ColorFiltered(
+///           colorFilter: ColorFilter.mode(
+///             Colors.red,
+///             BlendMode.modulate,
+///           ),
+///           child:Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
 ///         ),
-///         child:Image.network(
-///           'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
-///       ),
-///       ColorFiltered(
-///         colorFilter: ColorFilter.mode(
-///           Colors.grey,
-///           BlendMode.saturation,
+///         ColorFiltered(
+///           colorFilter: ColorFilter.mode(
+///             Colors.grey,
+///             BlendMode.saturation,
+///           ),
+///           child:Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
 ///         ),
-///         child:Image.network(
-///           'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
-///       ),
-///     ],
+///       ],
+///     ),
 ///   );
 /// }
 /// ```
