@@ -340,7 +340,7 @@ class SingletonFlutterWindow extends FlutterWindow {
   ///
   /// This is equivalent to `locales.first` and will provide an empty non-null
   /// locale if the [locales] list has not been set or is empty.
-  Locale? get locale => platformDispatcher.locale;
+  Locale get locale => platformDispatcher.locale;
 
   /// The full system-reported supported locales of the device.
   ///
@@ -358,7 +358,7 @@ class SingletonFlutterWindow extends FlutterWindow {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
-  List<Locale>? get locales => platformDispatcher.locales;
+  List<Locale> get locales => platformDispatcher.locales;
 
   /// Performs the platform-native locale resolution.
   ///
@@ -850,11 +850,11 @@ class Window extends SingletonFlutterWindow {
 
   @override
   // ignore: unnecessary_overrides
-  Locale? get locale => super.locale;
+  Locale get locale => super.locale;
 
   @override
   // ignore: unnecessary_overrides
-  List<Locale>? get locales => super.locales;
+  List<Locale> get locales => super.locales;
 
   @override
   // ignore: unnecessary_overrides
