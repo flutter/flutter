@@ -20,21 +20,23 @@ import 'framework.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return  Column(
+///   return  SingleChildScrollView(
 ///     children:[
 ///       ColorFiltered(
 ///         colorFilter: ColorFilter.mode(
 ///           Colors.red,
 ///           BlendMode.modulate,
 ///         ),
-///         child:Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+///         child:Image.network(
+///           'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
 ///       ),
 ///       ColorFiltered(
 ///         colorFilter: ColorFilter.mode(
 ///           Colors.grey,
 ///           BlendMode.saturation,
 ///         ),
-///         child:Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+///         child:Image.network(
+///           'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
 ///       ),
 ///     ],
 ///   );
@@ -44,10 +46,10 @@ import 'framework.dart';
 ///
 /// See Also:
 ///
-/// *[Blendmode], blending a source image with destination image.
-/// *[Image],the class in the [dart:ui](https://api.flutter.dev/flutter/dart-ui/dart-ui-library.html) library.
-/// *[Colors], constants which represent Material design's [color palette](https://material.io/design/color/).
-/// *Cookbook:[Display images from the internet](https://flutter.dev/docs/cookbook/images/network-image)
+/// * [Blendmode], describing how to blend a source image with destination image.
+/// * [Image], the class in the [dart:ui](https://api.flutter.dev/flutter/dart-ui/dart-ui-library.html) library.
+/// * [Colors], constants which represent Material Design's [color palette](https://material.io/design/color/).
+/// * Cookbook: [Display images from the internet](https://flutter.dev/docs/cookbook/images/network-image)
 ///
 @immutable
 class ColorFiltered extends SingleChildRenderObjectWidget {
