@@ -245,8 +245,8 @@ class Radio<T> extends StatefulWidget {
   ///
   /// Defaults to [ThemeData.toggleableActiveColor].
   ///
-  /// If [fillColor] or [RadioThemeData.fillColor] returns a non-null color in
-  /// the [MaterialState.selected] state, it will be used instead of this color.
+  /// If [fillColor] returns a non-null color in the [MaterialState.selected]
+  /// state, it will be used instead of this color.
   final Color? activeColor;
 
   /// {@template flutter.material.radio.fillColor}
@@ -260,8 +260,8 @@ class Radio<T> extends StatefulWidget {
   ///  * [MaterialState.disabled].
   /// {@endtemplate}
   ///
-  /// If null, then the value of [RadioThemeData.fillColor] is used. If that is
-  /// also null, then the value of [activeColor] is used in the selected state.
+  /// If null, then the value of [activeColor] is used in the selected state. If
+  /// that is also null, then the value of [RadioThemeData.fillColor] is used.
   final MaterialStateProperty<Color?>? fillColor;
 
   /// {@template flutter.material.radio.materialTapTargetSize}
@@ -436,12 +436,12 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     final Set<MaterialState> activeStates = _states..add(MaterialState.selected);
     final Set<MaterialState> inactiveStates = _states..remove(MaterialState.selected);
     final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
-      ?? themeData.radioTheme.fillColor?.resolve(activeStates)
       ?? _widgetFillColor.resolve(activeStates)
+      ?? themeData.radioTheme.fillColor?.resolve(activeStates)
       ?? _defaultFillColor.resolve(activeStates);
     final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
-      ?? themeData.radioTheme.fillColor?.resolve(inactiveStates)
       ?? _widgetFillColor.resolve(inactiveStates)
+      ?? themeData.radioTheme.fillColor?.resolve(inactiveStates)
       ?? _defaultFillColor.resolve(inactiveStates);
 
     return FocusableActionDetector(

@@ -135,9 +135,8 @@ class Checkbox extends StatefulWidget {
   ///
   /// Defaults to [ThemeData.toggleableActiveColor].
   ///
-  /// If [fillColor] or [CheckboxThemeData.fillColor] returns a non-null color
-  /// in the [MaterialState.selected] state, it will be used instead of this
-  /// color.
+  /// If [fillColor] returns a non-null color in the [MaterialState.selected]
+  /// state, it will be used instead of this color.
   final Color? activeColor;
 
   /// {@template flutter.material.checkbox.fillColor}
@@ -151,9 +150,9 @@ class Checkbox extends StatefulWidget {
   ///  * [MaterialState.disabled].
   /// {@endtemplate}
   ///
-  /// If null, then the value of [CheckboxThemeData.fillColor] is used. If that
-  /// is also null, then the value of [activeColor] is used in the selected
-  /// state.
+  /// If null, then the value of [activeColor] is used in the selected
+  /// state. If that is also null, the value of [CheckboxThemeData.fillColor]
+  /// is used.
   final MaterialStateProperty<Color?>? fillColor;
 
   /// {@template flutter.material.checkbox.checkColor}
@@ -346,12 +345,12 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     final Set<MaterialState> activeStates = _states..add(MaterialState.selected);
     final Set<MaterialState> inactiveStates = _states..remove(MaterialState.selected);
     final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
-      ?? themeData.checkboxTheme.fillColor?.resolve(activeStates)
       ?? _widgetFillColor.resolve(activeStates)
+      ?? themeData.checkboxTheme.fillColor?.resolve(activeStates)
       ?? _defaultFillColor.resolve(activeStates);
     final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
-      ?? themeData.checkboxTheme.fillColor?.resolve(inactiveStates)
       ?? _widgetFillColor.resolve(inactiveStates)
+      ?? themeData.checkboxTheme.fillColor?.resolve(inactiveStates)
       ?? _defaultFillColor.resolve(inactiveStates);
 
     return FocusableActionDetector(
