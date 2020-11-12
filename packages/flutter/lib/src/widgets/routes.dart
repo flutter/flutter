@@ -842,23 +842,11 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                             },
                           ),
                         ),
-                      );
-                    },
-                    child: _page ??= RepaintBoundary(
-                      key: widget.route._subtreeKey, // immutable
-                      child: Builder(
-                        builder: (BuildContext context) {
-                          return widget.route.buildPage(
-                            context,
-                            widget.route.animation!,
-                            widget.route.secondaryAnimation!,
-                          );
-                        },
                       ),
                     ),
                   ),
                 );
-              }
+              },
             ),
           ),
         ),
