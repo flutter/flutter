@@ -719,7 +719,8 @@ class _ResidentWebRunner extends ResidentWebRunner {
       lastCompiled: device.devFS.lastCompiled,
       urisToMonitor: device.devFS.sources,
       packagesPath: packagesFilePath,
-      packageConfig: device.devFS.lastPackageConfig,
+      packageConfig: device.devFS.lastPackageConfig
+        ?? debuggingOptions.buildInfo.packageConfig,
     );
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device.device.name}...',
