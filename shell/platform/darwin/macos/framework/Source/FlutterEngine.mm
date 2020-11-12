@@ -322,7 +322,6 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   [self sendUserLocales];
   [self updateWindowMetrics];
   [self updateDisplayConfig];
-  self.viewController.flutterView.synchronousResizing = YES;
   return YES;
 }
 
@@ -358,9 +357,6 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   if (!controller && !_allowHeadlessExecution) {
     [self shutDownEngine];
     _resourceContext = nil;
-  }
-  if (_engine) {
-    self.viewController.flutterView.synchronousResizing = YES;
   }
 }
 

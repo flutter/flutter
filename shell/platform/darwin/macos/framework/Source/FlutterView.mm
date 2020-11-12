@@ -71,15 +71,11 @@
 }
 
 - (void)reshaped {
-  if (self.synchronousResizing) {
-    CGSize scaledSize = [self convertSizeToBacking:self.bounds.size];
-    [_resizeSynchronizer beginResize:scaledSize
-                              notify:^{
-                                [_reshapeListener viewDidReshape:self];
-                              }];
-  } else {
-    [_reshapeListener viewDidReshape:self];
-  }
+  CGSize scaledSize = [self convertSizeToBacking:self.bounds.size];
+  [_resizeSynchronizer beginResize:scaledSize
+                            notify:^{
+                              [_reshapeListener viewDidReshape:self];
+                            }];
 }
 
 #pragma mark - NSView overrides

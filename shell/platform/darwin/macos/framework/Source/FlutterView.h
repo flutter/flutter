@@ -25,13 +25,6 @@
  */
 @property(readwrite, nonatomic, nonnull) NSOpenGLContext* openGLContext;
 
-/**
- * Controls whether view resizing synchronously updates contents. This can only be enabled
- * after the engine is running and producing frames, because during synchronous view resizing the
- * platform thread is blocked until engine produces frame with requested size.
- */
-@property(readwrite, nonatomic) BOOL synchronousResizing;
-
 - (nullable instancetype)initWithFrame:(NSRect)frame
                           shareContext:(nonnull NSOpenGLContext*)shareContext
                        reshapeListener:(nonnull id<FlutterViewReshapeListener>)reshapeListener
