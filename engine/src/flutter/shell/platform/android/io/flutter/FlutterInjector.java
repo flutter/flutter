@@ -62,22 +62,11 @@ public final class FlutterInjector {
     instance = null;
   }
 
-  private FlutterInjector(boolean shouldLoadNative, @NonNull FlutterLoader flutterLoader) {
-    this.shouldLoadNative = shouldLoadNative;
+  private FlutterInjector(@NonNull FlutterLoader flutterLoader) {
     this.flutterLoader = flutterLoader;
   }
 
-  private boolean shouldLoadNative;
   private FlutterLoader flutterLoader;
-
-  /**
-   * Returns whether the Flutter Android engine embedding should load the native C++ engine.
-   *
-   * <p>Useful for testing since JVM tests via Robolectric can't load native libraries.
-   */
-  public boolean shouldLoadNative() {
-    return shouldLoadNative;
-  }
 
   /** Returns the {@link FlutterLoader} instance to use for the Flutter Android engine embedding. */
   @NonNull
@@ -92,20 +81,6 @@ public final class FlutterInjector {
    * <p>Non-overriden values have reasonable defaults.
    */
   public static final class Builder {
-
-    private boolean shouldLoadNative = true;
-    /**
-     * Sets whether the Flutter Android engine embedding should load the native C++ engine.
-     *
-     * <p>Useful for testing since JVM tests via Robolectric can't load native libraries.
-     *
-     * <p>Defaults to true.
-     */
-    public Builder setShouldLoadNative(boolean shouldLoadNative) {
-      this.shouldLoadNative = shouldLoadNative;
-      return this;
-    }
-
     private FlutterLoader flutterLoader;
     /**
      * Sets a {@link FlutterLoader} override.
@@ -130,8 +105,7 @@ public final class FlutterInjector {
     public FlutterInjector build() {
       fillDefaults();
 
-      System.out.println("should load native is " + shouldLoadNative);
-      return new FlutterInjector(shouldLoadNative, flutterLoader);
+      return new FlutterInjector(flutterLoader);
     }
   }
 }
