@@ -551,12 +551,7 @@ class PlatformDispatcher {
   ///
   /// This is equivalent to `locales.first` and will provide an empty non-null
   /// locale if the [locales] list has not been set or is empty.
-  Locale? get locale {
-    if (locales != null && locales!.isNotEmpty) {
-      return locales!.first;
-    }
-    return null;
-  }
+  Locale get locale => locales.first;
 
   /// The full system-reported supported locales of the device.
   ///
@@ -573,7 +568,7 @@ class PlatformDispatcher {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
-  List<Locale>? get locales => configuration.locales;
+  List<Locale> get locales => configuration.locales;
 
   /// Performs the platform-native locale resolution.
   ///
@@ -649,12 +644,7 @@ class PlatformDispatcher {
   }
 
   // Called from the engine, via hooks.dart
-  String _localeClosure() {
-    if (locale == null) {
-      return '';
-    }
-    return locale.toString();
-  }
+  String _localeClosure() => locale.toString();
 
   /// The lifecycle state immediately after dart isolate initialization.
   ///
