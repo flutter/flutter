@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/protocol_discovery.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -914,11 +915,13 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
   group('startApp', () {
     SimControl simControl;
     MockXcode mockXcode;
+    MockPrototcolDiscovery mockPrototcolDiscovery;
 
     setUp(() {
       simControl = MockSimControl();
       mockXcode = MockXcode();
       when(mockXcode.xcrunCommand()).thenReturn(<String>['xcrun']);
+      mockPrototcolDiscovery = MockPrototcolDiscovery();
     });
 
     testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
@@ -930,15 +933,23 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         xcode: mockXcode,
       );
       when(globals.plistParser.getValueFromFile(any, any)).thenReturn('correct');
+      when(mockPrototcolDiscovery.uri)
+          .thenAnswer((_) async => Uri.parse('http://localhost:5678'));
 
       final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
 
       const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
-      final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
+      final DebuggingOptions mockOptions =
+          DebuggingOptions.enabled(mockInfo, hostVmServicePort: 8888);
       await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
-      verify(simControl.launch(any, 'correct', any));
+      verify(simControl.launch(any, 'correct', <String>[
+        '--enable-dart-profiling',
+        '--enable-checked-mode',
+        '--verify-entry-points',
+        '--observatory-port=8888',
+      ]));
     }, overrides: <Type, Generator>{
       PlistParser: () => MockPlistUtils(),
       FileSystem: () => fileSystem,
@@ -1018,4 +1029,5 @@ flutter:
   });
 }
 
+class MockPrototcolDiscovery extends Mock implements ProtocolDiscovery {}
 class MockBuildSystem extends Mock implements BuildSystem {}
