@@ -16,6 +16,13 @@ public interface PlatformViewsAccessibilityDelegate {
   View getPlatformViewById(Integer id);
 
   /**
+   * Returns true if the platform view uses virtual displays.
+   *
+   * @hide
+   */
+  boolean usesVirtualDisplay(Integer id);
+
+  /**
    * Attaches an accessibility bridge for this platform views accessibility delegate.
    *
    * <p>Accessibility events originating in platform views belonging to this delegate will be

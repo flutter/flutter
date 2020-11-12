@@ -17,7 +17,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Rect;
@@ -27,7 +26,6 @@ import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
-import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
 import java.nio.ByteBuffer;
@@ -430,8 +428,7 @@ public class AccessibilityBridgeTest {
 
     View embeddedView = mock(View.class);
     when(accessibilityDelegate.getPlatformViewById(1)).thenReturn(embeddedView);
-
-    when(embeddedView.getContext()).thenReturn(mock(FlutterActivity.class));
+    when(accessibilityDelegate.usesVirtualDisplay(1)).thenReturn(false);
 
     AccessibilityNodeInfo nodeInfo = mock(AccessibilityNodeInfo.class);
     when(embeddedView.createAccessibilityNodeInfo()).thenReturn(nodeInfo);
@@ -464,7 +461,7 @@ public class AccessibilityBridgeTest {
 
     View embeddedView = mock(View.class);
     when(accessibilityDelegate.getPlatformViewById(1)).thenReturn(embeddedView);
-    when(embeddedView.getContext()).thenReturn(mock(Activity.class));
+    when(accessibilityDelegate.usesVirtualDisplay(1)).thenReturn(true);
 
     accessibilityBridge.createAccessibilityNodeInfo(0);
     verify(accessibilityViewEmbedder).getRootNode(eq(embeddedView), eq(0), any(Rect.class));

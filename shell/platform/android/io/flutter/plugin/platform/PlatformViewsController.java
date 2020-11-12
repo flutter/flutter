@@ -584,6 +584,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     return controller.getView();
   }
 
+  @Override
+  public boolean usesVirtualDisplay(Integer id) {
+    return vdControllers.containsKey(id);
+  }
+
   private void lockInputConnection(@NonNull VirtualDisplayController controller) {
     if (textInputPlugin == null) {
       return;
