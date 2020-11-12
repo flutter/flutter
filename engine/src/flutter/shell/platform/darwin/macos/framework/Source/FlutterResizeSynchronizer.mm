@@ -17,6 +17,10 @@
   // Used to block [requestCommit].
   std::condition_variable _condBlockRequestCommit;
 
+  // Whether a frame was received; We don't block platform thread during resize
+  // until we know that framework is running and producing frames
+  BOOL _receivedFirstFrame;
+
   // If NO, requestCommit calls are ignored until shouldEnsureSurfaceForSize is called with
   // proper size.
   BOOL _acceptingCommit;
@@ -50,6 +54,12 @@
     return;
   }
 
+  if (!_receivedFirstFrame) {
+    // No blocking until framework produces at least one frame
+    notify();
+    return;
+  }
+
   ++_cookie;
 
   // from now on, ignore all incoming commits until the block below gets
@@ -79,6 +89,11 @@
 
 - (BOOL)shouldEnsureSurfaceForSize:(CGSize)size {
   std::unique_lock<std::mutex> lock(_mutex);
+
+  if (!_receivedFirstFrame) {
+    return YES;
+  }
+
   if (!_acceptingCommit) {
     if (CGSizeEqualToSize(_newSize, size)) {
       _acceptingCommit = YES;
@@ -92,6 +107,8 @@
   if (!_acceptingCommit) {
     return;
   }
+
+  _receivedFirstFrame = YES;
 
   _pendingCommit = YES;
   if (_waiting) {  // BeginResize is in progress, interrupt it and schedule commit call
