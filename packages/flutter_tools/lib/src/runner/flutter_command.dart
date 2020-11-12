@@ -796,12 +796,13 @@ abstract class FlutterCommand extends Command<void> {
       codeSizeDirectory = directory.path;
     }
 
-    NullSafetyMode nullSafetyMode = NullSafetyMode.unsound;
+    NullSafetyMode nullSafetyMode = NullSafetyMode.sound;
     if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
       // Explicitly check for `true` and `false` so that `null` results in not
       // passing a flag. Examine the entrypoint file to determine if it
       // is opted in or out.
-      if (!argResults.wasParsed(FlutterOptions.kNullSafety)) {
+      final bool wasNullSafetyFlagParsed = argResults.wasParsed(FlutterOptions.kNullSafety);
+      if (!wasNullSafetyFlagParsed && argParser.options.containsKey('target')) {
         final File entrypointFile = globals.fs.file(targetFile);
         final LanguageVersion languageVersion = determineLanguageVersion(
           entrypointFile,
@@ -814,6 +815,10 @@ abstract class FlutterCommand extends Command<void> {
           nullSafetyMode = NullSafetyMode.unsound;
           extraFrontEndOptions.add('--no-sound-null-safety');
         }
+      } else if (wasNullSafetyFlagParsed) {
+        // This mode is only used for commands which do not build a single target like
+        // 'flutter test'.
+        nullSafetyMode = NullSafetyMode.autodetect;
       } else if (boolArg(FlutterOptions.kNullSafety)) {
         nullSafetyMode = NullSafetyMode.sound;
         extraFrontEndOptions.add('--sound-null-safety');

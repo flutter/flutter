@@ -759,4 +759,6 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
 enum NullSafetyMode {
   sound,
   unsound,
+  /// The null safety mode was not detected. Only supported for 'flutter test'.
+  autodetect,
 }
