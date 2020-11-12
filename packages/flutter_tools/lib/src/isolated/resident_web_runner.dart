@@ -483,11 +483,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
       'Launching ${globals.fsUtils.getDisplayPath(target)} '
       'on ${device.device.name} in $modeName mode...',
     );
-    final String effectiveHostname = debuggingOptions.hostname ?? 'localhost';
-    final int hostPort = debuggingOptions.port == null
-        ? await globals.os.findFreePort()
-        : int.tryParse(debuggingOptions.port);
-
     if (device.device is ChromiumDevice) {
       _chromiumLauncher = (device.device as ChromiumDevice).chromeLauncher;
     }
@@ -498,10 +493,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions.webEnableExpressionEvaluation
               ? WebExpressionCompiler(device.generator)
               : null;
-
         device.devFS = WebDevFS(
-          hostname: effectiveHostname,
-          port: hostPort,
+          hostname: debuggingOptions.hostname ?? 'localhost',
+          port: debuggingOptions.port != null
+            ? int.tryParse(debuggingOptions.port)
+            : null,
           packagesFilePath: packagesFilePath,
           urlTunneller: urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
@@ -512,6 +508,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
+          nullSafetyMode: device.nullSafetyMode,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -636,7 +633,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         fullRestart: true,
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
-        nullSafety: usageNullSafety,
         fastReassemble: null,
       ).send();
     }
@@ -673,12 +669,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
           path: '/' + mainUri.pathSegments.last,
         );
       }
+      final LanguageVersion languageVersion =  determineLanguageVersion(
+        globals.fs.file(mainUri),
+        packageConfig[flutterProject.manifest.appName],
+      );
 
       final String entrypoint = <String>[
-        determineLanguageVersion(
-          globals.fs.file(mainUri),
-          packageConfig[flutterProject.manifest.appName],
-        ),
+        '// @dart=${languageVersion.major}.${languageVersion.minor}',
         '// Flutter web bootstrap script for $importedEntrypoint.',
         '',
         "import 'dart:ui' as ui;",

@@ -360,10 +360,9 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     if (matchedIntent != null) {
       final BuildContext primaryContext = primaryFocus!.context!;
       assert (primaryContext != null);
-      final Action<Intent>? action = Actions.find<Intent>(
+      final Action<Intent>? action = Actions.maybeFind<Intent>(
         primaryContext,
         intent: matchedIntent,
-        nullOk: true,
       );
       if (action != null && action.isEnabled(matchedIntent)) {
         Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
@@ -383,9 +382,60 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   }
 }
 
-/// A widget that establishes an [ShortcutManager] to be used by its descendants
+/// A widget that establishes a [ShortcutManager] to be used by its descendants
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
+///
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
+///
+/// Here, we will use a [Shortcuts] and [Actions] widget to add and remove from a counter.
+/// This can be done by creating a child widget that is focused and pressing the logical key
+/// sets that have been defined in [Shortcuts] and defining the actions that each key set
+/// performs.
+///
+/// ```dart imports
+/// import 'package:flutter/services.dart';
+/// ```
+///
+/// ```dart preamble
+/// class Increment extends Intent {}
+///
+/// class Decrement extends Intent {}
+/// ```
+///
+/// ```dart
+/// int count = 0;
+///
+/// Widget build(BuildContext context) {
+///   return Shortcuts(
+///     shortcuts: <LogicalKeySet, Intent> {
+///       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.keyK): Increment(),
+///       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.keyL): Decrement(),
+///     },
+///     child: Actions(
+///       actions: <Type, Action<Intent>> {
+///         Increment: CallbackAction<Increment>(
+///           onInvoke: (Increment intent) => setState(() { count = count + 1; }),
+///         ),
+///         Decrement: CallbackAction<Decrement>(
+///           onInvoke: (Decrement intent) => setState(() { count = count - 1; }),
+///         ),
+///       },
+///       child: Focus(
+///         autofocus:true,
+///         child: Column(
+///           children: <Widget>[
+///             Text('Add to the counter by pressing keyboard Shift and keyboard "K"'),
+///             Text('Subtract from the counter by pressing keyboard Shift and keyboard "L"'),
+///             Text('count: $count'),
+///           ],
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -426,7 +476,7 @@ class Shortcuts extends StatefulWidget {
 
   /// The child widget for this [Shortcuts] widget.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The debug label that is printed for this node when logged.
@@ -442,13 +492,18 @@ class Shortcuts extends StatefulWidget {
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.
-  static ShortcutManager? of(BuildContext context, {bool nullOk = false}) {
+  ///
+  /// If no [Shortcuts] widget encloses the context given, will assert in debug
+  /// mode and throw an exception in release mode.
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], which is similar to this function, but will return null if
+  ///    it doesn't find a [Shortcuts] ancestor.
+  static ShortcutManager of(BuildContext context) {
     assert(context != null);
     final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
     assert(() {
-      if (nullOk) {
-        return true;
-      }
       if (inherited == null) {
         throw FlutterError('Unable to find a $Shortcuts widget in the context.\n'
             '$Shortcuts.of() was called with a context that does not contain a '
@@ -460,6 +515,24 @@ class Shortcuts extends StatefulWidget {
       }
       return true;
     }());
+    return inherited!.manager;
+  }
+
+  /// Returns the [ActionDispatcher] that most tightly encloses the given
+  /// [BuildContext].
+  ///
+  /// The [context] argument must not be null.
+  ///
+  /// If no [Shortcuts] widget encloses the context given, will return null.
+  ///
+  /// See also:
+  ///
+  ///  * [of], which is similar to this function, but returns a non-nullable
+  ///    result, and will throw an exception if it doesn't find a [Shortcuts]
+  ///    ancestor.
+  static ShortcutManager? maybeOf(BuildContext context) {
+    assert(context != null);
+    final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
     return inherited?.manager;
   }
 

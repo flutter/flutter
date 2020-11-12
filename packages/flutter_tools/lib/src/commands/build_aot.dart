@@ -10,7 +10,7 @@ import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
-/// Builds AOT snapshots into platform specific library containers.
+/// Builds AOT executables into platform specific library containers.
 class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
   BuildAotCommand({this.aotBuilder}) {
     addTreeShakeIconsFlag();
@@ -18,7 +18,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     addBuildModeFlags();
     usesPubOption();
     usesDartDefineOption();
-    usesExtraFrontendOptions();
+    usesExtraDartFlagOptions();
     argParser
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
@@ -28,13 +28,9 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       ..addFlag('quiet', defaultsTo: false)
       ..addMultiOption('ios-arch',
         splitCommas: true,
-        defaultsTo: defaultIOSArchs.map<String>(getNameForDarwinArch),
+        defaultsTo: <String>[getNameForDarwinArch(DarwinArch.arm64)],
         allowed: DarwinArch.values.map<String>(getNameForDarwinArch),
         help: 'iOS architectures to build.',
-      )
-      ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
-        splitCommas: true,
-        hide: true,
       )
       ..addFlag('bitcode',
         defaultsTo: kBitcodeEnabledDefault,
@@ -61,7 +57,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     final String targetPlatform = stringArg('target-platform');
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     final String outputPath = stringArg('output-dir') ?? getAotBuildDirectory();
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
     }

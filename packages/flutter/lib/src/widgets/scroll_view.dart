@@ -149,6 +149,11 @@ abstract class ScrollView extends StatelessWidget {
   /// sufficient content to actually scroll. Otherwise, by default the user can
   /// only scroll the view if it has sufficient content. See [physics].
   ///
+  /// Also when true, the scroll view is used for default [ScrollAction]s. If a
+  /// ScrollAction is not handled by an otherwise focused part of the application,
+  /// the ScrollAction will be evaluated using this scroll view, for example,
+  /// when executing [Shortcuts] key events like page up and down.
+  ///
   /// On iOS, this also identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
   ///
@@ -237,7 +242,7 @@ abstract class ScrollView extends StatelessWidget {
   /// the viewport.
   final double anchor;
 
-  /// {@macro flutter.rendering.viewport.cacheExtent}
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   final double? cacheExtent;
 
   /// The number of children that will contribute semantic information.
@@ -265,7 +270,7 @@ abstract class ScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;

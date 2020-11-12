@@ -11,7 +11,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('TextButton defaults', (WidgetTester tester) async {
+  testWidgets('TextButton, TextButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
 
     // Enabled TextButton
@@ -58,6 +58,42 @@ void main() {
     await tester.pumpAndSettle();
     material = tester.widget<Material>(buttonMaterial);
     // No change vs enabled and not pressed.
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, Colors.transparent);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)));
+    expect(material.textStyle!.color, colorScheme.primary);
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.button);
+
+    // Enabled TextButton.icon
+    final Key iconButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: colorScheme),
+        home: Center(
+          child: TextButton.icon(
+            key: iconButtonKey,
+            onPressed: () { },
+            icon: const Icon(Icons.add),
+            label: const Text('label'),
+          ),
+        ),
+      ),
+    );
+
+    final Finder iconButtonMaterial = find.descendant(
+      of: find.byKey(iconButtonKey),
+      matching: find.byType(Material),
+    );
+
+    material = tester.widget<Material>(iconButtonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);

@@ -82,7 +82,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   void onSingleTapUp(TapUpDetails details) {
     editableText.hideToolbar();
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context)!.platform) {
+      switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
@@ -507,7 +507,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       widget.onSelectionChanged!(selection, cause);
     }
 
-    switch (Theme.of(context)!.platform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         if (cause == SelectionChangedCause.longPress) {
@@ -567,7 +567,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       'inherit false style must supply fontSize and textBaseline',
     );
 
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
     final FocusNode focusNode = _effectiveFocusNode;
 

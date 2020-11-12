@@ -28,7 +28,6 @@ abstract class AnalyzeBase {
     @required this.platform,
     @required this.processManager,
     @required this.terminal,
-    @required this.experiments,
     @required this.artifacts,
   });
 
@@ -48,8 +47,6 @@ abstract class AnalyzeBase {
   final Platform platform;
   @protected
   final Terminal terminal;
-  @protected
-  final List<String> experiments;
   @protected
   final Artifacts artifacts;
 

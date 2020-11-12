@@ -29,7 +29,7 @@ enum _ActivityIndicatorType { material, adaptive }
 abstract class ProgressIndicator extends StatefulWidget {
   /// Creates a progress indicator.
   ///
-  /// {@template flutter.material.progressIndicator.parameters}
+  /// {@template flutter.material.ProgressIndicator.ProgressIndicator}
   /// The [value] argument can either be null for an indeterminate
   /// progress indicator, or non-null for a determinate progress
   /// indicator.
@@ -80,7 +80,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// environment.
   final Animation<Color?>? valueColor;
 
-  /// {@template flutter.material.progressIndicator.semanticsLabel}
+  /// {@template flutter.progress_indicator.ProgressIndicator.semanticsLabel}
   /// The [SemanticsProperties.label] for this progress indicator.
   ///
   /// This value indicates the purpose of the progress bar, and will be
@@ -92,7 +92,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// {@endtemplate}
   final String? semanticsLabel;
 
-  /// {@template flutter.material.progressIndicator.semanticsValue}
+  /// {@template flutter.progress_indicator.ProgressIndicator.semanticsValue}
   /// The [SemanticsProperties.value] for this progress indicator.
   ///
   /// This will be used in conjunction with the [semanticsLabel] by
@@ -109,8 +109,8 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// {@endtemplate}
   final String? semanticsValue;
 
-  Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context)!.backgroundColor;
-  Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context)!.accentColor;
+  Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context).backgroundColor;
+  Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).accentColor;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -252,7 +252,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 class LinearProgressIndicator extends ProgressIndicator {
   /// Creates a linear progress indicator.
   ///
-  /// {@macro flutter.material.progressIndicator.parameters}
+  /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const LinearProgressIndicator({
     Key? key,
     double? value,
@@ -332,7 +332,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 
   @override
   Widget build(BuildContext context) {
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
 
     if (widget.value != null)
       return _buildIndicator(context, _controller.value, textDirection);
@@ -442,7 +442,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 class CircularProgressIndicator extends ProgressIndicator {
   /// Creates a circular progress indicator.
   ///
-  /// {@macro flutter.material.progressIndicator.parameters}
+  /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator({
     Key? key,
     double? value,
@@ -468,7 +468,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// The [value], [backgroundColor], [valueColor], [strokeWidth],
   /// [semanticsLabel], and [semanticsValue] will be ignored in iOS.
   ///
-  /// {@macro flutter.material.progressIndicator.parameters}
+  /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator.adaptive({
     Key? key,
     double? value,
@@ -595,7 +595,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
           return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
         return _buildAnimation();
       case _ActivityIndicatorType.adaptive:
-        final ThemeData theme = Theme.of(context)!;
+        final ThemeData theme = Theme.of(context);
         assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.iOS:
@@ -689,7 +689,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   /// Rather than creating a refresh progress indicator directly, consider using
   /// a [RefreshIndicator] together with a [Scrollable] widget.
   ///
-  /// {@macro flutter.material.progressIndicator.parameters}
+  /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const RefreshProgressIndicator({
     Key? key,
     double? value,
@@ -739,7 +739,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
         margin: const EdgeInsets.all(4.0), // accommodate the shadow
         child: Material(
           type: MaterialType.circle,
-          color: widget.backgroundColor ?? Theme.of(context)!.canvasColor,
+          color: widget.backgroundColor ?? Theme.of(context).canvasColor,
           elevation: 2.0,
           child: Padding(
             padding: const EdgeInsets.all(12.0),

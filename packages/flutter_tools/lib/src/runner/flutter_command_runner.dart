@@ -6,7 +6,6 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -17,7 +16,6 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
 
@@ -83,26 +81,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('suppress-analytics',
         negatable: false,
         help: 'Suppress analytics reporting when this command runs.');
-
-    String packagesHelp;
-    bool showPackagesCommand;
-    if (globals.fs.isFileSync(kPackagesFileName)) {
-      packagesHelp = '(defaults to "$kPackagesFileName")';
-      showPackagesCommand = verboseHelp;
-    } else {
-      packagesHelp = '(required, since the current directory does not contain a "$kPackagesFileName" file)';
-      showPackagesCommand = true;
-    }
     argParser.addOption('packages',
-        hide: !showPackagesCommand,
-        help: 'Path to your ".packages" file.\n$packagesHelp');
-
-    argParser.addOption('flutter-root',
         hide: !verboseHelp,
-        help: 'The root directory of the Flutter repository.\n'
-              'Defaults to \$$kFlutterRootEnvironmentVariableName if set, otherwise uses the parent '
-              'of the directory that the "flutter" script itself is in.');
-
+        help: 'Path to your "package_config.json" file.');
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
     }
@@ -112,8 +93,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         help: 'Path to your engine src directory, if you are building Flutter locally.\n'
               'Defaults to \$$kFlutterEngineEnvironmentVariableName if set, otherwise defaults to '
               'the path given in your pubspec.yaml dependency_overrides for $kFlutterEnginePackageName, '
-              'if any, or, failing that, tries to guess at the location based on the value of the '
-              '--flutter-root option.');
+              'if any.');
 
     argParser.addOption('local-engine',
         hide: !verboseHelp,
@@ -225,19 +205,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
       FlutterTesterDevices.showFlutterTesterDevice = true;
     }
 
-    // We must set Cache.flutterRoot early because other features use it (e.g.
-    // enginePath's initializer uses it).
-    final String flutterRoot = topLevelResults['flutter-root'] as String ?? Cache.defaultFlutterRoot(
-      platform: globals.platform,
-      fileSystem: globals.fs,
-      userMessages: globals.userMessages,
-    );
-    Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(flutterRoot));
-
     // Set up the tooling configuration.
     final EngineBuildPaths engineBuildPaths = await globals.localEngineLocator.findEnginePath(
       topLevelResults['local-engine-src-path'] as String,
-      topLevelResults['local-engine'] as String
+      topLevelResults['local-engine'] as String,
+      topLevelResults['packages'] as String,
     );
     if (engineBuildPaths != null) {
       contextOverrides.addAll(<Type, dynamic>{
@@ -253,7 +225,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         globals.logger.quiet = topLevelResults['quiet'] as bool;
 
         if (globals.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
-          await Cache.lock();
+          await globals.cache.lock();
         }
 
         if (topLevelResults['suppress-analytics'] as bool) {
@@ -270,10 +242,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
         final bool machineFlag = topLevelResults['machine'] as bool;
         if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
           await globals.flutterVersion.checkFlutterVersionFreshness();
-        }
-
-        if (topLevelResults.wasParsed('packages')) {
-          globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(topLevelResults['packages'] as String));
         }
 
         // See if the user specified a specific device.
@@ -301,15 +269,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
         await super.runCommand(topLevelResults);
       },
-    );
-  }
-
-  @visibleForTesting
-  static void initFlutterRoot() {
-    Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-      platform: globals.platform,
-      fileSystem: globals.fs,
-      userMessages: globals.userMessages,
     );
   }
 

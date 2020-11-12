@@ -18,6 +18,30 @@ import 'theme.dart';
 /// They are persistent and non-modal, allowing the user to either ignore them or
 /// interact with them at any time.
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return MaterialBanner(
+///     padding: const EdgeInsets.all(20),
+///     content: Text("Hey, I am a Material Banner"),
+///     leading: Icon(Icons.agriculture_outlined),
+///     backgroundColor: Colors.grey[300],
+///     actions: <Widget>[
+///       FlatButton(
+///         child: Text("OPEN"),
+///         onPressed: () {},
+///       ),
+///       FlatButton(
+///         child: Text("DISMISS"),
+///         onPressed: () {},
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// The [actions] will be placed beside the [content] if there is only one.
 /// Otherwise, the [actions] will be placed below the [content]. Use
 /// [forceActionsBelow] to override this behavior.
@@ -102,7 +126,7 @@ class MaterialBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(actions.isNotEmpty);
 
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
 
     final bool isSingleRow = actions.length == 1 && !forceActionsBelow;
@@ -125,10 +149,10 @@ class MaterialBanner extends StatelessWidget {
 
     final Color backgroundColor = this.backgroundColor
         ?? bannerTheme.backgroundColor
-        ?? theme!.colorScheme.surface;
+        ?? theme.colorScheme.surface;
     final TextStyle? textStyle = contentTextStyle
         ?? bannerTheme.contentTextStyle
-        ?? theme!.textTheme.bodyText2;
+        ?? theme.textTheme.bodyText2;
 
     return Container(
       color: backgroundColor,

@@ -321,11 +321,12 @@ void main() {
     });
   });
 
-  testWidgets('AnimatedList.of() called with a context that does not contain AnimatedList',
+  testWidgets('AnimatedList.of() and maybeOf called with a context that does not contain AnimatedList',
     (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(Container(key: key));
     late FlutterError error;
+    expect(AnimatedList.maybeOf(key.currentContext!), isNull);
     try {
       AnimatedList.of(key.currentContext!);
     } on FlutterError catch (e) {

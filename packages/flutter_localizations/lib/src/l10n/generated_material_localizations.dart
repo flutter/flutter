@@ -1338,7 +1338,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Başlama tarixi';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Silin';
@@ -1644,7 +1644,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Дата пачатку';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Выдаліць';
@@ -1950,7 +1950,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Начална дата';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Изтриване';
@@ -2562,7 +2562,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Datum početka';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Brisanje';
@@ -3480,7 +3480,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Startdato';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Slet';
@@ -8193,7 +8193,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Alguskuupäev';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Kustuta';
@@ -11049,7 +11049,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'תאריך התחלה';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'מחיקה';
@@ -11661,7 +11661,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Datum početka';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Brisanje';
@@ -13803,7 +13803,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'დაწყების თარიღი';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'წაშლა';
@@ -14109,7 +14109,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Басталу күні';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Жою';
@@ -15027,7 +15027,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => '시작일';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => '삭제';
@@ -15333,7 +15333,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Баштоо күнү';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Жок кылуу';
@@ -15945,7 +15945,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Pradžios data';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Ištrinti';
@@ -16251,7 +16251,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Sākuma datums';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Dzēst';
@@ -16557,7 +16557,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Датум на започнување';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Избриши';
@@ -17169,7 +17169,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Эхлэх огноо';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Устгах';
@@ -18087,7 +18087,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'စတင်သည့် ရက်စွဲ';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '-';
 
   @override
   String get deleteButtonTooltip => 'ဖျက်ရန်';
@@ -18393,7 +18393,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Startdato';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Slett';
@@ -18699,7 +18699,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'सुरु हुने मिति';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'मेट्नुहोस्';
@@ -19311,7 +19311,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Startdato';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Slett';
@@ -19761,7 +19761,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
-  String get searchFieldLabel => 'ଖୋଜନ୍ତୁ';
+  String get searchFieldLabel => 'ସନ୍ଧାନ କରନ୍ତୁ';
 
   @override
   String get selectAllButtonLabel => 'ସବୁ ଚୟନ କରନ୍ତୁ';
@@ -21273,7 +21273,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Data de începere';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Ștergeți';
@@ -21885,7 +21885,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'ආරම්භක දිනය';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'මකන්න';
@@ -22497,7 +22497,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Začetni datum';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '. ';
 
   @override
   String get deleteButtonTooltip => 'Brisanje';
@@ -23109,7 +23109,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Датум почетка';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Избришите';
@@ -23715,7 +23715,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Startdatum';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Radera';
@@ -25551,7 +25551,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Başlangıç Tarihi';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Sil';
@@ -25857,7 +25857,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Дата початку';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Видалити';
@@ -27795,7 +27795,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Idethi yokuqala';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Susa';

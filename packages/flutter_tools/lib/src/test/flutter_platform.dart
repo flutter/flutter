@@ -377,7 +377,7 @@ class FlutterPlatform extends PlatformPlugin {
     int ourTestCount,
   ) async {
     _packageConfig ??= await loadPackageConfigWithLogging(
-      globals.fs.file(globalPackagesPath),
+      globals.fs.file(buildInfo.packagesPath),
       logger: globals.logger,
     );
     globals.printTrace('test $ourTestCount: starting test $testPath');
@@ -446,7 +446,7 @@ class FlutterPlatform extends PlatformPlugin {
       final Process process = await _startProcess(
         shellPath,
         mainDart,
-        packages: globalPackagesPath,
+        packages: buildInfo.packagesPath,
         enableObservatory: enableObservatory,
         startPaused: startPaused,
         disableServiceAuthCodes: disableServiceAuthCodes,
@@ -713,18 +713,18 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     assert(testUrl.scheme == 'file');
     final File file = globals.fs.file(testUrl);
+    final LanguageVersion languageVersion = determineLanguageVersion(
+      file,
+      _packageConfig[flutterProject?.manifest?.appName],
+    );
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
-      languageVersionHeader: determineLanguageVersion(
-        file,
-        _packageConfig[flutterProject?.manifest?.appName],
-      ),
+      languageVersionHeader: '// @dart=${languageVersion.major}.${languageVersion.minor}'
     );
   }
-
 
   File _cachedFontConfig;
 

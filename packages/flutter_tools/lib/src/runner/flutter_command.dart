@@ -21,7 +21,6 @@ import '../build_system/targets/icon_tree_shaker.dart' show kIconTreeShakerEnabl
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
-import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
@@ -467,6 +466,9 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  /// Whether it is safe for this command to use a cached pub invocation.
+  bool get cachePubGet => true;
+
   Duration get deviceDiscoveryTimeout {
     if (_deviceDiscoveryTimeout == null
         && argResults.options.contains(FlutterOptions.kDeviceTimeout)
@@ -585,7 +587,7 @@ abstract class FlutterCommand extends Command<void> {
         'Flutter mobile & desktop applications will attempt to run at the null safety '
         'level of their entrypoint library (usually lib/main.dart). Flutter web '
         'applications will default to sound null-safety, unless specifically configured.',
-      defaultsTo: null,
+      defaultsTo: true,
       hide: hide,
     );
     argParser.addFlag(FlutterOptions.kNullAssertions,
@@ -596,8 +598,14 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void usesExtraFrontendOptions() {
+  /// Enables support for the hidden options --extra-front-end-options and
+  /// --extra-gen-snapshot-options.
+  void usesExtraDartFlagOptions() {
     argParser.addMultiOption(FlutterOptions.kExtraFrontEndOptions,
+      splitCommas: true,
+      hide: true,
+    );
+    argParser.addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
       splitCommas: true,
       hide: true,
     );
@@ -664,7 +672,7 @@ abstract class FlutterCommand extends Command<void> {
     addTreeShakeIconsFlag();
     usesAnalyzeSizeFlag();
     usesDartDefineOption();
-    usesExtraFrontendOptions();
+    usesExtraDartFlagOptions();
     usesPubOption();
     usesTargetOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
@@ -742,7 +750,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// each other.
-  BuildInfo getBuildInfo({ BuildMode forcedBuildMode }) {
+  Future<BuildInfo> getBuildInfo({ BuildMode forcedBuildMode }) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -783,18 +791,17 @@ abstract class FlutterCommand extends Command<void> {
 
     NullSafetyMode nullSafetyMode = NullSafetyMode.unsound;
     if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
-      final bool nullSafety = boolArg(FlutterOptions.kNullSafety);
       // Explicitly check for `true` and `false` so that `null` results in not
       // passing a flag. This will use the automatically detected null-safety
       // value based on the entrypoint
-      if (nullSafety == true) {
+      if (!argResults.wasParsed(FlutterOptions.kNullSafety)) {
+        nullSafetyMode = NullSafetyMode.autodetect;
+      } else if (boolArg(FlutterOptions.kNullSafety)) {
         nullSafetyMode = NullSafetyMode.sound;
         extraFrontEndOptions.add('--sound-null-safety');
-      } else if (nullSafety == false) {
+      } else {
         nullSafetyMode = NullSafetyMode.unsound;
         extraFrontEndOptions.add('--no-sound-null-safety');
-      } else if (extraFrontEndOptions.contains('--enable-experiment=non-nullable')) {
-        nullSafetyMode = NullSafetyMode.autodetect;
       }
     }
 
@@ -838,12 +845,12 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
-    final List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
+    List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
         ? stringsArg(FlutterOptions.kDartDefinesOption)
         : <String>[];
 
     if (argParser.options.containsKey('web-renderer') && argResults.wasParsed('web-renderer')) {
-      _updateDartDefines(dartDefines, stringArg('web-renderer'));
+      dartDefines = updateDartDefines(dartDefines, stringArg('web-renderer'));
     }
 
     return BuildInfo(buildMode,
@@ -874,7 +881,8 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      packagesPath: globalResults['packages'] as String ?? '.packages',
+      packagesPath: globalResults['packages'] as String
+        ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
@@ -944,17 +952,20 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Updates dart-defines based on [webRenderer].
-  void _updateDartDefines(List<String> dartDefines, String webRenderer) {
-    if (dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
-      throwToolExit('Only one of "--web-renderer" and '
-          '"--dart-defines=FLUTTER_WEB_USE_SKIA" may be specified.');
+  @visibleForTesting
+  static List<String> updateDartDefines(List<String> dartDefines, String webRenderer) {
+    final Set<String> dartDefinesSet = dartDefines.toSet();
+    if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
+        && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
+      dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
     }
-    dartDefines.addAll(_webRendererDartDefines[webRenderer]);
+    dartDefinesSet.addAll(_webRendererDartDefines[webRenderer]);
+    return dartDefinesSet.toList();
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
     final SignalHandler handler = (io.ProcessSignal s) {
-      Cache.releaseLock();
+      globals.cache.releaseLock();
       _sendPostUsage(
         commandPath,
         const FlutterCommandResult(ExitStatus.killed),
@@ -1006,10 +1017,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  List<String> get _enabledExperiments => argParser.options.containsKey(FlutterOptions.kEnableExperiment)
-    ? stringsArg(FlutterOptions.kEnableExperiment)
-    : <String>[];
-
   /// Perform validation then call [runCommand] to execute the command.
   /// Return a [Future] that completes with an exit code
   /// indicating whether execution was successful.
@@ -1027,7 +1034,7 @@ abstract class FlutterCommand extends Command<void> {
       await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
       await globals.cache.updateAll(await requiredArtifacts);
     }
-    Cache.releaseLock();
+    globals.cache.releaseLock();
 
     await validateCommand();
 
@@ -1053,6 +1060,7 @@ abstract class FlutterCommand extends Command<void> {
       await pub.get(
         context: PubContext.getVerifyContext(name),
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,
+        checkUpToDate: cachePubGet,
       );
       await project.regeneratePlatformSpecificTooling();
     }
@@ -1064,7 +1072,6 @@ abstract class FlutterCommand extends Command<void> {
         <CustomDimensions, Object>{
           ...?await usageValues,
           CustomDimensions.commandHasTerminal: globals.stdio.hasTerminal,
-          CustomDimensions.nullSafety: _enabledExperiments.contains('non-nullable'),
         };
       Usage.command(commandPath, parameters: additionalUsageValues);
     }
@@ -1167,7 +1174,7 @@ abstract class FlutterCommand extends Command<void> {
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
-    if (_requiresPubspecYaml && !isUsingCustomPackagesPath) {
+    if (_requiresPubspecYaml && !globalResults.wasParsed('packages')) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
 
       // If there is no pubspec in the current directory, look in the parent
